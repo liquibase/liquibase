@@ -59,6 +59,7 @@ public class ModifyDataTypeGenerator extends AbstractSqlGenerator<ModifyDataType
                 || database instanceof MySQLDatabase
                 || database instanceof OracleDatabase
                 || database instanceof MaxDBDatabase
+                || database instanceof InformixDatabase
                 ) {
             return "MODIFY";
         } else {
@@ -82,7 +83,8 @@ public class ModifyDataTypeGenerator extends AbstractSqlGenerator<ModifyDataType
                 || database instanceof H2Database
                 || database instanceof CacheDatabase
                 || database instanceof OracleDatabase
-                || database instanceof MaxDBDatabase) {
+                || database instanceof MaxDBDatabase
+                || database instanceof InformixDatabase) {
             return " ";
         } else {
             return " TYPE ";

@@ -5,6 +5,7 @@ import liquibase.database.DatabaseConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.ExecutorService;
+import liquibase.logging.LogFactory;
 import liquibase.statement.core.GetViewDefinitionStatement;
 import liquibase.statement.core.RawSqlStatement;
 
@@ -141,12 +142,13 @@ public class InformixDatabase extends AbstractDatabase {
 	}
 
 	public boolean supportsInitiallyDeferrableColumns() {
-		// TODO dont know if this correct
-		return true;
+		return false;
 	}
 
 	public boolean supportsTablespaces() {
-		return true;
+		// TODO Informix supports them,
+		// but you have to create them with onspaces command
+		return false;
 	}
 
 	@Override
@@ -156,7 +158,7 @@ public class InformixDatabase extends AbstractDatabase {
 		// building the view definition from the multiple rows
 		StringBuilder sb = new StringBuilder();
 		for (Map rowMap : retList) {
-			String s = (String) rowMap.get("viewtext");
+			String s = (String) rowMap.get("VIEWTEXT");
 			sb.append(s);
 		}
 		return CREATE_VIEW_AS_PATTERN.matcher(sb.toString()).replaceFirst("");
@@ -189,6 +191,16 @@ public class InformixDatabase extends AbstractDatabase {
 	@Override
 	public boolean supportsSchemas() {
 		return true;
+	}
+	
+	@Override
+	public String getDefaultSchemaName() {
+		try {
+			return getConnection().getCatalog();
+		} catch (DatabaseException e) {
+			LogFactory.getLogger().info("Error getting connection catalog.  Using default value", e);
+		}
+		return super.getDefaultSchemaName();
 	}
 
 }

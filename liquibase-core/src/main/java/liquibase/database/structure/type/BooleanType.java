@@ -45,26 +45,22 @@ public class BooleanType extends DataType {
         } else {
             returnValue = booleanType.getFalseBooleanValue();
         }
-        if (returnValue.matches("\\d+")) {
-            return returnValue;
-        } else {
-            return "'" + returnValue + "'";
-        }
 
+        return returnValue;
     }
 
     /**
      * The database-specific value to use for "false" "boolean" columns.
      */
     public String getFalseBooleanValue() {
-        return "FALSE";
+        return "'FALSE'";
     }
 
     /**
      * The database-specific value to use for "true" "boolean" columns.
      */
     public String getTrueBooleanValue() {
-        return "TRUE";
+        return "'TRUE'";
     }
 
     public static class NumericBooleanType extends BooleanType {

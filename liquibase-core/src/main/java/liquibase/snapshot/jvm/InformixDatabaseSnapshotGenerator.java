@@ -3,11 +3,15 @@ package liquibase.snapshot.jvm;
 import liquibase.database.Database;
 import liquibase.database.core.InformixDatabase;
 import liquibase.database.structure.Column;
+import liquibase.database.structure.ForeignKey;
+import liquibase.database.structure.ForeignKeyInfo;
 import liquibase.exception.DatabaseException;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class InformixDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerator {
@@ -55,4 +59,29 @@ public class InformixDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGener
     	}
     }
     
+    @Override
+	public List<ForeignKey> getForeignKeys(String schemaName, String foreignKeyTableName, Database database) throws DatabaseException {
+        List<ForeignKey> fkList = new ArrayList<ForeignKey>();
+		try {
+            String dbCatalog = database.convertRequestedSchemaToCatalog(schemaName);
+            // Informix handles schema differently
+            String dbSchema = null;
+            ResultSet rs = getMetaData(database).getImportedKeys(dbCatalog, dbSchema, convertTableNameToDatabaseTableName(foreignKeyTableName));
+
+            try {
+                while (rs.next()) {
+                    ForeignKeyInfo fkInfo = fillForeignKeyInfo(rs);
+
+                    fkList.add(generateForeignKey(fkInfo, database, fkList));
+                }
+            } finally {
+                rs.close();
+            }
+
+            return fkList;
+
+        } catch (Exception e) {
+            throw new DatabaseException(e);
+        }
+    }
 }

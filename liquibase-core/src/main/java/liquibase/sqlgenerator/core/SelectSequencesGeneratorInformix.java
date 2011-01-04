@@ -25,8 +25,13 @@ public class SelectSequencesGeneratorInformix extends AbstractSqlGenerator<Selec
     }
 
     public Sql[] generateSql(SelectSequencesStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-        return new Sql[]{
-                new UnparsedSql("SELECT tabname FROM systables t, syssequences s WHERE s.tabid = t.tabid")
+        StringBuilder sb = new StringBuilder("SELECT tabname FROM systables t, syssequences s WHERE s.tabid = t.tabid");
+        String schemaName = statement.getSchemaName();
+		if (schemaName != null) {
+        	sb.append(" AND t.owner = ").append("'").append(schemaName).append("'");
+        }
+		return new Sql[]{
+                new UnparsedSql(sb.toString())
         };
     }
 }

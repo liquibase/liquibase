@@ -13,34 +13,45 @@ import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.AddDefaultValueStatement;
 
 public class AddDefaultValueGeneratorInformix extends AddDefaultValueGenerator {
-    @Override
-    public int getPriority() {
-        return PRIORITY_DATABASE;
-    }
+	@Override
+	public int getPriority() {
+		return PRIORITY_DATABASE;
+	}
 
-    @Override
-    public boolean supports(AddDefaultValueStatement statement, Database database) {
-        return database instanceof InformixDatabase;
-    }
+	@Override
+	public boolean supports(AddDefaultValueStatement statement, Database database) {
+		return database instanceof InformixDatabase;
+	}
 
-    @Override
-    public ValidationErrors validate(AddDefaultValueStatement addDefaultValueStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-        ValidationErrors validationErrors = super.validate(addDefaultValueStatement, database, sqlGeneratorChain);
-        if (addDefaultValueStatement.getColumnDataType() == null) {
-            validationErrors.checkRequiredField("columnDataType", addDefaultValueStatement.getColumnDataType());
-        }
-        return validationErrors;
-    }
+	@Override
+	public ValidationErrors validate(AddDefaultValueStatement addDefaultValueStatement, Database database,
+			SqlGeneratorChain sqlGeneratorChain) {
+		ValidationErrors validationErrors = super.validate(addDefaultValueStatement, database, sqlGeneratorChain);
+		if (addDefaultValueStatement.getColumnDataType() == null) {
+			validationErrors.checkRequiredField("columnDataType", addDefaultValueStatement.getColumnDataType());
+		}
+		return validationErrors;
+	}
 
-    @Override
-    public Sql[] generateSql(AddDefaultValueStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+	@Override
+	public Sql[] generateSql(AddDefaultValueStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
 
-        Object defaultValue = statement.getDefaultValue();
-        return new Sql[]{
-                new UnparsedSql("ALTER TABLE " + database.escapeTableName(statement.getSchemaName(), statement.getTableName()) + " MODIFY (" + database.escapeColumnName(statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " " + TypeConverterFactory.getInstance().findTypeConverter(database).getDataType(statement.getColumnDataType(), false) + " DEFAULT " + TypeConverterFactory.getInstance().findTypeConverter(database).getDataType(defaultValue).convertObjectToString(defaultValue, database) + ")",
-                        new Column()
-                                .setTable(new Table(statement.getTableName()).setSchema(statement.getSchemaName()))
-                                .setName(statement.getColumnName()))
-        };
-    }
+		Column column = new Column().setTable(new Table(statement.getTableName()).setSchema(statement.getSchemaName()))
+				.setName(statement.getColumnName());
+		Object defaultValue = statement.getDefaultValue();
+		StringBuffer sql = new StringBuffer("ALTER TABLE ");
+		sql.append(database.escapeTableName(statement.getSchemaName(), statement.getTableName()));
+		sql.append(" MODIFY (");
+		sql.append(database.escapeColumnName(statement.getSchemaName(), statement.getTableName(),
+				statement.getColumnName()));
+		sql.append(" ");
+		sql.append(TypeConverterFactory.getInstance().findTypeConverter(database)
+				.getDataType(statement.getColumnDataType(), false));
+		sql.append(" DEFAULT ");
+		sql.append(TypeConverterFactory.getInstance().findTypeConverter(database).getDataType(defaultValue)
+				.convertObjectToString(defaultValue, database));
+		sql.append(")");
+		UnparsedSql unparsedSql = new UnparsedSql(sql.toString(), column);
+		return new Sql[] { unparsedSql };
+	}
 }
