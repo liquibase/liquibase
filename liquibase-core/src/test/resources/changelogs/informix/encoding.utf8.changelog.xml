@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+
+    <changeSet id="sampleCSVData-table" author="nvoxland">
+        <createTable tableName="csvdata" >
+            <column name="string1" type="varchar(50)"/>
+        </createTable>
+    </changeSet>
+    
+    <changeSet id="sampleCSVtoTestEncodings" author="nvoxland">
+        <!--by default UTF-8 encoding-->
+        <loadData tableName="csvdata" file="changelogs/encoding.utf8.csv"/>
+    </changeSet>
+
+</databaseChangeLog>

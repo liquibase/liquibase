@@ -58,6 +58,8 @@ public class AddForeignKeyConstraintGenerator extends AbstractSqlGenerator<AddFo
 	    if (statement.getOnUpdate() != null) {
 		    if ((database instanceof OracleDatabase) && statement.getOnUpdate().equalsIgnoreCase("RESTRICT")) {
 			    //don't use
+		    } else if (database instanceof InformixDatabase) {
+			    //TODO don't know if correct
 		    } else {
 			    sb.append(" ON UPDATE ").append(statement.getOnUpdate());
 		    }
@@ -68,20 +70,23 @@ public class AddForeignKeyConstraintGenerator extends AbstractSqlGenerator<AddFo
                 //don't use
             } else if ((database instanceof MSSQLDatabase) && statement.getOnDelete().equalsIgnoreCase("RESTRICT")) {
                 //don't use                        
+		    } else if (database instanceof InformixDatabase && !(statement.getOnDelete().equalsIgnoreCase("CASCADE"))) {
+			    //TODO Informix can handle ON DELETE CASCADE only, but I don't know if this is really correct
+		    	// see "REFERENCES Clause" in manual
 		    } else {
 			    sb.append(" ON DELETE ").append(statement.getOnDelete());
 		    }
 	    }
 
-	    if (statement.isDeferrable() || statement.isInitiallyDeferred()) {
-		    if (statement.isDeferrable()) {
-			    sb.append(" DEFERRABLE");
-		    }
+        if (statement.isDeferrable() || statement.isInitiallyDeferred()) {
+            if (statement.isDeferrable()) {
+                sb.append(" DEFERRABLE");
+            }
 
-		    if (statement.isInitiallyDeferred()) {
-			    sb.append(" INITIALLY DEFERRED");
-		    }
-	    }
+            if (statement.isInitiallyDeferred()) {
+                sb.append(" INITIALLY DEFERRED");
+            }
+        }
 
 	    if (database instanceof InformixDatabase) {
 		    sb.append(" CONSTRAINT ");
