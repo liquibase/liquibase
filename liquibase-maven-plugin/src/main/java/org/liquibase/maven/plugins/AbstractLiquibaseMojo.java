@@ -274,7 +274,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
                     driver,
                     defaultSchemaName,
                     databaseClass,
-                    null); // TODO: should we pass propertyFile here?
+                    null);
             liquibase = createLiquibase(getFileOpener(artifactClassLoader), database);
 
             getLog().debug("expressionVars = " + String.valueOf(expressionVars));

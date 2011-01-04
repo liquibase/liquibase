@@ -340,6 +340,7 @@ public class ChangeSet implements Conditional {
                 log.debug("Failure Stacktrace", e);
                 execType = ExecType.FAILED;
             } else {
+                log.severe("Change Set "+toString(false)+" failed.  Error: "+e.getMessage(), e);
                 if (e instanceof MigrationFailedException) {
                     throw ((MigrationFailedException) e);
                 } else {

@@ -858,8 +858,13 @@ public abstract class AbstractDatabase implements Database {
                 Date dateExecuted = (Date) rs.get("DATEEXECUTED");
                 String tag = rs.get("TAG") == null ? null : rs.get("TAG").toString();
                 String execType = rs.get("EXECTYPE") == null ? null : rs.get("EXECTYPE").toString();
-                RanChangeSet ranChangeSet = new RanChangeSet(fileName, id, author, CheckSum.parse(md5sum), dateExecuted, tag, ChangeSet.ExecType.valueOf(execType));
-                ranChangeSetList.add(ranChangeSet);
+                try {
+                    RanChangeSet ranChangeSet = new RanChangeSet(fileName, id, author, CheckSum.parse(md5sum), dateExecuted, tag, ChangeSet.ExecType.valueOf(execType));
+                    ranChangeSetList.add(ranChangeSet);
+                } catch (IllegalArgumentException e) {
+                    LogFactory.getLogger().severe("Unknown EXECTYPE from database: "+execType);
+                    throw e;
+                }
             }
         }
         return ranChangeSetList;
