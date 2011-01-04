@@ -231,6 +231,12 @@
         </insert>
     </changeSet>
 
+    <changeSet id="27" author="nvoxland">
+        <addLookupTable
+                existingTableName="address" existingColumnName="state"
+                newTableName="state" newColumnName="id" newColumnDataType="char(2)"/>
+    </changeSet>
+    
     <changeSet id="28" author="nvoxland">
         <addDefaultValue tableName="address" columnName="line2" columnDataType="varchar(255)" defaultValue="N/A"/>
     </changeSet>
