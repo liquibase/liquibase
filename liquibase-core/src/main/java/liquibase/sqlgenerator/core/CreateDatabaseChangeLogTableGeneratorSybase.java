@@ -31,7 +31,7 @@ public class CreateDatabaseChangeLogTableGeneratorSybase extends AbstractSqlGene
                 "AUTHOR VARCHAR(150) NOT NULL, " +
                 "FILENAME VARCHAR(255) NOT NULL, " +
                 "DATEEXECUTED " + TypeConverterFactory.getInstance().findTypeConverter(database).getDateTimeType() + " NOT NULL, " +
-                "ORDEREXECUTED INT NOT NULL UNIQUE, " +
+                "ORDEREXECUTED INT NOT NULL, " +
                 "EXECTYPE VARCHAR(10) NOT NULL, " +
                 "MD5SUM VARCHAR(35) NULL, " +
                 "DESCRIPTION VARCHAR(255) NULL, " +
