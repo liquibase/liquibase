@@ -7,12 +7,12 @@ import liquibase.database.structure.type.CustomType;
 public class PostgresTypeConverterTest extends DefaultTypeConverterTest {
     @Test
     public void getFalseBooleanValue() {
-        assertEquals("FALSE", new PostgresTypeConverter().getBooleanType().getFalseBooleanValue());
+        assertEquals("'FALSE'", new PostgresTypeConverter().getBooleanType().getFalseBooleanValue());
     }
 
     @Test
     public void getTrueBooleanValue() {
-        assertEquals("TRUE", new PostgresTypeConverter().getBooleanType().getTrueBooleanValue());
+        assertEquals("'TRUE'", new PostgresTypeConverter().getBooleanType().getTrueBooleanValue());
     }
 
     @Test
