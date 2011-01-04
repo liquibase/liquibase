@@ -4,19 +4,18 @@
 
     <target name="prepare">
         <path id="classpath">
-            <fileset dir="../../lib">
+            <!--<fileset dir="../../lib">-->
+                <!--<include name="**/*.jar"/>-->
+            <!--</fileset>-->
+            <fileset dir="../../test/resources/jdbc-drivers">
                 <include name="**/*.jar"/>
             </fileset>
-            <fileset dir="../../lib-jdbc">
-                <include name="**/*.jar"/>
-            </fileset>
-            <fileset dir="../../lib-compile">
-                <include name="**/*.jar"/>
-            </fileset>
-            <pathelement location="../../build"/>
-            <pathelement location="../../build-test"/>
-            <pathelement path="${user.home}/.IntelliJIdea50/config/plugins/clover-idea5.jar"/>
-            <pathelement location="."/>
+            <!--<fileset dir="../../lib-compile">-->
+                <!--<include name="**/*.jar"/>-->
+            <!--</fileset>-->
+            <pathelement location="../../../../liquibase-core/target/classes"/>
+            <pathelement location="../../../../liquibase-core/target/test-classes"/>
+            <pathelement location="../../test/resources"/>
             <!--<fileset dir="../../release">-->
                 <!--<include name="**/*.jar"/>-->
             <!--</fileset>-->
