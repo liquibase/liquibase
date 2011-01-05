@@ -7,6 +7,7 @@ import liquibase.database.structure.Table;
 import liquibase.database.structure.UniqueConstraint;
 import liquibase.exception.DatabaseException;
 import liquibase.snapshot.DatabaseSnapshot;
+import liquibase.util.StringUtils;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -98,11 +99,11 @@ public class PostgresDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGener
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            stmt = ((JdbcConnection) database.getConnection()).getUnderlyingConnection().prepareStatement("select attname,attnum from pg_attribute where attrelid = ? and attnum in (" + keys.toString().replace("{", "").replace("}", "") + ")");
+            stmt = ((JdbcConnection) database.getConnection()).getUnderlyingConnection().prepareStatement("select attname,attnum from pg_attribute where attrelid = ? and attnum in (" + StringUtils.join((String[]) keys.getArray(), ",") + ")");
             stmt.setInt(1, conrelid);
             rs = stmt.executeQuery();
             while (rs.next()) {
-                columns_map.put(new Integer(rs.getInt("attnum")), rs.getString("attname"));
+                columns_map.put(rs.getInt("attnum"), rs.getString("attname"));
             }
             StringTokenizer str_token = new StringTokenizer(keys.toString().replace("{", "").replace("}", ""), ",");
             while (str_token.hasMoreTokens()) {
