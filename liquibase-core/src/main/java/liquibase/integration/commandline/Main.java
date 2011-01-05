@@ -137,6 +137,8 @@ public class Main {
                 System.out.println("Liquibase Update Successful");
             } else if (main.command.startsWith("rollback") && !main.command.endsWith("SQL")) {
                 System.out.println("Liquibase Rollback Successful");
+            } else {
+                System.out.println("Liquibase '"+main.command+"' Successful");
             }
         } catch (Throwable e) {
             String message = "Unexpected error running Liquibase: " + e.getMessage();
