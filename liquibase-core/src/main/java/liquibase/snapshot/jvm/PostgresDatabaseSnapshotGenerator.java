@@ -99,7 +99,7 @@ public class PostgresDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGener
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            stmt = ((JdbcConnection) database.getConnection()).getUnderlyingConnection().prepareStatement("select attname,attnum from pg_attribute where attrelid = ? and attnum in (" + StringUtils.join((String[]) keys.getArray(), ",") + ")");
+            stmt = ((JdbcConnection) database.getConnection()).getUnderlyingConnection().prepareStatement("select attname,attnum from pg_attribute where attrelid = ? and attnum in (" + StringUtils.join((int[]) keys.getArray(), ",") + ")");
             stmt.setInt(1, conrelid);
             rs = stmt.executeQuery();
             while (rs.next()) {
