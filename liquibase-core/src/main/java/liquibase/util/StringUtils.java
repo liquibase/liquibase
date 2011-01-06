@@ -123,4 +123,22 @@ public class StringUtils {
 
         return returnString;
     }
+
+    public static String join(int[] array, String delimiter) {
+        if (array == null) {
+            return null;
+        }
+
+        if (array.length == 0) {
+            return "";
+        }
+
+        StringBuffer buffer = new StringBuffer();
+        for (int val : array) {
+            buffer.append(val).append(delimiter);
+        }
+
+        String returnString = buffer.toString();
+        return returnString.substring(0, returnString.length()-delimiter.length());
+    }
 }
