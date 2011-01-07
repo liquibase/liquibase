@@ -780,11 +780,11 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
 
     protected void readSequences(DatabaseSnapshot snapshot, String schema, DatabaseMetaData databaseMetaData) throws DatabaseException {
         Database database = snapshot.getDatabase();
-        updateListeners("Reading sequences for " + database.toString() + " ...");
-
-        String convertedSchemaName = database.convertRequestedSchemaToSchema(schema);
-
         if (database.supportsSequences()) {
+            updateListeners("Reading sequences for " + database.toString() + " ...");
+
+            String convertedSchemaName = database.convertRequestedSchemaToSchema(schema);
+
             //noinspection unchecked
             List<String> sequenceNames = (List<String>) ExecutorService.getInstance().getExecutor(database).queryForList(new SelectSequencesStatement(schema), String.class);
 
@@ -798,6 +798,8 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
                     snapshot.getSequences().add(seq);
                 }
             }
+        } else {
+            updateListeners("Sequences not supported for " + database.toString() + " ...");
         }
     }
 
