@@ -51,7 +51,7 @@ public class AddForeignKeyConstraintGenerator extends AbstractSqlGenerator<AddFo
 			    .append(database.escapeColumnNameList(statement.getBaseColumnNames()))
 			    .append(") REFERENCES ")
 			    .append(database.escapeTableName(statement.getReferencedTableSchemaName(), statement.getReferencedTableName()))
-			    .append("(")
+			    .append(" (")
 			    .append(database.escapeColumnNameList(statement.getReferencedColumnNames()))
 			    .append(")");
 
