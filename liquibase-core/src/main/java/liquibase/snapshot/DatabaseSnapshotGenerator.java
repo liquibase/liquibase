@@ -48,4 +48,6 @@ public interface DatabaseSnapshotGenerator {
     boolean hasDatabaseChangeLogLockTable(Database database);
 
     public boolean hasTable(String schemaName, String tableName, Database database);
+    
+    public boolean hasView(String schemaName, String viewName, Database database);
 }
