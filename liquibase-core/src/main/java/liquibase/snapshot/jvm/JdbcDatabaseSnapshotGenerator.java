@@ -63,6 +63,21 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
             throw new UnexpectedLiquibaseException(e);
         }
     }
+    
+    public boolean hasView(String schemaName, String viewName, Database database) {
+        try {
+            ResultSet rs = getMetaData(database).getTables(database.convertRequestedSchemaToCatalog(schemaName), database.convertRequestedSchemaToSchema(schemaName), convertTableNameToDatabaseTableName(viewName), new String[]{"VIEW"});
+            try {
+                return rs.next();
+            } finally {
+                try {
+                    rs.close();
+                } catch (SQLException ignore) { }
+            }
+        } catch (Exception e) {
+            throw new UnexpectedLiquibaseException(e);
+        }
+    }
 
     public Table getTable(String schemaName, String tableName, Database database) throws DatabaseException {
         ResultSet rs = null;
