@@ -739,14 +739,19 @@ public abstract class AbstractIntegrationTest {
             return;
         }
         
-        Liquibase liquibase = createLiquibase(encodingChangeLog);
-
+        // First import some data from utf8 encoded csv
+        // and create a snapshot
+        Liquibase liquibase = createLiquibase("changelogs/common/encoding.utf8.changelog.xml");
         liquibase.update(this.contexts);
-
-        //The changelog puts the same data using utf8 to default schema and latin1 to liquibaseb
-        //Then if there are no difference we can be pretty sure that the update is correct
         DatabaseSnapshot utf8Snapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(database, null, null);
-        DatabaseSnapshot iso88951Snapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(database,DatabaseTestContext.ALT_SCHEMA, null);
+
+        clearDatabase(liquibase);
+
+        // Second import some data from latin1 encoded csv
+        // and create a snapshot
+        liquibase = createLiquibase("changelogs/common/encoding.latin1.changelog.xml");
+        liquibase.update(this.contexts);
+        DatabaseSnapshot iso88951Snapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(database, null, null);
 
         //TODO: We need better data diff support to be able to do that
         //Diff diff = new Diff(utf8Snapshot,iso88951Snapshot);

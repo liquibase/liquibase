@@ -6,18 +6,18 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
 
     <changeSet id="sampleCSVData-table" author="nvoxland">
-        <createTable tableName="csvdata" >
+        <createTable tableName="csvdatautf8" >
             <column name="string1" type="varchar(50)"/>
         </createTable>
-        <createTable tableName="csvdata" schemaName="liquibaseb">
+        <createTable tableName="csvdatalatin1">
             <column name="string1" type="varchar(50)"/>
         </createTable>
     </changeSet>
     
     <changeSet id="sampleCSVtoTestEncodings" author="nvoxland">
         <!--by default UTF-8 encoding-->
-        <loadData tableName="csvdata" file="changelogs/encoding.utf8.csv"/>
-        <loadData tableName="csvdata" schemaName="liquibaseb" file="changelogs/encoding.latin1.csv" encoding="ISO-8859-1"/>
+        <loadData tableName="csvdatautf8" file="changelogs/encoding.utf8.csv"/>
+        <loadData tableName="csvdatalatin1" file="changelogs/encoding.latin1.csv" encoding="ISO-8859-1"/>
     </changeSet>
 
 </databaseChangeLog>
