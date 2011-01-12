@@ -275,9 +275,9 @@
         </createTable>
     </changeSet>
 
-    <!--<changeSet id="50" author="nvoxland">-->
-        <!--<modifyDataType tableName="address" columnName="postalcode" newDataType="varchar(20)"/>-->
-    <!--</changeSet>-->
+    <changeSet id="50" author="nvoxland">
+        <modifyDataType tableName="address" columnName="postalcode" newDataType="varchar(20)"/>
+    </changeSet>
 
     <changeSet id="51" author="nvoxland">
         <createTable tableName="nulldefaulttest">
@@ -306,8 +306,6 @@
     <include file="changelogs/common/common.tests.changelog.xml" />
 
     <include file="changelogs/common/autoincrement.tests.changelog.xml" />
-
-    <include file="changelogs/common/schema.tests.changelog.xml" />
 
     <changeSet id="54" author="nvoxland">
         <addColumn tableName="address">

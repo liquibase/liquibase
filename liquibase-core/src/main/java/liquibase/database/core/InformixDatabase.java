@@ -145,10 +145,11 @@ public class InformixDatabase extends AbstractDatabase {
 		return false;
 	}
 
+	/*
+	 * Informix calls them Dbspaces
+	 */
 	public boolean supportsTablespaces() {
-		// TODO Informix supports them,
-		// but you have to create them with onspaces command
-		return false;
+		return true;
 	}
 
 	@Override
@@ -190,6 +191,6 @@ public class InformixDatabase extends AbstractDatabase {
 	
 	@Override
 	public boolean supportsSchemas() {
-		return true;
+		return false;
 	}
 }
