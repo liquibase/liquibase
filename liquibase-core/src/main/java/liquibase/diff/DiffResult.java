@@ -425,6 +425,10 @@ public class DiffResult {
 			xml = xml.replaceFirst("(?ms).*<databaseChangeLog[^>]*>", "");
 			xml = xml.replaceFirst("</databaseChangeLog>", "");
 			xml = xml.trim();
+			if ("".equals( xml )) {
+			    LogFactory.getLogger().info("No changes found, nothing to do");
+			    return;
+			}
 
 			String lineSeparator = System.getProperty("line.separator");
 			BufferedReader fileReader = new BufferedReader(new FileReader(file));
