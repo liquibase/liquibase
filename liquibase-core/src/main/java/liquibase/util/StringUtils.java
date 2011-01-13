@@ -52,6 +52,10 @@ public class StringUtils {
     public static String[] splitSQL(String multiLineSQL, String endDelimiter) {
         if (endDelimiter == null) {
             endDelimiter = ";\\s*\n|;$|\n[gG][oO]\\s*\n|\n[Gg][oO]\\s*$";
+        } else {
+            if (endDelimiter.equalsIgnoreCase("go")) {
+                endDelimiter = "\n[gG][oO]\\s*\n|\n[Gg][oO]\\s*$";
+            }
         }
         String[] initialSplit = multiLineSQL.split(endDelimiter);
         List<String> strings = new ArrayList<String>();
