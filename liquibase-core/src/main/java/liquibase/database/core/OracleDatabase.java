@@ -589,7 +589,7 @@ public class OracleDatabase extends AbstractDatabase {
 //            "SELECT",
 //            "SEQUENCE",
 //            "SERIALIZABLE",
-//            "SESSION",
+            "SESSION",
 //            "SESSION_CACHED_CURSORS",
 //            "SESSIONS_PER_USER",
 //            "SET",
@@ -663,7 +663,7 @@ public class OracleDatabase extends AbstractDatabase {
 //            "UPDATE",
 //            "USAGE",
 //            "USE",
-//            "USER",
+            "USER"
 //            "USING",
 //            "VALIDATE",
 //            "VALIDATION",
