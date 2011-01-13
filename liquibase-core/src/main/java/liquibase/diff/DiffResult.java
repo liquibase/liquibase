@@ -450,7 +450,9 @@ public class DiffResult {
 
 			RandomAccessFile randomAccessFile = new RandomAccessFile(file, "rw");
 			randomAccessFile.seek(offset);
-			randomAccessFile.writeBytes("    " + xml + lineSeparator);
+			randomAccessFile.writeBytes("    "); 
+			randomAccessFile.write( xml.getBytes() );
+			randomAccessFile.writeBytes(lineSeparator);
 			randomAccessFile.writeBytes("</databaseChangeLog>" + lineSeparator);
 			randomAccessFile.close();
 
