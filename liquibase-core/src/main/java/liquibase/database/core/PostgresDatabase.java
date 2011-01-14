@@ -237,7 +237,7 @@ public class PostgresDatabase extends AbstractDatabase {
         if (objectName == null) {
             return null;
         }
-        if (objectName.contains("-") || hasCaseProblems(objectName) || startsWithNumeric(objectName) || isReservedWord(objectName)) {
+        if (objectName.contains("-") || hasMixedCase(objectName) || startsWithNumeric(objectName) || isReservedWord(objectName)) {
             return "\"" + objectName + "\"";
         } else {
             return super.escapeDatabaseObject(objectName);
@@ -248,8 +248,11 @@ public class PostgresDatabase extends AbstractDatabase {
     /*
     * Check if given string has case problems according to postgresql documentation.
     * If there are at least one characters with upper case while all other are in lower case (or vice versa) this string should be escaped.
+    *
+    * Note: This may make postgres support more case sensitive than normally is, but needs to be left in for backwards compatibility.
+    * Method is public so a subclass extension can override it to always return false.
     */
-    private boolean hasCaseProblems(String tableName) {
+    protected boolean hasMixedCase(String tableName) {
         return tableName.matches(".*[A-Z].*") && tableName.matches(".*[a-z].*");
 
     }
