@@ -9,14 +9,21 @@ import liquibase.change.custom.CustomChangeWrapper;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.parser.core.xml.LiquibaseEntityResolver;
 import liquibase.parser.core.xml.XMLChangeLogSAXParser;
 import liquibase.serializer.ChangeLogSerializer;
 import liquibase.sql.visitor.SqlVisitor;
 import liquibase.util.ISODateFormat;
 import liquibase.util.StringUtils;
 import liquibase.util.XMLUtil;
+import liquibase.util.xml.DefaultXmlWriter;
 import org.w3c.dom.*;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.lang.reflect.Field;
 import java.util.*;
 
@@ -69,6 +76,37 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
 
     }
 
+
+	public void write(List<ChangeSet> changeSets, OutputStream out)
+			throws IOException {
+		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+		DocumentBuilder documentBuilder;
+		try {
+			documentBuilder = factory.newDocumentBuilder();
+		}
+		catch(ParserConfigurationException e) {
+			throw new RuntimeException(e);
+		}
+		documentBuilder.setEntityResolver(new LiquibaseEntityResolver());
+
+		Document doc = documentBuilder.newDocument();
+		Element changeLogElement = doc.createElementNS(XMLChangeLogSAXParser.getDatabaseChangeLogNameSpace(), "databaseChangeLog");
+
+		changeLogElement.setAttribute("xmlns", XMLChangeLogSAXParser.getDatabaseChangeLogNameSpace());
+		changeLogElement.setAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
+		changeLogElement.setAttribute("xsi:schemaLocation", "http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-"+ XMLChangeLogSAXParser.getSchemaVersion()+ ".xsd");
+
+		doc.appendChild(changeLogElement);
+		setCurrentChangeLogFileDOM(doc);
+
+		for (ChangeSet changeSet : changeSets) {
+			doc.getDocumentElement().appendChild(createNode(changeSet));
+		}
+
+		new DefaultXmlWriter().write(doc, out);
+	}
+
+	
     public Element createNode(SqlVisitor visitor) {
         Element node = currentChangeLogFileDOM.createElementNS(XMLChangeLogSAXParser.getDatabaseChangeLogNameSpace(), visitor.getName());
         try {

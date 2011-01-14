@@ -15,13 +15,6 @@ import java.io.OutputStreamWriter;
 public class DefaultXmlWriter implements XmlWriter {
 
     public void write(Document doc, OutputStream outputStream) throws IOException {
-//        OutputFormat format = new OutputFormat(doc);
-//        format.setIndenting(true);
-//        format.setEncoding("UTF-8");
-//        XMLSerializer serializer = new XMLSerializer(outputStream, format);
-//        serializer.asDOMSerializer();
-//        serializer.serialize(doc);
-
         try {
             TransformerFactory factory = TransformerFactory.newInstance();
             try {

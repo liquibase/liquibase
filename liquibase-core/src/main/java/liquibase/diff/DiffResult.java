@@ -14,6 +14,8 @@ import liquibase.executor.ExecutorService;
 import liquibase.logging.LogFactory;
 import liquibase.parser.core.xml.LiquibaseEntityResolver;
 import liquibase.parser.core.xml.XMLChangeLogSAXParser;
+import liquibase.serializer.ChangeLogSerializer;
+import liquibase.serializer.ChangeLogSerializerFactory;
 import liquibase.serializer.core.xml.XMLChangeLogSerializer;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.statement.DatabaseFunction;
@@ -73,6 +75,8 @@ public class DiffResult {
 	private String dataDir = null;
 	private String changeSetContext;
 	private String changeSetAuthor;
+
+	private ChangeLogSerializerFactory serializerFactory = ChangeLogSerializerFactory.getInstance();
 
 	public DiffResult(DatabaseSnapshot referenceDatabaseSnapshot,
 			DatabaseSnapshot targetDatabaseSnapshot) {
@@ -398,28 +402,28 @@ public class DiffResult {
 
 	public void printChangeLog(String changeLogFile, Database targetDatabase)
 			throws ParserConfigurationException, IOException, DatabaseException {
-		this.printChangeLog(changeLogFile, targetDatabase,
-				new DefaultXmlWriter());
+		ChangeLogSerializer changeLogSerializer = serializerFactory.getSerializer(changeLogFile);
+		this.printChangeLog(changeLogFile, targetDatabase, changeLogSerializer);
 	}
 
 	public void printChangeLog(PrintStream out, Database targetDatabase)
 			throws ParserConfigurationException, IOException, DatabaseException {
-		this.printChangeLog(out, targetDatabase, new DefaultXmlWriter());
+		this.printChangeLog(out, targetDatabase, new XMLChangeLogSerializer());
 	}
 
 	public void printChangeLog(String changeLogFile, Database targetDatabase,
-			XmlWriter xmlWriter) throws ParserConfigurationException,
+			ChangeLogSerializer changeLogSerializer) throws ParserConfigurationException,
 			IOException, DatabaseException {
 		File file = new File(changeLogFile);
 		if (!file.exists()) {
 			LogFactory.getLogger().info(file + " does not exist, creating");
 			FileOutputStream stream = new FileOutputStream(file);
-			printChangeLog(new PrintStream(stream), targetDatabase, xmlWriter);
+			printChangeLog(new PrintStream(stream), targetDatabase, changeLogSerializer);
 			stream.close();
 		} else {
 			LogFactory.getLogger().info(file + " exists, appending");
 			ByteArrayOutputStream out = new ByteArrayOutputStream();
-			printChangeLog(new PrintStream(out), targetDatabase, xmlWriter);
+			printChangeLog(new PrintStream(out), targetDatabase, changeLogSerializer);
 
 			String xml = new String(out.toByteArray());
 			xml = xml.replaceFirst("(?ms).*<databaseChangeLog[^>]*>", "");
@@ -472,21 +476,9 @@ public class DiffResult {
 	 * the reference database
 	 */
 	public void printChangeLog(PrintStream out, Database targetDatabase,
-			XmlWriter xmlWriter) throws ParserConfigurationException,
+			ChangeLogSerializer changeLogSerializer)
+			throws ParserConfigurationException,
 			IOException, DatabaseException {
-		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-		DocumentBuilder documentBuilder = factory.newDocumentBuilder();
-		documentBuilder.setEntityResolver(new LiquibaseEntityResolver());
-
-		Document doc = documentBuilder.newDocument();
-
-		Element changeLogElement = doc.createElementNS(XMLChangeLogSAXParser.getDatabaseChangeLogNameSpace(), "databaseChangeLog");
-		changeLogElement.setAttribute("xmlns", XMLChangeLogSAXParser.getDatabaseChangeLogNameSpace());
-		changeLogElement.setAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
-		changeLogElement.setAttribute("xsi:schemaLocation", "http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-"+ XMLChangeLogSAXParser.getSchemaVersion()+ ".xsd");
-
-		doc.appendChild(changeLogElement);
-
 		List<ChangeSet> changeSets = new ArrayList<ChangeSet>();
 		addMissingTableChanges(changeSets, targetDatabase);
 		addMissingColumnChanges(changeSets, targetDatabase);
@@ -512,14 +504,7 @@ public class DiffResult {
 		addChangedViewChanges(changeSets);
 		addUnexpectedTableChanges(changeSets);
 
-		XMLChangeLogSerializer changeLogSerializer = new XMLChangeLogSerializer();
-		changeLogSerializer.setCurrentChangeLogFileDOM(doc);
-		for (ChangeSet changeSet : changeSets) {
-			doc.getDocumentElement().appendChild(
-					changeLogSerializer.createNode(changeSet));
-		}
-
-		xmlWriter.write(doc, out);
+		changeLogSerializer.write(changeSets, out);
 
 		out.flush();
 	}

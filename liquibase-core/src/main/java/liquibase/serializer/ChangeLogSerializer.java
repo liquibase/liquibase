@@ -6,6 +6,10 @@ import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.sql.visitor.SqlVisitor;
 
+import java.io.OutputStream;
+import java.io.IOException;
+import java.util.List;
+
 public interface ChangeLogSerializer {
 
     String[] getValidFileExtensions();
@@ -20,4 +24,5 @@ public interface ChangeLogSerializer {
 
     String serialize(ColumnConfig columnConfig);
 
+	void write(List<ChangeSet> changeSets, OutputStream out) throws IOException;
 }
