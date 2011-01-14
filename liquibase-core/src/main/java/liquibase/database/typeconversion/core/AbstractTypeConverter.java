@@ -171,7 +171,7 @@ public abstract class AbstractTypeConverter implements TypeConverter {
         DataType returnTypeName = null;
         if (dataTypeName.equalsIgnoreCase("BIGINT")) {
             returnTypeName = getBigIntType();
-        } else if (dataTypeName.equalsIgnoreCase("NUMBER")) {
+        } else if (dataTypeName.equalsIgnoreCase("NUMBER") || dataTypeName.equalsIgnoreCase("NUMERIC")) {
             returnTypeName = getNumberType();
         } else if (dataTypeName.equalsIgnoreCase("BLOB")) {
             returnTypeName = getBlobType();
@@ -218,12 +218,7 @@ public abstract class AbstractTypeConverter implements TypeConverter {
         } else if (dataTypeName.equalsIgnoreCase("NVARCHAR")) {
             returnTypeName = getNVarcharType();
         } else {
-            if (columnTypeString.startsWith("java.sql.Types")) {
-                returnTypeName = getTypeFromMetaData(dataTypeName);
-            } else {
-                // Don't know what it is, just return it
-                return new CustomType(columnTypeString,0,2);
-            }
+            return new CustomType(columnTypeString,0,2);
         }
 
         if (returnTypeName == null) {
@@ -245,44 +240,6 @@ public abstract class AbstractTypeConverter implements TypeConverter {
         }
     }
 
-	// Get the type from the Connection MetaData (use the MetaData to translate from java.sql.Types to DB-specific type)
-    private DataType getTypeFromMetaData(final String dataTypeName) {
-        return null;
-//        return new DataType(dataTypeName, false);
-//todo: reintroduce        ResultSet resultSet = null;
-//        try {
-//            Integer requestedType = (Integer) Class.forName("java.sql.Types").getDeclaredField(dataTypeName).get(null);
-//            DatabaseConnection connection = getConnection();
-//            if (connection == null) {
-//                throw new RuntimeException("Cannot evaluate java.sql.Types without a connection");
-//            }
-//            resultSet = connection.getMetaData().getTypeInfo();
-//            while (resultSet.next()) {
-//                String typeName = resultSet.getString("TYPE_NAME");
-//                int dataType = resultSet.getInt("DATA_TYPE");
-//                int maxPrecision = resultSet.getInt("PRECISION");
-//                if (requestedType == dataType) {
-//                    if (maxPrecision > 0) {
-//                        return new DataType(typeName, true);
-//                    } else {
-//                        return new DataType(typeName, false);
-//                    }
-//                }
-//            }
-//            // Connection MetaData does not contain the type, return null
-//            return null;
-//        } catch (Exception e) {
-//            throw new RuntimeException(e);
-//        } finally {
-//            if (resultSet != null) {
-//                try {
-//                    resultSet.close();
-//                } catch (DatabaseException e) {
-//                    // Can't close result set, no handling required
-//                }
-//            }
-//        }
-    }
 
     public DataType getDataType(ColumnConfig columnConfig) {
         return getDataType(columnConfig.getType(), columnConfig.isAutoIncrement());
