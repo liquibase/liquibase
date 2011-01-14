@@ -397,17 +397,6 @@ public class Diff {
 			}
 		}
 
-		// Sort the columns.
-		Set<String> sortedColumns = new TreeSet<String>();
-		for ( Index idx : combinedIndexes )
-		{
-			List<String> columns = idx.getColumns();
-			sortedColumns.clear();
-			sortedColumns.addAll( columns );
-			columns.clear();
-			columns.addAll( sortedColumns );
-		}
-
 		indexes.removeAll( indexesToRemove );
 	}
 
