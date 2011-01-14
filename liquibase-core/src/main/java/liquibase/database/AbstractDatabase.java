@@ -54,6 +54,7 @@ public abstract class AbstractDatabase implements Database {
 
     private String databaseChangeLogTableName = System.getProperty("liquibase.databaseChangeLogTableName") == null ? "DatabaseChangeLog".toUpperCase() : System.getProperty("liquibase.databaseChangeLogTableName");
     private String databaseChangeLogLockTableName = System.getProperty("liquibase.databaseChangeLogLockTableName") == null ? "DatabaseChangeLogLock".toUpperCase() : System.getProperty("liquibase.databaseChangeLogLockTableName");
+    private String liquibaseSchemaName = System.getProperty("liquibase.schemaName") == null ? null : System.getProperty("liquibase.schemaName");
 
     private Integer lastChangeSetSequenceValue;
 
@@ -485,7 +486,7 @@ public abstract class AbstractDatabase implements Database {
     }
 
     public String getLiquibaseSchemaName() {
-        return getDefaultSchemaName();
+        return liquibaseSchemaName == null ? getDefaultSchemaName(): liquibaseSchemaName;
     }
 
     /**
