@@ -1,0 +1,23 @@
+package org.liquibase.maven.plugins;
+
+import java.io.OutputStreamWriter;
+
+import liquibase.Liquibase;
+import liquibase.exception.LiquibaseException;
+
+/**
+ * A Maven Mojo for showing unrun change sets.
+ * 
+ * @author JAmes Atwill
+ * @goal status
+ */
+public class LiquibaseReportStatusMojo extends AbstractLiquibaseChangeLogMojo {
+
+	@Override
+	protected void performLiquibaseTask(Liquibase liquibase)
+			throws LiquibaseException {
+		liquibase.reportStatus(true, contexts, new OutputStreamWriter(
+				System.out));
+	}
+
+}
