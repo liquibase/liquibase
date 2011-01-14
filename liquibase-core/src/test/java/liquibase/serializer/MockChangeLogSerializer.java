@@ -6,6 +6,11 @@ import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.sql.visitor.SqlVisitor;
 
+import java.util.List;
+import java.io.OutputStream;
+import java.io.IOException;
+
+
 public class MockChangeLogSerializer implements ChangeLogSerializer {
 
     private String[] validExtensions;
@@ -37,4 +42,9 @@ public class MockChangeLogSerializer implements ChangeLogSerializer {
     public String serialize(SqlVisitor visitor) {
         return null;  
     }
+
+	public void write(List<ChangeSet> changeSets, OutputStream out)
+			throws IOException {
+		;
+	}
 }

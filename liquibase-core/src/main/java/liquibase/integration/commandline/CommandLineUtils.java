@@ -147,13 +147,12 @@ public class CommandLineUtils {
         diffResult.setChangeSetContext(context);
         diffResult.setDataDir(dataDir);
 
-        PrintStream outputStream = System.out;
-
         if (StringUtils.trimToNull(changeLogFile) != null) {
-            File changeFile = new File(changeLogFile);
-            outputStream = new PrintStream(changeFile);
+            diffResult.printChangeLog(changeLogFile, originalDatabase);
+        } else {
+            PrintStream outputStream = System.out;
+            diffResult.printChangeLog(outputStream, originalDatabase);
         }
-        diffResult.printChangeLog(outputStream, originalDatabase);
     }
 
     private static class OutDiffStatusListener implements DiffStatusListener {

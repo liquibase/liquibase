@@ -14,9 +14,12 @@ import liquibase.util.StringUtils;
 
 import java.lang.reflect.Field;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.io.OutputStream;
+import java.io.IOException;
 
 public class StringChangeLogSerializer implements ChangeLogSerializer {
 
@@ -159,4 +162,9 @@ public class StringChangeLogSerializer implements ChangeLogSerializer {
     public String serialize(ChangeSet changeSet) {
         return null;
     }
+
+	public void write(List<ChangeSet> changeSets, OutputStream out)
+			throws IOException {
+		
+	}
 }
