@@ -188,12 +188,12 @@ public class SybaseDatabase extends AbstractDatabase {
 
     @Override
     public boolean isSystemTable(String catalogName, String schemaName, String tableName) {
-        return super.isSystemTable(catalogName, schemaName, tableName) || schemaName.equals("sys") || schemaName.equals("sybfi_");
+        return super.isSystemTable(catalogName, schemaName, tableName) || schemaName.equals("sys") || schemaName.equals("sybfi");
     }
 
     @Override
     public boolean isSystemView(String catalogName, String schemaName, String viewName) {
-        return super.isSystemView(catalogName, schemaName, viewName) || schemaName.equals("sys") || schemaName.equals("sybfi_");
+        return super.isSystemView(catalogName, schemaName, viewName) || schemaName.equals("sys") || schemaName.equals("sybfi");
     }
 
     public String generateDefaultConstraintName(String tableName, String columnName) {
