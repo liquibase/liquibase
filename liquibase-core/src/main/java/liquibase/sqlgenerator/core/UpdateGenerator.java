@@ -51,7 +51,7 @@ public class UpdateGenerator extends AbstractSqlGenerator<UpdateStatement> {
         } else if (newValue instanceof Date) {
           // converting java.util.Date to java.sql.Date
           Date date = (Date) newValue;
-          sqlString = database.getDateLiteral(new java.sql.Date(date.getTime()));
+          sqlString = database.getDateLiteral(new java.sql.Timestamp(date.getTime()));
         } else if (newValue instanceof Boolean) {
             if (((Boolean) newValue)) {
                 sqlString = TypeConverterFactory.getInstance().findTypeConverter(database).getBooleanType().getTrueBooleanValue();
