@@ -280,7 +280,7 @@ public abstract class AbstractDatabase implements Database {
         } else if (dataTypeName.equalsIgnoreCase("TIME")) {
             returnTypeName = getTimeType();
         } else if (dataTypeName.equalsIgnoreCase("TIMESTAMP")) {
-            returnTypeName = getDateTimeType();
+            returnTypeName = getTimeStampType();
         } else if (dataTypeName.equalsIgnoreCase("TINYINT")) {
             returnTypeName = getTinyIntType();
         } else if (dataTypeName.equalsIgnoreCase("UUID")) {
@@ -460,6 +460,14 @@ public abstract class AbstractDatabase implements Database {
      */
     public DataType getTimeType() {
         return TIME_TYPE;
+    }
+
+    /**
+     * Returns the actual database-specific data type to use a "timestamp" column. Default is DateTime type.
+     * Databases that support an actual timestamp type should override this method.
+     */
+    public DataType getTimeStampType() {
+        return getDateTimeType();
     }
 
     public DataType getBigIntType() {

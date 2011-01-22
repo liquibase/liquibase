@@ -228,6 +228,11 @@ public interface Database extends DatabaseObject {
      */
     DataType getDateTimeType();
 
+    /**
+     * Returns the actual database-specific data type to use a "timestamp" column.
+     */
+    DataType getTimeStampType();
+
     DataType getTimeType();
 
     DataType getBigIntType();

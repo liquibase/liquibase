@@ -22,6 +22,7 @@ public class MySQLDatabase extends AbstractDatabase {
     private static final DataType CLOB_TYPE = new DataType("TEXT", true);
     private static final DataType BLOB_TYPE = new DataType("BLOB", true);
     private static final DataType DATETIME_TYPE = new DataType("DATETIME", false);
+    private static final DataType TIMESTAMP_TYPE = new DataType("TIMESTAMP", false);
 
     public String getProductName() {
         return "MySQL";
@@ -70,6 +71,10 @@ public class MySQLDatabase extends AbstractDatabase {
 
     public DataType getDateTimeType() {
         return DATETIME_TYPE;
+    }
+
+    public DataType getTimeStampType() {
+        return TIMESTAMP_TYPE;
     }
 
     public boolean supportsSequences() {

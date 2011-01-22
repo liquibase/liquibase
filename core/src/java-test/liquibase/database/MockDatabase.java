@@ -334,6 +334,14 @@ public class MockDatabase implements Database {
         return new DataType("TIME", false);
     }
 
+    /**
+     * Returns the actual database-specific data type to use a "timestamp" column. Default is DateTime type.
+     * Databases that support an actual timestamp type should override this method.
+     */
+    public DataType getTimeStampType() {
+        return getDateTimeType();
+    }
+
     public DataType getBigIntType() {
         return new DataType("BIGINT", true);
     }

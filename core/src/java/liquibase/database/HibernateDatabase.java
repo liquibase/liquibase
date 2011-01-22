@@ -291,6 +291,14 @@ public class HibernateDatabase implements Database {
         return null;
     }
 
+    /**
+     * Returns the actual database-specific data type to use a "timestamp" column. Default is DateTime type.
+     * Databases that support an actual timestamp type should override this method.
+     */
+    public DataType getTimeStampType() {
+        return getDateTimeType();
+    }
+
     public DataType getBigIntType() {
         return null;
     }
