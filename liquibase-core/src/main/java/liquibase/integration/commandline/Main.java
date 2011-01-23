@@ -453,19 +453,9 @@ public class Main {
     }
 
     private String[] splitArg(String arg) throws CommandLineParsingException {
-        String[] splitArg = arg.split("=");
+        String[] splitArg = arg.split("=", 2);
         if (splitArg.length < 2) {
             throw new CommandLineParsingException("Could not parse '" + arg + "'");
-        } else if (splitArg.length > 2) {
-            StringBuffer secondHalf = new StringBuffer();
-            for (int j = 1; j < splitArg.length; j++) {
-                secondHalf.append(splitArg[j]).append("=");
-            }
-
-            splitArg = new String[]{
-                    splitArg[0],
-                    secondHalf.toString().replaceFirst("=$", "")
-            };
         }
 
         splitArg[0] = splitArg[0].replaceFirst("--", "");

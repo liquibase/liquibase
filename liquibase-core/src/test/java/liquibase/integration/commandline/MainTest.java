@@ -358,4 +358,15 @@ public class MainTest {
         Main.main(new String[] {"--version"});
 
     }
+
+	@Test
+	public void testSplitArgWithValueEndingByEqualSing() throws CommandLineParsingException {
+		final String argName = "password";
+		final String argValue = "s3-cr3t=";
+		Main tested = new Main();
+
+		tested.parseOptions(new String[] { "--" + argName + "=" + argValue });
+
+		assertEquals(argValue, tested.password);
+	}
 }
