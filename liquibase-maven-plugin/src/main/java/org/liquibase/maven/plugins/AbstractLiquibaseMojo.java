@@ -227,10 +227,12 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     public void execute() throws MojoExecutionException, MojoFailureException {
         getLog().info(MavenUtils.LOG_SEPARATOR);
 
-        AuthenticationInfo info = wagonManager.getAuthenticationInfo( server );
-        if ( info != null ) {
-            username = info.getUserName();
-            password = info.getPassword();
+        if (server != null) {
+            AuthenticationInfo info = wagonManager.getAuthenticationInfo(server);
+            if (info != null) {
+                username = info.getUserName();
+                password = info.getPassword();
+            }
         }
 
         String shouldRunProperty = System.getProperty(Liquibase.SHOULD_RUN_SYSTEM_PROPERTY);
