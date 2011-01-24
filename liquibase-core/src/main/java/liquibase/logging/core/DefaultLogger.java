@@ -37,7 +37,7 @@ public class DefaultLogger extends AbstractLogger {
         }
     }
 
-    private void print(LogLevel logLevel, String message) {
+    protected void print(LogLevel logLevel, String message) {
         if (StringUtils.trimToNull(message) == null) {
             return;
         }
