@@ -99,7 +99,16 @@ public class PostgresDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGener
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            stmt = ((JdbcConnection) database.getConnection()).getUnderlyingConnection().prepareStatement("select attname,attnum from pg_attribute where attrelid = ? and attnum in (" + StringUtils.join((int[]) keys.getArray(), ",") + ")");
+            String str = null;
+            Object arrays = keys.getArray();
+            if (arrays instanceof Integer[]) {
+                str = StringUtils.join((Integer[])arrays, ",");
+            } else if (arrays instanceof int[]) {
+                str = StringUtils.join((int[])arrays, ",");
+            } else {
+                throw new SQLException("Can't detect type of array " + arrays);
+            }
+            stmt = ((JdbcConnection) database.getConnection()).getUnderlyingConnection().prepareStatement("select attname,attnum from pg_attribute where attrelid = ? and attnum in (" + str + ")");
             stmt.setInt(1, conrelid);
             rs = stmt.executeQuery();
             while (rs.next()) {

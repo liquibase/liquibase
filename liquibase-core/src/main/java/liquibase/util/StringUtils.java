@@ -128,6 +128,19 @@ public class StringUtils {
         return returnString;
     }
 
+    public static String join(Integer[] array, String delimiter) {
+        if (array == null) {
+            return null;
+        }
+
+        int[] ints = new int[array.length];
+        for (int i=0; i < ints.length; i++)
+        {
+            ints[i] = array[i];
+        }
+	return StringUtils.join(ints, delimiter);
+    }
+
     public static String join(int[] array, String delimiter) {
         if (array == null) {
             return null;
