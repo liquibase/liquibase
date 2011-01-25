@@ -111,8 +111,6 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
      */
     protected boolean promptOnNonLocalDatabase;
 
-    private boolean promptOnNonLocalDatabaseDefault = true;
-
     /**
      * Allows for the maven project artifact to be included in the class loader for
      * obtaining the Liquibase property and DatabaseChangeLog files.
@@ -120,8 +118,6 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
      * @parameter expression="${liquibase.includeArtifact}" default-value="true"
      */
     protected boolean includeArtifact;
-
-    private boolean includeArtifactDefault = true;
 
     /**
      * Allows for the maven test output directory to be included in the class loader for
@@ -131,8 +127,6 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
      */
     protected boolean includeTestOutputDirectory;
 
-    private boolean includeTestOutputDirectoryDefault = true;
-
     /**
      * Controls the verbosity of the output from invoking the plugin.
      *
@@ -140,8 +134,6 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
      * @description Controls the verbosity of the plugin when executing
      */
     protected boolean verbose;
-
-    private boolean verboseDefault = false;
 
     /**
      * Controls the level of logging from Liquibase when executing. The value can be
@@ -152,8 +144,6 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
      * @description Controls the verbosity of the plugin when executing
      */
     protected String logging;
-
-    private String loggingDefault = "INFO";
 
     /**
      * The Liquibase properties file used to configure the Liquibase {@link
@@ -178,8 +168,6 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
      * @parameter expression="${liquibase.clearCheckSums}" default-value="false"
      */
     protected boolean clearCheckSums;
-
-    private boolean clearCheckSumsDefault = false;
 
     /**                                                                                                                                                                          
      * List of system properties to pass to the database.                                                                                                                        

@@ -12,7 +12,6 @@
         <artifactId>liquibase-parent</artifactId>
         <groupId>org.liquibase</groupId>
         <version>2.0.1-SNAPSHOT</version>
-        <relativePath>../pom.xml</relativePath>
     </parent>
 
     <dependencies>
@@ -46,11 +45,35 @@
                     <skip>false</skip>
                 </configuration>
             </plugin>
+
+	<plugin>
+		<groupId>org.apache.maven.plugins</groupId>
+		<artifactId>maven-plugin-plugin</artifactId>
+		<version>2.6</version>
+		<executions>
+			<execution>
+				<id>generated-helpmojo</id>
+				<goals>
+					<goal>helpmojo</goal>
+				</goals>
+			</execution>
+		</executions>
+	</plugin>
+
         </plugins>
 
     </build>
 
-
+	<reporting>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-plugin-plugin</artifactId>
+				<version>2.6</version>
+			</plugin>
+		</plugins>
+	</reporting>
+    
     <profiles>
         <profile>
             <id>release-sign-artifacts</id>

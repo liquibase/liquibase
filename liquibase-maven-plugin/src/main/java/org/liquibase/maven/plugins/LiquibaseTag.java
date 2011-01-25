@@ -1,5 +1,3 @@
-// Version:   $Id: $
-// Copyright: Copyright(c) 2007 Trace Financial Limited
 package org.liquibase.maven.plugins;
 
 import liquibase.Liquibase;
@@ -7,7 +5,8 @@ import liquibase.exception.LiquibaseException;
 import org.apache.maven.plugin.MojoFailureException;
 
 /**
- * A Maven Mojo that allows a database to be tagged using Liquibase.
+ * Writes a Liquibase tag to the database.
+ * 
  * @author Peter Murray
  * @goal tag
  */

@@ -13,7 +13,7 @@ import liquibase.exception.LiquibaseException;
 import liquibase.resource.ResourceAccessor;
 
 /**
- * A Maven Mojo for generating the SQL that marks all unapplied changes as applied.
+ * Generates SQL that marks all unapplied changes as applied.
  * 
  * @author JAmes Atwill
  * @goal changelogSyncSQL

@@ -4,7 +4,8 @@ import liquibase.Liquibase;
 import liquibase.exception.LiquibaseException;
 
 /**
- * A Maven Mojo for performing cleanup of the check sums.
+ * Clears all checksums in the current changelog, so they will be recalculated next update.
+ * 
  * @author Nathan Voxland
  * @goal clearCheckSums
  */

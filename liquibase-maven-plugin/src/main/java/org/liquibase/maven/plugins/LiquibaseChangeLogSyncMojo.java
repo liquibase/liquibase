@@ -4,7 +4,7 @@ import liquibase.Liquibase;
 import liquibase.exception.LiquibaseException;
 
 /**
- * A Maven Mojo for marking all unapplied changes as applied.
+ * Marks all unapplied changes to the database as applied in the change log.
  * 
  * @author JAmes Atwill
  * @goal changelogSync

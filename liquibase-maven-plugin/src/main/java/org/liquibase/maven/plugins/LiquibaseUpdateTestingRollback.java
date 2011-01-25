@@ -4,9 +4,9 @@ import liquibase.exception.LiquibaseException;
 import liquibase.Liquibase;
 
 /**
- * Liquibase Update Maven plugin. This plugin allows for DatabaseChangeLogs to be
- * applied to a database as part of a Maven build process while testing rollback support.
- *
+ * Applies the DatabaseChangeLogs to the database, testing rollback. This is
+ * done by updating the database, rolling it back then updating it again.
+ * 
  * @description Liquibase UpdateTestingRollback Maven plugin
  * @goal updateTestingRollback
  */
