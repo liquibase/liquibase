@@ -425,7 +425,7 @@ public class H2Database extends AbstractDatabase {
 //            "UNNEST",
 //            "UNTIL",
 //            "UPDATE",
-//            "USER",
+            "USER",
 //            "USING",
 //            "VALUE",
 //            "VALUES",
@@ -454,7 +454,7 @@ public class H2Database extends AbstractDatabase {
 //            "MINUS",
 //            "NEXT",
 //            "OPENBRACKET",
-//            "PASSWORD",
+            "PASSWORD"
 //            "PLAN",
 //            "PROPERTY",
 //            "READONLY",
