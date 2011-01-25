@@ -439,17 +439,6 @@ public class Diff {
 			}
 		}
 
-		// Sort the columns.
-		Set<String> sortedColumns = new TreeSet<String>();
-		for ( UniqueConstraint uc : combinedConstraints )
-		{
-			List<String> columns = uc.getColumns();
-			sortedColumns.clear();
-			sortedColumns.addAll( columns );
-			columns.clear();
-			columns.addAll( sortedColumns );
-		}
-
 		uniqueConstraints.removeAll( constraintsToRemove );
 	}
 }
