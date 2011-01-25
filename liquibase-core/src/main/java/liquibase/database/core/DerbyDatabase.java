@@ -117,7 +117,7 @@ public class DerbyDatabase extends AbstractDatabase {
                 // this cleans up the lock files in the embedded derby database folder
                 ((Driver) Class.forName(driverName).newInstance()).connect(url, null);
             } catch (Exception e) {
-                //ok
+                LogFactory.getLogger().severe("Error closing derby cleanly", e);
             }
         }
     }
