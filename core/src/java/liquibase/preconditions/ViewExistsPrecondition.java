@@ -8,6 +8,7 @@ import java.util.logging.Logger;
 import liquibase.DatabaseChangeLog;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
+import liquibase.database.MSSQLDatabase;
 import liquibase.exception.JDBCException;
 import liquibase.exception.PreconditionErrorException;
 import liquibase.exception.PreconditionFailedException;
@@ -65,12 +66,17 @@ public class ViewExistsPrecondition implements Precondition {
         try {
             DatabaseMetaData dbm = conn.getMetaData();
             views = dbm.getTables(
-                    schemaName,
-                    schemaName,
+                    database.convertRequestedSchemaToCatalog(schemaName),
+                    // For this to work right on SQL Server, schemaName should be null (the MSSQLDatabase impl will use dbo in this case)
+                    database.convertRequestedSchemaToSchema(database instanceof MSSQLDatabase ? null : schemaName),
                     viewName,
                     new String[]{"VIEW"}
             );
             return views.next();
+        } catch (JDBCException j) {
+            SQLException e = new SQLException();
+            e.initCause(j);
+            throw e;
         } finally {
             if (views != null) {
                 try {

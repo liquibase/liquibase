@@ -6,6 +6,7 @@ import java.sql.SQLException;
 import java.util.logging.Logger;
 
 import liquibase.DatabaseChangeLog;
+import liquibase.database.MSSQLDatabase;
 import liquibase.log.LogFactory;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
@@ -65,12 +66,17 @@ public class TableExistsPrecondition implements Precondition {
         try {
             DatabaseMetaData dbm = conn.getMetaData();
             tables = dbm.getTables(
-                    schemaName,
-                    schemaName,
+                    database.convertRequestedSchemaToCatalog(schemaName),
+                    // For this to work right on SQL Server, schemaName should be null (the MSSQLDatabase impl will use dbo in this case)
+                    database.convertRequestedSchemaToSchema(database instanceof MSSQLDatabase ? null : schemaName),
                     tableName,
                     new String[]{"TABLE"}
             );
             return tables.next();
+        } catch (JDBCException j) {
+            SQLException e = new SQLException();
+            e.initCause(j);
+            throw e;
         } finally {
             if (tables != null) {
                 try {

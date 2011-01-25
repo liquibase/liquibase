@@ -9,6 +9,7 @@ import java.util.HashMap;
 import liquibase.DatabaseChangeLog;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
+import liquibase.database.MSSQLDatabase;
 import liquibase.exception.JDBCException;
 import liquibase.exception.PreconditionErrorException;
 import liquibase.exception.PreconditionFailedException;
@@ -76,12 +77,17 @@ public class ColumnExistsPrecondition implements Precondition {
         try {
             DatabaseMetaData dbm = conn.getMetaData();
             columns = dbm.getColumns(
-                    schemaName,
-                    schemaName,
+                    database.convertRequestedSchemaToCatalog(schemaName),
+                    // For this to work right on SQL Server, schemaName should be null (the MSSQLDatabase impl will use dbo in this case)
+                    database.convertRequestedSchemaToSchema(database instanceof MSSQLDatabase ? null : schemaName),
                     tableName,
                     columnName
             );
             return columns.next();
+        } catch (JDBCException j) {
+            SQLException e = new SQLException();
+            e.initCause(j);
+            throw e;
         } finally {
             if (columns != null) {
                 try {
