@@ -2,20 +2,21 @@
 // Copyright: Copyright(c) 2008 Trace Financial Limited
 package org.liquibase.maven.plugins;
 
-import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 
+import javax.xml.parsers.ParserConfigurationException;
+
 import liquibase.Liquibase;
-import liquibase.integration.commandline.CommandLineUtils;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
-import org.apache.maven.artifact.manager.WagonManager;
-import org.apache.maven.plugin.MojoFailureException;
+import liquibase.integration.commandline.CommandLineUtils;
+
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
 
 /**
- * A Maven Mojo for performing Database Diffs.
+ * Generates a diff between the specified database and the reference database.
  *
  * @author Peter Murray
  * @goal diff

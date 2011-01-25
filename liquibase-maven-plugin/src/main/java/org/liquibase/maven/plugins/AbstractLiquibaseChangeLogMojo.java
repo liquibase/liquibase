@@ -2,15 +2,13 @@
 // Copyright: Copyright(c) 2007 Trace Financial Limited
 package org.liquibase.maven.plugins;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import liquibase.*;
-import liquibase.exception.DatabaseException;
-import liquibase.resource.CompositeResourceAccessor;
-import liquibase.resource.ResourceAccessor;
-import liquibase.resource.FileSystemResourceAccessor;
+import liquibase.Liquibase;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
+import liquibase.resource.CompositeResourceAccessor;
+import liquibase.resource.FileSystemResourceAccessor;
+import liquibase.resource.ResourceAccessor;
+
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 
@@ -34,8 +32,6 @@ public abstract class AbstractLiquibaseChangeLogMojo extends AbstractLiquibaseMo
    * @parameter expression="${liquibase.contexts}" default-value=""
    */
   protected String contexts;
-
-  private String contextsDefault = "";
 
   @Override
   protected void checkRequiredParametersAreSpecified() throws MojoFailureException {

@@ -6,7 +6,7 @@ import liquibase.Liquibase;
 import liquibase.exception.LiquibaseException;
 
 /**
- * A Maven Mojo for showing unrun change sets.
+ * Prints which changesets need to be applied to the database.
  * 
  * @author JAmes Atwill
  * @goal status

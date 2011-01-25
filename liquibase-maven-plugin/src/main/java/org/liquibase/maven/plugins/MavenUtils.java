@@ -43,10 +43,10 @@ public class MavenUtils {
     Set<URL> urls = new HashSet<URL>();
 
     Set dependencies = project.getDependencyArtifacts();
-    if (dependencies != null && !dependencies.isEmpty()) {
-      for (Iterator it = dependencies.iterator(); it.hasNext();) {
-        addArtifact(urls, (Artifact)it.next(), log, verbose);
-      }
+	if (dependencies != null && !dependencies.isEmpty()) {
+		for (Iterator it = dependencies.iterator(); it.hasNext();) {
+			addArtifact(urls, (Artifact) it.next(), log, verbose);
+		}
     } else {
       log.info("there are no resolved artifacts for the Maven project.");
     }

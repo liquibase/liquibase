@@ -8,7 +8,7 @@ import liquibase.Liquibase;
 import org.apache.maven.plugin.MojoFailureException;
 
 /**
- * A Maven Mojo for invoking Liquibase rollbacks on a database.
+ * Invokes Liquibase rollbacks on a database.
  * @author Peter Murray
  * @goal rollback
  */

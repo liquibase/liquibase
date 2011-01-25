@@ -4,7 +4,8 @@ import liquibase.Liquibase;
 import liquibase.exception.LiquibaseException;
 
 /**
- * A Maven Mojo for releasing all locks.
+ * Removes any Liquibase updater locks from the current database.
+ * 
  * @author JAmes Atwill
  * @goal releaseLocks
  */

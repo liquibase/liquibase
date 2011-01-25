@@ -4,7 +4,8 @@ import liquibase.Liquibase;
 import liquibase.exception.LiquibaseException;
 
 /**
- * A Maven Mojo for listing all locks.
+ * Lists all Liquibase updater locks on the current database.
+ * 
  * @author JAmes Atwill
  * @goal listLocks
  */

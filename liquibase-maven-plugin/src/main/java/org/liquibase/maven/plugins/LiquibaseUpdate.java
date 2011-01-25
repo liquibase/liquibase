@@ -4,8 +4,9 @@ import liquibase.exception.LiquibaseException;
 import liquibase.Liquibase;
 
 /**
- * Liquibase Update Maven plugin. This plugin allows for DatabaseChangeLogs to be
- * applied to a database as part of a Maven build process.
+ * Applies the DatabaseChangeLogs to the database. Useful as part of the build
+ * process.
+ * 
  * @author Peter Murray
  * @description Liquibase Update Maven plugin
  * @goal update
@@ -17,8 +18,6 @@ public class LiquibaseUpdate extends AbstractLiquibaseUpdateMojo {
      * @parameter expression="${liquibase.dropFirst}" default-value="false"
      */
     protected boolean dropFirst;
-
-    private boolean dropFirstDefault = false;
 
   @Override
   protected void doUpdate(Liquibase liquibase) throws LiquibaseException {
