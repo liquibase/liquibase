@@ -321,10 +321,10 @@ public class DiffResult {
 		printSetComparison("Missing Primary Keys", getMissingPrimaryKeys(), out);
 		printSetComparison("Unexpected Primary Keys",
 				getUnexpectedPrimaryKeys(), out);
+        printSetComparison("Unexpected Unique Constraints",
+                getUnexpectedUniqueConstraints(), out);
 		printSetComparison("Missing Unique Constraints",
 				getMissingUniqueConstraints(), out);
-		printSetComparison("Unexpected Unique Constraints",
-				getUnexpectedUniqueConstraints(), out);
 		printSetComparison("Missing Indexes", getMissingIndexes(), out);
 		printSetComparison("Unexpected Indexes", getUnexpectedIndexes(), out);
 		printSetComparison("Missing Sequences", getMissingSequences(), out);
