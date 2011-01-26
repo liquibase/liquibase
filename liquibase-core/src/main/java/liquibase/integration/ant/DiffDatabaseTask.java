@@ -4,6 +4,8 @@ import liquibase.Liquibase;
 import liquibase.database.Database;
 import liquibase.diff.Diff;
 import liquibase.diff.DiffResult;
+import liquibase.exception.DatabaseException;
+import liquibase.logging.LogFactory;
 import liquibase.util.StringUtils;
 import org.apache.tools.ant.BuildException;
 
@@ -84,6 +86,7 @@ public class DiffDatabaseTask extends BaseLiquibaseTask {
         super.execute();    
 
         Liquibase liquibase = null;
+        Database referenceDatabase = null;
         try {
             PrintStream writer = createPrintStream();
             if (writer == null && getChangeLogFile() == null) {
@@ -92,7 +95,7 @@ public class DiffDatabaseTask extends BaseLiquibaseTask {
 
             liquibase = createLiquibase();
 
-            Database referenceDatabase = createDatabaseObject(getReferenceDriver(), getReferenceUrl(), getReferenceUsername(), getReferencePassword(), getReferenceDefaultSchemaName(), getDatabaseClass());
+            referenceDatabase = createDatabaseObject(getReferenceDriver(), getReferenceUrl(), getReferenceUsername(), getReferencePassword(), getReferenceDefaultSchemaName(), getDatabaseClass());
 
 
             Diff diff = new Diff(referenceDatabase, liquibase.getDatabase());
@@ -114,7 +117,17 @@ public class DiffDatabaseTask extends BaseLiquibaseTask {
         } catch (Exception e) {
             throw new BuildException(e);
         } finally {
-            closeDatabase(liquibase);
+            try {
+                closeDatabase(liquibase);
+            } finally {
+                if (referenceDatabase != null && referenceDatabase.getConnection() != null) {
+                    try {
+                        referenceDatabase.close();
+                    } catch (DatabaseException e) {
+                        LogFactory.getLogger().severe("Error closing referenceDatabase", e);
+                    }
+                }
+            }
         }
     }
 
