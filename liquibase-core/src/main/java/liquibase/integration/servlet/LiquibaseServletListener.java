@@ -124,13 +124,17 @@ public class LiquibaseServletListener implements ServletContextListener {
 
                 connection = dataSource.getConnection();
 
+                Thread currentThread = Thread.currentThread();
+                ClassLoader contextClassLoader = currentThread.getContextClassLoader();
+                ResourceAccessor threadClFO = new ClassLoaderResourceAccessor(contextClassLoader);
+
                 ResourceAccessor clFO = new ClassLoaderResourceAccessor();
                 ResourceAccessor fsFO = new FileSystemResourceAccessor();
 
 
                 Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(connection));
                 database.setDefaultSchemaName(this.defaultSchema);
-                Liquibase liquibase = new Liquibase(getChangeLogFile(), new CompositeResourceAccessor(clFO,fsFO), database);
+                Liquibase liquibase = new Liquibase(getChangeLogFile(), new CompositeResourceAccessor(clFO,fsFO, threadClFO), database);
 
                 Enumeration<String> initParameters = servletContextEvent.getServletContext().getInitParameterNames();
                 while (initParameters.hasMoreElements()) {
