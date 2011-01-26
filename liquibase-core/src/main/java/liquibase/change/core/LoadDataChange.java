@@ -105,13 +105,21 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns 
 
             List<SqlStatement> statements = new ArrayList<SqlStatement>();
             String[] line = null;
+            int lineNumber = 0;
+            
             while ((line = reader.readNext()) != null) {
+                lineNumber++;
+                
                 if (line.length == 0 || (line.length == 1 && StringUtils.trimToNull(line[0]) == null)) {
                     continue; //nothing on this line
                 }
                 InsertStatement insertStatement = this.createStatement(getSchemaName(), getTableName());
                 for (int i=0; i<headers.length; i++) {
                     String columnName = null;
+                    if( i >= line.length ) {
+                      throw new UnexpectedLiquibaseException("CSV Line " + lineNumber + " has only " + (i-1) + " columns, the header has " + headers.length);
+                    }
+                    
                     Object value = line[i];
 
                     ColumnConfig columnConfig = getColumnConfig(i, headers[i]);
