@@ -674,7 +674,7 @@ public class Main {
                 if (changeLogFile == null) {
                     throw new CommandLineParsingException("dbdoc requires a changeLog parameter");
                 }
-                liquibase.generateDocumentation(commandParams.iterator().next());
+                liquibase.generateDocumentation(commandParams.iterator().next(), contexts);
                 return;
             }
 
