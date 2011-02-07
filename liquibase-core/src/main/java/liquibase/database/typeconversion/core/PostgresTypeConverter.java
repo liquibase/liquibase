@@ -2,10 +2,7 @@ package liquibase.database.typeconversion.core;
 
 import liquibase.database.Database;
 import liquibase.database.core.PostgresDatabase;
-import liquibase.database.structure.type.BlobType;
-import liquibase.database.structure.type.ClobType;
-import liquibase.database.structure.type.DateTimeType;
-import liquibase.database.structure.type.DataType;
+import liquibase.database.structure.type.*;
 
 import java.text.ParseException;
 import java.sql.Types;
@@ -89,5 +86,10 @@ public class PostgresTypeConverter extends AbstractTypeConverter {
     @Override
     public DateTimeType getDateTimeType() {
         return new DateTimeType("TIMESTAMP WITH TIME ZONE");
+    }
+
+    @Override
+    public NumberType getNumberType() {
+        return new NumberType("NUMERIC");
     }
 }
