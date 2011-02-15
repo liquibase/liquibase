@@ -66,7 +66,7 @@ public class ColumnExistsPrecondition implements Precondition {
         }
 
         // If we got this far, the table doesn't exist, so throw PreconditionFailedException
-        throw new PreconditionFailedException("View "+database.escapeStringForDatabase(getColumnName())+" does not exist", changeLog, this);
+        throw new PreconditionFailedException("Column "+database.escapeStringForDatabase(getTableName())+"."+database.escapeStringForDatabase(getColumnName())+" does not exist", changeLog, this);
     }
 
     private boolean columnExists(final Database database, final String schemaName, final String tableName, final String columnName)
