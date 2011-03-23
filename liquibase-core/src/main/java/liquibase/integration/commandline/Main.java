@@ -63,7 +63,7 @@ public class Main {
     protected String currentDateTimeFunction;
 
     protected String command;
-    protected Set<String> commandParams = new HashSet<String>();
+    protected Set<String> commandParams = new LinkedHashSet<String>();
 
     protected String logLevel;
     protected String logFile;
