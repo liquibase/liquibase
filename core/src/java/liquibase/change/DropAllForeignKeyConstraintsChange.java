@@ -98,7 +98,8 @@ public class DropAllForeignKeyConstraintsChange extends AbstractChange {
         // Make a new list
         childDropChanges = new ArrayList<DropForeignKeyConstraintChange>();
 
-        JdbcTemplate jdbc = database.getJdbcTemplate();
+        // JIRA CORE-908: use explicit jdbcTemplate here to avoid use of jdbcOutputTemplate in updateSQL mode
+        JdbcTemplate jdbc = new JdbcTemplate(database);
 
         FindForeignKeyConstraintsStatement sql = new FindForeignKeyConstraintsStatement(
                 getBaseTableSchemaName(),

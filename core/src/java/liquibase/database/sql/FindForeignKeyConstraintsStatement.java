@@ -89,13 +89,13 @@ public class FindForeignKeyConstraintsStatement implements SqlStatement {
             sb.append("AND RC.CONSTRAINT_NAME = KCU.CONSTRAINT_NAME ");
             sb.append("AND RC.TABLE_NAME = '").append(getBaseTableName()).append("' ");
             try {
-                sb.append("AND RC.CONSTRAINT_SCHEMA = '").append(database.convertRequestedSchemaToSchema(null)).append("'");
+                sb.append("AND RC.CONSTRAINT_SCHEMA = '").append(database.convertRequestedSchemaToSchema(null)).append("' ");
             } catch (liquibase.exception.JDBCException e) {
                 StatementNotSupportedOnDatabaseException se = new StatementNotSupportedOnDatabaseException(this, database);
                 se.initCause(e);
                 throw se;
             }
-            sb.append("LIMIT 1");
+            sb.append("LIMIT 1 ");
             return sb.toString();
         }
 
@@ -119,13 +119,13 @@ public class FindForeignKeyConstraintsStatement implements SqlStatement {
             sb.append("AND BASE.TABLE_NAME =  '").append(getBaseTableName()).append("' ");
             sb.append("AND BASE.CONSTRAINT_TYPE = 'R' ");
             try {
-                sb.append("AND BASE.OWNER = '").append(database.convertRequestedSchemaToSchema(null)).append("'");
+                sb.append("AND BASE.OWNER = '").append(database.convertRequestedSchemaToSchema(null)).append("' ");
             } catch (liquibase.exception.JDBCException e) {
                 StatementNotSupportedOnDatabaseException se = new StatementNotSupportedOnDatabaseException(this, database);
                 se.initCause(e);
                 throw se;
             }
-            sb.append("AND ROWNUM <= 1");
+            sb.append("AND ROWNUM <= 1 ");
             return sb.toString();
         }
 
@@ -146,7 +146,7 @@ public class FindForeignKeyConstraintsStatement implements SqlStatement {
             sb.append("  INNER JOIN      INFORMATION_SCHEMA.KEY_COLUMN_USAGE i2 ON i1.CONSTRAINT_NAME = i2.CONSTRAINT_NAME ");
             sb.append("  WHERE       i1.CONSTRAINT_TYPE = 'PRIMARY KEY' ");
             sb.append(") PT ON PT.TABLE_NAME = PK.TABLE_NAME ");
-            sb.append("WHERE      FK.TABLE_NAME='").append(getBaseTableName()).append("'");
+            sb.append("WHERE      FK.TABLE_NAME='").append(getBaseTableName()).append("' ");
 
             return sb.toString();
         }
