@@ -91,7 +91,6 @@ public class JdbcExecutor extends AbstractExecutor implements Executor {
                     try {
                         stmt.execute(statement);
                     } catch (SQLException e) {
-                        log.severe("Error executing SQL "+statement, e);
                         throw e;
                     }
                 }
