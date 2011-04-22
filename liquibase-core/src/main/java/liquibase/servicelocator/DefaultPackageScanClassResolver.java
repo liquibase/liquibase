@@ -138,6 +138,7 @@ public class DefaultPackageScanClassResolver implements PackageScanClassResolver
                 url = customResourceLocator(url);
 
                 String urlPath = url.getFile();
+				String host = null;
                 urlPath = URLDecoder.decode(urlPath, "UTF-8");
 
                 if (url.getProtocol().equals("vfs") && !urlPath.startsWith("vfs")) {
@@ -155,7 +156,9 @@ public class DefaultPackageScanClassResolver implements PackageScanClassResolver
                     // for example + being decoded to something else (+ can be used in temp folders on Mac OS)
                     // to remedy this then create new path without using the URLDecoder
                     try {
-                        urlPath = new URI(url.getFile()).getPath();
+                        URI uri = new URI(url.getFile());
+						host = uri.getHost();
+						urlPath = uri.getPath();
                     } catch (URISyntaxException e) {
                         // fallback to use as it was given from the URLDecoder
                         // this allows us to work on Windows if users have spaces in paths
@@ -180,6 +183,17 @@ public class DefaultPackageScanClassResolver implements PackageScanClassResolver
                 if (urlPath.indexOf('!') > 0) {
                     urlPath = urlPath.substring(0, urlPath.indexOf('!'));
                 }
+				
+				// If a host component was given prepend it to the decoded path.
+				// This still has its problems as we silently skip user and password
+				// information etc. but it fixes UNC urls on windows.
+				if (host != null) {
+					if (urlPath.startsWith("/")) {
+						urlPath = "//" + host + urlPath;
+					} else {
+						urlPath = "//" + host + "/" + urlPath;
+					}
+				}
 
                 log.debug("Scanning for classes in [" + urlPath + "] matching criteria: " + test);
 
