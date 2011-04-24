@@ -93,7 +93,7 @@ public class SqlGeneratorFactory {
                 for (Type type : clazz.getGenericInterfaces()) {
                     if (type instanceof ParameterizedType) {
                         checkType(type, statement, generator, database, validGenerators);
-                    } else if (type.equals(SqlGenerator.class)) {
+                    } else if (isTypeEqual( type, SqlGenerator.class)) {
                         //noinspection unchecked
                         if (generator.supports(statement, database)) {
                             validGenerators.add(generator);
@@ -107,12 +107,20 @@ public class SqlGeneratorFactory {
         return validGenerators;
     }
 
+    private boolean isTypeEqual(Type aType, Class aClass) {
+        if (aType instanceof Class) {
+            return ((Class) aType).getName().equals(aClass.getName());
+        }
+        return aType.equals(aClass);
+    }
+    
     private void checkType(Type type, SqlStatement statement, SqlGenerator generator, Database database, SortedSet<SqlGenerator> validGenerators) {
         for (Type typeClass : ((ParameterizedType) type).getActualTypeArguments()) {
             if (typeClass instanceof TypeVariable) {
                 typeClass = ((TypeVariable) typeClass).getBounds()[0];
             }
-            if (typeClass.equals(SqlStatement.class)) {
+        
+            if (isTypeEqual( typeClass, SqlStatement.class)) {
                 return;
             }
             
