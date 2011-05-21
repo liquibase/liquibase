@@ -63,7 +63,7 @@ public class PostgresDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGener
             rs = statement.executeQuery();
             while (rs.next()) {
                 String constraintName = rs.getString("conname");
-                int conrelid = rs.getInt("conrelid");
+                long conrelid = rs.getLong("conrelid");
                 Array keys = rs.getArray("conkey");
                 String tableName = rs.getString("relname");
                 UniqueConstraint constraintInformation = new UniqueConstraint();
@@ -94,7 +94,7 @@ public class PostgresDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGener
         }
     }
 
-    protected void getColumnsForUniqueConstraint(Database database, int conrelid, Array keys, UniqueConstraint constraint) throws SQLException {
+    protected void getColumnsForUniqueConstraint(Database database, long conrelid, Array keys, UniqueConstraint constraint) throws SQLException {
         HashMap<Integer, String> columns_map = new HashMap<Integer, String>();
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -109,7 +109,7 @@ public class PostgresDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGener
                 throw new SQLException("Can't detect type of array " + arrays);
             }
             stmt = ((JdbcConnection) database.getConnection()).getUnderlyingConnection().prepareStatement("select attname,attnum from pg_attribute where attrelid = ? and attnum in (" + str + ")");
-            stmt.setInt(1, conrelid);
+            stmt.setLong(1, conrelid);
             rs = stmt.executeQuery();
             while (rs.next()) {
                 columns_map.put(rs.getInt("attnum"), rs.getString("attname"));
