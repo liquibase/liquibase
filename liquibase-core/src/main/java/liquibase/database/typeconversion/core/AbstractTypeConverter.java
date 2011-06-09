@@ -343,6 +343,10 @@ public abstract class AbstractTypeConverter implements TypeConverter {
         return new UUIDType();
     }
 
+    public TextType getTextType() {
+        return getClobType();
+    }
+
     public ClobType getClobType() {
         return new ClobType();
     }

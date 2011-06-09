@@ -67,6 +67,11 @@ public class InformixTypeConverter extends AbstractTypeConverter {
     }
 
     @Override
+    public TextType getTextType() {
+        return new TextType("TEXT", 0, 0);
+    }
+
+    @Override
     public BigIntType getBigIntType() {
         return new BigIntType("INT8");
     }
