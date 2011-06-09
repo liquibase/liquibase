@@ -76,7 +76,7 @@ public class CustomPreconditionWrapper implements Precondition {
         } catch (CustomPreconditionFailedException e) {
             throw new PreconditionFailedException(new FailedPrecondition("Custom Precondition Failed: "+e.getMessage(), changeLog, this));
         } catch (CustomPreconditionErrorException e) {
-            throw new PreconditionErrorException(new ErrorPrecondition(e.getCause(), changeLog, this));
+            throw new PreconditionErrorException(new ErrorPrecondition(e, changeLog, this));
         }
     }
 
