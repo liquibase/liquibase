@@ -11,6 +11,7 @@ import java.io.PrintStream;
 public class GenerateChangeLogTask extends BaseLiquibaseTask {
 
 	private String diffTypes;
+    private String dataDir;
 
 	public String getDiffTypes() {
 		return diffTypes;
@@ -20,7 +21,15 @@ public class GenerateChangeLogTask extends BaseLiquibaseTask {
 		this.diffTypes = diffTypes;
 	}
 
-	@Override
+    public String getDataDir() {
+        return dataDir;
+    }
+
+    public void setDataDir(String dataDir) {
+        this.dataDir = dataDir;
+    }
+
+    @Override
 	public void execute() throws BuildException {
         super.execute();
         
@@ -40,6 +49,7 @@ public class GenerateChangeLogTask extends BaseLiquibaseTask {
 			}
 //			diff.addStatusListener(new OutDiffStatusListener());
 			DiffResult diffResult = diff.compare();
+            diffResult.setDataDir(getDataDir());
 
 			if (getChangeLogFile() == null) {
 				diffResult.printChangeLog(writer, database);
