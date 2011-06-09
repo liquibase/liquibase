@@ -49,6 +49,15 @@ public class OracleDatabase extends AbstractDatabase {
         return "oracle";
     }
 
+    @Override
+    public String generatePrimaryKeyName(String tableName) {
+        if (tableName.length() > 27) {
+            return "PK_" + tableName.toUpperCase().substring(0, 27);
+        } else {
+            return "PK_" + tableName.toUpperCase();
+        }
+    }
+
     public boolean supportsInitiallyDeferrableColumns() {
         return true;
     }
