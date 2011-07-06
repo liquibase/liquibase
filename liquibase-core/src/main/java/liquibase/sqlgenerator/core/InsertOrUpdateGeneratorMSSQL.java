@@ -2,6 +2,7 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
 import liquibase.database.core.MSSQLDatabase;
+import liquibase.exception.LiquibaseException;
 import liquibase.sql.Sql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.InsertOrUpdateStatement;
@@ -39,7 +40,7 @@ public class InsertOrUpdateGeneratorMSSQL extends InsertOrUpdateGenerator {
     }
 
     @Override
-    protected String getUpdateStatement(InsertOrUpdateStatement insertOrUpdateStatement, Database database, String whereClause, SqlGeneratorChain sqlGeneratorChain) {
+    protected String getUpdateStatement(InsertOrUpdateStatement insertOrUpdateStatement, Database database, String whereClause, SqlGeneratorChain sqlGeneratorChain) throws LiquibaseException {
         StringBuffer updateBlock = new StringBuffer();
         updateBlock.append("BEGIN\n");
         updateBlock.append(super.getUpdateStatement(insertOrUpdateStatement, database, whereClause, sqlGeneratorChain));

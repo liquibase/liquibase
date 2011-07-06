@@ -2,6 +2,7 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
 import liquibase.database.core.PostgresDatabase;
+import liquibase.exception.LiquibaseException;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
@@ -20,9 +21,15 @@ public class InsertOrUpdateGeneratorPostgres extends InsertOrUpdateGenerator {
 		generatedSql.append("DO\n");
 		generatedSql.append("$$\n");
 		generatedSql.append("BEGIN\n");
-		generatedSql.append(getUpdateStatement(insertOrUpdateStatement,
-				database, getWhereClause(insertOrUpdateStatement, database),
-				sqlGeneratorChain));
+		try {
+			generatedSql.append(getUpdateStatement(insertOrUpdateStatement,
+					database, getWhereClause(insertOrUpdateStatement, database),
+					sqlGeneratorChain));
+		} catch (LiquibaseException e) {
+			// do a select statement instead
+			generatedSql.append("select * from " + database.escapeTableName(insertOrUpdateStatement.getSchemaName(), insertOrUpdateStatement.getTableName()) + " WHERE " +
+					getWhereClause(insertOrUpdateStatement, database) + "\n");
+		}
 		generatedSql.append("IF not found THEN\n");
 		generatedSql.append(getInsertStatement(insertOrUpdateStatement,
 				database, sqlGeneratorChain));
