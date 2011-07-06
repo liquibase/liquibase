@@ -3,6 +3,7 @@ package liquibase.sqlgenerator.core;
 import java.util.Arrays;
 import liquibase.database.Database;
 import liquibase.database.typeconversion.TypeConverterFactory;
+import liquibase.exception.LiquibaseException;
 import liquibase.exception.ValidationErrors;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.InsertOrUpdateStatement;
@@ -85,7 +86,15 @@ public abstract class InsertOrUpdateGenerator extends AbstractSqlGenerator<Inser
         return insertBuffer.toString();
     }
 
-    protected String getUpdateStatement(InsertOrUpdateStatement insertOrUpdateStatement,Database database, String whereClause, SqlGeneratorChain sqlGeneratorChain){
+    /**
+     * 
+     * @param insertOrUpdateStatement
+     * @param database
+     * @param whereClause
+     * @param sqlGeneratorChain
+     * @return the update statement, if there is nothing to update return null
+     */
+    protected String getUpdateStatement(InsertOrUpdateStatement insertOrUpdateStatement,Database database, String whereClause, SqlGeneratorChain sqlGeneratorChain) throws LiquibaseException {
 
         StringBuffer updateSqlString = new StringBuffer();
 
@@ -100,6 +109,10 @@ public abstract class InsertOrUpdateGenerator extends AbstractSqlGenerator<Inser
             if (!hashPkFields.contains(columnKey)) {
                 updateStatement.addNewColumnValue(columnKey,insertOrUpdateStatement.getColumnValue(columnKey));
             }
+        }
+        // this isn't very elegant but the code fails above without any columns to update
+        if(updateStatement.getNewColumnValues().isEmpty()) {
+        	throw new LiquibaseException("No fields to update in set clause");
         }
 
         Sql[] updateSql = update.generateSql(updateStatement, database, sqlGeneratorChain);
@@ -125,9 +138,15 @@ public abstract class InsertOrUpdateGenerator extends AbstractSqlGenerator<Inser
 
         completeSql.append(getInsertStatement(insertOrUpdateStatement, database, sqlGeneratorChain));
 
-        completeSql.append(getElse(database));
+        try {
+        	
+            String updateStatement = getUpdateStatement(insertOrUpdateStatement,database,whereClause,sqlGeneratorChain);
+            
+            completeSql.append(getElse(database));
 
-        completeSql.append(getUpdateStatement(insertOrUpdateStatement,database,whereClause,sqlGeneratorChain));
+            completeSql.append(updateStatement);
+            
+        } catch (LiquibaseException e) {}
 
         completeSql.append(getPostUpdateStatements());
 

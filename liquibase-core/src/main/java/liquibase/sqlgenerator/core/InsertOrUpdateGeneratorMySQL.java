@@ -22,7 +22,6 @@ public class InsertOrUpdateGeneratorMySQL extends InsertOrUpdateGenerator {
     @Override
     protected String getInsertStatement(InsertOrUpdateStatement insertOrUpdateStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         StringBuffer sql = new StringBuffer(super.getInsertStatement(insertOrUpdateStatement, database, sqlGeneratorChain));
-        String updateSql = super.getUpdateStatement(insertOrUpdateStatement, database, "", sqlGeneratorChain);
         
         sql.deleteCharAt(sql.lastIndexOf(";"));
         sql.append("ON DUPLICATE KEY UPDATE ");
