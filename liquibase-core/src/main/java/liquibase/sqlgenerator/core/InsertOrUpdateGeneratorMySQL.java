@@ -38,10 +38,10 @@ public class InsertOrUpdateGeneratorMySQL extends InsertOrUpdateGenerator {
             	updateClause.append(",");
             }
         }
-        updateClause.deleteCharAt(updateClause.lastIndexOf(","));
         
         if(hasFields) {
         	// append the updateClause onto the end of the insert statement
+            updateClause.deleteCharAt(updateClause.lastIndexOf(","));
         	sql.append(updateClause);
         } else {
         	// insert IGNORE keyword into insert statement
