@@ -46,7 +46,11 @@ public class ChangeLogSerializerFactory {
 
     public ChangeLogSerializer getSerializer(String fileNameOrExtension) {
         fileNameOrExtension = fileNameOrExtension.replaceAll(".*\\.", ""); //just need the extension
-        return serializers.get(fileNameOrExtension);
+        ChangeLogSerializer changeLogSerializer = serializers.get(fileNameOrExtension);
+        if (changeLogSerializer == null) {
+			throw new RuntimeException("No serializer associated with the filename or extension '" + fileNameOrExtension + "'");
+		}
+        return changeLogSerializer;
     }
 
     public void register(ChangeLogSerializer changeLogSerializer) {
