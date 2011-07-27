@@ -314,4 +314,26 @@ public class XMLChangeLogSAXParserTest {
         }
     }
 
+    @Test
+    public void otherNamespaceAttributesChangeLog() throws Exception {
+        DatabaseChangeLog changeLog = new XMLChangeLogSAXParser().parse("liquibase/parser/core/xml/simpleChangeLog.xml", new ChangeLogParameters(), new JUnitResourceAccessor());
+
+        assertEquals("liquibase/parser/core/xml/simpleChangeLog.xml", changeLog.getLogicalFilePath());
+        assertEquals("liquibase/parser/core/xml/simpleChangeLog.xml", changeLog.getPhysicalFilePath());
+
+        assertEquals(0, changeLog.getPreconditions().getNestedPreconditions().size());
+        assertEquals(1, changeLog.getChangeSets().size());
+
+        ChangeSet changeSet = changeLog.getChangeSets().get(0);
+        assertEquals("nvoxland", changeSet.getAuthor());
+        assertEquals("1", changeSet.getId());
+        assertEquals(1, changeSet.getChanges().size());
+        assertEquals("liquibase/parser/core/xml/simpleChangeLog.xml", changeSet.getFilePath());
+        assertEquals("Some comments go here", changeSet.getComments());
+
+        Change change = changeSet.getChanges().get(0);
+        assertEquals("createTable", change.getChangeMetaData().getName());
+        assertTrue(change instanceof CreateTableChange);
+    }
+
 }
