@@ -74,7 +74,7 @@ public class MySQLDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerato
 
 
             schemaCache.put(tableName, tableSchema);
-        	
+
         }
         
         tableSchema = schemaCache.get(tableName);
@@ -84,12 +84,22 @@ public class MySQLDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerato
 
         	columnInfo.setTypeName(tableSchema.get(columnName).get(0));
         	try {
-        		String tmpDefaultValue = (String) TypeConverterFactory.getInstance().findTypeConverter(database).convertDatabaseValueToObject(tableSchema.get(columnName).get(1), columnInfo.getDataType(), columnInfo.getColumnSize(), columnInfo.getDecimalDigits(), database);
-        		if ("".equals(tmpDefaultValue)) {
-        			columnInfo.setDefaultValue(null);
-        		} else {
-        			columnInfo.setDefaultValue(tmpDefaultValue);
-        		}
+                String tmpDefaultValue = (String) TypeConverterFactory.getInstance().findTypeConverter(database).convertDatabaseValueToObject(tableSchema.get(columnName).get(1), columnInfo.getDataType(), columnInfo.getColumnSize(), columnInfo.getDecimalDigits(), database);
+                // this just makes explicit the following implicit behavior defined in the mysql docs:
+                // "If an ENUM column is declared to permit NULL, the NULL value is a legal value for
+                // the column, and the default value is NULL. If an ENUM column is declared NOT NULL,
+                // its default value is the first element of the list of permitted values."
+                if (tmpDefaultValue == null && columnInfo.isNullable()) {
+                    columnInfo.setDefaultValue("NULL");
+                }
+                // column is NOT NULL, and this causes no "DEFAULT VALUE XXX" to be generated at all. per
+                // the above from MySQL docs, this will cause the first value in the enumeration to be the
+                // default.
+                else if (tmpDefaultValue == null) {
+                    columnInfo.setDefaultValue(null);
+                } else {
+                    columnInfo.setDefaultValue("'" + database.escapeStringForDatabase(tmpDefaultValue) + "'");
+                }
         	} catch (ParseException e) {
         		throw new DatabaseException(e);
         	}
