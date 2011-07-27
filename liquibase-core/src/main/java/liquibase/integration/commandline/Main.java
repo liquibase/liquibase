@@ -1,5 +1,35 @@
 package liquibase.integration.commandline;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStreamWriter;
+import java.io.PrintStream;
+import java.io.Writer;
+import java.lang.reflect.Field;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
+
 import liquibase.Liquibase;
 import liquibase.database.Database;
 import liquibase.exception.CommandLineParsingException;
@@ -16,19 +46,6 @@ import liquibase.servicelocator.ServiceLocator;
 import liquibase.util.LiquibaseUtil;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
-
-import java.io.*;
-import java.lang.reflect.Field;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.*;
-import java.util.jar.JarEntry;
-import java.util.jar.JarFile;
 
 /**
  * Class for executing Liquibase via the command line.
@@ -349,7 +366,7 @@ public class Main {
         stream.println("Required Parameters:");
         stream.println(" --changeLogFile=<path and filename>        Migration file");
         stream.println(" --username=<value>                         Database username");
-        stream.println(" --password=<value>                         Database password");
+        stream.println(" --password=<value>  | -p (prompt)          Database password");
         stream.println(" --url=<value>                              Database URL");
         stream.println("");
         stream.println("Optional Parameters:");
@@ -381,7 +398,7 @@ public class Main {
         stream.println("");
         stream.println("Required Diff Parameters:");
         stream.println(" --referenceUsername=<value>                Reference Database username");
-        stream.println(" --referencePassword=<value>                Reference Database password");
+        stream.println(" --referencePassword=<value> | -rp (prompt) Reference Database password");
         stream.println(" --referenceUrl=<value>                     Reference Database URL");
         stream.println("");
         stream.println("Optional Diff Parameters:");
@@ -445,6 +462,12 @@ public class Main {
                 } catch (Exception e) {
                     throw new CommandLineParsingException("Unknown parameter: '" + attributeName + "'");
                 }
+            } else if(arg.equals("-p")) {
+            	//Prompt for password
+            	password = new String(System.console().readPassword("DB Password:"));
+            } else if(arg.equals("-rp")) {
+            	//Prompt for reference password
+            	referencePassword = new String(System.console().readPassword("Reference DB Password:"));
             } else {
                 throw new CommandLineParsingException("Unexpected value " + arg + ": parameters must start with a '--'");
             }
