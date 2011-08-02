@@ -44,7 +44,9 @@ public class DropIndexGenerator extends AbstractSqlGenerator<DropIndexStatement>
             return new Sql[] {new UnparsedSql("DROP INDEX " + database.escapeIndexName(null, statement.getIndexName()) + " ON " + database.escapeTableName(schemaName, statement.getTableName())) };
         } else if (database instanceof MSSQLDatabase) {
             return new Sql[] {new UnparsedSql("DROP INDEX " + database.escapeTableName(schemaName, statement.getTableName()) + "." + database.escapeIndexName(null, statement.getIndexName())) };
-        }
+        } else if (database instanceof PostgresDatabase) {
+			return new Sql[]{new UnparsedSql("DROP INDEX " + schemaName + "." + statement.getIndexName())};
+		}
 
         return new Sql[] {new UnparsedSql("DROP INDEX " + database.escapeIndexName(schemaName, statement.getIndexName())) };
     }
