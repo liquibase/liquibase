@@ -48,7 +48,6 @@ public class FindForeignKeyConstraintsGeneratorMySQL extends AbstractSqlGenerato
         } catch (DatabaseException e) {
             throw new UnexpectedLiquibaseException(e);
         }
-        sb.append("LIMIT 1");
         return new Sql[]{
                 new UnparsedSql(sb.toString())
         };
