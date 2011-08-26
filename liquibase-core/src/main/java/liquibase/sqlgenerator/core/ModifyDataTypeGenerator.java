@@ -13,17 +13,6 @@ import liquibase.sql.UnparsedSql;
 
 public class ModifyDataTypeGenerator extends AbstractSqlGenerator<ModifyDataTypeStatement> {
 
-    @Override
-    public Warnings warn(ModifyDataTypeStatement modifyDataTypeStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-        Warnings warnings = super.warn(modifyDataTypeStatement, database, sqlGeneratorChain);
-
-        if (database instanceof MySQLDatabase && !modifyDataTypeStatement.getNewDataType().toLowerCase().contains("varchar")) {
-            warnings.addWarning("modifyDataType will lose primary key/autoincrement/not null settings for mysql.  Use <sql> and re-specify all configuration if this is the case");
-        }
-
-        return warnings;
-    }
-
     public ValidationErrors validate(ModifyDataTypeStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("tableName", statement.getTableName());
@@ -56,7 +45,6 @@ public class ModifyDataTypeGenerator extends AbstractSqlGenerator<ModifyDataType
     private String getModifyString(Database database) {
         if (database instanceof SybaseASADatabase
                 || database instanceof SybaseDatabase
-                || database instanceof MySQLDatabase
                 || database instanceof OracleDatabase
                 || database instanceof MaxDBDatabase
                 || database instanceof InformixDatabase
@@ -78,7 +66,6 @@ public class ModifyDataTypeGenerator extends AbstractSqlGenerator<ModifyDataType
         } else if (database instanceof SybaseASADatabase
                 || database instanceof SybaseDatabase
                 || database instanceof MSSQLDatabase
-                || database instanceof MySQLDatabase
                 || database instanceof HsqlDatabase
                 || database instanceof H2Database
                 || database instanceof CacheDatabase
