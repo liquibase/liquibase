@@ -3,6 +3,7 @@ package liquibase.database.typeconversion.core;
 import liquibase.database.structure.type.BlobType;
 import liquibase.database.structure.type.BooleanType;
 import liquibase.database.structure.type.ClobType;
+import liquibase.database.structure.type.NumberType;
 import liquibase.database.Database;
 import liquibase.database.core.MySQLDatabase;
 import liquibase.database.structure.type.DataType;
@@ -17,7 +18,6 @@ public class MySQLTypeConverter extends AbstractTypeConverter {
     public boolean supports(Database database) {
         return database instanceof MySQLDatabase;
     }
-
 
     @Override
     public BooleanType getBooleanType() {
@@ -34,6 +34,11 @@ public class MySQLTypeConverter extends AbstractTypeConverter {
     	return new BlobType("LONGBLOB");
     }
 
+    @Override
+    public NumberType getNumberType() {
+        return new NumberType("NUMERIC");
+    }
+    
     @Override
     protected DataType getDataType(String columnTypeString, Boolean autoIncrement, String dataTypeName, String precision, String additionalInformation) {
         if (columnTypeString.equalsIgnoreCase("timestamp")) {
