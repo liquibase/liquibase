@@ -1,6 +1,20 @@
 package liquibase.sqlgenerator.core;
 
-public abstract class DropIndexGeneratorTest {
+import liquibase.database.Database;
+import liquibase.database.core.PostgresDatabase;
+import liquibase.sql.Sql;
+import liquibase.sql.UnparsedSql;
+import liquibase.sqlgenerator.SqlGenerator;
+import liquibase.sqlgenerator.SqlGeneratorChain;
+import liquibase.statement.core.DropIndexStatement;
+import org.junit.Test;
+
+import java.util.SortedSet;
+import java.util.TreeSet;
+
+import static junit.framework.Assert.assertEquals;
+
+public class DropIndexGeneratorTest {
 //    @Test
 //    public void execute_defaultSchema() throws Exception {
 //        new DatabaseTestTemplate().testOnAvailableDatabases(
@@ -36,4 +50,15 @@ public abstract class DropIndexGeneratorTest {
 ////                });
 ////    }
 
+
+	@Test
+	public void shouldDropIndexInPostgreSQL() throws Exception {
+		DropIndexGenerator dropIndexGenerator = new DropIndexGenerator();
+		DropIndexStatement statement = new DropIndexStatement("indexName", "defaultSchema", "aTable", null);
+		Database database = new PostgresDatabase();
+		SortedSet<SqlGenerator> sqlGenerators = new TreeSet<SqlGenerator>();
+		SqlGeneratorChain sqlGenerationChain = new SqlGeneratorChain(sqlGenerators);
+		Sql[] sqls = dropIndexGenerator.generateSql(statement, database, sqlGenerationChain);
+		assertEquals("DROP INDEX defaultSchema.indexName", sqls[0].toSql());
+	}
 }
