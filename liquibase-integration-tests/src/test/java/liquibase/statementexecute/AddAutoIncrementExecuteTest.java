@@ -41,7 +41,7 @@ public class AddAutoIncrementExecuteTest extends AbstractExecuteTest {
     @SuppressWarnings("unchecked")
     @Test
     public void noSchema() throws Exception {
-        this.statementUnderTest = new AddAutoIncrementStatement(null, TABLE_NAME, COLUMN_NAME, "int");
+        this.statementUnderTest = new AddAutoIncrementStatement(null, TABLE_NAME, COLUMN_NAME, "int", null, null);
 
         assertCorrect("alter table [table_name] modify column_name serial auto_increment", PostgresDatabase.class);
         assertCorrect("alter table `table_name` modify `column_name` int auto_increment", MySQLDatabase.class);

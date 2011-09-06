@@ -52,7 +52,7 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
         String alterTable = "ALTER TABLE " + database.escapeTableName(statement.getSchemaName(), statement.getTableName()) + " ADD " + database.escapeColumnName(statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " " + TypeConverterFactory.getInstance().findTypeConverter(database).getDataType(statement.getColumnType(), statement.isAutoIncrement());
 
         if (statement.isAutoIncrement() && database.supportsAutoIncrement()) {
-            alterTable += " " + database.getAutoIncrementClause();
+            alterTable += " " + database.getAutoIncrementClause(null, null); // startWith and incrementBy not supported
         }
 
         if (!statement.isNullable()) {

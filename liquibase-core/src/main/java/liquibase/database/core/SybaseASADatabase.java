@@ -7,6 +7,7 @@ import liquibase.database.AbstractDatabase;
 import liquibase.database.DatabaseConnection;
 import liquibase.exception.DatabaseException;
 
+import java.math.BigInteger;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -234,8 +235,20 @@ public class SybaseASADatabase extends AbstractDatabase {
 	 * @see liquibase.database.AbstractDatabase#getAutoIncrementClause()
 	 */
 	@Override
-	public String getAutoIncrementClause() {
-		return "default autoincrement";
+	protected String getAutoIncrementClause() {
+		return "DEFAULT AUTOINCREMENT";
+	}
+	
+	@Override
+	protected boolean generateAutoIncrementStartWith(BigInteger startWith) {
+		// not supported
+		return false;
+	}
+	
+	@Override
+	protected boolean generateAutoIncrementBy(BigInteger incrementBy) {
+		// not supported
+		return false;
 	}
 	
 	@Override

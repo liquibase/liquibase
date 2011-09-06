@@ -1,13 +1,8 @@
 package liquibase.database.structure;
 
-import liquibase.database.Database;
-import liquibase.database.core.*;
-import liquibase.logging.LogFactory;
-import liquibase.util.SqlUtil;
+import java.math.BigInteger;
 
-import java.sql.Types;
-import java.util.Arrays;
-import java.util.List;
+import liquibase.util.SqlUtil;
 
 public class Column implements DatabaseObject, Comparable<Column> {
     private Table table;
@@ -21,6 +16,8 @@ public class Column implements DatabaseObject, Comparable<Column> {
     private String typeName;
     private Object defaultValue;
     private boolean autoIncrement = false;
+    private BigInteger startWith;
+    private BigInteger incrementBy;
     private boolean primaryKey = false;
     private boolean unique = false;
 	// indicates that data type need to initialize precision and scale
@@ -231,6 +228,26 @@ public class Column implements DatabaseObject, Comparable<Column> {
         return this;
     }
 
+    public BigInteger getStartWith() {
+    	return startWith;
+    }
+    
+    public Column setStartWith(BigInteger startWith) {
+    	this.startWith = startWith;
+    	
+    	return this;
+    }
+    
+    public BigInteger getIncrementBy() {
+    	return incrementBy;
+    }
+    
+    public Column setIncrementBy(BigInteger incrementBy) {
+    	this.incrementBy = incrementBy;
+    	
+    	return this;
+    }
+    
     public boolean isDataTypeDifferent(Column otherColumn) {
         if (!this.isCertainDataType() || !otherColumn.isCertainDataType()) {
             return false;

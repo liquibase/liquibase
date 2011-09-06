@@ -55,7 +55,7 @@ public class AddColumnGeneratorDefaultClauseBeforeNotNull extends AddColumnGener
         }
 
         if (statement.isAutoIncrement()) {
-            alterTable += " " + database.getAutoIncrementClause();
+            alterTable += " " + database.getAutoIncrementClause(null, null);  // startWith and incrementBy not supported
         }
 
         if (!statement.isNullable()) {

@@ -5,10 +5,10 @@ import liquibase.database.DatabaseConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.ExecutorService;
-import liquibase.logging.LogFactory;
 import liquibase.statement.core.GetViewDefinitionStatement;
 import liquibase.statement.core.RawSqlStatement;
 
+import java.math.BigInteger;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -166,7 +166,7 @@ public class InformixDatabase extends AbstractDatabase {
 	}
 
 	@Override
-	public String getAutoIncrementClause() {
+	public String getAutoIncrementClause(BigInteger startWith, BigInteger incrementBy) {
 		return "";
 	}
 
