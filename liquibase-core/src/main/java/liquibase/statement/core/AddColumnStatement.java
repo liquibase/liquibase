@@ -55,6 +55,19 @@ public class AddColumnStatement extends AbstractSqlStatement {
         return false;
     }
 
+    public AutoIncrementConstraint getAutoIncrementConstraint() {
+        AutoIncrementConstraint autoIncrementConstraint = null;
+        
+        for (ColumnConstraint constraint : getConstraints()) {
+            if (constraint instanceof AutoIncrementConstraint) {
+                autoIncrementConstraint = (AutoIncrementConstraint) constraint;
+                break;
+            }
+        }
+        
+        return autoIncrementConstraint;
+    }
+
     public boolean isPrimaryKey() {
         for (ColumnConstraint constraint : getConstraints()) {
             if (constraint instanceof PrimaryKeyConstraint) {

@@ -9,15 +9,14 @@ import liquibase.exception.ValidationErrors;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
-import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.core.AddColumnStatement;
 import liquibase.statement.core.AddForeignKeyConstraintStatement;
+import liquibase.statement.AutoIncrementConstraint;
 import liquibase.statement.ColumnConstraint;
 import liquibase.statement.ForeignKeyConstraint;
 
-import javax.swing.*;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -41,6 +40,7 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
             validationErrors.addError("Cannot add a primary key column");
         }
 
+        // TODO HsqlDatabase autoincrement on non primary key? other databases?
         if (database instanceof MySQLDatabase && statement.isAutoIncrement() && !statement.isPrimaryKey()) {
             validationErrors.addError("Cannot add a non-primary key identity column");
         }
@@ -52,7 +52,8 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
         String alterTable = "ALTER TABLE " + database.escapeTableName(statement.getSchemaName(), statement.getTableName()) + " ADD " + database.escapeColumnName(statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " " + TypeConverterFactory.getInstance().findTypeConverter(database).getDataType(statement.getColumnType(), statement.isAutoIncrement());
 
         if (statement.isAutoIncrement() && database.supportsAutoIncrement()) {
-            alterTable += " " + database.getAutoIncrementClause(null, null); // startWith and incrementBy not supported
+            AutoIncrementConstraint autoIncrementConstraint = statement.getAutoIncrementConstraint();
+        	alterTable += " " + database.getAutoIncrementClause(autoIncrementConstraint.getStartWith(), autoIncrementConstraint.getIncrementBy());
         }
 
         if (!statement.isNullable()) {
