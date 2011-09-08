@@ -232,9 +232,6 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
         } catch (SQLException e) {
             throw new DatabaseException(e);
         } finally {
-            if (liquibase != null) {
-                liquibase.forceReleaseLocks();
-            }
             if (c != null) {
                 try {
                     c.rollback();
