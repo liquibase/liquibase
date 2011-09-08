@@ -1,5 +1,7 @@
 package liquibase.database.core;
 
+import java.math.BigInteger;
+
 import liquibase.database.AbstractDatabase;
 import liquibase.database.DatabaseConnection;
 import liquibase.exception.DatabaseException;
@@ -61,6 +63,32 @@ public class MySQLDatabase extends AbstractDatabase {
         return "--";
     }
 
+    @Override
+    protected String getAutoIncrementClause() {
+    	return "AUTO_INCREMENT";
+    }    
+
+    @Override
+    protected boolean generateAutoIncrementBy(BigInteger incrementBy) {
+    	// incrementBy not supported
+    	return false;
+    }
+   
+    @Override
+    protected String getAutoIncrementOpening() {
+    	return "";
+    }
+    
+    @Override
+    protected String getAutoIncrementClosing() {
+    	return "";
+    }
+    
+    @Override
+    protected String getAutoIncrementStartWithClause() {
+    	return "=%d";
+    }
+    
     @Override
     public String getConcatSql(String ... values) {
         StringBuffer returnString = new StringBuffer();

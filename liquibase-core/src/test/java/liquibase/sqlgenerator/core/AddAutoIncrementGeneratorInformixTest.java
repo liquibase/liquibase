@@ -14,8 +14,8 @@ public class AddAutoIncrementGeneratorInformixTest extends AddAutoIncrementGener
 
     @Override
     public void isValid() throws Exception {
-        assertTrue(generatorUnderTest.validate(new AddAutoIncrementStatement(null, null, null, null), new InformixDatabase(), new MockSqlGeneratorChain()).getErrorMessages().contains("columnDataType is required"));
-        assertFalse(generatorUnderTest.validate(new AddAutoIncrementStatement(null, "table_name", "column_name", "int"), new InformixDatabase(), new MockSqlGeneratorChain()).hasErrors());
+        assertTrue(generatorUnderTest.validate(new AddAutoIncrementStatement(null, null, null, null, null, null), new InformixDatabase(), new MockSqlGeneratorChain()).getErrorMessages().contains("columnDataType is required"));
+        assertFalse(generatorUnderTest.validate(new AddAutoIncrementStatement(null, "table_name", "column_name", "int", null, null), new InformixDatabase(), new MockSqlGeneratorChain()).hasErrors());
     }
 
     @Override

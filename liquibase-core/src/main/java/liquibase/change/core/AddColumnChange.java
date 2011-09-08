@@ -90,7 +90,7 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
             }
 
             if (aColumn.isAutoIncrement() != null && aColumn.isAutoIncrement()) {
-                constraints.add(new AutoIncrementConstraint(aColumn.getName()));
+                constraints.add(new AutoIncrementConstraint(aColumn.getName(), aColumn.getStartWith(), aColumn.getIncrementBy()));
             }
 
             AddColumnStatement addColumnStatement = new AddColumnStatement(getSchemaName(),

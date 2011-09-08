@@ -16,6 +16,7 @@ import liquibase.statement.SqlStatement;
 import liquibase.statement.core.*;
 import liquibase.util.ISODateFormat;
 
+import java.math.BigInteger;
 import java.util.*;
 
 public class SQLiteDatabase extends AbstractDatabase {
@@ -92,7 +93,18 @@ public class SQLiteDatabase extends AbstractDatabase {
         return "AUTOINCREMENT";
     }
 
+    @Override
+    protected boolean generateAutoIncrementStartWith(BigInteger startWith) {
+    	// not supported
+    	return false;
+    }
 
+    @Override
+    protected boolean generateAutoIncrementBy(BigInteger incrementBy) {
+    	// not supported
+    	return false;
+    }
+    
     public static List<SqlStatement> getAlterTableStatements(
             AlterTableVisitor alterTableVisitor,
             Database database, String schemaName, String tableName)

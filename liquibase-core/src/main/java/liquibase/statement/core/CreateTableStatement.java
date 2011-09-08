@@ -10,7 +10,7 @@ public class CreateTableStatement extends AbstractSqlStatement {
     private String tableName;
     private String tablespace;
     private List<String> columns = new ArrayList<String>();
-    private Set<String> autoIncrementColumns = new HashSet<String>();
+    private Set<AutoIncrementConstraint> autoIncrementConstraints = new HashSet<AutoIncrementConstraint>();
     private Map<String, DataType> columnTypes = new HashMap<String, DataType>();
     private Map<String, Object> defaultValues = new HashMap<String, Object>();
 
@@ -45,7 +45,6 @@ public class CreateTableStatement extends AbstractSqlStatement {
         this.tablespace = tablespace;
         return this;
     }
-
 
     public PrimaryKeyConstraint getPrimaryKeyConstraint() {
         return primaryKeyConstraint;
@@ -129,7 +128,7 @@ public class CreateTableStatement extends AbstractSqlStatement {
                     ((UniqueConstraint) constraint).addColumns(columnName);
                     getUniqueConstraints().add(((UniqueConstraint) constraint));
                 } else if (constraint instanceof AutoIncrementConstraint) {
-                    autoIncrementColumns.add(columnName);
+                    autoIncrementConstraints.add((AutoIncrementConstraint) constraint);
                 } else {
                     throw new RuntimeException("Unknown constraint type: " + constraint.getClass().getName());
                 }
@@ -159,12 +158,12 @@ public class CreateTableStatement extends AbstractSqlStatement {
     }
 
     public CreateTableStatement addColumnConstraint(AutoIncrementConstraint autoIncrementConstraint) {
-        autoIncrementColumns.add(autoIncrementConstraint.getColumnName());
+        getAutoIncrementConstraints().add(autoIncrementConstraint);
         return this;
     }
 
-    public Set<String> getAutoIncrementColumns() {
-        return autoIncrementColumns;
+    public Set<AutoIncrementConstraint> getAutoIncrementConstraints() {
+        return autoIncrementConstraints;
     }
 
     public Map<String, DataType> getColumnTypes() {

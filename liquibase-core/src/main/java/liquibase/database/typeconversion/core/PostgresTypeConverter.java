@@ -92,4 +92,9 @@ public class PostgresTypeConverter extends AbstractTypeConverter {
     public NumberType getNumberType() {
         return new NumberType("NUMERIC");
     }
+
+    @Override
+    public TinyIntType getTinyIntType() {
+        return new TinyIntType("SMALLINT");
+    }
 }

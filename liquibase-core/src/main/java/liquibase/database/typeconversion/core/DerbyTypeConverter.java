@@ -4,6 +4,8 @@ import liquibase.database.Database;
 import liquibase.database.core.DerbyDatabase;
 import liquibase.database.structure.type.BooleanType;
 import liquibase.database.structure.type.DateTimeType;
+import liquibase.database.structure.type.NumberType;
+import liquibase.database.structure.type.TinyIntType;
 
 import java.text.ParseException;
 import java.sql.Types;
@@ -33,12 +35,15 @@ public class DerbyTypeConverter  extends AbstractTypeConverter {
     }
 
     @Override
-    public BooleanType getBooleanType() {
-        return new BooleanType.NumericBooleanType("SMALLINT");
-    }
-
-    @Override
     public DateTimeType getDateTimeType() {
         return new DateTimeType("TIMESTAMP");
+    }
+
+    public NumberType getNumberType() {
+        return new NumberType("NUMERIC");
+    }
+
+    public TinyIntType getTinyIntType() {
+        return new TinyIntType("SMALLINT");
     }
 }

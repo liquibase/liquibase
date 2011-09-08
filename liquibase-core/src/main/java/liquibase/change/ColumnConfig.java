@@ -1,13 +1,14 @@
 package liquibase.change;
 
-import liquibase.database.structure.Column;
-import liquibase.statement.DatabaseFunction;
-import liquibase.util.ISODateFormat;
-
+import java.math.BigInteger;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.Date;
 import java.util.Locale;
+
+import liquibase.database.structure.Column;
+import liquibase.statement.DatabaseFunction;
+import liquibase.util.ISODateFormat;
 
 /**
  * This class is the representation of the column tag in the XMl file
@@ -31,6 +32,8 @@ public class ColumnConfig {
 
     private ConstraintsConfig constraints;
     private Boolean autoIncrement;
+    private BigInteger startWith;
+    private BigInteger incrementBy;
     private String remarks;
     
     
@@ -41,6 +44,8 @@ public class ColumnConfig {
 			setDefaultValue(columnStructure.getDefaultValue().toString());
 		}
 		setAutoIncrement(columnStructure.isAutoIncrement());
+		setStartWith(columnStructure.getStartWith());
+		setIncrementBy(columnStructure.getIncrementBy());
 		ConstraintsConfig constraints = new ConstraintsConfig(); 
 		constraints.setNullable(columnStructure.isNullable());
 		constraints.setPrimaryKey(columnStructure.isPrimaryKey());
@@ -53,6 +58,8 @@ public class ColumnConfig {
 		setType(column.getType());
 		setDefaultValue(column.getDefaultValue());
 		setAutoIncrement(column.isAutoIncrement());
+		setStartWith(column.getStartWith());
+		setIncrementBy(column.getIncrementBy());
 		if (column.getConstraints()!=null) {
 			ConstraintsConfig constraints = new ConstraintsConfig(); 
 			constraints.setNullable(column.getConstraints().isNullable());
@@ -319,6 +326,26 @@ public class ColumnConfig {
         return this;
     }
 
+    public BigInteger getStartWith() {
+    	return startWith;
+    }
+    
+    public ColumnConfig setStartWith(BigInteger startWith) {
+    	this.startWith = startWith;
+    	
+    	return this;
+    }
+    
+    public BigInteger getIncrementBy() {
+    	return incrementBy;
+    }
+    
+    public ColumnConfig setIncrementBy(BigInteger incrementBy) {
+    	this.incrementBy = incrementBy;
+    	
+    	return this;
+    }
+    
     public boolean isPrimaryKey() {
         return getConstraints() != null && getConstraints().isPrimaryKey() != null && getConstraints().isPrimaryKey();
     }
