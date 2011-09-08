@@ -273,6 +273,8 @@
 		<xsd:attribute name="defaultValueBoolean" type="booleanExp" />
 		<xsd:attribute name="defaultValueComputed" type="xsd:string" />
 		<xsd:attribute name="autoIncrement" type="booleanExp" />
+		<xsd:attribute name="startWith" type="xsd:long" />
+		<xsd:attribute name="incrementBy" type="xsd:long" />
 		<xsd:attribute name="remarks" type="xsd:string" />
 	</xsd:attributeGroup>
 
@@ -413,6 +415,8 @@
 			<xsd:attribute name="tableName" type="xsd:string" use="required" />
 			<xsd:attribute name="columnName" type="xsd:string" use="required" />
 			<xsd:attribute name="columnDataType" type="xsd:string" />
+			<xsd:attribute name="startWith" type="xsd:long" />
+			<xsd:attribute name="incrementBy" type="xsd:long" />
 		</xsd:complexType>
 	</xsd:element>
 

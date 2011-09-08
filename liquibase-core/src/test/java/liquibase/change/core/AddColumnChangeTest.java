@@ -1,5 +1,7 @@
 package liquibase.change.core;
 
+import java.math.BigInteger;
+
 import liquibase.change.AbstractChangeTest;
 import liquibase.change.Change;
 import liquibase.change.ColumnConfig;
@@ -334,6 +336,8 @@ public class AddColumnChangeTest extends AbstractChangeTest {
         constraints.setNullable(Boolean.FALSE);
         constraints.setPrimaryKey(Boolean.TRUE);
         column.setAutoIncrement(Boolean.TRUE);
+        column.setStartWith(BigInteger.valueOf(2));
+        column.setIncrementBy(BigInteger.TEN);
 
         column.setConstraints(constraints);
 
@@ -352,6 +356,9 @@ public class AddColumnChangeTest extends AbstractChangeTest {
 
                 assertTrue(((AddColumnStatement) sqlStatements[0]).isPrimaryKey());
                 assertTrue(((AddColumnStatement) sqlStatements[0]).isAutoIncrement());
+                assertNotNull(((AddColumnStatement) sqlStatements[0]).getAutoIncrementConstraint());
+                assertEquals(BigInteger.valueOf(2), ((AddColumnStatement) sqlStatements[0]).getAutoIncrementConstraint().getStartWith());
+                assertEquals(BigInteger.TEN, ((AddColumnStatement) sqlStatements[0]).getAutoIncrementConstraint().getIncrementBy());
             }
         });
     }

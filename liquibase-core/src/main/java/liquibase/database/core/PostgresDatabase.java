@@ -8,6 +8,7 @@ import liquibase.logging.LogFactory;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.util.StringUtils;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -202,16 +203,21 @@ public class PostgresDatabase extends AbstractDatabase {
         return true;
     }
 
-
-
-
     @Override
     public String getAutoIncrementClause() {
         return "";
     }
 
+    @Override
+    public boolean generateAutoIncrementStartWith(BigInteger startWith) {
+    	return false;
+    }
 
-
+    @Override
+    public boolean generateAutoIncrementBy(BigInteger incrementBy) {
+    	return false;
+    }
+    
     @Override
     public String convertRequestedSchemaToSchema(String requestedSchema) throws DatabaseException {
         if (requestedSchema == null)

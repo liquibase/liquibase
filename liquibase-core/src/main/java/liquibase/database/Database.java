@@ -13,6 +13,7 @@ import liquibase.statement.DatabaseFunction;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.math.BigInteger;
 import java.util.Date;
 import java.util.List;
 
@@ -96,7 +97,7 @@ public interface Database extends DatabaseObject, PrioritizedService {
 
     String getLineComment();
 
-    String getAutoIncrementClause();
+    String getAutoIncrementClause(BigInteger startWith, BigInteger incrementBy);
 
     String getDatabaseChangeLogTableName();
 
