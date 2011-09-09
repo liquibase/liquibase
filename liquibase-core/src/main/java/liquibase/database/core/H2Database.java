@@ -176,7 +176,7 @@ public class H2Database extends AbstractDatabase {
     public String escapeDatabaseObject(String objectName) {
     	if (objectName != null) {
             if (isReservedWord(objectName)) {
-                return "\""+objectName+"\"";
+                return "\""+objectName.toUpperCase()+"\"";
             }
     	}
         return objectName;
