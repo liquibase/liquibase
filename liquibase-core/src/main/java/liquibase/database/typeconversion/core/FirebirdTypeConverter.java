@@ -43,4 +43,9 @@ public class FirebirdTypeConverter  extends AbstractTypeConverter {
     public DateTimeType getDateTimeType() {
         return new DateTimeType("TIMESTAMP");
     }
+
+    @Override
+    public NumberType getNumberType() {
+        return new NumericType();
+    }
 }
