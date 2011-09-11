@@ -458,7 +458,7 @@ public class DiffResult {
 
 			RandomAccessFile randomAccessFile = new RandomAccessFile(file, "rw");
 			randomAccessFile.seek(offset);
-			randomAccessFile.writeBytes("    "); 
+			randomAccessFile.writeBytes("    ");
 			randomAccessFile.write( xml.getBytes() );
 			randomAccessFile.writeBytes(lineSeparator);
 			randomAccessFile.writeBytes("</databaseChangeLog>" + lineSeparator);
@@ -487,7 +487,6 @@ public class DiffResult {
 		addUnexpectedPrimaryKeyChanges(changeSets);
         addUnexpectedForeignKeyChanges(changeSets);
 		addMissingUniqueConstraintChanges(changeSets);
-        addMissingIndexChanges(changeSets);
 		addUnexpectedUniqueConstraintChanges(changeSets);
 
 		if (diffData) {
@@ -496,6 +495,7 @@ public class DiffResult {
 
 		addMissingForeignKeyChanges(changeSets);
 		addUnexpectedIndexChanges(changeSets);
+        addMissingIndexChanges(changeSets);
 		addUnexpectedColumnChanges(changeSets);
 		addMissingSequenceChanges(changeSets);
 		addUnexpectedSequenceChanges(changeSets);
@@ -941,12 +941,12 @@ public class DiffResult {
 
 					constraintsConfig.setNullable(false);
 				}
-                if (column.isUnique()) {
-					if (constraintsConfig == null) {
-						constraintsConfig = new ConstraintsConfig();
-					}
-					constraintsConfig.setUnique(true);
-				}
+//                if (column.isUnique()) {
+//					if (constraintsConfig == null) {
+//						constraintsConfig = new ConstraintsConfig();
+//					}
+//					constraintsConfig.setUnique(true);
+//				}
 				if (constraintsConfig != null) {
 					columnConfig.setConstraints(constraintsConfig);
 				}
