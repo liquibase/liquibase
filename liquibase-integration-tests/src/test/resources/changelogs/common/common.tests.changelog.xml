@@ -855,4 +855,10 @@
             <column name="id" type="int"/>
         </createTable>
     </changeSet>
+
+    <changeSet id="number-type" author="nvoxland">
+        <createTable tableName="numbertest">
+            <column name="id" type="numeric"/>
+        </createTable>
+    </changeSet>
 </databaseChangeLog>

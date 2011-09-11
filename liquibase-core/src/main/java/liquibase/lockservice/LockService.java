@@ -60,7 +60,7 @@ public class LockService {
         while (!locked && new Date().getTime() < timeToGiveUp) {
             locked = acquireLock();
             if (!locked) {
-                System.out.println("Waiting for changelog lock....");
+                LogFactory.getLogger().info("Waiting for changelog lock....");
                 try {
                     Thread.sleep(changeLogLocRecheckTime);
                 } catch (InterruptedException e) {

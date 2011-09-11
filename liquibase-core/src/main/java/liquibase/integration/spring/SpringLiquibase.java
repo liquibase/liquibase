@@ -219,7 +219,7 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
     public void afterPropertiesSet() throws LiquibaseException {
         String shouldRunProperty = System.getProperty(Liquibase.SHOULD_RUN_SYSTEM_PROPERTY);
         if (shouldRunProperty != null && !Boolean.valueOf(shouldRunProperty)) {
-            System.out.println("Liquibase did not run because '" + Liquibase.SHOULD_RUN_SYSTEM_PROPERTY + "' system property was set to false");
+            LogFactory.getLogger().info("Liquibase did not run because '" + Liquibase.SHOULD_RUN_SYSTEM_PROPERTY + "' system property was set to false");
             return;
         }
 
