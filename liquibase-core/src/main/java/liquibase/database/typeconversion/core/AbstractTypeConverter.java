@@ -354,7 +354,7 @@ public abstract class AbstractTypeConverter implements TypeConverter {
     public BlobType getBlobType() {
         return new BlobType();
     }
-    
+
     public BlobType getLongBlobType() {
     	return getBlobType();
     }
@@ -443,6 +443,8 @@ public abstract class AbstractTypeConverter implements TypeConverter {
               return translatedTypeName+"("+referenceColumn.getColumnSize()+" "+referenceColumn.getLengthSemantics()+")";
             } else if (database instanceof MySQLDatabase && translatedTypeName.equalsIgnoreCase("DOUBLE")) {
               return translatedTypeName;
+            } else if (database instanceof MySQLDatabase && translatedTypeName.equalsIgnoreCase("DOUBLE PRECISION")) {
+                return translatedTypeName;
             }
             dataType = translatedTypeName+"("+referenceColumn.getColumnSize()+")";
         } else if (twoParams.contains(referenceColumn.getDataType())) {
