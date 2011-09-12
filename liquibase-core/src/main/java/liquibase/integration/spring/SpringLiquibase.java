@@ -72,13 +72,25 @@ import org.springframework.core.io.ResourceLoader;
  * @author Rob Schoening
  */
 public class SpringLiquibase implements InitializingBean, BeanNameAware, ResourceLoaderAware {
+
+    private boolean dropFirst = false;
+
+    public boolean isDropFirst() {
+        return dropFirst;
+    }
+
+    public void setDropFirst(boolean dropFirst) {
+        this.dropFirst = dropFirst;
+    }
+
+    
     public class SpringResourceOpener implements ResourceAccessor {
         private String parentFile;
+
 
         public SpringResourceOpener(String parentFile) {
             this.parentFile = parentFile;
         }
-
 
         public InputStream getResourceAsStream(String file) throws IOException {
             try {
@@ -250,6 +262,10 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
             for(Map.Entry<String, String> entry: parameters.entrySet()) {
                 liquibase.setChangeLogParameter(entry.getKey(), entry.getValue());
             }
+        }
+
+        if (isDropFirst()) {
+            liquibase.dropAll();
         }
 
         return liquibase;
