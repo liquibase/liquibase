@@ -26,7 +26,7 @@ public class MySQLTypeConverter extends AbstractTypeConverter {
 
     @Override
     public ClobType getClobType() {
-        return new ClobType("TEXT");
+        return new ClobType("LONGTEXT");
     }
 
     @Override
