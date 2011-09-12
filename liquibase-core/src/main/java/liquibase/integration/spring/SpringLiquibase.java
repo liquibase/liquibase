@@ -73,17 +73,6 @@ import org.springframework.core.io.ResourceLoader;
  */
 public class SpringLiquibase implements InitializingBean, BeanNameAware, ResourceLoaderAware {
 
-    private boolean dropFirst = false;
-
-    public boolean isDropFirst() {
-        return dropFirst;
-    }
-
-    public void setDropFirst(boolean dropFirst) {
-        this.dropFirst = dropFirst;
-    }
-
-    
     public class SpringResourceOpener implements ResourceAccessor {
         private String parentFile;
 
@@ -145,9 +134,21 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 
     private String defaultSchema;
 
+    private boolean dropFirst = false;
+
+
     public SpringLiquibase() {
         super();
     }
+
+    public boolean isDropFirst() {
+        return dropFirst;
+    }
+
+    public void setDropFirst(boolean dropFirst) {
+        this.dropFirst = dropFirst;
+    }
+
 
     public String getDatabaseProductName() throws DatabaseException {
         Connection connection = null;
