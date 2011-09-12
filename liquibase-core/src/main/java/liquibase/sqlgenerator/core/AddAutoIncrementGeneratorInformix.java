@@ -23,21 +23,40 @@ public class AddAutoIncrementGeneratorInformix extends AddAutoIncrementGenerator
     }
 
     @Override
-    public ValidationErrors validate(AddAutoIncrementStatement addAutoIncrementStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-        ValidationErrors validationErrors = super.validate(addAutoIncrementStatement, database, sqlGeneratorChain);
+    public ValidationErrors validate(
+    		AddAutoIncrementStatement addAutoIncrementStatement,
+    		Database database,
+    		SqlGeneratorChain sqlGeneratorChain) {
+        ValidationErrors validationErrors = super.validate(
+        	addAutoIncrementStatement, database, sqlGeneratorChain);
 
-        validationErrors.checkRequiredField("columnDataType", addAutoIncrementStatement.getColumnDataType());
+        validationErrors.checkRequiredField(
+        	"columnDataType", addAutoIncrementStatement.getColumnDataType());
 
         return validationErrors;
     }
 
     @Override
-    public Sql[] generateSql(AddAutoIncrementStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public Sql[] generateSql(
+    		AddAutoIncrementStatement statement,
+    		Database database,
+    		SqlGeneratorChain sqlGeneratorChain) {
         return new Sql[]{
-                new UnparsedSql("ALTER TABLE " + database.escapeTableName(statement.getSchemaName(), statement.getTableName()) + " MODIFY " + database.escapeColumnName(statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " " + TypeConverterFactory.getInstance().findTypeConverter(database).getDataType(statement.getColumnDataType(), true),
-                        new Column()
-                                .setTable(new Table(statement.getTableName()).setSchema(statement.getSchemaName()))
-                                .setName(statement.getColumnName()))
+            new UnparsedSql(
+            	"ALTER TABLE "
+            		+ database.escapeTableName(statement.getSchemaName(), statement.getTableName())
+            		+ " MODIFY "
+            		+ database.escapeColumnName(
+            			statement.getSchemaName(),
+            			statement.getTableName(),
+            			statement.getColumnName())
+            		+ " "
+            		+ TypeConverterFactory.getInstance().findTypeConverter(database).getDataType(
+            			statement.getColumnDataType(), true),
+                new Column()
+                    .setTable(
+                    	new Table(statement.getTableName()).setSchema(statement.getSchemaName()))
+                    .setName(statement.getColumnName()))
         };
     }
 }

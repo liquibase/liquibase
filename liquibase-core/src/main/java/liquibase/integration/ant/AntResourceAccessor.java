@@ -1,5 +1,7 @@
 package liquibase.integration.ant;
 
+import liquibase.resource.ClassLoaderResourceAccessor;
+import liquibase.resource.CompositeResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 import org.apache.tools.ant.AntClassLoader;
 import org.apache.tools.ant.Project;
@@ -15,35 +17,22 @@ import java.util.Enumeration;
 /**
  * An implementation of FileOpener that is specific to how Ant works.
  */
-public class AntResourceAccessor implements ResourceAccessor {
-    private AntClassLoader loader;
+public class AntResourceAccessor extends CompositeResourceAccessor {
 
     public AntResourceAccessor(final Project project, final Path classpath) {
-        loader = AccessController.doPrivileged(new PrivilegedAction<AntClassLoader>() {
-            public AntClassLoader run() {
-                return new AntClassLoader(project, classpath);
-            }
-        });
-    }
-
-    public InputStream getResourceAsStream(String file) throws IOException {
-        URL resource = loader.getResource(file);
-        if (resource == null) {
-            return null;
-        }
-        return resource.openStream();
-    }
-
-    public Enumeration<URL> getResources(String packageName) throws IOException {
-        return loader.getResources(packageName);
-    }
-
-    public ClassLoader toClassLoader() {
-        return loader;
-    }
-
-    @Override
-    public String toString() {
-        return getClass().getName()+"("+loader.getClasspath()+")";
+        super(new ClassLoaderResourceAccessor(
+                AccessController.doPrivileged(new PrivilegedAction<AntClassLoader>() {
+                    public AntClassLoader run() {
+                        return new AntClassLoader(project, classpath);
+                    }
+                })),
+                new ClassLoaderResourceAccessor(
+                        AccessController.doPrivileged(new PrivilegedAction<AntClassLoader>() {
+                            public AntClassLoader run() {
+                                return new AntClassLoader(project, new Path(project, "."));
+                            }
+                        }))
+        );
     }
 }
+

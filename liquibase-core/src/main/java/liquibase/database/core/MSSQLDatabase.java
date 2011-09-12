@@ -86,9 +86,20 @@ public class MSSQLDatabase extends AbstractDatabase {
     }
 
     @Override
-    public String getAutoIncrementClause() {
-        return "IDENTITY";
+    protected String getAutoIncrementClause() {
+    	return "IDENTITY";
     }
+    
+    @Override
+    protected String getAutoIncrementStartWithClause() {
+    	return "%d";
+    }
+
+    @Override
+    protected String getAutoIncrementByClause() {
+    	return "%d";
+    }
+    
     @Override
     protected String getDefaultDatabaseSchemaName() throws DatabaseException {
         return null;

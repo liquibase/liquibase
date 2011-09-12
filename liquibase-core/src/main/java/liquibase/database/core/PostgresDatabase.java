@@ -8,10 +8,8 @@ import liquibase.logging.LogFactory;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.util.StringUtils;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.math.BigInteger;
+import java.util.*;
 
 /**
  * Encapsulates PostgreSQL database support.
@@ -202,16 +200,21 @@ public class PostgresDatabase extends AbstractDatabase {
         return true;
     }
 
-
-
-
     @Override
     public String getAutoIncrementClause() {
         return "";
     }
 
+    @Override
+    public boolean generateAutoIncrementStartWith(BigInteger startWith) {
+    	return false;
+    }
 
-
+    @Override
+    public boolean generateAutoIncrementBy(BigInteger incrementBy) {
+    	return false;
+    }
+    
     @Override
     public String convertRequestedSchemaToSchema(String requestedSchema) throws DatabaseException {
         if (requestedSchema == null)
@@ -267,20 +270,17 @@ public class PostgresDatabase extends AbstractDatabase {
 
     @Override
     public boolean isReservedWord(String tableName) {
-        for (int i = 0; i != this.reservedWords.length; i++)
-            if (this.reservedWords[i].toLowerCase().equalsIgnoreCase(tableName))
-                return true;
-        return false;
+        return reservedWords.contains(tableName.toUpperCase());
     }
 
     /*
     * Reserved words from postgresql documentation
     */
-    private String[] reservedWords = new String[]{
-            "USER", "LIKE", "GROUP", "DATE"
+    private Set<String> reservedWords = new HashSet<String>(Arrays.asList(
+            "USER", "LIKE", "GROUP", "DATE", "ALL"
 //            "ALL", "ANALYSE", "ANALYZE", "AND", "ANY", "ARRAY", "AS", "ASC", "ASYMMETRIC", "AUTHORIZATION", "BETWEEN", "BINARY", "BOTH", "CASE", "CAST", "CHECK", "COLLATE", "COLUMN", "CONSTRAINT", "CORRESPONDING", "CREATE", "CROSS", "CURRENT_DATE", "CURRENT_ROLE", "CURRENT_TIME", "CURRENT_TIMESTAMP", "CURRENT_USER", "DEFAULT", "DEFERRABLE", "DESC", "DISTINCT", "DO", "ELSE", "END", "EXCEPT", "FALSE", "FOR", "FOREIGN", "FREEZE", "FROM", "FULL", "GRANT", "GROUP", "HAVING",
 //            "ILIKE", "IN", "INITIALLY", "INNER", "INTERSECT", "INTO", "IS", "ISNULL", "JOIN", "LEADING", "LEFT", "LIKE", "LIMIT", "LOCALTIME", "LOCALTIMESTAMP", "NATURAL", "NEW", "NOT", "NOTNULL", "NULL", "OFF", "OFFSET", "OLD", "ON", "ONLY", "OPEN", "OR", "ORDER", "OUTER", "OVERLAPS", "PLACING", "PRIMARY", "REFERENCES", "RETURNING", "RIGHT", "SELECT", "SESSION_USER", "SIMILAR", "SOME", "SYMMETRIC", "TABLE", "THEN", "TO", "TRAILING", "TRUE", "UNION", "UNIQUE", "USER", "USING", "VERBOSE", "WHEN", "WHERE"
-    };
+    ));
 
     /*
      * Get the current search paths

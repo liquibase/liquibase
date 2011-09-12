@@ -1,10 +1,16 @@
 package liquibase.sqlgenerator.core;
 
+import static org.junit.Assert.assertEquals;
+
+import java.math.BigInteger;
+
 import liquibase.database.Database;
 import liquibase.database.core.DerbyDatabase;
 import liquibase.database.core.HsqlDatabase;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.core.H2Database;
+import liquibase.database.typeconversion.TypeConverterFactory;
+import liquibase.sql.Sql;
 import liquibase.sqlgenerator.AbstractSqlGeneratorTest;
 import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.statement.core.AddAutoIncrementStatement;
@@ -25,7 +31,7 @@ public class AddAutoIncrementGeneratorTest extends AbstractSqlGeneratorTest<AddA
 
     @Override
 	protected AddAutoIncrementStatement createSampleSqlStatement() {
-        return new AddAutoIncrementStatement(null, TABLE_NAME, COLUMN_NAME, null);
+        return new AddAutoIncrementStatement(null, TABLE_NAME, COLUMN_NAME, null, null, null);
     }
 
     @Override
@@ -43,6 +49,32 @@ public class AddAutoIncrementGeneratorTest extends AbstractSqlGeneratorTest<AddA
         && !(database instanceof H2Database);
     }
 
+    protected AddAutoIncrementStatement createAddAutoIncrementStatement(
+    		Database database, BigInteger startWith, BigInteger incrementBy) {
+		
+    	AddAutoIncrementStatement statement = new AddAutoIncrementStatement(
+        	SCHEMA_NAME,
+        	TABLE_NAME,
+        	COLUMN_NAME,
+        	TypeConverterFactory.getInstance().findTypeConverter(database).getDataType(
+        		"BIGINT", true).toString(),
+        	startWith,
+        	incrementBy);   	
+    	
+    	return statement;
+    }
+    
+    protected void testAddAutoIncrementStatement(
+    		Database database, BigInteger startWith, BigInteger incrementBy, String expectedSql)
+    		throws Exception {
+		AddAutoIncrementStatement statement = createAddAutoIncrementStatement(
+			database, startWith, incrementBy);
+		
+		Sql[] generatedSql = this.generatorUnderTest.generateSql(statement, database, null);
+		
+		assertEquals(expectedSql, generatedSql[0].toSql());
+    }
+    
 //    @Test
 //    public void getAffectedDatabaseObjects() throws Exception {
 //        for (Database database : DatabaseTestContext.getInstance().getAvailableDatabases()) {
@@ -228,4 +260,6 @@ public class AddAutoIncrementGeneratorTest extends AbstractSqlGeneratorTest<AddA
 //                      }
 //                  });
 //      }
+
+
 }

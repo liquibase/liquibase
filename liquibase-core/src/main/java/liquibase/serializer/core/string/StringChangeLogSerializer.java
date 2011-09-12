@@ -80,6 +80,8 @@ public class StringChangeLogSerializer implements ChangeLogSerializer {
                                 values.add(indent(indent) + propertyName + "=" + serializeObject((Map) value, indent + 1));
                             } else if (value instanceof Collection) {
                                 values.add(indent(indent) + propertyName + "=" + serializeObject((Collection) value, indent + 1));
+                            } else if (value instanceof Object[]) {
+                                values.add(indent(indent) + propertyName + "=" + serializeObject((Object[]) value, indent + 1));
                             } else {
                                 values.add(indent(indent) + propertyName + "=\"" + value.toString() + "\"");
                             }
@@ -105,6 +107,26 @@ public class StringChangeLogSerializer implements ChangeLogSerializer {
 
     private String indent(int indent) {
         return StringUtils.repeat(" ", INDENT_LENGTH * indent);
+    }
+
+    private String serializeObject(Object[] collection, int indent) {
+        if (collection.length == 0) {
+            return "[]";
+        }
+
+        String returnString = "[\n";
+        for (Object object : collection) {
+            if (object instanceof ColumnConfig) {
+                returnString += indent(indent) + serializeColumnConfig((ColumnConfig) object, indent + 1) + ",\n";
+            } else {
+                returnString += indent(indent) + object.toString()+ ",\n";
+            }
+        }
+        returnString = returnString.replaceFirst(",$", "");
+        returnString += indent(indent - 1) + "]";
+
+        return returnString;
+
     }
 
     private String serializeObject(Collection collection, int indent) {

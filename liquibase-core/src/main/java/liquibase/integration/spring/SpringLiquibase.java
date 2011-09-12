@@ -72,13 +72,14 @@ import org.springframework.core.io.ResourceLoader;
  * @author Rob Schoening
  */
 public class SpringLiquibase implements InitializingBean, BeanNameAware, ResourceLoaderAware {
+
     public class SpringResourceOpener implements ResourceAccessor {
         private String parentFile;
+
 
         public SpringResourceOpener(String parentFile) {
             this.parentFile = parentFile;
         }
-
 
         public InputStream getResourceAsStream(String file) throws IOException {
             try {
@@ -133,9 +134,21 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 
     private String defaultSchema;
 
+    private boolean dropFirst = false;
+
+
     public SpringLiquibase() {
         super();
     }
+
+    public boolean isDropFirst() {
+        return dropFirst;
+    }
+
+    public void setDropFirst(boolean dropFirst) {
+        this.dropFirst = dropFirst;
+    }
+
 
     public String getDatabaseProductName() throws DatabaseException {
         Connection connection = null;
@@ -219,7 +232,7 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
     public void afterPropertiesSet() throws LiquibaseException {
         String shouldRunProperty = System.getProperty(Liquibase.SHOULD_RUN_SYSTEM_PROPERTY);
         if (shouldRunProperty != null && !Boolean.valueOf(shouldRunProperty)) {
-            System.out.println("Liquibase did not run because '" + Liquibase.SHOULD_RUN_SYSTEM_PROPERTY + "' system property was set to false");
+            LogFactory.getLogger().info("Liquibase did not run because '" + Liquibase.SHOULD_RUN_SYSTEM_PROPERTY + "' system property was set to false");
             return;
         }
 
@@ -232,9 +245,6 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
         } catch (SQLException e) {
             throw new DatabaseException(e);
         } finally {
-            if (liquibase != null) {
-                liquibase.forceReleaseLocks();
-            }
             if (c != null) {
                 try {
                     c.rollback();
@@ -253,6 +263,10 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
             for(Map.Entry<String, String> entry: parameters.entrySet()) {
                 liquibase.setChangeLogParameter(entry.getKey(), entry.getValue());
             }
+        }
+
+        if (isDropFirst()) {
+            liquibase.dropAll();
         }
 
         return liquibase;

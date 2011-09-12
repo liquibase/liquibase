@@ -9,7 +9,9 @@ import liquibase.statement.DatabaseFunction;
 import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 /**
@@ -215,7 +217,7 @@ public class OracleDatabase extends AbstractDatabase {
         return false;
     }
 
-    private List<String> reservedWords = Arrays.asList(
+    private Set<String> reservedWords = new HashSet(Arrays.asList(
 //            "ACCESS",
 //            "ACCOUNT",
 //            "ACTIVATE",
@@ -488,7 +490,7 @@ public class OracleDatabase extends AbstractDatabase {
 //            "NOTHING",
 //            "NOWAIT",
 //            "NULL",
-//            "NUMBER",
+            "NUMBER",
 //            "NUMERIC",
 //            "NVARCHAR2",
 //            "OBJECT",
@@ -693,5 +695,5 @@ public class OracleDatabase extends AbstractDatabase {
 //            "WRITEUP",
 //            "XID",
 //            "YEAR"
-    );
+    ));
 }

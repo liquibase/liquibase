@@ -26,7 +26,7 @@ public class Index implements DatabaseObject, Comparable<Index> {
 	public DatabaseObject[] getContainingObjects() {
         return new DatabaseObject[] {
                 table
-        };        
+        };
     }
 
     public String getName() {
@@ -99,12 +99,7 @@ public class Index implements DatabaseObject, Comparable<Index> {
         if (o == null || getClass() != o.getClass()) return false;
 
         Index index = (Index) o;
-        boolean equals = true;
-        for (String column : index.getColumns()) {
-            if (!columns.contains(column)) {
-                equals = false;
-            }
-        }
+        boolean equals = getColumnNames().equals(index.getColumnNames());
 
         if (this.unique == null && index.isUnique() == null) {
             //continue check
@@ -116,7 +111,7 @@ public class Index implements DatabaseObject, Comparable<Index> {
             equals = false;
         }
 
-        return equals || table.getName().equalsIgnoreCase(index.table.getName());
+        return equals && table.getName().equalsIgnoreCase(index.table.getName()) && getName().equals(index.getName());
 
     }
 

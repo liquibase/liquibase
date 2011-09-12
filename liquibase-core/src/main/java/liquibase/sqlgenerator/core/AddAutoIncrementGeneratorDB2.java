@@ -22,12 +22,26 @@ public class AddAutoIncrementGeneratorDB2 extends AddAutoIncrementGenerator {
     }
 
     @Override
-    public Sql[] generateSql(AddAutoIncrementStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public Sql[] generateSql(
+    		AddAutoIncrementStatement statement,
+    		Database database,
+    		SqlGeneratorChain sqlGeneratorChain) {
         return new Sql[]{
-                new UnparsedSql("ALTER TABLE " + database.escapeTableName(statement.getSchemaName(), statement.getTableName()) + " ALTER COLUMN " + database.escapeColumnName(statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " SET GENERATED ALWAYS AS IDENTITY",
-                        new Column()
-                                .setTable(new Table(statement.getTableName()).setSchema(statement.getSchemaName()))
-                                .setName(statement.getColumnName()))
+            new UnparsedSql(
+            	"ALTER TABLE "
+            		+ database.escapeTableName(statement.getSchemaName(), statement.getTableName())
+            		+ " ALTER COLUMN "
+            		+ database.escapeColumnName(
+            			statement.getSchemaName(),
+            			statement.getTableName(),
+            			statement.getColumnName())
+            		+ " SET "
+            		+ database.getAutoIncrementClause(
+            			statement.getStartWith(), statement.getIncrementBy()),
+                new Column()
+                    .setTable(
+                    	new Table(statement.getTableName()).setSchema(statement.getSchemaName()))
+                    .setName(statement.getColumnName()))
         };
     }
 }

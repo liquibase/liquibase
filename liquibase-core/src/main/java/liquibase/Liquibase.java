@@ -453,8 +453,8 @@ public class Liquibase {
 
             logIterator.run(new RollbackVisitor(database), database);
         } finally {
-            ExecutorService.getInstance().setExecutor(database, oldTemplate);
             lockService.releaseLock();
+            ExecutorService.getInstance().setExecutor(database, oldTemplate);
         }
 
         try {
@@ -713,7 +713,7 @@ public class Liquibase {
      * @throws DatabaseException
      */
     private void setDatabasePropertiesAsChangelogParameters(Database database) throws DatabaseException {            
-            setChangeLogParameter("database.autoIncrementClause", database.getAutoIncrementClause());
+            setChangeLogParameter("database.autoIncrementClause", database.getAutoIncrementClause(null, null));
             setChangeLogParameter("database.currentDateTimeFunction", database.getCurrentDateTimeFunction());
             setChangeLogParameter("database.databaseChangeLogLockTableName", database.getDatabaseChangeLogLockTableName());
             setChangeLogParameter("database.databaseChangeLogTableName", database.getDatabaseChangeLogTableName());

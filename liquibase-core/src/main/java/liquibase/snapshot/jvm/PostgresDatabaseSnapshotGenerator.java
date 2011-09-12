@@ -27,17 +27,17 @@ public class PostgresDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGener
 
     @Override
     protected String convertTableNameToDatabaseTableName(String tableName) {
-        return tableName;
+        return tableName.toLowerCase();
     }
 
     @Override
     protected String convertColumnNameToDatabaseTableName(String columnName) {
-        return columnName;
+        return columnName.toLowerCase();
     }
 
     @Override
     protected String convertPrimaryKeyName(String pkName) throws SQLException {
-        return pkName;
+        return pkName.toLowerCase();
     }
 
     @Override
