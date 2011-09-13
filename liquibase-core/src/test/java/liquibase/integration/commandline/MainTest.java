@@ -1,16 +1,24 @@
 package liquibase.integration.commandline;
 
-import liquibase.exception.CommandLineParsingException;
-import liquibase.integration.commandline.Main;
-import liquibase.util.StringUtils;
-import static org.junit.Assert.*;
-import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.PrintStream;
+import java.io.StringReader;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Arrays;
 import java.util.Properties;
+
+import liquibase.exception.CommandLineParsingException;
+import liquibase.util.StringUtils;
+
+import org.junit.Test;
 
 
 /**
@@ -272,6 +280,92 @@ public class MainTest {
 
         cli.command = "migrate";
         assertEquals(0, cli.checkSetup().size());
+
+        String[] noArgCommand = { "migrate", "migrateSQL", "update", "updateSQL",
+                "futureRollbackSQL", "updateTestingRollback", "listLocks",
+                "dropAll", "releaseLocks", "validate", "help", "generateChangeLog",
+                "clearCheckSums", "changelogSync", "changelogSyncSQL",
+                "markNextChangeSetRan", "markNextChangeSetRanSQL"
+        };
+
+        cli.commandParams.clear();
+        cli.commandParams.add("--logLevel=debug");
+
+        // verify unexpected parameter
+        for(int i=0; i<noArgCommand.length; i++) {
+            cli.command = noArgCommand[i];
+            assertEquals(1, cli.checkSetup().size());
+        }
+        
+        // test update cmd with -D parameter
+        cli.command = "update";
+        cli.commandParams.clear();
+        cli.changeLogParameters.clear();
+        cli.changeLogParameters.put("engine", "myisam");
+        assertEquals(0, cli.checkSetup().size());
+        
+        // verify normal case - comand w/o command parameters
+        cli.commandParams.clear();
+        for(int i=0; i<noArgCommand.length; i++) {
+            cli.command = noArgCommand[i];
+            assertEquals(0, cli.checkSetup().size());
+        }
+        
+        String[] singleArgCommand = { "updateCount", "updateCountSQL",
+                "rollback", "rollbackToDate", "rollbackCount",
+                "rollbackSQL", "rollbackToDateSQL", "rollbackCountSQL",
+                "tag", "dbDoc"
+        };
+        
+        // verify unexpected parameter for single arg commands
+        cli.commandParams.add("--logLevel=debug");
+        for(int i=0; i<singleArgCommand.length; i++) {
+            cli.command = singleArgCommand[i];
+            assertEquals(1, cli.checkSetup().size());
+        }
+        
+        // verify normal case - comand with string command parameter
+        cli.commandParams.clear();
+        cli.commandParams.add("someCommandValue");
+        for(int i=0; i<singleArgCommand.length; i++) {
+            cli.command = singleArgCommand[i];
+            assertEquals(0, cli.checkSetup().size());
+        }
+            
+        // status w/o parameter
+        cli.command = "status";
+        cli.commandParams.clear();
+        assertEquals(0, cli.checkSetup().size());
+        
+        // status w/--verbose
+        cli.commandParams.add("--verbose");
+        assertEquals(0, cli.checkSetup().size());
+       
+        cli.commandParams.clear();
+        cli.commandParams.add("--logLevel=debug");
+        assertEquals(1, cli.checkSetup().size());
+        
+        String[] multiArgCommand = { "diff", "diffChangeLog" };
+        
+        //first verify diff cmds w/o args 
+        cli.commandParams.clear();
+        for(int i=0; i<multiArgCommand.length; i++) {
+            cli.command = multiArgCommand[i];
+            assertEquals(0, cli.checkSetup().size());
+        }
+       
+        // next verify with all parms
+        String[] cmdParms = { "--referenceUsername=USERNAME", "--referencePassword=PASSWORD", 
+                "--referenceUrl=URL", "--referenceDriver=DRIVER"};
+        // load all parms 
+        for (String param : cmdParms) {
+            cli.commandParams.add(param);
+        }
+        assertEquals(0, cli.checkSetup().size());
+        
+        // now add an unexpected parm
+        cli.commandParams.add("--logLevel=debug");
+        assertEquals(1, cli.checkSetup().size());
     }
 
     @Test
