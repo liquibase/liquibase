@@ -40,6 +40,8 @@ public class PostgresTypeConverter extends AbstractTypeConverter {
 
         if (type.getDataTypeName().toLowerCase().contains("text")) {
             type = getClobType();
+        } else if (type.getDataTypeName().toLowerCase().contains("blob")) {
+            type = getBlobType();
         } else if (type.getDataTypeName().toLowerCase().startsWith("float8")) {
             type.setDataTypeName("FLOAT8");
         } else if (type.getDataTypeName().toLowerCase().startsWith("float4")) {
