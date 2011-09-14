@@ -50,7 +50,7 @@ public class PostgresTypeConverterTest extends DefaultTypeConverterTest {
         assertEquals("TIMESTAMP WITH TIME ZONE", new PostgresTypeConverter().getDateTimeType().toString());
     }
 
-       @Test
+    @Test
     public void getColumnType_BigSerial_AutoIncrement() {
         assertEquals("bigserial", new PostgresTypeConverter().getDataType("bigserial", true).toString());
     }
@@ -58,5 +58,44 @@ public class PostgresTypeConverterTest extends DefaultTypeConverterTest {
     @Test
     public void getColumnType_BigInt_AutoIncrement() {
         assertEquals("bigserial", new PostgresTypeConverter().getDataType("bigint", true).toString());
+    }
+
+    @Test
+    public void getColumnType_TinyText() {
+        assertEquals("TEXT", new PostgresTypeConverter().getDataType("TINYTEXT", false).toString());
+    }
+
+    @Test
+    public void getColumnType_Text() {
+        assertEquals("TEXT", new PostgresTypeConverter().getDataType("TEXT", false).toString());
+    }
+
+    @Test
+    public void getColumnType_MediumText() {
+        assertEquals("TEXT", new PostgresTypeConverter().getDataType("MEDIUMTEXT", false).toString());
+    }
+
+    @Test
+    public void getColumnType_LongText() {
+        assertEquals("TEXT", new PostgresTypeConverter().getDataType("LONGTEXT", false).toString());
+    }
+    @Test
+    public void getColumnType_TinyBlob() {
+        assertEquals("BYTEA", new PostgresTypeConverter().getDataType("TINYBLOB", false).toString());
+    }
+
+    @Test
+    public void getColumnType_Blob() {
+        assertEquals("BYTEA", new PostgresTypeConverter().getDataType("BLOB", false).toString());
+    }
+
+    @Test
+    public void getColumnType_MediumBlob() {
+        assertEquals("BYTEA", new PostgresTypeConverter().getDataType("MEDIUMBLOB", false).toString());
+    }
+
+    @Test
+    public void getColumnType_LongBlob() {
+        assertEquals("BYTEA", new PostgresTypeConverter().getDataType("LONGBLOB", false).toString());
     }
 }

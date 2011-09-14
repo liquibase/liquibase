@@ -32,7 +32,7 @@ public class MySQLTypeConverterTest extends DefaultTypeConverterTest {
     
     @Test
     public void getClobType() {
-        assertEquals("TEXT", new MySQLTypeConverter().getClobType().toString());
+        assertEquals("LONGTEXT", new MySQLTypeConverter().getClobType().toString());
     }
 
     
