@@ -15,7 +15,7 @@ import java.util.List;
 /**
  * Inserts data into an existing table.
  */
-public class InsertDataChange extends AbstractChange implements ChangeWithColumns {
+public class InsertDataChange extends AbstractChange implements ChangeWithColumns<ColumnConfig> {
 
     private String schemaName;
     private String tableName;

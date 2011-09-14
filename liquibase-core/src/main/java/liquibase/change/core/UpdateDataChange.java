@@ -13,7 +13,7 @@ import liquibase.util.StringUtils;
 import java.util.ArrayList;
 import java.util.List;
 
-public class UpdateDataChange extends AbstractChange implements ChangeWithColumns {
+public class UpdateDataChange extends AbstractChange implements ChangeWithColumns<ColumnConfig> {
 
     private String schemaName;
     private String tableName;

@@ -2,8 +2,8 @@ package liquibase.change;
 
 import java.util.List;
 
-public interface ChangeWithColumns {
-    public void addColumn(ColumnConfig column);
+public interface ChangeWithColumns<T extends ColumnConfig> {
+    public void addColumn(T column);
 
-    public List<ColumnConfig> getColumns();
+    public List<T> getColumns();
 }

@@ -16,7 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class LoadDataChange extends AbstractChange implements ChangeWithColumns {
+public class LoadDataChange extends AbstractChange implements ChangeWithColumns<LoadDataColumnConfig> {
 
     private String schemaName;
     private String tableName;
@@ -86,12 +86,12 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns 
 		this.quotchar = quotchar;
 	}
 
-	public void addColumn(ColumnConfig column) {
-      	columns.add((LoadDataColumnConfig) column);
+	public void addColumn(LoadDataColumnConfig column) {
+      	columns.add(column);
     }
 
-    public List<ColumnConfig> getColumns() {
-        return (List<ColumnConfig>) (List) columns;
+    public List<LoadDataColumnConfig> getColumns() {
+        return (List<LoadDataColumnConfig>) columns;
     }
 
     public SqlStatement[] generateStatements(Database database) {
