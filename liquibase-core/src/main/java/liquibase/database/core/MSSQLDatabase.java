@@ -3,9 +3,13 @@ package liquibase.database.core;
 import liquibase.database.AbstractDatabase;
 import liquibase.database.DatabaseConnection;
 import liquibase.exception.DatabaseException;
+import liquibase.executor.ExecutorService;
+import liquibase.statement.core.GetViewDefinitionStatement;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 /**
  * Encapsulates MS-SQL database support.
@@ -13,6 +17,8 @@ import java.util.Set;
 public class MSSQLDatabase extends AbstractDatabase {
     public static final String PRODUCT_NAME = "Microsoft SQL Server";
     protected Set<String> systemTablesAndViews = new HashSet<String>();
+
+    private static Pattern CREATE_VIEW_AS_PATTERN = Pattern.compile("^CREATE\\s+.*?VIEW\\s+.*?AS\\s+", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
     public String getTypeName() {
         return "mssql";
@@ -230,4 +236,22 @@ public class MSSQLDatabase extends AbstractDatabase {
         }
 
 	}
+
+      @Override
+    public String getViewDefinition(String schemaName, String viewName) throws DatabaseException {
+        if (schemaName == null) {
+            schemaName = convertRequestedSchemaToSchema(null);
+        }
+        List<String> defLines = (List<String>) ExecutorService.getInstance().getExecutor(this).queryForList(new GetViewDefinitionStatement(schemaName, viewName), String.class);
+        StringBuffer sb = new StringBuffer();
+        for (String defLine : defLines) {
+            sb.append(defLine);
+        }
+        String definition = sb.toString();
+
+        if (definition == null) {
+            return null;
+        }
+        return CREATE_VIEW_AS_PATTERN.matcher(definition).replaceFirst("");
+    }
 }

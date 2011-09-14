@@ -1023,8 +1023,7 @@ public class DiffResult {
 								+ " is not a directory");
 					}
 
-					CSVWriter outputFile = new CSVWriter(new FileWriter(
-							fileName));
+					CSVWriter outputFile = new CSVWriter(new BufferedWriter(new FileWriter(fileName)));
 					String[] dataTypes = new String[columnNames.size()];
 					String[] line = new String[columnNames.size()];
 					for (int i = 0; i < columnNames.size(); i++) {
