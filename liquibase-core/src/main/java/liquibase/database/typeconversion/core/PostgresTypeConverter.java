@@ -97,4 +97,9 @@ public class PostgresTypeConverter extends AbstractTypeConverter {
     public TinyIntType getTinyIntType() {
         return new TinyIntType("SMALLINT");
     }
+
+    @Override
+    public DoubleType getDoubleType() {
+        return new DoubleType("DOUBLE PRECISION");
+    }
 }
