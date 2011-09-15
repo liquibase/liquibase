@@ -28,8 +28,9 @@
     </issueManagement>
 
     <scm>
-        <url>https://liquibase.jira.com/svn/CORE/trunk</url>
-        <developerConnection>scm:svn:https://liquibase.jira.com/svn/CORE/trunk</developerConnection>
+        <connection>scm:git:git@github.com:liquibase/liquibase.git</connection>
+        <url>scm:git:git@github.com:liquibase/liquibase.git</url>
+        <developerConnection>scm:git:git@github.com:liquibase/liquibase.git</developerConnection>
     </scm>
 
     <developers>

@@ -1,6 +1,11 @@
 Liquibase Core Changelog
 ===========================================
 
+Change in version 2.0.2 (2011.09.15)
+----------------------
+- dropFirst parameter on SpringLiquibase bean
+- Bug Fixes
+
 Change in version 2.0.0 (2010.12.19)
 ----------------------
 - Major change to codebase, focusing on extension/integration APIs
