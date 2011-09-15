@@ -4,7 +4,7 @@
 
     <groupId>org.liquibase</groupId>
     <artifactId>liquibase-parent</artifactId>
-    <version>2.0.2</version>
+    <version>2.0.2-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>Liquibase Parent Configuration</name>
