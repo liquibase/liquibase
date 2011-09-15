@@ -176,7 +176,7 @@ public class DefaultPackageScanClassResolver implements PackageScanClassResolver
                 }
 
                 // Else it's in a JAR, grab the path to the jar
-                if (urlPath.contains(".jar/")) {
+                if (urlPath.contains(".jar/") && !urlPath.contains(".jar!/")) {
                     urlPath = urlPath.replace(".jar/", ".jar!/");
                 }
 

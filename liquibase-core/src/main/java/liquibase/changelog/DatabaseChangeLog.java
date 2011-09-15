@@ -90,7 +90,10 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         for (ChangeSet changeSet : changeSets) {
             if (changeSet.getFilePath().equalsIgnoreCase(path)
                     && changeSet.getAuthor().equalsIgnoreCase(author)
-                    && changeSet.getId().equalsIgnoreCase(id)) {
+                    && changeSet.getId().equalsIgnoreCase(id)
+                    && (null == changeSet.getDbmsSet()
+                    || changeSet.getDbmsSet().isEmpty()
+                    || changeSet.getDbmsSet().contains(changeLogParameters.getValue("database.typeName").toString()))) {
                 return changeSet;
             }
         }

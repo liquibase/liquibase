@@ -141,6 +141,12 @@ public class DB2Database extends AbstractDatabase {
 
     @Override
     public String generatePrimaryKeyName(String tableName) {
+        if (tableName.equals(getDatabaseChangeLogTableName())) {
+            tableName = "DbChgLog".toUpperCase();
+        } else if (tableName.equals(getDatabaseChangeLogLockTableName())) {
+            tableName = "DbChgLogLock".toUpperCase();
+        }
+
         String pkName = super.generatePrimaryKeyName(tableName);
         if (pkName.length() > 18) {
             pkName = pkName.substring(0, 17);

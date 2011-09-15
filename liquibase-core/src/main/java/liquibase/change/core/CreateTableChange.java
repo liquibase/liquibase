@@ -17,7 +17,7 @@ import java.util.List;
 /**
  * Creates a new table.
  */
-public class CreateTableChange extends AbstractChange implements ChangeWithColumns {
+public class CreateTableChange extends AbstractChange implements ChangeWithColumns<ColumnConfig> {
 
     private List<ColumnConfig> columns;
     private String schemaName;

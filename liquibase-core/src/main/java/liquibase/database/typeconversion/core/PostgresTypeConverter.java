@@ -38,8 +38,10 @@ public class PostgresTypeConverter extends AbstractTypeConverter {
     public DataType getDataType(String columnTypeString, Boolean autoIncrement) {
         DataType type = super.getDataType(columnTypeString, autoIncrement);
 
-        if (type.getDataTypeName().startsWith("TEXT(")) {
+        if (type.getDataTypeName().toLowerCase().contains("text")) {
             type = getClobType();
+        } else if (type.getDataTypeName().toLowerCase().contains("blob")) {
+            type = getBlobType();
         } else if (type.getDataTypeName().toLowerCase().startsWith("float8")) {
             type.setDataTypeName("FLOAT8");
         } else if (type.getDataTypeName().toLowerCase().startsWith("float4")) {
@@ -96,5 +98,10 @@ public class PostgresTypeConverter extends AbstractTypeConverter {
     @Override
     public TinyIntType getTinyIntType() {
         return new TinyIntType("SMALLINT");
+    }
+
+    @Override
+    public DoubleType getDoubleType() {
+        return new DoubleType("DOUBLE PRECISION");
     }
 }

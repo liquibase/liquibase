@@ -12,7 +12,7 @@ import java.util.List;
 /**
  * Creates an index on an existing column.
  */
-public class CreateIndexChange extends AbstractChange implements ChangeWithColumns {
+public class CreateIndexChange extends AbstractChange implements ChangeWithColumns<ColumnConfig> {
 
     private String schemaName;
     private String tableName;
