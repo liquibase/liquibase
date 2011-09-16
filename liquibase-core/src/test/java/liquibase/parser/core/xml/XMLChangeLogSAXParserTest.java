@@ -336,4 +336,28 @@ public class XMLChangeLogSAXParserTest {
         assertTrue(change instanceof CreateTableChange);
     }
 
+	@Test
+	public void rawSqlParameter() throws Exception {
+		ChangeLogParameters params = new ChangeLogParameters();
+		params.set("tablename", "rawsql");
+		DatabaseChangeLog changeLog = new XMLChangeLogSAXParser().parse("liquibase/parser/core/xml/rawSqlParameters.xml", params, new JUnitResourceAccessor());
+
+		assertEquals("liquibase/parser/core/xml/rawSqlParameters.xml", changeLog.getLogicalFilePath());
+		assertEquals("liquibase/parser/core/xml/rawSqlParameters.xml", changeLog.getPhysicalFilePath());
+
+		assertEquals(1, changeLog.getChangeSets().size());
+
+		// change 0
+		ChangeSet changeSet = changeLog.getChangeSets().get(0);
+		assertEquals("paikens", changeSet.getAuthor());
+		assertEquals("1", changeSet.getId());
+		assertEquals("liquibase/parser/core/xml/rawSqlParameters.xml", changeSet.getFilePath());
+		assertEquals(1, changeSet.getChanges().size());
+		assertTrue(changeSet.getChanges().get(0) instanceof RawSQLChange);
+		assertEquals("create table rawsql;", ((RawSQLChange) changeSet.getChanges().get(0)).getSql());
+		assertEquals(1, changeSet.getRollBackChanges().length);
+		assertTrue(changeSet.getRollBackChanges()[0] instanceof RawSQLChange);
+		assertEquals("drop table rawsql", ((RawSQLChange) changeSet.getRollBackChanges()[0]).getSql());
+	}
+
 }
