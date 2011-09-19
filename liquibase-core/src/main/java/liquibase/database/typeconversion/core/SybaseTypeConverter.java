@@ -75,4 +75,8 @@ public class SybaseTypeConverter extends AbstractTypeConverter {
         return new BlobType("IMAGE");
     }
 
+    @Override
+    public NumberType getNumberType() {
+        return new NumberType("NUMERIC");
+    }
 }
