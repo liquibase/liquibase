@@ -13,8 +13,11 @@ public class RenameColumnGenerator extends AbstractSqlGenerator<RenameColumnStat
 
     @Override
     public boolean supports(RenameColumnStatement statement, Database database) {
-        return !(database instanceof DB2Database
-                || database instanceof CacheDatabase
+        if (database instanceof DB2Database) {
+            return ((DB2Database) database).supportsColumnRename();
+        }
+        
+        return !(database instanceof CacheDatabase
                 || database instanceof SQLiteDatabase);
     }
 
@@ -49,6 +52,8 @@ public class RenameColumnGenerator extends AbstractSqlGenerator<RenameColumnStat
           sql = "RENAME COLUMN " + database.escapeTableName(statement.getSchemaName(), statement.getTableName()) + "." + database.escapeColumnName(statement.getSchemaName(), statement.getTableName(), statement.getOldColumnName()) + " TO " + database.escapeColumnName(statement.getSchemaName(), statement.getTableName(), statement.getNewColumnName());
         } else if (database instanceof SybaseASADatabase) {
             sql = "ALTER TABLE " + database.escapeTableName(statement.getSchemaName(), statement.getTableName()) + " RENAME " + database.escapeColumnName(statement.getSchemaName(), statement.getTableName(), statement.getOldColumnName()) + " TO " + database.escapeColumnName(statement.getSchemaName(), statement.getTableName(), statement.getNewColumnName());
+        } else if (database instanceof DB2Database) {
+            sql = "ALTER TABLE " + database.escapeTableName(statement.getSchemaName(), statement.getTableName()) + " RENAME COLUMN " + database.escapeColumnName(statement.getSchemaName(), statement.getTableName(), statement.getOldColumnName()) + " TO " + database.escapeColumnName(statement.getSchemaName(), statement.getTableName(), statement.getNewColumnName());
         } else {
             sql = "ALTER TABLE " + database.escapeTableName(statement.getSchemaName(), statement.getTableName()) + " RENAME COLUMN " + database.escapeColumnName(statement.getSchemaName(), statement.getTableName(), statement.getOldColumnName()) + " TO " + database.escapeColumnName(statement.getSchemaName(), statement.getTableName(), statement.getNewColumnName());
         }

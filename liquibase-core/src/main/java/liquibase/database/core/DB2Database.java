@@ -10,8 +10,21 @@ import java.text.SimpleDateFormat;
 
 public class DB2Database extends AbstractDatabase {
 
+    private int major;
+    private int minor;
+
     public boolean isCorrectDatabaseImplementation(DatabaseConnection conn) throws DatabaseException {
         return conn.getDatabaseProductName().startsWith("DB2");
+    }
+    
+    public boolean supportsColumnRename() {
+        try {
+            major = getConnection().getDatabaseMajorVersion();
+            minor = getConnection().getDatabaseMinorVersion();
+        } catch (DatabaseException e) {
+            e.printStackTrace();
+        }
+        return major > 9 || (major == 9 && minor >=7);
     }
 
     public String getDefaultDriver(String url) {
