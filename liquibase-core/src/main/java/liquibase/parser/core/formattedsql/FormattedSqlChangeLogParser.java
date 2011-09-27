@@ -77,7 +77,7 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
             while ((line = reader.readLine()) != null) {
                 Matcher changeSetPatternMatcher = changeSetPattern.matcher(line);
                 if (changeSetPatternMatcher.matches()) {
-                    String finalCurrentSql = StringUtils.trimToNull(currentSql.toString());
+                    String finalCurrentSql = changeLogParameters.expandExpressions(StringUtils.trimToNull(currentSql.toString()));
                     if (changeSet != null) {
 
                         if (finalCurrentSql == null) {
@@ -92,7 +92,7 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                         			changeSet.addRollbackChange(new EmptyChange());
                         		} else {
                         			RawSQLChange rollbackChange = new RawSQLChange();
-                        			rollbackChange.setSql(currentRollbackSql.toString());
+                        			rollbackChange.setSql(changeLogParameters.expandExpressions(currentRollbackSql.toString()));
                         			changeSet.addRollbackChange(rollbackChange);
                         		}
                             } catch (UnsupportedChangeException e) {
@@ -152,7 +152,7 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
             }
 
             if (changeSet != null) {
-                change.setSql(StringUtils.trimToNull(currentSql.toString()));
+                change.setSql(changeLogParameters.expandExpressions(StringUtils.trimToNull(currentSql.toString())));
 
                 if (StringUtils.trimToNull(currentRollbackSql.toString()) != null) {
                     try {
@@ -160,7 +160,7 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                             changeSet.addRollbackChange(new EmptyChange());
                         } else {
                             RawSQLChange rollbackChange = new RawSQLChange();
-                            rollbackChange.setSql(currentRollbackSql.toString());
+                            rollbackChange.setSql(changeLogParameters.expandExpressions(currentRollbackSql.toString()));
                             changeSet.addRollbackChange(rollbackChange);
                         }
                     } catch (UnsupportedChangeException e) {

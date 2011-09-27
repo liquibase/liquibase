@@ -135,7 +135,7 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
 			} else if ("includeAll".equals(qName)) {
 				String pathName = atts.getValue("path");
 				pathName = pathName.replace('\\', '/');
-				
+
 				if (!(pathName.endsWith("/"))) {
 					pathName = pathName + '/';
 				}
@@ -613,7 +613,7 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
 					&& localName.equals(change.getChangeMetaData().getName())) {
 				if (textString != null) {
 					if (change instanceof RawSQLChange) {
-						((RawSQLChange) change).setSql(textString);
+						((RawSQLChange) change).setSql(changeLogParameters.expandExpressions(textString));
 					} else if (change instanceof CreateProcedureChange) {
 						((CreateProcedureChange) change)
 								.setProcedureBody(textString);
