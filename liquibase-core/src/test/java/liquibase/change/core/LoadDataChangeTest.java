@@ -1,12 +1,13 @@
 package liquibase.change.core;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import liquibase.change.AbstractChangeTest;
 import liquibase.database.core.MockDatabase;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.InsertStatement;
 
-import static org.junit.Assert.*;
 import org.junit.Test;
 
 /**
@@ -36,6 +37,21 @@ public class LoadDataChangeTest extends AbstractChangeTest {
         stdAssertOfLoaded(sqlStatements);
     }
 
+    @Test
+    public void loadDataEmpty() throws Exception {
+        LoadDataChange refactoring = new LoadDataChange();
+        refactoring.setSchemaName("SCHEMA_NAME");
+        refactoring.setTableName("TABLE_NAME");
+        refactoring.setFile("liquibase/change/core/empty.data.csv");
+        refactoring.setSeparator(",");
+        
+        refactoring.setResourceAccessor(new ClassLoaderResourceAccessor());
+
+        SqlStatement[] sqlStatements = refactoring.generateStatements(new MockDatabase());
+
+        assertEquals(0, sqlStatements.length);
+    }
+    
     @Test
     public void loadDataCsvQuotChar() throws Exception {
         LoadDataChange refactoring = new LoadDataChange();

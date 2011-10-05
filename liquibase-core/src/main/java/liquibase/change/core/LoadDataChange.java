@@ -1,19 +1,25 @@
 package liquibase.change.core;
 
-import liquibase.change.*;
-import liquibase.database.Database;
-import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.resource.ResourceAccessor;
-import liquibase.statement.SqlStatement;
-import liquibase.statement.core.InsertStatement;
-import liquibase.util.StringUtils;
-import liquibase.util.csv.CSVReader;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
+
+import liquibase.change.AbstractChange;
+import liquibase.change.ChangeMetaData;
+import liquibase.change.ChangeWithColumns;
+import liquibase.change.CheckSum;
+import liquibase.change.ColumnConfig;
+import liquibase.database.Database;
+import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.logging.LogFactory;
+import liquibase.logging.Logger;
+import liquibase.resource.ResourceAccessor;
+import liquibase.statement.SqlStatement;
+import liquibase.statement.core.InsertStatement;
+import liquibase.util.StringUtils;
+import liquibase.util.csv.CSVReader;
 
 
 public class LoadDataChange extends AbstractChange implements ChangeWithColumns {
@@ -91,7 +97,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns 
     }
 
     public List<ColumnConfig> getColumns() {
-        return (List<ColumnConfig>) (List) columns;
+        return (List) columns;
     }
 
     public SqlStatement[] generateStatements(Database database) {
@@ -161,6 +167,12 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns 
             return statements.toArray(new SqlStatement[statements.size()]);
         } catch (IOException e) {
             throw new RuntimeException(e);
+        } catch (UnexpectedLiquibaseException ule) {
+            if (getChangeSet() != null && getChangeSet().getFailOnError() != null && !getChangeSet().getFailOnError()) {
+                Logger log = LogFactory.getLogger();
+                log.info("Change set " + getChangeSet().toString(false) + " failed, but failOnError was false.  Error: " + ule.getMessage());
+            }
+            return new SqlStatement[0];
         } finally {
 			if (null != reader) {
 				try {
