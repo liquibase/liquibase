@@ -38,9 +38,11 @@ public class ViewExistsPrecondition implements Precondition {
     }
 
     public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet) throws PreconditionFailedException, PreconditionErrorException {
+    	String currentSchemaName;
     	try {
-            if (!DatabaseSnapshotGeneratorFactory.getInstance().getGenerator(database).hasView(getSchemaName(), getViewName(), database)) {
-                throw new PreconditionFailedException("View "+database.escapeTableName(getSchemaName(), getViewName())+" does not exist", changeLog, this);
+            currentSchemaName = getSchemaName() == null ? (database == null ? null: database.getDefaultSchemaName()) : getSchemaName();
+            if (!DatabaseSnapshotGeneratorFactory.getInstance().getGenerator(database).hasView(currentSchemaName, getViewName(), database)) {
+                throw new PreconditionFailedException("View "+database.escapeTableName(currentSchemaName, getViewName())+" does not exist", changeLog, this);
             }
         } catch (PreconditionFailedException e) {
             throw e;
