@@ -20,7 +20,22 @@ public class LoadDataChangeTest extends AbstractChangeTest {
         assertEquals("Load Data", new LoadDataChange().getChangeMetaData().getDescription());
     }
 
-    
+
+    @Test
+    public void loadDataEmpty() throws Exception {
+        LoadDataChange refactoring = new LoadDataChange();
+        refactoring.setSchemaName("SCHEMA_NAME");
+        refactoring.setTableName("TABLE_NAME");
+        refactoring.setFile("liquibase/change/core/empty.data.csv");
+        refactoring.setSeparator(",");
+
+        refactoring.setResourceAccessor(new ClassLoaderResourceAccessor());
+
+        SqlStatement[] sqlStatements = refactoring.generateStatements(new MockDatabase());
+
+        assertEquals(0, sqlStatements.length);
+    }
+
     @Test
     public void loadDataTsv() throws Exception {
         LoadDataChange refactoring = new LoadDataChange();
