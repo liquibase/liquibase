@@ -1,45 +1,19 @@
-update build.version in core/src/build.properties
 update changelog.txt
-tag repository (after everything is sucessfully released)
-
-CORE:
-fix version in spec file
-run core/build.xml all
-create core release on sourceforge
-upload new version of site to server
-update version info on /download
-
-MAVEN:
-mvn release:prepare -DperformRelease
 
 set java home
 set path=%path%;gpg
 mvn release:prepare
 mvn release:perform
 
-MAVEN SNAPSHOT:
-mvn deploy -DperformRelease
+upload target/checkout/liquibase-maven-integration/target/site to phpinclude
+upload target/checkout/liquibase-core/target/site to phpinclude
 
-GRAILS:
-- copy new core jar to grails-liquibase/lib and remove old jar (including svn delete/add)
-- change version in LiquibaseGrailsPlugin.groovy
-- run: grails clean  
-- run: grails package-plugin
-- test by running grails install-plugin PATH_TO_NEW_ZIP.zip in an independent test grails environment 
-- commit changes
-- run: grails release-plugin
-
-INTELLIJ:
-- update liquibase core jar in intellij.plugin/lib if nessisary
-- update version minor version in build.properties if nessisary
-- update change log in plugin.base.xml
-- run: intellij.plugin/build.xml package
-- update on plugins.intellij.net with intellij.plugin/release/liquibase-intellij.zip
-- send message on http://www.intellij.net/forums/forum.jspa?forumID=18
+upload new version of site to server
+update version info on /download
+release version on jira
 
 POST MESSAGES TO:
-- update releaed versions on jira
-- mailing list
+- forum
 - blog
 - sourceforge project
 - javalobby
@@ -72,15 +46,3 @@ http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.4.xsd";>
 Download Liquibase 1.4 from:
 
 http://www.liquibase.org/download
----------------------------------------------------------------
-INTELLIJ
-------------------------------------------------------------
-Version 1.4.1.0 of the Liquibase IntelliJ plug-in is now available in the plug-in manager.
-
-This release is primarily a bug fix release.
-
-The core Liquibase library is a database refactoring and change management tool.  The IntelliJ plug-in builds on the base library to make database refactoring as easy as code refactoring.
-
-Please let me know of any questions or comments you have
-
-Nathan
