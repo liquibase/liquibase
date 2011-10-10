@@ -59,8 +59,10 @@ public class IndexExistsPrecondition implements Precondition {
     }
 
     public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet) throws PreconditionFailedException, PreconditionErrorException {
-        try {
-            if (!DatabaseSnapshotGeneratorFactory.getInstance().getGenerator(database).hasIndex(getSchemaName(), getTableName(), getIndexName(), database, getColumnNames())) {
+    	String currentSchemaName;
+    	try {
+            currentSchemaName = getSchemaName() == null ? (database == null ? null: database.getDefaultSchemaName()) : getSchemaName();
+            if (!DatabaseSnapshotGeneratorFactory.getInstance().getGenerator(database).hasIndex(currentSchemaName, getTableName(), getIndexName(), database, getColumnNames())) {
                 String name = "";
 
                 if (getIndexName() != null) {

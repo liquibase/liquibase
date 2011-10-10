@@ -46,12 +46,14 @@ public class ForeignKeyExistsPrecondition implements Precondition {
     }
 
     public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet) throws PreconditionFailedException, PreconditionErrorException {
-        try {
-            boolean checkPassed;
+        String currentSchemaName;
+    	try {
+            currentSchemaName = getSchemaName() == null ? (database == null ? null: database.getDefaultSchemaName()) : getSchemaName();
+        	boolean checkPassed;
             if (getForeignKeyTableName() == null) {
-                checkPassed = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(database, getSchemaName(), null).getForeignKey(getForeignKeyName()) != null;
+                checkPassed = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(database, currentSchemaName, null).getForeignKey(getForeignKeyName()) != null;
             } else { //much faster if we can limit to correct table
-                 checkPassed = DatabaseSnapshotGeneratorFactory.getInstance().getGenerator(database).getForeignKeyByForeignKeyTable(getSchemaName(), getForeignKeyTableName(), getForeignKeyName(), database) != null;
+                 checkPassed = DatabaseSnapshotGeneratorFactory.getInstance().getGenerator(database).getForeignKeyByForeignKeyTable(currentSchemaName, getForeignKeyTableName(), getForeignKeyName(), database) != null;
             }
             if (!checkPassed) {
                 String message = "Foreign Key " + database.escapeStringForDatabase(getForeignKeyName());

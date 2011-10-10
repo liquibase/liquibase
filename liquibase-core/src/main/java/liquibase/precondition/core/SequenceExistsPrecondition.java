@@ -39,13 +39,15 @@ public class SequenceExistsPrecondition implements Precondition {
 
     public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet) throws PreconditionFailedException, PreconditionErrorException {
         DatabaseSnapshot snapshot;
+        String currentSchemaName;
         try {
-            snapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(database, getSchemaName(), null);
+            currentSchemaName = getSchemaName() == null ? (database == null ? null: database.getDefaultSchemaName()) : getSchemaName();
+            snapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(database, currentSchemaName, null);
         } catch (DatabaseException e) {
             throw new PreconditionErrorException(e, changeLog, this);
         }
         if (snapshot.getSequence(getSequenceName()) == null) {
-            throw new PreconditionFailedException("Sequence "+database.escapeSequenceName(getSchemaName(), getSequenceName())+" does not exist", changeLog, this);
+            throw new PreconditionFailedException("Sequence "+database.escapeSequenceName(currentSchemaName, getSequenceName())+" does not exist", changeLog, this);
         }
     }
 
