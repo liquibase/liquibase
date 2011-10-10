@@ -3,6 +3,8 @@ package liquibase.change.core;
 import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.logging.LogFactory;
+import liquibase.logging.Logger;
 import liquibase.resource.ResourceAccessor;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.InsertStatement;
@@ -161,6 +163,13 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
             return statements.toArray(new SqlStatement[statements.size()]);
         } catch (IOException e) {
             throw new RuntimeException(e);
+        } catch (UnexpectedLiquibaseException ule) {
+                if (getChangeSet() != null && getChangeSet().getFailOnError() != null && !getChangeSet().getFailOnError()) {
+                    Logger log = LogFactory.getLogger();
+                    log.info("Change set " + getChangeSet().toString(false) + " failed, but failOnError was false.  Error: " + ule.getMessage());        
+                }
+
+            return new SqlStatement[0];
         } finally {
 			if (null != reader) {
 				try {
