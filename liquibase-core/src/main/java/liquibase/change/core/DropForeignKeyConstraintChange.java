@@ -3,6 +3,7 @@ package liquibase.change.core;
 import liquibase.change.AbstractChange;
 import liquibase.change.ChangeClass;
 import liquibase.change.ChangeMetaData;
+import liquibase.change.ChangeProperty;
 import liquibase.database.Database;
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.statement.SqlStatement;
@@ -25,6 +26,7 @@ public class DropForeignKeyConstraintChange extends AbstractChange {
         this.baseTableSchemaName = baseTableSchemaName;
     }
 
+    @ChangeProperty(requiredForDatabase = "all")
     public String getBaseTableName() {
         return baseTableName;
     }
@@ -33,6 +35,7 @@ public class DropForeignKeyConstraintChange extends AbstractChange {
         this.baseTableName = baseTableName;
     }
 
+    @ChangeProperty(requiredForDatabase = "all")
     public String getConstraintName() {
         return constraintName;
     }

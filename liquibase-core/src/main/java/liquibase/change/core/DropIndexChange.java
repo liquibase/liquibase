@@ -30,6 +30,7 @@ public class DropIndexChange extends AbstractChange {
         this.schemaName = StringUtils.trimToNull(schemaName);
     }
 
+    @ChangeProperty(requiredForDatabase = "all")
     public String getIndexName() {
         return indexName;
     }
@@ -38,6 +39,7 @@ public class DropIndexChange extends AbstractChange {
         this.indexName = indexName;
     }
 
+    @ChangeProperty(requiredForDatabase = "all")
     public String getTableName() {
         return tableName;
     }

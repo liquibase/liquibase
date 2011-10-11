@@ -1,9 +1,6 @@
 package liquibase.change.core;
 
-import liquibase.change.AbstractSQLChange;
-import liquibase.change.ChangeClass;
-import liquibase.change.ChangeMetaData;
-import liquibase.change.CheckSum;
+import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.exception.SetupException;
 import liquibase.exception.ValidationErrors;
@@ -32,6 +29,7 @@ public class SQLFileChange extends AbstractSQLChange {
     private Boolean relativeToChangelogFile;
 
 
+    @ChangeProperty(requiredForDatabase = "all")
     public String getPath() {
         return path;
     }

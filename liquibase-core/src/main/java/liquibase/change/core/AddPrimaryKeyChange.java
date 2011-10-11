@@ -26,6 +26,7 @@ public class AddPrimaryKeyChange extends AbstractChange {
     private String columnNames;
     private String constraintName;
 
+    @ChangeProperty(requiredForDatabase = "all")
     public String getTableName() {
         return tableName;
     }
@@ -42,6 +43,7 @@ public class AddPrimaryKeyChange extends AbstractChange {
         this.schemaName = StringUtils.trimToNull(schemaName);
     }
 
+    @ChangeProperty(requiredForDatabase = "all")
     public String getColumnNames() {
         return columnNames;
     }

@@ -10,4 +10,6 @@ import java.lang.annotation.Target;
 public @interface ChangeProperty {
     public boolean includeInSerialization() default true;
     public boolean includeInMetaData() default true;
+
+    public String[] requiredForDatabase() default "none";
 }

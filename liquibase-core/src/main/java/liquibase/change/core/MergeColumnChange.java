@@ -1,9 +1,6 @@
 package liquibase.change.core;
 
-import liquibase.change.AbstractChange;
-import liquibase.change.ChangeClass;
-import liquibase.change.ChangeMetaData;
-import liquibase.change.ColumnConfig;
+import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.database.core.DerbyDatabase;
 import liquibase.database.core.SQLiteDatabase;
@@ -40,6 +37,7 @@ public class MergeColumnChange extends AbstractChange {
         this.schemaName = StringUtils.trimToNull(schemaName);
     }
 
+    @ChangeProperty(requiredForDatabase = "all")
     public String getTableName() {
         return tableName;
     }
@@ -48,6 +46,7 @@ public class MergeColumnChange extends AbstractChange {
         this.tableName = tableName;
     }
 
+    @ChangeProperty(requiredForDatabase = "all")
     public String getColumn1Name() {
         return column1Name;
     }
@@ -64,6 +63,7 @@ public class MergeColumnChange extends AbstractChange {
         this.joinString = joinString;
     }
 
+    @ChangeProperty(requiredForDatabase = "all")
     public String getColumn2Name() {
         return column2Name;
     }
@@ -72,6 +72,7 @@ public class MergeColumnChange extends AbstractChange {
         this.column2Name = column2Name;
     }
 
+    @ChangeProperty(requiredForDatabase = "all")
     public String getFinalColumnName() {
         return finalColumnName;
     }
@@ -80,6 +81,7 @@ public class MergeColumnChange extends AbstractChange {
         this.finalColumnName = finalColumnName;
     }
 
+    @ChangeProperty(requiredForDatabase = "all")
     public String getFinalColumnType() {
         return finalColumnType;
     }

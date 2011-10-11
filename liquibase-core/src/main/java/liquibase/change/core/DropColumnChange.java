@@ -1,9 +1,6 @@
 package liquibase.change.core;
 
-import liquibase.change.AbstractChange;
-import liquibase.change.ChangeClass;
-import liquibase.change.ChangeMetaData;
-import liquibase.change.ColumnConfig;
+import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.database.core.DB2Database;
 import liquibase.database.core.SQLiteDatabase;
@@ -27,6 +24,7 @@ public class DropColumnChange extends AbstractChange {
     private String tableName;
     private String columnName;
 
+    @ChangeProperty(requiredForDatabase = "all")
     public String getColumnName() {
         return columnName;
     }
@@ -44,6 +42,7 @@ public class DropColumnChange extends AbstractChange {
         this.schemaName = StringUtils.trimToNull(schemaName);
     }
 
+    @ChangeProperty(requiredForDatabase = "all")
     public String getTableName() {
         return tableName;
     }

@@ -5,6 +5,7 @@ import java.math.BigInteger;
 import liquibase.change.AbstractChange;
 import liquibase.change.ChangeClass;
 import liquibase.change.ChangeMetaData;
+import liquibase.change.ChangeProperty;
 import liquibase.database.Database;
 import liquibase.database.core.PostgresDatabase;
 import liquibase.statement.DatabaseFunction;
@@ -29,7 +30,7 @@ public class AddAutoIncrementChange extends AbstractChange {
     private String columnDataType;
     private BigInteger startWith;
     private BigInteger incrementBy;
-    
+
     public String getSchemaName() {
         return schemaName;
     }
@@ -38,6 +39,7 @@ public class AddAutoIncrementChange extends AbstractChange {
         this.schemaName = StringUtils.trimToNull(schemaName);
     }
 
+    @ChangeProperty(requiredForDatabase = "all")
     public String getTableName() {
         return tableName;
     }
@@ -46,6 +48,7 @@ public class AddAutoIncrementChange extends AbstractChange {
         this.tableName = tableName;
     }
 
+    @ChangeProperty(requiredForDatabase = "all")
     public String getColumnName() {
         return columnName;
     }

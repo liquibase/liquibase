@@ -31,6 +31,7 @@ public class UpdateDataChange extends AbstractChange implements ChangeWithColumn
         this.schemaName = StringUtils.trimToNull(schemaName);
     }
 
+    @ChangeProperty(requiredForDatabase = "all")
     public String getTableName() {
         return tableName;
     }
@@ -39,6 +40,7 @@ public class UpdateDataChange extends AbstractChange implements ChangeWithColumn
         this.tableName = tableName;
     }
 
+    @ChangeProperty(requiredForDatabase = "all")
     public List<ColumnConfig> getColumns() {
         return columns;
     }

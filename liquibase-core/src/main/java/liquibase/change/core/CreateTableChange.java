@@ -114,6 +114,7 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
         };
     }
 
+    @ChangeProperty(requiredForDatabase = "all")
     public List<ColumnConfig> getColumns() {
         return columns;
     }
@@ -126,6 +127,7 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
         this.schemaName = StringUtils.trimToNull(schemaName);
     }
 
+    @ChangeProperty(requiredForDatabase = "all")
     public String getTableName() {
         return tableName;
     }

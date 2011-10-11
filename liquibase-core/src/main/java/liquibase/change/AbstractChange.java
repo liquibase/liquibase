@@ -68,14 +68,7 @@ public abstract class AbstractChange implements Change {
                 if (readMethod != null && writeMethod != null) {
                     ChangeProperty annotation = readMethod.getAnnotation(ChangeProperty.class);
                     if (annotation == null || annotation.includeInMetaData()) {
-                        String paramName = property.getDisplayName();
-
-                        String displayName = paramName.replaceAll("([A-Z])", " $1");
-                        displayName = displayName.substring(0,1).toUpperCase()+displayName.substring(1);
-
-                        String type = property.getPropertyType().getSimpleName();
-
-                        ChangeParameterMetaData param = new ChangeParameterMetaData(paramName, displayName, type);
+                        ChangeParameterMetaData param = createChangeParameterMetadata(property.getDisplayName());
                         params.add(param);
                     }
                 }
@@ -87,6 +80,35 @@ public abstract class AbstractChange implements Change {
         } catch (Throwable e) {
             throw new UnexpectedLiquibaseException(e);
         }
+    }
+
+    private ChangeParameterMetaData createChangeParameterMetadata(String propertyName) throws Exception {
+
+        String displayName = propertyName.replaceAll("([A-Z])", " $1");
+        displayName = displayName.substring(0,1).toUpperCase()+displayName.substring(1);
+
+        PropertyDescriptor property = null;
+        for (PropertyDescriptor prop : Introspector.getBeanInfo(this.getClass()).getPropertyDescriptors()) {
+            if (prop.getDisplayName().equals(propertyName)) {
+                property = prop;
+                break;
+            }
+        }
+        if (property == null) {
+            throw new RuntimeException("Could not find property "+propertyName);
+        }
+
+        String type = property.getPropertyType().getSimpleName();
+        ChangeProperty changePropertyAnnotation = property.getReadMethod().getAnnotation(ChangeProperty.class);
+
+        String[] requiredForDatabase;
+        if (changePropertyAnnotation == null) {
+            requiredForDatabase = new String[] {"none"};
+        } else {
+            requiredForDatabase = changePropertyAnnotation.requiredForDatabase();
+        }
+
+        return new ChangeParameterMetaData(propertyName, displayName, type, requiredForDatabase);
     }
 
     public ChangeMetaData getChangeMetaData() {
@@ -137,6 +159,16 @@ public abstract class AbstractChange implements Change {
 
     public ValidationErrors validate(Database database) {
         ValidationErrors changeValidationErrors = new ValidationErrors();
+
+        for (ChangeParameterMetaData param : getChangeMetaData().getParameters()) {
+            if (param.isRequiredFor(database) && param.getCurrentValue(this) == null) {
+                changeValidationErrors.addError(param.getParameterName()+" is required for "+getChangeMetaData().getName()+" on "+database.getTypeName());
+            }
+        }
+        if (changeValidationErrors.hasErrors()) {
+            return changeValidationErrors;
+        }
+
         for (SqlStatement statement : generateStatements(database)) {
             boolean supported = SqlGeneratorFactory.getInstance().supports(statement, database);
             if (!supported) {

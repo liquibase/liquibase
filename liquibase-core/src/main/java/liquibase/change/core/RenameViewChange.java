@@ -1,9 +1,6 @@
 package liquibase.change.core;
 
-import liquibase.change.AbstractChange;
-import liquibase.change.Change;
-import liquibase.change.ChangeClass;
-import liquibase.change.ChangeMetaData;
+import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RenameViewStatement;
@@ -26,6 +23,7 @@ public class RenameViewChange extends AbstractChange {
         this.schemaName = StringUtils.trimToNull(schemaName);
     }
 
+    @ChangeProperty(requiredForDatabase = "all")
     public String getOldViewName() {
         return oldViewName;
     }
@@ -34,6 +32,7 @@ public class RenameViewChange extends AbstractChange {
         this.oldViewName = oldViewName;
     }
 
+    @ChangeProperty(requiredForDatabase = "all")
     public String getNewViewName() {
         return newViewName;
     }

@@ -36,6 +36,7 @@ public class AddUniqueConstraintChange extends AbstractChange {
         this.schemaName = StringUtils.trimToNull(schemaName);
     }
 
+    @ChangeProperty(requiredForDatabase = "all")
     public String getTableName() {
         return tableName;
     }
@@ -44,6 +45,7 @@ public class AddUniqueConstraintChange extends AbstractChange {
         this.tableName = tableName;
     }
 
+    @ChangeProperty(requiredForDatabase = "all")
     public String getColumnNames() {
         return columnNames;
     }
@@ -52,6 +54,7 @@ public class AddUniqueConstraintChange extends AbstractChange {
         this.columnNames = columnNames;
     }
 
+    @ChangeProperty(requiredForDatabase = "all")
     public String getConstraintName() {
         return constraintName;
     }

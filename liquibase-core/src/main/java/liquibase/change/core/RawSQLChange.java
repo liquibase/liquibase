@@ -12,6 +12,7 @@ import liquibase.change.ChangeMetaData;
 public class RawSQLChange extends AbstractSQLChange {
 
     private String comments;
+    
     public RawSQLChange() {
     }
 

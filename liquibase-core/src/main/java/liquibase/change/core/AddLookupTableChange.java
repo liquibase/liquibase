@@ -1,9 +1,6 @@
 package liquibase.change.core;
 
-import liquibase.change.AbstractChange;
-import liquibase.change.Change;
-import liquibase.change.ChangeClass;
-import liquibase.change.ChangeMetaData;
+import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.database.core.DB2Database;
 import liquibase.database.core.InformixDatabase;
@@ -43,6 +40,7 @@ public class AddLookupTableChange extends AbstractChange {
         this.existingTableSchemaName = existingTableSchemaName;
     }
 
+    @ChangeProperty(requiredForDatabase = "all")
     public String getExistingTableName() {
         return existingTableName;
     }
@@ -51,6 +49,7 @@ public class AddLookupTableChange extends AbstractChange {
         this.existingTableName = existingTableName;
     }
 
+    @ChangeProperty(requiredForDatabase = "all")
     public String getExistingColumnName() {
         return existingColumnName;
     }
@@ -68,6 +67,7 @@ public class AddLookupTableChange extends AbstractChange {
         this.newTableSchemaName = newTableSchemaName;
     }
 
+    @ChangeProperty(requiredForDatabase = "all")
     public String getNewTableName() {
         return newTableName;
     }
@@ -76,6 +76,7 @@ public class AddLookupTableChange extends AbstractChange {
         this.newTableName = newTableName;
     }
 
+    @ChangeProperty(requiredForDatabase = "all")
     public String getNewColumnName() {
         return newColumnName;
     }
@@ -84,6 +85,7 @@ public class AddLookupTableChange extends AbstractChange {
         this.newColumnName = newColumnName;
     }
 
+    @ChangeProperty(requiredForDatabase = "all")
     public String getNewColumnDataType() {
         return newColumnDataType;
     }

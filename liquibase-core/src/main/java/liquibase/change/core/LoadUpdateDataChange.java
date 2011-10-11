@@ -2,6 +2,7 @@ package liquibase.change.core;
 
 import liquibase.change.ChangeClass;
 import liquibase.change.ChangeMetaData;
+import liquibase.change.ChangeProperty;
 import liquibase.database.Database;
 import liquibase.database.typeconversion.TypeConverterFactory;
 import liquibase.exception.RollbackImpossibleException;
@@ -32,6 +33,7 @@ public class LoadUpdateDataChange extends LoadDataChange {
         this.primaryKey = primaryKey;
     }
 
+    @ChangeProperty(requiredForDatabase = "all")
     public String getPrimaryKey() {
         return primaryKey;
     }

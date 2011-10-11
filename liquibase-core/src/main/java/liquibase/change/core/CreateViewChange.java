@@ -1,9 +1,6 @@
 package liquibase.change.core;
 
-import liquibase.change.AbstractChange;
-import liquibase.change.Change;
-import liquibase.change.ChangeClass;
-import liquibase.change.ChangeMetaData;
+import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.core.SQLiteDatabase;
@@ -35,6 +32,7 @@ public class CreateViewChange extends AbstractChange {
 		this.schemaName = StringUtils.trimToNull(schemaName);
 	}
 
+    @ChangeProperty(requiredForDatabase = "all")
 	public String getViewName() {
 		return viewName;
 	}
@@ -43,6 +41,7 @@ public class CreateViewChange extends AbstractChange {
 		this.viewName = viewName;
 	}
 
+    @ChangeProperty(requiredForDatabase = "all")
 	public String getSelectQuery() {
 		return selectQuery;
 	}

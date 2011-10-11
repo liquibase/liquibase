@@ -1,9 +1,6 @@
 package liquibase.change.core;
 
-import liquibase.change.AbstractChange;
-import liquibase.change.Change;
-import liquibase.change.ChangeClass;
-import liquibase.change.ChangeMetaData;
+import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.database.structure.ForeignKeyConstraintType;
 import liquibase.exception.UnexpectedLiquibaseException;
@@ -43,6 +40,7 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
         this.baseTableSchemaName = baseTableSchemaName;
     }
 
+    @ChangeProperty(requiredForDatabase = "all")
     public String getBaseTableName() {
         return baseTableName;
     }
@@ -51,6 +49,7 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
         this.baseTableName = baseTableName;
     }
 
+    @ChangeProperty(requiredForDatabase = "all")
     public String getBaseColumnNames() {
         return baseColumnNames;
     }
@@ -67,6 +66,7 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
         this.referencedTableSchemaName = referencedTableSchemaName;
     }
 
+    @ChangeProperty(requiredForDatabase = "all")
     public String getReferencedTableName() {
         return referencedTableName;
     }
@@ -75,6 +75,7 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
         this.referencedTableName = referencedTableName;
     }
 
+    @ChangeProperty(requiredForDatabase = "all")
     public String getReferencedColumnNames() {
         return referencedColumnNames;
     }
@@ -83,6 +84,7 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
         this.referencedColumnNames = referencedColumnNames;
     }
 
+    @ChangeProperty(requiredForDatabase = "all")
     public String getConstraintName() {
         return constraintName;
     }

@@ -3,6 +3,7 @@ package liquibase.change.core;
 import liquibase.change.AbstractChange;
 import liquibase.change.ChangeClass;
 import liquibase.change.ChangeMetaData;
+import liquibase.change.ChangeProperty;
 import liquibase.database.Database;
 import liquibase.database.core.OracleDatabase;
 import liquibase.database.core.DB2Database;
@@ -14,6 +15,7 @@ public class CreateProcedureChange extends AbstractChange {
     private String comments;
     private String procedureBody;
 
+    @ChangeProperty(requiredForDatabase = "all")
     public String getProcedureBody() {
         return procedureBody;
     }

@@ -32,6 +32,7 @@ public class RenameColumnChange extends AbstractChange {
         this.schemaName = StringUtils.trimToNull(schemaName);
     }
 
+    @ChangeProperty(requiredForDatabase = "all")
     public String getTableName() {
         return tableName;
     }
@@ -40,6 +41,7 @@ public class RenameColumnChange extends AbstractChange {
         this.tableName = tableName;
     }
 
+    @ChangeProperty(requiredForDatabase = "all")
     public String getOldColumnName() {
         return oldColumnName;
     }
@@ -48,6 +50,7 @@ public class RenameColumnChange extends AbstractChange {
         this.oldColumnName = oldColumnName;
     }
 
+    @ChangeProperty(requiredForDatabase = "all")
     public String getNewColumnName() {
         return newColumnName;
     }

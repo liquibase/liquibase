@@ -3,6 +3,7 @@ package liquibase.change.core;
 import liquibase.change.AbstractChange;
 import liquibase.change.ChangeClass;
 import liquibase.change.ChangeMetaData;
+import liquibase.change.ChangeProperty;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.ModifyDataTypeStatement;
 import liquibase.database.Database;
@@ -31,6 +32,7 @@ public class ModifyDataTypeChange extends AbstractChange {
         this.schemaName = schemaName;
     }
 
+    @ChangeProperty(requiredForDatabase = "all")
     public String getTableName() {
         return tableName;
     }
@@ -39,6 +41,7 @@ public class ModifyDataTypeChange extends AbstractChange {
         this.tableName = tableName;
     }
 
+    @ChangeProperty(requiredForDatabase = "all")
     public String getColumnName() {
         return columnName;
     }
@@ -47,6 +50,7 @@ public class ModifyDataTypeChange extends AbstractChange {
         this.columnName = columnName;
     }
 
+    @ChangeProperty(requiredForDatabase = "all")
     public String getNewDataType() {
         return newDataType;
     }

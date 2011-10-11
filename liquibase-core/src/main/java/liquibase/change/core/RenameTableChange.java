@@ -1,9 +1,6 @@
 package liquibase.change.core;
 
-import liquibase.change.AbstractChange;
-import liquibase.change.Change;
-import liquibase.change.ChangeClass;
-import liquibase.change.ChangeMetaData;
+import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.database.core.DB2Database;
 import liquibase.statement.SqlStatement;
@@ -36,6 +33,7 @@ public class RenameTableChange extends AbstractChange {
         this.schemaName = StringUtils.trimToNull(schemaName);
     }
 
+    @ChangeProperty(requiredForDatabase = "all")
     public String getOldTableName() {
         return oldTableName;
     }
@@ -44,6 +42,7 @@ public class RenameTableChange extends AbstractChange {
         this.oldTableName = oldTableName;
     }
 
+    @ChangeProperty(requiredForDatabase = "all")
     public String getNewTableName() {
         return newTableName;
     }

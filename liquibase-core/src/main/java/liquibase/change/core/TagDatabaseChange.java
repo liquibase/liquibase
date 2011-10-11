@@ -1,9 +1,6 @@
 package liquibase.change.core;
 
-import liquibase.change.AbstractChange;
-import liquibase.change.Change;
-import liquibase.change.ChangeClass;
-import liquibase.change.ChangeMetaData;
+import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.TagDatabaseStatement;
@@ -13,6 +10,7 @@ public class TagDatabaseChange extends AbstractChange {
 
     private String tag;
 
+    @ChangeProperty(requiredForDatabase = "all")
     public String getTag() {
         return tag;
     }

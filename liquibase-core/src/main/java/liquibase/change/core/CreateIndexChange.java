@@ -31,6 +31,7 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
         columns = new ArrayList<ColumnConfig>();
     }
 
+    @ChangeProperty(requiredForDatabase = "all")
     public String getIndexName() {
         return indexName;
     }
@@ -47,6 +48,7 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
         this.schemaName = StringUtils.trimToNull(schemaName);
     }
 
+    @ChangeProperty(requiredForDatabase = "all")
     public String getTableName() {
         return tableName;
     }
@@ -55,6 +57,7 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
         this.tableName = tableName;
     }
 
+    @ChangeProperty(requiredForDatabase = "all")
     public List<ColumnConfig> getColumns() {
         return columns;
     }

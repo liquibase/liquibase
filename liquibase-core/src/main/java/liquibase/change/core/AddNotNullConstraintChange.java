@@ -35,6 +35,7 @@ public class AddNotNullConstraintChange extends AbstractChange {
         this.schemaName = StringUtils.trimToNull(schemaName);
     }
 
+    @ChangeProperty(requiredForDatabase = "all")
     public String getTableName() {
         return tableName;
     }
@@ -43,6 +44,7 @@ public class AddNotNullConstraintChange extends AbstractChange {
         this.tableName = tableName;
     }
 
+    @ChangeProperty(requiredForDatabase = "all")
     public String getColumnName() {
         return columnName;
     }
