@@ -10,6 +10,12 @@ import liquibase.serializer.core.string.StringChangeLogSerializer;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.SqlStatement;
 
+import java.beans.BeanInfo;
+import java.beans.IntrospectionException;
+import java.beans.Introspector;
+import java.beans.PropertyDescriptor;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.*;
 
 /**
@@ -20,13 +26,13 @@ import java.util.*;
  */
 public abstract class AbstractChange implements Change {
 
-    @ChangeProperty(includeInSerialization = false)
+    @ChangeProperty(includeInSerialization = false, includeInMetaData = false)
     private ChangeMetaData changeMetaData;
 
-    @ChangeProperty(includeInSerialization = false)
+    @ChangeProperty(includeInSerialization = false, includeInMetaData = false)
     private ResourceAccessor resourceAccessor;
 
-    @ChangeProperty(includeInSerialization = false)
+    @ChangeProperty(includeInSerialization = false, includeInMetaData = false)
     private ChangeSet changeSet;
 
 //    /**
@@ -43,9 +49,44 @@ public abstract class AbstractChange implements Change {
         this.changeMetaData = createChangeMetaData();
     }
 
+    /**
+     * Generate the ChangeMetaData for this class. By default reads from the @ChangeClass annotation, but can return anything
+     * @return
+     */
     protected ChangeMetaData createChangeMetaData() {
-        ChangeClass changeClass = this.getClass().getAnnotation(ChangeClass.class);
-        return new ChangeMetaData(changeClass.name(), changeClass.description(), changeClass.priority());
+        try {
+            ChangeClass changeClass = this.getClass().getAnnotation(ChangeClass.class);
+
+            if (changeClass == null) {
+                throw new UnexpectedLiquibaseException("No @ChangeClass annotation for "+getClass().getName());
+            }
+
+            Set<ChangeParameterMetaData> params = new HashSet<ChangeParameterMetaData>();
+            for (PropertyDescriptor property : Introspector.getBeanInfo(this.getClass()).getPropertyDescriptors()) {
+                Method readMethod = property.getReadMethod();
+                Method writeMethod = property.getWriteMethod();
+                if (readMethod != null && writeMethod != null) {
+                    ChangeProperty annotation = readMethod.getAnnotation(ChangeProperty.class);
+                    if (annotation == null || annotation.includeInMetaData()) {
+                        String paramName = property.getDisplayName();
+
+                        String displayName = paramName.replaceAll("([A-Z])", " $1");
+                        displayName = displayName.substring(0,1).toUpperCase()+displayName.substring(1);
+
+                        String type = property.getPropertyType().getSimpleName();
+
+                        ChangeParameterMetaData param = new ChangeParameterMetaData(paramName, displayName, type);
+                        params.add(param);
+                    }
+                }
+
+            }
+
+
+            return new ChangeMetaData(changeClass.name(), changeClass.description(), changeClass.priority(), params);
+        } catch (Throwable e) {
+            throw new UnexpectedLiquibaseException(e);
+        }
     }
 
     public ChangeMetaData getChangeMetaData() {
@@ -56,6 +97,7 @@ public abstract class AbstractChange implements Change {
         this.changeMetaData.setPriority(newPriority);
     }
 
+    @ChangeProperty(includeInMetaData = false)
     public ChangeSet getChangeSet() {
         return changeSet;
     }
@@ -187,6 +229,7 @@ public abstract class AbstractChange implements Change {
      *
      * @return The file opener
      */
+    @ChangeProperty(includeInMetaData = false)
     public ResourceAccessor getResourceAccessor() {
         return resourceAccessor;
     }
