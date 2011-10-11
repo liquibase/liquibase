@@ -1,9 +1,6 @@
 package liquibase.change.core;
 
-import liquibase.change.AbstractChange;
-import liquibase.change.Change;
-import liquibase.change.ChangeMetaData;
-import liquibase.change.ColumnConfig;
+import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.database.core.DB2Database;
 import liquibase.database.core.SQLiteDatabase;
@@ -20,6 +17,7 @@ import java.util.List;
 /**
  * Creates a primary key out of an existing column or set of columns.
  */
+@ChangeClass(name="addPrimaryKey", description = "Add Primary Key", priority = ChangeMetaData.PRIORITY_DEFAULT)
 public class AddPrimaryKeyChange extends AbstractChange {
 
     private String schemaName;
@@ -27,10 +25,6 @@ public class AddPrimaryKeyChange extends AbstractChange {
     private String tablespace;
     private String columnNames;
     private String constraintName;
-
-    public AddPrimaryKeyChange() {
-        super("addPrimaryKey", "Add Primary Key", ChangeMetaData.PRIORITY_DEFAULT);
-    }
 
     public String getTableName() {
         return tableName;

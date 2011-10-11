@@ -1,9 +1,6 @@
 package liquibase.change.core;
 
-import liquibase.change.AbstractChange;
-import liquibase.change.Change;
-import liquibase.change.ChangeMetaData;
-import liquibase.change.ColumnConfig;
+import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.database.core.SQLiteDatabase.AlterTableVisitor;
@@ -18,17 +15,13 @@ import java.util.List;
 /**
  * Drops a not-null constraint from an existing column.
  */
+@ChangeClass(name="dropNotNullConstraint", description = "Drop Not-Null Constraint", priority = ChangeMetaData.PRIORITY_DEFAULT)
 public class DropNotNullConstraintChange extends AbstractChange {
 
     private String schemaName;
     private String tableName;
     private String columnName;
     private String columnDataType;
-
-
-    public DropNotNullConstraintChange() {
-        super("dropNotNullConstraint", "Drop Not-Null Constraint", ChangeMetaData.PRIORITY_DEFAULT);
-    }
 
     public String getSchemaName() {
         return schemaName;

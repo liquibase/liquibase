@@ -24,8 +24,7 @@ public abstract class AbstractSQLChange extends AbstractChange {
     private String endDelimiter;
     private String sql;
 
-    protected AbstractSQLChange(String tagName, String changeName, int priority) {
-        super(tagName, changeName, priority);
+    protected AbstractSQLChange() {
         stripComments= false;
         splitStatements =true;
     }

@@ -2,6 +2,7 @@ package liquibase.change.core;
 
 import liquibase.change.AbstractChange;
 import liquibase.change.Change;
+import liquibase.change.ChangeClass;
 import liquibase.change.ChangeMetaData;
 import liquibase.database.Database;
 import liquibase.statement.SqlStatement;
@@ -17,6 +18,7 @@ import java.util.Locale;
 /**
  * Sets a new default value to an existing column.
  */
+@ChangeClass(name="addDefaultValue", description = "Add Default Value", priority = ChangeMetaData.PRIORITY_DEFAULT)
 public class AddDefaultValueChange extends AbstractChange {
 
     private String schemaName;
@@ -28,10 +30,6 @@ public class AddDefaultValueChange extends AbstractChange {
     private String defaultValueDate;
     private Boolean defaultValueBoolean;
     private DatabaseFunction defaultValueComputed;
-
-    public AddDefaultValueChange() {
-        super("addDefaultValue", "Add Default Value", ChangeMetaData.PRIORITY_DEFAULT);
-    }
 
     public String getSchemaName() {
         return schemaName;

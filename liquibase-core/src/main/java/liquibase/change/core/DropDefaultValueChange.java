@@ -1,6 +1,7 @@
 package liquibase.change.core;
 
 import liquibase.change.AbstractChange;
+import liquibase.change.ChangeClass;
 import liquibase.change.ChangeMetaData;
 import liquibase.change.ColumnConfig;
 import liquibase.database.Database;
@@ -18,16 +19,13 @@ import java.util.List;
 /**
  * Removes the default value from an existing column.
  */
+@ChangeClass(name="dropDefaultValue", description="Drop Default Value", priority = ChangeMetaData.PRIORITY_DEFAULT)
 public class DropDefaultValueChange extends AbstractChange {
 
     private String schemaName;
     private String tableName;
     private String columnName;
     private String columnDataType;
-
-    public DropDefaultValueChange() {
-        super("dropDefaultValue", "Drop Default Value", ChangeMetaData.PRIORITY_DEFAULT);
-    }
 
     public String getSchemaName() {
         return schemaName;

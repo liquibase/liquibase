@@ -2,6 +2,7 @@ package liquibase.change.core;
 
 import liquibase.change.AbstractChange;
 import liquibase.change.Change;
+import liquibase.change.ChangeClass;
 import liquibase.change.ChangeMetaData;
 import liquibase.database.Database;
 import liquibase.statement.SqlStatement;
@@ -13,6 +14,7 @@ import java.math.BigInteger;
 /**
  * Creates a new sequence.
  */
+@ChangeClass(name="createSequence", description = "Create Sequence", priority = ChangeMetaData.PRIORITY_DEFAULT)
 public class CreateSequenceChange extends AbstractChange {
 
     private String schemaName;
@@ -23,10 +25,6 @@ public class CreateSequenceChange extends AbstractChange {
     private BigInteger minValue;
     private Boolean ordered;
     private Boolean cycle;
-
-    public CreateSequenceChange() {
-        super("createSequence", "Create Sequence", ChangeMetaData.PRIORITY_DEFAULT);
-    }
 
     public String getSchemaName() {
         return schemaName;

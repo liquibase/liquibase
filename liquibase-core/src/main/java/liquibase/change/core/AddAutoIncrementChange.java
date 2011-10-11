@@ -3,6 +3,7 @@ package liquibase.change.core;
 import java.math.BigInteger;
 
 import liquibase.change.AbstractChange;
+import liquibase.change.ChangeClass;
 import liquibase.change.ChangeMetaData;
 import liquibase.database.Database;
 import liquibase.database.core.PostgresDatabase;
@@ -19,6 +20,7 @@ import liquibase.util.StringUtils;
  * This change is only valid for databases with auto-increment/identity columns.
  * The current version does not support MS-SQL.
  */
+@ChangeClass(name="addAutoIncrement", description = "Set Column as Auto-Increment", priority = ChangeMetaData.PRIORITY_DEFAULT)
 public class AddAutoIncrementChange extends AbstractChange {
 
     private String schemaName;
@@ -28,10 +30,6 @@ public class AddAutoIncrementChange extends AbstractChange {
     private BigInteger startWith;
     private BigInteger incrementBy;
     
-    public AddAutoIncrementChange() {
-        super("addAutoIncrement", "Set Column as Auto-Increment", ChangeMetaData.PRIORITY_DEFAULT);
-    }
-
     public String getSchemaName() {
         return schemaName;
     }

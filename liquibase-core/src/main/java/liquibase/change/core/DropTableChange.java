@@ -1,6 +1,7 @@
 package liquibase.change.core;
 
 import liquibase.change.AbstractChange;
+import liquibase.change.ChangeClass;
 import liquibase.change.ChangeMetaData;
 import liquibase.database.Database;
 import liquibase.statement.SqlStatement;
@@ -10,16 +11,12 @@ import liquibase.util.StringUtils;
 /**
  * Drops an existing table.
  */
+@ChangeClass(name="dropTable", description = "Drop Table", priority = ChangeMetaData.PRIORITY_DEFAULT)
 public class DropTableChange extends AbstractChange {
 
     private String schemaName;
     private String tableName;
     private Boolean cascadeConstraints;
-
-    public DropTableChange() {
-        super("dropTable", "Drop Table", ChangeMetaData.PRIORITY_DEFAULT);
-    }
-
 
     public String getSchemaName() {
         return schemaName;

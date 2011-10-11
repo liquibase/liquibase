@@ -1,10 +1,6 @@
 package liquibase.change.core;
 
-import liquibase.change.AbstractChange;
-import liquibase.change.ChangeMetaData;
-import liquibase.change.ChangeWithColumns;
-import liquibase.change.ColumnConfig;
-import liquibase.change.TextNode;
+import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.UpdateStatement;
@@ -13,6 +9,7 @@ import liquibase.util.StringUtils;
 import java.util.ArrayList;
 import java.util.List;
 
+@ChangeClass(name = "update", description = "Update Data", priority = ChangeMetaData.PRIORITY_DEFAULT)
 public class UpdateDataChange extends AbstractChange implements ChangeWithColumns<ColumnConfig> {
 
     private String schemaName;
@@ -23,7 +20,6 @@ public class UpdateDataChange extends AbstractChange implements ChangeWithColumn
     private String whereClause;
 
     public UpdateDataChange() {
-        super("update", "Update Data", ChangeMetaData.PRIORITY_DEFAULT);
         columns = new ArrayList<ColumnConfig>();
     }
 

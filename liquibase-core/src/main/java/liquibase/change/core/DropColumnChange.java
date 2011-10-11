@@ -1,6 +1,7 @@
 package liquibase.change.core;
 
 import liquibase.change.AbstractChange;
+import liquibase.change.ChangeClass;
 import liquibase.change.ChangeMetaData;
 import liquibase.change.ColumnConfig;
 import liquibase.database.Database;
@@ -19,15 +20,12 @@ import java.util.List;
 /**
  * Drops an existing column from a table.
  */
+@ChangeClass(name="dropColumn", description = "Drop Column", priority = ChangeMetaData.PRIORITY_DEFAULT)
 public class DropColumnChange extends AbstractChange {
 
     private String schemaName;
     private String tableName;
     private String columnName;
-
-    public DropColumnChange() {
-        super("dropColumn", "Drop Column", ChangeMetaData.PRIORITY_DEFAULT);
-    }
 
     public String getColumnName() {
         return columnName;

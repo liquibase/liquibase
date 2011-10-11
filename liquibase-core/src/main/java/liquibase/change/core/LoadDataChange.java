@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 
+@ChangeClass(name="loadData", description = "Load Data", priority = ChangeMetaData.PRIORITY_DEFAULT)
 public class LoadDataChange extends AbstractChange implements ChangeWithColumns<LoadDataColumnConfig> {
 
     private String schemaName;
@@ -29,16 +30,6 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
 
 
     private List<LoadDataColumnConfig> columns = new ArrayList<LoadDataColumnConfig>();
-
-
-    public LoadDataChange() {
-        super("loadData", "Load Data", ChangeMetaData.PRIORITY_DEFAULT);
-    }
-
-    protected LoadDataChange(String changeName, String changeDescription)
-    {
-        super(changeName,changeDescription,ChangeMetaData.PRIORITY_DEFAULT);
-    }
 
     public String getSchemaName() {
         return schemaName;

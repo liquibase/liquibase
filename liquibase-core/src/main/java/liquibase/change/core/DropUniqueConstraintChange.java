@@ -1,6 +1,7 @@
 package liquibase.change.core;
 
 import liquibase.change.AbstractChange;
+import liquibase.change.ChangeClass;
 import liquibase.change.ChangeMetaData;
 import liquibase.change.ColumnConfig;
 import liquibase.database.Database;
@@ -18,6 +19,7 @@ import java.util.List;
 /**
  * Removes an existing unique constraint.
  */
+@ChangeClass(name="dropUniqueConstraint", description = "Drop Unique Constraint", priority = ChangeMetaData.PRIORITY_DEFAULT)
 public class DropUniqueConstraintChange extends AbstractChange {
     private String schemaName;
     private String tableName;
@@ -26,10 +28,6 @@ public class DropUniqueConstraintChange extends AbstractChange {
      * Sybase ASA does drop unique constraint not by name, but using list of the columns in unique clause.
      */
     private String uniqueColumns;
-
-	public DropUniqueConstraintChange() {
-        super("dropUniqueConstraint", "Drop Unique Constraint", ChangeMetaData.PRIORITY_DEFAULT);
-    }
 
     public String getSchemaName() {
         return schemaName;

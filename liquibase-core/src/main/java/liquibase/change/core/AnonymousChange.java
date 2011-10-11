@@ -1,6 +1,7 @@
 package liquibase.change.core;
 
 import liquibase.change.AbstractChange;
+import liquibase.change.ChangeClass;
 import liquibase.change.ChangeMetaData;
 import liquibase.change.ChangeProperty;
 import liquibase.database.Database;
@@ -10,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+@ChangeClass(name="anonymous", description = "Anonymous change", priority = ChangeMetaData.PRIORITY_DEFAULT)
 public class AnonymousChange extends AbstractChange {
 
     @ChangeProperty(includeInSerialization = false)
@@ -20,7 +22,6 @@ public class AnonymousChange extends AbstractChange {
     }
 
     public AnonymousChange(SqlStatement... statement) {
-        super("anonymous", "Anonymous change", ChangeMetaData.PRIORITY_DEFAULT);
         this.statements.addAll(Arrays.asList(statement));
     }
 

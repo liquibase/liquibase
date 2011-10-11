@@ -1,21 +1,19 @@
 package liquibase.change.core;
 
 import liquibase.change.AbstractChange;
+import liquibase.change.ChangeClass;
 import liquibase.change.ChangeMetaData;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.ModifyDataTypeStatement;
 import liquibase.database.Database;
 
+@ChangeClass(name="modifyDataType", description = "Modify data type", priority = ChangeMetaData.PRIORITY_DEFAULT)
 public class ModifyDataTypeChange extends AbstractChange {
 
     private String schemaName;
     private String tableName;
     private String columnName;
     private String newDataType;
-
-    public ModifyDataTypeChange() {
-        super("modifyDataType", "Modify data type", ChangeMetaData.PRIORITY_DEFAULT);
-    }
 
     public String getConfirmationMessage() {
         return tableName+"."+columnName+" datatype was changed to "+newDataType;

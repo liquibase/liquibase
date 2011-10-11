@@ -1,9 +1,6 @@
 package liquibase.change.core;
 
-import liquibase.change.AbstractChange;
-import liquibase.change.Change;
-import liquibase.change.ChangeMetaData;
-import liquibase.change.ColumnConfig;
+import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.database.core.SQLiteDatabase.AlterTableVisitor;
@@ -18,6 +15,7 @@ import java.util.List;
 /**
  * Adds a unique constraint to an existing column.
  */
+@ChangeClass(name="addUniqueConstraint", description = "Add Unique Constraint", priority = ChangeMetaData.PRIORITY_DEFAULT)
 public class AddUniqueConstraintChange extends AbstractChange {
 
     private String schemaName;
@@ -29,10 +27,6 @@ public class AddUniqueConstraintChange extends AbstractChange {
     private Boolean deferrable;
     private Boolean initiallyDeferred;
     private Boolean disabled;
-
-    public AddUniqueConstraintChange() {
-        super("addUniqueConstraint", "Add Unique Constraint", ChangeMetaData.PRIORITY_DEFAULT);
-    }
 
     public String getSchemaName() {
         return schemaName;

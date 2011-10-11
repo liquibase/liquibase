@@ -1,6 +1,7 @@
 package liquibase.change.core;
 
 import liquibase.change.AbstractChange;
+import liquibase.change.ChangeClass;
 import liquibase.change.ChangeMetaData;
 import liquibase.change.ColumnConfig;
 import liquibase.database.Database;
@@ -17,14 +18,11 @@ import java.util.List;
 /**
  * Removes an existing primary key.
  */
+@ChangeClass(name="dropPrimaryKey", description = "Drop Primary Key", priority = ChangeMetaData.PRIORITY_DEFAULT)
 public class DropPrimaryKeyChange extends AbstractChange {
     private String schemaName;
     private String tableName;
     private String constraintName;
-
-    public DropPrimaryKeyChange() {
-        super("dropPrimaryKey", "Drop Primary Key", ChangeMetaData.PRIORITY_DEFAULT);
-    }
 
     public String getSchemaName() {
         return schemaName;

@@ -18,6 +18,7 @@ import java.util.Set;
 /**
  * Adds a column to an existing table.
  */
+@ChangeClass(name="addColumn", description = "Add Column", priority = ChangeMetaData.PRIORITY_DEFAULT)
 public class AddColumnChange extends AbstractChange implements ChangeWithColumns<ColumnConfig> {
 
     private String schemaName;
@@ -25,7 +26,6 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
     private List<ColumnConfig> columns;
 
     public AddColumnChange() {
-        super("addColumn", "Add Column", ChangeMetaData.PRIORITY_DEFAULT);
         columns = new ArrayList<ColumnConfig>();
     }
 

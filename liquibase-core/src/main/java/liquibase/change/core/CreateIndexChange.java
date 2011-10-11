@@ -12,6 +12,7 @@ import java.util.List;
 /**
  * Creates an index on an existing column.
  */
+@ChangeClass(name="createIndex", description = "Create Index", priority = ChangeMetaData.PRIORITY_DEFAULT)
 public class CreateIndexChange extends AbstractChange implements ChangeWithColumns<ColumnConfig> {
 
     private String schemaName;
@@ -27,7 +28,6 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
 
 
     public CreateIndexChange() {
-        super("createIndex", "Create Index", ChangeMetaData.PRIORITY_DEFAULT);
         columns = new ArrayList<ColumnConfig>();
     }
 

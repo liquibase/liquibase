@@ -1,9 +1,6 @@
 package liquibase.change.core;
 
-import liquibase.change.AbstractChange;
-import liquibase.change.ChangeMetaData;
-import liquibase.change.ChangeWithColumns;
-import liquibase.change.ColumnConfig;
+import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.InsertStatement;
@@ -15,6 +12,7 @@ import java.util.List;
 /**
  * Inserts data into an existing table.
  */
+@ChangeClass(name="insert", description = "Insert Row", priority = ChangeMetaData.PRIORITY_DEFAULT)
 public class InsertDataChange extends AbstractChange implements ChangeWithColumns<ColumnConfig> {
 
     private String schemaName;
@@ -22,7 +20,6 @@ public class InsertDataChange extends AbstractChange implements ChangeWithColumn
     private List<ColumnConfig> columns;
 
     public InsertDataChange() {
-        super("insert", "Insert Row", ChangeMetaData.PRIORITY_DEFAULT);
         columns = new ArrayList<ColumnConfig>();
     }
 

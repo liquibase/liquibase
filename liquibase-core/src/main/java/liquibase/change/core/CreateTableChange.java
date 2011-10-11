@@ -17,6 +17,7 @@ import java.util.List;
 /**
  * Creates a new table.
  */
+@ChangeClass(name="createTable", description = "Create Table", priority = ChangeMetaData.PRIORITY_DEFAULT)
 public class CreateTableChange extends AbstractChange implements ChangeWithColumns<ColumnConfig> {
 
     private List<ColumnConfig> columns;
@@ -26,7 +27,6 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
     private String remarks;
 
     public CreateTableChange() {
-        super("createTable", "Create Table", ChangeMetaData.PRIORITY_DEFAULT);
         columns = new ArrayList<ColumnConfig>();
     }
 

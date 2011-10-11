@@ -1,5 +1,7 @@
 package liquibase.change.core;
 
+import liquibase.change.ChangeClass;
+import liquibase.change.ChangeMetaData;
 import liquibase.database.Database;
 import liquibase.database.typeconversion.TypeConverterFactory;
 import liquibase.exception.RollbackImpossibleException;
@@ -14,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+@ChangeClass(name="loadUpdateData", description = "Smart Load Data", priority = ChangeMetaData.PRIORITY_DEFAULT)
 public class LoadUpdateDataChange extends LoadDataChange {
     private String primaryKey;
 
@@ -21,11 +24,6 @@ public class LoadUpdateDataChange extends LoadDataChange {
     public SqlStatement[] generateStatements(Database database) {
         return super.generateStatements(database);    //To change body of overridden methods use File | Settings | File Templates.
     }
-
-    public LoadUpdateDataChange() {
-        super("loadUpdateData", "Smart Load Data");
-    }
-
 
     public void setPrimaryKey(String primaryKey) throws LiquibaseException {
         if (primaryKey == null) {

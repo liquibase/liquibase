@@ -1,9 +1,6 @@
 package liquibase.change.core;
 
-import liquibase.change.AbstractChange;
-import liquibase.change.Change;
-import liquibase.change.ChangeMetaData;
-import liquibase.change.ColumnConfig;
+import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.database.core.SQLiteDatabase.AlterTableVisitor;
@@ -18,6 +15,7 @@ import java.util.List;
 /**
  * Renames an existing column.
  */
+@ChangeClass(name="renameColumn", description = "Rename Column", priority = ChangeMetaData.PRIORITY_DEFAULT)
 public class RenameColumnChange extends AbstractChange {
 
     private String schemaName;
@@ -25,11 +23,6 @@ public class RenameColumnChange extends AbstractChange {
     private String oldColumnName;
     private String newColumnName;
     private String columnDataType;
-
-    public RenameColumnChange() {
-        super("renameColumn", "Rename Column", ChangeMetaData.PRIORITY_DEFAULT);
-    }
-
 
     public String getSchemaName() {
         return schemaName;

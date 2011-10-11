@@ -2,6 +2,7 @@ package liquibase.change.core;
 
 import liquibase.change.AbstractChange;
 import liquibase.change.Change;
+import liquibase.change.ChangeClass;
 import liquibase.change.ChangeMetaData;
 import liquibase.database.Database;
 import liquibase.database.core.DB2Database;
@@ -16,6 +17,7 @@ import java.util.List;
 /**
  * Renames an existing table.
  */
+@ChangeClass(name="renameTable", description = "Rename Table", priority = ChangeMetaData.PRIORITY_DEFAULT)
 public class RenameTableChange extends AbstractChange {
 
     private String schemaName;
@@ -24,7 +26,6 @@ public class RenameTableChange extends AbstractChange {
     private String newTableName;
 
     public RenameTableChange() {
-        super("renameTable", "Rename Table", ChangeMetaData.PRIORITY_DEFAULT);
     }
 
     public String getSchemaName() {

@@ -2,6 +2,7 @@ package liquibase.change.core;
 
 import liquibase.change.AbstractChange;
 import liquibase.change.Change;
+import liquibase.change.ChangeClass;
 import liquibase.change.ChangeMetaData;
 import liquibase.database.Database;
 import liquibase.database.structure.ForeignKeyConstraintType;
@@ -12,6 +13,7 @@ import liquibase.statement.core.AddForeignKeyConstraintStatement;
 /**
  * Adds a foreign key constraint to an existing column.
  */
+ @ChangeClass(name="addForeignKeyConstraint", description = "Add Foreign Key Constraint", priority = ChangeMetaData.PRIORITY_DEFAULT)
 public class AddForeignKeyConstraintChange extends AbstractChange {
     private String baseTableSchemaName;
     private String baseTableName;
@@ -32,10 +34,6 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
 	// Some databases supports creation of FK with referention to column marked as unique, not primary
 	// If FK referenced to such unique column this option should be set to false
 	private Boolean referencesUniqueColumn;
-
-    public AddForeignKeyConstraintChange() {
-        super("addForeignKeyConstraint", "Add Foreign Key Constraint", ChangeMetaData.PRIORITY_DEFAULT);
-    }
 
     public String getBaseTableSchemaName() {
         return baseTableSchemaName;

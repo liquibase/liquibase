@@ -1,6 +1,7 @@
 package liquibase.change.core;
 
 import liquibase.change.AbstractChange;
+import liquibase.change.ChangeClass;
 import liquibase.change.ChangeMetaData;
 import liquibase.change.ChangeProperty;
 import liquibase.database.Database;
@@ -11,6 +12,7 @@ import liquibase.util.StringUtils;
 /**
  * Drops an existing index.
  */
+@ChangeClass(name="dropIndex", description = "Drop Index", priority = ChangeMetaData.PRIORITY_DEFAULT)
 public class DropIndexChange extends AbstractChange {
 
     private String schemaName;
@@ -19,10 +21,6 @@ public class DropIndexChange extends AbstractChange {
 
     @ChangeProperty(includeInSerialization = false)
     private String associatedWith;
-
-    public DropIndexChange() {
-        super("dropIndex", "Drop Index", ChangeMetaData.PRIORITY_DEFAULT);
-    }
 
     public String getSchemaName() {
         return schemaName;

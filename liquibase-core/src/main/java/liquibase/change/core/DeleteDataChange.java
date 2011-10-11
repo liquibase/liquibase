@@ -1,6 +1,7 @@
 package liquibase.change.core;
 
 import liquibase.change.AbstractChange;
+import liquibase.change.ChangeClass;
 import liquibase.change.ChangeMetaData;
 import liquibase.change.TextNode;
 import liquibase.database.Database;
@@ -8,6 +9,7 @@ import liquibase.statement.SqlStatement;
 import liquibase.statement.core.DeleteStatement;
 import liquibase.util.StringUtils;
 
+@ChangeClass(name="delete", description = "Delete Data", priority = ChangeMetaData.PRIORITY_DEFAULT)
 public class DeleteDataChange extends AbstractChange {
 
     private String schemaName;
@@ -15,10 +17,6 @@ public class DeleteDataChange extends AbstractChange {
 
     @TextNode(nodeName="where")
     private String whereClause;
-
-    public DeleteDataChange() {
-        super("delete", "Delete Data", ChangeMetaData.PRIORITY_DEFAULT);
-    }
 
     public String getSchemaName() {
         return schemaName;

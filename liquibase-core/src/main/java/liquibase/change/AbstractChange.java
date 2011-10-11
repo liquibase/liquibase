@@ -29,14 +29,23 @@ public abstract class AbstractChange implements Change {
     @ChangeProperty(includeInSerialization = false)
     private ChangeSet changeSet;
 
-    /**
-     * Constructor with tag name and name
-     *
-     * @param changeName        the tag name for this change
-     * @param changeDescription the name for this change
-     */
-    protected AbstractChange(String changeName, String changeDescription, int priority) {
-        this.changeMetaData = new ChangeMetaData(changeName, changeDescription, priority);
+//    /**
+//     * Constructor with tag name and name
+//     *
+//     * @param changeName        the tag name for this change
+//     * @param changeDescription the name for this change
+//     */
+//    protected AbstractChange(String changeName, String changeDescription, int priority) {
+//        this.changeMetaData = new ChangeMetaData(changeName, changeDescription, priority);
+//    }
+
+    public AbstractChange() {
+        this.changeMetaData = createChangeMetaData();
+    }
+
+    protected ChangeMetaData createChangeMetaData() {
+        ChangeClass changeClass = this.getClass().getAnnotation(ChangeClass.class);
+        return new ChangeMetaData(changeClass.name(), changeClass.description(), changeClass.priority());
     }
 
     public ChangeMetaData getChangeMetaData() {

@@ -2,6 +2,7 @@ package liquibase.change.core;
 
 import liquibase.change.AbstractChange;
 import liquibase.change.Change;
+import liquibase.change.ChangeClass;
 import liquibase.change.ChangeMetaData;
 import liquibase.database.Database;
 import liquibase.database.core.MSSQLDatabase;
@@ -17,6 +18,7 @@ import java.util.List;
 /**
  * Creates a new view.
  */
+@ChangeClass(name="createView", description = "Create View", priority = ChangeMetaData.PRIORITY_DEFAULT)
 public class CreateViewChange extends AbstractChange {
 
 	private String schemaName;
@@ -24,9 +26,6 @@ public class CreateViewChange extends AbstractChange {
 	private String selectQuery;
 	private Boolean replaceIfExists;
 
-	public CreateViewChange() {
-		super("createView", "Create View", ChangeMetaData.PRIORITY_DEFAULT);
-	}
 
 	public String getSchemaName() {
 		return schemaName;

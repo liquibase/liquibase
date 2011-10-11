@@ -1,6 +1,7 @@
 package liquibase.change.core;
 
 import liquibase.change.AbstractChange;
+import liquibase.change.ChangeClass;
 import liquibase.change.ChangeMetaData;
 import liquibase.database.Database;
 import liquibase.statement.SqlStatement;
@@ -10,14 +11,11 @@ import liquibase.util.StringUtils;
 /**
  * Drops an existing sequence.
  */
+@ChangeClass(name="dropSequence", description = "Drop Sequence", priority = ChangeMetaData.PRIORITY_DEFAULT)
 public class DropSequenceChange extends AbstractChange {
 
     private String schemaName;
     private String sequenceName;
-
-    public DropSequenceChange() {
-        super("dropSequence", "Drop Sequence", ChangeMetaData.PRIORITY_DEFAULT);
-    }
 
     public String getSchemaName() {
         return schemaName;

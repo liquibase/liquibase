@@ -1,6 +1,7 @@
 package liquibase.change.core;
 
 import liquibase.change.AbstractChange;
+import liquibase.change.ChangeClass;
 import liquibase.change.ChangeMetaData;
 import liquibase.change.ChangeProperty;
 import liquibase.database.Database;
@@ -18,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+@ChangeClass(name="dropAllForeignKeyConstraints", description = "Drop All Foreign Key Constraints", priority = ChangeMetaData.PRIORITY_DEFAULT)
 public class DropAllForeignKeyConstraintsChange extends AbstractChange {
 
     private String baseTableSchemaName;
@@ -26,10 +28,6 @@ public class DropAllForeignKeyConstraintsChange extends AbstractChange {
     @ChangeProperty(includeInSerialization = false)
     private List<DropForeignKeyConstraintChange> childDropChanges;
 
-
-    public DropAllForeignKeyConstraintsChange() {
-        super("dropAllForeignKeyConstraints", "Drop All Foreign Key Constraints", ChangeMetaData.PRIORITY_DEFAULT);
-    }
 
     public String getBaseTableSchemaName() {
         return baseTableSchemaName;

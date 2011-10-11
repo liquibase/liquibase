@@ -1,9 +1,6 @@
 package liquibase.change.core;
 
-import liquibase.change.AbstractChange;
-import liquibase.change.Change;
-import liquibase.change.ChangeMetaData;
-import liquibase.change.ColumnConfig;
+import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.database.core.DB2Database;
 import liquibase.database.core.SQLiteDatabase;
@@ -22,17 +19,13 @@ import java.util.List;
 /**
  * Adds a not-null constraint to an existing column.
  */
+@ChangeClass(name="addNotNullConstraint", description = "Add Not-Null Constraint", priority = ChangeMetaData.PRIORITY_DEFAULT)
 public class AddNotNullConstraintChange extends AbstractChange {
     private String schemaName;
     private String tableName;
     private String columnName;
     private String defaultNullValue;
     private String columnDataType;
-
-
-    public AddNotNullConstraintChange() {
-        super("addNotNullConstraint", "Add Not-Null Constraint", ChangeMetaData.PRIORITY_DEFAULT);
-    }
 
     public String getSchemaName() {
         return schemaName;

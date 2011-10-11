@@ -1,6 +1,7 @@
 package liquibase.change.core;
 
 import liquibase.change.AbstractChange;
+import liquibase.change.ChangeClass;
 import liquibase.change.ChangeMetaData;
 import liquibase.database.Database;
 import liquibase.database.core.SQLiteDatabase;
@@ -10,14 +11,11 @@ import liquibase.statement.core.DropForeignKeyConstraintStatement;
 /**
  * Drops an existing foreign key constraint.
  */
+@ChangeClass(name="dropForeignKeyConstraint", description = "Drop Foreign Key Constraint", priority = ChangeMetaData.PRIORITY_DEFAULT)
 public class DropForeignKeyConstraintChange extends AbstractChange {
     private String baseTableSchemaName;
     private String baseTableName;
     private String constraintName;
-
-    public DropForeignKeyConstraintChange() {
-        super("dropForeignKeyConstraint", "Drop Foreign Key Constraint", ChangeMetaData.PRIORITY_DEFAULT);
-    }
 
     public String getBaseTableSchemaName() {
         return baseTableSchemaName;

@@ -1,6 +1,7 @@
 package liquibase.change.core;
 
 import liquibase.change.AbstractChange;
+import liquibase.change.ChangeClass;
 import liquibase.change.ChangeMetaData;
 import liquibase.database.Database;
 import liquibase.statement.SqlStatement;
@@ -10,13 +11,10 @@ import liquibase.util.StringUtils;
 /**
  * Drops an existing view.
  */
+@ChangeClass(name="dropView", description = "Drop View", priority = ChangeMetaData.PRIORITY_DEFAULT)
 public class DropViewChange extends AbstractChange {
     private String schemaName;
     private String viewName;
-
-    public DropViewChange() {
-        super("dropView", "Drop View", ChangeMetaData.PRIORITY_DEFAULT);
-    }
 
     public String getSchemaName() {
         return schemaName;

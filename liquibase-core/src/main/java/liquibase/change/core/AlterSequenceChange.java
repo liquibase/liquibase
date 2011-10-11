@@ -1,6 +1,7 @@
 package liquibase.change.core;
 
 import liquibase.change.AbstractChange;
+import liquibase.change.ChangeClass;
 import liquibase.change.ChangeMetaData;
 import liquibase.database.Database;
 import liquibase.statement.SqlStatement;
@@ -12,6 +13,7 @@ import java.math.BigInteger;
 /**
  * Modifies properties of an existing sequence.
  */
+@ChangeClass(name="alterSequence", description = "Alter Sequence", priority = ChangeMetaData.PRIORITY_DEFAULT)
 public class AlterSequenceChange extends AbstractChange {
 
     private String schemaName;
@@ -22,9 +24,6 @@ public class AlterSequenceChange extends AbstractChange {
     private Boolean ordered;
     // StartValue is not allowed since we cannot alter the starting sequence number
 
-    public AlterSequenceChange() {
-        super("alterSequence", "Alter Sequence", ChangeMetaData.PRIORITY_DEFAULT);
-    }
 
     public String getSchemaName() {
         return schemaName;

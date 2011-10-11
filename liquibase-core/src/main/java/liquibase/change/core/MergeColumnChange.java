@@ -1,6 +1,7 @@
 package liquibase.change.core;
 
 import liquibase.change.AbstractChange;
+import liquibase.change.ChangeClass;
 import liquibase.change.ChangeMetaData;
 import liquibase.change.ColumnConfig;
 import liquibase.database.Database;
@@ -20,6 +21,7 @@ import java.util.List;
 /**
  * Combines data from two existing columns into a new column and drops the original columns.
  */
+@ChangeClass(name="mergeColumns", description = "Merge Column", priority = ChangeMetaData.PRIORITY_DEFAULT)
 public class MergeColumnChange extends AbstractChange {
 
     private String schemaName;
@@ -29,10 +31,6 @@ public class MergeColumnChange extends AbstractChange {
     private String column2Name;
     private String finalColumnName;
     private String finalColumnType;
-
-    public MergeColumnChange() {
-        super("mergeColumns", "Merge Column", ChangeMetaData.PRIORITY_DEFAULT);
-    }
 
     public String getSchemaName() {
         return schemaName;

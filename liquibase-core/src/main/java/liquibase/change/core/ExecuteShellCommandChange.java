@@ -1,6 +1,7 @@
 package liquibase.change.core;
 
 import liquibase.change.AbstractChange;
+import liquibase.change.ChangeClass;
 import liquibase.change.ChangeMetaData;
 import liquibase.database.Database;
 import liquibase.exception.UnexpectedLiquibaseException;
@@ -25,16 +26,12 @@ import java.util.List;
 /**
  * Executes a given shell executable.
  */
+@ChangeClass(name="executeCommand", description = "Execute Shell Command", priority = ChangeMetaData.PRIORITY_DEFAULT)
 public class ExecuteShellCommandChange extends AbstractChange {
 
     private String executable;
     private List<String> os;
     private List<String> args = new ArrayList<String>();
-
-    public ExecuteShellCommandChange() {
-        super("executeCommand", "Execute Shell Command", ChangeMetaData.PRIORITY_DEFAULT);
-    }
-
 
     public String getExecutable() {
         return executable;

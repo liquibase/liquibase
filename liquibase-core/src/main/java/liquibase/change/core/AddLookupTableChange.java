@@ -2,6 +2,7 @@ package liquibase.change.core;
 
 import liquibase.change.AbstractChange;
 import liquibase.change.Change;
+import liquibase.change.ChangeClass;
 import liquibase.change.ChangeMetaData;
 import liquibase.database.Database;
 import liquibase.database.core.DB2Database;
@@ -21,6 +22,7 @@ import java.util.List;
  * Extracts data from an existing column to create a lookup table.
  * A foreign key is created between the old column and the new lookup table.
  */
+@ChangeClass(name="addLookupTable", description = "Add Lookup Table", priority = ChangeMetaData.PRIORITY_DEFAULT)
 public class AddLookupTableChange extends AbstractChange {
 
     private String existingTableSchemaName;
@@ -32,10 +34,6 @@ public class AddLookupTableChange extends AbstractChange {
     private String newColumnName;
     private String newColumnDataType;
     private String constraintName;
-
-    public AddLookupTableChange() {
-        super("addLookupTable", "Add Lookup Table", ChangeMetaData.PRIORITY_DEFAULT);
-    }
 
     public String getExistingTableSchemaName() {
         return existingTableSchemaName;
