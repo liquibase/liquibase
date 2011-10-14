@@ -28,11 +28,11 @@ public class CreateDatabaseChangeLogTableGeneratorFirebird extends CreateDatabas
 
     @Override
     protected String getIdColumnSize() {
-        return "30";
+        return "60";
     }
 
     @Override
     protected String getAuthorColumnSize() {
-        return "30";
+        return "60";
     }
 }
