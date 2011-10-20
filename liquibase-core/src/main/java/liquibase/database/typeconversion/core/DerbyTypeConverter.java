@@ -39,10 +39,12 @@ public class DerbyTypeConverter  extends AbstractTypeConverter {
         return new DateTimeType("TIMESTAMP");
     }
 
+    @Override
     public NumberType getNumberType() {
         return new NumberType("NUMERIC");
     }
 
+    @Override
     public TinyIntType getTinyIntType() {
         return new TinyIntType("SMALLINT");
     }
