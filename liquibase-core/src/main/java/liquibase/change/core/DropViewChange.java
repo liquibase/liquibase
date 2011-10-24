@@ -12,11 +12,12 @@ import liquibase.util.StringUtils;
 /**
  * Drops an existing view.
  */
-@ChangeClass(name="dropView", description = "Drop View", priority = ChangeMetaData.PRIORITY_DEFAULT)
+@ChangeClass(name="dropView", description = "Drop View", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "view")
 public class DropViewChange extends AbstractChange {
     private String schemaName;
     private String viewName;
 
+    @ChangeProperty(mustApplyTo ="view.schema")
     public String getSchemaName() {
         return schemaName;
     }
@@ -25,7 +26,7 @@ public class DropViewChange extends AbstractChange {
         this.schemaName = StringUtils.trimToNull(schemaName);
     }
 
-    @ChangeProperty(requiredForDatabase = "all")
+    @ChangeProperty(requiredForDatabase = "all", mustApplyTo = "view")
     public String getViewName() {
         return viewName;
     }

@@ -14,7 +14,7 @@ import java.util.List;
 /**
  * Renames an existing table.
  */
-@ChangeClass(name="renameTable", description = "Rename Table", priority = ChangeMetaData.PRIORITY_DEFAULT)
+@ChangeClass(name="renameTable", description = "Rename Table", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "table")
 public class RenameTableChange extends AbstractChange {
 
     private String schemaName;
@@ -25,6 +25,7 @@ public class RenameTableChange extends AbstractChange {
     public RenameTableChange() {
     }
 
+    @ChangeProperty(mustApplyTo ="table.schema")
     public String getSchemaName() {
         return schemaName;
     }
@@ -33,7 +34,7 @@ public class RenameTableChange extends AbstractChange {
         this.schemaName = StringUtils.trimToNull(schemaName);
     }
 
-    @ChangeProperty(requiredForDatabase = "all")
+    @ChangeProperty(requiredForDatabase = "all", mustApplyTo = "table")
     public String getOldTableName() {
         return oldTableName;
     }

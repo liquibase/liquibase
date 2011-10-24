@@ -14,12 +14,14 @@ public class ChangeMetaData implements PrioritizedService {
     private int priority;
 
     private Set<ChangeParameterMetaData> parameters;
+    private String[] appliesTo;
 
-    public ChangeMetaData(String name, String description, int priority, Set<ChangeParameterMetaData> parameters) {
+    public ChangeMetaData(String name, String description, int priority, String[] appliesTo, Set<ChangeParameterMetaData> parameters) {
         this.name = name;
         this.description = description;
         this.priority = priority;
         this.parameters = Collections.unmodifiableSet(parameters);
+        this.appliesTo = appliesTo;
     }
 
     public String getName() {
@@ -34,11 +36,11 @@ public class ChangeMetaData implements PrioritizedService {
         return priority;
     }
 
-    public void setPriority(int newPriority) {
-        this.priority = newPriority;
-    }
-
     public Set<ChangeParameterMetaData> getParameters() {
         return parameters;
+    }
+
+    public String[] getAppliesTo() {
+        return appliesTo;
     }
 }

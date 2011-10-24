@@ -12,4 +12,5 @@ public @interface ChangeProperty {
     public boolean includeInMetaData() default true;
 
     public String[] requiredForDatabase() default "none";
+    public String mustApplyTo() default "";
 }

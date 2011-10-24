@@ -15,7 +15,7 @@ import java.util.List;
 /**
  * Adds a unique constraint to an existing column.
  */
-@ChangeClass(name="addUniqueConstraint", description = "Add Unique Constraint", priority = ChangeMetaData.PRIORITY_DEFAULT)
+@ChangeClass(name="addUniqueConstraint", description = "Add Unique Constraint", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "column")
 public class AddUniqueConstraintChange extends AbstractChange {
 
     private String schemaName;
@@ -28,6 +28,7 @@ public class AddUniqueConstraintChange extends AbstractChange {
     private Boolean initiallyDeferred;
     private Boolean disabled;
 
+    @ChangeProperty(mustApplyTo ="column.table.schema")
     public String getSchemaName() {
         return schemaName;
     }
@@ -36,7 +37,7 @@ public class AddUniqueConstraintChange extends AbstractChange {
         this.schemaName = StringUtils.trimToNull(schemaName);
     }
 
-    @ChangeProperty(requiredForDatabase = "all")
+    @ChangeProperty(requiredForDatabase = "all",mustApplyTo = "column.table")
     public String getTableName() {
         return tableName;
     }
@@ -45,7 +46,7 @@ public class AddUniqueConstraintChange extends AbstractChange {
         this.tableName = tableName;
     }
 
-    @ChangeProperty(requiredForDatabase = "all")
+    @ChangeProperty(requiredForDatabase = "all", mustApplyTo = "column")
     public String getColumnNames() {
         return columnNames;
     }

@@ -9,5 +9,6 @@ public @interface ChangeClass {
     String name();
     String description();
     int priority();
+    String[] appliesTo() default {"all"};
 
 }

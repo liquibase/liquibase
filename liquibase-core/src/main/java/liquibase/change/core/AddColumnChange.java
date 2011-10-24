@@ -18,7 +18,7 @@ import java.util.Set;
 /**
  * Adds a column to an existing table.
  */
-@ChangeClass(name="addColumn", description = "Add Column", priority = ChangeMetaData.PRIORITY_DEFAULT)
+@ChangeClass(name="addColumn", description = "Add Column", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "table")
 public class AddColumnChange extends AbstractChange implements ChangeWithColumns<ColumnConfig> {
 
     private String schemaName;
@@ -29,6 +29,7 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
         columns = new ArrayList<ColumnConfig>();
     }
 
+    @ChangeProperty(mustApplyTo ="table.schema")
     public String getSchemaName() {
         return schemaName;
     }
@@ -37,7 +38,7 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
         this.schemaName = StringUtils.trimToNull(schemaName);
     }
 
-    @ChangeProperty(requiredForDatabase = "all")
+    @ChangeProperty(requiredForDatabase = "all", mustApplyTo ="table")
     public String getTableName() {
         return tableName;
     }

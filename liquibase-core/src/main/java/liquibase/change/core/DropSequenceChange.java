@@ -12,12 +12,13 @@ import liquibase.util.StringUtils;
 /**
  * Drops an existing sequence.
  */
-@ChangeClass(name="dropSequence", description = "Drop Sequence", priority = ChangeMetaData.PRIORITY_DEFAULT)
+@ChangeClass(name="dropSequence", description = "Drop Sequence", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "sequence")
 public class DropSequenceChange extends AbstractChange {
 
     private String schemaName;
     private String sequenceName;
 
+    @ChangeProperty(mustApplyTo ="sequence.schema")
     public String getSchemaName() {
         return schemaName;
     }
@@ -26,7 +27,7 @@ public class DropSequenceChange extends AbstractChange {
         this.schemaName = StringUtils.trimToNull(schemaName);
     }
 
-    @ChangeProperty(requiredForDatabase = "all")
+    @ChangeProperty(requiredForDatabase = "all", mustApplyTo = "sequence")
     public String getSequenceName() {
         return sequenceName;
     }

@@ -15,7 +15,7 @@ import java.util.Locale;
 /**
  * Sets a new default value to an existing column.
  */
-@ChangeClass(name="addDefaultValue", description = "Add Default Value", priority = ChangeMetaData.PRIORITY_DEFAULT)
+@ChangeClass(name="addDefaultValue", description = "Add Default Value", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "column")
 public class AddDefaultValueChange extends AbstractChange {
 
     private String schemaName;
@@ -28,6 +28,7 @@ public class AddDefaultValueChange extends AbstractChange {
     private Boolean defaultValueBoolean;
     private DatabaseFunction defaultValueComputed;
 
+    @ChangeProperty(requiredForDatabase = "all", mustApplyTo ="column.table.schema")
     public String getSchemaName() {
         return schemaName;
     }
@@ -36,7 +37,7 @@ public class AddDefaultValueChange extends AbstractChange {
         this.schemaName = StringUtils.trimToNull(schemaName);
     }
 
-    @ChangeProperty(requiredForDatabase = "all")
+    @ChangeProperty(requiredForDatabase = "all", mustApplyTo = "column.table")
     public String getTableName() {
         return tableName;
     }
@@ -45,7 +46,7 @@ public class AddDefaultValueChange extends AbstractChange {
         this.tableName = tableName;
     }
 
-    @ChangeProperty(requiredForDatabase = "all")
+    @ChangeProperty(requiredForDatabase = "all", mustApplyTo = "column")
     public String getColumnName() {
         return columnName;
     }

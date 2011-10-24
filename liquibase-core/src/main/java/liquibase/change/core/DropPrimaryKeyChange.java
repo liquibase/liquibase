@@ -15,12 +15,13 @@ import java.util.List;
 /**
  * Removes an existing primary key.
  */
-@ChangeClass(name="dropPrimaryKey", description = "Drop Primary Key", priority = ChangeMetaData.PRIORITY_DEFAULT)
+@ChangeClass(name="dropPrimaryKey", description = "Drop Primary Key", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "primaryKey")
 public class DropPrimaryKeyChange extends AbstractChange {
     private String schemaName;
     private String tableName;
     private String constraintName;
 
+    @ChangeProperty(mustApplyTo ="primaryKey.schema")
     public String getSchemaName() {
         return schemaName;
     }
@@ -29,7 +30,7 @@ public class DropPrimaryKeyChange extends AbstractChange {
         this.schemaName = StringUtils.trimToNull(schemaName);
     }
 
-    @ChangeProperty(requiredForDatabase = "all")
+    @ChangeProperty(requiredForDatabase = "all", mustApplyTo = "primaryKey.table")
     public String getTableName() {
         return tableName;
     }
@@ -38,7 +39,7 @@ public class DropPrimaryKeyChange extends AbstractChange {
         this.tableName = tableName;
     }
 
-    @ChangeProperty(requiredForDatabase = "all")
+    @ChangeProperty(requiredForDatabase = "all", mustApplyTo = "primaryKey")
     public String getConstraintName() {
         return constraintName;
     }

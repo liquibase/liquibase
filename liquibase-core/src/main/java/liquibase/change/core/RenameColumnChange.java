@@ -15,7 +15,7 @@ import java.util.List;
 /**
  * Renames an existing column.
  */
-@ChangeClass(name="renameColumn", description = "Rename Column", priority = ChangeMetaData.PRIORITY_DEFAULT)
+@ChangeClass(name="renameColumn", description = "Rename Column", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "column")
 public class RenameColumnChange extends AbstractChange {
 
     private String schemaName;
@@ -24,6 +24,7 @@ public class RenameColumnChange extends AbstractChange {
     private String newColumnName;
     private String columnDataType;
 
+    @ChangeProperty(mustApplyTo ="column.table.schema")
     public String getSchemaName() {
         return schemaName;
     }
@@ -32,7 +33,7 @@ public class RenameColumnChange extends AbstractChange {
         this.schemaName = StringUtils.trimToNull(schemaName);
     }
 
-    @ChangeProperty(requiredForDatabase = "all")
+    @ChangeProperty(requiredForDatabase = "all", mustApplyTo = "column.table")
     public String getTableName() {
         return tableName;
     }
@@ -41,7 +42,7 @@ public class RenameColumnChange extends AbstractChange {
         this.tableName = tableName;
     }
 
-    @ChangeProperty(requiredForDatabase = "all")
+    @ChangeProperty(requiredForDatabase = "all", mustApplyTo = "column")
     public String getOldColumnName() {
         return oldColumnName;
     }

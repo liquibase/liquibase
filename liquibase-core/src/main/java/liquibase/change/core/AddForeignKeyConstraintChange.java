@@ -10,7 +10,7 @@ import liquibase.statement.core.AddForeignKeyConstraintStatement;
 /**
  * Adds a foreign key constraint to an existing column.
  */
- @ChangeClass(name="addForeignKeyConstraint", description = "Add Foreign Key Constraint", priority = ChangeMetaData.PRIORITY_DEFAULT)
+ @ChangeClass(name="addForeignKeyConstraint", description = "Add Foreign Key Constraint", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "column")
 public class AddForeignKeyConstraintChange extends AbstractChange {
     private String baseTableSchemaName;
     private String baseTableName;
@@ -32,6 +32,7 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
 	// If FK referenced to such unique column this option should be set to false
 	private Boolean referencesUniqueColumn;
 
+    @ChangeProperty(requiredForDatabase = "all", mustApplyTo ="column.table.schema")
     public String getBaseTableSchemaName() {
         return baseTableSchemaName;
     }
@@ -40,7 +41,7 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
         this.baseTableSchemaName = baseTableSchemaName;
     }
 
-    @ChangeProperty(requiredForDatabase = "all")
+    @ChangeProperty(requiredForDatabase = "all", mustApplyTo = "column.table")
     public String getBaseTableName() {
         return baseTableName;
     }
@@ -49,7 +50,7 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
         this.baseTableName = baseTableName;
     }
 
-    @ChangeProperty(requiredForDatabase = "all")
+    @ChangeProperty(requiredForDatabase = "all", mustApplyTo = "column")
     public String getBaseColumnNames() {
         return baseColumnNames;
     }

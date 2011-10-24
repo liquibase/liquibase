@@ -17,14 +17,14 @@ import java.util.List;
 /**
  * Drops an existing column from a table.
  */
-@ChangeClass(name="dropColumn", description = "Drop Column", priority = ChangeMetaData.PRIORITY_DEFAULT)
+@ChangeClass(name="dropColumn", description = "Drop Column", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "column")
 public class DropColumnChange extends AbstractChange {
 
     private String schemaName;
     private String tableName;
     private String columnName;
 
-    @ChangeProperty(requiredForDatabase = "all")
+    @ChangeProperty(requiredForDatabase = "all",mustApplyTo = "column")
     public String getColumnName() {
         return columnName;
     }
@@ -34,6 +34,7 @@ public class DropColumnChange extends AbstractChange {
     }
 
 
+    @ChangeProperty(mustApplyTo ="column.table.schema")
     public String getSchemaName() {
         return schemaName;
     }
@@ -42,7 +43,7 @@ public class DropColumnChange extends AbstractChange {
         this.schemaName = StringUtils.trimToNull(schemaName);
     }
 
-    @ChangeProperty(requiredForDatabase = "all")
+    @ChangeProperty(requiredForDatabase = "all", mustApplyTo = "column.table")
     public String getTableName() {
         return tableName;
     }

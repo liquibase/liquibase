@@ -15,7 +15,7 @@ import java.util.List;
 /**
  * Drops a not-null constraint from an existing column.
  */
-@ChangeClass(name="dropNotNullConstraint", description = "Drop Not-Null Constraint", priority = ChangeMetaData.PRIORITY_DEFAULT)
+@ChangeClass(name="dropNotNullConstraint", description = "Drop Not-Null Constraint", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "notNullConstraint")
 public class DropNotNullConstraintChange extends AbstractChange {
 
     private String schemaName;
@@ -23,6 +23,7 @@ public class DropNotNullConstraintChange extends AbstractChange {
     private String columnName;
     private String columnDataType;
 
+    @ChangeProperty(mustApplyTo ="notNullConstraint.table.schema")
     public String getSchemaName() {
         return schemaName;
     }
@@ -31,7 +32,7 @@ public class DropNotNullConstraintChange extends AbstractChange {
         this.schemaName = StringUtils.trimToNull(schemaName);
     }
 
-    @ChangeProperty(requiredForDatabase = "all")
+    @ChangeProperty(requiredForDatabase = "all", mustApplyTo = "notNullConstraint.table")
     public String getTableName() {
         return tableName;
     }
@@ -40,7 +41,7 @@ public class DropNotNullConstraintChange extends AbstractChange {
         this.tableName = tableName;
     }
 
-    @ChangeProperty(requiredForDatabase = "all")
+    @ChangeProperty(requiredForDatabase = "all", mustApplyTo = "notNullConstraint.column")
     public String getColumnName() {
         return columnName;
     }

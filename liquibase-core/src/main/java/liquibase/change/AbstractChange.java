@@ -10,11 +10,8 @@ import liquibase.serializer.core.string.StringChangeLogSerializer;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.SqlStatement;
 
-import java.beans.BeanInfo;
-import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.*;
 
@@ -76,7 +73,7 @@ public abstract class AbstractChange implements Change {
             }
 
 
-            return new ChangeMetaData(changeClass.name(), changeClass.description(), changeClass.priority(), params);
+            return new ChangeMetaData(changeClass.name(), changeClass.description(), changeClass.priority(), changeClass.appliesTo(), params);
         } catch (Throwable e) {
             throw new UnexpectedLiquibaseException(e);
         }
@@ -102,21 +99,19 @@ public abstract class AbstractChange implements Change {
         ChangeProperty changePropertyAnnotation = property.getReadMethod().getAnnotation(ChangeProperty.class);
 
         String[] requiredForDatabase;
+        String mustApplyTo = null;
         if (changePropertyAnnotation == null) {
             requiredForDatabase = new String[] {"none"};
         } else {
             requiredForDatabase = changePropertyAnnotation.requiredForDatabase();
+            mustApplyTo = changePropertyAnnotation.mustApplyTo();
         }
 
-        return new ChangeParameterMetaData(propertyName, displayName, type, requiredForDatabase);
+        return new ChangeParameterMetaData(propertyName, displayName, type, requiredForDatabase, mustApplyTo);
     }
 
     public ChangeMetaData getChangeMetaData() {
         return changeMetaData;
-    }
-
-    protected void setPriority(int newPriority) {
-        this.changeMetaData.setPriority(newPriority);
     }
 
     @ChangeProperty(includeInMetaData = false)

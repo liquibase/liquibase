@@ -16,12 +16,14 @@ public class ChangeParameterMetaData {
     private String displayName;
     private String type;
     private Set<String> requiredForDatabase;
+    private String mustApplyTo;
 
-    public ChangeParameterMetaData(String parameterName, String displayName, String type, String[] requiredForDatabase) {
+    public ChangeParameterMetaData(String parameterName, String displayName, String type, String[] requiredForDatabase, String mustApplyTo) {
         this.parameterName = parameterName;
         this.displayName = displayName;
         this.type = type;
         this.requiredForDatabase = new HashSet<String>(Arrays.asList(requiredForDatabase));
+        this.mustApplyTo = mustApplyTo;
     }
 
     public String getParameterName() {
@@ -55,5 +57,9 @@ public class ChangeParameterMetaData {
         } catch (Exception e) {
             throw new UnexpectedLiquibaseException(e);
         }
+    }
+
+    public String getMustApplyTo() {
+        return mustApplyTo;
     }
 }

@@ -19,7 +19,7 @@ import java.util.List;
 /**
  * Adds a not-null constraint to an existing column.
  */
-@ChangeClass(name="addNotNullConstraint", description = "Add Not-Null Constraint", priority = ChangeMetaData.PRIORITY_DEFAULT)
+@ChangeClass(name="addNotNullConstraint", description = "Add Not-Null Constraint", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "column")
 public class AddNotNullConstraintChange extends AbstractChange {
     private String schemaName;
     private String tableName;
@@ -27,6 +27,7 @@ public class AddNotNullConstraintChange extends AbstractChange {
     private String defaultNullValue;
     private String columnDataType;
 
+    @ChangeProperty(mustApplyTo ="column.table.schema")
     public String getSchemaName() {
         return schemaName;
     }
@@ -35,7 +36,7 @@ public class AddNotNullConstraintChange extends AbstractChange {
         this.schemaName = StringUtils.trimToNull(schemaName);
     }
 
-    @ChangeProperty(requiredForDatabase = "all")
+    @ChangeProperty(requiredForDatabase = "all", mustApplyTo = "column.table")
     public String getTableName() {
         return tableName;
     }
@@ -44,7 +45,7 @@ public class AddNotNullConstraintChange extends AbstractChange {
         this.tableName = tableName;
     }
 
-    @ChangeProperty(requiredForDatabase = "all")
+    @ChangeProperty(requiredForDatabase = "all", mustApplyTo = "column.table.column")
     public String getColumnName() {
         return columnName;
     }

@@ -16,7 +16,7 @@ import java.util.List;
 /**
  * Removes the default value from an existing column.
  */
-@ChangeClass(name="dropDefaultValue", description="Drop Default Value", priority = ChangeMetaData.PRIORITY_DEFAULT)
+@ChangeClass(name="dropDefaultValue", description="Drop Default Value", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "column")
 public class DropDefaultValueChange extends AbstractChange {
 
     private String schemaName;
@@ -24,6 +24,7 @@ public class DropDefaultValueChange extends AbstractChange {
     private String columnName;
     private String columnDataType;
 
+    @ChangeProperty(mustApplyTo ="column.table.schema")
     public String getSchemaName() {
         return schemaName;
     }
@@ -32,7 +33,7 @@ public class DropDefaultValueChange extends AbstractChange {
         this.schemaName = StringUtils.trimToNull(schemaName);
     }
 
-    @ChangeProperty(requiredForDatabase = "all")
+    @ChangeProperty(requiredForDatabase = "all", mustApplyTo = "column.table")
     public String getTableName() {
         return tableName;
     }
@@ -41,7 +42,7 @@ public class DropDefaultValueChange extends AbstractChange {
         this.tableName = tableName;
     }
 
-    @ChangeProperty(requiredForDatabase = "all")
+    @ChangeProperty(requiredForDatabase = "all", mustApplyTo = "column")
     public String getColumnName() {
         return columnName;
     }

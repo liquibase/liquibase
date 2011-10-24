@@ -16,7 +16,7 @@ import java.util.List;
 /**
  * Removes an existing unique constraint.
  */
-@ChangeClass(name="dropUniqueConstraint", description = "Drop Unique Constraint", priority = ChangeMetaData.PRIORITY_DEFAULT)
+@ChangeClass(name="dropUniqueConstraint", description = "Drop Unique Constraint", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "uniqueConstraint")
 public class DropUniqueConstraintChange extends AbstractChange {
     private String schemaName;
     private String tableName;
@@ -26,6 +26,7 @@ public class DropUniqueConstraintChange extends AbstractChange {
      */
     private String uniqueColumns;
 
+    @ChangeProperty(mustApplyTo ="uniqueConstraint.table.schema")
     public String getSchemaName() {
         return schemaName;
     }
@@ -34,7 +35,7 @@ public class DropUniqueConstraintChange extends AbstractChange {
         this.schemaName = StringUtils.trimToNull(schemaName);
     }
 
-    @ChangeProperty(requiredForDatabase = "all")
+    @ChangeProperty(requiredForDatabase = "all", mustApplyTo = "uniqueConstraint.table")
     public String getTableName() {
         return tableName;
     }
@@ -43,7 +44,7 @@ public class DropUniqueConstraintChange extends AbstractChange {
         this.tableName = tableName;
     }
 
-    @ChangeProperty(requiredForDatabase = "all")
+    @ChangeProperty(requiredForDatabase = "all", mustApplyTo = "uniqueConstraint")
     public String getConstraintName() {
         return constraintName;
     }

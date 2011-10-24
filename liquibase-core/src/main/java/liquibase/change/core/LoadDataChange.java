@@ -18,7 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-@ChangeClass(name="loadData", description = "Load Data", priority = ChangeMetaData.PRIORITY_DEFAULT)
+@ChangeClass(name="loadData", description = "Load Data", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "table")
 public class LoadDataChange extends AbstractChange implements ChangeWithColumns<LoadDataColumnConfig> {
 
     private String schemaName;
@@ -31,6 +31,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
 
     private List<LoadDataColumnConfig> columns = new ArrayList<LoadDataColumnConfig>();
 
+    @ChangeProperty(mustApplyTo ="table.schema")
     public String getSchemaName() {
         return schemaName;
     }
@@ -39,7 +40,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
         this.schemaName = StringUtils.trimToNull(schemaName);
     }
 
-    @ChangeProperty(requiredForDatabase = "all")
+    @ChangeProperty(requiredForDatabase = "all", mustApplyTo = "table")
     public String getTableName() {
         return tableName;
     }

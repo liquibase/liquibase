@@ -14,7 +14,7 @@ import java.math.BigInteger;
 /**
  * Modifies properties of an existing sequence.
  */
-@ChangeClass(name="alterSequence", description = "Alter Sequence", priority = ChangeMetaData.PRIORITY_DEFAULT)
+@ChangeClass(name="alterSequence", description = "Alter Sequence", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "sequence")
 public class AlterSequenceChange extends AbstractChange {
 
     private String schemaName;
@@ -26,6 +26,7 @@ public class AlterSequenceChange extends AbstractChange {
     // StartValue is not allowed since we cannot alter the starting sequence number
 
 
+    @ChangeProperty(mustApplyTo ="sequence.schema")
     public String getSchemaName() {
         return schemaName;
     }
@@ -34,7 +35,7 @@ public class AlterSequenceChange extends AbstractChange {
         this.schemaName = StringUtils.trimToNull(schemaName);
     }
 
-    @ChangeProperty(requiredForDatabase = "all")
+    @ChangeProperty(requiredForDatabase = "all", mustApplyTo = "sequence")
     public String getSequenceName() {
         return sequenceName;
     }

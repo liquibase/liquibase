@@ -12,7 +12,7 @@ import liquibase.util.StringUtils;
 /**
  * Drops an existing index.
  */
-@ChangeClass(name="dropIndex", description = "Drop Index", priority = ChangeMetaData.PRIORITY_DEFAULT)
+@ChangeClass(name="dropIndex", description = "Drop Index", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "index")
 public class DropIndexChange extends AbstractChange {
 
     private String schemaName;
@@ -22,6 +22,7 @@ public class DropIndexChange extends AbstractChange {
     @ChangeProperty(includeInSerialization = false)
     private String associatedWith;
 
+    @ChangeProperty(mustApplyTo ="index.schema")
     public String getSchemaName() {
         return schemaName;
     }
@@ -30,7 +31,7 @@ public class DropIndexChange extends AbstractChange {
         this.schemaName = StringUtils.trimToNull(schemaName);
     }
 
-    @ChangeProperty(requiredForDatabase = "all")
+    @ChangeProperty(requiredForDatabase = "all", mustApplyTo = "index")
     public String getIndexName() {
         return indexName;
     }
@@ -39,7 +40,7 @@ public class DropIndexChange extends AbstractChange {
         this.indexName = indexName;
     }
 
-    @ChangeProperty(requiredForDatabase = "all")
+    @ChangeProperty(requiredForDatabase = "all", mustApplyTo = "index.table")
     public String getTableName() {
         return tableName;
     }
