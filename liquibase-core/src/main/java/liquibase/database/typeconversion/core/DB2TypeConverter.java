@@ -2,6 +2,7 @@ package liquibase.database.typeconversion.core;
 
 import liquibase.database.Database;
 import liquibase.database.core.DB2Database;
+import liquibase.database.structure.type.BlobType;
 import liquibase.database.structure.type.BooleanType;
 import liquibase.database.structure.type.CurrencyType;
 import liquibase.database.structure.type.DataType;
@@ -80,5 +81,10 @@ public class DB2TypeConverter  extends AbstractTypeConverter {
     public DateTimeType getDateTimeType() {
         return new DateTimeType("TIMESTAMP");
     }
+    
+    @Override
+    public BlobType getLongBlobType() {
+        return new BlobType("BLOB(2G)");
+    }    
 
 }

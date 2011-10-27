@@ -4,6 +4,7 @@ import liquibase.database.Database;
 import liquibase.database.core.OracleDatabase;
 import liquibase.database.structure.Column;
 import liquibase.database.structure.type.*;
+import liquibase.exception.UnexpectedLiquibaseException;
 
 import java.sql.Types;
 import java.text.ParseException;
@@ -27,7 +28,10 @@ public class OracleTypeConverter extends AbstractTypeConverter {
 		// Try to define data type by searching of common standard types
 		DataType returnTypeName = super.getDataType(columnTypeString, autoIncrement, dataTypeName, precision, additionalInformation);
 		// If we found CustomType (it means - nothing compatible) then search for oracle types
-		if (returnTypeName instanceof CustomType) {
+        if (dataTypeName.equalsIgnoreCase("BIT")) {
+            returnTypeName = getBooleanType();
+        }
+        else if (returnTypeName instanceof CustomType) {
 			if (columnTypeString.toUpperCase().startsWith("VARCHAR2")) {
 				// Varchar2 type pattern: VARCHAR2(50 BYTE) | VARCHAR2(50 CHAR)
 				returnTypeName = getVarcharType();
@@ -148,7 +152,7 @@ public class OracleTypeConverter extends AbstractTypeConverter {
 
 	@Override
 	public IntType getIntType() {
-		return new IntType("INTEGER");
+		return new IntType("NUMBER(10,0)");
 	}
 
 	@Override
