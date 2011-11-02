@@ -29,6 +29,7 @@ import liquibase.util.StringUtils;
 import java.io.IOException;
 import java.io.Writer;
 import java.math.BigInteger;
+import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -425,9 +426,15 @@ public abstract class AbstractDatabase implements Database {
             boolean hasComments = changeLogTable.getColumn("COMMENTS") != null;
             boolean hasTag = changeLogTable.getColumn("TAG") != null;
             boolean hasLiquibase = changeLogTable.getColumn("LIQUIBASE") != null;
-            boolean liquibaseColumnNotRightSize = changeLogTable.getColumn("LIQUIBASE").getColumnSize() != 20;
+            boolean liquibaseColumnNotRightSize = false;
+            if (!connection.getDatabaseProductName().equals("SQLite")) {
+                liquibaseColumnNotRightSize = changeLogTable.getColumn("LIQUIBASE").getColumnSize() != 20;
+            }
             boolean hasOrderExecuted = changeLogTable.getColumn("ORDEREXECUTED") != null;
-            boolean checksumNotRightSize = changeLogTable.getColumn("MD5SUM").getColumnSize() != 35;
+            boolean checksumNotRightSize = false;
+            if (!connection.getDatabaseProductName().equals("SQLite")) {
+                checksumNotRightSize = changeLogTable.getColumn("MD5SUM").getColumnSize() != 35;
+            }
             boolean hasExecTypeColumn = changeLogTable.getColumn("EXECTYPE") != null;
 
             if (!hasDescription) {
@@ -917,7 +924,16 @@ public abstract class AbstractDatabase implements Database {
                 String author = rs.get("AUTHOR").toString();
                 String id = rs.get("ID").toString();
                 String md5sum = rs.get("MD5SUM") == null ? null : rs.get("MD5SUM").toString();
-                Date dateExecuted = (Date) rs.get("DATEEXECUTED");
+                Object tmpDateExecuted = rs.get("DATEEXECUTED");
+                Date dateExecuted = null;
+                if (tmpDateExecuted instanceof Date) {
+                    dateExecuted = (Date) tmpDateExecuted;
+                } else {
+                    DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                    try {
+                        dateExecuted = df.parse((String)tmpDateExecuted);
+                    } catch (ParseException e) {}
+                }
                 String tag = rs.get("TAG") == null ? null : rs.get("TAG").toString();
                 String execType = rs.get("EXECTYPE") == null ? null : rs.get("EXECTYPE").toString();
                 try {
