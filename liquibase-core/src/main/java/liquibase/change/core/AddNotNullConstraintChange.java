@@ -9,6 +9,8 @@ import liquibase.database.core.DB2Database;
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.database.core.SQLiteDatabase.AlterTableVisitor;
 import liquibase.database.structure.Index;
+import liquibase.database.structure.type.BooleanType;
+import liquibase.database.typeconversion.TypeConverterFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.ReorganizeTableStatement;
 import liquibase.statement.core.SetNullableStatement;
@@ -84,8 +86,20 @@ public class AddNotNullConstraintChange extends AbstractChange {
     	String schemaName = getSchemaName() == null?database.getDefaultSchemaName():getSchemaName();
     	
         if (defaultNullValue != null) {
+            String defaultValue = defaultNullValue;
+
+            if (getColumnDataType().equalsIgnoreCase("BOOLEAN")) {
+                BooleanType booleanType = TypeConverterFactory.getInstance()
+                        .findTypeConverter(database).getBooleanType();
+                if (defaultNullValue.equalsIgnoreCase("TRUE")) {
+                    defaultValue = booleanType.getTrueBooleanValue();
+                } else if (defaultNullValue.equalsIgnoreCase("FALSE")) {
+                    defaultValue = booleanType.getFalseBooleanValue();
+                }
+            }
+
             statements.add(new UpdateStatement(schemaName, getTableName())
-                    .addNewColumnValue(getColumnName(), getDefaultNullValue())
+                    .addNewColumnValue(getColumnName(), defaultValue)
                     .setWhereClause(getColumnName() + " IS NULL"));
         }
         
