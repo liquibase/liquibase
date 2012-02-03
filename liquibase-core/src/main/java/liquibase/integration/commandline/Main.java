@@ -91,23 +91,23 @@ public class Main {
         try {
             String shouldRunProperty = System.getProperty(Liquibase.SHOULD_RUN_SYSTEM_PROPERTY);
             if (shouldRunProperty != null && !Boolean.valueOf(shouldRunProperty)) {
-                System.out.println("Liquibase did not run because '" + Liquibase.SHOULD_RUN_SYSTEM_PROPERTY + "' system property was set to false");
+                System.err.println("Liquibase did not run because '" + Liquibase.SHOULD_RUN_SYSTEM_PROPERTY + "' system property was set to false");
                 return;
             }
 
             Main main = new Main();
             if (args.length == 1 && "--help".equals(args[0])) {
-                main.printHelp(System.out);
+                main.printHelp(System.err);
                 return;
             } else if (args.length == 1 && "--version".equals(args[0])) {
-                System.out.println("Liquibase Version: " + LiquibaseUtil.getBuildVersion() + StreamUtil.getLineSeparator());
+                System.err.println("Liquibase Version: " + LiquibaseUtil.getBuildVersion() + StreamUtil.getLineSeparator());
                 return;
             }
 
             try {
                 main.parseOptions(args);
             } catch (CommandLineParsingException e) {
-                main.printHelp(Arrays.asList(e.getMessage()), System.out);
+                main.printHelp(Arrays.asList(e.getMessage()), System.err);
                 System.exit(-2);
             }
 
@@ -123,7 +123,7 @@ public class Main {
 
             List<String> setupMessages = main.checkSetup();
             if (setupMessages.size() > 0) {
-                main.printHelp(setupMessages, System.out);
+                main.printHelp(setupMessages, System.err);
                 return;
             }
 
@@ -141,25 +141,25 @@ public class Main {
                 }
 
                 if (e.getCause() instanceof ValidationFailedException) {
-                    ((ValidationFailedException) e.getCause()).printDescriptiveError(System.out);
+                    ((ValidationFailedException) e.getCause()).printDescriptiveError(System.err);
                 } else {
-                    System.out.println("Liquibase Update Failed: " + message);
+                    System.err.println("Liquibase Update Failed: " + message);
                     LogFactory.getLogger().severe(message, e);
-                    System.out.println(generateLogLevelWarningMessage());
+                    System.err.println(generateLogLevelWarningMessage());
                 }
                 System.exit(-1);
             }
 
             if ("update".equals(main.command)) {
-                System.out.println("Liquibase Update Successful");
+                System.err.println("Liquibase Update Successful");
             } else if (main.command.startsWith("rollback") && !main.command.endsWith("SQL")) {
-                System.out.println("Liquibase Rollback Successful");
+                System.err.println("Liquibase Rollback Successful");
             } else if (!main.command.endsWith("SQL")) {
-                System.out.println("Liquibase '"+main.command+"' Successful");
+                System.err.println("Liquibase '"+main.command+"' Successful");
             }
         } catch (Throwable e) {
             String message = "Unexpected error running Liquibase: " + e.getMessage();
-            System.out.println(message);
+            System.err.println(message);
             try {
                 LogFactory.getLogger().severe(message, e);
             } catch (Exception e1) {
@@ -685,7 +685,7 @@ public class Main {
 
     protected void doMigration() throws Exception {
         if ("help".equalsIgnoreCase(command)) {
-            printHelp(System.out);
+            printHelp(System.err);
             return;
         }
 
@@ -728,19 +728,19 @@ public class Main {
             }
 
             if ("listLocks".equalsIgnoreCase(command)) {
-                liquibase.reportLocks(System.out);
+                liquibase.reportLocks(System.err);
                 return;
             } else if ("releaseLocks".equalsIgnoreCase(command)) {
                 LockService.getInstance(database).forceReleaseLock();
-                System.out.println("Successfully released all database change log locks for " + liquibase.getDatabase().getConnection().getConnectionUserName() + "@" + liquibase.getDatabase().getConnection().getURL());
+                System.err.println("Successfully released all database change log locks for " + liquibase.getDatabase().getConnection().getConnectionUserName() + "@" + liquibase.getDatabase().getConnection().getURL());
                 return;
             } else if ("tag".equalsIgnoreCase(command)) {
                 liquibase.tag(commandParams.iterator().next());
-                System.out.println("Successfully tagged " + liquibase.getDatabase().getConnection().getConnectionUserName() + "@" + liquibase.getDatabase().getConnection().getURL());
+                System.err.println("Successfully tagged " + liquibase.getDatabase().getConnection().getConnectionUserName() + "@" + liquibase.getDatabase().getConnection().getURL());
                 return;
             } else if ("dropAll".equals(command)) {
                 liquibase.dropAll();
-                System.out.println("All objects dropped from " + liquibase.getDatabase().getConnection().getConnectionUserName() + "@" + liquibase.getDatabase().getConnection().getURL());
+                System.err.println("All objects dropped from " + liquibase.getDatabase().getConnection().getConnectionUserName() + "@" + liquibase.getDatabase().getConnection().getURL());
                 return;
             } else if ("status".equalsIgnoreCase(command)) {
                 boolean runVerbose = false;
@@ -754,10 +754,10 @@ public class Main {
                 try {
                     liquibase.validate();
                 } catch (ValidationFailedException e) {
-                    e.printDescriptiveError(System.out);
+                    e.printDescriptiveError(System.err);
                     return;
                 }
-                System.out.println("No validation errors found");
+                System.err.println("No validation errors found");
                 return;
             } else if ("clearCheckSums".equalsIgnoreCase(command)) {
                 liquibase.clearCheckSums();
@@ -918,7 +918,7 @@ public class Main {
     }
 
     private Writer getOutputWriter() {
-        return new OutputStreamWriter(System.out);
+        return new OutputStreamWriter(System.err);
     }
 
     public boolean isWindows() {
