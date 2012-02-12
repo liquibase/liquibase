@@ -35,6 +35,11 @@ public class DerbyTypeConverter  extends AbstractTypeConverter {
     }
 
     @Override
+    public BooleanType getBooleanType() {
+        return new BooleanType.NumericBooleanType("SMALLINT");
+    }
+
+    @Override
     public DateTimeType getDateTimeType() {
         return new DateTimeType("TIMESTAMP");
     }
