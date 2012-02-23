@@ -108,7 +108,12 @@ public class MySQLDatabase extends AbstractDatabase {
     @Override
     protected String getDefaultDatabaseSchemaName() throws DatabaseException {
 //        return super.getDefaultDatabaseSchemaName().replaceFirst("\\@.*","");
-            return getConnection().getCatalog();
+        String catalog = getConnection().getCatalog();
+        // catalog is empty if jdbc url doesn't contain a database
+        if (catalog == null || catalog.trim().length() == 0) {
+            return getDefaultSchemaName();
+        }
+        return catalog;
     }
 
     @Override
