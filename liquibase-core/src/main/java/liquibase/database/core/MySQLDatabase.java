@@ -1,12 +1,12 @@
 package liquibase.database.core;
 
-import java.math.BigInteger;
-
 import liquibase.database.AbstractDatabase;
 import liquibase.database.DatabaseConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.ExecutorService;
 import liquibase.statement.core.RawSqlStatement;
+
+import java.math.BigInteger;
 
 /**
  * Encapsulates MySQL database support.
@@ -108,7 +108,12 @@ public class MySQLDatabase extends AbstractDatabase {
     @Override
     protected String getDefaultDatabaseSchemaName() throws DatabaseException {
 //        return super.getDefaultDatabaseSchemaName().replaceFirst("\\@.*","");
-            return getConnection().getCatalog();
+        String catalog = getConnection().getCatalog();
+        // catalog is empty if jdbc url doesn't contain a database
+        if (catalog == null || catalog.trim().length() == 0) {
+            return getDefaultSchemaName();
+        }
+        return catalog;
     }
 
     @Override
