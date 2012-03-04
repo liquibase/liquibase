@@ -3,6 +3,8 @@ package liquibase.logging.core;
 import liquibase.logging.LogLevel;
 import liquibase.util.StringUtils;
 
+import java.io.File;
+import java.io.IOException;
 import java.io.PrintStream;
 import java.text.DateFormat;
 import java.util.Date;
@@ -31,6 +33,16 @@ public class DefaultLogger extends AbstractLogger {
 
     public void setLogLevel(String logLevel, String logFile) {
         setLogLevel(logLevel);
+        File log = new File(logFile);
+        if (log.exists()) {
+            log.delete();
+        }
+        try {
+            log.createNewFile();
+            err = new PrintStream(log);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public void severe(String message) {
