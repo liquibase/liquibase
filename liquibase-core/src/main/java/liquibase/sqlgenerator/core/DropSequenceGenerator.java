@@ -23,7 +23,7 @@ public class DropSequenceGenerator extends AbstractSqlGenerator<DropSequenceStat
     }
 
     public Sql[] generateSql(DropSequenceStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-        String sql = "DROP SEQUENCE " + database.escapeSequenceName(statement.getSchemaName(), statement.getSequenceName());
+        String sql = "DROP SEQUENCE " + database.escapeSequenceName(statement.getCatalogName(), statement.getSchemaName(), statement.getSequenceName());
         if (database instanceof PostgresDatabase) {
             sql += " CASCADE";
         }

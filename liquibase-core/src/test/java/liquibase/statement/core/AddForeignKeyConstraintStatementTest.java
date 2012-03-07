@@ -4,7 +4,7 @@ public class AddForeignKeyConstraintStatementTest extends AbstractSqStatementTes
 
     @Override
     protected AddForeignKeyConstraintStatement createStatementUnderTest() {
-        return new AddForeignKeyConstraintStatement(null, null, null, null, null, null, null);
+        return new AddForeignKeyConstraintStatement(null, null, null, null, null, null, null, null, null);
     }
 
 }

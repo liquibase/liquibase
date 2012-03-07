@@ -19,6 +19,6 @@ public class ClearDatabaseChangeLogTableGenerator extends AbstractSqlGenerator<C
         if (schemaName == null) {
             schemaName = database.getLiquibaseSchemaName();
         }
-        return new Sql[] { new UnparsedSql("DELETE FROM " + database.escapeTableName(schemaName, database.getDatabaseChangeLogTableName())) };
+        return new Sql[] { new UnparsedSql("DELETE FROM " + database.escapeTableName(database.getLiquibaseCatalogName(), schemaName, database.getDatabaseChangeLogTableName())) };
     }
 }

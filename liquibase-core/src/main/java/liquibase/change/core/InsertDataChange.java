@@ -1,9 +1,6 @@
 package liquibase.change.core;
 
-import liquibase.change.AbstractChange;
-import liquibase.change.ChangeMetaData;
-import liquibase.change.ChangeWithColumns;
-import liquibase.change.ColumnConfig;
+import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.InsertStatement;
@@ -15,25 +12,37 @@ import java.util.List;
 /**
  * Inserts data into an existing table.
  */
+@ChangeClass(name="insert", description = "Insert Row", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "table")
 public class InsertDataChange extends AbstractChange implements ChangeWithColumns<ColumnConfig> {
 
+    private String catalogName;
     private String schemaName;
     private String tableName;
     private List<ColumnConfig> columns;
 
     public InsertDataChange() {
-        super("insert", "Insert Row", ChangeMetaData.PRIORITY_DEFAULT);
         columns = new ArrayList<ColumnConfig>();
     }
 
+    @ChangeProperty(mustApplyTo ="table.catalog")
+    public String getCatalogName() {
+        return catalogName;
+    }
+
+    public void setCatalogName(String catalogName) {
+        this.catalogName = catalogName;
+    }
+
+    @ChangeProperty(mustApplyTo ="table.schema")
     public String getSchemaName() {
         return schemaName;
     }
 
     public void setSchemaName(String schemaName) {
-        this.schemaName = StringUtils.trimToNull(schemaName);
+        this.schemaName = schemaName;
     }
 
+    @ChangeProperty(requiredForDatabase = "all", mustApplyTo = "table")
     public String getTableName() {
         return tableName;
     }
@@ -42,6 +51,7 @@ public class InsertDataChange extends AbstractChange implements ChangeWithColumn
         this.tableName = tableName;
     }
 
+    @ChangeProperty(requiredForDatabase = "all", mustApplyTo = "table.column")
     public List<ColumnConfig> getColumns() {
         return columns;
     }
@@ -60,7 +70,7 @@ public class InsertDataChange extends AbstractChange implements ChangeWithColumn
 
     public SqlStatement[] generateStatements(Database database) {
 
-        InsertStatement statement = new InsertStatement(getSchemaName() == null?database.getDefaultSchemaName():getSchemaName(), getTableName());
+        InsertStatement statement = new InsertStatement(getCatalogName(), getSchemaName(), getTableName());
 
         for (ColumnConfig column : columns) {
             

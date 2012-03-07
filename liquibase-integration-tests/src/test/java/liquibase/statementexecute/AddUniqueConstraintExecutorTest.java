@@ -2,7 +2,7 @@ package liquibase.statementexecute;
 
 import liquibase.database.*;
 import liquibase.database.core.*;
-import liquibase.database.typeconversion.TypeConverterFactory;
+import liquibase.datatype.DataTypeFactory;
 import liquibase.test.DatabaseTestContext;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.CreateTableStatement;
@@ -24,17 +24,17 @@ public class AddUniqueConstraintExecutorTest extends AbstractExecuteTest {
     @Override
     protected List<? extends SqlStatement> setupStatements(Database database) {
         List<CreateTableStatement> statements = new ArrayList<CreateTableStatement>();
-        CreateTableStatement table = new CreateTableStatement(null, TABLE_NAME);
+        CreateTableStatement table = new CreateTableStatement(null, null, TABLE_NAME);
         table
-                .addColumn("id", TypeConverterFactory.getInstance().findTypeConverter(database).getDataType("int", false), null, new NotNullConstraint())
-                .addColumn(COLUMN_NAME, TypeConverterFactory.getInstance().findTypeConverter(database).getDataType("int", false), null, new NotNullConstraint());
+                .addColumn("id", DataTypeFactory.getInstance().fromDescription("int"), null, new NotNullConstraint())
+                .addColumn(COLUMN_NAME, DataTypeFactory.getInstance().fromDescription("int"), null, new NotNullConstraint());
         statements.add(table);
 
         if (database.supportsSchemas()) {
-            table = new CreateTableStatement(DatabaseTestContext.ALT_SCHEMA, TABLE_NAME);
+            table = new CreateTableStatement(DatabaseTestContext.ALT_CATALOG, DatabaseTestContext.ALT_SCHEMA, TABLE_NAME);
             table
-                    .addColumn("id", TypeConverterFactory.getInstance().findTypeConverter(database).getDataType("int", false), null, new NotNullConstraint())
-                    .addColumn(COLUMN_NAME, TypeConverterFactory.getInstance().findTypeConverter(database).getDataType("int", false), null, new NotNullConstraint());
+                    .addColumn("id", DataTypeFactory.getInstance().fromDescription("int"), null, new NotNullConstraint())
+                    .addColumn(COLUMN_NAME, DataTypeFactory.getInstance().fromDescription("int"), null, new NotNullConstraint());
             statements.add(table);
         }
         return statements;
@@ -93,7 +93,7 @@ public class AddUniqueConstraintExecutorTest extends AbstractExecuteTest {
     @SuppressWarnings("unchecked")
     @Test
     public void execute_noSchema() throws Exception {
-        this.statementUnderTest = new AddUniqueConstraintStatement(null, TABLE_NAME, COLUMN_NAME, CONSTRAINT_NAME);
+        this.statementUnderTest = new AddUniqueConstraintStatement(null, null, TABLE_NAME, COLUMN_NAME, CONSTRAINT_NAME);
         assertCorrect("alter table [adduqtest] add constraint [uq_test] unique ([coltomakeuq])", SybaseDatabase.class);
         assertCorrect("alter table [dbo].[adduqtest] add constraint [uq_test] unique ([coltomakeuq])", MSSQLDatabase.class);
         assertCorrect("alter table [adduqtest] add constraint [uq_test] unique ([coltomakeuq])", SybaseASADatabase.class);
@@ -108,7 +108,7 @@ public class AddUniqueConstraintExecutorTest extends AbstractExecuteTest {
     @SuppressWarnings("unchecked")
     @Test
     public void execute_noConstraintName() throws Exception {
-        this.statementUnderTest = new AddUniqueConstraintStatement(null, TABLE_NAME, COLUMN_NAME, null);
+        this.statementUnderTest = new AddUniqueConstraintStatement(null, null, TABLE_NAME, COLUMN_NAME, null);
 		assertCorrect("alter table `adduqtest` add unique (`coltomakeuq`)", MySQLDatabase.class);
 		assertCorrect("alter table adduqtest add constraint unique (coltomakeuq)", InformixDatabase.class);
 		assertCorrect("alter table adduqtest add unique (coltomakeuq)", OracleDatabase.class);
@@ -123,7 +123,7 @@ public class AddUniqueConstraintExecutorTest extends AbstractExecuteTest {
     @SuppressWarnings("unchecked")
     @Test
     public void execute_withSchema() throws Exception {
-        statementUnderTest = new AddUniqueConstraintStatement(DatabaseTestContext.ALT_SCHEMA, TABLE_NAME, COLUMN_NAME, CONSTRAINT_NAME);
+        statementUnderTest = new AddUniqueConstraintStatement(DatabaseTestContext.ALT_CATALOG, DatabaseTestContext.ALT_SCHEMA, TABLE_NAME, COLUMN_NAME, CONSTRAINT_NAME);
 
         // FIXME Syntax for mysql is correct, but exception "Table 'liquibaseb.adduqtest' doesn't exist" is thrown
 // 		assertCorrect("alter table `liquibaseb`.`adduqtest` add constraint `uq_test` unique (`coltomakeuq`)", MySQLDatabase.class);
@@ -141,7 +141,7 @@ public class AddUniqueConstraintExecutorTest extends AbstractExecuteTest {
     @SuppressWarnings("unchecked")
 	@Test
 	public void execute_withTablespace() throws Exception {
-		statementUnderTest = new AddUniqueConstraintStatement(null, TABLE_NAME, COLUMN_NAME, CONSTRAINT_NAME).setTablespace(TABLESPACE_NAME);
+		statementUnderTest = new AddUniqueConstraintStatement(null, null, TABLE_NAME, COLUMN_NAME, CONSTRAINT_NAME).setTablespace(TABLESPACE_NAME);
         assertCorrect("alter table [adduqtest] add constraint [uq_test] unique ([coltomakeuq])", SybaseASADatabase.class, SybaseDatabase.class);
         assertCorrect("alter table [dbo].[adduqtest] add constraint [uq_test] unique ([coltomakeuq])", MSSQLDatabase.class);
         assertCorrect("alter table adduqtest add constraint unique (coltomakeuq) constraint uq_test", InformixDatabase.class);
@@ -154,7 +154,7 @@ public class AddUniqueConstraintExecutorTest extends AbstractExecuteTest {
     @SuppressWarnings("unchecked")
 	@Test
 	public void execute_withDefferedAndDisabled() throws Exception {
-		statementUnderTest = new AddUniqueConstraintStatement(null, TABLE_NAME, COLUMN_NAME, CONSTRAINT_NAME).setDeferrable(true).setInitiallyDeferred(true).setDisabled(true);
+		statementUnderTest = new AddUniqueConstraintStatement(null, null, TABLE_NAME, COLUMN_NAME, CONSTRAINT_NAME).setDeferrable(true).setInitiallyDeferred(true).setDisabled(true);
         assertCorrect("alter table [adduqtest] add constraint [uq_test] unique ([coltomakeuq])", SybaseDatabase.class);
         assertCorrect("alter table [dbo].[adduqtest] add constraint [uq_test] unique ([coltomakeuq])", MSSQLDatabase.class);
         assertCorrect("alter table [adduqtest] add constraint [uq_test] unique ([coltomakeuq])", SybaseASADatabase.class);

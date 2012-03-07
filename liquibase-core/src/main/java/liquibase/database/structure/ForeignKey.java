@@ -20,18 +20,29 @@ public class ForeignKey implements DatabaseObject, Comparable<ForeignKey> {
 
     private ForeignKeyConstraintType updateRule;
     private ForeignKeyConstraintType deleteRule;
+    
+    private Index backingIndex;
 
     public DatabaseObject[] getContainingObjects() {
         return new DatabaseObject[] {
                 new liquibase.database.structure.Column()
                         .setName(getPrimaryKeyColumns())
-                        .setTable(getPrimaryKeyTable()),
+                        .setRelation(getPrimaryKeyTable()),
                 new liquibase.database.structure.Column()
                         .setName(getForeignKeyColumns())
-                        .setTable(getForeignKeyTable())
+                        .setRelation(getForeignKeyTable())
 
         };
     }
+
+    public Schema getSchema() {
+        if (foreignKeyTable == null) {
+            return null;
+        }
+
+        return foreignKeyTable.getSchema();
+    }
+
 
     public Table getPrimaryKeyTable() {
         return primaryKeyTable;
@@ -217,5 +228,13 @@ public class ForeignKey implements DatabaseObject, Comparable<ForeignKey> {
             }
         }
         return sb.toString();
+    }
+
+    public Index getBackingIndex() {
+        return backingIndex;
+    }
+
+    public void setBackingIndex(Index backingIndex) {
+        this.backingIndex = backingIndex;
     }
 }

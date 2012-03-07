@@ -1,8 +1,6 @@
 package liquibase.change.core;
 
-import liquibase.change.AbstractChange;
-import liquibase.change.Change;
-import liquibase.change.ChangeMetaData;
+import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.database.core.DB2Database;
 import liquibase.statement.SqlStatement;
@@ -16,25 +14,37 @@ import java.util.List;
 /**
  * Renames an existing table.
  */
+@ChangeClass(name="renameTable", description = "Rename Table", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "table")
 public class RenameTableChange extends AbstractChange {
 
+    private String catalogName;
     private String schemaName;
     private String oldTableName;
 
     private String newTableName;
 
     public RenameTableChange() {
-        super("renameTable", "Rename Table", ChangeMetaData.PRIORITY_DEFAULT);
     }
 
+    @ChangeProperty(mustApplyTo ="table.catalog")
+    public String getCatalogName() {
+        return catalogName;
+    }
+
+    public void setCatalogName(String catalogName) {
+        this.catalogName = catalogName;
+    }
+
+    @ChangeProperty(mustApplyTo ="table.schema")
     public String getSchemaName() {
         return schemaName;
     }
 
     public void setSchemaName(String schemaName) {
-        this.schemaName = StringUtils.trimToNull(schemaName);
+        this.schemaName = schemaName;
     }
 
+    @ChangeProperty(requiredForDatabase = "all", mustApplyTo = "table")
     public String getOldTableName() {
         return oldTableName;
     }
@@ -43,6 +53,7 @@ public class RenameTableChange extends AbstractChange {
         this.oldTableName = oldTableName;
     }
 
+    @ChangeProperty(requiredForDatabase = "all")
     public String getNewTableName() {
         return newTableName;
     }
@@ -53,10 +64,9 @@ public class RenameTableChange extends AbstractChange {
 
     public SqlStatement[] generateStatements(Database database) {
         List<SqlStatement> statements = new ArrayList<SqlStatement>();
-        String schemaName = getSchemaName() == null?database.getDefaultSchemaName():getSchemaName();
-        statements.add(new RenameTableStatement(schemaName, getOldTableName(), getNewTableName()));
+        statements.add(new RenameTableStatement(getCatalogName(), getSchemaName(), getOldTableName(), getNewTableName()));
         if (database instanceof DB2Database) {
-            statements.add(new ReorganizeTableStatement(schemaName, getNewTableName()));
+            statements.add(new ReorganizeTableStatement(getCatalogName(), getSchemaName(), getNewTableName()));
         }
 
         return statements.toArray(new SqlStatement[statements.size()]);

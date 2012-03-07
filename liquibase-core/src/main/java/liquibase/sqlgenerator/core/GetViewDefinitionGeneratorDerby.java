@@ -22,12 +22,8 @@ public class GetViewDefinitionGeneratorDerby extends GetViewDefinitionGenerator 
 
     @Override
     public Sql[] generateSql(GetViewDefinitionStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-        try {
             return new Sql[] {
-                    new UnparsedSql("select V.VIEWDEFINITION from SYS.SYSVIEWS V, SYS.SYSTABLES T, SYS.SYSSCHEMAS S WHERE  V.TABLEID=T.TABLEID AND T.SCHEMAID=S.SCHEMAID AND T.TABLETYPE='V' AND T.TABLENAME='" + statement.getViewName() + "' AND S.SCHEMANAME='"+database.convertRequestedSchemaToSchema(statement.getSchemaName())+"'")
+                    new UnparsedSql("select V.VIEWDEFINITION from SYS.SYSVIEWS V, SYS.SYSTABLES T, SYS.SYSSCHEMAS S WHERE  V.TABLEID=T.TABLEID AND T.SCHEMAID=S.SCHEMAID AND T.TABLETYPE='V' AND T.TABLENAME='" + statement.getViewName() + "' AND S.SCHEMANAME='"+database.correctSchemaName(statement.getSchemaName())+"'")
             };
-        } catch (DatabaseException e) {
-            throw new UnexpectedLiquibaseException(e);
-        }
     }
 }

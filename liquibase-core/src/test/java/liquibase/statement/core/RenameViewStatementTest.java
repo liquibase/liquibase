@@ -4,7 +4,7 @@ public class RenameViewStatementTest extends AbstractSqStatementTest<RenameViewS
 
     @Override
     protected RenameViewStatement createStatementUnderTest() {
-        return new RenameViewStatement(null, null, null);
+        return new RenameViewStatement(null, null, null, null);
     }
 
 

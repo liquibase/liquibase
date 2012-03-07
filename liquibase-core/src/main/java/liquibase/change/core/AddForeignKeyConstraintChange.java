@@ -1,8 +1,6 @@
 package liquibase.change.core;
 
-import liquibase.change.AbstractChange;
-import liquibase.change.Change;
-import liquibase.change.ChangeMetaData;
+import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.database.structure.ForeignKeyConstraintType;
 import liquibase.exception.UnexpectedLiquibaseException;
@@ -12,11 +10,15 @@ import liquibase.statement.core.AddForeignKeyConstraintStatement;
 /**
  * Adds a foreign key constraint to an existing column.
  */
+ @ChangeClass(name="addForeignKeyConstraint", description = "Add Foreign Key Constraint", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "column")
 public class AddForeignKeyConstraintChange extends AbstractChange {
+    
+    private String baseTableCatalogName;
     private String baseTableSchemaName;
     private String baseTableName;
     private String baseColumnNames;
 
+    private String referencedTableCatalogName;
     private String referencedTableSchemaName;
     private String referencedTableName;
     private String referencedColumnNames;
@@ -33,10 +35,16 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
 	// If FK referenced to such unique column this option should be set to false
 	private Boolean referencesUniqueColumn;
 
-    public AddForeignKeyConstraintChange() {
-        super("addForeignKeyConstraint", "Add Foreign Key Constraint", ChangeMetaData.PRIORITY_DEFAULT);
+    @ChangeProperty(mustApplyTo ="column.table.catalog")
+    public String getBaseTableCatalogName() {
+        return baseTableCatalogName;
     }
 
+    public void setBaseTableCatalogName(String baseTableCatalogName) {
+        this.baseTableCatalogName = baseTableCatalogName;
+    }
+
+    @ChangeProperty(mustApplyTo ="column.table.schema")
     public String getBaseTableSchemaName() {
         return baseTableSchemaName;
     }
@@ -45,6 +53,7 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
         this.baseTableSchemaName = baseTableSchemaName;
     }
 
+    @ChangeProperty(requiredForDatabase = "all", mustApplyTo = "column.table")
     public String getBaseTableName() {
         return baseTableName;
     }
@@ -53,12 +62,21 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
         this.baseTableName = baseTableName;
     }
 
+    @ChangeProperty(requiredForDatabase = "all", mustApplyTo = "column")
     public String getBaseColumnNames() {
         return baseColumnNames;
     }
 
     public void setBaseColumnNames(String baseColumnNames) {
         this.baseColumnNames = baseColumnNames;
+    }
+
+    public String getReferencedTableCatalogName() {
+        return referencedTableCatalogName;
+    }
+
+    public void setReferencedTableCatalogName(String referencedTableCatalogName) {
+        this.referencedTableCatalogName = referencedTableCatalogName;
     }
 
     public String getReferencedTableSchemaName() {
@@ -69,6 +87,7 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
         this.referencedTableSchemaName = referencedTableSchemaName;
     }
 
+    @ChangeProperty(requiredForDatabase = "all")
     public String getReferencedTableName() {
         return referencedTableName;
     }
@@ -77,6 +96,7 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
         this.referencedTableName = referencedTableName;
     }
 
+    @ChangeProperty(requiredForDatabase = "all")
     public String getReferencedColumnNames() {
         return referencedColumnNames;
     }
@@ -85,6 +105,7 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
         this.referencedColumnNames = referencedColumnNames;
     }
 
+    @ChangeProperty(requiredForDatabase = "all")
     public String getConstraintName() {
         return constraintName;
     }
@@ -193,10 +214,12 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
 
         return new SqlStatement[]{
                 new AddForeignKeyConstraintStatement(getConstraintName(),
-                        getBaseTableSchemaName() == null ? database.getDefaultSchemaName() : getBaseTableSchemaName(),
+                        getBaseTableCatalogName(),
+                        getBaseTableSchemaName(),
                         getBaseTableName(),
                         getBaseColumnNames(),
-                        getReferencedTableSchemaName() == null ? database.getDefaultSchemaName() : getReferencedTableSchemaName(),
+                        getReferencedTableCatalogName(),
+                        getReferencedTableSchemaName(),
                         getReferencedTableName(),
                         getReferencedColumnNames())
                         .setDeferrable(deferrable)

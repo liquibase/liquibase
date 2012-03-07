@@ -32,14 +32,14 @@ public class AddUniqueConstraintGeneratorInformix extends AddUniqueConstraintGen
 		if (statement.getConstraintName() == null) {
 			return new Sql[] {
 				new UnparsedSql(String.format(sqlNoContraintNameTemplate 
-						, database.escapeTableName(statement.getSchemaName(), statement.getTableName())
+						, database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName())
 						, database.escapeColumnNameList(statement.getColumnNames())
 				))
 			};
 		} else {
 			return new Sql[] {
 				new UnparsedSql(String.format(sqlTemplate
-						, database.escapeTableName(statement.getSchemaName(), statement.getTableName())
+						, database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName())
 						, database.escapeColumnNameList(statement.getColumnNames())
 						, database.escapeConstraintName(statement.getConstraintName())
 				))

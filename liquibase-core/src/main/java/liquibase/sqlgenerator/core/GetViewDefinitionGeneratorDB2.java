@@ -23,12 +23,8 @@ public class GetViewDefinitionGeneratorDB2 extends GetViewDefinitionGenerator {
 
     @Override
     public Sql[] generateSql(GetViewDefinitionStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-        try {
             return new Sql[] {
-                    new UnparsedSql("select view_definition from SYSIBM.VIEWS where TABLE_NAME='" + statement.getViewName() + "' and TABLE_SCHEMA='" + database.convertRequestedSchemaToSchema(statement.getSchemaName()) + "'")
+                    new UnparsedSql("select view_definition from SYSIBM.VIEWS where TABLE_NAME='" + statement.getViewName() + "' and TABLE_SCHEMA='" + database.correctSchemaName(statement.getSchemaName()) + "'")
             };
-        } catch (DatabaseException e) {
-            throw new UnexpectedLiquibaseException(e);
-        }
     }
 }

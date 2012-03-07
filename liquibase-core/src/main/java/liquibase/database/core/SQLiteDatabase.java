@@ -5,9 +5,8 @@ import liquibase.change.core.CreateTableChange;
 import liquibase.database.AbstractDatabase;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
-import liquibase.database.structure.Column;
-import liquibase.database.structure.Index;
-import liquibase.database.structure.Table;
+import liquibase.database.structure.*;
+import liquibase.diff.DiffControl;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnsupportedChangeException;
 import liquibase.snapshot.DatabaseSnapshot;
@@ -68,7 +67,7 @@ public class SQLiteDatabase extends AbstractDatabase {
     }
 
     @Override
-    public String getViewDefinition(String schemaName, String viewName) throws DatabaseException {
+    public String getViewDefinition(Schema schema, String viewName) throws DatabaseException {
         return null;
     }
 
@@ -107,13 +106,13 @@ public class SQLiteDatabase extends AbstractDatabase {
     
     public static List<SqlStatement> getAlterTableStatements(
             AlterTableVisitor alterTableVisitor,
-            Database database, String schemaName, String tableName)
+            Database database, String catalogName, String schemaName, String tableName)
             throws UnsupportedChangeException, DatabaseException {
 
         List<SqlStatement> statements = new ArrayList<SqlStatement>();
 
-        DatabaseSnapshot snapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(database, null, null);
-        Table table = snapshot.getTable(tableName);
+        DatabaseSnapshot snapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(database,new DiffControl(null, null));
+        Table table = snapshot.getDatabaseObject(new Schema(new Catalog(null), schemaName), tableName, Table.class);
 
         List<ColumnConfig> createColumns = new Vector<ColumnConfig>();
         List<ColumnConfig> copyColumns = new Vector<ColumnConfig>();
@@ -141,7 +140,7 @@ public class SQLiteDatabase extends AbstractDatabase {
         }
 
         List<Index> newIndices = new Vector<Index>();
-        for (Index index : snapshot.getIndexes()) {
+        for (Index index : snapshot.getDatabaseObjects(new Schema(new Catalog(null), schemaName), Index.class)) {
             if (index.getTable().getName().equalsIgnoreCase(tableName)) {
                 if (alterTableVisitor.createThisIndex(index)) {
                     newIndices.add(index);
@@ -151,7 +150,7 @@ public class SQLiteDatabase extends AbstractDatabase {
 
         // rename table
         String temp_table_name = tableName + "_temporary";
-        statements.add(new RenameTableStatement(schemaName, tableName, temp_table_name));
+        statements.add(new RenameTableStatement(catalogName, schemaName, tableName, temp_table_name));
         // create temporary table
         CreateTableChange ct_change_tmp = new CreateTableChange();
         ct_change_tmp.setSchemaName(schemaName);
@@ -163,14 +162,14 @@ public class SQLiteDatabase extends AbstractDatabase {
         // copy rows to temporary table
         statements.add(new CopyRowsStatement(temp_table_name, tableName, copyColumns));
         // delete original table
-        statements.add(new DropTableStatement(schemaName, temp_table_name, false));
+        statements.add(new DropTableStatement(catalogName, schemaName, temp_table_name, false));
         // validate indices
-        statements.add(new ReindexStatement(schemaName, tableName));
+        statements.add(new ReindexStatement(catalogName, schemaName, tableName));
         // add remaining indices
         for (Index index_config : newIndices) {
             statements.add(new CreateIndexStatement(
                     index_config.getName(),
-                    schemaName, tableName,
+                    catalogName, schemaName, tableName,
                     index_config.isUnique(),
 		            index_config.getAssociatedWithAsString(),
                     index_config.getColumns().

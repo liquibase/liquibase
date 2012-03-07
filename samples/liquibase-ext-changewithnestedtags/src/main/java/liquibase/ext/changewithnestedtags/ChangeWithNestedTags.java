@@ -1,19 +1,17 @@
 package liquibase.ext.changewithnestedtags;
 
 import liquibase.change.AbstractChange;
-import liquibase.database.typeconversion.TypeConverterFactory;
+import liquibase.change.ChangeClass;
+import liquibase.datatype.DataTypeFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.CreateTableStatement;
 import liquibase.database.Database;
 
+@ChangeClass(name="changeWithNestedTags", description = "Sample Extension: Change With Nested Tags", priority = 15)
 public class ChangeWithNestedTags extends AbstractChange {
     private String name;
     private SampleChild child;
     private SampleChild child2;
-
-    public ChangeWithNestedTags() {
-        super("changeWithNestedTags", "Sample Extension: Change With Nested Tags", 15);
-    }
 
     public String getConfirmationMessage() {
         return "changeWithNestedTags executed";
@@ -21,8 +19,8 @@ public class ChangeWithNestedTags extends AbstractChange {
 
     public SqlStatement[] generateStatements(Database database) {
         return new SqlStatement[]{
-            new CreateTableStatement(null, "cwnestedtags").addColumn("id", TypeConverterFactory.getInstance().findTypeConverter(database).getDataType("int", false))
-                    .addColumn("name", TypeConverterFactory.getInstance().findTypeConverter(database).getDataType("varchar(5)", false))
+            new CreateTableStatement(null, null, "cwnestedtags").addColumn("id", DataTypeFactory.getInstance().fromDescription("int"))
+                    .addColumn("name", DataTypeFactory.getInstance().fromDescription("varchar(5)"))
         };
     }
 

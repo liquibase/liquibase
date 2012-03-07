@@ -2,15 +2,7 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
 import liquibase.database.core.OracleDatabase;
-import liquibase.database.typeconversion.TypeConverterFactory;
-import liquibase.exception.ValidationErrors;
-import liquibase.sql.Sql;
-import liquibase.sql.UnparsedSql;
-import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.InsertOrUpdateStatement;
-import liquibase.statement.core.UpdateStatement;
-
-import java.util.Date;
 
 public class InsertOrUpdateGeneratorOracle extends InsertOrUpdateGenerator {
 
@@ -28,7 +20,7 @@ public class InsertOrUpdateGeneratorOracle extends InsertOrUpdateGenerator {
         recordCheckSql.append("DECLARE\n");
         recordCheckSql.append("\tv_reccount NUMBER := 0;\n");
         recordCheckSql.append("BEGIN\n");
-        recordCheckSql.append("\tSELECT COUNT(*) INTO v_reccount FROM " + database.escapeTableName(insertOrUpdateStatement.getSchemaName(), insertOrUpdateStatement.getTableName()) + " WHERE ");
+        recordCheckSql.append("\tSELECT COUNT(*) INTO v_reccount FROM " + database.escapeTableName(insertOrUpdateStatement.getCatalogName(), insertOrUpdateStatement.getSchemaName(), insertOrUpdateStatement.getTableName()) + " WHERE ");
 
         recordCheckSql.append(whereClause);
         recordCheckSql.append(";\n");

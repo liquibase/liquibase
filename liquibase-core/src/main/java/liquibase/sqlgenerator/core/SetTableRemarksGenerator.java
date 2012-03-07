@@ -29,9 +29,9 @@ public class SetTableRemarksGenerator extends AbstractSqlGenerator<SetTableRemar
         String sql;
         String remarks = database.escapeStringForDatabase(statement.getRemarks());
         if (database instanceof MySQLDatabase) {
-            sql = "ALTER TABLE "+database.escapeTableName(statement.getSchemaName(), statement.getTableName())+" COMMENT = '"+remarks+"'";
+            sql = "ALTER TABLE "+database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName())+" COMMENT = '"+remarks+"'";
         } else {
-            sql = "COMMENT ON TABLE "+database.escapeTableName(statement.getSchemaName(), statement.getTableName())+" IS '"+remarks+"'";
+            sql = "COMMENT ON TABLE "+database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName())+" IS '"+remarks+"'";
         }
 
         return new Sql[] {

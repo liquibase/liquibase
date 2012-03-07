@@ -5,7 +5,9 @@ package liquibase.database.core;
 
 import liquibase.database.AbstractDatabase;
 import liquibase.database.DatabaseConnection;
+import liquibase.database.structure.Schema;
 import liquibase.exception.DatabaseException;
+import liquibase.exception.UnexpectedLiquibaseException;
 
 import java.math.BigInteger;
 import java.util.HashSet;
@@ -164,39 +166,24 @@ public class SybaseASADatabase extends AbstractDatabase {
 	}
 
 	@Override
-	public String getDefaultCatalogName() throws DatabaseException {
+	public String getDefaultCatalogName() {
+        try {
             return getConnection().getCatalog();
-	}
-
-	@Override
-	protected String getDefaultDatabaseSchemaName() throws DatabaseException {
-		return null;
-	}
-
-	@Override
-	public String convertRequestedSchemaToSchema(String requestedSchema)
-			throws DatabaseException {
-        if (requestedSchema == null) {
-            requestedSchema = getDefaultDatabaseSchemaName();
+        } catch (DatabaseException e) {
+            throw new UnexpectedLiquibaseException(e);
         }
-
-        if (requestedSchema == null) {
-            return "DBA";
-        }
-        return requestedSchema;
-	}
+    }
 
 	@Override
 	public String getDefaultSchemaName() {
-		// TODO Auto-generated method stub
-		return super.getDefaultSchemaName();
+		return "DBA";
 	}
 
 	@Override
-	public String getViewDefinition(String schemaName, String viewName)
+	public String getViewDefinition(Schema schema, String viewName)
 			throws DatabaseException {
 		// TODO Auto-generated method stub
-		return super.getViewDefinition(schemaName, viewName);
+		return super.getViewDefinition(schema, viewName);
 	}
 
 	/* (non-Javadoc)
@@ -211,14 +198,6 @@ public class SybaseASADatabase extends AbstractDatabase {
 	 */
 	public boolean supportsTablespaces() {
 		return true;
-	}
-
-	@Override
-	public String convertRequestedSchemaToCatalog(String requestedSchema)
-			throws DatabaseException {
-		// like in MS SQL
-        return getDefaultCatalogName();
-        
 	}
 
 	@Override

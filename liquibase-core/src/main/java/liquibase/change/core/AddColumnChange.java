@@ -20,25 +20,37 @@ import java.util.Set;
 /**
  * Adds a column to an existing table.
  */
+@ChangeClass(name="addColumn", description = "Add Column", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "table")
 public class AddColumnChange extends AbstractChange implements ChangeWithColumns<ColumnConfig> {
 
+    private String catalogName;
     private String schemaName;
     private String tableName;
     private List<ColumnConfig> columns;
 
     public AddColumnChange() {
-        super("addColumn", "Add Column", ChangeMetaData.PRIORITY_DEFAULT);
         columns = new ArrayList<ColumnConfig>();
     }
 
+    @ChangeProperty(mustApplyTo ="table.catalog")
+    public String getCatalogName() {
+        return catalogName;
+    }
+
+    public void setCatalogName(String catalogName) {
+        this.catalogName = catalogName;
+    }
+
+    @ChangeProperty(mustApplyTo ="table.schema")
     public String getSchemaName() {
         return schemaName;
     }
 
     public void setSchemaName(String schemaName) {
-        this.schemaName = StringUtils.trimToNull(schemaName);
+        this.schemaName = schemaName;
     }
 
+    @ChangeProperty(requiredForDatabase = "all", mustApplyTo ="table")
     public String getTableName() {
         return tableName;
     }
@@ -47,6 +59,7 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
         this.tableName = tableName;
     }
 
+    @ChangeProperty(requiredForDatabase = "all")
     public List<ColumnConfig> getColumns() {
         return columns;
     }
@@ -95,7 +108,7 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
                 constraints.add(new AutoIncrementConstraint(aColumn.getName(), aColumn.getStartWith(), aColumn.getIncrementBy()));
             }
 
-            AddColumnStatement addColumnStatement = new AddColumnStatement(getSchemaName(),
+            AddColumnStatement addColumnStatement = new AddColumnStatement(getCatalogName(), getSchemaName(),
                     getTableName(),
                     aColumn.getName(),
                     aColumn.getType(),
@@ -105,11 +118,11 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
             sql.add(addColumnStatement);
 
             if (database instanceof DB2Database) {
-                sql.add(new ReorganizeTableStatement(getSchemaName(), getTableName()));
+                sql.add(new ReorganizeTableStatement(getCatalogName(), getSchemaName(), getTableName()));
             }            
 
             if (aColumn.getValueObject() != null) {
-                UpdateStatement updateStatement = new UpdateStatement(getSchemaName(), getTableName());
+                UpdateStatement updateStatement = new UpdateStatement(getCatalogName(), getSchemaName(), getTableName());
                 updateStatement.addNewColumnValue(aColumn.getName(), aColumn.getValueObject());
                 sql.add(updateStatement);
             }
@@ -118,7 +131,7 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
       for (ColumnConfig column : getColumns()) {
           String columnRemarks = StringUtils.trimToNull(column.getRemarks());
           if (columnRemarks != null) {
-              SetColumnRemarksStatement remarksStatement = new SetColumnRemarksStatement(schemaName, tableName, column.getName(), columnRemarks);
+              SetColumnRemarksStatement remarksStatement = new SetColumnRemarksStatement(catalogName, schemaName, tableName, column.getName(), columnRemarks);
               if (SqlGeneratorFactory.getInstance().supports(remarksStatement, database)) {
                   sql.add(remarksStatement);
               }

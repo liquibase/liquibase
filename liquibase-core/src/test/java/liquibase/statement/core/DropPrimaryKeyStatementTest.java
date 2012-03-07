@@ -4,7 +4,7 @@ public class DropPrimaryKeyStatementTest extends AbstractSqStatementTest<DropPri
 
     @Override
     protected DropPrimaryKeyStatement createStatementUnderTest() {
-        return new DropPrimaryKeyStatement(null, null, null);
+        return new DropPrimaryKeyStatement(null, null, null, null);
     }
 
 }

@@ -4,7 +4,7 @@ public class DropTableStatementTest extends AbstractSqStatementTest<DropTableSta
 
     @Override
     protected DropTableStatement createStatementUnderTest() {
-        return new DropTableStatement(null, null, true);
+        return new DropTableStatement(null, null, null, true);
     }
 
 }

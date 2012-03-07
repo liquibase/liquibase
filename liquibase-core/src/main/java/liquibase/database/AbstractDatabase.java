@@ -9,8 +9,9 @@ import liquibase.changelog.RanChangeSet;
 import liquibase.changelog.filter.ContextChangeSetFilter;
 import liquibase.changelog.filter.DbmsChangeSetFilter;
 import liquibase.database.core.*;
+import liquibase.database.jvm.JdbcConnection;
 import liquibase.database.structure.*;
-import liquibase.diff.DiffStatusListener;
+import liquibase.diff.DiffControl;
 import liquibase.exception.*;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
@@ -29,6 +30,8 @@ import liquibase.util.StringUtils;
 import java.io.IOException;
 import java.io.Writer;
 import java.math.BigInteger;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -43,12 +46,13 @@ import java.util.regex.Pattern;
 public abstract class AbstractDatabase implements Database {
 
     private DatabaseConnection connection;
+    private String defaultCatalogName;
     private String defaultSchemaName;
 
     protected String currentDateTimeFunction;
 
-	// List of Database native functions.
-	protected List<DatabaseFunction> databaseFunctions = new ArrayList<DatabaseFunction>();
+    // List of Database native functions.
+    protected List<DatabaseFunction> databaseFunctions = new ArrayList<DatabaseFunction>();
 
     private List<RanChangeSet> ranChangeSetList;
 
@@ -57,6 +61,7 @@ public abstract class AbstractDatabase implements Database {
     private String databaseChangeLogTableName = System.getProperty("liquibase.databaseChangeLogTableName") == null ? "DatabaseChangeLog".toUpperCase() : System.getProperty("liquibase.databaseChangeLogTableName");
     private String databaseChangeLogLockTableName = System.getProperty("liquibase.databaseChangeLogLockTableName") == null ? "DatabaseChangeLogLock".toUpperCase() : System.getProperty("liquibase.databaseChangeLogLockTableName");
     private String liquibaseSchemaName = System.getProperty("liquibase.schemaName") == null ? null : System.getProperty("liquibase.schemaName");
+    private String liquibaseCatalogName = System.getProperty("liquibase.catalogName") == null ? null : System.getProperty("liquibase.catalogName");
 
     private Integer lastChangeSetSequenceValue;
 
@@ -66,8 +71,16 @@ public abstract class AbstractDatabase implements Database {
 
     protected BigInteger defaultAutoIncrementStartWith = BigInteger.ONE;
     protected BigInteger defaultAutoIncrementBy = BigInteger.ONE;
-    
+
     protected AbstractDatabase() {
+    }
+
+    public String getName() {
+        return toString();
+    }
+
+    public Schema getSchema() {
+        return null;
     }
 
     public boolean requiresPassword() {
@@ -89,7 +102,7 @@ public abstract class AbstractDatabase implements Database {
     }
 
     public void setConnection(DatabaseConnection conn) {
-        LogFactory.getLogger().debug("Connected to "+conn.getConnectionUserName()+"@"+conn.getURL());
+        LogFactory.getLogger().debug("Connected to " + conn.getConnectionUserName() + "@" + conn.getURL());
         this.connection = conn;
         try {
             connection.setAutoCommit(getAutoCommitMode());
@@ -162,19 +175,84 @@ public abstract class AbstractDatabase implements Database {
         }
     }
 
-    public String getDefaultCatalogName() throws DatabaseException {
-        return null;
+    public String getDefaultCatalogName() {
+        if (defaultCatalogName == null) {
+            if (connection != null) {
+                try {
+                    defaultCatalogName = connection.getCatalog();
+                } catch (DatabaseException e) {
+                    LogFactory.getLogger().info("Error getting default catalog", e);
+                }
+            }
+        }
+        return defaultCatalogName;
     }
 
-    protected String getDefaultDatabaseSchemaName() throws DatabaseException {
-        return getConnection().getConnectionUserName();
+    public void setDefaultCatalogName(String defaultCatalogName) {
+        this.defaultCatalogName = defaultCatalogName;
+    }
+
+    public String correctCatalogName(String catalogName) {
+        if (catalogName == null) {
+            return getDefaultCatalogName();
+        } else {
+            return correctObjectName(catalogName);
+        }
+    }
+
+    public String correctSchemaName(String schemaName) {
+        if (schemaName == null) {
+            return getDefaultSchemaName();
+        } else {
+            return correctObjectName(schemaName);
+        }
+    }
+
+    public String correctTableName(String tableName) {
+        return correctObjectName(tableName);
+    }
+
+    public String correctConstraintName(String constraintName) {
+        return correctObjectName(constraintName);
+    }
+
+    public String correctColumnName(String columnName) {
+        return correctObjectName(columnName);
+    }
+
+    public String correctPrimaryKeyName(String pkName) {
+        return correctObjectName(pkName);
+    }
+
+    public String correctForeignKeyName(String fkName) {
+        return correctObjectName(fkName);
+    }
+
+    public String correctIndexName(String indexName) {
+        return correctObjectName(indexName);
+    }
+
+    protected String correctObjectName(String objectName) {
+        return objectName;
     }
 
     public String getDefaultSchemaName() {
+
+        if (defaultSchemaName == null && connection != null) {
+            try {
+                ResultSet resultSet = ((JdbcConnection) connection).prepareCall("call current_schema").executeQuery();
+                resultSet.next();
+                defaultSchemaName = resultSet.getString(1);
+            } catch (Exception e) {
+                LogFactory.getLogger().info("Error getting default schema", e);
+            }
+        }
+
+
         return defaultSchemaName;
     }
 
-    public void setDefaultSchemaName(String schemaName) throws DatabaseException {
+    public void setDefaultSchemaName(String schemaName) {
         this.defaultSchemaName = schemaName;
     }
 
@@ -309,63 +387,63 @@ public abstract class AbstractDatabase implements Database {
         }
 
         // generate an SQL:2003 standard compliant auto increment clause by default
-        
+
         String autoIncrementClause = getAutoIncrementClause();
-        
+
         boolean generateStartWith = generateAutoIncrementStartWith(startWith);
         boolean generateIncrementBy = generateAutoIncrementBy(incrementBy);
-        
-        if (generateStartWith || generateIncrementBy) {
-        	autoIncrementClause += getAutoIncrementOpening();
-        	
-        	if (generateStartWith) {
-        		autoIncrementClause += String.format(getAutoIncrementStartWithClause(), startWith);
-        	}
 
-        	if (generateIncrementBy) {
-        		if (generateStartWith) {
-        			autoIncrementClause += ", ";
-        		}
-        		
-        		autoIncrementClause += String.format(getAutoIncrementByClause(), incrementBy);
-        	}
-        	
-        	autoIncrementClause += getAutoIncrementClosing();
+        if (generateStartWith || generateIncrementBy) {
+            autoIncrementClause += getAutoIncrementOpening();
+
+            if (generateStartWith) {
+                autoIncrementClause += String.format(getAutoIncrementStartWithClause(), startWith);
+            }
+
+            if (generateIncrementBy) {
+                if (generateStartWith) {
+                    autoIncrementClause += ", ";
+                }
+
+                autoIncrementClause += String.format(getAutoIncrementByClause(), incrementBy);
+            }
+
+            autoIncrementClause += getAutoIncrementClosing();
         }
-    	
-    	return autoIncrementClause;        
+
+        return autoIncrementClause;
     }
 
     protected String getAutoIncrementClause() {
-    	return "GENERATED BY DEFAULT AS IDENTITY";
+        return "GENERATED BY DEFAULT AS IDENTITY";
     }
-    
+
     protected boolean generateAutoIncrementStartWith(BigInteger startWith) {
-    	return startWith != null
-        		&& !startWith.equals(defaultAutoIncrementStartWith);
+        return startWith != null
+                && !startWith.equals(defaultAutoIncrementStartWith);
     }
-    
+
     protected boolean generateAutoIncrementBy(BigInteger incrementBy) {
         return incrementBy != null
-        		&& !incrementBy.equals(defaultAutoIncrementBy);    	
+                && !incrementBy.equals(defaultAutoIncrementBy);
     }
-    
+
     protected String getAutoIncrementOpening() {
-    	return " (";
+        return " (";
     }
-    
+
     protected String getAutoIncrementClosing() {
-    	return ")";
+        return ")";
     }
-    
+
     protected String getAutoIncrementStartWithClause() {
-    	return "START WITH %d";
+        return "START WITH %d";
     }
 
     protected String getAutoIncrementByClause() {
-    	return "INCREMENT BY %d";
-    }    
-    
+        return "INCREMENT BY %d";
+    }
+
     public String getConcatSql(String... values) {
         StringBuffer returnString = new StringBuffer();
         for (String value : values) {
@@ -409,6 +487,7 @@ public abstract class AbstractDatabase implements Database {
      * This method will check the database ChangeLog table used to keep track of
      * the changes in the file. If the table does not exist it will create one
      * otherwise it will not do anything besides outputting a log message.
+     *
      * @param updateExistingNullChecksums
      * @param contexts
      */
@@ -425,48 +504,48 @@ public abstract class AbstractDatabase implements Database {
             boolean hasComments = changeLogTable.getColumn("COMMENTS") != null;
             boolean hasTag = changeLogTable.getColumn("TAG") != null;
             boolean hasLiquibase = changeLogTable.getColumn("LIQUIBASE") != null;
-            boolean liquibaseColumnNotRightSize = changeLogTable.getColumn("LIQUIBASE").getColumnSize() != 20;
+            boolean liquibaseColumnNotRightSize = changeLogTable.getColumn("LIQUIBASE").getType().getColumnSize() != 20;
             boolean hasOrderExecuted = changeLogTable.getColumn("ORDEREXECUTED") != null;
-            boolean checksumNotRightSize = changeLogTable.getColumn("MD5SUM").getColumnSize() != 35;
+            boolean checksumNotRightSize = changeLogTable.getColumn("MD5SUM").getType().getColumnSize() != 35;
             boolean hasExecTypeColumn = changeLogTable.getColumn("EXECTYPE") != null;
 
             if (!hasDescription) {
                 executor.comment("Adding missing databasechangelog.description column");
-                statementsToExecute.add(new AddColumnStatement(getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "DESCRIPTION", "VARCHAR(255)", null));
+                statementsToExecute.add(new AddColumnStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "DESCRIPTION", "VARCHAR(255)", null));
             }
             if (!hasTag) {
                 executor.comment("Adding missing databasechangelog.tag column");
-                statementsToExecute.add(new AddColumnStatement(getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "TAG", "VARCHAR(255)", null));
+                statementsToExecute.add(new AddColumnStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "TAG", "VARCHAR(255)", null));
             }
             if (!hasComments) {
                 executor.comment("Adding missing databasechangelog.comments column");
-                statementsToExecute.add(new AddColumnStatement(getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "COMMENTS", "VARCHAR(255)", null));
+                statementsToExecute.add(new AddColumnStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "COMMENTS", "VARCHAR(255)", null));
             }
             if (!hasLiquibase) {
                 executor.comment("Adding missing databasechangelog.liquibase column");
-                statementsToExecute.add(new AddColumnStatement(getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "LIQUIBASE", "VARCHAR(255)", null));
+                statementsToExecute.add(new AddColumnStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "LIQUIBASE", "VARCHAR(255)", null));
             }
             if (!hasOrderExecuted) {
                 executor.comment("Adding missing databasechangelog.orderexecuted column");
-                statementsToExecute.add(new AddColumnStatement(getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "ORDEREXECUTED", "INT", null));
-                statementsToExecute.add(new UpdateStatement(getLiquibaseSchemaName(), getDatabaseChangeLogTableName()).addNewColumnValue("ORDEREXECUTED", -1));
-                statementsToExecute.add(new SetNullableStatement(getLiquibaseSchemaName(),  getDatabaseChangeLogTableName(), "ORDEREXECUTED", "INT", false));
+                statementsToExecute.add(new AddColumnStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "ORDEREXECUTED", "INT", null));
+                statementsToExecute.add(new UpdateStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName()).addNewColumnValue("ORDEREXECUTED", -1));
+                statementsToExecute.add(new SetNullableStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "ORDEREXECUTED", "INT", false));
             }
             if (checksumNotRightSize) {
                 executor.comment("Modifying size of databasechangelog.md5sum column");
 
-                statementsToExecute.add(new ModifyDataTypeStatement(getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "MD5SUM", "VARCHAR(35)"));
+                statementsToExecute.add(new ModifyDataTypeStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "MD5SUM", "VARCHAR(35)"));
             }
             if (liquibaseColumnNotRightSize) {
                 executor.comment("Modifying size of databasechangelog.liquibase column");
 
-                statementsToExecute.add(new ModifyDataTypeStatement(getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "LIQUIBASE", "VARCHAR(20)"));
+                statementsToExecute.add(new ModifyDataTypeStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "LIQUIBASE", "VARCHAR(20)"));
             }
             if (!hasExecTypeColumn) {
                 executor.comment("Adding missing databasechangelog.exectype column");
-                statementsToExecute.add(new AddColumnStatement(getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "EXECTYPE", "VARCHAR(10)", null));
-                statementsToExecute.add(new UpdateStatement(getLiquibaseSchemaName(), getDatabaseChangeLogTableName()).addNewColumnValue("EXECTYPE", "EXECUTED"));
-                statementsToExecute.add(new SetNullableStatement(getLiquibaseSchemaName(),  getDatabaseChangeLogTableName(), "EXECTYPE", "VARCHAR(10)", false));
+                statementsToExecute.add(new AddColumnStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "EXECTYPE", "VARCHAR(10)", null));
+                statementsToExecute.add(new UpdateStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName()).addNewColumnValue("EXECTYPE", "EXECUTED"));
+                statementsToExecute.add(new SetNullableStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "EXECTYPE", "VARCHAR(10)", false));
             }
 
             List<Map> md5sumRS = ExecutorService.getInstance().getExecutor(this).queryForList(new SelectFromDatabaseChangeLogStatement(new SelectFromDatabaseChangeLogStatement.ByNotNullCheckSum(), "MD5SUM"));
@@ -474,7 +553,7 @@ public abstract class AbstractDatabase implements Database {
                 String md5sum = md5sumRS.get(0).get("MD5SUM").toString();
                 if (!md5sum.startsWith(CheckSum.getCurrentVersion() + ":")) {
                     executor.comment("DatabaseChangeLog checksums are an incompatible version.  Setting them to null so they will be updated on next database update");
-                    statementsToExecute.add(new RawSqlStatement("UPDATE " + escapeTableName(getLiquibaseSchemaName(), getDatabaseChangeLogTableName()) + " SET MD5SUM=null"));
+                    statementsToExecute.add(new RawSqlStatement("UPDATE " + escapeTableName(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName()) + " SET MD5SUM=null"));
                 }
             }
 
@@ -483,13 +562,13 @@ public abstract class AbstractDatabase implements Database {
             executor.comment("Create Database Change Log Table");
             SqlStatement createTableStatement = new CreateDatabaseChangeLogTableStatement();
             if (!canCreateChangeLogTable()) {
-                throw new DatabaseException("Cannot create " + escapeTableName(getDefaultSchemaName(), getDatabaseChangeLogTableName()) + " table for your database.\n\n" +
+                throw new DatabaseException("Cannot create " + escapeTableName(getDefaultCatalogName(), getDefaultSchemaName(), getDatabaseChangeLogTableName()) + " table for your database.\n\n" +
                         "Please construct it manually using the following SQL as a base and re-run Liquibase:\n\n" +
                         createTableStatement);
             }
             // If there is no table in the database for recording change history create one.
             statementsToExecute.add(createTableStatement);
-            LogFactory.getLogger().info("Creating database history table with name: " + escapeTableName(getDefaultSchemaName(), getDatabaseChangeLogTableName()));
+            LogFactory.getLogger().info("Creating database history table with name: " + escapeTableName(getDefaultCatalogName(), getDefaultSchemaName(), getDatabaseChangeLogTableName()));
 //                }
         }
 
@@ -499,11 +578,11 @@ public abstract class AbstractDatabase implements Database {
         }
 
         if (updateExistingNullChecksums) {
-            for (RanChangeSet ranChangeSet  : this.getRanChangeSetList()) {
+            for (RanChangeSet ranChangeSet : this.getRanChangeSetList()) {
                 if (ranChangeSet.getLastCheckSum() == null) {
                     ChangeSet changeSet = databaseChangeLog.getChangeSet(ranChangeSet);
                     if (changeSet != null && new ContextChangeSetFilter(contexts).accepts(changeSet) && new DbmsChangeSetFilter(this).accepts(changeSet)) {
-                        LogFactory.getLogger().info("Updating null or out of date checksum on changeSet "+changeSet+" to correct value");
+                        LogFactory.getLogger().info("Updating null or out of date checksum on changeSet " + changeSet + " to correct value");
                         executor.execute(new UpdateChangeSetChecksumStatement(changeSet));
                     }
                 }
@@ -546,8 +625,12 @@ public abstract class AbstractDatabase implements Database {
         return hasTable;
     }
 
+    public String getLiquibaseCatalogName() {
+        return liquibaseCatalogName == null ? getDefaultCatalogName() : liquibaseCatalogName;
+    }
+
     public String getLiquibaseSchemaName() {
-        return liquibaseSchemaName == null ? getDefaultSchemaName(): liquibaseSchemaName;
+        return liquibaseSchemaName == null ? getDefaultSchemaName() : liquibaseSchemaName;
     }
 
     /**
@@ -563,7 +646,7 @@ public abstract class AbstractDatabase implements Database {
             executor.comment("Create Database Lock Table");
             executor.execute(new CreateDatabaseChangeLogLockTableStatement());
             this.commit();
-            LogFactory.getLogger().debug("Created database lock table with name: " + escapeTableName(getLiquibaseSchemaName(), getDatabaseChangeLogLockTableName()));
+            LogFactory.getLogger().debug("Created database lock table with name: " + escapeTableName(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogLockTableName()));
             this.hasDatabaseChangeLogLockTable = true;
         }
     }
@@ -579,24 +662,27 @@ public abstract class AbstractDatabase implements Database {
      *
      * @param schema
      */
-    public void dropDatabaseObjects(String schema) throws DatabaseException {
+    public void dropDatabaseObjects(Schema schema) throws DatabaseException {
+        schema = schema.clone(this);
         try {
-            DatabaseSnapshot snapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(this, schema, new HashSet<DiffStatusListener>());
+            DatabaseSnapshot snapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(this, new DiffControl(schema));
 
             List<Change> dropChanges = new ArrayList<Change>();
 
-            for (View view : snapshot.getViews()) {
+            for (View view : snapshot.getDatabaseObjects(schema, View.class)) {
                 DropViewChange dropChange = new DropViewChange();
                 dropChange.setViewName(view.getName());
-                dropChange.setSchemaName(schema);
+                dropChange.setSchemaName(schema.getName(this));
+                dropChange.setCatalogName(schema.getCatalogName(this));
 
                 dropChanges.add(dropChange);
             }
 
             if (!supportsForeignKeyDisable()) {
-                for (ForeignKey fk : snapshot.getForeignKeys()) {
+                for (ForeignKey fk : snapshot.getDatabaseObjects(schema, ForeignKey.class)) {
                     DropForeignKeyConstraintChange dropFK = new DropForeignKeyConstraintChange();
-                    dropFK.setBaseTableSchemaName(schema);
+                    dropFK.setBaseTableSchemaName(schema.getName(this));
+                    dropFK.setBaseTableCatalogName(schema.getCatalogName(this));
                     dropFK.setBaseTableName(fk.getForeignKeyTable().getName());
                     dropFK.setConstraintName(fk.getName());
 
@@ -613,9 +699,10 @@ public abstract class AbstractDatabase implements Database {
 //                dropChanges.add(dropChange);
 //            }
 
-            for (Table table : snapshot.getTables()) {
+            for (Table table : snapshot.getDatabaseObjects(schema, Table.class)) {
                 DropTableChange dropChange = new DropTableChange();
-                dropChange.setSchemaName(schema);
+                dropChange.setSchemaName(schema.getName(this));
+                dropChange.setCatalogName(schema.getCatalogName(this));
                 dropChange.setTableName(table.getName());
                 if (supportsDropTableCascadeConstraints()) {
                     dropChange.setCascadeConstraints(true);
@@ -625,10 +712,11 @@ public abstract class AbstractDatabase implements Database {
             }
 
             if (this.supportsSequences()) {
-                for (Sequence seq : snapshot.getSequences()) {
+                for (Sequence seq : snapshot.getDatabaseObjects(schema, Sequence.class)) {
                     DropSequenceChange dropChange = new DropSequenceChange();
                     dropChange.setSequenceName(seq.getName());
-                    dropChange.setSchemaName(schema);
+                    dropChange.setSchemaName(schema.getName(this));
+                    dropChange.setCatalogName(schema.getCatalogName(this));
 
                     dropChanges.add(dropChange);
                 }
@@ -636,7 +724,7 @@ public abstract class AbstractDatabase implements Database {
 
 
             if (snapshot.hasDatabaseChangeLogTable()) {
-                dropChanges.add(new AnonymousChange(new ClearDatabaseChangeLogTableStatement(schema)));
+                dropChanges.add(new AnonymousChange(new ClearDatabaseChangeLogTableStatement(schema.getCatalogName(this), schema.getName(this))));
             }
 
             final boolean reEnableFK = supportsForeignKeyDisable() && disableForeignKeyChecks();
@@ -658,17 +746,17 @@ public abstract class AbstractDatabase implements Database {
     }
 
     public boolean supportsDropTableCascadeConstraints() {
-         return (this instanceof DerbyDatabase
-                 || this instanceof DB2Database
-                 || this instanceof MSSQLDatabase
-                 || this instanceof FirebirdDatabase
-                 || this instanceof SQLiteDatabase
-                 || this instanceof SybaseDatabase
-                 || this instanceof SybaseASADatabase);
+        return (this instanceof DerbyDatabase
+                || this instanceof DB2Database
+                || this instanceof MSSQLDatabase
+                || this instanceof FirebirdDatabase
+                || this instanceof SQLiteDatabase
+                || this instanceof SybaseDatabase
+                || this instanceof SybaseASADatabase);
     }
 
-    public boolean isSystemTable(String catalogName, String schemaName, String tableName) {
-        if ("information_schema".equalsIgnoreCase(schemaName)) {
+    public boolean isSystemTable(Schema schema, String tableName) {
+        if ("information_schema".equalsIgnoreCase(schema.getName(this))) {
             return true;
         } else if (tableName.equalsIgnoreCase(getDatabaseChangeLogLockTableName())) {
             return true;
@@ -678,8 +766,8 @@ public abstract class AbstractDatabase implements Database {
         return false;
     }
 
-    public boolean isSystemView(String catalogName, String schemaName, String viewName) {
-        if ("information_schema".equalsIgnoreCase(schemaName)) {
+    public boolean isSystemView(Schema schema, String viewName) {
+        if ("information_schema".equalsIgnoreCase(schema.getName(this))) {
             return true;
         } else if (getSystemTablesAndViews().contains(viewName)) {
             return true;
@@ -734,18 +822,15 @@ public abstract class AbstractDatabase implements Database {
         return true;
     }
 
-    public String getViewDefinition(String schemaName, String viewName) throws DatabaseException {
-        if (schemaName == null) {
-            schemaName = convertRequestedSchemaToSchema(null);
-        }
-        String definition = (String) ExecutorService.getInstance().getExecutor(this).queryForObject(new GetViewDefinitionStatement(schemaName, viewName), String.class);
+    public String getViewDefinition(Schema schema, String viewName) throws DatabaseException {
+        String definition = (String) ExecutorService.getInstance().getExecutor(this).queryForObject(new GetViewDefinitionStatement(schema.getCatalogName(this), schema.getName(this), viewName), String.class);
         if (definition == null) {
             return null;
         }
         return CREATE_VIEW_AS_PATTERN.matcher(definition).replaceFirst("");
     }
 
-    public String escapeTableName(String schemaName, String tableName) {
+    public String escapeTableName(String catalogName, String schemaName, String tableName) {
         if (schemaName == null) {
             schemaName = getDefaultSchemaName();
         }
@@ -761,7 +846,7 @@ public abstract class AbstractDatabase implements Database {
         return objectName;
     }
 
-    public String escapeIndexName(String schemaName, String indexName) {
+    public String escapeIndexName(String catalogName, String schemaName, String indexName) {
         if (StringUtils.trimToNull(schemaName) == null || !supportsSchemas()) {
             return escapeDatabaseObject(indexName);
         } else {
@@ -769,7 +854,7 @@ public abstract class AbstractDatabase implements Database {
         }
     }
 
-    public String escapeSequenceName(String schemaName, String sequenceName) {
+    public String escapeSequenceName(String catalogName, String schemaName, String sequenceName) {
         if (schemaName == null) {
             schemaName = getDefaultSchemaName();
         }
@@ -785,11 +870,11 @@ public abstract class AbstractDatabase implements Database {
         return escapeDatabaseObject(constraintName);
     }
 
-    public String escapeColumnName(String schemaName, String tableName, String columnName) {
+    public String escapeColumnName(String catalogName, String schemaName, String tableName, String columnName) {
         if (columnName.contains("(")) {
             return columnName;
         }
-        
+
         if (schemaName == null) {
             schemaName = getDefaultSchemaName();
         }
@@ -809,29 +894,6 @@ public abstract class AbstractDatabase implements Database {
 
     }
 
-    public String convertRequestedSchemaToCatalog(String requestedSchema) throws DatabaseException {
-        if (getDefaultCatalogName() == null) {
-            return null;
-        } else {
-            if (requestedSchema == null) {
-                return getDefaultCatalogName();
-            }
-            return StringUtils.trimToNull(requestedSchema);
-        }
-    }
-
-    public String convertRequestedSchemaToSchema(String requestedSchema) throws DatabaseException {
-        String returnSchema = requestedSchema;
-        if (returnSchema == null) {
-            returnSchema = getDefaultDatabaseSchemaName();
-        }
-
-        if (returnSchema != null) {
-            returnSchema = returnSchema.toUpperCase();
-        }
-        return returnSchema;
-    }
-
     public boolean supportsSchemas() {
         return true;
     }
@@ -840,8 +902,8 @@ public abstract class AbstractDatabase implements Database {
         return "PK_" + tableName.toUpperCase();
     }
 
-    public String escapeViewName(String schemaName, String viewName) {
-        return escapeTableName(schemaName, viewName);
+    public String escapeViewName(String catalogName, String schemaName, String viewName) {
+        return escapeTableName(catalogName, schemaName, viewName);
     }
 
     /**
@@ -860,7 +922,7 @@ public abstract class AbstractDatabase implements Database {
             if (foundRan.getLastCheckSum() == null) {
                 try {
                     LogFactory.getLogger().info("Updating NULL md5sum for " + changeSet.toString());
-                    ExecutorService.getInstance().getExecutor(this).execute(new RawSqlStatement("UPDATE " + escapeTableName(getLiquibaseSchemaName(), getDatabaseChangeLogTableName()) + " SET MD5SUM='" + changeSet.generateCheckSum().toString() + "' WHERE ID='" + changeSet.getId() + "' AND AUTHOR='" + changeSet.getAuthor() + "' AND FILENAME='" + changeSet.getFilePath() + "'"));
+                    ExecutorService.getInstance().getExecutor(this).execute(new RawSqlStatement("UPDATE " + escapeTableName(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName()) + " SET MD5SUM='" + changeSet.generateCheckSum().toString() + "' WHERE ID='" + changeSet.getId() + "' AND AUTHOR='" + changeSet.getAuthor() + "' AND FILENAME='" + changeSet.getFilePath() + "'"));
 
                     this.commit();
                 } catch (DatabaseException e) {
@@ -906,7 +968,7 @@ public abstract class AbstractDatabase implements Database {
             return this.ranChangeSetList;
         }
 
-        String databaseChangeLogTableName = escapeTableName(getLiquibaseSchemaName(), getDatabaseChangeLogTableName());
+        String databaseChangeLogTableName = escapeTableName(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName());
         ranChangeSetList = new ArrayList<RanChangeSet>();
         if (hasDatabaseChangeLogTable()) {
             LogFactory.getLogger().info("Reading from " + databaseChangeLogTableName);
@@ -924,7 +986,7 @@ public abstract class AbstractDatabase implements Database {
                     RanChangeSet ranChangeSet = new RanChangeSet(fileName, id, author, CheckSum.parse(md5sum), dateExecuted, tag, ChangeSet.ExecType.valueOf(execType));
                     ranChangeSetList.add(ranChangeSet);
                 } catch (IllegalArgumentException e) {
-                    LogFactory.getLogger().severe("Unknown EXECTYPE from database: "+execType);
+                    LogFactory.getLogger().severe("Unknown EXECTYPE from database: " + execType);
                     throw e;
                 }
             }
@@ -1120,13 +1182,13 @@ public abstract class AbstractDatabase implements Database {
         return ++lastChangeSetSequenceValue;
     }
 
-    public Table getTable(String schemaName, String tableName) throws DatabaseException {
-        return DatabaseSnapshotGeneratorFactory.getInstance().getGenerator(this).getTable(schemaName, tableName, this);
+    public Table getTable(String catalogName, String schemaName, String tableName) throws DatabaseException {
+        return DatabaseSnapshotGeneratorFactory.getInstance().getGenerator(this).getTable(catalogName, schemaName, tableName, this);
     }
 
-	public List<DatabaseFunction> getDatabaseFunctions() {
-		return databaseFunctions;
-	}
+    public List<DatabaseFunction> getDatabaseFunctions() {
+        return databaseFunctions;
+    }
 
     public void reset() {
         this.ranChangeSetList = null;

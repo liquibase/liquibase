@@ -27,12 +27,8 @@ public class SelectSequencesGeneratorMaxDB extends AbstractSqlGenerator<SelectSe
     }
 
     public Sql[] generateSql(SelectSequencesStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-        try {
-            return new Sql[] {
-                    new UnparsedSql("SELECT SEQUENCE_NAME FROM DOMAIN.SEQUENCES WHERE OWNER = '" + database.convertRequestedSchemaToSchema(statement.getSchemaName()) + "'")
-            };
-        } catch (DatabaseException e) {
-            throw new UnexpectedLiquibaseException(e);
-        }
+        return new Sql[]{
+                new UnparsedSql("SELECT SEQUENCE_NAME FROM DOMAIN.SEQUENCES WHERE OWNER = '" + database.correctSchemaName(statement.getSchemaName()) + "'")
+        };
     }
 }

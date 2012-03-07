@@ -4,7 +4,7 @@ public class RenameTableStatementTest extends AbstractSqStatementTest<RenameTabl
 
     @Override
     protected RenameTableStatement createStatementUnderTest() {
-        return new RenameTableStatement(null, null, null);
+        return new RenameTableStatement(null, null, null, null);
     }
 
 

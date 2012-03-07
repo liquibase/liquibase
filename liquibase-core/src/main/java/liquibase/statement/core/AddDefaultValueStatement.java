@@ -3,6 +3,7 @@ package liquibase.statement.core;
 import liquibase.statement.AbstractSqlStatement;
 
 public class AddDefaultValueStatement extends AbstractSqlStatement {
+    private String catalogName;
     private String schemaName;
     private String tableName;
     private String columnName;
@@ -10,11 +11,12 @@ public class AddDefaultValueStatement extends AbstractSqlStatement {
     private Object defaultValue;
 
 
-    public AddDefaultValueStatement(String schemaName, String tableName, String columnName, String columnDataType) {
-        this(schemaName, tableName, columnName, columnDataType, null);
+    public AddDefaultValueStatement(String catalogName, String schemaName, String tableName, String columnName, String columnDataType) {
+        this(catalogName, schemaName, tableName, columnName, columnDataType, null);
     }
 
-    public AddDefaultValueStatement(String schemaName, String tableName, String columnName, String columnDataType, Object defaultValue) {
+    public AddDefaultValueStatement(String catalogName, String schemaName, String tableName, String columnName, String columnDataType, Object defaultValue) {
+        this.catalogName = catalogName;
         this.schemaName = schemaName;
         this.tableName = tableName;
         this.columnName = columnName;
@@ -29,6 +31,10 @@ public class AddDefaultValueStatement extends AbstractSqlStatement {
     public String getColumnDataType() {
 		return columnDataType;
 	}
+
+    public String getCatalogName() {
+        return catalogName;
+    }
 
     public String getSchemaName() {
         return schemaName;

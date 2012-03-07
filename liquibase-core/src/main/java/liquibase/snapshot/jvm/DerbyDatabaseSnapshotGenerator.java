@@ -16,23 +16,13 @@ public class DerbyDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerato
         return PRIORITY_DATABASE;
     }
 
-    @Override
-    protected String convertTableNameToDatabaseTableName(String tableName) {
-        return tableName.toUpperCase();
-    }
-
-    @Override
-    protected String convertColumnNameToDatabaseTableName(String columnName) {
-        return columnName.toUpperCase();
-    }
-
     /**
      * Derby seems to have troubles
      */
     @Override
-    public boolean hasIndex(String schemaName, String tableName, String indexName, Database database, String columnNames) throws DatabaseException {
+    public boolean hasIndex(String catalogName, String schemaName, String tableName, String indexName, Database database, String columnNames) throws DatabaseException {
         try {
-            ResultSet rs = getMetaData(database).getIndexInfo(database.convertRequestedSchemaToCatalog(schemaName), database.convertRequestedSchemaToSchema(schemaName), "%", false, true);
+            ResultSet rs = getMetaData(database).getIndexInfo(database.correctCatalogName(catalogName), database.correctSchemaName(schemaName), "%", false, true);
             while (rs.next()) {
                 if (rs.getString("INDEX_NAME").equalsIgnoreCase(indexName)) {
                     return true;

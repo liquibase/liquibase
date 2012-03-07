@@ -8,6 +8,7 @@ import java.util.Set;
 
 public class AddColumnStatement extends AbstractSqlStatement {
 
+    private String catalogName;
     private String schemaName;
     private String tableName;
     private String columnName;
@@ -15,7 +16,8 @@ public class AddColumnStatement extends AbstractSqlStatement {
     private Object defaultValue;
     private Set<ColumnConstraint> constraints = new HashSet<ColumnConstraint>();
 
-    public AddColumnStatement(String schemaName, String tableName, String columnName, String columnType, Object defaultValue, ColumnConstraint... constraints) {
+    public AddColumnStatement(String catalogName, String schemaName, String tableName, String columnName, String columnType, Object defaultValue, ColumnConstraint... constraints) {
+        this.catalogName = catalogName;
         this.schemaName = schemaName;
         this.tableName = tableName;
         this.columnName = columnName;
@@ -24,6 +26,10 @@ public class AddColumnStatement extends AbstractSqlStatement {
         if (constraints != null) {
             this.constraints.addAll(Arrays.asList(constraints));
         }
+    }
+
+    public String getCatalogName() {
+        return catalogName;
     }
 
     public String getSchemaName() {

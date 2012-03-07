@@ -16,7 +16,7 @@ public class InsertOrUpdateGeneratorMSSQL extends InsertOrUpdateGenerator {
         StringBuffer recordCheck = new StringBuffer();
         recordCheck.append("DECLARE @reccount integer\n");
         recordCheck.append("SELECT @reccount = count(*) FROM ");
-        recordCheck.append(database.escapeTableName(insertOrUpdateStatement.getSchemaName(),insertOrUpdateStatement.getTableName()));
+        recordCheck.append(database.escapeTableName(insertOrUpdateStatement.getCatalogName(), insertOrUpdateStatement.getSchemaName(),insertOrUpdateStatement.getTableName()));
         recordCheck.append(" WHERE ");
         recordCheck.append(whereClause);
         recordCheck.append("\n");
@@ -35,6 +35,7 @@ public class InsertOrUpdateGeneratorMSSQL extends InsertOrUpdateGenerator {
         return insertBlock.toString(); 
     }
 
+    @Override
     protected String getElse(Database database) {
         return "ELSE\n";
     }
@@ -50,8 +51,6 @@ public class InsertOrUpdateGeneratorMSSQL extends InsertOrUpdateGenerator {
 
     @Override
     public Sql[] generateSql(InsertOrUpdateStatement insertOrUpdateStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-        System.out.println("generating");
-
         return super.generateSql(insertOrUpdateStatement, database, sqlGeneratorChain);    //To change body of overridden methods use File | Settings | File Templates.
     }
 }

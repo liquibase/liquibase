@@ -4,7 +4,7 @@ public class CreateSequenceStatementTest extends AbstractSqStatementTest<CreateS
 
     @Override
     protected CreateSequenceStatement createStatementUnderTest() {
-        return new CreateSequenceStatement(null, null);
+        return new CreateSequenceStatement(null, null, null);
     }
 
 

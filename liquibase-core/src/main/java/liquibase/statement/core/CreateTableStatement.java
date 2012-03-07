@@ -1,17 +1,18 @@
 package liquibase.statement.core;
 
-import liquibase.database.structure.type.DataType;
+import liquibase.datatype.LiquibaseDataType;
 import liquibase.statement.*;
 
 import java.util.*;
 
 public class CreateTableStatement extends AbstractSqlStatement {
+    private String catalogName;
     private String schemaName;
     private String tableName;
     private String tablespace;
     private List<String> columns = new ArrayList<String>();
     private Set<AutoIncrementConstraint> autoIncrementConstraints = new HashSet<AutoIncrementConstraint>();
-    private Map<String, DataType> columnTypes = new HashMap<String, DataType>();
+    private Map<String, LiquibaseDataType> columnTypes = new HashMap<String, LiquibaseDataType>();
     private Map<String, Object> defaultValues = new HashMap<String, Object>();
 
     private PrimaryKeyConstraint primaryKeyConstraint;
@@ -20,9 +21,14 @@ public class CreateTableStatement extends AbstractSqlStatement {
     private Set<UniqueConstraint> uniqueConstraints = new HashSet<UniqueConstraint>();
 
 
-    public CreateTableStatement(String schemaName, String tableName) {
+    public CreateTableStatement(String catalogName, String schemaName, String tableName) {
+        this.catalogName = catalogName;
         this.schemaName = schemaName;
         this.tableName = tableName;
+    }
+
+    public String getCatalogName() {
+        return catalogName;
     }
 
     public String getSchemaName() {
@@ -63,7 +69,7 @@ public class CreateTableStatement extends AbstractSqlStatement {
         return notNullColumns;
     }
 
-    public CreateTableStatement addPrimaryKeyColumn(String columnName, DataType columnType, Object defaultValue, String keyName, String tablespace, ColumnConstraint... constraints) {
+    public CreateTableStatement addPrimaryKeyColumn(String columnName, LiquibaseDataType columnType, Object defaultValue, String keyName, String tablespace, ColumnConstraint... constraints) {
 //        String pkName = "PK_" + getTableName().toUpperCase();
 ////        if (pkName.length() > 18) {
 ////            pkName = pkName.substring(0, 17);
@@ -83,22 +89,22 @@ public class CreateTableStatement extends AbstractSqlStatement {
         return this;
     }
 
-    public CreateTableStatement addColumn(String columnName, DataType columnType) {
+    public CreateTableStatement addColumn(String columnName, LiquibaseDataType columnType) {
         return addColumn(columnName, columnType, null, new ColumnConstraint[0]);
     }
 
-    public CreateTableStatement addColumn(String columnName, DataType columnType, Object defaultValue) {
+    public CreateTableStatement addColumn(String columnName, LiquibaseDataType columnType, Object defaultValue) {
         if (defaultValue instanceof ColumnConstraint) {
             return addColumn(columnName,  columnType, null, (ColumnConstraint) defaultValue);
         }
         return addColumn(columnName, columnType, defaultValue, new ColumnConstraint[0]);
     }
 
-    public CreateTableStatement addColumn(String columnName, DataType columnType, ColumnConstraint... constraints) {
+    public CreateTableStatement addColumn(String columnName, LiquibaseDataType columnType, ColumnConstraint... constraints) {
         return addColumn(columnName, columnType, null, constraints);
     }
 
-    public CreateTableStatement addColumn(String columnName, DataType columnType, Object defaultValue, ColumnConstraint... constraints) {
+    public CreateTableStatement addColumn(String columnName, LiquibaseDataType columnType, Object defaultValue, ColumnConstraint... constraints) {
         this.getColumns().add(columnName);
         this.columnTypes.put(columnName, columnType);
         if (defaultValue != null) {
@@ -166,7 +172,7 @@ public class CreateTableStatement extends AbstractSqlStatement {
         return autoIncrementConstraints;
     }
 
-    public Map<String, DataType> getColumnTypes() {
+    public Map<String, LiquibaseDataType> getColumnTypes() {
         return columnTypes;
     }
 

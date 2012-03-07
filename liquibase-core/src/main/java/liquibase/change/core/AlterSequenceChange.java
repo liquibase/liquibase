@@ -1,7 +1,9 @@
 package liquibase.change.core;
 
 import liquibase.change.AbstractChange;
+import liquibase.change.ChangeClass;
 import liquibase.change.ChangeMetaData;
+import liquibase.change.ChangeProperty;
 import liquibase.database.Database;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.AlterSequenceStatement;
@@ -12,8 +14,10 @@ import java.math.BigInteger;
 /**
  * Modifies properties of an existing sequence.
  */
+@ChangeClass(name="alterSequence", description = "Alter Sequence", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "sequence")
 public class AlterSequenceChange extends AbstractChange {
 
+    private String catalogName;
     private String schemaName;
     private String sequenceName;
     private BigInteger incrementBy;
@@ -22,18 +26,26 @@ public class AlterSequenceChange extends AbstractChange {
     private Boolean ordered;
     // StartValue is not allowed since we cannot alter the starting sequence number
 
-    public AlterSequenceChange() {
-        super("alterSequence", "Alter Sequence", ChangeMetaData.PRIORITY_DEFAULT);
+
+    @ChangeProperty(mustApplyTo ="sequence.catalog")
+    public String getCatalogName() {
+        return catalogName;
     }
 
+    public void setCatalogName(String catalogName) {
+        this.catalogName = catalogName;
+    }
+
+    @ChangeProperty(mustApplyTo ="sequence.schema")
     public String getSchemaName() {
         return schemaName;
     }
 
     public void setSchemaName(String schemaName) {
-        this.schemaName = StringUtils.trimToNull(schemaName);
+        this.schemaName = schemaName;
     }
 
+    @ChangeProperty(requiredForDatabase = "all", mustApplyTo = "sequence")
     public String getSequenceName() {
         return sequenceName;
     }
@@ -77,7 +89,7 @@ public class AlterSequenceChange extends AbstractChange {
 
     public SqlStatement[] generateStatements(Database database) {
         return new SqlStatement[] {
-                new AlterSequenceStatement(getSchemaName() == null?database.getDefaultSchemaName():getSchemaName(), getSequenceName())
+                new AlterSequenceStatement(getCatalogName(), getSchemaName(), getSequenceName())
                 .setIncrementBy(getIncrementBy())
                 .setMaxValue(getMaxValue())
                 .setMinValue(getMinValue())

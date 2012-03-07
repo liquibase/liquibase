@@ -2,7 +2,8 @@ package liquibase.change.core;
 
 import liquibase.change.*;
 import liquibase.database.Database;
-import liquibase.database.typeconversion.TypeConverterFactory;
+import liquibase.datatype.DataTypeFactory;
+import liquibase.datatype.LiquibaseDataType;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.*;
@@ -17,36 +18,37 @@ import java.util.List;
 /**
  * Creates a new table.
  */
+@ChangeClass(name="createTable", description = "Create Table", priority = ChangeMetaData.PRIORITY_DEFAULT)
 public class CreateTableChange extends AbstractChange implements ChangeWithColumns<ColumnConfig> {
 
     private List<ColumnConfig> columns;
+    private String catalogName;
     private String schemaName;
     private String tableName;
     private String tablespace;
     private String remarks;
 
     public CreateTableChange() {
-        super("createTable", "Create Table", ChangeMetaData.PRIORITY_DEFAULT);
         columns = new ArrayList<ColumnConfig>();
     }
 
     public SqlStatement[] generateStatements(Database database) {
 
-        String schemaName = getSchemaName() == null ? (database == null ? null: database.getDefaultSchemaName()) : getSchemaName();
-        CreateTableStatement statement = new CreateTableStatement(schemaName, getTableName());
+        CreateTableStatement statement = new CreateTableStatement(getCatalogName(), getSchemaName(), getTableName());
         for (ColumnConfig column : getColumns()) {
             ConstraintsConfig constraints = column.getConstraints();
             boolean isAutoIncrement = column.isAutoIncrement() != null && column.isAutoIncrement();
 
             Object defaultValue = column.getDefaultValueObject();
 
+            LiquibaseDataType columnType = DataTypeFactory.getInstance().fromDescription(column.getType() + (isAutoIncrement ? "{autoIncrement:true}" : ""));
             if (constraints != null && constraints.isPrimaryKey() != null && constraints.isPrimaryKey()) {
 
-	            statement.addPrimaryKeyColumn(column.getName(), TypeConverterFactory.getInstance().findTypeConverter(database).getDataType(column.getType(), isAutoIncrement), defaultValue, constraints.getPrimaryKeyName(), constraints.getPrimaryKeyTablespace());
+                statement.addPrimaryKeyColumn(column.getName(), columnType, defaultValue, constraints.getPrimaryKeyName(), constraints.getPrimaryKeyTablespace());
 
             } else {
                 statement.addColumn(column.getName(),
-                        TypeConverterFactory.getInstance().findTypeConverter(database).getDataType(column.getType(), column.isAutoIncrement()),
+                        columnType,
                         defaultValue);
             }
 
@@ -84,7 +86,7 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
         statements.add(statement);
 
         if (StringUtils.trimToNull(remarks) != null) {
-            SetTableRemarksStatement remarksStatement = new SetTableRemarksStatement(schemaName, tableName, remarks);
+            SetTableRemarksStatement remarksStatement = new SetTableRemarksStatement(catalogName, schemaName, tableName, remarks);
             if (SqlGeneratorFactory.getInstance().supports(remarksStatement, database)) {
                 statements.add(remarksStatement);
             }
@@ -93,7 +95,7 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
         for (ColumnConfig column : getColumns()) {
             String columnRemarks = StringUtils.trimToNull(column.getRemarks());
             if (columnRemarks != null) {
-                SetColumnRemarksStatement remarksStatement = new SetColumnRemarksStatement(schemaName, tableName, column.getName(), columnRemarks);
+                SetColumnRemarksStatement remarksStatement = new SetColumnRemarksStatement(catalogName, schemaName, tableName, column.getName(), columnRemarks);
                 if (SqlGeneratorFactory.getInstance().supports(remarksStatement, database)) {
                     statements.add(remarksStatement);
                 }
@@ -106,6 +108,7 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
     @Override
     protected Change[] createInverses() {
         DropTableChange inverse = new DropTableChange();
+        inverse.setCatalogName(getCatalogName());
         inverse.setSchemaName(getSchemaName());
         inverse.setTableName(getTableName());
 
@@ -114,8 +117,17 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
         };
     }
 
+    @ChangeProperty(requiredForDatabase = "all")
     public List<ColumnConfig> getColumns() {
         return columns;
+    }
+
+    public String getCatalogName() {
+        return catalogName;
+    }
+
+    public void setCatalogName(String catalogName) {
+        this.catalogName = catalogName;
     }
 
     public String getSchemaName() {
@@ -123,9 +135,10 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
     }
 
     public void setSchemaName(String schemaName) {
-        this.schemaName = StringUtils.trimToNull(schemaName);
+        this.schemaName = schemaName;
     }
 
+    @ChangeProperty(requiredForDatabase = "all")
     public String getTableName() {
         return tableName;
     }

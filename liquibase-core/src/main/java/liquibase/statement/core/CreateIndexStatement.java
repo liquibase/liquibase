@@ -4,6 +4,7 @@ import liquibase.statement.AbstractSqlStatement;
 
 public class CreateIndexStatement extends AbstractSqlStatement {
 
+    private String tableCatalogName;
     private String tableSchemaName;
     private String indexName;
     private String tableName;
@@ -14,13 +15,18 @@ public class CreateIndexStatement extends AbstractSqlStatement {
 	// for example: foreignKey, primaryKey or uniqueConstraint
 	private String associatedWith;
 
-    public CreateIndexStatement(String indexName, String tableSchemaName, String tableName, Boolean isUnique, String associatedWith, String... columns) {
+    public CreateIndexStatement(String indexName, String tableCatalogName, String tableSchemaName, String tableName, Boolean isUnique, String associatedWith, String... columns) {
         this.indexName = indexName;
+        this.tableCatalogName = tableCatalogName;
         this.tableSchemaName = tableSchemaName;
         this.tableName = tableName;
         this.columns = columns;
         this.unique = isUnique;
 	    this.associatedWith = associatedWith;
+    }
+
+    public String getTableCatalogName() {
+        return tableCatalogName;
     }
 
     public String getTableSchemaName() {

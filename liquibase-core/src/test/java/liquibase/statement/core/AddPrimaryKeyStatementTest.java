@@ -4,7 +4,7 @@ public class AddPrimaryKeyStatementTest extends AbstractSqStatementTest<AddPrima
 
     @Override
     protected AddPrimaryKeyStatement createStatementUnderTest() {
-        return new AddPrimaryKeyStatement(null, null, null, null);
+        return new AddPrimaryKeyStatement(null, null, null, null, null);
     }
 
    

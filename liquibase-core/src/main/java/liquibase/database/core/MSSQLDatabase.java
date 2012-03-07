@@ -2,7 +2,9 @@ package liquibase.database.core;
 
 import liquibase.database.AbstractDatabase;
 import liquibase.database.DatabaseConnection;
+import liquibase.database.structure.Schema;
 import liquibase.exception.DatabaseException;
+import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.ExecutorService;
 import liquibase.statement.core.GetViewDefinitionStatement;
 
@@ -25,6 +27,8 @@ public class MSSQLDatabase extends AbstractDatabase {
     }
 
     public MSSQLDatabase() {
+        setDefaultSchemaName("dbo");
+
         systemTablesAndViews.add("syscolumns");
         systemTablesAndViews.add("syscomments");
         systemTablesAndViews.add("sysdepends");
@@ -105,15 +109,14 @@ public class MSSQLDatabase extends AbstractDatabase {
     protected String getAutoIncrementByClause() {
     	return "%d";
     }
-    
-    @Override
-    protected String getDefaultDatabaseSchemaName() throws DatabaseException {
-        return null;
-    }
 
     @Override
-    public String getDefaultCatalogName() throws DatabaseException {
+    public String getDefaultCatalogName() {
+        try {
             return getConnection().getCatalog();
+        } catch (DatabaseException e) {
+            throw new UnexpectedLiquibaseException(e);
+        }
     }
 
     @Override
@@ -127,9 +130,9 @@ public class MSSQLDatabase extends AbstractDatabase {
     }
 
     @Override
-    public String escapeIndexName(String schemaName, String indexName) {
+    public String escapeIndexName(String catalogName, String schemaName, String indexName) {
         // MSSQL server does not support the schema name for the index -
-        return super.escapeIndexName(null, indexName);
+        return super.escapeIndexName(null, null, indexName);
     }
 
     //    protected void dropForeignKeys(Connection conn) throws DatabaseException {
@@ -179,13 +182,13 @@ public class MSSQLDatabase extends AbstractDatabase {
 
 
     @Override
-    public boolean isSystemTable(String catalogName, String schemaName, String tableName) {
-        return super.isSystemTable(catalogName, schemaName, tableName) || schemaName.equals("sys");
+    public boolean isSystemTable(Schema schema, String tableName) {
+        return super.isSystemTable(schema, tableName) || schema.getName(this).equals("sys");
     }
 
     @Override
-    public boolean isSystemView(String catalogName, String schemaName, String viewName) {
-        return super.isSystemView(catalogName, schemaName, viewName) || schemaName.equals("sys");
+    public boolean isSystemView(Schema schema, String viewName) {
+        return super.isSystemView(schema, viewName) || schema.getName(this).equals("sys");
     }
 
     public String generateDefaultConstraintName(String tableName, String columnName) {
@@ -199,24 +202,6 @@ public class MSSQLDatabase extends AbstractDatabase {
     }
 
     @Override
-    public String convertRequestedSchemaToCatalog(String requestedSchema) throws DatabaseException {
-        return getDefaultCatalogName();
-    }
-
-    @Override
-    public String convertRequestedSchemaToSchema(String requestedSchema) throws DatabaseException {
-        if (requestedSchema == null) {
-            requestedSchema = getDefaultDatabaseSchemaName();
-        }
-
-        if (requestedSchema == null) {
-            return "dbo";
-        }
-        return requestedSchema;
-    }
-
-
-    @Override
     public String getDateLiteral(String isoDate) {
         return super.getDateLiteral(isoDate).replace(' ', 'T');
     }
@@ -227,22 +212,8 @@ public class MSSQLDatabase extends AbstractDatabase {
     }
 
     @Override
-	public String getDefaultSchemaName() {
-        String defaultSchemaName = super.getDefaultSchemaName();
-        if (defaultSchemaName == null) {
-            return "dbo";
-        } else {
-            return defaultSchemaName;
-        }
-
-	}
-
-      @Override
-    public String getViewDefinition(String schemaName, String viewName) throws DatabaseException {
-        if (schemaName == null) {
-            schemaName = convertRequestedSchemaToSchema(null);
-        }
-        List<String> defLines = (List<String>) ExecutorService.getInstance().getExecutor(this).queryForList(new GetViewDefinitionStatement(schemaName, viewName), String.class);
+    public String getViewDefinition(Schema schema, String viewName) throws DatabaseException {
+        List<String> defLines = (List<String>) ExecutorService.getInstance().getExecutor(this).queryForList(new GetViewDefinitionStatement(schema.getCatalogName(this), schema.getName(this), viewName), String.class);
         StringBuffer sb = new StringBuffer();
         for (String defLine : defLines) {
             sb.append(defLine);

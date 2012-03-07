@@ -13,7 +13,8 @@ import java.util.Set;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.jvm.JdbcConnection;
-import liquibase.database.typeconversion.TypeConverterFactory;
+import liquibase.database.structure.Schema;
+import liquibase.datatype.DataTypeFactory;
 import liquibase.database.example.ExampleCustomDatabase;
 import liquibase.database.core.MockDatabase;
 import liquibase.database.core.UnsupportedDatabase;
@@ -129,16 +130,16 @@ public abstract class AbstractExecuteTest {
         convertedSql = replaceType("datetime", convertedSql, database);
         convertedSql = replaceType("boolean", convertedSql, database);
 
-        convertedSql = convertedSql.replaceAll("FALSE", TypeConverterFactory.getInstance().findTypeConverter(database).getBooleanType().getFalseBooleanValue());
-        convertedSql = convertedSql.replaceAll("TRUE", TypeConverterFactory.getInstance().findTypeConverter(database).getBooleanType().getFalseBooleanValue());
+        convertedSql = convertedSql.replaceAll("FALSE", DataTypeFactory.getInstance().fromDescription("boolean").objectToString(false, database));
+        convertedSql = convertedSql.replaceAll("TRUE", DataTypeFactory.getInstance().fromDescription("boolean").objectToString(true, database));
         convertedSql = convertedSql.replaceAll("NOW\\(\\)", database.getCurrentDateTimeFunction());
 
         return convertedSql;
     }
 
     private String replaceType(String type, String baseString, Database database) {
-        return baseString.replaceAll(" " + type + " ", " " + TypeConverterFactory.getInstance().findTypeConverter(database).getDataType(type, false) + " ")
-                .replaceAll(" " + type + ",", " " + TypeConverterFactory.getInstance().findTypeConverter(database).getDataType(type, false) + ",");
+        return baseString.replaceAll(" " + type + " ", " " + DataTypeFactory.getInstance().fromDescription(type) + " ")
+                .replaceAll(" " + type + ",", " " + DataTypeFactory.getInstance().fromDescription(type) + ",");
     }
 
     private String replaceDatabaseClauses(String convertedSql, Database database) {
@@ -190,32 +191,32 @@ public abstract class AbstractExecuteTest {
             DatabaseConnection connection = database.getConnection();
             Statement connectionStatement = ((JdbcConnection) connection).getUnderlyingConnection().createStatement();
 
-            database.dropDatabaseObjects(database.convertRequestedSchemaToSchema(null));
+            database.dropDatabaseObjects(Schema.DEFAULT);
             try {
-                connectionStatement.executeUpdate("drop table " + database.escapeTableName(database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName()));
+                connectionStatement.executeUpdate("drop table " + database.escapeTableName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName()));
             } catch (SQLException e) {
                 ;
             }
             connection.commit();
             try {
-                connectionStatement.executeUpdate("drop table " + database.escapeTableName(database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName()));
+                connectionStatement.executeUpdate("drop table " + database.escapeTableName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName()));
             } catch (SQLException e) {
                 ;
             }
             connection.commit();
 
             if (database.supportsSchemas()) {
-                database.dropDatabaseObjects(DatabaseTestContext.ALT_SCHEMA);
+                database.dropDatabaseObjects(new Schema(DatabaseTestContext.ALT_CATALOG, DatabaseTestContext.ALT_SCHEMA));
                 connection.commit();
 
                 try {
-                    connectionStatement.executeUpdate("drop table " + database.escapeTableName(DatabaseTestContext.ALT_SCHEMA, database.getDatabaseChangeLogLockTableName()));
+                    connectionStatement.executeUpdate("drop table " + database.escapeTableName(DatabaseTestContext.ALT_CATALOG, DatabaseTestContext.ALT_SCHEMA, database.getDatabaseChangeLogLockTableName()));
                 } catch (SQLException e) {
                     //ok
                 }
                 connection.commit();
                 try {
-                    connectionStatement.executeUpdate("drop table " + database.escapeTableName(DatabaseTestContext.ALT_SCHEMA, database.getDatabaseChangeLogTableName()));
+                    connectionStatement.executeUpdate("drop table " + database.escapeTableName(DatabaseTestContext.ALT_CATALOG, DatabaseTestContext.ALT_SCHEMA, database.getDatabaseChangeLogTableName()));
                 } catch (SQLException e) {
                     //ok
                 }

@@ -4,6 +4,6 @@ public class DropForeignKeyConstraintStatementTest extends AbstractSqStatementTe
 
     @Override
     protected DropForeignKeyConstraintStatement createStatementUnderTest() {
-        return new DropForeignKeyConstraintStatement(null, null, null);
+        return new DropForeignKeyConstraintStatement(null, null, null, null);
     }
 }

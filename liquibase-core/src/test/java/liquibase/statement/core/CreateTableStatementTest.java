@@ -4,7 +4,7 @@ public class CreateTableStatementTest extends AbstractSqStatementTest<CreateTabl
 
     @Override
     protected CreateTableStatement createStatementUnderTest() {
-        return new CreateTableStatement(null, null);
+        return new CreateTableStatement(null, null, null);
     }
 
 }

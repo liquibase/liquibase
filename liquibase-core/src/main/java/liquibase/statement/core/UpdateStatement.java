@@ -5,6 +5,7 @@ import liquibase.statement.AbstractSqlStatement;
 import java.util.*;
 
 public class UpdateStatement extends AbstractSqlStatement {
+    private String catalogName;
     private String schemaName;
     private String tableName;
     private SortedMap<String, Object> newColumnValues = new TreeMap<String, Object>();
@@ -12,9 +13,14 @@ public class UpdateStatement extends AbstractSqlStatement {
     private List<Object> whereParameters = new ArrayList<Object>();
 
 
-    public UpdateStatement(String schemaName, String tableName) {
+    public UpdateStatement(String catalogName, String schemaName, String tableName) {
+        this.catalogName = catalogName;
         this.schemaName = schemaName;
         this.tableName = tableName;
+    }
+
+    public String getCatalogName() {
+        return catalogName;
     }
 
     public String getSchemaName() {

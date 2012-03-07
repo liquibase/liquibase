@@ -3,23 +3,31 @@ package liquibase.precondition.core;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
+import liquibase.database.structure.Schema;
 import liquibase.exception.*;
 import liquibase.precondition.Precondition;
-import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.DatabaseSnapshotGeneratorFactory;
-import liquibase.util.StringUtils;
 
 public class PrimaryKeyExistsPrecondition implements Precondition {
+    private String catalogName;
     private String schemaName;
     private String primaryKeyName;
     private String tableName;
+
+    public String getCatalogName() {
+        return catalogName;
+    }
+
+    public void setCatalogName(String catalogName) {
+        this.catalogName = catalogName;
+    }
 
     public String getSchemaName() {
         return schemaName;
     }
 
     public void setSchemaName(String schemaName) {
-        this.schemaName = StringUtils.trimToNull(schemaName);
+        this.schemaName = schemaName;
     }
 
     public String getPrimaryKeyName() {
@@ -47,24 +55,18 @@ public class PrimaryKeyExistsPrecondition implements Precondition {
     }
 
     public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet) throws PreconditionFailedException, PreconditionErrorException {
-        DatabaseSnapshot snapshot;
-        String currentSchemaName;
         try {
-            currentSchemaName = getSchemaName() == null ? (database == null ? null: database.getDefaultSchemaName()) : getSchemaName();
-            snapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(database, currentSchemaName, null);
-        } catch (DatabaseException e) {
+            if (!DatabaseSnapshotGeneratorFactory.getInstance().getGenerator(database).hasPrimaryKey(new Schema(getCatalogName(), getSchemaName()), getTableName(), getPrimaryKeyName(), database)) {
+                if (tableName != null) {
+                    throw new PreconditionFailedException("Primary Key does not exist on "+database.escapeStringForDatabase(getTableName()), changeLog, this);
+                } else {
+                    throw new PreconditionFailedException("Primary Key "+database.escapeStringForDatabase(getPrimaryKeyName())+" does not exist", changeLog, this);
+                }
+            }
+        } catch (PreconditionFailedException e) {
+            throw e;
+        } catch (Exception e) {
             throw new PreconditionErrorException(e, changeLog, this);
-        }
-        if (tableName != null) {
-            if (snapshot.getPrimaryKeyForTable(getTableName()) == null) {
-                throw new PreconditionFailedException("Primary Key does not exist on "+database.escapeStringForDatabase(getTableName()), changeLog, this);
-            }
-        } else if (primaryKeyName != null) {
-            if (snapshot.getPrimaryKey(getPrimaryKeyName()) == null) {
-                throw new PreconditionFailedException("Primary Key "+database.escapeStringForDatabase(getPrimaryKeyName())+" does not exist", changeLog, this);
-            }
-        } else {
-            throw new RuntimeException("primaryKeyExists precondition requires a tableName or primaryKeyName");
         }
     }
 

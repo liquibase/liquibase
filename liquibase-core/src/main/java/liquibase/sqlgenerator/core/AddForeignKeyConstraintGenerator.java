@@ -42,7 +42,7 @@ public class AddForeignKeyConstraintGenerator extends AbstractSqlGenerator<AddFo
     public Sql[] generateSql(AddForeignKeyConstraintStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
 	    StringBuilder sb = new StringBuilder();
 	    sb.append("ALTER TABLE ")
-			    .append(database.escapeTableName(statement.getBaseTableSchemaName(), statement.getBaseTableName()))
+			    .append(database.escapeTableName(statement.getBaseTableCatalogName(), statement.getBaseTableSchemaName(), statement.getBaseTableName()))
 			    .append(" ADD CONSTRAINT ");
 	    if (!(database instanceof InformixDatabase)) {
 		    sb.append(database.escapeConstraintName(statement.getConstraintName()));
@@ -50,7 +50,7 @@ public class AddForeignKeyConstraintGenerator extends AbstractSqlGenerator<AddFo
 	    sb.append(" FOREIGN KEY (")
 			    .append(database.escapeColumnNameList(statement.getBaseColumnNames()))
 			    .append(") REFERENCES ")
-			    .append(database.escapeTableName(statement.getReferencedTableSchemaName(), statement.getReferencedTableName()))
+			    .append(database.escapeTableName(statement.getReferencedTableCatalogName(), statement.getReferencedTableSchemaName(), statement.getReferencedTableName()))
 			    .append(" (")
 			    .append(database.escapeColumnNameList(statement.getReferencedColumnNames()))
 			    .append(")");

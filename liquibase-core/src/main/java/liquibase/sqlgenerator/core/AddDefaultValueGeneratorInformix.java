@@ -2,8 +2,8 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
 import liquibase.database.core.InformixDatabase;
-import liquibase.database.typeconversion.TypeConverterFactory;
-import liquibase.database.core.SybaseDatabase;
+import liquibase.database.structure.Schema;
+import liquibase.datatype.DataTypeFactory;
 import liquibase.database.structure.Column;
 import liquibase.database.structure.Table;
 import liquibase.exception.ValidationErrors;
@@ -36,20 +36,19 @@ public class AddDefaultValueGeneratorInformix extends AddDefaultValueGenerator {
 	@Override
 	public Sql[] generateSql(AddDefaultValueStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
 
-		Column column = new Column().setTable(new Table(statement.getTableName()).setSchema(statement.getSchemaName()))
+		Column column = new Column().setRelation(new Table(statement.getTableName()).setSchema(new Schema(statement.getCatalogName(), statement.getSchemaName())))
 				.setName(statement.getColumnName());
 		Object defaultValue = statement.getDefaultValue();
 		StringBuffer sql = new StringBuffer("ALTER TABLE ");
-		sql.append(database.escapeTableName(statement.getSchemaName(), statement.getTableName()));
+		sql.append(database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()));
 		sql.append(" MODIFY (");
-		sql.append(database.escapeColumnName(statement.getSchemaName(), statement.getTableName(),
+		sql.append(database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(),
 				statement.getColumnName()));
 		sql.append(" ");
-		sql.append(TypeConverterFactory.getInstance().findTypeConverter(database)
-				.getDataType(statement.getColumnDataType(), false));
+		sql.append(DataTypeFactory.getInstance().fromDescription(statement.getColumnDataType()));
 		sql.append(" DEFAULT ");
-		sql.append(TypeConverterFactory.getInstance().findTypeConverter(database).getDataType(defaultValue)
-				.convertObjectToString(defaultValue, database));
+		sql.append(DataTypeFactory.getInstance().fromObject(defaultValue, database)
+				.objectToString(defaultValue, database));
 		sql.append(")");
 		UnparsedSql unparsedSql = new UnparsedSql(sql.toString(), column);
 		return new Sql[] { unparsedSql };

@@ -6,6 +6,7 @@ import java.math.BigInteger;
 
 public class AlterSequenceStatement extends AbstractSqlStatement {
 
+    private String catalogName;
     private String schemaName;
     private String sequenceName;
     private BigInteger incrementBy;
@@ -13,7 +14,8 @@ public class AlterSequenceStatement extends AbstractSqlStatement {
     private BigInteger minValue;
     private Boolean ordered;
 
-    public AlterSequenceStatement(String schemaName, String sequenceName) {
+    public AlterSequenceStatement(String catalogName, String schemaName, String sequenceName) {
+        this.catalogName = catalogName;
         this.schemaName = schemaName;
         this.sequenceName = sequenceName;
     }
@@ -22,7 +24,10 @@ public class AlterSequenceStatement extends AbstractSqlStatement {
     public boolean skipOnUnsupported() {
         return true;
     }
-    
+
+    public String getCatalogName() {
+        return catalogName;
+    }
 
     public String getSchemaName() {
         return schemaName;

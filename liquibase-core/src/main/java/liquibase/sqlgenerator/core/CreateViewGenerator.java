@@ -43,7 +43,7 @@ public class CreateViewGenerator extends AbstractSqlGenerator<CreateViewStatemen
         }
 
         return new Sql[]{
-                new UnparsedSql(createClause + " " + database.escapeViewName(statement.getSchemaName(), statement.getViewName()) + " AS " + statement.getSelectQuery())
+                new UnparsedSql(createClause + " " + database.escapeViewName(statement.getCatalogName(), statement.getSchemaName(), statement.getViewName()) + " AS " + statement.getSelectQuery())
         };
     }
 }

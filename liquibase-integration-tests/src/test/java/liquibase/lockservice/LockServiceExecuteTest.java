@@ -32,12 +32,12 @@ public class LockServiceExecuteTest {
                 try {
                     statement = ((JdbcConnection) database.getConnection()).getUnderlyingConnection().createStatement();
                     try {
-                        statement.execute("drop table " + database.escapeTableName(database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName()));
+                        statement.execute("drop table " + database.escapeTableName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName()));
                     } catch (Exception e) {
                         //ok
                     }
                     try {
-                        statement.execute("drop table " + database.escapeTableName(database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName()));
+                        statement.execute("drop table " + database.escapeTableName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName()));
                     } catch (Exception e) {
                         //ok
                     }

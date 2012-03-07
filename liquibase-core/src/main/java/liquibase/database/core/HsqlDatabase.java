@@ -45,6 +45,11 @@ public class HsqlDatabase extends AbstractDatabase {
     }
 
     @Override
+    protected String correctObjectName(String objectName) {
+        return objectName.toUpperCase();
+    }
+
+    @Override
     public boolean supportsSequences() {
         return true;
     }
@@ -54,7 +59,7 @@ public class HsqlDatabase extends AbstractDatabase {
     }
 
     @Override
-    protected String getDefaultDatabaseSchemaName() throws DatabaseException {
+    public String getDefaultSchemaName() {
         return "PUBLIC";
     }
 
@@ -123,11 +128,6 @@ public class HsqlDatabase extends AbstractDatabase {
 
     public boolean supportsTablespaces() {
         return false;
-    }
-
-    @Override
-    public String convertRequestedSchemaToSchema(String requestedSchema) throws DatabaseException {
-        return super.convertRequestedSchemaToSchema(requestedSchema).toUpperCase();
     }
 
     @Override

@@ -4,7 +4,7 @@ public class ReorganizeTableStatementTest extends AbstractSqStatementTest<Reorga
 
     @Override
     protected ReorganizeTableStatement createStatementUnderTest() {
-        return new ReorganizeTableStatement(null, null);
+        return new ReorganizeTableStatement(null, null, null);
     }
 
 }

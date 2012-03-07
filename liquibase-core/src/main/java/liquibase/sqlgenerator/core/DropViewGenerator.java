@@ -18,7 +18,7 @@ public class DropViewGenerator extends AbstractSqlGenerator<DropViewStatement> {
 
     public Sql[] generateSql(DropViewStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         return new Sql[] {
-                new UnparsedSql("DROP VIEW " + database.escapeViewName(statement.getSchemaName(), statement.getViewName()))
+                new UnparsedSql("DROP VIEW " + database.escapeViewName(statement.getCatalogName(), statement.getSchemaName(), statement.getViewName()))
         };
     }
 }

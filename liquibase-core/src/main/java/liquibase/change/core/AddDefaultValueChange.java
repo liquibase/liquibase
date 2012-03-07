@@ -1,8 +1,6 @@
 package liquibase.change.core;
 
-import liquibase.change.AbstractChange;
-import liquibase.change.Change;
-import liquibase.change.ChangeMetaData;
+import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.DatabaseFunction;
@@ -17,8 +15,10 @@ import java.util.Locale;
 /**
  * Sets a new default value to an existing column.
  */
+@ChangeClass(name="addDefaultValue", description = "Add Default Value", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "column")
 public class AddDefaultValueChange extends AbstractChange {
 
+    private String catalogName;
     private String schemaName;
     private String tableName;
     private String columnName;
@@ -29,18 +29,25 @@ public class AddDefaultValueChange extends AbstractChange {
     private Boolean defaultValueBoolean;
     private DatabaseFunction defaultValueComputed;
 
-    public AddDefaultValueChange() {
-        super("addDefaultValue", "Add Default Value", ChangeMetaData.PRIORITY_DEFAULT);
+    @ChangeProperty(mustApplyTo ="column.table.catalog")
+    public String getCatalogName() {
+        return catalogName;
     }
 
+    public void setCatalogName(String catalogName) {
+        this.catalogName = catalogName;
+    }
+
+    @ChangeProperty(mustApplyTo ="column.table.schema")
     public String getSchemaName() {
         return schemaName;
     }
 
     public void setSchemaName(String schemaName) {
-        this.schemaName = StringUtils.trimToNull(schemaName);
+        this.schemaName = schemaName;
     }
 
+    @ChangeProperty(requiredForDatabase = "all", mustApplyTo = "column.table")
     public String getTableName() {
         return tableName;
     }
@@ -49,6 +56,7 @@ public class AddDefaultValueChange extends AbstractChange {
         this.tableName = tableName;
     }
 
+    @ChangeProperty(requiredForDatabase = "all", mustApplyTo = "column")
     public String getColumnName() {
         return columnName;
     }
@@ -132,7 +140,7 @@ public class AddDefaultValueChange extends AbstractChange {
         }
         
         return new SqlStatement[]{
-                new AddDefaultValueStatement(getSchemaName(), getTableName(), getColumnName(), getColumnDataType(), defaultValue)
+                new AddDefaultValueStatement(getCatalogName(), getSchemaName(), getTableName(), getColumnName(), getColumnDataType(), defaultValue)
         };
     }
 

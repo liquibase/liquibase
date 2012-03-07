@@ -1,31 +1,25 @@
 package liquibase.integration.commandline;
 
-import liquibase.change.Change;
-import liquibase.changelog.ChangeSet;
-import liquibase.changelog.DatabaseChangeLog;
-import liquibase.changelog.RanChangeSet;
 import liquibase.database.Database;
-import liquibase.database.DatabaseConnection;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.jvm.JdbcConnection;
-import liquibase.database.structure.DatabaseObject;
-import liquibase.diff.Diff;
+import liquibase.diff.DiffControl;
+import liquibase.diff.DiffGeneratorFactory;
 import liquibase.diff.DiffResult;
 import liquibase.diff.DiffStatusListener;
+import liquibase.diff.output.DiffToChangeLog;
+import liquibase.diff.output.DiffToPrintStream;
 import liquibase.exception.*;
 import liquibase.logging.LogFactory;
-import liquibase.sql.visitor.SqlVisitor;
-import liquibase.statement.DatabaseFunction;
-import liquibase.statement.SqlStatement;
+import liquibase.snapshot.DatabaseSnapshot;
+import liquibase.snapshot.DatabaseSnapshotGeneratorFactory;
 import liquibase.util.StringUtils;
 
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.*;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.io.Writer;
 import java.sql.*;
-import java.sql.Date;
 import java.util.*;
 
 /**
@@ -113,45 +107,49 @@ public class CommandLineUtils {
     }
 
     public static void doDiff(Database referenceDatabase, Database targetDatabase) throws DatabaseException {
-        Diff diff = new Diff(referenceDatabase, targetDatabase);
-        diff.addStatusListener(new OutDiffStatusListener());
-        DiffResult diffResult = diff.compare();
+        DiffControl diffControl = new DiffControl();
+        diffControl.addStatusListener(new OutDiffStatusListener());
+        DiffResult diffResult = DiffGeneratorFactory.getInstance().compare(referenceDatabase, targetDatabase, diffControl);
 
         System.out.println("");
         System.out.println("Diff Results:");
-        diffResult.printResult(System.out);
+        new DiffToPrintStream(diffResult, System.out).print();
     }
 
     public static void doDiffToChangeLog(String changeLogFile,
                                          Database referenceDatabase,
                                          Database targetDatabase)
             throws DatabaseException, IOException, ParserConfigurationException {
-        Diff diff = new Diff(referenceDatabase, targetDatabase);
-        diff.addStatusListener(new OutDiffStatusListener());
-        DiffResult diffResult = diff.compare();
+        DiffControl diffControl = new DiffControl();
+        diffControl.addStatusListener(new OutDiffStatusListener());
+
+        DiffResult diffResult = DiffGeneratorFactory.getInstance().compare(referenceDatabase, targetDatabase, diffControl);
 
         if (changeLogFile == null) {
-            diffResult.printChangeLog(System.out, targetDatabase);
+            new DiffToChangeLog(diffResult).print(System.out);
         } else {
-            diffResult.printChangeLog(changeLogFile, targetDatabase);
+            new DiffToChangeLog(diffResult).print(changeLogFile);
         }
     }
 
-    public static void doGenerateChangeLog(String changeLogFile, Database originalDatabase, String defaultSchemaName, String diffTypes, String author, String context, String dataDir) throws DatabaseException, IOException, ParserConfigurationException {
-        Diff diff = new Diff(originalDatabase, defaultSchemaName);
-        diff.setDiffTypes(diffTypes);
+    public static void doGenerateChangeLog(String changeLogFile, Database originalDatabase, String catalogName, String schemaName, String diffTypes, String author, String context, String dataDir) throws DatabaseException, IOException, ParserConfigurationException {
+        DiffControl diffControl = new DiffControl(catalogName, schemaName, null, null, diffTypes);
+        diffControl.setDataDir(dataDir);
+        diffControl.addStatusListener(new OutDiffStatusListener());
 
-        diff.addStatusListener(new OutDiffStatusListener());
-        DiffResult diffResult = diff.compare();
-        diffResult.setChangeSetAuthor(author);
-        diffResult.setChangeSetContext(context);
-        diffResult.setDataDir(dataDir);
+        DatabaseSnapshot originalDatabaseSnapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(originalDatabase, diffControl, DiffControl.DatabaseRole.REFERENCE);
+        DiffResult diffResult = DiffGeneratorFactory.getInstance().compare(originalDatabaseSnapshot, new DatabaseSnapshot(null), diffControl);
+
+        DiffToChangeLog changeLogWriter = new DiffToChangeLog(diffResult);
+
+        changeLogWriter.setChangeSetAuthor(author);
+        changeLogWriter.setChangeSetContext(context);
 
         if (StringUtils.trimToNull(changeLogFile) != null) {
-            diffResult.printChangeLog(changeLogFile, originalDatabase);
+            changeLogWriter.print(changeLogFile);
         } else {
             PrintStream outputStream = System.out;
-            diffResult.printChangeLog(outputStream, originalDatabase);
+            changeLogWriter.print(outputStream);
         }
     }
 

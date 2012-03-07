@@ -1,9 +1,6 @@
 package liquibase.change.core;
 
-import liquibase.change.AbstractChange;
-import liquibase.change.Change;
-import liquibase.change.ChangeMetaData;
-import liquibase.change.ColumnConfig;
+import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.database.core.SQLiteDatabase.AlterTableVisitor;
@@ -18,26 +15,34 @@ import java.util.List;
 /**
  * Drops a not-null constraint from an existing column.
  */
+@ChangeClass(name="dropNotNullConstraint", description = "Drop Not-Null Constraint", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "notNullConstraint")
 public class DropNotNullConstraintChange extends AbstractChange {
 
+    private String catalogName;
     private String schemaName;
     private String tableName;
     private String columnName;
     private String columnDataType;
 
-
-    public DropNotNullConstraintChange() {
-        super("dropNotNullConstraint", "Drop Not-Null Constraint", ChangeMetaData.PRIORITY_DEFAULT);
+    @ChangeProperty(mustApplyTo ="notNullConstraint.table.catalog")
+    public String getCatalogName() {
+        return catalogName;
     }
 
+    public void setCatalogName(String catalogName) {
+        this.catalogName = catalogName;
+    }
+
+    @ChangeProperty(mustApplyTo ="notNullConstraint.table.schema")
     public String getSchemaName() {
         return schemaName;
     }
 
     public void setSchemaName(String schemaName) {
-        this.schemaName = StringUtils.trimToNull(schemaName);
+        this.schemaName = schemaName;
     }
 
+    @ChangeProperty(requiredForDatabase = "all", mustApplyTo = "notNullConstraint.table")
     public String getTableName() {
         return tableName;
     }
@@ -46,6 +51,7 @@ public class DropNotNullConstraintChange extends AbstractChange {
         this.tableName = tableName;
     }
 
+    @ChangeProperty(requiredForDatabase = "all", mustApplyTo = "notNullConstraint.column")
     public String getColumnName() {
         return columnName;
     }
@@ -70,7 +76,8 @@ public class DropNotNullConstraintChange extends AbstractChange {
 //    	}
 
     	return new SqlStatement[] { new SetNullableStatement(
-    			getSchemaName() == null?database.getDefaultSchemaName():getSchemaName(), 
+                getCatalogName(),
+    			getSchemaName(),
     			getTableName(), getColumnName(), getColumnDataType(), true) 
     	};
     }
@@ -105,7 +112,7 @@ public class DropNotNullConstraintChange extends AbstractChange {
     		// alter table
 			statements.addAll(SQLiteDatabase.getAlterTableStatements(
 					rename_alter_visitor,
-					database,getSchemaName(),getTableName()));
+					database,getCatalogName(), getSchemaName(),getTableName()));
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

@@ -22,16 +22,12 @@ public class GetViewDefinitionGeneratorSybase extends GetViewDefinitionGenerator
 
     @Override
     public Sql[] generateSql(GetViewDefinitionStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-        try {
-            String sql = "select text from syscomments where id = object_id('" +
-    			database.convertRequestedSchemaToSchema(statement.getSchemaName()) + "." +
-    			statement.getViewName() + "') order by colid";
-            
-            return new Sql[]{
-            	new UnparsedSql(sql)
-            };
-        } catch (DatabaseException e) {
-            throw new UnexpectedLiquibaseException(e);
-        }
+        String sql = "select text from syscomments where id = object_id('" +
+                database.correctSchemaName(statement.getSchemaName()) + "." +
+                statement.getViewName() + "') order by colid";
+
+        return new Sql[]{
+                new UnparsedSql(sql)
+        };
     }
 }

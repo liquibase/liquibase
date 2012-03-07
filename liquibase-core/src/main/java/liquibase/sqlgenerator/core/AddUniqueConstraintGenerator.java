@@ -34,12 +34,12 @@ public class AddUniqueConstraintGenerator extends AbstractSqlGenerator<AddUnique
 		String sql = null;
 		if (statement.getConstraintName() == null) {
 			sql = String.format("ALTER TABLE %s ADD UNIQUE (%s)"
-					, database.escapeTableName(statement.getSchemaName(), statement.getTableName())
+					, database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName())
 					, database.escapeColumnNameList(statement.getColumnNames())
 			);
 		} else {
 			sql = String.format("ALTER TABLE %s ADD CONSTRAINT %s UNIQUE (%s)"
-					, database.escapeTableName(statement.getSchemaName(), statement.getTableName())
+					, database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName())
 					, database.escapeConstraintName(statement.getConstraintName())
 					, database.escapeColumnNameList(statement.getColumnNames())
 			);

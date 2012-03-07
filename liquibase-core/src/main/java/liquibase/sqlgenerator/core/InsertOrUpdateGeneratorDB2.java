@@ -19,7 +19,7 @@ public class InsertOrUpdateGeneratorDB2 extends InsertOrUpdateGenerator {
 
         recordCheckSql.append("BEGIN ATOMIC\n");
         recordCheckSql.append("\tDECLARE v_reccount INTEGER;\n");
-        recordCheckSql.append("\tSET v_reccount = (SELECT COUNT(*) FROM " + database.escapeTableName(insertOrUpdateStatement.getSchemaName(), insertOrUpdateStatement.getTableName()) + " WHERE ");
+        recordCheckSql.append("\tSET v_reccount = (SELECT COUNT(*) FROM " + database.escapeTableName(insertOrUpdateStatement.getCatalogName(), insertOrUpdateStatement.getSchemaName(), insertOrUpdateStatement.getTableName()) + " WHERE ");
 
         recordCheckSql.append(whereClause);
         recordCheckSql.append(");\n");

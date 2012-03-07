@@ -1,7 +1,9 @@
 package liquibase.change.core;
 
 import liquibase.change.AbstractChange;
+import liquibase.change.ChangeClass;
 import liquibase.change.ChangeMetaData;
+import liquibase.change.ChangeProperty;
 import liquibase.database.Database;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.DropTableStatement;
@@ -10,25 +12,33 @@ import liquibase.util.StringUtils;
 /**
  * Drops an existing table.
  */
+@ChangeClass(name="dropTable", description = "Drop Table", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "table")
 public class DropTableChange extends AbstractChange {
 
+    private String catalogName;
     private String schemaName;
     private String tableName;
     private Boolean cascadeConstraints;
 
-    public DropTableChange() {
-        super("dropTable", "Drop Table", ChangeMetaData.PRIORITY_DEFAULT);
+    @ChangeProperty(mustApplyTo ="table.schema")
+    public String getCatalogName() {
+        return catalogName;
     }
 
+    public void setCatalogName(String catalogName) {
+        this.catalogName = catalogName;
+    }
 
+    @ChangeProperty(mustApplyTo ="table.schema")
     public String getSchemaName() {
         return schemaName;
     }
 
     public void setSchemaName(String schemaName) {
-        this.schemaName = StringUtils.trimToNull(schemaName);
+        this.schemaName = schemaName;
     }
 
+    @ChangeProperty(requiredForDatabase = "all", mustApplyTo = "table")
     public String getTableName() {
         return tableName;
     }
@@ -52,7 +62,7 @@ public class DropTableChange extends AbstractChange {
         }
         
         return new SqlStatement[]{
-                new DropTableStatement(getSchemaName() == null?database.getDefaultSchemaName():getSchemaName(), getTableName(), constraints)
+                new DropTableStatement(getCatalogName(), getSchemaName(), getTableName(), constraints)
         };
     }
 

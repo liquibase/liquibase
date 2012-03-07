@@ -41,13 +41,13 @@ public class DropIndexGenerator extends AbstractSqlGenerator<DropIndexStatement>
         String schemaName = statement.getTableSchemaName();
         
         if (database instanceof MySQLDatabase) {
-            return new Sql[] {new UnparsedSql("DROP INDEX " + database.escapeIndexName(null, statement.getIndexName()) + " ON " + database.escapeTableName(schemaName, statement.getTableName())) };
+            return new Sql[] {new UnparsedSql("DROP INDEX " + database.escapeIndexName(null, null, statement.getIndexName()) + " ON " + database.escapeTableName(statement.getTableCatalogName(), schemaName, statement.getTableName())) };
         } else if (database instanceof MSSQLDatabase) {
-            return new Sql[] {new UnparsedSql("DROP INDEX " + database.escapeTableName(schemaName, statement.getTableName()) + "." + database.escapeIndexName(null, statement.getIndexName())) };
+            return new Sql[] {new UnparsedSql("DROP INDEX " + database.escapeTableName(statement.getTableCatalogName(), schemaName, statement.getTableName()) + "." + database.escapeIndexName(null, null, statement.getIndexName())) };
         } else if (database instanceof PostgresDatabase) {
-			return new Sql[]{new UnparsedSql("DROP INDEX " + database.escapeIndexName(schemaName, statement.getIndexName()))};
+			return new Sql[]{new UnparsedSql("DROP INDEX " + database.escapeIndexName(statement.getTableCatalogName(),schemaName, statement.getIndexName()))};
 		}
 
-        return new Sql[] {new UnparsedSql("DROP INDEX " + database.escapeIndexName(schemaName, statement.getIndexName())) };
+        return new Sql[] {new UnparsedSql("DROP INDEX " + database.escapeIndexName(statement.getTableCatalogName(), schemaName, statement.getIndexName())) };
     }
 }

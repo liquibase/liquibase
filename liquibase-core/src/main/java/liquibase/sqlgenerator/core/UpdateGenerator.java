@@ -1,11 +1,10 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
-import liquibase.database.typeconversion.TypeConverterFactory;
+import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
-import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.UpdateStatement;
 
@@ -21,9 +20,9 @@ public class UpdateGenerator extends AbstractSqlGenerator<UpdateStatement> {
     }
 
     public Sql[] generateSql(UpdateStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-        StringBuffer sql = new StringBuffer("UPDATE " + database.escapeTableName(statement.getSchemaName(), statement.getTableName()) + " SET");
+        StringBuffer sql = new StringBuffer("UPDATE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " SET");
         for (String column : statement.getNewColumnValues().keySet()) {
-            sql.append(" ").append(database.escapeColumnName(statement.getSchemaName(), statement.getTableName(), column)).append(" = ");
+            sql.append(" ").append(database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), column)).append(" = ");
             sql.append(convertToString(statement.getNewColumnValues().get(column), database));
             sql.append(",");
         }
@@ -32,7 +31,7 @@ public class UpdateGenerator extends AbstractSqlGenerator<UpdateStatement> {
         if (statement.getWhereClause() != null) {
             String fixedWhereClause = "WHERE " + statement.getWhereClause().trim();
             for (Object param : statement.getWhereParameters()) {
-                fixedWhereClause = fixedWhereClause.replaceFirst("\\?", convertToString(param, database));
+                fixedWhereClause = fixedWhereClause.replaceFirst("\\?", DataTypeFactory.getInstance().fromObject(param, database).objectToString(param, database));
             }
             sql.append(" ").append(fixedWhereClause);
         }
@@ -49,7 +48,7 @@ public class UpdateGenerator extends AbstractSqlGenerator<UpdateStatement> {
         } else if (newValue instanceof String && database.shouldQuoteValue(((String) newValue))) {
             sqlString = "'" + database.escapeStringForDatabase(newValue.toString()) + "'";
         } else if (newValue instanceof Date) {
-          // converting java.util.Date to java.sql.Date
+            // converting java.util.Date to java.sql.Date
             Date date = (Date) newValue;
             if (date.getClass().equals(java.util.Date.class)) {
                 date = new java.sql.Date(date.getTime());
@@ -58,9 +57,9 @@ public class UpdateGenerator extends AbstractSqlGenerator<UpdateStatement> {
             sqlString = database.getDateLiteral(date);
         } else if (newValue instanceof Boolean) {
             if (((Boolean) newValue)) {
-                sqlString = TypeConverterFactory.getInstance().findTypeConverter(database).getBooleanType().getTrueBooleanValue();
+                sqlString = DataTypeFactory.getInstance().getTrueBooleanValue(database);
             } else {
-                sqlString = TypeConverterFactory.getInstance().findTypeConverter(database).getBooleanType().getFalseBooleanValue();
+                sqlString = DataTypeFactory.getInstance().getFalseBooleanValue(database);
             }
         } else {
             sqlString = newValue.toString();

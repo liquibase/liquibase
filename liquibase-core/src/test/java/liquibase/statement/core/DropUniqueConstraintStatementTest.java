@@ -5,7 +5,7 @@ public class DropUniqueConstraintStatementTest extends AbstractSqStatementTest<D
 
     @Override
     protected DropUniqueConstraintStatement createStatementUnderTest() {
-        return new DropUniqueConstraintStatement(null, null, null);
+        return new DropUniqueConstraintStatement(null, null, null, null);
     }
 
 

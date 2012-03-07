@@ -3,15 +3,11 @@ package liquibase.snapshot.jvm;
 import liquibase.database.Database;
 import liquibase.database.core.InformixDatabase;
 import liquibase.database.structure.Column;
-import liquibase.database.structure.ForeignKey;
-import liquibase.database.structure.ForeignKeyInfo;
-import liquibase.exception.DatabaseException;
+import liquibase.database.structure.DataType;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class InformixDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerator {
@@ -41,47 +37,49 @@ public class InformixDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGener
     }
 
     @Override
-    protected void getColumnTypeAndDefValue(Column columnInfo, ResultSet rs, Database database) throws SQLException, DatabaseException {
-    	// See http://publib.boulder.ibm.com/infocenter/idshelp/v115/topic/com.ibm.sqlr.doc/sqlr07.htm
-    	String typeName = rs.getString("TYPE_NAME").toUpperCase();
-    	if ("DATETIME".equals(typeName) || "INTERVAL".equals(typeName)) {
-    		int collength = columnInfo.getColumnSize();
-    		//int positions = collength / 256;
-    		int firstQualifierType = (collength % 256) / 16;
-    		int lastQualifierType = (collength % 256) % 16;
-    		String type = "DATETIME".equals(typeName) ? "DATETIME" : "INTERVAL";
-    		String firstQualifier = qualifiers.get(firstQualifierType);
-    		String lastQualifier = qualifiers.get(lastQualifierType);
-    		columnInfo.setTypeName(type + " " + firstQualifier + " TO " + lastQualifier);
-    		columnInfo.setLengthSemantics(Column.LengthSemantics.BYTE);
-    	} else {
-        	super.getColumnTypeAndDefValue(columnInfo, rs, database);
-    	}
-    }
-    
-    @Override
-	public List<ForeignKey> getForeignKeys(String schemaName, String foreignKeyTableName, Database database) throws DatabaseException {
-        List<ForeignKey> fkList = new ArrayList<ForeignKey>();
-		try {
-            String dbCatalog = database.convertRequestedSchemaToCatalog(schemaName);
-            // Informix handles schema differently
-            String dbSchema = null;
-            ResultSet rs = getMetaData(database).getImportedKeys(dbCatalog, dbSchema, convertTableNameToDatabaseTableName(foreignKeyTableName));
+    protected DataType readDataType(ResultSet rs, Column column, Database database) throws SQLException {
+        // See http://publib.boulder.ibm.com/infocenter/idshelp/v115/topic/com.ibm.sqlr.doc/sqlr07.htm
+        String typeName = rs.getString("TYPE_NAME").toUpperCase();
+        if ("DATETIME".equals(typeName) || "INTERVAL".equals(typeName)) {
+            int collength = rs.getInt("COLUMN_SIZE");
+            //int positions = collength / 256;
+            int firstQualifierType = (collength % 256) / 16;
+            int lastQualifierType = (collength % 256) % 16;
+            String type = "DATETIME".equals(typeName) ? "DATETIME" : "INTERVAL";
+            String firstQualifier = qualifiers.get(firstQualifierType);
+            String lastQualifier = qualifiers.get(lastQualifierType);
+            DataType dataTypeMetaData = new DataType(type + " " + firstQualifier + " TO " + lastQualifier);
+            dataTypeMetaData.setColumnSizeUnit(DataType.ColumnSizeUnit.BYTE);
 
-            try {
-                while (rs.next()) {
-                    ForeignKeyInfo fkInfo = fillForeignKeyInfo(rs);
-
-                    fkList.add(generateForeignKey(fkInfo, database, fkList));
-                }
-            } finally {
-                rs.close();
-            }
-
-            return fkList;
-
-        } catch (Exception e) {
-            throw new DatabaseException(e);
+            return dataTypeMetaData;
+        } else {
+            return super.readDataType(rs, column, database);
         }
     }
+
+//    @Override
+//	public List<ForeignKey> getForeignKeys(String schemaName, String foreignKeyTableName, Database database) throws DatabaseException {
+//        List<ForeignKey> fkList = new ArrayList<ForeignKey>();
+//		try {
+//            String dbCatalog = database.convertRequestedSchemaToCatalog(schemaName);
+//            // Informix handles schema differently
+//            String dbSchema = null;
+//            ResultSet rs = getMetaData(database).getImportedKeys(dbCatalog, dbSchema, database.correctTableName(foreignKeyTableName));
+//
+//            try {
+//                while (rs.next()) {
+//                    ForeignKeyInfo fkInfo = readForeignKey(rs);
+//
+//                    fkList.add(generateForeignKey(fkInfo, database, fkList));
+//                }
+//            } finally {
+//                rs.close();
+//            }
+//
+//            return fkList;
+//
+//        } catch (Exception e) {
+//            throw new DatabaseException(e);
+//        }
+//    }
 }

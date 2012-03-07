@@ -12,6 +12,7 @@ import java.util.List;
 /**
  * Creates an index on an existing column.
  */
+@ChangeClass(name="createIndex", description = "Create Index", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "index")
 public class CreateIndexChange extends AbstractChange implements ChangeWithColumns<ColumnConfig> {
 
     private String schemaName;
@@ -24,13 +25,14 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
 	// for example: foreignKey, primaryKey or uniqueConstraint
     @ChangeProperty(includeInSerialization = false)
 	private String associatedWith;
+    private String catalogName;
 
 
     public CreateIndexChange() {
-        super("createIndex", "Create Index", ChangeMetaData.PRIORITY_DEFAULT);
         columns = new ArrayList<ColumnConfig>();
     }
 
+    @ChangeProperty(requiredForDatabase = "all", mustApplyTo = "index")
     public String getIndexName() {
         return indexName;
     }
@@ -39,14 +41,18 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
         this.indexName = indexName;
     }
 
+
+
+    @ChangeProperty(mustApplyTo ="index.schema")
     public String getSchemaName() {
         return schemaName;
     }
 
     public void setSchemaName(String schemaName) {
-        this.schemaName = StringUtils.trimToNull(schemaName);
+        this.schemaName = schemaName;
     }
 
+    @ChangeProperty(requiredForDatabase = "all", mustApplyTo = "index.table")
     public String getTableName() {
         return tableName;
     }
@@ -55,6 +61,7 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
         this.tableName = tableName;
     }
 
+    @ChangeProperty(requiredForDatabase = "all", mustApplyTo = "index.column")
     public List<ColumnConfig> getColumns() {
         return columns;
     }
@@ -85,7 +92,8 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
 	    return new SqlStatement[]{
 			    new CreateIndexStatement(
 					    getIndexName(),
-					    getSchemaName() == null ? database.getDefaultSchemaName() : getSchemaName(),
+                        getCatalogName(),
+					    getSchemaName(),
 					    getTableName(),
 					    this.isUnique(),
 					    getAssociatedWith(),
@@ -138,4 +146,13 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
 	public void setAssociatedWith(String associatedWith) {
 		this.associatedWith = associatedWith;
 	}
+
+
+    public String getCatalogName() {
+        return catalogName;
+    }
+
+    public void setCatalogName(String catalogName) {
+        this.catalogName = catalogName;
+    }
 }

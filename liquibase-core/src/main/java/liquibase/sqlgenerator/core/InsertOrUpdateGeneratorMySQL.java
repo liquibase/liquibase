@@ -1,11 +1,10 @@
 package liquibase.sqlgenerator.core;
 
 import java.util.Arrays;
-import java.util.Date;
 import java.util.HashSet;
 import liquibase.database.Database;
 import liquibase.database.core.MySQLDatabase;
-import liquibase.database.typeconversion.TypeConverterFactory;
+import liquibase.datatype.DataTypeFactory;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.InsertOrUpdateStatement;
 
@@ -34,7 +33,7 @@ public class InsertOrUpdateGeneratorMySQL extends InsertOrUpdateGenerator {
             if (!hashPkFields.contains(columnKey)) {
             	hasFields = true;
             	updateClause.append(columnKey).append(" = ");
-            	updateClause.append(convertToString(insertOrUpdateStatement.getColumnValue(columnKey),database));
+            	updateClause.append(DataTypeFactory.getInstance().fromObject(insertOrUpdateStatement.getColumnValue(columnKey), database).objectToString(columnKey, database));
             	updateClause.append(",");
             }
         }
@@ -64,25 +63,5 @@ public class InsertOrUpdateGeneratorMySQL extends InsertOrUpdateGenerator {
     @Override
     protected String getElse(Database database) {
         return "";
-    }
-
-    private String convertToString(Object newValue, Database database) {
-        String sqlString;
-        if (newValue == null || newValue.toString().equals("") || newValue.toString().equalsIgnoreCase("NULL")) {
-            sqlString = "NULL";
-        } else if (newValue instanceof String && database.shouldQuoteValue(((String) newValue))) {
-            sqlString = "'" + database.escapeStringForDatabase(newValue.toString()) + "'";
-        } else if (newValue instanceof Date) {
-            sqlString = database.getDateLiteral(((Date) newValue));
-        } else if (newValue instanceof Boolean) {
-            if (((Boolean) newValue)) {
-                sqlString = TypeConverterFactory.getInstance().findTypeConverter(database).getBooleanType().getTrueBooleanValue();
-            } else {
-                sqlString = TypeConverterFactory.getInstance().findTypeConverter(database).getBooleanType().getFalseBooleanValue();
-            }
-        } else {
-            sqlString = newValue.toString();
-        }
-        return sqlString;
     }
 }

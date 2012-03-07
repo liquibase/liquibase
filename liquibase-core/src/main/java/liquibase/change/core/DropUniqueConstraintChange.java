@@ -1,8 +1,6 @@
 package liquibase.change.core;
 
-import liquibase.change.AbstractChange;
-import liquibase.change.ChangeMetaData;
-import liquibase.change.ColumnConfig;
+import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.database.core.SQLiteDatabase.AlterTableVisitor;
@@ -18,7 +16,9 @@ import java.util.List;
 /**
  * Removes an existing unique constraint.
  */
+@ChangeClass(name="dropUniqueConstraint", description = "Drop Unique Constraint", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "uniqueConstraint")
 public class DropUniqueConstraintChange extends AbstractChange {
+    private String catalogName;
     private String schemaName;
     private String tableName;
     private String constraintName;
@@ -27,18 +27,25 @@ public class DropUniqueConstraintChange extends AbstractChange {
      */
     private String uniqueColumns;
 
-	public DropUniqueConstraintChange() {
-        super("dropUniqueConstraint", "Drop Unique Constraint", ChangeMetaData.PRIORITY_DEFAULT);
+    @ChangeProperty(mustApplyTo ="uniqueConstraint.table.catalog")
+    public String getCatalogName() {
+        return catalogName;
     }
 
+    public void setCatalogName(String catalogName) {
+        this.catalogName = catalogName;
+    }
+
+    @ChangeProperty(mustApplyTo ="uniqueConstraint.table.schema")
     public String getSchemaName() {
         return schemaName;
     }
 
     public void setSchemaName(String schemaName) {
-        this.schemaName = StringUtils.trimToNull(schemaName);
+        this.schemaName = schemaName;
     }
 
+    @ChangeProperty(requiredForDatabase = "all", mustApplyTo = "uniqueConstraint.table")
     public String getTableName() {
         return tableName;
     }
@@ -47,6 +54,7 @@ public class DropUniqueConstraintChange extends AbstractChange {
         this.tableName = tableName;
     }
 
+    @ChangeProperty(requiredForDatabase = "all", mustApplyTo = "uniqueConstraint")
     public String getConstraintName() {
         return constraintName;
     }
@@ -69,7 +77,7 @@ public class DropUniqueConstraintChange extends AbstractChange {
 //    		// return special statements for SQLite databases
 //    		return generateStatementsForSQLiteDatabase(database);
 //        }
-    	DropUniqueConstraintStatement statement = new DropUniqueConstraintStatement(getSchemaName() == null?database.getDefaultSchemaName():getSchemaName(), getTableName(), getConstraintName());
+    	DropUniqueConstraintStatement statement = new DropUniqueConstraintStatement(getCatalogName(), getSchemaName(), getTableName(), getConstraintName());
     	if (database instanceof SybaseASADatabase) {
     		statement.setUniqueColumns(uniqueColumns);
     	}
@@ -112,7 +120,7 @@ public class DropUniqueConstraintChange extends AbstractChange {
     		// alter table
 			statements.addAll(SQLiteDatabase.getAlterTableStatements(
 					rename_alter_visitor,
-					database,getSchemaName(),getTableName()));
+					database,getCatalogName(), getSchemaName(),getTableName()));
     	} catch (Exception e) {
 			e.printStackTrace();
 		}

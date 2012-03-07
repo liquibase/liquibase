@@ -2,6 +2,7 @@ package liquibase.database.core;
 
 import liquibase.database.AbstractDatabase;
 import liquibase.database.DatabaseConnection;
+import liquibase.database.structure.Schema;
 import liquibase.exception.DatabaseException;
 
 public class CacheDatabase extends AbstractDatabase {
@@ -49,11 +50,6 @@ public class CacheDatabase extends AbstractDatabase {
 
 
     @Override
-    protected String getDefaultDatabaseSchemaName() throws DatabaseException {
-        return "";
-    }
-
-    @Override
     public boolean supportsSequences() {
         return false;
     }
@@ -69,7 +65,7 @@ public class CacheDatabase extends AbstractDatabase {
 
 
     @Override
-    public String getViewDefinition(String schemaName, String viewName) throws DatabaseException {
+    public String getViewDefinition(Schema schema, String viewName) throws DatabaseException {
         return null;
     }
 }

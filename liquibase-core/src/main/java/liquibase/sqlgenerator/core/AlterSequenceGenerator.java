@@ -32,7 +32,7 @@ public class AlterSequenceGenerator extends AbstractSqlGenerator<AlterSequenceSt
     public Sql[] generateSql(AlterSequenceStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         StringBuffer buffer = new StringBuffer();
         buffer.append("ALTER SEQUENCE ");
-        buffer.append(database.escapeSequenceName(statement.getSchemaName(), statement.getSequenceName()));
+        buffer.append(database.escapeSequenceName(statement.getCatalogName(), statement.getSchemaName(), statement.getSequenceName()));
 
         if (statement.getIncrementBy() != null) {
                 buffer.append(" INCREMENT BY ").append(statement.getIncrementBy());

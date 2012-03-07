@@ -9,7 +9,6 @@ import liquibase.database.core.DerbyDatabase;
 import liquibase.database.core.HsqlDatabase;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.core.H2Database;
-import liquibase.database.typeconversion.TypeConverterFactory;
 import liquibase.sql.Sql;
 import liquibase.sqlgenerator.AbstractSqlGeneratorTest;
 import liquibase.sqlgenerator.SqlGenerator;
@@ -20,6 +19,7 @@ public class AddAutoIncrementGeneratorTest extends AbstractSqlGeneratorTest<AddA
 	protected static final String TABLE_NAME = "TABLE_NAME";
 	protected static final String COLUMN_NAME = "COLUMN_NAME";
 	protected static final String SCHEMA_NAME = "SCHEMA_NAME";
+    protected static final String CATALOG_NAME = "CATALOG_NAME";
 
     public AddAutoIncrementGeneratorTest() throws Exception {
     	this(new AddAutoIncrementGenerator());
@@ -31,7 +31,7 @@ public class AddAutoIncrementGeneratorTest extends AbstractSqlGeneratorTest<AddA
 
     @Override
 	protected AddAutoIncrementStatement createSampleSqlStatement() {
-        return new AddAutoIncrementStatement(null, TABLE_NAME, COLUMN_NAME, null, null, null);
+        return new AddAutoIncrementStatement(null, null, TABLE_NAME, COLUMN_NAME, null, null, null);
     }
 
     @Override
@@ -53,11 +53,11 @@ public class AddAutoIncrementGeneratorTest extends AbstractSqlGeneratorTest<AddA
     		Database database, BigInteger startWith, BigInteger incrementBy) {
 		
     	AddAutoIncrementStatement statement = new AddAutoIncrementStatement(
+                CATALOG_NAME,
         	SCHEMA_NAME,
         	TABLE_NAME,
         	COLUMN_NAME,
-        	TypeConverterFactory.getInstance().findTypeConverter(database).getDataType(
-        		"BIGINT", true).toString(),
+        	"BIGINT",
         	startWith,
         	incrementBy);   	
     	

@@ -1,12 +1,11 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
-import liquibase.database.typeconversion.TypeConverterFactory;
+import liquibase.datatype.DataTypeFactory;
 import liquibase.database.core.SybaseDatabase;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
-import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.CreateDatabaseChangeLogTableStatement;
 
@@ -27,10 +26,10 @@ public class CreateDatabaseChangeLogTableGeneratorSybase extends AbstractSqlGene
 
     public Sql[] generateSql(CreateDatabaseChangeLogTableStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         return new Sql[] {
-                new UnparsedSql("CREATE TABLE " + database.escapeTableName(database.getDefaultSchemaName(), database.getDatabaseChangeLogTableName()) + " (ID VARCHAR(150) NOT NULL, " +
+                new UnparsedSql("CREATE TABLE " + database.escapeTableName(database.getDefaultCatalogName(), database.getDefaultSchemaName(), database.getDatabaseChangeLogTableName()) + " (ID VARCHAR(150) NOT NULL, " +
                 "AUTHOR VARCHAR(150) NOT NULL, " +
                 "FILENAME VARCHAR(255) NOT NULL, " +
-                "DATEEXECUTED " + TypeConverterFactory.getInstance().findTypeConverter(database).getDateTimeType() + " NOT NULL, " +
+                "DATEEXECUTED " + DataTypeFactory.getInstance().fromDescription("datetime").toDatabaseDataType(database) + " NOT NULL, " +
                 "ORDEREXECUTED INT NOT NULL, " +
                 "EXECTYPE VARCHAR(10) NOT NULL, " +
                 "MD5SUM VARCHAR(35) NULL, " +

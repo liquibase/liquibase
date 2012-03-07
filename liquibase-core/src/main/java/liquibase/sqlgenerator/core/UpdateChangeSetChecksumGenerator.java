@@ -24,7 +24,7 @@ public class UpdateChangeSetChecksumGenerator extends AbstractSqlGenerator<Updat
         ChangeSet changeSet = statement.getChangeSet();
 
         SqlStatement runStatement = null;
-        runStatement = new UpdateStatement(database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName())
+        runStatement = new UpdateStatement(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName())
                 .addNewColumnValue("MD5SUM", changeSet.generateCheckSum().toString())
                 .setWhereClause("ID=? AND AUTHOR=? AND FILENAME=?")
                 .addWhereParameters(changeSet.getId(), changeSet.getAuthor(), changeSet.getFilePath());

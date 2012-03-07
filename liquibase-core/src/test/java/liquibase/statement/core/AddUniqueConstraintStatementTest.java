@@ -4,7 +4,7 @@ public class AddUniqueConstraintStatementTest extends AbstractSqStatementTest<Ad
 
     @Override
     protected AddUniqueConstraintStatement createStatementUnderTest() {
-        return new AddUniqueConstraintStatement(null, null, null, null);
+        return new AddUniqueConstraintStatement(null, null, null, null, null);
     }
 
 

@@ -27,12 +27,8 @@ public class SelectSequencesGeneratorOracle extends AbstractSqlGenerator<SelectS
     }
 
     public Sql[] generateSql(SelectSequencesStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-        try {
-            return new Sql[] {
-                    new UnparsedSql("SELECT SEQUENCE_NAME FROM ALL_SEQUENCES WHERE SEQUENCE_OWNER = '" + database.convertRequestedSchemaToSchema(statement.getSchemaName()) + "'")
-            };
-        } catch (DatabaseException e) {
-            throw new UnexpectedLiquibaseException(e);
-        }
+        return new Sql[] {
+                new UnparsedSql("SELECT SEQUENCE_NAME FROM ALL_SEQUENCES WHERE SEQUENCE_OWNER = '" + database.correctSchemaName(statement.getSchemaName()) + "'")
+        };
     }
 }

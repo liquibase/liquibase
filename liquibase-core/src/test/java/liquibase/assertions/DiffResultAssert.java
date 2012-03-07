@@ -28,7 +28,7 @@ public class DiffResultAssert {
      * @param fkName Foreign key name
      */
     public DiffResultAssert containsMissingForeignKeyWithName(String fkName) {
-        for(ForeignKey fk:diff.getMissingForeignKeys()) {
+        for(ForeignKey fk:diff.getObjectDiff(ForeignKey.class).getMissing()) {
             if(fk.getName().equalsIgnoreCase(fkName))
                 return this;
         }

@@ -14,7 +14,7 @@ public class InsertOrUpdateGeneratorOracleTest {
     public void ContainsInsertStatement(){
         OracleDatabase database = new OracleDatabase();
         InsertOrUpdateGeneratorOracle generator = new InsertOrUpdateGeneratorOracle();
-        InsertOrUpdateStatement statement = new InsertOrUpdateStatement("myschema","mytable","pk_col1");
+        InsertOrUpdateStatement statement = new InsertOrUpdateStatement("mycatalog", "myschema","mytable","pk_col1");
         statement.addColumnValue("pk_col1","value1");
         statement.addColumnValue("col2","value2");
         Sql[] sql = generator.generateSql( statement, database,  null);

@@ -4,7 +4,6 @@ import liquibase.change.Change;
 import liquibase.database.Database;
 import liquibase.database.structure.Column;
 import liquibase.database.structure.Table;
-import liquibase.database.typeconversion.TypeConverterFactory;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -33,7 +32,7 @@ public class TableWriter extends HTMLWriter {
         List<List<String>> cells = new ArrayList<List<String>>();
 
         for (Column column : table.getColumns()) {
-            cells.add(Arrays.asList(TypeConverterFactory.getInstance().findTypeConverter(database).convertToDatabaseTypeString(column, database),
+            cells.add(Arrays.asList(column.getType().toString(),
                     "<A HREF=\"../columns/" + table.getName().toLowerCase() + "." + column.getName().toLowerCase() + ".html" + "\">" + column.getName() + "</A>"));
             //todo: add foreign key info to columns?
         }

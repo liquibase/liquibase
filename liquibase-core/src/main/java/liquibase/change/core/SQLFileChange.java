@@ -1,8 +1,6 @@
 package liquibase.change.core;
 
-import liquibase.change.AbstractSQLChange;
-import liquibase.change.ChangeMetaData;
-import liquibase.change.CheckSum;
+import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.exception.SetupException;
 import liquibase.exception.ValidationErrors;
@@ -23,6 +21,7 @@ import java.io.*;
  * @link{#setFileOpener(FileOpener)} before calling setPath otherwise the
  * file will likely not be found.
  */
+@ChangeClass(name="sqlFile", description = "SQL From File", priority = ChangeMetaData.PRIORITY_DEFAULT)
 public class SQLFileChange extends AbstractSQLChange {
 
     private String path;
@@ -30,10 +29,7 @@ public class SQLFileChange extends AbstractSQLChange {
     private Boolean relativeToChangelogFile;
 
 
-    public SQLFileChange() {
-        super("sqlFile", "SQL From File", ChangeMetaData.PRIORITY_DEFAULT);
-    }
-
+    @ChangeProperty(requiredForDatabase = "all")
     public String getPath() {
         return path;
     }

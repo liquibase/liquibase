@@ -39,14 +39,14 @@ public class MarkChangeSetRanGenerator extends AbstractSqlGenerator<MarkChangeSe
             if (statement.getExecType().equals(ChangeSet.ExecType.FAILED) || statement.getExecType().equals(ChangeSet.ExecType.SKIPPED)) {
                 return new Sql[0]; //don't mark
             } else  if (statement.getExecType().ranBefore) {
-                runStatement = new UpdateStatement(database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName())
+                runStatement = new UpdateStatement(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName())
                         .addNewColumnValue("DATEEXECUTED", new DatabaseFunction(dateValue))
                         .addNewColumnValue("MD5SUM", changeSet.generateCheckSum().toString())
                         .addNewColumnValue("EXECTYPE", statement.getExecType().value)
                         .setWhereClause("ID=? AND AUTHOR=? AND FILENAME=?")
                         .addWhereParameters(changeSet.getId(), changeSet.getAuthor(), changeSet.getFilePath());
             } else {
-                runStatement = new InsertStatement(database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName())
+                runStatement = new InsertStatement(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName())
                         .addColumnValue("ID", changeSet.getId())
                         .addColumnValue("AUTHOR", changeSet.getAuthor())
                         .addColumnValue("FILENAME", changeSet.getFilePath())

@@ -1,16 +1,13 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
-import liquibase.database.typeconversion.TypeConverterFactory;
+import liquibase.datatype.DataTypeFactory;
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
-import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.DeleteStatement;
-
-import java.util.Date;
 
 public class DeleteGenerator extends AbstractSqlGenerator<DeleteStatement> {
 
@@ -26,36 +23,16 @@ public class DeleteGenerator extends AbstractSqlGenerator<DeleteStatement> {
     }
 
     public Sql[] generateSql(DeleteStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-        StringBuffer sql = new StringBuffer("DELETE FROM " + database.escapeTableName(statement.getSchemaName(), statement.getTableName()));
+        StringBuffer sql = new StringBuffer("DELETE FROM " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()));
 
         if (statement.getWhereClause() != null) {
             String fixedWhereClause = " WHERE " + statement.getWhereClause();
             for (Object param : statement.getWhereParameters()) {
-                fixedWhereClause = fixedWhereClause.replaceFirst("\\?", convertToString(param, database));
+                fixedWhereClause = fixedWhereClause.replaceFirst("\\?", DataTypeFactory.getInstance().fromObject(param, database).objectToString(param, database));
             }
             sql.append(" ").append(fixedWhereClause);
         }
 
         return new Sql[]{new UnparsedSql(sql.toString())};
-    }
-
-    private String convertToString(Object newValue, Database database) {
-        String sqlString;
-        if (newValue == null) {
-            sqlString = "NULL";
-        } else if (newValue instanceof String && database.shouldQuoteValue(((String) newValue))) {
-            sqlString = "'" + newValue + "'";
-        } else if (newValue instanceof Date) {
-            sqlString = database.getDateLiteral(((Date) newValue));
-        } else if (newValue instanceof Boolean) {
-            if (((Boolean) newValue)) {
-                sqlString = TypeConverterFactory.getInstance().findTypeConverter(database).getBooleanType().getTrueBooleanValue();
-            } else {
-                sqlString = TypeConverterFactory.getInstance().findTypeConverter(database).getBooleanType().getFalseBooleanValue();
-            }
-        } else {
-            sqlString = newValue.toString();
-        }
-        return sqlString;
     }
 }

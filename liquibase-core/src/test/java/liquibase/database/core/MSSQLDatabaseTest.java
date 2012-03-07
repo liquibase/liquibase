@@ -47,14 +47,14 @@ public class MSSQLDatabaseTest extends AbstractDatabaseTest {
     @Test
     public void escapeTableName_noSchema() {
         Database database = new MSSQLDatabase();
-        assertEquals("[dbo].[tableName]", database.escapeTableName(null, "tableName"));
+        assertEquals("[dbo].[tableName]", database.escapeTableName(null, null, "tableName"));
     }
 
     @Override
     @Test
     public void escapeTableName_withSchema() {
         Database database = new MSSQLDatabase();
-        assertEquals("[schemaName].[tableName]", database.escapeTableName("schemaName", "tableName"));
+        assertEquals("[schemaName].[tableName]", database.escapeTableName("catalogName", "schemaName", "tableName"));
     }
 
     @Test
