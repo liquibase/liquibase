@@ -9,16 +9,25 @@ import liquibase.snapshot.DatabaseSnapshotGeneratorFactory;
 import liquibase.util.StringUtils;
 
 public class ColumnExistsPrecondition implements Precondition {
+    private String catalogName;
     private String schemaName;
     private String tableName;
     private String columnName;
+
+    public String getCatalogName() {
+        return catalogName;
+    }
+
+    public void setCatalogName(String catalogName) {
+        this.catalogName = catalogName;
+    }
 
     public String getSchemaName() {
         return schemaName;
     }
 
     public void setSchemaName(String schemaName) {
-        this.schemaName = StringUtils.trimToNull(schemaName);
+        this.schemaName = schemaName;
     }
 
     public String getTableName() {
@@ -44,16 +53,10 @@ public class ColumnExistsPrecondition implements Precondition {
     public ValidationErrors validate(Database database) {
         return new ValidationErrors();
     }
-    
+
     public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet) throws PreconditionFailedException, PreconditionErrorException {
-        String currentSchemaName;
-    	try {
-            currentSchemaName = getSchemaName() == null ? (database == null ? null: database.getDefaultSchemaName()) : getSchemaName();
-            if (DatabaseSnapshotGeneratorFactory.getInstance().getGenerator(database).getColumn(currentSchemaName, getTableName(), getColumnName(), database) == null) {
-                throw new PreconditionFailedException("Column '"+database.escapeColumnName(currentSchemaName, getTableName(), getColumnName())+"' does not exist", changeLog, this);
-            }
-        } catch (DatabaseException e) {
-            throw new PreconditionErrorException(e, changeLog, this);
+        if (!DatabaseSnapshotGeneratorFactory.getInstance().getGenerator(database).hasColumn(catalogName, schemaName, getTableName(), getColumnName(), database)) {
+            throw new PreconditionFailedException("Column '" + database.escapeColumnName(catalogName, schemaName, getTableName(), getColumnName()) + "' does not exist", changeLog, this);
         }
     }
 

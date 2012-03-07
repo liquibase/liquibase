@@ -27,12 +27,12 @@ public class SelectFromDatabaseChangeLogLockGenerator extends AbstractSqlGenerat
 		int numberOfColumns = columns.length;
 		String[] escapedColumns = new String[numberOfColumns];
 		for (int i=0; i<numberOfColumns; i++) {
-			escapedColumns[i] = database.escapeColumnName(liquibaseSchema, database.getDatabaseChangeLogLockTableName(), columns[i]);
+			escapedColumns[i] = database.escapeColumnName(database.getLiquibaseCatalogName(), liquibaseSchema, database.getDatabaseChangeLogLockTableName(), columns[i]);
 		}
 		
         String sql = "SELECT " + StringUtils.join(escapedColumns, ",") + " FROM " +
-                database.escapeTableName(liquibaseSchema, database.getDatabaseChangeLogLockTableName()) +
-                " WHERE " + database.escapeColumnName(liquibaseSchema, database.getDatabaseChangeLogLockTableName(), "ID") + "=1";
+                database.escapeTableName(database.getLiquibaseCatalogName(), liquibaseSchema, database.getDatabaseChangeLogLockTableName()) +
+                " WHERE " + database.escapeColumnName(database.getLiquibaseCatalogName(), liquibaseSchema, database.getDatabaseChangeLogLockTableName(), "ID") + "=1";
 
         if (database instanceof OracleDatabase) {
             sql += " FOR UPDATE";

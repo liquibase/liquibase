@@ -6,6 +6,7 @@ import liquibase.statement.AbstractSqlStatement;
 
 public class AddAutoIncrementStatement extends AbstractSqlStatement {
 
+    private String catalogName;
     private String schemaName;
     private String tableName;
     private String columnName;
@@ -14,18 +15,24 @@ public class AddAutoIncrementStatement extends AbstractSqlStatement {
     private BigInteger incrementBy;
     
     public AddAutoIncrementStatement(
+            String catalogName,
     		String schemaName,
     		String tableName,
     		String columnName,
     		String columnDataType,
     		BigInteger startWith,
     		BigInteger incrementBy) {
+        this.catalogName = catalogName;
         this.schemaName = schemaName;
         this.tableName = tableName;
         this.columnName = columnName;
         this.columnDataType = columnDataType;
         this.startWith = startWith;
         this.incrementBy = incrementBy;
+    }
+
+    public String getCatalogName() {
+        return catalogName;
     }
 
     public String getSchemaName() {

@@ -20,7 +20,7 @@ public class DropTableGenerator extends AbstractSqlGenerator<DropTableStatement>
 
     public Sql[] generateSql(DropTableStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         StringBuffer buffer = new StringBuffer();
-        buffer.append("DROP TABLE ").append(database.escapeTableName(statement.getSchemaName(), statement.getTableName()));
+        buffer.append("DROP TABLE ").append(database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()));
         if (statement.isCascadeConstraints()) {
             if (database.supportsDropTableCascadeConstraints()) {
                 LogFactory.getLogger().warning("Database does not support drop with cascade");

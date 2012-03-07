@@ -2,7 +2,7 @@ package liquibase.ext.changewithnestedtags;
 
 import liquibase.change.AbstractChange;
 import liquibase.change.ChangeClass;
-import liquibase.database.typeconversion.TypeConverterFactory;
+import liquibase.datatype.DataTypeFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.CreateTableStatement;
 import liquibase.database.Database;
@@ -19,8 +19,8 @@ public class ChangeWithNestedTags extends AbstractChange {
 
     public SqlStatement[] generateStatements(Database database) {
         return new SqlStatement[]{
-            new CreateTableStatement(null, "cwnestedtags").addColumn("id", TypeConverterFactory.getInstance().findTypeConverter(database).getDataType("int", false))
-                    .addColumn("name", TypeConverterFactory.getInstance().findTypeConverter(database).getDataType("varchar(5)", false))
+            new CreateTableStatement(null, null, "cwnestedtags").addColumn("id", DataTypeFactory.getInstance().fromDescription("int"))
+                    .addColumn("name", DataTypeFactory.getInstance().fromDescription("varchar(5)"))
         };
     }
 

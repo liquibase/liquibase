@@ -18,18 +18,27 @@ import java.util.List;
 @ChangeClass(name="createView", description = "Create View", priority = ChangeMetaData.PRIORITY_DEFAULT)
 public class CreateViewChange extends AbstractChange {
 
+    private String catalogName;
 	private String schemaName;
 	private String viewName;
 	private String selectQuery;
 	private Boolean replaceIfExists;
 
 
-	public String getSchemaName() {
+    public String getCatalogName() {
+        return catalogName;
+    }
+
+    public void setCatalogName(String catalogName) {
+        this.catalogName = catalogName;
+    }
+
+    public String getSchemaName() {
 		return schemaName;
 	}
 
 	public void setSchemaName(String schemaName) {
-		this.schemaName = StringUtils.trimToNull(schemaName);
+		this.schemaName = schemaName;
 	}
 
     @ChangeProperty(requiredForDatabase = "all")
@@ -67,18 +76,12 @@ public class CreateViewChange extends AbstractChange {
 		}
 
 		if (!supportsReplaceIfExistsOption(database) && replaceIfExists) {
-			statements.add(new DropViewStatement(
-					getSchemaName() == null ? database.getDefaultSchemaName()
-							: getSchemaName(), getViewName()));
-			statements.add(new CreateViewStatement(
-					getSchemaName() == null ? database.getDefaultSchemaName()
-							: getSchemaName(), getViewName(), getSelectQuery(),
+			statements.add(new DropViewStatement(getCatalogName(), getSchemaName(), getViewName()));
+			statements.add(new CreateViewStatement(getCatalogName(), getSchemaName(), getViewName(), getSelectQuery(),
 					false));
 		} else {
 			statements.add(new CreateViewStatement(
-					getSchemaName() == null ? database.getDefaultSchemaName()
-							: getSchemaName(), getViewName(), getSelectQuery(),
-					replaceIfExists));
+					getCatalogName(), getSchemaName(), getViewName(), getSelectQuery(), replaceIfExists));
 		}
 
 		return statements.toArray(new SqlStatement[statements.size()]);

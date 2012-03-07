@@ -26,6 +26,13 @@ public class PrimaryKey implements DatabaseObject, Comparable<PrimaryKey> {
         this.name = name;
     }
 
+    public Schema getSchema() {
+        if (table == null) {
+            return null;
+        }
+        return table.getSchema();
+    }
+
     public String getColumnNames() {
         return StringUtils.join(columnNames, ", ");
     }
@@ -68,15 +75,15 @@ public class PrimaryKey implements DatabaseObject, Comparable<PrimaryKey> {
 
         PrimaryKey that = (PrimaryKey) o;
 
-        return !(getColumnNames() != null ? !getColumnNames().equalsIgnoreCase(that.getColumnNames()) : that.getColumnNames() != null) && !(getTable().getName() != null ? !getTable().getName().equalsIgnoreCase(that.getTable().getName()) : that.getTable().getName() != null);
+        return !(getColumnNames() != null ? !getColumnNames().equals(that.getColumnNames()) : that.getColumnNames() != null) && !(getTable().getName() != null ? !getTable().getName().equals(that.getTable().getName()) : that.getTable().getName() != null);
 
     }
 
     @Override
     public int hashCode() {
         int result;
-        result = (getColumnNames() != null ? getColumnNames().toUpperCase().hashCode() : 0);
-        result = 31 * result + (table.getName() != null ? table.getName().toUpperCase().hashCode() : 0);
+        result = (getColumnNames() != null ? getColumnNames().hashCode() : 0);
+        result = 31 * result + (table.getName() != null ? table.getName().hashCode() : 0);
         return result;
     }
 

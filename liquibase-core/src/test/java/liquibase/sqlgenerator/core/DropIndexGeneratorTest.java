@@ -54,7 +54,7 @@ public class DropIndexGeneratorTest {
 	@Test
 	public void shouldDropIndexInPostgreSQL() throws Exception {
 		DropIndexGenerator dropIndexGenerator = new DropIndexGenerator();
-		DropIndexStatement statement = new DropIndexStatement("indexName", "defaultSchema", "aTable", null);
+		DropIndexStatement statement = new DropIndexStatement("indexName", "defaultCatalog", "defaultSchema", "aTable", null);
 		Database database = new PostgresDatabase();
 		SortedSet<SqlGenerator> sqlGenerators = new TreeSet<SqlGenerator>();
 		SqlGeneratorChain sqlGenerationChain = new SqlGeneratorChain(sqlGenerators);

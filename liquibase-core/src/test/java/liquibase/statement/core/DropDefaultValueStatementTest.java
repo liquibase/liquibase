@@ -4,7 +4,7 @@ public class DropDefaultValueStatementTest extends AbstractSqStatementTest<DropD
 
     @Override
     protected DropDefaultValueStatement createStatementUnderTest() {
-        return new DropDefaultValueStatement(null, null, null, null);
+        return new DropDefaultValueStatement(null, null, null, null, null);
     }
 
 }

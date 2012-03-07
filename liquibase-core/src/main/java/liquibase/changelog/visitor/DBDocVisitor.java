@@ -6,8 +6,10 @@ import liquibase.changelog.DatabaseChangeLog;
 import liquibase.database.Database;
 import liquibase.database.structure.Column;
 import liquibase.database.structure.DatabaseObject;
+import liquibase.database.structure.Schema;
 import liquibase.database.structure.Table;
 import liquibase.dbdoc.*;
+import liquibase.diff.DiffControl;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.DatabaseHistoryException;
 import liquibase.exception.LiquibaseException;
@@ -125,22 +127,24 @@ public class DBDocVisitor implements ChangeSetVisitor {
         copyFile("liquibase/dbdoc/globalnav.html", rootOutputDir);
         copyFile("liquibase/dbdoc/overview-summary.html", rootOutputDir);
 
-        DatabaseSnapshot snapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(database, null, null);
+        DatabaseSnapshot snapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(database, new DiffControl());
 
         new ChangeLogListWriter(rootOutputDir).writeHTML(changeLogs);
-        new TableListWriter(rootOutputDir).writeHTML(new TreeSet<Object>(snapshot.getTables()));
-        new AuthorListWriter(rootOutputDir).writeHTML(new TreeSet<Object>(changesByAuthor.keySet()));
+        for (Schema schema : snapshot.getSchemas()) {
+            new TableListWriter(rootOutputDir).writeHTML(new TreeSet<Object>(snapshot.getDatabaseObjects(schema, Table.class)));
+            new AuthorListWriter(rootOutputDir).writeHTML(new TreeSet<Object>(changesByAuthor.keySet()));
 
-        for (String author : changesByAuthor.keySet()) {
-            authorWriter.writeHTML(author, changesByAuthor.get(author), changesToRunByAuthor.get(author), rootChangeLogName);
-        }
+            for (String author : changesByAuthor.keySet()) {
+                authorWriter.writeHTML(author, changesByAuthor.get(author), changesToRunByAuthor.get(author), rootChangeLogName);
+            }
 
-        for (Table table : snapshot.getTables()) {
-            tableWriter.writeHTML(table, changesByObject.get(table), changesToRunByObject.get(table), rootChangeLogName);
-        }
+            for (Table table : snapshot.getDatabaseObjects(schema, Table.class)) {
+                tableWriter.writeHTML(table, changesByObject.get(table), changesToRunByObject.get(table), rootChangeLogName);
+            }
 
-        for (Column column : snapshot.getColumns()) {
-            columnWriter.writeHTML(column, changesByObject.get(column), changesToRunByObject.get(column), rootChangeLogName);
+            for (Column column : snapshot.getColumns(schema)) {
+                columnWriter.writeHTML(column, changesByObject.get(column), changesToRunByObject.get(column), rootChangeLogName);
+            }
         }
 
         for (ChangeLogInfo changeLog : changeLogs) {

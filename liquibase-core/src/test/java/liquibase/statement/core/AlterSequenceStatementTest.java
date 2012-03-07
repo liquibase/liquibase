@@ -4,7 +4,7 @@ public class AlterSequenceStatementTest extends AbstractSqStatementTest<AlterSeq
 
     @Override
     protected AlterSequenceStatement createStatementUnderTest() {
-        return new AlterSequenceStatement(null, null);
+        return new AlterSequenceStatement(null, null, null);
     }
 
 

@@ -1,9 +1,14 @@
 package liquibase.snapshot.jvm;
 
 import liquibase.database.Database;
+import liquibase.database.structure.Column;
 import liquibase.database.structure.Table;
 import liquibase.database.core.H2Database;
 import liquibase.exception.DatabaseException;
+import liquibase.statement.DatabaseFunction;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 public class H2DatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerator {
     public boolean supports(Database database) {
@@ -15,15 +20,12 @@ public class H2DatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerator {
     }
 
     @Override
-    public Table getTable(String schemaName, String tableName, Database database) throws DatabaseException {
-        return super.getTable(schemaName, convertTableNameToDatabaseTableName(tableName), database);
-    }
-
-    protected String convertTableNameToDatabaseTableName(String tableName) {
-        return tableName.toUpperCase();
-    }
-
-    protected String convertColumnNameToDatabaseTableName(String columnName) {
-        return columnName.toUpperCase();
+    protected Object readDefaultValue(ResultSet columnMetadataResultSet, Column columnInfo, Database database) throws SQLException, DatabaseException {
+        Object defaultValue = super.readDefaultValue(columnMetadataResultSet, columnInfo, database);
+        if (defaultValue != null && defaultValue instanceof DatabaseFunction && ((DatabaseFunction) defaultValue).getValue().startsWith("NEXT VALUE FOR ")) {
+            columnInfo.setAutoIncrement(true);
+            return null;
+        }
+        return defaultValue;
     }
 }

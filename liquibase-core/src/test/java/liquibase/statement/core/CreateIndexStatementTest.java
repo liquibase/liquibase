@@ -6,7 +6,7 @@ public class CreateIndexStatementTest extends AbstractSqStatementTest<SqlStateme
 
     @Override
     protected SqlStatement createStatementUnderTest() {
-        return new CreateIndexStatement(null, null, null, null, null);
+        return new CreateIndexStatement(null, null, null, null, null, null);
     }
 
 }

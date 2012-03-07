@@ -1,11 +1,10 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
-import liquibase.database.typeconversion.TypeConverterFactory;
+import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
-import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.InsertStatement;
 
@@ -26,9 +25,9 @@ public class InsertGenerator extends AbstractSqlGenerator<InsertStatement> {
     }
 
     public Sql[] generateSql(InsertStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-        StringBuffer sql = new StringBuffer("INSERT INTO " + database.escapeTableName(statement.getSchemaName(), statement.getTableName()) + " (");
+        StringBuffer sql = new StringBuffer("INSERT INTO " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " (");
         for (String column : statement.getColumnValues().keySet()) {
-            sql.append(database.escapeColumnName(statement.getSchemaName(), statement.getTableName(), column)).append(", ");
+            sql.append(database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), column)).append(", ");
         }
         sql.deleteCharAt(sql.lastIndexOf(" "));
         sql.deleteCharAt(sql.lastIndexOf(","));
@@ -45,9 +44,9 @@ public class InsertGenerator extends AbstractSqlGenerator<InsertStatement> {
                 sql.append(database.getDateLiteral(((Date) newValue)));
             } else if (newValue instanceof Boolean) {
                 if (((Boolean) newValue)) {
-                    sql.append(TypeConverterFactory.getInstance().findTypeConverter(database).getBooleanType().getTrueBooleanValue());
+                    sql.append(DataTypeFactory.getInstance().getTrueBooleanValue(database));
                 } else {
-                    sql.append(TypeConverterFactory.getInstance().findTypeConverter(database).getBooleanType().getFalseBooleanValue());
+                    sql.append(DataTypeFactory.getInstance().getFalseBooleanValue(database));
                 }
             } else {
                 sql.append(newValue);

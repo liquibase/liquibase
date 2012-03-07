@@ -2,7 +2,7 @@ package liquibase.statementexecute;
 
 import liquibase.database.*;
 import liquibase.database.core.*;
-import liquibase.database.typeconversion.TypeConverterFactory;
+import liquibase.datatype.DataTypeFactory;
 import liquibase.test.DatabaseTestContext;
 import liquibase.statement.*;
 import liquibase.statement.core.AddColumnStatement;
@@ -22,17 +22,17 @@ public class AddAutoIncrementExecuteTest extends AbstractExecuteTest {
     @Override
     protected List<? extends SqlStatement> setupStatements(Database database) {
         ArrayList<CreateTableStatement> statements = new ArrayList<CreateTableStatement>();
-        CreateTableStatement table = new CreateTableStatement(null, TABLE_NAME);
+        CreateTableStatement table = new CreateTableStatement(null, null, TABLE_NAME);
         if (database instanceof MySQLDatabase) {
-            table.addPrimaryKeyColumn("id", TypeConverterFactory.getInstance().findTypeConverter(database).getDataType("int", false), null, "pk_", null);
+            table.addPrimaryKeyColumn("id", DataTypeFactory.getInstance().fromDescription("int"), null, "pk_", null);
         } else {
-            table.addColumn("id", TypeConverterFactory.getInstance().findTypeConverter(database).getDataType("int", false), null, new NotNullConstraint());
+            table.addColumn("id", DataTypeFactory.getInstance().fromDescription("int"), null, new NotNullConstraint());
         }
         statements.add(table);
 
         if (database.supportsSchemas()) {
-            table = new CreateTableStatement(DatabaseTestContext.ALT_SCHEMA, TABLE_NAME);
-            table.addColumn("id", TypeConverterFactory.getInstance().findTypeConverter(database).getDataType("int", false), null, new NotNullConstraint());
+            table = new CreateTableStatement(DatabaseTestContext.ALT_CATALOG, DatabaseTestContext.ALT_SCHEMA, TABLE_NAME);
+            table.addColumn("id", DataTypeFactory.getInstance().fromDescription("int"), null, new NotNullConstraint());
             statements.add(table);
         }
         return statements;
@@ -41,7 +41,7 @@ public class AddAutoIncrementExecuteTest extends AbstractExecuteTest {
     @SuppressWarnings("unchecked")
     @Test
     public void noSchema() throws Exception {
-        this.statementUnderTest = new AddAutoIncrementStatement(null, TABLE_NAME, COLUMN_NAME, "int", null, null);
+        this.statementUnderTest = new AddAutoIncrementStatement(null, null, TABLE_NAME, COLUMN_NAME, "int", null, null);
 
         assertCorrect("alter table [table_name] modify column_name serial auto_increment", PostgresDatabase.class);
         assertCorrect("alter table `table_name` modify `column_name` int auto_increment", MySQLDatabase.class);
@@ -56,7 +56,7 @@ public class AddAutoIncrementExecuteTest extends AbstractExecuteTest {
     @SuppressWarnings("unchecked")
     @Test
     public void fullNoConstraints() throws Exception {
-        this.statementUnderTest = new AddColumnStatement(null, "table_name", TABLE_NAME, COLUMN_NAME, 42);
+        this.statementUnderTest = new AddColumnStatement(null, null, "table_name", TABLE_NAME, COLUMN_NAME, 42);
 
 
         assertCorrect("alter table [table_name] add [table_name] column_name default 42 null", SybaseDatabase.class);
@@ -85,7 +85,7 @@ public class AddAutoIncrementExecuteTest extends AbstractExecuteTest {
     @SuppressWarnings("unchecked")
     @Test
     public void notNull() throws Exception {
-        this.statementUnderTest = new AddColumnStatement(null, TABLE_NAME, COLUMN_NAME, "int", 42, new NotNullConstraint());
+        this.statementUnderTest = new AddColumnStatement(null, null, TABLE_NAME, COLUMN_NAME, "int", 42, new NotNullConstraint());
 
         assertCorrect("ALTER TABLE [table_name] ADD [column_name] int DEFAULT 42 NOT NULL", SybaseASADatabase.class, SybaseDatabase.class);
         assertCorrect("alter table table_name add column_name int default 42 not null", InformixDatabase.class);

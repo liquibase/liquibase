@@ -63,7 +63,7 @@ public class AddAutoIncrementGeneratorSQLite extends AddAutoIncrementGenerator {
 
         try {
             // alter table
-            for (SqlStatement generatedStatement : SQLiteDatabase.getAlterTableStatements(rename_alter_visitor,database, statement.getSchemaName(), statement.getTableName())) {
+            for (SqlStatement generatedStatement : SQLiteDatabase.getAlterTableStatements(rename_alter_visitor,database, statement.getCatalogName(), statement.getSchemaName(), statement.getTableName())) {
                     statements.addAll(Arrays.asList(SqlGeneratorFactory.getInstance().generateSql(generatedStatement, database)));
             }
         } catch (DatabaseException e) {

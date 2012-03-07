@@ -4,7 +4,7 @@ public class SetNullableStatementTest extends AbstractSqStatementTest<SetNullabl
 
     @Override
     protected SetNullableStatement createStatementUnderTest() {
-        return new SetNullableStatement(null, null, null, null, true);
+        return new SetNullableStatement(null, null, null, null, null, true);
     }
 
 }

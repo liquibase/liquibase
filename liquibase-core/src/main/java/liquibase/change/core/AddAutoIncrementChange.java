@@ -24,6 +24,7 @@ import liquibase.util.StringUtils;
 @ChangeClass(name="addAutoIncrement", description = "Set Column as Auto-Increment", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "column")
 public class AddAutoIncrementChange extends AbstractChange {
 
+    private String catalogName;
     private String schemaName;
     private String tableName;
     private String columnName;
@@ -31,13 +32,22 @@ public class AddAutoIncrementChange extends AbstractChange {
     private BigInteger startWith;
     private BigInteger incrementBy;
 
+    @ChangeProperty(mustApplyTo ="column.table.catalog")
+    public String getCatalogName() {
+        return catalogName;
+    }
+
+    public void setCatalogName(String catalogName) {
+        this.catalogName = catalogName;
+    }
+
     @ChangeProperty(mustApplyTo ="column.table.schema")
     public String getSchemaName() {
         return schemaName;
     }
 
     public void setSchemaName(String schemaName) {
-        this.schemaName = StringUtils.trimToNull(schemaName);
+        this.schemaName = schemaName;
     }
 
     @ChangeProperty(requiredForDatabase = "all", mustApplyTo ="column.table")
@@ -86,13 +96,13 @@ public class AddAutoIncrementChange extends AbstractChange {
         if (database instanceof PostgresDatabase) {
             String sequenceName = (getTableName() + "_" + getColumnName() + "_seq").toLowerCase();
             return new SqlStatement[]{
-                    new CreateSequenceStatement(schemaName, sequenceName),
-                    new SetNullableStatement(schemaName, getTableName(), getColumnName(), null, false),
-                    new AddDefaultValueStatement(schemaName, getTableName(), getColumnName(), getColumnDataType(), new DatabaseFunction("NEXTVAL('"+sequenceName+"')")),
+                    new CreateSequenceStatement(catalogName, schemaName, sequenceName),
+                    new SetNullableStatement(catalogName, schemaName, getTableName(), getColumnName(), null, false),
+                    new AddDefaultValueStatement(catalogName, schemaName, getTableName(), getColumnName(), getColumnDataType(), new DatabaseFunction("NEXTVAL('"+sequenceName+"')")),
             };
         }
 
-        return new SqlStatement[]{new AddAutoIncrementStatement(getSchemaName(), getTableName(), getColumnName(), getColumnDataType(), getStartWith(), getIncrementBy())};
+        return new SqlStatement[]{new AddAutoIncrementStatement(getCatalogName(), getSchemaName(), getTableName(), getColumnName(), getColumnDataType(), getStartWith(), getIncrementBy())};
     }
 
     public String getConfirmationMessage() {

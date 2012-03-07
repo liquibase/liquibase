@@ -29,7 +29,7 @@ public class DatabaseFactory {
 
     public static DatabaseFactory getInstance() {
         if (instance == null) {
-             instance = new DatabaseFactory();
+            instance = new DatabaseFactory();
         }
         return instance;
     }
@@ -65,7 +65,9 @@ public class DatabaseFactory {
 
         if (foundDatabases.size() == 0) {
             LogFactory.getLogger().warning("Unknown database: " + connection.getDatabaseProductName());
-            return new UnsupportedDatabase();
+            UnsupportedDatabase unsupportedDB = new UnsupportedDatabase();
+            unsupportedDB.setConnection(connection);
+            return unsupportedDB;
         }
 
         Database returnDatabase;

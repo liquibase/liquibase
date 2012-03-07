@@ -2,31 +2,20 @@ package liquibase.snapshot;
 
 import liquibase.database.Database;
 import liquibase.database.structure.*;
-import liquibase.util.StringUtils;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 public class DatabaseSnapshot {
 
     private Database database;
-    private Set<Table> tables = new HashSet<Table>();
-    private Set<View> views = new HashSet<View>();
-    private Set<ForeignKey> foreignKeys = new HashSet<ForeignKey>();
-    private Set<UniqueConstraint> uniqueConstraints = new HashSet<UniqueConstraint>();
-    private Set<Index> indexes = new HashSet<Index>();
-    private Set<PrimaryKey> primaryKeys = new HashSet<PrimaryKey>();
-    private Set<Sequence> sequences = new HashSet<Sequence>();
-
-    private String schema;
 
     private Table databaseChangeLogTable;
     private Table databaseChangeLogLockTable;
+    
+    private Map<Schema, SchemaSnapshot> schemaSnapshots = new HashMap<Schema, SchemaSnapshot>();
 
-    public DatabaseSnapshot(Database database, String requestedSchema) {
+    public DatabaseSnapshot(Database database) {
         this.database = database;
-        this.schema = requestedSchema;
     }
 
 
@@ -34,118 +23,84 @@ public class DatabaseSnapshot {
         return database;
     }
 
-    public Set<Table> getTables() {
-        return tables;
+    public Set<Schema> getSchemas() {
+        return Collections.unmodifiableSet(schemaSnapshots.keySet());
     }
 
-    public Set<View> getViews() {
-        return views;
+    public <T extends DatabaseObject> Set<T> getDatabaseObjects(Schema schema, Class<T> type) {
+        schema = schema.clone(database);
+        if (!schemaSnapshots.containsKey(schema)) {
+            return Collections.unmodifiableSet(new HashSet<T>());
+        }
+        Set<? extends DatabaseObject> snapshotItems = schemaSnapshots.get(schema).databaseObjects.get(type);
+        if (snapshotItems == null) {
+            return Collections.unmodifiableSet(new HashSet<T>());
+        }
+
+        //noinspection unchecked
+        return (Set<T>) Collections.unmodifiableSet(snapshotItems);
     }
 
-    public Set<ForeignKey> getForeignKeys() {
-        return foreignKeys;
-    }
-
-    public Set<Index> getIndexes() {
-        return indexes;
-    }
-
-    public Set<PrimaryKey> getPrimaryKeys() {
-        return primaryKeys;
-    }
-
-
-    public Set<Sequence> getSequences() {
-        return sequences;
-    }
-
-    public Set<UniqueConstraint> getUniqueConstraints() {
-        return this.uniqueConstraints;
-    }
-
-    public Table getTable(String tableName) {
-        for (Table table : getTables()) {
-            if (table.getName().equalsIgnoreCase(tableName)) {
-                return table;
+    public <T extends DatabaseObject> T getDatabaseObject(Schema schema, String objectName, Class<T> type) {
+        for (DatabaseObject object : getDatabaseObjects(schema, type)) {
+            if (object.getName().equals(objectName)) {
+                //noinspection unchecked
+                return (T) object;
             }
         }
         return null;
     }
 
-    public ForeignKey getForeignKey(String foreignKeyName) {
-        for (ForeignKey fk : getForeignKeys()) {
-            if (fk.getName().equalsIgnoreCase(foreignKeyName)) {
-                return fk;
+    public <T extends DatabaseObject> T getDatabaseObject(Schema schema, DatabaseObject databaseObject, Class<T> type) {
+        for (DatabaseObject object : getDatabaseObjects(schema, type)) {
+            if (object.equals(databaseObject)) {
+                //noinspection unchecked
+                return (T) object;
             }
         }
         return null;
     }
 
-    public Sequence getSequence(String sequenceName) {
-        for (Sequence sequence : getSequences()) {
-            if (sequence.getName().equalsIgnoreCase(sequenceName)) {
-                return sequence;
+    public void addDatabaseObjects(DatabaseObject... objects) {
+
+        for (DatabaseObject object : objects) {
+            Schema schema = object.getSchema();
+            
+            if (!schemaSnapshots.containsKey(schema)) {
+                schemaSnapshots.put(schema, new SchemaSnapshot());
             }
-        }
-        return null;
-    }
+            SchemaSnapshot schemaSnapshot = schemaSnapshots.get(schema);
 
-    public Index getIndex(String indexName) {
-        for (Index index : getIndexes()) {
-            if (StringUtils.trimToEmpty(index.getName()).equalsIgnoreCase(indexName)) {
-                return index;
+            if (!schemaSnapshot.databaseObjects.containsKey(object.getClass())) {
+                schemaSnapshot.databaseObjects.put(object.getClass(), new HashSet<DatabaseObject>());
             }
+
+            schemaSnapshot.databaseObjects.get((object.getClass())).add(object);
         }
-        return null;
     }
 
-    public View getView(String viewName) {
-        for (View view : getViews()) {
-            if (view.getName().equalsIgnoreCase(viewName)) {
-                return view;
+    public void removeDatabaseObjects(Schema schema, DatabaseObject... objects) {
+        SchemaSnapshot schemaSnapshot = schemaSnapshots.get(schema);
+        if (schemaSnapshot == null) {
+            return;
+        }
+
+        for (DatabaseObject object : objects) {
+            if (!schemaSnapshot.databaseObjects.containsKey(object.getClass())) {
+                return;
             }
+
+            schemaSnapshot.databaseObjects.get((object.getClass())).remove(object);
         }
-        return null;
     }
 
-    public PrimaryKey getPrimaryKey(String pkName) {
-        for (PrimaryKey pk : getPrimaryKeys()) {
-            if (pk.getName().equalsIgnoreCase(pkName)) {
-                return pk;
-            }
-        }
-        return null;
-    }
-
-    public PrimaryKey getPrimaryKeyForTable(String tableName) {
-        for (PrimaryKey pk : getPrimaryKeys()) {
-            if (pk.getTable().getName().equalsIgnoreCase(tableName)) {
-                return pk;
-            }
-        }
-        return null;
-    }
-
-    public UniqueConstraint getUniqueConstraint(String ucName) {
-        for (UniqueConstraint uc : getUniqueConstraints()) {
-            if (uc.getName().equalsIgnoreCase(ucName)) {
-                return uc;
-            }
-        }
-        return null;
-    }
-
-    public String getSchema() {
-        return schema;
-    }
-
-    public boolean isPrimaryKey(Column columnInfo) {
-        for (PrimaryKey pk : getPrimaryKeys()) {
-            if (columnInfo.getTable() == null) {
+    public boolean isPrimaryKey(Column column) {
+        for (PrimaryKey pk : getDatabaseObjects(column.getRelation().getSchema(), PrimaryKey.class)) {
+            if (column.getRelation() == null) {
                 continue;
             }
-            if (pk.getTable().getName().equalsIgnoreCase(columnInfo.getTable().getName())) {
-                if (pk.getColumnNamesAsList().contains(columnInfo.getName())) {
+            if (pk.getTable().getName().equalsIgnoreCase(column.getRelation().getName())) {
+                if (pk.getColumnNamesAsList().contains(column.getName())) {
                     return true;
                 }
             }
@@ -154,27 +109,32 @@ public class DatabaseSnapshot {
         return false;
     }
 
-    public Collection<Column> getColumns() {
+    public PrimaryKey getPrimaryKeyForTable(Schema schema, String tableName) {
+        Table table = getDatabaseObject(schema, tableName, Table.class);
+        if (table == null) {
+            return null;
+        }
+        return table.getPrimaryKey();
+
+    }
+
+
+    public Set<Column> getColumns(Schema schema) {
         Set<Column> returnSet = new HashSet<Column>();
 
-        for (Table table : getTables()) {
+        for (Table table : getDatabaseObjects(schema, Table.class)) {
             for (Column column : table.getColumns()) {
                 returnSet.add(column);
             }
         }
 
-        return returnSet;
+        return Collections.unmodifiableSet(returnSet);
     }
 
-    public Column getColumn(String tableName, String columnName) {
-        for (Table table : getTables()) {
-            for (Column column : table.getColumns()) {
-                if (table.getName().equalsIgnoreCase(tableName) && column.getName().equalsIgnoreCase(columnName)) {
-                    return column;
-                }
-            }
-        }
-        return null;
+    public Column getColumn(Schema schema, String tableName, String columnName) {
+        Table table = getDatabaseObject(schema, tableName, Table.class);
+
+        return table.getColumn(columnName);
     }
 
     public boolean hasDatabaseChangeLogTable() {
@@ -195,5 +155,23 @@ public class DatabaseSnapshot {
 
     public void setDatabaseChangeLogLockTable(Table table) {
         this.databaseChangeLogLockTable = table;
+    }
+
+    public boolean contains(Schema schema, DatabaseObject databaseObject) {
+        return schemaSnapshots.containsKey(schema)
+                && schemaSnapshots.get(schema).databaseObjects.containsKey(databaseObject.getClass())
+                && schemaSnapshots.get(schema).databaseObjects.get(databaseObject.getClass()).contains(databaseObject);
+
+    }
+
+    public boolean matches(Schema schema, DatabaseObject databaseObject) {
+        DatabaseObject thisDatabaseObject = this.getDatabaseObject(schema, databaseObject, databaseObject.getClass());
+        return thisDatabaseObject != null;
+
+    }
+
+    private static class SchemaSnapshot {
+        private Map<Class<? extends DatabaseObject>, Set<DatabaseObject>> databaseObjects = new HashMap<Class<? extends DatabaseObject>, Set<DatabaseObject>>();
+
     }
 }

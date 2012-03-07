@@ -21,6 +21,7 @@ import java.util.Set;
 @ChangeClass(name="addColumn", description = "Add Column", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "table")
 public class AddColumnChange extends AbstractChange implements ChangeWithColumns<ColumnConfig> {
 
+    private String catalogName;
     private String schemaName;
     private String tableName;
     private List<ColumnConfig> columns;
@@ -29,13 +30,22 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
         columns = new ArrayList<ColumnConfig>();
     }
 
+    @ChangeProperty(mustApplyTo ="table.catalog")
+    public String getCatalogName() {
+        return catalogName;
+    }
+
+    public void setCatalogName(String catalogName) {
+        this.catalogName = catalogName;
+    }
+
     @ChangeProperty(mustApplyTo ="table.schema")
     public String getSchemaName() {
         return schemaName;
     }
 
     public void setSchemaName(String schemaName) {
-        this.schemaName = StringUtils.trimToNull(schemaName);
+        this.schemaName = schemaName;
     }
 
     @ChangeProperty(requiredForDatabase = "all", mustApplyTo ="table")
@@ -96,7 +106,7 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
                 constraints.add(new AutoIncrementConstraint(aColumn.getName(), aColumn.getStartWith(), aColumn.getIncrementBy()));
             }
 
-            AddColumnStatement addColumnStatement = new AddColumnStatement(getSchemaName(),
+            AddColumnStatement addColumnStatement = new AddColumnStatement(getCatalogName(), getSchemaName(),
                     getTableName(),
                     aColumn.getName(),
                     aColumn.getType(),
@@ -106,11 +116,11 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
             sql.add(addColumnStatement);
 
             if (database instanceof DB2Database) {
-                sql.add(new ReorganizeTableStatement(getSchemaName(), getTableName()));
+                sql.add(new ReorganizeTableStatement(getCatalogName(), getSchemaName(), getTableName()));
             }            
 
             if (aColumn.getValueObject() != null) {
-                UpdateStatement updateStatement = new UpdateStatement(getSchemaName(), getTableName());
+                UpdateStatement updateStatement = new UpdateStatement(getCatalogName(), getSchemaName(), getTableName());
                 updateStatement.addNewColumnValue(aColumn.getName(), aColumn.getValueObject());
                 sql.add(updateStatement);
             }

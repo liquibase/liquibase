@@ -54,14 +54,14 @@ public class CreateIndexGenerator extends AbstractSqlGenerator<CreateIndexStatem
 
 	    if (statement.getIndexName() != null) {
             String indexSchema = statement.getTableSchemaName();
-            buffer.append(database.escapeIndexName(indexSchema, statement.getIndexName())).append(" ");
+            buffer.append(database.escapeIndexName(statement.getTableCatalogName(), indexSchema, statement.getIndexName())).append(" ");
 	    }
 	    buffer.append("ON ");
-	    buffer.append(database.escapeTableName(statement.getTableSchemaName(), statement.getTableName())).append("(");
+	    buffer.append(database.escapeTableName(statement.getTableCatalogName(), statement.getTableSchemaName(), statement.getTableName())).append("(");
 	    Iterator<String> iterator = Arrays.asList(statement.getColumns()).iterator();
 	    while (iterator.hasNext()) {
 		    String column = iterator.next();
-		    buffer.append(database.escapeColumnName(statement.getTableSchemaName(), statement.getTableName(), column));
+		    buffer.append(database.escapeColumnName(statement.getTableCatalogName(), statement.getTableSchemaName(), statement.getTableName(), column));
 		    if (iterator.hasNext()) {
 			    buffer.append(", ");
 		    }

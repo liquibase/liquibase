@@ -6,7 +6,7 @@
 
         <xsd:simpleType name="propertyExpression" id="propertyExpression">
         <xsd:restriction base="xsd:string">
-                <xsd:pattern value="\$\{[\w\.]+\}"/>
+            <xsd:pattern value="$\{[\w\.]+\}"/>
             </xsd:restriction>
     </xsd:simpleType>
 

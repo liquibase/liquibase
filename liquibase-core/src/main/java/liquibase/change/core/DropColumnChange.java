@@ -20,6 +20,7 @@ import java.util.List;
 @ChangeClass(name="dropColumn", description = "Drop Column", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "column")
 public class DropColumnChange extends AbstractChange {
 
+    private String catalogName;
     private String schemaName;
     private String tableName;
     private String columnName;
@@ -34,13 +35,22 @@ public class DropColumnChange extends AbstractChange {
     }
 
 
+    @ChangeProperty(mustApplyTo ="column.table.catalog")
+    public String getCatalogName() {
+        return catalogName;
+    }
+
+    public void setCatalogName(String catalogName) {
+        this.catalogName = catalogName;
+    }
+
     @ChangeProperty(mustApplyTo ="column.table.schema")
     public String getSchemaName() {
         return schemaName;
     }
 
     public void setSchemaName(String schemaName) {
-        this.schemaName = StringUtils.trimToNull(schemaName);
+        this.schemaName = schemaName;
     }
 
     @ChangeProperty(requiredForDatabase = "all", mustApplyTo = "column.table")
@@ -60,11 +70,10 @@ public class DropColumnChange extends AbstractChange {
 //		}
 			
         List<SqlStatement> statements = new ArrayList<SqlStatement>();
-        String schemaName = getSchemaName() == null?database.getDefaultSchemaName():getSchemaName();
-        
-        statements.add(new DropColumnStatement(schemaName, getTableName(), getColumnName()));
+
+        statements.add(new DropColumnStatement(getCatalogName(), getSchemaName(), getTableName(), getColumnName()));
         if (database instanceof DB2Database) {
-            statements.add(new ReorganizeTableStatement(schemaName, getTableName()));
+            statements.add(new ReorganizeTableStatement(getCatalogName(), getSchemaName(), getTableName()));
         }
         
         return statements.toArray(new SqlStatement[statements.size()]);
@@ -98,7 +107,7 @@ public class DropColumnChange extends AbstractChange {
     		// alter table
 			statements.addAll(SQLiteDatabase.getAlterTableStatements(
 					rename_alter_visitor,
-					database,getSchemaName(),getTableName()));
+					database,getCatalogName(), getSchemaName(),getTableName()));
 			
 		}  catch (Exception e) {
 			e.printStackTrace();

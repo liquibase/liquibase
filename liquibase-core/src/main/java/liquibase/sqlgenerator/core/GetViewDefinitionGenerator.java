@@ -19,19 +19,19 @@ public class GetViewDefinitionGenerator extends AbstractSqlGenerator<GetViewDefi
     }
 
     public Sql[] generateSql(GetViewDefinitionStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-        try {
-            String sql = "select view_definition from information_schema.views where upper(table_name)='" + statement.getViewName().toUpperCase() + "'";
-            if (database.convertRequestedSchemaToCatalog(statement.getSchemaName()) != null) {
-                sql += " and table_schema='" + database.convertRequestedSchemaToSchema(statement.getSchemaName()) + "'";
-            } else if (database.convertRequestedSchemaToCatalog(statement.getSchemaName()) != null) {
-                sql += " and table_catalog='" + database.convertRequestedSchemaToCatalog(statement.getSchemaName()) + "'";
-            }
-
-            return new Sql[] {
-                    new UnparsedSql(sql)
-            };
-        } catch (DatabaseException e) {
-            throw new UnexpectedLiquibaseException(e);
+        String sql = "select view_definition from information_schema.views where upper(table_name)='" + statement.getViewName().toUpperCase() + "'";
+        String schema = database.correctSchemaName(statement.getSchemaName());
+        String catalog = database.correctCatalogName(statement.getCatalogName());
+        if (schema != null) {
+            sql += " and table_schema='" + schema + "'";
         }
+
+        if (catalog != null) {
+            sql += " and table_catalog='" + catalog + "'";
+        }
+
+        return new Sql[]{
+                new UnparsedSql(sql)
+        };
     }
 }

@@ -14,8 +14,19 @@ import liquibase.util.StringUtils;
  */
 @ChangeClass(name="dropView", description = "Drop View", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "view")
 public class DropViewChange extends AbstractChange {
+    private String catalogName;
     private String schemaName;
     private String viewName;
+
+
+    @ChangeProperty(mustApplyTo ="view.catalog")
+    public String getCatalogName() {
+        return catalogName;
+    }
+
+    public void setCatalogName(String catalogName) {
+        this.catalogName = catalogName;
+    }
 
     @ChangeProperty(mustApplyTo ="view.schema")
     public String getSchemaName() {
@@ -23,7 +34,7 @@ public class DropViewChange extends AbstractChange {
     }
 
     public void setSchemaName(String schemaName) {
-        this.schemaName = StringUtils.trimToNull(schemaName);
+        this.schemaName = schemaName;
     }
 
     @ChangeProperty(requiredForDatabase = "all", mustApplyTo = "view")
@@ -37,7 +48,7 @@ public class DropViewChange extends AbstractChange {
 
     public SqlStatement[] generateStatements(Database database) {
         return new SqlStatement[]{
-                new DropViewStatement(getSchemaName() == null?database.getDefaultSchemaName():getSchemaName(), getViewName()),
+                new DropViewStatement(getCatalogName(), getSchemaName(), getViewName()),
         };
     }
 

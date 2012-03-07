@@ -71,12 +71,6 @@ public class JdbcExecutor extends AbstractExecutor implements Executor {
     }
 
     public void execute(final SqlStatement sql, final List<SqlVisitor> sqlVisitors) throws DatabaseException {
-        if (sql instanceof CallableSqlStatement) {
-            call(((CallableSqlStatement) sql), new ArrayList(), sqlVisitors);
-            return;
-        }
-
-
         class ExecuteStatementCallback implements StatementCallback {
             public Object doInStatement(Statement stmt) throws SQLException, DatabaseException {
                 for (String statement : applyVisitors(sql, sqlVisitors)) {
@@ -227,75 +221,6 @@ public class JdbcExecutor extends AbstractExecutor implements Executor {
             }
         }
         return (Integer) execute(new UpdateStatementCallback(), sqlVisitors);
-    }
-    //-------------------------------------------------------------------------
-    // Methods dealing with callable statements
-    //-------------------------------------------------------------------------
-
-    public Object execute(CallableSqlStatement csc, CallableStatementCallback action, List<SqlVisitor> sqlVisitors) throws DatabaseException {
-        CallableStatement cs = null;
-        try {
-            cs = createCallableStatement(((StoredProcedureStatement) csc), database);
-            CallableStatement csToUse = cs;
-            return action.doInCallableStatement(csToUse);
-        }
-        catch (SQLException ex) {
-            throw new DatabaseException("Error executing callable statement", ex);
-        }
-        finally {
-            JdbcUtils.closeStatement(cs);
-        }
-
-    }
-
-    public CallableStatement createCallableStatement(StoredProcedureStatement statement, Database database) throws SQLException {
-        StringBuffer sql = new StringBuffer("{call " + statement.getProcedureName());
-
-        List<String> parameters = statement.getParameters();
-        if (parameters.size() > 0) {
-            sql.append("(");
-            //noinspection UnusedDeclaration
-            for (Object param : parameters) {
-                sql.append("?,");
-            }
-            sql.deleteCharAt(sql.lastIndexOf(","));
-            sql.append(")");
-        }
-
-        sql.append("}");
-
-        CallableStatement pstmt = ((JdbcConnection) database.getConnection()).getUnderlyingConnection().prepareCall(sql.toString());
-
-        for (int i = 0; i < parameters.size(); i++) {
-            String param = parameters.get(i);
-            int type = ((JdbcDatabaseSnapshotGenerator) DatabaseSnapshotGeneratorFactory.getInstance().getGenerator(database)).getDatabaseType(statement.getParameterType(param), database);
-
-            if (param == null) {
-                pstmt.setNull(i + 1, type);
-            } else {
-                pstmt.setObject(i + 1, param, type);
-            }
-        }
-
-        return pstmt;
-    }
-
-
-    public Map call(CallableSqlStatement csc, final List declaredParameters, List<SqlVisitor> sqlVisitors) throws DatabaseException {
-        return (Map) execute(csc, new CallableStatementCallback() {
-            public Object doInCallableStatement(CallableStatement cs) throws SQLException {
-                //not currently doing anything with returned results
-//                boolean retVal = cs.execute();
-//                int updateCount = cs.getUpdateCount();
-//                Map returnedResults = new HashMap();
-//                if (retVal || updateCount != -1) {
-//                    returnedResults.putAll(extractReturnedResultSets(cs, declaredParameters, updateCount));
-//                }
-//                returnedResults.putAll(extractOutputParameters(cs, declaredParameters));
-                cs.execute();
-                return new HashMap();
-            }
-        }, sqlVisitors);
     }
 
     /**

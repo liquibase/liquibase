@@ -4,17 +4,23 @@ import liquibase.statement.AbstractSqlStatement;
 
 public class AddPrimaryKeyStatement extends AbstractSqlStatement {
 
+    private String catalogName;
     private String schemaName;
     private String tableName;
     private String tablespace;
     private String columnNames;
     private String constraintName;
 
-    public AddPrimaryKeyStatement(String schemaName, String tableName, String columnNames, String constraintName) {
+    public AddPrimaryKeyStatement(String catalogName, String schemaName, String tableName, String columnNames, String constraintName) {
+        this.catalogName = catalogName;
         this.schemaName = schemaName;
         this.tableName = tableName;
         this.columnNames = columnNames;
         this.constraintName = constraintName;
+    }
+
+    public String getCatalogName() {
+        return catalogName;
     }
 
     public String getSchemaName() {

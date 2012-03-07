@@ -6,7 +6,11 @@ import liquibase.changelog.visitor.*;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.DatabaseFactory;
-import liquibase.diff.Diff;
+import liquibase.database.structure.Catalog;
+import liquibase.database.structure.Schema;
+import liquibase.diff.DiffControl;
+import liquibase.diff.DiffGeneratorFactory;
+import liquibase.diff.DiffResult;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.LockException;
@@ -469,18 +473,18 @@ public class Liquibase {
      * Drops all database objects owned by the current user.
      */
     public final void dropAll() throws DatabaseException, LockException {
-        dropAll(getDatabase().getDefaultSchemaName());
+        dropAll(new Schema(getDatabase().getDefaultCatalogName(), getDatabase().getDefaultSchemaName()));
     }
 
     /**
      * Drops all database objects owned by the current user.
-     */
-    public final void dropAll(String... schemas) throws DatabaseException {
+     */                                      
+    public final void dropAll(Schema... schemas) throws DatabaseException {
         try {
             LockService.getInstance(database).waitForLock();
 
-            for (String schema : schemas) {
-                log.info("Dropping Database Objects in schema: " + database.convertRequestedSchemaToSchema(schema));
+            for (Schema schema : schemas) {
+                log.info("Dropping Database Objects in schema: " + schema);
                 checkDatabaseChangeLogTable(false, null, null);
                 getDatabase().dropDatabaseObjects(schema);
                 checkDatabaseChangeLogTable(false, null, null);
@@ -632,7 +636,7 @@ public class Liquibase {
         try {
             checkDatabaseChangeLogTable(false, null, null);
 
-            UpdateStatement updateStatement = new UpdateStatement(getDatabase().getLiquibaseSchemaName(), getDatabase().getDatabaseChangeLogTableName());
+            UpdateStatement updateStatement = new UpdateStatement(getDatabase().getLiquibaseCatalogName(), getDatabase().getLiquibaseSchemaName(), getDatabase().getDatabaseChangeLogTableName());
             updateStatement.addNewColumnValue("MD5SUM", null);
             ExecutorService.getInstance().getExecutor(database).execute(updateStatement);
             getDatabase().commit();
@@ -689,8 +693,8 @@ public class Liquibase {
 //        }
     }
 
-    public Diff diff(Database referenceDatabase, Database targetDatabase) {
-        return new Diff(referenceDatabase, targetDatabase);
+    public DiffResult diff(Database referenceDatabase, Database targetDatabase, DiffControl diffControl) throws DatabaseException {
+        return DiffGeneratorFactory.getInstance().compare(referenceDatabase, targetDatabase, diffControl);
     }
 
     /**

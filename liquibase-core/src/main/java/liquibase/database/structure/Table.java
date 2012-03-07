@@ -1,66 +1,20 @@
 package liquibase.database.structure;
 
-import liquibase.database.Database;
+public class Table extends Relation {
 
-import java.util.ArrayList;
-import java.util.List;
-
-public class Table implements DatabaseObject, Comparable<Table> {
-
-    private Database database;
-    private String name;
-    private String remarks;
-    private String schema;
-    private List<Column> columns = new ArrayList<Column>();
-
-    private String rawCatalogName;
-    private String rawSchemaName;
-
+    private PrimaryKey primaryKey;
+    
     public Table(String name) {
-        this.name = name;
+        super(name);
     }
 
-    public String getName() {
-        return name;
+    public PrimaryKey getPrimaryKey() {
+        return primaryKey;
     }
 
-    public Database getDatabase() {
-        return database;
+    public void setPrimaryKey(PrimaryKey primaryKey) {
+        this.primaryKey = primaryKey;
     }
-
-    public DatabaseObject[] getContainingObjects() {
-        if (getSchema() == null) {
-            return new DatabaseObject[] {
-                    getDatabase()
-            };
-        } else {
-            return new DatabaseObject[] {
-                    new Schema(getSchema())
-            };
-        }
-
-    }
-
-    public Table setDatabase(Database database) {
-        this.database = database;
-
-        return this;
-    }
-
-    public String getRemarks() {
-        return remarks;
-    }
-
-    public Table setRemarks(String remarks) {
-        this.remarks = remarks;
-
-        return this;
-    }
-
-    public List<Column> getColumns() {
-        return columns;
-    }
-
 
     @Override
     public boolean equals(Object o) {
@@ -78,59 +32,8 @@ public class Table implements DatabaseObject, Comparable<Table> {
         return name.toUpperCase().hashCode();
     }
 
-
-    public int compareTo(Table o) {
-        return this.getName().compareToIgnoreCase(o.getName());
-    }
-
-
     @Override
     public String toString() {
     	return getName();
-    }
-
-    /**
-     * Returns the column object for the given columnName.  If the column does not exist in this table,
-     * return null.
-     */
-    public Column getColumn(String columnName) {
-        for (Column column : getColumns()) {
-            if (column.getName().equalsIgnoreCase(columnName)) {
-                return column;
-            }
-        }
-        return null;
-    }
-
-	/**
-	 * @return Returns the schema.
-	 */
-	public String getSchema () {
-		return schema;
-	}
-
-	/**
-	 * @param schema The schema to set.
-	 */
-	public Table setSchema (String schema) {
-		this.schema = schema;
-
-        return this;
-	}
-
-    public String getRawCatalogName() {
-        return rawCatalogName;
-    }
-
-    public void setRawCatalogName(String rawCatalogName) {
-        this.rawCatalogName = rawCatalogName;
-    }
-
-    public String getRawSchemaName() {
-        return rawSchemaName;
-    }
-
-    public void setRawSchemaName(String rawSchemaName) {
-        this.rawSchemaName = rawSchemaName;
     }
 }

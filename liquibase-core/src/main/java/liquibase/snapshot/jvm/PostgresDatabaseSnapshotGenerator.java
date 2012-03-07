@@ -3,6 +3,7 @@ package liquibase.snapshot.jvm;
 import liquibase.database.Database;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.database.core.PostgresDatabase;
+import liquibase.database.structure.Schema;
 import liquibase.database.structure.Table;
 import liquibase.database.structure.UniqueConstraint;
 import liquibase.exception.DatabaseException;
@@ -26,22 +27,7 @@ public class PostgresDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGener
     }
 
     @Override
-    protected String convertTableNameToDatabaseTableName(String tableName) {
-        return tableName.toLowerCase();
-    }
-
-    @Override
-    protected String convertColumnNameToDatabaseTableName(String columnName) {
-        return columnName.toLowerCase();
-    }
-
-    @Override
-    protected String convertPrimaryKeyName(String pkName) throws SQLException {
-        return pkName.toLowerCase();
-    }
-
-    @Override
-    protected String convertFromDatabaseName(String objectName) {
+    protected String cleanObjectNameFromDatabase(String objectName) {
         if (objectName == null) {
             return null;
         }
@@ -52,7 +38,7 @@ public class PostgresDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGener
      *
      */
     @Override
-    protected void readUniqueConstraints(DatabaseSnapshot snapshot, String schema, DatabaseMetaData databaseMetaData) throws DatabaseException, SQLException {
+    protected void readUniqueConstraints(DatabaseSnapshot snapshot, Schema schema, DatabaseMetaData databaseMetaData) throws DatabaseException, SQLException {
         Database database = snapshot.getDatabase();
         updateListeners("Reading unique constraints for " + database.toString() + " ...");
         List<UniqueConstraint> foundUC = new ArrayList<UniqueConstraint>();
@@ -68,8 +54,8 @@ public class PostgresDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGener
                 String tableName = rs.getString("relname");
                 UniqueConstraint constraintInformation = new UniqueConstraint();
                 constraintInformation.setName(constraintName);
-                if(!database.isSystemTable(null, schema, tableName)&&!database.isLiquibaseTable(tableName)) {
-                    Table table = snapshot.getTable(tableName);
+                if(!database.isSystemTable(schema, tableName)&&!database.isLiquibaseTable(tableName)) {
+                    Table table = snapshot.getDatabaseObject(schema, tableName, Table.class);
                     if (table == null) {
                         // SKip it  --  the query  above pulls  back more  then the  query for tables &  views in  the super  class
  	 	                continue;
@@ -79,7 +65,7 @@ public class PostgresDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGener
 	                foundUC.add(constraintInformation);
                 }
             }
-            snapshot.getUniqueConstraints().addAll(foundUC);
+            snapshot.addDatabaseObjects(foundUC.toArray(new UniqueConstraint[foundUC.size()]));
         }
         finally {
             try {

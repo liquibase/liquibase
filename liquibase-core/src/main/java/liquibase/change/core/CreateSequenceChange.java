@@ -14,6 +14,7 @@ import java.math.BigInteger;
 @ChangeClass(name="createSequence", description = "Create Sequence", priority = ChangeMetaData.PRIORITY_DEFAULT)
 public class CreateSequenceChange extends AbstractChange {
 
+    private String catalogName;
     private String schemaName;
     private String sequenceName;
     private BigInteger startValue;
@@ -23,12 +24,20 @@ public class CreateSequenceChange extends AbstractChange {
     private Boolean ordered;
     private Boolean cycle;
 
+    public String getCatalogName() {
+        return catalogName;
+    }
+
+    public void setCatalogName(String catalogName) {
+        this.catalogName = catalogName;
+    }
+
     public String getSchemaName() {
         return schemaName;
     }
 
     public void setSchemaName(String schemaName) {
-        this.schemaName = StringUtils.trimToNull(schemaName);
+        this.schemaName = schemaName;
     }
 
     @ChangeProperty(requiredForDatabase = "all")
@@ -90,7 +99,7 @@ public class CreateSequenceChange extends AbstractChange {
 
     public SqlStatement[] generateStatements(Database database) {
         return new SqlStatement[] {
-                new CreateSequenceStatement(getSchemaName() == null?database.getDefaultSchemaName():getSchemaName(), getSequenceName())
+                new CreateSequenceStatement(getCatalogName(), getSchemaName(), getSequenceName())
                 .setIncrementBy(getIncrementBy())
                 .setMaxValue(getMaxValue())
                 .setMinValue(getMinValue())

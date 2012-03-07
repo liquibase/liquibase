@@ -14,9 +14,19 @@ import liquibase.statement.core.DropForeignKeyConstraintStatement;
  */
 @ChangeClass(name="dropForeignKeyConstraint", description = "Drop Foreign Key Constraint", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "foreignKey")
 public class DropForeignKeyConstraintChange extends AbstractChange {
+    private String baseTableCatalogName;
     private String baseTableSchemaName;
     private String baseTableName;
     private String constraintName;
+
+    @ChangeProperty(mustApplyTo ="foreignKey.table.catalog")
+    public String getBaseTableCatalogName() {
+        return baseTableCatalogName;
+    }
+
+    public void setBaseTableCatalogName(String baseTableCatalogName) {
+        this.baseTableCatalogName = baseTableCatalogName;
+    }
 
     @ChangeProperty(mustApplyTo ="foreignKey.table.schema")
     public String getBaseTableSchemaName() {
@@ -54,7 +64,8 @@ public class DropForeignKeyConstraintChange extends AbstractChange {
     	
         return new SqlStatement[]{
                 new DropForeignKeyConstraintStatement(
-                        getBaseTableSchemaName() == null?database.getDefaultSchemaName():getBaseTableSchemaName(),
+                        getBaseTableCatalogName(),
+                        getBaseTableSchemaName(),
                         getBaseTableName(),
                         getConstraintName()),
         };    	

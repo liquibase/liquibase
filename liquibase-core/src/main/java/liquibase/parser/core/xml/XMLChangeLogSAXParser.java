@@ -43,7 +43,7 @@ public class XMLChangeLogSAXParser implements ChangeLogParser {
     }
 
     public static String getSchemaVersion() {
-        return "2.0";
+        return "3.0";
     }
 
     public static String getDatabaseChangeLogNameSpace() {

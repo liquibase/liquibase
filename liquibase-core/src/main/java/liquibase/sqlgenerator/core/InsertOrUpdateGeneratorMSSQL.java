@@ -16,7 +16,7 @@ public class InsertOrUpdateGeneratorMSSQL extends InsertOrUpdateGenerator {
         StringBuffer recordCheck = new StringBuffer();
         recordCheck.append("DECLARE @reccount integer\n");
         recordCheck.append("SELECT @reccount = count(*) FROM ");
-        recordCheck.append(database.escapeTableName(insertOrUpdateStatement.getSchemaName(),insertOrUpdateStatement.getTableName()));
+        recordCheck.append(database.escapeTableName(insertOrUpdateStatement.getCatalogName(), insertOrUpdateStatement.getSchemaName(),insertOrUpdateStatement.getTableName()));
         recordCheck.append(" WHERE ");
         recordCheck.append(whereClause);
         recordCheck.append("\n");
@@ -35,6 +35,7 @@ public class InsertOrUpdateGeneratorMSSQL extends InsertOrUpdateGenerator {
         return insertBlock.toString(); 
     }
 
+    @Override
     protected String getElse(Database database) {
         return "ELSE\n";
     }

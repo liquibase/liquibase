@@ -2,6 +2,7 @@ package liquibase.database.core;
 
 import liquibase.database.AbstractDatabase;
 import liquibase.database.DatabaseConnection;
+import liquibase.database.structure.Schema;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.DateParseException;
 
@@ -30,8 +31,13 @@ public class DB2Database extends AbstractDatabase {
     }
 
     @Override
-    protected String getDefaultDatabaseSchemaName() throws DatabaseException {//NOPMD
-        return super.getDefaultDatabaseSchemaName().toUpperCase();
+    public String correctCatalogName(String catalogName) {
+        return null;
+    }
+
+    @Override
+    protected String correctObjectName(String objectName) {
+        return objectName.toUpperCase();
     }
 
     public boolean supportsInitiallyDeferrableColumns() {
@@ -98,8 +104,8 @@ public class DB2Database extends AbstractDatabase {
     }
 
     @Override
-    public String getViewDefinition(String schemaName, String name) throws DatabaseException {
-        return super.getViewDefinition(schemaName, name).replaceFirst("CREATE VIEW \\w+ AS ", ""); //db2 returns "create view....as select
+    public String getViewDefinition(Schema schema, String name) throws DatabaseException {
+        return super.getViewDefinition(schema, name).replaceFirst("CREATE VIEW \\w+ AS ", ""); //db2 returns "create view....as select
     }
 
 
@@ -126,20 +132,6 @@ public class DB2Database extends AbstractDatabase {
     }
 
     @Override
-    public String convertRequestedSchemaToSchema(String requestedSchema) throws DatabaseException {
-        if (requestedSchema == null) {
-            return getDefaultDatabaseSchemaName();
-        } else {
-            return requestedSchema.toUpperCase();
-        }
-    }
-
-    @Override
-    public String convertRequestedSchemaToCatalog(String requestedSchema) throws DatabaseException {
-        return null;
-    }
-
-    @Override
     public String generatePrimaryKeyName(String tableName) {
         if (tableName.equals(getDatabaseChangeLogTableName())) {
             tableName = "DbChgLog".toUpperCase();
@@ -154,10 +146,11 @@ public class DB2Database extends AbstractDatabase {
         return pkName;
     }
 
+
     @Override
-    public String escapeIndexName(String schemaName, String indexName) {
+    public String escapeIndexName(String catalogName, String schemaName, String indexName) {
         // does not support the schema name for the index -
-        return super.escapeIndexName(null, indexName);
+        return super.escapeIndexName(null, null, indexName);
     }
 
 }

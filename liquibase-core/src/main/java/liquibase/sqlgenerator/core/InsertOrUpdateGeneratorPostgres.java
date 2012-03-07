@@ -27,7 +27,7 @@ public class InsertOrUpdateGeneratorPostgres extends InsertOrUpdateGenerator {
 					sqlGeneratorChain));
 		} catch (LiquibaseException e) {
 			// do a select statement instead
-			generatedSql.append("select * from " + database.escapeTableName(insertOrUpdateStatement.getSchemaName(), insertOrUpdateStatement.getTableName()) + " WHERE " +
+			generatedSql.append("select * from " + database.escapeTableName(insertOrUpdateStatement.getCatalogName(), insertOrUpdateStatement.getSchemaName(), insertOrUpdateStatement.getTableName()) + " WHERE " +
 					getWhereClause(insertOrUpdateStatement, database) + "\n");
 		}
 		generatedSql.append("IF not found THEN\n");

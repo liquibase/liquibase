@@ -4,7 +4,7 @@ public class CreateViewStatementTest extends AbstractSqStatementTest<CreateViewS
 
     @Override
     protected CreateViewStatement createStatementUnderTest() {
-        return new CreateViewStatement(null, null, null, false);
+        return new CreateViewStatement(null, null, null, null, false);
     }
 
 }

@@ -17,6 +17,7 @@ import java.util.List;
 @ChangeClass(name="renameTable", description = "Rename Table", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "table")
 public class RenameTableChange extends AbstractChange {
 
+    private String catalogName;
     private String schemaName;
     private String oldTableName;
 
@@ -25,13 +26,22 @@ public class RenameTableChange extends AbstractChange {
     public RenameTableChange() {
     }
 
+    @ChangeProperty(mustApplyTo ="table.catalog")
+    public String getCatalogName() {
+        return catalogName;
+    }
+
+    public void setCatalogName(String catalogName) {
+        this.catalogName = catalogName;
+    }
+
     @ChangeProperty(mustApplyTo ="table.schema")
     public String getSchemaName() {
         return schemaName;
     }
 
     public void setSchemaName(String schemaName) {
-        this.schemaName = StringUtils.trimToNull(schemaName);
+        this.schemaName = schemaName;
     }
 
     @ChangeProperty(requiredForDatabase = "all", mustApplyTo = "table")
@@ -54,10 +64,9 @@ public class RenameTableChange extends AbstractChange {
 
     public SqlStatement[] generateStatements(Database database) {
         List<SqlStatement> statements = new ArrayList<SqlStatement>();
-        String schemaName = getSchemaName() == null?database.getDefaultSchemaName():getSchemaName();
-        statements.add(new RenameTableStatement(schemaName, getOldTableName(), getNewTableName()));
+        statements.add(new RenameTableStatement(getCatalogName(), getSchemaName(), getOldTableName(), getNewTableName()));
         if (database instanceof DB2Database) {
-            statements.add(new ReorganizeTableStatement(schemaName, getNewTableName()));
+            statements.add(new ReorganizeTableStatement(getCatalogName(), getSchemaName(), getNewTableName()));
         }
 
         return statements.toArray(new SqlStatement[statements.size()]);

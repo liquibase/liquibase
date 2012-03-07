@@ -4,7 +4,7 @@ public class DropViewStatementTest extends AbstractSqStatementTest<DropViewState
 
     @Override
     protected DropViewStatement createStatementUnderTest() {
-        return new DropViewStatement(null, null);
+        return new DropViewStatement(null, null, null);
     }
 
 

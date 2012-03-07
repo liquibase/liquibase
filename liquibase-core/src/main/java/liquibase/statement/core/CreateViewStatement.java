@@ -4,16 +4,22 @@ import liquibase.statement.AbstractSqlStatement;
 
 public class CreateViewStatement extends AbstractSqlStatement {
 
+    private String catalogName;
     private String schemaName;
     private String viewName;
     private String selectQuery;
     private boolean replaceIfExists;
 
-    public CreateViewStatement(String schemaName, String viewName, String selectQuery, boolean replaceIfExists) {
+    public CreateViewStatement(String catalogName, String schemaName, String viewName, String selectQuery, boolean replaceIfExists) {
+        this.catalogName = catalogName;
         this.schemaName = schemaName;
         this.viewName = viewName;
         this.selectQuery = selectQuery;
         this.replaceIfExists = replaceIfExists;
+    }
+
+    public String getCatalogName() {
+        return catalogName;
     }
 
     public String getSchemaName() {

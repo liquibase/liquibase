@@ -21,7 +21,7 @@ public class AddColumnGeneratorTest extends AbstractSqlGeneratorTest<AddColumnSt
 
 	@Override
 	protected AddColumnStatement createSampleSqlStatement() {
-		return new AddColumnStatement(null, "table_name", "column_name", "column_type", null);
+		return new AddColumnStatement(null, null, "table_name", "column_name", "column_type", null);
 	}
 
 

@@ -1,10 +1,9 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
-import liquibase.database.typeconversion.TypeConverterFactory;
+import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
-import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.NotNullConstraint;
@@ -23,13 +22,13 @@ public class CreateDatabaseChangeLogLockTableGenerator extends AbstractSqlGenera
     }
 
     public Sql[] generateSql(CreateDatabaseChangeLogLockTableStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-        CreateTableStatement createTableStatement = new CreateTableStatement(database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName())
-                .addPrimaryKeyColumn("ID", TypeConverterFactory.getInstance().findTypeConverter(database).getDataType("INT", false), null, null, null, new NotNullConstraint())
-                .addColumn("LOCKED", TypeConverterFactory.getInstance().findTypeConverter(database).getDataType("BOOLEAN", false), null, new NotNullConstraint())
-                .addColumn("LOCKGRANTED", TypeConverterFactory.getInstance().findTypeConverter(database).getDataType("DATETIME", false))
-                .addColumn("LOCKEDBY", TypeConverterFactory.getInstance().findTypeConverter(database).getDataType("VARCHAR(255)", false));
+        CreateTableStatement createTableStatement = new CreateTableStatement(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName())
+                .addPrimaryKeyColumn("ID", DataTypeFactory.getInstance().fromDescription("INT"), null, null, null, new NotNullConstraint())
+                .addColumn("LOCKED", DataTypeFactory.getInstance().fromDescription("BOOLEAN"), null, new NotNullConstraint())
+                .addColumn("LOCKGRANTED", DataTypeFactory.getInstance().fromDescription("DATETIME"))
+                .addColumn("LOCKEDBY", DataTypeFactory.getInstance().fromDescription("VARCHAR(255)"));
 
-        InsertStatement insertStatement = new InsertStatement(database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName())
+        InsertStatement insertStatement = new InsertStatement(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName())
                 .addColumnValue("ID", 1)
                 .addColumnValue("LOCKED", Boolean.FALSE);
 

@@ -77,8 +77,7 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
     }
 
 
-	public void write(List<ChangeSet> changeSets, OutputStream out)
-			throws IOException {
+	public void write(List<ChangeSet> changeSets, OutputStream out) throws IOException {
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder documentBuilder;
 		try {

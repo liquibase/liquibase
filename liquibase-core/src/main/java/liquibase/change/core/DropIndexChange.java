@@ -21,6 +21,7 @@ public class DropIndexChange extends AbstractChange {
 
     @ChangeProperty(includeInSerialization = false)
     private String associatedWith;
+    private String catalogName;
 
     @ChangeProperty(mustApplyTo ="index.schema")
     public String getSchemaName() {
@@ -28,7 +29,7 @@ public class DropIndexChange extends AbstractChange {
     }
 
     public void setSchemaName(String schemaName) {
-        this.schemaName = StringUtils.trimToNull(schemaName);
+        this.schemaName = schemaName;
     }
 
     @ChangeProperty(requiredForDatabase = "all", mustApplyTo = "index")
@@ -51,7 +52,7 @@ public class DropIndexChange extends AbstractChange {
 
     public SqlStatement[] generateStatements(Database database) {
         return new SqlStatement[] {
-            new DropIndexStatement(getIndexName(), getSchemaName() == null?database.getDefaultSchemaName():getSchemaName(), getTableName(), getAssociatedWith())
+            new DropIndexStatement(getIndexName(), getCatalogName(), getSchemaName(), getTableName(), getAssociatedWith())
         };
     }
 
@@ -65,5 +66,13 @@ public class DropIndexChange extends AbstractChange {
 
     public void setAssociatedWith(String associatedWith) {
         this.associatedWith = associatedWith;
+    }
+
+    public String getCatalogName() {
+        return catalogName;
+    }
+
+    public void setCatalogName(String catalogName) {
+        this.catalogName = catalogName;
     }
 }

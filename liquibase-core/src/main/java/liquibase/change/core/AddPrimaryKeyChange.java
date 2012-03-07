@@ -20,6 +20,7 @@ import java.util.List;
 @ChangeClass(name="addPrimaryKey", description = "Add Primary Key", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "column")
 public class AddPrimaryKeyChange extends AbstractChange {
 
+    private String catalogName;
     private String schemaName;
     private String tableName;
     private String tablespace;
@@ -35,13 +36,22 @@ public class AddPrimaryKeyChange extends AbstractChange {
         this.tableName = tableName;
     }
 
+    @ChangeProperty(mustApplyTo ="column.table.catalog")
+    public String getCatalogName() {
+        return catalogName;
+    }
+
+    public void setCatalogName(String catalogName) {
+        this.catalogName = catalogName;
+    }
+
     @ChangeProperty(mustApplyTo ="column.table.schema")
     public String getSchemaName() {
         return schemaName;
     }
 
     public void setSchemaName(String schemaName) {
-        this.schemaName = StringUtils.trimToNull(schemaName);
+        this.schemaName = schemaName;
     }
 
     @ChangeProperty(requiredForDatabase = "all", mustApplyTo = "column")
@@ -73,15 +83,13 @@ public class AddPrimaryKeyChange extends AbstractChange {
     public SqlStatement[] generateStatements(Database database) {
 
 
-        String schemaName = getSchemaName() == null ? database.getDefaultSchemaName() : getSchemaName();
-
-        AddPrimaryKeyStatement statement = new AddPrimaryKeyStatement(schemaName, getTableName(), getColumnNames(), getConstraintName());
+        AddPrimaryKeyStatement statement = new AddPrimaryKeyStatement(getCatalogName(), getSchemaName(), getTableName(), getColumnNames(), getConstraintName());
         statement.setTablespace(getTablespace());
 
         if (database instanceof DB2Database) {
             return new SqlStatement[]{
                     statement,
-                    new ReorganizeTableStatement(schemaName, getTableName())
+                    new ReorganizeTableStatement(getCatalogName(), getSchemaName(), getTableName())
             };
 //todo        } else if (database instanceof SQLiteDatabase) {
 //            // return special statements for SQLite databases
@@ -129,7 +137,7 @@ public class AddPrimaryKeyChange extends AbstractChange {
             // alter table
             statements.addAll(SQLiteDatabase.getAlterTableStatements(
                     rename_alter_visitor,
-                    database, getSchemaName(), getTableName()));
+                    database, getCatalogName(),  getSchemaName(), getTableName()));
         } catch (Exception e) {
             e.printStackTrace();
         }

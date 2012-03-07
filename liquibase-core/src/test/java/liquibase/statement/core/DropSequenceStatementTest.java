@@ -4,7 +4,7 @@ public class DropSequenceStatementTest extends AbstractSqStatementTest<DropSeque
 
     @Override
     protected DropSequenceStatement createStatementUnderTest() {
-        return new DropSequenceStatement(null, null);
+        return new DropSequenceStatement(null, null, null);
     }
 
 }

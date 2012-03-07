@@ -2,8 +2,12 @@ package liquibase.integration.ant;
 
 import liquibase.Liquibase;
 import liquibase.database.Database;
-import liquibase.diff.Diff;
+import liquibase.diff.DiffControl;
+import liquibase.diff.DiffGeneratorFactory;
 import liquibase.diff.DiffResult;
+import liquibase.diff.output.DiffToChangeLog;
+import liquibase.snapshot.DatabaseSnapshot;
+import liquibase.snapshot.DatabaseSnapshotGeneratorFactory;
 import org.apache.tools.ant.BuildException;
 
 import java.io.PrintStream;
@@ -43,18 +47,18 @@ public class GenerateChangeLogTask extends BaseLiquibaseTask {
 			liquibase = createLiquibase();
 
 			Database database = liquibase.getDatabase();
-			Diff diff = new Diff(database, getDefaultSchemaName());
-			if (getDiffTypes() != null) {
-				diff.setDiffTypes(getDiffTypes());
-			}
+            DiffControl diffControl = new DiffControl(getDefaultCatalogName(), getDefaultSchemaName(), null, null, getDiffTypes());
+            diffControl.setDataDir(getDataDir());
+
+            DatabaseSnapshot referenceSnapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(database, diffControl, DiffControl.DatabaseRole.REFERENCE);
+
+            DiffResult diffResult = DiffGeneratorFactory.getInstance().compare(referenceSnapshot, new DatabaseSnapshot(database), diffControl);
 //			diff.addStatusListener(new OutDiffStatusListener());
-			DiffResult diffResult = diff.compare();
-            diffResult.setDataDir(getDataDir());
 
 			if (getChangeLogFile() == null) {
-				diffResult.printChangeLog(writer, database);
+				new DiffToChangeLog(diffResult).print(writer);
 			} else {
-				diffResult.printChangeLog(getChangeLogFile(), database);
+                new DiffToChangeLog(diffResult).print(getChangeLogFile());
 			}
 
 			writer.flush();

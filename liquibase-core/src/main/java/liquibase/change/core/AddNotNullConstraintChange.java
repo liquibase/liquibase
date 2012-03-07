@@ -6,12 +6,11 @@ import liquibase.database.core.DB2Database;
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.database.core.SQLiteDatabase.AlterTableVisitor;
 import liquibase.database.structure.Index;
-import liquibase.database.typeconversion.TypeConverterFactory;
+import liquibase.datatype.DataTypeFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.ReorganizeTableStatement;
 import liquibase.statement.core.SetNullableStatement;
 import liquibase.statement.core.UpdateStatement;
-import liquibase.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,11 +20,21 @@ import java.util.List;
  */
 @ChangeClass(name="addNotNullConstraint", description = "Add Not-Null Constraint", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "column")
 public class AddNotNullConstraintChange extends AbstractChange {
+    private String catalogName;
     private String schemaName;
     private String tableName;
     private String columnName;
     private String defaultNullValue;
     private String columnDataType;
+
+    @ChangeProperty(mustApplyTo ="column.table.catalog")
+    public String getCatalogName() {
+        return catalogName;
+    }
+
+    public void setCatalogName(String catalogName) {
+        this.catalogName = catalogName;
+    }
 
     @ChangeProperty(mustApplyTo ="column.table.schema")
     public String getSchemaName() {
@@ -33,7 +42,7 @@ public class AddNotNullConstraintChange extends AbstractChange {
     }
 
     public void setSchemaName(String schemaName) {
-        this.schemaName = StringUtils.trimToNull(schemaName);
+        this.schemaName = schemaName;
     }
 
     @ChangeProperty(requiredForDatabase = "all", mustApplyTo = "column.table")
@@ -78,22 +87,18 @@ public class AddNotNullConstraintChange extends AbstractChange {
 //        }
 
     	List<SqlStatement> statements = new ArrayList<SqlStatement>();
-    	String schemaName = getSchemaName() == null?database.getDefaultSchemaName():getSchemaName();
     	
         if (defaultNullValue != null) {
-            String defaultValue = TypeConverterFactory.getInstance()
-                    .findTypeConverter(database).getDataType(
-                            getDefaultNullValue()).convertObjectToString(
-                            getDefaultNullValue(), database);
+            String defaultValue = DataTypeFactory.getInstance().fromObject(getDefaultNullValue(), database).objectToString(getDefaultNullValue(), database);
             
-            statements.add(new UpdateStatement(schemaName, getTableName())
+            statements.add(new UpdateStatement(getCatalogName(), getSchemaName(), getTableName())
                     .addNewColumnValue(getColumnName(), defaultValue)
                     .setWhereClause(getColumnName() + " IS NULL"));
         }
         
-    	statements.add(new SetNullableStatement(schemaName, getTableName(), getColumnName(), getColumnDataType(), false));
+    	statements.add(new SetNullableStatement(getCatalogName(), getSchemaName(), getTableName(), getColumnName(), getColumnDataType(), false));
         if (database instanceof DB2Database) {
-            statements.add(new ReorganizeTableStatement(schemaName, getTableName()));
+            statements.add(new ReorganizeTableStatement(getCatalogName(), getSchemaName(), getTableName()));
         }           
         
         return statements.toArray(new SqlStatement[statements.size()]);
@@ -107,9 +112,8 @@ public class AddNotNullConstraintChange extends AbstractChange {
     	
     	List<SqlStatement> statements = new ArrayList<SqlStatement>();
     	
-    	String schemaName = getSchemaName() == null?database.getDefaultSchemaName():getSchemaName();
         if (defaultNullValue != null) {
-            statements.add(new UpdateStatement(schemaName, getTableName())
+            statements.add(new UpdateStatement(getCatalogName(), getSchemaName(), getTableName())
                     .addNewColumnValue(getColumnName(), getDefaultNullValue())
                     .setWhereClause(getColumnName() + " IS NULL"));
         }
@@ -156,7 +160,7 @@ public class AddNotNullConstraintChange extends AbstractChange {
     		
 		try {
     		// alter table
-			statements.addAll(SQLiteDatabase.getAlterTableStatements(rename_alter_visitor, database,getSchemaName(),getTableName()));
+			statements.addAll(SQLiteDatabase.getAlterTableStatements(rename_alter_visitor, database,getCatalogName(), getSchemaName(),getTableName()));
     	} catch (Exception e) {
 			e.printStackTrace();
 		}

@@ -2,6 +2,7 @@ package liquibase.database.core;
 
 import liquibase.database.AbstractDatabase;
 import liquibase.database.DatabaseConnection;
+import liquibase.database.structure.Schema;
 import liquibase.exception.DatabaseException;
 import liquibase.logging.LogFactory;
 import liquibase.statement.DatabaseFunction;
@@ -10,7 +11,6 @@ import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -30,7 +30,12 @@ public class OracleDatabase extends AbstractDatabase {
 	public int getPriority() {
         return PRIORITY_DEFAULT;
     }
-    
+
+    @Override
+    protected String correctObjectName(String objectName) {
+        return objectName.toUpperCase();
+    }
+
     @Override
     public void setConnection(DatabaseConnection conn) {
         try {
@@ -104,12 +109,7 @@ public class OracleDatabase extends AbstractDatabase {
     }
 
     @Override
-    protected String getDefaultDatabaseSchemaName() throws DatabaseException {//NOPMD
-        return super.getDefaultDatabaseSchemaName().toUpperCase();
-    }
-
-    @Override
-    public String escapeIndexName(String schemaName, String indexName) {
+    public String escapeIndexName(String catalogName, String schemaName, String indexName) {
         String escapedIndexName = indexName;
         if (schemaName != null)
         {
@@ -160,8 +160,8 @@ public class OracleDatabase extends AbstractDatabase {
     }
 
     @Override
-    public boolean isSystemTable(String catalogName, String schemaName, String tableName) {
-        if (super.isSystemTable(catalogName, schemaName, tableName)) {
+    public boolean isSystemTable(Schema schema, String tableName) {
+        if (super.isSystemTable(schema, tableName)) {
             return true;
         } else if (tableName.startsWith("BIN$")) { //oracle deleted table
             return true;

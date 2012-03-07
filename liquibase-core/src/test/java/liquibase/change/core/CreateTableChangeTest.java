@@ -5,7 +5,6 @@ import liquibase.change.Change;
 import liquibase.change.ColumnConfig;
 import liquibase.change.ConstraintsConfig;
 import liquibase.database.core.MockDatabase;
-import liquibase.database.typeconversion.core.DefaultTypeConverter;
 import liquibase.statement.ForeignKeyConstraint;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.UniqueConstraint;

@@ -19,10 +19,20 @@ import java.util.List;
 @ChangeClass(name="dropDefaultValue", description="Drop Default Value", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "column")
 public class DropDefaultValueChange extends AbstractChange {
 
+    private String catalogName;
     private String schemaName;
     private String tableName;
     private String columnName;
     private String columnDataType;
+
+    @ChangeProperty(mustApplyTo ="column.table.catalog")
+    public String getCatalogName() {
+        return catalogName;
+    }
+
+    public void setCatalogName(String catalogName) {
+        this.catalogName = catalogName;
+    }
 
     @ChangeProperty(mustApplyTo ="column.table.schema")
     public String getSchemaName() {
@@ -30,7 +40,7 @@ public class DropDefaultValueChange extends AbstractChange {
     }
 
     public void setSchemaName(String schemaName) {
-        this.schemaName = StringUtils.trimToNull(schemaName);
+        this.schemaName = schemaName;
     }
 
     @ChangeProperty(requiredForDatabase = "all", mustApplyTo = "column.table")
@@ -67,7 +77,7 @@ public class DropDefaultValueChange extends AbstractChange {
 //        }
     	
         return new SqlStatement[]{
-                new DropDefaultValueStatement(getSchemaName() == null?database.getDefaultSchemaName():getSchemaName(), getTableName(), getColumnName(), getColumnDataType()),
+                new DropDefaultValueStatement(getCatalogName(), getSchemaName(), getTableName(), getColumnName(), getColumnDataType()),
         };
     }
     
@@ -105,7 +115,7 @@ public class DropDefaultValueChange extends AbstractChange {
     		// alter table
 			statements.addAll(SQLiteDatabase.getAlterTableStatements(
 					rename_alter_visitor,
-					database,getSchemaName(),getTableName()));
+					database,getCatalogName(), getSchemaName(),getTableName()));
     	} catch (Exception e) {
 			e.printStackTrace();
 		}

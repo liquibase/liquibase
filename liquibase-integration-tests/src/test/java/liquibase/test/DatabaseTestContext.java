@@ -43,6 +43,7 @@ public class DatabaseTestContext {
 
     private Map<String, DatabaseConnection> connectionsByUrl = new HashMap<String, DatabaseConnection>();
     private Map<String, Boolean> connectionsAttempted = new HashMap<String, Boolean>();
+    public static final String ALT_CATALOG = "LIQUIBASEC";
     public static final String ALT_SCHEMA = "LIQUIBASEB";
     public static final String ALT_TABLESPACE = "LIQUIBASE2";
     private static final String TEST_DATABASES_PROPERTY = "test.databases";

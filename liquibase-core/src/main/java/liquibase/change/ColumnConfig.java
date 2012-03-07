@@ -39,14 +39,16 @@ public class ColumnConfig {
     
     public ColumnConfig(Column columnStructure) {
     	setName(columnStructure.getName());
-		setType(columnStructure.getTypeName());
+		setType(columnStructure.getType().toString());
 		if (columnStructure.getDefaultValue()!=null) {
 			setDefaultValue(columnStructure.getDefaultValue().toString());
 		}
-		setAutoIncrement(columnStructure.isAutoIncrement());
-		setStartWith(columnStructure.getStartWith());
-		setIncrementBy(columnStructure.getIncrementBy());
-		ConstraintsConfig constraints = new ConstraintsConfig(); 
+        if (columnStructure.getType().isAutoIncrement()) {
+		    setAutoIncrement(true);
+            setStartWith(columnStructure.getType().getAutoIncrementInformation().getStartWith());
+            setIncrementBy(columnStructure.getType().getAutoIncrementInformation().getIncrementBy());
+        }
+        ConstraintsConfig constraints = new ConstraintsConfig();
 		constraints.setNullable(columnStructure.isNullable());
 		constraints.setPrimaryKey(columnStructure.isPrimaryKey());
 		constraints.setUnique(columnStructure.isUnique());

@@ -22,12 +22,8 @@ public class GetViewDefinitionGeneratorPostgres extends GetViewDefinitionGenerat
 
     @Override
     public Sql[] generateSql(GetViewDefinitionStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-        try {
             return new Sql[] {
-                    new UnparsedSql("select definition from pg_views where viewname='" + statement.getViewName() + "' AND schemaname='" + database.convertRequestedSchemaToSchema(statement.getSchemaName()) + "'" )
+                    new UnparsedSql("select definition from pg_views where viewname='" + statement.getViewName() + "' AND schemaname='" + database.correctSchemaName(statement.getSchemaName()) + "'" )
             };
-        } catch (DatabaseException e) {
-            throw new UnexpectedLiquibaseException(e);
-        }
     }
 }

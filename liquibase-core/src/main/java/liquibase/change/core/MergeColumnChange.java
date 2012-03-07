@@ -21,6 +21,7 @@ import java.util.List;
 @ChangeClass(name="mergeColumns", description = "Merge Column", priority = ChangeMetaData.PRIORITY_DEFAULT)
 public class MergeColumnChange extends AbstractChange {
 
+    private String catalogName;
     private String schemaName;
     private String tableName;
     private String column1Name;
@@ -29,12 +30,20 @@ public class MergeColumnChange extends AbstractChange {
     private String finalColumnName;
     private String finalColumnType;
 
+    public String getCatalogName() {
+        return catalogName;
+    }
+
+    public void setCatalogName(String catalogName) {
+        this.catalogName = catalogName;
+    }
+
     public String getSchemaName() {
         return schemaName;
     }
 
     public void setSchemaName(String schemaName) {
-        this.schemaName = StringUtils.trimToNull(schemaName);
+        this.schemaName = schemaName;
     }
 
     @ChangeProperty(requiredForDatabase = "all")
@@ -95,7 +104,6 @@ public class MergeColumnChange extends AbstractChange {
         List<SqlStatement> statements = new ArrayList<SqlStatement>();
 
         AddColumnChange addNewColumnChange = new AddColumnChange();
-        String schemaName = getSchemaName() == null?database.getDefaultSchemaName():getSchemaName();
         addNewColumnChange.setSchemaName(schemaName);
         addNewColumnChange.setTableName(getTableName());
         ColumnConfig columnConfig = new ColumnConfig();
@@ -104,7 +112,7 @@ public class MergeColumnChange extends AbstractChange {
         addNewColumnChange.addColumn(columnConfig);
         statements.addAll(Arrays.asList(addNewColumnChange.generateStatements(database)));
 
-        String updateStatement = "UPDATE " + database.escapeTableName(schemaName, getTableName()) + " SET " + getFinalColumnName() + " = " + database.getConcatSql(getColumn1Name(), "'"+getJoinString()+"'", getColumn2Name());
+        String updateStatement = "UPDATE " + database.escapeTableName(getCatalogName(), getSchemaName(), getTableName()) + " SET " + getFinalColumnName() + " = " + database.getConcatSql(getColumn1Name(), "'"+getJoinString()+"'", getColumn2Name());
 
         statements.add(new RawSqlStatement(updateStatement));
         
@@ -141,7 +149,7 @@ public class MergeColumnChange extends AbstractChange {
         		// alter table
 				statements.addAll(SQLiteDatabase.getAlterTableStatements(
 						rename_alter_visitor,
-						database,getSchemaName(),getTableName()));
+						database,getCatalogName(), getSchemaName(),getTableName()));
     		} catch (Exception e) {
 				e.printStackTrace();
 			}

@@ -24,7 +24,7 @@ public class AddPrimaryKeyGeneratorInformix extends AddPrimaryKeyGenerator {
     public Sql[] generateSql(AddPrimaryKeyStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         StringBuilder sql = new StringBuilder();
         sql.append("ALTER TABLE ");
-        sql.append(database.escapeTableName(statement.getSchemaName(), statement.getTableName()));
+        sql.append(database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()));
         sql.append(" ADD CONSTRAINT PRIMARY KEY (");
         sql.append(database.escapeColumnNameList(statement.getColumnNames()));
         sql.append(")");

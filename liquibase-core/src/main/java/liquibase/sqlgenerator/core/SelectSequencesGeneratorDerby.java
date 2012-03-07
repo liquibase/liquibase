@@ -31,12 +31,8 @@ extends AbstractSqlGenerator<SelectSequencesStatement>
         return new ValidationErrors();
     }
 
-    public Sql[] generateSql(SelectSequencesStatement statement,
-    		Database database, SqlGeneratorChain sqlGeneratorChain)
-    {
-        try {
-        	String schemaName = database.convertRequestedSchemaToSchema(
-        			statement.getSchemaName());
+    public Sql[] generateSql(SelectSequencesStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+        	String schemaName = database.correctSchemaName(statement.getSchemaName());
             return new Sql[] {
                     new UnparsedSql(
                     		"SELECT " +
@@ -48,8 +44,5 @@ extends AbstractSqlGenerator<SelectSequencesStatement>
                     		"  sch.SCHEMANAME = '" + schemaName + "' AND " +
                     		"  sch.SCHEMAID = seq.SCHEMAID")
             };
-        } catch (DatabaseException e) {
-            throw new UnexpectedLiquibaseException(e);
-        }
     }
 }

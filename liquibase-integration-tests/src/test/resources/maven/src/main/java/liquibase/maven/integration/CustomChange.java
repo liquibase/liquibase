@@ -22,7 +22,7 @@ public class CustomChange implements CustomSqlChange,CustomSqlRollback{
 
     public SqlStatement[] generateStatements(Database database) throws CustomChangeException {
         SqlStatement st[]=new SqlStatement[1];
-        InsertStatement is=new InsertStatement(null,"persons");
+        InsertStatement is=new InsertStatement(null, null,"persons");
         is.addColumnValue("id",new Integer(1));
         is.addColumnValue("firstname", "joan");
         is.addColumnValue("lastname", "pujol");
@@ -48,7 +48,7 @@ public class CustomChange implements CustomSqlChange,CustomSqlRollback{
 
     public SqlStatement[] generateRollbackStatements(Database database) throws CustomChangeException, UnsupportedChangeException, RollbackImpossibleException {
         SqlStatement st[]=new SqlStatement[1];
-        DeleteStatement ds=new DeleteStatement(null,"persons");
+        DeleteStatement ds=new DeleteStatement(null, null,"persons");
         ds.setWhereClause("id=1");
         st[0]=ds;
         return st;

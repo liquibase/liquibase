@@ -37,6 +37,14 @@ public class Index implements DatabaseObject, Comparable<Index> {
         this.name = name;
     }
 
+    public Schema getSchema() {
+        if (table == null) {
+            return null;
+        }
+        
+        return table.getSchema();
+    }
+
     public Table getTable() {
         return table;
     }
@@ -111,7 +119,7 @@ public class Index implements DatabaseObject, Comparable<Index> {
             equals = false;
         }
 
-        return equals && table.getName().equalsIgnoreCase(index.table.getName()) && getName().equals(index.getName());
+        return equals && table.getName().equalsIgnoreCase(index.table.getName());
 
     }
 

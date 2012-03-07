@@ -27,12 +27,8 @@ public class SelectSequencesGeneratorDB2 extends AbstractSqlGenerator<SelectSequ
     }
 
     public Sql[] generateSql(SelectSequencesStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-        try {
-            return new Sql[] {
-                    new UnparsedSql("SELECT SEQNAME AS SEQUENCE_NAME FROM SYSCAT.SEQUENCES WHERE SEQTYPE='S' AND SEQSCHEMA = '" + database.convertRequestedSchemaToSchema(statement.getSchemaName()) + "'")
-            };
-        } catch (DatabaseException e) {
-            throw new UnexpectedLiquibaseException(e);
-        }
+        return new Sql[] {
+                new UnparsedSql("SELECT SEQNAME AS SEQUENCE_NAME FROM SYSCAT.SEQUENCES WHERE SEQTYPE='S' AND SEQSCHEMA = '" + database.correctSchemaName(statement.getSchemaName()) + "'")
+        };
     }
 }

@@ -1,6 +1,7 @@
 package liquibase.database.core;
 
 import java.math.BigInteger;
+import java.sql.SQLException;
 
 import liquibase.database.AbstractDatabase;
 import liquibase.database.DatabaseConnection;
@@ -24,6 +25,14 @@ public class MySQLDatabase extends AbstractDatabase {
 //        return super.getConnection().getConnectionUserName().replaceAll("\\@.*", "");
 //    }
 
+    @Override
+    public String correctPrimaryKeyName(String pkName)  {
+        if (pkName.equals("PRIMARY")) {
+            return null;
+        } else {
+            return pkName;
+        }
+    }
 
     public int getPriority() {
         return PRIORITY_DEFAULT;
@@ -106,31 +115,12 @@ public class MySQLDatabase extends AbstractDatabase {
 
 
     @Override
-    protected String getDefaultDatabaseSchemaName() throws DatabaseException {
-//        return super.getDefaultDatabaseSchemaName().replaceFirst("\\@.*","");
-            return getConnection().getCatalog();
-    }
-
-    @Override
-    public String convertRequestedSchemaToSchema(String requestedSchema) throws DatabaseException {
-        if (requestedSchema == null) {
-            return getDefaultDatabaseSchemaName();
-        }
-        return requestedSchema;
-    }
-
-    @Override
-    public String convertRequestedSchemaToCatalog(String requestedSchema) throws DatabaseException {
-        return requestedSchema;
-    }
-
-    @Override
     public String escapeDatabaseObject(String objectName) {
         return "`"+objectName+"`";
     }
 
     @Override
-    public String escapeIndexName(String schemaName, String indexName) {
+    public String escapeIndexName(String catalogName, String schemaName, String indexName) {
         return escapeDatabaseObject(indexName);
     }
 

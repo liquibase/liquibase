@@ -18,11 +18,21 @@ import java.util.List;
 @ChangeClass(name="renameColumn", description = "Rename Column", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "column")
 public class RenameColumnChange extends AbstractChange {
 
+    private String catalogName;
     private String schemaName;
     private String tableName;
     private String oldColumnName;
     private String newColumnName;
     private String columnDataType;
+
+    @ChangeProperty(mustApplyTo ="column.table.catalog")
+    public String getCatalogName() {
+        return catalogName;
+    }
+
+    public void setCatalogName(String catalogName) {
+        this.catalogName = catalogName;
+    }
 
     @ChangeProperty(mustApplyTo ="column.table.schema")
     public String getSchemaName() {
@@ -30,7 +40,7 @@ public class RenameColumnChange extends AbstractChange {
     }
 
     public void setSchemaName(String schemaName) {
-        this.schemaName = StringUtils.trimToNull(schemaName);
+        this.schemaName = schemaName;
     }
 
     @ChangeProperty(requiredForDatabase = "all", mustApplyTo = "column.table")
@@ -75,7 +85,8 @@ public class RenameColumnChange extends AbstractChange {
 //        }
 
     	return new SqlStatement[] { new RenameColumnStatement(
-    			getSchemaName() == null?database.getDefaultSchemaName():getSchemaName(), 
+                getCatalogName(),
+    			getSchemaName(),
     			getTableName(), getOldColumnName(), getNewColumnName(), 
     			getColumnDataType())
         };
@@ -117,7 +128,7 @@ public class RenameColumnChange extends AbstractChange {
     		// alter table
 			statements.addAll(SQLiteDatabase.getAlterTableStatements(
 					rename_alter_visitor,
-					database,getSchemaName(),getTableName()));
+					database,getCatalogName(), getSchemaName(),getTableName()));
 		} catch (Exception e) {
 			System.err.println(e);
 			e.printStackTrace();

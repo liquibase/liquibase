@@ -36,7 +36,7 @@ public class CreateSequenceGenerator extends AbstractSqlGenerator<CreateSequence
     public Sql[] generateSql(CreateSequenceStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         StringBuffer buffer = new StringBuffer();
         buffer.append("CREATE SEQUENCE ");
-        buffer.append(database.escapeSequenceName(statement.getSchemaName(), statement.getSequenceName()));
+        buffer.append(database.escapeSequenceName(statement.getCatalogName(), statement.getSchemaName(), statement.getSequenceName()));
         if (statement.getStartValue() != null) {
             buffer.append(" START WITH ").append(statement.getStartValue());
         }

@@ -17,9 +17,19 @@ import java.util.List;
  */
 @ChangeClass(name="dropPrimaryKey", description = "Drop Primary Key", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "primaryKey")
 public class DropPrimaryKeyChange extends AbstractChange {
+    private String catalogName;
     private String schemaName;
     private String tableName;
     private String constraintName;
+
+    @ChangeProperty(mustApplyTo ="primaryKey.catalog")
+    public String getCatalogName() {
+        return catalogName;
+    }
+
+    public void setCatalogName(String catalogName) {
+        this.catalogName = catalogName;
+    }
 
     @ChangeProperty(mustApplyTo ="primaryKey.schema")
     public String getSchemaName() {
@@ -27,7 +37,7 @@ public class DropPrimaryKeyChange extends AbstractChange {
     }
 
     public void setSchemaName(String schemaName) {
-        this.schemaName = StringUtils.trimToNull(schemaName);
+        this.schemaName = schemaName;
     }
 
     @ChangeProperty(requiredForDatabase = "all", mustApplyTo = "primaryKey.table")
@@ -56,7 +66,7 @@ public class DropPrimaryKeyChange extends AbstractChange {
 //        }
     	
         return new SqlStatement[]{
-                new DropPrimaryKeyStatement(getSchemaName() == null?database.getDefaultSchemaName():getSchemaName(), getTableName(), getConstraintName()),
+                new DropPrimaryKeyStatement(getCatalogName(), getSchemaName(), getTableName(), getConstraintName()),
         };
     }
     
@@ -94,7 +104,7 @@ public class DropPrimaryKeyChange extends AbstractChange {
     		// alter table
 			statements.addAll(SQLiteDatabase.getAlterTableStatements(
 					rename_alter_visitor,
-					database,getSchemaName(),getTableName()));
+					database,getCatalogName(), getSchemaName(),getTableName()));
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

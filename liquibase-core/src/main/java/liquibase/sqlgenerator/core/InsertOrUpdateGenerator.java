@@ -2,7 +2,7 @@ package liquibase.sqlgenerator.core;
 
 import java.util.Arrays;
 import liquibase.database.Database;
-import liquibase.database.typeconversion.TypeConverterFactory;
+import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.ValidationErrors;
 import liquibase.sqlgenerator.SqlGeneratorChain;
@@ -11,7 +11,6 @@ import liquibase.statement.core.UpdateStatement;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 
-import java.util.Date;
 import java.util.HashSet;
 
 public abstract class InsertOrUpdateGenerator extends AbstractSqlGenerator<InsertOrUpdateStatement> {
@@ -45,22 +44,12 @@ public abstract class InsertOrUpdateGenerator extends AbstractSqlGenerator<Inser
 
         for(String thisPkColumn:pkColumns)
         {
-            where.append(database.escapeColumnName(insertOrUpdateStatement.getSchemaName(), insertOrUpdateStatement.getTableName(), thisPkColumn)).append(" = ");
+            where.append(database.escapeColumnName(insertOrUpdateStatement.getCatalogName(), insertOrUpdateStatement.getSchemaName(), insertOrUpdateStatement.getTableName(), thisPkColumn)).append(" = ");
             Object newValue = insertOrUpdateStatement.getColumnValues().get(thisPkColumn);
             if (newValue == null || newValue.toString().equals("NULL")) {
                 where.append("NULL");
-            } else if (newValue instanceof String && database.shouldQuoteValue(((String) newValue))) {
-                where.append("'").append(database.escapeStringForDatabase((String) newValue)).append("'");
-            } else if (newValue instanceof Date) {
-                where.append(database.getDateLiteral(((Date) newValue)));
-            } else if (newValue instanceof Boolean) {
-                if (((Boolean) newValue)) {
-                    where.append(TypeConverterFactory.getInstance().findTypeConverter(database).getBooleanType().getTrueBooleanValue());
-                } else {
-                    where.append(TypeConverterFactory.getInstance().findTypeConverter(database).getBooleanType().getFalseBooleanValue());
-                }
             } else {
-                where.append(newValue);
+                where.append(DataTypeFactory.getInstance().fromObject(newValue, database).objectToString(newValue, database));
             }
 
             where.append(" AND ");
@@ -99,7 +88,7 @@ public abstract class InsertOrUpdateGenerator extends AbstractSqlGenerator<Inser
         StringBuffer updateSqlString = new StringBuffer();
 
         UpdateGenerator update = new UpdateGenerator();
-        UpdateStatement updateStatement = new UpdateStatement(insertOrUpdateStatement.getSchemaName(),insertOrUpdateStatement.getTableName());
+        UpdateStatement updateStatement = new UpdateStatement(insertOrUpdateStatement.getCatalogName(), insertOrUpdateStatement.getSchemaName(),insertOrUpdateStatement.getTableName());
         updateStatement.setWhereClause(whereClause + ";\n");
 
         String[] pkFields=insertOrUpdateStatement.getPrimaryKey().split(",");

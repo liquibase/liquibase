@@ -4,7 +4,7 @@ public class FindForeignKeyConstraintsStatementTest extends AbstractSqStatementT
 
     @Override
     protected FindForeignKeyConstraintsStatement createStatementUnderTest() {
-        return new FindForeignKeyConstraintsStatement(null, null);
+        return new FindForeignKeyConstraintsStatement(null, null, null);
     }
 
 }

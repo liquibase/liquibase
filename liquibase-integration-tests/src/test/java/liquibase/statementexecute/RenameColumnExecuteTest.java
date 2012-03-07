@@ -2,7 +2,7 @@ package liquibase.statementexecute;
 
 import liquibase.database.Database;
 import liquibase.database.core.*;
-import liquibase.database.typeconversion.TypeConverterFactory;
+import liquibase.datatype.DataTypeFactory;
 import liquibase.statement.NotNullConstraint;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.CreateTableStatement;
@@ -22,19 +22,19 @@ public class RenameColumnExecuteTest extends AbstractExecuteTest {
     @Override
     protected List<? extends SqlStatement> setupStatements(Database database) {
         ArrayList<CreateTableStatement> statements = new ArrayList<CreateTableStatement>();
-        CreateTableStatement table = new CreateTableStatement(null, TABLE_NAME);
+        CreateTableStatement table = new CreateTableStatement(null, null, TABLE_NAME);
         if (database instanceof MySQLDatabase) {
-            table.addPrimaryKeyColumn("id", TypeConverterFactory.getInstance().findTypeConverter(database).getDataType("int", false), null, "pk_", null);
+            table.addPrimaryKeyColumn("id", DataTypeFactory.getInstance().fromDescription("int"), null, "pk_", null);
         } else {
-            table.addColumn("id", TypeConverterFactory.getInstance().findTypeConverter(database).getDataType("int", false), null, new NotNullConstraint());
+            table.addColumn("id", DataTypeFactory.getInstance().fromDescription("int"), null, new NotNullConstraint());
         }
-        table.addColumn(COLUMN_NAME, TypeConverterFactory.getInstance().findTypeConverter(database).getDataType("int", false));
+        table.addColumn(COLUMN_NAME, DataTypeFactory.getInstance().fromDescription("int"));
         statements.add(table);
 
         if (database.supportsSchemas()) {
-            table = new CreateTableStatement(DatabaseTestContext.ALT_SCHEMA, TABLE_NAME);
+            table = new CreateTableStatement(DatabaseTestContext.ALT_CATALOG, DatabaseTestContext.ALT_SCHEMA, TABLE_NAME);
             table
-                    .addColumn("id", TypeConverterFactory.getInstance().findTypeConverter(database).getDataType("int", false), null, new NotNullConstraint());
+                    .addColumn("id", DataTypeFactory.getInstance().fromDescription("int"), null, new NotNullConstraint());
             statements.add(table);
         }
         return statements;
@@ -43,7 +43,7 @@ public class RenameColumnExecuteTest extends AbstractExecuteTest {
     @SuppressWarnings("unchecked")
     @Test
     public void noSchema() throws Exception {
-        this.statementUnderTest = new RenameColumnStatement(null, TABLE_NAME, COLUMN_NAME, "new_name", "int");
+        this.statementUnderTest = new RenameColumnStatement(null, null, TABLE_NAME, COLUMN_NAME, "new_name", "int");
 
         assertCorrect("rename column table_name.column_name to new_name", DerbyDatabase.class, InformixDatabase.class, MaxDBDatabase.class);
         assertCorrect("alter table table_name alter column column_name rename to new_name", H2Database.class, HsqlDatabase.class);

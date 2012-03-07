@@ -9,17 +9,26 @@ import liquibase.snapshot.DatabaseSnapshotGeneratorFactory;
 import liquibase.util.StringUtils;
 
 public class IndexExistsPrecondition implements Precondition {
+    private String catalogName;
     private String schemaName;
     private String tableName;
     private String columnNames;
     private String indexName;
+
+    public String getCatalogName() {
+        return catalogName;
+    }
+
+    public void setCatalogName(String catalogName) {
+        this.catalogName = catalogName;
+    }
 
     public String getSchemaName() {
         return schemaName;
     }
 
     public void setSchemaName(String schemaName) {
-        this.schemaName = StringUtils.trimToNull(schemaName);
+        this.schemaName = schemaName;
     }
 
     public String getTableName() {
@@ -60,9 +69,11 @@ public class IndexExistsPrecondition implements Precondition {
 
     public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet) throws PreconditionFailedException, PreconditionErrorException {
     	String currentSchemaName;
+        String currentCatalogName;
     	try {
             currentSchemaName = getSchemaName() == null ? (database == null ? null: database.getDefaultSchemaName()) : getSchemaName();
-            if (!DatabaseSnapshotGeneratorFactory.getInstance().getGenerator(database).hasIndex(currentSchemaName, getTableName(), getIndexName(), database, getColumnNames())) {
+            currentCatalogName = getCatalogName() == null ? (database == null ? null: database.getDefaultCatalogName()) : getCatalogName();
+            if (!DatabaseSnapshotGeneratorFactory.getInstance().getGenerator(database).hasIndex(currentCatalogName, currentSchemaName, getTableName(), getIndexName(), database, getColumnNames())) {
                 String name = "";
 
                 if (getIndexName() != null) {

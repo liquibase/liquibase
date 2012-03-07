@@ -25,6 +25,7 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
 	// for example: foreignKey, primaryKey or uniqueConstraint
     @ChangeProperty(includeInSerialization = false)
 	private String associatedWith;
+    private String catalogName;
 
 
     public CreateIndexChange() {
@@ -40,13 +41,15 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
         this.indexName = indexName;
     }
 
+
+
     @ChangeProperty(mustApplyTo ="index.schema")
     public String getSchemaName() {
         return schemaName;
     }
 
     public void setSchemaName(String schemaName) {
-        this.schemaName = StringUtils.trimToNull(schemaName);
+        this.schemaName = schemaName;
     }
 
     @ChangeProperty(requiredForDatabase = "all", mustApplyTo = "index.table")
@@ -89,7 +92,8 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
 	    return new SqlStatement[]{
 			    new CreateIndexStatement(
 					    getIndexName(),
-					    getSchemaName() == null ? database.getDefaultSchemaName() : getSchemaName(),
+                        getCatalogName(),
+					    getSchemaName(),
 					    getTableName(),
 					    this.isUnique(),
 					    getAssociatedWith(),
@@ -142,4 +146,13 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
 	public void setAssociatedWith(String associatedWith) {
 		this.associatedWith = associatedWith;
 	}
+
+
+    public String getCatalogName() {
+        return catalogName;
+    }
+
+    public void setCatalogName(String catalogName) {
+        this.catalogName = catalogName;
+    }
 }

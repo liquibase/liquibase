@@ -15,9 +15,19 @@ import liquibase.util.StringUtils;
 @ChangeClass(name="dropTable", description = "Drop Table", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "table")
 public class DropTableChange extends AbstractChange {
 
+    private String catalogName;
     private String schemaName;
     private String tableName;
     private Boolean cascadeConstraints;
+
+    @ChangeProperty(mustApplyTo ="table.schema")
+    public String getCatalogName() {
+        return catalogName;
+    }
+
+    public void setCatalogName(String catalogName) {
+        this.catalogName = catalogName;
+    }
 
     @ChangeProperty(mustApplyTo ="table.schema")
     public String getSchemaName() {
@@ -25,7 +35,7 @@ public class DropTableChange extends AbstractChange {
     }
 
     public void setSchemaName(String schemaName) {
-        this.schemaName = StringUtils.trimToNull(schemaName);
+        this.schemaName = schemaName;
     }
 
     @ChangeProperty(requiredForDatabase = "all", mustApplyTo = "table")
@@ -52,7 +62,7 @@ public class DropTableChange extends AbstractChange {
         }
         
         return new SqlStatement[]{
-                new DropTableStatement(getSchemaName() == null?database.getDefaultSchemaName():getSchemaName(), getTableName(), constraints)
+                new DropTableStatement(getCatalogName(), getSchemaName(), getTableName(), constraints)
         };
     }
 

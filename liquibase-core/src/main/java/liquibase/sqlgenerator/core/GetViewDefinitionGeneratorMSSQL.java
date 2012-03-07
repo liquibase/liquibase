@@ -22,11 +22,7 @@ public class GetViewDefinitionGeneratorMSSQL extends GetViewDefinitionGenerator 
 
     @Override
     public Sql[] generateSql(GetViewDefinitionStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-        try {
-            String sql = "exec sp_helptext '" + database.convertRequestedSchemaToSchema(statement.getSchemaName()) + "."
+            String sql = "exec sp_helptext '" + database.correctSchemaName(statement.getSchemaName()) + "."
                     + statement.getViewName().toUpperCase() + "'";
             return new Sql[]{new UnparsedSql(sql) };
-        } catch (DatabaseException e) {
-            throw new UnexpectedLiquibaseException(e);
-        }
     }}

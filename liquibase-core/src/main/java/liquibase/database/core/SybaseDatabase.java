@@ -2,7 +2,9 @@ package liquibase.database.core;
 
 import liquibase.database.AbstractDatabase;
 import liquibase.database.DatabaseConnection;
+import liquibase.database.structure.Schema;
 import liquibase.exception.DatabaseException;
+import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.logging.LogFactory;
@@ -134,16 +136,6 @@ public class SybaseDatabase extends AbstractDatabase {
 	}    
     
     @Override
-    protected String getDefaultDatabaseSchemaName() throws DatabaseException {
-        return null;
-    }
-
-    @Override
-    public String getDefaultCatalogName() throws DatabaseException {
-        return getConnection().getCatalog();
-    }
-
-    @Override
     public String getConcatSql(String... values) {
         StringBuffer returnString = new StringBuffer();
         for (String value : values) {
@@ -200,35 +192,22 @@ public class SybaseDatabase extends AbstractDatabase {
 
 
     @Override
-    public boolean isSystemTable(String catalogName, String schemaName, String tableName) {
-        return super.isSystemTable(catalogName, schemaName, tableName) || schemaName.equals("sys") || tableName.toLowerCase().startsWith("sybfi");
+    public boolean isSystemTable(Schema schema, String tableName) {
+        return super.isSystemTable(schema, tableName) || schema.getName(this).equals("sys") || tableName.toLowerCase().startsWith("sybfi");
     }
 
     @Override
-    public boolean isSystemView(String catalogName, String schemaName, String viewName) {
-        return super.isSystemView(catalogName, schemaName, viewName) || schemaName.equals("sys") || viewName.toLowerCase().equals("sybfi");
+    public boolean isSystemView(Schema schema, String viewName) {
+        return super.isSystemView(schema, viewName) || schema.getName(this).equals("sys") || viewName.toLowerCase().equals("sybfi");
     }
 
     public String generateDefaultConstraintName(String tableName, String columnName) {
         return "DF_" + tableName + "_" + columnName;
     }
 
-
     @Override
-    public String convertRequestedSchemaToCatalog(String requestedSchema) throws DatabaseException {
-        return getDefaultCatalogName();
-    }
-
-    @Override
-    public String convertRequestedSchemaToSchema(String requestedSchema) throws DatabaseException {
-        if (requestedSchema == null) {
-            requestedSchema = getDefaultDatabaseSchemaName();
-        }
-
-        if (requestedSchema == null) {
-            return "dbo";
-        }
-        return requestedSchema;
+    public String getDefaultSchemaName() {
+        return "dbo";
     }
 
     @Override
@@ -242,8 +221,8 @@ public class SybaseDatabase extends AbstractDatabase {
     }
 
 	@Override
-	public String getViewDefinition(String schemaName, String viewName) throws DatabaseException {
-        GetViewDefinitionStatement statement = new GetViewDefinitionStatement(convertRequestedSchemaToSchema(schemaName), viewName);
+	public String getViewDefinition(Schema schema, String viewName) throws DatabaseException {
+        GetViewDefinitionStatement statement = new GetViewDefinitionStatement(schema.getCatalogName(this), schema.getName(this), viewName);
         Executor executor = ExecutorService.getInstance().getExecutor(this);
         @SuppressWarnings("unchecked")
         List<String> definitionRows = (List<String>) executor.queryForList(statement, String.class);
@@ -285,8 +264,8 @@ public class SybaseDatabase extends AbstractDatabase {
     }
 
     @Override
-    public String escapeIndexName(String schemaName, String indexName) {
-        return super.escapeIndexName(null, indexName);
+    public String escapeIndexName(String catalogName,String schemaName, String indexName) {
+        return super.escapeIndexName(null, null, indexName);
     }
 
 }

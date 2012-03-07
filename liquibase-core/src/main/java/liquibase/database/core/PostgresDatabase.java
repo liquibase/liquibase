@@ -2,11 +2,11 @@ package liquibase.database.core;
 
 import liquibase.database.AbstractDatabase;
 import liquibase.database.DatabaseConnection;
+import liquibase.database.structure.Schema;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.ExecutorService;
 import liquibase.logging.LogFactory;
 import liquibase.statement.core.RawSqlStatement;
-import liquibase.util.StringUtils;
 
 import java.math.BigInteger;
 import java.util.*;
@@ -89,6 +89,11 @@ public class PostgresDatabase extends AbstractDatabase {
         return true;
     }
 
+    @Override
+    protected String correctObjectName(String objectName) {
+        return objectName.toLowerCase();
+    }
+
     public boolean isCorrectDatabaseImplementation(DatabaseConnection conn) throws DatabaseException {
         return PRODUCT_NAME.equalsIgnoreCase(conn.getDatabaseProductName());
     }
@@ -111,45 +116,6 @@ public class PostgresDatabase extends AbstractDatabase {
         }
         
         return "NOW()";
-    }
-
-    @Override
-    protected String getDefaultDatabaseSchemaName() throws DatabaseException {
-
-        if (defaultDatabaseSchemaName == null) {
-            try {
-                List<String> searchPaths = getSearchPaths();
-                if (searchPaths != null && searchPaths.size() > 0) {
-                    for (String searchPath : searchPaths) {
-                        if (searchPath != null && searchPath.length() > 0) {
-                            defaultDatabaseSchemaName = searchPath;
-
-                            if (defaultDatabaseSchemaName.equals("$user") && getConnection().getConnectionUserName() != null) {
-                                if (!schemaExists(getConnection().getConnectionUserName())) {
-                                    defaultDatabaseSchemaName = null;
-                                } else {
-                                    defaultDatabaseSchemaName = getConnection().getConnectionUserName();
-                                }
-                            }
-
-                            if (defaultDatabaseSchemaName != null)
-                                break;
-                        }
-                    }
-                }
-            } catch (Exception e) {
-                // TODO: throw?
-                e.printStackTrace();
-                LogFactory.getLogger().severe("Failed to get default catalog name from postgres", e);
-            }
-        }
-
-        return defaultDatabaseSchemaName;
-    }
-
-    @Override
-    public String getDefaultCatalogName() throws DatabaseException {
-        return "public";
     }
 
     @Override
@@ -185,10 +151,10 @@ public class PostgresDatabase extends AbstractDatabase {
 
 
     @Override
-    public boolean isSystemTable(String catalogName, String schemaName, String tableName) {
-        return super.isSystemTable(catalogName, schemaName, tableName)
-                || "pg_catalog".equals(schemaName)
-                || "pg_toast".equals(schemaName)
+    public boolean isSystemTable(Schema schema, String tableName) {
+        return super.isSystemTable(schema, tableName)
+                || "pg_catalog".equals(schema.getName(this))
+                || "pg_toast".equals(schema.getName(this))
                 || tableName.endsWith("_seq")
                 || tableName.endsWith("_key")
                 || tableName.endsWith("_pkey")
@@ -215,26 +181,6 @@ public class PostgresDatabase extends AbstractDatabase {
     	return false;
     }
     
-    @Override
-    public String convertRequestedSchemaToSchema(String requestedSchema) throws DatabaseException {
-        if (requestedSchema == null)
-            requestedSchema = getDefaultSchemaName();
-
-        if (requestedSchema == null) {
-            // Return the catalog name instead..
-            return getDefaultCatalogName();
-        } else {
-            String schema = StringUtils.trimToNull(requestedSchema);
-            return (schema != null) ? schema.toLowerCase() : schema;
-        }
-    }
-
-    @Override
-    public String convertRequestedSchemaToCatalog(String requestedSchema) throws DatabaseException {
-        return super.convertRequestedSchemaToCatalog(requestedSchema);
-    }
-
-
     @Override
     public String escapeDatabaseObject(String objectName) {
         if (objectName == null) {
@@ -339,7 +285,7 @@ public class PostgresDatabase extends AbstractDatabase {
     }
 
     @Override
-    public String escapeIndexName(String schemaName, String indexName) {
-        return indexName;
+    public String escapeIndexName(String catalogName,String schemaName, String indexName) {
+        return escapeDatabaseObject(indexName);
     }
 }

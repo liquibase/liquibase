@@ -59,6 +59,7 @@ public class Main {
     protected String url;
     protected String databaseClass;
     protected String defaultSchemaName;
+    protected String defaultCatalogName;
     protected String changeLogFile;
     protected String classpath;
     protected String contexts;
@@ -716,7 +717,7 @@ public class Main {
                 CommandLineUtils.doDiffToChangeLog(changeLogFile, createReferenceDatabaseFromCommandParams(commandParams), database);
                 return;
             } else if ("generateChangeLog".equalsIgnoreCase(command)) {
-                CommandLineUtils.doGenerateChangeLog(changeLogFile, database, defaultSchemaName, StringUtils.trimToNull(diffTypes), StringUtils.trimToNull(changeSetAuthor), StringUtils.trimToNull(changeSetContext), StringUtils.trimToNull(dataDir));
+                CommandLineUtils.doGenerateChangeLog(changeLogFile, database, defaultSchemaName, defaultCatalogName, StringUtils.trimToNull(diffTypes), StringUtils.trimToNull(changeSetAuthor), StringUtils.trimToNull(changeSetContext), StringUtils.trimToNull(dataDir));
                 return;
             }
 

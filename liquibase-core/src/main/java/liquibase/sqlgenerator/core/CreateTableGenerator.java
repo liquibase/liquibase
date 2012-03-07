@@ -26,7 +26,7 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
 
     public Sql[] generateSql(CreateTableStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
             StringBuffer buffer = new StringBuffer();
-        buffer.append("CREATE TABLE ").append(database.escapeTableName(statement.getSchemaName(), statement.getTableName())).append(" ");
+        buffer.append("CREATE TABLE ").append(database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName())).append(" ");
         buffer.append("(");
         
         boolean isSinglePrimaryKeyColumn = statement.getPrimaryKeyConstraint() != null
@@ -38,8 +38,8 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
         while (columnIterator.hasNext()) {
             String column = columnIterator.next();
             
-            buffer.append(database.escapeColumnName(statement.getSchemaName(), statement.getTableName(), column));
-            buffer.append(" ").append(statement.getColumnTypes().get(column));
+            buffer.append(database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), column));
+            buffer.append(" ").append(statement.getColumnTypes().get(column).toDatabaseDataType(database));
             
             AutoIncrementConstraint autoIncrementConstraint = null;
             
@@ -77,7 +77,7 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
                     buffer.append(" CONSTRAINT ").append(((MSSQLDatabase) database).generateDefaultConstraintName(statement.getTableName(), column));
                 }
                 buffer.append(" DEFAULT ");
-                buffer.append(statement.getColumnTypes().get(column).convertObjectToString(defaultValue, database));
+                buffer.append(statement.getColumnTypes().get(column).objectToString(defaultValue, database));
             }
 
             if (isAutoIncrementColumn) {
@@ -89,7 +89,7 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
                 		buffer.append(" ").append(autoIncrementClause);
                 	}
                 } else {
-                    LogFactory.getLogger().warning(database.getTypeName()+" does not support autoincrement columns as request for "+(database.escapeTableName(statement.getSchemaName(), statement.getTableName())));
+                    LogFactory.getLogger().warning(database.getTypeName()+" does not support autoincrement columns as request for "+(database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName())));
                 }
             }
 
@@ -161,7 +161,7 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
                 referencesString = database.getDefaultSchemaName()+"."+referencesString;
             }
             buffer.append(" FOREIGN KEY (")
-                    .append(database.escapeColumnName(statement.getSchemaName(), statement.getTableName(), fkConstraint.getColumn()))
+                    .append(database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), fkConstraint.getColumn()))
                     .append(") REFERENCES ")
                     .append(referencesString);
 

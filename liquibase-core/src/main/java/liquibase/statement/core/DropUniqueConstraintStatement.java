@@ -4,6 +4,7 @@ import liquibase.statement.AbstractSqlStatement;
 
 public class DropUniqueConstraintStatement extends AbstractSqlStatement {
 
+    private String catalogName;
     private String schemaName;
     private String tableName;
     private String constraintName;
@@ -12,17 +13,23 @@ public class DropUniqueConstraintStatement extends AbstractSqlStatement {
      */
     private String uniqueColumns;
 
-    public DropUniqueConstraintStatement(String schemaName, String tableName, String constraintName) {
+    public DropUniqueConstraintStatement(String catalogName, String schemaName, String tableName, String constraintName) {
+        this.catalogName = catalogName;
         this.schemaName = schemaName;
         this.tableName = tableName;
         this.constraintName = constraintName;
     }
 
-    public DropUniqueConstraintStatement(String schemaName, String tableName, String constraintName, String uniqueColumns) {
+    public DropUniqueConstraintStatement(String catalogName, String schemaName, String tableName, String constraintName, String uniqueColumns) {
+        this.catalogName = catalogName;
         this.schemaName = schemaName;
         this.tableName = tableName;
         this.constraintName = constraintName;
         this.uniqueColumns = uniqueColumns;
+    }
+
+    public String getCatalogName() {
+        return catalogName;
     }
 
     public String getSchemaName() {

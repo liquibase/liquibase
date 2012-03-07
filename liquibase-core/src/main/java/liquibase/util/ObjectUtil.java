@@ -39,7 +39,7 @@ public class ObjectUtil {
             if (method.getName().equals(methodName)) {
                 Class<?> parameterType = method.getParameterTypes()[0];
                 if (method.getParameterTypes().length == 1) {
-                    if (parameterType.equals(Boolean.class)) {
+                    if (parameterType.equals(Boolean.class) || parameterType.equals(boolean.class)) {
                         method.invoke(object, Boolean.valueOf(propertyValue));
                         return;
                     } else if (parameterType.equals(String.class)) {

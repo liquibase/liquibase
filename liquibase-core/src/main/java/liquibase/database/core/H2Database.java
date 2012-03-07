@@ -2,6 +2,7 @@ package liquibase.database.core;
 
 import liquibase.database.DatabaseConnection;
 import liquibase.database.AbstractDatabase;
+import liquibase.database.structure.Schema;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.DateParseException;
 import liquibase.statement.DatabaseFunction;
@@ -43,6 +44,14 @@ public class H2Database extends AbstractDatabase {
         return "H2".equals(conn.getDatabaseProductName());
     }
 
+    @Override
+    protected String correctObjectName(String objectName) {
+        if (objectName == null) {
+            return null;
+        }
+        return objectName.toUpperCase();
+    }
+
     //    public void dropDatabaseObjects(String schema) throws DatabaseException {
 //        DatabaseConnection conn = getConnection();
 //        Statement dropStatement = null;
@@ -73,8 +82,8 @@ public class H2Database extends AbstractDatabase {
     }
 
     @Override
-    public String getViewDefinition(String schemaName, String name) throws DatabaseException {
-        String definition = super.getViewDefinition(schemaName, name);
+    public String getViewDefinition(Schema schema, String name) throws DatabaseException {
+        String definition = super.getViewDefinition(schema, name);
         if (!definition.startsWith("SELECT")) {
             definition = definition.replaceFirst(".*?\n", ""); //some h2 versions return "create view....as\nselect
         }
@@ -124,8 +133,9 @@ public class H2Database extends AbstractDatabase {
         return true;
     }
 
+
     @Override
-    protected String getDefaultDatabaseSchemaName() throws DatabaseException {
+    public String getDefaultSchemaName() {
         return "PUBLIC";
     }
 
@@ -167,10 +177,7 @@ public class H2Database extends AbstractDatabase {
         return "'" + returnString + "'";
     }
 
-    @Override
-    public String convertRequestedSchemaToSchema(String requestedSchema) throws DatabaseException {
-        return super.convertRequestedSchemaToSchema(requestedSchema).toUpperCase();
-    }
+
 
     @Override
     public String escapeDatabaseObject(String objectName) {

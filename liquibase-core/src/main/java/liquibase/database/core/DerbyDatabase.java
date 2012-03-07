@@ -2,6 +2,7 @@ package liquibase.database.core;
 
 import liquibase.database.AbstractDatabase;
 import liquibase.database.DatabaseConnection;
+import liquibase.database.structure.Schema;
 import liquibase.exception.DatabaseException;
 import liquibase.logging.LogFactory;
 import liquibase.logging.Logger;
@@ -36,13 +37,13 @@ public class DerbyDatabase extends AbstractDatabase {
     }
 
 
-    public String getTypeName() {
-        return "derby";
+    @Override
+    protected String correctObjectName(String objectName) {
+        return objectName.toUpperCase();
     }
 
-    @Override
-    protected String getDefaultDatabaseSchemaName() throws DatabaseException {//NOPMD
-        return super.getDefaultDatabaseSchemaName().toUpperCase();
+    public String getTypeName() {
+        return "derby";
     }
 
     @Override
@@ -90,8 +91,8 @@ public class DerbyDatabase extends AbstractDatabase {
     }
 
     @Override
-    public String getViewDefinition(String schemaName, String name) throws DatabaseException {
-        return super.getViewDefinition(schemaName, name).replaceFirst("CREATE VIEW \\w+ AS ", "");
+    public String getViewDefinition(Schema schema, String name) throws DatabaseException {
+        return super.getViewDefinition(schema, name).replaceFirst("CREATE VIEW \\w+ AS ", "");
     }
 
     @Override

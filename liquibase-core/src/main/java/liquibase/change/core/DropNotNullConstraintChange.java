@@ -18,10 +18,20 @@ import java.util.List;
 @ChangeClass(name="dropNotNullConstraint", description = "Drop Not-Null Constraint", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "notNullConstraint")
 public class DropNotNullConstraintChange extends AbstractChange {
 
+    private String catalogName;
     private String schemaName;
     private String tableName;
     private String columnName;
     private String columnDataType;
+
+    @ChangeProperty(mustApplyTo ="notNullConstraint.table.catalog")
+    public String getCatalogName() {
+        return catalogName;
+    }
+
+    public void setCatalogName(String catalogName) {
+        this.catalogName = catalogName;
+    }
 
     @ChangeProperty(mustApplyTo ="notNullConstraint.table.schema")
     public String getSchemaName() {
@@ -29,7 +39,7 @@ public class DropNotNullConstraintChange extends AbstractChange {
     }
 
     public void setSchemaName(String schemaName) {
-        this.schemaName = StringUtils.trimToNull(schemaName);
+        this.schemaName = schemaName;
     }
 
     @ChangeProperty(requiredForDatabase = "all", mustApplyTo = "notNullConstraint.table")
@@ -66,7 +76,8 @@ public class DropNotNullConstraintChange extends AbstractChange {
 //    	}
 
     	return new SqlStatement[] { new SetNullableStatement(
-    			getSchemaName() == null?database.getDefaultSchemaName():getSchemaName(), 
+                getCatalogName(),
+    			getSchemaName(),
     			getTableName(), getColumnName(), getColumnDataType(), true) 
     	};
     }
@@ -101,7 +112,7 @@ public class DropNotNullConstraintChange extends AbstractChange {
     		// alter table
 			statements.addAll(SQLiteDatabase.getAlterTableStatements(
 					rename_alter_visitor,
-					database,getSchemaName(),getTableName()));
+					database,getCatalogName(), getSchemaName(),getTableName()));
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
