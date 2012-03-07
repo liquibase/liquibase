@@ -4,9 +4,11 @@ import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.database.core.DB2Database;
 import liquibase.exception.ValidationErrors;
+import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.*;
 import liquibase.statement.core.AddColumnStatement;
 import liquibase.statement.core.ReorganizeTableStatement;
+import liquibase.statement.core.SetColumnRemarksStatement;
 import liquibase.statement.core.UpdateStatement;
 import liquibase.util.StringUtils;
 
@@ -125,6 +127,16 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
                 sql.add(updateStatement);
             }
         }
+
+      for (ColumnConfig column : getColumns()) {
+          String columnRemarks = StringUtils.trimToNull(column.getRemarks());
+          if (columnRemarks != null) {
+              SetColumnRemarksStatement remarksStatement = new SetColumnRemarksStatement(catalogName, schemaName, tableName, column.getName(), columnRemarks);
+              if (SqlGeneratorFactory.getInstance().supports(remarksStatement, database)) {
+                  sql.add(remarksStatement);
+              }
+          }
+      }
 
 //        for (ColumnConfig aColumn : columns) {
 //            if (aColumn.getConstraints() != null) {
