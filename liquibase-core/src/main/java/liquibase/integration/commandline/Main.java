@@ -217,7 +217,7 @@ public class Main {
             }
 
             if (isChangeLogRequired(command) && changeLogFile == null) {
-                messages.add("--changeLog is required");
+                messages.add("--changeLogFile is required");
             }
 
             if (isNoArgCommand(command) && !commandParams.isEmpty()) {
