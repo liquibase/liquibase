@@ -1,10 +1,12 @@
 package liquibase.logging.core;
 
-import liquibase.logging.LogLevel;
-import liquibase.util.StringUtils;
-
+import java.io.FileNotFoundException;
+import java.io.PrintStream;
 import java.text.DateFormat;
 import java.util.Date;
+
+import liquibase.logging.LogLevel;
+import liquibase.util.StringUtils;
 
 public class DefaultLogger extends AbstractLogger {
 
@@ -29,6 +31,11 @@ public class DefaultLogger extends AbstractLogger {
 
     public void setLogLevel(String logLevel, String logFile) {
         setLogLevel(logLevel);
+        try {
+            System.setErr(new PrintStream(logFile));
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
     }
 
     public void severe(String message) {
