@@ -31,6 +31,7 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
 import liquibase.Liquibase;
+import liquibase.change.CheckSum;
 import liquibase.database.Database;
 import liquibase.exception.CommandLineParsingException;
 import liquibase.exception.DatabaseException;
@@ -222,7 +223,7 @@ public class Main {
             if (isNoArgCommand(command) && !commandParams.isEmpty()) {
                 messages.add("unexpected command parameters: "+commandParams);
             } else {
-                checkForUnexpectedCommandParameter(messages);
+                validateCommandParameters(messages);
             }
         }
         return messages;
@@ -237,6 +238,7 @@ public class Main {
             || "rollbackSQL".equalsIgnoreCase(command)
             || "rollbackToDateSQL".equalsIgnoreCase(command)
             || "rollbackCountSQL".equalsIgnoreCase(command)
+            || "calculateCheckSum".equalsIgnoreCase(command)
             || "dbDoc".equalsIgnoreCase(command)
             || "tag".equalsIgnoreCase(command)) {
             
@@ -263,9 +265,41 @@ public class Main {
         
     }
 
+    private void validateCommandParameters(final List<String> messages) {
+        checkForUnexpectedCommandParameter(messages);
+        checkForMissingCommandParameters(messages);
+        checkForMalformedCommandParameters(messages);
+    }
+
+    private void checkForMissingCommandParameters(final List<String> messages) {
+        if (commandParams.isEmpty() || commandParams.iterator().next().startsWith("-")) {
+            if ("calculateCheckSum".equalsIgnoreCase(command)) {
+                messages.add("missing changeSet identifier");
+            }
+        }
+    }
+
+    private void checkForMalformedCommandParameters(final List<String> messages) {
+      if (!commandParams.isEmpty()) {
+        if ("calculateCheckSum".equalsIgnoreCase(command)) {
+          for (final String param : commandParams) {
+            assert param != null;
+            if (param != null && !param.startsWith("-")) {
+              final String[] parts = param.split("::");
+              if (parts == null || parts.length < 3) {
+                messages.add("changeSet identifier must be of the form filepath::id::author");
+                break;
+              }
+            }
+          }
+        }
+      }
+    }
+
     private boolean isChangeLogRequired(String command) {
         return command.toLowerCase().startsWith("update")
                 || command.toLowerCase().startsWith("rollback")
+                || "calculateCheckSum".equals(command)
                 || "validate".equals(command);
     }
 
@@ -294,6 +328,7 @@ public class Main {
                 || "diff".equalsIgnoreCase(arg)
                 || "diffChangeLog".equalsIgnoreCase(arg)
                 || "generateChangeLog".equalsIgnoreCase(arg)
+                || "calculateCheckSum".equalsIgnoreCase(arg)
                 || "clearCheckSums".equalsIgnoreCase(arg)
                 || "dbDoc".equalsIgnoreCase(arg)
                 || "changelogSync".equalsIgnoreCase(arg)
@@ -422,6 +457,8 @@ public class Main {
         stream.println(" tag <tag string>          'Tags' the current database state for future rollback");
         stream.println(" status [--verbose]        Outputs count (list if --verbose) of unrun changesets");
         stream.println(" validate                  Checks changelog for errors");
+        stream.println(" calculateCheckSum <id>    Calculates and prints a checksum for the changeset");
+        stream.println("                           with the given id in the format filepath::id::author.");
         stream.println(" clearCheckSums            Removes all saved checksums from database log.");
         stream.println("                           Useful for 'MD5Sum Check Failed' errors");
         stream.println(" changelogSync             Mark all changes as executed in the database");
@@ -762,6 +799,11 @@ public class Main {
                 return;
             } else if ("clearCheckSums".equalsIgnoreCase(command)) {
                 liquibase.clearCheckSums();
+                return;
+            } else if ("calculateCheckSum".equalsIgnoreCase(command)) {
+                CheckSum checkSum = null;
+                checkSum = liquibase.calculateCheckSum(commandParams.iterator().next());
+                System.out.println(checkSum);
                 return;
             } else if ("dbdoc".equalsIgnoreCase(command)) {
                 if (commandParams.size() == 0) {
