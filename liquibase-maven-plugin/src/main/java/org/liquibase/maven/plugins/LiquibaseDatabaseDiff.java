@@ -8,6 +8,7 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import liquibase.Liquibase;
 import liquibase.database.Database;
+import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
 import liquibase.integration.commandline.CommandLineUtils;
 
@@ -87,7 +88,7 @@ public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
             referenceUsername = referenceInfo.getUserName();
             referencePassword = referenceInfo.getPassword();
         }
-        
+
         super.execute();
     }
 
@@ -95,7 +96,7 @@ public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
     protected void performLiquibaseTask(Liquibase liquibase) throws LiquibaseException {
         ClassLoader cl = null;
         try {
-            cl = getMavenArtifactClassLoader();
+            cl = getClassLoaderIncludingProjectClasspath();
             Thread.currentThread().setContextClassLoader(cl);
         }
         catch (MojoExecutionException e) {
