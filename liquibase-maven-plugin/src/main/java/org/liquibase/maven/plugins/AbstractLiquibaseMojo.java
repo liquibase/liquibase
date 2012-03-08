@@ -225,7 +225,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
 
         String shouldRunProperty = System.getProperty(Liquibase.SHOULD_RUN_SYSTEM_PROPERTY);
         if (shouldRunProperty != null && !Boolean.valueOf(shouldRunProperty)) {
-            getLog().warn("Liquibase did not run because '" + Liquibase.SHOULD_RUN_SYSTEM_PROPERTY
+            getLog().info("Liquibase did not run because '" + Liquibase.SHOULD_RUN_SYSTEM_PROPERTY
                     + "' system property was set to false");
             return;
         }
