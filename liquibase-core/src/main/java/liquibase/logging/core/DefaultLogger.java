@@ -33,15 +33,18 @@ public class DefaultLogger extends AbstractLogger {
 
     public void setLogLevel(String logLevel, String logFile) {
         setLogLevel(logLevel);
-        File log = new File(logFile);
-        if (log.exists()) {
-            log.delete();
-        }
-        try {
-            log.createNewFile();
-            err = new PrintStream(log);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        if (logFile != null) {
+            File log = new File(logFile);
+            try {
+                if (!log.exists()) {
+                    if (!log.createNewFile()) {
+                        throw new RuntimeException("Could not create logFile "+log.getAbsolutePath());
+                    }
+                }
+                err = new PrintStream(log);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 
