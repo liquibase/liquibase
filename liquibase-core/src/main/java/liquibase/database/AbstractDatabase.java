@@ -30,12 +30,9 @@ import liquibase.util.StringUtils;
 import java.io.IOException;
 import java.io.Writer;
 import java.math.BigInteger;
-<<<<<<< HEAD
 import java.sql.ResultSet;
 import java.sql.SQLException;
-=======
 import java.text.DateFormat;
->>>>>>> 114d3d4737e32c1cae3bf8b7746f61d6060a9682
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
