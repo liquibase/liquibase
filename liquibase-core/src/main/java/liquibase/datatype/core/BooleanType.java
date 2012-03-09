@@ -24,6 +24,8 @@ public class BooleanType extends LiquibaseDataType {
             return new DatabaseDataType("NUMBER", 1);
         }  else if (database instanceof SybaseASADatabase || database instanceof SybaseDatabase) {
             return new DatabaseDataType("BIT");
+        }  else if (database instanceof DerbyDatabase) {
+            return new DatabaseDataType("SMALLINT");
         }
 
         return super.toDatabaseDataType(database);
