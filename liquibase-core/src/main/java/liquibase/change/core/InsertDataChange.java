@@ -77,14 +77,17 @@ public class InsertDataChange extends AbstractChange implements ChangeWithColumn
 
     public SqlStatement[] generateStatements(Database database) {
 
-        boolean needsStoredProc = false;
+        boolean needsPreparedStatement = false;
         for (ColumnConfig column : columns) {
             if (column.getValueBlob() != null) {
-                needsStoredProc = true;
+                needsPreparedStatement = true;
+            }
+            if (column.getValueClob() != null) {
+                needsPreparedStatement = true;
             }
         }
 
-        if (needsStoredProc) {
+        if (needsPreparedStatement) {
             return new SqlStatement[]{ new InsertExecutablePreparedStatement(database) };
         }
 
