@@ -57,6 +57,7 @@
     <modules>
         <module>liquibase-core</module>
         <module>liquibase-maven-plugin</module>
+        <module>liquibase-osgi</module>
         <module>samples/liquibase-ext-change</module>
         <module>samples/liquibase-ext-changewithnestedtags</module>
         <module>samples/liquibase-ext-sqlgenerator</module>
