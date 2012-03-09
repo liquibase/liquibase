@@ -2,6 +2,7 @@ package liquibase.executor.jvm;
 
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
+import liquibase.database.PreparedStatementFactory;
 import liquibase.database.core.OracleDatabase;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
@@ -11,9 +12,7 @@ import liquibase.logging.LogFactory;
 import liquibase.logging.Logger;
 import liquibase.snapshot.jvm.JdbcDatabaseSnapshotGenerator;
 import liquibase.sql.visitor.SqlVisitor;
-import liquibase.statement.CallableSqlStatement;
-import liquibase.statement.SqlStatement;
-import liquibase.statement.StoredProcedureStatement;
+import liquibase.statement.*;
 import liquibase.util.JdbcUtils;
 import liquibase.util.StringUtils;
 import liquibase.snapshot.DatabaseSnapshotGeneratorFactory;
@@ -71,6 +70,12 @@ public class JdbcExecutor extends AbstractExecutor implements Executor {
     }
 
     public void execute(final SqlStatement sql, final List<SqlVisitor> sqlVisitors) throws DatabaseException {
+        if(sql instanceof ExecutablePreparedStatement) {
+            ((ExecutablePreparedStatement) sql).execute(new PreparedStatementFactory((JdbcConnection)database.getConnection()));
+            return;
+        }
+
+
         class ExecuteStatementCallback implements StatementCallback {
             public Object doInStatement(Statement stmt) throws SQLException, DatabaseException {
                 for (String statement : applyVisitors(sql, sqlVisitors)) {
