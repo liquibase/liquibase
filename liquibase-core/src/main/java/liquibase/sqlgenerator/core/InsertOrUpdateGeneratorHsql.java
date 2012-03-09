@@ -6,7 +6,7 @@ import java.util.HashSet;
 
 import liquibase.database.Database;
 import liquibase.database.core.HsqlDatabase;
-import liquibase.database.typeconversion.TypeConverterFactory;
+import liquibase.datatype.DataTypeFactory;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.InsertOrUpdateStatement;
 
@@ -83,11 +83,9 @@ public class InsertOrUpdateGeneratorHsql extends InsertOrUpdateGenerator {
 			sqlString = database.getDateLiteral(((Date) newValue));
 		} else if (newValue instanceof Boolean) {
 			if (((Boolean) newValue)) {
-				sqlString = TypeConverterFactory.getInstance().findTypeConverter(database).getBooleanType()
-						.getTrueBooleanValue();
+				sqlString = DataTypeFactory.getInstance().getTrueBooleanValue(database);
 			} else {
-				sqlString = TypeConverterFactory.getInstance().findTypeConverter(database).getBooleanType()
-						.getFalseBooleanValue();
+				sqlString = DataTypeFactory.getInstance().getFalseBooleanValue(database);
 			}
 		} else {
 			sqlString = newValue.toString();

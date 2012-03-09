@@ -45,7 +45,7 @@ public class FindForeignKeyConstraintsGeneratorPostgres extends AbstractSqlGener
             sb.append("  INNER JOIN      INFORMATION_SCHEMA.KEY_COLUMN_USAGE i2 ON i1.CONSTRAINT_NAME = i2.CONSTRAINT_NAME ");
             sb.append("  WHERE       i1.CONSTRAINT_TYPE = 'PRIMARY KEY' ");
             sb.append(") PT ON PT.TABLE_NAME = PK.TABLE_NAME ");
-            sb.append("WHERE      FK.TABLE_NAME='").append(statement.getBaseTableName()).append("'");
+            sb.append("WHERE      lower(FK.TABLE_NAME)='").append(statement.getBaseTableName().toLowerCase()).append("'");
 
         return new Sql[] {
                 new UnparsedSql(sb.toString())
