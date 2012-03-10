@@ -333,6 +333,10 @@ public class MockDatabase implements Database {
         return true;
     }
 
+    public boolean supportsCatalogs() {
+        return true;
+    }
+
     public String generatePrimaryKeyName(String tableName) {
         return "PK_"+tableName;
     }

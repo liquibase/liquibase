@@ -16,13 +16,6 @@ public class VarcharType extends CharType {
         return super.toDatabaseDataType(database);
     }
 
-    @Override
-    public String objectToString(Object value, Database database) {
-        if (value == null) {
-            return null;
-        }
-        return "'"+value+"'";
-    }
 
     //oracle
     //			if (columnTypeString.toUpperCase().startsWith("VARCHAR2")) {

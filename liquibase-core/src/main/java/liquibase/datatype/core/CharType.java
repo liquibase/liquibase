@@ -9,7 +9,7 @@ public class CharType extends LiquibaseDataType {
 
     @Override
     public String objectToString(Object value, Database database) {
-        if (value == null) {
+        if (value == null || value.toString().equalsIgnoreCase("null")) {
             return null;
         }
         return "'"+value+"'";

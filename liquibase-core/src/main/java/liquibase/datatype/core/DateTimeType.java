@@ -35,10 +35,8 @@ public class DateTimeType extends LiquibaseDataType {
 
     @Override
     public String objectToString(Object value, Database database) {
-        if (value == null) {
+        if (value == null || value.toString().equalsIgnoreCase("null")) {
             return null;
-        } else if (value.toString().equalsIgnoreCase("null")) {
-            return "null";
         } else if (value.toString().equals("CURRENT_TIMESTAMP()")) {
             return database.getCurrentDateTimeFunction();
         } else if (value instanceof DatabaseFunction) {

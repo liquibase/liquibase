@@ -21,12 +21,4 @@ public class NVarcharType extends CharType {
         return super.toDatabaseDataType(database);
     }
 
-    @Override
-    public String objectToString(Object value, Database database) {
-        if (value == null) {
-            return null;
-        }
-        return "'"+value+"'";
-    }
-
 }

@@ -9,10 +9,8 @@ public class SmallIntType extends LiquibaseDataType {
 
     @Override
     public String objectToString(Object value, Database database) {
-        if (value == null) {
+        if (value == null || value.toString().equalsIgnoreCase("null")) {
             return null;
-        } else if (value.toString().equalsIgnoreCase("null")) {
-            return "null";
         }
         if (value instanceof Boolean)
             return Boolean.TRUE.equals(value) ? "1" : "0";

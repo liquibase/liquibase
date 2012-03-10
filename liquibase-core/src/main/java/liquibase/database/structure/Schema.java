@@ -84,4 +84,9 @@ public class Schema implements DatabaseObject {
     public Schema clone(Database database) {
         return new Schema(catalog.getName(database), getName(database));
     }
+
+    @Override
+    public String toString() {
+        return catalog.getName()+"."+name;
+    }
 }

@@ -23,8 +23,14 @@ public class GetViewDefinitionGeneratorInformationSchemaViews extends GetViewDef
 
     @Override
     public Sql[] generateSql(GetViewDefinitionStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+        String schema;
+        if (database instanceof MySQLDatabase) {
+            schema = database.correctCatalogName(statement.getCatalogName());
+        } else {
+            schema = database.correctSchemaName(statement.getSchemaName());
+        }
         return new Sql[]{
-                new UnparsedSql("SELECT VIEW_DEFINITION FROM INFORMATION_SCHEMA.VIEWS WHERE TABLE_NAME = '" + statement.getViewName() + "' AND TABLE_SCHEMA='" + database.correctSchemaName(statement.getSchemaName()) + "'")
+                new UnparsedSql("SELECT VIEW_DEFINITION FROM INFORMATION_SCHEMA.VIEWS WHERE TABLE_NAME = '" + statement.getViewName() + "' AND TABLE_SCHEMA='" + schema + "'")
         };
     }
 }

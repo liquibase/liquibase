@@ -882,10 +882,6 @@ public abstract class AbstractDatabase implements Database {
             return columnName;
         }
 
-        if (schemaName == null) {
-            schemaName = getDefaultSchemaName();
-        }
-
         return escapeDatabaseObject(columnName);
     }
 
@@ -902,6 +898,10 @@ public abstract class AbstractDatabase implements Database {
     }
 
     public boolean supportsSchemas() {
+        return true;
+    }
+
+    public boolean supportsCatalogs() {
         return true;
     }
 

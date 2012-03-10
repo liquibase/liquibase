@@ -82,10 +82,10 @@ public class DataTypeFactory {
 
     public LiquibaseDataType fromDescription(String dataTypeDefinition) {
         String dataTypeName = dataTypeDefinition;
-        if (dataTypeName.matches(".*\\(.*")) {
+        if (dataTypeName.matches(".+\\(.*")) {
             dataTypeName = dataTypeDefinition.replaceFirst("\\s*\\(.*", "");
         }
-        if (dataTypeName.matches(".*\\{.*")) {
+        if (dataTypeName.matches(".+\\{.*")) {
             dataTypeName = dataTypeDefinition.replaceFirst("\\s*\\{.*", "");
         }
 
@@ -107,7 +107,7 @@ public class DataTypeFactory {
 
         }
 
-        if (dataTypeDefinition.matches("\\w+\\s*\\(.*")) {
+        if (dataTypeDefinition.matches(".+\\s*\\(.*")) {
             String paramStrings = dataTypeDefinition.replaceFirst(".*?\\(", "").replaceFirst("\\).*", "");
             String[] params = paramStrings.split(",");
             for (String param : params) {

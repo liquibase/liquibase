@@ -89,9 +89,9 @@ public abstract class LiquibaseDataType implements PrioritizedService {
     }
 
     public String objectToString(Object value, Database database) {
-        if (value == null) {
+        if (value == null || value.toString().equalsIgnoreCase("null")) {
             return null;
-        } else if (value.toString().equals("CURRENT_TIMESTAMP()")) {
+        } else if (value.toString().equals("CURRENT_TIMESTAMP()") || value.toString().equals("NOW()")) {
             return database.getCurrentDateTimeFunction();
         }
         return value.toString();

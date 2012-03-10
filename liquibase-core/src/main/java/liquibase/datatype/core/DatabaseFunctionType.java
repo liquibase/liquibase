@@ -9,10 +9,11 @@ public class DatabaseFunctionType extends LiquibaseDataType {
 
     @Override
     public String objectToString(Object value, Database database) {
-        if (value.toString().equals("CURRENT_TIMESTAMP()")) {
+        if (value == null  || value.toString().equalsIgnoreCase("null"))  {
+            return null;
+        }
+        if (value.toString().equalsIgnoreCase("CURRENT_TIMESTAMP()") || value.toString().equalsIgnoreCase("NOW()")) {
             return database.getCurrentDateTimeFunction();
-        } else if (value.toString().equalsIgnoreCase("null")) {
-            return "null";
         }
 
 
