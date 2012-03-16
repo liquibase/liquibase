@@ -621,6 +621,53 @@ public class Liquibase {
 
     }
 
+    public Collection<RanChangeSet> listUnexpectedChangeSets(String contexts) throws LiquibaseException {
+        changeLogParameters.setContexts(StringUtils.splitAndTrim(contexts, ","));
+
+        DatabaseChangeLog changeLog = ChangeLogParserFactory.getInstance().getParser(changeLogFile, resourceAccessor).parse(changeLogFile, changeLogParameters, resourceAccessor);
+        changeLog.validate(database, contexts);
+
+        ChangeLogIterator logIterator = new ChangeLogIterator(changeLog,
+                new ContextChangeSetFilter(contexts),
+                new DbmsChangeSetFilter(database));
+        ExpectedChangesVisitor visitor = new ExpectedChangesVisitor(database.getRanChangeSetList());
+        logIterator.run(visitor, database);
+        return visitor.getUnexpectedChangeSets();
+    }
+
+
+    public void reportUnexpectedChangeSets(boolean verbose, String contexts, Writer out) throws LiquibaseException {
+        changeLogParameters.setContexts(StringUtils.splitAndTrim(contexts, ","));
+
+        try {
+            Collection<RanChangeSet> unexpectedChangeSets = listUnexpectedChangeSets(contexts);
+            if (unexpectedChangeSets.size() == 0) {
+                out.append(getDatabase().getConnection().getConnectionUserName());
+                out.append("@");
+                out.append(getDatabase().getConnection().getURL());
+                out.append(" contains no unexpected changes!");
+                out.append(StreamUtil.getLineSeparator());
+            } else {
+                out.append(String.valueOf(unexpectedChangeSets.size()));
+                out.append(" unexpected changes were found in ");
+                out.append(getDatabase().getConnection().getConnectionUserName());
+                out.append("@");
+                out.append(getDatabase().getConnection().getURL());
+                out.append(StreamUtil.getLineSeparator());
+                if (verbose) {
+                    for (RanChangeSet ranChangeSet : unexpectedChangeSets) {
+                        out.append("     ").append(ranChangeSet.toString()).append(StreamUtil.getLineSeparator());
+                    }
+                }
+            }
+
+            out.flush();
+        } catch (IOException e) {
+            throw new LiquibaseException(e);
+        }
+
+    }
+    
     /**
      * Sets checksums to null so they will be repopulated next run
      */
