@@ -42,7 +42,7 @@ public class AddLookupTableChange extends AbstractChange {
         this.existingTableCatalogName = existingTableCatalogName;
     }
 
-    @ChangeProperty(mustApplyTo ="column.table.schema")
+    @ChangeProperty(mustApplyTo ="column.relation.schema")
     public String getExistingTableSchemaName() {
         return existingTableSchemaName;
     }
@@ -51,7 +51,7 @@ public class AddLookupTableChange extends AbstractChange {
         this.existingTableSchemaName = existingTableSchemaName;
     }
 
-    @ChangeProperty(requiredForDatabase = "all", mustApplyTo = "column.table")
+    @ChangeProperty(requiredForDatabase = "all", mustApplyTo = "column.relation")
     public String getExistingTableName() {
         return existingTableName;
     }

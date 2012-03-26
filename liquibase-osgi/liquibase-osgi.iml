@@ -2,17 +2,20 @@
 <module org.jetbrains.idea.maven.project.MavenProjectsManager.isMavenModule="true" type="JAVA_MODULE" version="4">
   <component name="FacetManager">
     <facet type="Osmorc" name="OSGi">
-      <configuration osmorcControlsManifest="false" manifestLocation="src/main/resources/META-INF/MANIFEST.MF" jarfileLocation="liquibase-osgi-2.0.4-SNAPSHOT.jar" outputPathType="CompilerOutputPath" useBndFile="false" bndFileLocation="" useBundlorFile="false" bundlorFileLocation="" bundleActivator="liquibase.osgi.LiquibaseActivator" bundleSymbolicName="org.liquibase.osgi" bundleVersion="2.0.4.SNAPSHOT" ignoreFilePattern="" useProjectDefaultManifestFileLocation="false" alwaysRebuildBundleJAR="false">
+      <configuration osmorcControlsManifest="false" manifestLocation="src/main/resources/META-INF/MANIFEST.MF" jarfileLocation="liquibase-osgi-3.0.0-SNAPSHOT.jar" outputPathType="CompilerOutputPath" useBndFile="false" bndFileLocation="" useBundlorFile="false" bundlorFileLocation="" bundleActivator="liquibase.osgi.LiquibaseActivator" bundleSymbolicName="org.liquibase.osgi" bundleVersion="" ignoreFilePattern="" useProjectDefaultManifestFileLocation="false" alwaysRebuildBundleJAR="false">
         <additionalProperties>
-          <property key="Bundle-Description" value="Liquibase is a tool for managing and executing database changes." />
-          <property key="Bundle-Vendor" value="Liquibase.org" />
-          <property key="Bundle-DocURL" value="http://www.liquibase.org" />
+          <property key="DynamicImport-Package" value="net.sf.cglib.*" />
           <property key="Bundle-Name" value="Liquibase with OSGI Support" />
-          <property key="Export-Package" value="liquibase.*;version=&quot;2.0.4-SNAPSHOT&quot;" />
-          <property key="Import-Package" value="liquibase.*;version=&quot;2.0.4-SNAPSHOT&quot;,org.slf4j;version=&quot;[1.5,2.0)&quot;,javax.*;resolution:=optional,org.apache.tools.ant.*;resolution:=optional,org.springframework.*;resolution:=optional,org.w3c.*;resolution:=optional,org.xml.*;resolution:=optional,org.osgi.framework.*;resolution:=optional" />
           <property key="Embed-Dependency" value="*;scope=compile|runtime;type=!pom;inline=false;artifactId=!slf4j-api" />
           <property key="Embed-Transitive" value="true" />
-          <property key="DynamicImport-Package" value="net.sf.cglib.*" />
+          <property key="Import-Package" value="liquibase.*;version=&quot;3.0.0-SNAPSHOT&quot;," />
+          <property key="javax.*;resolution" value="=optional," />
+          <property key="org.apache.tools.ant.*;resolution" value="=optional," />
+          <property key="org.springframework.*;resolution" value="=optional," />
+          <property key="org.w3c.*;resolution" value="=optional," />
+          <property key="org.xml.*;resolution" value="=optional," />
+          <property key="org.osgi.framework.*;resolution" value="=optional" />
+          <property key="Export-Package" value="liquibase.*;version=&quot;3.0.0-SNAPSHOT&quot;" />
         </additionalProperties>
         <additionalJARContents />
       </configuration>

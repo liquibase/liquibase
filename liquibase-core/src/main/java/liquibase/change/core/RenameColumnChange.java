@@ -25,7 +25,7 @@ public class RenameColumnChange extends AbstractChange {
     private String newColumnName;
     private String columnDataType;
 
-    @ChangeProperty(mustApplyTo ="column.table.catalog")
+    @ChangeProperty(mustApplyTo ="column.relation.catalog")
     public String getCatalogName() {
         return catalogName;
     }
@@ -34,7 +34,7 @@ public class RenameColumnChange extends AbstractChange {
         this.catalogName = catalogName;
     }
 
-    @ChangeProperty(mustApplyTo ="column.table.schema")
+    @ChangeProperty(mustApplyTo ="column.relation.schema")
     public String getSchemaName() {
         return schemaName;
     }
@@ -43,7 +43,7 @@ public class RenameColumnChange extends AbstractChange {
         this.schemaName = schemaName;
     }
 
-    @ChangeProperty(requiredForDatabase = "all", mustApplyTo = "column.table")
+    @ChangeProperty(requiredForDatabase = "all", mustApplyTo = "column.relation")
     public String getTableName() {
         return tableName;
     }

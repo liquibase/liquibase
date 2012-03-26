@@ -57,6 +57,15 @@
   <component name="EntryPointsManager">
     <entry_points version="2.0" />
   </component>
+  <component name="FacetAutodetectingManager">
+    <autodetection-disabled>
+      <facet-type id="Osmorc">
+        <modules>
+          <module name="liquibase-osgi" />
+        </modules>
+      </facet-type>
+    </autodetection-disabled>
+  </component>
   <component name="FrameworkDetectionExcludesConfiguration">
     <file type="Osmorc" url="file://$PROJECT_DIR$/liquibase-core" />
     <file type="Osmorc" url="file://$PROJECT_DIR$/liquibase-osgi" />
@@ -100,7 +109,6 @@
         </inspection_tool>
         <inspection_tool class="MissingOverrideAnnotation" enabled="true" level="ERROR" enabled_by_default="true">
           <option name="ignoreObjectMethods" value="true" />
-          <option name="ignoreAnonymousClassMethods" value="false" />
         </inspection_tool>
         <inspection_tool class="UNUSED_IMPORT" enabled="false" level="WARNING" enabled_by_default="false" />
         <inspection_tool class="UnnecessarySemicolon" enabled="false" level="WARNING" enabled_by_default="false" />
@@ -142,9 +150,6 @@
         <option value="$PROJECT_DIR$/pom.xml" />
       </list>
     </option>
-  </component>
-  <component name="Osmorc">
-    <option name="manifestSynchronizationType" value="AutomaticallySynchronize" />
   </component>
   <component name="Palette2">
     <group name="Swing">

@@ -35,7 +35,7 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
 	// If FK referenced to such unique column this option should be set to false
 	private Boolean referencesUniqueColumn;
 
-    @ChangeProperty(mustApplyTo ="column.table.catalog")
+    @ChangeProperty(mustApplyTo ="column.relation.catalog")
     public String getBaseTableCatalogName() {
         return baseTableCatalogName;
     }
@@ -44,7 +44,7 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
         this.baseTableCatalogName = baseTableCatalogName;
     }
 
-    @ChangeProperty(mustApplyTo ="column.table.schema")
+    @ChangeProperty(mustApplyTo ="column.relation.schema")
     public String getBaseTableSchemaName() {
         return baseTableSchemaName;
     }
@@ -53,7 +53,7 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
         this.baseTableSchemaName = baseTableSchemaName;
     }
 
-    @ChangeProperty(requiredForDatabase = "all", mustApplyTo = "column.table")
+    @ChangeProperty(requiredForDatabase = "all", mustApplyTo = "column.relation")
     public String getBaseTableName() {
         return baseTableName;
     }
