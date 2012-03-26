@@ -14,6 +14,7 @@ import liquibase.parser.core.xml.XMLChangeLogSAXParser;
 import liquibase.serializer.ChangeLogSerializer;
 import liquibase.sql.visitor.SqlVisitor;
 import liquibase.util.ISODateFormat;
+import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
 import liquibase.util.XMLUtil;
 import liquibase.util.xml.DefaultXmlWriter;
@@ -22,8 +23,7 @@ import org.w3c.dom.*;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import java.io.IOException;
-import java.io.OutputStream;
+import java.io.*;
 import java.lang.reflect.Field;
 import java.util.*;
 
@@ -105,7 +105,24 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
 		new DefaultXmlWriter().write(doc, out);
 	}
 
-	
+    public void append(ChangeSet changeSet, File changeLogFile) throws IOException {
+        FileInputStream in = new FileInputStream(changeLogFile);
+        String existingChangeLog = StreamUtil.getStreamContents(in);
+        in.close();
+
+        FileOutputStream out = new FileOutputStream(changeLogFile);
+
+        if (!existingChangeLog.contains("</databaseChangeLog>")) {
+            write(Arrays.asList(changeSet), out);
+        } else {
+            existingChangeLog = existingChangeLog.replaceFirst("</databaseChangeLog>", serialize(changeSet)+"\n</databaseChangeLog>");
+
+            StreamUtil.copy(new ByteArrayInputStream(existingChangeLog.getBytes()), out);
+        }
+        out.flush();
+        out.close();
+    }
+
     public Element createNode(SqlVisitor visitor) {
         Element node = currentChangeLogFileDOM.createElementNS(XMLChangeLogSAXParser.getDatabaseChangeLogNameSpace(), visitor.getName());
         try {

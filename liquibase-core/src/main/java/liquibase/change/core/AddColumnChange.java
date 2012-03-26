@@ -32,7 +32,7 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
         columns = new ArrayList<ColumnConfig>();
     }
 
-    @ChangeProperty(mustApplyTo ="table.catalog")
+    @ChangeProperty(mustApplyTo ="relation.catalog")
     public String getCatalogName() {
         return catalogName;
     }
@@ -41,7 +41,7 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
         this.catalogName = catalogName;
     }
 
-    @ChangeProperty(mustApplyTo ="table.schema")
+    @ChangeProperty(mustApplyTo ="relation.schema")
     public String getSchemaName() {
         return schemaName;
     }

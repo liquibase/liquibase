@@ -12,6 +12,8 @@ import liquibase.serializer.ChangeLogSerializer;
 import liquibase.sql.visitor.SqlVisitor;
 import liquibase.util.StringUtils;
 
+import java.io.File;
+import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.List;
@@ -185,8 +187,11 @@ public class StringChangeLogSerializer implements ChangeLogSerializer {
         return null;
     }
 
-	public void write(List<ChangeSet> changeSets, OutputStream out)
-			throws IOException {
+	public void write(List<ChangeSet> changeSets, OutputStream out) throws IOException {
 		
 	}
+
+    public void append(ChangeSet changeSet, File changeLogFile) throws IOException {
+
+    }
 }

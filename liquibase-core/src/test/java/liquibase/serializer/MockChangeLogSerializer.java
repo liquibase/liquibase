@@ -6,6 +6,8 @@ import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.sql.visitor.SqlVisitor;
 
+import java.io.File;
+import java.io.InputStream;
 import java.util.List;
 import java.io.OutputStream;
 import java.io.IOException;
@@ -47,4 +49,8 @@ public class MockChangeLogSerializer implements ChangeLogSerializer {
 			throws IOException {
 		;
 	}
+
+    public void append(ChangeSet changeSet, File changeLogFile) throws IOException {
+
+    }
 }
