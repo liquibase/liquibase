@@ -1,5 +1,6 @@
 package liquibase;
 
+import liquibase.change.CheckSum;
 import liquibase.changelog.*;
 import liquibase.changelog.filter.*;
 import liquibase.changelog.visitor.*;
@@ -639,6 +640,33 @@ public class Liquibase {
         } finally {
             lockService.releaseLock();
         }
+    }
+
+    public final CheckSum calculateCheckSum(final String changeSetIdentifier) throws LiquibaseException {
+        if (changeSetIdentifier == null) {
+            throw new LiquibaseException(new IllegalArgumentException("changeSetIdentifier"));
+        }
+        final List<String> parts = StringUtils.splitAndTrim(changeSetIdentifier, "::");
+        if (parts == null || parts.size() < 3) {
+            throw new LiquibaseException(new IllegalArgumentException("Invalid changeSet identifier: " + changeSetIdentifier));
+        }
+        return this.calculateCheckSum(parts.get(0), parts.get(1), parts.get(2));
+    }
+
+    public CheckSum calculateCheckSum(final String filename, final String id, final String author) throws LiquibaseException {
+        log.info(String.format("Calculating checksum for changeset %s::%s::%s", filename, id, author));
+        final ChangeLogParameters changeLogParameters = this.getChangeLogParameters();
+        final ResourceAccessor resourceAccessor = this.getFileOpener();
+        final DatabaseChangeLog changeLog = ChangeLogParserFactory.getInstance().getParser(this.changeLogFile, resourceAccessor).parse(this.changeLogFile, changeLogParameters, resourceAccessor);
+
+        // TODO: validate?
+
+        final ChangeSet changeSet = changeLog.getChangeSet(filename, author, id);
+        if (changeSet == null) {
+          throw new LiquibaseException(new IllegalArgumentException("No such changeSet: " + filename + "::" + id + "::" + author));
+        }
+
+        return changeSet.generateCheckSum();
     }
 
     public void generateDocumentation(String outputDirectory) throws LiquibaseException {
