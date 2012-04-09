@@ -241,7 +241,7 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
         try {
             c = getDataSource().getConnection();
             liquibase = createLiquibase(c);
-            liquibase.update(getContexts());
+            performUpdate(liquibase);
         } catch (SQLException e) {
             throw new DatabaseException(e);
         } finally {
@@ -255,6 +255,10 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
             }
         }
 
+    }
+
+    protected void performUpdate(Liquibase liquibase) throws LiquibaseException {
+        liquibase.update(getContexts());
     }
 
     protected Liquibase createLiquibase(Connection c) throws LiquibaseException {
