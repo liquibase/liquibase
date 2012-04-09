@@ -1,9 +1,12 @@
 package org.liquibase.maven.plugins;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.*;
 
 import liquibase.*;
@@ -225,7 +228,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
 
         String shouldRunProperty = System.getProperty(Liquibase.SHOULD_RUN_SYSTEM_PROPERTY);
         if (shouldRunProperty != null && !Boolean.valueOf(shouldRunProperty)) {
-            getLog().warn("Liquibase did not run because '" + Liquibase.SHOULD_RUN_SYSTEM_PROPERTY
+            getLog().info("Liquibase did not run because '" + Liquibase.SHOULD_RUN_SYSTEM_PROPERTY
                     + "' system property was set to false");
             return;
         }
@@ -370,6 +373,26 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
         }
         catch (MalformedURLException e) {
             throw new MojoExecutionException("Failed to create artifact classloader", e);
+        }
+    }
+
+    /**
+     * Returns an isolated classloader.
+     *
+     * @return ClassLoader
+     * @noinspection unchecked
+     */
+    protected ClassLoader getClassLoaderIncludingProjectClasspath() throws MojoExecutionException {
+        try {
+            List classpathElements = project.getCompileClasspathElements();
+            classpathElements.add(project.getBuild().getOutputDirectory());
+            URL urls[] = new URL[classpathElements.size()];
+            for (int i = 0; i < classpathElements.size(); ++i) {
+                urls[i] = new File((String) classpathElements.get(i)).toURL();
+            }
+            return new URLClassLoader(urls, this.getClass().getClassLoader());
+        } catch (Exception e) {
+            throw new MojoExecutionException("Failed to create project classloader", e);
         }
     }
 
