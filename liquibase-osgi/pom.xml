@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project
+        xmlns="http://maven.apache.org/POM/4.0.0"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>liquibase-osgi</artifactId>
+    <name>Liquibase Osgi</name>
+    <packaging>bundle</packaging>
+
+    <parent>
+        <groupId>org.liquibase</groupId>
+        <artifactId>liquibase-parent</artifactId>
+        <version>2.0.4-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <properties>
+        <liquibase.version>2.0.4-SNAPSHOT</liquibase.version>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.liquibase</groupId>
+            <artifactId>liquibase-core</artifactId>
+            <version>${liquibase.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.core</artifactId>
+            <version>4.1.0</version>
+            <scope>provided</scope>
+        </dependency>
+
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <version>2.1.0</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <instructions>
+                        <Bundle-Name>Liquibase with OSGI Support</Bundle-Name>
+                        <Bundle-Activator>liquibase.osgi.LiquibaseActivator</Bundle-Activator>
+                        <Export-Package>
+                            liquibase.*;version="${liquibase.version}"
+                        </Export-Package>
+                        <Import-Package>
+                            liquibase.*;version="${liquibase.version}",
+                            org.slf4j;version="[1.5,2.0)",
+                            javax.*;resolution:=optional,
+                            org.apache.tools.ant.*;resolution:=optional,
+                            org.springframework.*;resolution:=optional,
+                            org.w3c.*;resolution:=optional,
+                            org.xml.*;resolution:=optional,
+                            org.osgi.framework.*;resolution:=optional
+                        </Import-Package>
+                        <Embed-Dependency>
+                            *;scope=compile|runtime;type=!pom;inline=false;artifactId=!slf4j-api
+                        </Embed-Dependency>
+                        <Embed-Transitive>true</Embed-Transitive>
+                        <DynamicImport-Package>net.sf.cglib.*</DynamicImport-Package>
+                        <_include>src/main/resources/META-INF/MANIFEST.MF</_include>
+                    </instructions>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>
