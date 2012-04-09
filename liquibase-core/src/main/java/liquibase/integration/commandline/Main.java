@@ -70,7 +70,7 @@ public class Main {
     protected String diffTypes;
     protected String changeSetAuthor;
     protected String changeSetContext;
-    protected String dataDir;
+    protected String dataOutputDirectory;
 
     protected String referenceDriver;
     protected String referenceUrl;
@@ -716,7 +716,7 @@ public class Main {
                 CommandLineUtils.doDiffToChangeLog(changeLogFile, createReferenceDatabaseFromCommandParams(commandParams), database);
                 return;
             } else if ("generateChangeLog".equalsIgnoreCase(command)) {
-                CommandLineUtils.doGenerateChangeLog(changeLogFile, database, defaultSchemaName, StringUtils.trimToNull(diffTypes), StringUtils.trimToNull(changeSetAuthor), StringUtils.trimToNull(changeSetContext), StringUtils.trimToNull(dataDir));
+                CommandLineUtils.doGenerateChangeLog(changeLogFile, database, defaultSchemaName, StringUtils.trimToNull(diffTypes), StringUtils.trimToNull(changeSetAuthor), StringUtils.trimToNull(changeSetContext), StringUtils.trimToNull(dataOutputDirectory));
                 return;
             }
 
@@ -877,7 +877,7 @@ public class Main {
             } else if ("referenceDefaultSchemaName".equalsIgnoreCase(attributeName)) {
                 defaultSchemaName = value;
             } else if ("dataOutputDirectory".equalsIgnoreCase(attributeName)) {
-                dataDir = value;
+                dataOutputDirectory = value;
             }
         }
 
