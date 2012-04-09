@@ -337,9 +337,4 @@ public class PostgresDatabase extends AbstractDatabase {
 
         return count != null && count > 0;
     }
-
-    @Override
-    public String escapeIndexName(String schemaName, String indexName) {
-        return indexName;
-    }
 }
