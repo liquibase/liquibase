@@ -1006,7 +1006,7 @@ public class DiffResult {
                     columnNames.add(column.getName());
                 }
 
-				// if dataDir is not null, print out a csv file and use loadData
+				// if dataOutputDirectory is not null, print out a csv file and use loadData
 				// tag
 				if (dataDir != null) {
 					String fileName = table.getName().toLowerCase() + ".csv";
@@ -1079,7 +1079,7 @@ public class DiffResult {
 					}
 
 					changes.add(change);
-				} else { // if dataDir is null, build and use insert tags
+				} else { // if dataOutputDirectory is null, build and use insert tags
 					for (Map row : rs) {
 						InsertDataChange change = new InsertDataChange();
 						change.setSchemaName(schema);
