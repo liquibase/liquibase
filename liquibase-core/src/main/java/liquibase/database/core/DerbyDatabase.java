@@ -8,6 +8,8 @@ import liquibase.logging.Logger;
 
 import java.lang.reflect.Method;
 import java.sql.Driver;
+import java.sql.DriverManager;
+import java.util.Enumeration;
 
 public class DerbyDatabase extends AbstractDatabase {
 
@@ -121,24 +123,22 @@ public class DerbyDatabase extends AbstractDatabase {
     @SuppressWarnings({ "static-access", "unchecked" })
     protected void determineDriverVersion() {
         try {
-            // Locate the Derby sysinfo class and query its version info
-            @SuppressWarnings("rawtypes")
-			final Class sysinfoClass = getClass().forName(
-                    "org.apache.derby.tools.sysinfo");
-            final Method majorVersionGetter = sysinfoClass.getMethod(
-                    "getMajorVersion");
-            final Method minorVersionGetter = sysinfoClass.getMethod(
-                    "getMinorVersion");
-            driverVersionMajor = ((Integer) majorVersionGetter.invoke(
-                    null)).intValue();
-            driverVersionMinor = ((Integer) minorVersionGetter.invoke(
-                    null)).intValue();
+// Locate the Derby sysinfo class and query its version info
+            Enumeration<Driver> it = DriverManager.getDrivers();
+            while (it.hasMoreElements()) {
+                Driver driver = it.nextElement();
+                if (driver.getClass().getName().contains("derby")) {
+                    driverVersionMajor = driver.getMajorVersion();
+                    driverVersionMinor = driver.getMinorVersion();
+                    return;
+                }
+            }
+            log.debug("Unable to load/access Apache Derby driver class " + "to check version");
+            driverVersionMajor = -1;
+            driverVersionMinor = -1;
         } catch (Exception e) {
-            log.debug("Unable to load/access Apache Derby driver class " +
-                    "org.apache.derby.tools.sysinfo to check version: " +
-                    e.getMessage());
+            log.debug("Unable to load/access Apache Derby driver class " + "org.apache.derby.tools.sysinfo to check version: " + e.getMessage());
             driverVersionMajor = -1;
             driverVersionMinor = -1;
         }
-    }
-}
+    }}
