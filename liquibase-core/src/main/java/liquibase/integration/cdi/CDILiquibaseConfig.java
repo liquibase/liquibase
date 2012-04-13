@@ -1,6 +1,5 @@
 package liquibase.integration.cdi;
 
-import com.sun.xml.internal.ws.util.QNameMap;
 import liquibase.resource.ResourceAccessor;
 
 import java.util.Map;
