@@ -1,8 +1,16 @@
 package liquibase.change.core;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+
 import liquibase.change.AbstractSQLChange;
 import liquibase.change.ChangeMetaData;
 import liquibase.change.CheckSum;
+import liquibase.changelog.ChangeLogParameters;
 import liquibase.database.Database;
 import liquibase.exception.SetupException;
 import liquibase.exception.ValidationErrors;
@@ -11,8 +19,6 @@ import liquibase.logging.LogFactory;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
-
-import java.io.*;
 
 /**
  * Represents a Change for custom SQL stored in a File.
@@ -111,7 +117,7 @@ public class SQLFileChange extends AbstractSQLChange {
      */
     private boolean loadFromFileSystem(String file) throws SetupException {
         if (relativeToChangelogFile != null && relativeToChangelogFile) {
-            file = getChangeSet().getFilePath().replaceFirst("/[^/]*$","")+"/"+file;
+            file = getChangeSet().getFilePath().replaceFirst("/[^/]*$", "") + "/" + file;
         }
 
         InputStream fis = null;
@@ -149,7 +155,7 @@ public class SQLFileChange extends AbstractSQLChange {
      */
     private boolean loadFromClasspath(String file) throws SetupException {
         if (relativeToChangelogFile != null && relativeToChangelogFile) {
-            file = getChangeSet().getFilePath().replaceFirst("/[^/]*$","")+"/"+file;
+            file = getChangeSet().getFilePath().replaceFirst("/[^/]*$", "") + "/" + file;
         }
 
         InputStream in = null;
@@ -194,5 +200,13 @@ public class SQLFileChange extends AbstractSQLChange {
 
     public String getConfirmationMessage() {
         return "SQL in file " + path + " executed";
+    }
+
+    @Override
+    public void setSql(String sql) {
+        if (getChangeLogParameters() != null) {
+            sql = getChangeLogParameters().expandExpressions(sql);
+        }
+        super.setSql(sql);
     }
 }

@@ -1,14 +1,15 @@
 package liquibase.changelog;
 
-import liquibase.util.StringUtils;
-import liquibase.database.Database;
-
-import java.util.List;
 import java.util.ArrayList;
-import java.util.Map;
 import java.util.Collection;
-import java.util.regex.Pattern;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import liquibase.database.Database;
+import liquibase.util.StringUtils;
 
 public class ChangeLogParameters {
 
@@ -51,14 +52,14 @@ public class ChangeLogParameters {
 
     /**
      * Return the value of a parameter
+     *
      * @param key Name of the parameter
      * @return The parameter value or null if not found. (Note that null can also be return if it is the parameter value. For
-     * strict parameter existence use {@link #hasValue(String)))
-     *
+     *         strict parameter existence use {@link #hasValue(String)))
      */
     public Object getValue(String key) {
-        ChangeLogParameter parameter=findParameter(key);
-        return parameter!=null?parameter.getValue():null;
+        ChangeLogParameter parameter = findParameter(key);
+        return parameter != null ? parameter.getValue() : null;
     }
 
     private ChangeLogParameter findParameter(String key) {
@@ -71,7 +72,7 @@ public class ChangeLogParameters {
     }
 
     public boolean hasValue(String key) {
-        return findParameter(key)!=null;
+        return findParameter(key) != null;
     }
 
     public String expandExpressions(String string) {
@@ -123,7 +124,7 @@ public class ChangeLogParameters {
 
         public boolean isValid() {
             boolean isValid = true;
-            if (validContexts != null && validContexts.size()  > 0) {
+            if (validContexts != null && validContexts.size() > 0) {
                 if (ChangeLogParameters.this.currentContexts != null && ChangeLogParameters.this.currentContexts.size() > 0) {
                     isValid = false;
                     for (String currentContext : ChangeLogParameters.this.currentContexts) {
@@ -134,7 +135,7 @@ public class ChangeLogParameters {
                 }
             }
 
-            if (isValid && validDatabases != null && validDatabases.size()  > 0) {
+            if (isValid && validDatabases != null && validDatabases.size() > 0) {
                 isValid = validDatabases.contains(currentDatabase.getTypeName());
             }
 
@@ -161,7 +162,7 @@ public class ChangeLogParameters {
                 String valueTolookup = expressionString.replaceFirst("\\$\\{", "").replaceFirst("\\}$", "");
 
                 int dotIndex = valueTolookup.indexOf('.');
-                Object value =changeLogParameters.getValue(valueTolookup);
+                Object value = changeLogParameters.getValue(valueTolookup);
 
                 if (value != null) {
                     text = text.replace(expressionString, value.toString());

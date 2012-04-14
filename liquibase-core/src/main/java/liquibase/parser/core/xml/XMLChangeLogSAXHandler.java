@@ -7,7 +7,17 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLDecoder;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.Stack;
+import java.util.TreeSet;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.regex.Matcher;
@@ -349,6 +359,8 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
 					String attributeValue = atts.getValue(i);
 					setProperty(change, attributeName, attributeValue);
 				}
+				
+				change.setChangeLogParameters(this.changeLogParameters);
 				change.init();
 			} else if (change != null && "column".equals(qName)) {
 				ColumnConfig column;
