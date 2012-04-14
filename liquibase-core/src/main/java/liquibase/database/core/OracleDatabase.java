@@ -358,7 +358,7 @@ public class OracleDatabase extends AbstractDatabase {
 //            "FAILED_LOGIN_ATTEMPTS",
 //            "FALSE",
 //            "FAST",
-//            "FILE",
+            "FILE",
 //            "FIRST_ROWS",
 //            "FLAGGER",
 //            "FLOAT",
