@@ -9,6 +9,7 @@ import liquibase.database.core.DB2Database;
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.database.core.SQLiteDatabase.AlterTableVisitor;
 import liquibase.database.structure.Index;
+import liquibase.database.structure.type.BooleanType;
 import liquibase.database.typeconversion.TypeConverterFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.ReorganizeTableStatement;
@@ -81,43 +82,50 @@ public class AddNotNullConstraintChange extends AbstractChange {
 //    		return generateStatementsForSQLiteDatabase(database);
 //        }
 
-    	List<SqlStatement> statements = new ArrayList<SqlStatement>();
-    	String schemaName = getSchemaName() == null?database.getDefaultSchemaName():getSchemaName();
-    	
+        List<SqlStatement> statements = new ArrayList<SqlStatement>();
+        String schemaName = getSchemaName() == null?database.getDefaultSchemaName():getSchemaName();
+
         if (defaultNullValue != null) {
-            String defaultValue = TypeConverterFactory.getInstance()
-                    .findTypeConverter(database).getDataType(
-                            getDefaultNullValue()).convertObjectToString(
-                            getDefaultNullValue(), database);
-            
+            String defaultValue = defaultNullValue;
+
+            if (getColumnDataType().equalsIgnoreCase("BOOLEAN")) {
+                BooleanType booleanType = TypeConverterFactory.getInstance()
+                        .findTypeConverter(database).getBooleanType();
+                if (defaultNullValue.equalsIgnoreCase("TRUE")) {
+                    defaultValue = booleanType.getTrueBooleanValue();
+                } else if (defaultNullValue.equalsIgnoreCase("FALSE")) {
+                    defaultValue = booleanType.getFalseBooleanValue();
+                }
+            }
+
             statements.add(new UpdateStatement(schemaName, getTableName())
                     .addNewColumnValue(getColumnName(), defaultValue)
                     .setWhereClause(getColumnName() + " IS NULL"));
         }
-        
-    	statements.add(new SetNullableStatement(schemaName, getTableName(), getColumnName(), getColumnDataType(), false));
+
+        statements.add(new SetNullableStatement(schemaName, getTableName(), getColumnName(), getColumnDataType(), false));
         if (database instanceof DB2Database) {
             statements.add(new ReorganizeTableStatement(schemaName, getTableName()));
-        }           
-        
+        }
+
         return statements.toArray(new SqlStatement[statements.size()]);
     }
-    
+
     private SqlStatement[] generateStatementsForSQLiteDatabase(Database database) {
-    	
-    	// SQLite does not support this ALTER TABLE operation until now.
-		// For more information see: http://www.sqlite.org/omitted.html.
-		// This is a small work around...
-    	
-    	List<SqlStatement> statements = new ArrayList<SqlStatement>();
-    	
-    	String schemaName = getSchemaName() == null?database.getDefaultSchemaName():getSchemaName();
+
+        // SQLite does not support this ALTER TABLE operation until now.
+        // For more information see: http://www.sqlite.org/omitted.html.
+        // This is a small work around...
+
+        List<SqlStatement> statements = new ArrayList<SqlStatement>();
+
+        String schemaName = getSchemaName() == null?database.getDefaultSchemaName():getSchemaName();
         if (defaultNullValue != null) {
             statements.add(new UpdateStatement(schemaName, getTableName())
                     .addNewColumnValue(getColumnName(), getDefaultNullValue())
                     .setWhereClause(getColumnName() + " IS NULL"));
         }
-        
+
 //		// ... test if column contains NULL values
 //		if (defaultNullValue == null) {
 //			List<Map> null_rows = null;
@@ -138,34 +146,34 @@ public class AddNotNullConstraintChange extends AbstractChange {
 //    					"values for the existing null values.");
 //    		}
 //    	}
-		
-		// define alter table logic
-		AlterTableVisitor rename_alter_visitor = new AlterTableVisitor() {
-			public ColumnConfig[] getColumnsToAdd() {
-				return new ColumnConfig[0];
-			}
-			public boolean copyThisColumn(ColumnConfig column) {
-				return true;
-			}
-			public boolean createThisColumn(ColumnConfig column) {
-				if (column.getName().equals(getColumnName())) {
-					column.getConstraints().setNullable(false);
-				}
-				return true;
-			}
-			public boolean createThisIndex(Index index) {
-				return true;
-			}
-		};
-    		
-		try {
-    		// alter table
-			statements.addAll(SQLiteDatabase.getAlterTableStatements(rename_alter_visitor, database,getSchemaName(),getTableName()));
-    	} catch (Exception e) {
-			e.printStackTrace();
-		}
-    	
-    	return statements.toArray(new SqlStatement[statements.size()]);
+
+        // define alter table logic
+        AlterTableVisitor rename_alter_visitor = new AlterTableVisitor() {
+            public ColumnConfig[] getColumnsToAdd() {
+                return new ColumnConfig[0];
+            }
+            public boolean copyThisColumn(ColumnConfig column) {
+                return true;
+            }
+            public boolean createThisColumn(ColumnConfig column) {
+                if (column.getName().equals(getColumnName())) {
+                    column.getConstraints().setNullable(false);
+                }
+                return true;
+            }
+            public boolean createThisIndex(Index index) {
+                return true;
+            }
+        };
+
+        try {
+            // alter table
+            statements.addAll(SQLiteDatabase.getAlterTableStatements(rename_alter_visitor, database,getSchemaName(),getTableName()));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return statements.toArray(new SqlStatement[statements.size()]);
     }
 
     @Override
