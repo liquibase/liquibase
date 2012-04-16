@@ -25,9 +25,9 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                 reader = new BufferedReader(new InputStreamReader(openChangeLogFile(changeLogFile, resourceAccessor)));
 
                 String line = reader.readLine();
-				if (line.startsWith("--liquibase formatted") || line.startsWith("-- liquibase formatted")) {
-					return true;
-				}
+                if (line.startsWith("--liquibase formatted") || line.startsWith("-- liquibase formatted")) {
+                	return true;
+                }
 
             }
             return false;
