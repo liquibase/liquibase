@@ -69,7 +69,7 @@ public class MySQLDatabase extends AbstractDatabase {
 
     @Override
     public String getLineComment() {
-        return "-- ";
+        return "--";
     }
 
     @Override

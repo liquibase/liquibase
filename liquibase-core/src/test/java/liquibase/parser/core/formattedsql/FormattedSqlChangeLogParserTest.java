@@ -47,12 +47,7 @@ public class FormattedSqlChangeLogParserTest {
             "create table ${tablename} (\n" +
             "  id int primary key\n" +
             ");\n" +
-            "--rollback drop table ${tablename};\n" +
-            "-- changeset mysql:1\n" +
-            "create table mysql_boo (\n" +
-            "  id int primary key\n" +
-            ");\n" +
-            "-- rollback drop table mysql_boo;\n"
+            "--rollback drop table ${tablename};\n"
             ;
 
     private static final String INVALID_CHANGELOG = "select * from table1";
@@ -66,12 +61,12 @@ public class FormattedSqlChangeLogParserTest {
     @Test
     public void parse() throws Exception {
         ChangeLogParameters params = new ChangeLogParameters();
-        params.set("tablename", "table4");
-        DatabaseChangeLog changeLog = new MockFormattedSqlChangeLogParser(VALID_CHANGELOG).parse("asdf.sql", params, new JUnitResourceAccessor());
+		params.set("tablename", "table4");
+		DatabaseChangeLog changeLog = new MockFormattedSqlChangeLogParser(VALID_CHANGELOG).parse("asdf.sql", params, new JUnitResourceAccessor());
 
         assertEquals("asdf.sql", changeLog.getLogicalFilePath());
 
-        assertEquals(7, changeLog.getChangeSets().size());
+        assertEquals(6, changeLog.getChangeSets().size());
 
         assertEquals("nvoxland", changeLog.getChangeSets().get(0).getAuthor());
         assertEquals("1", changeLog.getChangeSets().get(0).getId());
@@ -133,11 +128,11 @@ public class FormattedSqlChangeLogParserTest {
         assertEquals("nvoxland", changeLog.getChangeSets().get(4).getAuthor());
         assertEquals("5", changeLog.getChangeSets().get(4).getId());
         assertEquals(1, changeLog.getChangeSets().get(4).getRollBackChanges().length);
-        assertTrue(changeLog.getChangeSets().get(4).getRollBackChanges()[0] instanceof EmptyChange);
+		assertTrue(changeLog.getChangeSets().get(4).getRollBackChanges()[0] instanceof EmptyChange);
 
-        assertEquals("paikens", changeLog.getChangeSets().get(5).getAuthor());
+		assertEquals("paikens", changeLog.getChangeSets().get(5).getAuthor());
         assertEquals("6", changeLog.getChangeSets().get(5).getId());
-        assertEquals(1, changeLog.getChangeSets().get(5).getChanges().size());
+		assertEquals(1, changeLog.getChangeSets().get(5).getChanges().size());
         assertTrue(changeLog.getChangeSets().get(5).getChanges().get(0) instanceof RawSQLChange);
         assertEquals("create table table4 (\n" +
                 "  id int primary key\n" +
@@ -145,18 +140,6 @@ public class FormattedSqlChangeLogParserTest {
         assertEquals(1, changeLog.getChangeSets().get(5).getRollBackChanges().length);
         assertTrue(changeLog.getChangeSets().get(5).getRollBackChanges()[0] instanceof RawSQLChange);
         assertEquals("drop table table4;", ((RawSQLChange) changeLog.getChangeSets().get(5).getRollBackChanges()[0]).getSql());
-
-
-        assertEquals("mysql", changeLog.getChangeSets().get(6).getAuthor());
-        assertEquals("1", changeLog.getChangeSets().get(6).getId());
-        assertEquals(1, changeLog.getChangeSets().get(6).getChanges().size());
-        assertTrue(changeLog.getChangeSets().get(6).getChanges().get(0) instanceof RawSQLChange);
-        assertEquals("create table mysql_boo (\n" +
-                "  id int primary key\n" +
-                ");", ((RawSQLChange) changeLog.getChangeSets().get(6).getChanges().get(0)).getSql());
-        assertEquals(1, changeLog.getChangeSets().get(6).getRollBackChanges().length);
-        assertTrue(changeLog.getChangeSets().get(6).getRollBackChanges()[0] instanceof RawSQLChange);
-        assertEquals("drop table mysql;", ((RawSQLChange) changeLog.getChangeSets().get(6).getRollBackChanges()[0]).getSql());
     }
 
     private static class MockFormattedSqlChangeLogParser extends FormattedSqlChangeLogParser {
