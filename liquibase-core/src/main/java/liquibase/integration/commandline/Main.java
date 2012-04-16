@@ -423,7 +423,7 @@ public class Main {
         stream.println("                                to STDOUT");
         stream.println(" rollbackToDate <date/time>     Rolls back the database to the the state is was");
         stream.println("                                at the given date/time.");
-        stream.println("                                Date Format: yyyy-MM-dd HH:mm:ss");
+        stream.println("                                Date Format: yyyy-MM-dd'T'HH:mm:ss");
         stream.println(" rollbackToDateSQL <date/time>  Writes SQL to roll back the database to that");
         stream.println("                                state it was in at the given date/time version");
         stream.println("                                to STDOUT");

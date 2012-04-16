@@ -27,9 +27,9 @@ public class CreateDatabaseChangeLogTableGenerator extends AbstractSqlGenerator<
     public Sql[] generateSql(CreateDatabaseChangeLogTableStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         TypeConverter typeConverter = TypeConverterFactory.getInstance().findTypeConverter(database);
         CreateTableStatement createTableStatement = new CreateTableStatement(database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName())
-                .addPrimaryKeyColumn("ID", typeConverter.getDataType("VARCHAR(63)", false), null, null, null,new NotNullConstraint())
-                .addPrimaryKeyColumn("AUTHOR", typeConverter.getDataType("VARCHAR(63)", false), null, null, null,new NotNullConstraint())
-                .addPrimaryKeyColumn("FILENAME", typeConverter.getDataType("VARCHAR(200)", false), null, null, null,new NotNullConstraint())
+                .addPrimaryKeyColumn("ID", typeConverter.getDataType("VARCHAR("+getIdColumnSize()+")", false), null, null, null,new NotNullConstraint())
+                .addPrimaryKeyColumn("AUTHOR", typeConverter.getDataType("VARCHAR("+getAuthorColumnSize()+")", false), null, null, null,new NotNullConstraint())
+                .addPrimaryKeyColumn("FILENAME", typeConverter.getDataType("VARCHAR("+getFilenameColumnSize()+")", false), null, null, null,new NotNullConstraint())
                 .addColumn("DATEEXECUTED", typeConverter.getDateTimeType(), null, new NotNullConstraint())
                 .addColumn("ORDEREXECUTED", typeConverter.getDataType("INT", false), new NotNullConstraint())
                 .addColumn("EXECTYPE", typeConverter.getDataType("VARCHAR(10)", false), new NotNullConstraint())
@@ -40,5 +40,17 @@ public class CreateDatabaseChangeLogTableGenerator extends AbstractSqlGenerator<
                 .addColumn("LIQUIBASE", typeConverter.getDataType("VARCHAR(20)", false));
 
         return SqlGeneratorFactory.getInstance().generateSql(createTableStatement, database);
+    }
+
+    protected String getIdColumnSize() {
+        return "63";
+    }
+
+    protected String getAuthorColumnSize() {
+        return "63";
+    }
+
+    protected String getFilenameColumnSize() {
+        return "200";
     }
 }

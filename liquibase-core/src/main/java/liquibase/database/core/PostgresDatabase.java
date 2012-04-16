@@ -2,6 +2,7 @@ package liquibase.database.core;
 
 import liquibase.database.AbstractDatabase;
 import liquibase.database.DatabaseConnection;
+import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.ExecutorService;
 import liquibase.logging.LogFactory;
@@ -9,6 +10,7 @@ import liquibase.statement.core.RawSqlStatement;
 import liquibase.util.StringUtils;
 
 import java.math.BigInteger;
+import java.sql.SQLException;
 import java.util.*;
 
 /**
@@ -20,6 +22,8 @@ public class PostgresDatabase extends AbstractDatabase {
     private Set<String> systemTablesAndViews = new HashSet<String>();
 
     private String defaultDatabaseSchemaName;
+
+    private Set<String> reservedWords = new HashSet<String>();
 
     public PostgresDatabase() {
 //        systemTablesAndViews.add("pg_logdir_ls");
@@ -70,6 +74,18 @@ public class PostgresDatabase extends AbstractDatabase {
 //        systemTablesAndViews.add("information_schema_catalog_name");
 //        systemTablesAndViews.add("triggered_update_columns");
 //        systemTablesAndViews.add("book_pkey");
+    }
+
+    @Override
+    public void setConnection(DatabaseConnection conn) {
+        try {
+            reservedWords.addAll(Arrays.asList(((JdbcConnection) conn).getMetaData().getSQLKeywords().toUpperCase().split(",\\s*")));
+            reservedWords.addAll(Arrays.asList("USER", "LIKE", "GROUP", "DATE", "ALL"));
+        } catch (Exception e) {
+            LogFactory.getLogger().warning("Cannot retrieve reserved words", e);
+        }
+
+        super.setConnection(conn);
     }
 
     public String getTypeName() {
@@ -274,15 +290,6 @@ public class PostgresDatabase extends AbstractDatabase {
     }
 
     /*
-    * Reserved words from postgresql documentation
-    */
-    private Set<String> reservedWords = new HashSet<String>(Arrays.asList(
-            "USER", "LIKE", "GROUP", "DATE", "ALL"
-//            "ALL", "ANALYSE", "ANALYZE", "AND", "ANY", "ARRAY", "AS", "ASC", "ASYMMETRIC", "AUTHORIZATION", "BETWEEN", "BINARY", "BOTH", "CASE", "CAST", "CHECK", "COLLATE", "COLUMN", "CONSTRAINT", "CORRESPONDING", "CREATE", "CROSS", "CURRENT_DATE", "CURRENT_ROLE", "CURRENT_TIME", "CURRENT_TIMESTAMP", "CURRENT_USER", "DEFAULT", "DEFERRABLE", "DESC", "DISTINCT", "DO", "ELSE", "END", "EXCEPT", "FALSE", "FOR", "FOREIGN", "FREEZE", "FROM", "FULL", "GRANT", "GROUP", "HAVING",
-//            "ILIKE", "IN", "INITIALLY", "INNER", "INTERSECT", "INTO", "IS", "ISNULL", "JOIN", "LEADING", "LEFT", "LIKE", "LIMIT", "LOCALTIME", "LOCALTIMESTAMP", "NATURAL", "NEW", "NOT", "NOTNULL", "NULL", "OFF", "OFFSET", "OLD", "ON", "ONLY", "OPEN", "OR", "ORDER", "OUTER", "OVERLAPS", "PLACING", "PRIMARY", "REFERENCES", "RETURNING", "RIGHT", "SELECT", "SESSION_USER", "SIMILAR", "SOME", "SYMMETRIC", "TABLE", "THEN", "TO", "TRAILING", "TRUE", "UNION", "UNIQUE", "USER", "USING", "VERBOSE", "WHEN", "WHERE"
-    ));
-
-    /*
      * Get the current search paths
      */
     private List<String> getSearchPaths() {
@@ -336,5 +343,10 @@ public class PostgresDatabase extends AbstractDatabase {
         Long count = ExecutorService.getInstance().getExecutor(this).queryForLong(new RawSqlStatement(query));
 
         return count != null && count > 0;
+    }
+
+    @Override
+    public String escapeIndexName(String schemaName, String indexName) {
+        return escapeDatabaseObject(indexName);
     }
 }

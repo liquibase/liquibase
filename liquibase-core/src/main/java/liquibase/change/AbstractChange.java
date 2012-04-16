@@ -1,16 +1,25 @@
 package liquibase.change;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.database.structure.DatabaseObject;
-import liquibase.exception.*;
+import liquibase.exception.RollbackImpossibleException;
+import liquibase.exception.SetupException;
+import liquibase.exception.UnsupportedChangeException;
+import liquibase.exception.ValidationErrors;
+import liquibase.exception.Warnings;
 import liquibase.logging.LogFactory;
 import liquibase.resource.ResourceAccessor;
 import liquibase.serializer.core.string.StringChangeLogSerializer;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.SqlStatement;
-
-import java.util.*;
 
 /**
  * Standard superclass for Changes to implement. This is a <i>skeletal implementation</i>,
@@ -28,6 +37,10 @@ public abstract class AbstractChange implements Change {
 
     @ChangeProperty(includeInSerialization = false)
     private ChangeSet changeSet;
+
+    @ChangeProperty(includeInSerialization = false)
+    private ChangeLogParameters changeLogParameters;
+
 
     /**
      * Constructor with tag name and name
@@ -197,6 +210,14 @@ public abstract class AbstractChange implements Change {
         }
 
         return affectedObjects;
+    }
+
+    protected ChangeLogParameters getChangeLogParameters() {
+        return changeLogParameters;
+    }
+
+    public void setChangeLogParameters(ChangeLogParameters changeLogParameters) {
+        this.changeLogParameters = changeLogParameters;
     }
 
 }
