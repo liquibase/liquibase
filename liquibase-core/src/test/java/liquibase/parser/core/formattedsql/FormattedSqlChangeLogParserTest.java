@@ -55,7 +55,7 @@ public class FormattedSqlChangeLogParserTest {
             "\n" +
             "-- rollback delete from mysql;\n"+
             "-- rollback drop table mysql;\n"+
-            "\n" +
+            "\n"
             ;
 
     private static final String INVALID_CHANGELOG = "select * from table1";
