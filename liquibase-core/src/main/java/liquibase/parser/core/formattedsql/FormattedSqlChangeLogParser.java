@@ -24,13 +24,10 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
             if (changeLogFile.endsWith(".sql")) {
                 reader = new BufferedReader(new InputStreamReader(openChangeLogFile(changeLogFile, resourceAccessor)));
 
-                String line = reader.readLine();
-                if (line.startsWith("--liquibase formatted") || line.startsWith("-- liquibase formatted")) {
-                    return true;
-                }
-
+                return reader.readLine().startsWith("--liquibase formatted");
+            } else {
+                return false;
             }
-            return false;
         } catch (IOException e) {
             LogFactory.getLogger().debug("Exception reading " + changeLogFile, e);
             return false;
@@ -63,8 +60,8 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
 
             ChangeSet changeSet = null;
             RawSQLChange change = null;
-            Pattern changeSetPattern = Pattern.compile("\\-\\-[\\s]*changeset (\\w+):(\\w+).*", Pattern.CASE_INSENSITIVE);
-            Pattern rollbackPattern = Pattern.compile("\\s*\\-\\-[\\s]*rollback (.*)", Pattern.CASE_INSENSITIVE);
+            Pattern changeSetPattern = Pattern.compile("\\-\\-changeset (\\w+):(\\w+).*", Pattern.CASE_INSENSITIVE);
+            Pattern rollbackPattern = Pattern.compile("\\s*\\-\\-rollback (.*)", Pattern.CASE_INSENSITIVE);
             Pattern stripCommentsPattern = Pattern.compile(".*stripComments:(\\w+).*", Pattern.CASE_INSENSITIVE);
             Pattern splitStatementsPattern = Pattern.compile(".*splitStatements:(\\w+).*", Pattern.CASE_INSENSITIVE);
             Pattern endDelimiterPattern = Pattern.compile(".*endDelimiter:(\\w+).*", Pattern.CASE_INSENSITIVE);
