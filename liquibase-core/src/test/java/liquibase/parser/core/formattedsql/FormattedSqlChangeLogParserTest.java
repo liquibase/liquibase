@@ -47,7 +47,15 @@ public class FormattedSqlChangeLogParserTest {
             "create table ${tablename} (\n" +
             "  id int primary key\n" +
             ");\n" +
-            "--rollback drop table ${tablename};\n"
+            "--rollback drop table ${tablename};\n" +
+            "-- changeset mysql:1 (stripComments:false splitStatements:false endDelimiter:X runOnChange:true runAlways:true context:y dbms:mysql runInTransaction:false failOnError:false)\n" +
+            "create table mysql (\n" +
+            "  id int primary key\n" +
+            ");\n" +
+            "\n" +
+            "-- rollback delete from mysql;\n"+
+            "-- rollback drop table mysql;\n"+
+            "\n" +
             ;
 
     private static final String INVALID_CHANGELOG = "select * from table1";
@@ -140,6 +148,27 @@ public class FormattedSqlChangeLogParserTest {
         assertEquals(1, changeLog.getChangeSets().get(5).getRollBackChanges().length);
         assertTrue(changeLog.getChangeSets().get(5).getRollBackChanges()[0] instanceof RawSQLChange);
         assertEquals("drop table table4;", ((RawSQLChange) changeLog.getChangeSets().get(5).getRollBackChanges()[0]).getSql());
+
+        assertEquals("mysql", changeLog.getChangeSets().get(6).getAuthor());
+        assertEquals("1", changeLog.getChangeSets().get(6).getId());
+        assertEquals(1, changeLog.getChangeSets().get(6).getChanges().size());
+        assertEquals("create table mysql (\n" +
+                "  id int primary key\n" +
+                ");", ((RawSQLChange) changeLog.getChangeSets().get(6).getChanges().get(0)).getSql());
+        assertEquals("X", ((RawSQLChange) changeLog.getChangeSets().get(6).getChanges().get(0)).getEndDelimiter());
+        assertFalse(((RawSQLChange) changeLog.getChangeSets().get(6).getChanges().get(0)).isSplittingStatements());
+        assertFalse(((RawSQLChange) changeLog.getChangeSets().get(6).getChanges().get(0)).isStrippingComments());
+        assertEquals("X", ((RawSQLChange) changeLog.getChangeSets().get(6).getChanges().get(0)).getEndDelimiter());
+        assertFalse(((RawSQLChange) changeLog.getChangeSets().get(6).getChanges().get(0)).isSplittingStatements());
+        assertFalse(((RawSQLChange) changeLog.getChangeSets().get(6).getChanges().get(0)).isStrippingComments());
+        assertTrue(changeLog.getChangeSets().get(6).isAlwaysRun());
+        assertTrue(changeLog.getChangeSets().get(6).isRunOnChange());
+        assertFalse(changeLog.getChangeSets().get(6).isRunInTransaction());
+        assertEquals("y", StringUtils.join(changeLog.getChangeSets().get(6).getContexts(), ","));
+        assertEquals("mysql", StringUtils.join(changeLog.getChangeSets().get(6).getDbmsSet(), ","));
+        assertEquals(1, changeLog.getChangeSets().get(6).getRollBackChanges().length);
+        assertEquals("delete from mysql;\n" +
+                "drop table mysql;", ((RawSQLChange) changeLog.getChangeSets().get(6).getRollBackChanges()[0]).getSql());
     }
 
     private static class MockFormattedSqlChangeLogParser extends FormattedSqlChangeLogParser {
