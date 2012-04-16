@@ -141,4 +141,6 @@ public class DerbyDatabase extends AbstractDatabase {
             driverVersionMajor = -1;
             driverVersionMinor = -1;
         }
-    }}
+    }
+
+}

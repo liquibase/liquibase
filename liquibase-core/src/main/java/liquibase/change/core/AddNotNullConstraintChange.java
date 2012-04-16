@@ -88,9 +88,8 @@ public class AddNotNullConstraintChange extends AbstractChange {
         if (defaultNullValue != null) {
             String defaultValue = defaultNullValue;
 
-            if (getColumnDataType().equalsIgnoreCase("BOOLEAN")) {
-                BooleanType booleanType = TypeConverterFactory.getInstance()
-                        .findTypeConverter(database).getBooleanType();
+            if (getColumnDataType() != null && getColumnDataType().equalsIgnoreCase("BOOLEAN")) {
+                BooleanType booleanType = TypeConverterFactory.getInstance().findTypeConverter(database).getBooleanType();
                 if (defaultNullValue.equalsIgnoreCase("TRUE")) {
                     defaultValue = booleanType.getTrueBooleanValue();
                 } else if (defaultNullValue.equalsIgnoreCase("FALSE")) {

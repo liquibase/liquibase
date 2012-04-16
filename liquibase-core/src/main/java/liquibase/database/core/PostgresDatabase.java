@@ -79,7 +79,8 @@ public class PostgresDatabase extends AbstractDatabase {
     @Override
     public void setConnection(DatabaseConnection conn) {
         try {
-            reservedWords.addAll(Arrays.asList(((JdbcConnection) conn).getMetaData().getSQLKeywords().split(",\\s*")));
+            reservedWords.addAll(Arrays.asList(((JdbcConnection) conn).getMetaData().getSQLKeywords().toUpperCase().split(",\\s*")));
+            reservedWords.addAll(Arrays.asList("USER", "LIKE", "GROUP", "DATE", "ALL"));
         } catch (Exception e) {
             LogFactory.getLogger().warning("Cannot retrieve reserved words", e);
         }

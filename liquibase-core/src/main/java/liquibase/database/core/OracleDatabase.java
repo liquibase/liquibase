@@ -44,7 +44,7 @@ public class OracleDatabase extends AbstractDatabase {
             method.setAccessible(true);
             method.invoke(sqlConn, true);
 
-            reservedWords.addAll(Arrays.asList(sqlConn.getMetaData().getSQLKeywords().split(",\\s*")));
+            reservedWords.addAll(Arrays.asList(sqlConn.getMetaData().getSQLKeywords().toUpperCase().split(",\\s*")));
         } catch (Exception e) {
             LogFactory.getLogger().info("Could not set remarks reporting on OracleDatabase: "+e.getMessage());
             ; //cannot set it. That is OK

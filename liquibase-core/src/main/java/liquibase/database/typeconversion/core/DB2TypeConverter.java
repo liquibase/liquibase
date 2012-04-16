@@ -5,6 +5,7 @@ import liquibase.database.core.DB2Database;
 import liquibase.database.structure.type.BooleanType;
 import liquibase.database.structure.type.CurrencyType;
 import liquibase.database.structure.type.DateTimeType;
+import liquibase.database.structure.type.NumberType;
 
 import java.text.ParseException;
 import java.sql.Types;
@@ -48,4 +49,8 @@ public class DB2TypeConverter  extends AbstractTypeConverter {
         return new DateTimeType("TIMESTAMP");
     }
 
+    @Override
+    public NumberType getNumberType() {
+        return new NumberType("NUMERIC");
+    }
 }
