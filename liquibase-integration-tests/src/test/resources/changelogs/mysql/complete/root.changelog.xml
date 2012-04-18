@@ -419,4 +419,10 @@
             <column name="value" type="varchar2(50)"/>
         </createTable>
     </changeSet>
+
+    <changeSet id="department" author="rlamber" runOnChange="true">
+        <loadUpdateData tableName="timestampusage" file="changelogs/pkonly.csv" primaryKey="ID">
+            <column name="ID" type="STRING"/>
+        </loadUpdateData>
+    </changeSet>
 </databaseChangeLog>
