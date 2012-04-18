@@ -111,7 +111,7 @@ public class MySQLDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerato
         	
         // Parsing TIMESTAMP database.convertDatabaseValueToObject() produces incorrect results
         // eg. for default value 0000-00-00 00:00:00 we have 0002-11-30T00:00:00.0 as parsing result
-        } else if (columnTypeName.toLowerCase().equals("timestamp") && !"CURRENT_TIMESTAMP".equals(tableSchema.get(columnName).get(1))) {
+        } else if (columnTypeName.toLowerCase().equals("timestamp") && (tableSchema.get(columnName) != null && !"CURRENT_TIMESTAMP".equals(tableSchema.get(columnName).get(1)))) {
         	columnInfo.setTypeName(columnTypeName);
         	columnInfo.setDefaultValue(tableSchema.get(columnName).get(1));
         } else {
