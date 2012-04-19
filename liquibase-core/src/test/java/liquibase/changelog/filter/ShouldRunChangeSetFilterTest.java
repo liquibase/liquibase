@@ -33,8 +33,8 @@ public class ShouldRunChangeSetFilterTest  {
     @Test
     public void accepts() throws DatabaseException {
         ArrayList<RanChangeSet> ranChanges = new ArrayList<RanChangeSet>();
-        ranChanges.add(new RanChangeSet("path/changelog", "1", "testAuthor", CheckSum.parse("12345"), new Date(), null, null));
-        ranChanges.add(new RanChangeSet("path/changelog", "2", "testAuthor", CheckSum.parse("12345"), new Date(), null, null));
+        ranChanges.add(new RanChangeSet("path/changelog", "1", "testAuthor", CheckSum.parse("12345"), new Date(), null, null, null));
+        ranChanges.add(new RanChangeSet("path/changelog", "2", "testAuthor", CheckSum.parse("12345"), new Date(), null, null, null));
 
         Database database = createMock(Database.class);
         expect(database.getRanChangeSetList()).andReturn(ranChanges);

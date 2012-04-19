@@ -2,7 +2,7 @@
 <module MavenProjectsManager.isMavenModule="true" org.jetbrains.idea.maven.project.MavenProjectsManager.isMavenModule="true" relativePaths="true" type="JAVA_MODULE" version="4">
   <component name="FacetManager">
     <facet type="Osmorc" name="OSGi">
-      <configuration osmorcControlsManifest="true" manifestLocation="" jarfileLocation="$MODULE_DIR$/target/liquibase-core.jar" outputPathType="SpecificOutputPath" useBndFile="false" bndFileLocation="" useBundlorFile="false" bundlorFileLocation="" bundleActivator="" bundleSymbolicName="org.liquibase.liquibase-core" bundleVersion="2.0-rc6-SNAPSHOT" ignoreFilePattern="" useProjectDefaultManifestFileLocation="true" alwaysRebuildBundleJAR="false">
+      <configuration manifestGenerationMode="OsmorcControlled" manifestLocation="" jarfileLocation="C:\othergit\liquibase\liquibase-core\target\liquibase-core.jar" outputPathType="SpecificOutputPath" bndFileLocation="" bundlorFileLocation="" bundleActivator="" bundleSymbolicName="org.liquibase.liquibase-core" bundleVersion="2.0-rc6-SNAPSHOT" ignoreFilePattern="" useProjectDefaultManifestFileLocation="true" alwaysRebuildBundleJAR="false" doNotSynchronizeWithMaven="false">
         <additionalProperties>
           <property key="_include" value="-osgi.bnd" />
         </additionalProperties>
