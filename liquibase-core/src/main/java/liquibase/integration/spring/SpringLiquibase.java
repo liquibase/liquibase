@@ -22,6 +22,7 @@ import liquibase.logging.LogFactory;
 import liquibase.logging.Logger;
 import liquibase.resource.ResourceAccessor;
 
+import liquibase.util.StringUtils;
 import org.springframework.beans.factory.BeanNameAware;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ResourceLoaderAware;
@@ -285,7 +286,7 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
      */
     protected Database createDatabase(Connection c) throws DatabaseException {
         Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(c));
-        if (this.defaultSchema != null) {
+        if (StringUtils.trimToNull(this.defaultSchema) != null) {
             database.setDefaultSchemaName(this.defaultSchema);
         }
         return database;
