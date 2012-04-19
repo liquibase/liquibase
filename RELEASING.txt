@@ -2,8 +2,15 @@ update changelog.txt
 
 set java home
 set path=%path%;gpg
-mvn release:prepare
-mvn release:perform
+set path=%PATH%;git
+
+git\bin\ssh-agent
+set env variables based on output
+git\bin\ssh-add "c/Users/nvoxland/.ssh/id_rsa"
+git\bin\ssh -v git@github.com to test
+
+mvn -Dmaven.test.skip=true release:prepare
+mvn -Dmaven.test.skip=true release:perform
 
 upload target/checkout/liquibase-maven-integration/target/site to phpinclude
 upload target/checkout/liquibase-core/target/site to phpinclude
