@@ -2,8 +2,17 @@ update changelog.txt
 
 set java home
 set path=%path%;gpg
-mvn release:prepare
-mvn release:perform
+set path=%PATH%;git
+
+git\bin\ssh-agent
+set env variables based on output
+git\bin\ssh-add "c/Users/nvoxland/.ssh/id_rsa"
+git\bin\ssh -v git@github.com to test
+
+close intellij so .iml files aren't changed on the fly
+
+mvn -Darguments="-DskipTest=true" release:prepare
+mvn -Darguments="-DskipTest=true" release:perform
 
 upload target/checkout/liquibase-maven-integration/target/site to phpinclude
 upload target/checkout/liquibase-core/target/site to phpinclude
@@ -12,9 +21,19 @@ upload new version of site to server
 update version info on /download
 release version on jira
 
+release on sonatype
+- log in to oss.sonatype.org
+- staging repositories->select "org.liquibase..."
+- run "close"
+- select "org.liquibase..."
+- run "release"
+
 POST MESSAGES TO:
 - forum
 - blog
+- mailing list
+
+
 - sourceforge project
 - javalobby
 - freshmeat
