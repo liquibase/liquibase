@@ -1,6 +1,13 @@
 Liquibase Core Changelog
 ===========================================
 
+Change in version 2.0.4 (2012.04.18) https://liquibase.jira.com/secure/ReleaseNote.jspa?projectId=10020&version=10160
+----------------------
+- Support ${} params in included sql files
+- Ability to load blog/clob data from files
+- Bug Fixes
+
+
 Change in version 2.0.2 (2011.09.15)
 ----------------------
 - dropFirst parameter on SpringLiquibase bean
