@@ -1,3 +1,5 @@
 target
+.project
+.settings
 liquibase.iws
 out

@@ -1,13 +1,18 @@
 package liquibase.change;
 
+import java.util.Set;
+
+import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.database.structure.DatabaseObject;
-import liquibase.exception.*;
+import liquibase.exception.RollbackImpossibleException;
+import liquibase.exception.SetupException;
+import liquibase.exception.UnsupportedChangeException;
+import liquibase.exception.ValidationErrors;
+import liquibase.exception.Warnings;
 import liquibase.resource.ResourceAccessor;
 import liquibase.statement.SqlStatement;
-
-import java.util.Set;
 
 /**
  * Interface all changes (refactorings) implement.
@@ -115,4 +120,9 @@ public interface Change {
      * Does this change require access to the database metadata?  If true, the change cannot be used in an updateSql-style command.
      */
     public boolean requiresUpdatedDatabaseMetadata(Database database);
+
+   /**
+    * @param changeLogParameters
+    */
+   public void setChangeLogParameters(ChangeLogParameters changeLogParameters);
 }

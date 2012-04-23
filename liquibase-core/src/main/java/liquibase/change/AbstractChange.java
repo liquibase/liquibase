@@ -1,5 +1,12 @@
 package liquibase.change;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.database.structure.DatabaseObject;
@@ -31,6 +38,9 @@ public abstract class AbstractChange implements Change {
 
     @ChangeProperty(includeInSerialization = false, includeInMetaData = false)
     private ChangeSet changeSet;
+
+    @ChangeProperty(includeInSerialization = false)
+    private ChangeLogParameters changeLogParameters;
 
 //    /**
 //     * Constructor with tag name and name
@@ -276,6 +286,14 @@ public abstract class AbstractChange implements Change {
         }
 
         return affectedObjects;
+    }
+
+    protected ChangeLogParameters getChangeLogParameters() {
+        return changeLogParameters;
+    }
+
+    public void setChangeLogParameters(ChangeLogParameters changeLogParameters) {
+        this.changeLogParameters = changeLogParameters;
     }
 
 }

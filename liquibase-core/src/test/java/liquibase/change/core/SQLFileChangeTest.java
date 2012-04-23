@@ -1,23 +1,25 @@
 package liquibase.change.core;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
+
+import java.lang.reflect.Field;
+import java.util.Map;
+
 import liquibase.change.AbstractChangeTest;
 import liquibase.change.AbstractSQLChange;
 import liquibase.change.Change;
+import liquibase.changelog.ChangeLogParameters;
 import liquibase.database.Database;
 import liquibase.database.core.MockDatabase;
 import liquibase.database.core.OracleDatabase;
 import liquibase.exception.SetupException;
 import liquibase.resource.ClassLoaderResourceAccessor;
-import static org.junit.Assert.*;
-
 import liquibase.statement.SqlStatement;
-import liquibase.util.StringUtils;
+
 import org.junit.Before;
 import org.junit.Test;
-
-import java.io.File;
-import java.lang.reflect.Field;
-import java.util.Map;
 
 /**
  * Tests the SQL File with a simple text file. No real SQL is used with the
@@ -193,4 +195,21 @@ public class SQLFileChangeTest extends AbstractChangeTest {
     protected void checkThatChecksumIsNew(Change change, Map<String, String> seenCheckSums, Field field) {
         //always ok
     }
+    
+    @Test
+   public void replacementOfProperties() throws Exception
+   {
+      SQLFileChange change = new SQLFileChange();
+      ChangeLogParameters changeLogParameters = new ChangeLogParameters();
+      changeLogParameters.set("table.prefix", "prfx");
+      changeLogParameters.set("some.other.prop", "nofx");
+      change.setChangeLogParameters(changeLogParameters);
+      
+      String fakeSql = "create ${table.prefix}_customer (${some.other.prop} INTEGER NOT NULL, PRIMARY KEY (${some.other.prop}));";
+      
+      change.setSql(fakeSql);
+      
+      String expected = "create prfx_customer (nofx INTEGER NOT NULL, PRIMARY KEY (nofx));";
+      assertEquals(expected, change.getSql());
+   }
 }
