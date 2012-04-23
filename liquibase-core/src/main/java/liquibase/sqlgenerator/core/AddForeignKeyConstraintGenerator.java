@@ -56,7 +56,7 @@ public class AddForeignKeyConstraintGenerator extends AbstractSqlGenerator<AddFo
 			    .append(")");
 
 	    if (statement.getOnUpdate() != null) {
-		    if ((database instanceof OracleDatabase) && statement.getOnUpdate().equalsIgnoreCase("RESTRICT")) {
+		    if (database instanceof OracleDatabase) {
 			    //don't use
 		    } else if (database instanceof InformixDatabase) {
 			    //TODO don't know if correct
