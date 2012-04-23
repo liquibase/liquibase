@@ -183,13 +183,15 @@ public class InsertDataChange extends AbstractChange implements ChangeWithColumn
                         stmt.setDate(i, new java.sql.Date(col.getValueDate().getTime()));
                     } else if(col.getValueBlob() != null) {
                         try {
-                            stmt.setBlob(i, new BufferedInputStream(new FileInputStream(col.getValueBlob())));
+                            File file = new File(col.getValueBlob());
+                            stmt.setBinaryStream(i, new BufferedInputStream(new FileInputStream(file)), (int) file.length());
                         } catch (FileNotFoundException e) {
                             throw new DatabaseException(e.getMessage(), e); // wrap
                         }
                     } else if(col.getValueClob() != null) {
                         try {
-                            stmt.setClob(i, new BufferedReader(new FileReader(col.getValueClob())));
+                            File file = new File(col.getValueClob());
+                            stmt.setCharacterStream(i, new BufferedReader(new FileReader(file)), (int) file.length());
                         } catch(FileNotFoundException e) {
                             throw new DatabaseException(e.getMessage(), e); // wrap
                         }
