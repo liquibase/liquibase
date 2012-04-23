@@ -103,7 +103,7 @@ public class AddNotNullConstraintChange extends AbstractChange {
         
         return statements.toArray(new SqlStatement[statements.size()]);
     }
-    
+
     private SqlStatement[] generateStatementsForSQLiteDatabase(Database database) {
     	
     	// SQLite does not support this ALTER TABLE operation until now.
@@ -117,7 +117,7 @@ public class AddNotNullConstraintChange extends AbstractChange {
                     .addNewColumnValue(getColumnName(), getDefaultNullValue())
                     .setWhereClause(getColumnName() + " IS NULL"));
         }
-        
+
 //		// ... test if column contains NULL values
 //		if (defaultNullValue == null) {
 //			List<Map> null_rows = null;
