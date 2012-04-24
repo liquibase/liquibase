@@ -10,6 +10,9 @@ import java.util.regex.Pattern;
  * Various utility methods for working with strings.
  */
 public class StringUtils {
+    private static final Pattern commentPattern = Pattern.compile("/\\*.*?\\*/", Pattern.DOTALL);
+    private static final Pattern dashPattern = Pattern.compile("\\-\\-.*$", Pattern.MULTILINE);
+
     public static String trimToEmpty(String string) {
         if (string == null) {
             return "";
@@ -78,9 +81,8 @@ public class StringUtils {
      * @return The String without the comments in
      */
     public static String stripComments(String multiLineSQL) {
-        String strippedSingleLines = Pattern.compile("(.*?)\\s*\\-\\-.*\n").matcher(multiLineSQL).replaceAll("$1\n");
-        strippedSingleLines = Pattern.compile("(.*?)\\s*\\-\\-.*$").matcher(strippedSingleLines).replaceAll("$1\n");
-        return Pattern.compile("/\\*.*?\\*/", Pattern.DOTALL).matcher(strippedSingleLines).replaceAll("").trim();
+        String strippedDashDash = dashPattern.matcher(multiLineSQL).replaceAll("");
+        return commentPattern.matcher(strippedDashDash).replaceAll("").trim();
     }
 
     public static String join(String[] array, String delimiter) {
