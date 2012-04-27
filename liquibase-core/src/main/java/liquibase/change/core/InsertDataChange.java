@@ -84,7 +84,7 @@ public class InsertDataChange extends AbstractChange implements ChangeWithColumn
 
         private Database database;
 
-        ExecutableStatement(Database database) {
+        public ExecutableStatement(Database database) {
             this.database = database;
         }
 
@@ -95,21 +95,31 @@ public class InsertDataChange extends AbstractChange implements ChangeWithColumn
             StringBuilder params = new StringBuilder("VALUES(");
             sql.append(database.escapeTableName(schema, getTableName()));
             sql.append("(");
+            // list of columns which will have have values set as parameters
             List<ColumnConfig> cols = new ArrayList<ColumnConfig>(getColumns().size());
             for(ColumnConfig column : getColumns()) {
                 if(database.supportsAutoIncrement()
                     && Boolean.TRUE.equals(column.isAutoIncrement())) {
+                    // not adding column name or parameter
                     continue;
                 }
+                // add column name
+                if( sql.charAt(sql.length()-1) != '(' ) {
+                  sql.append(", ");
+                }
                 sql.append(database.escapeColumnName(schema, getTableName(), column.getName()));
-                sql.append(", ");
-                params.append("?, ");
-                cols.add(column);
+                if( params.charAt(params.length()-1) != '(' ) {
+                  params.append(", ");
+                }
+                if( column.getValueComputed() != null ) {
+                  // valueComputed will be a SQL fragment - add as a non-parametrized value
+                  params.append(column.getValueComputed());
+                } else {
+                  // all other column types will be added as a parametrized value
+                  params.append("?");
+                  cols.add(column);
+                }
             }
-            sql.deleteCharAt(sql.lastIndexOf(" "));
-            sql.deleteCharAt(sql.lastIndexOf(","));
-            params.deleteCharAt(params.lastIndexOf(" "));
-            params.deleteCharAt(params.lastIndexOf(","));
             params.append(")");
             sql.append(") ");
             sql.append(params);
