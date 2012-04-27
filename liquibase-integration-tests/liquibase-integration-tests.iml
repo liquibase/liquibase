@@ -10,7 +10,6 @@
       <sourceFolder url="file://$MODULE_DIR$/src/test/resources" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/src/test/filtered-resources" isTestSource="true" />
       <excludeFolder url="file://$MODULE_DIR$/.settings" />
-      <excludeFolder url="file://$MODULE_DIR$/src/test/resources/hibernate" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
     </content>
     <orderEntry type="inheritedJdk" />
