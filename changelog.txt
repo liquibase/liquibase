@@ -1,6 +1,12 @@
 Liquibase Core Changelog
 ===========================================
 
+Change in version 2.0.5 (2012.05.01) https://liquibase.jira.com/secure/ReleaseNote.jspa?projectId=10020&version=10360
+----------------------
+- Reverted load blog/clob data from files feature
+- Fixed linux distribution script
+- Fixed command line output back to stdout
+
 Change in version 2.0.4 (2012.04.18) https://liquibase.jira.com/secure/ReleaseNote.jspa?projectId=10020&version=10160
 ----------------------
 - Support ${} params in included sql files

@@ -1,3 +1,4 @@
+release version in jira
 update changelog.txt
 
 set java home
