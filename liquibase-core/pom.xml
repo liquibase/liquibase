@@ -167,6 +167,7 @@
                         </configuration>
                     </execution>
                 </executions>
+                <version>2.3</version>
             </plugin>
             <plugin>
                 <artifactId>maven-deploy-plugin</artifactId>
