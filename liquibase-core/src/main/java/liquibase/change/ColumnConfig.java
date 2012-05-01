@@ -22,8 +22,6 @@ public class ColumnConfig {
     private Number valueNumeric;
     private Date valueDate;
     private Boolean valueBoolean;
-    private String valueBlob;
-    private String valueClob;
     private DatabaseFunction valueComputed;
 
     private String defaultValue;
@@ -191,9 +189,6 @@ public class ColumnConfig {
         return this;
     }
 
-    // KEEP THIS A POJO!
-    // It's up to the user of this class to decide what value object to use
-    @Deprecated
     public Object getValueObject() {
         if (getValue() != null) {
             return getValue();
@@ -374,21 +369,5 @@ public class ColumnConfig {
     public ColumnConfig setRemarks(String remarks) {
         this.remarks = remarks;
         return this;
-    }
-
-    public String getValueBlob() {
-        return valueBlob;
-    }
-
-    public void setValueBlob(String valueBlob) {
-        this.valueBlob = valueBlob;
-    }
-
-    public String getValueClob() {
-        return valueClob;
-    }
-
-    public void setValueClob(String valueClob) {
-        this.valueClob = valueClob;
     }
 }
