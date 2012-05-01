@@ -970,7 +970,7 @@ public class Main {
     }
 
     private Writer getOutputWriter() {
-        return new OutputStreamWriter(System.err);
+        return new OutputStreamWriter(System.out);
     }
 
     public boolean isWindows() {
