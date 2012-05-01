@@ -48,6 +48,7 @@ public class InsertOrUpdateGeneratorOracle extends InsertOrUpdateGenerator {
         StringBuffer endStatements = new StringBuffer();
         endStatements.append("END IF;\n");
         endStatements.append("END;\n");
+        endStatements.append("/\n");
         return endStatements.toString();
 
     }
