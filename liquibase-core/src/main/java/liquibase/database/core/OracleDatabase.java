@@ -45,6 +45,7 @@ public class OracleDatabase extends AbstractDatabase {
             method.invoke(sqlConn, true);
 
             reservedWords.addAll(Arrays.asList(sqlConn.getMetaData().getSQLKeywords().toUpperCase().split(",\\s*")));
+            reservedWords.addAll(Arrays.asList("USER", "SESSION","RESOURCE")); //more reserved words not returned by driver
         } catch (Exception e) {
             LogFactory.getLogger().info("Could not set remarks reporting on OracleDatabase: "+e.getMessage());
             ; //cannot set it. That is OK
