@@ -131,7 +131,9 @@ public class PostgresDatabase extends AbstractDatabase {
 
     @Override
     protected String getDefaultDatabaseSchemaName() throws DatabaseException {
-
+        if (getDefaultSchemaName() != null) {
+            return getDefaultSchemaName();
+        }
         if (defaultDatabaseSchemaName == null) {
             try {
                 List<String> searchPaths = getSearchPaths();
