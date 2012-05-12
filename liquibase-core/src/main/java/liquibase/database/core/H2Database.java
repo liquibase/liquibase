@@ -29,6 +29,15 @@ public class H2Database extends AbstractDatabase {
         return "h2";
     }
 
+    public Integer getDefaultPort() {
+        return 8082;
+    }
+
+    @Override
+    protected String getDefaultDatabaseProductName() {
+        return "H2";
+    }
+
     public String getDefaultDriver(String url) {
         if (url.startsWith("jdbc:h2")) {
             return "org.h2.Driver";

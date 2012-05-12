@@ -62,6 +62,15 @@ public class OracleDatabase extends AbstractDatabase {
     }
 
     @Override
+    protected String getDefaultDatabaseProductName() {
+        return "Oracle";
+    }
+
+    public Integer getDefaultPort() {
+        return 1521;
+    }
+
+    @Override
     public String generatePrimaryKeyName(String tableName) {
         if (tableName.length() > 27) {
             return "PK_" + tableName.toUpperCase().substring(0, 27);

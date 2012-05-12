@@ -95,6 +95,15 @@ public class MaxDBDatabase extends AbstractDatabase {
         return "maxdb";
     }
 
+    public Integer getDefaultPort() {
+        return 7210;
+    }
+
+    @Override
+    protected String getDefaultDatabaseProductName() {
+        return PRODUCT_NAME;
+    }
+
     public boolean supportsInitiallyDeferrableColumns() {
         return false;
     }

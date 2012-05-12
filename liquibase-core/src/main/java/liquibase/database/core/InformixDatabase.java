@@ -102,8 +102,17 @@ public class InformixDatabase extends AbstractDatabase {
     public int getPriority() {
         return PRIORITY_DEFAULT;
     }
-    
-	@Override
+
+    @Override
+    protected String getDefaultDatabaseProductName() {
+        return "Informix";
+    }
+
+    public Integer getDefaultPort() {
+        return 1526;
+    }
+
+    @Override
     public void setConnection(DatabaseConnection connection) {
         super.setConnection(connection);
         try {

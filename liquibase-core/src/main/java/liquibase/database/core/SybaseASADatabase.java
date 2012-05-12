@@ -149,9 +149,18 @@ public class SybaseASADatabase extends AbstractDatabase {
         }
 	}
 
-	/* (non-Javadoc)
-	 * @see liquibase.database.Database#getTypeName()
-	 */
+    public Integer getDefaultPort() {
+        return 2638;
+    }
+
+    @Override
+    protected String getDefaultDatabaseProductName() {
+        return "Sybase Anywhere";
+    }
+
+    /* (non-Javadoc)
+    * @see liquibase.database.Database#getTypeName()
+    */
 	public String getTypeName() {
 		
 		return "asany";
@@ -168,7 +177,11 @@ public class SybaseASADatabase extends AbstractDatabase {
 	@Override
 	public String getDefaultCatalogName() {
         try {
-            return getConnection().getCatalog();
+            DatabaseConnection connection = getConnection();
+            if (connection == null) {
+                return null;
+            }
+            return connection.getCatalog();
         } catch (DatabaseException e) {
             throw new UnexpectedLiquibaseException(e);
         }

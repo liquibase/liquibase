@@ -34,6 +34,15 @@ public class MySQLDatabase extends AbstractDatabase {
         }
     }
 
+    @Override
+    protected String getDefaultDatabaseProductName() {
+        return "MySQL";
+    }
+
+    public Integer getDefaultPort() {
+        return 3306;
+    }
+
     public int getPriority() {
         return PRIORITY_DEFAULT;
     }

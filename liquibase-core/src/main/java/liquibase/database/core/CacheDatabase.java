@@ -25,6 +25,15 @@ public class CacheDatabase extends AbstractDatabase {
         return null;
     }
 
+    @Override
+    protected String getDefaultDatabaseProductName() {
+        return "Cache";
+    }
+
+    public Integer getDefaultPort() {
+        return 1972;
+    }
+
     public int getPriority() {
         return PRIORITY_DEFAULT;
     }

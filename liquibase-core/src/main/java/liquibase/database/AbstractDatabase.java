@@ -131,7 +131,7 @@ public abstract class AbstractDatabase implements Database {
      */
     public String getDatabaseProductName() {
         if (connection == null) {
-            return null;
+            return getDefaultDatabaseProductName();
         }
 
         try {
@@ -140,6 +140,8 @@ public abstract class AbstractDatabase implements Database {
             throw new RuntimeException("Cannot get database name");
         }
     }
+
+    protected abstract String getDefaultDatabaseProductName();
 
 
     public String getDatabaseProductVersion() throws DatabaseException {

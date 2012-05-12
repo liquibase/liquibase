@@ -53,6 +53,16 @@ public class SQLiteDatabase extends AbstractDatabase {
         return "sqlite";
     }
 
+
+    @Override
+    protected String getDefaultDatabaseProductName() {
+        return "SQLite";
+    }
+
+    public Integer getDefaultPort() {
+        return null;
+    }
+
     public boolean isCorrectDatabaseImplementation(DatabaseConnection conn)
             throws DatabaseException {
         return "SQLite".equalsIgnoreCase(conn.getDatabaseProductName());

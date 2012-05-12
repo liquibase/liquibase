@@ -42,6 +42,14 @@ public class DerbyDatabase extends AbstractDatabase {
         return PRIORITY_DEFAULT;
     }
 
+    public Integer getDefaultPort() {
+        return 1527;
+    }
+
+    @Override
+    protected String getDefaultDatabaseProductName() {
+        return "Derby";
+    }
 
     @Override
     protected String correctObjectName(String objectName) {

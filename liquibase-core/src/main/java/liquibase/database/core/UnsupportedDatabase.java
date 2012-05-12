@@ -38,6 +38,15 @@ public class UnsupportedDatabase extends AbstractDatabase {
         return "unsupported";
     }
 
+    public Integer getDefaultPort() {
+        return null;
+    }
+
+    @Override
+    protected String getDefaultDatabaseProductName() {
+        return "Unsupported";
+    }
+
     public boolean supportsInitiallyDeferrableColumns() {
         return false;
     }

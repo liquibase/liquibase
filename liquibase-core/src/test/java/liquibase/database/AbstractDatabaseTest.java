@@ -26,6 +26,14 @@ public abstract class AbstractDatabaseTest {
     public abstract void getCurrentDateTimeFunction();
 
 
+    @Test
+    public void defaultsWorkWithoutAConnection() {
+        database.getDatabaseProductName();
+        database.getDefaultCatalogName();
+        database.getDefaultSchemaName();
+        database.getDefaultPort();
+    }
+
 
     @Test
     public void isCorrectDatabaseImplementation() throws Exception {

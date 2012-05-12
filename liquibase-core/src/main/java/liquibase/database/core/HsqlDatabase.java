@@ -36,6 +36,15 @@ public class HsqlDatabase extends AbstractDatabase {
     }
 
 
+    public Integer getDefaultPort() {
+        return 9001;
+    }
+
+    @Override
+    protected String getDefaultDatabaseProductName() {
+        return "HyperSQL";
+    }
+
     public int getPriority() {
         return PRIORITY_DEFAULT;
     }

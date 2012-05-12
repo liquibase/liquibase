@@ -30,6 +30,14 @@ public class FirebirdDatabase extends AbstractDatabase {
         return "firebird";
     }
 
+    public Integer getDefaultPort() {
+        return 3050;
+    }
+
+    @Override
+    protected String getDefaultDatabaseProductName() {
+        return "Firebird";
+    }
 
     @Override
     public boolean supportsSequences() {

@@ -63,7 +63,17 @@ public class SybaseDatabase extends AbstractDatabase {
     public int getPriority() {
         return PRIORITY_DEFAULT;
     }
-    
+
+
+    public Integer getDefaultPort() {
+        return 4100;
+    }
+
+    @Override
+    protected String getDefaultDatabaseProductName() {
+        return "Sybase";
+    }
+
     /**
      * Sybase does not support DDL and meta data in transactions properly,
      * as such we turn off the commit and turn on auto commit.

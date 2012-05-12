@@ -24,6 +24,11 @@ public class DB2iDatabase extends DB2Database {
     }
 
     @Override
+    protected String getDefaultDatabaseProductName() {
+        return "DB2i";
+    }
+
+    @Override
     public String getTypeName() {
         return "db2i";
     }

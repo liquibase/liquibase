@@ -26,6 +26,15 @@ public class DB2Database extends AbstractDatabase {
         return PRIORITY_DEFAULT;
     }
 
+    public Integer getDefaultPort() {
+        return 446;
+    }
+
+    @Override
+    protected String getDefaultDatabaseProductName() {
+        return "DB2";
+    }
+
     public String getTypeName() {
         return "db2";
     }

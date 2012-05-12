@@ -72,6 +72,8 @@ public interface Database extends DatabaseObject, PrioritizedService {
 
     String getDefaultSchemaName();
 
+    Integer getDefaultPort();
+
     String getLiquibaseCatalogName();
     
     String getLiquibaseSchemaName();

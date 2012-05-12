@@ -93,6 +93,15 @@ public class PostgresDatabase extends AbstractDatabase {
     }
 
     @Override
+    protected String getDefaultDatabaseProductName() {
+        return "PostgreSQL";
+    }
+
+    public Integer getDefaultPort() {
+        return 5432;
+    }
+
+    @Override
     public Set<String> getSystemTablesAndViews() {
         return systemTablesAndViews;
     }

@@ -42,6 +42,10 @@ public class MockDatabase implements Database {
         return "Mock Database";
     }
 
+    public Integer getDefaultPort() {
+        return null;
+    }
+
     public DatabaseObject[] getContainingObjects() {
         return null;
     }

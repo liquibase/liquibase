@@ -57,7 +57,16 @@ public class MSSQLDatabase extends AbstractDatabase {
     public int getPriority() {
         return PRIORITY_DEFAULT;
     }
-    
+
+    @Override
+    protected String getDefaultDatabaseProductName() {
+        return "SQL Server";
+    }
+
+    public Integer getDefaultPort() {
+        return 1433;
+    }
+
     @Override
     public Set<String> getSystemTablesAndViews() {
         return systemTablesAndViews;
@@ -112,6 +121,9 @@ public class MSSQLDatabase extends AbstractDatabase {
 
     @Override
     public String getDefaultCatalogName() {
+        if (getConnection() == null) {
+            return null;
+        }
         try {
             return getConnection().getCatalog();
         } catch (DatabaseException e) {
