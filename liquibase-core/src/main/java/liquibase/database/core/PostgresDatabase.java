@@ -293,6 +293,13 @@ public class PostgresDatabase extends AbstractDatabase {
 
     @Override
     public String escapeIndexName(String catalogName,String schemaName, String indexName) {
-        return escapeDatabaseObject(indexName);
+    	String escapedSchema = escapeDatabaseObject(schemaName);
+    	String escapedIndex;
+    	if (escapedSchema == null) {
+    		escapedIndex = escapeDatabaseObject(indexName);
+    	} else {
+    		escapedIndex = escapedSchema + "." + escapeDatabaseObject(indexName);
+    	}
+        return escapedIndex;
     }
 }
