@@ -73,5 +73,16 @@ public class PostgresDatabaseTest extends AbstractDatabaseTest {
         Database database = getDatabase();
         assertEquals("\"schemaName\".\"tableName\"", database.escapeTableName("catalogName", "schemaName", "tableName"));
     }
-
+    
+    @Test
+    public void escapeIndexName_noSchema() {
+        Database database = getDatabase();
+        assertEquals("\"indexName\"", database.escapeIndexName(null, null, "indexName"));
+    }
+    
+    @Test
+    public void escapeIndexName_withSchema() {
+    	 Database database = getDatabase();
+    	 assertEquals("\"schemaName\".\"indexName\"", database.escapeIndexName("catalogName", "schemaName", "indexName"));
+	}
 }
