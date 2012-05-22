@@ -6,7 +6,6 @@ import liquibase.database.structure.Index;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
-import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.DropIndexStatement;
 import liquibase.util.StringUtils;
@@ -45,7 +44,9 @@ public class DropIndexGenerator extends AbstractSqlGenerator<DropIndexStatement>
         } else if (database instanceof MSSQLDatabase) {
             return new Sql[] {new UnparsedSql("DROP INDEX " + database.escapeTableName(schemaName, statement.getTableName()) + "." + database.escapeIndexName(null, statement.getIndexName())) };
         } else if (database instanceof PostgresDatabase) {
-			return new Sql[]{new UnparsedSql("DROP INDEX " + database.escapeIndexName(schemaName, statement.getIndexName()))};
+        	String escapedSchema = database.escapeDatabaseObject(schemaName);
+        	String escapedIndex = database.escapeIndexName(schemaName, statement.getIndexName());
+			return new Sql[]{new UnparsedSql("DROP INDEX " + ((escapedSchema == null)? escapedIndex : escapedSchema + "." + escapedIndex))};
 		}
 
         return new Sql[] {new UnparsedSql("DROP INDEX " + database.escapeIndexName(schemaName, statement.getIndexName())) };
