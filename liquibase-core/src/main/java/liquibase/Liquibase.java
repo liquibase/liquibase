@@ -7,6 +7,7 @@ import liquibase.changelog.visitor.*;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.DatabaseFactory;
+import liquibase.database.core.OracleDatabase;
 import liquibase.diff.Diff;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
@@ -20,6 +21,7 @@ import liquibase.logging.LogFactory;
 import liquibase.logging.Logger;
 import liquibase.parser.ChangeLogParserFactory;
 import liquibase.resource.ResourceAccessor;
+import liquibase.statement.core.RawSqlStatement;
 import liquibase.statement.core.UpdateStatement;
 import liquibase.util.LiquibaseUtil;
 import liquibase.util.StreamUtil;
@@ -212,6 +214,10 @@ public class Liquibase {
         executor.comment("Against: " + getDatabase().getConnection().getConnectionUserName() + "@" + getDatabase().getConnection().getURL());
         executor.comment("Liquibase version: " + LiquibaseUtil.getBuildVersion());
         executor.comment("*********************************************************************" + StreamUtil.getLineSeparator());
+        
+        if (database instanceof OracleDatabase) {
+        	executor.execute(new RawSqlStatement("SET DEFINE OFF;"));
+        }
     }
 
     public void rollback(int changesToRollback, String contexts, Writer output) throws LiquibaseException {
