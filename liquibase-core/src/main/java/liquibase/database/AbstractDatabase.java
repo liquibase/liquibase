@@ -666,7 +666,6 @@ public abstract class AbstractDatabase implements Database {
 
     public boolean supportsDropTableCascadeConstraints() {
          return (this instanceof DerbyDatabase
-                 || this instanceof DB2Database
                  || this instanceof MSSQLDatabase
                  || this instanceof FirebirdDatabase
                  || this instanceof SQLiteDatabase
