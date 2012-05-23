@@ -167,6 +167,14 @@ public abstract class AbstractDatabase implements Database {
         return null;
     }
 
+    /**
+     * Returns the default schema from the current database connection.  By default, this will be the user name
+     * for the current connection.  Implementations should override this method for databases which allow for the
+     * schema to be something other than the current user.
+     *
+     * @return The current schema name
+     * @throws DatabaseException if an error occured
+     */
     protected String getDefaultDatabaseSchemaName() throws DatabaseException {
         return getConnection().getConnectionUserName();
     }
