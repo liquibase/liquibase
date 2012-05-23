@@ -2,3 +2,7 @@ target
 .project
 .settings
 atlassian-ide-plugin.xml
+*.ipr
+*.iws
+*.iml
+
