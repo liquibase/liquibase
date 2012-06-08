@@ -3,19 +3,21 @@
 
     <modelVersion>4.0.0</modelVersion>
 
+    <groupId>org.liquibase</groupId>
     <artifactId>liquibase-core</artifactId>
     <name>Liquibase Core</name>
+    <version>2.0.4-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <parent>
       <groupId>org.liquibase</groupId>
       <artifactId>liquibase-parent</artifactId>
-      <version>3.0.0-SNAPSHOT</version>
-      <relativePath>../pom.xml</relativePath>
+      <version>2.0.4-SNAPSHOT</version>
     </parent>
     
     <properties>
         <bundle.namespace>liquibase.*</bundle.namespace>
+        <project.version>2.0.4-SNAPSHOT</project.version>
     </properties>
 
     <dependencies>
