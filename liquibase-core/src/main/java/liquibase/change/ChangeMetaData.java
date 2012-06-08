@@ -1,10 +1,9 @@
 package liquibase.change;
 
-import liquibase.servicelocator.PrioritizedService;
-
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Set;
+
+import liquibase.servicelocator.PrioritizedService;
 
 public class ChangeMetaData implements PrioritizedService {
     public static final int PRIORITY_DEFAULT = 1;

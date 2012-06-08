@@ -3,12 +3,12 @@ package liquibase.change.core;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
 
-import liquibase.change.*;
-import liquibase.changelog.ChangeLogParameters;
+import liquibase.change.AbstractSQLChange;
+import liquibase.change.ChangeClass;
+import liquibase.change.ChangeMetaData;
+import liquibase.change.ChangeProperty;
+import liquibase.change.CheckSum;
 import liquibase.database.Database;
 import liquibase.exception.SetupException;
 import liquibase.exception.ValidationErrors;

@@ -1,23 +1,30 @@
 package liquibase.database;
 
+import java.io.IOException;
+import java.io.Writer;
+import java.math.BigInteger;
+import java.util.Date;
+import java.util.List;
+
 import liquibase.change.Change;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.RanChangeSet;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.Schema;
-import liquibase.exception.*;
+import liquibase.datatype.DataTypeFactory;
+import liquibase.exception.DatabaseException;
+import liquibase.exception.DatabaseHistoryException;
+import liquibase.exception.DateParseException;
+import liquibase.exception.LiquibaseException;
+import liquibase.exception.RollbackImpossibleException;
+import liquibase.exception.StatementNotSupportedOnDatabaseException;
+import liquibase.exception.UnsupportedChangeException;
 import liquibase.servicelocator.PrioritizedService;
 import liquibase.sql.visitor.SqlVisitor;
-import liquibase.statement.SqlStatement;
 import liquibase.statement.DatabaseFunction;
-
-import java.io.IOException;
-import java.io.Writer;
-import java.math.BigInteger;
-import java.sql.SQLException;
-import java.util.Date;
-import java.util.List;
+import liquibase.statement.SqlStatement;
+import liquibase.statement.core.InsertStatement;
 
 public interface Database extends DatabaseObject, PrioritizedService {
 
@@ -285,4 +292,10 @@ public interface Database extends DatabaseObject, PrioritizedService {
     String correctForeignKeyName(String fkName);
     
     String correctIndexName(String indexName);
+        
+    /**
+     * Gets the database specific datatype factory
+     * @return A database vendor specific datatype factory.
+     */
+    DataTypeFactory getDataTypeFactory();
 }

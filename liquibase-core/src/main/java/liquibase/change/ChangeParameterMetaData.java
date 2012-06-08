@@ -1,15 +1,13 @@
 package liquibase.change;
 
-import liquibase.database.Database;
-import liquibase.exception.UnexpectedLiquibaseException;
-
-import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
-import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+
+import liquibase.database.Database;
+import liquibase.exception.UnexpectedLiquibaseException;
 
 public class ChangeParameterMetaData {
     private String parameterName;

@@ -1,5 +1,7 @@
 package liquibase.change.core;
 
+import java.math.BigInteger;
+
 import liquibase.change.AbstractChange;
 import liquibase.change.ChangeClass;
 import liquibase.change.ChangeMetaData;
@@ -7,9 +9,6 @@ import liquibase.change.ChangeProperty;
 import liquibase.database.Database;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.AlterSequenceStatement;
-import liquibase.util.StringUtils;
-
-import java.math.BigInteger;
 
 /**
  * Modifies properties of an existing sequence.

@@ -17,7 +17,7 @@ public class DataTypeFactory {
 
     private Map<String, SortedSet<Class<? extends LiquibaseDataType>>> registry = new ConcurrentHashMap<String, SortedSet<Class<? extends LiquibaseDataType>>>();
 
-    private DataTypeFactory() {
+    protected DataTypeFactory() {
         Class<? extends LiquibaseDataType>[] classes;
         try {
             classes = ServiceLocator.getInstance().findClasses(LiquibaseDataType.class);
@@ -33,6 +33,7 @@ public class DataTypeFactory {
 
     }
 
+    @Deprecated
     public static synchronized DataTypeFactory getInstance() {
         if (instance == null) {
             instance = new DataTypeFactory();

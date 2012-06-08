@@ -1,14 +1,13 @@
 package liquibase.snapshot.jvm;
 
-import liquibase.database.Database;
-import liquibase.database.structure.Column;
-import liquibase.database.structure.Table;
-import liquibase.database.core.H2Database;
-import liquibase.exception.DatabaseException;
-import liquibase.statement.DatabaseFunction;
-
 import java.sql.ResultSet;
 import java.sql.SQLException;
+
+import liquibase.database.Database;
+import liquibase.database.core.H2Database;
+import liquibase.database.structure.Column;
+import liquibase.exception.DatabaseException;
+import liquibase.statement.DatabaseFunction;
 
 public class H2DatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerator {
     public boolean supports(Database database) {

@@ -3,6 +3,7 @@ package liquibase.sqlgenerator.core;
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.exception.ValidationErrors;
+import liquibase.informix.sqlgenerator.core.InformixCreateTableGenerator;
 import liquibase.logging.LogFactory;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
@@ -14,6 +15,8 @@ import liquibase.statement.core.CreateTableStatement;
 import liquibase.util.StringUtils;
 
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 
 public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatement> {
 
@@ -25,7 +28,14 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
     }
 
     public Sql[] generateSql(CreateTableStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-            StringBuffer buffer = new StringBuffer();
+    	
+    	if (database instanceof InformixDatabase) {
+    		AbstractSqlGenerator<CreateTableStatement> gen = new InformixCreateTableGenerator();
+    		return gen.generateSql(statement, database, sqlGeneratorChain);
+    	}
+    	
+    	
+        StringBuffer buffer = new StringBuffer();
         buffer.append("CREATE TABLE ").append(database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName())).append(" ");
         buffer.append("(");
         
@@ -35,6 +45,7 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
         boolean isPrimaryKeyAutoIncrement = false;
         
         Iterator<String> columnIterator = statement.getColumns().iterator();
+        List<String> primaryKeyColumns = new LinkedList<String>();
         while (columnIterator.hasNext()) {
             String column = columnIterator.next();
             
@@ -44,32 +55,36 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
             AutoIncrementConstraint autoIncrementConstraint = null;
             
             for (AutoIncrementConstraint currentAutoIncrementConstraint : statement.getAutoIncrementConstraints()) {
-            	if (column.equals(currentAutoIncrementConstraint.getColumnName())) {
-            		autoIncrementConstraint = currentAutoIncrementConstraint;
-            		break;
-            	}
+                if (column.equals(currentAutoIncrementConstraint.getColumnName())) {
+                    autoIncrementConstraint = currentAutoIncrementConstraint;
+                    break;
+                }
             }
 
             boolean isAutoIncrementColumn = autoIncrementConstraint != null;            
             boolean isPrimaryKeyColumn = statement.getPrimaryKeyConstraint() != null
-            		&& statement.getPrimaryKeyConstraint().getColumns().contains(column);
+                    && statement.getPrimaryKeyConstraint().getColumns().contains(column);
             isPrimaryKeyAutoIncrement = isPrimaryKeyAutoIncrement
-            		|| isPrimaryKeyColumn && isAutoIncrementColumn;
+                    || isPrimaryKeyColumn && isAutoIncrementColumn;
+            
+            if (isPrimaryKeyColumn) {
+            	primaryKeyColumns.add(column);
+            }
             
             if ((database instanceof SQLiteDatabase) &&
-					isSinglePrimaryKeyColumn &&
-					isPrimaryKeyColumn &&
-					isAutoIncrementColumn) {
-            	String pkName = StringUtils.trimToNull(statement.getPrimaryKeyConstraint().getConstraintName());
-	            if (pkName == null) {
-	                pkName = database.generatePrimaryKeyName(statement.getTableName());
-	            }
+                    isSinglePrimaryKeyColumn &&
+                    isPrimaryKeyColumn &&
+                    isAutoIncrementColumn) {
+                String pkName = StringUtils.trimToNull(statement.getPrimaryKeyConstraint().getConstraintName());
+                if (pkName == null) {
+                    pkName = database.generatePrimaryKeyName(statement.getTableName());
+                }
                 if (pkName != null) {
                     buffer.append(" CONSTRAINT ");
                     buffer.append(database.escapeConstraintName(pkName));
                 }
                 buffer.append(" PRIMARY KEY AUTOINCREMENT");
-			}
+            }
 
             if (statement.getDefaultValue(column) != null) {
                 Object defaultValue = statement.getDefaultValue(column);
@@ -81,13 +96,13 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
             }
 
             if (isAutoIncrementColumn) {
-            	// TODO: check if database supports auto increment on non primary key column
+                // TODO: check if database supports auto increment on non primary key column
                 if (database.supportsAutoIncrement()) {
-                	String autoIncrementClause = database.getAutoIncrementClause(autoIncrementConstraint.getStartWith(), autoIncrementConstraint.getIncrementBy());
+                    String autoIncrementClause = database.getAutoIncrementClause(autoIncrementConstraint.getStartWith(), autoIncrementConstraint.getIncrementBy());
                 
-                	if (!"".equals(autoIncrementClause)) {
-                		buffer.append(" ").append(autoIncrementClause);
-                	}
+                    if (!"".equals(autoIncrementClause)) {
+                        buffer.append(" ").append(autoIncrementClause);
+                    }
                 } else {
                     LogFactory.getLogger().warning(database.getTypeName()+" does not support autoincrement columns as request for "+(database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName())));
                 }
@@ -106,8 +121,8 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
                 }
             }
 
-            if (database instanceof InformixDatabase && isSinglePrimaryKeyColumn) {
-            	buffer.append(" PRIMARY KEY");
+            if (database instanceof InformixDatabase && isSinglePrimaryKeyColumn && isPrimaryKeyColumn) {
+                //buffer.append(" PRIMARY KEY");
             }
 
             if (columnIterator.hasNext()) {
@@ -119,48 +134,48 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
 
         // TODO informixdb
         if (!( (database instanceof SQLiteDatabase) &&
-				isSinglePrimaryKeyColumn &&
-				isPrimaryKeyAutoIncrement) &&
+                isSinglePrimaryKeyColumn &&
+                isPrimaryKeyAutoIncrement) &&
 
-				!((database instanceof InformixDatabase) &&
-				isSinglePrimaryKeyColumn
-				)) {
-        	// ...skip this code block for sqlite if a single column primary key
-        	// with an autoincrement constraint exists.
-        	// This constraint is added after the column type.
+                !((database instanceof InformixDatabase) &&
+                isSinglePrimaryKeyColumn
+                )) {
+            // ...skip this code block for sqlite if a single column primary key
+            // with an autoincrement constraint exists.
+            // This constraint is added after the column type.
 
-	        if (statement.getPrimaryKeyConstraint() != null && statement.getPrimaryKeyConstraint().getColumns().size() > 0) {
-	        	if (!(database instanceof InformixDatabase)) {
-		            String pkName = StringUtils.trimToNull(statement.getPrimaryKeyConstraint().getConstraintName());
-		            if (pkName == null) {
-		                // TODO ORA-00972: identifier is too long
-			            // If tableName lenght is more then 28 symbols
-			            // then generated pkName will be incorrect
-			            pkName = database.generatePrimaryKeyName(statement.getTableName());
-		            }
+            if (statement.getPrimaryKeyConstraint() != null && statement.getPrimaryKeyConstraint().getColumns().size() > 0) {
+                if (!(database instanceof InformixDatabase)) {
+                    String pkName = StringUtils.trimToNull(statement.getPrimaryKeyConstraint().getConstraintName());
+                    if (pkName == null) {
+                        // TODO ORA-00972: identifier is too long
+                        // If tableName lenght is more then 28 symbols
+                        // then generated pkName will be incorrect
+                        pkName = database.generatePrimaryKeyName(statement.getTableName());
+                    }
                     if (pkName != null) {
                         buffer.append(" CONSTRAINT ");
                         buffer.append(database.escapeConstraintName(pkName));
                     }
                 }
-	            buffer.append(" PRIMARY KEY (");
-	            buffer.append(database.escapeColumnNameList(StringUtils.join(statement.getPrimaryKeyConstraint().getColumns(), ", ")));
-	            buffer.append(")");
-		        // Setting up table space for PK's index if it exist
-		        if (database instanceof OracleDatabase &&
-		            statement.getPrimaryKeyConstraint().getTablespace() != null) {
-			        buffer.append(" USING INDEX TABLESPACE ");
-			        buffer.append(statement.getPrimaryKeyConstraint().getTablespace());
-		        }
-	            buffer.append(",");
-	        }
+                buffer.append(" PRIMARY KEY (");
+                buffer.append(database.escapeColumnNameList(StringUtils.join(statement.getPrimaryKeyConstraint().getColumns(), ", ")));
+                buffer.append(")");
+                // Setting up table space for PK's index if it exist
+                if (database instanceof OracleDatabase &&
+                    statement.getPrimaryKeyConstraint().getTablespace() != null) {
+                    buffer.append(" USING INDEX TABLESPACE ");
+                    buffer.append(statement.getPrimaryKeyConstraint().getTablespace());
+                }
+                buffer.append(",");
+            }
         }
 
         for (ForeignKeyConstraint fkConstraint : statement.getForeignKeyConstraints()) {
-        	if (!(database instanceof InformixDatabase)) {
-        		buffer.append(" CONSTRAINT ");
+            if (!(database instanceof InformixDatabase)) {
+                buffer.append(" CONSTRAINT ");
                 buffer.append(database.escapeConstraintName(fkConstraint.getForeignKeyName()));
-        	}
+            }
             String referencesString = fkConstraint.getReferences();
             if (!referencesString.contains(".") && database.getDefaultSchemaName() != null) {
                 referencesString = database.getDefaultSchemaName()+"."+referencesString;
@@ -175,8 +190,8 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
             }
 
             if ((database instanceof InformixDatabase)) {
-            	buffer.append(" CONSTRAINT ");
-            	buffer.append(database.escapeConstraintName(fkConstraint.getForeignKeyName()));
+                buffer.append(" CONSTRAINT ");
+                buffer.append(database.escapeConstraintName(fkConstraint.getForeignKeyName()));
             }
 
             if (fkConstraint.isInitiallyDeferred()) {
@@ -236,7 +251,7 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
     }
 
     private boolean constraintNameAfterUnique(Database database) {
-		return database instanceof InformixDatabase;
-	}
+        return database instanceof InformixDatabase;
+    }
 
 }

@@ -1,19 +1,23 @@
 package liquibase.change.core;
 
-import liquibase.change.*;
+import java.util.ArrayList;
+import java.util.List;
+
+import liquibase.change.AbstractChange;
+import liquibase.change.Change;
+import liquibase.change.ChangeClass;
+import liquibase.change.ChangeMetaData;
+import liquibase.change.ChangeProperty;
+import liquibase.change.ColumnConfig;
 import liquibase.database.Database;
 import liquibase.database.core.DB2Database;
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.database.core.SQLiteDatabase.AlterTableVisitor;
 import liquibase.database.structure.Index;
-import liquibase.datatype.DataTypeFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.ReorganizeTableStatement;
 import liquibase.statement.core.SetNullableStatement;
 import liquibase.statement.core.UpdateStatement;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Adds a not-null constraint to an existing column.
@@ -89,7 +93,7 @@ public class AddNotNullConstraintChange extends AbstractChange {
     	List<SqlStatement> statements = new ArrayList<SqlStatement>();
     	
         if (defaultNullValue != null) {
-            String defaultValue = DataTypeFactory.getInstance().fromObject(getDefaultNullValue(), database).objectToString(getDefaultNullValue(), database);
+            String defaultValue = database.getDataTypeFactory().fromObject(getDefaultNullValue(), database).objectToString(getDefaultNullValue(), database);
             
             statements.add(new UpdateStatement(getCatalogName(), getSchemaName(), getTableName())
                     .addNewColumnValue(getColumnName(), defaultValue)

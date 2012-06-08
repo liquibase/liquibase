@@ -1,16 +1,19 @@
 package liquibase.change.core;
 
-import liquibase.change.*;
-import liquibase.database.Database;
-import liquibase.statement.SqlStatement;
-import liquibase.statement.DatabaseFunction;
-import liquibase.statement.core.AddDefaultValueStatement;
-import liquibase.util.ISODateFormat;
-import liquibase.util.StringUtils;
-
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.Locale;
+
+import liquibase.change.AbstractChange;
+import liquibase.change.Change;
+import liquibase.change.ChangeClass;
+import liquibase.change.ChangeMetaData;
+import liquibase.change.ChangeProperty;
+import liquibase.database.Database;
+import liquibase.statement.DatabaseFunction;
+import liquibase.statement.SqlStatement;
+import liquibase.statement.core.AddDefaultValueStatement;
+import liquibase.util.ISODateFormat;
 
 /**
  * Sets a new default value to an existing column.

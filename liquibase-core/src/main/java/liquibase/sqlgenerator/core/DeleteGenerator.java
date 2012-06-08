@@ -1,7 +1,6 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
-import liquibase.datatype.DataTypeFactory;
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
@@ -28,7 +27,7 @@ public class DeleteGenerator extends AbstractSqlGenerator<DeleteStatement> {
         if (statement.getWhereClause() != null) {
             String fixedWhereClause = " WHERE " + statement.getWhereClause();
             for (Object param : statement.getWhereParameters()) {
-                fixedWhereClause = fixedWhereClause.replaceFirst("\\?", DataTypeFactory.getInstance().fromObject(param, database).objectToString(param, database));
+                fixedWhereClause = fixedWhereClause.replaceFirst("\\?", database.getDataTypeFactory().fromObject(param, database).objectToString(param, database));
             }
             sql.append(" ").append(fixedWhereClause);
         }

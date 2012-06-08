@@ -1,10 +1,9 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
-import liquibase.database.structure.Schema;
-import liquibase.datatype.DataTypeFactory;
 import liquibase.database.core.InformixDatabase;
 import liquibase.database.structure.Column;
+import liquibase.database.structure.Schema;
 import liquibase.database.structure.Table;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
@@ -53,7 +52,7 @@ public class AddAutoIncrementGeneratorInformix extends AddAutoIncrementGenerator
             			statement.getTableName(),
             			statement.getColumnName())
             		+ " "
-            		+ DataTypeFactory.getInstance().fromDescription(statement.getColumnDataType() + "{autoIncrement:true}"),
+            		+ database.getDataTypeFactory().fromDescription(statement.getColumnDataType() + "{autoIncrement:true}"),
                 new Column()
                     .setRelation(
                             new Table(statement.getTableName()).setSchema(new Schema(statement.getCatalogName(), statement.getSchemaName())))

@@ -1,20 +1,32 @@
 package liquibase.change.core;
 
-import liquibase.change.*;
-import liquibase.database.Database;
-import liquibase.database.PreparedStatementFactory;
-import liquibase.exception.DatabaseException;
-import liquibase.statement.ExecutablePreparedStatement;
-import liquibase.statement.SqlStatement;
-import liquibase.statement.core.InsertStatement;
-
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.StringReader;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+
+import liquibase.change.AbstractChange;
+import liquibase.change.ChangeClass;
+import liquibase.change.ChangeMetaData;
+import liquibase.change.ChangeProperty;
+import liquibase.change.ChangeWithColumns;
+import liquibase.change.ColumnConfig;
+import liquibase.database.Database;
+import liquibase.database.PreparedStatementFactory;
+import liquibase.database.core.InformixDatabase;
+import liquibase.exception.DatabaseException;
+import liquibase.statement.ExecutablePreparedStatement;
+import liquibase.statement.SqlStatement;
+import liquibase.statement.core.InsertStatement;
 
 /**
  * Inserts data into an existing table.
@@ -83,6 +95,9 @@ public class InsertDataChange extends AbstractChange implements ChangeWithColumn
                 needsPreparedStatement = true;
             }
             if (column.getValueClob() != null) {
+                needsPreparedStatement = true;
+            }
+            if (column.getValueText() != null && database instanceof InformixDatabase) {
                 needsPreparedStatement = true;
             }
         }
@@ -195,6 +210,19 @@ public class InsertDataChange extends AbstractChange implements ChangeWithColumn
                         } catch(FileNotFoundException e) {
                             throw new DatabaseException(e.getMessage(), e); // wrap
                         }
+                    } else if(col.getValueText() != null) {
+                    	try {
+                    		StringReader r = new StringReader(col.getValueText());
+                    		stmt.setCharacterStream(i, new BufferedReader(r), col.getValueText().length());
+                    		//byte[] bytes = col.getValueText().getBytes("UTF-8");
+                    		//ByteArrayInputStream b = new ByteArrayInputStream(bytes);
+                    		//stmt.setBinaryStream(i, new BufferedInputStream(b), (int) col.getValueText().length());
+                    	} catch(Exception e) {
+                    		throw new DatabaseException(e.getMessage(), e);
+                    	}
+                    } else {
+                    	// NULL values might intentionally be set into a change, we must also add them to the prepared statement  
+                    	stmt.setNull(i, java.sql.Types.NULL);
                     }
                     i++;
                 }
