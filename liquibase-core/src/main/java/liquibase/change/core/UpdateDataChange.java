@@ -11,7 +11,9 @@ import liquibase.change.ChangeWithColumns;
 import liquibase.change.ColumnConfig;
 import liquibase.change.TextNode;
 import liquibase.database.Database;
+import liquibase.database.core.InformixDatabase;
 import liquibase.statement.SqlStatement;
+import liquibase.statement.UpdateExecutablePreparedStatement;
 import liquibase.statement.core.UpdateStatement;
 
 @ChangeClass(name = "update", description = "Update Data", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "table")
@@ -83,6 +85,25 @@ public class UpdateDataChange extends AbstractChange implements ChangeWithColumn
 
     public SqlStatement[] generateStatements(Database database) {
 
+    	boolean needsPreparedStatement = false;
+        for (ColumnConfig column : columns) {
+            if (column.getValueBlob() != null) {
+                needsPreparedStatement = true;
+            }
+            if (column.getValueClob() != null) {
+                needsPreparedStatement = true;
+            }
+            if (column.getValueText() != null && database instanceof InformixDatabase) {
+                needsPreparedStatement = true;
+            }
+        }
+
+        if (needsPreparedStatement) {
+            return new SqlStatement[] { 
+            		new UpdateExecutablePreparedStatement(database, catalogName, schemaName, tableName, columns) 
+            };
+        }
+    	
         UpdateStatement statement = new UpdateStatement(getCatalogName(), getSchemaName(), getTableName());
 
         for (ColumnConfig column : columns) {
