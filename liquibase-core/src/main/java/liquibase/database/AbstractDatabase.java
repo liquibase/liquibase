@@ -1,18 +1,55 @@
 package liquibase.database;
 
+import java.io.IOException;
+import java.io.Writer;
+import java.math.BigInteger;
+import java.sql.ResultSet;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.regex.Pattern;
+
 import liquibase.change.Change;
 import liquibase.change.CheckSum;
-import liquibase.change.core.*;
+import liquibase.change.core.AnonymousChange;
+import liquibase.change.core.DropForeignKeyConstraintChange;
+import liquibase.change.core.DropSequenceChange;
+import liquibase.change.core.DropTableChange;
+import liquibase.change.core.DropViewChange;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.RanChangeSet;
 import liquibase.changelog.filter.ContextChangeSetFilter;
 import liquibase.changelog.filter.DbmsChangeSetFilter;
-import liquibase.database.core.*;
+import liquibase.database.core.DB2Database;
+import liquibase.database.core.DerbyDatabase;
+import liquibase.database.core.FirebirdDatabase;
+import liquibase.database.core.MSSQLDatabase;
+import liquibase.database.core.SQLiteDatabase;
+import liquibase.database.core.SybaseASADatabase;
+import liquibase.database.core.SybaseDatabase;
 import liquibase.database.jvm.JdbcConnection;
-import liquibase.database.structure.*;
+import liquibase.database.structure.DatabaseObject;
+import liquibase.database.structure.ForeignKey;
+import liquibase.database.structure.Schema;
+import liquibase.database.structure.Sequence;
+import liquibase.database.structure.Table;
+import liquibase.database.structure.View;
+import liquibase.datatype.DataTypeFactory;
 import liquibase.diff.DiffControl;
-import liquibase.exception.*;
+import liquibase.exception.DatabaseException;
+import liquibase.exception.DatabaseHistoryException;
+import liquibase.exception.DateParseException;
+import liquibase.exception.LiquibaseException;
+import liquibase.exception.RollbackImpossibleException;
+import liquibase.exception.StatementNotSupportedOnDatabaseException;
+import liquibase.exception.UnsupportedChangeException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.logging.LogFactory;
@@ -21,22 +58,27 @@ import liquibase.snapshot.DatabaseSnapshotGeneratorFactory;
 import liquibase.sql.Sql;
 import liquibase.sql.visitor.SqlVisitor;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
-import liquibase.statement.*;
-import liquibase.statement.core.*;
+import liquibase.statement.DatabaseFunction;
+import liquibase.statement.SqlStatement;
+import liquibase.statement.core.AddColumnStatement;
+import liquibase.statement.core.ClearDatabaseChangeLogTableStatement;
+import liquibase.statement.core.CreateDatabaseChangeLogLockTableStatement;
+import liquibase.statement.core.CreateDatabaseChangeLogTableStatement;
+import liquibase.statement.core.GetNextChangeSetSequenceValueStatement;
+import liquibase.statement.core.GetViewDefinitionStatement;
+import liquibase.statement.core.InsertStatement;
+import liquibase.statement.core.MarkChangeSetRanStatement;
+import liquibase.statement.core.ModifyDataTypeStatement;
+import liquibase.statement.core.RawSqlStatement;
+import liquibase.statement.core.RemoveChangeSetRanStatusStatement;
+import liquibase.statement.core.SelectFromDatabaseChangeLogStatement;
+import liquibase.statement.core.SetNullableStatement;
+import liquibase.statement.core.TagDatabaseStatement;
+import liquibase.statement.core.UpdateChangeSetChecksumStatement;
+import liquibase.statement.core.UpdateStatement;
 import liquibase.util.ISODateFormat;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
-
-import java.io.IOException;
-import java.io.Writer;
-import java.math.BigInteger;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.*;
-import java.util.regex.Pattern;
 
 
 /**
@@ -56,6 +98,10 @@ public abstract class AbstractDatabase implements Database {
     protected List<DatabaseFunction> databaseFunctions = new ArrayList<DatabaseFunction>();
 
     private List<RanChangeSet> ranChangeSetList;
+    
+    protected void resetRanChangeSetList() {
+    	ranChangeSetList = null;
+    }
 
     private static Pattern CREATE_VIEW_AS_PATTERN = Pattern.compile("^CREATE\\s+.*?VIEW\\s+.*?AS\\s+", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
@@ -1222,5 +1268,11 @@ public abstract class AbstractDatabase implements Database {
 
     public void enableForeignKeyChecks() throws DatabaseException {
         throw new DatabaseException("ForeignKeyChecks Management not supported");
+    }
+    
+    
+    
+    public DataTypeFactory getDataTypeFactory() {
+    	return DataTypeFactory.getInstance();
     }
 }

@@ -1,19 +1,29 @@
 package liquibase.change.core;
 
-import liquibase.change.*;
+import java.util.ArrayList;
+import java.util.List;
+
+import liquibase.change.AbstractChange;
+import liquibase.change.Change;
+import liquibase.change.ChangeClass;
+import liquibase.change.ChangeMetaData;
+import liquibase.change.ChangeProperty;
+import liquibase.change.ChangeWithColumns;
+import liquibase.change.ColumnConfig;
+import liquibase.change.ConstraintsConfig;
 import liquibase.database.Database;
-import liquibase.datatype.DataTypeFactory;
 import liquibase.datatype.LiquibaseDataType;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
-import liquibase.statement.*;
+import liquibase.statement.AutoIncrementConstraint;
+import liquibase.statement.ForeignKeyConstraint;
+import liquibase.statement.NotNullConstraint;
+import liquibase.statement.SqlStatement;
+import liquibase.statement.UniqueConstraint;
 import liquibase.statement.core.CreateTableStatement;
 import liquibase.statement.core.SetColumnRemarksStatement;
 import liquibase.statement.core.SetTableRemarksStatement;
 import liquibase.util.StringUtils;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Creates a new table.
@@ -41,7 +51,7 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
 
             Object defaultValue = column.getDefaultValueObject();
 
-            LiquibaseDataType columnType = DataTypeFactory.getInstance().fromDescription(column.getType() + (isAutoIncrement ? "{autoIncrement:true}" : ""));
+            LiquibaseDataType columnType = database.getDataTypeFactory().fromDescription(column.getType() + (isAutoIncrement ? "{autoIncrement:true}" : ""));
             if (constraints != null && constraints.isPrimaryKey() != null && constraints.isPrimaryKey()) {
 
                 statement.addPrimaryKeyColumn(column.getName(), columnType, defaultValue, constraints.getPrimaryKeyName(), constraints.getPrimaryKeyTablespace());

@@ -2,9 +2,8 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
 import liquibase.database.core.InformixDatabase;
-import liquibase.database.structure.Schema;
-import liquibase.datatype.DataTypeFactory;
 import liquibase.database.structure.Column;
+import liquibase.database.structure.Schema;
 import liquibase.database.structure.Table;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
@@ -45,9 +44,9 @@ public class AddDefaultValueGeneratorInformix extends AddDefaultValueGenerator {
 		sql.append(database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(),
 				statement.getColumnName()));
 		sql.append(" ");
-		sql.append(DataTypeFactory.getInstance().fromDescription(statement.getColumnDataType()));
+		sql.append(database.getDataTypeFactory().fromDescription(statement.getColumnDataType()));
 		sql.append(" DEFAULT ");
-		sql.append(DataTypeFactory.getInstance().fromObject(defaultValue, database)
+		sql.append(database.getDataTypeFactory().fromObject(defaultValue, database)
 				.objectToString(defaultValue, database));
 		sql.append(")");
 		UnparsedSql unparsedSql = new UnparsedSql(sql.toString(), column);

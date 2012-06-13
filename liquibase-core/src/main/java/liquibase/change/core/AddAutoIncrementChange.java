@@ -14,7 +14,6 @@ import liquibase.statement.core.AddAutoIncrementStatement;
 import liquibase.statement.core.AddDefaultValueStatement;
 import liquibase.statement.core.CreateSequenceStatement;
 import liquibase.statement.core.SetNullableStatement;
-import liquibase.util.StringUtils;
 
 /**
  * Makes an existing column into an auto-increment column.

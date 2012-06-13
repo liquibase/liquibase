@@ -1,11 +1,43 @@
 package liquibase.snapshot.jvm;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.Timestamp;
+import java.sql.Types;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
+
 import liquibase.database.Database;
-import liquibase.database.jvm.JdbcConnection;
 import liquibase.database.core.InformixDatabase;
 import liquibase.database.core.OracleDatabase;
-import liquibase.database.structure.*;
+import liquibase.database.jvm.JdbcConnection;
+import liquibase.database.structure.Catalog;
+import liquibase.database.structure.Column;
 import liquibase.database.structure.DataType;
+import liquibase.database.structure.ForeignKey;
+import liquibase.database.structure.ForeignKeyConstraintType;
+import liquibase.database.structure.Index;
+import liquibase.database.structure.PrimaryKey;
+import liquibase.database.structure.Relation;
+import liquibase.database.structure.Schema;
+import liquibase.database.structure.Sequence;
+import liquibase.database.structure.Table;
+import liquibase.database.structure.UniqueConstraint;
+import liquibase.database.structure.View;
 import liquibase.diff.DiffControl;
 import liquibase.diff.DiffStatusListener;
 import liquibase.exception.DatabaseException;
@@ -19,15 +51,6 @@ import liquibase.statement.DatabaseFunction;
 import liquibase.statement.core.GetViewDefinitionStatement;
 import liquibase.statement.core.SelectSequencesStatement;
 import liquibase.util.StringUtils;
-
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.sql.*;
-import java.sql.Date;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.*;
 
 public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotGenerator {
 

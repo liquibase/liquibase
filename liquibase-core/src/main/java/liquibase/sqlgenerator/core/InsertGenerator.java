@@ -1,14 +1,13 @@
 package liquibase.sqlgenerator.core;
 
+import java.util.Date;
+
 import liquibase.database.Database;
-import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.InsertStatement;
-
-import java.util.Date;
 
 public class InsertGenerator extends AbstractSqlGenerator<InsertStatement> {
 
@@ -25,6 +24,7 @@ public class InsertGenerator extends AbstractSqlGenerator<InsertStatement> {
     }
 
     public Sql[] generateSql(InsertStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    	   	
         StringBuffer sql = new StringBuffer("INSERT INTO " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " (");
         for (String column : statement.getColumnValues().keySet()) {
             sql.append(database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), column)).append(", ");
@@ -44,9 +44,9 @@ public class InsertGenerator extends AbstractSqlGenerator<InsertStatement> {
                 sql.append(database.getDateLiteral(((Date) newValue)));
             } else if (newValue instanceof Boolean) {
                 if (((Boolean) newValue)) {
-                    sql.append(DataTypeFactory.getInstance().getTrueBooleanValue(database));
+                    sql.append(database.getDataTypeFactory().getTrueBooleanValue(database));
                 } else {
-                    sql.append(DataTypeFactory.getInstance().getFalseBooleanValue(database));
+                    sql.append(database.getDataTypeFactory().getFalseBooleanValue(database));
                 }
             } else {
                 sql.append(newValue);

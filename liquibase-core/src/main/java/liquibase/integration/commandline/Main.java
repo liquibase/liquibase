@@ -415,7 +415,7 @@ public class Main {
         stream.println(" updateSQL                      Writes SQL to update database to current");
         stream.println("                                version to STDOUT");
         stream.println(" updateCount <num>              Applies next NUM changes to the database");
-        stream.println(" updateCountSQL <num>           Writes SQL to apply next NUM changes");
+        stream.println(" updateSQL <num>                Writes SQL to apply next NUM changes");
         stream.println("                                to the database");
         stream.println(" rollback <tag>                 Rolls back the database to the the state is was");
         stream.println("                                when the tag was applied");

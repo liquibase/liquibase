@@ -1,18 +1,7 @@
 package liquibase.snapshot.jvm;
 
 import liquibase.database.Database;
-import liquibase.database.jvm.JdbcConnection;
 import liquibase.database.core.OracleDatabase;
-import liquibase.database.structure.*;
-import liquibase.exception.DatabaseException;
-import liquibase.snapshot.DatabaseSnapshot;
-import liquibase.util.JdbcUtils;
-
-import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.HashMap;
 
 public class OracleDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerator {
 

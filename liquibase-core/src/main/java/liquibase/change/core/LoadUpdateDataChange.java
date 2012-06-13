@@ -1,20 +1,19 @@
 package liquibase.change.core;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import liquibase.change.ChangeClass;
 import liquibase.change.ChangeMetaData;
 import liquibase.change.ChangeProperty;
 import liquibase.database.Database;
-import liquibase.datatype.DataTypeFactory;
+import liquibase.exception.LiquibaseException;
 import liquibase.exception.RollbackImpossibleException;
 import liquibase.exception.UnsupportedChangeException;
-import liquibase.exception.LiquibaseException;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.DeleteStatement;
 import liquibase.statement.core.InsertOrUpdateStatement;
 import liquibase.statement.core.InsertStatement;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @ChangeClass(name="loadUpdateData", description = "Smart Load Data", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "table")
 public class LoadUpdateDataChange extends LoadDataChange {
@@ -66,7 +65,7 @@ public class LoadUpdateDataChange extends LoadDataChange {
         {
             where.append(database.escapeColumnName(insertOrUpdateStatement.getCatalogName(), insertOrUpdateStatement.getSchemaName(), insertOrUpdateStatement.getTableName(), thisPkColumn)  + " = " );
             Object newValue = insertOrUpdateStatement.getColumnValues().get(thisPkColumn);
-            where.append(DataTypeFactory.getInstance().fromObject(newValue, database));
+            where.append(database.getDataTypeFactory().fromObject(newValue, database));
 
             where.append(" AND ");
         }

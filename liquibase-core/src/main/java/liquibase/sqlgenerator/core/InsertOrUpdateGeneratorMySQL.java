@@ -2,9 +2,9 @@ package liquibase.sqlgenerator.core;
 
 import java.util.Arrays;
 import java.util.HashSet;
+
 import liquibase.database.Database;
 import liquibase.database.core.MySQLDatabase;
-import liquibase.datatype.DataTypeFactory;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.InsertOrUpdateStatement;
 
@@ -33,7 +33,7 @@ public class InsertOrUpdateGeneratorMySQL extends InsertOrUpdateGenerator {
             if (!hashPkFields.contains(columnKey)) {
             	hasFields = true;
             	updateClause.append(columnKey).append(" = ");
-            	updateClause.append(DataTypeFactory.getInstance().fromObject(insertOrUpdateStatement.getColumnValue(columnKey), database).objectToString(columnKey, database));
+            	updateClause.append(database.getDataTypeFactory().fromObject(insertOrUpdateStatement.getColumnValue(columnKey), database).objectToString(columnKey, database));
             	updateClause.append(",");
             }
         }

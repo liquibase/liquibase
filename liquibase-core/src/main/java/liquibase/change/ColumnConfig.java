@@ -19,6 +19,7 @@ public class ColumnConfig {
     private String name;
     private String type;
     private String value;
+    private String valueText;
     private Number valueNumeric;
     private Date valueDate;
     private Boolean valueBoolean;
@@ -207,6 +208,8 @@ public class ColumnConfig {
             return getValueDate();
         } else if (getValueComputed() != null) {
             return getValueComputed();
+        } else if (getValueText() != null) {
+            return getValueText();
         }
         return null;
     }
@@ -392,5 +395,13 @@ public class ColumnConfig {
 
     public void setValueClob(String valueClob) {
         this.valueClob = valueClob;
+    }
+    
+    public String getValueText() {
+        return valueText;
+    }
+
+    public void setValueText(String valueText) {
+        this.valueText = valueText;
     }
 }

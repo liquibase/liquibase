@@ -1,15 +1,12 @@
 package liquibase.diff.output;
 
-import liquibase.database.structure.Column;
+import java.io.PrintStream;
+import java.util.SortedSet;
+
 import liquibase.database.structure.DatabaseObject;
-import liquibase.database.structure.Table;
-import liquibase.database.structure.View;
 import liquibase.diff.DiffResult;
 import liquibase.diff.StringDiff;
 import liquibase.exception.DatabaseException;
-
-import java.io.PrintStream;
-import java.util.SortedSet;
 
 public class DiffToPrintStream {
 

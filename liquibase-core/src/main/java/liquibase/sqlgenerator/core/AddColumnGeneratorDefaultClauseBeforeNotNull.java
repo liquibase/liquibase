@@ -16,7 +16,6 @@ import liquibase.database.core.SybaseDatabase;
 import liquibase.database.structure.Column;
 import liquibase.database.structure.Schema;
 import liquibase.database.structure.Table;
-import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
@@ -54,7 +53,7 @@ public class AddColumnGeneratorDefaultClauseBeforeNotNull extends AddColumnGener
 
     @Override
     public Sql[] generateSql(AddColumnStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-        String alterTable = "ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " ADD " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " " + DataTypeFactory.getInstance().fromDescription(statement.getColumnType() + (statement.isAutoIncrement() ? "{autoIncrement:true}" : ""));
+        String alterTable = "ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " ADD " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " " + database.getDataTypeFactory().fromDescription(statement.getColumnType() + (statement.isAutoIncrement() ? "{autoIncrement:true}" : ""));
 
         alterTable += getDefaultClause(statement, database);
 
@@ -99,7 +98,7 @@ public class AddColumnGeneratorDefaultClauseBeforeNotNull extends AddColumnGener
         String clause = "";
         Object defaultValue = statement.getDefaultValue();
         if (defaultValue != null) {
-            clause += " DEFAULT " + DataTypeFactory.getInstance().fromObject(defaultValue, database).objectToString(defaultValue, database);
+            clause += " DEFAULT " + database.getDataTypeFactory().fromObject(defaultValue, database).objectToString(defaultValue, database);
         }
         return clause;
     }

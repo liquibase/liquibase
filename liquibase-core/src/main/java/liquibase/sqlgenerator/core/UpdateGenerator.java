@@ -1,14 +1,13 @@
 package liquibase.sqlgenerator.core;
 
+import java.util.Date;
+
 import liquibase.database.Database;
-import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.UpdateStatement;
-
-import java.util.Date;
 
 public class UpdateGenerator extends AbstractSqlGenerator<UpdateStatement> {
 
@@ -20,6 +19,7 @@ public class UpdateGenerator extends AbstractSqlGenerator<UpdateStatement> {
     }
 
     public Sql[] generateSql(UpdateStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    	   	
         StringBuffer sql = new StringBuffer("UPDATE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " SET");
         for (String column : statement.getNewColumnValues().keySet()) {
             sql.append(" ").append(database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), column)).append(" = ");
@@ -31,7 +31,7 @@ public class UpdateGenerator extends AbstractSqlGenerator<UpdateStatement> {
         if (statement.getWhereClause() != null) {
             String fixedWhereClause = "WHERE " + statement.getWhereClause().trim();
             for (Object param : statement.getWhereParameters()) {
-                fixedWhereClause = fixedWhereClause.replaceFirst("\\?", DataTypeFactory.getInstance().fromObject(param, database).objectToString(param, database));
+                fixedWhereClause = fixedWhereClause.replaceFirst("\\?", database.getDataTypeFactory().fromObject(param, database).objectToString(param, database));
             }
             sql.append(" ").append(fixedWhereClause);
         }
@@ -57,9 +57,9 @@ public class UpdateGenerator extends AbstractSqlGenerator<UpdateStatement> {
             sqlString = database.getDateLiteral(date);
         } else if (newValue instanceof Boolean) {
             if (((Boolean) newValue)) {
-                sqlString = DataTypeFactory.getInstance().getTrueBooleanValue(database);
+                sqlString = database.getDataTypeFactory().getTrueBooleanValue(database);
             } else {
-                sqlString = DataTypeFactory.getInstance().getFalseBooleanValue(database);
+                sqlString = database.getDataTypeFactory().getFalseBooleanValue(database);
             }
         } else {
             sqlString = newValue.toString();

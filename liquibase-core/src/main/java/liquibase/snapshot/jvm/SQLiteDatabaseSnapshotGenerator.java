@@ -1,23 +1,7 @@
 package liquibase.snapshot.jvm;
 
 import liquibase.database.Database;
-import liquibase.database.jvm.JdbcConnection;
-import liquibase.datatype.DataTypeFactory;
 import liquibase.database.core.SQLiteDatabase;
-import liquibase.database.structure.*;
-import liquibase.exception.DatabaseException;
-import liquibase.executor.ExecutorService;
-import liquibase.logging.LogFactory;
-import liquibase.snapshot.DatabaseSnapshot;
-import liquibase.statement.core.GetViewDefinitionStatement;
-import liquibase.statement.core.SelectSequencesStatement;
-import liquibase.util.StringUtils;
-
-import java.sql.DatabaseMetaData;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.*;
 
 public class SQLiteDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerator {
 

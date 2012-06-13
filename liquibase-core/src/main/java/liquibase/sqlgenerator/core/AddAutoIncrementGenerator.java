@@ -8,7 +8,6 @@ import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.structure.Column;
 import liquibase.database.structure.Schema;
 import liquibase.database.structure.Table;
-import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
@@ -52,7 +51,7 @@ public class AddAutoIncrementGenerator extends AbstractSqlGenerator<AddAutoIncre
             + " MODIFY "
             + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName())
             + " "
-            + DataTypeFactory.getInstance().fromDescription(statement.getColumnDataType() + "{autoIncrement:true}")
+            + database.getDataTypeFactory().fromDescription(statement.getColumnDataType() + "{autoIncrement:true}")
             + " " 
             + database.getAutoIncrementClause(statement.getStartWith(), statement.getIncrementBy());
 

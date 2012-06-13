@@ -7,7 +7,6 @@ import liquibase.change.ChangeProperty;
 import liquibase.database.Database;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.DropViewStatement;
-import liquibase.util.StringUtils;
 
 /**
  * Drops an existing view.

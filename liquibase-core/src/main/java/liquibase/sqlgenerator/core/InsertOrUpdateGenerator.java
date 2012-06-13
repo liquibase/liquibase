@@ -1,17 +1,16 @@
 package liquibase.sqlgenerator.core;
 
 import java.util.Arrays;
+import java.util.HashSet;
+
 import liquibase.database.Database;
-import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.ValidationErrors;
+import liquibase.sql.Sql;
+import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.InsertOrUpdateStatement;
 import liquibase.statement.core.UpdateStatement;
-import liquibase.sql.Sql;
-import liquibase.sql.UnparsedSql;
-
-import java.util.HashSet;
 
 public abstract class InsertOrUpdateGenerator extends AbstractSqlGenerator<InsertOrUpdateStatement> {
 
@@ -49,7 +48,7 @@ public abstract class InsertOrUpdateGenerator extends AbstractSqlGenerator<Inser
             if (newValue == null || newValue.toString().equals("NULL")) {
                 where.append("NULL");
             } else {
-                where.append(DataTypeFactory.getInstance().fromObject(newValue, database).objectToString(newValue, database));
+                where.append(database.getDataTypeFactory().fromObject(newValue, database).objectToString(newValue, database));
             }
 
             where.append(" AND ");
@@ -88,7 +87,10 @@ public abstract class InsertOrUpdateGenerator extends AbstractSqlGenerator<Inser
         StringBuffer updateSqlString = new StringBuffer();
 
         UpdateGenerator update = new UpdateGenerator();
-        UpdateStatement updateStatement = new UpdateStatement(insertOrUpdateStatement.getCatalogName(), insertOrUpdateStatement.getSchemaName(),insertOrUpdateStatement.getTableName());
+        UpdateStatement updateStatement = new UpdateStatement(
+        		insertOrUpdateStatement.getCatalogName(), 
+        		insertOrUpdateStatement.getSchemaName(),
+        		insertOrUpdateStatement.getTableName());
         updateStatement.setWhereClause(whereClause + ";\n");
 
         String[] pkFields=insertOrUpdateStatement.getPrimaryKey().split(",");
