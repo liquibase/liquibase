@@ -52,7 +52,7 @@ public class GenerateChangeLogTask extends BaseLiquibaseTask {
 
             DatabaseSnapshot referenceSnapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(database, diffControl, DiffControl.DatabaseRole.REFERENCE);
 
-            DiffResult diffResult = DiffGeneratorFactory.getInstance().compare(referenceSnapshot, new DatabaseSnapshot(database), diffControl);
+            DiffResult diffResult = DiffGeneratorFactory.getInstance().compare(referenceSnapshot, new DatabaseSnapshot(database, diffControl.getSchemas(DiffControl.DatabaseRole.REFERENCE)), diffControl);
 //			diff.addStatusListener(new OutDiffStatusListener());
 
 			if (getChangeLogFile() == null) {

@@ -64,6 +64,10 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
         return columns;
     }
 
+    public void setColumns(List<ColumnConfig> columns) {
+        this.columns = columns;
+    }
+
     public void addColumn(ColumnConfig column) {
         columns.add(column);
     }

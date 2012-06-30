@@ -71,7 +71,19 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
 
     public String serialize(ChangeSet changeSet) {
         StringBuffer buffer = new StringBuffer();
+        boolean tempDOM = false;
+        try {
+            if (currentChangeLogFileDOM == null) {
+                currentChangeLogFileDOM = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
+                tempDOM = true;
+            }
+        } catch (ParserConfigurationException e) {
+            throw new RuntimeException(e);
+        }
         nodeToStringBuffer(createNode(changeSet), buffer);
+        if (tempDOM) {
+            currentChangeLogFileDOM = null;
+        }
         return buffer.toString();
 
     }

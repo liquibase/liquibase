@@ -314,7 +314,7 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
 
     public DatabaseSnapshot createSnapshot(Database database, DiffControl diffControl, DiffControl.DatabaseRole type) throws DatabaseException {
         try {
-            DatabaseSnapshot snapshot = new DatabaseSnapshot(database);
+            DatabaseSnapshot snapshot = new DatabaseSnapshot(database, diffControl.getSchemas(type));
             DatabaseMetaData databaseMetaData = getMetaData(database);
             this.statusListeners = diffControl.getStatusListeners();
 

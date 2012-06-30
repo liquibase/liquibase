@@ -122,6 +122,10 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
         return columns;
     }
 
+    public void setColumns(List<ColumnConfig> columns) {
+        this.columns = columns;
+    }
+
     public String getCatalogName() {
         return catalogName;
     }

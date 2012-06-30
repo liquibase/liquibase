@@ -37,7 +37,7 @@ public class StandardDiffGenerator implements DiffGenerator {
     public DiffResult compare(DatabaseSnapshot referenceSnapshot, DatabaseSnapshot comparisonSnapshot, DiffControl diffControl) throws DatabaseException {
 
         if (comparisonSnapshot == null) {
-            comparisonSnapshot = new DatabaseSnapshot(referenceSnapshot.getDatabase());
+            comparisonSnapshot = new DatabaseSnapshot(referenceSnapshot.getDatabase(), diffControl.getSchemas(DiffControl.DatabaseRole.REFERENCE));
         }
 
         DiffResult diffResult = new DiffResult(referenceSnapshot, comparisonSnapshot, diffControl);

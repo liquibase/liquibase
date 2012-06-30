@@ -14,8 +14,11 @@ public class DatabaseSnapshot {
     
     private Map<Schema, SchemaSnapshot> schemaSnapshots = new HashMap<Schema, SchemaSnapshot>();
 
-    public DatabaseSnapshot(Database database) {
+    public DatabaseSnapshot(Database database, Schema[] schemas) {
         this.database = database;
+        for (Schema schema : schemas) {
+            addSchema(schema);
+        }
     }
 
 
@@ -61,13 +64,17 @@ public class DatabaseSnapshot {
         return null;
     }
 
+    public void addSchema(Schema schema) {
+        schemaSnapshots.put(schema, new SchemaSnapshot(schema));
+    }
+
     public void addDatabaseObjects(DatabaseObject... objects) {
 
         for (DatabaseObject object : objects) {
             Schema schema = object.getSchema();
             
             if (!schemaSnapshots.containsKey(schema)) {
-                schemaSnapshots.put(schema, new SchemaSnapshot());
+                addSchema(schema);
             }
             SchemaSnapshot schemaSnapshot = schemaSnapshots.get(schema);
 
@@ -171,6 +178,13 @@ public class DatabaseSnapshot {
     }
 
     private static class SchemaSnapshot {
+
+        private Schema schema;
+
+        private SchemaSnapshot(Schema schema) {
+            this.schema = schema;
+        }
+
         private Map<Class<? extends DatabaseObject>, Set<DatabaseObject>> databaseObjects = new HashMap<Class<? extends DatabaseObject>, Set<DatabaseObject>>();
 
     }
