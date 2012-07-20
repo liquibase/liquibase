@@ -52,7 +52,9 @@ public class FormattedSqlChangeLogParserTest {
             "create table mysql_boo (\n" +
             "  id int primary key\n" +
             ");\n" +
-            "-- rollback drop table mysql_boo;\n"
+            "-- rollback drop table mysql_boo;\n" +
+            "-- changeset multicontext:1 context:first,second,third\n" +
+            "select 1;\n"
             ;
 
     private static final String INVALID_CHANGELOG = "select * from table1";
@@ -71,7 +73,7 @@ public class FormattedSqlChangeLogParserTest {
 
         assertEquals("asdf.sql", changeLog.getLogicalFilePath());
 
-        assertEquals(7, changeLog.getChangeSets().size());
+        assertEquals(8, changeLog.getChangeSets().size());
 
         assertEquals("nvoxland", changeLog.getChangeSets().get(0).getAuthor());
         assertEquals("1", changeLog.getChangeSets().get(0).getId());
@@ -157,6 +159,17 @@ public class FormattedSqlChangeLogParserTest {
         assertEquals(1, changeLog.getChangeSets().get(6).getRollBackChanges().length);
         assertTrue(changeLog.getChangeSets().get(6).getRollBackChanges()[0] instanceof RawSQLChange);
         assertEquals("drop table mysql_boo;", ((RawSQLChange) changeLog.getChangeSets().get(6).getRollBackChanges()[0]).getSql());
+
+        assertEquals("multicontext", changeLog.getChangeSets().get(7).getAuthor());
+        assertEquals("1", changeLog.getChangeSets().get(7).getId());
+        assertEquals(1, changeLog.getChangeSets().get(7).getChanges().size());
+        assertTrue(changeLog.getChangeSets().get(7).getChanges().get(0) instanceof RawSQLChange);
+        assertEquals("select 1;", ((RawSQLChange) changeLog.getChangeSets().get(7).getChanges().get(0)).getSql());
+        assertEquals(0, changeLog.getChangeSets().get(7).getRollBackChanges().length);
+        assertEquals(3, changeLog.getChangeSets().get(7).getContexts().size());
+        assertTrue(changeLog.getChangeSets().get(7).getContexts().contains("first"));
+        assertTrue(changeLog.getChangeSets().get(7).getContexts().contains("second"));
+        assertTrue(changeLog.getChangeSets().get(7).getContexts().contains("third"));
     }
 
     private static class MockFormattedSqlChangeLogParser extends FormattedSqlChangeLogParser {
