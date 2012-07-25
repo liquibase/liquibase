@@ -127,7 +127,7 @@ public class OracleDatabase extends AbstractDatabase {
         String escapedIndexName = indexName;
         if (schemaName != null)
         {
-            escapedIndexName = schemaName + "." + escapedIndexName;
+            escapedIndexName = escapeDatabaseObject(schemaName) + "." + escapedIndexName;
         }
         return escapedIndexName;
     }
