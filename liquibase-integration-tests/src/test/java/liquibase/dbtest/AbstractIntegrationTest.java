@@ -2,6 +2,7 @@ package liquibase.dbtest;
 
 import liquibase.Liquibase;
 import liquibase.database.jvm.JdbcConnection;
+import liquibase.exception.ChangeLogParseException;
 import liquibase.exception.LiquibaseException;
 import liquibase.servicelocator.ServiceLocator;
 import liquibase.snapshot.DatabaseSnapshotGeneratorFactory;
@@ -56,6 +57,7 @@ public abstract class AbstractIntegrationTest {
     private String externalfkInitChangeLog;
     private String externalEntityChangeLog;
     private String externalEntityChangeLog2;
+    private String invalidReferenceChangeLog;
 
     protected String contexts = "test, context-b";
     private Database database;
@@ -71,6 +73,7 @@ public abstract class AbstractIntegrationTest {
         this.externalfkInitChangeLog= "changelogs/common/externalfk.init.changelog.xml";
         this.externalEntityChangeLog= "changelogs/common/externalEntity.changelog.xml";
         this.externalEntityChangeLog2= "com/example/nonIncluded/externalEntity.changelog.xml";
+        this.invalidReferenceChangeLog= "changelogs/common/invalid.reference.changelog.xml";
 
         this.url = url;
 
@@ -798,7 +801,31 @@ public abstract class AbstractIntegrationTest {
        DiffResultAssert.assertThat(diffResult).containsMissingForeignKeyWithName("fk_person_country");
    }
 
-  
+    @Test
+    public void invalidIncludeDoesntBreakLiquibase() throws Exception{
+        Liquibase liquibase = createLiquibase(invalidReferenceChangeLog);
+        try {
+            liquibase.update(null);
+            fail("Did not fail with invalid include");
+        } catch (ChangeLogParseException ignored) {
+            //expected
+        }
+
+        assertFalse(LockService.getInstance(database).hasChangeLogLock());
+    }
+
+    @Test
+    public void contextsWithHyphensWorkInFormattedSql() throws Exception {
+        Liquibase liquibase = createLiquibase("changelogs/common/sqlstyle/formatted.changelog.sql");
+        liquibase.update("hyphen-context-using-sql");
+
+        DatabaseSnapshot snapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(database, null, null);
+        assertNotNull(snapshot.getTable("hyphen_context"));
+        assertNull(snapshot.getTable("camel_context"));
+        assertNotNull(snapshot.getTable("bar_id"));
+        assertNotNull(snapshot.getTable("foo_id"));
+    }
+
 //   @Test
 //   public void testXMLInclude() throws Exception{
 //       if (database == null) {
