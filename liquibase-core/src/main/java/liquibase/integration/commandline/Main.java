@@ -298,8 +298,10 @@ public class Main {
     private boolean isChangeLogRequired(String command) {
         return command.toLowerCase().startsWith("update")
                 || command.toLowerCase().startsWith("rollback")
-                || "calculateCheckSum".equals(command)
-                || "validate".equals(command);
+                || "calculateCheckSum".equalsIgnoreCase(command)
+                || "validate".equalsIgnoreCase(command)
+                || "changeLogSync".equalsIgnoreCase(command)
+                || "changeLogSyncSql".equalsIgnoreCase(command);
     }
 
     private boolean isCommand(String arg) {
