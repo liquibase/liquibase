@@ -794,6 +794,7 @@ public class Liquibase {
             setChangeLogParameter("database.databaseProductVersion", database.getDatabaseProductVersion());
             setChangeLogParameter("database.defaultCatalogName", database.getDefaultCatalogName());
             setChangeLogParameter("database.defaultSchemaName", database.getDefaultSchemaName());
+            setChangeLogParameter("database.defaultSchemaNamePrefix", StringUtils.trimToNull(database.getDefaultSchemaName())==null?"":"."+database.getDefaultSchemaName());
             setChangeLogParameter("database.lineComment", database.getLineComment());
             setChangeLogParameter("database.liquibaseSchemaName", database.getLiquibaseSchemaName());
             setChangeLogParameter("database.typeName", database.getTypeName());
