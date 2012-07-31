@@ -227,6 +227,15 @@ public class MSSQLDatabase extends AbstractDatabase {
     }
 
     @Override
+    public boolean supportsDropTableCascadeConstraints() {
+        try {
+            return this.getDatabaseMajorVersion() >= 10;
+        } catch (DatabaseException e) {
+            return true;
+        }
+    }
+
+    @Override
 	public String getDefaultSchemaName() {
         String defaultSchemaName = super.getDefaultSchemaName();
         if (defaultSchemaName == null) {
