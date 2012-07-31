@@ -180,20 +180,6 @@ public class SQLFileChange extends AbstractSQLChange {
         }
     }
 
-    /**
-     * Calculates an MD5 from the contents of the file.
-     *
-     * @see liquibase.change.AbstractChange#generateCheckSum()
-     */
-    @Override
-    public CheckSum generateCheckSum() {
-        String sql = getSql();
-        if (sql == null) {
-            sql = "";
-        }
-        return CheckSum.compute(sql);
-    }
-
     public String getConfirmationMessage() {
         return "SQL in file " + path + " executed";
     }

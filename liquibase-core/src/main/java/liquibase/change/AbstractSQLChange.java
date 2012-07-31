@@ -87,6 +87,24 @@ public abstract class AbstractSQLChange extends AbstractChange {
     }
 
     /**
+     * Calculates an MD5 from the contents of the file.
+     *
+     * @see liquibase.change.AbstractChange#generateCheckSum()
+     */
+    @Override
+    public CheckSum generateCheckSum() {
+        String sql = getSql();
+        if (sql == null) {
+            sql = "";
+        }
+        return CheckSum.compute(this.endDelimiter+":"+
+                this.isSplittingStatements()+":"+
+                this.isStrippingComments()+":"+
+                sql.replaceAll("\r\n", "\n").replaceAll("\r", "\n")); //normalize line endings
+    }
+
+
+    /**
      * Generates one or more statements depending on how the SQL should be parsed.
      * If split statements is set to true then the SQL is split on the ; and go\n entries
      * found in the sql text and each is made a separate statement.
