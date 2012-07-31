@@ -861,4 +861,19 @@
             <column name="id" type="numeric"/>
         </createTable>
     </changeSet>
+
+    <changeSet id="createOrReplaceVieworks" author="nvoxland">
+        <createView replaceIfExists="true" viewName="replace_view_test">
+            select * from test_table
+        </createView>
+    </changeSet>
+
+    <changeSet id="createOrReplaceVieworks-2" author="nvoxland">
+        <createView replaceIfExists="true" viewName="replace_view_test">
+            select * from dataTypeTest
+        </createView>
+    </changeSet>
+    <changeSet id="createOrReplaceVieworks-3" author="nvoxland">
+        <sql>select * from replace_view_test</sql>
+    </changeSet>
 </databaseChangeLog>
