@@ -1,5 +1,6 @@
 package liquibase.database.core;
 
+import java.sql.ResultSet;
 import liquibase.database.AbstractDatabase;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.structure.Schema;
@@ -12,6 +13,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
+import liquibase.database.jvm.JdbcConnection;
+import liquibase.logging.LogFactory;
 
 /**
  * Encapsulates MS-SQL database support.
@@ -131,6 +134,18 @@ public class MSSQLDatabase extends AbstractDatabase {
         }
     }
 
+    @Override
+    protected String doGetDefaultSchemaName() {
+        try {
+            ResultSet resultSet = ((JdbcConnection) getConnection()).prepareStatement("select schema_name()").executeQuery();
+            resultSet.next();
+            return resultSet.getString(1);
+        } catch (Exception e) {
+            LogFactory.getLogger().info("Error getting default schema", e);
+        }
+        return null;
+    }
+    
     @Override
     public String getConcatSql(String... values) {
         StringBuffer returnString = new StringBuffer();
