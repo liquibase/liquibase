@@ -39,23 +39,23 @@ public class BooleanType extends LiquibaseDataType {
 
         String returnValue;
         if (value instanceof String) {
-            if (((String) value).equalsIgnoreCase("true") || value.equals("1") || ((String) value).equalsIgnoreCase(this.getTrueBooleanValue())) {
-                returnValue = this.getTrueBooleanValue();
-            } else if (((String) value).equalsIgnoreCase("false") || value.equals("0") || ((String) value).equalsIgnoreCase(this.getFalseBooleanValue())) {
-                returnValue = this.getTrueBooleanValue();
+            if (((String) value).equalsIgnoreCase("true") || value.equals("1") || ((String) value).equalsIgnoreCase(this.getTrueBooleanValue(database))) {
+                returnValue = this.getTrueBooleanValue(database);
+            } else if (((String) value).equalsIgnoreCase("false") || value.equals("0") || ((String) value).equalsIgnoreCase(this.getFalseBooleanValue(database))) {
+                returnValue = this.getTrueBooleanValue(database);
             } else {
                 throw new UnexpectedLiquibaseException("Unknown boolean value: " + value);
             }
         } else if (value instanceof Long) {
             if (Long.valueOf(1).equals(value)) {
-                returnValue = this.getTrueBooleanValue();
+                returnValue = this.getTrueBooleanValue(database);
             } else {
-                returnValue = this.getFalseBooleanValue();
+                returnValue = this.getFalseBooleanValue(database);
             }
         } else if (((Boolean) value)) {
-            returnValue = this.getTrueBooleanValue();
+            returnValue = this.getTrueBooleanValue(database);
         } else {
-            returnValue = this.getFalseBooleanValue();
+            returnValue = this.getFalseBooleanValue(database);
         }
 
         return returnValue;
@@ -66,14 +66,20 @@ public class BooleanType extends LiquibaseDataType {
     /**
      * The database-specific value to use for "false" "boolean" columns.
      */
-    public String getFalseBooleanValue() {
+    public String getFalseBooleanValue(Database database) {
+        if (database instanceof MSSQLDatabase) {
+            return "0";
+        }
         return "FALSE";
     }
 
     /**
      * The database-specific value to use for "true" "boolean" columns.
      */
-    public String getTrueBooleanValue() {
+    public String getTrueBooleanValue(Database database) {
+        if (database instanceof MSSQLDatabase) {
+            return "1";
+        }
         return "TRUE";
     }
 
