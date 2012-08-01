@@ -11,6 +11,7 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="liquibase-core" />
+    <orderEntry type="library" name="Maven: org.jboss.weld.se:weld-se:1.1.8.Final" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: junit:junit:4.8.1" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: org.easymock:easymockclassextension:2.2" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: org.easymock:easymock:2.2" level="project" />

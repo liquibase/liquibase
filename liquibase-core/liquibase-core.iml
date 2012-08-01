@@ -38,8 +38,7 @@
     <orderEntry type="library" scope="PROVIDED" name="Maven: org.jboss.spec.javax.interceptor:jboss-interceptors-api_1.1_spec:1.0.0.Beta1" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: javax.annotation:jsr250-api:1.0" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: javax.inject:javax.inject:1" level="project" />
-    <orderEntry type="library" scope="TEST" name="Maven: org.jboss.weld.se:weld-se:1.1.5.Final" level="project" />
-    <orderEntry type="library" scope="TEST" name="Maven: org.jboss.weld:weld-build-config:1.1.5.Final" level="project" />
+    <orderEntry type="library" name="Maven: org.jboss.weld.se:weld-se:1.1.8.Final" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: hsqldb:hsqldb:1.8.0.7" level="project" />
   </component>
 </module>
