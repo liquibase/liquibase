@@ -191,8 +191,16 @@ public abstract class AbstractDatabase implements Database {
         return defaultCatalogName;
     }
 
-    public void setDefaultCatalogName(String defaultCatalogName) {
-        this.defaultCatalogName = defaultCatalogName;
+    /**
+     * Returns the default schema from the current database connection.  By default, this will be the user name
+     * for the current connection.  Implementations should override this method for databases which allow for the
+     * schema to be something other than the current user.
+     *
+     * @return The current schema name
+     * @throws DatabaseException if an error occured
+     */
+    protected String getDefaultDatabaseSchemaName() throws DatabaseException {
+        return getConnection().getConnectionUserName();
     }
 
     public String correctCatalogName(String catalogName) {
@@ -755,13 +763,12 @@ public abstract class AbstractDatabase implements Database {
     }
 
     public boolean supportsDropTableCascadeConstraints() {
-        return (this instanceof DerbyDatabase
-                || this instanceof DB2Database
-                || this instanceof MSSQLDatabase
-                || this instanceof FirebirdDatabase
-                || this instanceof SQLiteDatabase
-                || this instanceof SybaseDatabase
-                || this instanceof SybaseASADatabase);
+         return (this instanceof DerbyDatabase
+                 || this instanceof MSSQLDatabase
+                 || this instanceof FirebirdDatabase
+                 || this instanceof SQLiteDatabase
+                 || this instanceof SybaseDatabase
+                 || this instanceof SybaseASADatabase);
     }
 
     public boolean isSystemTable(Schema schema, String tableName) {

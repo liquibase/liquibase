@@ -2,14 +2,20 @@ package liquibase.database.core;
 
 import liquibase.database.AbstractDatabase;
 import liquibase.database.DatabaseConnection;
+import liquibase.database.jvm.JdbcConnection;
 import liquibase.database.structure.Schema;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.DateParseException;
+import liquibase.util.JdbcUtils;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 
 public class DB2Database extends AbstractDatabase {
+    private String defaultSchemaName;
 
     public boolean isCorrectDatabaseImplementation(DatabaseConnection conn) throws DatabaseException {
         return conn.getDatabaseProductName().startsWith("DB2");
@@ -37,6 +43,33 @@ public class DB2Database extends AbstractDatabase {
 
     public String getTypeName() {
         return "db2";
+    }
+
+    @Override
+    protected String getDefaultDatabaseSchemaName() throws DatabaseException {//NOPMD
+      if( defaultSchemaName == null ) {
+        Statement stmt = null;
+        ResultSet rs = null;
+        try {
+          stmt = ((JdbcConnection)getConnection()).createStatement();
+          rs = stmt.executeQuery("select current schema from sysibm.sysdummy1");
+          if( rs.next() ) {
+            String result = rs.getString(1);
+            if( result != null ) {
+              this.defaultSchemaName = result;
+            } else {
+              this.defaultSchemaName = super.getDefaultDatabaseSchemaName();
+            }
+          }
+        } catch (Exception e) {
+          throw new DatabaseException("Could not determine current schema", e);
+        } finally {
+          JdbcUtils.closeResultSet(rs);
+          JdbcUtils.closeStatement(stmt);
+        }
+
+      }
+      return defaultSchemaName;
     }
 
     @Override
