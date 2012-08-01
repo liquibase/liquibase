@@ -137,6 +137,7 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 
     private boolean dropFirst = false;
 
+    private boolean shouldRun = true;
 
     public SpringLiquibase() {
         super();
@@ -150,6 +151,9 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
         this.dropFirst = dropFirst;
     }
 
+    public void setShouldRun(boolean shouldRun) {
+        this.shouldRun = shouldRun;
+    }
 
     public String getDatabaseProductName() throws DatabaseException {
         Connection connection = null;
@@ -234,6 +238,11 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
         String shouldRunProperty = System.getProperty(Liquibase.SHOULD_RUN_SYSTEM_PROPERTY);
         if (shouldRunProperty != null && !Boolean.valueOf(shouldRunProperty)) {
             LogFactory.getLogger().info("Liquibase did not run because '" + Liquibase.SHOULD_RUN_SYSTEM_PROPERTY + "' system property was set to false");
+            return;
+        }
+        if (!shouldRun) {
+            LogFactory.getLogger().info("Liquibase did not run because 'shouldRun' " +
+                    "property was set to false on " + getBeanName() + " Liquibase Spring bean.");
             return;
         }
 
