@@ -22,6 +22,9 @@
             <includes>
                 <include>*.bat</include>
             </includes>
+            <excludes>
+                <exclude>liquibase</exclude>
+            </excludes>
         </fileSet>
         <fileSet>
             <directory>${project.build.directory}/site/apidocs</directory>

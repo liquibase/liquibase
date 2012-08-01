@@ -101,8 +101,7 @@ public class CreateViewChange extends AbstractChange {
 	}
 
 	private boolean supportsReplaceIfExistsOption(Database database) {
-		return !(database instanceof SQLiteDatabase
-		    || database instanceof MSSQLDatabase);
+		return !(database instanceof SQLiteDatabase);
 	}
 
 }

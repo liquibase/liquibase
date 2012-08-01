@@ -299,8 +299,10 @@ public class Main {
     private boolean isChangeLogRequired(String command) {
         return command.toLowerCase().startsWith("update")
                 || command.toLowerCase().startsWith("rollback")
-                || "calculateCheckSum".equals(command)
-                || "validate".equals(command);
+                || "calculateCheckSum".equalsIgnoreCase(command)
+                || "validate".equalsIgnoreCase(command)
+                || "changeLogSync".equalsIgnoreCase(command)
+                || "changeLogSyncSql".equalsIgnoreCase(command);
     }
 
     private boolean isCommand(String arg) {
@@ -317,6 +319,7 @@ public class Main {
                 || "rollbackToDateSQL".equalsIgnoreCase(arg)
                 || "rollbackCountSQL".equalsIgnoreCase(arg)
                 || "futureRollbackSQL".equalsIgnoreCase(arg)
+                || "futureRollbackCountSQL".equalsIgnoreCase(arg)
                 || "updateTestingRollback".equalsIgnoreCase(arg)
                 || "tag".equalsIgnoreCase(arg)
                 || "listLocks".equalsIgnoreCase(arg)
@@ -435,6 +438,9 @@ public class Main {
         stream.println("                                applied to the database");
         stream.println(" futureRollbackSQL              Writes SQL to roll back the database to the ");
         stream.println("                                current state after the changes in the ");
+        stream.println("                                changeslog have been applied");
+        stream.println(" futureRollbackSQL <value>      Writes SQL to roll back the database to the ");
+        stream.println("                                current state after <value> changes in the ");
         stream.println("                                changeslog have been applied");
         stream.println(" updateTestingRollback          Updates database, then rolls back changes before");
         stream.println("                                updating again. Useful for testing");
@@ -865,6 +871,12 @@ public class Main {
                     liquibase.rollback(Integer.parseInt(commandParams.iterator().next()), contexts, getOutputWriter());
                 } else if ("futureRollbackSQL".equalsIgnoreCase(command)) {
                     liquibase.futureRollbackSQL(contexts, getOutputWriter());
+                } else if ("futureRollbackCountSQL".equalsIgnoreCase(command)) {
+                    if (commandParams == null || commandParams.size() == 0) {
+                        throw new CommandLineParsingException("futureRollbackCountSQL requires a rollback count");
+                    }
+
+                    liquibase.futureRollbackSQL(Integer.parseInt(commandParams.iterator().next()), contexts, getOutputWriter());
                 } else if ("updateTestingRollback".equalsIgnoreCase(command)) {
                     liquibase.updateTestingRollback(contexts);
                 } else {

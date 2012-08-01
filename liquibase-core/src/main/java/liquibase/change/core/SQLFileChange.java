@@ -113,7 +113,7 @@ public class SQLFileChange extends AbstractSQLChange {
      */
     private boolean loadFromFileSystem(String file) throws SetupException {
         if (relativeToChangelogFile != null && relativeToChangelogFile) {
-            file = getChangeSet().getFilePath().replaceFirst("[^/]*$","")+file;
+            file = getChangeSet().getFilePath().replaceFirst("/[^/]*$", "") + "/" + file;
         }
 
         InputStream fis = null;

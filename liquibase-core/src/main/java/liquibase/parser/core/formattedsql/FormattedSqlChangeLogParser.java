@@ -60,7 +60,7 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
 
             ChangeSet changeSet = null;
             RawSQLChange change = null;
-            Pattern changeSetPattern = Pattern.compile("\\-\\-[\\s]*changeset (\\w+):(\\w+).*", Pattern.CASE_INSENSITIVE);
+            Pattern changeSetPattern = Pattern.compile("\\-\\-[\\s]*changeset (\\S+):(\\S+).*", Pattern.CASE_INSENSITIVE);
             Pattern rollbackPattern = Pattern.compile("\\s*\\-\\-[\\s]*rollback (.*)", Pattern.CASE_INSENSITIVE);
             Pattern stripCommentsPattern = Pattern.compile(".*stripComments:(\\w+).*", Pattern.CASE_INSENSITIVE);
             Pattern splitStatementsPattern = Pattern.compile(".*splitStatements:(\\w+).*", Pattern.CASE_INSENSITIVE);
@@ -68,7 +68,7 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
 
             Pattern runOnChangePattern = Pattern.compile(".*runOnChange:(\\w+).*", Pattern.CASE_INSENSITIVE);
             Pattern runAlwaysPattern = Pattern.compile(".*runAlways:(\\w+).*", Pattern.CASE_INSENSITIVE);
-            Pattern contextPattern = Pattern.compile(".*context:(\\w+).*", Pattern.CASE_INSENSITIVE);
+            Pattern contextPattern = Pattern.compile(".*context:(\\S+).*", Pattern.CASE_INSENSITIVE);
             Pattern runInTransactionPattern = Pattern.compile(".*runInTransaction:(\\w+).*", Pattern.CASE_INSENSITIVE);
             Pattern dbmsPattern = Pattern.compile(".*dbms:(\\w+).*", Pattern.CASE_INSENSITIVE);
             Pattern failOnErrorPattern = Pattern.compile(".*failOnError:(\\w+).*", Pattern.CASE_INSENSITIVE);

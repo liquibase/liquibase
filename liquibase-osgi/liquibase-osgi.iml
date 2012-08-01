@@ -15,7 +15,7 @@
           <property key="DynamicImport-Package" value="net.sf.cglib.*" />
           <property key="-include" value="src/main/resources/META-INF/MANIFEST.MF" />
           <property key="Bundle-ClassPath" value=".,liquibase-core-3.0.0-SNAPSHOT.jar" />
-          <property key="Include-Resource" value="liquibase-core-3.0.0-SNAPSHOT.jar=$MODULE_DIR$/../liquibase-core/pom.xml" />
+          <property key="Include-Resource" value="liquibase-core-3.0.0-SNAPSHOT.jar=C:/dev-other/liquibase/liquibase-core/pom.xml" />
           <property key="Embedded-Artifacts" value="liquibase-core-3.0.0-SNAPSHOT.jar;g=&quot;org.liquibase&quot;;a=&quot;liquibase-core&quot;;v=&quot;3.0.0-SNAPSHOT&quot;" />
         </additionalProperties>
         <additionalJARContents />

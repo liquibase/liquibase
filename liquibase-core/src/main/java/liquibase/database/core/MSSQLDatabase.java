@@ -224,6 +224,26 @@ public class MSSQLDatabase extends AbstractDatabase {
     }
 
     @Override
+    public boolean supportsDropTableCascadeConstraints() {
+        try {
+            return this.getDatabaseMajorVersion() >= 10;
+        } catch (DatabaseException e) {
+            return true;
+        }
+    }
+
+    @Override
+	public String getDefaultSchemaName() {
+        String defaultSchemaName = super.getDefaultSchemaName();
+        if (defaultSchemaName == null) {
+            return "dbo";
+        } else {
+            return defaultSchemaName;
+        }
+
+	}
+
+      @Override
     public String getViewDefinition(Schema schema, String viewName) throws DatabaseException {
         List<String> defLines = (List<String>) ExecutorService.getInstance().getExecutor(this).queryForList(new GetViewDefinitionStatement(schema.getCatalogName(this), schema.getName(this), viewName), String.class);
         StringBuffer sb = new StringBuffer();

@@ -19,11 +19,6 @@ public class H2IntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    public void testRerunDiffChangeLog() throws Exception {
-        super.testRerunDiffChangeLog();    //To change body of overridden methods use File | Settings | File Templates.
-    }
-
-    @Test
     public void diffToPrintStream() throws Exception{
         if (getDatabase() == null) {
             return;
