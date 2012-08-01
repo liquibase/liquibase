@@ -250,19 +250,29 @@ public abstract class AbstractDatabase implements Database {
     public String getDefaultSchemaName() {
 
         if (defaultSchemaName == null && connection != null) {
-            try {
-                ResultSet resultSet = ((JdbcConnection) connection).prepareCall("call current_schema").executeQuery();
-                resultSet.next();
-                defaultSchemaName = resultSet.getString(1);
-            } catch (Exception e) {
-                LogFactory.getLogger().info("Error getting default schema", e);
-            }
+            defaultSchemaName = doGetDefaultSchemaName();
         }
 
 
         return defaultSchemaName;
     }
-
+    
+    /** 
+     * Overwrite this method to get the default schema name for the connection.
+     * 
+     * @return 
+     */
+    protected String doGetDefaultSchemaName() {
+        try {
+            ResultSet resultSet = ((JdbcConnection) connection).prepareCall("call current_schema").executeQuery();
+            resultSet.next();
+            return resultSet.getString(1);
+        } catch (Exception e) {
+            LogFactory.getLogger().info("Error getting default schema", e);
+        }
+        return null;
+    }
+    
     public void setDefaultSchemaName(String schemaName) {
         this.defaultSchemaName = schemaName;
     }
