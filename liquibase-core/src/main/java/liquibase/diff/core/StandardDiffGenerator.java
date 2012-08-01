@@ -67,13 +67,13 @@ public class StandardDiffGenerator implements DiffGenerator {
     }
 
     protected <T extends DatabaseObject> void compareObjectType(Class<T> type, DatabaseSnapshot referenceSnapshot, DatabaseSnapshot comparisonSnapshot, DiffResult diffResult) {
-        Set<Schema> schemas = new HashSet<Schema>();
-        schemas.addAll(referenceSnapshot.getSchemas());
-        schemas.addAll(comparisonSnapshot.getSchemas());
-        for (Schema schema : schemas) {
-            for (T referenceObject : referenceSnapshot.getDatabaseObjects(schema, type)) {
-                if (comparisonSnapshot.contains(schema, referenceObject)) {
-                    if (!comparisonSnapshot.matches(schema, referenceObject)) {
+
+        for (DiffControl.SchemaComparison schemaComparison : diffResult.getDiffControl().getSchemaComparisons()) {
+            Schema referenceSchema = schemaComparison.getReferenceSchema().clone(referenceSnapshot.getDatabase());
+            Schema comparisonSchema = schemaComparison.getComparisonSchema().clone(comparisonSnapshot.getDatabase());
+            for (T referenceObject : referenceSnapshot.getDatabaseObjects(referenceSchema, type)) {
+                if (comparisonSnapshot.contains(comparisonSchema, referenceObject)) {
+                    if (!comparisonSnapshot.matches(comparisonSchema, referenceObject)) {
                         diffResult.getObjectDiff(type).addChanged(referenceObject);
                     }
                 } else {
@@ -81,8 +81,8 @@ public class StandardDiffGenerator implements DiffGenerator {
                 }
             }
 
-            for (T targetObject : comparisonSnapshot.getDatabaseObjects(schema, type)) {
-                if (!referenceSnapshot.contains(schema, targetObject)) {
+            for (T targetObject : comparisonSnapshot.getDatabaseObjects(comparisonSchema, type)) {
+                if (!referenceSnapshot.contains(referenceSchema, targetObject)) {
                     diffResult.getObjectDiff(type).addUnexpected(targetObject);
                 }
             }

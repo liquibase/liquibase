@@ -2,6 +2,7 @@ package liquibase.integration.ant;
 
 import liquibase.Liquibase;
 import liquibase.database.Database;
+import liquibase.database.structure.Schema;
 import liquibase.diff.DiffControl;
 import liquibase.diff.DiffResult;
 import liquibase.diff.output.DiffToChangeLog;
@@ -108,7 +109,10 @@ public class DiffDatabaseTask extends BaseLiquibaseTask {
             referenceDatabase = createDatabaseObject(getReferenceDriver(), getReferenceUrl(), getReferenceUsername(), getReferencePassword(), getReferenceDefaultSchemaName(), getDatabaseClass());
 
 
-            DiffControl diffControl = new DiffControl(getReferenceDefaultCatalogName(), getReferenceDefaultSchemaName(), getDefaultCatalogName(), getDefaultSchemaName(), getDiffTypes());
+            DiffControl diffControl = new DiffControl(new DiffControl.SchemaComparison[]{
+                    new DiffControl.SchemaComparison(
+                            new Schema(getReferenceDefaultCatalogName(), getReferenceDefaultSchemaName()),
+                            new Schema(getDefaultCatalogName(), getDefaultSchemaName()))}, getDiffTypes());
             diffControl.setDataDir(getDataDir());
 
             DiffResult diffResult = liquibase.diff(referenceDatabase, liquibase.getDatabase(), diffControl);

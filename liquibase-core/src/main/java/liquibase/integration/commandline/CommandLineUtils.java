@@ -3,6 +3,7 @@ package liquibase.integration.commandline;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.jvm.JdbcConnection;
+import liquibase.database.structure.Schema;
 import liquibase.diff.DiffControl;
 import liquibase.diff.DiffGeneratorFactory;
 import liquibase.diff.DiffResult;
@@ -133,7 +134,7 @@ public class CommandLineUtils {
     }
 
     public static void doGenerateChangeLog(String changeLogFile, Database originalDatabase, String catalogName, String schemaName, String diffTypes, String author, String context, String dataDir) throws DatabaseException, IOException, ParserConfigurationException {
-        DiffControl diffControl = new DiffControl(catalogName, schemaName, null, null, diffTypes);
+        DiffControl diffControl = new DiffControl(new Schema(catalogName, schemaName), diffTypes);
         diffControl.setDataDir(dataDir);
         diffControl.addStatusListener(new OutDiffStatusListener());
 

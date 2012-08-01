@@ -2,6 +2,7 @@ package liquibase.integration.ant;
 
 import liquibase.Liquibase;
 import liquibase.database.Database;
+import liquibase.database.structure.Schema;
 import liquibase.diff.DiffControl;
 import liquibase.diff.DiffGeneratorFactory;
 import liquibase.diff.DiffResult;
@@ -47,7 +48,7 @@ public class GenerateChangeLogTask extends BaseLiquibaseTask {
 			liquibase = createLiquibase();
 
 			Database database = liquibase.getDatabase();
-            DiffControl diffControl = new DiffControl(getDefaultCatalogName(), getDefaultSchemaName(), null, null, getDiffTypes());
+            DiffControl diffControl = new DiffControl(new Schema(getDefaultCatalogName(), getDefaultSchemaName()), getDiffTypes());
             diffControl.setDataDir(getDataDir());
 
             DatabaseSnapshot referenceSnapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(database, diffControl, DiffControl.DatabaseRole.REFERENCE);

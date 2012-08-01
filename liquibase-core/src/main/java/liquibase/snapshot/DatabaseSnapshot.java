@@ -65,6 +65,7 @@ public class DatabaseSnapshot {
     }
 
     public void addSchema(Schema schema) {
+        schema = schema.clone(database);
         schemaSnapshots.put(schema, new SchemaSnapshot(schema));
     }
 
