@@ -828,11 +828,11 @@ public abstract class AbstractIntegrationTest {
     @Test
     public void contextsWithHyphensWorkInFormattedSql() throws Exception {
         Liquibase liquibase = createLiquibase("changelogs/common/sqlstyle/formatted.changelog.sql");
-        liquibase.update("hyphen-context-using-sql");
+        liquibase.update("hyphen-context-using-sql,camelCaseContextUsingSql");
 
         DatabaseSnapshotGenerator snapshot = DatabaseSnapshotGeneratorFactory.getInstance().getGenerator(database);
         assertNotNull(snapshot.hasTable(null, null, "hyphen_context", database));
-        assertNull(snapshot.hasTable(null, null, "camel_context", database));
+        assertNotNull(snapshot.hasTable(null, null, "camel_context", database));
         assertNotNull(snapshot.hasTable(null, null, "bar_id", database));
         assertNotNull(snapshot.hasTable(null, null, "foo_id", database));
     }

@@ -726,7 +726,9 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
 
         foreignKey.setForeignKeyTable(foreignKeyTable);
         foreignKey.setForeignKeyColumns(cleanObjectNameFromDatabase(importedKeyMetadataResultSet.getString("FKCOLUMN_NAME")));
-        foreignKey.setPrimaryKeyTable(snapshot.getDatabaseObject(new Schema(importedKeyMetadataResultSet.getString("PKTABLE_CAT"), importedKeyMetadataResultSet.getString("PKTABLE_SCHEM")), importedKeyMetadataResultSet.getString("PKTABLE_NAME"), Table.class));
+
+        Table tempPkTable = (Table) new Table(importedKeyMetadataResultSet.getString("PKTABLE_NAME")).setSchema(new Schema(importedKeyMetadataResultSet.getString("PKTABLE_CAT"), importedKeyMetadataResultSet.getString("PKTABLE_SCHEM")));
+        foreignKey.setPrimaryKeyTable(tempPkTable);
         foreignKey.setPrimaryKeyColumns(cleanObjectNameFromDatabase(importedKeyMetadataResultSet.getString("PKCOLUMN_NAME")));
         //todo foreignKey.setKeySeq(importedKeyMetadataResultSet.getInt("KEY_SEQ"));
 
