@@ -14,8 +14,7 @@ Liquibase core is currently built using Maven 3.  Liquibase's modules are organi
 Building with the <code>maven package</code> command will compile, run
 tests and build the packages.
 
-<code>
-$ mvn package
+```$ mvn package
 [INFO] Reactor Summary:
 [INFO] 
 [INFO] Liquibase Parent Configuration
@@ -26,7 +25,7 @@ $ mvn package
 [INFO] Liquibase extension sample using nested tags for change
 [INFO] Liquibase extension showing sample sqlgenerator
 [INFO] Liquibase Integration Tests
-</code>
+```
 
 ## Known Issues ##
 
