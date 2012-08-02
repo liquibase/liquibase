@@ -1,3 +1,4 @@
+## Building Liquibase ##
 Liquibase core is currently built using Maven 3.  Liquibase's modules are organized as follows
 
 /                               Liquibase Parent Configuration pom
