@@ -17,6 +17,12 @@ public class DiffControl {
     private String dataDir = null;
 
     public DiffControl() {
+        addDefaultTypes();
+
+        schemaComparisons = new SchemaComparison[]{new SchemaComparison(new Schema(new Catalog(null), null), new Schema(new Catalog(null), null))};
+    }
+
+    private void addDefaultTypes() {
         objectTypesToDiff.add(Table.class);
         objectTypesToDiff.add(View.class);
         objectTypesToDiff.add(Column.class);
@@ -25,13 +31,18 @@ public class DiffControl {
         objectTypesToDiff.add(PrimaryKey.class);
         objectTypesToDiff.add(UniqueConstraint.class);
         objectTypesToDiff.add(Sequence.class);
-
-        schemaComparisons = new SchemaComparison[]{new SchemaComparison(new Schema(new Catalog(null), null), new Schema(new Catalog(null), null))};
+    }
+    public DiffControl(SchemaComparison[] schemaComparison) {
+        this(schemaComparison, (Class[]) null);
     }
 
     public DiffControl(SchemaComparison[] schemaComparison, Class<? extends DatabaseObject>[] typesToDiff) {
+        if (typesToDiff == null) {
+            addDefaultTypes();
+        } else {
+            this.objectTypesToDiff = Arrays.asList(typesToDiff);
+        }
         this.schemaComparisons = schemaComparison;
-        this.objectTypesToDiff = Arrays.asList(typesToDiff);
     }
 
     public DiffControl(SchemaComparison[] schemaComparison, String typesToDiff) {
@@ -44,7 +55,7 @@ public class DiffControl {
     }
 
     public DiffControl(Schema schema, String diffTypes) {
-        this(new SchemaComparison[]{new SchemaComparison(schema, null)}, new Class[0]);
+        this.schemaComparisons = new SchemaComparison[] {new SchemaComparison(schema, schema)};
         readDiffTypesString(diffTypes);
     }
 
@@ -76,7 +87,9 @@ public class DiffControl {
     }
 
     private void readDiffTypesString(String diffTypes) {
-        if (StringUtils.trimToNull(diffTypes) != null) {
+        if (StringUtils.trimToNull(diffTypes) == null) {
+            addDefaultTypes();
+        } else {
             Set<String> types = new HashSet<String>(Arrays.asList(diffTypes.toLowerCase().split("\\s*,\\s*")));
 
             if (types.contains("tables")) {

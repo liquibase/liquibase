@@ -472,7 +472,8 @@ public abstract class AbstractIntegrationTest {
 
         DatabaseSnapshot originalSnapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(database, new DiffControl());
 
-        DiffResult diffResult = DiffGeneratorFactory.getInstance().compare(database, null, new DiffControl(new Schema(Catalog.DEFAULT, "liquibaseb")));
+        DiffControl diffControl = new DiffControl(new DiffControl.SchemaComparison[]{new DiffControl.SchemaComparison(Schema.DEFAULT, new Schema(Catalog.DEFAULT, "liquibaseb"))});
+        DiffResult diffResult = DiffGeneratorFactory.getInstance().compare(database, database, diffControl);
 
         File tempFile = File.createTempFile("liquibase-test", ".xml");
 

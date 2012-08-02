@@ -692,7 +692,7 @@ public abstract class AbstractDatabase implements Database {
     public void dropDatabaseObjects(Schema schema) throws DatabaseException {
         schema = schema.clone(this);
         try {
-            DatabaseSnapshot snapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(this, new DiffControl(schema));
+            DatabaseSnapshot snapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(this, new DiffControl(schema, ""));
 
             List<Change> dropChanges = new ArrayList<Change>();
 
