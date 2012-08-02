@@ -7,7 +7,7 @@ import liquibase.datatype.LiquibaseDataType;
 import liquibase.statement.DatabaseFunction;
 import liquibase.database.Database;
 
-@DataTypeInfo(name = "datetime", aliases = {"timestamp", "java.sql.Types.DATETIME", "java.sql.Types.TIMESTAMP", "java.sql.Timestamp", "java.util.Date"}, minParameters = 0, maxParameters = 1, priority = LiquibaseDataType.PRIORITY_DEFAULT)
+@DataTypeInfo(name = "datetime", aliases = {"java.sql.Types.DATETIME", "java.util.Date"}, minParameters = 0, maxParameters = 1, priority = LiquibaseDataType.PRIORITY_DEFAULT)
 public class DateTimeType extends LiquibaseDataType {
 
     @Override

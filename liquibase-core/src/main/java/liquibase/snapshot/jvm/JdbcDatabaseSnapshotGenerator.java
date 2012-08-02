@@ -478,6 +478,9 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
                 } else if (type == Types.BINARY) {
                     return new DatabaseFunction(stringVal);
                 } else if (type == Types.BIT) {
+                    if (stringVal.startsWith("b'")) { //mysql returns boolean values as b'0' and b'1'
+                        stringVal = stringVal.replaceFirst("b'", "").replaceFirst("'$", "");
+                    }
                     return new Integer(stringVal);
                 } else if (type == Types.BLOB) {
                     return new DatabaseFunction(stringVal);
