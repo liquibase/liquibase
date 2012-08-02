@@ -26,3 +26,6 @@ $ mvn package
 [INFO] Liquibase extension showing sample sqlgenerator
 [INFO] Liquibase Integration Tests
 
+
+==Known Issues==
+
