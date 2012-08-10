@@ -129,6 +129,10 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
                     if (columnConfig != null) {
                         columnName = columnConfig.getName();
 
+                        if (columnConfig.getType().equalsIgnoreCase("SKIP")) {
+                            continue;
+                        }
+
                         if (value.toString().equalsIgnoreCase("NULL")) {
                             value = "NULL";
                         } else if (columnConfig.getType() != null) {
@@ -144,7 +148,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
                             } else if (columnConfig.getType().equalsIgnoreCase("COMPUTED")) {
                                 valueConfig.setValue(value.toString());
                             } else {
-                                throw new UnexpectedLiquibaseException("loadData type of "+columnConfig.getType()+" is not supported.  Please use BOOLEAN, NUMERIC, DATE, STRING, or COMPUTED");
+                                throw new UnexpectedLiquibaseException("loadData type of "+columnConfig.getType()+" is not supported.  Please use BOOLEAN, NUMERIC, DATE, STRING, COMPUTED or SKIP");
                             }
                             value = valueConfig.getValueObject();
                         }
