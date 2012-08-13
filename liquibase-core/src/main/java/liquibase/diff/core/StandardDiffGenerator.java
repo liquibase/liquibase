@@ -72,6 +72,9 @@ public class StandardDiffGenerator implements DiffGenerator {
             Schema referenceSchema = schemaComparison.getReferenceSchema().clone(referenceSnapshot.getDatabase());
             Schema comparisonSchema = schemaComparison.getComparisonSchema().clone(comparisonSnapshot.getDatabase());
             for (T referenceObject : referenceSnapshot.getDatabaseObjects(referenceSchema, type)) {
+                if (referenceObject instanceof Table && referenceSnapshot.getDatabase().isLiquibaseTable(referenceObject.getName())) {
+                    continue;
+                }
                 if (comparisonSnapshot.contains(comparisonSchema, referenceObject)) {
                     if (!comparisonSnapshot.matches(comparisonSchema, referenceObject)) {
                         diffResult.getObjectDiff(type).addChanged(referenceObject);
@@ -82,6 +85,9 @@ public class StandardDiffGenerator implements DiffGenerator {
             }
 
             for (T targetObject : comparisonSnapshot.getDatabaseObjects(comparisonSchema, type)) {
+                if (targetObject instanceof Table && comparisonSnapshot.getDatabase().isLiquibaseTable(targetObject.getName())) {
+                    continue;
+                }
                 if (!referenceSnapshot.contains(referenceSchema, targetObject)) {
                     diffResult.getObjectDiff(type).addUnexpected(targetObject);
                 }

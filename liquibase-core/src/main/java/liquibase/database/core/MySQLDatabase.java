@@ -132,13 +132,9 @@ public class MySQLDatabase extends AbstractDatabase {
         return "`"+objectName+"`";
     }
 
-    /**
-     * MySQL doesn't technically support schemas, but instead uses schemas and catalogs interchangably. Liquibase blurs that line as well for mysql
-     * @return
-     */
     @Override
     public boolean supportsSchemas() {
-        return true;
+        return false;
     }
 
     @Override

@@ -645,6 +645,9 @@ public class DiffToChangeLog {
         try {
             for (Schema schema : diffResult.getReferenceSnapshot().getSchemas()) {
                 for (Table table : diffResult.getReferenceSnapshot().getDatabaseObjects(schema, Table.class)) {
+                    if (diffResult.getReferenceSnapshot().getDatabase().isLiquibaseTable(table.getName())) {
+                        continue;
+                    }
                     List<Change> changes = new ArrayList<Change>();
                     List<Map> rs = ExecutorService.getInstance().getExecutor(diffResult.getReferenceSnapshot().getDatabase()).queryForList(new RawSqlStatement("SELECT * FROM " + diffResult.getReferenceSnapshot().getDatabase().escapeTableName(schema.getCatalog().getName(), schema.getName(), table.getName())));
 

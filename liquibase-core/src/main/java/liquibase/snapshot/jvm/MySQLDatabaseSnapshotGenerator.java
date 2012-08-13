@@ -2,6 +2,11 @@ package liquibase.snapshot.jvm;
 
 import liquibase.database.Database;
 import liquibase.database.core.MySQLDatabase;
+import liquibase.database.structure.DatabaseObject;
+import liquibase.database.structure.Index;
+
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 
 public class MySQLDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerator {
 	
@@ -14,7 +19,20 @@ public class MySQLDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerato
         return database instanceof MySQLDatabase;
     }
 
-//    @Override
+    @Override
+    public DateFormat getDateTimeFormat() {
+        return new SimpleDateFormat("yyyy-MM-dd HH:mm:SS"); //no ms in mysql
+    }
+
+    @Override
+    protected boolean includeInSnapshot(DatabaseObject obj) {
+        if (obj instanceof Index && obj.getName().equals("PRIMARY")) {
+            return false;
+        }
+        return super.includeInSnapshot(obj);
+    }
+
+    //    @Override
 //    protected Object readDefaultValue(Column columnInfo, ResultSet rs, Database database) throws SQLException, DatabaseException {
 //            try {
 //                Object tmpDefaultValue = columnInfo.getType().toLiquibaseType().stringToObject(tableSchema.get(columnName).get(1), database);

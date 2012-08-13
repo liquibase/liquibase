@@ -17,7 +17,8 @@ public class DateType extends LiquibaseDataType {
         if (database instanceof MSSQLDatabase || database instanceof SybaseDatabase) {
             return new DatabaseDataType("SMALLDATETIME");
         }
-        return super.toDatabaseDataType(database);
+
+        return new DatabaseDataType(getName());
     }
 
     @Override

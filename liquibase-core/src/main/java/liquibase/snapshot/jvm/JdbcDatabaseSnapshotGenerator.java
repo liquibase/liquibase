@@ -845,6 +845,9 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
                         indexInformation.setName(indexName);
                         indexInformation.setUnique(!nonUnique);
                         indexInformation.setFilterCondition(filterCondition);
+                        if (!includeInSnapshot(indexInformation)) {
+                            continue;
+                        }
                         indexMap.put(indexName, indexInformation);
                     }
 
@@ -900,6 +903,10 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
         snapshot.removeDatabaseObjects(schema, indexesToRemove.toArray(new Index[indexesToRemove.size()]));
     }
 
+    protected boolean includeInSnapshot(DatabaseObject obj) {
+        return true;
+    }
+
     protected void readPrimaryKeys(DatabaseSnapshot snapshot, Schema schema, DatabaseMetaData databaseMetaData) throws DatabaseException, SQLException {
         Database database = snapshot.getDatabase();
         updateListeners("Reading primary keys for " + database.toString() + " ...");
@@ -915,6 +922,10 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
                     String tableName = cleanObjectNameFromDatabase(rs.getString("TABLE_NAME"));
                     String columnName = cleanObjectNameFromDatabase(rs.getString("COLUMN_NAME"));
                     short position = rs.getShort("KEY_SEQ");
+
+                    if (database.isLiquibaseTable(tableName)) {
+                        continue;
+                    }
 
                     boolean foundExistingPK = false;
                     for (PrimaryKey pk : foundPKs) {

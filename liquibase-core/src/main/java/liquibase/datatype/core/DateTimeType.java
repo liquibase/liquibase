@@ -30,7 +30,8 @@ public class DateTimeType extends LiquibaseDataType {
         if (database instanceof SQLiteDatabase) {
             return new DatabaseDataType("TEXT");
         }
-        return super.toDatabaseDataType(database);
+
+        return new DatabaseDataType(getName());
     }
 
     @Override

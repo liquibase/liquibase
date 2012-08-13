@@ -21,7 +21,7 @@ public class TimeType  extends LiquibaseDataType {
         if (database instanceof OracleDatabase) {
             return new DatabaseDataType("DATE");
         }
-        return super.toDatabaseDataType(database);
+        return new DatabaseDataType(getName());
     }
 
     @Override

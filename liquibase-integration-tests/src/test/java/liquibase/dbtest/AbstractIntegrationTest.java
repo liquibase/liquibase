@@ -121,6 +121,8 @@ public abstract class AbstractIntegrationTest {
             database.dropDatabaseObjects(Schema.DEFAULT);
             if (database.supportsSchemas()) {
                 database.dropDatabaseObjects(new Schema(DatabaseTestContext.ALT_CATALOG, DatabaseTestContext.ALT_SCHEMA));
+            } else if (database.supportsCatalogs()) {
+                database.dropDatabaseObjects(new Schema(DatabaseTestContext.ALT_SCHEMA, null));
             }
             database.commit();
             DatabaseSnapshotGeneratorFactory.resetAll();
@@ -447,7 +449,7 @@ public abstract class AbstractIntegrationTest {
             }
 
             DatabaseSnapshot emptyAgainSnapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(database, new DiffControl());
-            assertEquals(0, emptyAgainSnapshot.getDatabaseObjects(migratedSnapshot.getSchemas().iterator().next(), Table.class).size());
+            assertEquals(1, emptyAgainSnapshot.getDatabaseObjects(migratedSnapshot.getSchemas().iterator().next(), Table.class).size());
             assertEquals(0, emptyAgainSnapshot.getDatabaseObjects(migratedSnapshot.getSchemas().iterator().next(), View.class).size());
         }
     }
