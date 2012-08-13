@@ -11,6 +11,12 @@ import java.util.regex.Pattern;
  */
 public class StringUtils {
     private static final Pattern commentPattern = Pattern.compile("/\\*.*?\\*/", Pattern.DOTALL);
+
+    /**
+     * This pattern is used to recognize end-of-line ANSI style comments at the end of lines of SQL. -- like this
+     * and strip them out.  We might need to watch the case of new space--like this
+     * and the case of having a space -- like this.
+     */
     private static final Pattern dashPattern = Pattern.compile("\\-\\-.*$", Pattern.MULTILINE);
 
     public static String trimToEmpty(String string) {
