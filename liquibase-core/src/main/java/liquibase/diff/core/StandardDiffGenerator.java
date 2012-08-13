@@ -59,7 +59,7 @@ public class StandardDiffGenerator implements DiffGenerator {
 
     protected void checkVersionInfo(DatabaseSnapshot referenceSnapshot, DatabaseSnapshot comparisonSnapshot, DiffResult diffResult) throws DatabaseException {
 
-        if (comparisonSnapshot != null) {
+        if (comparisonSnapshot != null && comparisonSnapshot.getDatabase() != null) {
             diffResult.setProductName(new StringDiff(referenceSnapshot.getDatabase().getDatabaseProductName(), comparisonSnapshot.getDatabase().getDatabaseProductName()));
             diffResult.setProductVersion(new StringDiff(referenceSnapshot.getDatabase().getDatabaseProductVersion(), comparisonSnapshot.getDatabase().getDatabaseProductVersion()));
         }

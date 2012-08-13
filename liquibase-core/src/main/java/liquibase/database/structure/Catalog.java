@@ -26,6 +26,9 @@ public class Catalog {
     }
     
     public String getName(Database database) {
+        if (database == null) {
+            return getName();
+        }
         return database.correctCatalogName(getName());
     }
 

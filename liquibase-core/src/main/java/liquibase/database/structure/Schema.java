@@ -42,6 +42,9 @@ public class Schema implements DatabaseObject {
     }
     
     public String getName(Database database) {
+        if (database == null) {
+            return getName();
+        }
         return database.correctSchemaName(getName());
     }
 
