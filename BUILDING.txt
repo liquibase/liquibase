@@ -1,23 +1,31 @@
-Liquibase core is currently built using Ant.
+Liquibase core is currently built using Maven 3.  Liquibase's modules are organized as follows
 
-The main end-builder Ant targets are:
-
-  package:          builds the output artifacts (*.jar, *.zip, *.tar.gz). Both sources
-                    and binary artifacts are packaged, including jdk1.4 targeted ones
-
-  compile:          compiles the sources (1.5 bytecode)
-
-  clean:            cleans the output folders and all the previously generated artifacts
-
-  site:             builds the project's site from static resources (*.html)
-
-  test:             executes the unit tests
-
-  test-int:         executes the integration tests (requires a running accesible db runtime)
-
-  all (default):    performs a complete build of the project
+/                               Liquibase Parent Configuration pom
++ liquibase-core                       
++ liqubase-integration-tests   
++ liquibase-maven-plugin      
++ liquibase-osgi
++ samples
+   + liquibase-ext-change
+   + liquibase-ext-changewithnestedtags
+   + liquibase-ext-sqlgenerator
 
 
-If you wish to override any of the standard build properties for your paticular environment,
-please create a build.local.properties file in src and do not check it into SVN
-(it should already be marked as SVN ignore).
+Building with the <code>maven package</code> command will compile, run
+tests and build the packages.
+
+$ mvn package
+[INFO] Reactor Summary:
+[INFO] 
+[INFO] Liquibase Parent Configuration
+[INFO] Liquibase Core
+[INFO] Liquibase Maven Plugin
+[INFO] Liquibase Osgi
+[INFO] Liquibase extension sample change
+[INFO] Liquibase extension sample using nested tags for change
+[INFO] Liquibase extension showing sample sqlgenerator
+[INFO] Liquibase Integration Tests
+
+
+==Known Issues==
+
