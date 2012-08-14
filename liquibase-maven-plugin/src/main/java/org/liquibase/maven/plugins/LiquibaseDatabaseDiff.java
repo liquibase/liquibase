@@ -8,6 +8,7 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import liquibase.Liquibase;
 import liquibase.database.Database;
+import liquibase.diff.output.DiffOutputConfig;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
 import liquibase.integration.commandline.CommandLineUtils;
@@ -81,6 +82,27 @@ public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
      */
     protected String diffChangeLogFile;
 
+    /**
+     * Include the catalog in the diff output? If this is null then the catalog will not be included
+     *
+     * @parameter expression="${liquibase.diffIncludeCatalog}"
+     */
+    protected boolean diffIncludeCatalog;
+
+    /**
+     * Include the schema in the diff output? If this is null then the schema will not be included
+     *
+     * @parameter expression="${liquibase.diffIncludeSchema}"
+     */
+    protected boolean diffIncludeSchema;
+
+    /**
+     * Include the tablespace in the diff output? If this is null then the tablespace will not be included
+     *
+     * @parameter expression="${liquibase.diffIncludeTablespace}"
+     */
+    protected boolean diffIncludeTablespace;
+
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
         AuthenticationInfo referenceInfo = wagonManager.getAuthenticationInfo(referenceServer);
@@ -109,7 +131,7 @@ public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
         getLog().info("Performing Diff on database " + db.toString());
         if (diffChangeLogFile != null) {
             try {
-                CommandLineUtils.doDiffToChangeLog(diffChangeLogFile, referenceDatabase, db);
+                CommandLineUtils.doDiffToChangeLog(diffChangeLogFile, referenceDatabase, db, new DiffOutputConfig(diffIncludeCatalog, diffIncludeSchema, diffIncludeTablespace));
                 getLog().info("Differences written to Change Log File, " + diffChangeLogFile);
             }
             catch (IOException e) {

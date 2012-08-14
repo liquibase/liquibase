@@ -20,7 +20,6 @@ import liquibase.statement.SqlStatement;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
-import java.util.*;
 
 /**
  * Standard superclass for Changes to implement. This is a <i>skeletal implementation</i>,

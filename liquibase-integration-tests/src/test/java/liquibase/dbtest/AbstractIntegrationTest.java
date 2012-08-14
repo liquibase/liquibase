@@ -9,6 +9,7 @@ import liquibase.database.structure.View;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.diff.DiffControl;
 import liquibase.diff.DiffGeneratorFactory;
+import liquibase.diff.output.DiffOutputConfig;
 import liquibase.diff.output.DiffToChangeLog;
 import liquibase.diff.output.DiffToPrintStream;
 import liquibase.exception.ChangeLogParseException;
@@ -398,7 +399,7 @@ public abstract class AbstractIntegrationTest {
 
             FileOutputStream output = new FileOutputStream(tempFile);
             try {
-                new DiffToChangeLog(diffResult).print(new PrintStream(output));
+                new DiffToChangeLog(diffResult, new DiffOutputConfig()).print(new PrintStream(output));
                 output.flush();
             } finally {
                 output.close();
@@ -434,7 +435,7 @@ public abstract class AbstractIntegrationTest {
             DiffResult emptyDiffResult = DiffGeneratorFactory.getInstance().compare(emptySnapshot, migratedSnapshot, new DiffControl());
             output = new FileOutputStream(tempFile);
             try {
-                new DiffToChangeLog(emptyDiffResult).print(new PrintStream(output));
+                new DiffToChangeLog(emptyDiffResult, new DiffOutputConfig()).print(new PrintStream(output));
                 output.flush();
             } finally {
                 output.close();
@@ -481,7 +482,7 @@ public abstract class AbstractIntegrationTest {
 
         FileOutputStream output = new FileOutputStream(tempFile);
         try {
-            new DiffToChangeLog(diffResult).print(new PrintStream(output));
+            new DiffToChangeLog(diffResult, new DiffOutputConfig()).print(new PrintStream(output));
             output.flush();
         } finally {
             output.close();

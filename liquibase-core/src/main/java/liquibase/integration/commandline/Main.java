@@ -33,6 +33,7 @@ import java.util.jar.JarFile;
 import liquibase.Liquibase;
 import liquibase.change.CheckSum;
 import liquibase.database.Database;
+import liquibase.diff.output.DiffOutputConfig;
 import liquibase.exception.CommandLineParsingException;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.ValidationFailedException;
@@ -256,7 +257,10 @@ public class Main {
                     if (!cmdParm.startsWith("--referenceUsername")
                         && !cmdParm.startsWith("--referencePassword")
                         && !cmdParm.startsWith("--referenceDriver")
-                        && !cmdParm.startsWith("--referenceUrl")) {
+                            && !cmdParm.startsWith("--includeSchema")
+                            && !cmdParm.startsWith("--includeCatalog")
+                            && !cmdParm.startsWith("--includeTablespace")
+                            && !cmdParm.startsWith("--referenceUrl")) {
                         messages.add("unexpected command parameters: "+commandParams);
                     }
                 }
@@ -352,7 +356,6 @@ public class Main {
                     || "releaseLocks".equalsIgnoreCase(arg)
                     || "validate".equalsIgnoreCase(arg)
                     || "help".equalsIgnoreCase(arg)
-                    || "generateChangeLog".equalsIgnoreCase(arg)
                     || "clearCheckSums".equalsIgnoreCase(arg)
                     || "changelogSync".equalsIgnoreCase(arg)
                     || "changelogSyncSQL".equalsIgnoreCase(arg)
@@ -753,14 +756,19 @@ public class Main {
 
             CompositeResourceAccessor fileOpener = new CompositeResourceAccessor(fsOpener, clOpener);
 
+            boolean includeCatalog = Boolean.parseBoolean(getCommandParam("includeCatalog", "false"));
+            boolean includeSchema = Boolean.parseBoolean(getCommandParam("includeSchema", "false"));
+            boolean includeTablespace = Boolean.parseBoolean(getCommandParam("includeTablespace", "false"));
+            DiffOutputConfig diffOutputConfig = new DiffOutputConfig(includeCatalog, includeSchema, includeTablespace);
+
             if ("diff".equalsIgnoreCase(command)) {
                 CommandLineUtils.doDiff(createReferenceDatabaseFromCommandParams(commandParams), database);
                 return;
             } else if ("diffChangeLog".equalsIgnoreCase(command)) {
-                CommandLineUtils.doDiffToChangeLog(changeLogFile, createReferenceDatabaseFromCommandParams(commandParams), database);
+                CommandLineUtils.doDiffToChangeLog(changeLogFile, createReferenceDatabaseFromCommandParams(commandParams), database, diffOutputConfig);
                 return;
             } else if ("generateChangeLog".equalsIgnoreCase(command)) {
-                CommandLineUtils.doGenerateChangeLog(changeLogFile, database, defaultSchemaName, defaultCatalogName, StringUtils.trimToNull(diffTypes), StringUtils.trimToNull(changeSetAuthor), StringUtils.trimToNull(changeSetContext), StringUtils.trimToNull(dataOutputDirectory));
+                CommandLineUtils.doGenerateChangeLog(changeLogFile, database, defaultSchemaName, defaultCatalogName, StringUtils.trimToNull(diffTypes), StringUtils.trimToNull(changeSetAuthor), StringUtils.trimToNull(changeSetContext), StringUtils.trimToNull(dataOutputDirectory), diffOutputConfig);
                 return;
             }
 
@@ -895,7 +903,7 @@ public class Main {
         }
     }
 
-    private String getCommandParam(String paramName) throws CommandLineParsingException {
+    private String getCommandParam(String paramName, String defaultValue) throws CommandLineParsingException {
         for (String param : commandParams) {
             String[] splitArg = splitArg(param);
 
@@ -906,7 +914,7 @@ public class Main {
             }
         }
 
-        return null;
+        return defaultValue;
     }
 
     private Database createReferenceDatabaseFromCommandParams(Set<String> commandParams) throws CommandLineParsingException, DatabaseException {

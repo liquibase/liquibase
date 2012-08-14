@@ -35,9 +35,11 @@ public class DiffToChangeLog {
     private String changeSetContext;
     private String changeSetAuthor;
     private DiffResult diffResult;
+    private DiffOutputConfig diffOutputConfig;
 
-    public DiffToChangeLog(DiffResult diffResult) {
+    public DiffToChangeLog(DiffResult diffResult, DiffOutputConfig diffOutputConfig) {
         this.diffResult = diffResult;
+        this.diffOutputConfig = diffOutputConfig;
     }
 
     public void setChangeSetContext(String changeSetContext) {
@@ -191,9 +193,12 @@ public class DiffToChangeLog {
 
             DropIndexChange change = new DropIndexChange();
             change.setTableName(index.getTable().getName());
-            change.setCatalogName(index.getTable().getSchema().getCatalog().getName());
-            change.setSchemaName(index.getTable().getSchema().getName());
-            change.setCatalogName(index.getTable().getSchema().getCatalog().getName());
+            if (diffOutputConfig.isIncludeCatalog()) {
+                change.setCatalogName(index.getTable().getSchema().getCatalog().getName());
+            }
+            if (diffOutputConfig.isIncludeSchema()) {
+                change.setSchemaName(index.getTable().getSchema().getName());
+            }
             change.setIndexName(index.getName());
             change.setAssociatedWith(index.getAssociatedWithAsString());
 
@@ -206,10 +211,15 @@ public class DiffToChangeLog {
 
             CreateIndexChange change = new CreateIndexChange();
             change.setTableName(index.getTable().getName());
-            change.setTablespace(index.getTablespace());
-            change.setCatalogName(index.getTable().getSchema().getCatalog().getName());
-            change.setSchemaName(index.getTable().getSchema().getName());
-            change.setCatalogName(index.getTable().getSchema().getCatalog().getName());
+            if (diffOutputConfig.isIncludeTablespace()) {
+                change.setTablespace(index.getTablespace());
+            }
+            if (diffOutputConfig.isIncludeCatalog()) {
+                change.setCatalogName(index.getTable().getSchema().getCatalog().getName());
+            }
+            if (diffOutputConfig.isIncludeSchema()) {
+                change.setSchemaName(index.getTable().getSchema().getName());
+            }
             change.setIndexName(index.getName());
             change.setUnique(index.isUnique());
             change.setAssociatedWith(index.getAssociatedWithAsString());
@@ -233,8 +243,12 @@ public class DiffToChangeLog {
             if (!diffResult.getObjectDiff(Table.class).getUnexpected().contains(pk.getTable())) {
                 DropPrimaryKeyChange change = new DropPrimaryKeyChange();
                 change.setTableName(pk.getTable().getName());
-                change.setCatalogName(pk.getTable().getSchema().getCatalog().getName());
-                change.setSchemaName(pk.getTable().getSchema().getName());
+                if (diffOutputConfig.isIncludeCatalog()) {
+                    change.setCatalogName(pk.getTable().getSchema().getCatalog().getName());
+                }
+                if (diffOutputConfig.isIncludeSchema()) {
+                    change.setSchemaName(pk.getTable().getSchema().getName());
+                }
                 change.setConstraintName(pk.getName());
 
                 changes.add(generateChangeSet(change));
@@ -247,11 +261,17 @@ public class DiffToChangeLog {
 
             AddPrimaryKeyChange change = new AddPrimaryKeyChange();
             change.setTableName(pk.getTable().getName());
-            change.setCatalogName(pk.getTable().getSchema().getCatalog().getName());
-            change.setSchemaName(pk.getTable().getSchema().getName());
+            if (diffOutputConfig.isIncludeCatalog()) {
+                change.setCatalogName(pk.getTable().getSchema().getCatalog().getName());
+            }
+            if (diffOutputConfig.isIncludeSchema()) {
+                change.setSchemaName(pk.getTable().getSchema().getName());
+            }
             change.setConstraintName(pk.getName());
             change.setColumnNames(pk.getColumnNames());
-            change.setTablespace(pk.getTablespace());
+            if (diffOutputConfig.isIncludeTablespace()) {
+                change.setTablespace(pk.getTablespace());
+            }
 
             changes.add(generateChangeSet(change));
         }
@@ -264,8 +284,12 @@ public class DiffToChangeLog {
                 if (null != uc.getTable()) {
                     DropUniqueConstraintChange change = new DropUniqueConstraintChange();
                     change.setTableName(uc.getTable().getName());
-                    change.setCatalogName(uc.getTable().getSchema().getCatalog().getName());
-                    change.setSchemaName(uc.getTable().getSchema().getName());
+                    if (diffOutputConfig.isIncludeCatalog()) {
+                        change.setCatalogName(uc.getTable().getSchema().getCatalog().getName());
+                    }
+                    if (diffOutputConfig.isIncludeSchema()) {
+                        change.setSchemaName(uc.getTable().getSchema().getName());
+                    }
                     change.setConstraintName(uc.getName());
 
                     changes.add(generateChangeSet(change));
@@ -281,11 +305,15 @@ public class DiffToChangeLog {
                 if (null != uc.getTable()) {
                     AddUniqueConstraintChange change = new AddUniqueConstraintChange();
                     change.setTableName(uc.getTable().getName());
-                    if (uc.getBackingIndex() != null) {
+                    if (uc.getBackingIndex() != null && diffOutputConfig.isIncludeTablespace()) {
                         change.setTablespace(uc.getBackingIndex().getTablespace());
                     }
-                    change.setCatalogName(uc.getTable().getSchema().getCatalog().getName());
-                    change.setSchemaName(uc.getTable().getSchema().getName());
+                    if (diffOutputConfig.isIncludeCatalog()) {
+                        change.setCatalogName(uc.getTable().getSchema().getCatalog().getName());
+                    }
+                    if (diffOutputConfig.isIncludeSchema()) {
+                        change.setSchemaName(uc.getTable().getSchema().getName());
+                    }
                     change.setConstraintName(uc.getName());
                     change.setColumnNames(uc.getColumnNames());
                     change.setDeferrable(uc.isDeferrable());
@@ -339,8 +367,12 @@ public class DiffToChangeLog {
 
             DropSequenceChange change = new DropSequenceChange();
             change.setSequenceName(sequence.getName());
-            change.setCatalogName(sequence.getSchema().getCatalog().getName());
-            change.setSchemaName(sequence.getSchema().getName());
+            if (diffOutputConfig.isIncludeCatalog()) {
+                change.setCatalogName(sequence.getSchema().getCatalog().getName());
+            }
+            if (diffOutputConfig.isIncludeSchema()) {
+                change.setSchemaName(sequence.getSchema().getName());
+            }
 
             changes.add(generateChangeSet(change));
         }
@@ -351,8 +383,12 @@ public class DiffToChangeLog {
 
             CreateSequenceChange change = new CreateSequenceChange();
             change.setSequenceName(sequence.getName());
-            change.setCatalogName(sequence.getSchema().getCatalog().getName());
-            change.setSchemaName(sequence.getSchema().getName());
+            if (diffOutputConfig.isIncludeCatalog()) {
+                change.setCatalogName(sequence.getSchema().getCatalog().getName());
+            }
+            if (diffOutputConfig.isIncludeSchema()) {
+                change.setSchemaName(sequence.getSchema().getName());
+            }
 
             changes.add(generateChangeSet(change));
         }
@@ -366,8 +402,12 @@ public class DiffToChangeLog {
 
             DropColumnChange change = new DropColumnChange();
             change.setTableName(column.getRelation().getName());
-            change.setCatalogName(column.getRelation().getSchema().getCatalog().getName());
-            change.setSchemaName(column.getRelation().getSchema().getName());
+            if (diffOutputConfig.isIncludeCatalog()) {
+                change.setCatalogName(column.getRelation().getSchema().getCatalog().getName());
+            }
+            if (diffOutputConfig.isIncludeSchema()) {
+                change.setSchemaName(column.getRelation().getSchema().getName());
+            }
             change.setColumnName(column.getName());
 
             changes.add(generateChangeSet(change));
@@ -379,8 +419,12 @@ public class DiffToChangeLog {
 
             CreateViewChange change = new CreateViewChange();
             change.setViewName(view.getName());
-            change.setCatalogName(view.getSchema().getCatalog().getName());
-            change.setSchemaName(view.getSchema().getName());
+            if (diffOutputConfig.isIncludeCatalog()) {
+                change.setCatalogName(view.getSchema().getCatalog().getName());
+            }
+            if (diffOutputConfig.isIncludeSchema()) {
+                change.setSchemaName(view.getSchema().getName());
+            }
             String selectQuery = view.getDefinition();
             if (selectQuery == null) {
                 selectQuery = "COULD NOT DETERMINE VIEW QUERY";
@@ -396,8 +440,12 @@ public class DiffToChangeLog {
 
             CreateViewChange change = new CreateViewChange();
             change.setViewName(view.getName());
-            change.setCatalogName(view.getSchema().getCatalog().getName());
-            change.setSchemaName(view.getSchema().getName());
+            if (diffOutputConfig.isIncludeCatalog()) {
+                change.setCatalogName(view.getSchema().getCatalog().getName());
+            }
+            if (diffOutputConfig.isIncludeSchema()) {
+                change.setSchemaName(view.getSchema().getName());
+            }
             String selectQuery = view.getDefinition();
             if (selectQuery == null) {
                 selectQuery = "COULD NOT DETERMINE VIEW QUERY";
@@ -420,8 +468,12 @@ public class DiffToChangeLog {
             if (column.isDataTypeDifferent(referenceColumn)) {
                 ModifyDataTypeChange change = new ModifyDataTypeChange();
                 change.setTableName(column.getRelation().getName());
-                change.setCatalogName(column.getRelation().getSchema().getCatalog().getName());
-                change.setSchemaName(column.getRelation().getSchema().getName());
+                if (diffOutputConfig.isIncludeCatalog()) {
+                    change.setCatalogName(column.getRelation().getSchema().getCatalog().getName());
+                }
+                if (diffOutputConfig.isIncludeSchema()) {
+                    change.setSchemaName(column.getRelation().getSchema().getName());
+                }
                 change.setColumnName(column.getName());
                 change.setNewDataType(referenceColumn.getType().toString());
                 changes.add(generateChangeSet(change));
@@ -432,8 +484,12 @@ public class DiffToChangeLog {
                         || referenceColumn.isNullable()) {
                     DropNotNullConstraintChange change = new DropNotNullConstraintChange();
                     change.setTableName(column.getRelation().getName());
-                    change.setCatalogName(column.getRelation().getSchema().getCatalog().getName());
-                    change.setSchemaName(column.getRelation().getSchema().getName());
+                    if (diffOutputConfig.isIncludeCatalog()) {
+                        change.setCatalogName(column.getRelation().getSchema().getCatalog().getName());
+                    }
+                    if (diffOutputConfig.isIncludeSchema()) {
+                        change.setSchemaName(column.getRelation().getSchema().getName());
+                    }
                     change.setColumnName(column.getName());
                     change.setColumnDataType(referenceColumn.getType().toString());
 
@@ -442,8 +498,12 @@ public class DiffToChangeLog {
                 } else {
                     AddNotNullConstraintChange change = new AddNotNullConstraintChange();
                     change.setTableName(column.getRelation().getName());
-                    change.setCatalogName(column.getRelation().getSchema().getCatalog().getName());
-                    change.setSchemaName(column.getRelation().getSchema().getName());
+                    if (diffOutputConfig.isIncludeCatalog()) {
+                        change.setCatalogName(column.getRelation().getSchema().getCatalog().getName());
+                    }
+                    if (diffOutputConfig.isIncludeSchema()) {
+                        change.setSchemaName(column.getRelation().getSchema().getName());
+                    }
                     change.setColumnName(column.getName());
                     change.setColumnDataType(referenceColumn.getType().toString());
 
@@ -479,8 +539,12 @@ public class DiffToChangeLog {
 
             DropViewChange change = new DropViewChange();
             change.setViewName(view.getName());
-            change.setCatalogName(view.getSchema().getCatalog().getName());
-            change.setSchemaName(view.getSchema().getName());
+            if (diffOutputConfig.isIncludeCatalog()) {
+                change.setCatalogName(view.getSchema().getCatalog().getName());
+            }
+            if (diffOutputConfig.isIncludeSchema()) {
+                change.setSchemaName(view.getSchema().getName());
+            }
 
             changes.add(generateChangeSet(change));
         }
@@ -494,8 +558,12 @@ public class DiffToChangeLog {
 
             AddColumnChange change = new AddColumnChange();
             change.setTableName(column.getRelation().getName());
-            change.setCatalogName(column.getRelation().getSchema().getCatalog().getName());
-            change.setSchemaName(column.getRelation().getSchema().getName());
+            if (diffOutputConfig.isIncludeCatalog()) {
+                change.setCatalogName(column.getRelation().getSchema().getCatalog().getName());
+            }
+            if (diffOutputConfig.isIncludeSchema()) {
+                change.setSchemaName(column.getRelation().getSchema().getName());
+            }
 
             ColumnConfig columnConfig = new ColumnConfig();
             columnConfig.setName(column.getName());
@@ -549,8 +617,12 @@ public class DiffToChangeLog {
 
             CreateTableChange change = new CreateTableChange();
             change.setTableName(missingTable.getName());
-            change.setCatalogName(missingTable.getSchema().getCatalog().getName());
-            change.setSchemaName(missingTable.getSchema().getName());
+            if (diffOutputConfig.isIncludeCatalog()) {
+                change.setCatalogName(missingTable.getSchema().getCatalog().getName());
+            }
+            if (diffOutputConfig.isIncludeSchema()) {
+                change.setSchemaName(missingTable.getSchema().getName());
+            }
             if (missingTable.getRemarks() != null) {
                 change.setRemarks(missingTable.getRemarks());
             }
@@ -634,8 +706,12 @@ public class DiffToChangeLog {
         for (Table unexpectedTable : diffResult.getObjectDiff(Table.class).getUnexpected()) {
             DropTableChange change = new DropTableChange();
             change.setTableName(unexpectedTable.getName());
-            change.setCatalogName(unexpectedTable.getSchema().getCatalog().getName());
-            change.setSchemaName(unexpectedTable.getSchema().getName());
+            if (diffOutputConfig.isIncludeCatalog()) {
+                change.setCatalogName(unexpectedTable.getSchema().getCatalog().getName());
+            }
+            if (diffOutputConfig.isIncludeSchema()) {
+                change.setSchemaName(unexpectedTable.getSchema().getName());
+            }
 
             changes.add(generateChangeSet(change));
         }
@@ -719,8 +795,12 @@ public class DiffToChangeLog {
                         LoadDataChange change = new LoadDataChange();
                         change.setFile(fileName);
                         change.setEncoding("UTF-8");
-                        change.setCatalogName(schema.getCatalog().getName());
-                        change.setSchemaName(schema.getName());
+                        if (diffOutputConfig.isIncludeCatalog()) {
+                            change.setCatalogName(schema.getCatalog().getName());
+                        }
+                        if (diffOutputConfig.isIncludeSchema()) {
+                            change.setSchemaName(schema.getName());
+                        }
                         change.setTableName(table.getName());
 
                         for (int i = 0; i < columnNames.size(); i++) {
@@ -737,8 +817,12 @@ public class DiffToChangeLog {
                     } else { // if dataDir is null, build and use insert tags
                         for (Map row : rs) {
                             InsertDataChange change = new InsertDataChange();
-                            change.setCatalogName(schema.getCatalog().getName());
-                            change.setSchemaName(schema.getName());
+                            if (diffOutputConfig.isIncludeCatalog()) {
+                                change.setCatalogName(schema.getCatalog().getName());
+                            }
+                            if (diffOutputConfig.isIncludeSchema()) {
+                                change.setSchemaName(schema.getName());
+                            }
                             change.setTableName(table.getName());
 
                             // loop over all columns for this row

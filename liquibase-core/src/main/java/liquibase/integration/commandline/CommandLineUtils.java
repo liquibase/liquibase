@@ -8,6 +8,7 @@ import liquibase.diff.DiffControl;
 import liquibase.diff.DiffGeneratorFactory;
 import liquibase.diff.DiffResult;
 import liquibase.diff.DiffStatusListener;
+import liquibase.diff.output.DiffOutputConfig;
 import liquibase.diff.output.DiffToChangeLog;
 import liquibase.diff.output.DiffToPrintStream;
 import liquibase.exception.*;
@@ -119,7 +120,8 @@ public class CommandLineUtils {
 
     public static void doDiffToChangeLog(String changeLogFile,
                                          Database referenceDatabase,
-                                         Database targetDatabase)
+                                         Database targetDatabase,
+                                         DiffOutputConfig diffOutputConfig)
             throws DatabaseException, IOException, ParserConfigurationException {
         DiffControl diffControl = new DiffControl();
         diffControl.addStatusListener(new OutDiffStatusListener());
@@ -127,13 +129,13 @@ public class CommandLineUtils {
         DiffResult diffResult = DiffGeneratorFactory.getInstance().compare(referenceDatabase, targetDatabase, diffControl);
 
         if (changeLogFile == null) {
-            new DiffToChangeLog(diffResult).print(System.out);
+            new DiffToChangeLog(diffResult, diffOutputConfig).print(System.out);
         } else {
-            new DiffToChangeLog(diffResult).print(changeLogFile);
+            new DiffToChangeLog(diffResult, diffOutputConfig).print(changeLogFile);
         }
     }
 
-    public static void doGenerateChangeLog(String changeLogFile, Database originalDatabase, String catalogName, String schemaName, String diffTypes, String author, String context, String dataDir) throws DatabaseException, IOException, ParserConfigurationException {
+    public static void doGenerateChangeLog(String changeLogFile, Database originalDatabase, String catalogName, String schemaName, String diffTypes, String author, String context, String dataDir, DiffOutputConfig diffOutputConfig) throws DatabaseException, IOException, ParserConfigurationException {
         DiffControl diffControl = new DiffControl(new Schema(catalogName, schemaName), diffTypes);
         diffControl.setDataDir(dataDir);
         diffControl.addStatusListener(new OutDiffStatusListener());
@@ -141,7 +143,7 @@ public class CommandLineUtils {
         DatabaseSnapshot originalDatabaseSnapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(originalDatabase, diffControl, DiffControl.DatabaseRole.REFERENCE);
         DiffResult diffResult = DiffGeneratorFactory.getInstance().compare(originalDatabaseSnapshot, new DatabaseSnapshot(null, diffControl.getSchemas(DiffControl.DatabaseRole.REFERENCE)), diffControl);
 
-        DiffToChangeLog changeLogWriter = new DiffToChangeLog(diffResult);
+        DiffToChangeLog changeLogWriter = new DiffToChangeLog(diffResult, diffOutputConfig);
 
         changeLogWriter.setChangeSetAuthor(author);
         changeLogWriter.setChangeSetContext(context);
