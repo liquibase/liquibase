@@ -28,23 +28,23 @@ public interface DatabaseSnapshotGenerator {
 
     Table getDatabaseChangeLogLockTable(Database database) throws DatabaseException;
 
-    Table getTable(String catalog, String schemaName, String tableName, Database database) throws DatabaseException;
+    Table getTable(Schema schema, String tableName, Database database) throws DatabaseException;
 
-    Column getColumn(String catalog, String schemaName, String tableName, String columnName, Database database) throws DatabaseException;
+    Column getColumn(Schema schema, String tableName, String columnName, Database database) throws DatabaseException;
 
-    boolean hasForeignKey(String catalog, String schemaName, String tableName, String fkName, Database database) throws DatabaseException;
+    boolean hasForeignKey(Schema schema, String tableName, String fkName, Database database) throws DatabaseException;
 
-    boolean hasIndex(String catalog, String schemaName, String tableName, String indexName, Database database, String columnNames) throws DatabaseException;
+    boolean hasIndex(Schema schema, String tableName, String indexName, Database database, String columnNames) throws DatabaseException;
 
     boolean hasDatabaseChangeLogTable(Database database);
 
     boolean hasDatabaseChangeLogLockTable(Database database);
 
-    public boolean hasTable(String catalog, String schemaName, String tableName, Database database);
+    public boolean hasTable(Schema schema, String tableName, Database database);
     
-    public boolean hasView(String catalog, String schemaName, String viewName, Database database);
+    public boolean hasView(Schema schema, String viewName, Database database);
 
     boolean hasPrimaryKey(Schema schema, String tableName, String primaryKeyName, Database database);
 
-    boolean hasColumn(String catalogName, String schemaName, String tableName, String columnName, Database database);
+    boolean hasColumn(Schema schema, String tableName, String columnName, Database database);
 }

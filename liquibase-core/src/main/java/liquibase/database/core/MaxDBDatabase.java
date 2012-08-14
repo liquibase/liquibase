@@ -134,15 +134,16 @@ public class MaxDBDatabase extends AbstractDatabase {
 
     @Override
     public boolean isSystemTable(Schema schema, String tableName) {
+        schema = correctSchema(schema);
         if (super.isSystemTable(schema, tableName)) {
             return true;
-        } else if ("DOMAIN".equalsIgnoreCase(schema.getName(this))) {
+        } else if ("DOMAIN".equalsIgnoreCase(schema.getName())) {
             return true;
-        } else if ("SYSINFO".equalsIgnoreCase(schema.getName(this))) {
+        } else if ("SYSINFO".equalsIgnoreCase(schema.getName())) {
             return true;
-        } else if ("SYSLOADER".equalsIgnoreCase(schema.getName(this))) {
+        } else if ("SYSLOADER".equalsIgnoreCase(schema.getName())) {
             return true;
-        } else if ("SYSDBA".equalsIgnoreCase(schema.getName(this))) {
+        } else if ("SYSDBA".equalsIgnoreCase(schema.getName())) {
             return true;
         }
         return false;
@@ -150,15 +151,16 @@ public class MaxDBDatabase extends AbstractDatabase {
 
     @Override
     public boolean isSystemView(Schema schema, String tableName) {
+        schema = correctSchema(schema);
         if (super.isSystemView(schema, tableName)) {
             return true;
-        } else if ("DOMAIN".equalsIgnoreCase(schema.getName(this))) {
+        } else if ("DOMAIN".equalsIgnoreCase(schema.getName())) {
             return true;
-        } else if ("SYSINFO".equalsIgnoreCase(schema.getName(this))) {
+        } else if ("SYSINFO".equalsIgnoreCase(schema.getName())) {
             return true;
-        } else if ("SYSLOADER".equalsIgnoreCase(schema.getName(this))) {
+        } else if ("SYSLOADER".equalsIgnoreCase(schema.getName())) {
             return true;
-        } else if ("SYSDBA".equalsIgnoreCase(schema.getName(this))) {
+        } else if ("SYSDBA".equalsIgnoreCase(schema.getName())) {
             return true;
         }
         return false;

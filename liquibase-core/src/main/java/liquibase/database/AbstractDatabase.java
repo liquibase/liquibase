@@ -203,22 +203,32 @@ public abstract class AbstractDatabase implements Database {
         return getConnection().getConnectionUserName();
     }
 
-    public String correctCatalogName(String catalogName) {
+    public Schema correctSchema(Schema schema) {
+        if (schema == null) {
+            schema = new Schema(getDefaultCatalogName(), getDefaultSchemaName());
+        }
+        String catalogName = schema.getCatalogName();
+        String schemaName = schema.getName();
+
         if (catalogName == null) {
-            return getDefaultCatalogName();
+            catalogName = getDefaultCatalogName();
         } else {
-            return correctObjectName(catalogName);
+            catalogName = correctObjectName(catalogName);
         }
-    }
 
-    public String correctSchemaName(String schemaName) {
-        if (schemaName == null) {
-            return getDefaultSchemaName();
+        if (supportsSchemas()) {
+            if (schemaName == null) {
+                schemaName = getDefaultSchemaName();
+            } else {
+                schemaName =  correctObjectName(schemaName);
+            }
         } else {
-            return correctObjectName(schemaName);
+            schemaName = catalogName;
         }
-    }
 
+        return new Schema(catalogName, schemaName);
+
+    }
     public String correctTableName(String tableName) {
         return correctObjectName(tableName);
     }
@@ -690,7 +700,7 @@ public abstract class AbstractDatabase implements Database {
      * @param schema
      */
     public void dropDatabaseObjects(Schema schema) throws DatabaseException {
-        schema = schema.clone(this);
+        schema = correctSchema(schema);
         try {
             DatabaseSnapshot snapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(this, new DiffControl(schema, ""));
 
@@ -699,8 +709,8 @@ public abstract class AbstractDatabase implements Database {
             for (View view : snapshot.getDatabaseObjects(schema, View.class)) {
                 DropViewChange dropChange = new DropViewChange();
                 dropChange.setViewName(view.getName());
-                dropChange.setSchemaName(schema.getName(this));
-                dropChange.setCatalogName(schema.getCatalogName(this));
+                dropChange.setSchemaName(schema.getName());
+                dropChange.setCatalogName(schema.getCatalogName());
 
                 dropChanges.add(dropChange);
             }
@@ -708,8 +718,8 @@ public abstract class AbstractDatabase implements Database {
             if (!supportsForeignKeyDisable()) {
                 for (ForeignKey fk : snapshot.getDatabaseObjects(schema, ForeignKey.class)) {
                     DropForeignKeyConstraintChange dropFK = new DropForeignKeyConstraintChange();
-                    dropFK.setBaseTableSchemaName(schema.getName(this));
-                    dropFK.setBaseTableCatalogName(schema.getCatalogName(this));
+                    dropFK.setBaseTableSchemaName(schema.getName());
+                    dropFK.setBaseTableCatalogName(schema.getCatalogName());
                     dropFK.setBaseTableName(fk.getForeignKeyTable().getName());
                     dropFK.setConstraintName(fk.getName());
 
@@ -728,8 +738,8 @@ public abstract class AbstractDatabase implements Database {
 
             for (Table table : snapshot.getDatabaseObjects(schema, Table.class)) {
                 DropTableChange dropChange = new DropTableChange();
-                dropChange.setSchemaName(schema.getName(this));
-                dropChange.setCatalogName(schema.getCatalogName(this));
+                dropChange.setSchemaName(schema.getName());
+                dropChange.setCatalogName(schema.getCatalogName());
                 dropChange.setTableName(table.getName());
                 if (supportsDropTableCascadeConstraints()) {
                     dropChange.setCascadeConstraints(true);
@@ -742,8 +752,8 @@ public abstract class AbstractDatabase implements Database {
                 for (Sequence seq : snapshot.getDatabaseObjects(schema, Sequence.class)) {
                     DropSequenceChange dropChange = new DropSequenceChange();
                     dropChange.setSequenceName(seq.getName());
-                    dropChange.setSchemaName(schema.getName(this));
-                    dropChange.setCatalogName(schema.getCatalogName(this));
+                    dropChange.setSchemaName(schema.getName());
+                    dropChange.setCatalogName(schema.getCatalogName());
 
                     dropChanges.add(dropChange);
                 }
@@ -751,7 +761,7 @@ public abstract class AbstractDatabase implements Database {
 
 
             if (snapshot.hasDatabaseChangeLogTable()) {
-                dropChanges.add(new AnonymousChange(new ClearDatabaseChangeLogTableStatement(schema.getCatalogName(this), schema.getName(this))));
+                dropChanges.add(new AnonymousChange(new ClearDatabaseChangeLogTableStatement(schema.getCatalogName(), schema.getName())));
             }
 
             final boolean reEnableFK = supportsForeignKeyDisable() && disableForeignKeyChecks();
@@ -782,7 +792,8 @@ public abstract class AbstractDatabase implements Database {
     }
 
     public boolean isSystemTable(Schema schema, String tableName) {
-        if ("information_schema".equalsIgnoreCase(schema.getName(this))) {
+        schema = correctSchema(schema);
+        if ("information_schema".equalsIgnoreCase(schema.getName())) {
             return true;
         } else if (tableName.equalsIgnoreCase(getDatabaseChangeLogLockTableName())) {
             return true;
@@ -793,7 +804,8 @@ public abstract class AbstractDatabase implements Database {
     }
 
     public boolean isSystemView(Schema schema, String viewName) {
-        if ("information_schema".equalsIgnoreCase(schema.getName(this))) {
+        schema = correctSchema(schema);
+        if ("information_schema".equalsIgnoreCase(schema.getName())) {
             return true;
         } else if (getSystemTablesAndViews().contains(viewName)) {
             return true;
@@ -849,7 +861,8 @@ public abstract class AbstractDatabase implements Database {
     }
 
     public String getViewDefinition(Schema schema, String viewName) throws DatabaseException {
-        String definition = (String) ExecutorService.getInstance().getExecutor(this).queryForObject(new GetViewDefinitionStatement(schema.getCatalogName(this), schema.getName(this), viewName), String.class);
+        schema = correctSchema(schema);
+        String definition = (String) ExecutorService.getInstance().getExecutor(this).queryForObject(new GetViewDefinitionStatement(schema.getCatalogName(), schema.getName(), viewName), String.class);
         if (definition == null) {
             return null;
         }
@@ -1218,8 +1231,9 @@ public abstract class AbstractDatabase implements Database {
         return ++lastChangeSetSequenceValue;
     }
 
-    public Table getTable(String catalogName, String schemaName, String tableName) throws DatabaseException {
-        return DatabaseSnapshotGeneratorFactory.getInstance().getGenerator(this).getTable(catalogName, schemaName, tableName, this);
+    public Table getTable(Schema schema, String tableName) throws DatabaseException {
+        schema = correctSchema(schema);
+        return DatabaseSnapshotGeneratorFactory.getInstance().getGenerator(this).getTable(schema, tableName, this);
     }
 
     public List<DatabaseFunction> getDatabaseFunctions() {

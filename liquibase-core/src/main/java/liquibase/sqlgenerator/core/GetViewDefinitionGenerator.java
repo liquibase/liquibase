@@ -1,6 +1,7 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
+import liquibase.database.structure.Schema;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
@@ -19,15 +20,16 @@ public class GetViewDefinitionGenerator extends AbstractSqlGenerator<GetViewDefi
     }
 
     public Sql[] generateSql(GetViewDefinitionStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+        Schema schema = database.correctSchema(new Schema(statement.getCatalogName(), statement.getSchemaName()));
+
         String sql = "select view_definition from information_schema.views where upper(table_name)='" + statement.getViewName().toUpperCase() + "'";
-        String schema = database.correctSchemaName(statement.getSchemaName());
-        String catalog = database.correctCatalogName(statement.getCatalogName());
-        if (schema != null) {
-            sql += " and table_schema='" + schema + "'";
+
+        if (statement.getSchemaName() != null) {
+            sql += " and table_schema='" + schema.getName() + "'";
         }
 
-        if (catalog != null) {
-            sql += " and table_catalog='" + catalog + "'";
+        if (statement.getCatalogName() != null) {
+            sql += " and table_catalog='" + schema.getCatalogName() + "'";
         }
 
         return new Sql[]{

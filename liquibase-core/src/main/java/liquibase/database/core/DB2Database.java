@@ -73,8 +73,8 @@ public class DB2Database extends AbstractDatabase {
     }
 
     @Override
-    public String correctCatalogName(String catalogName) {
-        return null;
+    public Schema correctSchema(Schema schema) {
+        return schema;
     }
 
     @Override

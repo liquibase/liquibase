@@ -2,6 +2,7 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
 import liquibase.database.core.PostgresDatabase;
+import liquibase.database.structure.Schema;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
@@ -27,13 +28,13 @@ public class SelectSequencesGeneratorPostgres extends AbstractSqlGenerator<Selec
     }
 
     public Sql[] generateSql(SelectSequencesStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-            String schema = statement.getSchemaName();
+            Schema schema = database.correctSchema(new Schema(statement.getCatalogName(), statement.getSchemaName()));
             
             return new Sql[] {
                     new UnparsedSql("SELECT relname AS SEQUENCE_NAME FROM pg_class, pg_namespace " +
                 "WHERE relkind='S' " +
                 "AND pg_class.relnamespace = pg_namespace.oid " +
-                "AND nspname = '" + database.correctSchemaName(schema) + "' " +
+                "AND nspname = '" + schema.getName() + "' " +
                 "AND 'nextval(''" + (schema == null ? "" : schema + ".") + "'||relname||'''::regclass)' not in (select adsrc from pg_attrdef where adsrc is not null) " +
                 "AND 'nextval(''" + (schema == null ? "" : schema + ".") + "\"'||relname||'\"''::regclass)' not in (select adsrc from pg_attrdef where adsrc is not null) " +
                 "AND 'nextval('''||relname||'''::regclass)' not in (select adsrc from pg_attrdef where adsrc is not null)")

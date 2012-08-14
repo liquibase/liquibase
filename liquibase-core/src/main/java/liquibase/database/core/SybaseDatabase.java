@@ -203,12 +203,14 @@ public class SybaseDatabase extends AbstractDatabase {
 
     @Override
     public boolean isSystemTable(Schema schema, String tableName) {
-        return super.isSystemTable(schema, tableName) || schema.getName(this).equals("sys") || tableName.toLowerCase().startsWith("sybfi");
+        schema = correctSchema(schema);
+        return super.isSystemTable(schema, tableName) || schema.getName().equals("sys") || tableName.toLowerCase().startsWith("sybfi");
     }
 
     @Override
     public boolean isSystemView(Schema schema, String viewName) {
-        return super.isSystemView(schema, viewName) || schema.getName(this).equals("sys") || viewName.toLowerCase().equals("sybfi");
+        schema = correctSchema(schema);
+        return super.isSystemView(schema, viewName) || schema.getName().equals("sys") || viewName.toLowerCase().equals("sybfi");
     }
 
     public String generateDefaultConstraintName(String tableName, String columnName) {
@@ -232,7 +234,8 @@ public class SybaseDatabase extends AbstractDatabase {
 
 	@Override
 	public String getViewDefinition(Schema schema, String viewName) throws DatabaseException {
-        GetViewDefinitionStatement statement = new GetViewDefinitionStatement(schema.getCatalogName(this), schema.getName(this), viewName);
+        schema = correctSchema(schema);
+        GetViewDefinitionStatement statement = new GetViewDefinitionStatement(schema.getCatalogName(), schema.getName(), viewName);
         Executor executor = ExecutorService.getInstance().getExecutor(this);
         @SuppressWarnings("unchecked")
         List<String> definitionRows = (List<String>) executor.queryForList(statement, String.class);

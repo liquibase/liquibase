@@ -177,9 +177,10 @@ public class PostgresDatabase extends AbstractDatabase {
 
     @Override
     public boolean isSystemTable(Schema schema, String tableName) {
+        schema = correctSchema(schema);
         return super.isSystemTable(schema, tableName)
-                || "pg_catalog".equals(schema.getName(this))
-                || "pg_toast".equals(schema.getName(this))
+                || "pg_catalog".equals(schema.getName())
+                || "pg_toast".equals(schema.getName())
                 || tableName.endsWith("_seq")
                 || tableName.endsWith("_key")
                 || tableName.endsWith("_pkey")

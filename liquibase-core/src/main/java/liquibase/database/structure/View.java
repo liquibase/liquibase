@@ -7,6 +7,10 @@ public class View extends Relation {
         super(name);
     }
 
+    @Override
+    public Relation setSchema(Schema schema) {
+        return super.setSchema(schema);    //To change body of overridden methods use File | Settings | File Templates.
+    }
 
     public String getDefinition() {
         return definition;
