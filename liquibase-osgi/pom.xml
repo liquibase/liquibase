@@ -57,7 +57,11 @@
                             org.springframework.*;resolution:=optional,
                             org.w3c.*;resolution:=optional,
                             org.xml.*;resolution:=optional,
-                            org.osgi.framework.*;resolution:=optional
+                            org.osgi.framework.*;resolution:=optional,
+                            javax.enterprise.*,
+                            com.sun.jdi*,
+                            org.apache.commons.lang.text,
+                            sun.misc;
                         </Import-Package>
                         <Embed-Dependency>
                             *;scope=compile|runtime;type=!pom;inline=false;artifactId=!slf4j-api
