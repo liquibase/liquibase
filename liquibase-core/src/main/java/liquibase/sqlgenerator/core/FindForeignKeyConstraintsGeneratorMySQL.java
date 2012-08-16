@@ -2,6 +2,7 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
 import liquibase.database.core.MySQLDatabase;
+import liquibase.database.structure.Schema;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
@@ -29,6 +30,8 @@ public class FindForeignKeyConstraintsGeneratorMySQL extends AbstractSqlGenerato
     }
 
     public Sql[] generateSql(FindForeignKeyConstraintsStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+        Schema schema = database.correctSchema(new Schema(statement.getBaseTableCatalogName(), statement.getBaseTableSchemaName()));
+
         StringBuilder sb = new StringBuilder();
 
         sb.append("SELECT ");
@@ -43,7 +46,7 @@ public class FindForeignKeyConstraintsGeneratorMySQL extends AbstractSqlGenerato
         sb.append("AND RC.CONSTRAINT_SCHEMA = KCU.CONSTRAINT_SCHEMA ");
         sb.append("AND RC.CONSTRAINT_NAME = KCU.CONSTRAINT_NAME ");
         sb.append("AND RC.TABLE_NAME = '").append(statement.getBaseTableName()).append("' ");
-        sb.append("AND RC.CONSTRAINT_SCHEMA = '").append(database.correctSchemaName(null)).append("'");
+        sb.append("AND RC.CONSTRAINT_SCHEMA = '").append(schema.getCatalogName()).append("'");
         return new Sql[]{
                 new UnparsedSql(sb.toString())
         };

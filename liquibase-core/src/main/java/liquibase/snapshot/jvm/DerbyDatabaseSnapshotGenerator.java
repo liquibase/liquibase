@@ -2,6 +2,7 @@ package liquibase.snapshot.jvm;
 
 import liquibase.database.Database;
 import liquibase.database.core.DerbyDatabase;
+import liquibase.database.structure.Schema;
 import liquibase.exception.DatabaseException;
 
 import java.sql.ResultSet;
@@ -20,9 +21,9 @@ public class DerbyDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerato
      * Derby seems to have troubles
      */
     @Override
-    public boolean hasIndex(String catalogName, String schemaName, String tableName, String indexName, Database database, String columnNames) throws DatabaseException {
+    public boolean hasIndex(Schema schema, String tableName, String indexName, Database database, String columnNames) throws DatabaseException {
         try {
-            ResultSet rs = getMetaData(database).getIndexInfo(database.correctCatalogName(catalogName), database.correctSchemaName(schemaName), "%", false, true);
+            ResultSet rs = getMetaData(database).getIndexInfo(schema.getCatalogName(), schema.getName(), "%", false, true);
             while (rs.next()) {
                 if (rs.getString("INDEX_NAME").equalsIgnoreCase(indexName)) {
                     return true;

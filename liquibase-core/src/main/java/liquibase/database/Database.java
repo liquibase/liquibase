@@ -272,9 +272,7 @@ public interface Database extends DatabaseObject, PrioritizedService {
 
     public boolean isReservedWord(String string);
 
-    String correctCatalogName(String catalogName);
-
-    String correctSchemaName(String schemaName);
+    Schema correctSchema(Schema schema);
     
     String correctTableName(String tableName);
 

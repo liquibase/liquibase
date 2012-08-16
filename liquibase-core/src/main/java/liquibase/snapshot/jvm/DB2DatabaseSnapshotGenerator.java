@@ -2,6 +2,7 @@ package liquibase.snapshot.jvm;
 
 import liquibase.database.Database;
 import liquibase.database.core.DB2Database;
+import liquibase.database.structure.Schema;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.ExecutorService;
 import liquibase.statement.core.RawSqlStatement;
@@ -19,10 +20,12 @@ public class DB2DatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerator 
     }
 
     @Override
-    public boolean isColumnAutoIncrement(Database database, String catalogName, String schemaName, String tableName, String columnName) throws DatabaseException {
+    public boolean isColumnAutoIncrement(Database database, Schema schema, String tableName, String columnName) throws DatabaseException {
+        schema = database.correctSchema(schema);
+
         boolean autoIncrement = false;
 
-        List<Map> rs = ExecutorService.getInstance().getExecutor(database).queryForList(new RawSqlStatement("SELECT IDENTITY FROM SYSCAT.COLUMNS WHERE TABSCHEMA = '" + database.correctSchemaName(schemaName) + "' AND TABNAME = '" + tableName + "' AND COLNAME = '" + columnName + "' AND HIDDEN != 'S'"));
+        List<Map> rs = ExecutorService.getInstance().getExecutor(database).queryForList(new RawSqlStatement("SELECT IDENTITY FROM SYSCAT.COLUMNS WHERE TABSCHEMA = '" + schema.getName() + "' AND TABNAME = '" + tableName + "' AND COLNAME = '" + columnName + "' AND HIDDEN != 'S'"));
 
         for (Map row : rs) {
             String identity = row.get("IDENTITY").toString();

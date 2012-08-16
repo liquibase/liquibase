@@ -489,12 +489,8 @@ public class MockDatabase implements Database {
         return false;
     }
 
-    public String correctCatalogName(String catalogName) {
-        return catalogName;
-    }
-
-    public String correctSchemaName(String schemaName) {
-        return schemaName;
+    public Schema correctSchema(Schema schema) {
+        return schema;
     }
 
     public String correctTableName(String tableName) {

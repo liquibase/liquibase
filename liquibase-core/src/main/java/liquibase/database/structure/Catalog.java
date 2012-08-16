@@ -1,6 +1,5 @@
 package liquibase.database.structure;
 
-import liquibase.database.Database;
 import liquibase.util.StringUtils;
 
 public class Catalog {
@@ -25,13 +24,6 @@ public class Catalog {
         return name;
     }
     
-    public String getName(Database database) {
-        if (database == null) {
-            return getName();
-        }
-        return database.correctCatalogName(getName());
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

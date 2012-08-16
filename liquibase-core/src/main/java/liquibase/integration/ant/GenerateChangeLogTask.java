@@ -6,6 +6,7 @@ import liquibase.database.structure.Schema;
 import liquibase.diff.DiffControl;
 import liquibase.diff.DiffGeneratorFactory;
 import liquibase.diff.DiffResult;
+import liquibase.diff.output.DiffOutputConfig;
 import liquibase.diff.output.DiffToChangeLog;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.DatabaseSnapshotGeneratorFactory;
@@ -17,8 +18,11 @@ public class GenerateChangeLogTask extends BaseLiquibaseTask {
 
 	private String diffTypes;
     private String dataDir;
+    private boolean includeCatalog;
+    private boolean includeSchema;
+    private boolean includeTablespace;
 
-	public String getDiffTypes() {
+    public String getDiffTypes() {
 		return diffTypes;
 	}
 
@@ -32,6 +36,31 @@ public class GenerateChangeLogTask extends BaseLiquibaseTask {
 
     public void setDataDir(String dataDir) {
         this.dataDir = dataDir;
+    }
+
+
+    public boolean getIncludeCatalog() {
+        return includeCatalog;
+    }
+
+    public void setIncludeCatalog(boolean includeCatalog) {
+        this.includeCatalog = includeCatalog;
+    }
+
+    public boolean getIncludeSchema() {
+        return includeSchema;
+    }
+
+    public void setIncludeSchema(boolean includeSchema) {
+        this.includeSchema = includeSchema;
+    }
+
+    public boolean getIncludeTablespace() {
+        return includeTablespace;
+    }
+
+    public void setIncludeTablespace(boolean includeTablespace) {
+        this.includeTablespace = includeTablespace;
     }
 
     @Override
@@ -56,10 +85,11 @@ public class GenerateChangeLogTask extends BaseLiquibaseTask {
             DiffResult diffResult = DiffGeneratorFactory.getInstance().compare(referenceSnapshot, new DatabaseSnapshot(database, diffControl.getSchemas(DiffControl.DatabaseRole.REFERENCE)), diffControl);
 //			diff.addStatusListener(new OutDiffStatusListener());
 
+            DiffOutputConfig diffOutputConfig = new DiffOutputConfig(getIncludeCatalog(), getIncludeSchema(), getIncludeTablespace());
 			if (getChangeLogFile() == null) {
-				new DiffToChangeLog(diffResult).print(writer);
+				new DiffToChangeLog(diffResult, diffOutputConfig).print(writer);
 			} else {
-                new DiffToChangeLog(diffResult).print(getChangeLogFile());
+                new DiffToChangeLog(diffResult, diffOutputConfig).print(getChangeLogFile());
 			}
 
 			writer.flush();
@@ -70,4 +100,5 @@ public class GenerateChangeLogTask extends BaseLiquibaseTask {
 			closeDatabase(liquibase);
 		}
 	}
+
 }

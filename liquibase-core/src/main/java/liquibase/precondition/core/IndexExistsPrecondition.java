@@ -3,6 +3,7 @@ package liquibase.precondition.core;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
+import liquibase.database.structure.Schema;
 import liquibase.exception.*;
 import liquibase.precondition.Precondition;
 import liquibase.snapshot.DatabaseSnapshotGeneratorFactory;
@@ -73,7 +74,11 @@ public class IndexExistsPrecondition implements Precondition {
     	try {
             currentSchemaName = getSchemaName() == null ? (database == null ? null: database.getDefaultSchemaName()) : getSchemaName();
             currentCatalogName = getCatalogName() == null ? (database == null ? null: database.getDefaultCatalogName()) : getCatalogName();
-            if (!DatabaseSnapshotGeneratorFactory.getInstance().getGenerator(database).hasIndex(currentCatalogName, currentSchemaName, getTableName(), getIndexName(), database, getColumnNames())) {
+            Schema schema = new Schema(currentCatalogName, currentSchemaName);
+            if (database != null) {
+                schema = database.correctSchema(schema);
+            }
+            if (!DatabaseSnapshotGeneratorFactory.getInstance().getGenerator(database).hasIndex(schema, getTableName(), getIndexName(), database, getColumnNames())) {
                 String name = "";
 
                 if (getIndexName() != null) {

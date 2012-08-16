@@ -4,6 +4,7 @@ import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.database.structure.ForeignKey;
+import liquibase.database.structure.Schema;
 import liquibase.exception.*;
 import liquibase.precondition.Precondition;
 import liquibase.snapshot.DatabaseSnapshotGeneratorFactory;
@@ -57,7 +58,7 @@ public class ForeignKeyExistsPrecondition implements Precondition {
 
     public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet) throws PreconditionFailedException, PreconditionErrorException {
         try {
-            if (!DatabaseSnapshotGeneratorFactory.getInstance().getGenerator(database).hasForeignKey(getCatalogName(), getSchemaName(), getForeignKeyTableName(), getForeignKeyName(), database)) {
+            if (!DatabaseSnapshotGeneratorFactory.getInstance().getGenerator(database).hasForeignKey(database.correctSchema(new Schema(getCatalogName(), getSchemaName())), getForeignKeyTableName(), getForeignKeyName(), database)) {
                     throw new PreconditionFailedException("Foreign Key "+database.escapeIndexName(catalogName, schemaName, foreignKeyName)+" does not exist", changeLog, this);
             }
         } catch (PreconditionFailedException e) {

@@ -210,12 +210,14 @@ public class MSSQLDatabase extends AbstractDatabase {
 
     @Override
     public boolean isSystemTable(Schema schema, String tableName) {
-        return super.isSystemTable(schema, tableName) || schema.getName(this).equals("sys");
+        schema = correctSchema(schema);
+        return super.isSystemTable(schema, tableName) || schema.getName().equals("sys");
     }
 
     @Override
     public boolean isSystemView(Schema schema, String viewName) {
-        return super.isSystemView(schema, viewName) || schema.getName(this).equals("sys");
+        schema = correctSchema(schema);
+        return super.isSystemView(schema, viewName) || schema.getName().equals("sys");
     }
 
     public String generateDefaultConstraintName(String tableName, String columnName) {
@@ -260,7 +262,8 @@ public class MSSQLDatabase extends AbstractDatabase {
 
       @Override
     public String getViewDefinition(Schema schema, String viewName) throws DatabaseException {
-        List<String> defLines = (List<String>) ExecutorService.getInstance().getExecutor(this).queryForList(new GetViewDefinitionStatement(schema.getCatalogName(this), schema.getName(this), viewName), String.class);
+          schema = correctSchema(schema);
+        List<String> defLines = (List<String>) ExecutorService.getInstance().getExecutor(this).queryForList(new GetViewDefinitionStatement(schema.getCatalogName(), schema.getName(), viewName), String.class);
         StringBuffer sb = new StringBuffer();
         for (String defLine : defLines) {
             sb.append(defLine);
