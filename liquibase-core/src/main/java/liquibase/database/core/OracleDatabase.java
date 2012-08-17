@@ -2,6 +2,7 @@ package liquibase.database.core;
 
 import liquibase.database.AbstractDatabase;
 import liquibase.database.DatabaseConnection;
+import liquibase.database.jvm.JdbcConnection;
 import liquibase.database.structure.Schema;
 import liquibase.exception.DatabaseException;
 import liquibase.logging.LogFactory;
@@ -9,6 +10,7 @@ import liquibase.statement.DatabaseFunction;
 
 import java.lang.reflect.Method;
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -103,6 +105,27 @@ public class OracleDatabase extends AbstractDatabase {
     @Override
     public boolean supportsSequences() {
         return true;
+    }
+
+    /**
+     * Oracle supports catalogs in liquibase terms
+     * @return
+     */
+    @Override
+    public boolean supportsSchemas() {
+        return false;
+    }
+
+    @Override
+    protected String doGetDefaultCatalogName() throws DatabaseException {
+        try {
+            ResultSet resultSet = ((JdbcConnection) getConnection()).prepareCall("select sys_context( 'userenv', 'current_schema' ) from dual").executeQuery();
+            resultSet.next();
+            return resultSet.getString(1);
+        } catch (Exception e) {
+            LogFactory.getLogger().info("Error getting default schema", e);
+        }
+        return null;
     }
 
     public boolean isCorrectDatabaseImplementation(DatabaseConnection conn) throws DatabaseException {

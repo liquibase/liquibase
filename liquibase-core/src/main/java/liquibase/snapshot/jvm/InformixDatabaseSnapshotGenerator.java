@@ -37,11 +37,11 @@ public class InformixDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGener
     }
 
     @Override
-    protected DataType readDataType(ResultSet rs, Column column, Database database) throws SQLException {
+    protected DataType readDataType(Map<String, Object> rs, Column column, Database database) throws SQLException {
         // See http://publib.boulder.ibm.com/infocenter/idshelp/v115/topic/com.ibm.sqlr.doc/sqlr07.htm
-        String typeName = rs.getString("TYPE_NAME").toUpperCase();
+        String typeName = ((String) rs.get("TYPE_NAME")).toUpperCase();
         if ("DATETIME".equals(typeName) || "INTERVAL".equals(typeName)) {
-            int collength = rs.getInt("COLUMN_SIZE");
+            int collength = (Integer) rs.get("COLUMN_SIZE");
             //int positions = collength / 256;
             int firstQualifierType = (collength % 256) / 16;
             int lastQualifierType = (collength % 256) % 16;
