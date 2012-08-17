@@ -9,6 +9,7 @@ import liquibase.statement.DatabaseFunction;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Map;
 
 public class H2DatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerator {
     public boolean supports(Database database) {
@@ -20,7 +21,7 @@ public class H2DatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerator {
     }
 
     @Override
-    protected Object readDefaultValue(ResultSet columnMetadataResultSet, Column columnInfo, Database database) throws SQLException, DatabaseException {
+    protected Object readDefaultValue(Map<String, Object> columnMetadataResultSet, Column columnInfo, Database database) throws SQLException, DatabaseException {
         Object defaultValue = super.readDefaultValue(columnMetadataResultSet, columnInfo, database);
         if (defaultValue != null && defaultValue instanceof DatabaseFunction && ((DatabaseFunction) defaultValue).getValue().startsWith("NEXT VALUE FOR ")) {
             columnInfo.setAutoIncrement(true);

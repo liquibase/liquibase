@@ -145,7 +145,7 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
 
             Table table = new Table(database.correctTableName(tableName));
             table.setSchema(schema);
-            return readColumn(rs, table, database);
+            return readColumn(convertResultSetToMap(rs), table, database);
         } catch (Exception e) {
             throw new DatabaseException(e);
         } finally {
@@ -176,7 +176,7 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
             ResultSet columnMetadataResultSet = getMetaData(database).getColumns(table.getRawCatalogName(), table.getRawSchemaName(), rawTableName, null);
             try {
                 while (columnMetadataResultSet.next()) {
-                    table.getColumns().add(readColumn(columnMetadataResultSet, table, database));
+                    table.getColumns().add(readColumn(convertResultSetToMap(columnMetadataResultSet), table, database));
                 }
             } finally {
                 columnMetadataResultSet.close();
@@ -209,12 +209,12 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
         return view;
     }
 
-    protected Column readColumn(ResultSet columnMetadataResultSet, Relation table, Database database) throws SQLException, DatabaseException {
-        String rawTableName = columnMetadataResultSet.getString("TABLE_NAME");
-        String rawColumnName = columnMetadataResultSet.getString("COLUMN_NAME");
-        String rawSchemaName = StringUtils.trimToNull(columnMetadataResultSet.getString("TABLE_SCHEM"));
-        String rawCatalogName = StringUtils.trimToNull(columnMetadataResultSet.getString("TABLE_CAT"));
-        String remarks = StringUtils.trimToNull(columnMetadataResultSet.getString("REMARKS"));
+    protected Column readColumn(Map<String, Object> columnMetadataResultSet, Relation table, Database database) throws SQLException, DatabaseException {
+        String rawTableName = (String) columnMetadataResultSet.get("TABLE_NAME");
+        String rawColumnName = (String) columnMetadataResultSet.get("COLUMN_NAME");
+        String rawSchemaName = StringUtils.trimToNull((String) columnMetadataResultSet.get("TABLE_SCHEM"));
+        String rawCatalogName = StringUtils.trimToNull((String) columnMetadataResultSet.get("TABLE_CAT"));
+        String remarks = StringUtils.trimToNull((String) columnMetadataResultSet.get("REMARKS"));
 
         Schema schema = new Schema(rawCatalogName, rawSchemaName);
         if (database.isSystemTable(schema, rawTableName) || database.isSystemView(schema, rawTableName)) {
@@ -226,7 +226,7 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
         column.setRelation(table);
         column.setRemarks(remarks);
 
-        int nullable = columnMetadataResultSet.getInt("NULLABLE");
+        int nullable = (Integer) columnMetadataResultSet.get("NULLABLE");
         if (nullable == DatabaseMetaData.columnNoNulls) {
             column.setNullable(false);
         } else if (nullable == DatabaseMetaData.columnNullable) {
@@ -236,8 +236,8 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
             column.setNullable(true);
         }
 
-        try {
-            String isAutoincrement = columnMetadataResultSet.getString("IS_AUTOINCREMENT");
+        if (columnMetadataResultSet.containsKey("IS_AUTOINCREMENT")) {
+            String isAutoincrement = (String) columnMetadataResultSet.get("IS_AUTOINCREMENT");
             if (isAutoincrement.equals("YES")) {
                 column.setAutoIncrement(true);
             } else if (isAutoincrement.equals("NO")) {
@@ -248,7 +248,7 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
             } else {
                 throw new UnexpectedLiquibaseException("Unknown is_autoincrement value: " + isAutoincrement);
             }
-        } catch (SQLException e) {
+        } else {
             //probably older version of java, need to select from the column to find out if it is auto-increment
             String selectStatement = "select " + database.escapeColumnName(rawCatalogName, rawSchemaName, rawTableName, rawColumnName) + " from " + database.escapeTableName(rawCatalogName, rawSchemaName, rawTableName) + " where 0=1";
             Connection underlyingConnection = ((JdbcConnection) database.getConnection()).getUnderlyingConnection();
@@ -274,50 +274,31 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
 
         column.setDefaultValue(readDefaultValue(columnMetadataResultSet, column, database));
 
-        readAdditionalDataType(columnMetadataResultSet, column, database);
-
         return column;
     }
 
-    protected DataType readDataType(ResultSet columnMetadataResultSet, Column column, Database database) throws SQLException {
-        String columnTypeName = columnMetadataResultSet.getString("TYPE_NAME");
+    protected DataType readDataType(Map<String, Object> columnMetadataResultSet, Column column, Database database) throws SQLException {
+        String columnTypeName = (String) columnMetadataResultSet.get("TYPE_NAME");
 
-        int dataType = columnMetadataResultSet.getInt("DATA_TYPE");
-        Integer columnSize = columnMetadataResultSet.getInt("COLUMN_SIZE");
-        if (columnMetadataResultSet.wasNull()) {
-            columnSize = null;
-        }
+        int dataType = (Integer) columnMetadataResultSet.get("DATA_TYPE");
+        Integer columnSize = (Integer) columnMetadataResultSet.get("COLUMN_SIZE");
 
-        Integer decimalDigits = columnMetadataResultSet.getInt("DECIMAL_DIGITS");
-        if (columnMetadataResultSet.wasNull() || decimalDigits.equals(0)) {
+        Integer decimalDigits = (Integer) columnMetadataResultSet.get("DECIMAL_DIGITS");
+        if (decimalDigits != null && decimalDigits.equals(0)) {
             decimalDigits = null;
         }
+
+        Integer radix = (Integer) columnMetadataResultSet.get("NUM_PREC_RADIX");
+
+        Integer characterOctetLength = (Integer) columnMetadataResultSet.get("CHAR_OCTET_LENGTH");
 
         DataType type = new DataType(columnTypeName);
         type.setDataTypeId(dataType);
         type.setColumnSize(columnSize);
         type.setDecimalDigits(decimalDigits);
-        type.setColumnSizeUnit(DataType.ColumnSizeUnit.BYTE);
-
-        return type;
-    }
-
-    /**
-     * Some databases, such as Oracle, have problems reading column_def after other metadata has been read, so this is mainly to have a point for more type data to be read in
-     */
-    protected DataType readAdditionalDataType(ResultSet columnMetadataResultSet, Column column, Database database) throws SQLException {
-        Integer radix = columnMetadataResultSet.getInt("NUM_PREC_RADIX");
-        if (columnMetadataResultSet.wasNull()) {
-            radix = null;
-        }
-        Integer characterOctetLength = columnMetadataResultSet.getInt("CHAR_OCTET_LENGTH");
-        if (columnMetadataResultSet.wasNull()) {
-            characterOctetLength = null;
-        }
-
-        DataType type = column.getType();
         type.setRadix(radix);
         type.setCharacterOctetLength(characterOctetLength);
+        type.setColumnSizeUnit(DataType.ColumnSizeUnit.BYTE);
 
         return type;
     }
@@ -429,7 +410,8 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
         try {
             allColumnsMetadataRs = databaseMetaData.getColumns(schema.getCatalogName(), schema.getName(), null, null);
             while (allColumnsMetadataRs.next()) {
-                String tableOrViewName = cleanObjectNameFromDatabase(allColumnsMetadataRs.getString("TABLE_NAME"));
+                Map<String, Object> data = convertResultSetToMap(allColumnsMetadataRs);
+                String tableOrViewName = cleanObjectNameFromDatabase((String) data.get("TABLE_NAME"));
                 Relation relation = snapshot.getDatabaseObject(schema, tableOrViewName, Table.class);
                 if (relation == null) {
                     relation = snapshot.getDatabaseObject(schema, tableOrViewName, View.class);
@@ -445,7 +427,7 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
                     }
                 }
 
-                Column column = readColumn(allColumnsMetadataRs, relation, database);
+                Column column = readColumn(data, relation, database);
 
                 if (column == null) {
                     continue;
@@ -463,11 +445,58 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
         }
     }
 
-    protected Object readDefaultValue(ResultSet columnMetadataResultSet, Column columnInfo, Database database) throws SQLException, DatabaseException {
-        Object val = columnMetadataResultSet.getObject("COLUMN_DEF");
-        if (columnMetadataResultSet.wasNull()) {
-            return null;
+    private Map<String, Object> convertResultSetToMap(ResultSet rs) throws SQLException {
+        Class[] types = new Class[]{ //matches tableMetadata.getColumns() types. UglY, but otherwise get wrong types
+                null, //no zero index
+                String.class,
+                String.class,
+                String.class,
+                String.class,
+                int.class,
+                String.class,
+                int.class,
+                String.class,
+                int.class,
+                int.class,
+                int.class,
+                String.class,
+                String.class,
+                int.class,
+                int.class,
+                int.class,
+                int.class,
+                String.class,
+                String.class,
+                String.class,
+                String.class,
+                short.class,
+                String.class
+        };
+
+        Map<String, Object> data = new HashMap<String, Object>();
+        for (int i=1; i<= rs.getMetaData().getColumnCount(); i++) {
+            Class classType = types[i];
+            Object value;
+            if (classType.equals(String.class)) {
+                value = rs.getString(i);
+            } else if (classType.equals(int.class)) {
+                value = rs.getInt(i);
+            }  else if (classType.equals(short.class)) {
+                value = rs.getShort(i);
+            } else {
+                value = rs.getObject(i);
+            }
+            if (rs.wasNull()) {
+                value = null;
+            }
+            data.put(rs.getMetaData().getColumnName(i), value);
         }
+        return data;
+    }
+
+    protected Object readDefaultValue(Map<String, Object> columnMetadataResultSet, Column columnInfo, Database database) throws SQLException, DatabaseException {
+        Object val = columnMetadataResultSet.get("COLUMN_DEF");
+
         if (val instanceof String && val.equals("")) {
             return null;
         }
@@ -485,34 +514,34 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
                 if (type == Types.ARRAY) {
                     return new DatabaseFunction(stringVal);
                 } else if (type == Types.BIGINT) {
-                    return new BigInteger(stringVal);
+                    return new BigInteger(stringVal.trim());
                 } else if (type == Types.BINARY) {
-                    return new DatabaseFunction(stringVal);
+                    return new DatabaseFunction(stringVal.trim());
                 } else if (type == Types.BIT) {
                     if (stringVal.startsWith("b'")) { //mysql returns boolean values as b'0' and b'1'
                         stringVal = stringVal.replaceFirst("b'", "").replaceFirst("'$", "");
                     }
-                    return new Integer(stringVal);
+                    return new Integer(stringVal.trim());
                 } else if (type == Types.BLOB) {
                     return new DatabaseFunction(stringVal);
                 } else if (type == Types.BOOLEAN) {
-                    return Boolean.valueOf(stringVal);
+                    return Boolean.valueOf(stringVal.trim());
                 } else if (type == Types.CHAR) {
                     return stringVal;
                 } else if (type == Types.DATALINK) {
                     return new DatabaseFunction(stringVal);
                 } else if (type == Types.DATE) {
-                    return new java.sql.Date(getDateFormat().parse(stringVal).getTime());
+                    return new java.sql.Date(getDateFormat().parse(stringVal.trim()).getTime());
                 } else if (type == Types.DECIMAL) {
-                    return new BigDecimal(stringVal);
+                    return new BigDecimal(stringVal.trim());
                 } else if (type == Types.DISTINCT) {
                     return new DatabaseFunction(stringVal);
                 } else if (type == Types.DOUBLE) {
-                    return Double.valueOf(stringVal);
+                    return Double.valueOf(stringVal.trim());
                 } else if (type == Types.FLOAT) {
-                    return Float.valueOf(stringVal);
+                    return Float.valueOf(stringVal.trim());
                 } else if (type == Types.INTEGER) {
-                    return Integer.valueOf(stringVal);
+                    return Integer.valueOf(stringVal.trim());
                 } else if (type == Types.JAVA_OBJECT) {
                     return new DatabaseFunction(stringVal);
                 } else if (type == Types.LONGNVARCHAR) {
@@ -528,19 +557,19 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
                 } else if (type == Types.NULL) {
                     return null;
                 } else if (type == Types.NUMERIC) {
-                    return new BigDecimal(stringVal);
+                    return new BigDecimal(stringVal.trim());
                 } else if (type == Types.NVARCHAR) {
                     return stringVal;
                 } else if (type == Types.OTHER) {
                     return new DatabaseFunction(stringVal);
                 } else if (type == Types.REAL) {
-                    return new BigDecimal(stringVal);
+                    return new BigDecimal(stringVal.trim());
                 } else if (type == Types.REF) {
                     return new DatabaseFunction(stringVal);
                 } else if (type == Types.ROWID) {
                     return new DatabaseFunction(stringVal);
                 } else if (type == Types.SMALLINT) {
-                    return Integer.valueOf(stringVal);
+                    return Integer.valueOf(stringVal.trim());
                 } else if (type == Types.SQLXML) {
                     return new DatabaseFunction(stringVal);
                 } else if (type == Types.STRUCT) {
@@ -550,7 +579,7 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
                 } else if (type == Types.TIMESTAMP) {
                     return new Timestamp(getDateTimeFormat().parse(stringVal).getTime());
                 } else if (type == Types.TINYINT) {
-                    return Integer.valueOf(stringVal);
+                    return Integer.valueOf(stringVal.trim());
                 } else if (type == Types.VARBINARY) {
                     return new DatabaseFunction(stringVal);
                 } else if (type == Types.VARCHAR) {
