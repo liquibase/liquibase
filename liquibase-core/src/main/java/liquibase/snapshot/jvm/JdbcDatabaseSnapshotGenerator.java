@@ -616,22 +616,7 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
                 }
             }
 
-            if (indexName != null) {
-                ResultSet rs = getMetaData(database).getIndexInfo(schema.getCatalogName(), schema.getName(), database.correctTableName(tableName), false, true);
-                try {
-                    while (rs.next()) {
-                        if (rs.getString("INDEX_NAME").equals(database.correctIndexName(indexName))) {
-                            return true;
-                        }
-                    }
-                    return false;
-                } finally {
-                    try {
-                        rs.close();
-                    } catch (SQLException ignore) {
-                    }
-                }
-            } else if (columnNames != null) {
+            if (columnNames != null) {
                 columnNames = columnNames.replace(" ", "");
                 if (columnNames.contains(",")) {
                     List<String> fixedColumnNames = new ArrayList<String>();
@@ -645,6 +630,9 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
                 try {
                     while (rs.next()) {
                         String foundIndexName = rs.getString("INDEX_NAME");
+                        if (indexName != null && !foundIndexName.equals(indexName)) {
+                            continue;
+                        }
                         short ordinalPosition = rs.getShort("ORDINAL_POSITION");
 
                         if (!columnsByIndexName.containsKey(foundIndexName)) {
@@ -665,8 +653,21 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
                 } finally {
                     rs.close();
                 }
-
-
+            } else if (indexName != null) {
+                    ResultSet rs = getMetaData(database).getIndexInfo(schema.getCatalogName(), schema.getName(), database.correctTableName(tableName), false, true);
+                    try {
+                        while (rs.next()) {
+                            if (rs.getString("INDEX_NAME").equals(database.correctIndexName(indexName))) {
+                                return true;
+                            }
+                        }
+                        return false;
+                    } finally {
+                        try {
+                            rs.close();
+                        } catch (SQLException ignore) {
+                        }
+                    }
             } else {
                 throw new UnexpectedLiquibaseException("Either indexName or columnNames must be set");
             }
