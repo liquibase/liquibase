@@ -31,7 +31,6 @@ import java.io.IOException;
 import java.io.Writer;
 import java.math.BigInteger;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -182,7 +181,7 @@ public abstract class AbstractDatabase implements Database {
         if (defaultCatalogName == null) {
             if (connection != null) {
                 try {
-                    defaultCatalogName = connection.getCatalog();
+                    defaultCatalogName = doGetDefaultCatalogName();
                 } catch (DatabaseException e) {
                     LogFactory.getLogger().info("Error getting default catalog", e);
                 }
@@ -191,16 +190,8 @@ public abstract class AbstractDatabase implements Database {
         return defaultCatalogName;
     }
 
-    /**
-     * Returns the default schema from the current database connection.  By default, this will be the user name
-     * for the current connection.  Implementations should override this method for databases which allow for the
-     * schema to be something other than the current user.
-     *
-     * @return The current schema name
-     * @throws DatabaseException if an error occured
-     */
-    protected String getDefaultDatabaseSchemaName() throws DatabaseException {
-        return getConnection().getConnectionUserName();
+    protected String doGetDefaultCatalogName() throws DatabaseException {
+        return connection.getCatalog();
     }
 
     public Schema correctSchema(Schema schema) {
@@ -258,6 +249,10 @@ public abstract class AbstractDatabase implements Database {
     }
 
     public String getDefaultSchemaName() {
+
+        if (!supportsSchemas()) {
+            return getDefaultCatalogName();
+        }
 
         if (defaultSchemaName == null && connection != null) {
             defaultSchemaName = doGetDefaultSchemaName();

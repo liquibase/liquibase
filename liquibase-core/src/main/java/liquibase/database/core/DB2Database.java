@@ -7,6 +7,7 @@ import liquibase.database.structure.Schema;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.DateParseException;
 import liquibase.util.JdbcUtils;
+import sun.util.logging.resources.logging;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -46,7 +47,7 @@ public class DB2Database extends AbstractDatabase {
     }
 
     @Override
-    protected String getDefaultDatabaseSchemaName() throws DatabaseException {//NOPMD
+    public String getDefaultSchemaName() {
       if( defaultSchemaName == null ) {
         Statement stmt = null;
         ResultSet rs = null;
@@ -58,11 +59,11 @@ public class DB2Database extends AbstractDatabase {
             if( result != null ) {
               this.defaultSchemaName = result;
             } else {
-              this.defaultSchemaName = super.getDefaultDatabaseSchemaName();
+              this.defaultSchemaName = super.getDefaultSchemaName();
             }
           }
         } catch (Exception e) {
-          throw new DatabaseException("Could not determine current schema", e);
+            throw new RuntimeException("Could not determine current schema", e);
         } finally {
           JdbcUtils.closeResultSet(rs);
           JdbcUtils.closeStatement(stmt);

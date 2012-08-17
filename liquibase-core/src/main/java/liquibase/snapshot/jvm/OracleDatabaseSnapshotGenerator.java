@@ -25,7 +25,7 @@ public class OracleDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerat
     public int getPriority(Database database) {
         return PRIORITY_DATABASE;
     }
-//
+    //
 //
 //    /**
 //     * Oracle specific implementation

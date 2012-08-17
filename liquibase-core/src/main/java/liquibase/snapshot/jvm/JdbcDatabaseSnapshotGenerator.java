@@ -274,6 +274,8 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
 
         column.setDefaultValue(readDefaultValue(columnMetadataResultSet, column, database));
 
+        readAdditionalDataType(columnMetadataResultSet, column, database);
+
         return column;
     }
 
@@ -291,6 +293,19 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
             decimalDigits = null;
         }
 
+        DataType type = new DataType(columnTypeName);
+        type.setDataTypeId(dataType);
+        type.setColumnSize(columnSize);
+        type.setDecimalDigits(decimalDigits);
+        type.setColumnSizeUnit(DataType.ColumnSizeUnit.BYTE);
+
+        return type;
+    }
+
+    /**
+     * Some databases, such as Oracle, have problems reading column_def after other metadata has been read, so this is mainly to have a point for more type data to be read in
+     */
+    protected DataType readAdditionalDataType(ResultSet columnMetadataResultSet, Column column, Database database) throws SQLException {
         Integer radix = columnMetadataResultSet.getInt("NUM_PREC_RADIX");
         if (columnMetadataResultSet.wasNull()) {
             radix = null;
@@ -300,13 +315,9 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
             characterOctetLength = null;
         }
 
-        DataType type = new DataType(columnTypeName);
-        type.setDataTypeId(dataType);
-        type.setColumnSize(columnSize);
-        type.setDecimalDigits(decimalDigits);
+        DataType type = column.getType();
         type.setRadix(radix);
         type.setCharacterOctetLength(characterOctetLength);
-        type.setColumnSizeUnit(DataType.ColumnSizeUnit.BYTE);
 
         return type;
     }
