@@ -23,7 +23,6 @@ import liquibase.util.StringUtils;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.*;
-import java.sql.Date;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -601,13 +600,13 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
         }
     }
 
-    public boolean hasIndex(Schema schema, String tableName, String indexName, Database database, String columnNames) throws DatabaseException {
+    public boolean hasIndex(Schema schema, String tableName, String indexName, String columnNames, Database database) throws DatabaseException {
         try {
             if (tableName == null) {
                 ResultSet rs = getMetaData(database).getTables(schema.getCatalogName(), schema.getName(), null, new String[]{"TABLE"});
                 try {
                     while (rs.next()) {
-                        if (hasIndex(schema, rs.getString("TABLE_NAME"), indexName, database, columnNames)) {
+                        if (hasIndex(schema, rs.getString("TABLE_NAME"), indexName, columnNames, database)) {
                             return true;
                         }
                     }

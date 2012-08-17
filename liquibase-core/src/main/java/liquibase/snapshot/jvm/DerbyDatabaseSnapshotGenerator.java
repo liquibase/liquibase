@@ -21,7 +21,7 @@ public class DerbyDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerato
      * Derby seems to have troubles
      */
     @Override
-    public boolean hasIndex(Schema schema, String tableName, String indexName, Database database, String columnNames) throws DatabaseException {
+    public boolean hasIndex(Schema schema, String tableName, String indexName, String columnNames, Database database) throws DatabaseException {
         try {
             ResultSet rs = getMetaData(database).getIndexInfo(schema.getCatalogName(), schema.getName(), "%", false, true);
             while (rs.next()) {

@@ -34,7 +34,7 @@ public interface DatabaseSnapshotGenerator {
 
     boolean hasForeignKey(Schema schema, String tableName, String fkName, Database database) throws DatabaseException;
 
-    boolean hasIndex(Schema schema, String tableName, String indexName, Database database, String columnNames) throws DatabaseException;
+    boolean hasIndex(Schema schema, String tableName, String indexName, String columnNames, Database database) throws DatabaseException;
 
     boolean hasDatabaseChangeLogTable(Database database);
 

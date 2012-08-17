@@ -69,16 +69,12 @@ public class IndexExistsPrecondition implements Precondition {
     }
 
     public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet) throws PreconditionFailedException, PreconditionErrorException {
-    	String currentSchemaName;
-        String currentCatalogName;
     	try {
-            currentSchemaName = getSchemaName() == null ? (database == null ? null: database.getDefaultSchemaName()) : getSchemaName();
-            currentCatalogName = getCatalogName() == null ? (database == null ? null: database.getDefaultCatalogName()) : getCatalogName();
-            Schema schema = new Schema(currentCatalogName, currentSchemaName);
+            Schema schema = new Schema(getCatalogName(), getSchemaName());
             if (database != null) {
                 schema = database.correctSchema(schema);
             }
-            if (!DatabaseSnapshotGeneratorFactory.getInstance().getGenerator(database).hasIndex(schema, getTableName(), getIndexName(), database, getColumnNames())) {
+            if (!DatabaseSnapshotGeneratorFactory.getInstance().getGenerator(database).hasIndex(schema, getTableName(), getIndexName(), getColumnNames(), database)) {
                 String name = "";
 
                 if (getIndexName() != null) {
