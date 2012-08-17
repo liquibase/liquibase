@@ -25,7 +25,7 @@ public class CheckSum {
     }
 
     public static int getCurrentVersion() {
-        return 3;
+        return 4;
     }
 
     public static CheckSum compute(String valueToChecksum) {
