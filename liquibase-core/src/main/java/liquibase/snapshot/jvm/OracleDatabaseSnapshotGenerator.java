@@ -284,102 +284,103 @@ public class OracleDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerat
 //        return foreignKeys;
 //    }
 //
-//    @Override
-//    protected void readIndexes(DatabaseSnapshot snapshot, String schema, DatabaseMetaData databaseMetaData) throws DatabaseException, SQLException {
-//        Database database = snapshot.getDatabase();
-//        updateListeners("Reading indexes for " + database.toString() + " ...");
-//
-//        String query = "select aic.index_name, 3 AS TYPE, aic.table_name, aic.column_name, aic.column_position AS ORDINAL_POSITION, null AS FILTER_CONDITION, ai.tablespace_name AS TABLESPACE, ai.uniqueness FROM all_ind_columns aic, all_indexes ai WHERE aic.table_owner='" + database.convertRequestedSchemaToSchema(schema) + "' and aic.index_name = ai.index_name ORDER BY INDEX_NAME, ORDINAL_POSITION";
-//        Statement statement = null;
-//        ResultSet rs = null;
-//        Map<String, Index> indexMap = null;
-//        try {
-//            statement = ((JdbcConnection) database.getConnection()).getUnderlyingConnection().createStatement();
-//            rs = statement.executeQuery(query);
-//
-//            indexMap = new HashMap<String, Index>();
-//            while (rs.next()) {
-//                String indexName = cleanObjectNameFromDatabase(rs.getString("INDEX_NAME"));
-//                String tableName = rs.getString("TABLE_NAME");
-//                String tableSpace = rs.getString("TABLESPACE");
-//                String columnName = cleanObjectNameFromDatabase(rs.getString("COLUMN_NAME"));
-//                if (columnName == null) {
-//                    //nothing to index, not sure why these come through sometimes
-//                    continue;
-//                }
-//                short type = rs.getShort("TYPE");
-//
-//                boolean nonUnique;
-//
-//                String uniqueness = rs.getString("UNIQUENESS");
-//
-//                if ("UNIQUE".equals(uniqueness)) {
-//                    nonUnique = false;
-//                } else {
-//                    nonUnique = true;
-//                }
-//
-//                short position = rs.getShort("ORDINAL_POSITION");
-//                String filterCondition = rs.getString("FILTER_CONDITION");
-//
-//                if (type == DatabaseMetaData.tableIndexStatistic) {
-//                    continue;
-//                }
-//
-//                Index index;
-//                if (indexMap.containsKey(indexName)) {
-//                    index = indexMap.get(indexName);
-//                } else {
-//                    index = new Index();
-//                    Table table = snapshot.getTable(tableName);
-//                    if (table == null) {
-//                        continue; //probably different schema
-//                    }
-//                    index.setTable(table);
-//                    index.setTablespace(tableSpace);
-//                    index.setName(indexName);
-//                    index.setUnique(!nonUnique);
-//                    index.setFilterCondition(filterCondition);
-//                    indexMap.put(indexName, index);
-//                }
-//
-//                for (int i = index.getColumns().size(); i < position; i++) {
-//                    index.getColumns().add(null);
-//                }
-//                index.getColumns().set(position - 1, columnName);
-//            }
-//        } finally {
-//            JdbcUtils.closeResultSet(rs);
-//            JdbcUtils.closeStatement(statement);
-//        }
-//
-//        for (Map.Entry<String, Index> entry : indexMap.entrySet()) {
-//            snapshot.getIndexes().add(entry.getValue());
-//        }
-//
-//        /*
-//          * marks indexes as "associated with" instead of "remove it"
-//          * Index should have associations with:
-//          * foreignKey, primaryKey or uniqueConstraint
-//          * */
-//        for (Index index : snapshot.getIndexes()) {
-//            for (PrimaryKey pk : snapshot.getPrimaryKeys()) {
-//                if (index.getTable().getName().equalsIgnoreCase(pk.getTable().getName()) && index.getColumnNames().equals(pk.getColumnNames())) {
-//                    index.addAssociatedWith(Index.MARK_PRIMARY_KEY);
-//                }
-//            }
-//            for (ForeignKey fk : snapshot.getForeignKeys()) {
-//                if (index.getTable().getName().equalsIgnoreCase(fk.getForeignKeyTable().getName()) && index.getColumnNames().equals(fk.getForeignKeyColumns())) {
-//                    index.addAssociatedWith(Index.MARK_FOREIGN_KEY);
-//                }
-//            }
-//            for (UniqueConstraint uc : snapshot.getUniqueConstraints()) {
-//                if (index.getTable().getName().equalsIgnoreCase(uc.getTable().getName()) && index.getColumnNames().equals(uc.getColumnNames())) {
-//                    index.addAssociatedWith(Index.MARK_UNIQUE_CONSTRAINT);
-//                }
-//            }
-//        }
-//    }
+    @Override
+    protected void readIndexes(DatabaseSnapshot snapshot, Schema schema, DatabaseMetaData databaseMetaData) throws DatabaseException, SQLException {
+        Database database = snapshot.getDatabase();
+        schema = database.correctSchema(schema);
+        updateListeners("Reading indexes for " + database.toString() + " ...");
+
+        String query = "select aic.index_name, 3 AS TYPE, aic.table_name, aic.column_name, aic.column_position AS ORDINAL_POSITION, null AS FILTER_CONDITION, ai.tablespace_name AS TABLESPACE, ai.uniqueness FROM all_ind_columns aic, all_indexes ai WHERE aic.table_owner='" + schema.getName() + "' and ai.table_owner='" + schema.getName() + "' and aic.index_name = ai.index_name ORDER BY INDEX_NAME, ORDINAL_POSITION";
+        Statement statement = null;
+        ResultSet rs = null;
+        Map<String, Index> indexMap = null;
+        try {
+            statement = ((JdbcConnection) database.getConnection()).getUnderlyingConnection().createStatement();
+            rs = statement.executeQuery(query);
+
+            indexMap = new HashMap<String, Index>();
+            while (rs.next()) {
+                String indexName = cleanObjectNameFromDatabase(rs.getString("INDEX_NAME"));
+                String tableName = rs.getString("TABLE_NAME");
+                String tableSpace = rs.getString("TABLESPACE");
+                String columnName = cleanObjectNameFromDatabase(rs.getString("COLUMN_NAME"));
+                if (columnName == null) {
+                    //nothing to index, not sure why these come through sometimes
+                    continue;
+                }
+                short type = rs.getShort("TYPE");
+
+                boolean nonUnique;
+
+                String uniqueness = rs.getString("UNIQUENESS");
+
+                if ("UNIQUE".equals(uniqueness)) {
+                    nonUnique = false;
+                } else {
+                    nonUnique = true;
+                }
+
+                short position = rs.getShort("ORDINAL_POSITION");
+                String filterCondition = rs.getString("FILTER_CONDITION");
+
+                if (type == DatabaseMetaData.tableIndexStatistic) {
+                    continue;
+                }
+
+                Index index;
+                if (indexMap.containsKey(indexName)) {
+                    index = indexMap.get(indexName);
+                } else {
+                    index = new Index();
+                    Table table = snapshot.getDatabaseObject(schema, tableName, Table.class);
+                    if (table == null) {
+                        continue; //probably different schema
+                    }
+                    index.setTable(table);
+                    index.setTablespace(tableSpace);
+                    index.setName(indexName);
+                    index.setUnique(!nonUnique);
+                    index.setFilterCondition(filterCondition);
+                    indexMap.put(indexName, index);
+                }
+
+                for (int i = index.getColumns().size(); i < position; i++) {
+                    index.getColumns().add(null);
+                }
+                index.getColumns().set(position - 1, columnName);
+            }
+        } finally {
+            JdbcUtils.closeResultSet(rs);
+            JdbcUtils.closeStatement(statement);
+        }
+
+        for (Map.Entry<String, Index> entry : indexMap.entrySet()) {
+            snapshot.addDatabaseObjects(entry.getValue());
+        }
+
+        /*
+          * marks indexes as "associated with" instead of "remove it"
+          * Index should have associations with:
+          * foreignKey, primaryKey or uniqueConstraint
+          * */
+        for (Index index : snapshot.getDatabaseObjects(schema, Index.class)) {
+            for (PrimaryKey pk : snapshot.getDatabaseObjects(schema, PrimaryKey.class)) {
+                if (index.getTable().getName().equalsIgnoreCase(pk.getTable().getName()) && index.getColumnNames().equals(pk.getColumnNames())) {
+                    index.addAssociatedWith(Index.MARK_PRIMARY_KEY);
+                }
+            }
+            for (ForeignKey fk : snapshot.getDatabaseObjects(schema, ForeignKey.class)) {
+                if (index.getTable().getName().equalsIgnoreCase(fk.getForeignKeyTable().getName()) && index.getColumnNames().equals(fk.getForeignKeyColumns())) {
+                    index.addAssociatedWith(Index.MARK_FOREIGN_KEY);
+                }
+            }
+            for (UniqueConstraint uc : snapshot.getDatabaseObjects(schema, UniqueConstraint.class)) {
+                if (index.getTable().getName().equalsIgnoreCase(uc.getTable().getName()) && index.getColumnNames().equals(uc.getColumnNames())) {
+                    index.addAssociatedWith(Index.MARK_UNIQUE_CONSTRAINT);
+                }
+            }
+        }
+    }
 //
 //    @Override
 //    protected void readPrimaryKeys(DatabaseSnapshot snapshot, String schema, DatabaseMetaData databaseMetaData) throws DatabaseException, SQLException {
