@@ -70,6 +70,11 @@ public class DataType {
     @Override
     public String toString() {
         String value = typeName;
+        boolean unsigned = false;
+        if (value.toLowerCase().endsWith(" unsigned")) {
+            value = value.substring(0, value.length()-" unsigned".length());
+            unsigned = true;
+        }
 
         if (columnSize != null) {
             value += "(";
@@ -80,6 +85,10 @@ public class DataType {
             }
 
             value +=")";
+        }
+
+        if (unsigned) {
+            value += " UNSIGNED";
         }
 
         return value;
