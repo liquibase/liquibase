@@ -270,6 +270,10 @@ public interface Database extends DatabaseObject, PrioritizedService {
 
     void enableForeignKeyChecks() throws DatabaseException;
 
+    public boolean isCaseSensitive();
+
+    public boolean objectNamesEqual(String name1, String name2);
+
     public boolean isReservedWord(String string);
 
     Schema correctSchema(Schema schema);

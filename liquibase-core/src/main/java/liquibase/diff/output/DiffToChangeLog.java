@@ -636,7 +636,7 @@ public class DiffToChangeLog {
                 if (column.isPrimaryKey()) {
                     PrimaryKey primaryKey = null;
                     for (PrimaryKey pk : diffResult.getObjectDiff(PrimaryKey.class).getMissing()) {
-                        if (pk.getTable().getName().equalsIgnoreCase(missingTable.getName())) {
+                        if (diffResult.getComparisonSnapshot().getDatabase().objectNamesEqual(pk.getTable().getName(), missingTable.getName())) {
                             primaryKey = pk;
                         }
                     }

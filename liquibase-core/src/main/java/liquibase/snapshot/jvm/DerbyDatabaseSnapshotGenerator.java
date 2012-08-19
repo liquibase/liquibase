@@ -25,11 +25,11 @@ public class DerbyDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerato
         try {
             ResultSet rs = getMetaData(database).getIndexInfo(schema.getCatalogName(), schema.getName(), "%", false, true);
             while (rs.next()) {
-                if (rs.getString("INDEX_NAME").equalsIgnoreCase(indexName)) {
+                if (database.objectNamesEqual(rs.getString("INDEX_NAME"), indexName)) {
                     return true;
                 }
                 if (tableName != null && columnNames != null) {
-                    if (tableName.equalsIgnoreCase(rs.getString("TABLE_NAME")) && columnNames.replaceAll(" ","").equalsIgnoreCase(rs.getString("COLUMN_NAME").replaceAll(" ",""))) {
+                    if (database.objectNamesEqual(tableName, rs.getString("TABLE_NAME")) && database.objectNamesEqual(columnNames.replaceAll(" ",""), rs.getString("COLUMN_NAME").replaceAll(" ",""))) {
                         return true;
                     }
                 }

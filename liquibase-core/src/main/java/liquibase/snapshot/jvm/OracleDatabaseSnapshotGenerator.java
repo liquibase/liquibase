@@ -365,17 +365,17 @@ public class OracleDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerat
           * */
         for (Index index : snapshot.getDatabaseObjects(schema, Index.class)) {
             for (PrimaryKey pk : snapshot.getDatabaseObjects(schema, PrimaryKey.class)) {
-                if (index.getTable().getName().equalsIgnoreCase(pk.getTable().getName()) && index.getColumnNames().equals(pk.getColumnNames())) {
+                if (database.objectNamesEqual(index.getTable().getName(), pk.getTable().getName()) && database.objectNamesEqual(index.getColumnNames(), pk.getColumnNames())) {
                     index.addAssociatedWith(Index.MARK_PRIMARY_KEY);
                 }
             }
             for (ForeignKey fk : snapshot.getDatabaseObjects(schema, ForeignKey.class)) {
-                if (index.getTable().getName().equalsIgnoreCase(fk.getForeignKeyTable().getName()) && index.getColumnNames().equals(fk.getForeignKeyColumns())) {
+                if (database.objectNamesEqual(index.getTable().getName(), fk.getForeignKeyTable().getName()) && database.objectNamesEqual(index.getColumnNames(), fk.getForeignKeyColumns())) {
                     index.addAssociatedWith(Index.MARK_FOREIGN_KEY);
                 }
             }
             for (UniqueConstraint uc : snapshot.getDatabaseObjects(schema, UniqueConstraint.class)) {
-                if (index.getTable().getName().equalsIgnoreCase(uc.getTable().getName()) && index.getColumnNames().equals(uc.getColumnNames())) {
+                if (database.objectNamesEqual(index.getTable().getName(), uc.getTable().getName()) && database.objectNamesEqual(index.getColumnNames(), uc.getColumnNames())) {
                     index.addAssociatedWith(Index.MARK_UNIQUE_CONSTRAINT);
                 }
             }
@@ -408,7 +408,7 @@ public class OracleDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerat
 //
 //                boolean foundExistingPK = false;
 //                for (PrimaryKey pk : foundPKs) {
-//                    if (pk.getTable().getName().equals(tableName)) {
+//                    if (database.objectNamesEqual(pk.getTable().getName(), tableName)) {
 //                        pk.addColumnName(position - 1, columnName);
 //
 //                        foundExistingPK = true;
