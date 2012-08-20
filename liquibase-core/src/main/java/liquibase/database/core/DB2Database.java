@@ -38,6 +38,11 @@ public class DB2Database extends AbstractDatabase {
     }
 
     @Override
+    public boolean supportsSchemas() {
+        return false;
+    }
+
+    @Override
     protected String getDefaultDatabaseProductName() {
         return "DB2";
     }
@@ -71,11 +76,6 @@ public class DB2Database extends AbstractDatabase {
 
       }
       return defaultSchemaName;
-    }
-
-    @Override
-    public Schema correctSchema(Schema schema) {
-        return schema;
     }
 
     @Override

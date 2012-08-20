@@ -55,6 +55,7 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
         try {
             if (database != null) {
                 tableName = database.correctTableName(tableName);
+                schema = database.correctSchema(schema);
             }
             ResultSet rs = getMetaData(database).getTables(schema.getCatalogName(), schema.getName(), tableName, new String[]{"TABLE"});
             try {
@@ -347,6 +348,7 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
 
 
     protected void readTables(DatabaseSnapshot snapshot, Schema schema, DatabaseMetaData databaseMetaData) throws SQLException, DatabaseException {
+        schema = snapshot.getDatabase().correctSchema(schema);
         Database database = snapshot.getDatabase();
         updateListeners("Reading tables for " + database.toString() + " ...");
 

@@ -697,6 +697,12 @@ public abstract class AbstractDatabase implements Database {
     }
 
     public boolean objectNamesEqual(String name1, String name2) {
+        if (name1 == null && name2 == null) {
+            return true;
+        }
+        if (name1 == null || name2 == null) {
+            return false;
+        }
         if (isCaseSensitive()) {
             return name1.equals(name2);
         } else {
