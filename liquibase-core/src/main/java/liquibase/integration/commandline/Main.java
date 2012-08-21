@@ -304,6 +304,7 @@ public class Main {
         return command.toLowerCase().startsWith("update")
                 || command.toLowerCase().startsWith("rollback")
                 || "calculateCheckSum".equalsIgnoreCase(command)
+                || "status".equalsIgnoreCase(command)
                 || "validate".equalsIgnoreCase(command)
                 || "changeLogSync".equalsIgnoreCase(command)
                 || "changeLogSyncSql".equalsIgnoreCase(command);
