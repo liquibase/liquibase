@@ -52,7 +52,7 @@ public class DatabaseSnapshot {
         schema = database.correctSchema(schema);
 
         for (DatabaseObject object : getDatabaseObjects(schema, type)) {
-            if (object.getName().equals(objectName)) {
+            if (database.objectNamesEqual(object.getName(), objectName)) {
                 //noinspection unchecked
                 return (T) object;
             }
@@ -117,7 +117,7 @@ public class DatabaseSnapshot {
             if (column.getRelation() == null) {
                 continue;
             }
-            if (pk.getTable().getName().equalsIgnoreCase(column.getRelation().getName())) {
+            if (database.objectNamesEqual(pk.getTable().getName(), column.getRelation().getName())) {
                 if (pk.getColumnNamesAsList().contains(column.getName())) {
                     return true;
                 }

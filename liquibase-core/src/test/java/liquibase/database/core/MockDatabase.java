@@ -88,6 +88,15 @@ public class MockDatabase implements Database {
         return false;
     }
 
+
+    public boolean isCaseSensitive() {
+        return false;
+    }
+
+    public boolean objectNamesEqual(String name1, String name2) {
+        return name1.equalsIgnoreCase(name2);
+    }
+
     public void setAutoCommit(boolean b) throws DatabaseException {
 
     }

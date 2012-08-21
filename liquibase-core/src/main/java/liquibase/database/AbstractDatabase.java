@@ -31,6 +31,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.math.BigInteger;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -683,6 +684,32 @@ public abstract class AbstractDatabase implements Database {
         }
     }
 
+    public boolean isCaseSensitive() {
+        if (connection != null) {
+            try {
+                return !((JdbcConnection) connection).getUnderlyingConnection().getMetaData().supportsMixedCaseIdentifiers();
+            } catch (SQLException e) {
+                LogFactory.getLogger().warning("Cannot determine case sensitivity from JDBC driver", e);
+                return false;
+            }
+        }
+        return false;
+    }
+
+    public boolean objectNamesEqual(String name1, String name2) {
+        if (name1 == null && name2 == null) {
+            return true;
+        }
+        if (name1 == null || name2 == null) {
+            return false;
+        }
+        if (isCaseSensitive()) {
+            return name1.equals(name2);
+        } else {
+            return name1.equalsIgnoreCase(name2);
+        }
+    }
+
     public boolean isReservedWord(String string) {
         return false;
     }
@@ -788,9 +815,9 @@ public abstract class AbstractDatabase implements Database {
 
     public boolean isSystemTable(Schema schema, String tableName) {
         schema = correctSchema(schema);
-        if ("information_schema".equalsIgnoreCase(schema.getName())) {
+        if (this.objectNamesEqual("information_schema", schema.getName())) {
             return true;
-        } else if (tableName.equalsIgnoreCase(getDatabaseChangeLogLockTableName())) {
+        } else if (this.objectNamesEqual(tableName, getDatabaseChangeLogLockTableName())) {
             return true;
         } else if (getSystemTablesAndViews().contains(tableName)) {
             return true;
@@ -800,7 +827,7 @@ public abstract class AbstractDatabase implements Database {
 
     public boolean isSystemView(Schema schema, String viewName) {
         schema = correctSchema(schema);
-        if ("information_schema".equalsIgnoreCase(schema.getName())) {
+        if (this.objectNamesEqual("information_schema", schema.getName())) {
             return true;
         } else if (getSystemTablesAndViews().contains(viewName)) {
             return true;
@@ -809,7 +836,7 @@ public abstract class AbstractDatabase implements Database {
     }
 
     public boolean isLiquibaseTable(String tableName) {
-        return tableName.equalsIgnoreCase(this.getDatabaseChangeLogTableName()) || tableName.equalsIgnoreCase(this.getDatabaseChangeLogLockTableName());
+        return this.objectNamesEqual(tableName, this.getDatabaseChangeLogTableName()) || this.objectNamesEqual(tableName, this.getDatabaseChangeLogLockTableName());
     }
 
 // ------- DATABASE TAGGING METHODS ---- //
