@@ -356,18 +356,18 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
         try {
             while (tableMetaDataRs.next()) {
                 Table table = readTable(tableMetaDataRs, database, false);
-                if (database.isLiquibaseTable(table.getName())) {
-                    if (database.objectNamesEqual(table.getName(), database.getDatabaseChangeLogTableName())) {
+                if (database.isLiquibaseTable(schema, table.getName())) {
+                    if (table.equals(database.getDatabaseChangeLogTableName(), database)) {
                         snapshot.setDatabaseChangeLogTable(table);
                         continue;
                     }
 
-                    if (database.objectNamesEqual(table.getName(), database.getDatabaseChangeLogLockTableName())) {
+                    if (table.equals(database.getDatabaseChangeLogLockTableName(), database)) {
                         snapshot.setDatabaseChangeLogLockTable(table);
                         continue;
                     }
                 }
-                if (database.isSystemTable(table.getSchema(), table.getName())) {
+                if (database.isSystemTable(table.getSchema(), table.getName()) || database.isLiquibaseTable(table.getSchema(), table.getName())) {
                     continue;
                 }
 
@@ -664,21 +664,22 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
                 }
             }
 
+            Index index = new Index();
+            index.setTable((Table) new Table(tableName).setSchema(schema));
+            index.setName(indexName);
             if (columnNames != null) {
-                columnNames = columnNames.replace(" ", "");
-                if (columnNames.contains(",")) {
-                    List<String> fixedColumnNames = new ArrayList<String>();
-                    for (String columnName : columnNames.split(",")) {
-                        fixedColumnNames.add(database.correctColumnName(columnName));
-                    }
-                    columnNames = StringUtils.join(fixedColumnNames, ",");
+                for (String column : columnNames.split("\\s*,\\s*")) {
+                    index.getColumns().add(column);
                 }
+            }
+
+            if (columnNames != null) {
                 Map<String, TreeMap<Short, String>> columnsByIndexName = new HashMap<String, TreeMap<Short, String>>();
                 ResultSet rs = getMetaData(database).getIndexInfo(schema.getCatalogName(), schema.getName(), database.correctTableName(tableName), false, true);
                 try {
                     while (rs.next()) {
                         String foundIndexName = rs.getString("INDEX_NAME");
-                        if (indexName != null && !database.objectNamesEqual(foundIndexName, indexName)) {
+                        if (indexName != null && indexName.equalsIgnoreCase(foundIndexName)) { //ok to use equalsIgnoreCase because we will check case later
                             continue;
                         }
                         short ordinalPosition = rs.getShort("ORDINAL_POSITION");
@@ -686,16 +687,21 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
                         if (!columnsByIndexName.containsKey(foundIndexName)) {
                             columnsByIndexName.put(foundIndexName, new TreeMap<Short, String>());
                         }
-                        String columnName = database.correctColumnName(rs.getString("COLUMN_NAME"));
+                        String columnName = rs.getString("COLUMN_NAME");
                         Map<Short, String> columns = columnsByIndexName.get(foundIndexName);
                         columns.put(ordinalPosition, columnName);
                     }
 
-                    for (TreeMap<Short, String> columnList : columnsByIndexName.values()) {
+                    for (Map.Entry<String, TreeMap<Short, String>> foundIndexData : columnsByIndexName.entrySet()) {
+                        Index foundIndex =  new Index()
+                                .setName(foundIndexData.getKey())
+                                .setTable(((Table) new Table(tableName).setSchema(schema)));
+                        foundIndex.getColumns().addAll(foundIndexData.getValue().values());
 
-                        if (database.objectNamesEqual(StringUtils.join(columnList.values(), ","), columnNames)) {
+                        if (foundIndex.equals(index, database)) {
                             return true;
                         }
+                        return false;
                     }
                     return false;
                 } finally {
@@ -705,7 +711,10 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
                     ResultSet rs = getMetaData(database).getIndexInfo(schema.getCatalogName(), schema.getName(), database.correctTableName(tableName), false, true);
                     try {
                         while (rs.next()) {
-                            if (database.objectNamesEqual(rs.getString("INDEX_NAME"), database.correctIndexName(indexName))) {
+                            Index foundIndex =  new Index()
+                                    .setName(rs.getString("INDEX_NAME"))
+                                    .setTable(((Table) new Table(tableName).setSchema(schema)));
+                            if (foundIndex.equals(index, database)) {
                                 return true;
                             }
                         }
@@ -725,11 +734,13 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
     }
 
     public boolean hasForeignKey(Schema schema, String foreignKeyTableName, String fkName, Database database) throws DatabaseException {
+        ForeignKey fk = new ForeignKey().setName(fkName);
         try {
             ResultSet rs = getMetaData(database).getImportedKeys(schema.getCatalogName(), schema.getName(), database.correctTableName(foreignKeyTableName));
             try {
                 while (rs.next()) {
-                    if (database.objectNamesEqual(rs.getString("FK_NAME"), database.correctForeignKeyName(fkName))) {
+                    ForeignKey foundFk = new ForeignKey().setName(rs.getString("FK_NAME"));
+                    if (fk.equals(foundFk, database)) {
                         return true;
                     }
                 }
@@ -933,23 +944,31 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
           * */
         for (Index index : snapshot.getDatabaseObjects(schema, Index.class)) {
             for (PrimaryKey pk : snapshot.getDatabaseObjects(schema, PrimaryKey.class)) {
-                if (database.objectNamesEqual(index.getTable().getName(), pk.getTable().getName()) && database.objectNamesEqual(index.getColumnNames(), pk.getColumnNames())) {
+                if (index.getTable().equals(pk.getTable().getName(), database) && columnNamesAreEqual(index.getColumnNames(), pk.getColumnNames(), database)) {
                     index.addAssociatedWith(Index.MARK_PRIMARY_KEY);
                 }
             }
             for (ForeignKey fk : snapshot.getDatabaseObjects(schema, ForeignKey.class)) {
-                if (database.objectNamesEqual(index.getTable().getName(), fk.getForeignKeyTable().getName()) && database.objectNamesEqual(index.getColumnNames(), fk.getForeignKeyColumns())) {
+                if (index.getTable().equals(fk.getForeignKeyTable().getName(), database) && columnNamesAreEqual(index.getColumnNames(), fk.getForeignKeyColumns(), database)) {
                     index.addAssociatedWith(Index.MARK_FOREIGN_KEY);
                 }
             }
             for (UniqueConstraint uc : snapshot.getDatabaseObjects(schema, UniqueConstraint.class)) {
-                if (database.objectNamesEqual(index.getTable().getName(), uc.getTable().getName()) && database.objectNamesEqual(index.getColumnNames(), uc.getColumnNames())) {
+                if (index.getTable().equals(uc.getTable()) && columnNamesAreEqual(index.getColumnNames(), uc.getColumnNames(), database)) {
                     index.addAssociatedWith(Index.MARK_UNIQUE_CONSTRAINT);
                 }
             }
 
         }
         snapshot.removeDatabaseObjects(schema, indexesToRemove.toArray(new Index[indexesToRemove.size()]));
+    }
+
+    protected boolean columnNamesAreEqual(String columnNames, String otherColumnNames, Database database) {
+        if (database.isCaseSensitive()) {
+            return columnNames.replace(" ", "").equals(otherColumnNames.replace(" ", ""));
+        } else {
+            return columnNames.replace(" ", "").equalsIgnoreCase(otherColumnNames.replace(" ", ""));
+        }
     }
 
     protected boolean includeInSnapshot(DatabaseObject obj) {
@@ -972,13 +991,13 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
                     String columnName = cleanObjectNameFromDatabase(rs.getString("COLUMN_NAME"));
                     short position = rs.getShort("KEY_SEQ");
 
-                    if (database.isLiquibaseTable(tableName)) {
+                    if (database.isLiquibaseTable(schema, tableName)) {
                         continue;
                     }
 
                     boolean foundExistingPK = false;
                     for (PrimaryKey pk : foundPKs) {
-                        if (database.objectNamesEqual(pk.getTable().getName(), tableName)) {
+                        if (pk.getTable().equals(tableName, database)) {
                             pk.addColumnName(position - 1, columnName);
 
                             foundExistingPK = true;

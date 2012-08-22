@@ -2,7 +2,7 @@ package liquibase.database.structure;
 
 import liquibase.util.StringUtils;
 
-public class Schema implements DatabaseObject {
+public class Schema extends DatabaseObjectImpl {
 
     public static final String DEFAULT_NAME = "!DEFAULT_SCHEMA!";
     public static final Schema DEFAULT = new Schema(Catalog.DEFAULT, DEFAULT_NAME);

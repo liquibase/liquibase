@@ -146,7 +146,7 @@ public interface Database extends DatabaseObject, PrioritizedService {
 
     boolean isSystemTable(Schema schema, String tableName);
 
-    boolean isLiquibaseTable(String tableName);
+    boolean isLiquibaseTable(Schema schema, String tableName);
 
     boolean shouldQuoteValue(String value);
 
@@ -271,8 +271,6 @@ public interface Database extends DatabaseObject, PrioritizedService {
     void enableForeignKeyChecks() throws DatabaseException;
 
     public boolean isCaseSensitive();
-
-    public boolean objectNamesEqual(String name1, String name2);
 
     public boolean isReservedWord(String string);
 

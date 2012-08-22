@@ -133,7 +133,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
                     if (columnConfig != null) {
                         columnName = columnConfig.getName();
 
-                        if (columnConfig.getType().equalsIgnoreCase("SKIP")) {
+                        if ("skip".equalsIgnoreCase(columnConfig.getType())) {
                             continue;
                         }
 

@@ -9,8 +9,6 @@ import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.util.JdbcUtils;
 
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
 
@@ -365,21 +363,23 @@ public class OracleDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerat
           * */
         for (Index index : snapshot.getDatabaseObjects(schema, Index.class)) {
             for (PrimaryKey pk : snapshot.getDatabaseObjects(schema, PrimaryKey.class)) {
-                if (database.objectNamesEqual(index.getTable().getName(), pk.getTable().getName()) && database.objectNamesEqual(index.getColumnNames(), pk.getColumnNames())) {
+                if (index.getTable().equals(pk.getTable().getName(), database) && columnNamesAreEqual(index.getColumnNames(), pk.getColumnNames(), database)) {
                     index.addAssociatedWith(Index.MARK_PRIMARY_KEY);
                 }
             }
             for (ForeignKey fk : snapshot.getDatabaseObjects(schema, ForeignKey.class)) {
-                if (database.objectNamesEqual(index.getTable().getName(), fk.getForeignKeyTable().getName()) && database.objectNamesEqual(index.getColumnNames(), fk.getForeignKeyColumns())) {
+                if (index.getTable().equals(fk.getForeignKeyTable().getName(), database) && columnNamesAreEqual(index.getColumnNames(), fk.getForeignKeyColumns(), database)) {
                     index.addAssociatedWith(Index.MARK_FOREIGN_KEY);
                 }
             }
             for (UniqueConstraint uc : snapshot.getDatabaseObjects(schema, UniqueConstraint.class)) {
-                if (database.objectNamesEqual(index.getTable().getName(), uc.getTable().getName()) && database.objectNamesEqual(index.getColumnNames(), uc.getColumnNames())) {
+                if (index.getTable().equals(uc.getTable()) && columnNamesAreEqual(index.getColumnNames(), uc.getColumnNames(), database)) {
                     index.addAssociatedWith(Index.MARK_UNIQUE_CONSTRAINT);
                 }
             }
+
         }
+
     }
 //
 //    @Override

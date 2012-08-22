@@ -284,9 +284,17 @@ public abstract class AbstractDatabase implements Database {
     }
 
     /**
-     * Returns system (undroppable) tables and views.
+     * Returns system (undroppable) views.
      */
-    protected Set<String> getSystemTablesAndViews() {
+    protected Set<String> getSystemTables() {
+        return new HashSet<String>();
+    }
+
+
+    /**
+     * Returns system (undroppable) views.
+     */
+    protected Set<String> getSystemViews() {
         return new HashSet<String>();
     }
 
@@ -687,27 +695,13 @@ public abstract class AbstractDatabase implements Database {
     public boolean isCaseSensitive() {
         if (connection != null) {
             try {
-                return !((JdbcConnection) connection).getUnderlyingConnection().getMetaData().supportsMixedCaseIdentifiers();
+                return ((JdbcConnection) connection).getUnderlyingConnection().getMetaData().supportsMixedCaseIdentifiers();
             } catch (SQLException e) {
                 LogFactory.getLogger().warning("Cannot determine case sensitivity from JDBC driver", e);
                 return false;
             }
         }
         return false;
-    }
-
-    public boolean objectNamesEqual(String name1, String name2) {
-        if (name1 == null && name2 == null) {
-            return true;
-        }
-        if (name1 == null || name2 == null) {
-            return false;
-        }
-        if (isCaseSensitive()) {
-            return name1.equals(name2);
-        } else {
-            return name1.equalsIgnoreCase(name2);
-        }
     }
 
     public boolean isReservedWord(String string) {
@@ -815,31 +809,28 @@ public abstract class AbstractDatabase implements Database {
 
     public boolean isSystemTable(Schema schema, String tableName) {
         schema = correctSchema(schema);
-        if (this.objectNamesEqual("information_schema", schema.getName())) {
-            return true;
-        } else if (this.objectNamesEqual(tableName, getDatabaseChangeLogLockTableName())) {
-            return true;
-        } else if (getSystemTablesAndViews().contains(tableName)) {
-            return true;
-        }
-        return false;
+        return "information_schema".equalsIgnoreCase(schema.getName()) || getSystemTables().contains(tableName);
     }
 
     public boolean isSystemView(Schema schema, String viewName) {
         schema = correctSchema(schema);
-        if (this.objectNamesEqual("information_schema", schema.getName())) {
+        if ("information_schema".equalsIgnoreCase(schema.getName())) {
             return true;
-        } else if (getSystemTablesAndViews().contains(viewName)) {
+        } else if (getSystemViews().contains(viewName)) {
             return true;
         }
         return false;
     }
 
-    public boolean isLiquibaseTable(String tableName) {
-        return this.objectNamesEqual(tableName, this.getDatabaseChangeLogTableName()) || this.objectNamesEqual(tableName, this.getDatabaseChangeLogLockTableName());
+    public boolean isLiquibaseTable(Schema schema, String tableName) {
+        if (isCaseSensitive()) {
+            return tableName.equals(this.getDatabaseChangeLogTableName()) || tableName.equals(this.getDatabaseChangeLogLockTableName());
+        } else {
+            return tableName.equalsIgnoreCase(this.getDatabaseChangeLogTableName()) || tableName.equalsIgnoreCase(this.getDatabaseChangeLogLockTableName());
+        }
     }
 
-// ------- DATABASE TAGGING METHODS ---- //
+    // ------- DATABASE TAGGING METHODS ---- //
 
     /**
      * Tags the database changelog with the given string.
@@ -1277,5 +1268,13 @@ public abstract class AbstractDatabase implements Database {
 
     public void enableForeignKeyChecks() throws DatabaseException {
         throw new DatabaseException("ForeignKeyChecks Management not supported");
+    }
+
+    public boolean equals(DatabaseObject otherObject, Database accordingTo) {
+        return otherObject.getClass().equals(this.getClass());
+    }
+
+    public boolean equals(String otherObject, Database accordingTo) {
+        return this.getName().equals(otherObject);
     }
 }

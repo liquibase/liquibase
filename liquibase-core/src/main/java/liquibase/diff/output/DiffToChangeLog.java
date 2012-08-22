@@ -530,7 +530,7 @@ public class DiffToChangeLog {
     }
 
     protected boolean shouldModifyColumn(Column column) {
-        return !diffResult.getReferenceSnapshot().getDatabase().isLiquibaseTable(column.getRelation().getName());
+        return !diffResult.getReferenceSnapshot().getDatabase().isLiquibaseTable(column.getRelation().getSchema(), column.getRelation().getName());
 
     }
 
@@ -610,8 +610,7 @@ public class DiffToChangeLog {
 
     protected void addMissingTableChanges(List<ChangeSet> changes) {
         for (Table missingTable : diffResult.getObjectDiff(Table.class).getMissing()) {
-            if (diffResult.getReferenceSnapshot().getDatabase().isLiquibaseTable(
-                    missingTable.getName())) {
+            if (diffResult.getReferenceSnapshot().getDatabase().isLiquibaseTable(missingTable.getSchema(), missingTable.getName())) {
                 continue;
             }
 
@@ -636,7 +635,7 @@ public class DiffToChangeLog {
                 if (column.isPrimaryKey()) {
                     PrimaryKey primaryKey = null;
                     for (PrimaryKey pk : diffResult.getObjectDiff(PrimaryKey.class).getMissing()) {
-                        if (diffResult.getComparisonSnapshot().getDatabase().objectNamesEqual(pk.getTable().getName(), missingTable.getName())) {
+                        if (pk.getTable().equals(missingTable.getName(), diffResult.getComparisonSnapshot().getDatabase())) {
                             primaryKey = pk;
                         }
                     }
@@ -721,7 +720,7 @@ public class DiffToChangeLog {
         try {
             for (Schema schema : diffResult.getReferenceSnapshot().getSchemas()) {
                 for (Table table : diffResult.getReferenceSnapshot().getDatabaseObjects(schema, Table.class)) {
-                    if (diffResult.getReferenceSnapshot().getDatabase().isLiquibaseTable(table.getName())) {
+                    if (diffResult.getReferenceSnapshot().getDatabase().isLiquibaseTable(schema, table.getName())) {
                         continue;
                     }
                     List<Change> changes = new ArrayList<Change>();

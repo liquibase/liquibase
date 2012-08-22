@@ -1,10 +1,12 @@
 package liquibase.database.structure;
 
+import liquibase.database.Database;
+import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.util.StringUtils;
 
 import java.util.*;
 
-public class Index implements DatabaseObject, Comparable<Index> {
+public class Index extends DatabaseObjectImpl implements Comparable<Index> {
 
 	/** Marks Index as associated with Primary Key [PK] */
 	public final static String MARK_PRIMARY_KEY = "primaryKey";
@@ -33,8 +35,9 @@ public class Index implements DatabaseObject, Comparable<Index> {
         return name;
     }
 
-    public void setName(String name) {
+    public Index setName(String name) {
         this.name = name;
+        return this;
     }
 
     public Schema getSchema() {
@@ -49,16 +52,18 @@ public class Index implements DatabaseObject, Comparable<Index> {
         return table;
     }
 
-    public void setTable(Table table) {
+    public Index setTable(Table table) {
         this.table = table;
+        return this;
     }
 
 	public String getTablespace() {
 		return tablespace;
 	}
 
-	public void setTablespace(String tablespace) {
+	public Index setTablespace(String tablespace) {
 		this.tablespace = tablespace;
+        return this;
 	}
 
     public List<String> getColumns() {
@@ -73,12 +78,14 @@ public class Index implements DatabaseObject, Comparable<Index> {
         return filterCondition;
     }
 
-    public void setFilterCondition(String filterCondition) {
+    public Index setFilterCondition(String filterCondition) {
         this.filterCondition = filterCondition;
+        return this;
     }
 
-    public void setUnique(Boolean value) {
+    public Index setUnique(Boolean value) {
         this.unique = value;
+        return this;
     }
 
     public Boolean isUnique() {
@@ -101,7 +108,34 @@ public class Index implements DatabaseObject, Comparable<Index> {
 		return associatedWith.contains(keyword);
 	}
 
-	@Override
+    @Override
+    public boolean equals(DatabaseObject otherObject, Database accordingTo) {
+        if (!(otherObject instanceof Index)) {
+            return false;
+        }
+        Index otherIndex = (Index) otherObject;
+
+        if (((Index) otherObject).getColumns().size() == 0) {
+            return super.equals(otherObject, accordingTo); //fall back to name
+        }
+
+        if (this.getTable() != null) {
+            return this.getTable().equals(((Index) otherObject).getTable(), accordingTo);
+        }
+
+        if (otherIndex.getColumns() != null & otherIndex.getColumns().size() > 0) {
+            for (int i=0; i<otherIndex.getColumns().size(); i++) {
+                if (! new Column().setName(getColumns().get(i)).equals(new Column().setName(otherIndex.getColumns().get(i)), accordingTo)) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        throw new UnexpectedLiquibaseException("Nothing to compare");
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;

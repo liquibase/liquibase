@@ -1,6 +1,6 @@
 package liquibase.database.structure;
 
-public class Sequence implements DatabaseObject, Comparable<Sequence> {
+public class Sequence extends DatabaseObjectImpl implements Comparable<Sequence> {
     private String name;
     private Schema schema;
 
