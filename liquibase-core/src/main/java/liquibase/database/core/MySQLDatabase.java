@@ -138,6 +138,11 @@ public class MySQLDatabase extends AbstractDatabase {
     }
 
     @Override
+    public boolean supportsCatalogs() {
+        return true;
+    }
+
+    @Override
     public String escapeIndexName(String catalogName, String schemaName, String indexName) {
         return escapeDatabaseObject(indexName);
     }

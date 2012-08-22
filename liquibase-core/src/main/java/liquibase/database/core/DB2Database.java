@@ -39,6 +39,11 @@ public class DB2Database extends AbstractDatabase {
 
     @Override
     public boolean supportsSchemas() {
+        return true;
+    }
+
+    @Override
+    public boolean supportsCatalogs() {
         return false;
     }
 

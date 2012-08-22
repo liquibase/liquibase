@@ -83,6 +83,7 @@ public class DatabaseSnapshot {
 
         for (DatabaseObject object : objects) {
             Schema schema = object.getSchema();
+            schema = database.correctSchema(schema);
             
             if (!schemaSnapshots.containsKey(schema)) {
                 addSchema(schema);

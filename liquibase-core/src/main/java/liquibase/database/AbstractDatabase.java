@@ -196,29 +196,36 @@ public abstract class AbstractDatabase implements Database {
     }
 
     public Schema correctSchema(Schema schema) {
+        if (schema instanceof Schema.DatabaseSpecific && ((Schema.DatabaseSpecific) schema).getDatabase().equals(this)) {
+            return schema;
+        }
         if (schema == null) {
-            schema = new Schema(getDefaultCatalogName(), getDefaultSchemaName());
+            schema = new Schema.DatabaseSpecific(getDefaultCatalogName(), getDefaultSchemaName(), this);
         }
         String catalogName = schema.getCatalogName();
         String schemaName = schema.getName();
 
-        if (catalogName == null) {
-            catalogName = getDefaultCatalogName();
+        if (supportsCatalogs()) {
+            if (catalogName.equals(Catalog.DEFAULT_NAME)) {
+                catalogName = getDefaultCatalogName();
+            } else {
+                catalogName = correctObjectName(catalogName);
+            }
         } else {
-            catalogName = correctObjectName(catalogName);
+            catalogName = null;
         }
 
         if (supportsSchemas()) {
-            if (schemaName == null) {
+            if (schemaName.equals(Schema.DEFAULT_NAME)) {
                 schemaName = getDefaultSchemaName();
             } else {
                 schemaName =  correctObjectName(schemaName);
             }
         } else {
-            schemaName = catalogName;
+            schemaName = null;
         }
 
-        return new Schema(catalogName, schemaName);
+        return new Schema.DatabaseSpecific(catalogName, schemaName, this);
 
     }
     public String correctTableName(String tableName) {

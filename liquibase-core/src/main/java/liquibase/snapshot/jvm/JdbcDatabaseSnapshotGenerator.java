@@ -714,6 +714,9 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
                             Index foundIndex =  new Index()
                                     .setName(rs.getString("INDEX_NAME"))
                                     .setTable(((Table) new Table(tableName).setSchema(schema)));
+                            if (foundIndex.getName() == null) {
+                                continue;
+                            }
                             if (foundIndex.equals(index, database)) {
                                 return true;
                             }
