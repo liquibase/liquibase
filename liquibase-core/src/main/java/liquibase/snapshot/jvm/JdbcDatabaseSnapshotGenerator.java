@@ -484,7 +484,6 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
 
         Map<String, Object> data = new HashMap<String, Object>();
         for (int i=1; i<= rs.getMetaData().getColumnCount(); i++) {
-            //System.err.println("" + i + " " + rs.getMetaData().getColumnName(i) + " is a " + rs.getMetaData().getColumnType(i) + " " + rs.getMetaData().getColumnTypeName(i));
             Class classType = types[i];
             Object value;
             if (classType.equals(String.class)) {
