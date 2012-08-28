@@ -15,6 +15,7 @@ import java.util.Set;
 import java.util.regex.Pattern;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.logging.LogFactory;
+import liquibase.util.StringUtils;
 
 /**
  * Encapsulates MS-SQL database support.
@@ -275,4 +276,21 @@ public class MSSQLDatabase extends AbstractDatabase {
         }
         return CREATE_VIEW_AS_PATTERN.matcher(definition).replaceFirst("");
     }
+
+    /**
+     * SQLServer does not support specifying teh database name as a prefix to the object name
+     * @return
+     */
+    @Override
+    public String escapeViewName(String catalogName, String schemaName, String viewName) {
+        schemaName = getAssumedSchemaName(catalogName, schemaName);
+        if (StringUtils.trimToNull(schemaName) == null) {
+            return escapeDatabaseObject(viewName);
+        } else {
+            return escapeDatabaseObject(schemaName)+"."+escapeDatabaseObject(viewName);
+        }
+
+    }
+
+
 }

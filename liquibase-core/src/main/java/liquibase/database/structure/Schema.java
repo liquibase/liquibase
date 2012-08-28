@@ -26,7 +26,7 @@ public class Schema extends DatabaseObjectImpl {
             if (schemaName.equals(Schema.DEFAULT_NAME)) {
                 catalog = Catalog.DEFAULT_NAME;
             } else {
-                catalog = schemaName;
+                catalog = Catalog.DEFAULT_NAME;
             }
         } else if (catalog != null && schemaName == null) {
             if (catalog.equals(Catalog.DEFAULT_NAME)) {

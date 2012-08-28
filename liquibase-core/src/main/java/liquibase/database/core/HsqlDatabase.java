@@ -59,6 +59,11 @@ public class HsqlDatabase extends AbstractDatabase {
     }
 
     @Override
+    public boolean supportsCatalogs() {
+        return false;
+    }
+
+    @Override
     public boolean supportsSequences() {
         return true;
     }

@@ -40,7 +40,7 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
             
             buffer.append(database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), column));
             buffer.append(" ").append(statement.getColumnTypes().get(column).toDatabaseDataType(database));
-            
+
             AutoIncrementConstraint autoIncrementConstraint = null;
             
             for (AutoIncrementConstraint currentAutoIncrementConstraint : statement.getAutoIncrementConstraints()) {

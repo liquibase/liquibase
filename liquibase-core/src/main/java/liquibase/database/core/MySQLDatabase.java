@@ -147,27 +147,6 @@ public class MySQLDatabase extends AbstractDatabase {
         return escapeDatabaseObject(indexName);
     }
 
-
-    @Override
-    public String escapeTableName(String catalogName, String schemaName, String tableName) {
-        return getPrefix(catalogName, schemaName)+tableName;
-    }
-
-    private String getPrefix(String catalogName, String schemaName) {
-        String prefix = "";
-        if (catalogName != null) {
-            prefix = catalogName+".";
-        } else if (schemaName != null) {
-            prefix = schemaName + ".";
-        }
-        return prefix;
-    }
-
-    @Override
-    public String escapeViewName(String catalogName, String schemaName, String viewName) {
-        return getPrefix(catalogName, schemaName)+viewName;
-    }
-
     @Override
     public boolean supportsForeignKeyDisable() {
         return true;

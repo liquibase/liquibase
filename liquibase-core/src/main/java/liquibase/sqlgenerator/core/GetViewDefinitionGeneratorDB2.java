@@ -27,7 +27,7 @@ public class GetViewDefinitionGeneratorDB2 extends GetViewDefinitionGenerator {
         Schema schema = database.correctSchema(new Schema(statement.getCatalogName(), statement.getSchemaName()));
 
         return new Sql[] {
-                    new UnparsedSql("select view_definition from SYSIBM.VIEWS where TABLE_NAME='" + statement.getViewName() + "' and TABLE_SCHEMA='" + schema.getName() + "'")
+                    new UnparsedSql("select view_definition from SYSIBM.VIEWS where TABLE_NAME='" + statement.getViewName() + "' and TABLE_SCHEMA='" + database.getAssumedCatalogName(schema.getCatalogName(), schema.getName()) + "'")
             };
     }
 }

@@ -529,4 +529,20 @@ public class MockDatabase implements Database {
     public String correctIndexName(String indexName) {
         return indexName;
     }
+
+    public String escapeSchemaName(String schemaName) {
+        return schemaName;
+    }
+
+    public String escapeCatalogName(String name) {
+        return name;
+    }
+
+    public String getAssumedSchemaName(String catalogName, String schemaName) {
+        return schemaName;
+    }
+
+    public String getAssumedCatalogName(String catalogName, String schemaName) {
+        return catalogName;
+    }
 }

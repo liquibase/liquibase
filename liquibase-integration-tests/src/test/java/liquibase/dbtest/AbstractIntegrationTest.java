@@ -120,15 +120,26 @@ public abstract class AbstractIntegrationTest {
             DatabaseSnapshotGeneratorFactory.resetAll();
             LockService.getInstance(database).forceReleaseLock();
             database.dropDatabaseObjects(Schema.DEFAULT);
+
             if (database.supportsSchemas()) {
-                database.dropDatabaseObjects(new Schema(DatabaseTestContext.ALT_CATALOG, DatabaseTestContext.ALT_SCHEMA));
-            } else if (database.supportsCatalogs()) {
-                database.dropDatabaseObjects(new Schema(DatabaseTestContext.ALT_SCHEMA, null));
+                database.dropDatabaseObjects(new Schema((String) null, DatabaseTestContext.ALT_SCHEMA));
+            }
+
+            if (supportsAltCatalogTests()) {
+                if (database.supportsSchemas() && database.supportsCatalogs()) {
+                    database.dropDatabaseObjects(new Schema(DatabaseTestContext.ALT_CATALOG, DatabaseTestContext.ALT_SCHEMA));
+                } else if (database.supportsCatalogs()) {
+                    database.dropDatabaseObjects(new Schema((String) null, DatabaseTestContext.ALT_SCHEMA));
+                }
             }
             database.commit();
             DatabaseSnapshotGeneratorFactory.resetAll();
 
         }
+    }
+
+    protected boolean supportsAltCatalogTests() {
+        return database.supportsCatalogs();
     }
 
     protected Properties createProperties() {

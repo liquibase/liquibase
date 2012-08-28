@@ -330,7 +330,12 @@ public class DiffToChangeLog {
             DropForeignKeyConstraintChange change = new DropForeignKeyConstraintChange();
             change.setConstraintName(fk.getName());
             change.setBaseTableName(fk.getForeignKeyTable().getName());
-            change.setBaseTableSchemaName(fk.getForeignKeyTable().getSchema().getName());
+            if (diffOutputConfig.isIncludeCatalog()) {
+                change.setBaseTableCatalogName(fk.getForeignKeyTable().getSchema().getCatalogName());
+            }
+            if (diffOutputConfig.isIncludeSchema()) {
+                change.setBaseTableSchemaName(fk.getForeignKeyTable().getSchema().getName());
+            }
 
             changes.add(generateChangeSet(change));
         }
@@ -343,12 +348,21 @@ public class DiffToChangeLog {
             change.setConstraintName(fk.getName());
 
             change.setReferencedTableName(fk.getPrimaryKeyTable().getName());
-            change.setReferencedTableSchemaName(fk.getPrimaryKeyTable()
-                    .getSchema().getName());
+            if (diffOutputConfig.isIncludeCatalog()) {
+                change.setReferencedTableCatalogName(fk.getPrimaryKeyTable().getSchema().getCatalogName());
+            }
+            if (diffOutputConfig.isIncludeSchema()) {
+                change.setReferencedTableSchemaName(fk.getPrimaryKeyTable().getSchema().getName());
+            }
             change.setReferencedColumnNames(fk.getPrimaryKeyColumns());
 
             change.setBaseTableName(fk.getForeignKeyTable().getName());
-            change.setBaseTableSchemaName(fk.getForeignKeyTable().getSchema().getName());
+            if (diffOutputConfig.isIncludeCatalog()) {
+                change.setBaseTableCatalogName(fk.getForeignKeyTable().getSchema().getCatalogName());
+            }
+            if (diffOutputConfig.isIncludeSchema()) {
+                change.setBaseTableSchemaName(fk.getForeignKeyTable().getSchema().getName());
+            }
             change.setBaseColumnNames(fk.getForeignKeyColumns());
 
             change.setDeferrable(fk.isDeferrable());

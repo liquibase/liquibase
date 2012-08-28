@@ -9,6 +9,9 @@ public abstract class DatabaseObjectImpl implements DatabaseObject {
     }
 
     public boolean equals(String otherObjectName, Database accordingTo) {
+        if (this.getName() == null) {
+            return otherObjectName == null;
+        }
         if (otherObjectName == null) {
             return false;
         }

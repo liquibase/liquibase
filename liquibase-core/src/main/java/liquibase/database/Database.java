@@ -175,6 +175,10 @@ public interface Database extends DatabaseObject, PrioritizedService {
 
     String escapeDatabaseObject(String objectName);
 
+    String escapeSchemaName(String schemaName);
+
+    String escapeCatalogName(String name);
+
     /**
      * Escapes a single column name in a database-dependent manner so reserved words can be used as a column
      * name (i.e. "return"). 
@@ -287,4 +291,9 @@ public interface Database extends DatabaseObject, PrioritizedService {
     String correctForeignKeyName(String fkName);
     
     String correctIndexName(String indexName);
+
+    String getAssumedSchemaName(String catalogName, String schemaName);
+
+    String getAssumedCatalogName(String catalogName, String schemaName);
+
 }
