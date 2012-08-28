@@ -1,5 +1,6 @@
 target
 .project
 .settings
+.classpath
 liquibase.iws
 out
