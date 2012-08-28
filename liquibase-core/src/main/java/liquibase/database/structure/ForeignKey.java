@@ -2,7 +2,7 @@ package liquibase.database.structure;
 
 import java.util.List;
 
-public class ForeignKey implements DatabaseObject, Comparable<ForeignKey> {
+public class ForeignKey extends DatabaseObjectImpl implements Comparable<ForeignKey> {
     private Table primaryKeyTable;
     private String primaryKeyColumns;
 
@@ -48,8 +48,9 @@ public class ForeignKey implements DatabaseObject, Comparable<ForeignKey> {
         return primaryKeyTable;
     }
 
-    public void setPrimaryKeyTable(Table primaryKeyTable) {
+    public ForeignKey setPrimaryKeyTable(Table primaryKeyTable) {
         this.primaryKeyTable = primaryKeyTable;
+        return this;
     }
 
     public String getPrimaryKeyColumns() {
@@ -66,16 +67,18 @@ public class ForeignKey implements DatabaseObject, Comparable<ForeignKey> {
         }
     }
 
-    public void setPrimaryKeyColumns(String primaryKeyColumns) {
+    public ForeignKey setPrimaryKeyColumns(String primaryKeyColumns) {
         this.primaryKeyColumns = primaryKeyColumns;
+        return this;
     }
 
     public Table getForeignKeyTable() {
         return foreignKeyTable;
     }
 
-    public void setForeignKeyTable(Table foreignKeyTable) {
+    public ForeignKey setForeignKeyTable(Table foreignKeyTable) {
         this.foreignKeyTable = foreignKeyTable;
+        return this;
     }
 
     public String getForeignKeyColumns() {
@@ -92,16 +95,18 @@ public class ForeignKey implements DatabaseObject, Comparable<ForeignKey> {
         }
     }
 
-    public void setForeignKeyColumns(String foreignKeyColumns) {
+    public ForeignKey setForeignKeyColumns(String foreignKeyColumns) {
         this.foreignKeyColumns = foreignKeyColumns;
+        return this;
     }
 
     public String getName() {
         return name;
     }
 
-    public void setName(String name) {
+    public ForeignKey setName(String name) {
         this.name = name;
+        return this;
     }
 
 
@@ -115,8 +120,9 @@ public class ForeignKey implements DatabaseObject, Comparable<ForeignKey> {
         return deferrable;
     }
 
-    public void setDeferrable(boolean deferrable) {
+    public ForeignKey setDeferrable(boolean deferrable) {
         this.deferrable = deferrable;
+        return this;
     }
 
 
@@ -124,20 +130,23 @@ public class ForeignKey implements DatabaseObject, Comparable<ForeignKey> {
         return initiallyDeferred;
     }
 
-    public void setInitiallyDeferred(boolean initiallyDeferred) {
+    public ForeignKey setInitiallyDeferred(boolean initiallyDeferred) {
         this.initiallyDeferred = initiallyDeferred;
+        return this;
     }
 
-    public void setUpdateRule(ForeignKeyConstraintType rule) {
+    public ForeignKey setUpdateRule(ForeignKeyConstraintType rule) {
         this.updateRule = rule;
+        return this;
     }
 
     public ForeignKeyConstraintType getUpdateRule() {
         return this.updateRule;
     }
 
-    public void setDeleteRule(ForeignKeyConstraintType rule) {
+    public ForeignKey setDeleteRule(ForeignKeyConstraintType rule) {
         this.deleteRule = rule;
+        return this;
     }
 
     public ForeignKeyConstraintType getDeleteRule() {
@@ -148,8 +157,9 @@ public class ForeignKey implements DatabaseObject, Comparable<ForeignKey> {
 		return referencesUniqueColumn;
 	}
 
-	public void setReferencesUniqueColumn(boolean referencesUniqueColumn) {
+	public ForeignKey setReferencesUniqueColumn(boolean referencesUniqueColumn) {
 		this.referencesUniqueColumn = referencesUniqueColumn;
+        return this;
 	}
 
     @Override
@@ -234,7 +244,8 @@ public class ForeignKey implements DatabaseObject, Comparable<ForeignKey> {
         return backingIndex;
     }
 
-    public void setBackingIndex(Index backingIndex) {
+    public ForeignKey setBackingIndex(Index backingIndex) {
         this.backingIndex = backingIndex;
+        return this;
     }
 }

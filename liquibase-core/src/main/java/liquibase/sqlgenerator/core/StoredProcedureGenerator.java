@@ -1,6 +1,7 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
+import liquibase.database.core.OracleDatabase;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
@@ -17,12 +18,17 @@ public class StoredProcedureGenerator extends AbstractSqlGenerator<StoredProcedu
     }
 
     public Sql[] generateSql(StoredProcedureStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-        StringBuffer string = new StringBuffer();
-        string.append("exec (").append(statement.getProcedureName());
+        StringBuilder string = new StringBuilder();
+        string.append("exec ").append(statement.getProcedureName()).append("(");
         for (String param : statement.getParameters()) {
             string.append(" ").append(param).append(",");
         }
-        return new Sql[] { new UnparsedSql(string.toString().replaceFirst(",$", ")") )};
+        String sql = string.toString().replaceFirst(",$", "")+")";
+
+        if (database instanceof OracleDatabase) {
+            sql = sql.replaceFirst("exec ", "BEGIN ").replaceFirst("\\)$", "); END;");
+        }
+        return new Sql[] { new UnparsedSql(sql)};
 
     }
 }

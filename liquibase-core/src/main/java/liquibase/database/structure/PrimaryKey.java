@@ -5,7 +5,7 @@ import liquibase.util.StringUtils;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PrimaryKey implements DatabaseObject, Comparable<PrimaryKey> {
+public class PrimaryKey extends DatabaseObjectImpl implements Comparable<PrimaryKey> {
     private String name;
     private List<String> columnNames = new ArrayList<String>();
     private Table table;

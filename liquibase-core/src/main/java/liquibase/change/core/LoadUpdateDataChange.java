@@ -66,7 +66,7 @@ public class LoadUpdateDataChange extends LoadDataChange {
         {
             where.append(database.escapeColumnName(insertOrUpdateStatement.getCatalogName(), insertOrUpdateStatement.getSchemaName(), insertOrUpdateStatement.getTableName(), thisPkColumn)  + " = " );
             Object newValue = insertOrUpdateStatement.getColumnValues().get(thisPkColumn);
-            where.append(DataTypeFactory.getInstance().fromObject(newValue, database));
+            where.append(DataTypeFactory.getInstance().fromObject(newValue, database).objectToString(newValue, database));
 
             where.append(" AND ");
         }

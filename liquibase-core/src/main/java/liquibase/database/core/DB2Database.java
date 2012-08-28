@@ -43,6 +43,11 @@ public class DB2Database extends AbstractDatabase {
     }
 
     @Override
+    public boolean supportsCatalogs() {
+        return true;
+    }
+
+    @Override
     protected String getDefaultDatabaseProductName() {
         return "DB2";
     }
@@ -52,7 +57,7 @@ public class DB2Database extends AbstractDatabase {
     }
 
     @Override
-    public String getDefaultSchemaName() {
+    public String getDefaultCatalogName() {
       if( defaultSchemaName == null ) {
         Statement stmt = null;
         ResultSet rs = null;
@@ -196,4 +201,8 @@ public class DB2Database extends AbstractDatabase {
         return super.escapeIndexName(null, null, indexName);
     }
 
+    @Override
+    public String getAssumedCatalogName(String catalogName, String schemaName) {
+        return schemaName;
+    }
 }

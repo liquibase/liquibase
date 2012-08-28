@@ -2,6 +2,7 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
 import liquibase.database.core.*;
+import liquibase.database.structure.Schema;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
@@ -46,8 +47,9 @@ public class CreateViewGenerator extends AbstractSqlGenerator<CreateViewStatemen
         } else if (database instanceof MSSQLDatabase) {
             if (statement.isReplaceIfExists()) {
                 //from http://stackoverflow.com/questions/163246/sql-server-equivalent-to-oracles-create-or-replace-view
-                sql.add(new UnparsedSql("IF NOT EXISTS (SELECT * FROM sys.views WHERE object_id = OBJECT_ID(N'["+statement.getSchemaName()+"].["+statement.getViewName()+"]'))\n" +
-                        "    EXEC sp_executesql N'CREATE VIEW ["+statement.getSchemaName()+"].["+statement.getViewName()+"] AS SELECT ''This is a code stub which will be replaced by an Alter Statement'' as [code_stub]'"));
+                Schema schema = database.correctSchema(new Schema(statement.getCatalogName(), statement.getSchemaName()));
+                sql.add(new UnparsedSql("IF NOT EXISTS (SELECT * FROM sys.views WHERE object_id = OBJECT_ID(N'["+ schema.getName() +"].["+statement.getViewName()+"]'))\n" +
+                        "    EXEC sp_executesql N'CREATE VIEW ["+schema.getName()+"].["+statement.getViewName()+"] AS SELECT ''This is a code stub which will be replaced by an Alter Statement'' as [code_stub]'"));
                 createClause = "ALTER VIEW";
             } else {
                 createClause = "CREATE VIEW";
@@ -55,9 +57,8 @@ public class CreateViewGenerator extends AbstractSqlGenerator<CreateViewStatemen
         } else {
             createClause = "CREATE " + (statement.isReplaceIfExists() ? "OR REPLACE " : "") + "VIEW";
         }
+        sql.add(new UnparsedSql(createClause + " " + database.escapeViewName(statement.getCatalogName(), statement.getSchemaName(), statement.getViewName()) + " AS " + statement.getSelectQuery()));
 
-        return new Sql[]{
-                new UnparsedSql(createClause + " " + database.escapeViewName(statement.getCatalogName(), statement.getSchemaName(), statement.getViewName()) + " AS " + statement.getSelectQuery())
-        };
+        return sql.toArray(new Sql[sql.size()]);
     }
 }

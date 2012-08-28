@@ -1,6 +1,7 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
+import liquibase.database.core.MySQLDatabase;
 import liquibase.database.structure.Schema;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
@@ -22,14 +23,26 @@ public class GetViewDefinitionGenerator extends AbstractSqlGenerator<GetViewDefi
     public Sql[] generateSql(GetViewDefinitionStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         Schema schema = database.correctSchema(new Schema(statement.getCatalogName(), statement.getSchemaName()));
 
-        String sql = "select view_definition from information_schema.views where upper(table_name)='" + statement.getViewName().toUpperCase() + "'";
+        String sql = "select view_definition from information_schema.views where table_name='" + database.correctTableName(statement.getViewName()) + "'";
 
-        if (statement.getSchemaName() != null) {
-            sql += " and table_schema='" + schema.getName() + "'";
-        }
+        if (database instanceof MySQLDatabase) {
+            String catalogName = database.getAssumedCatalogName(schema.getCatalogName(), schema.getName());
+            sql += " and table_schema='" + catalogName + "'";
+        } else {
 
-        if (statement.getCatalogName() != null) {
-            sql += " and table_catalog='" + schema.getCatalogName() + "'";
+            if (database.supportsSchemas()) {
+                String schemaName = database.getAssumedSchemaName(schema.getCatalogName(), schema.getName());
+                if (schemaName != null) {
+                    sql += " and table_schema='" + schemaName + "'";
+                }
+            }
+
+            if (database.supportsCatalogs()) {
+                String catalogName = database.getAssumedCatalogName(schema.getCatalogName(), schema.getName());
+                if (catalogName != null) {
+                    sql += " and table_catalog='" + catalogName + "'";
+                }
+            }
         }
 
         return new Sql[]{

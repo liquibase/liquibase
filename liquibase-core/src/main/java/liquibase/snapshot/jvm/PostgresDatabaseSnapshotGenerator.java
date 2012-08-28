@@ -54,7 +54,7 @@ public class PostgresDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGener
                 String tableName = rs.getString("relname");
                 UniqueConstraint constraintInformation = new UniqueConstraint();
                 constraintInformation.setName(constraintName);
-                if(!database.isSystemTable(schema, tableName)&&!database.isLiquibaseTable(tableName)) {
+                if(!database.isSystemTable(schema, tableName)&&!database.isLiquibaseTable(schema, tableName)) {
                     Table table = snapshot.getDatabaseObject(schema, tableName, Table.class);
                     if (table == null) {
                         // SKip it  --  the query  above pulls  back more  then the  query for tables &  views in  the super  class

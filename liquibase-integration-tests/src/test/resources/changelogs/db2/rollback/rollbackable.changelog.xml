@@ -112,7 +112,7 @@
     <changeSet id="14" author="nvoxland">
         <addLookupTable
             existingTableName="publication" existingColumnName="sku"
-            newTableName="sku" newColumnName="code"/>
+            newTableName="sku" newColumnName="code" newColumnDataType="varchar(50)"/>
     </changeSet>
 
     <changeSet id="15" author="nvoxland">

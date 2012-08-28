@@ -1,6 +1,6 @@
 package liquibase.database.structure;
 
-public class Column implements DatabaseObject, Comparable<Column> {
+public class Column extends DatabaseObjectImpl implements Comparable<Column> {
     private Relation relation;
     private String name;
     private Boolean nullable;

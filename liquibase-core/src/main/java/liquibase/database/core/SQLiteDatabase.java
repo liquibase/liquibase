@@ -190,7 +190,7 @@ public class SQLiteDatabase extends AbstractDatabase {
     }
     
     @Override
-    protected Set<String> getSystemTablesAndViews() {
+    protected Set<String> getSystemViews() {
         return systemTables;
     }
 

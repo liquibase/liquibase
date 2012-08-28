@@ -10,7 +10,6 @@ import liquibase.logging.LogFactory;
 import liquibase.statement.core.RawSqlStatement;
 
 import java.math.BigInteger;
-import java.sql.SQLException;
 import java.util.*;
 
 /**
@@ -102,7 +101,7 @@ public class PostgresDatabase extends AbstractDatabase {
     }
 
     @Override
-    public Set<String> getSystemTablesAndViews() {
+    public Set<String> getSystemViews() {
         return systemTablesAndViews;
     }
 

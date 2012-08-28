@@ -330,7 +330,12 @@ public class DiffToChangeLog {
             DropForeignKeyConstraintChange change = new DropForeignKeyConstraintChange();
             change.setConstraintName(fk.getName());
             change.setBaseTableName(fk.getForeignKeyTable().getName());
-            change.setBaseTableSchemaName(fk.getForeignKeyTable().getSchema().getName());
+            if (diffOutputConfig.isIncludeCatalog()) {
+                change.setBaseTableCatalogName(fk.getForeignKeyTable().getSchema().getCatalogName());
+            }
+            if (diffOutputConfig.isIncludeSchema()) {
+                change.setBaseTableSchemaName(fk.getForeignKeyTable().getSchema().getName());
+            }
 
             changes.add(generateChangeSet(change));
         }
@@ -343,12 +348,21 @@ public class DiffToChangeLog {
             change.setConstraintName(fk.getName());
 
             change.setReferencedTableName(fk.getPrimaryKeyTable().getName());
-            change.setReferencedTableSchemaName(fk.getPrimaryKeyTable()
-                    .getSchema().getName());
+            if (diffOutputConfig.isIncludeCatalog()) {
+                change.setReferencedTableCatalogName(fk.getPrimaryKeyTable().getSchema().getCatalogName());
+            }
+            if (diffOutputConfig.isIncludeSchema()) {
+                change.setReferencedTableSchemaName(fk.getPrimaryKeyTable().getSchema().getName());
+            }
             change.setReferencedColumnNames(fk.getPrimaryKeyColumns());
 
             change.setBaseTableName(fk.getForeignKeyTable().getName());
-            change.setBaseTableSchemaName(fk.getForeignKeyTable().getSchema().getName());
+            if (diffOutputConfig.isIncludeCatalog()) {
+                change.setBaseTableCatalogName(fk.getForeignKeyTable().getSchema().getCatalogName());
+            }
+            if (diffOutputConfig.isIncludeSchema()) {
+                change.setBaseTableSchemaName(fk.getForeignKeyTable().getSchema().getName());
+            }
             change.setBaseColumnNames(fk.getForeignKeyColumns());
 
             change.setDeferrable(fk.isDeferrable());
@@ -530,7 +544,7 @@ public class DiffToChangeLog {
     }
 
     protected boolean shouldModifyColumn(Column column) {
-        return !diffResult.getReferenceSnapshot().getDatabase().isLiquibaseTable(column.getRelation().getName());
+        return !diffResult.getReferenceSnapshot().getDatabase().isLiquibaseTable(column.getRelation().getSchema(), column.getRelation().getName());
 
     }
 
@@ -610,8 +624,7 @@ public class DiffToChangeLog {
 
     protected void addMissingTableChanges(List<ChangeSet> changes) {
         for (Table missingTable : diffResult.getObjectDiff(Table.class).getMissing()) {
-            if (diffResult.getReferenceSnapshot().getDatabase().isLiquibaseTable(
-                    missingTable.getName())) {
+            if (diffResult.getReferenceSnapshot().getDatabase().isLiquibaseTable(missingTable.getSchema(), missingTable.getName())) {
                 continue;
             }
 
@@ -636,7 +649,7 @@ public class DiffToChangeLog {
                 if (column.isPrimaryKey()) {
                     PrimaryKey primaryKey = null;
                     for (PrimaryKey pk : diffResult.getObjectDiff(PrimaryKey.class).getMissing()) {
-                        if (diffResult.getComparisonSnapshot().getDatabase().objectNamesEqual(pk.getTable().getName(), missingTable.getName())) {
+                        if (pk.getTable().equals(missingTable.getName(), diffResult.getComparisonSnapshot().getDatabase())) {
                             primaryKey = pk;
                         }
                     }
@@ -721,7 +734,7 @@ public class DiffToChangeLog {
         try {
             for (Schema schema : diffResult.getReferenceSnapshot().getSchemas()) {
                 for (Table table : diffResult.getReferenceSnapshot().getDatabaseObjects(schema, Table.class)) {
-                    if (diffResult.getReferenceSnapshot().getDatabase().isLiquibaseTable(table.getName())) {
+                    if (diffResult.getReferenceSnapshot().getDatabase().isLiquibaseTable(schema, table.getName())) {
                         continue;
                     }
                     List<Change> changes = new ArrayList<Change>();

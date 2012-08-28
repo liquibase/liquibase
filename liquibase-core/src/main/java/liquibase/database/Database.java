@@ -146,7 +146,7 @@ public interface Database extends DatabaseObject, PrioritizedService {
 
     boolean isSystemTable(Schema schema, String tableName);
 
-    boolean isLiquibaseTable(String tableName);
+    boolean isLiquibaseTable(Schema schema, String tableName);
 
     boolean shouldQuoteValue(String value);
 
@@ -174,6 +174,10 @@ public interface Database extends DatabaseObject, PrioritizedService {
     String escapeIndexName(String catalogName, String schemaName, String indexName);
 
     String escapeDatabaseObject(String objectName);
+
+    String escapeSchemaName(String schemaName);
+
+    String escapeCatalogName(String name);
 
     /**
      * Escapes a single column name in a database-dependent manner so reserved words can be used as a column
@@ -272,8 +276,6 @@ public interface Database extends DatabaseObject, PrioritizedService {
 
     public boolean isCaseSensitive();
 
-    public boolean objectNamesEqual(String name1, String name2);
-
     public boolean isReservedWord(String string);
 
     Schema correctSchema(Schema schema);
@@ -289,4 +291,9 @@ public interface Database extends DatabaseObject, PrioritizedService {
     String correctForeignKeyName(String fkName);
     
     String correctIndexName(String indexName);
+
+    String getAssumedSchemaName(String catalogName, String schemaName);
+
+    String getAssumedCatalogName(String catalogName, String schemaName);
+
 }
