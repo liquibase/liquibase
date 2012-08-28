@@ -37,4 +37,19 @@ public class DB2DatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerator 
         return autoIncrement;
     }
 
+    @Override
+    protected String getJdbcCatalogName(Schema schema) {
+        return null;
+    }
+
+    @Override
+    protected String getJdbcSchemaName(Schema schema) {
+        return schema.getCatalogName();
+    }
+
+    @Override
+    protected Schema getSchemaFromJdbcInfo(String rawSchemaName, String rawCatalogName, Database database) {
+        return database.correctSchema(new Schema(rawSchemaName, null));
+    }
+
 }

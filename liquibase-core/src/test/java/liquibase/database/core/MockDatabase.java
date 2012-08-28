@@ -50,6 +50,14 @@ public class MockDatabase implements Database {
         return null;
     }
 
+    public boolean equals(DatabaseObject otherObject, Database accordingTo) {
+        return otherObject.getName().equalsIgnoreCase(this.getName());
+    }
+
+    public boolean equals(String otherObjectName, Database accordingTo) {
+        return otherObjectName.equalsIgnoreCase(this.getName());
+    }
+
     public void setCanCacheLiquibaseTableInfo(boolean canCacheLiquibaseTableInfo) {
         //
     }
@@ -85,6 +93,11 @@ public class MockDatabase implements Database {
     }
 
     public boolean isAutoCommit() throws DatabaseException {
+        return false;
+    }
+
+
+    public boolean isCaseSensitive() {
         return false;
     }
 
@@ -273,7 +286,7 @@ public class MockDatabase implements Database {
         return false;
     }
 
-    public boolean isLiquibaseTable(String tableName) {
+    public boolean isLiquibaseTable(Schema schema, String tableName) {
         return false;
     }
 
@@ -515,5 +528,21 @@ public class MockDatabase implements Database {
 
     public String correctIndexName(String indexName) {
         return indexName;
+    }
+
+    public String escapeSchemaName(String schemaName) {
+        return schemaName;
+    }
+
+    public String escapeCatalogName(String name) {
+        return name;
+    }
+
+    public String getAssumedSchemaName(String catalogName, String schemaName) {
+        return schemaName;
+    }
+
+    public String getAssumedCatalogName(String catalogName, String schemaName) {
+        return catalogName;
     }
 }

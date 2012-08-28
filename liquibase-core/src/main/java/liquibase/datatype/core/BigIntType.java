@@ -1,6 +1,7 @@
 package liquibase.datatype.core;
 
 import liquibase.database.Database;
+import liquibase.database.core.DB2Database;
 import liquibase.database.core.InformixDatabase;
 import liquibase.database.core.OracleDatabase;
 import liquibase.datatype.DataTypeInfo;
@@ -31,6 +32,9 @@ public class BigIntType extends LiquibaseDataType {
         }
         if (database instanceof OracleDatabase) {
             return new DatabaseDataType("NUMBER", 38,0);
+        }
+        if (database instanceof DB2Database) {
+            return new DatabaseDataType("BIGINT");
         }
         return super.toDatabaseDataType(database);
     }

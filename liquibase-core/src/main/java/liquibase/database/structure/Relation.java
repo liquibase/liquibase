@@ -8,7 +8,7 @@ import java.util.List;
 /**
  * A container of columns. Usually a table or view.
  */
-public abstract class Relation implements DatabaseObject, Comparable<Relation> {
+public abstract class Relation extends DatabaseObjectImpl implements Comparable<Relation> {
     private Database database;
     private Schema schema;
     protected String name;

@@ -95,7 +95,7 @@ public class InformixDatabase extends AbstractDatabase {
 	}
 
 	@Override
-	protected Set<String> getSystemTablesAndViews() {
+	protected Set<String> getSystemViews() {
 		return systemTablesAndViews;
 	}
 

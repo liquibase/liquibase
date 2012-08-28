@@ -10,10 +10,6 @@ import liquibase.exception.DatabaseException;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.DatabaseSnapshotGeneratorFactory;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 public class StandardDiffGenerator implements DiffGenerator {
 
     public int getPriority() {
@@ -75,7 +71,7 @@ public class StandardDiffGenerator implements DiffGenerator {
                 comparisonSchema = comparisonSnapshot.getDatabase().correctSchema(schemaComparison.getComparisonSchema());
             }
             for (T referenceObject : referenceSnapshot.getDatabaseObjects(referenceSchema, type)) {
-                if (referenceObject instanceof Table && referenceSnapshot.getDatabase().isLiquibaseTable(referenceObject.getName())) {
+                if (referenceObject instanceof Table && referenceSnapshot.getDatabase().isLiquibaseTable(referenceSchema, referenceObject.getName())) {
                     continue;
                 }
                 if (comparisonSnapshot.contains(comparisonSchema, referenceObject)) {
@@ -88,7 +84,7 @@ public class StandardDiffGenerator implements DiffGenerator {
             }
 
             for (T targetObject : comparisonSnapshot.getDatabaseObjects(comparisonSchema, type)) {
-                if (targetObject instanceof Table && comparisonSnapshot.getDatabase().isLiquibaseTable(targetObject.getName())) {
+                if (targetObject instanceof Table && comparisonSnapshot.getDatabase().isLiquibaseTable(comparisonSchema, targetObject.getName())) {
                     continue;
                 }
                 if (!referenceSnapshot.contains(referenceSchema, targetObject)) {

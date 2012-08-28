@@ -31,7 +31,7 @@ public class SelectSequencesGeneratorDB2 extends AbstractSqlGenerator<SelectSequ
         Schema schema = database.correctSchema(new Schema(statement.getCatalogName(), statement.getSchemaName()));
 
         return new Sql[] {
-                new UnparsedSql("SELECT SEQNAME AS SEQUENCE_NAME FROM SYSCAT.SEQUENCES WHERE SEQTYPE='S' AND SEQSCHEMA = '" + schema.getName() + "'")
+                new UnparsedSql("SELECT SEQNAME AS SEQUENCE_NAME FROM SYSCAT.SEQUENCES WHERE SEQTYPE='S' AND SEQSCHEMA = '" + schema.getCatalogName() + "'")
         };
     }
 }

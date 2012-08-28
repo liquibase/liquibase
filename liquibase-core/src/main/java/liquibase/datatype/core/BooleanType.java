@@ -19,12 +19,12 @@ public class BooleanType extends LiquibaseDataType {
         } else if (database instanceof MSSQLDatabase) {
             return new DatabaseDataType("BIT");
         } else if (database instanceof MySQLDatabase) {
-            return new DatabaseDataType("TINYINT",1);
+            return new DatabaseDataType("TINYINT", 1);
         } else if (database instanceof OracleDatabase) {
             return new DatabaseDataType("NUMBER", 1);
-        }  else if (database instanceof SybaseASADatabase || database instanceof SybaseDatabase) {
+        } else if (database instanceof SybaseASADatabase || database instanceof SybaseDatabase) {
             return new DatabaseDataType("BIT");
-        }  else if (database instanceof DerbyDatabase) {
+        } else if (database instanceof DerbyDatabase) {
             return new DatabaseDataType("SMALLINT");
         }
 
@@ -61,14 +61,32 @@ public class BooleanType extends LiquibaseDataType {
         return returnValue;
     }
 
-    //todo: informix 't' and 'f'
+    protected boolean isNumericBoolean(Database database) {
+        if (database instanceof CacheDatabase
+                || database instanceof DB2Database
+                || database instanceof FirebirdDatabase
+                || database instanceof MSSQLDatabase
+                || database instanceof MySQLDatabase
+                || database instanceof OracleDatabase
+                || database instanceof SybaseASADatabase
+                || database instanceof SybaseDatabase
+                || database instanceof DerbyDatabase) {
+            return true;
+        } else {
+            return false;
+        }
+
+    }
 
     /**
      * The database-specific value to use for "false" "boolean" columns.
      */
     public String getFalseBooleanValue(Database database) {
-        if (database instanceof MSSQLDatabase) {
+        if (isNumericBoolean(database)) {
             return "0";
+        }
+        if (database instanceof InformixDatabase) {
+            return "f";
         }
         return "FALSE";
     }
@@ -77,8 +95,11 @@ public class BooleanType extends LiquibaseDataType {
      * The database-specific value to use for "true" "boolean" columns.
      */
     public String getTrueBooleanValue(Database database) {
-        if (database instanceof MSSQLDatabase) {
+        if (isNumericBoolean(database)) {
             return "1";
+        }
+        if (database instanceof InformixDatabase) {
+            return "t";
         }
         return "TRUE";
     }

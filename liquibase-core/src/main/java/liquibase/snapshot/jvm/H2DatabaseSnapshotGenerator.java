@@ -2,6 +2,7 @@ package liquibase.snapshot.jvm;
 
 import liquibase.database.Database;
 import liquibase.database.structure.Column;
+import liquibase.database.structure.Schema;
 import liquibase.database.structure.Table;
 import liquibase.database.core.H2Database;
 import liquibase.exception.DatabaseException;

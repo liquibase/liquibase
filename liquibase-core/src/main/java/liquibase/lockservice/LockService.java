@@ -140,6 +140,11 @@ public class LockService {
                     throw new LockException("Did not update change log lock correctly.\n\n" + updatedRows + " rows were updated instead of the expected 1 row using executor " + executor.getClass().getName()+" there are "+executor.queryForInt(new RawSqlStatement("select count(*) from "+database.getDatabaseChangeLogLockTableName()))+" rows in the table");
                 }
                 database.commit();
+            }
+        } catch (Exception e) {
+            throw new LockException(e);
+        } finally {
+            try {
                 hasChangeLogLock = false;
 
                 instances.remove(this.database);
@@ -147,11 +152,6 @@ public class LockService {
                 database.setCanCacheLiquibaseTableInfo(false);
 
                 LogFactory.getLogger().info("Successfully released change log lock");
-            }
-        } catch (Exception e) {
-            throw new LockException(e);
-        } finally {
-            try {
                 database.rollback();
             } catch (DatabaseException e) {
                 ;

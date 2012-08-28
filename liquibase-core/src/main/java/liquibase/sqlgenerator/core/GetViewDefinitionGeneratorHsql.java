@@ -27,7 +27,7 @@ public class GetViewDefinitionGeneratorHsql extends GetViewDefinitionGenerator {
         Schema schema = database.correctSchema(new Schema(statement.getCatalogName(), statement.getSchemaName()));
 
         return new Sql[] {
-                    new UnparsedSql("SELECT VIEW_DEFINITION FROM INFORMATION_SCHEMA.SYSTEM_VIEWS WHERE TABLE_NAME = '" + statement.getViewName() + "' AND TABLE_SCHEMA='" + schema.getSchema() + "'")
+                    new UnparsedSql("SELECT VIEW_DEFINITION FROM INFORMATION_SCHEMA.SYSTEM_VIEWS WHERE TABLE_NAME = '" + statement.getViewName() + "' AND TABLE_SCHEMA='" + schema.getName() + "'")
             };
     }
 }
