@@ -26,7 +26,7 @@ public class MSSQLDatabase extends AbstractDatabase {
 
     private static Pattern CREATE_VIEW_AS_PATTERN = Pattern.compile("^CREATE\\s+.*?VIEW\\s+.*?AS\\s+", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
-    public String getTypeName() {
+    public String getShortName() {
         return "mssql";
     }
 

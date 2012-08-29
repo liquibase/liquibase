@@ -57,7 +57,7 @@ public class DiffGeneratorFactory {
         }
 
         if (foundGenerators.size() == 0) {
-            throw new UnexpectedLiquibaseException("Cannot find DiffGenerator for "+referenceDatabase.getTypeName()+", "+comparisonDatabase.getTypeName());
+            throw new UnexpectedLiquibaseException("Cannot find DiffGenerator for "+referenceDatabase.getShortName()+", "+comparisonDatabase.getShortName());
         }
 
         DiffGenerator returnDiffGenerator;

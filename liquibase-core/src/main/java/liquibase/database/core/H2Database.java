@@ -25,7 +25,7 @@ public class H2Database extends AbstractDatabase {
         this.databaseFunctions.add(new DatabaseFunction("CURRENT_TIMESTAMP()"));
     }
 
-    public String getTypeName() {
+    public String getShortName() {
         return "h2";
     }
 

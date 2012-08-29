@@ -89,7 +89,7 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
                 		buffer.append(" ").append(autoIncrementClause);
                 	}
                 } else {
-                    LogFactory.getLogger().warning(database.getTypeName()+" does not support autoincrement columns as request for "+(database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName())));
+                    LogFactory.getLogger().warning(database.getShortName()+" does not support autoincrement columns as request for "+(database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName())));
                 }
             }
 

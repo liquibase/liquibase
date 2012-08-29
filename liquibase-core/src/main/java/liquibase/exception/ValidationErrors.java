@@ -38,7 +38,7 @@ public class ValidationErrors {
         }
 
         if (isDisallowed && value != null) {
-            addError(disallowedFieldName + " is not allowed on "+database.getTypeName());
+            addError(disallowedFieldName + " is not allowed on "+database.getShortName());
         }
     }
 

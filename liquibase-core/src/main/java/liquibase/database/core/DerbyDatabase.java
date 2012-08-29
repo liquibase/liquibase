@@ -56,7 +56,7 @@ public class DerbyDatabase extends AbstractDatabase {
         return objectName.toUpperCase();
     }
 
-    public String getTypeName() {
+    public String getShortName() {
         return "derby";
     }
 

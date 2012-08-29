@@ -15,7 +15,7 @@ import liquibase.statement.core.RawSqlStatement;
 public class MySQLDatabase extends AbstractDatabase {
     public static final String PRODUCT_NAME = "MySQL";
 
-    public String getTypeName() {
+    public String getShortName() {
         return "mysql";
     }
 

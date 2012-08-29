@@ -52,7 +52,7 @@ public class DB2Database extends AbstractDatabase {
         return "DB2";
     }
 
-    public String getTypeName() {
+    public String getShortName() {
         return "db2";
     }
 

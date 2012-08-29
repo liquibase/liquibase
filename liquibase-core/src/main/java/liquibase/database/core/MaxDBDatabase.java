@@ -91,7 +91,7 @@ public class MaxDBDatabase extends AbstractDatabase {
         return systemTablesAndViews;
     }
 
-    public String getTypeName() {
+    public String getShortName() {
         return "maxdb";
     }
 

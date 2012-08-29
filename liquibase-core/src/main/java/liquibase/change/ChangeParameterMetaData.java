@@ -3,10 +3,8 @@ package liquibase.change;
 import liquibase.database.Database;
 import liquibase.exception.UnexpectedLiquibaseException;
 
-import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
-import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -43,7 +41,7 @@ public class ChangeParameterMetaData {
     }
 
     public boolean isRequiredFor(Database database) {
-        return requiredForDatabase.contains("all") || requiredForDatabase.contains(database.getTypeName());
+        return requiredForDatabase.contains("all") || requiredForDatabase.contains(database.getShortName());
     }
 
     public Object getCurrentValue(Change change) {

@@ -49,7 +49,7 @@ public class SQLiteDatabase extends AbstractDatabase {
     }
     
 
-    public String getTypeName() {
+    public String getShortName() {
         return "sqlite";
     }
 

@@ -35,9 +35,9 @@ public abstract class AbstractSqlGeneratorTest<T extends SqlStatement> {
         for (Database database : TestContext.getInstance().getAllDatabases()) {
             boolean isImpl = generatorUnderTest.supports(createSampleSqlStatement(), database);
             if (shouldBeImplementation(database)) {
-                assertTrue("Unexpected false supports for " + database.getTypeName(), isImpl);
+                assertTrue("Unexpected false supports for " + database.getShortName(), isImpl);
             } else {
-                assertFalse("Unexpected true supports for " + database.getTypeName(), isImpl);
+                assertFalse("Unexpected true supports for " + database.getShortName(), isImpl);
             }
         }
     }

@@ -165,7 +165,7 @@ public abstract class AbstractChange implements Change {
 
         for (ChangeParameterMetaData param : getChangeMetaData().getParameters()) {
             if (param.isRequiredFor(database) && param.getCurrentValue(this) == null) {
-                changeValidationErrors.addError(param.getParameterName()+" is required for "+getChangeMetaData().getName()+" on "+database.getTypeName());
+                changeValidationErrors.addError(param.getParameterName()+" is required for "+getChangeMetaData().getName()+" on "+database.getShortName());
             }
         }
         if (changeValidationErrors.hasErrors()) {
@@ -176,9 +176,9 @@ public abstract class AbstractChange implements Change {
             boolean supported = SqlGeneratorFactory.getInstance().supports(statement, database);
             if (!supported) {
                 if (statement.skipOnUnsupported()) {
-                    LogFactory.getLogger().info(getChangeMetaData().getName()+" is not supported on "+database.getTypeName()+" but will continue");
+                    LogFactory.getLogger().info(getChangeMetaData().getName()+" is not supported on "+database.getShortName()+" but will continue");
                 } else {
-                    changeValidationErrors.addError(getChangeMetaData().getName()+" is not supported on "+database.getTypeName());
+                    changeValidationErrors.addError(getChangeMetaData().getName()+" is not supported on "+database.getShortName());
                 }
             } else {
                 changeValidationErrors.addAll(SqlGeneratorFactory.getInstance().validate(statement, database));

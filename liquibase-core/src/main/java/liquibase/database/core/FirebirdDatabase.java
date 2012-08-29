@@ -26,7 +26,7 @@ public class FirebirdDatabase extends AbstractDatabase {
         return PRIORITY_DEFAULT;
     }
     
-    public String getTypeName() {
+    public String getShortName() {
         return "firebird";
     }
 

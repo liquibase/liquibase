@@ -29,7 +29,7 @@ public class DB2iDatabase extends DB2Database {
     }
 
     @Override
-    public String getTypeName() {
+    public String getShortName() {
         return "db2i";
     }
 }

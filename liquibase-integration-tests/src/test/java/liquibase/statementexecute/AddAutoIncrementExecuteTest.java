@@ -129,7 +129,7 @@ public class AddAutoIncrementExecuteTest extends AbstractExecuteTest {
 //                        Column columnSnapshot = snapshot.getTable(TABLE_NAME).getColumn(NEW_COLUMN_NAME);
 //                        assertNotNull(columnSnapshot);
 //                        assertEquals(NEW_COLUMN_NAME.toUpperCase(), columnSnapshot.getName().toUpperCase());
-//                        assertEquals("varchar".toUpperCase(), columnSnapshot.getTypeName().toUpperCase().replaceAll("VARCHAR2", "VARCHAR"));
+//                        assertEquals("varchar".toUpperCase(), columnSnapshot.getShortName().toUpperCase().replaceAll("VARCHAR2", "VARCHAR"));
 //                        assertEquals(50, columnSnapshot.getColumnSize());
 //                        assertEquals("new default", columnSnapshot.getDefaultValue());
 //
@@ -151,9 +151,9 @@ public class AddAutoIncrementExecuteTest extends AbstractExecuteTest {
 //                        assertNotNull(columnSnapshot);
 //                        assertEquals(NEW_COLUMN_NAME.toUpperCase(), columnSnapshot.getName().toUpperCase());
 //                        if (snapshot.getDatabase() instanceof OracleDatabase) {
-//                            assertEquals("NUMBER", columnSnapshot.getTypeName().toUpperCase());
+//                            assertEquals("NUMBER", columnSnapshot.getShortName().toUpperCase());
 //                        } else {
-//                            assertTrue(columnSnapshot.getTypeName().toUpperCase().startsWith("INT"));
+//                            assertTrue(columnSnapshot.getShortName().toUpperCase().startsWith("INT"));
 //                        }
 //                        assertEquals(42, ((Number) columnSnapshot.getDefaultValue()).intValue());
 //

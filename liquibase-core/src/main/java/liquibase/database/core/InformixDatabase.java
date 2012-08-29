@@ -142,7 +142,7 @@ public class InformixDatabase extends AbstractDatabase {
 		return null;
 	}
 
-	public String getTypeName() {
+	public String getShortName() {
 		return "informix";
 	}
 

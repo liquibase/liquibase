@@ -12,7 +12,7 @@ public class DbmsChangeSetFilter implements ChangeSetFilter {
     private String databaseString;
 
     public DbmsChangeSetFilter(Database database) {
-        this.databaseString = database.getTypeName();
+        this.databaseString = database.getShortName();
     }
 
     public boolean accepts(ChangeSet changeSet) {

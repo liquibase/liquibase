@@ -25,7 +25,7 @@ public class SybaseDatabase extends AbstractDatabase {
         return "Sybase SQL Server";
     }
 
-    public String getTypeName() {
+    public String getShortName() {
         return "sybase";
     }
 

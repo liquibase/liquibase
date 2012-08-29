@@ -2,7 +2,6 @@ package liquibase.changelog;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -136,7 +135,7 @@ public class ChangeLogParameters {
             }
 
             if (isValid && validDatabases != null && validDatabases.size() > 0) {
-                isValid = validDatabases.contains(currentDatabase.getTypeName());
+                isValid = validDatabases.contains(currentDatabase.getShortName());
             }
 
             return isValid;

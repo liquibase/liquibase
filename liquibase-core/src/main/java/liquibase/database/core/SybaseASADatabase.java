@@ -159,9 +159,9 @@ public class SybaseASADatabase extends AbstractDatabase {
     }
 
     /* (non-Javadoc)
-    * @see liquibase.database.Database#getTypeName()
+    * @see liquibase.database.Database#getShortName()
     */
-	public String getTypeName() {
+	public String getShortName() {
 		
 		return "asany";
 	}

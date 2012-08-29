@@ -87,7 +87,7 @@ public class PostgresDatabase extends AbstractDatabase {
         super.setConnection(conn);
     }
 
-    public String getTypeName() {
+    public String getShortName() {
         return "postgresql";
     }
 

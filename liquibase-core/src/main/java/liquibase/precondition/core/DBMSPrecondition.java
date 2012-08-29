@@ -39,7 +39,7 @@ public class DBMSPrecondition implements Precondition {
     
     public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet) throws PreconditionFailedException, PreconditionErrorException {
         try {
-            String dbType = database.getTypeName();
+            String dbType = database.getShortName();
             if (!type.equals(dbType)) {
                 throw new PreconditionFailedException("DBMS Precondition failed: expected "+type+", got "+dbType, changeLog, this);
             }

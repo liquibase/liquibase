@@ -60,7 +60,7 @@ public class OracleDatabase extends AbstractDatabase {
         super.setConnection(conn);
     }
 
-    public String getTypeName() {
+    public String getShortName() {
         return "oracle";
     }
 

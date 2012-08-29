@@ -195,7 +195,7 @@ public abstract class AbstractChangeTest {
             try {
                 validator.validate(sqlStatements, database);
             } catch (AssertionError e) {
-                AssertionError error = new AssertionError("GenerateAllValidator failed for " + database.getTypeName() + ": " + e.getMessage());
+                AssertionError error = new AssertionError("GenerateAllValidator failed for " + database.getShortName() + ": " + e.getMessage());
                 error.setStackTrace(e.getStackTrace());
 
                 throw error;
@@ -214,7 +214,7 @@ public abstract class AbstractChangeTest {
             try {
                 validator.validate(sqlStatements, database);
             } catch (AssertionError e) {
-                AssertionError error = new AssertionError("GenerateAllValidator failed for " + database.getTypeName() + ": " + e.getMessage());
+                AssertionError error = new AssertionError("GenerateAllValidator failed for " + database.getShortName() + ": " + e.getMessage());
                 error.setStackTrace(e.getStackTrace());
 
                 throw error;
@@ -240,7 +240,7 @@ public abstract class AbstractChangeTest {
             try {
                 validator.validate(inverses);
             } catch (AssertionError e) {
-                AssertionError error = new AssertionError("InverseValidator failed for " + database.getTypeName() + ": " + e.getMessage());
+                AssertionError error = new AssertionError("InverseValidator failed for " + database.getShortName() + ": " + e.getMessage());
                 error.setStackTrace(e.getStackTrace());
 
                 throw error;
@@ -259,7 +259,7 @@ public abstract class AbstractChangeTest {
             try {
                 validator.validate(inverses);
             } catch (AssertionError e) {
-                AssertionError error = new AssertionError("InverseValidator failed for " + database.getTypeName() + ": " + e.getMessage());
+                AssertionError error = new AssertionError("InverseValidator failed for " + database.getShortName() + ": " + e.getMessage());
                 error.setStackTrace(e.getStackTrace());
 
                 throw error;
@@ -274,7 +274,7 @@ public abstract class AbstractChangeTest {
             return;
         }
         for (Database database : TestContext.getInstance().getAllDatabases()) {
-            assertEquals("Unexpected availablity on "+database.getTypeName(), !changeIsUnsupported(database), change.supports(database));
+            assertEquals("Unexpected availablity on "+database.getShortName(), !changeIsUnsupported(database), change.supports(database));
         }
     }
 

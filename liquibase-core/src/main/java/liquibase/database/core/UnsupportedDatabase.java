@@ -34,7 +34,7 @@ public class UnsupportedDatabase extends AbstractDatabase {
         return null;
     }    
 
-    public String getTypeName() {
+    public String getShortName() {
         return "unsupported";
     }
 

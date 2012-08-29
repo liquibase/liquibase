@@ -126,7 +126,7 @@ public class MockDatabase implements Database {
         return 0;
     }
 
-    public String getTypeName() {
+    public String getShortName() {
         return null;
     }
 

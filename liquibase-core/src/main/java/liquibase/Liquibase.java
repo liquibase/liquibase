@@ -7,7 +7,6 @@ import liquibase.changelog.visitor.*;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.DatabaseFactory;
-import liquibase.database.structure.Catalog;
 import liquibase.database.structure.Schema;
 import liquibase.diff.DiffControl;
 import liquibase.diff.DiffGeneratorFactory;
@@ -802,7 +801,7 @@ public class Liquibase {
             setChangeLogParameter("database.defaultSchemaNamePrefix", StringUtils.trimToNull(database.getDefaultSchemaName())==null?"":"."+database.getDefaultSchemaName());
             setChangeLogParameter("database.lineComment", database.getLineComment());
             setChangeLogParameter("database.liquibaseSchemaName", database.getLiquibaseSchemaName());
-            setChangeLogParameter("database.typeName", database.getTypeName());
+            setChangeLogParameter("database.typeName", database.getShortName());
             setChangeLogParameter("database.isLocalDatabase", database.isLocalDatabase());
             setChangeLogParameter("database.requiresPassword", database.requiresPassword());
             setChangeLogParameter("database.requiresUsername", database.requiresUsername());

@@ -117,7 +117,7 @@ public abstract class AbstractExecuteTest {
                 try {
                     statement.execute(sqlToRun);
                 } catch (Exception e) {
-                    System.out.println("Failed to execute against " + availableDatabase.getTypeName() + ": " + sqlToRun);
+                    System.out.println("Failed to execute against " + availableDatabase.getShortName() + ": " + sqlToRun);
                     throw e;
 
                 }

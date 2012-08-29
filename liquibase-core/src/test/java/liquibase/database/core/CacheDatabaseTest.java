@@ -35,7 +35,7 @@ public class CacheDatabaseTest extends AbstractDatabaseTest {
 
 	@Test
 	public void getTypeName() {
-		Assert.assertEquals("cache", database.getTypeName());
+		Assert.assertEquals("cache", database.getShortName());
 	}
 
 

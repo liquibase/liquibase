@@ -49,7 +49,7 @@ public class HsqlDatabase extends AbstractDatabase {
         return PRIORITY_DEFAULT;
     }
 
-    public String getTypeName() {
+    public String getShortName() {
         return "hsqldb";
     }
 

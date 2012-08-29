@@ -21,10 +21,10 @@ import java.util.List;
 
 public interface Database extends DatabaseObject, PrioritizedService {
 
-	String databaseChangeLogTableName = "DatabaseChangeLog".toUpperCase();
-	String databaseChangeLogLockTableName = "DatabaseChangeLogLock".toUpperCase();
+    String databaseChangeLogTableName = "DatabaseChangeLog".toUpperCase();
+    String databaseChangeLogLockTableName = "DatabaseChangeLogLock".toUpperCase();
 
-	/**
+    /**
      * Is this AbstractDatabase subclass the correct one to use for the given connection.
      */
     boolean isCorrectDatabaseImplementation(DatabaseConnection conn) throws DatabaseException;
@@ -41,7 +41,7 @@ public interface Database extends DatabaseObject, PrioritizedService {
     boolean requiresUsername();
 
     boolean requiresPassword();
-    
+
     /**
      * Auto-commit mode to run in
      */
@@ -49,7 +49,7 @@ public interface Database extends DatabaseObject, PrioritizedService {
 
     /**
      * Determines if the database supports DDL within a transaction or not.
-     * 
+     *
      * @return True if the database supports DDL within a transaction, otherwise false.
      */
     boolean supportsDDLInTransaction();
@@ -58,7 +58,7 @@ public interface Database extends DatabaseObject, PrioritizedService {
 
     String getDatabaseProductVersion() throws DatabaseException;
 
-     int getDatabaseMajorVersion() throws DatabaseException;
+    int getDatabaseMajorVersion() throws DatabaseException;
 
     int getDatabaseMinorVersion() throws DatabaseException;
 
@@ -66,7 +66,7 @@ public interface Database extends DatabaseObject, PrioritizedService {
      * Returns an all-lower-case short name of the product.  Used for end-user selecting of database type
      * such as the DBMS precondition.
      */
-    String getTypeName();
+    String getShortName();
 
     String getDefaultCatalogName();
 
@@ -75,9 +75,9 @@ public interface Database extends DatabaseObject, PrioritizedService {
     Integer getDefaultPort();
 
     String getLiquibaseCatalogName();
-    
+
     String getLiquibaseSchemaName();
-    
+
     void setDefaultSchemaName(String schemaName) throws DatabaseException;
 
     /**
@@ -88,7 +88,7 @@ public interface Database extends DatabaseObject, PrioritizedService {
     public boolean supportsSequences();
 
     public boolean supportsDropTableCascadeConstraints();
-    
+
     public boolean supportsAutoIncrement();
 
     String getDateLiteral(String isoDate);
@@ -108,17 +108,17 @@ public interface Database extends DatabaseObject, PrioritizedService {
     String getDatabaseChangeLogTableName();
 
     String getDatabaseChangeLogLockTableName();
-    
+
     /**
      * Set the table name of the change log to the given table name
-     * 
+     *
      * @param tableName
      */
     public void setDatabaseChangeLogTableName(String tableName);
-    
+
     /**
      * Set the table name of the change log lock to the given table name
-     * 
+     *
      * @param tableName
      */
     public void setDatabaseChangeLogLockTableName(String tableName);
@@ -126,12 +126,12 @@ public interface Database extends DatabaseObject, PrioritizedService {
     /**
      * Returns SQL to concat the passed values.
      */
-    String getConcatSql(String ... values);
+    String getConcatSql(String... values);
 
     boolean hasDatabaseChangeLogTable() throws DatabaseException;
 
     public void setCanCacheLiquibaseTableInfo(boolean canCacheLiquibaseTableInfo);
-    
+
     boolean hasDatabaseChangeLogLockTable() throws DatabaseException;
 
     void checkDatabaseChangeLogTable(boolean updateExistingNullChecksums, DatabaseChangeLog databaseChangeLog, String[] contexts) throws DatabaseException;
@@ -181,11 +181,11 @@ public interface Database extends DatabaseObject, PrioritizedService {
 
     /**
      * Escapes a single column name in a database-dependent manner so reserved words can be used as a column
-     * name (i.e. "return"). 
-     * @param schemaName
-     * @param tableName 
-     * @param columnName column name
+     * name (i.e. "return").
      *
+     * @param schemaName
+     * @param tableName
+     * @param columnName column name
      * @return escaped column name
      */
     String escapeColumnName(String catalogName, String schemaName, String tableName, String columnName);
@@ -238,7 +238,7 @@ public interface Database extends DatabaseObject, PrioritizedService {
     boolean isAutoCommit() throws DatabaseException;
 
     void setAutoCommit(boolean b) throws DatabaseException;
-    
+
     boolean isLocalDatabase() throws DatabaseException;
 
     void executeStatements(Change change, DatabaseChangeLog changeLog, List<SqlVisitor> sqlVisitors) throws LiquibaseException, UnsupportedChangeException;/*
@@ -261,10 +261,10 @@ public interface Database extends DatabaseObject, PrioritizedService {
 
     public Date parseDate(String dateAsString) throws DateParseException;
 
-	/**
-	 * Returns list of database native functions
-	 * */
-	public List<DatabaseFunction> getDatabaseFunctions();
+    /**
+     * Returns list of database native functions
+     */
+    public List<DatabaseFunction> getDatabaseFunctions();
 
     void reset();
 
@@ -279,7 +279,7 @@ public interface Database extends DatabaseObject, PrioritizedService {
     public boolean isReservedWord(String string);
 
     Schema correctSchema(Schema schema);
-    
+
     String correctTableName(String tableName);
 
     String correctConstraintName(String constraintName);
@@ -289,7 +289,7 @@ public interface Database extends DatabaseObject, PrioritizedService {
     String correctPrimaryKeyName(String pkName);
 
     String correctForeignKeyName(String fkName);
-    
+
     String correctIndexName(String indexName);
 
     String getAssumedSchemaName(String catalogName, String schemaName);
