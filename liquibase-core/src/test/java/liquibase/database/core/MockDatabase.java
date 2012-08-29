@@ -434,7 +434,7 @@ public class MockDatabase implements Database {
     	return true;
     }
 
-    public String escapeDatabaseObject(String objectName) {
+    public String escapeDatabaseObject(String objectName, Class<? extends DatabaseObject> objectType) {
         return objectName;
     }
 

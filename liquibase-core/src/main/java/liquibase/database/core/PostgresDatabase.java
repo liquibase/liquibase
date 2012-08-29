@@ -3,6 +3,8 @@ package liquibase.database.core;
 import liquibase.database.AbstractDatabase;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.jvm.JdbcConnection;
+import liquibase.database.structure.DatabaseObject;
+import liquibase.database.structure.Index;
 import liquibase.database.structure.Schema;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.ExecutorService;
@@ -207,14 +209,14 @@ public class PostgresDatabase extends AbstractDatabase {
     }
     
     @Override
-    public String escapeDatabaseObject(String objectName) {
+    public String escapeDatabaseObject(String objectName, Class<? extends DatabaseObject> objectType) {
         if (objectName == null) {
             return null;
         }
         if (objectName.contains("-") || hasMixedCase(objectName) || startsWithNumeric(objectName) || isReservedWord(objectName)) {
             return "\"" + objectName + "\"";
         } else {
-            return super.escapeDatabaseObject(objectName);
+            return super.escapeDatabaseObject(objectName, objectType);
         }
 
     }
@@ -302,6 +304,6 @@ public class PostgresDatabase extends AbstractDatabase {
 
     @Override
     public String escapeIndexName(String catalogName,String schemaName, String indexName) {
-        return escapeDatabaseObject(indexName);
+        return escapeDatabaseObject(indexName, Index.class);
     }
 }

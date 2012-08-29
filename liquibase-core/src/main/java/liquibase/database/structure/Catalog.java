@@ -3,7 +3,7 @@ package liquibase.database.structure;
 import liquibase.database.Database;
 import liquibase.util.StringUtils;
 
-public class Catalog {
+public class Catalog extends DatabaseObjectImpl {
 
     public static final String DEFAULT_NAME = "!DEFAULT_CATALOG!";
     public static final Catalog DEFAULT = new Catalog(DEFAULT_NAME);
@@ -16,6 +16,14 @@ public class Catalog {
         } else {
             this.name = name;
         }
+    }
+
+    public DatabaseObject[] getContainingObjects() {
+        return null;
+    }
+
+    public Schema getSchema() {
+        return null;
     }
 
     public String getName() {
@@ -33,6 +41,8 @@ public class Catalog {
 
         return true;
     }
+
+
 
     @Override
     public int hashCode() {

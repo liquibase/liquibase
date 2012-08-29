@@ -3,7 +3,9 @@ package liquibase.database.core;
 import java.sql.ResultSet;
 import liquibase.database.AbstractDatabase;
 import liquibase.database.DatabaseConnection;
+import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.Schema;
+import liquibase.database.structure.View;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.ExecutorService;
@@ -227,7 +229,7 @@ public class MSSQLDatabase extends AbstractDatabase {
 
 
     @Override
-    public String escapeDatabaseObject(String objectName) {
+    public String escapeDatabaseObject(String objectName, Class<? extends DatabaseObject> objectType) {
         return "["+objectName+"]";
     }
 
@@ -285,9 +287,9 @@ public class MSSQLDatabase extends AbstractDatabase {
     public String escapeViewName(String catalogName, String schemaName, String viewName) {
         schemaName = getAssumedSchemaName(catalogName, schemaName);
         if (StringUtils.trimToNull(schemaName) == null) {
-            return escapeDatabaseObject(viewName);
+            return escapeDatabaseObject(viewName, View.class);
         } else {
-            return escapeDatabaseObject(schemaName)+"."+escapeDatabaseObject(viewName);
+            return escapeDatabaseObject(schemaName, Schema.class)+"."+escapeDatabaseObject(viewName, Schema.class);
         }
 
     }

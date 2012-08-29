@@ -2,6 +2,7 @@ package liquibase.database.core;
 
 import liquibase.database.DatabaseConnection;
 import liquibase.database.AbstractDatabase;
+import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.Schema;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.DateParseException;
@@ -189,7 +190,7 @@ public class H2Database extends AbstractDatabase {
 
 
     @Override
-    public String escapeDatabaseObject(String objectName) {
+    public String escapeDatabaseObject(String objectName, Class<? extends DatabaseObject> objectType) {
     	if (objectName != null) {
             if (isReservedWord(objectName)) {
                 return "\""+objectName.toUpperCase()+"\"";

@@ -5,6 +5,8 @@ import java.sql.SQLException;
 
 import liquibase.database.AbstractDatabase;
 import liquibase.database.DatabaseConnection;
+import liquibase.database.structure.DatabaseObject;
+import liquibase.database.structure.Index;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.ExecutorService;
 import liquibase.statement.core.RawSqlStatement;
@@ -128,7 +130,7 @@ public class MySQLDatabase extends AbstractDatabase {
     }
 
     @Override
-    public String escapeDatabaseObject(String objectName) {
+    public String escapeDatabaseObject(String objectName, Class<? extends DatabaseObject> objectType) {
         return "`"+objectName+"`";
     }
 
@@ -144,7 +146,7 @@ public class MySQLDatabase extends AbstractDatabase {
 
     @Override
     public String escapeIndexName(String catalogName, String schemaName, String indexName) {
-        return escapeDatabaseObject(indexName);
+        return escapeDatabaseObject(indexName, Index.class);
     }
 
     @Override

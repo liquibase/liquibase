@@ -168,7 +168,7 @@ public interface Database extends DatabaseObject, PrioritizedService {
 
     String escapeIndexName(String catalogName, String schemaName, String indexName);
 
-    String escapeDatabaseObject(String objectName);
+    String escapeDatabaseObject(String objectName, Class<? extends DatabaseObject> objectType);
 
     /**
      * Escapes a single column name in a database-dependent manner so reserved words can be used as a column
