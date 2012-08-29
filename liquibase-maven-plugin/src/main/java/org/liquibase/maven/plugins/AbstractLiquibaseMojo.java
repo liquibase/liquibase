@@ -303,7 +303,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
             getLog().info("Executing on Database: " + url);
 
             if (isPromptOnNonLocalDatabase()) {
-                if (!liquibase.isSafeToRunMigration()) {
+                if (!liquibase.isSafeToRunUpdate()) {
                     if (UIFactory.getInstance().getFacade().promptForNonLocalDatabase(liquibase.getDatabase())) {
                         throw new LiquibaseException("User decided not to run against non-local database");
                     }

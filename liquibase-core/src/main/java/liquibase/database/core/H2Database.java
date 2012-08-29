@@ -121,10 +121,10 @@ public class H2Database extends AbstractDatabase {
     }
 
     @Override
-    public boolean isLocalDatabase() throws DatabaseException {
+    public boolean isSafeToRunUpdate() throws DatabaseException {
         String url = getConnection().getURL();
         boolean isLocalURL = (
-                super.isLocalDatabase()
+                super.isSafeToRunUpdate()
                         || url.startsWith("jdbc:h2:file:")
                         || url.startsWith("jdbc:h2:mem:")
                         || url.startsWith("jdbc:h2:zip:")

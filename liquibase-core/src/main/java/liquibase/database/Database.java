@@ -232,7 +232,7 @@ public interface Database extends DatabaseObject, PrioritizedService {
 
     void setAutoCommit(boolean b) throws DatabaseException;
 
-    boolean isLocalDatabase() throws DatabaseException;
+    boolean isSafeToRunUpdate() throws DatabaseException;
 
     void executeStatements(Change change, DatabaseChangeLog changeLog, List<SqlVisitor> sqlVisitors) throws LiquibaseException, UnsupportedChangeException;/*
      * Executes the statements passed as argument to a target {@link Database}

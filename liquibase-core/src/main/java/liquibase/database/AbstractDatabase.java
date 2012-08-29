@@ -1232,7 +1232,7 @@ public abstract class AbstractDatabase implements Database {
      * @throws liquibase.exception.DatabaseException
      *
      */
-    public boolean isLocalDatabase() throws DatabaseException {
+    public boolean isSafeToRunUpdate() throws DatabaseException {
         DatabaseConnection connection = getConnection();
         if (connection == null) {
             return true;

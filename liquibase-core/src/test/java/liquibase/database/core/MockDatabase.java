@@ -430,7 +430,7 @@ public class MockDatabase implements Database {
         return constraintName;
     }
     
-    public boolean isLocalDatabase() throws DatabaseException {
+    public boolean isSafeToRunUpdate() throws DatabaseException {
     	return true;
     }
 

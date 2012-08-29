@@ -58,13 +58,13 @@ public class LiquibaseTest {
 //        Database database = testLiquibase.getDatabase();
 //
 //        liquibase.setUrl("jdbc:oracle:thin:@localhost:1521:latest");
-//        assertTrue(liquibase.isSafeToRunMigration());
+//        assertTrue(liquibase.isSafeToRunUpdate());
 //
 //        liquibase.setUrl("jdbc:oracle:thin:@liquibase:1521:latest");
-//        assertFalse(liquibase.isSafeToRunMigration());
+//        assertFalse(liquibase.isSafeToRunUpdate());
 //
 //        ExecutorService.getInstance().setWriteExecutor(database, new LoggingExecutor(new PrintWriter(System.out), database));
-//        assertTrue("Safe to run if outputing sql, even if non-localhost URL", liquibase.isSafeToRunMigration());
+//        assertTrue("Safe to run if outputing sql, even if non-localhost URL", liquibase.isSafeToRunUpdate());
 //
 //    }
 

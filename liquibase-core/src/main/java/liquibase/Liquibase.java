@@ -589,8 +589,8 @@ public class Liquibase {
      * It is fine to run Liquibase against a "non-safe" database, the method is mainly used to determine if the user
      * should be prompted before continuing.
      */
-    public boolean isSafeToRunMigration() throws DatabaseException {
-        return getDatabase().isLocalDatabase();
+    public boolean isSafeToRunUpdate() throws DatabaseException {
+        return getDatabase().isSafeToRunUpdate();
     }
 
     /**
@@ -802,7 +802,7 @@ public class Liquibase {
             setChangeLogParameter("database.lineComment", database.getLineComment());
             setChangeLogParameter("database.liquibaseSchemaName", database.getLiquibaseSchemaName());
             setChangeLogParameter("database.typeName", database.getShortName());
-            setChangeLogParameter("database.isLocalDatabase", database.isLocalDatabase());
+            setChangeLogParameter("database.isSafeToRunUpdate", database.isSafeToRunUpdate());
             setChangeLogParameter("database.requiresPassword", database.requiresPassword());
             setChangeLogParameter("database.requiresUsername", database.requiresUsername());
             setChangeLogParameter("database.supportsForeignKeyDisable", database.supportsForeignKeyDisable());
