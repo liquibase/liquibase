@@ -354,7 +354,7 @@ public class ChangeSet implements Conditional {
                 try {
                     database.setAutoCommit(false);
                 } catch (DatabaseException e) {
-                    throw new MigrationFailedException(this, "Could not reset autocommit", e);
+                    throw new MigrationFailedException(this, "Could not resetInternalState autocommit", e);
                 }
             }
         }

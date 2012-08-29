@@ -1318,7 +1318,7 @@ public abstract class AbstractDatabase implements Database {
         return dateFunctions;
     }
 
-    public void reset() {
+    public void resetInternalState() {
         this.ranChangeSetList = null;
         this.hasDatabaseChangeLogLockTable = false;
     }

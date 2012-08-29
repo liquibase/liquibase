@@ -482,7 +482,7 @@ public class MockDatabase implements Database {
 		return null;
 	}
 
-    public void reset() {
+    public void resetInternalState() {
         
     }
     

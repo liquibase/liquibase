@@ -156,9 +156,9 @@ public abstract class AbstractIntegrationTest {
             database.setDefaultSchemaName(null);
 //            database.close();
         }
-//        ServiceLocator.reset();
+//        ServiceLocator.resetInternalState();
         DatabaseSnapshotGeneratorFactory.resetAll();
-//        DatabaseFactory.reset();
+//        DatabaseFactory.resetInternalState();
     }
 
     protected boolean shouldRollBack() {
@@ -172,7 +172,7 @@ public abstract class AbstractIntegrationTest {
 
     private Liquibase createLiquibase(String changeLogFile, ResourceAccessor resourceAccessor) throws LiquibaseException {
         ExecutorService.getInstance().clearExecutor(database);
-        database.reset();
+        database.resetInternalState();
         return new Liquibase(changeLogFile, resourceAccessor, database);
     }
 

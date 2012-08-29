@@ -259,7 +259,7 @@ public interface Database extends DatabaseObject, PrioritizedService {
      */
     public List<DatabaseFunction> getDateFunctions();
 
-    void reset();
+    void resetInternalState();
 
     boolean supportsForeignKeyDisable();
 
