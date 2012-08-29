@@ -146,6 +146,10 @@ public class MockDatabase implements Database {
         return null;
     }
 
+    public void setDefaultCatalogName(String catalogName) throws DatabaseException {
+
+    }
+
     public String getDefaultSchemaName()  {
         return null;
     }

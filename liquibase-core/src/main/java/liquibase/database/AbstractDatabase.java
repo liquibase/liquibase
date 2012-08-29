@@ -331,7 +331,11 @@ public abstract class AbstractDatabase implements Database {
         }
         return null;
     }
-    
+
+    public void setDefaultCatalogName(String defaultCatalogName) {
+        this.defaultCatalogName = defaultCatalogName;
+    }
+
     public void setDefaultSchemaName(String schemaName) {
         this.defaultSchemaName = schemaName;
     }

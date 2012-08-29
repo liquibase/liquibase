@@ -70,15 +70,17 @@ public interface Database extends DatabaseObject, PrioritizedService {
 
     String getDefaultCatalogName();
 
+    void setDefaultCatalogName(String catalogName) throws DatabaseException;
+
     String getDefaultSchemaName();
+
+    void setDefaultSchemaName(String schemaName) throws DatabaseException;
 
     Integer getDefaultPort();
 
     String getLiquibaseCatalogName();
 
     String getLiquibaseSchemaName();
-
-    void setDefaultSchemaName(String schemaName) throws DatabaseException;
 
     /**
      * Returns whether this database support initially deferrable columns.

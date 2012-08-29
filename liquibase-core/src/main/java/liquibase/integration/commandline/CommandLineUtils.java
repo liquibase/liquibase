@@ -37,6 +37,7 @@ public class CommandLineUtils {
                                                 String username,
                                                 String password,
                                                 String driver,
+                                                String defaultCatalogName,
                                                 String defaultSchemaName,
                                                 String databaseClass,
                                                 String driverPropertiesFile) throws DatabaseException {
@@ -101,6 +102,7 @@ public class CommandLineUtils {
             }
 
             Database database = databaseFactory.findCorrectDatabaseImplementation(new JdbcConnection(connection));
+            database.setDefaultCatalogName(StringUtils.trimToNull(defaultCatalogName));
             database.setDefaultSchemaName(StringUtils.trimToNull(defaultSchemaName));
             return database;
         } catch (Exception e) {

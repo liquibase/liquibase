@@ -59,8 +59,14 @@ public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
     protected String referencePassword;
 
     /**
-     * The reference database password to use to connect to the specified database. If this is
-     * null then an empty password will be used.
+     * The reference database catalog.
+     *
+     * @parameter expression="${liquibase.referenceDefaultCatalogName}"
+     */
+    protected String referenceDefaultCatalogName;
+
+    /**
+     * The reference database schema.
      *
      * @parameter expression="${liquibase.referenceDefaultSchemaName}"
      */
@@ -126,7 +132,7 @@ public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
         }
 
         Database db = liquibase.getDatabase();
-        Database referenceDatabase = CommandLineUtils.createDatabaseObject(cl, referenceUrl, referenceUsername, referencePassword, referenceDriver, referenceDefaultSchemaName, null, null);
+        Database referenceDatabase = CommandLineUtils.createDatabaseObject(cl, referenceUrl, referenceUsername, referencePassword, referenceDriver, referenceDefaultCatalogName, referenceDefaultSchemaName, null, null);
 
         getLog().info("Performing Diff on database " + db.toString());
         if (diffChangeLogFile != null) {
