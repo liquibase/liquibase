@@ -438,6 +438,10 @@ public class MockDatabase implements Database {
         return objectName;
     }
 
+    public String escapeDatabaseObject(String catalogname, String schemaName, String objectName, Class<? extends DatabaseObject> objectType) {
+        return catalogname+"."+schemaName+"."+objectName;
+    }
+
     public void executeStatements(Change change, DatabaseChangeLog changeLog, List<SqlVisitor> sqlVisitors) throws LiquibaseException, UnsupportedChangeException {
         ;
     }
@@ -528,14 +532,6 @@ public class MockDatabase implements Database {
 
     public String correctIndexName(String indexName) {
         return indexName;
-    }
-
-    public String escapeSchemaName(String schemaName) {
-        return schemaName;
-    }
-
-    public String escapeCatalogName(String name) {
-        return name;
     }
 
     public String getAssumedSchemaName(String catalogName, String schemaName) {

@@ -148,13 +148,11 @@ public interface Database extends DatabaseObject, PrioritizedService {
 
     boolean isSystemTable(Schema schema, String tableName);
 
+    boolean isSystemView(Schema schema, String name);
+
     boolean isLiquibaseTable(Schema schema, String tableName);
 
-    boolean supportsTablespaces();
-
     String getViewDefinition(Schema schema, String name) throws DatabaseException;
-
-    boolean isSystemView(Schema schema, String name);
 
     String getDateLiteral(java.sql.Date date);
 
@@ -164,20 +162,13 @@ public interface Database extends DatabaseObject, PrioritizedService {
 
     String getDateLiteral(Date defaultDateValue);
 
-    /**
-     * Escapes the table name in a database-dependent manner so reserved words can be used as a table name (i.e. "order").
-     * Currently only escapes MS-SQL because other DBMSs store table names case-sensitively when escaping is used which
-     * could confuse end-users.  Pass null to schemaName to use the default schema
-     */
+    String escapeDatabaseObject(String catalogname, String schemaName, String objectName, Class<? extends DatabaseObject> objectType);
+
     String escapeTableName(String catalogName, String schemaName, String tableName);
 
     String escapeIndexName(String catalogName, String schemaName, String indexName);
 
     String escapeDatabaseObject(String objectName);
-
-    String escapeSchemaName(String schemaName);
-
-    String escapeCatalogName(String name);
 
     /**
      * Escapes a single column name in a database-dependent manner so reserved words can be used as a column
@@ -201,9 +192,11 @@ public interface Database extends DatabaseObject, PrioritizedService {
 
 //    Set<UniqueConstraint> findUniqueConstraints(String schema) throws DatabaseException;
 
-    boolean supportsSchemas();
+    boolean supportsTablespaces();
 
     boolean supportsCatalogs();
+
+    boolean supportsSchemas();
 
     String generatePrimaryKeyName(String tableName);
 
