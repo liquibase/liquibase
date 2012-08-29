@@ -39,7 +39,7 @@ public class CreateViewChange extends AbstractChange {
 		this.schemaName = schemaName;
 	}
 
-    @ChangeProperty(requiredForDatabase = "all")
+    @DatabaseChangeProperty(requiredForDatabase = "all")
 	public String getViewName() {
 		return viewName;
 	}
@@ -48,7 +48,7 @@ public class CreateViewChange extends AbstractChange {
 		this.viewName = viewName;
 	}
 
-    @ChangeProperty(requiredForDatabase = "all")
+    @DatabaseChangeProperty(requiredForDatabase = "all")
 	public String getSelectQuery() {
 		return selectQuery;
 	}

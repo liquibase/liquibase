@@ -23,7 +23,7 @@ public class UpdateDataChange extends AbstractChange implements ChangeWithColumn
         columns = new ArrayList<ColumnConfig>();
     }
 
-    @ChangeProperty(mustApplyTo ="column.relation.catalog")
+    @DatabaseChangeProperty(mustApplyTo ="column.relation.catalog")
     public String getCatalogName() {
         return catalogName;
     }
@@ -32,7 +32,7 @@ public class UpdateDataChange extends AbstractChange implements ChangeWithColumn
         this.catalogName = catalogName;
     }
 
-    @ChangeProperty(mustApplyTo ="column.relation.schema")
+    @DatabaseChangeProperty(mustApplyTo ="column.relation.schema")
     public String getSchemaName() {
         return schemaName;
     }
@@ -41,7 +41,7 @@ public class UpdateDataChange extends AbstractChange implements ChangeWithColumn
         this.schemaName = schemaName;
     }
 
-    @ChangeProperty(requiredForDatabase = "all", mustApplyTo = "table")
+    @DatabaseChangeProperty(requiredForDatabase = "all", mustApplyTo = "table")
     public String getTableName() {
         return tableName;
     }
@@ -50,7 +50,7 @@ public class UpdateDataChange extends AbstractChange implements ChangeWithColumn
         this.tableName = tableName;
     }
 
-    @ChangeProperty(requiredForDatabase = "all")
+    @DatabaseChangeProperty(requiredForDatabase = "all")
     public List<ColumnConfig> getColumns() {
         return columns;
     }

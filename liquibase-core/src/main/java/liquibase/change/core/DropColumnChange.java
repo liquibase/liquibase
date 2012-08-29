@@ -24,7 +24,7 @@ public class DropColumnChange extends AbstractChange {
     private String tableName;
     private String columnName;
 
-    @ChangeProperty(requiredForDatabase = "all",mustApplyTo = "column")
+    @DatabaseChangeProperty(requiredForDatabase = "all",mustApplyTo = "column")
     public String getColumnName() {
         return columnName;
     }
@@ -34,7 +34,7 @@ public class DropColumnChange extends AbstractChange {
     }
 
 
-    @ChangeProperty(mustApplyTo ="column.relation.schema.catalog")
+    @DatabaseChangeProperty(mustApplyTo ="column.relation.schema.catalog")
     public String getCatalogName() {
         return catalogName;
     }
@@ -43,7 +43,7 @@ public class DropColumnChange extends AbstractChange {
         this.catalogName = catalogName;
     }
 
-    @ChangeProperty(mustApplyTo ="column.relation.schema")
+    @DatabaseChangeProperty(mustApplyTo ="column.relation.schema")
     public String getSchemaName() {
         return schemaName;
     }
@@ -52,7 +52,7 @@ public class DropColumnChange extends AbstractChange {
         this.schemaName = schemaName;
     }
 
-    @ChangeProperty(requiredForDatabase = "all", mustApplyTo = "column.relation")
+    @DatabaseChangeProperty(requiredForDatabase = "all", mustApplyTo = "column.relation")
     public String getTableName() {
         return tableName;
     }

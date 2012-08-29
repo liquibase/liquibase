@@ -29,16 +29,16 @@ import java.lang.reflect.Method;
  */
 public abstract class AbstractChange implements Change {
 
-    @ChangeProperty(includeInSerialization = false, includeInMetaData = false)
+    @DatabaseChangeProperty(includeInSerialization = false, includeInMetaData = false)
     private ChangeMetaData changeMetaData;
 
-    @ChangeProperty(includeInSerialization = false, includeInMetaData = false)
+    @DatabaseChangeProperty(includeInSerialization = false, includeInMetaData = false)
     private ResourceAccessor resourceAccessor;
 
-    @ChangeProperty(includeInSerialization = false, includeInMetaData = false)
+    @DatabaseChangeProperty(includeInSerialization = false, includeInMetaData = false)
     private ChangeSet changeSet;
 
-    @ChangeProperty(includeInSerialization = false)
+    @DatabaseChangeProperty(includeInSerialization = false)
     private ChangeLogParameters changeLogParameters;
 
 //    /**
@@ -72,7 +72,7 @@ public abstract class AbstractChange implements Change {
                 Method readMethod = property.getReadMethod();
                 Method writeMethod = property.getWriteMethod();
                 if (readMethod != null && writeMethod != null) {
-                    ChangeProperty annotation = readMethod.getAnnotation(ChangeProperty.class);
+                    DatabaseChangeProperty annotation = readMethod.getAnnotation(DatabaseChangeProperty.class);
                     if (annotation == null || annotation.includeInMetaData()) {
                         ChangeParameterMetaData param = createChangeParameterMetadata(property.getDisplayName());
                         params.add(param);
@@ -105,7 +105,7 @@ public abstract class AbstractChange implements Change {
         }
 
         String type = property.getPropertyType().getSimpleName();
-        ChangeProperty changePropertyAnnotation = property.getReadMethod().getAnnotation(ChangeProperty.class);
+        DatabaseChangeProperty changePropertyAnnotation = property.getReadMethod().getAnnotation(DatabaseChangeProperty.class);
 
         String[] requiredForDatabase;
         String mustApplyTo = null;
@@ -123,7 +123,7 @@ public abstract class AbstractChange implements Change {
         return changeMetaData;
     }
 
-    @ChangeProperty(includeInMetaData = false)
+    @DatabaseChangeProperty(includeInMetaData = false)
     public ChangeSet getChangeSet() {
         return changeSet;
     }
@@ -265,7 +265,7 @@ public abstract class AbstractChange implements Change {
      *
      * @return The file opener
      */
-    @ChangeProperty(includeInMetaData = false)
+    @DatabaseChangeProperty(includeInMetaData = false)
     public ResourceAccessor getResourceAccessor() {
         return resourceAccessor;
     }

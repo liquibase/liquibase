@@ -45,7 +45,7 @@ public class MergeColumnChange extends AbstractChange {
         this.schemaName = schemaName;
     }
 
-    @ChangeProperty(requiredForDatabase = "all")
+    @DatabaseChangeProperty(requiredForDatabase = "all")
     public String getTableName() {
         return tableName;
     }
@@ -54,7 +54,7 @@ public class MergeColumnChange extends AbstractChange {
         this.tableName = tableName;
     }
 
-    @ChangeProperty(requiredForDatabase = "all")
+    @DatabaseChangeProperty(requiredForDatabase = "all")
     public String getColumn1Name() {
         return column1Name;
     }
@@ -71,7 +71,7 @@ public class MergeColumnChange extends AbstractChange {
         this.joinString = joinString;
     }
 
-    @ChangeProperty(requiredForDatabase = "all")
+    @DatabaseChangeProperty(requiredForDatabase = "all")
     public String getColumn2Name() {
         return column2Name;
     }
@@ -80,7 +80,7 @@ public class MergeColumnChange extends AbstractChange {
         this.column2Name = column2Name;
     }
 
-    @ChangeProperty(requiredForDatabase = "all")
+    @DatabaseChangeProperty(requiredForDatabase = "all")
     public String getFinalColumnName() {
         return finalColumnName;
     }
@@ -89,7 +89,7 @@ public class MergeColumnChange extends AbstractChange {
         this.finalColumnName = finalColumnName;
     }
 
-    @ChangeProperty(requiredForDatabase = "all")
+    @DatabaseChangeProperty(requiredForDatabase = "all")
     public String getFinalColumnType() {
         return finalColumnType;
     }

@@ -15,7 +15,7 @@ public class DeleteDataChange extends AbstractChange {
     @TextNode(nodeName="where")
     private String whereClause;
 
-    @ChangeProperty(mustApplyTo ="table.catalog")
+    @DatabaseChangeProperty(mustApplyTo ="table.catalog")
     public String getCatalogName() {
         return catalogName;
     }
@@ -24,7 +24,7 @@ public class DeleteDataChange extends AbstractChange {
         this.catalogName = catalogName;
     }
 
-    @ChangeProperty(mustApplyTo ="table.schema")
+    @DatabaseChangeProperty(mustApplyTo ="table.schema")
     public String getSchemaName() {
         return schemaName;
     }
@@ -33,7 +33,7 @@ public class DeleteDataChange extends AbstractChange {
         this.schemaName = schemaName;
     }
 
-    @ChangeProperty(requiredForDatabase = "all", mustApplyTo = "table")
+    @DatabaseChangeProperty(requiredForDatabase = "all", mustApplyTo = "table")
     public String getTableName() {
         return tableName;
     }

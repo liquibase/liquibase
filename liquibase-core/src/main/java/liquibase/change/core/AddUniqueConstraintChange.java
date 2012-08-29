@@ -28,7 +28,7 @@ public class AddUniqueConstraintChange extends AbstractChange {
     private Boolean initiallyDeferred;
     private Boolean disabled;
 
-    @ChangeProperty(mustApplyTo ="column.relation.catalog")
+    @DatabaseChangeProperty(mustApplyTo ="column.relation.catalog")
     public String getCatalogName() {
         return catalogName;
     }
@@ -37,7 +37,7 @@ public class AddUniqueConstraintChange extends AbstractChange {
         this.catalogName = catalogName;
     }
 
-    @ChangeProperty(mustApplyTo ="column.relation.schema")
+    @DatabaseChangeProperty(mustApplyTo ="column.relation.schema")
     public String getSchemaName() {
         return schemaName;
     }
@@ -46,7 +46,7 @@ public class AddUniqueConstraintChange extends AbstractChange {
         this.schemaName = schemaName;
     }
 
-    @ChangeProperty(requiredForDatabase = "all",mustApplyTo = "column.relation")
+    @DatabaseChangeProperty(requiredForDatabase = "all",mustApplyTo = "column.relation")
     public String getTableName() {
         return tableName;
     }
@@ -55,7 +55,7 @@ public class AddUniqueConstraintChange extends AbstractChange {
         this.tableName = tableName;
     }
 
-    @ChangeProperty(requiredForDatabase = "all", mustApplyTo = "column")
+    @DatabaseChangeProperty(requiredForDatabase = "all", mustApplyTo = "column")
     public String getColumnNames() {
         return columnNames;
     }
@@ -64,7 +64,7 @@ public class AddUniqueConstraintChange extends AbstractChange {
         this.columnNames = columnNames;
     }
 
-    @ChangeProperty(requiredForDatabase = "all")
+    @DatabaseChangeProperty(requiredForDatabase = "all")
     public String getConstraintName() {
         return constraintName;
     }

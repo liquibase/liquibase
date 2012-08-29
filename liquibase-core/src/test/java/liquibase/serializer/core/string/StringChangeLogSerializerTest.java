@@ -18,11 +18,8 @@ import java.util.Random;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import liquibase.change.Change;
-import liquibase.change.ChangeFactory;
-import liquibase.change.ChangeProperty;
-import liquibase.change.ColumnConfig;
-import liquibase.change.ConstraintsConfig;
+import liquibase.change.*;
+import liquibase.change.DatabaseChangeProperty;
 import liquibase.change.core.AddColumnChange;
 import liquibase.change.core.AddForeignKeyConstraintChange;
 import liquibase.change.core.AddUniqueConstraintChange;
@@ -266,7 +263,7 @@ public class StringChangeLogSerializerTest {
         }
         
         for (Field field : clazz.getDeclaredFields()) {
-            if (field.getAnnotation(ChangeProperty.class) != null && !field.getAnnotation(ChangeProperty.class).includeInSerialization()) {
+            if (field.getAnnotation(DatabaseChangeProperty.class) != null && !field.getAnnotation(DatabaseChangeProperty.class).includeInSerialization()) {
                 continue;
             }
             field.setAccessible(true);

@@ -10,7 +10,7 @@ public class TagDatabaseChange extends AbstractChange {
 
     private String tag;
 
-    @ChangeProperty(requiredForDatabase = "all")
+    @DatabaseChangeProperty(requiredForDatabase = "all")
     public String getTag() {
         return tag;
     }

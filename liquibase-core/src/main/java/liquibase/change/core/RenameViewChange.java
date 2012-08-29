@@ -15,7 +15,7 @@ public class RenameViewChange extends AbstractChange {
     private String oldViewName;
     private String newViewName;
 
-    @ChangeProperty(mustApplyTo ="view.catalog")
+    @DatabaseChangeProperty(mustApplyTo ="view.catalog")
     public String getCatalogName() {
         return catalogName;
     }
@@ -24,7 +24,7 @@ public class RenameViewChange extends AbstractChange {
         this.catalogName = catalogName;
     }
 
-    @ChangeProperty(mustApplyTo ="view.schema")
+    @DatabaseChangeProperty(mustApplyTo ="view.schema")
     public String getSchemaName() {
         return schemaName;
     }
@@ -33,7 +33,7 @@ public class RenameViewChange extends AbstractChange {
         this.schemaName = schemaName;
     }
 
-    @ChangeProperty(requiredForDatabase = "all", mustApplyTo = "view")
+    @DatabaseChangeProperty(requiredForDatabase = "all", mustApplyTo = "view")
     public String getOldViewName() {
         return oldViewName;
     }
@@ -42,7 +42,7 @@ public class RenameViewChange extends AbstractChange {
         this.oldViewName = oldViewName;
     }
 
-    @ChangeProperty(requiredForDatabase = "all")
+    @DatabaseChangeProperty(requiredForDatabase = "all")
     public String getNewViewName() {
         return newViewName;
     }

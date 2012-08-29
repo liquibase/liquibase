@@ -3,7 +3,7 @@ package liquibase.change.core;
 import liquibase.change.AbstractChange;
 import liquibase.change.DatabaseChange;
 import liquibase.change.ChangeMetaData;
-import liquibase.change.ChangeProperty;
+import liquibase.change.DatabaseChangeProperty;
 import liquibase.database.Database;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.DropIndexStatement;
@@ -18,11 +18,11 @@ public class DropIndexChange extends AbstractChange {
     private String indexName;
     private String tableName;
 
-    @ChangeProperty(includeInSerialization = false)
+    @DatabaseChangeProperty(includeInSerialization = false)
     private String associatedWith;
     private String catalogName;
 
-    @ChangeProperty(mustApplyTo ="index.schema")
+    @DatabaseChangeProperty(mustApplyTo ="index.schema")
     public String getSchemaName() {
         return schemaName;
     }
@@ -31,7 +31,7 @@ public class DropIndexChange extends AbstractChange {
         this.schemaName = schemaName;
     }
 
-    @ChangeProperty(requiredForDatabase = "all", mustApplyTo = "index")
+    @DatabaseChangeProperty(requiredForDatabase = "all", mustApplyTo = "index")
     public String getIndexName() {
         return indexName;
     }
@@ -40,7 +40,7 @@ public class DropIndexChange extends AbstractChange {
         this.indexName = indexName;
     }
 
-    @ChangeProperty(requiredForDatabase = "all", mustApplyTo = "index.table")
+    @DatabaseChangeProperty(requiredForDatabase = "all", mustApplyTo = "index.table")
     public String getTableName() {
         return tableName;
     }

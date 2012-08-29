@@ -3,7 +3,7 @@ package liquibase.change.core;
 import liquibase.change.AbstractChange;
 import liquibase.change.DatabaseChange;
 import liquibase.change.ChangeMetaData;
-import liquibase.change.ChangeProperty;
+import liquibase.change.DatabaseChangeProperty;
 import liquibase.database.Database;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.DropViewStatement;
@@ -18,7 +18,7 @@ public class DropViewChange extends AbstractChange {
     private String viewName;
 
 
-    @ChangeProperty(mustApplyTo ="view.catalog")
+    @DatabaseChangeProperty(mustApplyTo ="view.catalog")
     public String getCatalogName() {
         return catalogName;
     }
@@ -27,7 +27,7 @@ public class DropViewChange extends AbstractChange {
         this.catalogName = catalogName;
     }
 
-    @ChangeProperty(mustApplyTo ="view.schema")
+    @DatabaseChangeProperty(mustApplyTo ="view.schema")
     public String getSchemaName() {
         return schemaName;
     }
@@ -36,7 +36,7 @@ public class DropViewChange extends AbstractChange {
         this.schemaName = schemaName;
     }
 
-    @ChangeProperty(requiredForDatabase = "all", mustApplyTo = "view")
+    @DatabaseChangeProperty(requiredForDatabase = "all", mustApplyTo = "view")
     public String getViewName() {
         return viewName;
     }

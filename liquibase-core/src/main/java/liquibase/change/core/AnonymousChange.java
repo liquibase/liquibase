@@ -3,7 +3,7 @@ package liquibase.change.core;
 import liquibase.change.AbstractChange;
 import liquibase.change.DatabaseChange;
 import liquibase.change.ChangeMetaData;
-import liquibase.change.ChangeProperty;
+import liquibase.change.DatabaseChangeProperty;
 import liquibase.database.Database;
 import liquibase.statement.SqlStatement;
 
@@ -14,7 +14,7 @@ import java.util.List;
 @DatabaseChange(name="anonymous", description = "Anonymous change", priority = ChangeMetaData.PRIORITY_DEFAULT)
 public class AnonymousChange extends AbstractChange {
 
-    @ChangeProperty(includeInSerialization = false)
+    @DatabaseChangeProperty(includeInSerialization = false)
     private List<SqlStatement> statements = new ArrayList<SqlStatement>();
 
     public AnonymousChange() {

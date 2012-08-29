@@ -26,7 +26,7 @@ public class DropUniqueConstraintChange extends AbstractChange {
      */
     private String uniqueColumns;
 
-    @ChangeProperty(mustApplyTo ="uniqueConstraint.table.catalog")
+    @DatabaseChangeProperty(mustApplyTo ="uniqueConstraint.table.catalog")
     public String getCatalogName() {
         return catalogName;
     }
@@ -35,7 +35,7 @@ public class DropUniqueConstraintChange extends AbstractChange {
         this.catalogName = catalogName;
     }
 
-    @ChangeProperty(mustApplyTo ="uniqueConstraint.table.schema")
+    @DatabaseChangeProperty(mustApplyTo ="uniqueConstraint.table.schema")
     public String getSchemaName() {
         return schemaName;
     }
@@ -44,7 +44,7 @@ public class DropUniqueConstraintChange extends AbstractChange {
         this.schemaName = schemaName;
     }
 
-    @ChangeProperty(requiredForDatabase = "all", mustApplyTo = "uniqueConstraint.table")
+    @DatabaseChangeProperty(requiredForDatabase = "all", mustApplyTo = "uniqueConstraint.table")
     public String getTableName() {
         return tableName;
     }
@@ -53,7 +53,7 @@ public class DropUniqueConstraintChange extends AbstractChange {
         this.tableName = tableName;
     }
 
-    @ChangeProperty(requiredForDatabase = "all", mustApplyTo = "uniqueConstraint")
+    @DatabaseChangeProperty(requiredForDatabase = "all", mustApplyTo = "uniqueConstraint")
     public String getConstraintName() {
         return constraintName;
     }

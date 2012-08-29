@@ -3,7 +3,7 @@ package liquibase.change.core;
 import liquibase.change.AbstractChange;
 import liquibase.change.DatabaseChange;
 import liquibase.change.ChangeMetaData;
-import liquibase.change.ChangeProperty;
+import liquibase.change.DatabaseChangeProperty;
 import liquibase.database.Database;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.DropSequenceStatement;
@@ -26,7 +26,7 @@ public class DropSequenceChange extends AbstractChange {
         this.catalogName = catalogName;
     }
 
-    @ChangeProperty(mustApplyTo ="sequence.schema")
+    @DatabaseChangeProperty(mustApplyTo ="sequence.schema")
     public String getSchemaName() {
         return schemaName;
     }
@@ -35,7 +35,7 @@ public class DropSequenceChange extends AbstractChange {
         this.schemaName = schemaName;
     }
 
-    @ChangeProperty(requiredForDatabase = "all", mustApplyTo = "sequence")
+    @DatabaseChangeProperty(requiredForDatabase = "all", mustApplyTo = "sequence")
     public String getSequenceName() {
         return sequenceName;
     }

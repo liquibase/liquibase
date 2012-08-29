@@ -3,7 +3,7 @@ package liquibase.change.core;
 import liquibase.change.AbstractChange;
 import liquibase.change.DatabaseChange;
 import liquibase.change.ChangeMetaData;
-import liquibase.change.ChangeProperty;
+import liquibase.change.DatabaseChangeProperty;
 import liquibase.database.Database;
 import liquibase.database.structure.Table;
 import liquibase.exception.DatabaseException;
@@ -27,10 +27,10 @@ public class DropAllForeignKeyConstraintsChange extends AbstractChange {
     private String baseTableSchemaName;
     private String baseTableName;
 
-    @ChangeProperty(includeInSerialization = false)
+    @DatabaseChangeProperty(includeInSerialization = false)
     private List<DropForeignKeyConstraintChange> childDropChanges;
 
-    @ChangeProperty(mustApplyTo ="table.catalog")
+    @DatabaseChangeProperty(mustApplyTo ="table.catalog")
     public String getBaseTableCatalogName() {
         return baseTableCatalogName;
     }
@@ -39,7 +39,7 @@ public class DropAllForeignKeyConstraintsChange extends AbstractChange {
         this.baseTableCatalogName = baseTableCatalogName;
     }
 
-    @ChangeProperty(mustApplyTo ="table.schema")
+    @DatabaseChangeProperty(mustApplyTo ="table.schema")
     public String getBaseTableSchemaName() {
         return baseTableSchemaName;
     }
@@ -48,7 +48,7 @@ public class DropAllForeignKeyConstraintsChange extends AbstractChange {
         this.baseTableSchemaName = baseTableSchemaName;
     }
 
-    @ChangeProperty(requiredForDatabase = "all", mustApplyTo = "table")
+    @DatabaseChangeProperty(requiredForDatabase = "all", mustApplyTo = "table")
     public String getBaseTableName() {
         return baseTableName;
     }

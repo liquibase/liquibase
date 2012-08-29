@@ -1,7 +1,7 @@
 package liquibase.serializer.core.string;
 
 import liquibase.change.Change;
-import liquibase.change.ChangeProperty;
+import liquibase.change.DatabaseChangeProperty;
 import liquibase.change.ColumnConfig;
 import liquibase.change.ConstraintsConfig;
 import liquibase.change.custom.CustomChange;
@@ -13,7 +13,6 @@ import liquibase.sql.visitor.SqlVisitor;
 import liquibase.util.StringUtils;
 
 import java.io.File;
-import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.List;
@@ -53,7 +52,7 @@ public class StringChangeLogSerializer implements ChangeLogSerializer {
             while (!classToCheck.equals(Object.class)) {
                 for (Field field : classToCheck.getDeclaredFields()) {
                     field.setAccessible(true);
-                    ChangeProperty changePropertyAnnotation = field.getAnnotation(ChangeProperty.class);
+                    DatabaseChangeProperty changePropertyAnnotation = field.getAnnotation(DatabaseChangeProperty.class);
                     if (changePropertyAnnotation != null && !changePropertyAnnotation.includeInSerialization()) {
                         continue;
                     }

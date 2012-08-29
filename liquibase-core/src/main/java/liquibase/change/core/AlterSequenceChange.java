@@ -3,7 +3,7 @@ package liquibase.change.core;
 import liquibase.change.AbstractChange;
 import liquibase.change.DatabaseChange;
 import liquibase.change.ChangeMetaData;
-import liquibase.change.ChangeProperty;
+import liquibase.change.DatabaseChangeProperty;
 import liquibase.database.Database;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.AlterSequenceStatement;
@@ -26,7 +26,7 @@ public class AlterSequenceChange extends AbstractChange {
     // StartValue is not allowed since we cannot alter the starting sequence number
 
 
-    @ChangeProperty(mustApplyTo ="sequence.catalog")
+    @DatabaseChangeProperty(mustApplyTo ="sequence.catalog")
     public String getCatalogName() {
         return catalogName;
     }
@@ -35,7 +35,7 @@ public class AlterSequenceChange extends AbstractChange {
         this.catalogName = catalogName;
     }
 
-    @ChangeProperty(mustApplyTo ="sequence.schema")
+    @DatabaseChangeProperty(mustApplyTo ="sequence.schema")
     public String getSchemaName() {
         return schemaName;
     }
@@ -44,7 +44,7 @@ public class AlterSequenceChange extends AbstractChange {
         this.schemaName = schemaName;
     }
 
-    @ChangeProperty(requiredForDatabase = "all", mustApplyTo = "sequence")
+    @DatabaseChangeProperty(requiredForDatabase = "all", mustApplyTo = "sequence")
     public String getSequenceName() {
         return sequenceName;
     }

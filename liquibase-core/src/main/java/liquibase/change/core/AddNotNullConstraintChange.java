@@ -27,7 +27,7 @@ public class AddNotNullConstraintChange extends AbstractChange {
     private String defaultNullValue;
     private String columnDataType;
 
-    @ChangeProperty(mustApplyTo ="column.relation.catalog")
+    @DatabaseChangeProperty(mustApplyTo ="column.relation.catalog")
     public String getCatalogName() {
         return catalogName;
     }
@@ -36,7 +36,7 @@ public class AddNotNullConstraintChange extends AbstractChange {
         this.catalogName = catalogName;
     }
 
-    @ChangeProperty(mustApplyTo ="column.relation.schema")
+    @DatabaseChangeProperty(mustApplyTo ="column.relation.schema")
     public String getSchemaName() {
         return schemaName;
     }
@@ -45,7 +45,7 @@ public class AddNotNullConstraintChange extends AbstractChange {
         this.schemaName = schemaName;
     }
 
-    @ChangeProperty(requiredForDatabase = "all", mustApplyTo = "column.relation")
+    @DatabaseChangeProperty(requiredForDatabase = "all", mustApplyTo = "column.relation")
     public String getTableName() {
         return tableName;
     }
@@ -54,7 +54,7 @@ public class AddNotNullConstraintChange extends AbstractChange {
         this.tableName = tableName;
     }
 
-    @ChangeProperty(requiredForDatabase = "all", mustApplyTo = "column.relation.column")
+    @DatabaseChangeProperty(requiredForDatabase = "all", mustApplyTo = "column.relation.column")
     public String getColumnName() {
         return columnName;
     }

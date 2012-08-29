@@ -23,7 +23,7 @@ public class DropNotNullConstraintChange extends AbstractChange {
     private String columnName;
     private String columnDataType;
 
-    @ChangeProperty(mustApplyTo ="notNullConstraint.table.catalog")
+    @DatabaseChangeProperty(mustApplyTo ="notNullConstraint.table.catalog")
     public String getCatalogName() {
         return catalogName;
     }
@@ -32,7 +32,7 @@ public class DropNotNullConstraintChange extends AbstractChange {
         this.catalogName = catalogName;
     }
 
-    @ChangeProperty(mustApplyTo ="notNullConstraint.table.schema")
+    @DatabaseChangeProperty(mustApplyTo ="notNullConstraint.table.schema")
     public String getSchemaName() {
         return schemaName;
     }
@@ -41,7 +41,7 @@ public class DropNotNullConstraintChange extends AbstractChange {
         this.schemaName = schemaName;
     }
 
-    @ChangeProperty(requiredForDatabase = "all", mustApplyTo = "notNullConstraint.table")
+    @DatabaseChangeProperty(requiredForDatabase = "all", mustApplyTo = "notNullConstraint.table")
     public String getTableName() {
         return tableName;
     }
@@ -50,7 +50,7 @@ public class DropNotNullConstraintChange extends AbstractChange {
         this.tableName = tableName;
     }
 
-    @ChangeProperty(requiredForDatabase = "all", mustApplyTo = "notNullConstraint.column")
+    @DatabaseChangeProperty(requiredForDatabase = "all", mustApplyTo = "notNullConstraint.column")
     public String getColumnName() {
         return columnName;
     }

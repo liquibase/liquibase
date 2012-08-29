@@ -22,7 +22,7 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
     private List<ColumnConfig> columns;
 	// Contain associations of index
 	// for example: foreignKey, primaryKey or uniqueConstraint
-    @ChangeProperty(includeInSerialization = false)
+    @DatabaseChangeProperty(includeInSerialization = false)
 	private String associatedWith;
     private String catalogName;
 
@@ -31,7 +31,7 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
         columns = new ArrayList<ColumnConfig>();
     }
 
-    @ChangeProperty(requiredForDatabase = "all", mustApplyTo = "index")
+    @DatabaseChangeProperty(requiredForDatabase = "all", mustApplyTo = "index")
     public String getIndexName() {
         return indexName;
     }
@@ -42,7 +42,7 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
 
 
 
-    @ChangeProperty(mustApplyTo ="index.schema")
+    @DatabaseChangeProperty(mustApplyTo ="index.schema")
     public String getSchemaName() {
         return schemaName;
     }
@@ -51,7 +51,7 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
         this.schemaName = schemaName;
     }
 
-    @ChangeProperty(requiredForDatabase = "all", mustApplyTo = "index.table")
+    @DatabaseChangeProperty(requiredForDatabase = "all", mustApplyTo = "index.table")
     public String getTableName() {
         return tableName;
     }
@@ -60,7 +60,7 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
         this.tableName = tableName;
     }
 
-    @ChangeProperty(requiredForDatabase = "all", mustApplyTo = "index.column")
+    @DatabaseChangeProperty(requiredForDatabase = "all", mustApplyTo = "index.column")
     public List<ColumnConfig> getColumns() {
         return columns;
     }

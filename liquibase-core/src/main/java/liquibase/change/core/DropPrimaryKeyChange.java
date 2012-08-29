@@ -21,7 +21,7 @@ public class DropPrimaryKeyChange extends AbstractChange {
     private String tableName;
     private String constraintName;
 
-    @ChangeProperty(mustApplyTo ="primaryKey.catalog")
+    @DatabaseChangeProperty(mustApplyTo ="primaryKey.catalog")
     public String getCatalogName() {
         return catalogName;
     }
@@ -30,7 +30,7 @@ public class DropPrimaryKeyChange extends AbstractChange {
         this.catalogName = catalogName;
     }
 
-    @ChangeProperty(mustApplyTo ="primaryKey.schema")
+    @DatabaseChangeProperty(mustApplyTo ="primaryKey.schema")
     public String getSchemaName() {
         return schemaName;
     }
@@ -39,7 +39,7 @@ public class DropPrimaryKeyChange extends AbstractChange {
         this.schemaName = schemaName;
     }
 
-    @ChangeProperty(requiredForDatabase = "all", mustApplyTo = "primaryKey.table")
+    @DatabaseChangeProperty(requiredForDatabase = "all", mustApplyTo = "primaryKey.table")
     public String getTableName() {
         return tableName;
     }
@@ -48,7 +48,7 @@ public class DropPrimaryKeyChange extends AbstractChange {
         this.tableName = tableName;
     }
 
-    @ChangeProperty(requiredForDatabase = "all", mustApplyTo = "primaryKey")
+    @DatabaseChangeProperty(requiredForDatabase = "all", mustApplyTo = "primaryKey")
     public String getConstraintName() {
         return constraintName;
     }

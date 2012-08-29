@@ -1,10 +1,7 @@
 package liquibase.serializer.core.xml;
 
-import liquibase.change.Change;
-import liquibase.change.ChangeProperty;
-import liquibase.change.ColumnConfig;
-import liquibase.change.ConstraintsConfig;
-import liquibase.change.TextNode;
+import liquibase.change.*;
+import liquibase.change.DatabaseChangeProperty;
 import liquibase.change.custom.CustomChangeWrapper;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
@@ -147,7 +144,7 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
 
             for (Field field : allFields) {
                 field.setAccessible(true);
-                ChangeProperty changePropertyAnnotation = field.getAnnotation(ChangeProperty.class);
+                DatabaseChangeProperty changePropertyAnnotation = field.getAnnotation(DatabaseChangeProperty.class);
                 if (changePropertyAnnotation != null && !changePropertyAnnotation.includeInSerialization()) {
                     continue;
                 }
@@ -184,7 +181,7 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
 
             for (Field field : allFields) {
                 field.setAccessible(true);
-                ChangeProperty changePropertyAnnotation = field.getAnnotation(ChangeProperty.class);
+                DatabaseChangeProperty changePropertyAnnotation = field.getAnnotation(DatabaseChangeProperty.class);
                 if (changePropertyAnnotation != null && !changePropertyAnnotation.includeInSerialization()) {
                     continue;
                 }

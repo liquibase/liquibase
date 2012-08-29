@@ -42,7 +42,7 @@ public class AddLookupTableChange extends AbstractChange {
         this.existingTableCatalogName = existingTableCatalogName;
     }
 
-    @ChangeProperty(mustApplyTo ="column.relation.schema")
+    @DatabaseChangeProperty(mustApplyTo ="column.relation.schema")
     public String getExistingTableSchemaName() {
         return existingTableSchemaName;
     }
@@ -51,7 +51,7 @@ public class AddLookupTableChange extends AbstractChange {
         this.existingTableSchemaName = existingTableSchemaName;
     }
 
-    @ChangeProperty(requiredForDatabase = "all", mustApplyTo = "column.relation")
+    @DatabaseChangeProperty(requiredForDatabase = "all", mustApplyTo = "column.relation")
     public String getExistingTableName() {
         return existingTableName;
     }
@@ -60,7 +60,7 @@ public class AddLookupTableChange extends AbstractChange {
         this.existingTableName = existingTableName;
     }
 
-    @ChangeProperty(requiredForDatabase = "all", mustApplyTo = "column")
+    @DatabaseChangeProperty(requiredForDatabase = "all", mustApplyTo = "column")
     public String getExistingColumnName() {
         return existingColumnName;
     }
@@ -86,7 +86,7 @@ public class AddLookupTableChange extends AbstractChange {
         this.newTableSchemaName = newTableSchemaName;
     }
 
-    @ChangeProperty(requiredForDatabase = "all")
+    @DatabaseChangeProperty(requiredForDatabase = "all")
     public String getNewTableName() {
         return newTableName;
     }
@@ -95,7 +95,7 @@ public class AddLookupTableChange extends AbstractChange {
         this.newTableName = newTableName;
     }
 
-    @ChangeProperty(requiredForDatabase = "all")
+    @DatabaseChangeProperty(requiredForDatabase = "all")
     public String getNewColumnName() {
         return newColumnName;
     }
@@ -104,7 +104,7 @@ public class AddLookupTableChange extends AbstractChange {
         this.newColumnName = newColumnName;
     }
 
-    @ChangeProperty(requiredForDatabase = "all")
+    @DatabaseChangeProperty(requiredForDatabase = "all")
     public String getNewColumnDataType() {
         return newColumnDataType;
     }

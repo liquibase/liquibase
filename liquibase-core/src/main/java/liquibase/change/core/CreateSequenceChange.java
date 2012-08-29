@@ -39,7 +39,7 @@ public class CreateSequenceChange extends AbstractChange {
         this.schemaName = schemaName;
     }
 
-    @ChangeProperty(requiredForDatabase = "all")
+    @DatabaseChangeProperty(requiredForDatabase = "all")
     public String getSequenceName() {
         return sequenceName;
     }

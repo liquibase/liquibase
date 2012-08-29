@@ -5,7 +5,7 @@ import java.math.BigInteger;
 import liquibase.change.AbstractChange;
 import liquibase.change.DatabaseChange;
 import liquibase.change.ChangeMetaData;
-import liquibase.change.ChangeProperty;
+import liquibase.change.DatabaseChangeProperty;
 import liquibase.database.Database;
 import liquibase.database.core.PostgresDatabase;
 import liquibase.statement.DatabaseFunction;
@@ -31,7 +31,7 @@ public class AddAutoIncrementChange extends AbstractChange {
     private BigInteger startWith;
     private BigInteger incrementBy;
 
-    @ChangeProperty(mustApplyTo ="column.relation.catalog")
+    @DatabaseChangeProperty(mustApplyTo ="column.relation.catalog")
     public String getCatalogName() {
         return catalogName;
     }
@@ -40,7 +40,7 @@ public class AddAutoIncrementChange extends AbstractChange {
         this.catalogName = catalogName;
     }
 
-    @ChangeProperty(mustApplyTo ="column.relation.schema")
+    @DatabaseChangeProperty(mustApplyTo ="column.relation.schema")
     public String getSchemaName() {
         return schemaName;
     }
@@ -49,7 +49,7 @@ public class AddAutoIncrementChange extends AbstractChange {
         this.schemaName = schemaName;
     }
 
-    @ChangeProperty(requiredForDatabase = "all", mustApplyTo ="column.relation")
+    @DatabaseChangeProperty(requiredForDatabase = "all", mustApplyTo ="column.relation")
     public String getTableName() {
         return tableName;
     }
@@ -58,7 +58,7 @@ public class AddAutoIncrementChange extends AbstractChange {
         this.tableName = tableName;
     }
 
-    @ChangeProperty(requiredForDatabase = "all", mustApplyTo ="column")
+    @DatabaseChangeProperty(requiredForDatabase = "all", mustApplyTo ="column")
     public String getColumnName() {
         return columnName;
     }
