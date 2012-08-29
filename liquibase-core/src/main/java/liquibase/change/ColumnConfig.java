@@ -193,9 +193,6 @@ public class ColumnConfig {
         return this;
     }
 
-    // KEEP THIS A POJO!
-    // It's up to the user of this class to decide what value object to use
-    @Deprecated
     public Object getValueObject() {
         if (getValue() != null) {
             return getValue();

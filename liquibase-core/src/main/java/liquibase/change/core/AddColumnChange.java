@@ -89,34 +89,34 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
 
         List<SqlStatement> sql = new ArrayList<SqlStatement>();
 
-        for (ColumnConfig aColumn : getColumns()) {
+        for (ColumnConfig column : getColumns()) {
             Set<ColumnConstraint> constraints = new HashSet<ColumnConstraint>();
-            if (aColumn.getConstraints() != null) {
-                if (aColumn.getConstraints().isNullable() != null && !aColumn.getConstraints().isNullable()) {
+            if (column.getConstraints() != null) {
+                if (column.getConstraints().isNullable() != null && !column.getConstraints().isNullable()) {
                     constraints.add(new NotNullConstraint());
                 }
-                if (aColumn.getConstraints().isUnique() != null && aColumn.getConstraints().isUnique()) {
+                if (column.getConstraints().isUnique() != null && column.getConstraints().isUnique()) {
                 	constraints.add(new UniqueConstraint());
                 }
-                if (aColumn.getConstraints().isPrimaryKey() != null && aColumn.getConstraints().isPrimaryKey()) {
-                    constraints.add(new PrimaryKeyConstraint(aColumn.getConstraints().getPrimaryKeyName()));
+                if (column.getConstraints().isPrimaryKey() != null && column.getConstraints().isPrimaryKey()) {
+                    constraints.add(new PrimaryKeyConstraint(column.getConstraints().getPrimaryKeyName()));
                 }
 
-                if (aColumn.getConstraints().getReferences() != null) {
-                    constraints.add(new ForeignKeyConstraint(aColumn.getConstraints().getForeignKeyName(), aColumn.getConstraints().getReferences()));
+                if (column.getConstraints().getReferences() != null) {
+                    constraints.add(new ForeignKeyConstraint(column.getConstraints().getForeignKeyName(), column.getConstraints().getReferences()));
                 }
 
             }
 
-            if (aColumn.isAutoIncrement() != null && aColumn.isAutoIncrement()) {
-                constraints.add(new AutoIncrementConstraint(aColumn.getName(), aColumn.getStartWith(), aColumn.getIncrementBy()));
+            if (column.isAutoIncrement() != null && column.isAutoIncrement()) {
+                constraints.add(new AutoIncrementConstraint(column.getName(), column.getStartWith(), column.getIncrementBy()));
             }
 
             AddColumnStatement addColumnStatement = new AddColumnStatement(getCatalogName(), getSchemaName(),
                     getTableName(),
-                    aColumn.getName(),
-                    aColumn.getType(),
-                    aColumn.getDefaultValueObject(),
+                    column.getName(),
+                    column.getType(),
+                    column.getDefaultValueObject(),
                     constraints.toArray(new ColumnConstraint[constraints.size()]));
 
             sql.add(addColumnStatement);
@@ -125,9 +125,9 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
                 sql.add(new ReorganizeTableStatement(getCatalogName(), getSchemaName(), getTableName()));
             }            
 
-            if (aColumn.getValueObject() != null) {
+            if (column.getValueObject() != null) {
                 UpdateStatement updateStatement = new UpdateStatement(getCatalogName(), getSchemaName(), getTableName());
-                updateStatement.addNewColumnValue(aColumn.getName(), aColumn.getValueObject());
+                updateStatement.addNewColumnValue(column.getName(), column.getValueObject());
                 sql.add(updateStatement);
             }
         }
@@ -142,20 +142,7 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
           }
       }
 
-//        for (ColumnConfig aColumn : columns) {
-//            if (aColumn.getConstraints() != null) {
-//                if (aColumn.getConstraints().isPrimaryKey() != null && aColumn.getConstraints().isPrimaryKey()) {
-//                    AddPrimaryKeyChange change = new AddPrimaryKeyChange();
-//                    change.setSchemaName(schemaName);
-//                    change.setTableName(getTableName());
-//                    change.setColumnNames(aColumn.getName());
-//
-//                    sql.addAll(Arrays.asList(change.generateStatements(database)));
-//                }
-//            }
-//        }
-
-        return sql.toArray(new SqlStatement[sql.size()]);
+      return sql.toArray(new SqlStatement[sql.size()]);
     }
 
     @Override

@@ -120,11 +120,10 @@ public class AddDefaultValueChange extends AbstractChange {
         if (getDefaultValue() != null) {
             defaultValue = getDefaultValue();
         } else if (getDefaultValueBoolean() != null) {
-            defaultValue = Boolean.valueOf(getDefaultValueBoolean());
+            defaultValue = getDefaultValueBoolean();
         } else if (getDefaultValueNumeric() != null) {
             try {
-                defaultValue = NumberFormat.getInstance(Locale.US).
-                	parse(getDefaultValueNumeric()); 
+                defaultValue = NumberFormat.getInstance(Locale.US).parse(getDefaultValueNumeric());
             } catch (ParseException e) {
             	defaultValue = new DatabaseFunction(getDefaultValueNumeric());
             }
