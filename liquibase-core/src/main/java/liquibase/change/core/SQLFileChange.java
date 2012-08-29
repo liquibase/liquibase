@@ -145,7 +145,7 @@ public class SQLFileChange extends AbstractSQLChange {
      * @param file The file name to try and find.
      * @return True if the file was found and loaded, false otherwise.
      */
-    private boolean loadFromClasspath(String file) throws SetupException {
+    private boolean loadFromClasspath(String file) {
         if (relativeToChangelogFile != null && relativeToChangelogFile) {
             file = getChangeSet().getFilePath().replaceFirst("/[^/]*$", "") + "/" + file;
         }

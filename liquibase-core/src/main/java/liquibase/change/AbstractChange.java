@@ -132,7 +132,7 @@ public abstract class AbstractChange implements Change {
         this.changeSet = changeSet;
     }
 
-    public boolean requiresUpdatedDatabaseMetadata(Database database) {
+    public boolean queriesDatabase(Database database) {
         for (SqlStatement statement : generateStatements(database)) {
             if (SqlGeneratorFactory.getInstance().requiresCurrentDatabaseMetadata(statement, database)) {
                 return true;

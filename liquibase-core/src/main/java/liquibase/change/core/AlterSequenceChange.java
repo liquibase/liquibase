@@ -11,7 +11,7 @@ import liquibase.statement.core.AlterSequenceStatement;
 import java.math.BigInteger;
 
 /**
- * Modifies properties of an existing sequence.
+ * Modifies properties of an existing sequence. StartValue is not allowed since we cannot alter the starting sequence number
  */
 @DatabaseChange(name="alterSequence", description = "Alter Sequence", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "sequence")
 public class AlterSequenceChange extends AbstractChange {
@@ -23,8 +23,6 @@ public class AlterSequenceChange extends AbstractChange {
     private BigInteger maxValue;
     private BigInteger minValue;
     private Boolean ordered;
-    // StartValue is not allowed since we cannot alter the starting sequence number
-
 
     @DatabaseChangeProperty(mustApplyTo ="sequence.catalog")
     public String getCatalogName() {

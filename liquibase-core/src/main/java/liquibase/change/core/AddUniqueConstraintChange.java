@@ -136,47 +136,47 @@ public class AddUniqueConstraintChange extends AbstractChange {
         return new SqlStatement[] { statement };
     }
 
-    private SqlStatement[] generateStatementsForSQLiteDatabase(Database database) {
-
-    	// SQLite does not support this ALTER TABLE operation until now.
-		// For more information see: http://www.sqlite.org/omitted.html.
-		// This is a small work around...
-
-    	List<SqlStatement> statements = new ArrayList<SqlStatement>();
-
-		// define alter table logic
-		AlterTableVisitor rename_alter_visitor = new AlterTableVisitor() {
-			public ColumnConfig[] getColumnsToAdd() {
-				return new ColumnConfig[0];
-			}
-			public boolean copyThisColumn(ColumnConfig column) {
-				return true;
-			}
-			public boolean createThisColumn(ColumnConfig column) {
-				String[] split_columns = getColumnNames().split("[ ]*,[ ]*");
-				for (String split_column:split_columns) {
-					if (column.getName().equals(split_column)) {
-    					column.getConstraints().setUnique(true);
-    				}
-				}
-				return true;
-			}
-			public boolean createThisIndex(Index index) {
-				return true;
-			}
-		};
-
-    	try {
-    		// alter table
-			statements.addAll(SQLiteDatabase.getAlterTableStatements(
-					rename_alter_visitor,
-					database,getCatalogName(), getSchemaName(),getTableName()));
-    	} catch (Exception e) {
-			e.printStackTrace();
-		}
-
-    	return statements.toArray(new SqlStatement[statements.size()]);
-    }
+//    private SqlStatement[] generateStatementsForSQLiteDatabase(Database database) {
+//
+//    	// SQLite does not support this ALTER TABLE operation until now.
+//		// For more information see: http://www.sqlite.org/omitted.html.
+//		// This is a small work around...
+//
+//    	List<SqlStatement> statements = new ArrayList<SqlStatement>();
+//
+//		// define alter table logic
+//		AlterTableVisitor rename_alter_visitor = new AlterTableVisitor() {
+//			public ColumnConfig[] getColumnsToAdd() {
+//				return new ColumnConfig[0];
+//			}
+//			public boolean copyThisColumn(ColumnConfig column) {
+//				return true;
+//			}
+//			public boolean createThisColumn(ColumnConfig column) {
+//				String[] split_columns = getColumnNames().split("[ ]*,[ ]*");
+//				for (String split_column:split_columns) {
+//					if (column.getName().equals(split_column)) {
+//    					column.getConstraints().setUnique(true);
+//    				}
+//				}
+//				return true;
+//			}
+//			public boolean createThisIndex(Index index) {
+//				return true;
+//			}
+//		};
+//
+//    	try {
+//    		// alter table
+//			statements.addAll(SQLiteDatabase.getAlterTableStatements(
+//					rename_alter_visitor,
+//					database,getCatalogName(), getSchemaName(),getTableName()));
+//    	} catch (Exception e) {
+//			e.printStackTrace();
+//		}
+//
+//    	return statements.toArray(new SqlStatement[statements.size()]);
+//    }
 
     public String getConfirmationMessage() {
         return "Unique constraint added to "+getTableName()+"("+getColumnNames()+")";

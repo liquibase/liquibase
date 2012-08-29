@@ -97,7 +97,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
     }
 
     public List<LoadDataColumnConfig> getColumns() {
-        return (List<LoadDataColumnConfig>) columns;
+        return columns;
     }
 
     public SqlStatement[] generateStatements(Database database) {
@@ -111,7 +111,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
             }
 
             List<SqlStatement> statements = new ArrayList<SqlStatement>();
-            String[] line = null;
+            String[] line;
             int lineNumber = 0;
 
             while ((line = reader.readNext()) != null) {
@@ -214,9 +214,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
         	quotchar = this.quotchar.charAt(0);
         }
 
-        CSVReader reader = new CSVReader(streamReader, separator.charAt(0), quotchar );
-
-        return reader;
+        return new CSVReader(streamReader, separator.charAt(0), quotchar );
     }
 
     protected InsertStatement createStatement(String catalogName, String schemaName, String tableName){

@@ -29,6 +29,11 @@ public class MergeColumnChange extends AbstractChange {
     private String finalColumnName;
     private String finalColumnType;
 
+    @Override
+    public boolean supports(Database database) {
+        return supports(database) && !(database instanceof DerbyDatabase);
+    }
+
     public String getCatalogName() {
         return catalogName;
     }
@@ -99,7 +104,6 @@ public class MergeColumnChange extends AbstractChange {
     }
 
     public SqlStatement[] generateStatements(Database database) {
-
         List<SqlStatement> statements = new ArrayList<SqlStatement>();
 
         AddColumnChange addNewColumnChange = new AddColumnChange();
@@ -171,10 +175,6 @@ public class MergeColumnChange extends AbstractChange {
         }
         return statements.toArray(new SqlStatement[statements.size()]);
 
-    }
-
-    public SqlStatement[] generateStatements(@SuppressWarnings("unused") DerbyDatabase database) throws UnsupportedChangeException {
-        throw new UnsupportedChangeException("Derby does not currently support merging columns");
     }
 
     public String getConfirmationMessage() {

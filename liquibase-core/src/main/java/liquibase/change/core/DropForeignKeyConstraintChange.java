@@ -59,7 +59,7 @@ public class DropForeignKeyConstraintChange extends AbstractChange {
     	
     	if (database instanceof SQLiteDatabase) {
     		// return special statements for SQLite databases
-    		return generateStatementsForSQLiteDatabase(database);
+    		return generateStatementsForSQLiteDatabase();
     	} 
     	
         return new SqlStatement[]{
@@ -71,7 +71,7 @@ public class DropForeignKeyConstraintChange extends AbstractChange {
         };    	
     }
     
-    private SqlStatement[] generateStatementsForSQLiteDatabase(Database database) {
+    private SqlStatement[] generateStatementsForSQLiteDatabase() {
     	// SQLite does not support foreign keys until now.
 		// See for more information: http://www.sqlite.org/omitted.html
 		// Therefore this is an empty operation...

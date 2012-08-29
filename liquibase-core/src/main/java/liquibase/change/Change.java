@@ -119,7 +119,7 @@ public interface Change {
     /**
      * Does this change require access to the database metadata?  If true, the change cannot be used in an updateSql-style command.
      */
-    public boolean requiresUpdatedDatabaseMetadata(Database database);
+    public boolean queriesDatabase(Database database);
 
    /**
     * @param changeLogParameters

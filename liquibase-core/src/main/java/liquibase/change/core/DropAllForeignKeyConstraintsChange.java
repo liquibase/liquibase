@@ -119,7 +119,7 @@ public class DropAllForeignKeyConstraintsChange extends AbstractChange {
     }
 
     @Override
-    public boolean requiresUpdatedDatabaseMetadata(Database database) {
+    public boolean queriesDatabase(Database database) {
         return true;
     }
 }

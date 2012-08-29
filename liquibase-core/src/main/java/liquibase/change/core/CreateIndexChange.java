@@ -14,17 +14,18 @@ import java.util.List;
 @DatabaseChange(name="createIndex", description = "Create Index", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "index")
 public class CreateIndexChange extends AbstractChange implements ChangeWithColumns<ColumnConfig> {
 
+    private String catalogName;
     private String schemaName;
     private String tableName;
     private String indexName;
     private Boolean unique;
     private String tablespace;
     private List<ColumnConfig> columns;
+
 	// Contain associations of index
 	// for example: foreignKey, primaryKey or uniqueConstraint
     @DatabaseChangeProperty(includeInSerialization = false)
 	private String associatedWith;
-    private String catalogName;
 
 
     public CreateIndexChange() {

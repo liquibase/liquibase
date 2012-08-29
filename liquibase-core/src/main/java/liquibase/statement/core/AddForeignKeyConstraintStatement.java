@@ -22,8 +22,8 @@ public class AddForeignKeyConstraintStatement extends AbstractSqlStatement {
     private String onDelete;
     private String onUpdate;
 
-	// Some databases supports creation of FK with referention to column marked as unique, not primary
-	// If FK referenced to such unique column this option should be set to false
+	// Some databases supports creation of FK with references to column marked as unique, not primary
+	// If FK referenced to such unique column this option should be set to true
 	private boolean referencesUniqueColumn = false;
 
     public AddForeignKeyConstraintStatement(String constraintName, String baseTableCatalogName, String baseTableSchemaName, String baseTableName, String baseColumnNames, String referencedTableCatalogName, String referencedTableSchemaName, String referencedTableName, String referencedColumnNames) {

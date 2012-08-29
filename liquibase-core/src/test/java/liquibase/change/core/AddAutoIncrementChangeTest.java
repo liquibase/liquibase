@@ -19,6 +19,7 @@ public class AddAutoIncrementChangeTest extends AbstractChangeTest {
         AddAutoIncrementChange change = new AddAutoIncrementChange();
         assertEquals("addAutoIncrement", change.getChangeMetaData().getName());
         assertEquals("Set Column as Auto-Increment", change.getChangeMetaData().getDescription());
+        assertArrayEquals(new String[] {"column"}, change.getChangeMetaData().getAppliesTo());
     }
 
     @Override

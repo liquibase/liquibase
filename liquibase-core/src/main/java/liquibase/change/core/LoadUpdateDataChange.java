@@ -20,11 +20,6 @@ import java.util.List;
 public class LoadUpdateDataChange extends LoadDataChange {
     private String primaryKey;
 
-    @Override
-    public SqlStatement[] generateStatements(Database database) {
-        return super.generateStatements(database);    //To change body of overridden methods use File | Settings | File Templates.
-    }
-
     public void setPrimaryKey(String primaryKey) throws LiquibaseException {
         if (primaryKey == null) {
             throw new LiquibaseException("primaryKey cannot be null.");
@@ -58,13 +53,13 @@ public class LoadUpdateDataChange extends LoadDataChange {
     }
 
     private String getWhereClause(InsertOrUpdateStatement insertOrUpdateStatement, Database database) {
-        StringBuffer where = new StringBuffer();
+        StringBuilder where = new StringBuilder();
 
         String[] pkColumns = insertOrUpdateStatement.getPrimaryKey().split(",");
 
         for(String thisPkColumn:pkColumns)
         {
-            where.append(database.escapeColumnName(insertOrUpdateStatement.getCatalogName(), insertOrUpdateStatement.getSchemaName(), insertOrUpdateStatement.getTableName(), thisPkColumn)  + " = " );
+            where.append(database.escapeColumnName(insertOrUpdateStatement.getCatalogName(), insertOrUpdateStatement.getSchemaName(), insertOrUpdateStatement.getTableName(), thisPkColumn)).append(" = ");
             Object newValue = insertOrUpdateStatement.getColumnValues().get(thisPkColumn);
             where.append(DataTypeFactory.getInstance().fromObject(newValue, database).objectToString(newValue, database));
 

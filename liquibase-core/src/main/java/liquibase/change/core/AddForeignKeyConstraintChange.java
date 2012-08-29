@@ -12,7 +12,7 @@ import liquibase.statement.core.AddForeignKeyConstraintStatement;
  */
  @DatabaseChange(name="addForeignKeyConstraint", description = "Add Foreign Key Constraint", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "column")
 public class AddForeignKeyConstraintChange extends AbstractChange {
-    
+
     private String baseTableCatalogName;
     private String baseTableSchemaName;
     private String baseTableName;
@@ -31,8 +31,8 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
     private String onUpdate;
     private String onDelete;
 
-	// Some databases supports creation of FK with referention to column marked as unique, not primary
-	// If FK referenced to such unique column this option should be set to false
+	// Some databases supports creation of FK with references to column marked as unique, not primary
+	// If FK referenced to such unique column this option should be set to true
 	private Boolean referencesUniqueColumn;
 
     @DatabaseChangeProperty(mustApplyTo ="column.relation.catalog")
