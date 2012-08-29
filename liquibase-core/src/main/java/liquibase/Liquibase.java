@@ -523,6 +523,7 @@ public class Liquibase {
             LockService.getInstance(database).waitForLock();
 
             for (Schema schema : schemas) {
+                schema = database.correctSchema(schema);
                 log.info("Dropping Database Objects in schema: " + schema);
                 checkDatabaseChangeLogTable(false, null, null);
                 getDatabase().dropDatabaseObjects(schema);
