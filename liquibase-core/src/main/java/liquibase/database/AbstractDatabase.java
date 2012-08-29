@@ -53,7 +53,7 @@ public abstract class AbstractDatabase implements Database {
     protected String currentDateTimeFunction;
 
     // List of Database native functions.
-    protected List<DatabaseFunction> databaseFunctions = new ArrayList<DatabaseFunction>();
+    protected List<DatabaseFunction> dateFunctions = new ArrayList<DatabaseFunction>();
 
     private List<RanChangeSet> ranChangeSetList;
 
@@ -74,6 +74,7 @@ public abstract class AbstractDatabase implements Database {
     protected BigInteger defaultAutoIncrementBy = BigInteger.ONE;
 
     protected AbstractDatabase() {
+        this.dateFunctions.add(new DatabaseFunction(getCurrentDateTimeFunction()));
     }
 
     public String getName() {
@@ -1313,8 +1314,8 @@ public abstract class AbstractDatabase implements Database {
         return DatabaseSnapshotGeneratorFactory.getInstance().getGenerator(this).getTable(schema, tableName, this);
     }
 
-    public List<DatabaseFunction> getDatabaseFunctions() {
-        return databaseFunctions;
+    public List<DatabaseFunction> getDateFunctions() {
+        return dateFunctions;
     }
 
     public void reset() {

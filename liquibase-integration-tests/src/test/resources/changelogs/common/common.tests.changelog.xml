@@ -30,7 +30,7 @@
         <changeLogPropertyDefined property="database.databaseProductVersion"/>        
         <changeLogPropertyDefined property="database.lineComment"/>        
         <changeLogPropertyDefined property="database.typeName"/>
-        <changeLogPropertyDefined property="database.isLocalDatabase"/>
+        <changeLogPropertyDefined property="database.isSafeToRunUpdate"/>
         <changeLogPropertyDefined property="database.requiresPassword"/>
         <changeLogPropertyDefined property="database.requiresUsername"/>
         <changeLogPropertyDefined property="database.supportsForeignKeyDisable"/>

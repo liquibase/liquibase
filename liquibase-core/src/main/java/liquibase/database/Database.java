@@ -235,13 +235,13 @@ public interface Database extends DatabaseObject, PrioritizedService {
     boolean isSafeToRunUpdate() throws DatabaseException;
 
     void executeStatements(Change change, DatabaseChangeLog changeLog, List<SqlVisitor> sqlVisitors) throws LiquibaseException, UnsupportedChangeException;/*
+
      * Executes the statements passed as argument to a target {@link Database}
      *
      * @param statements an array containing the SQL statements to be issued
      * @param database the target {@link Database}
      * @throws DatabaseException if there were problems issuing the statements
      */
-
     void execute(SqlStatement[] statements, List<SqlVisitor> sqlVisitors) throws LiquibaseException;
 
     void saveStatements(Change change, List<SqlVisitor> sqlVisitors, Writer writer) throws IOException, UnsupportedChangeException, StatementNotSupportedOnDatabaseException, LiquibaseException;
@@ -255,9 +255,9 @@ public interface Database extends DatabaseObject, PrioritizedService {
     public Date parseDate(String dateAsString) throws DateParseException;
 
     /**
-     * Returns list of database native functions
+     * Returns list of database native date functions
      */
-    public List<DatabaseFunction> getDatabaseFunctions();
+    public List<DatabaseFunction> getDateFunctions();
 
     void reset();
 

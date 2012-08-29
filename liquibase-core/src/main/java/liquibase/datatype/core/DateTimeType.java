@@ -42,7 +42,7 @@ public class DateTimeType extends LiquibaseDataType {
             return database.getCurrentDateTimeFunction();
         } else if (value instanceof DatabaseFunction) {
             return ((DatabaseFunction) value).getValue();
-        } else if (database.getDatabaseFunctions().contains(new DatabaseFunction(value.toString()))) {
+        } else if (database.getDateFunctions().contains(new DatabaseFunction(value.toString()))) {
             return value.toString();
         } else if (value instanceof String) {
             return "'" + ((String) value).replaceAll("'", "''") + "'";

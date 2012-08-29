@@ -478,7 +478,7 @@ public class MockDatabase implements Database {
         return new Date();
     }
 
-	public List<DatabaseFunction> getDatabaseFunctions() {
+	public List<DatabaseFunction> getDateFunctions() {
 		return null;
 	}
 

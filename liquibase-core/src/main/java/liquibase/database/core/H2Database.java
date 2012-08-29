@@ -23,7 +23,7 @@ public class H2Database extends AbstractDatabase {
     private static String SEP_CONCAT = ", ";
 
     public H2Database() {
-        this.databaseFunctions.add(new DatabaseFunction("CURRENT_TIMESTAMP()"));
+        this.dateFunctions.add(new DatabaseFunction("CURRENT_TIMESTAMP()"));
     }
 
     public String getShortName() {

@@ -28,9 +28,9 @@ public class OracleDatabase extends AbstractDatabase {
 
 	public OracleDatabase() {
 		// Setting list of Oracle's native functions
-		databaseFunctions.add(new DatabaseFunction("SYSDATE"));
-		databaseFunctions.add(new DatabaseFunction("SYSTIMESTAMP"));
-        databaseFunctions.add(new DatabaseFunction("CURRENT_TIMESTAMP"));
+		dateFunctions.add(new DatabaseFunction("SYSDATE"));
+		dateFunctions.add(new DatabaseFunction("SYSTIMESTAMP"));
+        dateFunctions.add(new DatabaseFunction("CURRENT_TIMESTAMP"));
 	}
 
 	public int getPriority() {
