@@ -5,7 +5,7 @@ import liquibase.database.Database;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.TagDatabaseStatement;
 
-@ChangeClass(name="tagDatabase", description = "Tag Database", priority = ChangeMetaData.PRIORITY_DEFAULT)
+@DatabaseChange(name="tagDatabase", description = "Tag Database", priority = ChangeMetaData.PRIORITY_DEFAULT)
 public class TagDatabaseChange extends AbstractChange {
 
     private String tag;

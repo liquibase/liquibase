@@ -1,14 +1,14 @@
 package liquibase.change.core;
 
 import liquibase.change.AbstractChange;
-import liquibase.change.ChangeClass;
+import liquibase.change.DatabaseChange;
 import liquibase.change.ChangeMetaData;
 import liquibase.change.ChangeProperty;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.ModifyDataTypeStatement;
 import liquibase.database.Database;
 
-@ChangeClass(name="modifyDataType", description = "Modify data type", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "column")
+@DatabaseChange(name="modifyDataType", description = "Modify data type", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "column")
 public class ModifyDataTypeChange extends AbstractChange {
 
     private String catalogName;

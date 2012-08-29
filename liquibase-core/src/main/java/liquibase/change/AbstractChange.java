@@ -56,15 +56,15 @@ public abstract class AbstractChange implements Change {
     }
 
     /**
-     * Generate the ChangeMetaData for this class. By default reads from the @ChangeClass annotation, but can return anything
+     * Generate the ChangeMetaData for this class. By default reads from the @DatabaseChange annotation, but can return anything
      * @return
      */
     protected ChangeMetaData createChangeMetaData() {
         try {
-            ChangeClass changeClass = this.getClass().getAnnotation(ChangeClass.class);
+            DatabaseChange databaseChange = this.getClass().getAnnotation(DatabaseChange.class);
 
-            if (changeClass == null) {
-                throw new UnexpectedLiquibaseException("No @ChangeClass annotation for "+getClass().getName());
+            if (databaseChange == null) {
+                throw new UnexpectedLiquibaseException("No @DatabaseChange annotation for "+getClass().getName());
             }
 
             Set<ChangeParameterMetaData> params = new HashSet<ChangeParameterMetaData>();
@@ -82,7 +82,7 @@ public abstract class AbstractChange implements Change {
             }
 
 
-            return new ChangeMetaData(changeClass.name(), changeClass.description(), changeClass.priority(), changeClass.appliesTo(), params);
+            return new ChangeMetaData(databaseChange.name(), databaseChange.description(), databaseChange.priority(), databaseChange.appliesTo(), params);
         } catch (Throwable e) {
             throw new UnexpectedLiquibaseException(e);
         }

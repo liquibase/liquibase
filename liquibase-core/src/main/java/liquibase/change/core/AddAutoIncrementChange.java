@@ -3,7 +3,7 @@ package liquibase.change.core;
 import java.math.BigInteger;
 
 import liquibase.change.AbstractChange;
-import liquibase.change.ChangeClass;
+import liquibase.change.DatabaseChange;
 import liquibase.change.ChangeMetaData;
 import liquibase.change.ChangeProperty;
 import liquibase.database.Database;
@@ -14,14 +14,13 @@ import liquibase.statement.core.AddAutoIncrementStatement;
 import liquibase.statement.core.AddDefaultValueStatement;
 import liquibase.statement.core.CreateSequenceStatement;
 import liquibase.statement.core.SetNullableStatement;
-import liquibase.util.StringUtils;
 
 /**
  * Makes an existing column into an auto-increment column.
  * This change is only valid for databases with auto-increment/identity columns.
  * The current version does not support MS-SQL.
  */
-@ChangeClass(name="addAutoIncrement", description = "Set Column as Auto-Increment", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "column")
+@DatabaseChange(name="addAutoIncrement", description = "Set Column as Auto-Increment", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "column")
 public class AddAutoIncrementChange extends AbstractChange {
 
     private String catalogName;

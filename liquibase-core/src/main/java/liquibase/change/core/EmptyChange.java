@@ -1,12 +1,12 @@
 package liquibase.change.core;
 
 import liquibase.change.AbstractChange;
-import liquibase.change.ChangeClass;
+import liquibase.change.DatabaseChange;
 import liquibase.change.ChangeMetaData;
 import liquibase.database.Database;
 import liquibase.statement.SqlStatement;
 
-@ChangeClass(name="empty", description = "empty", priority = ChangeMetaData.PRIORITY_DEFAULT)
+@DatabaseChange(name="empty", description = "empty", priority = ChangeMetaData.PRIORITY_DEFAULT)
 public class EmptyChange extends AbstractChange {
 
     public SqlStatement[] generateStatements(Database database) {

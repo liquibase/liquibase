@@ -19,7 +19,7 @@ import java.util.List;
  * Extracts data from an existing column to create a lookup table.
  * A foreign key is created between the old column and the new lookup table.
  */
-@ChangeClass(name="addLookupTable", description = "Add Lookup Table", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "column")
+@DatabaseChange(name="addLookupTable", description = "Add Lookup Table", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "column")
 public class AddLookupTableChange extends AbstractChange {
 
     private String existingTableCatalogName;

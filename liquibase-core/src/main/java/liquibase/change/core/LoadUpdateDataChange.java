@@ -1,6 +1,6 @@
 package liquibase.change.core;
 
-import liquibase.change.ChangeClass;
+import liquibase.change.DatabaseChange;
 import liquibase.change.ChangeMetaData;
 import liquibase.change.ChangeProperty;
 import liquibase.database.Database;
@@ -16,7 +16,7 @@ import liquibase.statement.core.InsertStatement;
 import java.util.ArrayList;
 import java.util.List;
 
-@ChangeClass(name="loadUpdateData", description = "Smart Load Data", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "table")
+@DatabaseChange(name="loadUpdateData", description = "Smart Load Data", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "table")
 public class LoadUpdateDataChange extends LoadDataChange {
     private String primaryKey;
 

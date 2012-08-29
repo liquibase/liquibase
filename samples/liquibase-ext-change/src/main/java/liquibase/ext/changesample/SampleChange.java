@@ -1,13 +1,13 @@
 package liquibase.ext.changesample;
 
 import liquibase.change.AbstractChange;
-import liquibase.change.ChangeClass;
+import liquibase.change.DatabaseChange;
 import liquibase.database.Database;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.statement.core.CreateTableStatement;
 import liquibase.statement.SqlStatement;
 
-@ChangeClass(name="sampleChange", description = "Sample Change", priority = 15)
+@DatabaseChange(name="sampleChange", description = "Sample Change", priority = 15)
 public class SampleChange extends AbstractChange {
 
     public String getConfirmationMessage() {

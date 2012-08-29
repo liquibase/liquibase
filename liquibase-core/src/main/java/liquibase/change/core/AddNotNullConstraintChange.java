@@ -18,7 +18,7 @@ import java.util.List;
 /**
  * Adds a not-null constraint to an existing column.
  */
-@ChangeClass(name="addNotNullConstraint", description = "Add Not-Null Constraint", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "column")
+@DatabaseChange(name="addNotNullConstraint", description = "Add Not-Null Constraint", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "column")
 public class AddNotNullConstraintChange extends AbstractChange {
     private String catalogName;
     private String schemaName;

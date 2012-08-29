@@ -1,7 +1,7 @@
 package liquibase.change.custom;
 
 import liquibase.change.AbstractChange;
-import liquibase.change.ChangeClass;
+import liquibase.change.DatabaseChange;
 import liquibase.change.ChangeMetaData;
 import liquibase.change.ChangeProperty;
 import liquibase.database.Database;
@@ -21,7 +21,7 @@ import java.util.TreeSet;
  * @see liquibase.change.custom.CustomSqlChange
  * @see liquibase.change.custom.CustomTaskChange
  */
-@ChangeClass(name="customChange", description = "Custom Change", priority = ChangeMetaData.PRIORITY_DEFAULT)
+@DatabaseChange(name="customChange", description = "Custom Change", priority = ChangeMetaData.PRIORITY_DEFAULT)
 public class CustomChangeWrapper extends AbstractChange {
 
     @ChangeProperty(includeInSerialization = false)

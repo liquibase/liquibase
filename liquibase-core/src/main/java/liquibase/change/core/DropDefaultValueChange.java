@@ -7,7 +7,6 @@ import liquibase.database.core.SQLiteDatabase.AlterTableVisitor;
 import liquibase.database.structure.Index;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.DropDefaultValueStatement;
-import liquibase.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -16,7 +15,7 @@ import java.util.List;
 /**
  * Removes the default value from an existing column.
  */
-@ChangeClass(name="dropDefaultValue", description="Drop Default Value", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "column")
+@DatabaseChange(name="dropDefaultValue", description="Drop Default Value", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "column")
 public class DropDefaultValueChange extends AbstractChange {
 
     private String catalogName;

@@ -4,14 +4,13 @@ import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.CreateSequenceStatement;
-import liquibase.util.StringUtils;
 
 import java.math.BigInteger;
 
 /**
  * Creates a new sequence.
  */
-@ChangeClass(name="createSequence", description = "Create Sequence", priority = ChangeMetaData.PRIORITY_DEFAULT)
+@DatabaseChange(name="createSequence", description = "Create Sequence", priority = ChangeMetaData.PRIORITY_DEFAULT)
 public class CreateSequenceChange extends AbstractChange {
 
     private String catalogName;

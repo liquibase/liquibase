@@ -1,13 +1,13 @@
 package liquibase.ext.changewithnestedtags;
 
 import liquibase.change.AbstractChange;
-import liquibase.change.ChangeClass;
+import liquibase.change.DatabaseChange;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.CreateTableStatement;
 import liquibase.database.Database;
 
-@ChangeClass(name="changeWithNestedTags", description = "Sample Extension: Change With Nested Tags", priority = 15)
+@DatabaseChange(name="changeWithNestedTags", description = "Sample Extension: Change With Nested Tags", priority = 15)
 public class ChangeWithNestedTags extends AbstractChange {
     private String name;
     private SampleChild child;

@@ -9,7 +9,6 @@ import liquibase.database.structure.Index;
 import liquibase.exception.UnsupportedChangeException;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RawSqlStatement;
-import liquibase.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -18,7 +17,7 @@ import java.util.List;
 /**
  * Combines data from two existing columns into a new column and drops the original columns.
  */
-@ChangeClass(name="mergeColumns", description = "Merge Column", priority = ChangeMetaData.PRIORITY_DEFAULT)
+@DatabaseChange(name="mergeColumns", description = "Merge Column", priority = ChangeMetaData.PRIORITY_DEFAULT)
 public class MergeColumnChange extends AbstractChange {
 
     private String catalogName;

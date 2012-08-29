@@ -1,7 +1,7 @@
 package liquibase.change.core;
 
 import liquibase.change.AbstractChange;
-import liquibase.change.ChangeClass;
+import liquibase.change.DatabaseChange;
 import liquibase.change.ChangeMetaData;
 import liquibase.database.Database;
 import liquibase.sql.Sql;
@@ -9,7 +9,7 @@ import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RuntimeStatement;
 import liquibase.util.StringUtils;
 
-@ChangeClass(name="stop", description = "Stop Execution", priority = ChangeMetaData.PRIORITY_DEFAULT)
+@DatabaseChange(name="stop", description = "Stop Execution", priority = ChangeMetaData.PRIORITY_DEFAULT)
 public class StopChange extends AbstractChange {
 
     private String message ="Stop command in changelog file";
