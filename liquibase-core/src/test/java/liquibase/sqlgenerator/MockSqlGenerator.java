@@ -37,7 +37,7 @@ public class MockSqlGenerator implements SqlGenerator {
         return supports;
     }
 
-    public boolean requiresUpdatedDatabaseMetadata(Database database) {
+    public boolean queriesDatabase(Database database) {
         return false;
     }
 

@@ -53,7 +53,7 @@ public interface SqlGenerator<StatementType extends SqlStatement> extends Priori
     /**
      * Does this change require access to the database metadata?  If true, the change cannot be used in an updateSql-style command.
      */
-    public boolean requiresUpdatedDatabaseMetadata(Database database);
+    public boolean queriesDatabase(Database database);
 
     /**
      * Validate the data contained in the SqlStatement.  If there are no errors, return an empty ValidationErrors object, not a null value.

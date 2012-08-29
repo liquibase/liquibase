@@ -22,8 +22,7 @@ import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
 
 /**
- * Standard superclass for Changes to implement. This is a <i>skeletal implementation</i>,
- * as defined in Effective Java#16.
+ * Standard superclass for Changes to implement.
  *
  * @see Change
  */
@@ -41,23 +40,20 @@ public abstract class AbstractChange implements Change {
     @DatabaseChangeProperty(includeInSerialization = false)
     private ChangeLogParameters changeLogParameters;
 
-//    /**
-//     * Constructor with tag name and name
-//     *
-//     * @param changeName        the tag name for this change
-//     * @param changeDescription the name for this change
-//     */
-//    protected AbstractChange(String changeName, String changeDescription, int priority) {
-//        this.changeMetaData = new ChangeMetaData(changeName, changeDescription, priority);
-//    }
-
     public AbstractChange() {
         this.changeMetaData = createChangeMetaData();
     }
 
     /**
+     * Most Changes don't need to do any setup.
+     * This implements a no-op
+     */
+    public void init() throws SetupException {
+
+    }
+
+    /**
      * Generate the ChangeMetaData for this class. By default reads from the @DatabaseChange annotation, but can return anything
-     * @return
      */
     protected ChangeMetaData createChangeMetaData() {
         try {
@@ -81,14 +77,13 @@ public abstract class AbstractChange implements Change {
 
             }
 
-
             return new ChangeMetaData(databaseChange.name(), databaseChange.description(), databaseChange.priority(), databaseChange.appliesTo(), params);
         } catch (Throwable e) {
             throw new UnexpectedLiquibaseException(e);
         }
     }
 
-    private ChangeParameterMetaData createChangeParameterMetadata(String propertyName) throws Exception {
+    protected ChangeParameterMetaData createChangeParameterMetadata(String propertyName) throws Exception {
 
         String displayName = propertyName.replaceAll("([A-Z])", " $1");
         displayName = displayName.substring(0,1).toUpperCase()+displayName.substring(1);
@@ -132,9 +127,13 @@ public abstract class AbstractChange implements Change {
         this.changeSet = changeSet;
     }
 
+    /**
+     * Return true if the Change class queries the database in any way to determine Statements to execute.
+     * If the change queries the database, it cannot be used in updateSql type operations
+     */
     public boolean queriesDatabase(Database database) {
         for (SqlStatement statement : generateStatements(database)) {
-            if (SqlGeneratorFactory.getInstance().requiresCurrentDatabaseMetadata(statement, database)) {
+            if (SqlGeneratorFactory.getInstance().queriesDatabase(statement, database)) {
                 return true;
             }
         }
@@ -189,35 +188,18 @@ public abstract class AbstractChange implements Change {
         return changeValidationErrors;
     }
 
-    /*
-    * Skipped by this skeletal implementation
-    *
-    * @see liquibase.change.Change#generateStatements(liquibase.database.Database)
-    */
-
-    /**
-     * @see liquibase.change.Change#generateRollbackStatements(liquibase.database.Database)
-     */
     public SqlStatement[] generateRollbackStatements(Database database) throws UnsupportedChangeException, RollbackImpossibleException {
         return generateRollbackStatementsFromInverse(database);
     }
 
-    /**
-     * @see Change#supportsRollback(liquibase.database.Database)
-     * @param database
-     */
     public boolean supportsRollback(Database database) {
         return createInverses() != null;
     }
 
-    /**
-     * @see liquibase.change.Change#generateCheckSum()
-     */
     public CheckSum generateCheckSum() {
         return CheckSum.compute(new StringChangeLogSerializer().serialize(this));
     }
 
-    //~ ------------------------------------------------------------------------------- private methods
     /*
      * Generates rollback statements from the inverse changes returned by createInverses()
      *
@@ -268,14 +250,6 @@ public abstract class AbstractChange implements Change {
     @DatabaseChangeProperty(includeInMetaData = false)
     public ResourceAccessor getResourceAccessor() {
         return resourceAccessor;
-    }
-
-    /**
-     * Most Changes don't need to do any setup.
-     * This implements a no-op
-     */
-    public void init() throws SetupException {
-
     }
 
     public Set<DatabaseObject> getAffectedDatabaseObjects(Database database) {

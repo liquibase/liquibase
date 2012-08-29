@@ -6,7 +6,6 @@ import liquibase.exception.ValidationErrors;
 import liquibase.exception.Warnings;
 import liquibase.servicelocator.ServiceLocator;
 import liquibase.sql.Sql;
-import liquibase.sqlgenerator.core.AbstractSqlGenerator;
 import liquibase.statement.SqlStatement;
 
 import java.lang.reflect.ParameterizedType;
@@ -93,7 +92,7 @@ public class SqlGeneratorFactory {
                 for (Type type : clazz.getGenericInterfaces()) {
                     if (type instanceof ParameterizedType) {
                         checkType(type, statement, generator, database, validGenerators);
-                    } else if (isTypeEqual( type, SqlGenerator.class)) {
+                    } else if (isTypeEqual(type, SqlGenerator.class)) {
                         //noinspection unchecked
                         if (generator.supports(statement, database)) {
                             validGenerators.add(generator);
@@ -113,17 +112,17 @@ public class SqlGeneratorFactory {
         }
         return aType.equals(aClass);
     }
-    
+
     private void checkType(Type type, SqlStatement statement, SqlGenerator generator, Database database, SortedSet<SqlGenerator> validGenerators) {
         for (Type typeClass : ((ParameterizedType) type).getActualTypeArguments()) {
             if (typeClass instanceof TypeVariable) {
                 typeClass = ((TypeVariable) typeClass).getBounds()[0];
             }
-        
-            if (isTypeEqual( typeClass, SqlStatement.class)) {
+
+            if (isTypeEqual(typeClass, SqlStatement.class)) {
                 return;
             }
-            
+
             if (((Class) typeClass).isAssignableFrom(statement.getClass())) {
                 if (generator.supports(statement, database)) {
                     validGenerators.add(generator);
@@ -150,9 +149,13 @@ public class SqlGeneratorFactory {
         return generatorChain.generateSql(statement, database);
     }
 
-    public boolean requiresCurrentDatabaseMetadata(SqlStatement statement, Database database) {
+    /**
+     * Return true if the SqlStatement class queries the database in any way to determine Statements to execute.
+     * If the statement queries the database, it cannot be used in updateSql type operations
+     */
+    public boolean queriesDatabase(SqlStatement statement, Database database) {
         for (SqlGenerator generator : getGenerators(statement, database)) {
-            if (generator.requiresUpdatedDatabaseMetadata(database)) {
+            if (generator.queriesDatabase(database)) {
                 return true;
             }
         }

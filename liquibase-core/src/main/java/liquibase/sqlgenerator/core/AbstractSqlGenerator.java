@@ -13,7 +13,7 @@ public abstract class AbstractSqlGenerator<StatementType extends SqlStatement> i
         return PRIORITY_DEFAULT;
     }
 
-    public boolean requiresUpdatedDatabaseMetadata(Database database) {
+    public boolean queriesDatabase(Database database) {
         return false;
     }
 

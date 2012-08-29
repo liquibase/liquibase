@@ -13,8 +13,6 @@ import java.util.List;
  * A common parent for all SQL related changes regardless of where the sql was sourced from.
  * 
  * Implements the necessary logic to choose how it should be parsed to generate the statements.
- * 
- * @author <a href="mailto:csuml@yahoo.co.uk">Paul Keeble</a>
  *
  */
 public abstract class AbstractSQLChange extends AbstractChange {

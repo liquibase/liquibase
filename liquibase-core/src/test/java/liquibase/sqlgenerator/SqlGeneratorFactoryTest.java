@@ -132,7 +132,7 @@ public class SqlGeneratorFactoryTest {
                 return level;
             }
 
-            public boolean requiresUpdatedDatabaseMetadata(Database database) {
+            public boolean queriesDatabase(Database database) {
                 return false;
             }
 
