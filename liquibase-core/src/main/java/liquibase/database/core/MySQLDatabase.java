@@ -7,6 +7,7 @@ import liquibase.database.AbstractDatabase;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.Index;
+import liquibase.database.structure.PrimaryKey;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.ExecutorService;
 import liquibase.statement.core.RawSqlStatement;
@@ -28,11 +29,11 @@ public class MySQLDatabase extends AbstractDatabase {
 //    }
 
     @Override
-    public String correctPrimaryKeyName(String pkName)  {
-        if (pkName.equals("PRIMARY")) {
+    public String correctObjectName(String name, Class<? extends DatabaseObject> objectType) {
+        if (objectType.equals(PrimaryKey.class) && name.equals("PRIMARY")) {
             return null;
         } else {
-            return pkName;
+            return name;
         }
     }
 
@@ -74,7 +75,7 @@ public class MySQLDatabase extends AbstractDatabase {
         if (currentDateTimeFunction != null) {
             return currentDateTimeFunction;
         }
-        
+
         return "NOW()";
     }
 
@@ -85,32 +86,32 @@ public class MySQLDatabase extends AbstractDatabase {
 
     @Override
     protected String getAutoIncrementClause() {
-    	return "AUTO_INCREMENT";
-    }    
+        return "AUTO_INCREMENT";
+    }
 
     @Override
     protected boolean generateAutoIncrementBy(BigInteger incrementBy) {
-    	// incrementBy not supported
-    	return false;
+        // incrementBy not supported
+        return false;
     }
-   
+
     @Override
     protected String getAutoIncrementOpening() {
-    	return "";
+        return "";
     }
-    
+
     @Override
     protected String getAutoIncrementClosing() {
-    	return "";
+        return "";
     }
-    
+
     @Override
     protected String getAutoIncrementStartWithClause() {
-    	return "=%d";
+        return "=%d";
     }
-    
+
     @Override
-    public String getConcatSql(String ... values) {
+    public String getConcatSql(String... values) {
         StringBuffer returnString = new StringBuffer();
         returnString.append("CONCAT_WS(");
         for (String value : values) {
@@ -131,7 +132,7 @@ public class MySQLDatabase extends AbstractDatabase {
 
     @Override
     public String escapeDatabaseObject(String objectName, Class<? extends DatabaseObject> objectType) {
-        return "`"+objectName+"`";
+        return "`" + objectName + "`";
     }
 
     @Override

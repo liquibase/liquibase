@@ -273,17 +273,10 @@ public interface Database extends DatabaseObject, PrioritizedService {
 
     Schema correctSchema(Schema schema);
 
-    String correctTableName(String tableName);
-
-    String correctConstraintName(String constraintName);
-
-    String correctColumnName(String columnName);
-
-    String correctPrimaryKeyName(String pkName);
-
-    String correctForeignKeyName(String fkName);
-
-    String correctIndexName(String indexName);
+    /**
+     * Fix the object name to the format the database expects, handling changes in case, etc.
+     */
+    String correctObjectName(String name, Class<? extends DatabaseObject> objectType);
 
     String getAssumedSchemaName(String catalogName, String schemaName);
 

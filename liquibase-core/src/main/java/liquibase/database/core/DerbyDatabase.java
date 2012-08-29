@@ -6,6 +6,7 @@ import java.sql.SQLException;
 
 import liquibase.database.AbstractDatabase;
 import liquibase.database.DatabaseConnection;
+import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.Schema;
 import liquibase.exception.DatabaseException;
 import liquibase.logging.LogFactory;
@@ -52,7 +53,7 @@ public class DerbyDatabase extends AbstractDatabase {
     }
 
     @Override
-    protected String correctObjectName(String objectName) {
+    public String correctObjectName(String objectName, Class<? extends DatabaseObject> objectType) {
         return objectName.toUpperCase();
     }
 

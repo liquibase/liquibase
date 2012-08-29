@@ -3,6 +3,7 @@ package liquibase.sqlgenerator.core;
 import liquibase.database.Database;
 import liquibase.database.core.MySQLDatabase;
 import liquibase.database.structure.Schema;
+import liquibase.database.structure.View;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
@@ -23,7 +24,7 @@ public class GetViewDefinitionGenerator extends AbstractSqlGenerator<GetViewDefi
     public Sql[] generateSql(GetViewDefinitionStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         Schema schema = database.correctSchema(new Schema(statement.getCatalogName(), statement.getSchemaName()));
 
-        String sql = "select view_definition from information_schema.views where table_name='" + database.correctTableName(statement.getViewName()) + "'";
+        String sql = "select view_definition from information_schema.views where table_name='" + database.correctObjectName(statement.getViewName(), View.class) + "'";
 
         if (database instanceof MySQLDatabase) {
             String catalogName = database.getAssumedCatalogName(schema.getCatalogName(), schema.getName());

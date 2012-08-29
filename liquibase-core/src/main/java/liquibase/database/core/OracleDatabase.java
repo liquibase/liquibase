@@ -38,7 +38,7 @@ public class OracleDatabase extends AbstractDatabase {
     }
 
     @Override
-    protected String correctObjectName(String objectName) {
+    public String correctObjectName(String objectName, Class<? extends DatabaseObject> objectType) {
         return objectName.toUpperCase();
     }
 

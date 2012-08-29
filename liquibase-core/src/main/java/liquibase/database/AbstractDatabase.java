@@ -210,13 +210,13 @@ public abstract class AbstractDatabase implements Database {
             if (catalogName.equals(Catalog.DEFAULT_NAME)) {
                 catalogName = getDefaultCatalogName();
             } else {
-                catalogName = correctObjectName(catalogName);
+                catalogName = correctObjectName(catalogName, Catalog.class);
             }
 
             if (schemaName.equals(Schema.DEFAULT_NAME)) {
                 schemaName = getDefaultSchemaName();
             } else {
-                schemaName =  correctObjectName(schemaName);
+                schemaName =  correctObjectName(schemaName, Schema.class);
             }
         } else if (!supportsCatalogs() && !supportsSchemas()) {
             return new Schema.DatabaseSpecific("DEFAULT", "DEFAULT", this);
@@ -275,31 +275,7 @@ public abstract class AbstractDatabase implements Database {
         }
     }
 
-    public String correctTableName(String tableName) {
-        return correctObjectName(tableName);
-    }
-
-    public String correctConstraintName(String constraintName) {
-        return correctObjectName(constraintName);
-    }
-
-    public String correctColumnName(String columnName) {
-        return correctObjectName(columnName);
-    }
-
-    public String correctPrimaryKeyName(String pkName) {
-        return correctObjectName(pkName);
-    }
-
-    public String correctForeignKeyName(String fkName) {
-        return correctObjectName(fkName);
-    }
-
-    public String correctIndexName(String indexName) {
-        return correctObjectName(indexName);
-    }
-
-    protected String correctObjectName(String objectName) {
+    public String correctObjectName(String objectName, Class<? extends DatabaseObject> objectType) {
         return objectName;
     }
 

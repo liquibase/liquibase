@@ -510,28 +510,8 @@ public class MockDatabase implements Database {
         return schema;
     }
 
-    public String correctTableName(String tableName) {
-        return tableName;
-    }
-
-    public String correctConstraintName(String constraintName) {
-        return constraintName;
-    }
-
-    public String correctColumnName(String columnName) {
-        return columnName;
-    }
-
-    public String correctPrimaryKeyName(String pkName) {
-        return pkName;
-    }
-
-    public String correctForeignKeyName(String fkName) {
-        return fkName;
-    }
-
-    public String correctIndexName(String indexName) {
-        return indexName;
+    public String correctObjectName(String name, Class<? extends DatabaseObject> objectType) {
+        return name;
     }
 
     public String getAssumedSchemaName(String catalogName, String schemaName) {

@@ -54,7 +54,7 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
         }
         try {
             if (database != null) {
-                tableName = database.correctTableName(tableName);
+                tableName = database.correctObjectName(tableName, Table.class);
                 schema = database.correctSchema(schema);
             }
             ResultSet rs = getMetaData(database).getTables(getJdbcCatalogName(schema), getJdbcSchemaName(schema), tableName, new String[]{"TABLE"});
@@ -73,7 +73,7 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
 
     public boolean hasView(Schema schema, String viewName, Database database) {
         try {
-            ResultSet rs = getMetaData(database).getTables(getJdbcCatalogName(schema), getJdbcSchemaName(schema), database.correctTableName(viewName), new String[]{"VIEW"});
+            ResultSet rs = getMetaData(database).getTables(getJdbcCatalogName(schema), getJdbcSchemaName(schema), database.correctObjectName(viewName, View.class), new String[]{"VIEW"});
             try {
                 return rs.next();
             } finally {
@@ -91,7 +91,7 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
         ResultSet rs = null;
         try {
             DatabaseMetaData metaData = getMetaData(database);
-            rs = metaData.getTables(getJdbcCatalogName(schema), getJdbcSchemaName(schema), database.correctTableName(tableName), new String[]{"TABLE"});
+            rs = metaData.getTables(getJdbcCatalogName(schema), getJdbcSchemaName(schema), database.correctObjectName(tableName, Table.class), new String[]{"TABLE"});
 
             Table table;
             try {
@@ -144,13 +144,13 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
     public Column getColumn(Schema schema, String tableName, String columnName, Database database) throws DatabaseException {
         ResultSet rs = null;
         try {
-            rs = getMetaData(database).getColumns(getJdbcCatalogName(schema), getJdbcSchemaName(schema), database.correctTableName(tableName), database.correctColumnName(columnName));
+            rs = getMetaData(database).getColumns(getJdbcCatalogName(schema), getJdbcSchemaName(schema), database.correctObjectName(tableName, Table.class), database.correctObjectName(columnName, Column.class));
 
             if (!rs.next()) {
                 return null;
             }
 
-            Table table = new Table(database.correctTableName(tableName));
+            Table table = new Table(database.correctObjectName(tableName, Table.class));
             table.setSchema(schema);
             return readColumn(convertResultSetToMap(rs), table, database);
         } catch (Exception e) {
@@ -687,7 +687,7 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
 
             if (columnNames != null) {
                 Map<String, TreeMap<Short, String>> columnsByIndexName = new HashMap<String, TreeMap<Short, String>>();
-                ResultSet rs = getMetaData(database).getIndexInfo(getJdbcCatalogName(schema), getJdbcSchemaName(schema), database.correctTableName(tableName), false, true);
+                ResultSet rs = getMetaData(database).getIndexInfo(getJdbcCatalogName(schema), getJdbcSchemaName(schema), database.correctObjectName(tableName, Table.class), false, true);
                 try {
                     while (rs.next()) {
                         String foundIndexName = rs.getString("INDEX_NAME");
@@ -720,7 +720,7 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
                     rs.close();
                 }
             } else if (indexName != null) {
-                    ResultSet rs = getMetaData(database).getIndexInfo(getJdbcCatalogName(schema), getJdbcSchemaName(schema), database.correctTableName(tableName), false, true);
+                    ResultSet rs = getMetaData(database).getIndexInfo(getJdbcCatalogName(schema), getJdbcSchemaName(schema), database.correctObjectName(tableName, Table.class), false, true);
                     try {
                         while (rs.next()) {
                             Index foundIndex =  new Index()
@@ -751,7 +751,7 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
     public boolean hasForeignKey(Schema schema, String foreignKeyTableName, String fkName, Database database) throws DatabaseException {
         ForeignKey fk = new ForeignKey().setName(fkName);
         try {
-            ResultSet rs = getMetaData(database).getImportedKeys(getJdbcCatalogName(schema), getJdbcSchemaName(schema), database.correctTableName(foreignKeyTableName));
+            ResultSet rs = getMetaData(database).getImportedKeys(getJdbcCatalogName(schema), getJdbcSchemaName(schema), database.correctObjectName(foreignKeyTableName, ForeignKey.class));
             try {
                 while (rs.next()) {
                     ForeignKey foundFk = new ForeignKey().setName(rs.getString("FK_NAME"));
@@ -1023,7 +1023,7 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
                         PrimaryKey primaryKey = new PrimaryKey();
                         primaryKey.setTable(table);
                         primaryKey.addColumnName(position - 1, columnName);
-                        primaryKey.setName(database.correctPrimaryKeyName(rs.getString("PK_NAME")));
+                        primaryKey.setName(database.correctObjectName(rs.getString("PK_NAME"), PrimaryKey.class));
 
                         foundPKs.add(primaryKey);
                     }
