@@ -77,7 +77,7 @@ public class InsertOrUpdateGeneratorHsql extends InsertOrUpdateGenerator {
 		String sqlString;
 		if (newValue == null || newValue.toString().equals("") || newValue.toString().equalsIgnoreCase("NULL")) {
 			sqlString = "NULL";
-		} else if (newValue instanceof String && database.shouldQuoteValue(((String) newValue))) {
+		} else if (newValue instanceof String && !looksLikeFunctionCall(((String) newValue), database)) {
 			sqlString = "'" + database.escapeStringForDatabase(newValue.toString()) + "'";
 		} else if (newValue instanceof Date) {
 			sqlString = database.getDateLiteral(((Date) newValue));

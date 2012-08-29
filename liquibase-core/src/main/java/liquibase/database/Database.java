@@ -150,8 +150,6 @@ public interface Database extends DatabaseObject, PrioritizedService {
 
     boolean isLiquibaseTable(Schema schema, String tableName);
 
-    boolean shouldQuoteValue(String value);
-
     boolean supportsTablespaces();
 
     String getViewDefinition(Schema schema, String name) throws DatabaseException;

@@ -294,10 +294,6 @@ public class MockDatabase implements Database {
         return false;
     }
 
-    public boolean shouldQuoteValue(String value) {
-        return true;
-    }
-
     public boolean supportsTablespaces() {
         return false;
     }

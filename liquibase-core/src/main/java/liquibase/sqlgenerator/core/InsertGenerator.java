@@ -38,7 +38,7 @@ public class InsertGenerator extends AbstractSqlGenerator<InsertStatement> {
             Object newValue = statement.getColumnValues().get(column);
             if (newValue == null || newValue.toString().equalsIgnoreCase("NULL")) {
                 sql.append("NULL");
-            } else if (newValue instanceof String && database.shouldQuoteValue(((String) newValue))) {
+            } else if (newValue instanceof String && !looksLikeFunctionCall(((String) newValue), database)) {
                 sql.append("'").append(database.escapeStringForDatabase((String) newValue)).append("'");
             } else if (newValue instanceof Date) {
                 sql.append(database.getDateLiteral(((Date) newValue)));

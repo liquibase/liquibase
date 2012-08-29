@@ -7,10 +7,8 @@ import liquibase.database.structure.Schema;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.DateParseException;
 import liquibase.util.JdbcUtils;
-import sun.util.logging.resources.logging;
 
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -140,11 +138,6 @@ public class DB2Database extends AbstractDatabase {
         }
     }
 
-    @Override
-    public boolean shouldQuoteValue(String value) {
-        return super.shouldQuoteValue(value)
-                && !value.startsWith("\"SYSIBM\"");
-    }
 
 
     public boolean supportsTablespaces() {

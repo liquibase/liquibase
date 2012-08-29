@@ -929,10 +929,6 @@ public abstract class AbstractDatabase implements Database {
     }
 
 
-    public boolean shouldQuoteValue(String value) {
-        return true;
-    }
-
     public String getViewDefinition(Schema schema, String viewName) throws DatabaseException {
         schema = correctSchema(schema);
         String definition = (String) ExecutorService.getInstance().getExecutor(this).queryForObject(new GetViewDefinitionStatement(schema.getCatalogName(), schema.getName(), viewName), String.class);
