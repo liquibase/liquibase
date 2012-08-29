@@ -101,7 +101,6 @@ public class Schema extends DatabaseObjectImpl {
 
         public DatabaseSpecific(Catalog catalog, String name) {
             super(catalog, name);
-            this.database = database;
             if (catalog == null) {
                 this.catalog = new Catalog.DatabaseSpecific(null, database);
             }
