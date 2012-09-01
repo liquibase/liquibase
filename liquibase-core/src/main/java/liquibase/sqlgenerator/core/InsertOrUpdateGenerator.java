@@ -49,7 +49,7 @@ public abstract class InsertOrUpdateGenerator extends AbstractSqlGenerator<Inser
             if (newValue == null || newValue.toString().equals("NULL")) {
                 where.append("NULL");
             } else {
-                where.append(DataTypeFactory.getInstance().fromObject(newValue, database).objectToString(newValue, database));
+                where.append(DataTypeFactory.getInstance().fromObject(newValue, database).objectToSql(newValue, database));
             }
 
             where.append(" AND ");

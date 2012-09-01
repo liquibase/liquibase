@@ -25,12 +25,12 @@ public class TimeType  extends LiquibaseDataType {
     }
 
     @Override
-    public String objectToString(Object value, Database database) {
+    public String objectToSql(Object value, Database database) {
         if (value == null || value.toString().equalsIgnoreCase("null")) {
             return null;
         }  else if (value instanceof DatabaseFunction) {
             return ((DatabaseFunction) value).getValue();
-        } else if (value.toString().equals("CURRENT_TIMESTAMP()")) {
+        } else if (value instanceof String && database.getDateFunctions().contains(new DatabaseFunction(value.toString()))) {
               return database.getCurrentDateTimeFunction();
         } else if (value instanceof java.sql.Time) {
             return database.getTimeLiteral(((java.sql.Time) value));
@@ -40,7 +40,7 @@ public class TimeType  extends LiquibaseDataType {
     }
 
     @Override
-    public Object stringToObject(String value, Database database) {
+    public Object sqlToObject(String value, Database database) {
         if (database instanceof DB2Database) {
             return value.replaceFirst("^\"SYSIBM\".\"TIME\"\\('", "").replaceFirst("'\\)", "");
         }
@@ -48,7 +48,7 @@ public class TimeType  extends LiquibaseDataType {
             return value.replaceFirst("^TIME\\('", "").replaceFirst("'\\)", "");
         }
 
-        return super.stringToObject(value, database);
+        return super.sqlToObject(value, database);
     }
 
 }

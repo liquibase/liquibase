@@ -3,6 +3,7 @@ package liquibase.datatype;
 import liquibase.database.Database;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.servicelocator.PrioritizedService;
+import liquibase.statement.DatabaseFunction;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -88,16 +89,19 @@ public abstract class LiquibaseDataType implements PrioritizedService {
         return new DatabaseDataType(name, getParameters());
     }
 
-    public String objectToString(Object value, Database database) {
+    /**
+     * Returns the value object in a format to include in SQL. Quote if necessary.
+     */
+    public String objectToSql(Object value, Database database) {
         if (value == null || value.toString().equalsIgnoreCase("null")) {
             return null;
-        } else if (value.toString().equals("CURRENT_TIMESTAMP()") || value.toString().equals("NOW()")) {
+        } else if (database.getDateFunctions().contains(new DatabaseFunction(value.toString()))) {
             return database.getCurrentDateTimeFunction();
         }
         return value.toString();
     }
     
-    public Object stringToObject(String value, Database database) {
+    public Object sqlToObject(String value, Database database) {
         return value;
     }
 

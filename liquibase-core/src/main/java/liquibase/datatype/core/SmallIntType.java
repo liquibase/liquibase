@@ -15,13 +15,13 @@ public class SmallIntType extends LiquibaseDataType {
     @Override
     public DatabaseDataType toDatabaseDataType(Database database) {
         if (database instanceof DB2Database) {
-            return new DatabaseDataType("SMALLINT");
+            return new DatabaseDataType("SMALLINT"); //always smallint regardless of parameters passed
         }
         return super.toDatabaseDataType(database);
     }
 
     @Override
-    public String objectToString(Object value, Database database) {
+    public String objectToSql(Object value, Database database) {
         if (value == null || value.toString().equalsIgnoreCase("null")) {
             return null;
         }

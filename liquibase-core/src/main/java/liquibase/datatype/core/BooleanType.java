@@ -32,16 +32,16 @@ public class BooleanType extends LiquibaseDataType {
     }
 
     @Override
-    public String objectToString(Object value, Database database) {
+    public String objectToSql(Object value, Database database) {
         if (value == null || value.toString().equalsIgnoreCase("null")) {
             return null;
         }
 
         String returnValue;
         if (value instanceof String) {
-            if (((String) value).equalsIgnoreCase("true") || value.equals("1") || ((String) value).equalsIgnoreCase(this.getTrueBooleanValue(database))) {
+            if (((String) value).equalsIgnoreCase("true") || value.equals("1") || value.equals("t") || ((String) value).equalsIgnoreCase(this.getTrueBooleanValue(database))) {
                 returnValue = this.getTrueBooleanValue(database);
-            } else if (((String) value).equalsIgnoreCase("false") || value.equals("0") || ((String) value).equalsIgnoreCase(this.getFalseBooleanValue(database))) {
+            } else if (((String) value).equalsIgnoreCase("false") || value.equals("0") || value.equals("f") || ((String) value).equalsIgnoreCase(this.getFalseBooleanValue(database))) {
                 returnValue = this.getTrueBooleanValue(database);
             } else {
                 throw new UnexpectedLiquibaseException("Unknown boolean value: " + value);
@@ -62,7 +62,7 @@ public class BooleanType extends LiquibaseDataType {
     }
 
     protected boolean isNumericBoolean(Database database) {
-        if (database instanceof CacheDatabase
+        return database instanceof CacheDatabase
                 || database instanceof DB2Database
                 || database instanceof FirebirdDatabase
                 || database instanceof MSSQLDatabase
@@ -70,11 +70,7 @@ public class BooleanType extends LiquibaseDataType {
                 || database instanceof OracleDatabase
                 || database instanceof SybaseASADatabase
                 || database instanceof SybaseDatabase
-                || database instanceof DerbyDatabase) {
-            return true;
-        } else {
-            return false;
-        }
+                || database instanceof DerbyDatabase;
 
     }
 

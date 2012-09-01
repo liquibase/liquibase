@@ -152,10 +152,10 @@ public class DataTypeFactory {
     }
 
     public String getTrueBooleanValue(Database database) {
-        return fromDescription("boolean").objectToString(true, database);
+        return fromDescription("boolean").objectToSql(true, database);
     }
 
     public String getFalseBooleanValue(Database database) {
-        return fromDescription("boolean").objectToString(false, database);
+        return fromDescription("boolean").objectToSql(false, database);
     }
 }

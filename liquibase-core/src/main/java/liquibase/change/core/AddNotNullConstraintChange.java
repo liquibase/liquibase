@@ -89,7 +89,7 @@ public class AddNotNullConstraintChange extends AbstractChange {
     	List<SqlStatement> statements = new ArrayList<SqlStatement>();
     	
         if (defaultNullValue != null) {
-            String defaultValue = DataTypeFactory.getInstance().fromObject(getDefaultNullValue(), database).objectToString(getDefaultNullValue(), database);
+            String defaultValue = DataTypeFactory.getInstance().fromObject(getDefaultNullValue(), database).objectToSql(getDefaultNullValue(), database);
             
             statements.add(new UpdateStatement(getCatalogName(), getSchemaName(), getTableName())
                     .addNewColumnValue(getColumnName(), defaultValue)

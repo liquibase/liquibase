@@ -524,7 +524,7 @@ public class DiffToChangeLog {
                     Object defaultValue = column.getDefaultValue();
                     String defaultValueString;
                     if (defaultValue != null) {
-                        defaultValueString = DataTypeFactory.getInstance().from(column.getType()).objectToString(defaultValue, diffResult.getComparisonSnapshot().getDatabase());
+                        defaultValueString = DataTypeFactory.getInstance().from(column.getType()).objectToSql(defaultValue, diffResult.getComparisonSnapshot().getDatabase());
 
                         if (defaultValueString != null) {
                             change.setDefaultNullValue(defaultValueString);
@@ -588,7 +588,7 @@ public class DiffToChangeLog {
 
             Object defaultValue = column.getDefaultValue();
             if (defaultValue != null) {
-                String defaultValueString = DataTypeFactory.getInstance().from(column.getType()).objectToString(defaultValue, diffResult.getReferenceSnapshot().getDatabase());
+                String defaultValueString = DataTypeFactory.getInstance().from(column.getType()).objectToSql(defaultValue, diffResult.getReferenceSnapshot().getDatabase());
                 if (defaultValueString != null) {
                     defaultValueString = defaultValueString.replaceFirst("'",
                             "").replaceAll("'$", "");

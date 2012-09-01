@@ -35,7 +35,7 @@ public class MySQLDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerato
     //    @Override
 //    protected Object readDefaultValue(Column columnInfo, ResultSet rs, Database database) throws SQLException, DatabaseException {
 //            try {
-//                Object tmpDefaultValue = columnInfo.getType().toLiquibaseType().stringToObject(tableSchema.get(columnName).get(1), database);
+//                Object tmpDefaultValue = columnInfo.getType().toLiquibaseType().sqlToObject(tableSchema.get(columnName).get(1), database);
 //                // this just makes explicit the following implicit behavior defined in the mysql docs:
 //                // "If an ENUM column is declared to permit NULL, the NULL value is a legal value for
 //                // the column, and the default value is NULL. If an ENUM column is declared NOT NULL,
@@ -119,7 +119,7 @@ public class MySQLDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerato
 //
 //            DatabaseDataType dataType = new DatabaseDataType(tableSchema.get(columnName).get(0));
 //        	try {
-//                Object tmpDefaultValue = dataType.toLiquibaseType().stringToObject(tableSchema.get(columnName).get(1), database);
+//                Object tmpDefaultValue = dataType.toLiquibaseType().sqlToObject(tableSchema.get(columnName).get(1), database);
 //                // this just makes explicit the following implicit behavior defined in the mysql docs:
 //                // "If an ENUM column is declared to permit NULL, the NULL value is a legal value for
 //                // the column, and the default value is NULL. If an ENUM column is declared NOT NULL,

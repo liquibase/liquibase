@@ -35,10 +35,10 @@ public class DateTimeType extends LiquibaseDataType {
     }
 
     @Override
-    public String objectToString(Object value, Database database) {
+    public String objectToSql(Object value, Database database) {
         if (value == null || value.toString().equalsIgnoreCase("null")) {
             return null;
-        } else if (value.toString().equals("CURRENT_TIMESTAMP()")) {
+        } else if (value instanceof String && database.getDateFunctions().contains(new DatabaseFunction(value.toString()))) {
             return database.getCurrentDateTimeFunction();
         } else if (value instanceof DatabaseFunction) {
             return ((DatabaseFunction) value).getValue();
@@ -51,14 +51,14 @@ public class DateTimeType extends LiquibaseDataType {
     }
 
     @Override
-    public Object stringToObject(String value, Database database) {
+    public Object sqlToObject(String value, Database database) {
         if (database instanceof DB2Database) {
             return value.replaceFirst("^\"SYSIBM\".\"TIMESTAMP\"\\('", "").replaceFirst("'\\)", "");
         }
         if (database instanceof DerbyDatabase) {
             return value.replaceFirst("^TIMESTAMP\\('", "").replaceFirst("'\\)", "");
         }
-        return super.stringToObject(value, database);
+        return super.sqlToObject(value, database);
     }
 
 

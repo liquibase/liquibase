@@ -22,7 +22,7 @@ public class DateType extends LiquibaseDataType {
     }
 
     @Override
-    public String objectToString(Object value, Database database) {
+    public String objectToSql(Object value, Database database) {
         if (value == null || value.toString().equalsIgnoreCase("null")) {
             return null;
         } else if (value instanceof DatabaseFunction) {
@@ -44,7 +44,7 @@ public class DateType extends LiquibaseDataType {
 
 
     @Override
-    public Object stringToObject(String value, Database database) {
+    public Object sqlToObject(String value, Database database) {
         if (database instanceof DB2Database) {
             return value.replaceFirst("^\"SYSIBM\".\"DATE\"\\('", "").replaceFirst("'\\)", "");
         }
@@ -52,6 +52,6 @@ public class DateType extends LiquibaseDataType {
             return value.replaceFirst("^DATE\\('", "").replaceFirst("'\\)", "");
         }
 
-        return super.stringToObject(value, database);
+        return super.sqlToObject(value, database);
     }
 }

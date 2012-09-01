@@ -8,7 +8,7 @@ import liquibase.datatype.LiquibaseDataType;
 public class CharType extends LiquibaseDataType {
 
     @Override
-    public String objectToString(Object value, Database database) {
+    public String objectToSql(Object value, Database database) {
         if (value == null || value.toString().equalsIgnoreCase("null")) {
             return null;
         }

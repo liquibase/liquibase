@@ -99,7 +99,7 @@ public class AddColumnGeneratorDefaultClauseBeforeNotNull extends AddColumnGener
         String clause = "";
         Object defaultValue = statement.getDefaultValue();
         if (defaultValue != null) {
-            clause += " DEFAULT " + DataTypeFactory.getInstance().fromObject(defaultValue, database).objectToString(defaultValue, database);
+            clause += " DEFAULT " + DataTypeFactory.getInstance().fromObject(defaultValue, database).objectToSql(defaultValue, database);
         }
         return clause;
     }

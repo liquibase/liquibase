@@ -48,7 +48,7 @@ public class AddDefaultValueGeneratorInformix extends AddDefaultValueGenerator {
 		sql.append(DataTypeFactory.getInstance().fromDescription(statement.getColumnDataType()));
 		sql.append(" DEFAULT ");
 		sql.append(DataTypeFactory.getInstance().fromObject(defaultValue, database)
-				.objectToString(defaultValue, database));
+				.objectToSql(defaultValue, database));
 		sql.append(")");
 		UnparsedSql unparsedSql = new UnparsedSql(sql.toString(), column);
 		return new Sql[] { unparsedSql };
