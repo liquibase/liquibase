@@ -6,6 +6,7 @@ import static org.junit.Assert.*;
 import liquibase.database.core.H2Database;
 
 import java.util.Arrays;
+import static java.lang.String.format;
 
 
 public class ChangeLogParametersTest {
@@ -18,6 +19,30 @@ public class ChangeLogParametersTest {
         changeLogParameters.set("doubleSet", "newValue");
 
         assertEquals("re-setting a param should not overwrite the value (like how ant works)", "originalValue", changeLogParameters.getValue("doubleSet"));
+    }
+
+    @Test 
+    public void getParameterValue_escaped_simple() {
+        ChangeLogParameters changeLogParameters = new ChangeLogParameters(true);
+        
+        String expanded = changeLogParameters.expandExpressions("${:user.name}");
+        assertEquals("${user.name}", expanded);
+    }
+
+    @Test 
+    public void getParameterValue_escaped_and_undescaped() {
+        ChangeLogParameters changeLogParameters = new ChangeLogParameters(true);
+        
+        String expanded = changeLogParameters.expandExpressions("${user.name} != ${:user.name}");
+        assertEquals(format("%s != ${user.name}", changeLogParameters.getValue("user.name")), expanded);
+    }
+        
+    @Test 
+    public void getParameterValue_escaped_complex() {
+        ChangeLogParameters changeLogParameters = new ChangeLogParameters(true);
+        
+        String expanded = changeLogParameters.expandExpressions("${user.name} != ${:user.name} but does equal ${user.name}");
+        assertEquals(format("%s != ${user.name} but does equal %s", changeLogParameters.getValue("user.name"), changeLogParameters.getValue("user.name")), expanded);
     }
 
     @Test
