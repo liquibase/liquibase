@@ -11,6 +11,10 @@ import liquibase.database.Database;
 import liquibase.util.StringUtils;
 
 public class ChangeLogParameters {
+    static final String ENABLE_ESCAPING_OPT = "liquibase.enableEscaping";
+
+    private static final boolean EnableEscapingOpt = 
+        Boolean.valueOf(System.getProperty(ENABLE_ESCAPING_OPT, "false"));
 
     private List<ChangeLogParameter> changeLogParameters = new ArrayList<ChangeLogParameter>();
     private ExpressionExpander expressionExpander;
@@ -20,14 +24,23 @@ public class ChangeLogParameters {
     public ChangeLogParameters() {
         this(null);
     }
-
-    public ChangeLogParameters(Database currentDatabase) {
+    
+    public ChangeLogParameters(boolean enableEscaping) {
+        this(null, enableEscaping);
+    }
+    
+    public ChangeLogParameters(Database currentDatabase, boolean enableEscaping) {
         for (Map.Entry entry : System.getProperties().entrySet()) {
             changeLogParameters.add(new ChangeLogParameter(entry.getKey().toString(), entry.getValue()));
         }
-        this.expressionExpander = new ExpressionExpander(this);
+        
+        this.expressionExpander = new ExpressionExpander(this, EnableEscapingOpt || enableEscaping);
         this.currentDatabase = currentDatabase;
         this.currentContexts = new ArrayList<String>();
+    }
+    
+    public ChangeLogParameters(Database currentDatabase) {
+    	this(currentDatabase, false);
     }
 
     public void addContext(String context) {
@@ -144,16 +157,25 @@ public class ChangeLogParameters {
 
     protected static class ExpressionExpander {
         private ChangeLogParameters changeLogParameters;
+        private final boolean enableEscaping;
+        
+        public ExpressionExpander(ChangeLogParameters changeLogParameters, boolean enableEscaping) {
+            this.changeLogParameters = changeLogParameters;
+            this.enableEscaping = enableEscaping;
+        }
 
         public ExpressionExpander(ChangeLogParameters changeLogParameters) {
-            this.changeLogParameters = changeLogParameters;
+        	this(changeLogParameters, false);
         }
 
         public String expandExpressions(String text) {
             if (text == null) {
                 return null;
             }
-            Pattern expressionPattern = Pattern.compile("(\\$\\{[^\\}]+\\})");
+
+            final String parameterExp = enableEscaping ? "(\\$\\{[^:][^\\}]+\\})" : "(\\$\\{[^\\}]+\\})";
+
+            Pattern expressionPattern = Pattern.compile(parameterExp);
             Matcher matcher = expressionPattern.matcher(text);
             String originalText = text;
             while (matcher.find()) {
@@ -167,6 +189,18 @@ public class ChangeLogParameters {
                     text = text.replace(expressionString, value.toString());
                 }
             }
+
+            // if enabled, then collapse ${: into ${
+            if (enableEscaping) {
+                expressionPattern = Pattern.compile("(\\$\\{:[^\\}]+\\})");
+                matcher = expressionPattern.matcher(text);
+
+                while (matcher.find()) {
+                    String expressionString = text.substring(matcher.start(), matcher.end());
+                    text = text.replace(expressionString, "${" + expressionString.substring(3));
+                }
+            }
+
             return text;
         }
     }
