@@ -13,7 +13,7 @@ public class DatabaseFunctionType extends LiquibaseDataType {
         if (value == null  || value.toString().equalsIgnoreCase("null"))  {
             return null;
         }
-        if (database.getDateFunctions().contains(new DatabaseFunction(value.toString()))) {
+        if (isCurrentDateTimeFunction(value.toString(), database)) {
             return database.getCurrentDateTimeFunction();
         }
 

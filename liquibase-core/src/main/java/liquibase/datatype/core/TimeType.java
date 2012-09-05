@@ -30,7 +30,7 @@ public class TimeType  extends LiquibaseDataType {
             return null;
         }  else if (value instanceof DatabaseFunction) {
             return ((DatabaseFunction) value).getValue();
-        } else if (value instanceof String && database.getDateFunctions().contains(new DatabaseFunction(value.toString()))) {
+        } else if (value instanceof String && isCurrentDateTimeFunction(value.toString(), database)) {
               return database.getCurrentDateTimeFunction();
         } else if (value instanceof java.sql.Time) {
             return database.getTimeLiteral(((java.sql.Time) value));

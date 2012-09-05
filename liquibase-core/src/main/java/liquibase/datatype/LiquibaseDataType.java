@@ -95,7 +95,7 @@ public abstract class LiquibaseDataType implements PrioritizedService {
     public String objectToSql(Object value, Database database) {
         if (value == null || value.toString().equalsIgnoreCase("null")) {
             return null;
-        } else if (database.getDateFunctions().contains(new DatabaseFunction(value.toString()))) {
+        } else if (isCurrentDateTimeFunction(value.toString(), database)) {
             return database.getCurrentDateTimeFunction();
         }
         return value.toString();
@@ -136,5 +136,11 @@ public abstract class LiquibaseDataType implements PrioritizedService {
     @Override
     public int hashCode() {
         return toString().hashCode();
+    }
+
+    protected boolean isCurrentDateTimeFunction(String string, Database database) {
+        return string.toLowerCase().startsWith("current_timestamp")
+                || string.toLowerCase().startsWith("current_datetime")
+                || database.getCurrentDateTimeFunction().equalsIgnoreCase(string);
     }
 }

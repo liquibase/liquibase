@@ -1294,6 +1294,18 @@ public abstract class AbstractDatabase implements Database {
         return dateFunctions;
     }
 
+    public boolean isFunction(String string) {
+        if (string.endsWith("()")) {
+            return true;
+        }
+        for (DatabaseFunction function : getDateFunctions()) {
+            if (function.toString().equalsIgnoreCase(string)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public void resetInternalState() {
         this.ranChangeSetList = null;
         this.hasDatabaseChangeLogLockTable = false;

@@ -38,11 +38,15 @@ public class DateTimeType extends LiquibaseDataType {
     public String objectToSql(Object value, Database database) {
         if (value == null || value.toString().equalsIgnoreCase("null")) {
             return null;
-        } else if (value instanceof String && database.getDateFunctions().contains(new DatabaseFunction(value.toString()))) {
+        } else if (value instanceof String && isCurrentDateTimeFunction(value.toString(), database)) {
             return database.getCurrentDateTimeFunction();
         } else if (value instanceof DatabaseFunction) {
-            return ((DatabaseFunction) value).getValue();
-        } else if (database.getDateFunctions().contains(new DatabaseFunction(value.toString()))) {
+            if (isCurrentDateTimeFunction(value.toString(), database)) {
+                return database.getCurrentDateTimeFunction();
+            } else {
+                return ((DatabaseFunction) value).getValue();
+            }
+        } else if (database.isFunction(value.toString())) {
             return value.toString();
         } else if (value instanceof String) {
             return "'" + ((String) value).replaceAll("'", "''") + "'";
