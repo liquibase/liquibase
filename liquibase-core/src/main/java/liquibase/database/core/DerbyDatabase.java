@@ -1,11 +1,11 @@
 package liquibase.database.core;
 
 import java.lang.reflect.Method;
-import java.sql.Driver;
-import java.sql.SQLException;
+import java.sql.*;
 
 import liquibase.database.AbstractDatabase;
 import liquibase.database.DatabaseConnection;
+import liquibase.database.jvm.JdbcConnection;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.Schema;
 import liquibase.exception.DatabaseException;
@@ -14,7 +14,6 @@ import liquibase.logging.Logger;
 
 import java.lang.reflect.Method;
 import java.sql.Driver;
-import java.sql.DriverManager;
 import java.util.Enumeration;
 
 public class DerbyDatabase extends AbstractDatabase {
@@ -168,6 +167,18 @@ public class DerbyDatabase extends AbstractDatabase {
             driverVersionMajor = -1;
             driverVersionMinor = -1;
         }
+    }
+
+    @Override
+    protected String doGetDefaultSchemaName() {
+        try {
+            ResultSet resultSet = ((JdbcConnection) getConnection()).prepareStatement("select current schema from sysibm.sysdummy1").executeQuery();
+            resultSet.next();
+            return resultSet.getString(1);
+        } catch (Exception e) {
+            LogFactory.getLogger().info("Error getting default schema", e);
+        }
+        return null;
     }
 
 }

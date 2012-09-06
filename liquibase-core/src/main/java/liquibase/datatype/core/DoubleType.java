@@ -1,10 +1,7 @@
 package liquibase.datatype.core;
 
 import liquibase.database.Database;
-import liquibase.database.core.DB2Database;
-import liquibase.database.core.MSSQLDatabase;
-import liquibase.database.core.OracleDatabase;
-import liquibase.database.core.PostgresDatabase;
+import liquibase.database.core.*;
 import liquibase.datatype.DataTypeInfo;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
@@ -16,7 +13,7 @@ public class DoubleType  extends LiquibaseDataType {
         if (database instanceof MSSQLDatabase) {
             return new DatabaseDataType("FLOAT");
         }
-        if (database instanceof DB2Database) {
+        if (database instanceof DB2Database || database instanceof DerbyDatabase) {
             return new DatabaseDataType("DOUBLE");
         }
         if (database instanceof OracleDatabase) {

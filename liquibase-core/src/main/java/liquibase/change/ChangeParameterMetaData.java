@@ -41,7 +41,11 @@ public class ChangeParameterMetaData {
     }
 
     public boolean isRequiredFor(Database database) {
-        return requiredForDatabase.contains("all") || requiredForDatabase.contains(database.getShortName());
+        try {
+            return requiredForDatabase != null && (requiredForDatabase.contains("all") || requiredForDatabase.contains(database.getShortName()));
+        } catch (NullPointerException e) {
+            throw e;
+        }
     }
 
     public Object getCurrentValue(Change change) {

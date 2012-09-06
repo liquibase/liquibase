@@ -1,10 +1,7 @@
 package liquibase.datatype.core;
 
 import liquibase.database.Database;
-import liquibase.database.core.DB2Database;
-import liquibase.database.core.HsqlDatabase;
-import liquibase.database.core.MSSQLDatabase;
-import liquibase.database.core.MySQLDatabase;
+import liquibase.database.core.*;
 import liquibase.datatype.DataTypeInfo;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
@@ -13,7 +10,7 @@ import liquibase.datatype.LiquibaseDataType;
 public class NumberType extends LiquibaseDataType {
     @Override
     public DatabaseDataType toDatabaseDataType(Database database) {
-        if (database instanceof MySQLDatabase || database instanceof DB2Database|| database instanceof MSSQLDatabase || database instanceof HsqlDatabase) {
+        if (database instanceof MySQLDatabase || database instanceof DB2Database|| database instanceof MSSQLDatabase || database instanceof HsqlDatabase || database instanceof DerbyDatabase) {
             return new DatabaseDataType("numeric", getParameters());
         }
         return super.toDatabaseDataType(database);

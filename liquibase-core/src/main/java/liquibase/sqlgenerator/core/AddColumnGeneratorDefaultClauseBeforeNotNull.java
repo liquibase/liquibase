@@ -47,7 +47,7 @@ public class AddColumnGeneratorDefaultClauseBeforeNotNull extends AddColumnGener
     public ValidationErrors validate(AddColumnStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = super.validate(statement, database, sqlGeneratorChain);
         if (database instanceof DerbyDatabase && statement.isAutoIncrement()) {
-            validationErrors.addError("Cannot add an identity column to a database");
+            validationErrors.addError("Cannot add an identity column to derby");
         }
         return validationErrors;
     }

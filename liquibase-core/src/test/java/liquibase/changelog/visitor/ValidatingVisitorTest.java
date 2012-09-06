@@ -5,6 +5,7 @@ import liquibase.change.core.CreateTableChange;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.RanChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
+import liquibase.database.core.MockDatabase;
 import liquibase.exception.SetupException;
 import static org.junit.Assert.*;
 import org.junit.Before;
@@ -44,8 +45,8 @@ public class ValidatingVisitorTest {
         changeSet2.addChange(change2);
 
         ValidatingVisitor handler = new ValidatingVisitor(new ArrayList<RanChangeSet>());
-        handler.visit(changeSet1, new DatabaseChangeLog(), null);
-        handler.visit(changeSet2, new DatabaseChangeLog(), null);
+        handler.visit(changeSet1, new DatabaseChangeLog(), new MockDatabase());
+        handler.visit(changeSet2, new DatabaseChangeLog(), new MockDatabase());
 
         assertTrue(handler.validationPassed());
 

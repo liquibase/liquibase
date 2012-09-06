@@ -57,29 +57,32 @@ public class DB2Database extends AbstractDatabase {
 
     @Override
     public String getDefaultCatalogName() {
-      if( defaultSchemaName == null ) {
-        Statement stmt = null;
-        ResultSet rs = null;
-        try {
-          stmt = ((JdbcConnection)getConnection()).createStatement();
-          rs = stmt.executeQuery("select current schema from sysibm.sysdummy1");
-          if( rs.next() ) {
-            String result = rs.getString(1);
-            if( result != null ) {
-              this.defaultSchemaName = result;
-            } else {
-              this.defaultSchemaName = super.getDefaultSchemaName();
+        if (defaultSchemaName == null) {
+            if (getConnection() == null) {
+                return null;
             }
-          }
-        } catch (Exception e) {
-            throw new RuntimeException("Could not determine current schema", e);
-        } finally {
-          JdbcUtils.closeResultSet(rs);
-          JdbcUtils.closeStatement(stmt);
-        }
+            Statement stmt = null;
+            ResultSet rs = null;
+            try {
+                stmt = ((JdbcConnection) getConnection()).createStatement();
+                rs = stmt.executeQuery("select current schema from sysibm.sysdummy1");
+                if (rs.next()) {
+                    String result = rs.getString(1);
+                    if (result != null) {
+                        this.defaultSchemaName = result;
+                    } else {
+                        this.defaultSchemaName = super.getDefaultSchemaName();
+                    }
+                }
+            } catch (Exception e) {
+                throw new RuntimeException("Could not determine current schema", e);
+            } finally {
+                JdbcUtils.closeResultSet(rs);
+                JdbcUtils.closeStatement(stmt);
+            }
 
-      }
-      return defaultSchemaName;
+        }
+        return defaultSchemaName;
     }
 
     @Override

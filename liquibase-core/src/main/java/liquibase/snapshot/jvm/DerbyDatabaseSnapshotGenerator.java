@@ -2,11 +2,13 @@ package liquibase.snapshot.jvm;
 
 import liquibase.database.Database;
 import liquibase.database.core.DerbyDatabase;
+import liquibase.database.structure.Column;
 import liquibase.database.structure.Schema;
 import liquibase.exception.DatabaseException;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Map;
 
 public class DerbyDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerator {
     public boolean supports(Database database) {
@@ -17,7 +19,17 @@ public class DerbyDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerato
         return PRIORITY_DATABASE;
     }
 
-//    /**
+    @Override
+    protected Object readDefaultValue(Map<String, Object> columnMetadataResultSet, Column columnInfo, Database database) throws SQLException, DatabaseException {
+        Object val = columnMetadataResultSet.get("COLUMN_DEF");
+
+        if (val instanceof String && "GENERATED_BY_DEFAULT".equals(val)) {
+            return null;
+        }
+        return super.readDefaultValue(columnMetadataResultSet, columnInfo, database);
+    }
+
+    //    /**
 //     * Derby seems to have troubles
 //     */
 //    @Override
