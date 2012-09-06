@@ -9,13 +9,13 @@
           <property key="Bundle-DocURL" value="http://www.liquibase.org" />
           <property key="Bundle-Name" value="Liquibase with OSGI Support" />
           <property key="Export-Package" value="liquibase.*;version=&quot;3.0.0-SNAPSHOT&quot;" />
-          <property key="Import-Package" value="liquibase.*;version=&quot;3.0.0-SNAPSHOT&quot;,org.slf4j;version=&quot;[1.5,2.0)&quot;,javax.*;resolution:=optional,org.apache.tools.ant.*;resolution:=optional,org.springframework.*;resolution:=optional,org.w3c.*;resolution:=optional,org.xml.*;resolution:=optional,org.osgi.framework.*;resolution:=optional,javax.enterprise.*,com.sun.jdi*,org.apache.commons.lang.text,sun.misc;" />
+          <property key="Import-Package" value="liquibase.*;version=&quot;3.0.0-SNAPSHOT&quot;,org.slf4j;version=&quot;[1.5,2.0)&quot;,javax.*;resolution:=optional,org.apache.tools.ant.*;resolution:=optional,org.springframework.*;resolution:=optional,org.w3c.*;resolution:=optional,org.xml.*;resolution:=optional,org.osgi.framework.*;resolution:=optional,javax.enterprise.*;resolution:=optional,com.sun.*;resolution:=optional,sun.misc.*;resolution:=optional,org.apache.commons.lang.text;resolution:=optional," />
           <property key="Embed-Dependency" value="*;scope=compile|runtime;type=!pom;inline=false;artifactId=!slf4j-api" />
           <property key="Embed-Transitive" value="true" />
           <property key="DynamicImport-Package" value="net.sf.cglib.*" />
           <property key="-include" value="src/main/resources/META-INF/MANIFEST.MF" />
           <property key="Bundle-ClassPath" value=".,weld-se-1.1.8.Final.jar,liquibase-core-3.0.0-SNAPSHOT.jar" />
-          <property key="Include-Resource" value="weld-se-1.1.8.Final.jar=C:/Users/nathan.voxland/.m2/repository/org/jboss/weld/se/weld-se/1.1.8.Final/weld-se-1.1.8.Final.jar,liquibase-core-3.0.0-SNAPSHOT.jar=C:/dev-other/liquibase/liquibase-core/pom.xml" />
+          <property key="Include-Resource" value="weld-se-1.1.8.Final.jar=$MAVEN_REPOSITORY$/org/jboss/weld/se/weld-se/1.1.8.Final/weld-se-1.1.8.Final.jar,liquibase-core-3.0.0-SNAPSHOT.jar=$MODULE_DIR$/../liquibase-core/pom.xml" />
           <property key="Embedded-Artifacts" value="weld-se-1.1.8.Final.jar;g=&quot;org.jboss.weld.se&quot;;a=&quot;weld-se&quot;;v=&quot;1.1.8.Final&quot;,liquibase-core-3.0.0-SNAPSHOT.jar;g=&quot;org.liquibase&quot;;a=&quot;liquibase-core&quot;;v=&quot;3.0.0-SNAPSHOT&quot;" />
         </additionalProperties>
         <additionalJARContents />
