@@ -13,6 +13,13 @@ import liquibase.database.Database;
 import liquibase.util.StringUtils;
 
 public class ChangeLogParameters {
+	
+	public static final boolean EnableEscaping;
+	
+	static {
+		String enableEscaping = System.getProperty(ENABLE_CHANGELOG_PROP_ESCAPING, "false");
+		EnableEscaping = Boolean.valueOf(enableEscaping);
+	}
 
     private List<ChangeLogParameter> changeLogParameters = new ArrayList<ChangeLogParameter>();
     private ExpressionExpander expressionExpander;
@@ -28,8 +35,7 @@ public class ChangeLogParameters {
             changeLogParameters.add(new ChangeLogParameter(entry.getKey().toString(), entry.getValue()));
         }
         
-        String enableEscaping = System.getProperty(ENABLE_CHANGELOG_PROP_ESCAPING, "false");
-        this.expressionExpander = new ExpressionExpander(this, Boolean.valueOf(enableEscaping));
+        this.expressionExpander = new ExpressionExpander(this, EnableEscaping);
         this.currentDatabase = currentDatabase;
         this.currentContexts = new ArrayList<String>();
     }
