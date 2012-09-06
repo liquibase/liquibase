@@ -253,6 +253,14 @@ public class MSSQLDatabase extends AbstractDatabase {
     }
 
     @Override
+    public String escapeDatabaseObject(String catalogName, String schemaName, String objectName, Class<? extends DatabaseObject> objectType) {
+        if (schemaName == null) {
+            schemaName = "dbo";
+        }
+        return super.escapeDatabaseObject(catalogName, schemaName, objectName, objectType);
+    }
+
+    @Override
 	public String getDefaultSchemaName() {
         String defaultSchemaName = super.getDefaultSchemaName();
         if (defaultSchemaName == null) {

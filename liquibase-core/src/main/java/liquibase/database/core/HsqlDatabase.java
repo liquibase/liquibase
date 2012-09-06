@@ -2,6 +2,7 @@ package liquibase.database.core;
 
 import liquibase.database.AbstractDatabase;
 import liquibase.database.DatabaseConnection;
+import liquibase.database.jvm.JdbcConnection;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.DateParseException;
@@ -60,11 +61,6 @@ public class HsqlDatabase extends AbstractDatabase {
     }
 
     @Override
-    public boolean supportsCatalogs() {
-        return false;
-    }
-
-    @Override
     public boolean supportsSequences() {
         return true;
     }
@@ -74,7 +70,12 @@ public class HsqlDatabase extends AbstractDatabase {
     }
 
     @Override
-    public String getDefaultSchemaName() {
+    protected String doGetDefaultCatalogName() throws DatabaseException {
+        return "PUBLIC";
+    }
+
+    @Override
+    protected String doGetDefaultSchemaName() {
         return "PUBLIC";
     }
 
@@ -143,6 +144,11 @@ public class HsqlDatabase extends AbstractDatabase {
 
     public boolean supportsTablespaces() {
         return false;
+    }
+
+    @Override
+    public String escapeDatabaseObject(String catalogName, String schemaName, String objectName, Class<? extends DatabaseObject> objectType) {
+        return super.escapeDatabaseObject(null, schemaName, objectName, objectType);
     }
 
     @Override

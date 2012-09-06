@@ -86,7 +86,7 @@ public abstract class LiquibaseDataType implements PrioritizedService {
     }
 
     public DatabaseDataType toDatabaseDataType(Database database) {
-        return new DatabaseDataType(name, getParameters());
+        return new DatabaseDataType(name.toUpperCase(), getParameters());
     }
 
     /**

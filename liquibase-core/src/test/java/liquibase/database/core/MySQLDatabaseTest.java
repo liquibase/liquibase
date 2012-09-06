@@ -53,7 +53,7 @@ public class MySQLDatabaseTest extends AbstractDatabaseTest {
     @Test
     public void escapeTableName_withSchema() {
         Database database = getDatabase();
-        assertEquals("`schemaName`.`tableName`", database.escapeTableName("catalogName", "schemaName", "tableName"));
+        assertEquals("`catalogName`.`tableName`", database.escapeTableName("catalogName", "schemaName", "tableName"));
     }
 
 }

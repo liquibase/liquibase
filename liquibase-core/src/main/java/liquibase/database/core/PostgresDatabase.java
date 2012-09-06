@@ -27,6 +27,8 @@ public class PostgresDatabase extends AbstractDatabase {
     private Set<String> reservedWords = new HashSet<String>();
 
     public PostgresDatabase() {
+        reservedWords.addAll(Arrays.asList("USER", "LIKE", "GROUP", "DATE", "ALL"));
+
 //        systemTablesAndViews.add("pg_logdir_ls");
 //        systemTablesAndViews.add("administrable_role_authorizations");
 //        systemTablesAndViews.add("applicable_roles");
@@ -81,7 +83,6 @@ public class PostgresDatabase extends AbstractDatabase {
     public void setConnection(DatabaseConnection conn) {
         try {
             reservedWords.addAll(Arrays.asList(((JdbcConnection) conn).getMetaData().getSQLKeywords().toUpperCase().split(",\\s*")));
-            reservedWords.addAll(Arrays.asList("USER", "LIKE", "GROUP", "DATE", "ALL"));
         } catch (Exception e) {
             LogFactory.getLogger().warning("Cannot retrieve reserved words", e);
         }
