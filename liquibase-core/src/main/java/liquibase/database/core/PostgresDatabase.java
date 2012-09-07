@@ -133,6 +133,11 @@ public class PostgresDatabase extends AbstractDatabase {
     }
 
     @Override
+    public boolean supportsCatalogInObjectName() {
+        return false;
+    }
+
+    @Override
     public boolean supportsSequences() {
         return true;
     }
@@ -301,10 +306,5 @@ public class PostgresDatabase extends AbstractDatabase {
         Long count = ExecutorService.getInstance().getExecutor(this).queryForLong(new RawSqlStatement(query));
 
         return count != null && count > 0;
-    }
-
-    @Override
-    public String escapeIndexName(String catalogName,String schemaName, String indexName) {
-        return escapeDatabaseObject(indexName, Index.class);
     }
 }

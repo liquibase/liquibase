@@ -26,14 +26,13 @@ public class InsertOrUpdateGeneratorMSSQLTest {
 
         String where = "1 = 1";
 
-        Class c = InsertOrUpdateGenerator.class.getClass();
         String recordCheck = (String)invokePrivateMethod(generator,"getRecordCheck", new Object[] {statement,database,where});
 
         Integer lineNumber = 0;
         String[] lines = recordCheck.split("\n");
         assertEquals("DECLARE @reccount integer", lines[lineNumber]);
         lineNumber++;
-        assertEquals("SELECT @reccount = count(*) FROM [myschema].[mytable] WHERE " + where, lines[lineNumber]);
+        assertEquals("SELECT @reccount = count(*) FROM [mycatalog].[myschema].[mytable] WHERE " + where, lines[lineNumber]);
         lineNumber++;
         assertEquals("IF @reccount = 0", lines[lineNumber]);
 

@@ -931,7 +931,7 @@ public abstract class AbstractDatabase implements Database {
             schemaName = StringUtils.trimToNull(schemaName);
             if (catalogName == null && schemaName == null) {
                 return escapeDatabaseObject(objectName, objectType);
-            } else if (catalogName == null) {
+            } else if (catalogName == null || !this.supportsCatalogInObjectName()) {
                 return escapeDatabaseObject(schemaName, Schema.class)+"."+escapeDatabaseObject(objectName, objectType);
             } else {
                 return escapeDatabaseObject(catalogName, Catalog.class)+"."+escapeDatabaseObject(schemaName, Schema.class)+"."+escapeDatabaseObject(objectName, objectType);
@@ -987,6 +987,10 @@ public abstract class AbstractDatabase implements Database {
     }
 
     public boolean supportsCatalogs() {
+        return true;
+    }
+
+    public boolean supportsCatalogInObjectName() {
         return true;
     }
 

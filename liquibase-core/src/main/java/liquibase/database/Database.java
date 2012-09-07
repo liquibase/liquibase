@@ -198,6 +198,8 @@ public interface Database extends DatabaseObject, PrioritizedService {
 
     boolean supportsSchemas();
 
+    boolean supportsCatalogInObjectName();
+
     String generatePrimaryKeyName(String tableName);
 
     String escapeSequenceName(String catalogName, String schemaName, String sequenceName);
