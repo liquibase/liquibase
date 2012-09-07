@@ -21,6 +21,7 @@ public abstract class LiquibaseDataType implements PrioritizedService {
     private int maxParameters;
 
     private List<Object> parameters = new ArrayList<Object>();
+    private String additionalInformation;
 
     public LiquibaseDataType() {
         DataTypeInfo dataTypeAnnotation = this.getClass().getAnnotation(DataTypeInfo.class);
@@ -71,6 +72,14 @@ public abstract class LiquibaseDataType implements PrioritizedService {
         this.parameters.add(value);
     }
 
+    public String getAdditionalInformation() {
+        return additionalInformation;
+    }
+
+    public void setAdditionalInformation(String additionalInformation) {
+        this.additionalInformation = additionalInformation;
+    }
+
     public boolean validate(Database database) {
         int maxParameters = this.getMaxParameters(database);
         int minParameters = this.getMinParameters(database);
@@ -86,7 +95,10 @@ public abstract class LiquibaseDataType implements PrioritizedService {
     }
 
     public DatabaseDataType toDatabaseDataType(Database database) {
-        return new DatabaseDataType(name.toUpperCase(), getParameters());
+        DatabaseDataType type = new DatabaseDataType(name.toUpperCase(), getParameters());
+        type.addAdditionalInformation(additionalInformation);
+
+        return type;
     }
 
     /**
@@ -123,6 +135,10 @@ public abstract class LiquibaseDataType implements PrioritizedService {
 //            }
 
             returnString += ")";
+        }
+
+        if (additionalInformation != null) {
+            returnString += " "+additionalInformation;
         }
 
         return returnString.trim();

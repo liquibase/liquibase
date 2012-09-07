@@ -66,7 +66,7 @@ public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTab
                 statement.addColumn(COLUMN_NAME1, DataTypeFactory.getInstance().fromDescription("int(11) unsigned"));
 
             if (database instanceof MySQLDatabase) {
-                assertEquals("CREATE TABLE `CATALOG_NAME`.`TABLE_NAME` (`COLUMN1_NAME` INT(11) unsigned)", this.generatorUnderTest.generateSql(statement, database, null)[0].toSql());
+                assertEquals("CREATE TABLE `CATALOG_NAME`.`TABLE_NAME` (`COLUMN1_NAME` INT(11) unsigned NULL)", this.generatorUnderTest.generateSql(statement, database, null)[0].toSql());
             }
         }
     }
@@ -705,7 +705,7 @@ public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTab
 	    		
 	    		Sql[] generatedSql = this.generatorUnderTest.generateSql(statement, database, null);
     		
-    			assertEquals("CREATE TABLE CATALOG_NAME.SCHEMA_NAME.TABLE_NAME (COLUMN1_NAME BIGSERIAL)", generatedSql[0].toSql());
+    			assertEquals("CREATE TABLE SCHEMA_NAME.TABLE_NAME (COLUMN1_NAME BIGSERIAL)", generatedSql[0].toSql());
     		}
     	}
     }
@@ -724,7 +724,7 @@ public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTab
 	    		Sql[] generatedSql = this.generatorUnderTest.generateSql(statement, database, null);
     		
 	    		// start with supported over generated sequence
-    			assertEquals("CREATE TABLE CATALOG_NAME.SCHEMA_NAME.TABLE_NAME (COLUMN1_NAME BIGSERIAL)", generatedSql[0].toSql());
+    			assertEquals("CREATE TABLE SCHEMA_NAME.TABLE_NAME (COLUMN1_NAME BIGSERIAL)", generatedSql[0].toSql());
     		}
     	}
     }
@@ -743,7 +743,7 @@ public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTab
 	    		Sql[] generatedSql = this.generatorUnderTest.generateSql(statement, database, null);
 	
 	    		// start with and increment by supported over generated sequence
-				assertEquals("CREATE TABLE CATALOG_NAME.SCHEMA_NAME.TABLE_NAME (COLUMN1_NAME BIGSERIAL)", generatedSql[0].toSql());
+				assertEquals("CREATE TABLE SCHEMA_NAME.TABLE_NAME (COLUMN1_NAME BIGSERIAL)", generatedSql[0].toSql());
     		}
     	}
     }     

@@ -9,6 +9,12 @@ public class DatabaseDataType {
     public DatabaseDataType(String type) {
         this.type = type;
     }
+
+    public void addAdditionalInformation(String additionalInformation) {
+        if (additionalInformation != null) {
+            this.type += " "+additionalInformation;
+        }
+    }
     
     public DatabaseDataType(String name, Object... parameters) {
         this.type = name;

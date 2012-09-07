@@ -118,6 +118,13 @@ public class DataTypeFactory {
             }
         }
 
+        //try to something like "int(11) unsigned" or int unsigned but not "varchar(11 bytes)"
+        String lookingForAdditionalInfo = dataTypeDefinition;
+        lookingForAdditionalInfo = lookingForAdditionalInfo.replaceFirst("\\(.*\\)", "");
+        if (lookingForAdditionalInfo.contains(" ")) {
+            liquibaseDataType.setAdditionalInformation(lookingForAdditionalInfo.split(" ", 2)[1]);
+        }
+
         if (dataTypeDefinition.matches(".*\\{.*")) {
             String paramStrings = dataTypeDefinition.replaceFirst(".*?\\{", "").replaceFirst("\\}.*", "");
             String[] params = paramStrings.split(",");
