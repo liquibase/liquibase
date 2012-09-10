@@ -238,4 +238,15 @@ public class OracleDatabase extends AbstractDatabase {
     public boolean supportsRestrictForeignKeys() {
         return false;
     }
+
+    @Override
+    public int getDataTypeMaxParameters(String dataTypeName) {
+        if (dataTypeName.toUpperCase().equals("BINARY_FLOAT")) {
+            return 0;
+        }
+        if (dataTypeName.toUpperCase().equals("BINARY_DOUBLE")) {
+            return 0;
+        }
+        return super.getDataTypeMaxParameters(dataTypeName);
+    }
 }

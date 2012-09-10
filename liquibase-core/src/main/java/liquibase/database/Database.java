@@ -285,4 +285,6 @@ public interface Database extends DatabaseObject, PrioritizedService {
     String getAssumedCatalogName(String catalogName, String schemaName);
 
     boolean isFunction(String string);
+
+    int getDataTypeMaxParameters(String dataTypeName);
 }

@@ -532,4 +532,8 @@ public class MockDatabase implements Database {
         }
         return false;
     }
+
+    public int getDataTypeMaxParameters(String dataTypeName) {
+        return 2;
+    }
 }

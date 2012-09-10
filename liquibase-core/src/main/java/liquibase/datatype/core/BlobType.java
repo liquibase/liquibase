@@ -31,6 +31,9 @@ public class BlobType extends LiquibaseDataType {
         if (database instanceof SybaseDatabase) {
             return new DatabaseDataType("IMAGE");
         }
+        if (database instanceof OracleDatabase) {
+            return new DatabaseDataType("BLOB");
+        }
         return super.toDatabaseDataType(database);
     }
 

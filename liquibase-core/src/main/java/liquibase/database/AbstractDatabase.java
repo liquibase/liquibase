@@ -1333,4 +1333,8 @@ public abstract class AbstractDatabase implements Database {
     public boolean equals(String otherObject, Database accordingTo) {
         return this.getName().equals(otherObject);
     }
+
+    public int getDataTypeMaxParameters(String dataTypeName) {
+        return 2;
+    }
 }
