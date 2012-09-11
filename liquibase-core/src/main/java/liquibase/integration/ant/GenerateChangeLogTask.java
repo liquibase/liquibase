@@ -2,7 +2,7 @@ package liquibase.integration.ant;
 
 import liquibase.Liquibase;
 import liquibase.database.Database;
-import liquibase.database.structure.Schema;
+import liquibase.structure.core.Schema;
 import liquibase.diff.DiffControl;
 import liquibase.diff.DiffGeneratorFactory;
 import liquibase.diff.DiffResult;

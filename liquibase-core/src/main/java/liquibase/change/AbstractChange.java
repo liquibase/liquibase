@@ -9,7 +9,7 @@ import java.util.Set;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
-import liquibase.database.structure.DatabaseObject;
+import liquibase.structure.DatabaseObject;
 import liquibase.exception.*;
 import liquibase.logging.LogFactory;
 import liquibase.resource.ResourceAccessor;

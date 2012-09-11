@@ -1,13 +1,12 @@
 package liquibase.database.core;
 
 import java.math.BigInteger;
-import java.sql.SQLException;
 
 import liquibase.database.AbstractDatabase;
 import liquibase.database.DatabaseConnection;
-import liquibase.database.structure.DatabaseObject;
-import liquibase.database.structure.Index;
-import liquibase.database.structure.PrimaryKey;
+import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.Index;
+import liquibase.structure.core.PrimaryKey;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.ExecutorService;
 import liquibase.statement.core.RawSqlStatement;

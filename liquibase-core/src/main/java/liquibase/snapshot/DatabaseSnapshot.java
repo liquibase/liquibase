@@ -1,8 +1,11 @@
 package liquibase.snapshot;
 
 import liquibase.database.Database;
-import liquibase.database.structure.*;
-import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.Column;
+import liquibase.structure.core.PrimaryKey;
+import liquibase.structure.core.Schema;
+import liquibase.structure.core.Table;
 
 import java.util.*;
 

@@ -1,6 +1,6 @@
 package liquibase.assertions;
 
-import liquibase.database.structure.ForeignKey;
+import liquibase.structure.core.ForeignKey;
 import liquibase.diff.DiffResult;
 import static org.junit.Assert.*;
 

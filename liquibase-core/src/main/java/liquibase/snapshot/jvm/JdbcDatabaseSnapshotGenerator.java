@@ -4,8 +4,7 @@ import liquibase.database.Database;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.database.core.InformixDatabase;
 import liquibase.database.core.OracleDatabase;
-import liquibase.database.structure.*;
-import liquibase.database.structure.DataType;
+import liquibase.structure.core.*;
 import liquibase.diff.DiffControl;
 import liquibase.diff.DiffStatusListener;
 import liquibase.exception.DatabaseException;
@@ -18,6 +17,7 @@ import liquibase.snapshot.DatabaseSnapshotGeneratorFactory;
 import liquibase.statement.DatabaseFunction;
 import liquibase.statement.core.GetViewDefinitionStatement;
 import liquibase.statement.core.SelectSequencesStatement;
+import liquibase.structure.DatabaseObject;
 import liquibase.util.StringUtils;
 
 import java.math.BigDecimal;

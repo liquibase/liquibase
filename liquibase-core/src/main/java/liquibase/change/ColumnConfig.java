@@ -6,7 +6,7 @@ import java.text.ParseException;
 import java.util.Date;
 import java.util.Locale;
 
-import liquibase.database.structure.Column;
+import liquibase.structure.core.Column;
 import liquibase.statement.DatabaseFunction;
 import liquibase.util.ISODateFormat;
 

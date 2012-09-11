@@ -1,9 +1,6 @@
 package liquibase.diff.output;
 
-import liquibase.database.structure.Column;
-import liquibase.database.structure.DatabaseObject;
-import liquibase.database.structure.Table;
-import liquibase.database.structure.View;
+import liquibase.structure.DatabaseObject;
 import liquibase.diff.DiffResult;
 import liquibase.diff.StringDiff;
 import liquibase.exception.DatabaseException;

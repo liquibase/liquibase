@@ -2,10 +2,9 @@ package liquibase.snapshot.jvm;
 
 import liquibase.database.Database;
 import liquibase.database.core.InformixDatabase;
-import liquibase.database.structure.Column;
-import liquibase.database.structure.DataType;
+import liquibase.structure.core.Column;
+import liquibase.structure.core.DataType;
 
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;

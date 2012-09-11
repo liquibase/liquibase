@@ -2,7 +2,7 @@ package liquibase.snapshot.jvm;
 
 import liquibase.database.Database;
 import liquibase.database.core.MSSQLDatabase;
-import liquibase.database.structure.ForeignKeyConstraintType;
+import liquibase.structure.core.ForeignKeyConstraintType;
 import liquibase.exception.DatabaseException;
 
 public class MSSQLDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerator {

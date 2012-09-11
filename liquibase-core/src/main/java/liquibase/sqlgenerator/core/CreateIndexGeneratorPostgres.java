@@ -10,7 +10,7 @@ import liquibase.database.core.InformixDatabase;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.core.PostgresDatabase;
 import liquibase.database.core.SybaseASADatabase;
-import liquibase.database.structure.Index;
+import liquibase.structure.core.Index;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;

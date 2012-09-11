@@ -2,8 +2,8 @@ package liquibase.dbdoc;
 
 import liquibase.change.Change;
 import liquibase.database.Database;
-import liquibase.database.structure.Column;
-import liquibase.database.structure.Table;
+import liquibase.structure.core.Column;
+import liquibase.structure.core.Table;
 
 import java.io.File;
 import java.io.FileWriter;

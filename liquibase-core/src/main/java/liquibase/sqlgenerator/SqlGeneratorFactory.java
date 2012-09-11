@@ -1,7 +1,7 @@
 package liquibase.sqlgenerator;
 
 import liquibase.database.Database;
-import liquibase.database.structure.DatabaseObject;
+import liquibase.structure.DatabaseObject;
 import liquibase.exception.ValidationErrors;
 import liquibase.exception.Warnings;
 import liquibase.servicelocator.ServiceLocator;

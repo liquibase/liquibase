@@ -1,14 +1,11 @@
 package liquibase.snapshot.jvm;
 
 import liquibase.database.Database;
-import liquibase.database.structure.Column;
-import liquibase.database.structure.Schema;
-import liquibase.database.structure.Table;
+import liquibase.structure.core.Column;
 import liquibase.database.core.H2Database;
 import liquibase.exception.DatabaseException;
 import liquibase.statement.DatabaseFunction;
 
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Map;
 

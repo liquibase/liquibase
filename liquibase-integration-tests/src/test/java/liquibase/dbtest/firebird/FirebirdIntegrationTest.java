@@ -1,7 +1,7 @@
 package liquibase.dbtest.firebird;
 
-import liquibase.database.structure.Catalog;
-import liquibase.database.structure.Schema;
+import liquibase.structure.core.Catalog;
+import liquibase.structure.core.Schema;
 import liquibase.dbtest.AbstractIntegrationTest;
 import liquibase.exception.DatabaseException;
 

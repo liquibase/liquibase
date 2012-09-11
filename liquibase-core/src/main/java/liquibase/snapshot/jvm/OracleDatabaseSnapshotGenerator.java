@@ -3,9 +3,9 @@ package liquibase.snapshot.jvm;
 import liquibase.database.Database;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.database.core.OracleDatabase;
-import liquibase.database.structure.*;
 import liquibase.exception.DatabaseException;
 import liquibase.snapshot.DatabaseSnapshot;
+import liquibase.structure.core.*;
 import liquibase.util.JdbcUtils;
 
 import java.sql.*;

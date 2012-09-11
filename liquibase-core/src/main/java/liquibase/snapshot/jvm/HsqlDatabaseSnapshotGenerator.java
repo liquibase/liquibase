@@ -2,7 +2,7 @@ package liquibase.snapshot.jvm;
 
 import liquibase.database.Database;
 import liquibase.database.core.HsqlDatabase;
-import liquibase.database.structure.Schema;
+import liquibase.structure.core.Schema;
 
 public class HsqlDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerator {
     public boolean supports(Database database) {

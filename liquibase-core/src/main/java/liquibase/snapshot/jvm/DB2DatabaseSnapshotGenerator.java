@@ -2,7 +2,7 @@ package liquibase.snapshot.jvm;
 
 import liquibase.database.Database;
 import liquibase.database.core.DB2Database;
-import liquibase.database.structure.Schema;
+import liquibase.structure.core.Schema;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.ExecutorService;
 import liquibase.statement.core.RawSqlStatement;

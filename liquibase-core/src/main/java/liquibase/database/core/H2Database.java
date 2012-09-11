@@ -2,8 +2,8 @@ package liquibase.database.core;
 
 import liquibase.database.DatabaseConnection;
 import liquibase.database.AbstractDatabase;
-import liquibase.database.structure.DatabaseObject;
-import liquibase.database.structure.Schema;
+import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.Schema;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.DateParseException;
 import liquibase.statement.DatabaseFunction;

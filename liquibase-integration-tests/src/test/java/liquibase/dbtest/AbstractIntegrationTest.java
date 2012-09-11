@@ -2,10 +2,10 @@ package liquibase.dbtest;
 
 import liquibase.Liquibase;
 import liquibase.database.jvm.JdbcConnection;
-import liquibase.database.structure.Catalog;
-import liquibase.database.structure.Schema;
-import liquibase.database.structure.Table;
-import liquibase.database.structure.View;
+import liquibase.structure.core.Catalog;
+import liquibase.structure.core.Schema;
+import liquibase.structure.core.Table;
+import liquibase.structure.core.View;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.diff.DiffControl;
 import liquibase.diff.DiffGeneratorFactory;

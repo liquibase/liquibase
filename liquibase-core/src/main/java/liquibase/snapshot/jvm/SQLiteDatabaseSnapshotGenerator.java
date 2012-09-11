@@ -4,7 +4,7 @@ import liquibase.database.Database;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.database.core.SQLiteDatabase;
-import liquibase.database.structure.*;
+import liquibase.structure.*;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.ExecutorService;
 import liquibase.logging.LogFactory;

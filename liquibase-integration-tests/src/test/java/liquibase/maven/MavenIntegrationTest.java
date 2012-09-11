@@ -3,7 +3,7 @@ package liquibase.maven;
 import java.io.IOException;
 import java.io.File;
 
-import liquibase.database.structure.Schema;
+import liquibase.structure.core.Schema;
 import org.apache.maven.it.VerificationException;
 
 import org.apache.maven.it.Verifier;

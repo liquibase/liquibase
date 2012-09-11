@@ -1,4 +1,4 @@
-package liquibase.database.structure;
+package liquibase.structure;
 
 import liquibase.database.Database;
 

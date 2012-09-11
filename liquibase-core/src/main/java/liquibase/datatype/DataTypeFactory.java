@@ -1,7 +1,7 @@
 package liquibase.datatype;
 
 import liquibase.database.Database;
-import liquibase.database.structure.DataType;
+import liquibase.structure.core.DataType;
 import liquibase.datatype.core.UnknownType;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.servicelocator.ServiceLocator;

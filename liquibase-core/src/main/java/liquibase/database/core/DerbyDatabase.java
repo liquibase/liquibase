@@ -1,18 +1,16 @@
 package liquibase.database.core;
 
-import java.lang.reflect.Method;
 import java.sql.*;
 
 import liquibase.database.AbstractDatabase;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.jvm.JdbcConnection;
-import liquibase.database.structure.DatabaseObject;
-import liquibase.database.structure.Schema;
+import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.Schema;
 import liquibase.exception.DatabaseException;
 import liquibase.logging.LogFactory;
 import liquibase.logging.Logger;
 
-import java.lang.reflect.Method;
 import java.sql.Driver;
 import java.util.Enumeration;
 

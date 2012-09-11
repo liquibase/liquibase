@@ -1,9 +1,9 @@
 package liquibase.snapshot;
 
 import liquibase.database.Database;
-import liquibase.database.structure.Schema;
-import liquibase.database.structure.Table;
-import liquibase.database.structure.Column;
+import liquibase.structure.core.Schema;
+import liquibase.structure.core.Table;
+import liquibase.structure.core.Column;
 import liquibase.diff.DiffControl;
 import liquibase.exception.DatabaseException;
 

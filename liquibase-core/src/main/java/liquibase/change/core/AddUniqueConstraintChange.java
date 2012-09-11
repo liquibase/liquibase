@@ -2,14 +2,8 @@ package liquibase.change.core;
 
 import liquibase.change.*;
 import liquibase.database.Database;
-import liquibase.database.core.SQLiteDatabase;
-import liquibase.database.core.SQLiteDatabase.AlterTableVisitor;
-import liquibase.database.structure.Index;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.AddUniqueConstraintStatement;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Adds a unique constraint to an existing column.

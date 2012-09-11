@@ -1,10 +1,10 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
-import liquibase.database.structure.Schema;
+import liquibase.structure.core.Schema;
 import liquibase.datatype.DataTypeFactory;
-import liquibase.database.structure.Column;
-import liquibase.database.structure.Table;
+import liquibase.structure.core.Column;
+import liquibase.structure.core.Table;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;

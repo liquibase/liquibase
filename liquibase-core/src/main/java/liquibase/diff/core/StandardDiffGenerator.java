@@ -1,7 +1,6 @@
 package liquibase.diff.core;
 
 import liquibase.database.Database;
-import liquibase.database.structure.*;
 import liquibase.diff.StringDiff;
 import liquibase.diff.DiffControl;
 import liquibase.diff.DiffGenerator;
@@ -9,6 +8,9 @@ import liquibase.diff.DiffResult;
 import liquibase.exception.DatabaseException;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.DatabaseSnapshotGeneratorFactory;
+import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.Schema;
+import liquibase.structure.core.Table;
 
 public class StandardDiffGenerator implements DiffGenerator {
 

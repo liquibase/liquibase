@@ -2,8 +2,8 @@ package liquibase.snapshot.jvm;
 
 import liquibase.database.Database;
 import liquibase.database.core.MySQLDatabase;
-import liquibase.database.structure.DatabaseObject;
-import liquibase.database.structure.Index;
+import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.Index;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;

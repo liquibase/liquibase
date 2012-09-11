@@ -4,8 +4,8 @@ import liquibase.change.Change;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.RanChangeSet;
-import liquibase.database.structure.DatabaseObject;
-import liquibase.database.structure.Schema;
+import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.Schema;
 import liquibase.exception.*;
 import liquibase.servicelocator.PrioritizedService;
 import liquibase.sql.visitor.SqlVisitor;
@@ -15,7 +15,6 @@ import liquibase.statement.DatabaseFunction;
 import java.io.IOException;
 import java.io.Writer;
 import java.math.BigInteger;
-import java.sql.SQLException;
 import java.util.Date;
 import java.util.List;
 

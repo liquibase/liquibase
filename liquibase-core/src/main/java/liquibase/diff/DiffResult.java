@@ -1,14 +1,12 @@
 package liquibase.diff;
 
-import liquibase.database.structure.*;
 import liquibase.exception.DatabaseException;
 import liquibase.snapshot.DatabaseSnapshot;
+import liquibase.structure.DatabaseObject;
 
 import java.io.*;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 public class DiffResult {
 
@@ -18,7 +16,7 @@ public class DiffResult {
     private StringDiff productName;
     private StringDiff productVersion;
 
-    private Map<Class<? extends DatabaseObject>, DatabaseObjectDiff> databaseObjectDiffs = new HashMap<Class<? extends DatabaseObject>, DatabaseObjectDiff> (); 
+    private Map<Class<? extends DatabaseObject>, DatabaseObjectDiff> databaseObjectDiffs = new HashMap<Class<? extends DatabaseObject>, DatabaseObjectDiff> ();
 
     private DataDiff data = new DataDiff();
 
