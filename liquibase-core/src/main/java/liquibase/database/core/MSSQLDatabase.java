@@ -4,6 +4,7 @@ import java.sql.ResultSet;
 import liquibase.database.AbstractDatabase;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.structure.DatabaseObject;
+import liquibase.database.structure.Index;
 import liquibase.database.structure.Schema;
 import liquibase.database.structure.View;
 import liquibase.exception.DatabaseException;
@@ -162,7 +163,7 @@ public class MSSQLDatabase extends AbstractDatabase {
     @Override
     public String escapeIndexName(String catalogName, String schemaName, String indexName) {
         // MSSQL server does not support the schema name for the index -
-        return super.escapeIndexName(null, null, indexName);
+        return super.escapeDatabaseObject(indexName, Index.class);
     }
 
     //    protected void dropForeignKeys(Connection conn) throws DatabaseException {
