@@ -1,6 +1,7 @@
 package liquibase.database.core;
 
 import liquibase.database.AbstractDatabase;
+import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.structure.DatabaseObject;
@@ -202,4 +203,21 @@ public class DB2Database extends AbstractDatabase {
     public String getAssumedCatalogName(String catalogName, String schemaName) {
         return schemaName;
     }
+
+    @Override
+    public Schema getSchemaFromJdbcInfo(String rawSchemaName, String rawCatalogName) {
+        return this.correctSchema(new Schema(rawSchemaName, null));
+    }
+
+    @Override
+    public String getJdbcCatalogName(Schema schema) {
+        return null;
+    }
+
+    @Override
+    public String getJdbcSchemaName(Schema schema) {
+        return schema.getCatalogName();
+    }
+
+
 }

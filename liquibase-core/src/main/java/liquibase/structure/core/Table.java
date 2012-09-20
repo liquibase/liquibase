@@ -3,9 +3,8 @@ package liquibase.structure.core;
 public class Table extends Relation {
 
     private PrimaryKey primaryKey;
-    
-    public Table(String name) {
-        super(name);
+
+    public Table() {
     }
 
     public PrimaryKey getPrimaryKey() {
@@ -36,4 +35,10 @@ public class Table extends Relation {
     public String toString() {
     	return getName();
     }
+
+    public Table setName(String name) {
+        this.name = name;
+        return this;
+    }
+
 }

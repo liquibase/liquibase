@@ -14,4 +14,5 @@ public interface DatabaseObject {
 
     boolean equals(String otherObjectName, Database accordingTo);
 
+    boolean isPartial();
 }

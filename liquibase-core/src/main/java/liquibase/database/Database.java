@@ -286,4 +286,10 @@ public interface Database extends DatabaseObject, PrioritizedService {
     boolean isFunction(String string);
 
     int getDataTypeMaxParameters(String dataTypeName);
+
+    Schema getSchemaFromJdbcInfo(String rawSchemaName, String rawCatalogName);
+
+    String getJdbcCatalogName(Schema schema);
+
+    String getJdbcSchemaName(Schema schema);
 }

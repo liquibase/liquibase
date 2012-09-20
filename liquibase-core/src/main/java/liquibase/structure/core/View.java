@@ -3,8 +3,7 @@ package liquibase.structure.core;
 public class View extends Relation {
     private String definition;
 
-    public View(String name) {
-        super(name);
+    public View() {
     }
 
     @Override
@@ -49,4 +48,11 @@ public class View extends Relation {
         viewStr += ")";
         return viewStr;
     }
+
+    public View setName(String name) {
+        this.name = name;
+        return this;
+    }
+
+
 }

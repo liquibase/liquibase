@@ -36,7 +36,7 @@ public class AddDefaultValueGeneratorInformix extends AddDefaultValueGenerator {
 	@Override
 	public Sql[] generateSql(AddDefaultValueStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
 
-		Column column = new Column().setRelation(new Table(statement.getTableName()).setSchema(new Schema(statement.getCatalogName(), statement.getSchemaName())))
+		Column column = new Column().setRelation(new Table().setName(statement.getTableName()).setSchema(new Schema(statement.getCatalogName(), statement.getSchemaName())))
 				.setName(statement.getColumnName());
 		Object defaultValue = statement.getDefaultValue();
 		StringBuffer sql = new StringBuffer("ALTER TABLE ");

@@ -536,4 +536,20 @@ public class MockDatabase implements Database {
     public int getDataTypeMaxParameters(String dataTypeName) {
         return 2;
     }
+
+    public Schema getSchemaFromJdbcInfo(String rawSchemaName, String rawCatalogName) {
+        return new Schema(rawCatalogName, rawSchemaName);
+    }
+
+    public String getJdbcCatalogName(Schema schema) {
+        return schema.getCatalogName();
+    }
+
+    public String getJdbcSchemaName(Schema schema) {
+        return schema.getName();
+    }
+
+    public boolean isPartial() {
+        return false;
+    }
 }

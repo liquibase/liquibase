@@ -3,10 +3,13 @@ package liquibase.precondition.core;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
+import liquibase.snapshot.jvm.DatabaseObjectGeneratorFactory;
+import liquibase.structure.core.PrimaryKey;
 import liquibase.structure.core.Schema;
 import liquibase.exception.*;
 import liquibase.precondition.Precondition;
-import liquibase.snapshot.DatabaseSnapshotGeneratorFactory;
+import liquibase.structure.core.Table;
+import liquibase.util.StringUtils;
 
 public class PrimaryKeyExistsPrecondition implements Precondition {
     private String catalogName;
@@ -56,7 +59,13 @@ public class PrimaryKeyExistsPrecondition implements Precondition {
 
     public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet) throws PreconditionFailedException, PreconditionErrorException {
         try {
-            if (!DatabaseSnapshotGeneratorFactory.getInstance().getGenerator(database).hasPrimaryKey(new Schema(getCatalogName(), getSchemaName()), getTableName(), getPrimaryKeyName(), database)) {
+            PrimaryKey example = new PrimaryKey();
+            if (StringUtils.trimToNull(getTableName()) != null) {
+                example.setTable(new Table().setName(getTableName()));
+            }
+            example.setName(getPrimaryKeyName());
+
+            if (!DatabaseObjectGeneratorFactory.getInstance().getGenerator(PrimaryKey.class, database).has(new Schema(getCatalogName(), getSchemaName()), example, database)) {
                 if (tableName != null) {
                     throw new PreconditionFailedException("Primary Key does not exist on "+database.escapeStringForDatabase(getTableName()), changeLog, this);
                 } else {

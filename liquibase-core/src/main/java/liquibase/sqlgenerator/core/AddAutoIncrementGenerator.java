@@ -58,7 +58,7 @@ public class AddAutoIncrementGenerator extends AbstractSqlGenerator<AddAutoIncre
 
         return new Sql[]{
             new UnparsedSql(sql, new Column()
-                .setRelation(new Table(statement.getTableName()).setSchema(new Schema(statement.getCatalogName(), statement.getSchemaName())))
+                .setRelation(new Table().setName(statement.getTableName()).setSchema(new Schema(statement.getCatalogName(), statement.getSchemaName())))
                 .setName(statement.getColumnName()))
         };
     }

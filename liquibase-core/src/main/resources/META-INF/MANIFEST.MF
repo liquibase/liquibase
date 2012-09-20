@@ -11,4 +11,5 @@ Liquibase-Package: liquibase.change,
  liquibase.snapshot,
  liquibase.logging,
  liquibase.diff,
+ liquibase.structure,
  liquibase.ext

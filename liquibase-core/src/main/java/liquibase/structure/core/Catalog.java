@@ -18,6 +18,7 @@ public class Catalog extends DatabaseObjectImpl {
         } else {
             this.name = name;
         }
+        setPartial(false);
     }
 
     public DatabaseObject[] getContainingObjects() {

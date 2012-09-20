@@ -77,7 +77,7 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
 
         List<Sql> returnSql = new ArrayList<Sql>();
         returnSql.add(new UnparsedSql(alterTable, new Column()
-                .setRelation(new Table(statement.getTableName()).setSchema(new Schema(statement.getCatalogName(), statement.getSchemaName())))
+                .setRelation(new Table().setName(statement.getTableName()).setSchema(new Schema(statement.getCatalogName(), statement.getSchemaName())))
                 .setName(statement.getColumnName())));
 
         addForeignKeyStatements(statement, database, returnSql);

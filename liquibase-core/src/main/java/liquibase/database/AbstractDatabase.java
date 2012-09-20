@@ -78,6 +78,10 @@ public abstract class AbstractDatabase implements Database {
         this.dateFunctions.add(new DatabaseFunction(getCurrentDateTimeFunction()));
     }
 
+    public boolean isPartial() {
+        return false;
+    }
+
     public String getName() {
         return toString();
     }
@@ -1289,11 +1293,6 @@ public abstract class AbstractDatabase implements Database {
         return ++lastChangeSetSequenceValue;
     }
 
-    public Table getTable(Schema schema, String tableName) throws DatabaseException {
-        schema = correctSchema(schema);
-        return DatabaseSnapshotGeneratorFactory.getInstance().getGenerator(this).getTable(schema, tableName, this);
-    }
-
     public List<DatabaseFunction> getDateFunctions() {
         return dateFunctions;
     }
@@ -1338,4 +1337,18 @@ public abstract class AbstractDatabase implements Database {
     public int getDataTypeMaxParameters(String dataTypeName) {
         return 2;
     }
+
+    public Schema getSchemaFromJdbcInfo(String rawSchemaName, String rawCatalogName) {
+        return this.correctSchema(new Schema(rawCatalogName, rawSchemaName));
+    }
+
+    public String getJdbcCatalogName(Schema schema) {
+        return schema.getCatalogName();
+    }
+
+    public String getJdbcSchemaName(Schema schema) {
+        return schema.getName();
+    }
+
+
 }

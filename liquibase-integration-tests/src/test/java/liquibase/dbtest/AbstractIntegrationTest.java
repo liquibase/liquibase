@@ -2,6 +2,8 @@ package liquibase.dbtest;
 
 import liquibase.Liquibase;
 import liquibase.database.jvm.JdbcConnection;
+import liquibase.snapshot.jvm.DatabaseObjectGeneratorFactory;
+import liquibase.snapshot.jvm.DatabaseObjectSnapshotGenerator;
 import liquibase.structure.core.Catalog;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
@@ -15,7 +17,6 @@ import liquibase.diff.output.DiffToPrintStream;
 import liquibase.exception.ChangeLogParseException;
 import liquibase.exception.LiquibaseException;
 import liquibase.servicelocator.ServiceLocator;
-import liquibase.snapshot.DatabaseSnapshotGenerator;
 import liquibase.snapshot.DatabaseSnapshotGeneratorFactory;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.executor.ExecutorService;
@@ -291,6 +292,23 @@ public abstract class AbstractIntegrationTest {
 
         liquibase = createLiquibase(completeChangeLog);
         liquibase.update(this.contexts);
+        liquibase.update(this.contexts);
+    }
+
+    @Test
+    public void testUpdateClearUpdate() throws Exception {
+        if (database == null) {
+            return;
+        }
+
+        Liquibase liquibase = createLiquibase(completeChangeLog);
+        clearDatabase(liquibase);
+
+        liquibase = createLiquibase(completeChangeLog);
+        liquibase.update(this.contexts);
+        clearDatabase(liquibase);
+
+        liquibase = createLiquibase(completeChangeLog);
         liquibase.update(this.contexts);
     }
 
@@ -844,11 +862,11 @@ public abstract class AbstractIntegrationTest {
         Liquibase liquibase = createLiquibase("changelogs/common/sqlstyle/formatted.changelog.sql");
         liquibase.update("hyphen-context-using-sql,camelCaseContextUsingSql");
 
-        DatabaseSnapshotGenerator snapshot = DatabaseSnapshotGeneratorFactory.getInstance().getGenerator(database);
-        assertNotNull(snapshot.hasTable(null, "hyphen_context", database));
-        assertNotNull(snapshot.hasTable(null, "camel_context", database));
-        assertNotNull(snapshot.hasTable(null, "bar_id", database));
-        assertNotNull(snapshot.hasTable(null, "foo_id", database));
+        DatabaseObjectSnapshotGenerator<Table> tableSnapshotGenerator = DatabaseObjectGeneratorFactory.getInstance().getGenerator(Table.class, database);
+        assertNotNull(tableSnapshotGenerator.has(null, "hyphen_context", database));
+        assertNotNull(tableSnapshotGenerator.has(null, "camel_context", database));
+        assertNotNull(tableSnapshotGenerator.has(null, "bar_id", database));
+        assertNotNull(tableSnapshotGenerator.has(null, "foo_id", database));
     }
 
 //   @Test

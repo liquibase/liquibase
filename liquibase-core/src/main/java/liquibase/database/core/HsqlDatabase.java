@@ -5,6 +5,7 @@ import liquibase.database.DatabaseConnection;
 import liquibase.structure.DatabaseObject;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.DateParseException;
+import liquibase.structure.core.Schema;
 import liquibase.util.ISODateFormat;
 
 import java.math.BigInteger;
@@ -445,4 +446,11 @@ public class HsqlDatabase extends AbstractDatabase {
             "ROLE",
             "DOW",
             "INITIAL");
+
+    @Override
+    public String getJdbcCatalogName(Schema schema) {
+        return null;
+    }
+
+
 }

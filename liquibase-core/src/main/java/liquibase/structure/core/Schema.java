@@ -18,6 +18,8 @@ public class Schema extends DatabaseObjectImpl {
     }
 
     public Schema(String catalog, String schemaName) {
+        setPartial(false);
+
         catalog = StringUtils.trimToNull(catalog);
         schemaName = StringUtils.trimToNull(schemaName);
 

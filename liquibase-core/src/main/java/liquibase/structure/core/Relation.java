@@ -20,8 +20,7 @@ public abstract class Relation extends DatabaseObjectImpl implements Comparable<
     private String rawCatalogName;
     private String rawSchemaName;
 
-    public Relation(String name) {
-        this.name = name;
+    protected Relation() {
     }
 
     public String getName() {
