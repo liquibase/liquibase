@@ -20,8 +20,8 @@ public class PrimaryKeyGenerator extends JdbcDatabaseObjectSnapshotGenerator<Pri
         return PRIORITY_DEFAULT;
     }
 
-    public boolean has(DatabaseObject container, String objectName, Database database) throws DatabaseException {
-        return get(container, objectName, database) != null;
+    public boolean has(DatabaseObject container, PrimaryKey example, Database database) throws DatabaseException {
+        return get(container,  example, database) != null;
     }
 
     public PrimaryKey[] get(DatabaseObject container, Database database) throws DatabaseException {
@@ -68,7 +68,7 @@ public class PrimaryKeyGenerator extends JdbcDatabaseObjectSnapshotGenerator<Pri
 
                     if (!foundExistingPK) {
                         PrimaryKey primaryKey = new PrimaryKey();
-                        primaryKey.setTable(table);
+                        primaryKey.setTable(new Table().setName(table.getName()));
                         primaryKey.addColumnName(position - 1, columnName);
                         primaryKey.setName(database.correctObjectName(rs.getString("PK_NAME"), PrimaryKey.class));
 

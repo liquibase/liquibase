@@ -21,13 +21,11 @@ public class ViewSnapshotGenerator extends JdbcDatabaseObjectSnapshotGenerator<V
 
     @Override
     public boolean has(DatabaseObject container, View example, Database database) throws DatabaseException {
-        return has(container, example.getName(), database);
-    }
-
-    public boolean has(DatabaseObject container, String viewName, Database database) throws DatabaseException {
         if (!(container instanceof Schema)) {
             return false;
         }
+
+        String viewName = example.getName();
         Schema schema = (Schema) container;
         try {
             ResultSet rs = getMetaData(database).getTables(database.getJdbcCatalogName(schema), database.getJdbcSchemaName(schema), database.correctObjectName(viewName, View.class), new String[]{"VIEW"});

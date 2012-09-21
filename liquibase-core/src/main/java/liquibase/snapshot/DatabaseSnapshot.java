@@ -1,12 +1,14 @@
 package liquibase.snapshot;
 
 import liquibase.database.Database;
+import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.PrimaryKey;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
 
+import java.lang.reflect.Field;
 import java.util.*;
 
 public class DatabaseSnapshot {
@@ -190,6 +192,39 @@ public class DatabaseSnapshot {
         DatabaseObject thisDatabaseObject = this.getDatabaseObject(schema, databaseObject, databaseObject.getClass());
         return thisDatabaseObject != null;
 
+    }
+
+    public void merge() {
+        try {
+            for (SchemaSnapshot snapshot : schemaSnapshots.values()) {
+                for (Map.Entry<Class <? extends DatabaseObject>, Set<DatabaseObject>> objEntry : snapshot.databaseObjects.entrySet()) {
+                    for (DatabaseObject obj : objEntry.getValue()) {
+                        for (Field field : obj.getClass().getDeclaredFields()) {
+                            field.setAccessible(true);
+                            if (DatabaseObject.class.isAssignableFrom(field.getType())) {
+                                DatabaseObject fieldValue = (DatabaseObject) field.get(obj);
+                                if (fieldValue != null && fieldValue.isPartial()) {
+                                    DatabaseObject fullValue = null;
+                                    for (DatabaseObject potentialMatch : schemaSnapshots.get(snapshot.schema).databaseObjects.get(fieldValue.getClass())) {
+                                        if (potentialMatch.equals(fieldValue, getDatabase())) {
+                                            fullValue = potentialMatch;
+                                            break;
+                                        }
+
+                                    }
+                                    if (fullValue != null) {
+                                        field.set(obj, fullValue);
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                }
+            }
+        } catch (IllegalAccessException e) {
+            throw new UnexpectedLiquibaseException(e);
+        }
     }
 
     private static class SchemaSnapshot {

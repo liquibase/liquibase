@@ -52,7 +52,7 @@ public class ViewExistsPrecondition implements Precondition {
     	try {
             currentCatalogName = getCatalogName();
             currentSchemaName = getSchemaName();
-            if (!DatabaseObjectGeneratorFactory.getInstance().getGenerator(View.class, database).has(database.correctSchema(new Schema(currentCatalogName, currentSchemaName)), getViewName(), database)) {
+            if (!DatabaseObjectGeneratorFactory.getInstance().getGenerator(View.class, database).has(database.correctSchema(new Schema(currentCatalogName, currentSchemaName)), new View().setName(getViewName()), database)) {
                 throw new PreconditionFailedException("View "+database.escapeTableName(currentCatalogName, currentSchemaName, getViewName())+" does not exist", changeLog, this);
             }
         } catch (PreconditionFailedException e) {

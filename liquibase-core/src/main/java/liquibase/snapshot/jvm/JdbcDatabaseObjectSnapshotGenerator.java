@@ -24,10 +24,6 @@ public abstract class JdbcDatabaseObjectSnapshotGenerator<DatabaseObjectType ext
         return true;
     }
 
-    public boolean has(DatabaseObject container, DatabaseObjectType example, Database database) throws DatabaseException {
-        return has(container, example.getName(), database);
-    }
-
     public DatabaseObjectType get(DatabaseObject container, DatabaseObjectType example, Database database) throws DatabaseException {
         return get(container, example.getName(), database);
     }

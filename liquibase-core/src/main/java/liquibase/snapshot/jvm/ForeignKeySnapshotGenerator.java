@@ -18,8 +18,8 @@ public class ForeignKeySnapshotGenerator extends JdbcDatabaseObjectSnapshotGener
         return PRIORITY_DEFAULT;
     }
 
-    public boolean has(DatabaseObject container, String objectName, Database database) throws DatabaseException {
-        return get(container, objectName,database) != null;
+    public boolean has(DatabaseObject container, ForeignKey example, Database database) throws DatabaseException {
+        return get(container,  example, database) != null;
     }
 
     public ForeignKey[] get(DatabaseObject container, Database database) throws DatabaseException {
@@ -41,7 +41,7 @@ public class ForeignKeySnapshotGenerator extends JdbcDatabaseObjectSnapshotGener
         try {
             List<Table> tables = new ArrayList<Table>();
             if (relation == null) {
-                tables.addAll((List<Table>) Arrays.asList(DatabaseObjectGeneratorFactory.getInstance().getGenerator(Table.class, database).get(schema, database)));
+                tables.addAll(Arrays.asList(DatabaseObjectGeneratorFactory.getInstance().getGenerator(Table.class, database).get(schema, database)));
             } else {
                 tables.add(relation);
             }

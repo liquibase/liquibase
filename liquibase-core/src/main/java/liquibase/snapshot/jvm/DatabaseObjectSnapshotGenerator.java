@@ -15,8 +15,6 @@ public interface DatabaseObjectSnapshotGenerator<DatabaseObjectType extends Data
      */
     public boolean supports(Class<? extends DatabaseObject> databaseObjectClass, Database database);
 
-    boolean has(DatabaseObject container, String objectName, Database database) throws DatabaseException;
-
     boolean has(DatabaseObject container, DatabaseObjectType example, Database database) throws DatabaseException;
 
     DatabaseObjectType[] get(DatabaseObject container, Database database) throws DatabaseException;

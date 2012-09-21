@@ -1,6 +1,7 @@
 package liquibase.snapshot.jvm;
 
 import liquibase.database.Database;
+import liquibase.exception.DatabaseException;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.UniqueConstraint;
 
@@ -9,8 +10,8 @@ public class UniqueConstraintSnapshotGenerator extends JdbcDatabaseObjectSnapsho
         return PRIORITY_DEFAULT;
     }
 
-    public boolean has(DatabaseObject container, String objectName, Database database) {
-        return false;  //TODO
+    public boolean has(DatabaseObject container, UniqueConstraint example, Database database) throws DatabaseException {
+        return get(container,  example, database) != null;
     }
 
     public UniqueConstraint[] get(DatabaseObject container, Database database) {

@@ -18,10 +18,7 @@ public class SequenceSnapshotGenerator extends JdbcDatabaseObjectSnapshotGenerat
         return PRIORITY_DEFAULT;
     }
 
-    public boolean has(DatabaseObject container, String objectName, Database database) throws DatabaseException {
-        return get(container, objectName, database) != null;
-    }
-
+    @Override
     public boolean has(DatabaseObject container, Sequence example, Database database) throws DatabaseException {
         return get(container, example, database) != null;
     }

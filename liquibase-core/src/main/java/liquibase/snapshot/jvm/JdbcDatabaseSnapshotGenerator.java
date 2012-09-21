@@ -42,7 +42,7 @@ public class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotGenerator 
     }
 
     private boolean hasTable(Schema schema, String tableName, Database database) throws DatabaseException {
-        return DatabaseObjectGeneratorFactory.getInstance().getGenerator(Table.class, database).has(schema, tableName, database);
+        return DatabaseObjectGeneratorFactory.getInstance().getGenerator(Table.class, database).has(schema, new Table().setName(tableName), database);
     }
 
     private Table getTable(Schema schema, String tableName, Database database) throws DatabaseException {
@@ -66,6 +66,8 @@ public class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotGenerator 
                 }
             }
         }
+
+        snapshot.merge();
 
         return snapshot;
 

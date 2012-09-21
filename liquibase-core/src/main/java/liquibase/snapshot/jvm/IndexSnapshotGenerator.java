@@ -20,10 +20,6 @@ public class IndexSnapshotGenerator extends JdbcDatabaseObjectSnapshotGenerator<
         return PRIORITY_DEFAULT;
     }
 
-    public boolean has(DatabaseObject container, String objectName, Database database) throws DatabaseException {
-        return get(container, objectName, database) != null;
-    }
-
     @Override
     public boolean has(DatabaseObject container, Index example, Database database) throws DatabaseException {
 //    public boolean hasIndex(Schema schema, String tableName, String indexName, String columnNames, Database database) throws DatabaseException {

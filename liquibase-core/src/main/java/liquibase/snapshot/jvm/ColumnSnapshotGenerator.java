@@ -28,10 +28,6 @@ public class ColumnSnapshotGenerator extends JdbcDatabaseObjectSnapshotGenerator
         return PRIORITY_DEFAULT;
     }
 
-    public boolean has(DatabaseObject container, String objectName, Database database) throws DatabaseException {
-        return has(container, new Column().setName(objectName), database);
-    }
-
     @Override
     public boolean has(DatabaseObject container, Column example, Database database) throws DatabaseException {
         Relation relation;

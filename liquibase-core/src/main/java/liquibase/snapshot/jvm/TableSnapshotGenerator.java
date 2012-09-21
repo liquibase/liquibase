@@ -21,7 +21,8 @@ public class TableSnapshotGenerator extends JdbcDatabaseObjectSnapshotGenerator<
     }
 
 
-    public boolean has(DatabaseObject container, String tableName, Database database) throws DatabaseException {
+    @Override
+    public boolean has(DatabaseObject container, Table example, Database database) throws DatabaseException {
         if (!(container instanceof Schema)) {
             return false;
         }
@@ -30,6 +31,7 @@ public class TableSnapshotGenerator extends JdbcDatabaseObjectSnapshotGenerator<
             schema = Schema.DEFAULT;
         }
         try {
+            String tableName = example.getName();
             if (database != null) {
                 tableName = database.correctObjectName(tableName, Table.class);
                 schema = database.correctSchema(schema);
@@ -63,7 +65,7 @@ public class TableSnapshotGenerator extends JdbcDatabaseObjectSnapshotGenerator<
             Table table;
             try {
                 if (rs.next()) {
-                 table = readTable(rs, database, true);
+                 table = readTable(rs, database);
                 } else {
                     return null;
                 }
@@ -99,7 +101,7 @@ public class TableSnapshotGenerator extends JdbcDatabaseObjectSnapshotGenerator<
         try {
             tableMetaDataRs = getMetaData(database).getTables(database.getJdbcCatalogName(schema), database.getJdbcSchemaName(schema), null, new String[]{"TABLE"});
             while (tableMetaDataRs.next()) {
-                Table table = readTable(tableMetaDataRs, database, false);
+                Table table = readTable(tableMetaDataRs, database);
                 returnTables.add(table);
             }
         } catch (SQLException e) {
@@ -115,7 +117,7 @@ public class TableSnapshotGenerator extends JdbcDatabaseObjectSnapshotGenerator<
         return returnTables.toArray(new Table[returnTables.size()]);
     }
 
-    protected Table readTable(ResultSet tableMetadataResultSet, Database database, boolean readColumns) throws SQLException, DatabaseException {
+    protected Table readTable(ResultSet tableMetadataResultSet, Database database) throws SQLException, DatabaseException {
         String rawTableName = tableMetadataResultSet.getString("TABLE_NAME");
         String rawSchemaName = StringUtils.trimToNull(tableMetadataResultSet.getString("TABLE_SCHEM"));
         String rawCatalogName = StringUtils.trimToNull(tableMetadataResultSet.getString("TABLE_CAT"));
@@ -129,16 +131,14 @@ public class TableSnapshotGenerator extends JdbcDatabaseObjectSnapshotGenerator<
 
         table.setSchema(database.getSchemaFromJdbcInfo(rawSchemaName, rawCatalogName));
 
-        if (readColumns) {
-            Schema rawSchema = database.correctSchema(new Schema(table.getRawCatalogName(), table.getRawSchemaName()));
-            ResultSet columnMetadataResultSet = getMetaData(database).getColumns(database.getJdbcCatalogName(rawSchema), database.getJdbcSchemaName(rawSchema), rawTableName, null);
-            try {
-                while (columnMetadataResultSet.next()) {
-                    table.getColumns().addAll(Arrays.asList(DatabaseObjectGeneratorFactory.getInstance().getGenerator(Column.class, database).get(table, database)));
-                }
-            } finally {
-                columnMetadataResultSet.close();
+        Schema rawSchema = database.correctSchema(new Schema(table.getRawCatalogName(), table.getRawSchemaName()));
+        ResultSet columnMetadataResultSet = getMetaData(database).getColumns(database.getJdbcCatalogName(rawSchema), database.getJdbcSchemaName(rawSchema), rawTableName, null);
+        try {
+            while (columnMetadataResultSet.next()) {
+                table.getColumns().add(new Column().setName(columnMetadataResultSet.getString("COLUMN_NAME")));
             }
+        } finally {
+            columnMetadataResultSet.close();
         }
 
         table.setPartial(false);
