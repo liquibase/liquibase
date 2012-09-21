@@ -18,7 +18,7 @@ public class UniqueConstraintSnapshotGenerator extends JdbcDatabaseObjectSnapsho
         return new UniqueConstraint[0];  //TODO
     }
 
-    public UniqueConstraint get(DatabaseObject container, String objectName, Database database) {
+    public UniqueConstraint get(DatabaseObject container, UniqueConstraint example, Database database) throws DatabaseException {
         return null;  //TODO
     }
 

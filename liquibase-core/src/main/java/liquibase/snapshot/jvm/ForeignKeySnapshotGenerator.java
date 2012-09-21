@@ -71,8 +71,9 @@ public class ForeignKeySnapshotGenerator extends JdbcDatabaseObjectSnapshotGener
         return returnList.toArray(new ForeignKey[returnList.size()]);
     }
 
-    public ForeignKey get(DatabaseObject container, String objectName, Database database) throws DatabaseException {
-        objectName = database.correctObjectName(objectName, ForeignKey.class);
+    @Override
+    public ForeignKey get(DatabaseObject container, ForeignKey example, Database database) throws DatabaseException {
+        String objectName = database.correctObjectName(example.getName(), ForeignKey.class);
         for (ForeignKey key : get(container, database)) {
             if (key.getName().equals(objectName)) {
                 return key;

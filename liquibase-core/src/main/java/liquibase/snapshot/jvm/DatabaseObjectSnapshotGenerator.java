@@ -19,7 +19,5 @@ public interface DatabaseObjectSnapshotGenerator<DatabaseObjectType extends Data
 
     DatabaseObjectType[] get(DatabaseObject container, Database database) throws DatabaseException;
 
-    DatabaseObjectType get(DatabaseObject container, String objectName, Database database) throws DatabaseException;
-
     DatabaseObjectType get(DatabaseObject container, DatabaseObjectType example, Database database) throws DatabaseException;
 }

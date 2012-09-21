@@ -20,7 +20,6 @@ public class IndexSnapshotGenerator extends JdbcDatabaseObjectSnapshotGenerator<
         return PRIORITY_DEFAULT;
     }
 
-    @Override
     public boolean has(DatabaseObject container, Index example, Database database) throws DatabaseException {
 //    public boolean hasIndex(Schema schema, String tableName, String indexName, String columnNames, Database database) throws DatabaseException {
         String tableName = null;
@@ -291,8 +290,8 @@ public class IndexSnapshotGenerator extends JdbcDatabaseObjectSnapshotGenerator<
         return indexes.toArray(new Index[indexes.size()]);
     }
 
-    public Index get(DatabaseObject container, String objectName, Database database) throws DatabaseException {
-        objectName = database.correctObjectName(objectName, ForeignKey.class);
+    public Index get(DatabaseObject container, Index example, Database database) throws DatabaseException {
+        String objectName = database.correctObjectName(example.getName(), Index.class);
         for (Index index : get(container, database)) {
             if (index.getName().equals(objectName)) {
                 return index;

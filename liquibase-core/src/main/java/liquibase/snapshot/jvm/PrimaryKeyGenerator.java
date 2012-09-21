@@ -95,8 +95,9 @@ public class PrimaryKeyGenerator extends JdbcDatabaseObjectSnapshotGenerator<Pri
         return foundPKs.toArray(new PrimaryKey[foundPKs.size()]);
     }
 
-    public PrimaryKey get(DatabaseObject container, String objectName, Database database) throws DatabaseException {
-        objectName = database.correctObjectName(objectName, ForeignKey.class);
+    @Override
+    public PrimaryKey get(DatabaseObject container, PrimaryKey example, Database database) throws DatabaseException {
+        String objectName = database.correctObjectName(example.getName(), PrimaryKey.class);
         for (PrimaryKey key : get(container, database)) {
             if (key.getName().equals(objectName)) {
                 return key;

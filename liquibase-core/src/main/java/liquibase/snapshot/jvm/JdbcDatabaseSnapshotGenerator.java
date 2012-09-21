@@ -46,7 +46,7 @@ public class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotGenerator 
     }
 
     private Table getTable(Schema schema, String tableName, Database database) throws DatabaseException {
-        return DatabaseObjectGeneratorFactory.getInstance().getGenerator(Table.class, database).get(schema, tableName, database);
+        return DatabaseObjectGeneratorFactory.getInstance().getGenerator(Table.class, database).get(schema, new Table().setName(tableName), database);
     }
 
     public DatabaseSnapshot createSnapshot(Database database, DiffControl diffControl, DiffControl.DatabaseRole type) throws DatabaseException {

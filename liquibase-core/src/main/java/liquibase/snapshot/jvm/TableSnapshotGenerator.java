@@ -21,7 +21,6 @@ public class TableSnapshotGenerator extends JdbcDatabaseObjectSnapshotGenerator<
     }
 
 
-    @Override
     public boolean has(DatabaseObject container, Table example, Database database) throws DatabaseException {
         if (!(container instanceof Schema)) {
             return false;
@@ -51,7 +50,8 @@ public class TableSnapshotGenerator extends JdbcDatabaseObjectSnapshotGenerator<
     }
 
 
-    public Table get(DatabaseObject container, String objectName, Database database) throws DatabaseException {
+    public Table get(DatabaseObject container, Table example, Database database) throws DatabaseException {
+        String objectName = example.getName();
         if (!(container instanceof Schema)) {
             return null;
         }

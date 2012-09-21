@@ -24,10 +24,6 @@ public abstract class JdbcDatabaseObjectSnapshotGenerator<DatabaseObjectType ext
         return true;
     }
 
-    public DatabaseObjectType get(DatabaseObject container, DatabaseObjectType example, Database database) throws DatabaseException {
-        return get(container, example.getName(), database);
-    }
-
     protected DatabaseMetaData getMetaData(Database database) throws SQLException {
         DatabaseMetaData databaseMetaData = null;
         if (database.getConnection() != null) {

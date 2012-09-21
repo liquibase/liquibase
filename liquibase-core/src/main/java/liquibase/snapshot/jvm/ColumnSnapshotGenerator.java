@@ -121,10 +121,6 @@ public class ColumnSnapshotGenerator extends JdbcDatabaseObjectSnapshotGenerator
         return returnColumns.toArray(new Column[returnColumns.size()]);
     }
 
-    public Column get(DatabaseObject container, String objectName, Database database) throws DatabaseException {
-        return get(container, new Column().setName(objectName), database);
-    }
-
     @Override
     public Column get(DatabaseObject container, Column example, Database database) throws DatabaseException {
         Relation relation;

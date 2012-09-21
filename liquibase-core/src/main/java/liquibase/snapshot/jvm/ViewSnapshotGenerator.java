@@ -19,7 +19,6 @@ public class ViewSnapshotGenerator extends JdbcDatabaseObjectSnapshotGenerator<V
         return PRIORITY_DEFAULT;
     }
 
-    @Override
     public boolean has(DatabaseObject container, View example, Database database) throws DatabaseException {
         if (!(container instanceof Schema)) {
             return false;
@@ -73,14 +72,12 @@ public class ViewSnapshotGenerator extends JdbcDatabaseObjectSnapshotGenerator<V
 
     @Override
     public View get(DatabaseObject container, View example, Database database) throws DatabaseException {
-        return get(container, example.getName(), database);
-    }
-
-    public View get(DatabaseObject container, String objectName, Database database) throws DatabaseException {
         if (!(container instanceof Schema)) {
             return null;
         }
         Schema schema = (Schema) container;
+
+        String objectName = example.getName();
 
         ResultSet viewsMetadataRs = null;
         try {
