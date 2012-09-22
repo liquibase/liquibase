@@ -28,7 +28,6 @@ public class ColumnSnapshotGenerator extends JdbcDatabaseObjectSnapshotGenerator
         return PRIORITY_DEFAULT;
     }
 
-    @Override
     public boolean has(DatabaseObject container, Column example, Database database) throws DatabaseException {
         Relation relation;
         Schema schema;
@@ -121,7 +120,6 @@ public class ColumnSnapshotGenerator extends JdbcDatabaseObjectSnapshotGenerator
         return returnColumns.toArray(new Column[returnColumns.size()]);
     }
 
-    @Override
     public Column get(DatabaseObject container, Column example, Database database) throws DatabaseException {
         Relation relation;
         Schema schema;
@@ -170,11 +168,6 @@ public class ColumnSnapshotGenerator extends JdbcDatabaseObjectSnapshotGenerator
         String rawSchemaName = StringUtils.trimToNull((String) columnMetadataResultSet.get("TABLE_SCHEM"));
         String rawCatalogName = StringUtils.trimToNull((String) columnMetadataResultSet.get("TABLE_CAT"));
         String remarks = StringUtils.trimToNull((String) columnMetadataResultSet.get("REMARKS"));
-
-        Schema schema = new Schema(rawCatalogName, rawSchemaName);
-        if (database.isSystemTable(schema, rawTableName) || database.isSystemView(schema, rawTableName)) {
-            return null;
-        }
 
         Column column = new Column();
         column.setName(rawColumnName);

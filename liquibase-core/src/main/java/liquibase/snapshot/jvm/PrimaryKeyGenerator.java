@@ -40,20 +40,19 @@ public class PrimaryKeyGenerator extends JdbcDatabaseObjectSnapshotGenerator<Pri
 
         List<PrimaryKey> foundPKs = new ArrayList<PrimaryKey>();
 
-        List<Table> tables = new ArrayList<Table>();
+        List<String> tables = new ArrayList<String>();
         if (relation == null) {
-            tables.addAll(Arrays.asList(DatabaseObjectGeneratorFactory.getInstance().getGenerator(Table.class, database).get(schema, database)));
+            tables.addAll(listAllTables(schema, database));
         } else {
-            tables.add(relation);
+            tables.add(relation.getName());
         }
 
         ResultSet rs = null;
         try {
             DatabaseMetaData metaData = getMetaData(database);
-            for (Table table : tables) {
-                rs = metaData.getPrimaryKeys(database.getJdbcCatalogName(schema), database.getJdbcSchemaName(schema), table.getName());
+            for (String tableName : tables) {
+                rs = metaData.getPrimaryKeys(database.getJdbcCatalogName(schema), database.getJdbcSchemaName(schema), tableName);
                 while (rs.next()) {
-                    String tableName = cleanNameFromDatabase(rs.getString("TABLE_NAME"), database);
                     String columnName = cleanNameFromDatabase(rs.getString("COLUMN_NAME"), database);
                     short position = rs.getShort("KEY_SEQ");
 
@@ -68,7 +67,7 @@ public class PrimaryKeyGenerator extends JdbcDatabaseObjectSnapshotGenerator<Pri
 
                     if (!foundExistingPK) {
                         PrimaryKey primaryKey = new PrimaryKey();
-                        primaryKey.setTable(new Table().setName(table.getName()));
+                        primaryKey.setTable(new Table().setName(tableName));
                         primaryKey.addColumnName(position - 1, columnName);
                         primaryKey.setName(database.correctObjectName(rs.getString("PK_NAME"), PrimaryKey.class));
 
@@ -95,7 +94,6 @@ public class PrimaryKeyGenerator extends JdbcDatabaseObjectSnapshotGenerator<Pri
         return foundPKs.toArray(new PrimaryKey[foundPKs.size()]);
     }
 
-    @Override
     public PrimaryKey get(DatabaseObject container, PrimaryKey example, Database database) throws DatabaseException {
         String objectName = database.correctObjectName(example.getName(), PrimaryKey.class);
         for (PrimaryKey key : get(container, database)) {

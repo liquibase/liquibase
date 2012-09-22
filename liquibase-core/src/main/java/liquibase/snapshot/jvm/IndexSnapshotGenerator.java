@@ -49,19 +49,19 @@ public class IndexSnapshotGenerator extends JdbcDatabaseObjectSnapshotGenerator<
                 }
 
                 ResultSet rs = getMetaData(database).getTables(database.getJdbcCatalogName(schema), database.getJdbcSchemaName(schema), null, new String[]{"TABLE"});
-                    try {
-                        while (rs.next()) {
-                            String foundTable = rs.getString("TABLE_NAME");
-                            newExample.setTable(new Table().setName(foundTable));
-                            if (has(schema, newExample, database)) {
-                                return true;
-                            }
+                try {
+                    while (rs.next()) {
+                        String foundTable = rs.getString("TABLE_NAME");
+                        newExample.setTable(new Table().setName(foundTable));
+                        if (has(schema, newExample, database)) {
+                            return true;
                         }
-                        return false;
-                    } finally {
-                        rs.close();
                     }
+                    return false;
+                } finally {
+                    rs.close();
                 }
+            }
 
             Index index = new Index();
             index.setTable((Table) new Table().setName(tableName).setSchema(schema));
@@ -92,7 +92,7 @@ public class IndexSnapshotGenerator extends JdbcDatabaseObjectSnapshotGenerator<
                     }
 
                     for (Map.Entry<String, TreeMap<Short, String>> foundIndexData : columnsByIndexName.entrySet()) {
-                        Index foundIndex =  new Index()
+                        Index foundIndex = new Index()
                                 .setName(foundIndexData.getKey())
                                 .setTable(((Table) new Table().setName(tableName).setSchema(schema)));
                         foundIndex.getColumns().addAll(foundIndexData.getValue().values());
@@ -107,26 +107,26 @@ public class IndexSnapshotGenerator extends JdbcDatabaseObjectSnapshotGenerator<
                     rs.close();
                 }
             } else if (indexName != null) {
-                    ResultSet rs = getMetaData(database).getIndexInfo(database.getJdbcCatalogName(schema), database.getJdbcSchemaName(schema), database.correctObjectName(tableName, Table.class), false, true);
-                    try {
-                        while (rs.next()) {
-                            Index foundIndex =  new Index()
-                                    .setName(rs.getString("INDEX_NAME"))
-                                    .setTable(((Table) new Table().setName(tableName).setSchema(schema)));
-                            if (foundIndex.getName() == null) {
-                                continue;
-                            }
-                            if (foundIndex.equals(index, database)) {
-                                return true;
-                            }
+                ResultSet rs = getMetaData(database).getIndexInfo(database.getJdbcCatalogName(schema), database.getJdbcSchemaName(schema), database.correctObjectName(tableName, Table.class), false, true);
+                try {
+                    while (rs.next()) {
+                        Index foundIndex = new Index()
+                                .setName(rs.getString("INDEX_NAME"))
+                                .setTable(((Table) new Table().setName(tableName).setSchema(schema)));
+                        if (foundIndex.getName() == null) {
+                            continue;
                         }
-                        return false;
-                    } finally {
-                        try {
-                            rs.close();
-                        } catch (SQLException ignore) {
+                        if (foundIndex.equals(index, database)) {
+                            return true;
                         }
                     }
+                    return false;
+                } finally {
+                    try {
+                        rs.close();
+                    } catch (SQLException ignore) {
+                    }
+                }
             } else {
                 throw new UnexpectedLiquibaseException("Either indexName or columnNames must be set");
             }
@@ -152,12 +152,13 @@ public class IndexSnapshotGenerator extends JdbcDatabaseObjectSnapshotGenerator<
 
         List<Index> indexes = new ArrayList<Index>();
 
-        List<Table> tables = new ArrayList<Table>();
+        List<String> tables = new ArrayList<String>();
         if (relation == null) {
-            tables.addAll(Arrays.asList(DatabaseObjectGeneratorFactory.getInstance().getGenerator(Table.class, database).get(schema, database)));
+            tables.addAll(listAllTables(schema, database));
         } else {
-            tables.add(relation);
+            tables.add(relation.getName());
         }
+
 
         DatabaseMetaData databaseMetaData = null;
         try {
@@ -166,17 +167,18 @@ public class IndexSnapshotGenerator extends JdbcDatabaseObjectSnapshotGenerator<
             throw new DatabaseException(e);
         }
 
-        for (Table table : tables) {
+        for (String tableName : tables) {
+            database.correctObjectName(tableName, Table.class);
             ResultSet rs = null;
             Statement statement = null;
             try {
                 if (database instanceof OracleDatabase) {
                     //oracle getIndexInfo is buggy and slow.  See Issue 1824548 and http://forums.oracle.com/forums/thread.jspa?messageID=578383&#578383
                     statement = ((JdbcConnection) database.getConnection()).getUnderlyingConnection().createStatement();
-                    String sql = "SELECT INDEX_NAME, 3 AS TYPE, TABLE_NAME, COLUMN_NAME, COLUMN_POSITION AS ORDINAL_POSITION, null AS FILTER_CONDITION FROM ALL_IND_COLUMNS WHERE TABLE_OWNER='" + schema.getName() + "' AND TABLE_NAME='" + table.getName() + "' ORDER BY INDEX_NAME, ORDINAL_POSITION";
+                    String sql = "SELECT INDEX_NAME, 3 AS TYPE, TABLE_NAME, COLUMN_NAME, COLUMN_POSITION AS ORDINAL_POSITION, null AS FILTER_CONDITION FROM ALL_IND_COLUMNS WHERE TABLE_OWNER='" + schema.getName() + "' AND TABLE_NAME='" + tableName + "' ORDER BY INDEX_NAME, ORDINAL_POSITION";
                     rs = statement.executeQuery(sql);
                 } else {
-                    rs = databaseMetaData.getIndexInfo(database.getJdbcCatalogName(schema), database.getJdbcSchemaName(schema), table.getName(), false, true);
+                    rs = databaseMetaData.getIndexInfo(database.getJdbcCatalogName(schema), database.getJdbcSchemaName(schema), tableName, false, true);
                 }
                 Map<String, Index> indexMap = new HashMap<String, Index>();
                 while (rs.next()) {
@@ -227,7 +229,7 @@ public class IndexSnapshotGenerator extends JdbcDatabaseObjectSnapshotGenerator<
                         indexInformation = indexMap.get(indexName);
                     } else {
                         indexInformation = new Index();
-                        indexInformation.setTable(table);
+                        indexInformation.setTable(new Table().setName(tableName));
                         indexInformation.setName(indexName);
                         indexInformation.setUnique(!nonUnique);
                         indexInformation.setFilterCondition(filterCondition);

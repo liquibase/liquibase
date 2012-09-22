@@ -7,10 +7,15 @@ import liquibase.diff.DiffStatusListener;
 import liquibase.exception.DatabaseException;
 import liquibase.logging.LogFactory;
 import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.Schema;
+import liquibase.structure.core.Table;
 
 import java.sql.DatabaseMetaData;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 public abstract class JdbcDatabaseObjectSnapshotGenerator<DatabaseObjectType extends DatabaseObject> implements DatabaseObjectSnapshotGenerator<DatabaseObjectType> {
@@ -52,4 +57,25 @@ public abstract class JdbcDatabaseObjectSnapshotGenerator<DatabaseObjectType ext
         return objectName;
     }
 
+    protected Set<String> listAllTables(Schema schema, Database database) throws DatabaseException {
+        Set<String> returnTables = new HashSet<String>();
+        ResultSet tableMetaDataRs = null;
+        try {
+            tableMetaDataRs = getMetaData(database).getTables(database.getJdbcCatalogName(schema), database.getJdbcSchemaName(schema), null, new String[]{"TABLE"});
+            while (tableMetaDataRs.next()) {
+                returnTables.add(tableMetaDataRs.getString("TABLE_NAME"));
+            }
+        } catch (SQLException e) {
+            throw new DatabaseException(e);
+        } finally {
+            try {
+                if (tableMetaDataRs != null) {
+                    tableMetaDataRs.close();
+                }
+            } catch (SQLException ignore) {
+            }
+        }
+        return returnTables;
+
+    }
 }

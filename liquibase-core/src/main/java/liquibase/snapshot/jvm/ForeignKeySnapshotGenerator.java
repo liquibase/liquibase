@@ -39,16 +39,15 @@ public class ForeignKeySnapshotGenerator extends JdbcDatabaseObjectSnapshotGener
         List<ForeignKey> returnList = new ArrayList<ForeignKey>();
         ResultSet importedKeyMetadataResultSet = null;
         try {
-            List<Table> tables = new ArrayList<Table>();
+            List<String> tables = new ArrayList<String>();
             if (relation == null) {
-                tables.addAll(Arrays.asList(DatabaseObjectGeneratorFactory.getInstance().getGenerator(Table.class, database).get(schema, database)));
+                tables.addAll(listAllTables(schema, database));
             } else {
-                tables.add(relation);
+                tables.add(relation.getName());
             }
 
-            for (Table table : tables) {
-                Schema rawSchema = database.getSchemaFromJdbcInfo(table.getRawSchemaName(), table.getRawCatalogName());
-                importedKeyMetadataResultSet = getMetaData(database).getImportedKeys(database.getJdbcCatalogName(rawSchema), database.getJdbcSchemaName(rawSchema), table.getName());
+            for (String tableName : tables) {
+                importedKeyMetadataResultSet = getMetaData(database).getImportedKeys(database.getJdbcCatalogName(schema), database.getJdbcSchemaName(schema), tableName);
 
                 while (importedKeyMetadataResultSet.next()) {
                     ForeignKey newFk = readForeignKey(importedKeyMetadataResultSet, database);
@@ -71,7 +70,6 @@ public class ForeignKeySnapshotGenerator extends JdbcDatabaseObjectSnapshotGener
         return returnList.toArray(new ForeignKey[returnList.size()]);
     }
 
-    @Override
     public ForeignKey get(DatabaseObject container, ForeignKey example, Database database) throws DatabaseException {
         String objectName = database.correctObjectName(example.getName(), ForeignKey.class);
         for (ForeignKey key : get(container, database)) {
