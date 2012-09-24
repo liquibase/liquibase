@@ -54,10 +54,6 @@ public class MockDatabase implements Database {
         return otherObject.getName().equalsIgnoreCase(this.getName());
     }
 
-    public boolean equals(String otherObjectName, Database accordingTo) {
-        return otherObjectName.equalsIgnoreCase(this.getName());
-    }
-
     public void setCanCacheLiquibaseTableInfo(boolean canCacheLiquibaseTableInfo) {
         //
     }

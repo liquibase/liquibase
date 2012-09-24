@@ -51,6 +51,7 @@ public class PrimaryKeyGenerator extends JdbcDatabaseObjectSnapshotGenerator<Pri
         try {
             DatabaseMetaData metaData = getMetaData(database);
             for (String tableName : tables) {
+                Table otherTable = new Table().setName(tableName);
                 rs = metaData.getPrimaryKeys(database.getJdbcCatalogName(schema), database.getJdbcSchemaName(schema), tableName);
                 while (rs.next()) {
                     String columnName = cleanNameFromDatabase(rs.getString("COLUMN_NAME"), database);
@@ -58,7 +59,7 @@ public class PrimaryKeyGenerator extends JdbcDatabaseObjectSnapshotGenerator<Pri
 
                     boolean foundExistingPK = false;
                     for (PrimaryKey pk : foundPKs) {
-                        if (pk.getTable().equals(tableName, database)) {
+                        if (pk.getTable().equals(otherTable, database)) {
                             pk.addColumnName(position - 1, columnName);
 
                             foundExistingPK = true;

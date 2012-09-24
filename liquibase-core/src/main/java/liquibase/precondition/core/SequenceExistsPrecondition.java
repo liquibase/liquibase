@@ -56,7 +56,7 @@ public class SequenceExistsPrecondition implements Precondition {
         } catch (DatabaseException e) {
             throw new PreconditionErrorException(e, changeLog, this);
         }
-        if (snapshot.getDatabaseObject(schema, getSequenceName(), Sequence.class) == null) {
+        if (snapshot.getDatabaseObject(schema, new Sequence().setName(getSequenceName()), Sequence.class) == null) {
             throw new PreconditionFailedException("Sequence "+database.escapeSequenceName(getCatalogName(), getSchemaName(), getSequenceName())+" does not exist", changeLog, this);
         }
     }

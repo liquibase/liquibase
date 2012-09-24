@@ -53,18 +53,6 @@ public class DatabaseSnapshot {
         return (Set<T>) Collections.unmodifiableSet(snapshotItems);
     }
 
-    public <T extends DatabaseObject> T getDatabaseObject(Schema schema, String objectName, Class<T> type) {
-        schema = database.correctSchema(schema);
-
-        for (DatabaseObject object : getDatabaseObjects(schema, type)) {
-            if (object.equals(objectName, database)) {
-                //noinspection unchecked
-                return (T) object;
-            }
-        }
-        return null;
-    }
-
     public <T extends DatabaseObject> T getDatabaseObject(Schema schema, DatabaseObject databaseObject, Class<T> type) {
         schema = database.correctSchema(schema);
 
@@ -134,7 +122,7 @@ public class DatabaseSnapshot {
     }
 
     public PrimaryKey getPrimaryKeyForTable(Schema schema, String tableName) {
-        Table table = getDatabaseObject(schema, tableName, Table.class);
+        Table table = getDatabaseObject(schema, new Table().setName(tableName), Table.class);
         if (table == null) {
             return null;
         }
@@ -156,7 +144,7 @@ public class DatabaseSnapshot {
     }
 
     public Column getColumn(Schema schema, String tableName, String columnName) {
-        Table table = getDatabaseObject(schema, tableName, Table.class);
+        Table table = getDatabaseObject(schema, new Table().setName(tableName), Table.class);
 
         return table.getColumn(columnName);
     }
@@ -195,35 +183,17 @@ public class DatabaseSnapshot {
     }
 
     public void merge() {
-        try {
-            for (SchemaSnapshot snapshot : schemaSnapshots.values()) {
-                for (Map.Entry<Class <? extends DatabaseObject>, Set<DatabaseObject>> objEntry : snapshot.databaseObjects.entrySet()) {
-                    for (DatabaseObject obj : objEntry.getValue()) {
-                        for (Field field : obj.getClass().getDeclaredFields()) {
-                            field.setAccessible(true);
-                            if (DatabaseObject.class.isAssignableFrom(field.getType())) {
-                                DatabaseObject fieldValue = (DatabaseObject) field.get(obj);
-                                if (fieldValue != null && fieldValue.isPartial()) {
-                                    DatabaseObject fullValue = null;
-                                    for (DatabaseObject potentialMatch : schemaSnapshots.get(snapshot.schema).databaseObjects.get(fieldValue.getClass())) {
-                                        if (potentialMatch.equals(fieldValue, getDatabase())) {
-                                            fullValue = potentialMatch;
-                                            break;
-                                        }
+        for (SchemaSnapshot snapshot : schemaSnapshots.values()) {
+            Set<DatabaseObject> allObjects = new HashSet<DatabaseObject>();
+            for (Set<DatabaseObject> objects : snapshot.databaseObjects.values()) {
+                allObjects.addAll(objects);
+            }
 
-                                    }
-                                    if (fullValue != null) {
-                                        field.set(obj, fullValue);
-                                    }
-                                }
-                            }
-                        }
-                    }
+            for (DatabaseObject object : allObjects) {
+                for (DatabaseObject otherObject : allObjects) {
 
                 }
             }
-        } catch (IllegalAccessException e) {
-            throw new UnexpectedLiquibaseException(e);
         }
     }
 

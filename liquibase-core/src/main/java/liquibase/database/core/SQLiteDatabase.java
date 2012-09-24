@@ -122,7 +122,7 @@ public class SQLiteDatabase extends AbstractDatabase {
         List<SqlStatement> statements = new ArrayList<SqlStatement>();
 
         DatabaseSnapshot snapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(database,new DiffControl((Schema)null, (String) null));
-        Table table = snapshot.getDatabaseObject(new Schema(new Catalog(null), schemaName), tableName, Table.class);
+        Table table = snapshot.getDatabaseObject(new Schema(new Catalog(null), schemaName), new Table().setName(tableName), Table.class);
 
         List<ColumnConfig> createColumns = new Vector<ColumnConfig>();
         List<ColumnConfig> copyColumns = new Vector<ColumnConfig>();

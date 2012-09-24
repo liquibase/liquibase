@@ -1330,10 +1330,6 @@ public abstract class AbstractDatabase implements Database {
         return otherObject.getClass().equals(this.getClass());
     }
 
-    public boolean equals(String otherObject, Database accordingTo) {
-        return this.getName().equals(otherObject);
-    }
-
     public int getDataTypeMaxParameters(String dataTypeName) {
         return 2;
     }
