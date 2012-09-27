@@ -1,5 +1,6 @@
 package liquibase.sqlgenerator.core;
 
+import liquibase.CatalogAndSchema;
 import liquibase.database.Database;
 import liquibase.database.core.OracleDatabase;
 import liquibase.structure.core.Schema;
@@ -21,10 +22,10 @@ public class GetViewDefinitionGeneratorOracle extends GetViewDefinitionGenerator
 
     @Override
     public Sql[] generateSql(GetViewDefinitionStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-        Schema schema = database.correctSchema(new Schema(statement.getCatalogName(), statement.getSchemaName()));
+        CatalogAndSchema schema = database.correctSchema(new CatalogAndSchema(statement.getCatalogName(), statement.getSchemaName()));
 
         return new Sql[]{
-                new UnparsedSql("SELECT TEXT FROM ALL_VIEWS WHERE upper(VIEW_NAME)='" + statement.getViewName().toUpperCase() + "' AND OWNER='" + schema.getName() + "'")
+                new UnparsedSql("SELECT TEXT FROM ALL_VIEWS WHERE upper(VIEW_NAME)='" + statement.getViewName().toUpperCase() + "' AND OWNER='" + schema.getSchemaName() + "'")
         };
     }
 }

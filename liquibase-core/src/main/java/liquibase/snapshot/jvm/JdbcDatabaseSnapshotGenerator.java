@@ -1,21 +1,15 @@
 package liquibase.snapshot.jvm;
 
+import liquibase.CatalogAndSchema;
 import liquibase.database.Database;
-import liquibase.servicelocator.ServiceLocator;
+import liquibase.snapshot.SnapshotControl;
 import liquibase.structure.core.*;
-import liquibase.diff.DiffControl;
-import liquibase.diff.DiffStatusListener;
 import liquibase.exception.DatabaseException;
-import liquibase.logging.LogFactory;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.DatabaseSnapshotGenerator;
 import liquibase.structure.DatabaseObject;
 
-import java.util.*;
-
 public class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotGenerator {
-
-    private Set<DiffStatusListener> statusListeners;
 
     public boolean supports(Database database) {
         return true;
@@ -26,51 +20,42 @@ public class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotGenerator 
     }
 
     public Table getDatabaseChangeLogTable(Database database) throws DatabaseException {
-        return getTable(database.correctSchema(new Schema(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName())), database.getDatabaseChangeLogTableName(), database);
+        return getTable(database.correctSchema(new CatalogAndSchema(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName())), database.getDatabaseChangeLogTableName(), database);
     }
 
     public Table getDatabaseChangeLogLockTable(Database database) throws DatabaseException {
-        return getTable(database.correctSchema(new Schema(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName())), database.getDatabaseChangeLogLockTableName(), database);
+        return getTable(database.correctSchema(new CatalogAndSchema(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName())), database.getDatabaseChangeLogLockTableName(), database);
     }
 
     public boolean hasDatabaseChangeLogTable(Database database) throws DatabaseException {
-        return hasTable(database.correctSchema(new Schema(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName())), database.getDatabaseChangeLogTableName(), database);
+        return hasTable(database.correctSchema(new CatalogAndSchema(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName())), database.getDatabaseChangeLogTableName(), database);
     }
 
     public boolean hasDatabaseChangeLogLockTable(Database database) throws DatabaseException {
-        return hasTable(database.correctSchema(new Schema(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName())), database.getDatabaseChangeLogLockTableName(), database);
+        return hasTable(database.correctSchema(new CatalogAndSchema(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName())), database.getDatabaseChangeLogLockTableName(), database);
     }
 
-    private boolean hasTable(Schema schema, String tableName, Database database) throws DatabaseException {
-        return DatabaseObjectGeneratorFactory.getInstance().getGenerator(Table.class, database).has(schema, new Table().setName(tableName), database);
+    private boolean hasTable(CatalogAndSchema schema, String tableName, Database database) throws DatabaseException {
+        return DatabaseObjectGeneratorFactory.getInstance().getGenerator(Table.class, database).has((Table) new Table().setName(tableName).setSchema(new Schema(schema.getCatalogName(), schema.getSchemaName())), database);
     }
 
-    private Table getTable(Schema schema, String tableName, Database database) throws DatabaseException {
-        return DatabaseObjectGeneratorFactory.getInstance().getGenerator(Table.class, database).get(schema, new Table().setName(tableName), database);
+    private Table getTable(CatalogAndSchema schema, String tableName, Database database) throws DatabaseException {
+        return DatabaseObjectGeneratorFactory.getInstance().getGenerator(Table.class, database).snapshot((Table) new Table().setName(tableName).setSchema(new Schema(schema.getCatalogName(), schema.getSchemaName())), database);
     }
 
-    public DatabaseSnapshot createSnapshot(Database database, DiffControl diffControl, DiffControl.DatabaseRole type) throws DatabaseException {
-        DatabaseSnapshot snapshot = new DatabaseSnapshot(database, diffControl.getSchemas(type));
-        this.statusListeners = diffControl.getStatusListeners();
+    public DatabaseSnapshot createSnapshot(Database database, SnapshotControl snapshotControl) throws DatabaseException {
+        DatabaseSnapshot snapshot = new DatabaseSnapshot(database, snapshotControl);
 
-        for (Schema schema : diffControl.getSchemas(type)) {
-            schema = snapshot.getDatabase().correctSchema(schema);
-            for (Class clazz :  ServiceLocator.getInstance().findClasses(DatabaseObject.class)) {
-                DatabaseObjectSnapshotGenerator generator = DatabaseObjectGeneratorFactory.getInstance().getGenerator(clazz, database);
-                if (generator != null) {
-                    updateListeners("Reading objects of type "+clazz.getName()+" from "+schema);
-                    DatabaseObject[] objects = generator.get(schema, database);
-                    if (objects != null) {
-                        snapshot.addDatabaseObjects(objects);
-                    }
-                }
-            }
+        for (CatalogAndSchema schema : snapshotControl.getSchemas()) {
+            snapshot.addSchema(snapshot(new Schema(schema.getCatalogName(), schema.getSchemaName()), snapshot));
         }
-
-        snapshot.merge();
-
         return snapshot;
+    }
 
+    public <DatabaseObjectType extends DatabaseObject> DatabaseObjectType snapshot(DatabaseObjectType example, DatabaseSnapshot snapshot) throws DatabaseException {
+        Class<? extends DatabaseObject> objectType = example.getClass();
+        DatabaseObjectSnapshotGenerator<DatabaseObjectType> generator = (DatabaseObjectSnapshotGenerator<DatabaseObjectType>) DatabaseObjectGeneratorFactory.getInstance().getGenerator(objectType, snapshot.getDatabase());
+        return generator.snapshot(example, snapshot.getDatabase());
     }
 
 
@@ -123,15 +108,5 @@ public class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotGenerator 
 
     protected boolean includeInSnapshot(DatabaseObject obj) {
         return true;
-    }
-
-    protected void updateListeners(String message) {
-        if (this.statusListeners == null) {
-            return;
-        }
-        LogFactory.getLogger().debug(message);
-        for (DiffStatusListener listener : this.statusListeners) {
-            listener.statusUpdate(message);
-        }
     }
 }

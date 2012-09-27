@@ -1,5 +1,6 @@
 package liquibase.snapshot.jvm;
 
+import liquibase.CatalogAndSchema;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 import liquibase.structure.DatabaseObject;
@@ -21,19 +22,15 @@ public class TableSnapshotGenerator extends JdbcDatabaseObjectSnapshotGenerator<
     }
 
 
-    public boolean has(DatabaseObject container, Table example, Database database) throws DatabaseException {
-        if (!(container instanceof Schema)) {
-            return false;
-        }
-        Schema schema = (Schema) container;
-        if (schema == null) {
-            schema = Schema.DEFAULT;
-        }
+    public boolean has(Table example, Database database) throws DatabaseException {
+        Schema schema = example.getSchema();
+//        if (schema == null) {
+//            schema = Schema.DEFAULT;
+//        }
         try {
             String tableName = example.getName();
             if (database != null) {
                 tableName = database.correctObjectName(tableName, Table.class);
-                schema = database.correctSchema(schema);
             }
             ResultSet rs = getMetaData(database).getTables(database.getJdbcCatalogName(schema), database.getJdbcSchemaName(schema), tableName, new String[]{"TABLE"});
             try {
@@ -50,12 +47,9 @@ public class TableSnapshotGenerator extends JdbcDatabaseObjectSnapshotGenerator<
     }
 
 
-    public Table get(DatabaseObject container, Table example, Database database) throws DatabaseException {
+    public Table snapshot(Table example, Database database) throws DatabaseException {
         String objectName = example.getName();
-        if (!(container instanceof Schema)) {
-            return null;
-        }
-        Schema schema = (Schema) container;
+        Schema schema = example.getSchema();
 
         ResultSet rs = null;
         try {
@@ -93,7 +87,6 @@ public class TableSnapshotGenerator extends JdbcDatabaseObjectSnapshotGenerator<
         }
         Schema schema = (Schema) container;
 
-        schema = database.correctSchema(schema);
         updateListeners("Reading tables for " + database.toString() + " ...");
 
         List<Table> returnTables = new ArrayList<Table>();
@@ -129,9 +122,10 @@ public class TableSnapshotGenerator extends JdbcDatabaseObjectSnapshotGenerator<
         table.setRawSchemaName(rawSchemaName);
         table.setRawCatalogName(rawCatalogName);
 
-        table.setSchema(database.getSchemaFromJdbcInfo(rawSchemaName, rawCatalogName));
+        CatalogAndSchema schemaFromJdbcInfo = database.getSchemaFromJdbcInfo(rawSchemaName, rawCatalogName);
+        table.setSchema(new Schema(schemaFromJdbcInfo.getCatalogName(), schemaFromJdbcInfo.getSchemaName()));
 
-        Schema rawSchema = database.correctSchema(new Schema(table.getRawCatalogName(), table.getRawSchemaName()));
+        CatalogAndSchema rawSchema = database.correctSchema(new CatalogAndSchema(table.getRawCatalogName(), table.getRawSchemaName()));
         ResultSet columnMetadataResultSet = getMetaData(database).getColumns(database.getJdbcCatalogName(rawSchema), database.getJdbcSchemaName(rawSchema), rawTableName, null);
         try {
             while (columnMetadataResultSet.next()) {

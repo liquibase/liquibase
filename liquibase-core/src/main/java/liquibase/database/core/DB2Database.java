@@ -1,5 +1,6 @@
 package liquibase.database.core;
 
+import liquibase.CatalogAndSchema;
 import liquibase.database.AbstractDatabase;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
@@ -150,7 +151,7 @@ public class DB2Database extends AbstractDatabase {
     }
 
     @Override
-    public String getViewDefinition(Schema schema, String name) throws DatabaseException {
+    public String getViewDefinition(CatalogAndSchema schema, String name) throws DatabaseException {
         return super.getViewDefinition(schema, name).replaceFirst("CREATE VIEW \\w+ AS ", ""); //db2 returns "create view....as select
     }
 
@@ -205,17 +206,17 @@ public class DB2Database extends AbstractDatabase {
     }
 
     @Override
-    public Schema getSchemaFromJdbcInfo(String rawSchemaName, String rawCatalogName) {
-        return this.correctSchema(new Schema(rawSchemaName, null));
+    public CatalogAndSchema getSchemaFromJdbcInfo(String rawSchemaName, String rawCatalogName) {
+        return this.correctSchema(new CatalogAndSchema(rawSchemaName, null));
     }
 
     @Override
-    public String getJdbcCatalogName(Schema schema) {
+    public String getJdbcCatalogName(CatalogAndSchema schema) {
         return null;
     }
 
     @Override
-    public String getJdbcSchemaName(Schema schema) {
+    public String getJdbcSchemaName(CatalogAndSchema schema) {
         return schema.getCatalogName();
     }
 

@@ -60,12 +60,12 @@ public class ColumnExistsPrecondition implements Precondition {
     public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet) throws PreconditionFailedException, PreconditionErrorException {
         Column example = new Column();
         if (StringUtils.trimToNull(getTableName()) != null) {
-            example.setRelation(new Table().setName(getTableName()));
+            example.setRelation(new Table().setName(getTableName()).setSchema(new Schema(getCatalogName(), getSchemaName())));
         }
         example.setName(getColumnName());
 
         try {
-            if (!DatabaseObjectGeneratorFactory.getInstance().getGenerator(Column.class, database).has(database.correctSchema(new Schema(getCatalogName(), getSchemaName())), example, database)) {
+            if (!DatabaseObjectGeneratorFactory.getInstance().getGenerator(Column.class, database).has(example, database)) {
                 throw new PreconditionFailedException("Column '" + database.escapeColumnName(catalogName, schemaName, getTableName(), getColumnName()) + "' does not exist", changeLog, this);
             }
         } catch (DatabaseException e) {

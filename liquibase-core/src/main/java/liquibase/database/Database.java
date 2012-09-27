@@ -1,9 +1,11 @@
 package liquibase.database;
 
+import liquibase.CatalogAndSchema;
 import liquibase.change.Change;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.RanChangeSet;
+import liquibase.snapshot.SnapshotControl;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Schema;
 import liquibase.exception.*;
@@ -139,19 +141,19 @@ public interface Database extends DatabaseObject, PrioritizedService {
 
     void checkDatabaseChangeLogLockTable() throws DatabaseException;
 
-    void dropDatabaseObjects(Schema schema) throws DatabaseException;
+    void dropDatabaseObjects(CatalogAndSchema schema) throws DatabaseException;
 
     void tag(String tagString) throws DatabaseException;
 
     boolean doesTagExist(String tag) throws DatabaseException;
 
-    boolean isSystemTable(Schema schema, String tableName);
+    boolean isSystemTable(CatalogAndSchema schema, String tableName);
 
-    boolean isSystemView(Schema schema, String name);
+    boolean isSystemView(CatalogAndSchema schema, String name);
 
-    boolean isLiquibaseTable(Schema schema, String tableName);
+    boolean isLiquibaseTable(CatalogAndSchema schema, String tableName);
 
-    String getViewDefinition(Schema schema, String name) throws DatabaseException;
+    String getViewDefinition(CatalogAndSchema schema, String name) throws DatabaseException;
 
     String getDateLiteral(java.sql.Date date);
 
@@ -272,7 +274,7 @@ public interface Database extends DatabaseObject, PrioritizedService {
 
     public boolean isReservedWord(String string);
 
-    Schema correctSchema(Schema schema);
+    CatalogAndSchema correctSchema(CatalogAndSchema schema);
 
     /**
      * Fix the object name to the format the database expects, handling changes in case, etc.
@@ -287,7 +289,11 @@ public interface Database extends DatabaseObject, PrioritizedService {
 
     int getDataTypeMaxParameters(String dataTypeName);
 
-    Schema getSchemaFromJdbcInfo(String rawSchemaName, String rawCatalogName);
+    CatalogAndSchema getSchemaFromJdbcInfo(String rawSchemaName, String rawCatalogName);
+
+    String getJdbcCatalogName(CatalogAndSchema schema);
+
+    String getJdbcSchemaName(CatalogAndSchema schema);
 
     String getJdbcCatalogName(Schema schema);
 

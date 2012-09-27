@@ -60,16 +60,19 @@ public class PrimaryKeyExistsPrecondition implements Precondition {
     public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet) throws PreconditionFailedException, PreconditionErrorException {
         try {
             PrimaryKey example = new PrimaryKey();
+            Table table = new Table();
+            table.setSchema(new Schema(getCatalogName(), getSchemaName()));
             if (StringUtils.trimToNull(getTableName()) != null) {
-                example.setTable(new Table().setName(getTableName()));
+                table.setName(getTableName());
             }
+            example.setTable(table);
             example.setName(getPrimaryKeyName());
 
-            if (!DatabaseObjectGeneratorFactory.getInstance().getGenerator(PrimaryKey.class, database).has(new Schema(getCatalogName(), getSchemaName()), example, database)) {
+            if (!DatabaseObjectGeneratorFactory.getInstance().getGenerator(PrimaryKey.class, database).has(example, database)) {
                 if (tableName != null) {
-                    throw new PreconditionFailedException("Primary Key does not exist on "+database.escapeStringForDatabase(getTableName()), changeLog, this);
+                    throw new PreconditionFailedException("Primary Key does not exist on " + database.escapeStringForDatabase(getTableName()), changeLog, this);
                 } else {
-                    throw new PreconditionFailedException("Primary Key "+database.escapeStringForDatabase(getPrimaryKeyName())+" does not exist", changeLog, this);
+                    throw new PreconditionFailedException("Primary Key " + database.escapeStringForDatabase(getPrimaryKeyName()) + " does not exist", changeLog, this);
                 }
             }
         } catch (PreconditionFailedException e) {

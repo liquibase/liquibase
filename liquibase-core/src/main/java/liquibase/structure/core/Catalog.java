@@ -7,17 +7,10 @@ import liquibase.util.StringUtils;
 
 public class Catalog extends DatabaseObjectImpl {
 
-    public static final String DEFAULT_NAME = "!DEFAULT_CATALOG!";
-    public static final Catalog DEFAULT = new Catalog(DEFAULT_NAME);
-
     protected String name;
 
     public Catalog(String name) {
-        if (StringUtils.trimToNull(name) == null) {
-            this.name = DEFAULT_NAME;
-        } else {
-            this.name = name;
-        }
+        this.name = name;
         setPartial(false);
     }
 

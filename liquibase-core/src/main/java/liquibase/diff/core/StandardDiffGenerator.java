@@ -8,6 +8,7 @@ import liquibase.diff.DiffResult;
 import liquibase.exception.DatabaseException;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.DatabaseSnapshotGeneratorFactory;
+import liquibase.snapshot.SnapshotControl;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
@@ -23,10 +24,10 @@ public class StandardDiffGenerator implements DiffGenerator {
     }
 
     public DiffResult compare(Database referenceDatabase, Database comparisonDatabase, DiffControl diffControl) throws DatabaseException {
-        DatabaseSnapshot referenceSnapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(referenceDatabase, diffControl, DiffControl.DatabaseRole.REFERENCE);
+        DatabaseSnapshot referenceSnapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(referenceDatabase, diffControl.toSnapshotControl(DiffControl.DatabaseRole.REFERENCE));
         DatabaseSnapshot comparisonSnapshot = null;
         if (comparisonDatabase != null) {
-            comparisonSnapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(comparisonDatabase, diffControl, DiffControl.DatabaseRole.COMPARISON);
+            comparisonSnapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(comparisonDatabase, diffControl.toSnapshotControl(DiffControl.DatabaseRole.COMPARISON));
         }
 
         return compare(referenceSnapshot, comparisonSnapshot, diffControl);
@@ -35,7 +36,7 @@ public class StandardDiffGenerator implements DiffGenerator {
     public DiffResult compare(DatabaseSnapshot referenceSnapshot, DatabaseSnapshot comparisonSnapshot, DiffControl diffControl) throws DatabaseException {
 
         if (comparisonSnapshot == null) {
-            comparisonSnapshot = new DatabaseSnapshot(referenceSnapshot.getDatabase(), diffControl.getSchemas(DiffControl.DatabaseRole.REFERENCE));
+            comparisonSnapshot = new DatabaseSnapshot(referenceSnapshot.getDatabase(), diffControl.toSnapshotControl(DiffControl.DatabaseRole.REFERENCE));
         }
 
         DiffResult diffResult = new DiffResult(referenceSnapshot, comparisonSnapshot, diffControl);
@@ -66,34 +67,34 @@ public class StandardDiffGenerator implements DiffGenerator {
 
     protected <T extends DatabaseObject> void compareObjectType(Class<T> type, DatabaseSnapshot referenceSnapshot, DatabaseSnapshot comparisonSnapshot, DiffResult diffResult) {
 
-        for (DiffControl.SchemaComparison schemaComparison : diffResult.getDiffControl().getSchemaComparisons()) {
-            Schema referenceSchema = referenceSnapshot.getDatabase().correctSchema(schemaComparison.getReferenceSchema());
-            Schema comparisonSchema = null;
-            if (comparisonSnapshot.getDatabase() != null) {
-                comparisonSchema = comparisonSnapshot.getDatabase().correctSchema(schemaComparison.getComparisonSchema());
-            }
-            for (T referenceObject : referenceSnapshot.getDatabaseObjects(referenceSchema, type)) {
-                if (referenceObject instanceof Table && referenceSnapshot.getDatabase().isLiquibaseTable(referenceSchema, referenceObject.getName())) {
-                    continue;
-                }
-                if (comparisonSnapshot.contains(comparisonSchema, referenceObject)) {
-                    if (!comparisonSnapshot.matches(comparisonSchema, referenceObject)) {
-                        diffResult.getObjectDiff(type).addChanged(referenceObject);
-                    }
-                } else {
-                    diffResult.getObjectDiff(type).addMissing(referenceObject);
-                }
-            }
-
-            for (T targetObject : comparisonSnapshot.getDatabaseObjects(comparisonSchema, type)) {
-                if (targetObject instanceof Table && comparisonSnapshot.getDatabase().isLiquibaseTable(comparisonSchema, targetObject.getName())) {
-                    continue;
-                }
-                if (!referenceSnapshot.contains(referenceSchema, targetObject)) {
-                    diffResult.getObjectDiff(type).addUnexpected(targetObject);
-                }
-            }
-        }
+//todo        for (DiffControl.SchemaComparison schemaComparison : diffResult.getDiffControl().getSchemaComparisons()) {
+//            Schema referenceSchema = referenceSnapshot.getDatabase().correctSchema(schemaComparison.getReferenceSchema());
+//            Schema comparisonSchema = null;
+//            if (comparisonSnapshot.getDatabase() != null) {
+//                comparisonSchema = comparisonSnapshot.getDatabase().correctSchema(schemaComparison.getComparisonSchema());
+//            }
+//            for (T referenceObject : referenceSnapshot.getDatabaseObjects(referenceSchema, type)) {
+//                if (referenceObject instanceof Table && referenceSnapshot.getDatabase().isLiquibaseTable(referenceSchema, referenceObject.getName())) {
+//                    continue;
+//                }
+//                if (comparisonSnapshot.contains(comparisonSchema, referenceObject)) {
+//                    if (!comparisonSnapshot.matches(comparisonSchema, referenceObject)) {
+//                        diffResult.getObjectDiff(type).addChanged(referenceObject);
+//                    }
+//                } else {
+//                    diffResult.getObjectDiff(type).addMissing(referenceObject);
+//                }
+//            }
+//
+//            for (T targetObject : comparisonSnapshot.getDatabaseObjects(comparisonSchema, type)) {
+//                if (targetObject instanceof Table && comparisonSnapshot.getDatabase().isLiquibaseTable(comparisonSchema, targetObject.getName())) {
+//                    continue;
+//                }
+//                if (!referenceSnapshot.contains(referenceSchema, targetObject)) {
+//                    diffResult.getObjectDiff(type).addUnexpected(targetObject);
+//                }
+//            }
+//        }
 
         //todo: add logic for when container is missing or unexpected also
     }

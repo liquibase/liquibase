@@ -1,5 +1,6 @@
 package liquibase.database.core;
 
+import liquibase.CatalogAndSchema;
 import liquibase.database.AbstractDatabase;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.jvm.JdbcConnection;
@@ -189,7 +190,7 @@ public class OracleDatabase extends AbstractDatabase {
     }
 
     @Override
-    public boolean isSystemTable(Schema schema, String tableName) {
+    public boolean isSystemTable(CatalogAndSchema schema, String tableName) {
         if (super.isSystemTable(schema, tableName)) {
             return true;
         } else if (tableName.startsWith("BIN$")) { //oracle deleted table

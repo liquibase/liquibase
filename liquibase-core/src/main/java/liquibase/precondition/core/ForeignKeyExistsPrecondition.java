@@ -1,5 +1,6 @@
 package liquibase.precondition.core;
 
+import liquibase.CatalogAndSchema;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
@@ -64,8 +65,9 @@ public class ForeignKeyExistsPrecondition implements Precondition {
             if (StringUtils.trimToNull(getForeignKeyTableName()) != null) {
                 example.setForeignKeyTable(new Table().setName(getForeignKeyTableName()));
             }
+            //todo: include catalog/schema
 
-            if (!DatabaseObjectGeneratorFactory.getInstance().getGenerator(ForeignKey.class, database).has(database.correctSchema(new Schema(getCatalogName(), getSchemaName())), example, database)) {
+            if (!DatabaseObjectGeneratorFactory.getInstance().getGenerator(ForeignKey.class, database).has(example, database)) {
                     throw new PreconditionFailedException("Foreign Key "+database.escapeIndexName(catalogName, schemaName, foreignKeyName)+" does not exist", changeLog, this);
             }
         } catch (PreconditionFailedException e) {

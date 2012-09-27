@@ -1,7 +1,9 @@
 package liquibase.dbtest;
 
+import liquibase.CatalogAndSchema;
 import liquibase.Liquibase;
 import liquibase.database.jvm.JdbcConnection;
+import liquibase.snapshot.SnapshotControl;
 import liquibase.snapshot.jvm.DatabaseObjectGeneratorFactory;
 import liquibase.snapshot.jvm.DatabaseObjectSnapshotGenerator;
 import liquibase.structure.core.Catalog;
@@ -120,17 +122,17 @@ public abstract class AbstractIntegrationTest {
 
             DatabaseSnapshotGeneratorFactory.resetAll();
             LockService.getInstance(database).forceReleaseLock();
-            database.dropDatabaseObjects(Schema.DEFAULT);
+            database.dropDatabaseObjects(CatalogAndSchema.DEFAULT);
 
             if (database.supportsSchemas()) {
-                database.dropDatabaseObjects(new Schema((String) null, DatabaseTestContext.ALT_SCHEMA));
+                database.dropDatabaseObjects(new CatalogAndSchema((String) null, DatabaseTestContext.ALT_SCHEMA));
             }
 
             if (supportsAltCatalogTests()) {
                 if (database.supportsSchemas() && database.supportsCatalogs()) {
-                    database.dropDatabaseObjects(new Schema(DatabaseTestContext.ALT_CATALOG, DatabaseTestContext.ALT_SCHEMA));
+                    database.dropDatabaseObjects(new CatalogAndSchema(DatabaseTestContext.ALT_CATALOG, DatabaseTestContext.ALT_SCHEMA));
                 } else if (database.supportsCatalogs()) {
-                    database.dropDatabaseObjects(new Schema((String) null, DatabaseTestContext.ALT_SCHEMA));
+                    database.dropDatabaseObjects(new CatalogAndSchema((String) null, DatabaseTestContext.ALT_SCHEMA));
                 }
             }
             database.commit();
@@ -200,10 +202,10 @@ public abstract class AbstractIntegrationTest {
         }
     }
 
-    protected Schema[] getSchemasToDrop() throws DatabaseException {
-        return new Schema[]{
-                new Schema(new Catalog(null), "liquibaseb".toUpperCase()),
-                new Schema(new Catalog(null), database.getDefaultSchemaName())
+    protected CatalogAndSchema[] getSchemasToDrop() throws DatabaseException {
+        return new CatalogAndSchema[]{
+                new CatalogAndSchema(null, "liquibaseb".toUpperCase()),
+                new CatalogAndSchema(null, database.getDefaultSchemaName())
         };
     }
 
@@ -252,8 +254,8 @@ public abstract class AbstractIntegrationTest {
         assertTrue("create databasechangelog command not found in: \n" + outputResult, outputResult.contains("CREATE TABLE "+database.escapeTableName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName())));
         assertTrue("create databasechangeloglock command not found in: \n" + outputResult, outputResult.contains("CREATE TABLE "+database.escapeTableName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName())));
 
-        DatabaseSnapshot snapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(database, new DiffControl());
-        assertEquals(0, snapshot.getDatabaseObjects(Schema.DEFAULT, Table.class).size());
+        DatabaseSnapshot snapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(database, new SnapshotControl());
+        assertEquals(0, snapshot.getDatabaseObjects(null, Table.class).length);
     }
 
     protected void clearDatabase(Liquibase liquibase) throws DatabaseException {
@@ -414,7 +416,7 @@ public abstract class AbstractIntegrationTest {
             boolean outputCsv = run == 1;
             runCompleteChangeLog();
 
-            DatabaseSnapshot originalSnapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(database, new DiffControl());
+            DatabaseSnapshot originalSnapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(database, new SnapshotControl());
 
             DiffControl diffControl = new DiffControl();
             diffControl.setDiffData(true);
@@ -437,7 +439,7 @@ public abstract class AbstractIntegrationTest {
             Liquibase liquibase = createLiquibase(tempFile.getName());
             clearDatabase(liquibase);
 
-            DatabaseSnapshot emptySnapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(database, new DiffControl());
+            DatabaseSnapshot emptySnapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(database, new SnapshotControl());
 
             //run again to test changelog testing logic
             liquibase = createLiquibase(tempFile.getName());
@@ -450,7 +452,7 @@ public abstract class AbstractIntegrationTest {
 
 //            tempFile.deleteOnExit();
 
-            DatabaseSnapshot migratedSnapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(database, new DiffControl());
+            DatabaseSnapshot migratedSnapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(database, new SnapshotControl());
 
             DiffResult finalDiffResult = DiffGeneratorFactory.getInstance().compare(originalSnapshot, migratedSnapshot, new DiffControl());
             try {
@@ -478,9 +480,9 @@ public abstract class AbstractIntegrationTest {
                 throw e;
             }
 
-            DatabaseSnapshot emptyAgainSnapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(database, new DiffControl());
-            assertEquals(0, emptyAgainSnapshot.getDatabaseObjects(migratedSnapshot.getSchemas().iterator().next(), Table.class).size());
-            assertEquals(0, emptyAgainSnapshot.getDatabaseObjects(migratedSnapshot.getSchemas().iterator().next(), View.class).size());
+            DatabaseSnapshot emptyAgainSnapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(database, new SnapshotControl());
+            assertEquals(0, emptyAgainSnapshot.getDatabaseObjects(migratedSnapshot.getSchemas().iterator().next(), Table.class).length);
+            assertEquals(0, emptyAgainSnapshot.getDatabaseObjects(migratedSnapshot.getSchemas().iterator().next(), View.class).length);
         }
     }
 
@@ -502,9 +504,9 @@ public abstract class AbstractIntegrationTest {
 
         liquibase.update(includedChangeLog);
 
-        DatabaseSnapshot originalSnapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(database, new DiffControl());
+        DatabaseSnapshot originalSnapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(database, new SnapshotControl());
 
-        DiffControl diffControl = new DiffControl(new DiffControl.SchemaComparison[]{new DiffControl.SchemaComparison(Schema.DEFAULT, new Schema(Catalog.DEFAULT, "liquibaseb"))});
+        DiffControl diffControl = new DiffControl(new DiffControl.SchemaComparison[]{new DiffControl.SchemaComparison(CatalogAndSchema.DEFAULT, new CatalogAndSchema(null, "liquibaseb"))});
         DiffResult diffResult = DiffGeneratorFactory.getInstance().compare(database, database, diffControl);
 
         File tempFile = File.createTempFile("liquibase-test", ".xml");
@@ -547,7 +549,7 @@ public abstract class AbstractIntegrationTest {
 
         tempFile.deleteOnExit();
 
-        DatabaseSnapshot finalSnapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(database, new DiffControl());
+        DatabaseSnapshot finalSnapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(database, new SnapshotControl());
 
         DiffResult finalDiffResult = DiffGeneratorFactory.getInstance().compare(originalSnapshot, finalSnapshot, new DiffControl());
         new DiffToPrintStream(finalDiffResult, System.out).print();
@@ -863,10 +865,10 @@ public abstract class AbstractIntegrationTest {
         liquibase.update("hyphen-context-using-sql,camelCaseContextUsingSql");
 
         DatabaseObjectSnapshotGenerator<Table> tableSnapshotGenerator = DatabaseObjectGeneratorFactory.getInstance().getGenerator(Table.class, database);
-        assertNotNull(tableSnapshotGenerator.has(null, new Table().setName("hyphen_context"), database));
-        assertNotNull(tableSnapshotGenerator.has(null, new Table().setName("camel_context"), database));
-        assertNotNull(tableSnapshotGenerator.has(null, new Table().setName("bar_id"), database));
-        assertNotNull(tableSnapshotGenerator.has(null, new Table().setName("foo_id"), database));
+        assertNotNull(tableSnapshotGenerator.has(new Table().setName("hyphen_context"), database));
+        assertNotNull(tableSnapshotGenerator.has(new Table().setName("camel_context"), database));
+        assertNotNull(tableSnapshotGenerator.has(new Table().setName("bar_id"), database));
+        assertNotNull(tableSnapshotGenerator.has(new Table().setName("foo_id"), database));
     }
 
 //   @Test

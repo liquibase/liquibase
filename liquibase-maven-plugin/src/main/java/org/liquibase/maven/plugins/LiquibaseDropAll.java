@@ -1,5 +1,6 @@
 package org.liquibase.maven.plugins;
 
+import liquibase.CatalogAndSchema;
 import liquibase.Liquibase;
 import liquibase.structure.core.Schema;
 import liquibase.exception.LiquibaseException;
@@ -30,11 +31,11 @@ public class LiquibaseDropAll extends AbstractLiquibaseMojo {
 	protected void performLiquibaseTask(Liquibase liquibase)
 			throws LiquibaseException {
 		if (schemas != null) {
-            List<Schema> schemaObjs = new ArrayList<Schema>();
+            List<CatalogAndSchema> schemaObjs = new ArrayList<CatalogAndSchema>();
             for (String name : schemas.split(",")) {
-                schemaObjs.add(new Schema(catalog, name));
+                schemaObjs.add(new CatalogAndSchema(catalog, name));
             }
-			liquibase.dropAll(schemaObjs.toArray(new Schema[schemaObjs.size()]));
+			liquibase.dropAll(schemaObjs.toArray(new CatalogAndSchema[schemaObjs.size()]));
 		} else {
 			liquibase.dropAll();
 		}

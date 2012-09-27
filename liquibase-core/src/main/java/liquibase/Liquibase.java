@@ -511,18 +511,17 @@ public class Liquibase {
      * Drops all database objects owned by the current user.
      */
     public final void dropAll() throws DatabaseException, LockException {
-        dropAll(new Schema(getDatabase().getDefaultCatalogName(), getDatabase().getDefaultSchemaName()));
+        dropAll(new CatalogAndSchema(getDatabase().getDefaultCatalogName(), getDatabase().getDefaultSchemaName()));
     }
 
     /**
      * Drops all database objects owned by the current user.
      */                                      
-    public final void dropAll(Schema... schemas) throws DatabaseException {
+    public final void dropAll(CatalogAndSchema... schemas) throws DatabaseException {
         try {
             LockService.getInstance(database).waitForLock();
 
-            for (Schema schema : schemas) {
-                schema = database.correctSchema(schema);
+            for (CatalogAndSchema schema : schemas) {
                 log.info("Dropping Database Objects in schema: " + schema);
                 checkDatabaseChangeLogTable(false, null, null);
                 getDatabase().dropDatabaseObjects(schema);

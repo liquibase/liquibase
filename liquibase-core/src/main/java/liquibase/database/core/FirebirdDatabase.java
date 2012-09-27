@@ -1,5 +1,6 @@
 package liquibase.database.core;
 
+import liquibase.CatalogAndSchema;
 import liquibase.database.AbstractDatabase;
 import liquibase.database.DatabaseConnection;
 import liquibase.structure.DatabaseObject;
@@ -68,7 +69,7 @@ public class FirebirdDatabase extends AbstractDatabase {
     }
 
     @Override
-    public boolean isSystemTable(Schema schema, String tableName) {
+    public boolean isSystemTable(CatalogAndSchema schema, String tableName) {
         return tableName.startsWith("RDB$") || super.isSystemTable(schema, tableName);
     }
 

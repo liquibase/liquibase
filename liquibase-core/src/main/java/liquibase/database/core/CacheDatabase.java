@@ -1,5 +1,6 @@
 package liquibase.database.core;
 
+import liquibase.CatalogAndSchema;
 import liquibase.database.AbstractDatabase;
 import liquibase.database.DatabaseConnection;
 import liquibase.structure.core.Schema;
@@ -74,7 +75,7 @@ public class CacheDatabase extends AbstractDatabase {
 
 
     @Override
-    public String getViewDefinition(Schema schema, String viewName) throws DatabaseException {
+    public String getViewDefinition(CatalogAndSchema schema, String viewName) throws DatabaseException {
         return null;
     }
 }

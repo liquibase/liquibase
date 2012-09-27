@@ -1,5 +1,6 @@
 package liquibase.snapshot.jvm;
 
+import liquibase.CatalogAndSchema;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
@@ -19,13 +20,9 @@ public class ViewSnapshotGenerator extends JdbcDatabaseObjectSnapshotGenerator<V
         return PRIORITY_DEFAULT;
     }
 
-    public boolean has(DatabaseObject container, View example, Database database) throws DatabaseException {
-        if (!(container instanceof Schema)) {
-            return false;
-        }
-
+    public boolean has(View example, Database database) throws DatabaseException {
         String viewName = example.getName();
-        Schema schema = (Schema) container;
+        Schema schema = example.getSchema();
         try {
             ResultSet rs = getMetaData(database).getTables(database.getJdbcCatalogName(schema), database.getJdbcSchemaName(schema), database.correctObjectName(viewName, View.class), new String[]{"VIEW"});
             try {
@@ -70,12 +67,8 @@ public class ViewSnapshotGenerator extends JdbcDatabaseObjectSnapshotGenerator<V
         return returnList.toArray(new View[returnList.size()]);
     }
 
-    @Override
-    public View get(DatabaseObject container, View example, Database database) throws DatabaseException {
-        if (!(container instanceof Schema)) {
-            return null;
-        }
-        Schema schema = (Schema) container;
+    public View snapshot(View example, Database database) throws DatabaseException {
+        Schema schema = example.getSchema();
 
         String objectName = example.getName();
 
@@ -111,10 +104,11 @@ public class ViewSnapshotGenerator extends JdbcDatabaseObjectSnapshotGenerator<V
         view.setRawSchemaName(rawSchemaName);
         view.setRawCatalogName(rawCatalogName);
 
-        view.setSchema(database.getSchemaFromJdbcInfo(rawSchemaName, rawCatalogName));
+        CatalogAndSchema schemaFromJdbcInfo = database.getSchemaFromJdbcInfo(rawSchemaName, rawCatalogName);
+        view.setSchema(new Schema(schemaFromJdbcInfo.getCatalogName(), schemaFromJdbcInfo.getSchemaName()));
 
         try {
-            view.setDefinition(database.getViewDefinition(view.getSchema(), view.getName()));
+            view.setDefinition(database.getViewDefinition(schemaFromJdbcInfo, view.getName()));
         } catch (DatabaseException e) {
             throw new DatabaseException("Error getting " + database.getConnection().getURL() + " view with " + new GetViewDefinitionStatement(view.getSchema().getCatalog().getName(), view.getSchema().getName(), rawViewName), e);
         }

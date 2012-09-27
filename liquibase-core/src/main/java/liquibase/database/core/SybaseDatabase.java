@@ -1,5 +1,6 @@
 package liquibase.database.core;
 
+import liquibase.CatalogAndSchema;
 import liquibase.database.AbstractDatabase;
 import liquibase.database.DatabaseConnection;
 import liquibase.structure.DatabaseObject;
@@ -202,15 +203,15 @@ public class SybaseDatabase extends AbstractDatabase {
 
 
     @Override
-    public boolean isSystemTable(Schema schema, String tableName) {
+    public boolean isSystemTable(CatalogAndSchema schema, String tableName) {
         schema = correctSchema(schema);
-        return super.isSystemTable(schema, tableName) || schema.getName().equals("sys") || tableName.toLowerCase().startsWith("sybfi");
+        return super.isSystemTable(schema, tableName) || schema.getSchemaName().equals("sys") || tableName.toLowerCase().startsWith("sybfi");
     }
 
     @Override
-    public boolean isSystemView(Schema schema, String viewName) {
+    public boolean isSystemView(CatalogAndSchema schema, String viewName) {
         schema = correctSchema(schema);
-        return super.isSystemView(schema, viewName) || schema.getName().equals("sys") || viewName.toLowerCase().equals("sybfi");
+        return super.isSystemView(schema, viewName) || schema.getSchemaName().equals("sys") || viewName.toLowerCase().equals("sybfi");
     }
 
     public String generateDefaultConstraintName(String tableName, String columnName) {
@@ -233,9 +234,9 @@ public class SybaseDatabase extends AbstractDatabase {
     }
 
 	@Override
-	public String getViewDefinition(Schema schema, String viewName) throws DatabaseException {
+	public String getViewDefinition(CatalogAndSchema schema, String viewName) throws DatabaseException {
         schema = correctSchema(schema);
-        GetViewDefinitionStatement statement = new GetViewDefinitionStatement(schema.getCatalogName(), schema.getName(), viewName);
+        GetViewDefinitionStatement statement = new GetViewDefinitionStatement(schema.getCatalogName(), schema.getSchemaName(), viewName);
         Executor executor = ExecutorService.getInstance().getExecutor(this);
         @SuppressWarnings("unchecked")
         List<String> definitionRows = (List<String>) executor.queryForList(statement, String.class);

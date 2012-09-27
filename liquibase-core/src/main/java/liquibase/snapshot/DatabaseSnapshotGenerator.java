@@ -23,7 +23,7 @@ public interface DatabaseSnapshotGenerator {
 
     int getPriority(Database database);
 
-    DatabaseSnapshot createSnapshot(Database database, DiffControl diffControl, DiffControl.DatabaseRole type) throws DatabaseException;
+    DatabaseSnapshot createSnapshot(Database database, SnapshotControl snapshotControl) throws DatabaseException;
 
     Table getDatabaseChangeLogTable(Database database) throws DatabaseException;
 

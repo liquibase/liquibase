@@ -18,8 +18,8 @@ public class SequenceSnapshotGenerator extends JdbcDatabaseObjectSnapshotGenerat
         return PRIORITY_DEFAULT;
     }
 
-    public boolean has(DatabaseObject container, Sequence example, Database database) throws DatabaseException {
-        return get(container, example, database) != null;
+    public boolean has(Sequence example, Database database) throws DatabaseException {
+        return snapshot(example, database) != null;
     }
 
     public Sequence[] get(DatabaseObject container, Database database) throws DatabaseException {
@@ -53,8 +53,8 @@ public class SequenceSnapshotGenerator extends JdbcDatabaseObjectSnapshotGenerat
         return returnSequences.toArray(new Sequence[returnSequences.size()]);
     }
 
-    public Sequence get(DatabaseObject container, Sequence example, Database database) throws DatabaseException {
-        Sequence[] sequences = get(container, database);
+    public Sequence snapshot(Sequence example, Database database) throws DatabaseException {
+        Sequence[] sequences = get(example.getSchema(), database);
         if (sequences == null) {
             return null;
         }

@@ -1,5 +1,6 @@
 package liquibase.sqlgenerator.core;
 
+import liquibase.CatalogAndSchema;
 import liquibase.database.Database;
 import liquibase.database.core.MySQLDatabase;
 import liquibase.structure.core.Schema;
@@ -19,24 +20,24 @@ public class GetViewDefinitionGenerator extends AbstractSqlGenerator<GetViewDefi
     }
 
     public Sql[] generateSql(GetViewDefinitionStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-        Schema schema = database.correctSchema(new Schema(statement.getCatalogName(), statement.getSchemaName()));
+        CatalogAndSchema schema = database.correctSchema(new CatalogAndSchema(statement.getCatalogName(), statement.getSchemaName()));
 
         String sql = "select view_definition from information_schema.views where table_name='" + database.correctObjectName(statement.getViewName(), View.class) + "'";
 
         if (database instanceof MySQLDatabase) {
-            String catalogName = database.getAssumedCatalogName(schema.getCatalogName(), schema.getName());
+            String catalogName = database.getAssumedCatalogName(schema.getCatalogName(), schema.getSchemaName());
             sql += " and table_schema='" + catalogName + "'";
         } else {
 
             if (database.supportsSchemas()) {
-                String schemaName = database.getAssumedSchemaName(schema.getCatalogName(), schema.getName());
+                String schemaName = database.getAssumedSchemaName(schema.getCatalogName(), schema.getSchemaName());
                 if (schemaName != null) {
                     sql += " and table_schema='" + schemaName + "'";
                 }
             }
 
             if (database.supportsCatalogs()) {
-                String catalogName = database.getAssumedCatalogName(schema.getCatalogName(), schema.getName());
+                String catalogName = database.getAssumedCatalogName(schema.getCatalogName(), schema.getSchemaName());
                 if (catalogName != null) {
                     sql += " and table_catalog='" + catalogName + "'";
                 }

@@ -1,5 +1,6 @@
 package liquibase.database;
 
+import liquibase.CatalogAndSchema;
 import liquibase.change.Change;
 import liquibase.change.CheckSum;
 import liquibase.change.core.*;
@@ -10,13 +11,13 @@ import liquibase.changelog.filter.ContextChangeSetFilter;
 import liquibase.changelog.filter.DbmsChangeSetFilter;
 import liquibase.database.core.*;
 import liquibase.database.jvm.JdbcConnection;
-import liquibase.diff.DiffControl;
 import liquibase.exception.*;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.logging.LogFactory;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.DatabaseSnapshotGeneratorFactory;
+import liquibase.snapshot.SnapshotControl;
 import liquibase.sql.Sql;
 import liquibase.sql.visitor.SqlVisitor;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
@@ -201,33 +202,34 @@ public abstract class AbstractDatabase implements Database {
         return connection.getCatalog();
     }
 
-    public Schema correctSchema(Schema schema) {
-        if (schema instanceof Schema.DatabaseSpecific && ((Schema.DatabaseSpecific) schema).getDatabase().equals(this)) {
-            return schema;
-        }
+    public CatalogAndSchema correctSchema(String catalog, String schema) {
+        return correctSchema(new CatalogAndSchema(catalog, schema));
+    }
+
+    public CatalogAndSchema correctSchema(CatalogAndSchema schema) {
         if (schema == null) {
-            return new Schema.DatabaseSpecific(getDefaultCatalogName(), getDefaultSchemaName(), this);
+            return new CatalogAndSchema(getDefaultCatalogName(), getDefaultSchemaName());
         }
         String catalogName = schema.getCatalogName();
-        String schemaName = schema.getName();
+        String schemaName = schema.getSchemaName();
 
         if (supportsCatalogs() && supportsSchemas()) {
-            if (catalogName.equals(Catalog.DEFAULT_NAME)) {
+            if (catalogName == null) {
                 catalogName = getDefaultCatalogName();
             } else {
                 catalogName = correctObjectName(catalogName, Catalog.class);
             }
 
-            if (schemaName.equals(Schema.DEFAULT_NAME)) {
+            if (schemaName == null) {
                 schemaName = getDefaultSchemaName();
             } else {
                 schemaName =  correctObjectName(schemaName, Schema.class);
             }
         } else if (!supportsCatalogs() && !supportsSchemas()) {
-            return new Schema.DatabaseSpecific("DEFAULT", "DEFAULT", this);
+            return new CatalogAndSchema(null, null);
         }  else if (supportsCatalogs()) { //schema is null
-            if (catalogName.equals(Catalog.DEFAULT_NAME)) {
-                if (Schema.DEFAULT_NAME.equals(schemaName)) {
+            if (catalogName == null) {
+                if (schemaName == null) {
                     catalogName = getDefaultCatalogName();
                 } else {
                     catalogName = schemaName;
@@ -235,8 +237,8 @@ public abstract class AbstractDatabase implements Database {
             }
             schemaName = catalogName;
         }  else if (supportsSchemas()) {
-            if (schemaName.equals(Schema.DEFAULT_NAME)) {
-                if (Catalog.DEFAULT_NAME.equals(catalogName)) {
+            if (schemaName == null) {
+                if (catalogName == null) {
                     schemaName = getDefaultSchemaName();
                 } else {
                     schemaName = catalogName;
@@ -244,7 +246,7 @@ public abstract class AbstractDatabase implements Database {
             }
             catalogName = schemaName;
         }
-        return new Schema.DatabaseSpecific(catalogName, schemaName, this);
+        return new CatalogAndSchema(catalogName, schemaName);
 
     }
 
@@ -751,87 +753,87 @@ public abstract class AbstractDatabase implements Database {
 
     /**
      * Drops all objects owned by the connected user.
-     *
-     * @param schema
      */
-    public void dropDatabaseObjects(Schema schema) throws DatabaseException {
-        schema = correctSchema(schema);
+    public void dropDatabaseObjects(CatalogAndSchema schemaToDrop) throws DatabaseException {
         try {
-            DatabaseSnapshot snapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(this, new DiffControl(schema, ""));
+            SnapshotControl snapshotControl = new SnapshotControl(schemaToDrop);
+            snapshotControl.setTypes(View.class, Table.class);
+            DatabaseSnapshot snapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(this, snapshotControl);
 
             List<Change> dropChanges = new ArrayList<Change>();
 
-            for (View view : snapshot.getDatabaseObjects(schema, View.class)) {
-                DropViewChange dropChange = new DropViewChange();
-                dropChange.setViewName(view.getName());
-                dropChange.setSchemaName(schema.getName());
-                dropChange.setCatalogName(schema.getCatalogName());
-
-                dropChanges.add(dropChange);
-            }
-
-            if (!supportsForeignKeyDisable()) {
-                for (ForeignKey fk : snapshot.getDatabaseObjects(schema, ForeignKey.class)) {
-                    DropForeignKeyConstraintChange dropFK = new DropForeignKeyConstraintChange();
-                    dropFK.setBaseTableSchemaName(schema.getName());
-                    dropFK.setBaseTableCatalogName(schema.getCatalogName());
-                    dropFK.setBaseTableName(fk.getForeignKeyTable().getName());
-                    dropFK.setConstraintName(fk.getName());
-
-                    dropChanges.add(dropFK);
-                }
-            }
-
-//            for (Index index : snapshotGenerator.getIndexes()) {
-//                DropIndexChange dropChange = new DropIndexChange();
-//                dropChange.setIndexName(index.getName());
-//                dropChange.setSchemaName(schema);
-//                dropChange.setTableName(index.getTableName());
-//
-//                dropChanges.add(dropChange);
-//            }
-
-            for (Table table : snapshot.getDatabaseObjects(schema, Table.class)) {
-                DropTableChange dropChange = new DropTableChange();
-                dropChange.setSchemaName(schema.getName());
-                dropChange.setCatalogName(schema.getCatalogName());
-                dropChange.setTableName(table.getName());
-                if (supportsDropTableCascadeConstraints()) {
-                    dropChange.setCascadeConstraints(true);
-                }
-
-                dropChanges.add(dropChange);
-            }
-
-            if (this.supportsSequences()) {
-                for (Sequence seq : snapshot.getDatabaseObjects(schema, Sequence.class)) {
-                    DropSequenceChange dropChange = new DropSequenceChange();
-                    dropChange.setSequenceName(seq.getName());
+            for (Schema schema : snapshot.getSchemas()) {
+                for (View view : snapshot.getDatabaseObjects(schema, View.class)) {
+                    DropViewChange dropChange = new DropViewChange();
+                    dropChange.setViewName(view.getName());
                     dropChange.setSchemaName(schema.getName());
                     dropChange.setCatalogName(schema.getCatalogName());
 
                     dropChanges.add(dropChange);
                 }
-            }
 
+                if (!supportsForeignKeyDisable()) {
+                    for (ForeignKey fk : snapshot.getDatabaseObjects(schema, ForeignKey.class)) {
+                        DropForeignKeyConstraintChange dropFK = new DropForeignKeyConstraintChange();
+                        dropFK.setBaseTableSchemaName(schema.getName());
+                        dropFK.setBaseTableCatalogName(schema.getCatalogName());
+                        dropFK.setBaseTableName(fk.getForeignKeyTable().getName());
+                        dropFK.setConstraintName(fk.getName());
 
-            if (snapshot.hasDatabaseChangeLogTable()) {
-                dropChanges.add(new AnonymousChange(new ClearDatabaseChangeLogTableStatement(schema.getCatalogName(), schema.getName())));
-            }
-
-            final boolean reEnableFK = supportsForeignKeyDisable() && disableForeignKeyChecks();
-            try {
-                for (Change change : dropChanges) {
-                    for (SqlStatement statement : change.generateStatements(this)) {
-                        ExecutorService.getInstance().getExecutor(this).execute(statement);
+                        dropChanges.add(dropFK);
                     }
                 }
-            } finally {
-                if (reEnableFK) {
-                    enableForeignKeyChecks();
+
+    //            for (Index index : snapshotGenerator.getIndexes()) {
+    //                DropIndexChange dropChange = new DropIndexChange();
+    //                dropChange.setIndexName(index.getName());
+    //                dropChange.setSchemaName(schema);
+    //                dropChange.setTableName(index.getTableName());
+    //
+    //                dropChanges.add(dropChange);
+    //            }
+
+                for (Table table : snapshot.getDatabaseObjects(schema, Table.class)) {
+                    DropTableChange dropChange = new DropTableChange();
+                    dropChange.setSchemaName(schema.getName());
+                    dropChange.setCatalogName(schema.getCatalogName());
+                    dropChange.setTableName(table.getName());
+                    if (supportsDropTableCascadeConstraints()) {
+                        dropChange.setCascadeConstraints(true);
+                    }
+
+                    dropChanges.add(dropChange);
+                }
+
+                if (this.supportsSequences()) {
+                    for (Sequence seq : snapshot.getDatabaseObjects(schema, Sequence.class)) {
+                        DropSequenceChange dropChange = new DropSequenceChange();
+                        dropChange.setSequenceName(seq.getName());
+                        dropChange.setSchemaName(schema.getName());
+                        dropChange.setCatalogName(schema.getCatalogName());
+
+                        dropChanges.add(dropChange);
+                    }
+                }
+
+
+                if (snapshot.hasDatabaseChangeLogTable()) {
+                    dropChanges.add(new AnonymousChange(new ClearDatabaseChangeLogTableStatement(schema.getCatalogName(), schema.getName())));
+                }
+
+                final boolean reEnableFK = supportsForeignKeyDisable() && disableForeignKeyChecks();
+                try {
+                    for (Change change : dropChanges) {
+                        for (SqlStatement statement : change.generateStatements(this)) {
+                            ExecutorService.getInstance().getExecutor(this).execute(statement);
+                        }
+                    }
+                } finally {
+                    if (reEnableFK) {
+                        enableForeignKeyChecks();
+                    }
                 }
             }
-
         } finally {
             this.commit();
         }
@@ -845,14 +847,14 @@ public abstract class AbstractDatabase implements Database {
                  || this instanceof SybaseASADatabase);
     }
 
-    public boolean isSystemTable(Schema schema, String tableName) {
+    public boolean isSystemTable(CatalogAndSchema schema, String tableName) {
         schema = correctSchema(schema);
-        return "information_schema".equalsIgnoreCase(schema.getName()) || getSystemTables().contains(tableName);
+        return "information_schema".equalsIgnoreCase(schema.getSchemaName()) || getSystemTables().contains(tableName);
     }
 
-    public boolean isSystemView(Schema schema, String viewName) {
+    public boolean isSystemView(CatalogAndSchema schema, String viewName) {
         schema = correctSchema(schema);
-        if ("information_schema".equalsIgnoreCase(schema.getName())) {
+        if ("information_schema".equalsIgnoreCase(schema.getSchemaName())) {
             return true;
         } else if (getSystemViews().contains(viewName)) {
             return true;
@@ -860,8 +862,8 @@ public abstract class AbstractDatabase implements Database {
         return false;
     }
 
-    public boolean isLiquibaseTable(Schema schema, String tableName) {
-        if (!schema.equals(correctSchema(new Schema(getLiquibaseCatalogName(), getLiquibaseSchemaName())), this)) {
+    public boolean isLiquibaseTable(CatalogAndSchema schema, String tableName) {
+        if (!schema.equals(correctSchema(new CatalogAndSchema(getLiquibaseCatalogName(), getLiquibaseSchemaName())), this)) {
             return false;
         }
         if (isCaseSensitive()) {
@@ -910,9 +912,9 @@ public abstract class AbstractDatabase implements Database {
     }
 
 
-    public String getViewDefinition(Schema schema, String viewName) throws DatabaseException {
+    public String getViewDefinition(CatalogAndSchema schema, String viewName) throws DatabaseException {
         schema = correctSchema(schema);
-        String definition = (String) ExecutorService.getInstance().getExecutor(this).queryForObject(new GetViewDefinitionStatement(schema.getCatalogName(), schema.getName(), viewName), String.class);
+        String definition = (String) ExecutorService.getInstance().getExecutor(this).queryForObject(new GetViewDefinitionStatement(schema.getCatalogName(), schema.getSchemaName(), viewName), String.class);
         if (definition == null) {
             return null;
         }
@@ -1334,17 +1336,23 @@ public abstract class AbstractDatabase implements Database {
         return 2;
     }
 
-    public Schema getSchemaFromJdbcInfo(String rawSchemaName, String rawCatalogName) {
-        return this.correctSchema(new Schema(rawCatalogName, rawSchemaName));
+    public CatalogAndSchema getSchemaFromJdbcInfo(String rawSchemaName, String rawCatalogName) {
+        return this.correctSchema(new CatalogAndSchema(rawCatalogName, rawSchemaName));
     }
 
-    public String getJdbcCatalogName(Schema schema) {
+    public String getJdbcCatalogName(CatalogAndSchema schema) {
         return schema.getCatalogName();
     }
 
-    public String getJdbcSchemaName(Schema schema) {
-        return schema.getName();
+    public String getJdbcSchemaName(CatalogAndSchema schema) {
+        return schema.getSchemaName();
     }
 
+    public final String getJdbcCatalogName(Schema schema) {
+        return getJdbcCatalogName(new CatalogAndSchema(schema.getCatalogName(), schema.getName()));
+    }
 
+    public final String getJdbcSchemaName(Schema schema) {
+        return getJdbcSchemaName(new CatalogAndSchema(schema.getCatalogName(), schema.getName()));
+    }
 }

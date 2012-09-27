@@ -3,6 +3,8 @@ package liquibase.precondition.core;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
+import liquibase.snapshot.jvm.DatabaseObjectGeneratorFactory;
+import liquibase.snapshot.jvm.DatabaseObjectSnapshotGenerator;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.Sequence;
 import liquibase.diff.DiffControl;
@@ -52,12 +54,11 @@ public class SequenceExistsPrecondition implements Precondition {
         DatabaseSnapshot snapshot;
         Schema schema = new Schema(getCatalogName(), getSchemaName());
         try {
-            snapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(database, new DiffControl(schema, Sequence.class));
+            if (!DatabaseObjectGeneratorFactory.getInstance().getGenerator(Sequence.class, database).has(new Sequence().setName(getSequenceName()).setSchema(schema), database)) {
+                throw new PreconditionFailedException("Sequence "+database.escapeSequenceName(getCatalogName(), getSchemaName(), getSequenceName())+" does not exist", changeLog, this);
+            }
         } catch (DatabaseException e) {
             throw new PreconditionErrorException(e, changeLog, this);
-        }
-        if (snapshot.getDatabaseObject(schema, new Sequence().setName(getSequenceName()), Sequence.class) == null) {
-            throw new PreconditionFailedException("Sequence "+database.escapeSequenceName(getCatalogName(), getSchemaName(), getSequenceName())+" does not exist", changeLog, this);
         }
     }
 

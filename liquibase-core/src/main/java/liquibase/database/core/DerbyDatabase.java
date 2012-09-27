@@ -2,6 +2,7 @@ package liquibase.database.core;
 
 import java.sql.*;
 
+import liquibase.CatalogAndSchema;
 import liquibase.database.AbstractDatabase;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.jvm.JdbcConnection;
@@ -103,7 +104,7 @@ public class DerbyDatabase extends AbstractDatabase {
     }
 
     @Override
-    public String getViewDefinition(Schema schema, String name) throws DatabaseException {
+    public String getViewDefinition(CatalogAndSchema schema, String name) throws DatabaseException {
         return super.getViewDefinition(schema, name).replaceFirst("CREATE VIEW \\w+ AS ", "");
     }
 

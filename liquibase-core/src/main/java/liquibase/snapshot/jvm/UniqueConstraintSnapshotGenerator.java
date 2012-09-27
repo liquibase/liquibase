@@ -10,15 +10,15 @@ public class UniqueConstraintSnapshotGenerator extends JdbcDatabaseObjectSnapsho
         return PRIORITY_DEFAULT;
     }
 
-    public boolean has(DatabaseObject container, UniqueConstraint example, Database database) throws DatabaseException {
-        return get(container,  example, database) != null;
+    public boolean has(UniqueConstraint example, Database database) throws DatabaseException {
+        return snapshot(example, database) != null;
     }
 
     public UniqueConstraint[] get(DatabaseObject container, Database database) {
         return new UniqueConstraint[0];  //TODO
     }
 
-    public UniqueConstraint get(DatabaseObject container, UniqueConstraint example, Database database) throws DatabaseException {
+    public UniqueConstraint snapshot(UniqueConstraint example, Database database) throws DatabaseException {
         return null;  //TODO
     }
 

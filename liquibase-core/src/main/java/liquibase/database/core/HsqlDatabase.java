@@ -1,5 +1,6 @@
 package liquibase.database.core;
 
+import liquibase.CatalogAndSchema;
 import liquibase.database.AbstractDatabase;
 import liquibase.database.DatabaseConnection;
 import liquibase.structure.DatabaseObject;
@@ -448,7 +449,7 @@ public class HsqlDatabase extends AbstractDatabase {
             "INITIAL");
 
     @Override
-    public String getJdbcCatalogName(Schema schema) {
+    public String getJdbcCatalogName(CatalogAndSchema schema) {
         return null;
     }
 

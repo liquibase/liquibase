@@ -1,6 +1,8 @@
 package liquibase.diff;
 
+import liquibase.CatalogAndSchema;
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.snapshot.SnapshotControl;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
 import liquibase.util.StringUtils;
@@ -20,7 +22,7 @@ public class DiffControl {
     public DiffControl() {
         addDefaultTypes();
 
-        schemaComparisons = new SchemaComparison[]{new SchemaComparison(new Schema(new Catalog(null), null), new Schema(new Catalog(null), null))};
+        schemaComparisons = new SchemaComparison[]{new SchemaComparison(new CatalogAndSchema(null, null), new CatalogAndSchema(null, null))};
     }
 
     private void addDefaultTypes() {
@@ -51,11 +53,11 @@ public class DiffControl {
         readDiffTypesString(typesToDiff);
     }
 
-    public DiffControl(Schema schema, Class<? extends DatabaseObject>... typesToDiff) {
+    public DiffControl(CatalogAndSchema schema, Class<? extends DatabaseObject>... typesToDiff) {
         this(new SchemaComparison[]{new SchemaComparison(schema, null)}, typesToDiff);
     }
 
-    public DiffControl(Schema schema, String diffTypes) {
+    public DiffControl(CatalogAndSchema schema, String diffTypes) {
         this.schemaComparisons = new SchemaComparison[] {new SchemaComparison(schema, schema)};
         readDiffTypesString(diffTypes);
     }
@@ -79,8 +81,8 @@ public class DiffControl {
                 comparisonSchemaName = comparisonSchemaName.split(".", 2)[1];
             }
 
-            Schema referenceSchema = new Schema(new Catalog(referenceCatalogName), referenceSchemaName);
-            Schema comparisonSchema = new Schema(new Catalog(comparisonCatalogName), comparisonSchemaName);
+            CatalogAndSchema referenceSchema = new CatalogAndSchema(referenceCatalogName, referenceSchemaName);
+            CatalogAndSchema comparisonSchema = new CatalogAndSchema(comparisonCatalogName, comparisonSchemaName);
             this.schemaComparisons[i] = new SchemaComparison(referenceSchema, comparisonSchema);
         }
 
@@ -126,8 +128,8 @@ public class DiffControl {
         return schemaComparisons;
     }
 
-    public Schema[] getSchemas(DatabaseRole databaseRole) {
-        Schema[] schemas = new Schema[schemaComparisons.length];
+    public CatalogAndSchema[] getSchemas(DatabaseRole databaseRole) {
+        CatalogAndSchema[] schemas = new CatalogAndSchema[schemaComparisons.length];
         for (int i=0; i<schemaComparisons.length; i++) {
             if (databaseRole.equals(DatabaseRole.COMPARISON)) {
                 schemas[i] = schemaComparisons[i].getComparisonSchema();
@@ -185,25 +187,35 @@ public class DiffControl {
         return objectTypesToDiff;
     }
 
+    public SnapshotControl toSnapshotControl(DatabaseRole role) {
+        CatalogAndSchema[] diffSchemas = getSchemas(role);
+        CatalogAndSchema[] snapshotSchemas = new CatalogAndSchema[diffSchemas.length];
+        for (int i=0; i<diffSchemas.length; i++) {
+            snapshotSchemas[i] = new CatalogAndSchema(diffSchemas[i].getCatalogName(), diffSchemas[i].getSchemaName());
+        }
+
+        return new SnapshotControl(snapshotSchemas);
+    }
+
     public static enum DatabaseRole {
         REFERENCE,
         COMPARISON
     }
 
     public static class SchemaComparison {
-        private Schema comparisonSchema;
-        private Schema referenceSchema;
+        private CatalogAndSchema comparisonSchema;
+        private CatalogAndSchema referenceSchema;
 
-        public SchemaComparison(Schema reference, Schema comparison) {
+        public SchemaComparison(CatalogAndSchema reference, CatalogAndSchema comparison) {
             this.referenceSchema = reference;
             this.comparisonSchema = comparison;
         }
 
-        public Schema getComparisonSchema() {
+        public CatalogAndSchema getComparisonSchema() {
             return comparisonSchema;
         }
 
-        public Schema getReferenceSchema() {
+        public CatalogAndSchema getReferenceSchema() {
             return referenceSchema;
         }
     }

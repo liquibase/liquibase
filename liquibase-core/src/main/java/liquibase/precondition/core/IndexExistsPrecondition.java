@@ -73,20 +73,19 @@ public class IndexExistsPrecondition implements Precondition {
     public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet) throws PreconditionFailedException, PreconditionErrorException {
     	try {
             Schema schema = new Schema(getCatalogName(), getSchemaName());
-            if (database != null) {
-                schema = database.correctSchema(schema);
-            }
             Index example = new Index();
+            example.setTable(new Table());
             if (StringUtils.trimToNull(getTableName()) != null) {
-                example.setTable(new Table().setName(getTableName()));
+                example.getTable().setName(getTableName());
             }
+            example.getTable().setSchema(schema);
             example.setName(getIndexName());
             if (StringUtils.trimToNull(getColumnNames()) != null) {
                 for (String column : getColumnNames().split("\\s*,\\s*")) {
                     example.getColumns().add(column);
                 }
             }
-            if (!DatabaseObjectGeneratorFactory.getInstance().getGenerator(Index.class, database).has(schema, example, database)) {
+            if (!DatabaseObjectGeneratorFactory.getInstance().getGenerator(Index.class, database).has(example, database)) {
                 String name = "";
 
                 if (getIndexName() != null) {

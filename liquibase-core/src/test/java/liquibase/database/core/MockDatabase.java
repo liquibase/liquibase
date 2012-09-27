@@ -1,5 +1,6 @@
 package liquibase.database.core;
 
+import liquibase.CatalogAndSchema;
 import liquibase.Liquibase;
 import liquibase.change.Change;
 import liquibase.changelog.ChangeSet;
@@ -7,6 +8,7 @@ import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.RanChangeSet;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
+import liquibase.snapshot.SnapshotControl;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Schema;
 import liquibase.diff.DiffStatusListener;
@@ -267,7 +269,7 @@ public class MockDatabase implements Database {
     public void checkDatabaseChangeLogLockTable(Liquibase liquibase) throws DatabaseException, IOException {
     }
 
-    public void dropDatabaseObjects(Schema schema) throws DatabaseException {
+    public void dropDatabaseObjects(CatalogAndSchema schema) throws DatabaseException {
     }
 
     public void tag(String tagString) throws DatabaseException {
@@ -277,16 +279,16 @@ public class MockDatabase implements Database {
         return false;
     }
 
-    public boolean isSystemTable(Schema schema, String tableName) {
+    public boolean isSystemTable(CatalogAndSchema schema, String tableName) {
         return false;
     }
 
 
-    public boolean isSystemView(Schema schema, String name) {
+    public boolean isSystemView(CatalogAndSchema schema, String name) {
         return false;
     }
 
-    public boolean isLiquibaseTable(Schema schema, String tableName) {
+    public boolean isLiquibaseTable(CatalogAndSchema schema, String tableName) {
         return false;
     }
 
@@ -294,7 +296,7 @@ public class MockDatabase implements Database {
         return false;
     }
 
-    public String getViewDefinition(Schema schema, String name) throws DatabaseException {
+    public String getViewDefinition(CatalogAndSchema schema, String name) throws DatabaseException {
         return null;
     }
 
@@ -506,7 +508,7 @@ public class MockDatabase implements Database {
         return false;
     }
 
-    public Schema correctSchema(Schema schema) {
+    public CatalogAndSchema correctSchema(CatalogAndSchema schema) {
         return schema;
     }
 
@@ -533,8 +535,20 @@ public class MockDatabase implements Database {
         return 2;
     }
 
-    public Schema getSchemaFromJdbcInfo(String rawSchemaName, String rawCatalogName) {
-        return new Schema(rawCatalogName, rawSchemaName);
+    public CatalogAndSchema getSchemaFromJdbcInfo(String rawSchemaName, String rawCatalogName) {
+        return new CatalogAndSchema(rawCatalogName, rawSchemaName);
+    }
+
+    public String getJdbcCatalogName(CatalogAndSchema schema) {
+        return schema.getCatalogName();
+    }
+
+    public String getJdbcSchemaName(CatalogAndSchema schema) {
+        return schema.getSchemaName();
+    }
+
+    public boolean isPartial() {
+        return false;
     }
 
     public String getJdbcCatalogName(Schema schema) {
@@ -543,9 +557,5 @@ public class MockDatabase implements Database {
 
     public String getJdbcSchemaName(Schema schema) {
         return schema.getName();
-    }
-
-    public boolean isPartial() {
-        return false;
     }
 }

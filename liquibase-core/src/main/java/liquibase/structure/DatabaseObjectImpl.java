@@ -1,5 +1,6 @@
 package liquibase.structure;
 
+import liquibase.CatalogAndSchema;
 import liquibase.database.Database;
 
 public abstract class DatabaseObjectImpl implements DatabaseObject {
@@ -28,5 +29,4 @@ public abstract class DatabaseObjectImpl implements DatabaseObject {
             return this.getName().equalsIgnoreCase(otherObject.getName());
         }
     }
-
 }

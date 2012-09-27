@@ -1,6 +1,8 @@
 package liquibase.database.core;
 
 import java.sql.ResultSet;
+
+import liquibase.CatalogAndSchema;
 import liquibase.database.AbstractDatabase;
 import liquibase.database.DatabaseConnection;
 import liquibase.structure.DatabaseObject;
@@ -213,15 +215,15 @@ public class MSSQLDatabase extends AbstractDatabase {
 
 
     @Override
-    public boolean isSystemTable(Schema schema, String tableName) {
+    public boolean isSystemTable(CatalogAndSchema schema, String tableName) {
         schema = correctSchema(schema);
-        return super.isSystemTable(schema, tableName) || schema.getName().equals("sys");
+        return super.isSystemTable(schema, tableName) || schema.getSchemaName().equals("sys");
     }
 
     @Override
-    public boolean isSystemView(Schema schema, String viewName) {
+    public boolean isSystemView(CatalogAndSchema schema, String viewName) {
         schema = correctSchema(schema);
-        return super.isSystemView(schema, viewName) || schema.getName().equals("sys");
+        return super.isSystemView(schema, viewName) || schema.getSchemaName().equals("sys");
     }
 
     public String generateDefaultConstraintName(String tableName, String columnName) {
@@ -273,9 +275,9 @@ public class MSSQLDatabase extends AbstractDatabase {
 	}
 
       @Override
-    public String getViewDefinition(Schema schema, String viewName) throws DatabaseException {
+    public String getViewDefinition(CatalogAndSchema schema, String viewName) throws DatabaseException {
           schema = correctSchema(schema);
-        List<String> defLines = (List<String>) ExecutorService.getInstance().getExecutor(this).queryForList(new GetViewDefinitionStatement(schema.getCatalogName(), schema.getName(), viewName), String.class);
+        List<String> defLines = (List<String>) ExecutorService.getInstance().getExecutor(this).queryForList(new GetViewDefinitionStatement(schema.getCatalogName(), schema.getSchemaName(), viewName), String.class);
         StringBuffer sb = new StringBuffer();
         for (String defLine : defLines) {
             sb.append(defLine);

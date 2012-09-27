@@ -3,6 +3,7 @@ package liquibase.maven;
 import java.io.IOException;
 import java.io.File;
 
+import liquibase.CatalogAndSchema;
 import liquibase.structure.core.Schema;
 import org.apache.maven.it.VerificationException;
 
@@ -28,7 +29,7 @@ public class MavenIntegrationTest {
          DatabaseConnection connection = DatabaseTestContext.getInstance().getConnection(URL);
          assertNotNull(connection);
          Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(connection);
-         database.dropDatabaseObjects(Schema.DEFAULT);
+         database.dropDatabaseObjects(CatalogAndSchema.DEFAULT);
          database.close();
          DatabaseFactory.reset();
     }

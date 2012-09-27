@@ -1,5 +1,6 @@
 package liquibase.sqlgenerator.core;
 
+import liquibase.CatalogAndSchema;
 import liquibase.database.Database;
 import liquibase.database.core.HsqlDatabase;
 import liquibase.structure.core.Schema;
@@ -21,10 +22,10 @@ public class GetViewDefinitionGeneratorHsql extends GetViewDefinitionGenerator {
 
     @Override
     public Sql[] generateSql(GetViewDefinitionStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-        Schema schema = database.correctSchema(new Schema(statement.getCatalogName(), statement.getSchemaName()));
+        CatalogAndSchema schema = database.correctSchema(new CatalogAndSchema(statement.getCatalogName(), statement.getSchemaName()));
 
         return new Sql[] {
-                    new UnparsedSql("SELECT VIEW_DEFINITION FROM INFORMATION_SCHEMA.SYSTEM_VIEWS WHERE TABLE_NAME = '" + statement.getViewName() + "' AND TABLE_SCHEMA='" + schema.getName() + "'")
+                    new UnparsedSql("SELECT VIEW_DEFINITION FROM INFORMATION_SCHEMA.SYSTEM_VIEWS WHERE TABLE_NAME = '" + statement.getViewName() + "' AND TABLE_SCHEMA='" + schema.getSchemaName() + "'")
             };
     }
 }

@@ -3,7 +3,6 @@ package liquibase.snapshot.jvm;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.core.ForeignKey;
 import liquibase.structure.core.PrimaryKey;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
@@ -12,7 +11,6 @@ import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class PrimaryKeyGenerator extends JdbcDatabaseObjectSnapshotGenerator<PrimaryKey> {
@@ -20,8 +18,8 @@ public class PrimaryKeyGenerator extends JdbcDatabaseObjectSnapshotGenerator<Pri
         return PRIORITY_DEFAULT;
     }
 
-    public boolean has(DatabaseObject container, PrimaryKey example, Database database) throws DatabaseException {
-        return get(container,  example, database) != null;
+    public boolean has(PrimaryKey example, Database database) throws DatabaseException {
+        return snapshot( example, database) != null;
     }
 
     public PrimaryKey[] get(DatabaseObject container, Database database) throws DatabaseException {
@@ -42,7 +40,7 @@ public class PrimaryKeyGenerator extends JdbcDatabaseObjectSnapshotGenerator<Pri
 
         List<String> tables = new ArrayList<String>();
         if (relation == null) {
-            tables.addAll(listAllTables(schema, database));
+            tables.addAll(listAllTables(schema.toCatalogAndSchema(), database));
         } else {
             tables.add(relation.getName());
         }
@@ -95,9 +93,9 @@ public class PrimaryKeyGenerator extends JdbcDatabaseObjectSnapshotGenerator<Pri
         return foundPKs.toArray(new PrimaryKey[foundPKs.size()]);
     }
 
-    public PrimaryKey get(DatabaseObject container, PrimaryKey example, Database database) throws DatabaseException {
+    public PrimaryKey snapshot(PrimaryKey example, Database database) throws DatabaseException {
         String objectName = database.correctObjectName(example.getName(), PrimaryKey.class);
-        for (PrimaryKey key : get(container, database)) {
+        for (PrimaryKey key : get(example.getSchema(), database)) {
             if (key.getName().equals(objectName)) {
                 return key;
             }

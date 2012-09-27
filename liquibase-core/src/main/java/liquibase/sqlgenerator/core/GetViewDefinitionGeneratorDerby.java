@@ -1,5 +1,6 @@
 package liquibase.sqlgenerator.core;
 
+import liquibase.CatalogAndSchema;
 import liquibase.database.Database;
 import liquibase.database.core.DerbyDatabase;
 import liquibase.structure.core.Schema;
@@ -21,10 +22,10 @@ public class GetViewDefinitionGeneratorDerby extends GetViewDefinitionGenerator 
 
     @Override
     public Sql[] generateSql(GetViewDefinitionStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-        Schema schema = database.correctSchema(new Schema(statement.getCatalogName(), statement.getSchemaName()));
+        CatalogAndSchema schema = database.correctSchema(new CatalogAndSchema(statement.getCatalogName(), statement.getSchemaName()));
 
         return new Sql[] {
-                    new UnparsedSql("select V.VIEWDEFINITION from SYS.SYSVIEWS V, SYS.SYSTABLES T, SYS.SYSSCHEMAS S WHERE  V.TABLEID=T.TABLEID AND T.SCHEMAID=S.SCHEMAID AND T.TABLETYPE='V' AND T.TABLENAME='" + statement.getViewName() + "' AND S.SCHEMANAME='"+schema.getName()+"'")
+                    new UnparsedSql("select V.VIEWDEFINITION from SYS.SYSVIEWS V, SYS.SYSTABLES T, SYS.SYSSCHEMAS S WHERE  V.TABLEID=T.TABLEID AND T.SCHEMAID=S.SCHEMAID AND T.TABLETYPE='V' AND T.TABLENAME='" + statement.getViewName() + "' AND S.SCHEMANAME='"+schema.getSchemaName()+"'")
             };
     }
 }

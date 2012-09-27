@@ -1,5 +1,6 @@
 package liquibase.database.core;
 
+import liquibase.CatalogAndSchema;
 import liquibase.database.AbstractDatabase;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.jvm.JdbcConnection;
@@ -182,11 +183,11 @@ public class PostgresDatabase extends AbstractDatabase {
 
 
     @Override
-    public boolean isSystemTable(Schema schema, String tableName) {
+    public boolean isSystemTable(CatalogAndSchema schema, String tableName) {
         schema = correctSchema(schema);
         return super.isSystemTable(schema, tableName)
-                || "pg_catalog".equals(schema.getName())
-                || "pg_toast".equals(schema.getName())
+                || "pg_catalog".equals(schema.getSchemaName())
+                || "pg_toast".equals(schema.getSchemaName())
                 || tableName.endsWith("_seq")
                 || tableName.endsWith("_key")
                 || tableName.endsWith("_pkey")

@@ -4,6 +4,7 @@ import static java.util.Arrays.*;
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
 
+import liquibase.CatalogAndSchema;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.structure.core.Catalog;
@@ -50,7 +51,7 @@ public class SybaseDatabaseTest {
 		SybaseDatabase database = new SybaseDatabase();
 		configureExecutor(database);
 		
-		assertEquals("", database.getViewDefinition(new Schema(new Catalog(null), "dbo"), "view_name"));
+		assertEquals("", database.getViewDefinition(new CatalogAndSchema(null, "dbo"), "view_name"));
 	}
 	
 	@Test
@@ -58,7 +59,7 @@ public class SybaseDatabaseTest {
 		SybaseDatabase database = new SybaseDatabase();
 		configureExecutor(database, "foo");
 		
-		assertEquals("foo", database.getViewDefinition(new Schema(new Catalog(null), "dbo"), "view_name"));
+		assertEquals("foo", database.getViewDefinition(new CatalogAndSchema(null, "dbo"), "view_name"));
 	}
 	
 	@Test
@@ -66,7 +67,7 @@ public class SybaseDatabaseTest {
 		SybaseDatabase database = new SybaseDatabase();
 		configureExecutor(database, "foo", " bar", " bat");
 		
-		assertEquals("foo bar bat", database.getViewDefinition(new Schema(new Catalog(null), "dbo"), "view_name"));
+		assertEquals("foo bar bat", database.getViewDefinition(new CatalogAndSchema(null, "dbo"), "view_name"));
 	}
 
 	@Test

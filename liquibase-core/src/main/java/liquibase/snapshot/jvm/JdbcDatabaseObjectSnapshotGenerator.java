@@ -1,5 +1,6 @@
 package liquibase.snapshot.jvm;
 
+import liquibase.CatalogAndSchema;
 import liquibase.database.Database;
 import liquibase.database.core.PostgresDatabase;
 import liquibase.database.jvm.JdbcConnection;
@@ -57,7 +58,7 @@ public abstract class JdbcDatabaseObjectSnapshotGenerator<DatabaseObjectType ext
         return objectName;
     }
 
-    protected Set<String> listAllTables(Schema schema, Database database) throws DatabaseException {
+    protected Set<String> listAllTables(CatalogAndSchema schema, Database database) throws DatabaseException {
         Set<String> returnTables = new HashSet<String>();
         ResultSet tableMetaDataRs = null;
         try {

@@ -1,5 +1,6 @@
 package liquibase.snapshot.jvm;
 
+import liquibase.CatalogAndSchema;
 import liquibase.database.Database;
 import liquibase.database.core.InformixDatabase;
 import liquibase.database.core.OracleDatabase;
@@ -20,21 +21,11 @@ public class IndexSnapshotGenerator extends JdbcDatabaseObjectSnapshotGenerator<
         return PRIORITY_DEFAULT;
     }
 
-    public boolean has(DatabaseObject container, Index example, Database database) throws DatabaseException {
+    public boolean has(Index example, Database database) throws DatabaseException {
 //    public boolean hasIndex(Schema schema, String tableName, String indexName, String columnNames, Database database) throws DatabaseException {
-        String tableName = null;
-        Schema schema = null;
-        if (container instanceof Schema) {
-            schema = (Schema) container;
-            if (example.getTable() != null) {
-                tableName = example.getTable().getName();
-            }
-        } else if (container instanceof Relation) {
-            tableName = container.getName();
-            schema = container.getSchema();
-        } else {
-            return false;
-        }
+        String tableName = example.getTable().getName();
+        Schema schema = example.getSchema();
+
         String indexName = example.getName();
         String columnNames = example.getColumnNames();
 
@@ -52,8 +43,8 @@ public class IndexSnapshotGenerator extends JdbcDatabaseObjectSnapshotGenerator<
                 try {
                     while (rs.next()) {
                         String foundTable = rs.getString("TABLE_NAME");
-                        newExample.setTable(new Table().setName(foundTable));
-                        if (has(schema, newExample, database)) {
+                        newExample.setTable((Table) new Table().setName(foundTable).setSchema(schema));
+                        if (has(newExample, database)) {
                             return true;
                         }
                     }
@@ -154,7 +145,7 @@ public class IndexSnapshotGenerator extends JdbcDatabaseObjectSnapshotGenerator<
 
         List<String> tables = new ArrayList<String>();
         if (relation == null) {
-            tables.addAll(listAllTables(schema, database));
+            tables.addAll(listAllTables(new CatalogAndSchema(schema.getCatalogName(), schema.getName()), database));
         } else {
             tables.add(relation.getName());
         }
@@ -292,9 +283,9 @@ public class IndexSnapshotGenerator extends JdbcDatabaseObjectSnapshotGenerator<
         return indexes.toArray(new Index[indexes.size()]);
     }
 
-    public Index get(DatabaseObject container, Index example, Database database) throws DatabaseException {
+    public Index snapshot(Index example, Database database) throws DatabaseException {
         String objectName = database.correctObjectName(example.getName(), Index.class);
-        for (Index index : get(container, database)) {
+        for (Index index : get(example.getSchema(), database)) {
             if (index.getName().equals(objectName)) {
                 return index;
             }

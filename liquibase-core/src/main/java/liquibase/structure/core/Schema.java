@@ -1,14 +1,12 @@
 package liquibase.structure.core;
 
+import liquibase.CatalogAndSchema;
 import liquibase.database.Database;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.DatabaseObjectImpl;
 import liquibase.util.StringUtils;
 
 public class Schema extends DatabaseObjectImpl {
-
-    public static final String DEFAULT_NAME = "!DEFAULT_SCHEMA!";
-    public static final Schema DEFAULT = new Schema(Catalog.DEFAULT, DEFAULT_NAME);
 
     protected Catalog catalog;
     protected String name;
@@ -22,23 +20,6 @@ public class Schema extends DatabaseObjectImpl {
 
         catalog = StringUtils.trimToNull(catalog);
         schemaName = StringUtils.trimToNull(schemaName);
-
-        if (catalog == null && schemaName == null) {
-            catalog = Catalog.DEFAULT_NAME;
-            schemaName = Schema.DEFAULT_NAME;
-        } else if (schemaName != null && catalog == null) {
-            if (schemaName.equals(Schema.DEFAULT_NAME)) {
-                catalog = Catalog.DEFAULT_NAME;
-            } else {
-                catalog = Catalog.DEFAULT_NAME;
-            }
-        } else if (catalog != null && schemaName == null) {
-            if (catalog.equals(Catalog.DEFAULT_NAME)) {
-                schemaName = Schema.DEFAULT_NAME;
-            } else {
-                schemaName = catalog;
-            }
-        }
 
         this.name = schemaName;
         this.catalog = new Catalog(catalog);
@@ -88,6 +69,11 @@ public class Schema extends DatabaseObjectImpl {
     public String toString() {
         return catalog.getName()+"."+name;
     }
+
+    public CatalogAndSchema toCatalogAndSchema() {
+        return new CatalogAndSchema(getCatalogName(), getName());
+    }
+
 
     public static class DatabaseSpecific extends Schema {
         private Database database;

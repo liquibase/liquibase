@@ -10,6 +10,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import liquibase.CatalogAndSchema;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.jvm.JdbcConnection;
@@ -192,7 +193,7 @@ public abstract class AbstractExecuteTest {
             DatabaseConnection connection = database.getConnection();
             Statement connectionStatement = ((JdbcConnection) connection).getUnderlyingConnection().createStatement();
 
-            database.dropDatabaseObjects(Schema.DEFAULT);
+            database.dropDatabaseObjects(CatalogAndSchema.DEFAULT);
             try {
                 connectionStatement.executeUpdate("drop table " + database.escapeTableName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName()));
             } catch (SQLException e) {
@@ -207,7 +208,7 @@ public abstract class AbstractExecuteTest {
             connection.commit();
 
             if (database.supportsSchemas()) {
-                database.dropDatabaseObjects(new Schema(DatabaseTestContext.ALT_CATALOG, DatabaseTestContext.ALT_SCHEMA));
+                database.dropDatabaseObjects(new CatalogAndSchema(DatabaseTestContext.ALT_CATALOG, DatabaseTestContext.ALT_SCHEMA));
                 connection.commit();
 
                 try {

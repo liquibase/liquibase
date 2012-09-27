@@ -1,5 +1,6 @@
 package liquibase.database.core;
 
+import liquibase.CatalogAndSchema;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.AbstractDatabase;
 import liquibase.structure.DatabaseObject;
@@ -92,7 +93,7 @@ public class H2Database extends AbstractDatabase {
     }
 
     @Override
-    public String getViewDefinition(Schema schema, String name) throws DatabaseException {
+    public String getViewDefinition(CatalogAndSchema schema, String name) throws DatabaseException {
         String definition = super.getViewDefinition(schema, name);
         if (!definition.startsWith("SELECT")) {
             definition = definition.replaceFirst(".*?\n", ""); //some h2 versions return "create view....as\nselect

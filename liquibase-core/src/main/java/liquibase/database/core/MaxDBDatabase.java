@@ -1,6 +1,7 @@
 package liquibase.database.core;
 
 
+import liquibase.CatalogAndSchema;
 import liquibase.database.AbstractDatabase;
 import liquibase.database.DatabaseConnection;
 import liquibase.structure.core.Schema;
@@ -133,34 +134,34 @@ public class MaxDBDatabase extends AbstractDatabase {
     }
 
     @Override
-    public boolean isSystemTable(Schema schema, String tableName) {
+    public boolean isSystemTable(CatalogAndSchema schema, String tableName) {
         schema = correctSchema(schema);
         if (super.isSystemTable(schema, tableName)) {
             return true;
-        } else if ("DOMAIN".equalsIgnoreCase(schema.getName())) {
+        } else if ("DOMAIN".equalsIgnoreCase(schema.getSchemaName())) {
             return true;
-        } else if ("SYSINFO".equalsIgnoreCase(schema.getName())) {
+        } else if ("SYSINFO".equalsIgnoreCase(schema.getSchemaName())) {
             return true;
-        } else if ("SYSLOADER".equalsIgnoreCase(schema.getName())) {
+        } else if ("SYSLOADER".equalsIgnoreCase(schema.getSchemaName())) {
             return true;
-        } else if ("SYSDBA".equalsIgnoreCase(schema.getName())) {
+        } else if ("SYSDBA".equalsIgnoreCase(schema.getSchemaName())) {
             return true;
         }
         return false;
     }
 
     @Override
-    public boolean isSystemView(Schema schema, String tableName) {
+    public boolean isSystemView(CatalogAndSchema schema, String tableName) {
         schema = correctSchema(schema);
         if (super.isSystemView(schema, tableName)) {
             return true;
-        } else if ("DOMAIN".equalsIgnoreCase(schema.getName())) {
+        } else if ("DOMAIN".equalsIgnoreCase(schema.getSchemaName())) {
             return true;
-        } else if ("SYSINFO".equalsIgnoreCase(schema.getName())) {
+        } else if ("SYSINFO".equalsIgnoreCase(schema.getSchemaName())) {
             return true;
-        } else if ("SYSLOADER".equalsIgnoreCase(schema.getName())) {
+        } else if ("SYSLOADER".equalsIgnoreCase(schema.getSchemaName())) {
             return true;
-        } else if ("SYSDBA".equalsIgnoreCase(schema.getName())) {
+        } else if ("SYSDBA".equalsIgnoreCase(schema.getSchemaName())) {
             return true;
         }
         return false;

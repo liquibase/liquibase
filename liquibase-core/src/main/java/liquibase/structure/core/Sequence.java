@@ -59,7 +59,8 @@ public class Sequence extends DatabaseObjectImpl implements Comparable<Sequence>
 	/**
 	 * @param schema The schema to set.
 	 */
-	public void setSchema (Schema schema) {
+	public Sequence setSchema (Schema schema) {
 		this.schema = schema;
+        return this;
 	}
 }

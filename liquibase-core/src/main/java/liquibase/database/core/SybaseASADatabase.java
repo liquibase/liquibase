@@ -3,6 +3,7 @@
  */
 package liquibase.database.core;
 
+import liquibase.CatalogAndSchema;
 import liquibase.database.AbstractDatabase;
 import liquibase.database.DatabaseConnection;
 import liquibase.structure.DatabaseObject;
@@ -194,7 +195,7 @@ public class SybaseASADatabase extends AbstractDatabase {
 	}
 
 	@Override
-	public String getViewDefinition(Schema schema, String viewName)
+	public String getViewDefinition(CatalogAndSchema schema, String viewName)
 			throws DatabaseException {
 		// TODO Auto-generated method stub
 		return super.getViewDefinition(schema, viewName);

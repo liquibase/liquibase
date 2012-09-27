@@ -1,5 +1,6 @@
 package liquibase.integration.commandline;
 
+import liquibase.CatalogAndSchema;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.jvm.JdbcConnection;
@@ -138,12 +139,12 @@ public class CommandLineUtils {
     }
 
     public static void doGenerateChangeLog(String changeLogFile, Database originalDatabase, String catalogName, String schemaName, String diffTypes, String author, String context, String dataDir, DiffOutputConfig diffOutputConfig) throws DatabaseException, IOException, ParserConfigurationException {
-        DiffControl diffControl = new DiffControl(new Schema(catalogName, schemaName), diffTypes);
+        DiffControl diffControl = new DiffControl(new CatalogAndSchema(catalogName, schemaName), diffTypes);
         diffControl.setDataDir(dataDir);
         diffControl.addStatusListener(new OutDiffStatusListener());
 
-        DatabaseSnapshot originalDatabaseSnapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(originalDatabase, diffControl, DiffControl.DatabaseRole.REFERENCE);
-        DiffResult diffResult = DiffGeneratorFactory.getInstance().compare(originalDatabaseSnapshot, new DatabaseSnapshot(null, diffControl.getSchemas(DiffControl.DatabaseRole.REFERENCE)), diffControl);
+        DatabaseSnapshot originalDatabaseSnapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(originalDatabase, diffControl.toSnapshotControl(DiffControl.DatabaseRole.REFERENCE));
+        DiffResult diffResult = DiffGeneratorFactory.getInstance().compare(originalDatabaseSnapshot, new DatabaseSnapshot(null, diffControl.toSnapshotControl(DiffControl.DatabaseRole.REFERENCE)), diffControl);
 
         DiffToChangeLog changeLogWriter = new DiffToChangeLog(diffResult, diffOutputConfig);
 

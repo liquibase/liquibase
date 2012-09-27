@@ -1,5 +1,6 @@
 package liquibase.integration.ant;
 
+import liquibase.CatalogAndSchema;
 import liquibase.Liquibase;
 import liquibase.structure.core.Schema;
 import liquibase.util.StringUtils;
@@ -44,11 +45,11 @@ public class DropAllTask extends BaseLiquibaseTask {
 
             if (StringUtils.trimToNull(schemas) != null) {
                 List<String> schemaNames = StringUtils.splitAndTrim(this.schemas, ",");
-                List<Schema> schemas = new ArrayList<Schema>();
+                List<CatalogAndSchema> schemas = new ArrayList<CatalogAndSchema>();
                 for (String name : schemaNames) {
-                    schemas.add(new Schema(catalog,  name));
+                    schemas.add(new CatalogAndSchema(catalog,  name));
                 }
-                liquibase.dropAll(schemas.toArray(new Schema[schemas.size()]));
+                liquibase.dropAll(schemas.toArray(new CatalogAndSchema[schemas.size()]));
             } else {
                 liquibase.dropAll();
             }

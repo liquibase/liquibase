@@ -28,22 +28,9 @@ public class ColumnSnapshotGenerator extends JdbcDatabaseObjectSnapshotGenerator
         return PRIORITY_DEFAULT;
     }
 
-    public boolean has(DatabaseObject container, Column example, Database database) throws DatabaseException {
-        Relation relation;
-        Schema schema;
-        if (container instanceof Schema) {
-            if (example.getRelation() == null) {
-                return false;
-            }
-            relation = example.getRelation();
-            schema = (Schema) container;
-        } else {
-            if (!(container instanceof Relation)) {
-                return false;
-            }
-            relation = (Relation) container;
-            schema = relation.getSchema();
-        }
+    public boolean has(Column example, Database database) throws DatabaseException {
+        Relation relation = example.getRelation();
+        Schema schema = relation.getSchema();
 
         ResultSet columnsMetadataRs = null;
         try {
@@ -120,22 +107,9 @@ public class ColumnSnapshotGenerator extends JdbcDatabaseObjectSnapshotGenerator
         return returnColumns.toArray(new Column[returnColumns.size()]);
     }
 
-    public Column get(DatabaseObject container, Column example, Database database) throws DatabaseException {
-        Relation relation;
-        Schema schema;
-        if (container instanceof Schema) {
-            if (example.getRelation() == null) {
-                return null;
-            }
-            relation = example.getRelation();
-            schema = (Schema) container;
-        } else {
-            if (!(container instanceof Relation)) {
-                return null;
-            }
-            relation = (Relation) container;
-            schema = relation.getSchema();
-        }
+    public Column snapshot(Column example, Database database) throws DatabaseException {
+        Relation relation = example.getRelation();
+        Schema schema = relation.getSchema();
 
         ResultSet columnMetadataRs = null;
         try {
