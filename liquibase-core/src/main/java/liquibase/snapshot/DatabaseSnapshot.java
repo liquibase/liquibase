@@ -19,6 +19,9 @@ public class DatabaseSnapshot {
         this.snapshotControl = snapshotControl;
     }
 
+    public SnapshotControl getSnapshotControl() {
+        return snapshotControl;
+    }
 
     public Database getDatabase() {
         return database;
@@ -32,15 +35,8 @@ public class DatabaseSnapshot {
         schemas.add(schema);
     }
 
-    public <DatabaseObjectType extends DatabaseObject> DatabaseObjectType[] getDatabaseObjects(Schema schema, Class<DatabaseObjectType> type) {
-        return null; //todo
-    }
-
     public boolean hasDatabaseChangeLogTable() {
         return false;  //todo
     }
 
-    public Table getDatabaseObject(Schema schema, DatabaseObject example) {
-        return null; //todo
-    }
 }

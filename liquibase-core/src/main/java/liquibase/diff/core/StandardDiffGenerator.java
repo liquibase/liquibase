@@ -8,10 +8,7 @@ import liquibase.diff.DiffResult;
 import liquibase.exception.DatabaseException;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.DatabaseSnapshotGeneratorFactory;
-import liquibase.snapshot.SnapshotControl;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.core.Schema;
-import liquibase.structure.core.Table;
 
 public class StandardDiffGenerator implements DiffGenerator {
 
@@ -24,10 +21,10 @@ public class StandardDiffGenerator implements DiffGenerator {
     }
 
     public DiffResult compare(Database referenceDatabase, Database comparisonDatabase, DiffControl diffControl) throws DatabaseException {
-        DatabaseSnapshot referenceSnapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(referenceDatabase, diffControl.toSnapshotControl(DiffControl.DatabaseRole.REFERENCE));
+        DatabaseSnapshot referenceSnapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(diffControl.toSnapshotControl(DiffControl.DatabaseRole.REFERENCE), referenceDatabase);
         DatabaseSnapshot comparisonSnapshot = null;
         if (comparisonDatabase != null) {
-            comparisonSnapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(comparisonDatabase, diffControl.toSnapshotControl(DiffControl.DatabaseRole.COMPARISON));
+            comparisonSnapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(diffControl.toSnapshotControl(DiffControl.DatabaseRole.COMPARISON), comparisonDatabase);
         }
 
         return compare(referenceSnapshot, comparisonSnapshot, diffControl);

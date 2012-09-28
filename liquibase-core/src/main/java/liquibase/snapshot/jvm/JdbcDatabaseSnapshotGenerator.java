@@ -11,6 +11,8 @@ import liquibase.structure.DatabaseObject;
 
 public class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotGenerator {
 
+    private Database database;
+
     public boolean supports(Database database) {
         return true;
     }
@@ -19,31 +21,39 @@ public class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotGenerator 
         return PRIORITY_DEFAULT;
     }
 
-    public Table getDatabaseChangeLogTable(Database database) throws DatabaseException {
-        return getTable(database.correctSchema(new CatalogAndSchema(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName())), database.getDatabaseChangeLogTableName(), database);
+
+    public JdbcDatabaseSnapshotGenerator() {
     }
 
-    public Table getDatabaseChangeLogLockTable(Database database) throws DatabaseException {
-        return getTable(database.correctSchema(new CatalogAndSchema(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName())), database.getDatabaseChangeLogLockTableName(), database);
+    public JdbcDatabaseSnapshotGenerator(Database database) {
+        this.database = database;
     }
 
-    public boolean hasDatabaseChangeLogTable(Database database) throws DatabaseException {
-        return hasTable(database.correctSchema(new CatalogAndSchema(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName())), database.getDatabaseChangeLogTableName(), database);
+    public Table getDatabaseChangeLogTable() throws DatabaseException {
+        return getTable(database.correctSchema(new CatalogAndSchema(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName())), database.getDatabaseChangeLogTableName());
     }
 
-    public boolean hasDatabaseChangeLogLockTable(Database database) throws DatabaseException {
-        return hasTable(database.correctSchema(new CatalogAndSchema(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName())), database.getDatabaseChangeLogLockTableName(), database);
+    public Table getDatabaseChangeLogLockTable() throws DatabaseException {
+        return getTable(database.correctSchema(new CatalogAndSchema(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName())), database.getDatabaseChangeLogLockTableName());
     }
 
-    private boolean hasTable(CatalogAndSchema schema, String tableName, Database database) throws DatabaseException {
+    public boolean hasDatabaseChangeLogTable() throws DatabaseException {
+        return hasTable(database.correctSchema(new CatalogAndSchema(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName())), database.getDatabaseChangeLogTableName());
+    }
+
+    public boolean hasDatabaseChangeLogLockTable() throws DatabaseException {
+        return hasTable(database.correctSchema(new CatalogAndSchema(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName())), database.getDatabaseChangeLogLockTableName());
+    }
+
+    private boolean hasTable(CatalogAndSchema schema, String tableName) throws DatabaseException {
         return DatabaseObjectGeneratorFactory.getInstance().getGenerator(Table.class, database).has((Table) new Table().setName(tableName).setSchema(new Schema(schema.getCatalogName(), schema.getSchemaName())), database);
     }
 
-    private Table getTable(CatalogAndSchema schema, String tableName, Database database) throws DatabaseException {
+    private Table getTable(CatalogAndSchema schema, String tableName) throws DatabaseException {
         return DatabaseObjectGeneratorFactory.getInstance().getGenerator(Table.class, database).snapshot((Table) new Table().setName(tableName).setSchema(new Schema(schema.getCatalogName(), schema.getSchemaName())), database);
     }
 
-    public DatabaseSnapshot createSnapshot(Database database, SnapshotControl snapshotControl) throws DatabaseException {
+    public DatabaseSnapshot createSnapshot(SnapshotControl snapshotControl) throws DatabaseException {
         DatabaseSnapshot snapshot = new DatabaseSnapshot(database, snapshotControl);
 
         for (CatalogAndSchema schema : snapshotControl.getSchemas()) {
@@ -98,7 +108,7 @@ public class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotGenerator 
 //    }
 
 
-    protected boolean columnNamesAreEqual(String columnNames, String otherColumnNames, Database database) {
+    protected boolean columnNamesAreEqual(String columnNames, String otherColumnNames) {
         if (database.isCaseSensitive()) {
             return columnNames.replace(" ", "").equals(otherColumnNames.replace(" ", ""));
         } else {

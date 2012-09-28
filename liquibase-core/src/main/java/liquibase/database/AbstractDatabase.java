@@ -570,7 +570,7 @@ public abstract class AbstractDatabase implements Database {
     public void checkDatabaseChangeLogTable(boolean updateExistingNullChecksums, DatabaseChangeLog databaseChangeLog, String... contexts) throws DatabaseException {
         Executor executor = ExecutorService.getInstance().getExecutor(this);
 
-        Table changeLogTable = DatabaseSnapshotGeneratorFactory.getInstance().getGenerator(this).getDatabaseChangeLogTable(this);
+        Table changeLogTable = DatabaseSnapshotGeneratorFactory.getInstance().getGenerator(this).getDatabaseChangeLogTable();
 
         List<SqlStatement> statementsToExecute = new ArrayList<SqlStatement>();
 
@@ -689,7 +689,7 @@ public abstract class AbstractDatabase implements Database {
         if (hasDatabaseChangeLogTable) {
             return true;
         }
-        boolean hasTable = DatabaseSnapshotGeneratorFactory.getInstance().getGenerator(this).hasDatabaseChangeLogTable(this);
+        boolean hasTable = DatabaseSnapshotGeneratorFactory.getInstance().getGenerator(this).hasDatabaseChangeLogTable();
         if (canCacheLiquibaseTableInfo) {
             hasDatabaseChangeLogTable = hasTable;
         }
@@ -700,7 +700,7 @@ public abstract class AbstractDatabase implements Database {
         if (canCacheLiquibaseTableInfo && hasDatabaseChangeLogLockTable) {
             return true;
         }
-        boolean hasTable = DatabaseSnapshotGeneratorFactory.getInstance().getGenerator(this).hasDatabaseChangeLogLockTable(this);
+        boolean hasTable = DatabaseSnapshotGeneratorFactory.getInstance().getGenerator(this).hasDatabaseChangeLogLockTable();
         if (canCacheLiquibaseTableInfo) {
             hasDatabaseChangeLogLockTable = hasTable;
         }
@@ -758,12 +758,12 @@ public abstract class AbstractDatabase implements Database {
         try {
             SnapshotControl snapshotControl = new SnapshotControl(schemaToDrop);
             snapshotControl.setTypes(View.class, Table.class);
-            DatabaseSnapshot snapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(this, snapshotControl);
+            DatabaseSnapshot snapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(snapshotControl, this);
 
             List<Change> dropChanges = new ArrayList<Change>();
 
             for (Schema schema : snapshot.getSchemas()) {
-                for (View view : snapshot.getDatabaseObjects(schema, View.class)) {
+                for (View view : schema.getDatabaseObjects(View.class)) {
                     DropViewChange dropChange = new DropViewChange();
                     dropChange.setViewName(view.getName());
                     dropChange.setSchemaName(schema.getName());
@@ -773,7 +773,7 @@ public abstract class AbstractDatabase implements Database {
                 }
 
                 if (!supportsForeignKeyDisable()) {
-                    for (ForeignKey fk : snapshot.getDatabaseObjects(schema, ForeignKey.class)) {
+                    for (ForeignKey fk : schema.getDatabaseObjects(ForeignKey.class)) {
                         DropForeignKeyConstraintChange dropFK = new DropForeignKeyConstraintChange();
                         dropFK.setBaseTableSchemaName(schema.getName());
                         dropFK.setBaseTableCatalogName(schema.getCatalogName());
@@ -793,7 +793,7 @@ public abstract class AbstractDatabase implements Database {
     //                dropChanges.add(dropChange);
     //            }
 
-                for (Table table : snapshot.getDatabaseObjects(schema, Table.class)) {
+                for (Table table : schema.getDatabaseObjects(Table.class)) {
                     DropTableChange dropChange = new DropTableChange();
                     dropChange.setSchemaName(schema.getName());
                     dropChange.setCatalogName(schema.getCatalogName());
@@ -806,7 +806,7 @@ public abstract class AbstractDatabase implements Database {
                 }
 
                 if (this.supportsSequences()) {
-                    for (Sequence seq : snapshot.getDatabaseObjects(schema, Sequence.class)) {
+                    for (Sequence seq : schema.getDatabaseObjects(Sequence.class)) {
                         DropSequenceChange dropChange = new DropSequenceChange();
                         dropChange.setSequenceName(seq.getName());
                         dropChange.setSchemaName(schema.getName());

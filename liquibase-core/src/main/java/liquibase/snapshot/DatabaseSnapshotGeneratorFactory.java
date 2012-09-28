@@ -3,8 +3,10 @@ package liquibase.snapshot;
 import liquibase.database.Database;
 import liquibase.diff.DiffControl;
 import liquibase.exception.DatabaseException;
+import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.servicelocator.ServiceLocator;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
 public class DatabaseSnapshotGeneratorFactory {
@@ -35,16 +37,17 @@ public class DatabaseSnapshotGeneratorFactory {
     }
 
     public DatabaseSnapshotGenerator getGenerator(Database database) {
-        return getGenerators(database).iterator().next();
+        try {
+            return getGenerators(database).iterator().next().getClass().getConstructor(Database.class).newInstance(database);
+        } catch (Exception e) {
+            throw new UnexpectedLiquibaseException(e);
+        }
     }
 
 
     /**
      * Get generators supporting database, sorted from highest priority to
      * lowest.
-     *
-     * @param database
-     * @return
      */
     public SortedSet<DatabaseSnapshotGenerator> getGenerators(final Database database) {
         SortedSet<DatabaseSnapshotGenerator> generators = new TreeSet<DatabaseSnapshotGenerator>(new Comparator<DatabaseSnapshotGenerator>() {
@@ -65,14 +68,11 @@ public class DatabaseSnapshotGeneratorFactory {
     /**
      * Get generator for database with highest priority.
      */
-    public DatabaseSnapshot createSnapshot(Database database, SnapshotControl snapshotControl) throws DatabaseException {
-        return getGenerator(database).createSnapshot(database, snapshotControl);
+    public DatabaseSnapshot createSnapshot(SnapshotControl snapshotControl, Database database) throws DatabaseException {
+        return getGenerator(database).createSnapshot(snapshotControl);
     }
 
-    /**
-     * Returns instances of all implemented database types.
-     */
-    public List<DatabaseSnapshotGenerator> getRegistry() {
+    public Collection<DatabaseSnapshotGenerator> getRegistry() {
         return registry;
     }
 

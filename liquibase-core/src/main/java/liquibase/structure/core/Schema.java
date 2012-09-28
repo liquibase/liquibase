@@ -74,33 +74,7 @@ public class Schema extends DatabaseObjectImpl {
         return new CatalogAndSchema(getCatalogName(), getName());
     }
 
-
-    public static class DatabaseSpecific extends Schema {
-        private Database database;
-
-        public DatabaseSpecific(String catalog, String schemaName, Database database) {
-            super(catalog, schemaName);
-            this.database = database;
-            if (catalog == null) {
-                this.catalog = new Catalog.DatabaseSpecific(null, database);
-            }
-            if (schemaName == null) {
-                this.name = null;
-            }
-        }
-
-        public DatabaseSpecific(Catalog catalog, String name) {
-            super(catalog, name);
-            if (catalog == null) {
-                this.catalog = new Catalog.DatabaseSpecific(null, database);
-            }
-            if (name == null) {
-                this.name = null;
-            }
-        }
-
-        public Database getDatabase() {
-            return database;
-        }
+    public <DatabaseObjectType extends DatabaseObject> DatabaseObjectType[] getDatabaseObjects(Class<DatabaseObjectType> type) {
+        return null; //todo
     }
 }

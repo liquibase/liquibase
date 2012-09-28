@@ -13,6 +13,7 @@ public interface DatabaseSnapshotGenerator {
      * Default generator, lower priority.
      */
     public static final int PRIORITY_DEFAULT = 1;
+
     /**
      * Generator specific to database, higher priority.
      *
@@ -23,13 +24,13 @@ public interface DatabaseSnapshotGenerator {
 
     int getPriority(Database database);
 
-    DatabaseSnapshot createSnapshot(Database database, SnapshotControl snapshotControl) throws DatabaseException;
+    DatabaseSnapshot createSnapshot(SnapshotControl snapshotControl) throws DatabaseException;
 
-    Table getDatabaseChangeLogTable(Database database) throws DatabaseException;
+    Table getDatabaseChangeLogTable() throws DatabaseException;
 
-    Table getDatabaseChangeLogLockTable(Database database) throws DatabaseException;
+    Table getDatabaseChangeLogLockTable() throws DatabaseException;
 
-    boolean hasDatabaseChangeLogTable(Database database) throws DatabaseException;
+    boolean hasDatabaseChangeLogTable() throws DatabaseException;
 
-    boolean hasDatabaseChangeLogLockTable(Database database) throws DatabaseException;
+    boolean hasDatabaseChangeLogLockTable() throws DatabaseException;
 }

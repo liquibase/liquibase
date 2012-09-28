@@ -4,7 +4,6 @@ import liquibase.CatalogAndSchema;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.jvm.JdbcConnection;
-import liquibase.structure.core.Schema;
 import liquibase.diff.DiffControl;
 import liquibase.diff.DiffGeneratorFactory;
 import liquibase.diff.DiffResult;
@@ -143,7 +142,7 @@ public class CommandLineUtils {
         diffControl.setDataDir(dataDir);
         diffControl.addStatusListener(new OutDiffStatusListener());
 
-        DatabaseSnapshot originalDatabaseSnapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(originalDatabase, diffControl.toSnapshotControl(DiffControl.DatabaseRole.REFERENCE));
+        DatabaseSnapshot originalDatabaseSnapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(diffControl.toSnapshotControl(DiffControl.DatabaseRole.REFERENCE), originalDatabase);
         DiffResult diffResult = DiffGeneratorFactory.getInstance().compare(originalDatabaseSnapshot, new DatabaseSnapshot(null, diffControl.toSnapshotControl(DiffControl.DatabaseRole.REFERENCE)), diffControl);
 
         DiffToChangeLog changeLogWriter = new DiffToChangeLog(diffResult, diffOutputConfig);
