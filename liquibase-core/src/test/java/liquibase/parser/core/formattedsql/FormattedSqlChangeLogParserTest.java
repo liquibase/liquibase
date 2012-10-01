@@ -3,7 +3,11 @@ package liquibase.parser.core.formattedsql;
 import liquibase.change.core.EmptyChange;
 import liquibase.change.core.RawSQLChange;
 import liquibase.changelog.ChangeLogParameters;
+import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
+import liquibase.exception.ChangeLogParseException;
+import liquibase.precondition.core.PreconditionContainer;
+import liquibase.precondition.core.SqlPrecondition;
 import liquibase.resource.ResourceAccessor;
 import liquibase.test.JUnitResourceAccessor;
 import liquibase.util.StringUtils;
@@ -52,15 +56,35 @@ public class FormattedSqlChangeLogParserTest {
             "create table mysql_boo (\n" +
             "  id int primary key\n" +
             ");\n" +
-            "-- rollback drop table mysql_boo;\n"
+            "-- rollback drop table mysql_boo;\n" +
+            "--changeset bboisvert:with_preconditions\n" +
+            "--preconditions onFail:MARK_RAN onerror:HALT onUpdateSql:FAIL\n" +
+            // these aren't very clever
+            "--precondition-sql-check expectedResult:\"0 table(s)\" select count(*) || ' table(s)' from information_schema.tables where table_name = 'my_table'\n" +
+            "--precondition-sql-check expectedresult:0 select count(*) from information_schema.columns where table_name = 'my_table' and column_name = 'id'\n" +
+            "create table my_table (\n" +
+            "  id int primary key\n" +
+            ");\n" +
+            "-- rollback drop table my_table;\n"
             ;
 
     private static final String INVALID_CHANGELOG = "select * from table1";
+    private static final String INVALID_CHANGELOG_INVALID_PRECONDITION = "--liquibase formatted sql\n" +
+        "\n" +
+        "--changeset bboisvert:invalid_precondition\n" +
+        "--precondition-invalid-type 123\n" +
+        "select 1;"
+        ;
 
     @Test
     public void supports() throws Exception {
         assertTrue(new MockFormattedSqlChangeLogParser(VALID_CHANGELOG).supports("asdf.sql", new JUnitResourceAccessor()));
         assertFalse(new MockFormattedSqlChangeLogParser(INVALID_CHANGELOG).supports("asdf.sql", new JUnitResourceAccessor()));
+    }
+
+    @Test(expected = ChangeLogParseException.class)
+    public void invalidPrecondition() throws Exception{
+        new MockFormattedSqlChangeLogParser(INVALID_CHANGELOG_INVALID_PRECONDITION).parse("asdf.sql", new ChangeLogParameters(), new JUnitResourceAccessor());
     }
 
     @Test
@@ -71,7 +95,7 @@ public class FormattedSqlChangeLogParserTest {
 
         assertEquals("asdf.sql", changeLog.getLogicalFilePath());
 
-        assertEquals(7, changeLog.getChangeSets().size());
+        assertEquals(8, changeLog.getChangeSets().size());
 
         assertEquals("nvoxland", changeLog.getChangeSets().get(0).getAuthor());
         assertEquals("1", changeLog.getChangeSets().get(0).getId());
@@ -157,6 +181,33 @@ public class FormattedSqlChangeLogParserTest {
         assertEquals(1, changeLog.getChangeSets().get(6).getRollBackChanges().length);
         assertTrue(changeLog.getChangeSets().get(6).getRollBackChanges()[0] instanceof RawSQLChange);
         assertEquals("drop table mysql_boo;", ((RawSQLChange) changeLog.getChangeSets().get(6).getRollBackChanges()[0]).getSql());
+
+
+        ChangeSet cs = changeLog.getChangeSets().get(7);
+        assertEquals("bboisvert", cs.getAuthor());
+        assertEquals("with_preconditions", cs.getId());
+        PreconditionContainer pc = cs.getPreconditions();
+        assertNotNull(pc);
+        assertEquals(PreconditionContainer.FailOption.MARK_RAN, pc.getOnFail());
+        assertEquals(PreconditionContainer.ErrorOption.HALT, pc.getOnError());
+        assertEquals(PreconditionContainer.OnSqlOutputOption.FAIL, pc.getOnSqlOutput());
+        assertEquals(2, pc.getNestedPreconditions().size());
+        assertTrue(pc.getNestedPreconditions().get(0) instanceof SqlPrecondition);
+        SqlPrecondition p0 = (SqlPrecondition) pc.getNestedPreconditions().get(0);
+        assertEquals("0 table(s)", p0.getExpectedResult());
+        assertEquals("select count(*) || ' table(s)' from information_schema.tables where table_name = 'my_table'", p0.getSql());
+        assertTrue(pc.getNestedPreconditions().get(1) instanceof SqlPrecondition);
+        SqlPrecondition p1 = (SqlPrecondition) pc.getNestedPreconditions().get(1);
+        assertEquals("0", p1.getExpectedResult());
+        assertEquals("select count(*) from information_schema.columns where table_name = 'my_table' and column_name = 'id'", p1.getSql());
+        assertEquals(1, cs.getChanges().size());
+        assertTrue(cs.getChanges().get(0) instanceof RawSQLChange);
+        assertEquals("create table my_table (\n" +
+            "  id int primary key\n" +
+            ");", ((RawSQLChange) cs.getChanges().get(0)).getSql());
+        assertEquals(1, cs.getRollBackChanges().length);
+        assertTrue(cs.getRollBackChanges()[0] instanceof RawSQLChange);
+        assertEquals("drop table my_table;", ((RawSQLChange) cs.getRollBackChanges()[0]).getSql());
     }
 
     private static class MockFormattedSqlChangeLogParser extends FormattedSqlChangeLogParser {
