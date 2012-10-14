@@ -37,7 +37,7 @@ import liquibase.diff.output.DiffOutputConfig;
 import liquibase.exception.CommandLineParsingException;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.ValidationFailedException;
-import liquibase.lockservice.LockService;
+import liquibase.lockservice.LockServiceImpl;
 import liquibase.logging.LogFactory;
 import liquibase.logging.LogLevel;
 import liquibase.logging.Logger;
@@ -783,7 +783,7 @@ public class Main {
                 liquibase.reportLocks(System.err);
                 return;
             } else if ("releaseLocks".equalsIgnoreCase(command)) {
-                LockService.getInstance(database).forceReleaseLock();
+                LockServiceImpl.getInstance(database).forceReleaseLock();
                 System.err.println("Successfully released all database change log locks for " + liquibase.getDatabase().getConnection().getConnectionUserName() + "@" + liquibase.getDatabase().getConnection().getURL());
                 return;
             } else if ("tag".equalsIgnoreCase(command)) {

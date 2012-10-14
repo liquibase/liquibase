@@ -14,6 +14,7 @@ import liquibase.diff.output.DiffToChangeLog;
 import liquibase.diff.output.DiffToPrintStream;
 import liquibase.exception.ChangeLogParseException;
 import liquibase.exception.LiquibaseException;
+import liquibase.lockservice.LockServiceImpl;
 import liquibase.servicelocator.ServiceLocator;
 import liquibase.snapshot.DatabaseSnapshotGenerator;
 import liquibase.snapshot.DatabaseSnapshotGeneratorFactory;
@@ -27,7 +28,6 @@ import liquibase.database.DatabaseFactory;
 import liquibase.diff.DiffResult;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.ValidationFailedException;
-import liquibase.lockservice.LockService;
 import liquibase.resource.ResourceAccessor;
 import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.resource.CompositeResourceAccessor;
@@ -108,7 +108,7 @@ public abstract class AbstractIntegrationTest {
 
             DatabaseSnapshotGeneratorFactory.resetAll();
             ExecutorService.getInstance().reset();
-            LockService.resetAll();
+            LockServiceImpl.resetAll();
 
             database.checkDatabaseChangeLogLockTable();
 
@@ -118,7 +118,7 @@ public abstract class AbstractIntegrationTest {
             }
 
             DatabaseSnapshotGeneratorFactory.resetAll();
-            LockService.getInstance(database).forceReleaseLock();
+            LockServiceImpl.getInstance(database).forceReleaseLock();
             database.dropDatabaseObjects(Schema.DEFAULT);
 
             if (database.supportsSchemas()) {
@@ -480,7 +480,7 @@ public abstract class AbstractIntegrationTest {
 
         database.setDefaultSchemaName("liquibaseb");
 
-        LockService.getInstance(database).forceReleaseLock();
+        LockServiceImpl.getInstance(database).forceReleaseLock();
 
         liquibase.update(includedChangeLog);
 
@@ -836,7 +836,7 @@ public abstract class AbstractIntegrationTest {
             //expected
         }
 
-        assertFalse(LockService.getInstance(database).hasChangeLogLock());
+        assertFalse(LockServiceImpl.getInstance(database).hasChangeLogLock());
     }
 
     @Test

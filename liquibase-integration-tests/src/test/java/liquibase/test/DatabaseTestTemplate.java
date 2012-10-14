@@ -5,7 +5,8 @@ import liquibase.database.core.SQLiteDatabase;
 import liquibase.executor.ExecutorService;
 import liquibase.executor.jvm.JdbcExecutor;
 import liquibase.exception.MigrationFailedException;
-import liquibase.lockservice.LockService;
+import liquibase.lockservice.LockServiceImpl;
+
 import org.junit.ComparisonFailure;
 
 import java.util.Set;
@@ -27,9 +28,9 @@ public class DatabaseTestTemplate {
             JdbcExecutor writeExecutor = new JdbcExecutor();
             writeExecutor.setDatabase(database);
             ExecutorService.getInstance().setExecutor(database, writeExecutor);
-            LockService.getInstance(database).reset();
+            LockServiceImpl.getInstance(database).reset();
             if (database.getConnection() != null) {
-                LockService.getInstance(database).forceReleaseLock();
+                LockServiceImpl.getInstance(database).forceReleaseLock();
             }
 
             try {

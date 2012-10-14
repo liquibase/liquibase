@@ -19,6 +19,7 @@ import liquibase.executor.ExecutorService;
 import liquibase.executor.LoggingExecutor;
 import liquibase.lockservice.DatabaseChangeLogLock;
 import liquibase.lockservice.LockService;
+import liquibase.lockservice.LockServiceImpl;
 import liquibase.logging.LogFactory;
 import liquibase.logging.Logger;
 import liquibase.parser.ChangeLogParserFactory;
@@ -101,7 +102,7 @@ public class Liquibase {
 
     public void update(String contexts) throws LiquibaseException {
         contexts = StringUtils.trimToNull(contexts);
-        LockService lockService = LockService.getInstance(database);
+        LockService lockService = LockServiceImpl.getInstance(database);
         lockService.waitForLock();
 
         changeLogParameters.setContexts(StringUtils.splitAndTrim(contexts, ","));
@@ -141,7 +142,7 @@ public class Liquibase {
 
         outputHeader("Update Database Script");
 
-        LockService lockService = LockService.getInstance(database);
+        LockService lockService = LockServiceImpl.getInstance(database);
         lockService.waitForLock();
 
         try {
@@ -162,7 +163,7 @@ public class Liquibase {
         contexts = StringUtils.trimToNull(contexts);
         changeLogParameters.setContexts(StringUtils.splitAndTrim(contexts, ","));
 
-        LockService lockService = LockService.getInstance(database);
+        LockService lockService = LockServiceImpl.getInstance(database);
         lockService.waitForLock();
 
         try {
@@ -240,7 +241,7 @@ public class Liquibase {
         contexts = StringUtils.trimToNull(contexts);
         changeLogParameters.setContexts(StringUtils.splitAndTrim(contexts, ","));
 
-        LockService lockService = LockService.getInstance(database);
+        LockService lockService = LockServiceImpl.getInstance(database);
         lockService.waitForLock();
 
         try {
@@ -288,7 +289,7 @@ public class Liquibase {
         contexts = StringUtils.trimToNull(contexts);
         changeLogParameters.setContexts(StringUtils.splitAndTrim(contexts, ","));
 
-        LockService lockService = LockService.getInstance(database);
+        LockService lockService = LockServiceImpl.getInstance(database);
         lockService.waitForLock();
 
         try {
@@ -334,7 +335,7 @@ public class Liquibase {
         contexts = StringUtils.trimToNull(contexts);
         changeLogParameters.setContexts(StringUtils.splitAndTrim(contexts, ","));
 
-        LockService lockService = LockService.getInstance(database);
+        LockService lockService = LockServiceImpl.getInstance(database);
         lockService.waitForLock();
 
         try {
@@ -380,7 +381,7 @@ public class Liquibase {
         contexts = StringUtils.trimToNull(contexts);
         changeLogParameters.setContexts(StringUtils.splitAndTrim(contexts, ","));
 
-        LockService lockService = LockService.getInstance(database);
+        LockService lockService = LockServiceImpl.getInstance(database);
         lockService.waitForLock();
 
         try {
@@ -425,7 +426,7 @@ public class Liquibase {
         contexts = StringUtils.trimToNull(contexts);
         changeLogParameters.setContexts(StringUtils.splitAndTrim(contexts, ","));
 
-        LockService lockService = LockService.getInstance(database);
+        LockService lockService = LockServiceImpl.getInstance(database);
         lockService.waitForLock();
 
         try {
@@ -459,7 +460,7 @@ public class Liquibase {
 
         outputHeader("SQL to roll back currently unexecuted changes");
 
-        LockService lockService = LockService.getInstance(database);
+        LockService lockService = LockServiceImpl.getInstance(database);
         lockService.waitForLock();
 
         try {
@@ -519,7 +520,7 @@ public class Liquibase {
      */                                      
     public final void dropAll(Schema... schemas) throws DatabaseException {
         try {
-            LockService.getInstance(database).waitForLock();
+            LockServiceImpl.getInstance(database).waitForLock();
 
             for (Schema schema : schemas) {
                 schema = database.correctSchema(schema);
@@ -535,7 +536,7 @@ public class Liquibase {
             throw new DatabaseException(e);
         } finally {
             try {
-                LockService.getInstance(database).releaseLock();
+                LockServiceImpl.getInstance(database).releaseLock();
             } catch (LockException e) {
                 log.severe("Unable to release lock: " + e.getMessage());
             }
@@ -546,7 +547,7 @@ public class Liquibase {
      * 'Tags' the database for future rollback
      */
     public void tag(String tagString) throws LiquibaseException {
-        LockService lockService = LockService.getInstance(database);
+        LockService lockService = LockServiceImpl.getInstance(database);
         lockService.waitForLock();
 
         try {
@@ -578,7 +579,7 @@ public class Liquibase {
             splitContexts = contexts.split(",");
         }
         getDatabase().checkDatabaseChangeLogTable(updateExistingNullChecksums, databaseChangeLog, splitContexts);
-        if (!LockService.getInstance(database).hasChangeLogLock()) {
+        if (!LockServiceImpl.getInstance(database).hasChangeLogLock()) {
             getDatabase().checkDatabaseChangeLogLockTable();
         }
     }
@@ -599,7 +600,7 @@ public class Liquibase {
     public DatabaseChangeLogLock[] listLocks() throws LiquibaseException {
         checkDatabaseChangeLogTable(false, null, null);
 
-        return LockService.getInstance(getDatabase()).listLocks();
+        return LockServiceImpl.getInstance(getDatabase()).listLocks();
     }
 
     public void reportLocks(PrintStream out) throws LiquibaseException {
@@ -617,7 +618,7 @@ public class Liquibase {
     public void forceReleaseLocks() throws LiquibaseException {
         checkDatabaseChangeLogTable(false, null, null);
 
-        LockService.getInstance(getDatabase()).forceReleaseLock();
+        LockServiceImpl.getInstance(getDatabase()).forceReleaseLock();
     }
 
     public List<ChangeSet> listUnrunChangeSets(String contexts) throws LiquibaseException {
@@ -673,7 +674,7 @@ public class Liquibase {
      */
     public void clearCheckSums() throws LiquibaseException {
         log.info("Clearing database change log checksums");
-        LockService lockService = LockService.getInstance(database);
+        LockService lockService = LockServiceImpl.getInstance(database);
         lockService.waitForLock();
 
         try {
@@ -724,7 +725,7 @@ public class Liquibase {
         contexts = StringUtils.trimToNull(contexts);
         log.info("Generating Database Documentation");
         changeLogParameters.setContexts(StringUtils.splitAndTrim(contexts, ","));
-        LockService lockService = LockService.getInstance(database);
+        LockService lockService = LockServiceImpl.getInstance(database);
         lockService.waitForLock();
 
         try {
