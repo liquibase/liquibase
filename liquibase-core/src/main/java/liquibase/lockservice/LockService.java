@@ -1,5 +1,6 @@
 package liquibase.lockservice;
 
+import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LockException;
 
@@ -7,6 +8,9 @@ import liquibase.exception.LockException;
  * @author John Sanda
  */
 public interface LockService {
+
+    void setDatabase(Database database);
+
     void setChangeLogLockWaitTime(long changeLogLockWaitTime);
 
     void setChangeLogLockRecheckTime(long changeLogLocRecheckTime);

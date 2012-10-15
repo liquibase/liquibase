@@ -33,46 +33,12 @@ public class LockServiceImplTest {
     }
 
     @Test
-    public void getInstance() {
-        final Database oracle1 = new OracleDatabase() {
-            @Override
-            public boolean equals(Object o) {
-                return o == this;
-            }
-        };
-        final Database oracle2 = new OracleDatabase() {
-            @Override
-            public boolean equals(Object o) {
-                return o == this;
-            }
-
-        };
-        final Database mysql = new MySQLDatabase() {
-            @Override
-            public boolean equals(Object o) {
-                return o == this;
-            }
-        };
-
-        assertNotNull(LockServiceImpl.getInstance(oracle1));
-        assertNotNull(LockServiceImpl.getInstance(oracle2));
-        assertNotNull(LockServiceImpl.getInstance(mysql));
-
-        assertTrue(LockServiceImpl.getInstance(oracle1) == LockServiceImpl.getInstance(oracle1));
-        assertTrue(LockServiceImpl.getInstance(oracle2) == LockServiceImpl.getInstance(oracle2));
-        assertTrue(LockServiceImpl.getInstance(mysql) == LockServiceImpl.getInstance(mysql));
-
-        assertTrue(LockServiceImpl.getInstance(oracle1) != LockServiceImpl.getInstance(oracle2));
-        assertTrue(LockServiceImpl.getInstance(oracle1) != LockServiceImpl.getInstance(mysql));
-    }
-
-
-    @Test
     public void aquireLock_hasLockAlready() throws Exception {
         Database database = createMock(Database.class);
         replay(database);
 
-        LockServiceImpl lockService = (LockServiceImpl) LockServiceImpl.getInstance(database);
+        LockServiceImpl lockService = new LockServiceImpl();
+        lockService.setDatabase(database);
         assertFalse(lockService.hasChangeLogLock());
 
         Field field = lockService.getClass().getDeclaredField("hasChangeLogLock");
@@ -113,7 +79,8 @@ public class LockServiceImplTest {
         replay(database);
         ExecutorService.getInstance().setExecutor(database, executor);
 
-        LockServiceImpl service = (LockServiceImpl) LockServiceImpl.getInstance(database);
+        LockServiceImpl service = new LockServiceImpl();
+        service.setDatabase(database);
         assertTrue(service.acquireLock());
 
         verify(database);
@@ -137,7 +104,8 @@ public class LockServiceImplTest {
         replay(executor);
         ExecutorService.getInstance().setExecutor(database, executor);
 
-        LockServiceImpl service = (LockServiceImpl) LockServiceImpl.getInstance(database);
+        LockServiceImpl service = new LockServiceImpl();
+        service.setDatabase(database);
         assertFalse(service.acquireLock());
 
         verify(database);
@@ -172,7 +140,8 @@ public class LockServiceImplTest {
         replay(executor);
         ExecutorService.getInstance().setExecutor(database, executor);
 
-        LockServiceImpl service = (LockServiceImpl) LockServiceImpl.getInstance(database);
+        LockServiceImpl service = new LockServiceImpl();
+        service.setDatabase(database);
         service.waitForLock();
 
         verify(database);
@@ -210,7 +179,8 @@ public class LockServiceImplTest {
         replay(executor);
         ExecutorService.getInstance().setExecutor(database, executor);
 
-        LockServiceImpl service = (LockServiceImpl) LockServiceImpl.getInstance(database);
+        LockServiceImpl service = new LockServiceImpl();
+        service.setDatabase(database);
         service.setChangeLogLockRecheckTime(1);
         service.waitForLock();
 
@@ -247,7 +217,8 @@ public class LockServiceImplTest {
         replay(executor);
         ExecutorService.getInstance().setExecutor(database, executor);
 
-        LockServiceImpl service = (LockServiceImpl) LockServiceImpl.getInstance(database);
+        LockServiceImpl service = new LockServiceImpl();
+        service.setDatabase(database);
         service.setChangeLogLockWaitTime(10);
         service.setChangeLogLockRecheckTime(5);
 
@@ -284,7 +255,8 @@ public class LockServiceImplTest {
         replay(executor);
         ExecutorService.getInstance().setExecutor(database, executor);
 
-        LockServiceImpl service = (LockServiceImpl) LockServiceImpl.getInstance(database);
+        LockServiceImpl service = new LockServiceImpl();
+        service.setDatabase(database);
         service.releaseLock();
 
         verify(database);
@@ -316,7 +288,8 @@ public class LockServiceImplTest {
         replay(executor);
         ExecutorService.getInstance().setExecutor(database, executor);
 
-        LockServiceImpl service = (LockServiceImpl) LockServiceImpl.getInstance(database);
+        LockServiceImpl service = new LockServiceImpl();
+        service.setDatabase(database);
         DatabaseChangeLogLock[] locks = service.listLocks();
         assertEquals(1, locks.length);
         assertEquals(1, locks[0].getId());
@@ -345,7 +318,8 @@ public class LockServiceImplTest {
         replay(executor);
         ExecutorService.getInstance().setExecutor(database, executor);
 
-        LockServiceImpl service = (LockServiceImpl) LockServiceImpl.getInstance(database);
+        LockServiceImpl service = new LockServiceImpl();
+        service.setDatabase(database);
         DatabaseChangeLogLock[] locks = service.listLocks();
         assertEquals(0, locks.length);
 
@@ -360,7 +334,8 @@ public class LockServiceImplTest {
 
         replay(database);
 
-        LockServiceImpl service = (LockServiceImpl) LockServiceImpl.getInstance(database);
+        LockServiceImpl service = new LockServiceImpl();
+        service.setDatabase(database);
         DatabaseChangeLogLock[] locks = service.listLocks();
         assertEquals(0, locks.length);
 

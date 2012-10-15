@@ -30,15 +30,11 @@ public class LockServiceImpl implements LockService {
 
     private static Map<Database, LockService> instances = new ConcurrentHashMap<Database, LockService>();
 
-    private LockServiceImpl(Database database) {
-        this.database = database;
+    public LockServiceImpl() {
     }
 
-    public static LockService getInstance(Database database) {
-        if (!instances.containsKey(database)) {
-            instances.put(database, new LockServiceImpl(database));
-        }
-        return instances.get(database);
+    public void setDatabase(Database database) {
+        this.database = database;
     }
 
     public void setChangeLogLockWaitTime(long changeLogLockWaitTime) {
