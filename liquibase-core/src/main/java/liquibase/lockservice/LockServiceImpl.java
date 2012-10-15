@@ -28,9 +28,15 @@ public class LockServiceImpl implements LockService {
     private long changeLogLockWaitTime = 1000 * 60 * 5;  //default to 5 mins
     private long changeLogLocRecheckTime = 1000 * 10;  //default to every 10 seconds
 
-    private static Map<Database, LockService> instances = new ConcurrentHashMap<Database, LockService>();
-
     public LockServiceImpl() {
+    }
+
+    public int getPriority() {
+        return PRIORITY_DEFAULT;
+    }
+
+    public boolean supports(Database database) {
+        return true;
     }
 
     public void setDatabase(Database database) {
@@ -143,8 +149,6 @@ public class LockServiceImpl implements LockService {
             try {
                 hasChangeLogLock = false;
 
-                instances.remove(this.database);
-
                 database.setCanCacheLiquibaseTableInfo(false);
 
                 LogFactory.getLogger().info("Successfully released change log lock");
@@ -197,9 +201,4 @@ public class LockServiceImpl implements LockService {
         hasChangeLogLock = false;
     }
 
-    public static void resetAll() {
-        for (Map.Entry<Database, LockService> entity : instances.entrySet()) {
-            entity.getValue().reset();
-        }
-    }
 }

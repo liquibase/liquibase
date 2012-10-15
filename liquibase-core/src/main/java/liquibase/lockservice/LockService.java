@@ -3,11 +3,14 @@ package liquibase.lockservice;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LockException;
+import liquibase.servicelocator.PrioritizedService;
 
 /**
  * @author John Sanda
  */
-public interface LockService {
+public interface LockService extends PrioritizedService {
+
+    boolean supports(Database database);
 
     void setDatabase(Database database);
 
