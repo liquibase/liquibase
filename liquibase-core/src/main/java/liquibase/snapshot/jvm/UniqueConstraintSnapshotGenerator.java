@@ -1,26 +1,26 @@
 package liquibase.snapshot.jvm;
 
-import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
+import liquibase.snapshot.InvalidExampleException;
+import liquibase.snapshot.SnapshotGeneratorChain;
+import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.UniqueConstraint;
 
-public class UniqueConstraintSnapshotGenerator extends JdbcDatabaseObjectSnapshotGenerator<UniqueConstraint> {
-    public int getPriority() {
-        return PRIORITY_DEFAULT;
+public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
+
+    public UniqueConstraintSnapshotGenerator() {
+        super(UniqueConstraint.class);
     }
 
-    public boolean has(UniqueConstraint example, Database database) throws DatabaseException {
-        return snapshot(example, database) != null;
-    }
+//    public Boolean has(DatabaseObject example, DatabaseSnapshot snapshot, SnapshotGeneratorChain chain) throws DatabaseException {
+//        return chain.has(example, snapshot); // snapshot(example, database, snapshot) != null;
+//    }
 
-    public UniqueConstraint[] get(DatabaseObject container, Database database) {
-        return new UniqueConstraint[0];  //TODO
-    }
-
-    public UniqueConstraint snapshot(UniqueConstraint example, Database database) throws DatabaseException {
+    public DatabaseObject snapshot(DatabaseObject example, DatabaseSnapshot snapshot, SnapshotGeneratorChain chain) throws DatabaseException, InvalidExampleException {
         return null;  //TODO
     }
+
 
     //START CODE FROM PostgresDatabseSnapshotGenerator
 //    protected void readUniqueConstraints(DatabaseSnapshot snapshot, Schema schema, DatabaseMetaData databaseMetaData) throws DatabaseException, SQLException {

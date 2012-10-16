@@ -6,8 +6,7 @@ import liquibase.diff.DiffControl;
 import liquibase.diff.DiffGeneratorFactory;
 import liquibase.diff.DiffResult;
 import liquibase.diff.output.DiffToPrintStream;
-import liquibase.snapshot.DatabaseSnapshot;
-import liquibase.snapshot.DatabaseSnapshotGeneratorFactory;
+import liquibase.snapshot.*;
 import org.junit.Test;
 
 import java.util.Locale;
@@ -28,6 +27,18 @@ public class H2IntegrationTest extends AbstractIntegrationTest {
 
         DiffResult diffResult = DiffGeneratorFactory.getInstance().compare(getDatabase(), null, new DiffControl());
         new DiffToPrintStream(diffResult, System.out).print();
+    }
+
+    @Test
+    public void snapshot() throws Exception {
+        if (getDatabase() == null) {
+            return;
+        }
+
+
+        runCompleteChangeLog();
+        DatabaseSnapshot snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(new SnapshotControl(), getDatabase());
+        System.out.println(snapshot);
     }
 
     //    @Test

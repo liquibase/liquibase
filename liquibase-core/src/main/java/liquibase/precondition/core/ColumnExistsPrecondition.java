@@ -3,7 +3,7 @@ package liquibase.precondition.core;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
-import liquibase.snapshot.jvm.DatabaseObjectGeneratorFactory;
+import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Schema;
 import liquibase.exception.*;
@@ -65,10 +65,10 @@ public class ColumnExistsPrecondition implements Precondition {
         example.setName(getColumnName());
 
         try {
-            if (!DatabaseObjectGeneratorFactory.getInstance().getGenerator(Column.class, database).has(example, database)) {
+            if (!SnapshotGeneratorFactory.getInstance().has(example, database)) {
                 throw new PreconditionFailedException("Column '" + database.escapeColumnName(catalogName, schemaName, getTableName(), getColumnName()) + "' does not exist", changeLog, this);
             }
-        } catch (DatabaseException e) {
+        } catch (LiquibaseException e) {
             throw new PreconditionErrorException(e, changeLog, this);
         }
     }

@@ -11,6 +11,4 @@ public interface DatabaseObject {
     Schema getSchema();
 
     boolean equals(DatabaseObject otherObject, Database accordingTo);
-
-    boolean isPartial();
 }

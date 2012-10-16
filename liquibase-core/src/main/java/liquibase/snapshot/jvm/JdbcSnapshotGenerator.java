@@ -7,6 +7,9 @@ import liquibase.database.jvm.JdbcConnection;
 import liquibase.diff.DiffStatusListener;
 import liquibase.exception.DatabaseException;
 import liquibase.logging.LogFactory;
+import liquibase.snapshot.DatabaseSnapshot;
+import liquibase.snapshot.SnapshotGenerator;
+import liquibase.snapshot.SnapshotGeneratorChain;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
@@ -14,20 +17,45 @@ import liquibase.structure.core.Table;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
-public abstract class JdbcDatabaseObjectSnapshotGenerator<DatabaseObjectType extends DatabaseObject> implements DatabaseObjectSnapshotGenerator<DatabaseObjectType> {
+public abstract class JdbcSnapshotGenerator implements SnapshotGenerator {
     private Set<DiffStatusListener> statusListeners = new HashSet<DiffStatusListener>();
+
+    private Class<? extends DatabaseObject> defaultFor = null;
+    private Class<? extends DatabaseObject>[] addsTo = null;
+
+    protected JdbcSnapshotGenerator(Class<? extends DatabaseObject> defaultFor) {
+        this.defaultFor = defaultFor;
+    }
+
+    protected JdbcSnapshotGenerator(Class<? extends DatabaseObject> defaultFor, Class<? extends DatabaseObject>[] addsTo) {
+        this.defaultFor = defaultFor;
+        this.addsTo = addsTo;
+    }
+
+    public int getPriority(Class<? extends DatabaseObject> objectType, Database database) {
+        if (defaultFor != null && defaultFor.isAssignableFrom(objectType)) {
+            return PRIORITY_DEFAULT;
+        }
+        if (addsTo != null) {
+            for (Class<? extends DatabaseObject> type : addsTo) {
+                if (type.isAssignableFrom(objectType)) {
+                    return PRIORITY_ADDITIONAL;
+                }
+            }
+        }
+        return PRIORITY_NONE;
+
+    }
+
+//    public Boolean has(DatabaseObject example, DatabaseSnapshot snapshot, SnapshotGeneratorChain chain) throws DatabaseException {
+//        return null;  //To change body of implemented methods use File | Settings | File Templates.
+//    }
 
     public void addStatusListener(DiffStatusListener listener) {
         statusListeners.add(listener);
-    }
-
-    public boolean supports(Class<? extends DatabaseObject> databaseObjectClass, Database database) {
-        return true;
     }
 
     protected DatabaseMetaData getMetaData(Database database) throws SQLException {

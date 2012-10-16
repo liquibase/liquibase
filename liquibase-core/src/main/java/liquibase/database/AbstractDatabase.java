@@ -16,8 +16,8 @@ import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.logging.LogFactory;
 import liquibase.snapshot.DatabaseSnapshot;
-import liquibase.snapshot.DatabaseSnapshotGeneratorFactory;
 import liquibase.snapshot.SnapshotControl;
+import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.sql.Sql;
 import liquibase.sql.visitor.SqlVisitor;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
@@ -77,10 +77,6 @@ public abstract class AbstractDatabase implements Database {
 
     protected AbstractDatabase() {
         this.dateFunctions.add(new DatabaseFunction(getCurrentDateTimeFunction()));
-    }
-
-    public boolean isPartial() {
-        return false;
     }
 
     public String getName() {
@@ -570,7 +566,12 @@ public abstract class AbstractDatabase implements Database {
     public void checkDatabaseChangeLogTable(boolean updateExistingNullChecksums, DatabaseChangeLog databaseChangeLog, String... contexts) throws DatabaseException {
         Executor executor = ExecutorService.getInstance().getExecutor(this);
 
-        Table changeLogTable = DatabaseSnapshotGeneratorFactory.getInstance().getGenerator(this).getDatabaseChangeLogTable();
+        Table changeLogTable = null;
+        try {
+            changeLogTable = SnapshotGeneratorFactory.getInstance().getDatabaseChangeLogTable(this);
+        } catch (LiquibaseException e) {
+            throw new UnexpectedLiquibaseException(e);
+        }
 
         List<SqlStatement> statementsToExecute = new ArrayList<SqlStatement>();
 
@@ -689,7 +690,12 @@ public abstract class AbstractDatabase implements Database {
         if (hasDatabaseChangeLogTable) {
             return true;
         }
-        boolean hasTable = DatabaseSnapshotGeneratorFactory.getInstance().getGenerator(this).hasDatabaseChangeLogTable();
+        boolean hasTable = false;
+        try {
+            hasTable = SnapshotGeneratorFactory.getInstance().hasDatabaseChangeLogTable(this);
+        } catch (LiquibaseException e) {
+            throw new UnexpectedLiquibaseException(e);
+        }
         if (canCacheLiquibaseTableInfo) {
             hasDatabaseChangeLogTable = hasTable;
         }
@@ -700,7 +706,12 @@ public abstract class AbstractDatabase implements Database {
         if (canCacheLiquibaseTableInfo && hasDatabaseChangeLogLockTable) {
             return true;
         }
-        boolean hasTable = DatabaseSnapshotGeneratorFactory.getInstance().getGenerator(this).hasDatabaseChangeLogLockTable();
+        boolean hasTable = false;
+        try {
+            hasTable = SnapshotGeneratorFactory.getInstance().hasDatabaseChangeLogLockTable(this);
+        } catch (LiquibaseException e) {
+            throw new UnexpectedLiquibaseException(e);
+        }
         if (canCacheLiquibaseTableInfo) {
             hasDatabaseChangeLogLockTable = hasTable;
         }
@@ -757,8 +768,12 @@ public abstract class AbstractDatabase implements Database {
     public void dropDatabaseObjects(CatalogAndSchema schemaToDrop) throws DatabaseException {
         try {
             SnapshotControl snapshotControl = new SnapshotControl(schemaToDrop);
-            snapshotControl.setTypes(View.class, Table.class);
-            DatabaseSnapshot snapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(snapshotControl, this);
+            DatabaseSnapshot snapshot = null;
+            try {
+                snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(snapshotControl, this);
+            } catch (LiquibaseException e) {
+                throw new UnexpectedLiquibaseException(e);
+            }
 
             List<Change> dropChanges = new ArrayList<Change>();
 
@@ -1336,7 +1351,7 @@ public abstract class AbstractDatabase implements Database {
         return 2;
     }
 
-    public CatalogAndSchema getSchemaFromJdbcInfo(String rawSchemaName, String rawCatalogName) {
+    public CatalogAndSchema getSchemaFromJdbcInfo(String rawCatalogName, String rawSchemaName) {
         return this.correctSchema(new CatalogAndSchema(rawCatalogName, rawSchemaName));
     }
 

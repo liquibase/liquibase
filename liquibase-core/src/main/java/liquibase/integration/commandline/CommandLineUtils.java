@@ -14,7 +14,8 @@ import liquibase.diff.output.DiffToPrintStream;
 import liquibase.exception.*;
 import liquibase.logging.LogFactory;
 import liquibase.snapshot.DatabaseSnapshot;
-import liquibase.snapshot.DatabaseSnapshotGeneratorFactory;
+import liquibase.snapshot.InvalidExampleException;
+import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.util.StringUtils;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -110,7 +111,7 @@ public class CommandLineUtils {
         }
     }
 
-    public static void doDiff(Database referenceDatabase, Database targetDatabase) throws DatabaseException {
+    public static void doDiff(Database referenceDatabase, Database targetDatabase) throws LiquibaseException {
         DiffControl diffControl = new DiffControl();
         diffControl.addStatusListener(new OutDiffStatusListener());
         DiffResult diffResult = DiffGeneratorFactory.getInstance().compare(referenceDatabase, targetDatabase, diffControl);
@@ -124,7 +125,7 @@ public class CommandLineUtils {
                                          Database referenceDatabase,
                                          Database targetDatabase,
                                          DiffOutputConfig diffOutputConfig)
-            throws DatabaseException, IOException, ParserConfigurationException {
+            throws LiquibaseException, IOException, ParserConfigurationException {
         DiffControl diffControl = new DiffControl();
         diffControl.addStatusListener(new OutDiffStatusListener());
 
@@ -137,12 +138,12 @@ public class CommandLineUtils {
         }
     }
 
-    public static void doGenerateChangeLog(String changeLogFile, Database originalDatabase, String catalogName, String schemaName, String diffTypes, String author, String context, String dataDir, DiffOutputConfig diffOutputConfig) throws DatabaseException, IOException, ParserConfigurationException {
+    public static void doGenerateChangeLog(String changeLogFile, Database originalDatabase, String catalogName, String schemaName, String diffTypes, String author, String context, String dataDir, DiffOutputConfig diffOutputConfig) throws DatabaseException, IOException, ParserConfigurationException, InvalidExampleException {
         DiffControl diffControl = new DiffControl(new CatalogAndSchema(catalogName, schemaName), diffTypes);
         diffControl.setDataDir(dataDir);
         diffControl.addStatusListener(new OutDiffStatusListener());
 
-        DatabaseSnapshot originalDatabaseSnapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(diffControl.toSnapshotControl(DiffControl.DatabaseRole.REFERENCE), originalDatabase);
+        DatabaseSnapshot originalDatabaseSnapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(diffControl.toSnapshotControl(DiffControl.DatabaseRole.REFERENCE), originalDatabase);
         DiffResult diffResult = DiffGeneratorFactory.getInstance().compare(originalDatabaseSnapshot, new DatabaseSnapshot(null, diffControl.toSnapshotControl(DiffControl.DatabaseRole.REFERENCE)), diffControl);
 
         DiffToChangeLog changeLogWriter = new DiffToChangeLog(diffResult, diffOutputConfig);

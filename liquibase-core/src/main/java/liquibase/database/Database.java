@@ -289,7 +289,7 @@ public interface Database extends DatabaseObject, PrioritizedService {
 
     int getDataTypeMaxParameters(String dataTypeName);
 
-    CatalogAndSchema getSchemaFromJdbcInfo(String rawSchemaName, String rawCatalogName);
+    CatalogAndSchema getSchemaFromJdbcInfo(String rawCatalogName, String rawSchemaName);
 
     String getJdbcCatalogName(CatalogAndSchema schema);
 

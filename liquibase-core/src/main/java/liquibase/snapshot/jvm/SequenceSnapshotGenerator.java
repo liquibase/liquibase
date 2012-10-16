@@ -5,6 +5,9 @@ import liquibase.database.core.*;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.ExecutorService;
+import liquibase.snapshot.InvalidExampleException;
+import liquibase.snapshot.SnapshotGeneratorChain;
+import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Schema;
@@ -13,26 +16,33 @@ import liquibase.structure.core.Sequence;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SequenceSnapshotGenerator extends JdbcDatabaseObjectSnapshotGenerator<Sequence> {
-    public int getPriority() {
-        return PRIORITY_DEFAULT;
+public class SequenceSnapshotGenerator extends JdbcSnapshotGenerator {
+
+    public SequenceSnapshotGenerator() {
+        super(Sequence.class, new Class[]{Schema.class});
     }
 
-    public boolean has(Sequence example, Database database) throws DatabaseException {
-        return snapshot(example, database) != null;
-    }
+//    public Boolean has(DatabaseObject example, DatabaseSnapshot snapshot, SnapshotGeneratorChain chain) throws DatabaseException {
+//        return chain.has(example, snapshot); //snapshot(example, database, snapshot) != null;
+//    }
 
-    public Sequence[] get(DatabaseObject container, Database database) throws DatabaseException {
-        if (!(container instanceof Schema)) {
-            return new Sequence[0];
+    public DatabaseObject snapshot(DatabaseObject example, DatabaseSnapshot snapshot, SnapshotGeneratorChain chain) throws DatabaseException, InvalidExampleException {
+        if (example instanceof Sequence) {
+            return snapshotSequence((Sequence) example, snapshot);
+        } else if (example instanceof Schema) {
+            return addToSchema((Schema) chain.snapshot(example, snapshot), snapshot);
+        } else {
+            throw new UnexpectedLiquibaseException("Unexpected example type: " + example.getClass().getName());
         }
-        Schema schema = (Schema) container;
+
+    }
+
+    protected DatabaseObject addToSchema(Schema schema, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException {
+        Database database = snapshot.getDatabase();
         if (!database.supportsSequences()) {
             updateListeners("Sequences not supported for " + database.toString() + " ...");
-            return new Sequence[0];
+            return schema;
         }
-
-        updateListeners("Reading sequences for " + database.toString() + " ...");
 
         List<Sequence> returnSequences = new ArrayList<Sequence>();
 
@@ -42,29 +52,22 @@ public class SequenceSnapshotGenerator extends JdbcDatabaseObjectSnapshotGenerat
 
         if (sequenceNames != null) {
             for (String sequenceName : sequenceNames) {
-                Sequence seq = new Sequence();
-                seq.setName(sequenceName.trim());
-                seq.setSchema(new Schema(schema.getCatalogName(), schema.getName()));
-
-                returnSequences.add(seq);
+                schema.addDatabaseObject(snapshot.snapshot(new Sequence().setName(sequenceName).setSchema(schema)));
             }
         }
-
-        return returnSequences.toArray(new Sequence[returnSequences.size()]);
+        return schema;
     }
 
-    public Sequence snapshot(Sequence example, Database database) throws DatabaseException {
-        Sequence[] sequences = get(example.getSchema(), database);
-        if (sequences == null) {
+    protected Sequence snapshotSequence(Sequence example, DatabaseSnapshot snapshot) throws DatabaseException {
+        Database database = snapshot.getDatabase();
+        if (!database.supportsSequences()) {
             return null;
         }
-        String objectName = database.correctObjectName(example.getName(), Sequence.class);
-        for (Sequence sequence : sequences) {
-            if (sequence.getName().equals(objectName)) {
-                return sequence;
-            }
-        }
-        return null;
+        Sequence seq = new Sequence();
+        seq.setName(example.getName());
+        seq.setSchema(example.getSchema());
+
+        return seq;
     }
 
     protected String getSelectSequenceSql(Schema schema, Database database) {

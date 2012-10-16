@@ -7,8 +7,12 @@ import liquibase.database.AbstractDatabase;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.exception.DatabaseException;
+import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.UnsupportedChangeException;
-import liquibase.snapshot.jvm.DatabaseObjectGeneratorFactory;
+import liquibase.snapshot.DatabaseSnapshot;
+import liquibase.snapshot.SnapshotGeneratorFactory;
+import liquibase.snapshot.InvalidExampleException;
+import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.*;
 import liquibase.structure.core.*;
@@ -118,9 +122,15 @@ public class SQLiteDatabase extends AbstractDatabase {
             Database database, String catalogName, String schemaName, String tableName)
             throws UnsupportedChangeException, DatabaseException {
 
+        DatabaseSnapshot snapshot = null; //todo
         List<SqlStatement> statements = new ArrayList<SqlStatement>();
 
-        Table table = DatabaseObjectGeneratorFactory.getInstance().getGenerator(Table.class, database).snapshot((Table) new Table().setName(tableName).setSchema(new Schema(new Catalog(null), null)), database);
+        Table table = null;
+        try {
+            table = SnapshotGeneratorFactory.getInstance().snapshot((Table) new Table().setName(tableName).setSchema(new Schema(new Catalog(null), null)), database);
+        } catch (InvalidExampleException e) {
+            throw new UnexpectedLiquibaseException(e);
+        }
 
         List<ColumnConfig> createColumns = new Vector<ColumnConfig>();
         List<ColumnConfig> copyColumns = new Vector<ColumnConfig>();
@@ -148,7 +158,7 @@ public class SQLiteDatabase extends AbstractDatabase {
         }
 
         List<Index> newIndices = new Vector<Index>();
-        for (Index index : DatabaseObjectGeneratorFactory.getInstance().getGenerator(Index.class, database).get(new Schema(new Catalog(null), schemaName), database)) {
+        for (Index index : new ArrayList<Index>()) { //todo SnapshotGeneratorFactory.getInstance().getGenerator(Index.class, database).get(new Schema(new Catalog(null), schemaName), database)) {
             if (index.getTable().getName().equalsIgnoreCase(tableName)) {
                 if (alterTableVisitor.createThisIndex(index)) {
                     newIndices.add(index);

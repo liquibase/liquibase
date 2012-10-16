@@ -4,18 +4,11 @@ import liquibase.change.Change;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.database.Database;
-import liquibase.structure.core.Column;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.core.Schema;
-import liquibase.structure.core.Table;
-import liquibase.dbdoc.*;
-import liquibase.diff.DiffControl;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.DatabaseHistoryException;
 import liquibase.exception.LiquibaseException;
 import liquibase.resource.ResourceAccessor;
-import liquibase.snapshot.DatabaseSnapshot;
-import liquibase.snapshot.DatabaseSnapshotGeneratorFactory;
 import liquibase.util.StreamUtil;
 
 import java.io.File;

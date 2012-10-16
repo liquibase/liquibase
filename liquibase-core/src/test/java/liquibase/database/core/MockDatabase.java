@@ -8,13 +8,10 @@ import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.RanChangeSet;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
-import liquibase.snapshot.SnapshotControl;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Schema;
-import liquibase.diff.DiffStatusListener;
 import liquibase.exception.*;
 import liquibase.lockservice.DatabaseChangeLogLock;
-import liquibase.snapshot.DatabaseSnapshotGenerator;
 import liquibase.sql.visitor.SqlVisitor;
 import liquibase.statement.DatabaseFunction;
 import liquibase.statement.SqlStatement;
@@ -27,7 +24,6 @@ import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
 
 public class MockDatabase implements Database {
 
@@ -420,10 +416,6 @@ public class MockDatabase implements Database {
         ;
     }
 
-    public DatabaseSnapshotGenerator createDatabaseSnapshot(String schema, Set<DiffStatusListener> statusListeners) throws DatabaseException {
-        return null;
-    }
-
     public boolean supportsRestrictForeignKeys() {
         return true;
     }
@@ -535,7 +527,7 @@ public class MockDatabase implements Database {
         return 2;
     }
 
-    public CatalogAndSchema getSchemaFromJdbcInfo(String rawSchemaName, String rawCatalogName) {
+    public CatalogAndSchema getSchemaFromJdbcInfo(String rawCatalogName, String rawSchemaName) {
         return new CatalogAndSchema(rawCatalogName, rawSchemaName);
     }
 
@@ -545,10 +537,6 @@ public class MockDatabase implements Database {
 
     public String getJdbcSchemaName(CatalogAndSchema schema) {
         return schema.getSchemaName();
-    }
-
-    public boolean isPartial() {
-        return false;
     }
 
     public String getJdbcCatalogName(Schema schema) {

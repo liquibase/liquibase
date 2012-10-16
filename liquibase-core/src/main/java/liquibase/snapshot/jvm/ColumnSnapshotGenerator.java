@@ -2,11 +2,13 @@ package liquibase.snapshot.jvm;
 
 import liquibase.database.Database;
 import liquibase.database.core.MySQLDatabase;
-import liquibase.database.core.PostgresDatabase;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.logging.LogFactory;
+import liquibase.snapshot.InvalidExampleException;
+import liquibase.snapshot.SnapshotGeneratorChain;
+import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.statement.DatabaseFunction;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
@@ -18,121 +20,104 @@ import java.sql.*;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-public class ColumnSnapshotGenerator extends JdbcDatabaseObjectSnapshotGenerator<Column> {
-    public int getPriority() {
-        return PRIORITY_DEFAULT;
+public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
+
+    public ColumnSnapshotGenerator() {
+        super(Column.class, new Class[]{Table.class, View.class});
     }
 
-    public boolean has(Column example, Database database) throws DatabaseException {
-        Relation relation = example.getRelation();
-        Schema schema = relation.getSchema();
+//    public Boolean has(DatabaseObject example, DatabaseSnapshot snapshot, SnapshotGeneratorChain chain) throws DatabaseException {
+//        Database database = snapshot.getDatabase();
+//        if (example instanceof Column) {
+//
+//            Relation relation = ((Column) example).getRelation();
+//            Schema schema = relation.getSchema();
+//
+//            ResultSet columnsMetadataRs = null;
+//            try {
+//
+//                DatabaseMetaData databaseMetaData = getMetaData(database);
+//
+//                columnsMetadataRs = databaseMetaData.getColumns(database.getJdbcCatalogName(schema), database.getJdbcSchemaName(schema), database.correctObjectName(relation.getName(), Relation.class), database.correctObjectName(example.getName(), Column.class));
+//
+//                return columnsMetadataRs.next();
+//            } catch (Exception e) {
+//                throw new DatabaseException(e);
+//            } finally {
+//                if (columnsMetadataRs != null) {
+//                    try {
+//                        columnsMetadataRs.close();
+//                    } catch (SQLException ignored) {
+//                    }
+//                }
+//            }
+//        }
+//        return chain.has(example, snapshot);
+//    }
 
-        ResultSet columnsMetadataRs = null;
-        try {
+    public DatabaseObject snapshot(DatabaseObject example, DatabaseSnapshot snapshot, SnapshotGeneratorChain chain) throws DatabaseException, InvalidExampleException {
+        Database database = snapshot.getDatabase();
+        if (example instanceof Column) {
+            Relation relation = ((Column) example).getRelation();
+            Schema schema = relation.getSchema();
 
-            DatabaseMetaData databaseMetaData = getMetaData(database);
+            ResultSet columnMetadataRs = null;
+            try {
 
-            columnsMetadataRs = databaseMetaData.getColumns(database.getJdbcCatalogName(schema), database.getJdbcSchemaName(schema), database.correctObjectName(relation.getName(), Relation.class), database.correctObjectName(example.getName(), Column.class));
+                DatabaseMetaData databaseMetaData = getMetaData(database);
 
-            return columnsMetadataRs.next();
-        } catch (Exception e) {
-            throw new DatabaseException(e);
-        } finally {
-            if (columnsMetadataRs != null) {
-                try {
-                    columnsMetadataRs.close();
-                } catch (SQLException ignored) {
-                }
-            }
-        }
-    }
+                columnMetadataRs = databaseMetaData.getColumns(database.getJdbcCatalogName(schema), database.getJdbcSchemaName(schema), relation.getName(), ((Column) example).getName());
 
-    public Column[] get(DatabaseObject container, Database database) throws DatabaseException {
-        updateListeners("Reading columns for " + database.toString() + " ...");
-        List<Column> returnColumns = new ArrayList<Column>();
-
-        ResultSet allColumnsMetadataRs = null;
-        try {
-
-            DatabaseMetaData databaseMetaData = getMetaData(database);
-
-            Schema schema;
-
-            if (container instanceof Schema) {
-                schema = (Schema) container;
-                allColumnsMetadataRs = databaseMetaData.getColumns(database.getJdbcCatalogName(((Schema) container)), database.getJdbcSchemaName(schema), null, null);
-            } else if (container instanceof Relation) {
-                Relation relation = (Relation) container;
-                schema = relation.getSchema();
-                allColumnsMetadataRs = databaseMetaData.getColumns(database.getJdbcCatalogName(schema), database.getJdbcSchemaName(schema), database.correctObjectName(relation.getName(), Relation.class), null);
-            } else {
-                return new Column[0];
-            }
-
-            while (allColumnsMetadataRs.next()) {
-                Map<String, Object> data = convertResultSetToMap(allColumnsMetadataRs);
-                Relation relation;
-                if (container instanceof Relation) {
-                    relation = (Relation) container;
+                if (columnMetadataRs.next()) {
+                    Map<String, Object> data = convertResultSetToMap(columnMetadataRs);
+                    return readColumn(data, relation, database);
                 } else {
-                    String tableOrViewName = cleanNameFromDatabase((String) data.get("TABLE_NAME"), database);
-                    relation = new Table().setName(tableOrViewName);
-                    relation.setSchema(schema);
+                    return null;
                 }
-
-                Column column = readColumn(data, relation, database);
-
-                if (column == null) {
-                    continue;
+            } catch (Exception e) {
+                throw new DatabaseException(e);
+            } finally {
+                if (columnMetadataRs != null) {
+                    try {
+                        columnMetadataRs.close();
+                    } catch (SQLException ignored) {
+                    }
                 }
-
-                returnColumns.add(column);
             }
-        } catch (Exception e) {
-            throw new DatabaseException(e);
-        } finally {
-            if (allColumnsMetadataRs != null) {
+        } else if (example instanceof Relation) {
+            Relation relation = (Relation) chain.snapshot(example, snapshot);
+            if (relation != null) {
+                ResultSet allColumnsMetadataRs = null;
                 try {
-                    allColumnsMetadataRs.close();
-                } catch (SQLException ignored) {
+
+                    DatabaseMetaData databaseMetaData = getMetaData(database);
+
+                    Schema schema;
+
+                    schema = relation.getSchema();
+                    allColumnsMetadataRs = databaseMetaData.getColumns(database.getJdbcCatalogName(schema), database.getJdbcSchemaName(schema), relation.getName(), null);
+
+                    while (allColumnsMetadataRs.next()) {
+                        Column exampleColumn = new Column().setRelation(relation).setName(allColumnsMetadataRs.getString("COLUMN_NAME"));
+                        relation.getColumns().add(snapshot.snapshot(exampleColumn));
+                    }
+                } catch (Exception e) {
+                    throw new DatabaseException(e);
+                } finally {
+                    if (allColumnsMetadataRs != null) {
+                        try {
+                            allColumnsMetadataRs.close();
+                        } catch (SQLException ignored) {
+                        }
+                    }
                 }
             }
-        }
-
-        return returnColumns.toArray(new Column[returnColumns.size()]);
-    }
-
-    public Column snapshot(Column example, Database database) throws DatabaseException {
-        Relation relation = example.getRelation();
-        Schema schema = relation.getSchema();
-
-        ResultSet columnMetadataRs = null;
-        try {
-
-            DatabaseMetaData databaseMetaData = getMetaData(database);
-
-            columnMetadataRs = databaseMetaData.getColumns(database.getJdbcCatalogName(schema), database.getJdbcSchemaName(schema), database.correctObjectName(relation.getName(), Relation.class), null);
-
-            if (columnMetadataRs.next()) {
-                Map<String, Object> data = convertResultSetToMap(columnMetadataRs);
-                return readColumn(data, relation, database);
-            } else {
-                return null;
-            }
-        } catch (Exception e) {
-            throw new DatabaseException(e);
-        } finally {
-            if (columnMetadataRs != null) {
-                try {
-                    columnMetadataRs.close();
-                } catch (SQLException ignored) {
-                }
-            }
+            return relation;
+        } else {
+            throw new UnexpectedLiquibaseException("Unexpected snapshot example: "+example.getClass().getName());
         }
     }
 

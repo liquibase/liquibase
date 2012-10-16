@@ -1,7 +1,12 @@
 package liquibase.snapshot.jvm;
 
+import liquibase.CatalogAndSchema;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
+import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.snapshot.InvalidExampleException;
+import liquibase.snapshot.SnapshotGeneratorChain;
+import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.PrimaryKey;
 import liquibase.structure.core.Schema;
@@ -10,74 +15,87 @@ import liquibase.structure.core.Table;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
 
-public class PrimaryKeyGenerator extends JdbcDatabaseObjectSnapshotGenerator<PrimaryKey> {
-    public int getPriority() {
-        return PRIORITY_DEFAULT;
+public class PrimaryKeyGenerator extends JdbcSnapshotGenerator {
+
+    public PrimaryKeyGenerator() {
+        super(PrimaryKey.class, new Class[]{Table.class});
     }
 
-    public boolean has(PrimaryKey example, Database database) throws DatabaseException {
-        return snapshot( example, database) != null;
-    }
+//    public Boolean has(DatabaseObject example, DatabaseSnapshot snapshot, SnapshotGeneratorChain chain) throws DatabaseException {
+//         return chain.has(example, snapshot);//snapshot( example, database, snapshot) != null;
+//    }
 
-    public PrimaryKey[] get(DatabaseObject container, Database database) throws DatabaseException {
-        updateListeners("Reading primary keys for " + database.toString() + " ...");
-
-        Schema schema;
-        Table relation = null;
-        if (container instanceof Schema) {
-            schema = (Schema) container;
-        } else if (container instanceof Table) {
-            relation = (Table) container;
-            schema = relation.getSchema();
+    public DatabaseObject snapshot(DatabaseObject example, DatabaseSnapshot snapshot, SnapshotGeneratorChain chain) throws DatabaseException, InvalidExampleException {
+        if (example instanceof Table) {
+            return addToTable((Table) chain.snapshot(example, snapshot), snapshot);
+        } else if (example instanceof PrimaryKey) {
+            return snapshotPrimaryKey((PrimaryKey) example, snapshot);
         } else {
-            return new PrimaryKey[0];
+            throw new UnexpectedLiquibaseException("Unexpected example type: " + example.getClass().getName());
         }
+    }
 
-        List<PrimaryKey> foundPKs = new ArrayList<PrimaryKey>();
-
-        List<String> tables = new ArrayList<String>();
-        if (relation == null) {
-            tables.addAll(listAllTables(schema.toCatalogAndSchema(), database));
-        } else {
-            tables.add(relation.getName());
+    protected PrimaryKey snapshotPrimaryKey(PrimaryKey example, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException {
+        Database database = snapshot.getDatabase();
+        Schema schema = example.getSchema();
+        String searchTableName = null;
+        if (example.getTable() != null) {
+            searchTableName = example.getTable().getName();
         }
 
         ResultSet rs = null;
         try {
             DatabaseMetaData metaData = getMetaData(database);
-            for (String tableName : tables) {
-                Table otherTable = new Table().setName(tableName);
-                rs = metaData.getPrimaryKeys(database.getJdbcCatalogName(schema), database.getJdbcSchemaName(schema), tableName);
-                while (rs.next()) {
-                    String columnName = cleanNameFromDatabase(rs.getString("COLUMN_NAME"), database);
-                    short position = rs.getShort("KEY_SEQ");
-
-                    boolean foundExistingPK = false;
-                    for (PrimaryKey pk : foundPKs) {
-                        if (pk.getTable().equals(otherTable, database)) {
-                            pk.addColumnName(position - 1, columnName);
-
-                            foundExistingPK = true;
-                        }
-                    }
-
-                    if (!foundExistingPK) {
-                        PrimaryKey primaryKey = new PrimaryKey();
-                        primaryKey.setTable(new Table().setName(tableName));
-                        primaryKey.addColumnName(position - 1, columnName);
-                        primaryKey.setName(database.correctObjectName(rs.getString("PK_NAME"), PrimaryKey.class));
-
-                        foundPKs.add(primaryKey);
-                    }
+            rs = metaData.getPrimaryKeys(database.getJdbcCatalogName(schema), database.getJdbcSchemaName(schema), searchTableName);
+            PrimaryKey returnKey = null;
+            while (rs.next()) {
+                if (example.getName().equals(rs.getString("PK_NAME"))) {
+                    continue;
                 }
+                String columnName = cleanNameFromDatabase(rs.getString("COLUMN_NAME"), database);
+                short position = rs.getShort("KEY_SEQ");
 
-                //todo set on column object and table object
-
-                rs.close();
+                if (returnKey == null) {
+                    returnKey = new PrimaryKey();
+                    CatalogAndSchema tableSchema = database.getSchemaFromJdbcInfo(rs.getString("TABLE_CAT"), rs.getString("TABLE_SCHEMA"));
+                    returnKey.setTable((Table) snapshot.snapshot(new Table().setName(rs.getString("TABLE_NAME")).setSchema(new Schema(tableSchema.getCatalogName(), tableSchema.getSchemaName()))));
+                    returnKey.setName(database.correctObjectName(rs.getString("PK_NAME"), PrimaryKey.class));
+                }
+                returnKey.addColumnName(position - 1, columnName);
             }
+
+            rs.close();
+            return returnKey;
+        } catch (SQLException e) {
+            throw new DatabaseException(e);
+        } finally {
+            try {
+                if (rs != null) {
+                    rs.close();
+                }
+            } catch (SQLException ignored) {
+
+            }
+        }
+    }
+
+    protected Table addToTable(Table table, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException {
+        if (table == null) {
+            return null;
+        }
+        Database database = snapshot.getDatabase();
+        Schema schema = table.getSchema();
+
+        ResultSet rs = null;
+        try {
+            DatabaseMetaData metaData = getMetaData(database);
+            rs = metaData.getPrimaryKeys(database.getJdbcCatalogName(schema), database.getJdbcSchemaName(schema), table.getName());
+            if (rs.next()) {
+                table.setPrimaryKey(snapshot.snapshot(new PrimaryKey().setName(rs.getString("PK_NAME")).setTable(table)));
+            }
+
+            rs.close();
         } catch (SQLException e) {
             throw new DatabaseException(e);
         } finally {
@@ -90,18 +108,7 @@ public class PrimaryKeyGenerator extends JdbcDatabaseObjectSnapshotGenerator<Pri
             }
         }
 
-        return foundPKs.toArray(new PrimaryKey[foundPKs.size()]);
-    }
-
-    public PrimaryKey snapshot(PrimaryKey example, Database database) throws DatabaseException {
-        String objectName = database.correctObjectName(example.getName(), PrimaryKey.class);
-        for (PrimaryKey key : get(example.getSchema(), database)) {
-            if (key.getName().equals(objectName)) {
-                return key;
-            }
-        }
-
-        return null;
+        return table;
     }
 
     //FROM SQLIteDatabaseSnapshotGenerator

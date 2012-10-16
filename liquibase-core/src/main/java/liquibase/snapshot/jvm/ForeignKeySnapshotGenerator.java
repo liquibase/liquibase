@@ -4,59 +4,89 @@ import liquibase.CatalogAndSchema;
 import liquibase.database.Database;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.exception.DatabaseException;
+import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.snapshot.InvalidExampleException;
+import liquibase.snapshot.SnapshotGeneratorChain;
+import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
 
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
-public class ForeignKeySnapshotGenerator extends JdbcDatabaseObjectSnapshotGenerator<ForeignKey> {
-    public int getPriority() {
-        return PRIORITY_DEFAULT;
+public class ForeignKeySnapshotGenerator extends JdbcSnapshotGenerator {
+
+    public ForeignKeySnapshotGenerator() {
+        super(ForeignKey.class, new Class[]{Table.class});
     }
 
-    public boolean has(ForeignKey example, Database database) throws DatabaseException {
-        return snapshot(example, database) != null;
-    }
+//    public Boolean has(DatabaseObject example, DatabaseSnapshot snapshot, SnapshotGeneratorChain chain) throws DatabaseException {
+//        if (example instanceof ForeignKey) {
+//            Database database = snapshot.getDatabase();
+//            String searchCatalog = database.getJdbcCatalogName(example.getSchema());
+//            String searchSchema = database.getJdbcSchemaName(example.getSchema());
+//            String searchTableName = null;
+//            if (((ForeignKey) example).getForeignKeyTable() != null) {
+//                searchTableName = ((ForeignKey) example).getForeignKeyTable().getName();
+//            }
+//            String fkName = example.getName();
+//
+//            ResultSet rs = null;
+//            try {
+//                rs = getMetaData(database).getImportedKeys(searchCatalog, searchSchema, searchTableName);
+//                while (rs.next()) {
+//                    if (fkName.equals(rs.getString("FK_NAME"))) {
+//                        return true;
+//                    }
+//                }
+//                return false;
+//            } catch (SQLException e) {
+//                throw new DatabaseException(e);
+//            } finally {
+//                if (rs != null) {
+//                    try {
+//                        rs.close();
+//                    } catch (SQLException ignored) { }
+//                }
+//            }
+//        } else {
+//            return chain.has(example, snapshot);
+//        }
+//    }
 
-    public ForeignKey[] get(DatabaseObject container, Database database) throws DatabaseException {
-        Schema schema;
-        Table relation = null;
-        if (container instanceof Schema) {
-            schema = (Schema) container;
-        } else if (container instanceof Table) {
-            relation = (Table) container;
-            schema = relation.getSchema();
+    public DatabaseObject snapshot(DatabaseObject example, DatabaseSnapshot snapshot, SnapshotGeneratorChain chain) throws DatabaseException, InvalidExampleException {
+        if (example instanceof ForeignKey) {
+            return snapshotForeignKey((ForeignKey) example, snapshot);
+        } else if (example instanceof Table) {
+            return addToTable((Table) chain.snapshot(example, snapshot), snapshot);
         } else {
-            return new ForeignKey[0];
+            throw new UnexpectedLiquibaseException("Unknown example type: "+example.getClass().getName());
+        }
+    }
+
+    protected DatabaseObject addToTable(Table table, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException {
+        if (table == null) {
+            return null;
         }
 
-        updateListeners("Reading foreign keys for " + database.toString() + " ...");
+        Database database = snapshot.getDatabase();
+        Schema schema;
+        schema = table.getSchema();
 
-        List<ForeignKey> returnList = new ArrayList<ForeignKey>();
+
+        Set<String> seenFks = new HashSet<String>();
         ResultSet importedKeyMetadataResultSet = null;
         try {
-            List<String> tables = new ArrayList<String>();
-            if (relation == null) {
-                tables.addAll(listAllTables(new CatalogAndSchema(schema.getCatalogName(), schema.getName()), database));
-            } else {
-                tables.add(relation.getName());
-            }
+            importedKeyMetadataResultSet = getMetaData(database).getImportedKeys(database.getJdbcCatalogName(schema), database.getJdbcSchemaName(schema), table.getName());
 
-            for (String tableName : tables) {
-                importedKeyMetadataResultSet = getMetaData(database).getImportedKeys(database.getJdbcCatalogName(schema), database.getJdbcSchemaName(schema), tableName);
-
-                while (importedKeyMetadataResultSet.next()) {
-                    ForeignKey newFk = readForeignKey(importedKeyMetadataResultSet, database);
-
-                    if (newFk != null) {
-                        returnList.add(newFk);
-                    }
+            while (importedKeyMetadataResultSet.next()) {
+                ForeignKey fk = new ForeignKey().setName(importedKeyMetadataResultSet.getString("FK_NAME")).setForeignKeyTable(table);
+                if (seenFks.add(fk.getName())) {
+                    table.getOutgoingForeignKeys().add(snapshot.snapshot(fk));
                 }
-
             }
         } catch (Exception e) {
             throw new DatabaseException(e);
@@ -64,68 +94,105 @@ public class ForeignKeySnapshotGenerator extends JdbcDatabaseObjectSnapshotGener
             if (importedKeyMetadataResultSet != null) {
                 try {
                     importedKeyMetadataResultSet.close();
-                } catch (SQLException ignored) { }
-            }
-        }
-        return returnList.toArray(new ForeignKey[returnList.size()]);
-    }
-
-    public ForeignKey snapshot(ForeignKey example, Database database) throws DatabaseException {
-        String objectName = database.correctObjectName(example.getName(), ForeignKey.class);
-        for (ForeignKey key : get(example.getSchema(), database)) {
-            if (key.getName().equals(objectName)) {
-                return key;
+                } catch (SQLException ignored) {
+                }
             }
         }
 
-        return null;
+        seenFks = new HashSet<String>();
+        ResultSet exportedKeyMetadataResultSet = null;
+        try {
+            exportedKeyMetadataResultSet = getMetaData(database).getExportedKeys(database.getJdbcCatalogName(schema), database.getJdbcSchemaName(schema), table.getName());
+
+            while (exportedKeyMetadataResultSet.next()) {
+                ForeignKey fk = new ForeignKey().setName(exportedKeyMetadataResultSet.getString("FK_NAME")).setForeignKeyTable(table);
+                if (seenFks.add(fk.getName())) {
+                    table.getIncomingForeignKeys().add(snapshot.snapshot(fk));
+                }
+            }
+        } catch (Exception e) {
+            throw new DatabaseException(e);
+        } finally {
+            if (exportedKeyMetadataResultSet != null) {
+                try {
+                    exportedKeyMetadataResultSet.close();
+                } catch (SQLException ignored) {
+                }
+            }
+        }
+
+        return table;
     }
 
-    protected ForeignKey readForeignKey(ResultSet importedKeyMetadataResultSet, Database database) throws DatabaseException, SQLException {
-        String fk_name = cleanNameFromDatabase(importedKeyMetadataResultSet.getString("FK_NAME"), database);
-        ForeignKey foreignKey = new ForeignKey();
-        foreignKey.setName(fk_name);
+    protected DatabaseObject snapshotForeignKey(ForeignKey example, DatabaseSnapshot snapshot) throws DatabaseException {
 
-        String fkTableCatalog = cleanNameFromDatabase(importedKeyMetadataResultSet.getString("FKTABLE_CAT"), database);
-        String fkTableSchema = cleanNameFromDatabase(importedKeyMetadataResultSet.getString("FKTABLE_SCHEM"), database);
-        String fkTableName = cleanNameFromDatabase(importedKeyMetadataResultSet.getString("FKTABLE_NAME"), database);
-        Table foreignKeyTable = new Table().setName(fkTableName);
-        foreignKeyTable.setSchema(new Schema(new Catalog(fkTableCatalog), fkTableSchema));
+        Database database = snapshot.getDatabase();
 
-        foreignKey.setForeignKeyTable(foreignKeyTable);
-        foreignKey.setForeignKeyColumns(cleanNameFromDatabase(importedKeyMetadataResultSet.getString("FKCOLUMN_NAME"), database));
+        ResultSet importedKeyMetadataResultSet = null;
+        try {
+            Table fkTable = example.getForeignKeyTable();
+            String searchCatalog = database.getJdbcCatalogName(fkTable.getSchema());
+            String searchSchema = database.getJdbcSchemaName(fkTable.getSchema());
+            String searchTableName = fkTable.getName();
 
-        CatalogAndSchema pkTableSchema = database.getSchemaFromJdbcInfo(importedKeyMetadataResultSet.getString("PKTABLE_CAT"), importedKeyMetadataResultSet.getString("PKTABLE_SCHEM"));
-        Table tempPkTable = (Table) new Table().setName(importedKeyMetadataResultSet.getString("PKTABLE_NAME")).setSchema(new Schema(pkTableSchema.getCatalogName(), pkTableSchema.getSchemaName()));
-        foreignKey.setPrimaryKeyTable(tempPkTable);
-        foreignKey.setPrimaryKeyColumns(cleanNameFromDatabase(importedKeyMetadataResultSet.getString("PKCOLUMN_NAME"), database));
-        //todo foreignKey.setKeySeq(importedKeyMetadataResultSet.getInt("KEY_SEQ"));
+            importedKeyMetadataResultSet = getMetaData(database).getImportedKeys(searchCatalog, searchSchema, searchTableName);
+            while (importedKeyMetadataResultSet.next()) {
+                String fk_name = cleanNameFromDatabase(importedKeyMetadataResultSet.getString("FK_NAME"), database);
+                ForeignKey foreignKey = new ForeignKey();
+                foreignKey.setName(fk_name);
 
-        ForeignKeyConstraintType updateRule = convertToForeignKeyConstraintType(importedKeyMetadataResultSet.getInt("UPDATE_RULE"), database);
-        if (importedKeyMetadataResultSet.wasNull()) {
-            updateRule = null;
+                String fkTableCatalog = cleanNameFromDatabase(importedKeyMetadataResultSet.getString("FKTABLE_CAT"), database);
+                String fkTableSchema = cleanNameFromDatabase(importedKeyMetadataResultSet.getString("FKTABLE_SCHEM"), database);
+                String fkTableName = cleanNameFromDatabase(importedKeyMetadataResultSet.getString("FKTABLE_NAME"), database);
+                Table foreignKeyTable = new Table().setName(fkTableName);
+                foreignKeyTable.setSchema(new Schema(new Catalog(fkTableCatalog), fkTableSchema));
+
+                foreignKey.setForeignKeyTable(snapshot.snapshot(foreignKeyTable));
+                foreignKey.setForeignKeyColumns(cleanNameFromDatabase(importedKeyMetadataResultSet.getString("FKCOLUMN_NAME"), database));
+
+                CatalogAndSchema pkTableSchema = database.getSchemaFromJdbcInfo(importedKeyMetadataResultSet.getString("PKTABLE_CAT"), importedKeyMetadataResultSet.getString("PKTABLE_SCHEM"));
+                Table tempPkTable = (Table) new Table().setName(importedKeyMetadataResultSet.getString("PKTABLE_NAME")).setSchema(new Schema(pkTableSchema.getCatalogName(), pkTableSchema.getSchemaName()));
+                foreignKey.setPrimaryKeyTable(snapshot.snapshot(tempPkTable));
+                foreignKey.setPrimaryKeyColumns(cleanNameFromDatabase(importedKeyMetadataResultSet.getString("PKCOLUMN_NAME"), database));
+                //todo foreignKey.setKeySeq(importedKeyMetadataResultSet.getInt("KEY_SEQ"));
+
+                ForeignKeyConstraintType updateRule = convertToForeignKeyConstraintType(importedKeyMetadataResultSet.getInt("UPDATE_RULE"), database);
+                if (importedKeyMetadataResultSet.wasNull()) {
+                    updateRule = null;
+                }
+                foreignKey.setUpdateRule(updateRule);
+                ForeignKeyConstraintType deleteRule = convertToForeignKeyConstraintType(importedKeyMetadataResultSet.getInt("DELETE_RULE"), database);
+                if (importedKeyMetadataResultSet.wasNull()) {
+                    deleteRule = null;
+                }
+                foreignKey.setDeleteRule(deleteRule);
+                short deferrability = importedKeyMetadataResultSet.getShort("DEFERRABILITY");
+                if (deferrability == DatabaseMetaData.importedKeyInitiallyDeferred) {
+                    foreignKey.setDeferrable(true);
+                    foreignKey.setInitiallyDeferred(true);
+                } else if (deferrability == DatabaseMetaData.importedKeyInitiallyImmediate) {
+                    foreignKey.setDeferrable(true);
+                    foreignKey.setInitiallyDeferred(false);
+                } else if (deferrability == DatabaseMetaData.importedKeyNotDeferrable) {
+                    foreignKey.setDeferrable(false);
+                    foreignKey.setInitiallyDeferred(false);
+                } else {
+                    throw new RuntimeException("Unknown deferrablility result: " + deferrability);
+                }
+
+                return foreignKey;
+            }
+            return null;
+        } catch (Exception e) {
+            throw new DatabaseException(e);
+        } finally {
+            if (importedKeyMetadataResultSet != null) {
+                try {
+                    importedKeyMetadataResultSet.close();
+                } catch (SQLException ignored) {
+                }
+            }
         }
-        foreignKey.setUpdateRule(updateRule);
-        ForeignKeyConstraintType deleteRule = convertToForeignKeyConstraintType(importedKeyMetadataResultSet.getInt("DELETE_RULE"), database);
-        if (importedKeyMetadataResultSet.wasNull()) {
-            deleteRule = null;
-        }
-        foreignKey.setDeleteRule(deleteRule);
-        short deferrability = importedKeyMetadataResultSet.getShort("DEFERRABILITY");
-        if (deferrability == DatabaseMetaData.importedKeyInitiallyDeferred) {
-            foreignKey.setDeferrable(true);
-            foreignKey.setInitiallyDeferred(true);
-        } else if (deferrability == DatabaseMetaData.importedKeyInitiallyImmediate) {
-            foreignKey.setDeferrable(true);
-            foreignKey.setInitiallyDeferred(false);
-        } else if (deferrability == DatabaseMetaData.importedKeyNotDeferrable) {
-            foreignKey.setDeferrable(false);
-            foreignKey.setInitiallyDeferred(false);
-        } else {
-            throw new RuntimeException("Unknown deferrablility result: " + deferrability);
-        }
-
-        return foreignKey;
     }
 
 

@@ -11,14 +11,10 @@ import java.util.List;
  * A container of columns. Usually a table or view.
  */
 public abstract class Relation extends DatabaseObjectImpl implements Comparable<Relation> {
-    private Database database;
     private Schema schema;
     protected String name;
     private String remarks;
     private List<Column> columns = new ArrayList<Column>();
-
-    private String rawCatalogName;
-    private String rawSchemaName;
 
     protected Relation() {
     }
@@ -27,27 +23,11 @@ public abstract class Relation extends DatabaseObjectImpl implements Comparable<
         return name;
     }
 
-    public Database getDatabase() {
-        return database;
-    }
-
     public DatabaseObject[] getContainingObjects() {
-        Schema schema = getSchema();
-        if (schema == null) {
-            return new DatabaseObject[]{
-                    getDatabase()
-            };
-        } else {
-            return new DatabaseObject[]{
-                    schema
-            };
-        }
+        return new DatabaseObject[]{
+                getSchema()
+        };
 
-    }
-
-    public Relation setDatabase(Database database) {
-        this.database = database;
-        return this;
     }
 
     public String getRemarks() {
@@ -88,24 +68,6 @@ public abstract class Relation extends DatabaseObjectImpl implements Comparable<
      */
     public Relation setSchema(Schema schema) {
         this.schema = schema;
-        return this;
-    }
-
-    public String getRawCatalogName() {
-        return rawCatalogName;
-    }
-
-    public Relation setRawCatalogName(String rawCatalogName) {
-        this.rawCatalogName = rawCatalogName;
-        return this;
-    }
-
-    public String getRawSchemaName() {
-        return rawSchemaName;
-    }
-
-    public Relation setRawSchemaName(String rawSchemaName) {
-        this.rawSchemaName = rawSchemaName;
         return this;
     }
 

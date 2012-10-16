@@ -1,8 +1,16 @@
 package liquibase.structure.core;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 public class Table extends Relation {
 
     private PrimaryKey primaryKey;
+    private List<ForeignKey> outgoingForeignKeys = new ArrayList<ForeignKey>();
+    private List<ForeignKey> incomingForeignKeys = new ArrayList<ForeignKey>();
+    private List<Index> indexes = new ArrayList<Index>();
 
     public Table() {
     }
@@ -13,6 +21,18 @@ public class Table extends Relation {
 
     public void setPrimaryKey(PrimaryKey primaryKey) {
         this.primaryKey = primaryKey;
+    }
+
+    public List<ForeignKey> getOutgoingForeignKeys() {
+        return outgoingForeignKeys;
+    }
+
+    public List<ForeignKey> getIncomingForeignKeys() {
+        return incomingForeignKeys;
+    }
+
+    public List<Index> getIndexes() {
+        return indexes;
     }
 
     @Override

@@ -3,7 +3,8 @@ package liquibase.precondition.core;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
-import liquibase.snapshot.jvm.DatabaseObjectGeneratorFactory;
+import liquibase.snapshot.SnapshotGeneratorFactory;
+import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.structure.core.Index;
 import liquibase.structure.core.Schema;
 import liquibase.exception.*;
@@ -85,7 +86,7 @@ public class IndexExistsPrecondition implements Precondition {
                     example.getColumns().add(column);
                 }
             }
-            if (!DatabaseObjectGeneratorFactory.getInstance().getGenerator(Index.class, database).has(example, database)) {
+            if (!SnapshotGeneratorFactory.getInstance().has(example, database)) {
                 String name = "";
 
                 if (getIndexName() != null) {
@@ -101,7 +102,7 @@ public class IndexExistsPrecondition implements Precondition {
                 }
                 throw new PreconditionFailedException("Index "+ name +" does not exist", changeLog, this);
             }
-        } catch (DatabaseException e) {
+        } catch (Exception e) {
             throw new PreconditionErrorException(e, changeLog, this);
         }
     }

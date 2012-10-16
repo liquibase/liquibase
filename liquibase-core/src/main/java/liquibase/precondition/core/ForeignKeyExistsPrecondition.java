@@ -1,14 +1,13 @@
 package liquibase.precondition.core;
 
-import liquibase.CatalogAndSchema;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
-import liquibase.snapshot.jvm.DatabaseObjectGeneratorFactory;
+import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.structure.core.ForeignKey;
-import liquibase.structure.core.Schema;
 import liquibase.exception.*;
 import liquibase.precondition.Precondition;
+import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
 import liquibase.util.StringUtils;
 
@@ -62,12 +61,13 @@ public class ForeignKeyExistsPrecondition implements Precondition {
         try {
             ForeignKey example = new ForeignKey();
             example.setName(getForeignKeyName());
+            example.setForeignKeyTable(new Table());
             if (StringUtils.trimToNull(getForeignKeyTableName()) != null) {
-                example.setForeignKeyTable(new Table().setName(getForeignKeyTableName()));
+                example.getForeignKeyTable().setName(getForeignKeyTableName());
             }
-            //todo: include catalog/schema
+            example.getForeignKeyTable().setSchema(new Schema(getCatalogName(), getSchemaName()));
 
-            if (!DatabaseObjectGeneratorFactory.getInstance().getGenerator(ForeignKey.class, database).has(example, database)) {
+            if (!SnapshotGeneratorFactory.getInstance().has(example, database)) {
                     throw new PreconditionFailedException("Foreign Key "+database.escapeIndexName(catalogName, schemaName, foreignKeyName)+" does not exist", changeLog, this);
             }
         } catch (PreconditionFailedException e) {

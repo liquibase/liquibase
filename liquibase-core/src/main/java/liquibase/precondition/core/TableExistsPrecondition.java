@@ -3,7 +3,8 @@ package liquibase.precondition.core;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
-import liquibase.snapshot.jvm.DatabaseObjectGeneratorFactory;
+import liquibase.snapshot.SnapshotGeneratorFactory;
+import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.structure.core.Schema;
 import liquibase.exception.PreconditionErrorException;
 import liquibase.exception.PreconditionFailedException;
@@ -50,7 +51,7 @@ public class TableExistsPrecondition implements Precondition {
     }
     public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet) throws PreconditionFailedException, PreconditionErrorException {
     	try {
-            if (!DatabaseObjectGeneratorFactory.getInstance().getGenerator(Table.class, database).has((Table) new Table().setName(getTableName()).setSchema(new Schema(getCatalogName(), getSchemaName())), database)) {
+            if (!SnapshotGeneratorFactory.getInstance().has(new Table().setName(getTableName()).setSchema(new Schema(getCatalogName(), getSchemaName())), database)) {
                 throw new PreconditionFailedException("Table "+database.escapeTableName(getCatalogName(), getSchemaName(), getTableName())+" does not exist", changeLog, this);
             }
         } catch (PreconditionFailedException e) {

@@ -3,7 +3,7 @@ package liquibase.precondition.core;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
-import liquibase.snapshot.jvm.DatabaseObjectGeneratorFactory;
+import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.structure.core.PrimaryKey;
 import liquibase.structure.core.Schema;
 import liquibase.exception.*;
@@ -68,7 +68,7 @@ public class PrimaryKeyExistsPrecondition implements Precondition {
             example.setTable(table);
             example.setName(getPrimaryKeyName());
 
-            if (!DatabaseObjectGeneratorFactory.getInstance().getGenerator(PrimaryKey.class, database).has(example, database)) {
+            if (!SnapshotGeneratorFactory.getInstance().has(example, database)) {
                 if (tableName != null) {
                     throw new PreconditionFailedException("Primary Key does not exist on " + database.escapeStringForDatabase(getTableName()), changeLog, this);
                 } else {

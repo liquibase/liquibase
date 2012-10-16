@@ -6,8 +6,9 @@ import liquibase.diff.DiffControl;
 import liquibase.diff.DiffGenerator;
 import liquibase.diff.DiffResult;
 import liquibase.exception.DatabaseException;
+import liquibase.exception.LiquibaseException;
 import liquibase.snapshot.DatabaseSnapshot;
-import liquibase.snapshot.DatabaseSnapshotGeneratorFactory;
+import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.structure.DatabaseObject;
 
 public class StandardDiffGenerator implements DiffGenerator {
@@ -20,11 +21,13 @@ public class StandardDiffGenerator implements DiffGenerator {
         return true;
     }
 
-    public DiffResult compare(Database referenceDatabase, Database comparisonDatabase, DiffControl diffControl) throws DatabaseException {
-        DatabaseSnapshot referenceSnapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(diffControl.toSnapshotControl(DiffControl.DatabaseRole.REFERENCE), referenceDatabase);
+    public DiffResult compare(Database referenceDatabase, Database comparisonDatabase, DiffControl diffControl) throws LiquibaseException {
+        DatabaseSnapshot referenceSnapshot = null;
         DatabaseSnapshot comparisonSnapshot = null;
+        referenceSnapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(diffControl.toSnapshotControl(DiffControl.DatabaseRole.REFERENCE), referenceDatabase);
+        comparisonSnapshot = null;
         if (comparisonDatabase != null) {
-            comparisonSnapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(diffControl.toSnapshotControl(DiffControl.DatabaseRole.COMPARISON), comparisonDatabase);
+            comparisonSnapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(diffControl.toSnapshotControl(DiffControl.DatabaseRole.COMPARISON), comparisonDatabase);
         }
 
         return compare(referenceSnapshot, comparisonSnapshot, diffControl);
@@ -41,7 +44,7 @@ public class StandardDiffGenerator implements DiffGenerator {
 
         for (Class<? extends DatabaseObject> typeToCompare : diffControl.getTypesToCompare()) {
             compareObjectType(typeToCompare, referenceSnapshot, comparisonSnapshot, diffResult);
-        }               
+        }
 
 //        // Hack:  Sometimes Indexes or Unique Constraints with multiple columns get added twice (1 for each column),
 //        // so we're combining them back to a single Index or Unique Constraint here.

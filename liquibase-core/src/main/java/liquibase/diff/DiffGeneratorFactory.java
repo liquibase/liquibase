@@ -2,6 +2,7 @@ package liquibase.diff;
 
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
+import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.servicelocator.ServiceLocator;
 import liquibase.snapshot.DatabaseSnapshot;
@@ -39,7 +40,7 @@ public class DiffGeneratorFactory {
     }
 
 
-    public DiffResult compare(Database referenceDatabase, Database comparisonDatabase, DiffControl diffControl) throws DatabaseException {
+    public DiffResult compare(Database referenceDatabase, Database comparisonDatabase, DiffControl diffControl) throws LiquibaseException {
         return getGenerator(referenceDatabase, comparisonDatabase).compare(referenceDatabase, comparisonDatabase, diffControl);
     }
 

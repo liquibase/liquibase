@@ -6,18 +6,19 @@ import liquibase.structure.DatabaseObject;
 import liquibase.structure.DatabaseObjectImpl;
 import liquibase.util.StringUtils;
 
+import java.util.*;
+
 public class Schema extends DatabaseObjectImpl {
 
-    protected Catalog catalog;
-    protected String name;
+    private Catalog catalog;
+    private String name;
+    private Map<Class<? extends DatabaseObject>, Set<DatabaseObject>> objects = new HashMap<Class<? extends DatabaseObject>, Set<DatabaseObject>>();
 
     public DatabaseObject[] getContainingObjects() {
         return null;
     }
 
     public Schema(String catalog, String schemaName) {
-        setPartial(false);
-
         catalog = StringUtils.trimToNull(catalog);
         schemaName = StringUtils.trimToNull(schemaName);
 
@@ -74,7 +75,24 @@ public class Schema extends DatabaseObjectImpl {
         return new CatalogAndSchema(getCatalogName(), getName());
     }
 
-    public <DatabaseObjectType extends DatabaseObject> DatabaseObjectType[] getDatabaseObjects(Class<DatabaseObjectType> type) {
-        return null; //todo
+    public <DatabaseObjectType extends DatabaseObject> List<DatabaseObjectType> getDatabaseObjects(Class<DatabaseObjectType> type) {
+        Set<DatabaseObjectType> databaseObjects = (Set<DatabaseObjectType>) this.objects.get(type);
+        if (databaseObjects == null) {
+            return new ArrayList<DatabaseObjectType>();
+        }
+        return new ArrayList<DatabaseObjectType>(databaseObjects);
+    }
+
+    public void addDatabaseObject(DatabaseObject databaseObject) {
+        if (databaseObject == null) {
+            return;
+        }
+        Set<DatabaseObject> objects = this.objects.get(databaseObject.getClass());
+        if (objects == null) {
+            objects = new HashSet<DatabaseObject>();
+            this.objects.put(databaseObject.getClass(), objects);
+        }
+        objects.add(databaseObject);
+
     }
 }

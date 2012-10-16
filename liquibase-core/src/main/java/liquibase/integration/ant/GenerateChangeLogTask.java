@@ -1,19 +1,6 @@
 package liquibase.integration.ant;
 
-import liquibase.Liquibase;
-import liquibase.database.Database;
-import liquibase.snapshot.SnapshotControl;
-import liquibase.structure.core.Schema;
-import liquibase.diff.DiffControl;
-import liquibase.diff.DiffGeneratorFactory;
-import liquibase.diff.DiffResult;
-import liquibase.diff.output.DiffOutputConfig;
-import liquibase.diff.output.DiffToChangeLog;
-import liquibase.snapshot.DatabaseSnapshot;
-import liquibase.snapshot.DatabaseSnapshotGeneratorFactory;
 import org.apache.tools.ant.BuildException;
-
-import java.io.PrintStream;
 
 public class GenerateChangeLogTask extends BaseLiquibaseTask {
 

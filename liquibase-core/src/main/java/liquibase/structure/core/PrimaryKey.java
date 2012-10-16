@@ -24,8 +24,9 @@ public class PrimaryKey extends DatabaseObjectImpl implements Comparable<Primary
         return name;
     }
 
-    public void setName(String name) {
+    public PrimaryKey setName(String name) {
         this.name = name;
+        return this;
     }
 
     public Schema getSchema() {
@@ -52,8 +53,9 @@ public class PrimaryKey extends DatabaseObjectImpl implements Comparable<Primary
         return table;
     }
 
-    public void setTable(Table table) {
+    public PrimaryKey setTable(Table table) {
         this.table = table;
+        return this;
     }
 
 
