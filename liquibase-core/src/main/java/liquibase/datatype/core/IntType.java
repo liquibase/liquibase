@@ -36,6 +36,9 @@ public class IntType extends LiquibaseDataType {
                 return new DatabaseDataType("SERIAL");
             }
         }
+        if (database instanceof MSSQLDatabase) {
+            return new DatabaseDataType("INT");
+        }
         return super.toDatabaseDataType(database);
 
         //sqllite

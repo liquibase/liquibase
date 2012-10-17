@@ -2,8 +2,12 @@ package liquibase.snapshot.jvm;
 
 import liquibase.database.Database;
 import liquibase.database.core.MSSQLDatabase;
+import liquibase.database.structure.Column;
 import liquibase.database.structure.ForeignKeyConstraintType;
 import liquibase.exception.DatabaseException;
+
+import java.sql.SQLException;
+import java.util.Map;
 
 public class MSSQLDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerator {
     public boolean supports(Database database) {
@@ -34,4 +38,17 @@ public class MSSQLDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerato
         }
     }
 
+    @Override
+    protected Object readDefaultValue(Map<String, Object> columnMetadataResultSet, Column columnInfo, Database database) throws SQLException, DatabaseException {
+        Object defaultValue = columnMetadataResultSet.get("COLUMN_DEF");
+
+        if (defaultValue != null && defaultValue instanceof String) {
+            String newValue = null;
+            if (defaultValue.equals("(NULL)")) {
+                newValue = null;
+            }
+            columnMetadataResultSet.put("COLUMN_DEF", newValue);
+        }
+        return super.readDefaultValue(columnMetadataResultSet, columnInfo, database);
+    }
 }

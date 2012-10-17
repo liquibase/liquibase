@@ -6,8 +6,9 @@ import liquibase.datatype.DataTypeInfo;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.statement.DatabaseFunction;
 
-@DataTypeInfo(name = "boolean", aliases = {"java.sql.Types.BOOLEAN", "java.lang.Boolean"}, minParameters = 0, maxParameters = 0, priority = LiquibaseDataType.PRIORITY_DEFAULT)
+@DataTypeInfo(name = "boolean", aliases = {"java.sql.Types.BOOLEAN", "java.lang.Boolean", "bit"}, minParameters = 0, maxParameters = 0, priority = LiquibaseDataType.PRIORITY_DEFAULT)
 public class BooleanType extends LiquibaseDataType {
 
     @Override
@@ -52,6 +53,8 @@ public class BooleanType extends LiquibaseDataType {
             } else {
                 returnValue = this.getFalseBooleanValue(database);
             }
+        } else if (value instanceof DatabaseFunction) {
+            return ((DatabaseFunction) value).toString();
         } else if (((Boolean) value)) {
             returnValue = this.getTrueBooleanValue(database);
         } else {

@@ -2,6 +2,7 @@ package liquibase.datatype.core;
 
 import liquibase.database.Database;
 import liquibase.database.core.HsqlDatabase;
+import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.core.OracleDatabase;
 import liquibase.datatype.DataTypeInfo;
 import liquibase.datatype.DatabaseDataType;
@@ -17,6 +18,12 @@ public class NVarcharType extends CharType {
         }
         if (database instanceof OracleDatabase) {
             return new DatabaseDataType("NVARCHAR2", getParameters());
+        }
+        if (database instanceof MSSQLDatabase) {
+            if (getParameters() != null && getParameters().length > 0 && getParameters()[0].equals("2147483647")) {
+                return new DatabaseDataType("NVARCHAR", "MAX");
+            }
+            return new DatabaseDataType("NVARCHAR", getParameters());
         }
         return super.toDatabaseDataType(database);
     }
