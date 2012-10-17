@@ -7,6 +7,6 @@ public class DataDiff {
     }
 
     public boolean wasCompared() {
-        return true;
+        return false;
     }
 }
