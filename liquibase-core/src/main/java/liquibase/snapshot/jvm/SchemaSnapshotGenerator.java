@@ -22,62 +22,60 @@ public class SchemaSnapshotGenerator extends JdbcSnapshotGenerator {
         super(Schema.class);
     }
 
-//    public Boolean has(DatabaseObject example, DatabaseSnapshot snapshot, SnapshotGeneratorChain chain) throws DatabaseException {
-//        return chain.has(example, snapshot);
-//    }
 
-    public DatabaseObject snapshot(DatabaseObject example, DatabaseSnapshot snapshot, SnapshotGeneratorChain chain) throws DatabaseException, InvalidExampleException {
-        if (example instanceof Schema) {
-            Schema exampleSchema = (Schema) example;
-            Database database = snapshot.getDatabase();
-            ResultSet schemas = null;
-            Schema match = null;
-            String catalogName = exampleSchema.getCatalogName();
-            if (catalogName == null && database.supportsCatalogs()) {
-                catalogName = database.getDefaultCatalogName();
-            }
-            String schemaName = example.getName();
-            if (schemaName == null && database.supportsCatalogs()) {
-                schemaName = database.getDefaultSchemaName();
-            }
-            example = new Schema(catalogName, schemaName);
+    @Override
+    protected DatabaseObject snapshotObject(DatabaseObject example, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException {
+        Database database = snapshot.getDatabase();
+        ResultSet schemas = null;
+        Schema match = null;
+        String catalogName = ((Schema) example).getCatalogName();
+        if (catalogName == null && database.supportsCatalogs()) {
+            catalogName = database.getDefaultCatalogName();
+        }
+        String schemaName = example.getName();
+        if (schemaName == null && database.supportsCatalogs()) {
+            schemaName = database.getDefaultSchemaName();
+        }
+        example = new Schema(catalogName, schemaName);
 
-            try {
-                if (database.supportsSchemas()) {
-                    schemas = ((JdbcConnection) database.getConnection()).getMetaData().getSchemas();
-                    while (schemas.next()) {
-                        CatalogAndSchema schemaFromJdbcInfo = database.getSchemaFromJdbcInfo(schemas.getString("TABLE_CATALOG"), schemas.getString("TABLE_SCHEM"));
+        try {
+            if (database.supportsSchemas()) {
+                schemas = ((JdbcConnection) database.getConnection()).getMetaData().getSchemas();
+                while (schemas.next()) {
+                    CatalogAndSchema schemaFromJdbcInfo = database.getSchemaFromJdbcInfo(schemas.getString("TABLE_CATALOG"), schemas.getString("TABLE_SCHEM"));
 
-                        Catalog catalog = snapshot.snapshot(new Catalog(schemaFromJdbcInfo.getCatalogName()));
+                    Catalog catalog = snapshot.include(new Catalog(schemaFromJdbcInfo.getCatalogName()));
 
-                        Schema schema = new Schema(catalog, schemaFromJdbcInfo.getSchemaName());
-                        if (schema.equals(example, database)) {
-                            if (match == null) {
-                                match = schema;
-                            } else {
-                                throw new InvalidExampleException("Found multiple catalog/schemas matching " + exampleSchema.getCatalogName() + "." + example.getName());
-                            }
+                    Schema schema = new Schema(catalog, schemaFromJdbcInfo.getSchemaName());
+                    if (schema.equals(example, database)) {
+                        if (match == null) {
+                            match = schema;
+                        } else {
+                            throw new InvalidExampleException("Found multiple catalog/schemas matching " + ((Schema) example).getCatalogName() + "." + example.getName());
                         }
                     }
-                } else {
-                    Catalog catalog = snapshot.snapshot(new Catalog(catalogName));
-                    return new Schema(catalog, null);
                 }
+            } else {
+                Catalog catalog = snapshot.include(new Catalog(catalogName));
+                return new Schema(catalog, null);
+            }
 
-            } catch (SQLException e) {
-                throw new DatabaseException(e);
-            } finally {
-                if (schemas != null) {
-                    try {
-                        schemas.close();
-                    } catch (SQLException ignore) {
+        } catch (SQLException e) {
+            throw new DatabaseException(e);
+        } finally {
+            if (schemas != null) {
+                try {
+                    schemas.close();
+                } catch (SQLException ignore) {
 
-                    }
                 }
             }
-            return match;
         }
-        throw new UnexpectedLiquibaseException("Unexpected example type: " + example.getClass().getName());
+        return match;
+    }
 
+    @Override
+    protected void addTo(DatabaseObject foundObject, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException {
+        //no other types
     }
 }

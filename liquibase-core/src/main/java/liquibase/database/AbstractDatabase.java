@@ -767,10 +767,10 @@ public abstract class AbstractDatabase implements Database {
      */
     public void dropDatabaseObjects(CatalogAndSchema schemaToDrop) throws DatabaseException {
         try {
-            SnapshotControl snapshotControl = new SnapshotControl(schemaToDrop);
+            SnapshotControl snapshotControl = new SnapshotControl();
             DatabaseSnapshot snapshot = null;
             try {
-                snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(snapshotControl, this);
+                snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(snapshotControl, this, new Schema(schemaToDrop.getCatalogName(), schemaToDrop.getSchemaName()));
             } catch (LiquibaseException e) {
                 throw new UnexpectedLiquibaseException(e);
             }

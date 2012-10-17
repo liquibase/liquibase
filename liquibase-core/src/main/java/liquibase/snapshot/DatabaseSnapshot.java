@@ -15,9 +15,13 @@ public class DatabaseSnapshot {
     private Set<Schema> schemas = new HashSet<Schema>();
     private Map<Class<? extends DatabaseObject>, Set<DatabaseObject>> allFound = new HashMap<Class<? extends DatabaseObject>, Set<DatabaseObject>>();
 
-    public DatabaseSnapshot(Database database, SnapshotControl snapshotControl) {
+    DatabaseSnapshot(SnapshotControl snapshotControl, Database database) {
         this.database = database;
         this.snapshotControl = snapshotControl;
+    }
+
+    public DatabaseSnapshot(Database database) {
+        this.database = database;
     }
 
     public SnapshotControl getSnapshotControl() {
@@ -40,31 +44,53 @@ public class DatabaseSnapshot {
         return false;  //todo
     }
 
-    public <DatabaseObjectType extends DatabaseObject> DatabaseObjectType snapshot(DatabaseObjectType example) throws DatabaseException, InvalidExampleException {
-        DatabaseObjectType returnObj = getExistingObject(example);
-        if (returnObj == null) {
-            returnObj = SnapshotGeneratorFactory.getInstance().snapshot(example, this.getDatabase());
-            if (returnObj == null) {
-                return null;
-            }
-            Set<DatabaseObject> collection = allFound.get(returnObj.getClass());
-            if (collection == null) {
-                collection = new HashSet<DatabaseObject>();
-                allFound.put(returnObj.getClass(), collection);
-            }
-            collection.add(returnObj);
-
-            return returnObj;
-        } else {
-            return returnObj;
+    public <T extends DatabaseObject> T include(T example) throws DatabaseException, InvalidExampleException {
+        T existing = get(example);
+        if (existing != null) {
+            return existing;
         }
+
+        SnapshotGeneratorChain chain = createGeneratorChain(example.getClass(), database);
+        T object = chain.snapshot(example, this);
+        if (object == null) {
+            return object;
+        }
+        Set<DatabaseObject> collection = allFound.get(object.getClass());
+        if (collection == null) {
+            collection = new HashSet<DatabaseObject>();
+            allFound.put(object.getClass(), collection);
+        }
+        collection.add(object);
+        return  object;
+    }
+
+    public boolean has(DatabaseObject example) {
+        Set<DatabaseObject> databaseObjects = allFound.get(example.getClass());
+        if (databaseObjects == null) {
+            return false;
+        }
+        for (DatabaseObject obj : databaseObjects) {
+            if (obj.equals(example, database)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private SnapshotGeneratorChain createGeneratorChain(Class<? extends DatabaseObject> databaseObjectType, Database database) {
+        SortedSet<SnapshotGenerator> generators = SnapshotGeneratorFactory.getInstance().getGenerators(databaseObjectType, database);
+        if (generators == null || generators.size() == 0) {
+            return null;
+        }
+        //noinspection unchecked
+        return new SnapshotGeneratorChain(generators);
     }
 
     public <DatabaseObjectType extends  DatabaseObject> Set<DatabaseObjectType> getAll(Class<DatabaseObjectType> type) {
         return (Set<DatabaseObjectType>) allFound.get(type);
     }
 
-    private <DatabaseObjectType extends DatabaseObject> DatabaseObjectType getExistingObject(DatabaseObjectType example) {
+    public  <DatabaseObjectType extends DatabaseObject> DatabaseObjectType get(DatabaseObjectType example) {
         Set<DatabaseObject> databaseObjects = allFound.get(example.getClass());
         if (databaseObjects == null) {
             return null;
@@ -76,5 +102,4 @@ public class DatabaseSnapshot {
         }
         return null;
     }
-
 }

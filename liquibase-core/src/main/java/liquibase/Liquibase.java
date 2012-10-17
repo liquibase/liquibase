@@ -763,7 +763,7 @@ public class Liquibase {
 //        }
     }
 
-    public DiffResult diff(Database referenceDatabase, Database targetDatabase, DiffControl diffControl) throws DatabaseException {
+    public DiffResult diff(Database referenceDatabase, Database targetDatabase, DiffControl diffControl) throws LiquibaseException {
         return DiffGeneratorFactory.getInstance().compare(referenceDatabase, targetDatabase, diffControl);
     }
 

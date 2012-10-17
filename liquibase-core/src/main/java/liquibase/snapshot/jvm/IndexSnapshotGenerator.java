@@ -131,71 +131,62 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
 //
 //    }
 
-    public DatabaseObject snapshot(DatabaseObject example, DatabaseSnapshot snapshot, SnapshotGeneratorChain chain) throws DatabaseException, InvalidExampleException {
-        if (example instanceof Table) {
-            return addToTable((Table) chain.snapshot(example, snapshot), snapshot);
-        } else if (example instanceof Index) {
-            return snapshotIndex((Index) example, snapshot);
-        } else {
-            throw new UnexpectedLiquibaseException("Unexpected example type: "+example.getClass().getName());
-        }
-    }
 
-    protected Table addToTable(Table table, DatabaseSnapshot snapshot) throws DatabaseException {
-        if (table == null) {
-            return null;
-        }
-
-        Database database = snapshot.getDatabase();
-        Schema schema;
-        schema = table.getSchema();
+    @Override
+    protected void addTo(DatabaseObject foundObject, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException {
+        if (foundObject instanceof Table) {
+            Table table = (Table) foundObject;
+            Database database = snapshot.getDatabase();
+            Schema schema;
+            schema = table.getSchema();
 
 
-        ResultSet rs = null;
-        Statement statement = null;
-        DatabaseMetaData databaseMetaData = null;
-        try {
-            databaseMetaData = getMetaData(database);
+            ResultSet rs = null;
+            Statement statement = null;
+            DatabaseMetaData databaseMetaData = null;
+            try {
+                databaseMetaData = getMetaData(database);
 
-            if (database instanceof OracleDatabase) {
-                //oracle getIndexInfo is buggy and slow.  See Issue 1824548 and http://forums.oracle.com/forums/thread.jspa?messageID=578383&#578383
-                statement = ((JdbcConnection) database.getConnection()).getUnderlyingConnection().createStatement();
-                String sql = "SELECT INDEX_NAME FROM ALL_IND_COLUMNS WHERE TABLE_OWNER='" + schema.getName() + "' AND TABLE_NAME='" + table.getName() + "'";
-                rs = statement.executeQuery(sql);
-            } else {
-                rs = databaseMetaData.getIndexInfo(database.getJdbcCatalogName(schema), database.getJdbcSchemaName(schema), table.getName(), false, true);
-            }
-            while (rs.next()) {
-                Index exampleIndex = new Index().setName(rs.getString("INDEX_NAME")).setTable(table);
-                table.getIndexes().add(snapshot.snapshot(exampleIndex));
-              }
-            return table;
-        } catch (Exception e) {
-            throw new DatabaseException(e);
-        } finally {
-            if (rs != null) {
-                try {
-                    rs.close();
-                } catch (SQLException ignored) {
+                if (database instanceof OracleDatabase) {
+                    //oracle getIndexInfo is buggy and slow.  See Issue 1824548 and http://forums.oracle.com/forums/thread.jspa?messageID=578383&#578383
+                    statement = ((JdbcConnection) database.getConnection()).getUnderlyingConnection().createStatement();
+                    String sql = "SELECT INDEX_NAME FROM ALL_IND_COLUMNS WHERE TABLE_OWNER='" + schema.getName() + "' AND TABLE_NAME='" + table.getName() + "'";
+                    rs = statement.executeQuery(sql);
+                } else {
+                    rs = databaseMetaData.getIndexInfo(database.getJdbcCatalogName(schema), database.getJdbcSchemaName(schema), table.getName(), false, true);
                 }
-            }
-            if (statement != null) {
-                try {
-                    statement.close();
-                } catch (SQLException ignored) {
+                while (rs.next()) {
+                    Index exampleIndex = new Index().setName(rs.getString("INDEX_NAME")).setTable(table);
+                    table.getIndexes().add(snapshot.include(exampleIndex));
+                }
+            } catch (Exception e) {
+                throw new DatabaseException(e);
+            } finally {
+                if (rs != null) {
+                    try {
+                        rs.close();
+                    } catch (SQLException ignored) {
+                    }
+                }
+                if (statement != null) {
+                    try {
+                        statement.close();
+                    } catch (SQLException ignored) {
+                    }
                 }
             }
         }
     }
 
-    protected Index snapshotIndex(Index example, DatabaseSnapshot snapshot) throws DatabaseException {
+    @Override
+    protected DatabaseObject snapshotObject(DatabaseObject example, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException {
         Database database = snapshot.getDatabase();
-        Table exampleTable = example.getTable();
+        Table exampleTable = ((Index) example).getTable();
         Schema schema = exampleTable.getSchema();
 
         List<Table> tables = new ArrayList<Table>();
         if (exampleTable.getName() == null) {
-            DatabaseSnapshot tableSnapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(new SnapshotControl(schema.toCatalogAndSchema(), Table.class), database);
+            DatabaseSnapshot tableSnapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(new SnapshotControl(Table.class), database); //todo: don't get from Factory
             tables.addAll(tableSnapshot.getAll(Table.class));
         } else {
             tables.add(exampleTable);
@@ -210,7 +201,7 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                 if (database instanceof OracleDatabase) {
                     //oracle getIndexInfo is buggy and slow.  See Issue 1824548 and http://forums.oracle.com/forums/thread.jspa?messageID=578383&#578383
                     statement = ((JdbcConnection) database.getConnection()).getUnderlyingConnection().createStatement();
-                    String sql = "SELECT INDEX_NAME, 3 AS TYPE, TABLE_NAME, COLUMN_NAME, COLUMN_POSITION AS ORDINAL_POSITION, null AS FILTER_CONDITION FROM ALL_IND_COLUMNS WHERE TABLE_OWNER='" + schema.getName() + "' AND TABLE_NAME='" + table.getName() + "' AND INDEX_NAME='"+example.getName()+"' ORDER BY INDEX_NAME, ORDINAL_POSITION";
+                    String sql = "SELECT INDEX_NAME, 3 AS TYPE, TABLE_NAME, COLUMN_NAME, COLUMN_POSITION AS ORDINAL_POSITION, null AS FILTER_CONDITION FROM ALL_IND_COLUMNS WHERE TABLE_OWNER='" + schema.getName() + "' AND TABLE_NAME='" + table.getName() + "' AND INDEX_NAME='" + example.getName() + "' ORDER BY INDEX_NAME, ORDINAL_POSITION";
                     rs = statement.executeQuery(sql);
                 } else {
                     rs = databaseMetaData.getIndexInfo(database.getJdbcCatalogName(schema), database.getJdbcSchemaName(schema), table.getName(), false, true);
@@ -219,7 +210,7 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                 Index returnIndex = null;
                 while (rs.next()) {
                     String indexName = cleanNameFromDatabase(rs.getString("INDEX_NAME"), database);
-                    if (example.getName() != null && !indexName.equals(example.getName()))  {
+                    if (example.getName() != null && !indexName.equals(example.getName())) {
                         continue;
                     }
                     /*
@@ -265,7 +256,7 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                     }
                     if (returnIndex == null) {
                         returnIndex = new Index();
-                        returnIndex.setTable(example.getTable());
+                        returnIndex.setTable(((Index) example).getTable());
                         returnIndex.setName(indexName);
                         returnIndex.setUnique(!nonUnique);
                         returnIndex.setFilterCondition(filterCondition);

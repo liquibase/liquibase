@@ -12,19 +12,9 @@ import java.util.Set;
 
 public class SnapshotControl {
 
-    private CatalogAndSchema[] schemas;
     private Set<Class<? extends DatabaseObject>> types;
 
-    public SnapshotControl() {
-        this(new CatalogAndSchema[]{CatalogAndSchema.DEFAULT}, null);
-    }
-
-    public SnapshotControl(CatalogAndSchema schema, Class<? extends DatabaseObject>... types) {
-        this(new CatalogAndSchema[]{schema}, types);
-    }
-
-    public SnapshotControl(CatalogAndSchema[] schemas, Class<? extends DatabaseObject>[] types) {
-        this.schemas = schemas;
+    public SnapshotControl(Class<? extends DatabaseObject>... types) {
         if (types == null || types.length == 0) {
             this.types = getDefaultTypes();
         } else {
@@ -39,10 +29,6 @@ public class SnapshotControl {
         set.add(Column.class);
 
         return set;
-    }
-
-    public CatalogAndSchema[] getSchemas() {
-        return schemas;
     }
 
     public Set<Class<? extends DatabaseObject>> getTypesToInclude() {

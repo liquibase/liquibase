@@ -24,7 +24,9 @@ public class CatalogSnapshotGenerator extends JdbcSnapshotGenerator {
 //        return chain.has(example, snapshot);  //To change body of implemented methods use File | Settings | File Templates.
 //    }
 
-    public DatabaseObject snapshot(DatabaseObject example, DatabaseSnapshot snapshot, SnapshotGeneratorChain chain) throws DatabaseException, InvalidExampleException {
+
+    @Override
+    protected DatabaseObject snapshotObject(DatabaseObject example, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException {
         if (!(example instanceof Catalog)) {
             throw new UnexpectedLiquibaseException("Unexpected example type: "+example.getClass().getName());
         }
@@ -65,5 +67,10 @@ public class CatalogSnapshotGenerator extends JdbcSnapshotGenerator {
             }
         }
         return match;
+    }
+
+    @Override
+    protected void addTo(DatabaseObject foundObject, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException {
+        //nothing to add to
     }
 }

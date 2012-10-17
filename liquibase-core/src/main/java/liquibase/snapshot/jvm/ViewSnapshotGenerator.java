@@ -19,7 +19,7 @@ import java.sql.SQLException;
 public class ViewSnapshotGenerator extends JdbcSnapshotGenerator {
 
     public ViewSnapshotGenerator() {
-        super(View.class, new Class[]{Schema.class});
+        super(View.class, Schema.class);
     }
 
 //    public Boolean has(DatabaseObject example, DatabaseSnapshot snapshot, SnapshotGeneratorChain chain) throws DatabaseException {
@@ -44,18 +44,9 @@ public class ViewSnapshotGenerator extends JdbcSnapshotGenerator {
 //        }
 //    }
 
-    public DatabaseObject snapshot(DatabaseObject example, DatabaseSnapshot snapshot, SnapshotGeneratorChain chain) throws DatabaseException, InvalidExampleException {
-        if (example instanceof Schema) {
-            return addToSchema((Schema) chain.snapshot(example, snapshot), snapshot);
-        } else if (example instanceof View) {
-            return snapshotView((View) example, snapshot);
-        } else {
-            throw new UnexpectedLiquibaseException("Unexpected example type: " + example.getClass().getName());
-        }
 
-    }
-
-    protected View snapshotView(View example, DatabaseSnapshot snapshot) throws DatabaseException {
+    @Override
+    protected DatabaseObject snapshotObject(DatabaseObject example, DatabaseSnapshot snapshot) throws DatabaseException {
         Database database = snapshot.getDatabase();
         Schema schema = example.getSchema();
 
@@ -96,25 +87,28 @@ public class ViewSnapshotGenerator extends JdbcSnapshotGenerator {
         }
     }
 
-    protected Schema addToSchema(Schema schema, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException {
-        Database database = snapshot.getDatabase();
-        ResultSet viewsMetadataRs = null;
-        try {
-            viewsMetadataRs = getMetaData(database).getTables(database.getJdbcCatalogName(schema), database.getJdbcSchemaName(schema), null, new String[]{"VIEW"});
-            while (viewsMetadataRs.next()) {
-                schema.addDatabaseObject(snapshot.snapshot(new View().setName(viewsMetadataRs.getString("TABLE_NAME")).setSchema(schema)));
-            }
-        } catch (SQLException e) {
-            throw new DatabaseException(e);
-        } finally {
+    @Override
+    protected void addTo(DatabaseObject foundObject, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException {
+        if (foundObject instanceof Schema) {
+            Schema schema = (Schema) foundObject;
+            Database database = snapshot.getDatabase();
+            ResultSet viewsMetadataRs = null;
             try {
-                if (viewsMetadataRs != null) {
-                    viewsMetadataRs.close();
+                viewsMetadataRs = getMetaData(database).getTables(database.getJdbcCatalogName(schema), database.getJdbcSchemaName(schema), null, new String[]{"VIEW"});
+                while (viewsMetadataRs.next()) {
+                    schema.addDatabaseObject(snapshot.include(new View().setName(viewsMetadataRs.getString("TABLE_NAME")).setSchema(schema)));
                 }
-            } catch (SQLException ignore) {
+            } catch (SQLException e) {
+                throw new DatabaseException(e);
+            } finally {
+                try {
+                    if (viewsMetadataRs != null) {
+                        viewsMetadataRs.close();
+                    }
+                } catch (SQLException ignore) {
+                }
             }
         }
-        return schema;
     }
 
     //from SQLIteSnapshotGenerator

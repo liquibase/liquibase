@@ -194,7 +194,7 @@ public class DiffControl {
             snapshotSchemas[i] = new CatalogAndSchema(diffSchemas[i].getCatalogName(), diffSchemas[i].getSchemaName());
         }
 
-        return new SnapshotControl(snapshotSchemas);
+        return new SnapshotControl();
     }
 
     public static enum DatabaseRole {

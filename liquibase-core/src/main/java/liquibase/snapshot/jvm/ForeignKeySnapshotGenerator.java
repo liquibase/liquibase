@@ -20,7 +20,7 @@ import java.util.Set;
 public class ForeignKeySnapshotGenerator extends JdbcSnapshotGenerator {
 
     public ForeignKeySnapshotGenerator() {
-        super(ForeignKey.class, new Class[]{Table.class});
+        super(ForeignKey.class, Table.class);
     }
 
 //    public Boolean has(DatabaseObject example, DatabaseSnapshot snapshot, SnapshotGeneratorChain chain) throws DatabaseException {
@@ -57,80 +57,72 @@ public class ForeignKeySnapshotGenerator extends JdbcSnapshotGenerator {
 //        }
 //    }
 
-    public DatabaseObject snapshot(DatabaseObject example, DatabaseSnapshot snapshot, SnapshotGeneratorChain chain) throws DatabaseException, InvalidExampleException {
-        if (example instanceof ForeignKey) {
-            return snapshotForeignKey((ForeignKey) example, snapshot);
-        } else if (example instanceof Table) {
-            return addToTable((Table) chain.snapshot(example, snapshot), snapshot);
-        } else {
-            throw new UnexpectedLiquibaseException("Unknown example type: "+example.getClass().getName());
+
+    @Override
+    protected void addTo(DatabaseObject foundObject, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException {
+
+        if (foundObject instanceof Table) {
+            Table table = (Table) foundObject;
+            Database database = snapshot.getDatabase();
+            Schema schema;
+            schema = table.getSchema();
+
+
+            Set<String> seenFks = new HashSet<String>();
+            ResultSet importedKeyMetadataResultSet = null;
+            try {
+                importedKeyMetadataResultSet = getMetaData(database).getImportedKeys(database.getJdbcCatalogName(schema), database.getJdbcSchemaName(schema), table.getName());
+
+                while (importedKeyMetadataResultSet.next()) {
+                    ForeignKey fk = new ForeignKey().setName(importedKeyMetadataResultSet.getString("FK_NAME")).setForeignKeyTable(table);
+                    if (seenFks.add(fk.getName())) {
+                        table.getOutgoingForeignKeys().add(snapshot.include(fk));
+                    }
+                }
+            } catch (Exception e) {
+                throw new DatabaseException(e);
+            } finally {
+                if (importedKeyMetadataResultSet != null) {
+                    try {
+                        importedKeyMetadataResultSet.close();
+                    } catch (SQLException ignored) {
+                    }
+                }
+            }
+
+            seenFks = new HashSet<String>();
+            ResultSet exportedKeyMetadataResultSet = null;
+            try {
+                exportedKeyMetadataResultSet = getMetaData(database).getExportedKeys(database.getJdbcCatalogName(schema), database.getJdbcSchemaName(schema), table.getName());
+
+                while (exportedKeyMetadataResultSet.next()) {
+                    ForeignKey fk = new ForeignKey().setName(exportedKeyMetadataResultSet.getString("FK_NAME")).setForeignKeyTable(table);
+                    if (seenFks.add(fk.getName())) {
+                        table.getIncomingForeignKeys().add(snapshot.include(fk));
+                    }
+                }
+            } catch (Exception e) {
+                throw new DatabaseException(e);
+            } finally {
+                if (exportedKeyMetadataResultSet != null) {
+                    try {
+                        exportedKeyMetadataResultSet.close();
+                    } catch (SQLException ignored) {
+                    }
+                }
+            }
+
         }
     }
 
-    protected DatabaseObject addToTable(Table table, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException {
-        if (table == null) {
-            return null;
-        }
-
-        Database database = snapshot.getDatabase();
-        Schema schema;
-        schema = table.getSchema();
-
-
-        Set<String> seenFks = new HashSet<String>();
-        ResultSet importedKeyMetadataResultSet = null;
-        try {
-            importedKeyMetadataResultSet = getMetaData(database).getImportedKeys(database.getJdbcCatalogName(schema), database.getJdbcSchemaName(schema), table.getName());
-
-            while (importedKeyMetadataResultSet.next()) {
-                ForeignKey fk = new ForeignKey().setName(importedKeyMetadataResultSet.getString("FK_NAME")).setForeignKeyTable(table);
-                if (seenFks.add(fk.getName())) {
-                    table.getOutgoingForeignKeys().add(snapshot.snapshot(fk));
-                }
-            }
-        } catch (Exception e) {
-            throw new DatabaseException(e);
-        } finally {
-            if (importedKeyMetadataResultSet != null) {
-                try {
-                    importedKeyMetadataResultSet.close();
-                } catch (SQLException ignored) {
-                }
-            }
-        }
-
-        seenFks = new HashSet<String>();
-        ResultSet exportedKeyMetadataResultSet = null;
-        try {
-            exportedKeyMetadataResultSet = getMetaData(database).getExportedKeys(database.getJdbcCatalogName(schema), database.getJdbcSchemaName(schema), table.getName());
-
-            while (exportedKeyMetadataResultSet.next()) {
-                ForeignKey fk = new ForeignKey().setName(exportedKeyMetadataResultSet.getString("FK_NAME")).setForeignKeyTable(table);
-                if (seenFks.add(fk.getName())) {
-                    table.getIncomingForeignKeys().add(snapshot.snapshot(fk));
-                }
-            }
-        } catch (Exception e) {
-            throw new DatabaseException(e);
-        } finally {
-            if (exportedKeyMetadataResultSet != null) {
-                try {
-                    exportedKeyMetadataResultSet.close();
-                } catch (SQLException ignored) {
-                }
-            }
-        }
-
-        return table;
-    }
-
-    protected DatabaseObject snapshotForeignKey(ForeignKey example, DatabaseSnapshot snapshot) throws DatabaseException {
+    @Override
+    protected DatabaseObject snapshotObject(DatabaseObject example, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException {
 
         Database database = snapshot.getDatabase();
 
         ResultSet importedKeyMetadataResultSet = null;
         try {
-            Table fkTable = example.getForeignKeyTable();
+            Table fkTable = ((ForeignKey) example).getForeignKeyTable();
             String searchCatalog = database.getJdbcCatalogName(fkTable.getSchema());
             String searchSchema = database.getJdbcSchemaName(fkTable.getSchema());
             String searchTableName = fkTable.getName();
@@ -147,12 +139,12 @@ public class ForeignKeySnapshotGenerator extends JdbcSnapshotGenerator {
                 Table foreignKeyTable = new Table().setName(fkTableName);
                 foreignKeyTable.setSchema(new Schema(new Catalog(fkTableCatalog), fkTableSchema));
 
-                foreignKey.setForeignKeyTable(snapshot.snapshot(foreignKeyTable));
+                foreignKey.setForeignKeyTable(snapshot.include(foreignKeyTable));
                 foreignKey.setForeignKeyColumns(cleanNameFromDatabase(importedKeyMetadataResultSet.getString("FKCOLUMN_NAME"), database));
 
                 CatalogAndSchema pkTableSchema = database.getSchemaFromJdbcInfo(importedKeyMetadataResultSet.getString("PKTABLE_CAT"), importedKeyMetadataResultSet.getString("PKTABLE_SCHEM"));
                 Table tempPkTable = (Table) new Table().setName(importedKeyMetadataResultSet.getString("PKTABLE_NAME")).setSchema(new Schema(pkTableSchema.getCatalogName(), pkTableSchema.getSchemaName()));
-                foreignKey.setPrimaryKeyTable(snapshot.snapshot(tempPkTable));
+                foreignKey.setPrimaryKeyTable(snapshot.include(tempPkTable));
                 foreignKey.setPrimaryKeyColumns(cleanNameFromDatabase(importedKeyMetadataResultSet.getString("PKCOLUMN_NAME"), database));
                 //todo foreignKey.setKeySeq(importedKeyMetadataResultSet.getInt("KEY_SEQ"));
 

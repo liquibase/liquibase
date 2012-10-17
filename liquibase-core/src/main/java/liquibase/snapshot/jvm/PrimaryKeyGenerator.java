@@ -22,26 +22,13 @@ public class PrimaryKeyGenerator extends JdbcSnapshotGenerator {
         super(PrimaryKey.class, new Class[]{Table.class});
     }
 
-//    public Boolean has(DatabaseObject example, DatabaseSnapshot snapshot, SnapshotGeneratorChain chain) throws DatabaseException {
-//         return chain.has(example, snapshot);//snapshot( example, database, snapshot) != null;
-//    }
-
-    public DatabaseObject snapshot(DatabaseObject example, DatabaseSnapshot snapshot, SnapshotGeneratorChain chain) throws DatabaseException, InvalidExampleException {
-        if (example instanceof Table) {
-            return addToTable((Table) chain.snapshot(example, snapshot), snapshot);
-        } else if (example instanceof PrimaryKey) {
-            return snapshotPrimaryKey((PrimaryKey) example, snapshot);
-        } else {
-            throw new UnexpectedLiquibaseException("Unexpected example type: " + example.getClass().getName());
-        }
-    }
-
-    protected PrimaryKey snapshotPrimaryKey(PrimaryKey example, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException {
+    @Override
+    protected DatabaseObject snapshotObject(DatabaseObject example, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException {
         Database database = snapshot.getDatabase();
         Schema schema = example.getSchema();
         String searchTableName = null;
-        if (example.getTable() != null) {
-            searchTableName = example.getTable().getName();
+        if (((PrimaryKey) example).getTable() != null) {
+            searchTableName = ((PrimaryKey) example).getTable().getName();
         }
 
         ResultSet rs = null;
@@ -59,7 +46,7 @@ public class PrimaryKeyGenerator extends JdbcSnapshotGenerator {
                 if (returnKey == null) {
                     returnKey = new PrimaryKey();
                     CatalogAndSchema tableSchema = database.getSchemaFromJdbcInfo(rs.getString("TABLE_CAT"), rs.getString("TABLE_SCHEMA"));
-                    returnKey.setTable((Table) snapshot.snapshot(new Table().setName(rs.getString("TABLE_NAME")).setSchema(new Schema(tableSchema.getCatalogName(), tableSchema.getSchemaName()))));
+                    returnKey.setTable((Table) snapshot.include(new Table().setName(rs.getString("TABLE_NAME")).setSchema(new Schema(tableSchema.getCatalogName(), tableSchema.getSchemaName()))));
                     returnKey.setName(database.correctObjectName(rs.getString("PK_NAME"), PrimaryKey.class));
                 }
                 returnKey.addColumnName(position - 1, columnName);
@@ -80,35 +67,35 @@ public class PrimaryKeyGenerator extends JdbcSnapshotGenerator {
         }
     }
 
-    protected Table addToTable(Table table, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException {
-        if (table == null) {
-            return null;
-        }
-        Database database = snapshot.getDatabase();
-        Schema schema = table.getSchema();
+    @Override
+    protected void addTo(DatabaseObject foundObject, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException {
+        if (foundObject instanceof Table) {
+            Table table = (Table) foundObject;
+            Database database = snapshot.getDatabase();
+            Schema schema = table.getSchema();
 
-        ResultSet rs = null;
-        try {
-            DatabaseMetaData metaData = getMetaData(database);
-            rs = metaData.getPrimaryKeys(database.getJdbcCatalogName(schema), database.getJdbcSchemaName(schema), table.getName());
-            if (rs.next()) {
-                table.setPrimaryKey(snapshot.snapshot(new PrimaryKey().setName(rs.getString("PK_NAME")).setTable(table)));
-            }
-
-            rs.close();
-        } catch (SQLException e) {
-            throw new DatabaseException(e);
-        } finally {
+            ResultSet rs = null;
             try {
-                if (rs != null) {
-                    rs.close();
+                DatabaseMetaData metaData = getMetaData(database);
+                rs = metaData.getPrimaryKeys(database.getJdbcCatalogName(schema), database.getJdbcSchemaName(schema), table.getName());
+                if (rs.next()) {
+                    table.setPrimaryKey(snapshot.include(new PrimaryKey().setName(rs.getString("PK_NAME")).setTable(table)));
                 }
-            } catch (SQLException ignored) {
 
+                rs.close();
+            } catch (SQLException e) {
+                throw new DatabaseException(e);
+            } finally {
+                try {
+                    if (rs != null) {
+                        rs.close();
+                    }
+                } catch (SQLException ignored) {
+
+                }
             }
-        }
 
-        return table;
+        }
     }
 
     //FROM SQLIteDatabaseSnapshotGenerator

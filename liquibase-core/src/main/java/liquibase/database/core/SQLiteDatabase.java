@@ -127,7 +127,7 @@ public class SQLiteDatabase extends AbstractDatabase {
 
         Table table = null;
         try {
-            table = SnapshotGeneratorFactory.getInstance().snapshot((Table) new Table().setName(tableName).setSchema(new Schema(new Catalog(null), null)), database);
+            table = SnapshotGeneratorFactory.getInstance().createSnapshot((Table) new Table().setName(tableName).setSchema(new Schema(new Catalog(null), null)), database);
         } catch (InvalidExampleException e) {
             throw new UnexpectedLiquibaseException(e);
         }

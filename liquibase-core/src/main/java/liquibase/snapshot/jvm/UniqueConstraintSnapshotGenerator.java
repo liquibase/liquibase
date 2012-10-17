@@ -17,8 +17,15 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
 //        return chain.has(example, snapshot); // snapshot(example, database, snapshot) != null;
 //    }
 
-    public DatabaseObject snapshot(DatabaseObject example, DatabaseSnapshot snapshot, SnapshotGeneratorChain chain) throws DatabaseException, InvalidExampleException {
+
+    @Override
+    protected DatabaseObject snapshotObject(DatabaseObject example, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException {
         return null;  //TODO
+    }
+
+    @Override
+    protected void addTo(DatabaseObject foundObject, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException {
+        ///todo
     }
 
 

@@ -144,7 +144,7 @@ public class CommandLineUtils {
         diffControl.addStatusListener(new OutDiffStatusListener());
 
         DatabaseSnapshot originalDatabaseSnapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(diffControl.toSnapshotControl(DiffControl.DatabaseRole.REFERENCE), originalDatabase);
-        DiffResult diffResult = DiffGeneratorFactory.getInstance().compare(originalDatabaseSnapshot, new DatabaseSnapshot(null, diffControl.toSnapshotControl(DiffControl.DatabaseRole.REFERENCE)), diffControl);
+        DiffResult diffResult = DiffGeneratorFactory.getInstance().compare(originalDatabaseSnapshot, SnapshotGeneratorFactory.getInstance().createSnapshot(diffControl.toSnapshotControl(DiffControl.DatabaseRole.REFERENCE), null), diffControl);
 
         DiffToChangeLog changeLogWriter = new DiffToChangeLog(diffResult, diffOutputConfig);
 

@@ -17,73 +17,50 @@ import java.sql.SQLException;
 
 public class TableSnapshotGenerator extends JdbcSnapshotGenerator {
     public TableSnapshotGenerator() {
-        super(Table.class, new Class[] {Schema.class});
+        super(Table.class, Schema.class);
     }
 
-//    public Boolean has(DatabaseObject example, DatabaseSnapshot snapshot, SnapshotGeneratorChain chain) throws DatabaseException {
-//        if (!(example instanceof Table)) {
-//            return chain.has(example, snapshot);
-//        }
-//        Database database = snapshot.getDatabase();
-//        Schema schema = example.getSchema();
-////        if (schema == null) {
-////            schema = Schema.DEFAULT;
-////        }
-//        try {
-//            String tableName = example.getName();
-//            if (snapshot != null) {
-//                tableName = database.correctObjectName(tableName, Table.class);
-//            }
-//            ResultSet rs = getMetaData(database).getTables(database.getJdbcCatalogName(schema), database.getJdbcSchemaName(schema), tableName, new String[]{"TABLE"});
-//            try {
-//                return rs.next();
-//            } finally {
-//                try {
-//                    rs.close();
-//                } catch (SQLException ignore) {
-//                }
-//            }
-//        } catch (SQLException e) {
-//            throw new DatabaseException(e);
-//        }
-//    }
-
-
-    public DatabaseObject snapshot(DatabaseObject example, DatabaseSnapshot snapshot, SnapshotGeneratorChain chain) throws DatabaseException, InvalidExampleException {
+    @Override
+    protected DatabaseObject snapshotObject(DatabaseObject example, DatabaseSnapshot snapshot) throws DatabaseException {
         Database database = snapshot.getDatabase();
-        if (example instanceof Table) {
-            String objectName = example.getName();
-            Schema schema = example.getSchema();
+        String objectName = example.getName();
+        Schema schema = example.getSchema();
 
-            ResultSet rs = null;
+        ResultSet rs = null;
+        try {
+            DatabaseMetaData metaData = getMetaData(database);
+            rs = metaData.getTables(database.getJdbcCatalogName(schema), database.getJdbcSchemaName(schema), database.correctObjectName(objectName, Table.class), new String[]{"TABLE"});
+
+            Table table;
             try {
-                DatabaseMetaData metaData = getMetaData(database);
-                rs = metaData.getTables(database.getJdbcCatalogName(schema), database.getJdbcSchemaName(schema), database.correctObjectName(objectName, Table.class), new String[]{"TABLE"});
-
-                Table table;
-                try {
-                    if (rs.next()) {
-                        table = readTable(rs, database);
-                    } else {
-                        return null;
-                    }
-                } finally {
-                    rs.close();
+                if (rs.next()) {
+                    table = readTable(rs, database);
+                } else {
+                    return null;
                 }
-
-                return table;
-            } catch (SQLException e) {
-                throw new DatabaseException(e);
             } finally {
-                if (rs != null) {
-                    try {
-                        rs.close();
-                    } catch (SQLException ignore) {
-                    }
+                rs.close();
+            }
+
+            return table;
+        } catch (SQLException e) {
+            throw new DatabaseException(e);
+        } finally {
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException ignore) {
                 }
             }
-        } else if (example instanceof Schema) {
-            Schema schema = (Schema) chain.snapshot(example, snapshot);
+        }
+    }
+
+    @Override
+    protected void addTo(DatabaseObject foundObject, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException {
+        if (foundObject instanceof Schema) {
+
+            Database database = snapshot.getDatabase();
+            Schema schema = (Schema) foundObject;
 
             if (schema != null) {
                 ResultSet tableMetaDataRs = null;
@@ -93,7 +70,7 @@ public class TableSnapshotGenerator extends JdbcSnapshotGenerator {
                         String tableName = tableMetaDataRs.getString("TABLE_NAME");
                         Table tableExample = (Table) new Table().setName(tableName).setSchema(schema);
 
-                        schema.addDatabaseObject(snapshot.snapshot(tableExample));
+                        schema.addDatabaseObject(snapshot.include(tableExample));
                     }
                 } catch (SQLException e) {
                     throw new DatabaseException(e);
@@ -106,11 +83,8 @@ public class TableSnapshotGenerator extends JdbcSnapshotGenerator {
                     }
                 }
             }
-            return schema;
-
-        }  else {
-            throw new UnexpectedLiquibaseException("Unexpected snapshot example: "+example.getClass().getName());
         }
+
 
     }
 

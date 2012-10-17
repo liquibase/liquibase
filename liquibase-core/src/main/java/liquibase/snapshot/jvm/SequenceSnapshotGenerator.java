@@ -19,46 +19,31 @@ import java.util.List;
 public class SequenceSnapshotGenerator extends JdbcSnapshotGenerator {
 
     public SequenceSnapshotGenerator() {
-        super(Sequence.class, new Class[]{Schema.class});
+        super(Sequence.class, Schema.class);
     }
 
-//    public Boolean has(DatabaseObject example, DatabaseSnapshot snapshot, SnapshotGeneratorChain chain) throws DatabaseException {
-//        return chain.has(example, snapshot); //snapshot(example, database, snapshot) != null;
-//    }
+    @Override
+    protected void addTo(DatabaseObject foundObject, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException {
+        if (foundObject instanceof Schema) {
+            Schema schema = (Schema) foundObject;
+            Database database = snapshot.getDatabase();
+            if (!database.supportsSequences()) {
+                updateListeners("Sequences not supported for " + database.toString() + " ...");
+            }
 
-    public DatabaseObject snapshot(DatabaseObject example, DatabaseSnapshot snapshot, SnapshotGeneratorChain chain) throws DatabaseException, InvalidExampleException {
-        if (example instanceof Sequence) {
-            return snapshotSequence((Sequence) example, snapshot);
-        } else if (example instanceof Schema) {
-            return addToSchema((Schema) chain.snapshot(example, snapshot), snapshot);
-        } else {
-            throw new UnexpectedLiquibaseException("Unexpected example type: " + example.getClass().getName());
-        }
+            //noinspection unchecked
+            List<String> sequenceNames = (List<String>) ExecutorService.getInstance().getExecutor(database).queryForList(new RawSqlStatement(getSelectSequenceSql(schema, database)), String.class);
 
-    }
-
-    protected DatabaseObject addToSchema(Schema schema, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException {
-        Database database = snapshot.getDatabase();
-        if (!database.supportsSequences()) {
-            updateListeners("Sequences not supported for " + database.toString() + " ...");
-            return schema;
-        }
-
-        List<Sequence> returnSequences = new ArrayList<Sequence>();
-
-        //noinspection unchecked
-        List<String> sequenceNames = (List<String>) ExecutorService.getInstance().getExecutor(database).queryForList(new RawSqlStatement(getSelectSequenceSql(schema, database)), String.class);
-
-
-        if (sequenceNames != null) {
-            for (String sequenceName : sequenceNames) {
-                schema.addDatabaseObject(snapshot.snapshot(new Sequence().setName(sequenceName).setSchema(schema)));
+            if (sequenceNames != null) {
+                for (String sequenceName : sequenceNames) {
+                    schema.addDatabaseObject(snapshot.include(new Sequence().setName(sequenceName).setSchema(schema)));
+                }
             }
         }
-        return schema;
     }
 
-    protected Sequence snapshotSequence(Sequence example, DatabaseSnapshot snapshot) throws DatabaseException {
+    @Override
+    protected DatabaseObject snapshotObject(DatabaseObject example, DatabaseSnapshot snapshot) {
         Database database = snapshot.getDatabase();
         if (!database.supportsSequences()) {
             return null;
