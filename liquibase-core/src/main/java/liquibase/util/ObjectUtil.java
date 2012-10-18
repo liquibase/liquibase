@@ -8,6 +8,7 @@ import java.util.Locale;
 import java.util.Map;
 
 import liquibase.statement.DatabaseFunction;
+import liquibase.statement.SequenceFunction;
 
 public class ObjectUtil {
 
@@ -56,6 +57,9 @@ public class ObjectUtil {
                         return;
                     } else if (parameterType.equals(DatabaseFunction.class)) {
                         method.invoke(object, new DatabaseFunction(propertyValue));
+                        return;
+                    } else if (parameterType.equals(SequenceFunction.class)) {
+                        method.invoke(object, new SequenceFunction(propertyValue));
                         return;
                     }
                 }

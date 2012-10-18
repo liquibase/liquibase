@@ -1,7 +1,6 @@
 package liquibase.snapshot.jvm;
 
 import liquibase.database.Database;
-import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.database.core.InformixDatabase;
 import liquibase.database.core.OracleDatabase;
@@ -19,10 +18,10 @@ import liquibase.snapshot.DatabaseSnapshotGeneratorFactory;
 import liquibase.statement.DatabaseFunction;
 import liquibase.statement.core.GetViewDefinitionStatement;
 import liquibase.statement.core.SelectSequencesStatement;
+import liquibase.util.NumberUtils;
 import liquibase.util.StringUtils;
 
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.sql.*;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -222,12 +221,12 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
         return view;
     }
 
-    protected Column readColumn(Map<String, Object> columnMetadataResultSet, Relation table, Database database) throws SQLException, DatabaseException {
-        String rawTableName = (String) columnMetadataResultSet.get("TABLE_NAME");
-        String rawColumnName = (String) columnMetadataResultSet.get("COLUMN_NAME");
-        String rawSchemaName = StringUtils.trimToNull((String) columnMetadataResultSet.get("TABLE_SCHEM"));
-        String rawCatalogName = StringUtils.trimToNull((String) columnMetadataResultSet.get("TABLE_CAT"));
-        String remarks = StringUtils.trimToNull((String) columnMetadataResultSet.get("REMARKS"));
+    protected Column readColumn(Map<String, String> columnMetadataResultSet, Relation table, Database database) throws SQLException, DatabaseException {
+        String rawTableName = columnMetadataResultSet.get("TABLE_NAME");
+        String rawColumnName = columnMetadataResultSet.get("COLUMN_NAME");
+        String rawSchemaName = StringUtils.trimToNull(columnMetadataResultSet.get("TABLE_SCHEM"));
+        String rawCatalogName = StringUtils.trimToNull(columnMetadataResultSet.get("TABLE_CAT"));
+        String remarks = StringUtils.trimToNull(columnMetadataResultSet.get("REMARKS"));
 
         Schema schema = new Schema(rawCatalogName, rawSchemaName);
         if (database.isSystemTable(schema, rawTableName) || database.isSystemView(schema, rawTableName)) {
@@ -239,7 +238,7 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
         column.setRelation(table);
         column.setRemarks(remarks);
 
-        int nullable = (Integer) columnMetadataResultSet.get("NULLABLE");
+        int nullable = NumberUtils.readInteger(columnMetadataResultSet.get("NULLABLE"));
         if (nullable == DatabaseMetaData.columnNoNulls) {
             column.setNullable(false);
         } else if (nullable == DatabaseMetaData.columnNullable) {
@@ -251,7 +250,7 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
 
         if (table instanceof Table) {
             if (columnMetadataResultSet.containsKey("IS_AUTOINCREMENT")) {
-                String isAutoincrement = (String) columnMetadataResultSet.get("IS_AUTOINCREMENT");
+                String isAutoincrement = columnMetadataResultSet.get("IS_AUTOINCREMENT");
                 if (isAutoincrement == null) {
                     column.setAutoIncrement(false);
                 } else if (isAutoincrement.equals("YES")) {
@@ -294,20 +293,23 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
         return column;
     }
 
-    protected DataType readDataType(Map<String, Object> columnMetadataResultSet, Column column, Database database) throws SQLException {
-        String columnTypeName = (String) columnMetadataResultSet.get("TYPE_NAME");
+    protected DataType readDataType(Map<String, String> columnMetadataResultSet, Column column, Database database) throws SQLException {
+        String columnTypeName = columnMetadataResultSet.get("TYPE_NAME");
 
-        int dataType = (Integer) columnMetadataResultSet.get("DATA_TYPE");
-        Integer columnSize = (Integer) columnMetadataResultSet.get("COLUMN_SIZE");
+        int dataType = NumberUtils.readInteger(columnMetadataResultSet.get("DATA_TYPE"));
+        Integer columnSize = NumberUtils.readInteger(columnMetadataResultSet.get("COLUMN_SIZE"));
 
-        Integer decimalDigits = (Integer) columnMetadataResultSet.get("DECIMAL_DIGITS");
+        Integer decimalDigits = NumberUtils.readInteger(columnMetadataResultSet.get("DECIMAL_DIGITS"));
         if (decimalDigits != null && decimalDigits.equals(0)) {
             decimalDigits = null;
         }
+        Integer radix = NumberUtils.readInteger(columnMetadataResultSet.get("NUM_PREC_RADIX"));
 
-        Integer radix = (Integer) columnMetadataResultSet.get("NUM_PREC_RADIX");
+        Integer characterOctetLength = NumberUtils.readInteger(columnMetadataResultSet.get("CHAR_OCTET_LENGTH"));
 
-        Integer characterOctetLength = (Integer) columnMetadataResultSet.get("CHAR_OCTET_LENGTH");
+        if (database.dataTypeIsNotModifiable(columnTypeName)) {
+            columnSize = null;
+        }
 
         DataType type = new DataType(columnTypeName);
         type.setDataTypeId(dataType);
@@ -428,7 +430,7 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
         try {
             allColumnsMetadataRs = databaseMetaData.getColumns(getJdbcCatalogName(schema), getJdbcSchemaName(schema), null, null);
             while (allColumnsMetadataRs.next()) {
-                Map<String, Object> data = convertResultSetToMap(allColumnsMetadataRs, database);
+                Map<String, String> data = convertResultSetToMap(allColumnsMetadataRs, database);
                 String tableOrViewName = cleanObjectNameFromDatabase((String) data.get("TABLE_NAME"));
                 Relation relation = snapshot.getDatabaseObject(schema, tableOrViewName, Table.class);
                 if (relation == null) {
@@ -463,33 +465,8 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
         }
     }
 
-    private Map<String, Object> convertResultSetToMap(ResultSet rs, Database database) throws SQLException {
-        Class[] types = new Class[]{ //matches tableMetadata.getColumns() types. Ugly, but otherwise get wrong types
-                null, //no zero index
-                String.class,
-                String.class,
-                String.class,
-                String.class,
-                int.class,
-                String.class,
-                int.class,
-                String.class,
-                int.class,
-                int.class,
-                int.class,
-                String.class,
-                String.class,
-                int.class,
-                int.class,
-                int.class,
-                int.class,
-                String.class,
-                String.class,
-                String.class,
-                String.class,
-                short.class,
-                String.class
-        };
+    private Map<String, String> convertResultSetToMap(ResultSet rs, Database database) throws SQLException {
+//        Descriptions of the fields in the map
 //        TABLE_CAT String => table catalog (may be null)
 //        TABLE_SCHEM String => table schema (may be null)
 //        TABLE_NAME String => table name
@@ -523,126 +500,128 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
 //        NO --- if the column is not auto incremented
 //        empty string --- if it cannot be determined whether the column is auto incremented parameter is unknown
 
-        Map<String, Object> data = new HashMap<String, Object>();
-        for (int i=1; i< types.length; i++) {
-            Class classType = types[i];
-            Object value;
-            if (classType.equals(String.class)) {
-                value = rs.getString(i);
-            } else if (classType.equals(int.class)) {
-                value = rs.getInt(i);
-            }  else if (classType.equals(short.class)) {
-                value = null; //SOURCE_DATA_TYPE is not used and causes problems on sqlserver jdbc 3.0
-            } else {
-                value = rs.getObject(i);
-            }
+//        The comment for the previous approach was correct in saying that getting the
+//        database type from the result set isColumnAutoIncrement() unreliable.
+
+        ResultSetMetaData metaData = rs.getMetaData();
+        Map<String, String> data = new HashMap<String, String>();
+        for (int i=1; i< metaData.getColumnCount(); i++) {
+            String value = rs.getString(i);
             if (rs.wasNull()) {
                 value = null;
             }
-            data.put(rs.getMetaData().getColumnName(i), value);
+            data.put(rs.getMetaData().getColumnLabel(i), value);
         }
         return data;
     }
 
-    protected Object readDefaultValue(Map<String, Object> columnMetadataResultSet, Column columnInfo, Database database) throws SQLException, DatabaseException {
+    protected Object readDefaultValue(Map<String, String> columnMetadataResultSet, Column columnInfo, Database database) throws SQLException, DatabaseException {
         Object val = columnMetadataResultSet.get("COLUMN_DEF");
 
-        if (val instanceof String && val.equals("")) {
+        if (!(val instanceof String)) {
+            return val;
+        }
+
+        String stringVal = (String) val;
+        if (stringVal.isEmpty()) {
             return null;
         }
 
-        if (val instanceof String) {
-            String stringVal = (String) val;
-            if (stringVal.startsWith("'") && stringVal.endsWith("'")) {
-                stringVal = stringVal.substring(1, stringVal.length() - 1);
-            } else if (stringVal.startsWith("(") && stringVal.endsWith(")")) {
-                return new DatabaseFunction(stringVal.substring(1, stringVal.length() - 1));
-            }
+        if (stringVal.startsWith("'") && stringVal.endsWith("'")) {
+            stringVal = stringVal.substring(1, stringVal.length() - 1);
+        } else if (stringVal.startsWith("(") && stringVal.endsWith(")")) {
+            return new DatabaseFunction(stringVal.substring(1, stringVal.length() - 1));
+        }
 
-            int type = columnInfo.getType().getDataTypeId();
-            try {
-                if (type == Types.ARRAY) {
-                    return new DatabaseFunction(stringVal);
-                } else if (type == Types.BIGINT) {
-                    return new BigInteger(stringVal.trim());
-                } else if (type == Types.BINARY) {
-                    return new DatabaseFunction(stringVal.trim());
-                } else if (type == Types.BIT) {
-                    if (stringVal.startsWith("b'")) { //mysql returns boolean values as b'0' and b'1'
-                        stringVal = stringVal.replaceFirst("b'", "").replaceFirst("'$", "");
-                    }
-                    return new Integer(stringVal.trim());
-                } else if (type == Types.BLOB) {
-                    return new DatabaseFunction(stringVal);
-                } else if (type == Types.BOOLEAN) {
-                    return Boolean.valueOf(stringVal.trim());
-                } else if (type == Types.CHAR) {
-                    return stringVal;
-                } else if (type == Types.DATALINK) {
-                    return new DatabaseFunction(stringVal);
-                } else if (type == Types.DATE) {
-                    return new java.sql.Date(getDateFormat().parse(stringVal.trim()).getTime());
-                } else if (type == Types.DECIMAL) {
-                    return new BigDecimal(stringVal.trim());
-                } else if (type == Types.DISTINCT) {
-                    return new DatabaseFunction(stringVal);
-                } else if (type == Types.DOUBLE) {
-                    return Double.valueOf(stringVal.trim());
-                } else if (type == Types.FLOAT) {
-                    return Float.valueOf(stringVal.trim());
-                } else if (type == Types.INTEGER) {
-                    return Integer.valueOf(stringVal.trim());
-                } else if (type == Types.JAVA_OBJECT) {
-                    return new DatabaseFunction(stringVal);
-                } else if (type == Types.LONGNVARCHAR) {
-                    return stringVal;
-                } else if (type == Types.LONGVARBINARY) {
-                    return new DatabaseFunction(stringVal);
-                } else if (type == Types.LONGVARCHAR) {
-                    return stringVal;
-                } else if (type == Types.NCHAR) {
-                    return stringVal;
-                } else if (type == Types.NCLOB) {
-                    return stringVal;
-                } else if (type == Types.NULL) {
-                    return null;
-                } else if (type == Types.NUMERIC) {
-                    return new BigDecimal(stringVal.trim());
-                } else if (type == Types.NVARCHAR) {
-                    return stringVal;
-                } else if (type == Types.OTHER) {
-                    return new DatabaseFunction(stringVal);
-                } else if (type == Types.REAL) {
-                    return new BigDecimal(stringVal.trim());
-                } else if (type == Types.REF) {
-                    return new DatabaseFunction(stringVal);
-                } else if (type == Types.ROWID) {
-                    return new DatabaseFunction(stringVal);
-                } else if (type == Types.SMALLINT) {
-                    return Integer.valueOf(stringVal.trim());
-                } else if (type == Types.SQLXML) {
-                    return new DatabaseFunction(stringVal);
-                } else if (type == Types.STRUCT) {
-                    return new DatabaseFunction(stringVal);
-                } else if (type == Types.TIME) {
-                    return new java.sql.Time(getTimeFormat().parse(stringVal).getTime());
-                } else if (type == Types.TIMESTAMP) {
-                    return new Timestamp(getDateTimeFormat().parse(stringVal).getTime());
-                } else if (type == Types.TINYINT) {
-                    return Integer.valueOf(stringVal.trim());
-                } else if (type == Types.VARBINARY) {
-                    return new DatabaseFunction(stringVal);
-                } else if (type == Types.VARCHAR) {
-                    return stringVal;
-                } else {
-                    LogFactory.getLogger().info("Unknown type: " + type);
-                    return new DatabaseFunction(stringVal);
+        int type = columnInfo.getType().getDataTypeId();
+        String typeName = columnInfo.getType().getTypeName();
+        Scanner scanner = new Scanner(stringVal.trim());
+        try {
+            if (type == Types.ARRAY) {
+                return new DatabaseFunction(stringVal);
+            } else if (type == Types.BIGINT && scanner.hasNextBigInteger()) {
+                return scanner.nextBigInteger();
+            } else if (type == Types.BINARY) {
+                return new DatabaseFunction(stringVal.trim());
+            } else if (type == Types.BIT) {
+                if (stringVal.startsWith("b'")) { //mysql returns boolean values as b'0' and b'1'
+                    stringVal = stringVal.replaceFirst("b'", "").replaceFirst("'$", "");
                 }
-            } catch (ParseException e) {
+                stringVal = stringVal.trim();
+                if (scanner.hasNextBoolean()) {
+                    return scanner.nextBoolean();
+                } else {
+                    return new Integer(stringVal);
+                }
+            } else if (type == Types.BLOB) {
+                return new DatabaseFunction(stringVal);
+            } else if (type == Types.BOOLEAN && scanner.hasNextBoolean()) {
+                return scanner.nextBoolean();
+            } else if (type == Types.CHAR) {
+                return stringVal;
+            } else if (type == Types.DATALINK) {
+                return new DatabaseFunction(stringVal);
+            } else if (type == Types.DATE) {
+                return new java.sql.Date(getDateFormat().parse(stringVal.trim()).getTime());
+            } else if (type == Types.DECIMAL && scanner.hasNextBigDecimal()) {
+                return scanner.nextBigDecimal();
+            } else if (type == Types.DISTINCT) {
+                return new DatabaseFunction(stringVal);
+            } else if (type == Types.DOUBLE && scanner.hasNextDouble()) {
+                return scanner.nextDouble();
+            } else if (type == Types.FLOAT && scanner.hasNextFloat()) {
+                return scanner.nextFloat();
+            } else if (type == Types.INTEGER && scanner.hasNextInt()) {
+                return scanner.nextInt();
+            } else if (type == Types.JAVA_OBJECT) {
+                return new DatabaseFunction(stringVal);
+            } else if (type == Types.LONGNVARCHAR) {
+                return stringVal;
+            } else if (type == Types.LONGVARBINARY) {
+                return new DatabaseFunction(stringVal);
+            } else if (type == Types.LONGVARCHAR) {
+                return stringVal;
+            } else if (type == Types.NCHAR) {
+                return stringVal;
+            } else if (type == Types.NCLOB) {
+                return stringVal;
+            } else if (type == Types.NULL) {
+                return null;
+            } else if (type == Types.NUMERIC && scanner.hasNextBigDecimal()) {
+                return scanner.nextBigDecimal();
+            } else if (type == Types.NVARCHAR) {
+                return stringVal;
+            } else if (type == Types.OTHER) {
+                return new DatabaseFunction(stringVal);
+            } else if (type == Types.REAL) {
+                return new BigDecimal(stringVal.trim());
+            } else if (type == Types.REF) {
+                return new DatabaseFunction(stringVal);
+            } else if (type == Types.ROWID) {
+                return new DatabaseFunction(stringVal);
+            } else if (type == Types.SMALLINT && scanner.hasNextInt()) {
+                return scanner.nextInt();
+            } else if (type == Types.SQLXML) {
+                return new DatabaseFunction(stringVal);
+            } else if (type == Types.STRUCT) {
+                return new DatabaseFunction(stringVal);
+            } else if (type == Types.TIME) {
+                return new java.sql.Time(getTimeFormat().parse(stringVal).getTime());
+            } else if (type == Types.TIMESTAMP) {
+                return new Timestamp(getDateTimeFormat().parse(stringVal).getTime());
+            } else if (type == Types.TINYINT && scanner.hasNextInt()) {
+                return scanner.nextInt();
+            } else if (type == Types.VARBINARY) {
+                return new DatabaseFunction(stringVal);
+            } else if (type == Types.VARCHAR) {
+                return stringVal;
+            } else {
+                LogFactory.getLogger().info("Unknown default value: value [" + stringVal + "] type [" + typeName + " " + type + "]");
                 return new DatabaseFunction(stringVal);
             }
+        } catch (ParseException e) {
+            return new DatabaseFunction(stringVal);
         }
-        return val;
     }
 
     protected void readForeignKeys(DatabaseSnapshot snapshot, Schema schema, DatabaseMetaData databaseMetaData) throws DatabaseException, SQLException {
@@ -721,7 +700,8 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
 
             if (columnNames != null) {
                 Map<String, TreeMap<Short, String>> columnsByIndexName = new HashMap<String, TreeMap<Short, String>>();
-                ResultSet rs = getMetaData(database).getIndexInfo(getJdbcCatalogName(schema), getJdbcSchemaName(schema), database.correctObjectName(tableName, Table.class), false, true);
+                ResultSet rs = getMetaData(database).getIndexInfo(getJdbcCatalogName(schema), getJdbcSchemaName(schema),
+                        database.correctObjectName(tableName, Table.class), false, true);
                 try {
                     while (rs.next()) {
                         String foundIndexName = rs.getString("INDEX_NAME");
@@ -747,14 +727,14 @@ public abstract class JdbcDatabaseSnapshotGenerator implements DatabaseSnapshotG
                         if (foundIndex.equals(index, database)) {
                             return true;
                         }
-                        return false;
                     }
                     return false;
                 } finally {
                     rs.close();
                 }
             } else if (indexName != null) {
-                    ResultSet rs = getMetaData(database).getIndexInfo(getJdbcCatalogName(schema), getJdbcSchemaName(schema), database.correctObjectName(tableName, Table.class), false, true);
+                    ResultSet rs = getMetaData(database).getIndexInfo(getJdbcCatalogName(schema),
+                            getJdbcSchemaName(schema), database.correctObjectName(tableName, Table.class), false, true);
                     try {
                         while (rs.next()) {
                             Index foundIndex =  new Index()

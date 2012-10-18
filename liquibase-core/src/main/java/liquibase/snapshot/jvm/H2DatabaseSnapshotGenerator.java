@@ -22,7 +22,7 @@ public class H2DatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerator {
     }
 
     @Override
-    protected Object readDefaultValue(Map<String, Object> columnMetadataResultSet, Column columnInfo, Database database) throws SQLException, DatabaseException {
+    protected Object readDefaultValue(Map<String, String> columnMetadataResultSet, Column columnInfo, Database database) throws SQLException, DatabaseException {
         Object defaultValue = super.readDefaultValue(columnMetadataResultSet, columnInfo, database);
         if (defaultValue != null && defaultValue instanceof DatabaseFunction && ((DatabaseFunction) defaultValue).getValue().startsWith("NEXT VALUE FOR ")) {
             columnInfo.setAutoIncrement(true);

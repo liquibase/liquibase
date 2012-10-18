@@ -198,6 +198,10 @@ public class MockDatabase implements Database {
     public void setCurrentDateTimeFunction(String function) {
     }
 
+    public String generateSequenceNextValueFunction(final String sequenceName) {
+        return "NEXTVAL('" + sequenceName + "')";
+    }
+
     public String getLineComment() {
         return null;
     }
@@ -535,5 +539,9 @@ public class MockDatabase implements Database {
 
     public int getDataTypeMaxParameters(String dataTypeName) {
         return 2;
+    }
+
+    public boolean dataTypeIsNotModifiable(final String typeName) {
+        return true;
     }
 }

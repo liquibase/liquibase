@@ -276,6 +276,9 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
         if (columnConfig.getValueComputed() != null) {
             element.setAttribute("valueComputed", columnConfig.getValueComputed().toString());
         }
+        if (columnConfig.getValueSequenceNext() != null) {
+            element.setAttribute("valueSequenceNext", columnConfig.getValueSequenceNext().toString());
+        }
         if (StringUtils.trimToNull(columnConfig.getRemarks()) != null) {
             element.setAttribute("remarks", columnConfig.getRemarks());
         }

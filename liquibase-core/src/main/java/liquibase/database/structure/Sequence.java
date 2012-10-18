@@ -13,8 +13,9 @@ public class Sequence extends DatabaseObjectImpl implements Comparable<Sequence>
         return name;
     }
 
-    public void setName(String name) {
+    public Sequence setName(String name) {
         this.name = name;
+        return this;
     }
 
 

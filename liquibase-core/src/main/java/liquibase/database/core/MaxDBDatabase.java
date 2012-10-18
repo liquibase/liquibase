@@ -80,6 +80,8 @@ public class MaxDBDatabase extends AbstractDatabase {
         systemTablesAndViews.add("TRANSACTIONS");
         systemTablesAndViews.add("UNLOADEDSTATEMENTS");
         systemTablesAndViews.add("VERSION");
+        super.sequenceNextValueFunction = "%s.NEXTVAL";
+
     }
 
     public int getPriority() {

@@ -31,6 +31,7 @@ public class OracleDatabase extends AbstractDatabase {
 		dateFunctions.add(new DatabaseFunction("SYSDATE"));
 		dateFunctions.add(new DatabaseFunction("SYSTIMESTAMP"));
         dateFunctions.add(new DatabaseFunction("CURRENT_TIMESTAMP"));
+        super.sequenceNextValueFunction = "%s.nextval)";
 	}
 
 	public int getPriority() {

@@ -20,10 +20,10 @@ public class DerbyDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerato
     }
 
     @Override
-    protected Object readDefaultValue(Map<String, Object> columnMetadataResultSet, Column columnInfo, Database database) throws SQLException, DatabaseException {
+    protected Object readDefaultValue(Map<String, String> columnMetadataResultSet, Column columnInfo, Database database) throws SQLException, DatabaseException {
         Object val = columnMetadataResultSet.get("COLUMN_DEF");
 
-        if (val instanceof String && "GENERATED_BY_DEFAULT".equals(val)) {
+        if ("GENERATED_BY_DEFAULT".equals(val)) {
             return null;
         }
         return super.readDefaultValue(columnMetadataResultSet, columnInfo, database);

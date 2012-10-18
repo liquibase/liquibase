@@ -50,8 +50,8 @@ public class CreateIndexGeneratorPostgres extends CreateIndexGenerator {
 	    buffer.append("INDEX ");
 
 	    if (statement.getIndexName() != null) {
-            String indexSchema = statement.getTableSchemaName();
-            buffer.append(database.escapeIndexName(null, indexSchema, statement.getIndexName())).append(" ");
+            // for postgres setting the schema name for the index name is invalid
+            buffer.append(database.escapeDatabaseObject(statement.getIndexName(), Index.class)).append(" ");
 	    }
 	    buffer.append("ON ");
 	    buffer.append(database.escapeTableName(statement.getTableCatalogName(), statement.getTableSchemaName(), statement.getTableName())).append("(");

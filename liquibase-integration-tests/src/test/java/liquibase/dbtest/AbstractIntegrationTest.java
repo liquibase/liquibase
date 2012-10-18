@@ -113,7 +113,8 @@ public abstract class AbstractIntegrationTest {
             database.checkDatabaseChangeLogLockTable();
 
             if (database.getConnection() != null) {
-                ((JdbcConnection) database.getConnection()).getUnderlyingConnection().createStatement().executeUpdate("drop table "+database.getDatabaseChangeLogLockTableName());
+                String dropTableCommand = "drop table " + database.escapeTableName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(),database.getDatabaseChangeLogLockTableName());
+                ((JdbcConnection) database.getConnection()).getUnderlyingConnection().createStatement().executeUpdate(dropTableCommand);
                 database.commit();
             }
 
@@ -201,7 +202,7 @@ public abstract class AbstractIntegrationTest {
 
     protected Schema[] getSchemasToDrop() throws DatabaseException {
         return new Schema[]{
-                new Schema(new Catalog(null), "liquibaseb".toUpperCase()),
+                new Schema(new Catalog(null), database.escapeDatabaseObject("liquibaseb", Schema.class)),
                 new Schema(new Catalog(null), database.getDefaultSchemaName())
         };
     }
@@ -415,6 +416,7 @@ public abstract class AbstractIntegrationTest {
             } finally {
                 output.close();
             }
+
 
             Liquibase liquibase = createLiquibase(tempFile.getName());
             clearDatabase(liquibase);
@@ -828,6 +830,9 @@ public abstract class AbstractIntegrationTest {
 
     @Test
     public void invalidIncludeDoesntBreakLiquibase() throws Exception{
+        if (database == null) {
+            return;
+        }
         Liquibase liquibase = createLiquibase(invalidReferenceChangeLog);
         try {
             liquibase.update(null);
@@ -841,6 +846,9 @@ public abstract class AbstractIntegrationTest {
 
     @Test
     public void contextsWithHyphensWorkInFormattedSql() throws Exception {
+        if (database == null) {
+            return;
+        }
         Liquibase liquibase = createLiquibase("changelogs/common/sqlstyle/formatted.changelog.sql");
         liquibase.update("hyphen-context-using-sql,camelCaseContextUsingSql");
 

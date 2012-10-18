@@ -125,12 +125,17 @@ public class DataTypeFactory {
             }
         }
 
+        /*
+        The block below seems logically incomplete.
+        It will always end up putting the second word after the entire type name
+        e.g. character varying will become CHARACTER VARYING varying
+
         //try to something like "int(11) unsigned" or int unsigned but not "varchar(11 bytes)"
         String lookingForAdditionalInfo = dataTypeDefinition;
         lookingForAdditionalInfo = lookingForAdditionalInfo.replaceFirst("\\(.*\\)", "");
         if (lookingForAdditionalInfo.contains(" ")) {
             liquibaseDataType.setAdditionalInformation(lookingForAdditionalInfo.split(" ", 2)[1]);
-        }
+        }*/
 
         if (dataTypeDefinition.matches(".*\\{.*")) {
             String paramStrings = dataTypeDefinition.replaceFirst(".*?\\{", "").replaceFirst("\\}.*", "");

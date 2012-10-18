@@ -12,7 +12,14 @@ public class CharType extends LiquibaseDataType {
         if (value == null || value.toString().equalsIgnoreCase("null")) {
             return null;
         }
-        return "'"+value+"'";
+        String val = String.valueOf(value);
+        // postgres type character varying gets identified as a char type
+        // simple sanity check to avoid double quoting a value
+        if (val.startsWith("'")) {
+            return val;
+        } else {
+            return "'"+val+"'";
+        }
     }
 
 }
