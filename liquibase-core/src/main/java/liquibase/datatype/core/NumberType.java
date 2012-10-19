@@ -10,7 +10,8 @@ import liquibase.datatype.LiquibaseDataType;
 public class NumberType extends LiquibaseDataType {
     @Override
     public DatabaseDataType toDatabaseDataType(Database database) {
-        if (database instanceof MySQLDatabase || database instanceof DB2Database|| database instanceof MSSQLDatabase || database instanceof HsqlDatabase || database instanceof DerbyDatabase) {
+        if (database instanceof MySQLDatabase || database instanceof DB2Database|| database instanceof MSSQLDatabase
+                || database instanceof HsqlDatabase || database instanceof DerbyDatabase || database instanceof PostgresDatabase) {
             return new DatabaseDataType("numeric", getParameters());
         }
         return super.toDatabaseDataType(database);

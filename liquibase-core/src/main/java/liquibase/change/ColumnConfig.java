@@ -8,6 +8,7 @@ import java.util.Locale;
 
 import liquibase.database.structure.Column;
 import liquibase.statement.DatabaseFunction;
+import liquibase.statement.SequenceFunction;
 import liquibase.util.ISODateFormat;
 
 /**
@@ -25,6 +26,7 @@ public class ColumnConfig {
     private String valueBlob;
     private String valueClob;
     private DatabaseFunction valueComputed;
+    private SequenceFunction valueSequenceNext;
 
     private String defaultValue;
     private Number defaultValueNumeric;
@@ -168,6 +170,14 @@ public class ColumnConfig {
         return this;
     }
 
+    public SequenceFunction getValueSequenceNext() {
+        return valueSequenceNext;
+    }
+
+    public void setValueSequenceNext(final SequenceFunction valueSequenceNext) {
+        this.valueSequenceNext = valueSequenceNext;
+    }
+
     public Date getValueDate() {
         return valueDate;
     }
@@ -204,6 +214,8 @@ public class ColumnConfig {
             return getValueDate();
         } else if (getValueComputed() != null) {
             return getValueComputed();
+        } else if (getValueSequenceNext() != null) {
+            return getValueSequenceNext();
         }
         return null;
     }

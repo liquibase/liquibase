@@ -12,6 +12,11 @@ import liquibase.exception.DatabaseException;
  */
 public class FirebirdDatabase extends AbstractDatabase {
 
+    public FirebirdDatabase() {
+        super();
+        super.sequenceNextValueFunction = "NEXT VALUE FOR %s";
+    }
+
     public boolean isCorrectDatabaseImplementation(DatabaseConnection conn) throws DatabaseException {
         return conn.getDatabaseProductName().startsWith("Firebird");
     }

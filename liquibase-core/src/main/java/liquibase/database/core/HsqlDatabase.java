@@ -24,6 +24,7 @@ public class HsqlDatabase extends AbstractDatabase {
     public HsqlDatabase() {
     	super();
     	super.defaultAutoIncrementStartWith = BigInteger.ZERO;
+        super.sequenceNextValueFunction = "NEXT VALUE FOR %s";
     }
     
     public boolean isCorrectDatabaseImplementation(DatabaseConnection conn) throws DatabaseException {

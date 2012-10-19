@@ -15,6 +15,12 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 
 public class DB2Database extends AbstractDatabase {
+
+    public DB2Database() {
+        super();
+        super.sequenceNextValueFunction = "nextval for %s";
+    }
+
     private String defaultSchemaName;
 
     public boolean isCorrectDatabaseImplementation(DatabaseConnection conn) throws DatabaseException {

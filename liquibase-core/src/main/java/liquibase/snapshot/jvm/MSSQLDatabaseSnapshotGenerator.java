@@ -39,15 +39,12 @@ public class MSSQLDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerato
     }
 
     @Override
-    protected Object readDefaultValue(Map<String, Object> columnMetadataResultSet, Column columnInfo, Database database) throws SQLException, DatabaseException {
-        Object defaultValue = columnMetadataResultSet.get("COLUMN_DEF");
+    protected Object readDefaultValue(Map<String, String> columnMetadataResultSet, Column columnInfo, Database database) throws SQLException, DatabaseException {
+        String defaultValue = columnMetadataResultSet.get("COLUMN_DEF");
 
-        if (defaultValue != null && defaultValue instanceof String) {
-            String newValue = null;
-            if (defaultValue.equals("(NULL)")) {
-                newValue = null;
-            }
-            columnMetadataResultSet.put("COLUMN_DEF", newValue);
+        // todo: decide if we were handling anything else here
+        if (defaultValue.equals("(NULL)")) {
+            columnMetadataResultSet.put("COLUMN_DEF", null);
         }
         return super.readDefaultValue(columnMetadataResultSet, columnInfo, database);
     }

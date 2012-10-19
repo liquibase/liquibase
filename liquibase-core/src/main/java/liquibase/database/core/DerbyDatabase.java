@@ -25,6 +25,7 @@ public class DerbyDatabase extends AbstractDatabase {
 
     public DerbyDatabase() {
         determineDriverVersion();
+        super.sequenceNextValueFunction = "NEXT VALUE FOR %s";
     }
 
     public boolean isCorrectDatabaseImplementation(DatabaseConnection conn) throws DatabaseException {

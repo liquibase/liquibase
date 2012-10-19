@@ -193,4 +193,16 @@ public abstract class NumberUtils {
 		return (negative ? result.negate() : result);
 	}
 
+    /**
+     * Convenience method for converting a string to an Integer object
+     * @param value string value
+     * @return Null if the value is null, otherwise the converted integer
+     */
+    public static Integer readInteger(String value) {
+        if (value == null) {
+            return null;
+        }
+        return Integer.valueOf(value);
+    }
+
 }

@@ -263,6 +263,7 @@
 		<xsd:attribute name="valueBoolean" type="xsd:string" />
 		<xsd:attribute name="valueDate" type="xsd:string" />
 		<xsd:attribute name="valueComputed" type="xsd:string" />
+        <xsd:attribute name="valueSequenceNext" type="xsd:string" />
 		<xsd:attribute name="defaultValue" type="xsd:string" />
 		<xsd:attribute name="defaultValueNumeric" type="xsd:string" />
 		<xsd:attribute name="defaultValueDate" type="xsd:string" />

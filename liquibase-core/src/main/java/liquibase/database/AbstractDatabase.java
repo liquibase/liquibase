@@ -52,8 +52,15 @@ public abstract class AbstractDatabase implements Database {
 
     protected String currentDateTimeFunction;
 
+    /**
+     * The sequence name will be substituted into the string e.g. NEXTVAL('%s')
+     */
+    protected String sequenceNextValueFunction;
+
     // List of Database native functions.
     protected List<DatabaseFunction> dateFunctions = new ArrayList<DatabaseFunction>();
+
+    protected List<String> unmodifiableDataTypes = new ArrayList<String>();
 
     private List<RanChangeSet> ranChangeSetList;
 
@@ -75,6 +82,7 @@ public abstract class AbstractDatabase implements Database {
 
     protected AbstractDatabase() {
         this.dateFunctions.add(new DatabaseFunction(getCurrentDateTimeFunction()));
+        this.sequenceNextValueFunction = "NEXTVAL('%s')";
     }
 
     public String getName() {
@@ -522,6 +530,13 @@ public abstract class AbstractDatabase implements Database {
         return returnString.toString().replaceFirst(" \\|\\| $", "");
     }
 
+    public String generateSequenceNextValueFunction(String sequenceName) {
+        if (sequenceNextValueFunction == null) {
+            return null;
+        }
+        return String.format(sequenceNextValueFunction, this.escapeDatabaseObject(sequenceName, Sequence.class));
+    }
+
 // ------- DATABASECHANGELOG / DATABASECHANGELOGLOCK METHODS ---- //
 
     /**
@@ -809,7 +824,6 @@ public abstract class AbstractDatabase implements Database {
                 }
             }
 
-
             if (snapshot.hasDatabaseChangeLogTable()) {
                 dropChanges.add(new AnonymousChange(new ClearDatabaseChangeLogTableStatement(schema.getCatalogName(), schema.getName())));
             }
@@ -837,7 +851,8 @@ public abstract class AbstractDatabase implements Database {
                  || this instanceof FirebirdDatabase
                  || this instanceof SQLiteDatabase
                  || this instanceof SybaseDatabase
-                 || this instanceof SybaseASADatabase);
+                 || this instanceof SybaseASADatabase
+                 || this instanceof PostgresDatabase);
     }
 
     public boolean isSystemTable(Schema schema, String tableName) {
@@ -1336,5 +1351,9 @@ public abstract class AbstractDatabase implements Database {
 
     public int getDataTypeMaxParameters(String dataTypeName) {
         return 2;
+    }
+
+    public boolean dataTypeIsNotModifiable(final String typeName) {
+        return unmodifiableDataTypes.contains(typeName.toLowerCase());
     }
 }

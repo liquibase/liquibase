@@ -92,6 +92,7 @@ public class InformixDatabase extends AbstractDatabase {
 
 		systemTablesAndViews.add("sysdomains");
 		systemTablesAndViews.add("sysindexes");
+        super.sequenceNextValueFunction = "%s.NEXTVAL";
 	}
 
 	@Override
