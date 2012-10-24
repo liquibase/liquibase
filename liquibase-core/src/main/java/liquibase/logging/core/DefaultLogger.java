@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.text.DateFormat;
 import java.util.Date;
+import java.util.Stack;
 
 public class DefaultLogger extends AbstractLogger {
 
@@ -59,7 +60,7 @@ public class DefaultLogger extends AbstractLogger {
             return;
         }
         
-        err.println(logLevel+" "+DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(new Date())+ ":"+name + ": " + message);
+        err.println(logLevel+" "+DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(new Date())+ ":"+name + ":" + getContext() + ": " + message);
     }
 
     public void severe(String message, Throwable e) {
@@ -108,4 +109,5 @@ public class DefaultLogger extends AbstractLogger {
         }
 
     }
+
 }

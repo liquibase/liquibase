@@ -23,6 +23,8 @@ public class UpdateVisitor implements ChangeSetVisitor {
 
     public void visit(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database) throws LiquibaseException {
         ChangeSet.RunStatus runStatus = this.database.getRunStatus(changeSet);
+        log.pushContext("Changeset " + changeSet.getId());
+        try {
         log.debug("Running Changeset:" + changeSet);
         ChangeSet.ExecType execType = changeSet.execute(databaseChangeLog, this.database);
         if (!runStatus.equals(ChangeSet.RunStatus.NOT_RAN)) {
@@ -32,5 +34,9 @@ public class UpdateVisitor implements ChangeSetVisitor {
         this.database.markChangeSetExecStatus(changeSet, execType);
 
         this.database.commit();
+        }
+        finally {
+            log.popContext();
+        }
     }
 }
