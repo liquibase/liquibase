@@ -148,10 +148,15 @@ public class SnapshotGeneratorFactory {
             return snapshot.get(example);
     }
 
-    public Table getDatabaseChangeLogTable(Database database) throws DatabaseException {
+    public <T extends DatabaseObject> T createSnapshot(T example, Database database, SnapshotControl snapshotControl) throws DatabaseException, InvalidExampleException {
+        DatabaseSnapshot snapshot = createSnapshot(snapshotControl, database, example);
+        return snapshot.get(example);
+    }
+
+    public Table getDatabaseChangeLogTable(SnapshotControl snapshotControl, Database database) throws DatabaseException {
         try {
             Table liquibaseTable = (Table) new Table().setName(database.getDatabaseChangeLogTableName()).setSchema(new Schema(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName()));
-            return createSnapshot(liquibaseTable, database);
+            return createSnapshot(liquibaseTable, database, snapshotControl);
         } catch (InvalidExampleException e) {
             throw new UnexpectedLiquibaseException(e);
         }

@@ -70,7 +70,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
 
             DatabaseMetaData databaseMetaData = getMetaData(database);
 
-            columnMetadataRs = databaseMetaData.getColumns(database.getJdbcCatalogName(schema), database.getJdbcSchemaName(schema), relation.getName(), ((Column) example).getName());
+            columnMetadataRs = databaseMetaData.getColumns(database.getJdbcCatalogName(schema), database.getJdbcSchemaName(schema), database.correctObjectName(relation.getName(), Table.class), database.correctObjectName(example.getName(), Column.class));
 
             if (columnMetadataRs.next()) {
                 Map<String, Object> data = convertResultSetToMap(columnMetadataRs);
@@ -107,7 +107,10 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
 
                 while (allColumnsMetadataRs.next()) {
                     Column exampleColumn = new Column().setRelation(relation).setName(allColumnsMetadataRs.getString("COLUMN_NAME"));
-                    relation.getColumns().add(snapshot.include(exampleColumn));
+                    Column column = snapshot.include(exampleColumn);
+                    if (column != null) {
+                        relation.getColumns().add(column);
+                    }
                 }
             } catch (Exception e) {
                 throw new DatabaseException(e);

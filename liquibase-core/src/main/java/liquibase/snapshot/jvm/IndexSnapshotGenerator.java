@@ -182,11 +182,11 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
     protected DatabaseObject snapshotObject(DatabaseObject example, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException {
         Database database = snapshot.getDatabase();
         Table exampleTable = ((Index) example).getTable();
-        Schema schema = exampleTable.getSchema();
+        Schema schema = new Schema(database.getDefaultCatalogName(), database.getDefaultSchemaName()); //todo exampleTable.getSchema();
 
         List<Table> tables = new ArrayList<Table>();
         if (exampleTable.getName() == null) {
-            DatabaseSnapshot tableSnapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(new SnapshotControl(Table.class), database); //todo: don't get from Factory
+            DatabaseSnapshot tableSnapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(new SnapshotControl(Schema.class, Table.class), database, schema); //todo: don't get from Factory
             tables.addAll(tableSnapshot.getAll(Table.class));
         } else {
             tables.add(exampleTable);
@@ -204,13 +204,13 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                     String sql = "SELECT INDEX_NAME, 3 AS TYPE, TABLE_NAME, COLUMN_NAME, COLUMN_POSITION AS ORDINAL_POSITION, null AS FILTER_CONDITION FROM ALL_IND_COLUMNS WHERE TABLE_OWNER='" + schema.getName() + "' AND TABLE_NAME='" + table.getName() + "' AND INDEX_NAME='" + example.getName() + "' ORDER BY INDEX_NAME, ORDINAL_POSITION";
                     rs = statement.executeQuery(sql);
                 } else {
-                    rs = databaseMetaData.getIndexInfo(database.getJdbcCatalogName(schema), database.getJdbcSchemaName(schema), table.getName(), false, true);
+                    rs = databaseMetaData.getIndexInfo(database.getJdbcCatalogName(schema), database.getJdbcSchemaName(schema), database.correctObjectName(table.getName(), Table.class), false, true);
                 }
 
                 Index returnIndex = null;
                 while (rs.next()) {
                     String indexName = cleanNameFromDatabase(rs.getString("INDEX_NAME"), database);
-                    if (example.getName() != null && !indexName.equals(example.getName())) {
+                    if (example.getName() != null && !indexName.equalsIgnoreCase(example.getName())) { //todo not ignorecase
                         continue;
                     }
                     /*
@@ -267,7 +267,9 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                     }
                     returnIndex.getColumns().set(position - 1, columnName);
                 }
-                return returnIndex;
+                if (returnIndex != null) {
+                    return returnIndex;
+                }
             } catch (Exception e) {
                 throw new DatabaseException(e);
             } finally {
@@ -286,6 +288,7 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
             }
         }
 
+        return null;
         //todo?
 //        Set<Index> indexesToRemove = new HashSet<Index>();
 
@@ -313,7 +316,6 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
 //
 //        }
 //        snapshot.removeDatabaseObjects(schema, indexesToRemove.toArray(new Index[indexesToRemove.size()]));
-        return null;
     }
 
     //METHOD FROM SQLIteDatabaseSnapshotGenerator

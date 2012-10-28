@@ -568,7 +568,7 @@ public abstract class AbstractDatabase implements Database {
 
         Table changeLogTable = null;
         try {
-            changeLogTable = SnapshotGeneratorFactory.getInstance().getDatabaseChangeLogTable(this);
+            changeLogTable = SnapshotGeneratorFactory.getInstance().getDatabaseChangeLogTable(new SnapshotControl(Table.class, Column.class), this);
         } catch (LiquibaseException e) {
             throw new UnexpectedLiquibaseException(e);
         }
