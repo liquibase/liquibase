@@ -1,6 +1,7 @@
 package liquibase.snapshot.jvm;
 
 import liquibase.CatalogAndSchema;
+import liquibase.database.AbstractDatabase;
 import liquibase.database.Database;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
@@ -42,7 +43,7 @@ public class CatalogSnapshotGenerator extends JdbcSnapshotGenerator {
         try {
             catalogs = ((JdbcConnection) database.getConnection()).getMetaData().getCatalogs();
             while (catalogs.next()) {
-                CatalogAndSchema schemaFromJdbcInfo = database.getSchemaFromJdbcInfo(catalogs.getString("TABLE_CAT"), null);
+                CatalogAndSchema schemaFromJdbcInfo = ((AbstractDatabase) database).getSchemaFromJdbcInfo(catalogs.getString("TABLE_CAT"), null);
 
                 Catalog catalog = new Catalog(schemaFromJdbcInfo.getCatalogName());
 

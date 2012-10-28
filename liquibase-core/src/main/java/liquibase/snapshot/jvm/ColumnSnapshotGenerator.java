@@ -1,5 +1,6 @@
 package liquibase.snapshot.jvm;
 
+import liquibase.database.AbstractDatabase;
 import liquibase.database.Database;
 import liquibase.database.core.MySQLDatabase;
 import liquibase.database.jvm.JdbcConnection;
@@ -70,7 +71,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
 
             DatabaseMetaData databaseMetaData = getMetaData(database);
 
-            columnMetadataRs = databaseMetaData.getColumns(database.getJdbcCatalogName(schema), database.getJdbcSchemaName(schema), database.correctObjectName(relation.getName(), Table.class), database.correctObjectName(example.getName(), Column.class));
+            columnMetadataRs = databaseMetaData.getColumns(((AbstractDatabase) database).getJdbcCatalogName(schema), ((AbstractDatabase) database).getJdbcSchemaName(schema), database.correctObjectName(relation.getName(), Table.class), database.correctObjectName(example.getName(), Column.class));
 
             if (columnMetadataRs.next()) {
                 Map<String, Object> data = convertResultSetToMap(columnMetadataRs);
@@ -103,7 +104,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                 Schema schema;
 
                 schema = relation.getSchema();
-                allColumnsMetadataRs = databaseMetaData.getColumns(database.getJdbcCatalogName(schema), database.getJdbcSchemaName(schema), relation.getName(), null);
+                allColumnsMetadataRs = databaseMetaData.getColumns(((AbstractDatabase) database).getJdbcCatalogName(schema), ((AbstractDatabase) database).getJdbcSchemaName(schema), relation.getName(), null);
 
                 while (allColumnsMetadataRs.next()) {
                     Column exampleColumn = new Column().setRelation(relation).setName(allColumnsMetadataRs.getString("COLUMN_NAME"));

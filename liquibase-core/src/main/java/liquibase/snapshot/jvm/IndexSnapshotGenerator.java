@@ -1,5 +1,6 @@
 package liquibase.snapshot.jvm;
 
+import liquibase.database.AbstractDatabase;
 import liquibase.database.Database;
 import liquibase.database.core.InformixDatabase;
 import liquibase.database.core.OracleDatabase;
@@ -153,7 +154,7 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                     String sql = "SELECT INDEX_NAME FROM ALL_IND_COLUMNS WHERE TABLE_OWNER='" + schema.getName() + "' AND TABLE_NAME='" + table.getName() + "'";
                     rs = statement.executeQuery(sql);
                 } else {
-                    rs = databaseMetaData.getIndexInfo(database.getJdbcCatalogName(schema), database.getJdbcSchemaName(schema), table.getName(), false, true);
+                    rs = databaseMetaData.getIndexInfo(((AbstractDatabase) database).getJdbcCatalogName(schema), ((AbstractDatabase) database).getJdbcSchemaName(schema), table.getName(), false, true);
                 }
                 while (rs.next()) {
                     Index exampleIndex = new Index().setName(rs.getString("INDEX_NAME")).setTable(table);
@@ -204,7 +205,7 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                     String sql = "SELECT INDEX_NAME, 3 AS TYPE, TABLE_NAME, COLUMN_NAME, COLUMN_POSITION AS ORDINAL_POSITION, null AS FILTER_CONDITION FROM ALL_IND_COLUMNS WHERE TABLE_OWNER='" + schema.getName() + "' AND TABLE_NAME='" + table.getName() + "' AND INDEX_NAME='" + example.getName() + "' ORDER BY INDEX_NAME, ORDINAL_POSITION";
                     rs = statement.executeQuery(sql);
                 } else {
-                    rs = databaseMetaData.getIndexInfo(database.getJdbcCatalogName(schema), database.getJdbcSchemaName(schema), database.correctObjectName(table.getName(), Table.class), false, true);
+                    rs = databaseMetaData.getIndexInfo(((AbstractDatabase) database).getJdbcCatalogName(schema), ((AbstractDatabase) database).getJdbcSchemaName(schema), database.correctObjectName(table.getName(), Table.class), false, true);
                 }
 
                 Index returnIndex = null;

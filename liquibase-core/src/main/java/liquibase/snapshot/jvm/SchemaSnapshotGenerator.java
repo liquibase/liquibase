@@ -1,6 +1,7 @@
 package liquibase.snapshot.jvm;
 
 import liquibase.CatalogAndSchema;
+import liquibase.database.AbstractDatabase;
 import liquibase.database.Database;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
@@ -42,7 +43,7 @@ public class SchemaSnapshotGenerator extends JdbcSnapshotGenerator {
             if (database.supportsSchemas()) {
                 schemas = ((JdbcConnection) database.getConnection()).getMetaData().getSchemas();
                 while (schemas.next()) {
-                    CatalogAndSchema schemaFromJdbcInfo = database.getSchemaFromJdbcInfo(schemas.getString("TABLE_CATALOG"), schemas.getString("TABLE_SCHEM"));
+                    CatalogAndSchema schemaFromJdbcInfo = ((AbstractDatabase) database).getSchemaFromJdbcInfo(schemas.getString("TABLE_CATALOG"), schemas.getString("TABLE_SCHEM"));
 
                     Catalog catalog = snapshot.include(new Catalog(schemaFromJdbcInfo.getCatalogName()));
 

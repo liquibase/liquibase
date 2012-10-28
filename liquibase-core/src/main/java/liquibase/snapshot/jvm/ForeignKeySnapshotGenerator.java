@@ -1,6 +1,7 @@
 package liquibase.snapshot.jvm;
 
 import liquibase.CatalogAndSchema;
+import liquibase.database.AbstractDatabase;
 import liquibase.database.Database;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.exception.DatabaseException;
@@ -71,7 +72,7 @@ public class ForeignKeySnapshotGenerator extends JdbcSnapshotGenerator {
             Set<String> seenFks = new HashSet<String>();
             ResultSet importedKeyMetadataResultSet = null;
             try {
-                importedKeyMetadataResultSet = getMetaData(database).getImportedKeys(database.getJdbcCatalogName(schema), database.getJdbcSchemaName(schema), database.correctObjectName(table.getName(), Table.class));
+                importedKeyMetadataResultSet = getMetaData(database).getImportedKeys(((AbstractDatabase) database).getJdbcCatalogName(schema), ((AbstractDatabase) database).getJdbcSchemaName(schema), database.correctObjectName(table.getName(), Table.class));
 
                 while (importedKeyMetadataResultSet.next()) {
                     ForeignKey fk = new ForeignKey().setName(importedKeyMetadataResultSet.getString("FK_NAME")).setForeignKeyTable(table);
@@ -93,7 +94,7 @@ public class ForeignKeySnapshotGenerator extends JdbcSnapshotGenerator {
             seenFks = new HashSet<String>();
             ResultSet exportedKeyMetadataResultSet = null;
             try {
-                exportedKeyMetadataResultSet = getMetaData(database).getExportedKeys(database.getJdbcCatalogName(schema), database.getJdbcSchemaName(schema), database.correctObjectName(table.getName(), Table.class));
+                exportedKeyMetadataResultSet = getMetaData(database).getExportedKeys(((AbstractDatabase) database).getJdbcCatalogName(schema), ((AbstractDatabase) database).getJdbcSchemaName(schema), database.correctObjectName(table.getName(), Table.class));
 
                 while (exportedKeyMetadataResultSet.next()) {
                     ForeignKey fk = new ForeignKey().setName(exportedKeyMetadataResultSet.getString("FK_NAME")).setForeignKeyTable(table);
@@ -123,8 +124,8 @@ public class ForeignKeySnapshotGenerator extends JdbcSnapshotGenerator {
         ResultSet importedKeyMetadataResultSet = null;
         try {
             Table fkTable = ((ForeignKey) example).getForeignKeyTable();
-            String searchCatalog = database.getJdbcCatalogName(fkTable.getSchema());
-            String searchSchema = database.getJdbcSchemaName(fkTable.getSchema());
+            String searchCatalog = ((AbstractDatabase) database).getJdbcCatalogName(fkTable.getSchema());
+            String searchSchema = ((AbstractDatabase) database).getJdbcSchemaName(fkTable.getSchema());
             String searchTableName = database.correctObjectName(fkTable.getName(), Table.class);
 
             importedKeyMetadataResultSet = getMetaData(database).getImportedKeys(searchCatalog, searchSchema, searchTableName);
@@ -142,7 +143,7 @@ public class ForeignKeySnapshotGenerator extends JdbcSnapshotGenerator {
                 foreignKey.setForeignKeyTable(snapshot.include(foreignKeyTable));
                 foreignKey.setForeignKeyColumns(cleanNameFromDatabase(importedKeyMetadataResultSet.getString("FKCOLUMN_NAME"), database));
 
-                CatalogAndSchema pkTableSchema = database.getSchemaFromJdbcInfo(importedKeyMetadataResultSet.getString("PKTABLE_CAT"), importedKeyMetadataResultSet.getString("PKTABLE_SCHEM"));
+                CatalogAndSchema pkTableSchema = ((AbstractDatabase) database).getSchemaFromJdbcInfo(importedKeyMetadataResultSet.getString("PKTABLE_CAT"), importedKeyMetadataResultSet.getString("PKTABLE_SCHEM"));
                 Table tempPkTable = (Table) new Table().setName(importedKeyMetadataResultSet.getString("PKTABLE_NAME")).setSchema(new Schema(pkTableSchema.getCatalogName(), pkTableSchema.getSchemaName()));
                 foreignKey.setPrimaryKeyTable(snapshot.include(tempPkTable));
                 foreignKey.setPrimaryKeyColumns(cleanNameFromDatabase(importedKeyMetadataResultSet.getString("PKCOLUMN_NAME"), database));

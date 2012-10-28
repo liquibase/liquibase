@@ -1,6 +1,7 @@
 package liquibase.snapshot.jvm;
 
 import liquibase.CatalogAndSchema;
+import liquibase.database.AbstractDatabase;
 import liquibase.database.Database;
 import liquibase.database.core.PostgresDatabase;
 import liquibase.database.jvm.JdbcConnection;
@@ -116,7 +117,7 @@ public abstract class JdbcSnapshotGenerator implements SnapshotGenerator {
         Set<String> returnTables = new HashSet<String>();
         ResultSet tableMetaDataRs = null;
         try {
-            tableMetaDataRs = getMetaData(database).getTables(database.getJdbcCatalogName(schema), database.getJdbcSchemaName(schema), null, new String[]{"TABLE"});
+            tableMetaDataRs = getMetaData(database).getTables(((AbstractDatabase) database).getJdbcCatalogName(schema), ((AbstractDatabase) database).getJdbcSchemaName(schema), null, new String[]{"TABLE"});
             while (tableMetaDataRs.next()) {
                 returnTables.add(tableMetaDataRs.getString("TABLE_NAME"));
             }

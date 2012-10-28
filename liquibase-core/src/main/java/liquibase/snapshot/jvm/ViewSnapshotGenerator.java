@@ -1,6 +1,7 @@
 package liquibase.snapshot.jvm;
 
 import liquibase.CatalogAndSchema;
+import liquibase.database.AbstractDatabase;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
@@ -52,7 +53,7 @@ public class ViewSnapshotGenerator extends JdbcSnapshotGenerator {
 
         ResultSet viewsMetadataRs = null;
         try {
-            viewsMetadataRs = getMetaData(database).getTables(database.getJdbcCatalogName(schema), database.getJdbcSchemaName(schema), example.getName(), new String[]{"VIEW"});
+            viewsMetadataRs = getMetaData(database).getTables(((AbstractDatabase) database).getJdbcCatalogName(schema), ((AbstractDatabase) database).getJdbcSchemaName(schema), example.getName(), new String[]{"VIEW"});
             if (viewsMetadataRs.next()) {
                 String rawViewName = viewsMetadataRs.getString("TABLE_NAME");
                 String rawSchemaName = StringUtils.trimToNull(viewsMetadataRs.getString("TABLE_SCHEM"));
@@ -62,7 +63,7 @@ public class ViewSnapshotGenerator extends JdbcSnapshotGenerator {
                 View view = new View().setName(cleanNameFromDatabase(rawViewName, database));
                 view.setRemarks(remarks);
 
-                CatalogAndSchema schemaFromJdbcInfo = database.getSchemaFromJdbcInfo(rawCatalogName, rawSchemaName);
+                CatalogAndSchema schemaFromJdbcInfo = ((AbstractDatabase) database).getSchemaFromJdbcInfo(rawCatalogName, rawSchemaName);
                 view.setSchema(new Schema(schemaFromJdbcInfo.getCatalogName(), schemaFromJdbcInfo.getSchemaName()));
 
                 try {
@@ -94,7 +95,7 @@ public class ViewSnapshotGenerator extends JdbcSnapshotGenerator {
             Database database = snapshot.getDatabase();
             ResultSet viewsMetadataRs = null;
             try {
-                viewsMetadataRs = getMetaData(database).getTables(database.getJdbcCatalogName(schema), database.getJdbcSchemaName(schema), null, new String[]{"VIEW"});
+                viewsMetadataRs = getMetaData(database).getTables(((AbstractDatabase) database).getJdbcCatalogName(schema), ((AbstractDatabase) database).getJdbcSchemaName(schema), null, new String[]{"VIEW"});
                 while (viewsMetadataRs.next()) {
                     schema.addDatabaseObject(snapshot.include(new View().setName(viewsMetadataRs.getString("TABLE_NAME")).setSchema(schema)));
                 }
