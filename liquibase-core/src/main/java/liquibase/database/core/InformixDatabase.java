@@ -1,9 +1,8 @@
 package liquibase.database.core;
 
 import liquibase.CatalogAndSchema;
-import liquibase.database.AbstractDatabase;
+import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
-import liquibase.structure.core.Schema;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.ExecutorService;
@@ -17,7 +16,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-public class InformixDatabase extends AbstractDatabase {
+public class InformixDatabase extends AbstractJdbcDatabase {
 	
 	private static final String PRODUCT_NAME = "Informix Dynamic Server";
     private static final String INTERVAL_FIELD_QUALIFIER = "HOUR TO FRACTION(5)";

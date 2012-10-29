@@ -1,7 +1,7 @@
 package liquibase.database.core;
 
 import liquibase.CatalogAndSchema;
-import liquibase.database.AbstractDatabase;
+import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.structure.DatabaseObject;
@@ -16,7 +16,7 @@ import java.util.*;
 /**
  * Encapsulates PostgreSQL database support.
  */
-public class PostgresDatabase extends AbstractDatabase {
+public class PostgresDatabase extends AbstractJdbcDatabase {
     public static final String PRODUCT_NAME = "PostgreSQL";
 
     private Set<String> systemTablesAndViews = new HashSet<String>();

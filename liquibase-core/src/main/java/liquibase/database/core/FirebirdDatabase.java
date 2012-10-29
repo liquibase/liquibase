@@ -1,17 +1,16 @@
 package liquibase.database.core;
 
 import liquibase.CatalogAndSchema;
-import liquibase.database.AbstractDatabase;
+import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.core.Schema;
 import liquibase.exception.DatabaseException;
 
 /**
  * Firebird database implementation.
  * SQL Syntax ref: http://www.ibphoenix.com/main.nfs?a=ibphoenix&page=ibp_60_sqlref
  */
-public class FirebirdDatabase extends AbstractDatabase {
+public class FirebirdDatabase extends AbstractJdbcDatabase {
 
     public boolean isCorrectDatabaseImplementation(DatabaseConnection conn) throws DatabaseException {
         return conn.getDatabaseProductName().startsWith("Firebird");

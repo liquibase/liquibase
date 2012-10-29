@@ -1,12 +1,12 @@
 package liquibase.database.core;
 
-import liquibase.database.AbstractDatabaseTest;
+import liquibase.database.AbstractJdbcDatabaseTest;
 import liquibase.database.Database;
 import org.junit.Assert;
 import static org.junit.Assert.*;
 import org.junit.Test;
 
-public class H2DatabaseTest extends AbstractDatabaseTest {
+public class H2DatabaseTest extends AbstractJdbcDatabaseTest {
 
     public H2DatabaseTest() throws Exception {
         super(new H2Database());

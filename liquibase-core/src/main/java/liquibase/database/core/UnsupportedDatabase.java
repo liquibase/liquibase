@@ -1,10 +1,10 @@
 package liquibase.database.core;
 
-import liquibase.database.AbstractDatabase;
+import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
 import liquibase.exception.DatabaseException;
 
-public class UnsupportedDatabase extends AbstractDatabase {
+public class UnsupportedDatabase extends AbstractJdbcDatabase {
 
     public int getPriority() {
         return -1;

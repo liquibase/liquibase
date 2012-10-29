@@ -1,7 +1,7 @@
 package liquibase.database.core;
 
 import liquibase.CatalogAndSchema;
-import liquibase.database.AbstractDatabase;
+import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
 import liquibase.structure.DatabaseObject;
 import liquibase.exception.DatabaseException;
@@ -16,7 +16,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
-public class HsqlDatabase extends AbstractDatabase {
+public class HsqlDatabase extends AbstractJdbcDatabase {
     private static String START_CONCAT = "CONCAT(";
     private static String END_CONCAT = ")";
     private static String SEP_CONCAT = ", ";

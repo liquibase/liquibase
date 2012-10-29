@@ -3,7 +3,7 @@ package liquibase.database.core;
 import java.sql.ResultSet;
 
 import liquibase.CatalogAndSchema;
-import liquibase.database.AbstractDatabase;
+import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Index;
@@ -25,7 +25,7 @@ import liquibase.util.StringUtils;
 /**
  * Encapsulates MS-SQL database support.
  */
-public class MSSQLDatabase extends AbstractDatabase {
+public class MSSQLDatabase extends AbstractJdbcDatabase {
     public static final String PRODUCT_NAME = "Microsoft SQL Server";
     protected Set<String> systemTablesAndViews = new HashSet<String>();
 

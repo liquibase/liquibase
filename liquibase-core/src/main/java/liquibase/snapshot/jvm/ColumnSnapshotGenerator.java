@@ -1,6 +1,6 @@
 package liquibase.snapshot.jvm;
 
-import liquibase.database.AbstractDatabase;
+import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
 import liquibase.database.core.MySQLDatabase;
 import liquibase.database.jvm.JdbcConnection;
@@ -8,7 +8,6 @@ import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.logging.LogFactory;
 import liquibase.snapshot.InvalidExampleException;
-import liquibase.snapshot.SnapshotGeneratorChain;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.statement.DatabaseFunction;
 import liquibase.structure.DatabaseObject;
@@ -71,7 +70,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
 
             DatabaseMetaData databaseMetaData = getMetaData(database);
 
-            columnMetadataRs = databaseMetaData.getColumns(((AbstractDatabase) database).getJdbcCatalogName(schema), ((AbstractDatabase) database).getJdbcSchemaName(schema), database.correctObjectName(relation.getName(), Table.class), database.correctObjectName(example.getName(), Column.class));
+            columnMetadataRs = databaseMetaData.getColumns(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), database.correctObjectName(relation.getName(), Table.class), database.correctObjectName(example.getName(), Column.class));
 
             if (columnMetadataRs.next()) {
                 Map<String, Object> data = convertResultSetToMap(columnMetadataRs);
@@ -104,7 +103,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                 Schema schema;
 
                 schema = relation.getSchema();
-                allColumnsMetadataRs = databaseMetaData.getColumns(((AbstractDatabase) database).getJdbcCatalogName(schema), ((AbstractDatabase) database).getJdbcSchemaName(schema), relation.getName(), null);
+                allColumnsMetadataRs = databaseMetaData.getColumns(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), relation.getName(), null);
 
                 while (allColumnsMetadataRs.next()) {
                     Column exampleColumn = new Column().setRelation(relation).setName(allColumnsMetadataRs.getString("COLUMN_NAME"));

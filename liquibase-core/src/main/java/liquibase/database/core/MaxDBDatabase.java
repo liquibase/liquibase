@@ -2,16 +2,15 @@ package liquibase.database.core;
 
 
 import liquibase.CatalogAndSchema;
-import liquibase.database.AbstractDatabase;
+import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
-import liquibase.structure.core.Schema;
 import liquibase.exception.DatabaseException;
 
 import java.util.HashSet;
 import java.util.Set;
 
 
-public class MaxDBDatabase extends AbstractDatabase {
+public class MaxDBDatabase extends AbstractJdbcDatabase {
 
     public static final String PRODUCT_NAME = "SAP DB";
     protected Set<String> systemTablesAndViews = new HashSet<String>();

@@ -1,12 +1,10 @@
 package liquibase.database.core;
 
 import liquibase.CatalogAndSchema;
-import liquibase.database.AbstractDatabase;
-import liquibase.database.Database;
+import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.core.Schema;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.DateParseException;
 import liquibase.util.JdbcUtils;
@@ -16,7 +14,7 @@ import java.sql.Statement;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 
-public class DB2Database extends AbstractDatabase {
+public class DB2Database extends AbstractJdbcDatabase {
     private String defaultSchemaName;
 
     public boolean isCorrectDatabaseImplementation(DatabaseConnection conn) throws DatabaseException {

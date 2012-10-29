@@ -1,6 +1,5 @@
 package liquibase;
 
-import liquibase.database.AbstractDatabase;
 import liquibase.database.Database;
 
 public class CatalogAndSchema {

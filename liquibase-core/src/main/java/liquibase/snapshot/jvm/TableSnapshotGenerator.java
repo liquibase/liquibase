@@ -1,11 +1,9 @@
 package liquibase.snapshot.jvm;
 
 import liquibase.CatalogAndSchema;
-import liquibase.database.AbstractDatabase;
+import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
-import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.snapshot.SnapshotGeneratorChain;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.InvalidExampleException;
 import liquibase.structure.DatabaseObject;
@@ -30,7 +28,7 @@ public class TableSnapshotGenerator extends JdbcSnapshotGenerator {
         ResultSet rs = null;
         try {
             DatabaseMetaData metaData = getMetaData(database);
-            rs = metaData.getTables(((AbstractDatabase) database).getJdbcCatalogName(schema), ((AbstractDatabase) database).getJdbcSchemaName(schema), database.correctObjectName(objectName, Table.class), new String[]{"TABLE"});
+            rs = metaData.getTables(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), database.correctObjectName(objectName, Table.class), new String[]{"TABLE"});
 
             Table table;
             try {
@@ -66,7 +64,7 @@ public class TableSnapshotGenerator extends JdbcSnapshotGenerator {
             if (schema != null) {
                 ResultSet tableMetaDataRs = null;
                 try {
-                    tableMetaDataRs = getMetaData(database).getTables(((AbstractDatabase) database).getJdbcCatalogName(schema), ((AbstractDatabase) database).getJdbcSchemaName(schema), null, new String[]{"TABLE"});
+                    tableMetaDataRs = getMetaData(database).getTables(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), null, new String[]{"TABLE"});
                     while (tableMetaDataRs.next()) {
                         String tableName = tableMetaDataRs.getString("TABLE_NAME");
                         Table tableExample = (Table) new Table().setName(tableName).setSchema(schema);
@@ -98,7 +96,7 @@ public class TableSnapshotGenerator extends JdbcSnapshotGenerator {
         Table table = new Table().setName(cleanNameFromDatabase(rawTableName, database));
         table.setRemarks(remarks);
 
-        CatalogAndSchema schemaFromJdbcInfo = ((AbstractDatabase) database).getSchemaFromJdbcInfo(rawCatalogName, rawSchemaName);
+        CatalogAndSchema schemaFromJdbcInfo = ((AbstractJdbcDatabase) database).getSchemaFromJdbcInfo(rawCatalogName, rawSchemaName);
         table.setSchema(new Schema(schemaFromJdbcInfo.getCatalogName(), schemaFromJdbcInfo.getSchemaName()));
 
         return table;

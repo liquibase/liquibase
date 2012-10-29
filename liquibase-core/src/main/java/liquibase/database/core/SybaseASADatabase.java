@@ -4,10 +4,9 @@
 package liquibase.database.core;
 
 import liquibase.CatalogAndSchema;
-import liquibase.database.AbstractDatabase;
+import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.core.Schema;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 
@@ -19,7 +18,7 @@ import java.util.Set;
  * @author otaranenko
  *
  */
-public class SybaseASADatabase extends AbstractDatabase {
+public class SybaseASADatabase extends AbstractJdbcDatabase {
 
     private static final Set<String> systemTablesAndViews;
 
@@ -226,7 +225,7 @@ public class SybaseASADatabase extends AbstractDatabase {
     }
 
 	/* (non-Javadoc)
-	 * @see liquibase.database.AbstractDatabase#getAutoIncrementClause()
+	 * @see liquibase.database.AbstractJdbcDatabase#getAutoIncrementClause()
 	 */
 	@Override
 	protected String getAutoIncrementClause() {

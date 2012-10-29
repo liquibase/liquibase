@@ -1,10 +1,9 @@
 package liquibase.database.core;
 
 import liquibase.CatalogAndSchema;
-import liquibase.database.AbstractDatabase;
+import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.core.Schema;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
@@ -19,7 +18,7 @@ import java.util.Set;
 /**
  * Encapsulates Sybase ASE database support.
  */
-public class SybaseDatabase extends AbstractDatabase {
+public class SybaseDatabase extends AbstractJdbcDatabase {
     public static final String PRODUCT_NAME = "Adaptive Server Enterprise";
     protected Set<String> systemTablesAndViews = new HashSet<String>();
 
@@ -249,7 +248,7 @@ public class SybaseDatabase extends AbstractDatabase {
 	
 	/** 
 	 * @return the major version if supported, otherwise -1
-	 * @see liquibase.database.AbstractDatabase#getDatabaseMajorVersion()
+	 * @see liquibase.database.AbstractJdbcDatabase#getDatabaseMajorVersion()
 	 */
 	@Override
     public int getDatabaseMajorVersion() throws DatabaseException {
@@ -264,7 +263,7 @@ public class SybaseDatabase extends AbstractDatabase {
 
 	/**
 	 * @return the minor version if supported, otherwise -1
-	 * @see liquibase.database.AbstractDatabase#getDatabaseMinorVersion()
+	 * @see liquibase.database.AbstractJdbcDatabase#getDatabaseMinorVersion()
 	 */
 	@Override
     public int getDatabaseMinorVersion() throws DatabaseException {

@@ -1,6 +1,6 @@
 package liquibase.database.core;
 
-import liquibase.database.AbstractDatabaseTest;
+import liquibase.database.AbstractJdbcDatabaseTest;
 import liquibase.database.Database;
 import org.junit.Assert;
 import static org.junit.Assert.*;
@@ -9,7 +9,7 @@ import org.junit.Test;
 /**
  * Tests for {@link PostgresDatabase}
  */
-public class PostgresDatabaseTest extends AbstractDatabaseTest {
+public class PostgresDatabaseTest extends AbstractJdbcDatabaseTest {
 
     public PostgresDatabaseTest() throws Exception {
         super(new PostgresDatabase());

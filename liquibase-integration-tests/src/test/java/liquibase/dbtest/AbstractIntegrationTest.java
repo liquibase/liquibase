@@ -652,19 +652,19 @@ public abstract class AbstractIntegrationTest {
 //        database2.setDefaultSchemaName("liquibaseb");
 //
 //        { //this is ugly, but is a special case specific to this test
-//            Field changeLogTableExistsField = AbstractDatabase.class.getDeclaredField("changeLogTableExists");
+//            Field changeLogTableExistsField = AbstractJdbcDatabase.class.getDeclaredField("changeLogTableExists");
 //            changeLogTableExistsField.setAccessible(true);
 //            changeLogTableExistsField.set(database2, false);
 //
-//            Field changeLogCreateAttemptedField = AbstractDatabase.class.getDeclaredField("changeLogCreateAttempted");
+//            Field changeLogCreateAttemptedField = AbstractJdbcDatabase.class.getDeclaredField("changeLogCreateAttempted");
 //            changeLogCreateAttemptedField.setAccessible(true);
 //            changeLogCreateAttemptedField.set(database2, false);
 //
-//            Field changeLogLockTableExistsField = AbstractDatabase.class.getDeclaredField("changeLogLockTableExists");
+//            Field changeLogLockTableExistsField = AbstractJdbcDatabase.class.getDeclaredField("changeLogLockTableExists");
 //            changeLogLockTableExistsField.setAccessible(true);
 //            changeLogLockTableExistsField.set(database2, false);
 //
-//            Field changeLogLockCreateAttemptedField = AbstractDatabase.class.getDeclaredField("changeLogLockCreateAttempted");
+//            Field changeLogLockCreateAttemptedField = AbstractJdbcDatabase.class.getDeclaredField("changeLogLockCreateAttempted");
 //            changeLogLockCreateAttemptedField.setAccessible(true);
 //            changeLogLockCreateAttemptedField.set(database2, false);
 //

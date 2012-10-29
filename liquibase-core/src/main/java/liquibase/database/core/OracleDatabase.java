@@ -1,11 +1,10 @@
 package liquibase.database.core;
 
 import liquibase.CatalogAndSchema;
-import liquibase.database.AbstractDatabase;
+import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.core.Schema;
 import liquibase.exception.DatabaseException;
 import liquibase.logging.LogFactory;
 import liquibase.statement.DatabaseFunction;
@@ -21,7 +20,7 @@ import java.util.regex.Pattern;
 /**
  * Encapsulates Oracle database support.
  */
-public class OracleDatabase extends AbstractDatabase {
+public class OracleDatabase extends AbstractJdbcDatabase {
     public static final String PRODUCT_NAME = "oracle";
 
 

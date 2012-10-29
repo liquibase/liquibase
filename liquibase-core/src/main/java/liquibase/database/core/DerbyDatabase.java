@@ -3,11 +3,10 @@ package liquibase.database.core;
 import java.sql.*;
 
 import liquibase.CatalogAndSchema;
-import liquibase.database.AbstractDatabase;
+import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.core.Schema;
 import liquibase.exception.DatabaseException;
 import liquibase.logging.LogFactory;
 import liquibase.logging.Logger;
@@ -15,7 +14,7 @@ import liquibase.logging.Logger;
 import java.sql.Driver;
 import java.util.Enumeration;
 
-public class DerbyDatabase extends AbstractDatabase {
+public class DerbyDatabase extends AbstractJdbcDatabase {
 
     private Logger log = LogFactory.getLogger();
 

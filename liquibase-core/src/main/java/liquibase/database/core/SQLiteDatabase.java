@@ -3,7 +3,7 @@ package liquibase.database.core;
 import liquibase.CatalogAndSchema;
 import liquibase.change.ColumnConfig;
 import liquibase.change.core.CreateTableChange;
-import liquibase.database.AbstractDatabase;
+import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.exception.DatabaseException;
@@ -12,7 +12,6 @@ import liquibase.exception.UnsupportedChangeException;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.snapshot.InvalidExampleException;
-import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.*;
 import liquibase.structure.core.*;
@@ -21,7 +20,7 @@ import liquibase.util.ISODateFormat;
 import java.math.BigInteger;
 import java.util.*;
 
-public class SQLiteDatabase extends AbstractDatabase {
+public class SQLiteDatabase extends AbstractJdbcDatabase {
 
     private Set<String> systemTables = new HashSet<String>();
 

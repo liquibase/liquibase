@@ -1,12 +1,11 @@
 package liquibase.database.core;
 
 import liquibase.CatalogAndSchema;
-import liquibase.database.AbstractDatabase;
+import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
-import liquibase.structure.core.Schema;
 import liquibase.exception.DatabaseException;
 
-public class CacheDatabase extends AbstractDatabase {
+public class CacheDatabase extends AbstractJdbcDatabase {
     public static final String PRODUCT_NAME = "cache";
 
 

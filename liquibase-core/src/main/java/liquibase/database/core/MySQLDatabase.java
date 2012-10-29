@@ -2,7 +2,7 @@ package liquibase.database.core;
 
 import java.math.BigInteger;
 
-import liquibase.database.AbstractDatabase;
+import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Index;
@@ -14,7 +14,7 @@ import liquibase.statement.core.RawSqlStatement;
 /**
  * Encapsulates MySQL database support.
  */
-public class MySQLDatabase extends AbstractDatabase {
+public class MySQLDatabase extends AbstractJdbcDatabase {
     public static final String PRODUCT_NAME = "MySQL";
 
     public String getShortName() {
