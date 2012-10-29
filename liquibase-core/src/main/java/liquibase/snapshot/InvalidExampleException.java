@@ -2,6 +2,9 @@ package liquibase.snapshot;
 
 import liquibase.exception.LiquibaseException;
 
+/**
+ * Thrown if a descriptive example is not specific enough to perform a snapshot.
+ */
 public class InvalidExampleException extends LiquibaseException {
     public InvalidExampleException() {
     }

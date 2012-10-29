@@ -20,7 +20,7 @@ import java.math.BigInteger;
 import java.util.Date;
 import java.util.List;
 
-public interface Database extends DatabaseObject, PrioritizedService {
+public interface Database extends PrioritizedService {
 
     String databaseChangeLogTableName = "DatabaseChangeLog".toUpperCase();
     String databaseChangeLogLockTableName = "DatabaseChangeLogLock".toUpperCase();

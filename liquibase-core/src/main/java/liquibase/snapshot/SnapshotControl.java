@@ -1,10 +1,8 @@
 package liquibase.snapshot;
 
-import liquibase.CatalogAndSchema;
+import liquibase.logging.LogFactory;
+import liquibase.servicelocator.ServiceLocator;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.core.Column;
-import liquibase.structure.core.Table;
-import liquibase.structure.core.View;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -13,6 +11,7 @@ import java.util.Set;
 public class SnapshotControl {
 
     private Set<Class<? extends DatabaseObject>> types;
+    private static Set<Class<? extends DatabaseObject>> defaultTypes;
 
     public SnapshotControl(Class<? extends DatabaseObject>... types) {
         if (types == null || types.length == 0) {
@@ -22,20 +21,31 @@ public class SnapshotControl {
         }
     }
 
-    protected Set<Class<? extends DatabaseObject>> getDefaultTypes() {
-        HashSet<Class<? extends DatabaseObject>> set = new HashSet<Class<? extends DatabaseObject>>();
-        set.add(Table.class);
-        set.add(View.class);
-        set.add(Column.class);
+    private Set<Class<? extends DatabaseObject>> getDefaultTypes() {
+        if (defaultTypes == null) {
+            Set<Class<? extends DatabaseObject>> set = new HashSet<Class<? extends DatabaseObject>>();
 
-        return set;
+            Class<? extends DatabaseObject>[] classes = ServiceLocator.getInstance().findClasses(DatabaseObject.class);
+            for (Class<? extends DatabaseObject> clazz : classes) {
+                try {
+                    if (clazz.newInstance().snapshotByDefault()) {
+                        set.add(clazz);
+                    }
+                } catch (Exception e) {
+                    LogFactory.getLogger().info("Cannot construct "+clazz.getName()+" to determine if it should be included in the snapshot by default");
+                }
+            }
+
+            defaultTypes = set;
+        }
+        return defaultTypes;
     }
 
     public Set<Class<? extends DatabaseObject>> getTypesToInclude() {
         return types;
     }
 
-    public boolean shouldSnapshot(Class<? extends DatabaseObject> type) {
+    public boolean shouldInclude(Class<? extends DatabaseObject> type) {
         return types.contains(type);
     }
 }

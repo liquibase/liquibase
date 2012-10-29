@@ -1,6 +1,5 @@
 package liquibase.snapshot;
 
-import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Catalog;
@@ -23,7 +22,7 @@ public class SnapshotGeneratorChain {
             return null;
         }
 
-        if (!(example instanceof Catalog || example instanceof Schema) && !snapshot.getSnapshotControl().shouldSnapshot(example.getClass())) {
+        if (!(example instanceof Catalog || example instanceof Schema) && !snapshot.getSnapshotControl().shouldInclude(example.getClass())) {
             return null;
         }
 

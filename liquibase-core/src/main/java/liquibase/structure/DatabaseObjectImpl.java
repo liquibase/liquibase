@@ -5,6 +5,10 @@ import liquibase.database.Database;
 
 public abstract class DatabaseObjectImpl implements DatabaseObject {
 
+    public boolean snapshotByDefault() {
+        return true;
+    }
+
     public boolean equals(DatabaseObject otherObject, Database accordingTo) {
         if (otherObject == null) {
             return false;
