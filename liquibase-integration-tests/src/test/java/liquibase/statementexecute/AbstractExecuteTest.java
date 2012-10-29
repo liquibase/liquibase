@@ -177,7 +177,7 @@ public abstract class AbstractExecuteTest {
         while ((lastIndex = convertedSql.indexOf("[", lastIndex)) >= 0) {
             String objectName = convertedSql.substring(lastIndex + 1, convertedSql.indexOf("]", lastIndex));
             try {
-                convertedSql = convertedSql.replace("[" + objectName + "]", database.escapeDatabaseObject(objectName, Table.class));
+                convertedSql = convertedSql.replace("[" + objectName + "]", database.escapeObjectName(objectName, Table.class));
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }

@@ -5,7 +5,6 @@ import liquibase.database.AbstractDatabase;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.core.Schema;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.ExecutorService;
 import liquibase.logging.LogFactory;
@@ -215,14 +214,14 @@ public class PostgresDatabase extends AbstractDatabase {
     }
     
     @Override
-    public String escapeDatabaseObject(String objectName, Class<? extends DatabaseObject> objectType) {
+    public String escapeObjectName(String objectName, Class<? extends DatabaseObject> objectType) {
         if (objectName == null) {
             return null;
         }
         if (objectName.contains("-") || hasMixedCase(objectName) || startsWithNumeric(objectName) || isReservedWord(objectName)) {
             return "\"" + objectName + "\"";
         } else {
-            return super.escapeDatabaseObject(objectName, objectType);
+            return super.escapeObjectName(objectName, objectType);
         }
 
     }

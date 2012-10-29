@@ -163,13 +163,13 @@ public interface Database extends DatabaseObject, PrioritizedService {
 
     String getDateLiteral(Date defaultDateValue);
 
-    String escapeDatabaseObject(String catalogname, String schemaName, String objectName, Class<? extends DatabaseObject> objectType);
+    String escapeObjectName(String catalogName, String schemaName, String objectName, Class<? extends DatabaseObject> objectType);
 
     String escapeTableName(String catalogName, String schemaName, String tableName);
 
     String escapeIndexName(String catalogName, String schemaName, String indexName);
 
-    String escapeDatabaseObject(String objectName, Class<? extends DatabaseObject> objectType);
+    String escapeObjectName(String objectName, Class<? extends DatabaseObject> objectType);
 
     /**
      * Escapes a single column name in a database-dependent manner so reserved words can be used as a column
@@ -274,6 +274,14 @@ public interface Database extends DatabaseObject, PrioritizedService {
 
     public boolean isReservedWord(String string);
 
+    /**
+     * Returns a new CatalogAndSchema adjusted for this database. Examples of adjustments include:
+     * fixes for case issues,
+     * replacing null schema or catalog names with the default values
+     * removing set schema or catalog names if they are not supported
+     * @param schema
+     * @return
+     */
     CatalogAndSchema correctSchema(CatalogAndSchema schema);
 
     /**

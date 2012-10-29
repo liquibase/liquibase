@@ -191,7 +191,7 @@ public class H2Database extends AbstractDatabase {
 
 
     @Override
-    public String escapeDatabaseObject(String objectName, Class<? extends DatabaseObject> objectType) {
+    public String escapeObjectName(String objectName, Class<? extends DatabaseObject> objectType) {
     	if (objectName != null) {
             if (isReservedWord(objectName)) {
                 return "\""+objectName.toUpperCase()+"\"";

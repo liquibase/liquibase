@@ -89,7 +89,7 @@ public class OracleDatabase extends AbstractDatabase {
     }
 
     @Override
-    public String escapeDatabaseObject(String objectName, Class<? extends DatabaseObject> objectType) {
+    public String escapeObjectName(String objectName, Class<? extends DatabaseObject> objectType) {
         // escape the object name if it contains any non-word characters
         if (objectName != null &&
                 (Pattern.compile("\\W").matcher(objectName).find() || isReservedWord(objectName))) {

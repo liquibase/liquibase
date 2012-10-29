@@ -165,7 +165,7 @@ public class MSSQLDatabase extends AbstractDatabase {
     @Override
     public String escapeIndexName(String catalogName, String schemaName, String indexName) {
         // MSSQL server does not support the schema name for the index -
-        return super.escapeDatabaseObject(indexName, Index.class);
+        return super.escapeObjectName(indexName, Index.class);
     }
 
     //    protected void dropForeignKeys(Connection conn) throws DatabaseException {
@@ -232,7 +232,7 @@ public class MSSQLDatabase extends AbstractDatabase {
 
 
     @Override
-    public String escapeDatabaseObject(String objectName, Class<? extends DatabaseObject> objectType) {
+    public String escapeObjectName(String objectName, Class<? extends DatabaseObject> objectType) {
         return "["+objectName+"]";
     }
 
@@ -256,11 +256,11 @@ public class MSSQLDatabase extends AbstractDatabase {
     }
 
     @Override
-    public String escapeDatabaseObject(String catalogName, String schemaName, String objectName, Class<? extends DatabaseObject> objectType) {
+    public String escapeObjectName(String catalogName, String schemaName, String objectName, Class<? extends DatabaseObject> objectType) {
         if (schemaName == null) {
             schemaName = "dbo";
         }
-        return super.escapeDatabaseObject(catalogName, schemaName, objectName, objectType);
+        return super.escapeObjectName(catalogName, schemaName, objectName, objectType);
     }
 
     @Override
@@ -298,9 +298,9 @@ public class MSSQLDatabase extends AbstractDatabase {
     public String escapeViewName(String catalogName, String schemaName, String viewName) {
         schemaName = getAssumedSchemaName(catalogName, schemaName);
         if (StringUtils.trimToNull(schemaName) == null) {
-            return escapeDatabaseObject(viewName, View.class);
+            return escapeObjectName(viewName, View.class);
         } else {
-            return escapeDatabaseObject(schemaName, Schema.class)+"."+escapeDatabaseObject(viewName, Schema.class);
+            return escapeObjectName(schemaName, Schema.class)+"."+ escapeObjectName(viewName, Schema.class);
         }
 
     }

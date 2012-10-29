@@ -6,7 +6,6 @@ import liquibase.database.DatabaseConnection;
 import liquibase.structure.DatabaseObject;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.DateParseException;
-import liquibase.structure.core.Schema;
 import liquibase.util.ISODateFormat;
 
 import java.math.BigInteger;
@@ -148,12 +147,12 @@ public class HsqlDatabase extends AbstractDatabase {
     }
 
     @Override
-    public String escapeDatabaseObject(String catalogName, String schemaName, String objectName, Class<? extends DatabaseObject> objectType) {
-        return super.escapeDatabaseObject(null, schemaName, objectName, objectType);
+    public String escapeObjectName(String catalogName, String schemaName, String objectName, Class<? extends DatabaseObject> objectType) {
+        return super.escapeObjectName(null, schemaName, objectName, objectType);
     }
 
     @Override
-    public String escapeDatabaseObject(String objectName, Class<? extends DatabaseObject> objectType) {
+    public String escapeObjectName(String objectName, Class<? extends DatabaseObject> objectType) {
     	if (objectName != null) {
             if (keywords.contains(objectName.toUpperCase())) {
                 return "\""+objectName+"\"";

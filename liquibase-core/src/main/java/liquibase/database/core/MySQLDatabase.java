@@ -130,7 +130,7 @@ public class MySQLDatabase extends AbstractDatabase {
     }
 
     @Override
-    public String escapeDatabaseObject(String objectName, Class<? extends DatabaseObject> objectType) {
+    public String escapeObjectName(String objectName, Class<? extends DatabaseObject> objectType) {
         return "`" + objectName + "`";
     }
 
@@ -146,7 +146,7 @@ public class MySQLDatabase extends AbstractDatabase {
 
     @Override
     public String escapeIndexName(String catalogName, String schemaName, String indexName) {
-        return escapeDatabaseObject(indexName, Index.class);
+        return escapeObjectName(indexName, Index.class);
     }
 
     @Override
