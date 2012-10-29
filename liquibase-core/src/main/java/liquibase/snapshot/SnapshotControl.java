@@ -3,6 +3,8 @@ package liquibase.snapshot;
 import liquibase.logging.LogFactory;
 import liquibase.servicelocator.ServiceLocator;
 import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.Catalog;
+import liquibase.structure.core.Schema;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -19,6 +21,8 @@ public class SnapshotControl {
         } else {
             this.types = new HashSet<Class<? extends DatabaseObject>>(Arrays.asList(types));
         }
+        this.types.add(Catalog.class);
+        this.types.add(Schema.class);
     }
 
     private Set<Class<? extends DatabaseObject>> getDefaultTypes() {

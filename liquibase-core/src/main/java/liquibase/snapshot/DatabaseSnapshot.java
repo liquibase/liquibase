@@ -87,7 +87,12 @@ public class DatabaseSnapshot {
      */
     public <DatabaseObjectType extends  DatabaseObject> Set<DatabaseObjectType> get(Class<DatabaseObjectType> type) {
         //noinspection unchecked
-        return Collections.unmodifiableSet((Set<DatabaseObjectType>) allFound.get(type));
+        Set<DatabaseObjectType> objects = (Set<DatabaseObjectType>) allFound.get(type);
+        if (objects == null) {
+            return null;
+        } else {
+            return Collections.unmodifiableSet(objects);
+        }
     }
 
 

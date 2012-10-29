@@ -18,6 +18,9 @@ public class Schema extends DatabaseObjectImpl {
         return null;
     }
 
+    public Schema() {
+    }
+
     public Schema(String catalog, String schemaName) {
         catalog = StringUtils.trimToNull(catalog);
         schemaName = StringUtils.trimToNull(schemaName);

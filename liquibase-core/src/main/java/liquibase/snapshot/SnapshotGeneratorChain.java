@@ -22,7 +22,7 @@ public class SnapshotGeneratorChain {
             return null;
         }
 
-        if (!(example instanceof Catalog || example instanceof Schema) && !snapshot.getSnapshotControl().shouldInclude(example.getClass())) {
+        if (!snapshot.getSnapshotControl().shouldInclude(example.getClass())) {
             return null;
         }
 
@@ -36,16 +36,4 @@ public class SnapshotGeneratorChain {
 
         return snapshotGenerators.next().snapshot(example, snapshot, this);
     }
-
-//    public Boolean has(DatabaseObject example, DatabaseSnapshot snapshot) throws DatabaseException {
-//        if (snapshotGenerators == null) {
-//            return null;
-//        }
-//
-//        if (!snapshotGenerators.hasNext()) {
-//            return null;
-//        }
-//
-//        return snapshotGenerators.next().has(example, snapshot, this);
-//    }
 }

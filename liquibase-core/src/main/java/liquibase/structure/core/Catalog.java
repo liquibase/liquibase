@@ -9,6 +9,9 @@ public class Catalog extends DatabaseObjectImpl {
 
     protected String name;
 
+    public Catalog() {
+    }
+
     public Catalog(String name) {
         this.name = name;
     }
