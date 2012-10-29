@@ -508,14 +508,6 @@ public class MockDatabase implements Database {
         return name;
     }
 
-    public String getAssumedSchemaName(String catalogName, String schemaName) {
-        return schemaName;
-    }
-
-    public String getAssumedCatalogName(String catalogName, String schemaName) {
-        return catalogName;
-    }
-
     public boolean isFunction(String string) {
         if (string.endsWith("()")) {
             return true;

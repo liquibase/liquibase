@@ -206,8 +206,8 @@ public abstract class AbstractJdbcDatabase implements Database {
         if (schema == null) {
             return new CatalogAndSchema(getDefaultCatalogName(), getDefaultSchemaName());
         }
-        String catalogName = schema.getCatalogName();
-        String schemaName = schema.getSchemaName();
+        String catalogName = StringUtils.trimToNull(schema.getCatalogName());
+        String schemaName = StringUtils.trimToNull(schema.getSchemaName());
 
         if (supportsCatalogs() && supportsSchemas()) {
             if (catalogName == null) {
@@ -244,38 +244,6 @@ public abstract class AbstractJdbcDatabase implements Database {
         }
         return new CatalogAndSchema(catalogName, schemaName);
 
-    }
-
-    public String getAssumedCatalogName(String catalogName, String schemaName) {
-        if (this.supportsCatalogs()) {
-            if (catalogName == null) {
-                if (this.supportsSchemas()) {
-                    return null;
-                } else {
-                    return schemaName;
-                }
-            } else {
-                return catalogName;
-            }
-        }  else {
-            return null;
-        }
-    }
-
-    public String getAssumedSchemaName(String catalogName, String schemaName) {
-        if (this.supportsSchemas()) {
-            if (schemaName == null) {
-                if (this.supportsCatalogs()) {
-                    return null;
-                } else {
-                    return catalogName;
-                }
-            } else {
-                return schemaName;
-            }
-        }  else {
-            return null;
-        }
     }
 
     public String correctObjectName(String objectName, Class<? extends DatabaseObject> objectType) {
@@ -941,6 +909,10 @@ public abstract class AbstractJdbcDatabase implements Database {
     }
 
     public String escapeObjectName(String catalogName, String schemaName, String objectName, Class<? extends DatabaseObject> objectType) {
+        CatalogAndSchema catalogAndSchema = this.correctSchema(catalogName, schemaName);
+        catalogName = catalogAndSchema.getCatalogName();
+        schemaName = catalogAndSchema.getSchemaName();
+
         if (catalogName == null && schemaName == null) {
             return escapeObjectName(objectName, objectType);
         }
@@ -959,7 +931,6 @@ public abstract class AbstractJdbcDatabase implements Database {
                 return escapeObjectName(catalogName, Catalog.class)+"."+ escapeObjectName(schemaName, Schema.class)+"."+ escapeObjectName(objectName, objectType);
             }
         } else {
-            catalogName = getAssumedCatalogName(catalogName, schemaName);
             if (StringUtils.trimToNull(catalogName) == null) {
                 return escapeObjectName(objectName, objectType);
             } else {

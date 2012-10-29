@@ -25,19 +25,18 @@ public class GetViewDefinitionGenerator extends AbstractSqlGenerator<GetViewDefi
         String sql = "select view_definition from information_schema.views where table_name='" + database.correctObjectName(statement.getViewName(), View.class) + "'";
 
         if (database instanceof MySQLDatabase) {
-            String catalogName = database.getAssumedCatalogName(schema.getCatalogName(), schema.getSchemaName());
-            sql += " and table_schema='" + catalogName + "'";
+            sql += " and table_schema='" + schema.getCatalogName() + "'";
         } else {
 
             if (database.supportsSchemas()) {
-                String schemaName = database.getAssumedSchemaName(schema.getCatalogName(), schema.getSchemaName());
+                String schemaName = schema.getSchemaName();
                 if (schemaName != null) {
                     sql += " and table_schema='" + schemaName + "'";
                 }
             }
 
             if (database.supportsCatalogs()) {
-                String catalogName = database.getAssumedCatalogName(schema.getCatalogName(), schema.getSchemaName());
+                String catalogName = schema.getCatalogName();
                 if (catalogName != null) {
                     sql += " and table_catalog='" + catalogName + "'";
                 }
