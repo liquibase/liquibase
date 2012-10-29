@@ -4,7 +4,7 @@ import liquibase.CatalogAndSchema;
 import liquibase.Liquibase;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.snapshot.*;
-import liquibase.snapshot.SnapshotGenerator;
+import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
 import liquibase.structure.core.View;
 import liquibase.datatype.DataTypeFactory;
@@ -250,7 +250,7 @@ public abstract class AbstractIntegrationTest {
         assertTrue("create databasechangeloglock command not found in: \n" + outputResult, outputResult.contains("CREATE TABLE "+database.escapeTableName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName())));
 
         DatabaseSnapshot snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(new SnapshotControl(), database);
-        assertEquals(0, snapshot.getSchemas().iterator().next().getDatabaseObjects(Table.class).size());
+        assertEquals(0, snapshot.get(Schema.class).iterator().next().getDatabaseObjects(Table.class).size());
     }
 
     protected void clearDatabase(Liquibase liquibase) throws DatabaseException {
@@ -476,8 +476,8 @@ public abstract class AbstractIntegrationTest {
             }
 
             DatabaseSnapshot emptyAgainSnapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(new SnapshotControl(), database);
-            assertEquals(0, emptyAgainSnapshot.getSchemas().iterator().next().getDatabaseObjects(Table.class).size());
-            assertEquals(0, emptyAgainSnapshot.getSchemas().iterator().next().getDatabaseObjects(View.class).size());
+            assertEquals(0, emptyAgainSnapshot.get(Schema.class).iterator().next().getDatabaseObjects(Table.class).size());
+            assertEquals(0, emptyAgainSnapshot.get(Schema.class).iterator().next().getDatabaseObjects(View.class).size());
         }
     }
 

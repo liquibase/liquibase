@@ -14,7 +14,5 @@ public interface SnapshotGenerator {
 
     int getPriority(Class<? extends DatabaseObject> objectType, Database database);
 
-//    Boolean has(DatabaseObject example, DatabaseSnapshot snapshot, SnapshotGeneratorChain chain) throws DatabaseException;
-
     <T extends DatabaseObject> T snapshot(T example, DatabaseSnapshot snapshot, SnapshotGeneratorChain chain) throws DatabaseException, InvalidExampleException;
 }

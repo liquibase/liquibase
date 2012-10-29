@@ -745,7 +745,7 @@ public abstract class AbstractJdbcDatabase implements Database {
 
             List<Change> dropChanges = new ArrayList<Change>();
 
-            for (Schema schema : snapshot.getSchemas()) {
+            for (Schema schema : snapshot.get(Schema.class)) {
                 for (View view : schema.getDatabaseObjects(View.class)) {
                     DropViewChange dropChange = new DropViewChange();
                     dropChange.setViewName(view.getName());
@@ -797,11 +797,6 @@ public abstract class AbstractJdbcDatabase implements Database {
 
                         dropChanges.add(dropChange);
                     }
-                }
-
-
-                if (snapshot.hasDatabaseChangeLogTable()) {
-                    dropChanges.add(new AnonymousChange(new ClearDatabaseChangeLogTableStatement(schema.getCatalogName(), schema.getName())));
                 }
 
                 final boolean reEnableFK = supportsForeignKeyDisable() && disableForeignKeyChecks();
