@@ -292,4 +292,6 @@ public interface Database extends PrioritizedService {
     boolean isFunction(String string);
 
     int getDataTypeMaxParameters(String dataTypeName);
+
+    CatalogAndSchema getDefaultSchema();
 }

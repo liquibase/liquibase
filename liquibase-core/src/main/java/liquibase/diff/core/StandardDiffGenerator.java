@@ -24,10 +24,10 @@ public class StandardDiffGenerator implements DiffGenerator {
     public DiffResult compare(Database referenceDatabase, Database comparisonDatabase, DiffControl diffControl) throws LiquibaseException {
         DatabaseSnapshot referenceSnapshot = null;
         DatabaseSnapshot comparisonSnapshot = null;
-        referenceSnapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(diffControl.toSnapshotControl(DiffControl.DatabaseRole.REFERENCE), referenceDatabase);
+        referenceSnapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(diffControl.getSchemas(DiffControl.DatabaseRole.REFERENCE), referenceDatabase, diffControl.toSnapshotControl(DiffControl.DatabaseRole.REFERENCE));
         comparisonSnapshot = null;
         if (comparisonDatabase != null) {
-            comparisonSnapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(diffControl.toSnapshotControl(DiffControl.DatabaseRole.COMPARISON), comparisonDatabase);
+            comparisonSnapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(diffControl.getSchemas(DiffControl.DatabaseRole.COMPARISON), comparisonDatabase, diffControl.toSnapshotControl(DiffControl.DatabaseRole.COMPARISON));
         }
 
         return compare(referenceSnapshot, comparisonSnapshot, diffControl);

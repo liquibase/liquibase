@@ -15,6 +15,10 @@ public class SnapshotControl {
     private Set<Class<? extends DatabaseObject>> types;
     private static Set<Class<? extends DatabaseObject>> defaultTypes;
 
+    public SnapshotControl() {
+        this.types = getDefaultTypes();
+    }
+
     public SnapshotControl(Class<? extends DatabaseObject>... types) {
         if (types == null || types.length == 0) {
             this.types = getDefaultTypes();

@@ -31,7 +31,7 @@ public class SnapshotGeneratorFactory {
             }
 
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new UnexpectedLiquibaseException(e);
         }
 
     }
@@ -70,70 +70,35 @@ public class SnapshotGeneratorFactory {
         unregister(toRemove);
     }
 
-    public boolean has(DatabaseObject example, Database database) throws DatabaseException, InvalidExampleException {
-        return createSnapshot(example, database) != null;
-    }
-
-    public Collection<SnapshotGenerator> getGenerators() {
-        return generators;
-    }
-
     protected SortedSet<SnapshotGenerator> getGenerators(Class<? extends DatabaseObject> generatorClass, Database database) {
         SortedSet<SnapshotGenerator> validGenerators = new TreeSet<SnapshotGenerator>(new SnapshotGeneratorComparator(generatorClass, database));
 
-        for (SnapshotGenerator generator : getGenerators()) {
-            Class clazz = generator.getClass();
-            Type classType = null;
-            while (clazz != null) {
-                if (classType instanceof ParameterizedType) {
-                    checkType(classType, generatorClass, generator, database, validGenerators);
-                }
-
-                for (Type type : clazz.getGenericInterfaces()) {
-                    if (type instanceof ParameterizedType) {
-                        checkType(type, generatorClass, generator, database, validGenerators);
-                    } else if (isTypeEqual(type, SnapshotGenerator.class)) {
-                        //noinspection unchecked
-                        if (generator.getPriority(generatorClass, database) > 0) {
-                            validGenerators.add(generator);
-                        }
-                    }
-                }
-                classType = clazz.getGenericSuperclass();
-                clazz = clazz.getSuperclass();
+        for (SnapshotGenerator generator : generators) {
+            if (generator.getPriority(generatorClass, database) > 0) {
+                validGenerators.add(generator);
             }
         }
         return validGenerators;
     }
 
-    private boolean isTypeEqual(Type aType, Class aClass) {
-        if (aType instanceof Class) {
-            return ((Class) aType).getName().equals(aClass.getName());
-        }
-        return aType.equals(aClass);
+
+    public boolean has(DatabaseObject example, Database database) throws DatabaseException, InvalidExampleException {
+        return createSnapshot(example, database) != null;
     }
 
-    private void checkType(Type type, Class<? extends DatabaseObject> databaseObject, SnapshotGenerator generator, Database database, SortedSet<SnapshotGenerator> validGenerators) {
-        for (Type typeClass : ((ParameterizedType) type).getActualTypeArguments()) {
-            if (typeClass instanceof TypeVariable) {
-                typeClass = ((TypeVariable) typeClass).getBounds()[0];
-            }
-
-            if (isTypeEqual(typeClass, DatabaseObject.class)) {
-                return;
-            }
-
-            if (((Class) typeClass).isAssignableFrom(databaseObject)) {
-                if (generator.getPriority(databaseObject, database) > 0) {
-                    validGenerators.add(generator);
-                }
-            }
-        }
-
+    public DatabaseSnapshot createSnapshot(CatalogAndSchema example, Database database, SnapshotControl snapshotControl) throws DatabaseException, InvalidExampleException {
+        return createSnapshot(new CatalogAndSchema[] {example}, database, snapshotControl);
     }
 
+    public DatabaseSnapshot createSnapshot(CatalogAndSchema[] examples, Database database, SnapshotControl snapshotControl) throws DatabaseException, InvalidExampleException {
+        Schema[] schemas = new Schema[examples.length];
+        for (int i = 0; i< schemas.length; i++) {
+            schemas[i] = new Schema(examples[i].getCatalogName(), examples[i].getSchemaName());
+        }
+        return createSnapshot(schemas, database, snapshotControl);
+    }
 
-    public DatabaseSnapshot createSnapshot(SnapshotControl snapshotControl, Database database, DatabaseObject... examples) throws DatabaseException, InvalidExampleException {
+    public DatabaseSnapshot createSnapshot(DatabaseObject[] examples, Database database, SnapshotControl snapshotControl) throws DatabaseException, InvalidExampleException {
         DatabaseSnapshot snapshot = new DatabaseSnapshot(snapshotControl, database);
 
         for (DatabaseObject example : examples) {
@@ -144,12 +109,11 @@ public class SnapshotGeneratorFactory {
     }
 
     public <T extends DatabaseObject> T createSnapshot(T example, Database database) throws DatabaseException, InvalidExampleException {
-            DatabaseSnapshot snapshot = createSnapshot(new SnapshotControl(example.getClass()), database, example);
-            return snapshot.get(example);
+            return createSnapshot(example, database, new SnapshotControl());
     }
 
     public <T extends DatabaseObject> T createSnapshot(T example, Database database, SnapshotControl snapshotControl) throws DatabaseException, InvalidExampleException {
-        DatabaseSnapshot snapshot = createSnapshot(snapshotControl, database, example);
+        DatabaseSnapshot snapshot = createSnapshot(new DatabaseObject[]{example}, database, snapshotControl);
         return snapshot.get(example);
     }
 

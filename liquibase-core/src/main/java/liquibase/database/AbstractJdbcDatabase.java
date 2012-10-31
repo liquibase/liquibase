@@ -250,6 +250,10 @@ public abstract class AbstractJdbcDatabase implements Database {
         return objectName;
     }
 
+    public CatalogAndSchema getDefaultSchema() {
+        return new CatalogAndSchema(getDefaultCatalogName(), getDefaultSchemaName());
+
+    }
     public String getDefaultSchemaName() {
 
         if (!supportsSchemas()) {
@@ -735,10 +739,9 @@ public abstract class AbstractJdbcDatabase implements Database {
      */
     public void dropDatabaseObjects(CatalogAndSchema schemaToDrop) throws DatabaseException {
         try {
-            SnapshotControl snapshotControl = new SnapshotControl();
             DatabaseSnapshot snapshot = null;
             try {
-                snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(snapshotControl, this, new Schema(schemaToDrop.getCatalogName(), schemaToDrop.getSchemaName()));
+                snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(schemaToDrop, this, new SnapshotControl());
             } catch (LiquibaseException e) {
                 throw new UnexpectedLiquibaseException(e);
             }
