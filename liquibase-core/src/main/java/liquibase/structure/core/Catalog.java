@@ -1,11 +1,10 @@
 package liquibase.structure.core;
 
 import liquibase.database.Database;
+import liquibase.structure.AbstractDatabaseObject;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.DatabaseObjectImpl;
-import liquibase.util.StringUtils;
 
-public class Catalog extends DatabaseObjectImpl {
+public class Catalog extends AbstractDatabaseObject {
 
     protected String name;
 

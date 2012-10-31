@@ -1,13 +1,13 @@
 package liquibase.structure.core;
 
+import liquibase.structure.AbstractDatabaseObject;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.DatabaseObjectImpl;
 import liquibase.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class PrimaryKey extends DatabaseObjectImpl implements Comparable<PrimaryKey> {
+public class PrimaryKey extends AbstractDatabaseObject implements Comparable<PrimaryKey> {
     private String name;
     private List<String> columnNames = new ArrayList<String>();
     private Table table;

@@ -1,9 +1,9 @@
 package liquibase.structure.core;
 
+import liquibase.structure.AbstractDatabaseObject;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.DatabaseObjectImpl;
 
-public class Sequence extends DatabaseObjectImpl implements Comparable<Sequence> {
+public class Sequence extends AbstractDatabaseObject implements Comparable<Sequence> {
     private String name;
     private Schema schema;
 

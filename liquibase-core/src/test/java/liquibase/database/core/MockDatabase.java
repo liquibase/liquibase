@@ -40,6 +40,10 @@ public class MockDatabase implements Database {
         return "Mock Database";
     }
 
+    public CatalogAndSchema getDefaultSchema() {
+        return new CatalogAndSchema("default", "default");
+    }
+
     public Integer getDefaultPort() {
         return null;
     }

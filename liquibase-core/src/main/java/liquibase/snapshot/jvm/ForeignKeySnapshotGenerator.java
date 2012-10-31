@@ -75,7 +75,7 @@ public class ForeignKeySnapshotGenerator extends JdbcSnapshotGenerator {
                 while (importedKeyMetadataResultSet.next()) {
                     ForeignKey fk = new ForeignKey().setName(importedKeyMetadataResultSet.getString("FK_NAME")).setForeignKeyTable(table);
                     if (seenFks.add(fk.getName())) {
-                        table.getOutgoingForeignKeys().add(snapshot.include(fk));
+                        table.getOutgoingForeignKeys().add(fk);
                     }
                 }
             } catch (Exception e) {
@@ -97,7 +97,7 @@ public class ForeignKeySnapshotGenerator extends JdbcSnapshotGenerator {
                 while (exportedKeyMetadataResultSet.next()) {
                     ForeignKey fk = new ForeignKey().setName(exportedKeyMetadataResultSet.getString("FK_NAME")).setForeignKeyTable(table);
                     if (seenFks.add(fk.getName())) {
-                        table.getIncomingForeignKeys().add(snapshot.include(fk));
+                        table.getIncomingForeignKeys().add(fk);
                     }
                 }
             } catch (Exception e) {
@@ -138,12 +138,12 @@ public class ForeignKeySnapshotGenerator extends JdbcSnapshotGenerator {
                 Table foreignKeyTable = new Table().setName(fkTableName);
                 foreignKeyTable.setSchema(new Schema(new Catalog(fkTableCatalog), fkTableSchema));
 
-                foreignKey.setForeignKeyTable(snapshot.include(foreignKeyTable));
+                foreignKey.setForeignKeyTable(foreignKeyTable);
                 foreignKey.setForeignKeyColumns(cleanNameFromDatabase(importedKeyMetadataResultSet.getString("FKCOLUMN_NAME"), database));
 
                 CatalogAndSchema pkTableSchema = ((AbstractJdbcDatabase) database).getSchemaFromJdbcInfo(importedKeyMetadataResultSet.getString("PKTABLE_CAT"), importedKeyMetadataResultSet.getString("PKTABLE_SCHEM"));
                 Table tempPkTable = (Table) new Table().setName(importedKeyMetadataResultSet.getString("PKTABLE_NAME")).setSchema(new Schema(pkTableSchema.getCatalogName(), pkTableSchema.getSchemaName()));
-                foreignKey.setPrimaryKeyTable(snapshot.include(tempPkTable));
+                foreignKey.setPrimaryKeyTable(tempPkTable);
                 foreignKey.setPrimaryKeyColumns(cleanNameFromDatabase(importedKeyMetadataResultSet.getString("PKCOLUMN_NAME"), database));
                 //todo foreignKey.setKeySeq(importedKeyMetadataResultSet.getInt("KEY_SEQ"));
 

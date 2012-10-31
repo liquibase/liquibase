@@ -3,7 +3,19 @@ package liquibase.structure;
 import liquibase.CatalogAndSchema;
 import liquibase.database.Database;
 
-public abstract class DatabaseObjectImpl implements DatabaseObject {
+import java.util.UUID;
+
+public abstract class AbstractDatabaseObject implements DatabaseObject {
+
+    private UUID snapshotId;
+
+    public UUID getSnapshotId() {
+        return snapshotId;
+    }
+
+    public void setSnapshotId(UUID snapshotId) {
+        this.snapshotId = snapshotId;
+    }
 
     public boolean snapshotByDefault() {
         return true;

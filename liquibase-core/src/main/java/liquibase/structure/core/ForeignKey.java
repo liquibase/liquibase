@@ -1,11 +1,11 @@
 package liquibase.structure.core;
 
+import liquibase.structure.AbstractDatabaseObject;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.DatabaseObjectImpl;
 
 import java.util.List;
 
-public class ForeignKey extends DatabaseObjectImpl implements Comparable<ForeignKey> {
+public class ForeignKey extends AbstractDatabaseObject implements Comparable<ForeignKey> {
     private Table primaryKeyTable;
     private String primaryKeyColumns;
 

@@ -2,10 +2,12 @@ package liquibase.snapshot;
 
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
+import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.servicelocator.ServiceLocator;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
 
+import java.lang.reflect.Field;
 import java.util.*;
 
 public class DatabaseSnapshot {
@@ -36,7 +38,11 @@ public class DatabaseSnapshot {
      * Include the object described by the passed example object in this snapshot. Returns the object snapshot or null if the object does not exist in the database.
      * If the same object was returned by an earlier include() call, the same object instance will be returned.
      */
-    public <T extends DatabaseObject> T include(T example) throws DatabaseException, InvalidExampleException {
+//    public void include(DatabaseObject example) throws DatabaseException, InvalidExampleException {
+//        include(example, false);
+//    }
+
+    protected  <T extends DatabaseObject> T include(T example) throws DatabaseException, InvalidExampleException {
         T existing = get(example);
         if (existing != null) {
             return existing;
@@ -47,6 +53,7 @@ public class DatabaseSnapshot {
 
         SnapshotGeneratorChain chain = createGeneratorChain(example.getClass(), database);
         T object = chain.snapshot(example, this);
+
         if (object == null) {
             Set<DatabaseObject> collection = knownNull.get(example.getClass());
             if (collection == null) {
@@ -54,15 +61,88 @@ public class DatabaseSnapshot {
                 knownNull.put(example.getClass(), collection);
             }
             collection.add(example);
+        } else {
+            Set<DatabaseObject> collection = allFound.get(object.getClass());
+            if (collection == null) {
+                collection = new HashSet<DatabaseObject>();
+                allFound.put(object.getClass(), collection);
+            }
+            collection.add(object);
+
+            includeNestedObjects(object);
+        }
+        return object;
+    }
+
+    private void includeNestedObjects(DatabaseObject object) throws DatabaseException, InvalidExampleException {
+        try {
+            Class clazz = object.getClass();
+            do {
+                for (Field field : clazz.getDeclaredFields()) {
+                    field.setAccessible(true);
+                    Object fieldValue = field.get(object);
+                    Object newFieldValue = replaceObject(fieldValue);
+                    if (fieldValue != newFieldValue) {
+                        field.set(object, newFieldValue);
+                    }
+
+                }
+                clazz = clazz.getSuperclass();
+            } while (clazz != null && !clazz.equals(Object.class));
+        } catch (IllegalAccessException e) {
+            throw new UnexpectedLiquibaseException(e);
+        } catch (InstantiationException e) {
+            throw new UnexpectedLiquibaseException(e);
+        }
+    }
+
+    private Object replaceObject(Object fieldValue) throws DatabaseException, InvalidExampleException, IllegalAccessException, InstantiationException {
+        if (fieldValue == null) {
             return null;
         }
-        Set<DatabaseObject> collection = allFound.get(object.getClass());
-        if (collection == null) {
-            collection = new HashSet<DatabaseObject>();
-            allFound.put(object.getClass(), collection);
+        if (fieldValue instanceof DatabaseObject) {
+            if (((DatabaseObject) fieldValue).getSnapshotId() == null) {
+                return include((DatabaseObject) fieldValue);
+            } else {
+                return fieldValue;
+            }
+            //            } else if (Set.class.isAssignableFrom(field.getType())) {
+            //                field.setAccessible(true);
+            //                Set fieldValue = field.get(object);
+            //                for (Object val : fieldValue) {
+            //
+            //                }
+        } else if (fieldValue instanceof Collection) {
+            Iterator fieldValueIterator = ((Collection) fieldValue).iterator();
+            List newValues = new ArrayList();
+            while (fieldValueIterator.hasNext()) {
+                Object obj = fieldValueIterator.next();
+                if (obj instanceof DatabaseObject && ((DatabaseObject) obj).getSnapshotId() == null) {
+                    obj = include((DatabaseObject) obj);
+                }
+                if (obj != null) {
+                    newValues.add(obj);
+                }
+            }
+            Collection newCollection = (Collection) fieldValue.getClass().newInstance();
+            newCollection.addAll(newValues);
+            return newCollection;
+        } else if (fieldValue instanceof Map) {
+            Map newMap = (Map) fieldValue.getClass().newInstance();
+            for (Map.Entry entry : (Set<Map.Entry>) ((Map) fieldValue).entrySet()) {
+                Object key = replaceObject(entry.getKey());
+                Object value = replaceObject(entry.getValue());
+
+                if (key != null) {
+                    newMap.put(key, value);
+                }
+            }
+
+            return newMap;
+
         }
-        collection.add(object);
-        return  object;
+
+        return fieldValue;
     }
 
     /**

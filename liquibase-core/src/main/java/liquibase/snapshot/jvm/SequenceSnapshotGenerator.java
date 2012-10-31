@@ -36,7 +36,7 @@ public class SequenceSnapshotGenerator extends JdbcSnapshotGenerator {
 
             if (sequenceNames != null) {
                 for (String sequenceName : sequenceNames) {
-                    schema.addDatabaseObject(snapshot.include(new Sequence().setName(sequenceName).setSchema(schema)));
+                    schema.addDatabaseObject(new Sequence().setName(sequenceName).setSchema(schema));
                 }
             }
         }

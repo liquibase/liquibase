@@ -95,7 +95,7 @@ public class ViewSnapshotGenerator extends JdbcSnapshotGenerator {
             try {
                 viewsMetadataRs = getMetaData(database).getTables(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), null, new String[]{"VIEW"});
                 while (viewsMetadataRs.next()) {
-                    schema.addDatabaseObject(snapshot.include(new View().setName(viewsMetadataRs.getString("TABLE_NAME")).setSchema(schema)));
+                    schema.addDatabaseObject(new View().setName(viewsMetadataRs.getString("TABLE_NAME")).setSchema(schema));
                 }
             } catch (SQLException e) {
                 throw new DatabaseException(e);

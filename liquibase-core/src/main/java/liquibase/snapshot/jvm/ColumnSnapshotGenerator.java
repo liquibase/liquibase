@@ -107,10 +107,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
 
                 while (allColumnsMetadataRs.next()) {
                     Column exampleColumn = new Column().setRelation(relation).setName(allColumnsMetadataRs.getString("COLUMN_NAME"));
-                    Column column = snapshot.include(exampleColumn);
-                    if (column != null) {
-                        relation.getColumns().add(column);
-                    }
+                    relation.getColumns().add(exampleColumn);
                 }
             } catch (Exception e) {
                 throw new DatabaseException(e);

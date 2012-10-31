@@ -2,13 +2,13 @@ package liquibase.structure.core;
 
 import liquibase.database.Database;
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.structure.AbstractDatabaseObject;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.DatabaseObjectImpl;
 import liquibase.util.StringUtils;
 
 import java.util.*;
 
-public class Index extends DatabaseObjectImpl implements Comparable<Index> {
+public class Index extends AbstractDatabaseObject implements Comparable<Index> {
 
 	/** Marks Index as associated with Primary Key [PK] */
 	public final static String MARK_PRIMARY_KEY = "primaryKey";

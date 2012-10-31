@@ -1,14 +1,13 @@
 package liquibase.structure.core;
 
 import liquibase.CatalogAndSchema;
-import liquibase.database.Database;
+import liquibase.structure.AbstractDatabaseObject;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.DatabaseObjectImpl;
 import liquibase.util.StringUtils;
 
 import java.util.*;
 
-public class Schema extends DatabaseObjectImpl {
+public class Schema extends AbstractDatabaseObject {
 
     private Catalog catalog;
     private String name;

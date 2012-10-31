@@ -43,7 +43,7 @@ public class SchemaSnapshotGenerator extends JdbcSnapshotGenerator {
                 while (schemas.next()) {
                     CatalogAndSchema schemaFromJdbcInfo = ((AbstractJdbcDatabase) database).getSchemaFromJdbcInfo(schemas.getString("TABLE_CATALOG"), schemas.getString("TABLE_SCHEM"));
 
-                    Catalog catalog = snapshot.include(new Catalog(schemaFromJdbcInfo.getCatalogName()));
+                    Catalog catalog = new Catalog(schemaFromJdbcInfo.getCatalogName());
 
                     Schema schema = new Schema(catalog, schemaFromJdbcInfo.getSchemaName());
                     if (schema.equals(example, database)) {
@@ -55,7 +55,7 @@ public class SchemaSnapshotGenerator extends JdbcSnapshotGenerator {
                     }
                 }
             } else {
-                Catalog catalog = snapshot.include(new Catalog(catalogName));
+                Catalog catalog = new Catalog(catalogName);
                 return new Schema(catalog, null);
             }
 

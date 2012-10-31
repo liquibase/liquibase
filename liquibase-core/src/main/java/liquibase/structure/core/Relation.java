@@ -1,8 +1,7 @@
 package liquibase.structure.core;
 
-import liquibase.database.Database;
+import liquibase.structure.AbstractDatabaseObject;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.DatabaseObjectImpl;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,7 +9,7 @@ import java.util.List;
 /**
  * A container of columns. Usually a table or view.
  */
-public abstract class Relation extends DatabaseObjectImpl implements Comparable<Relation> {
+public abstract class Relation extends AbstractDatabaseObject implements Comparable<Relation> {
     private Schema schema;
     protected String name;
     private String remarks;

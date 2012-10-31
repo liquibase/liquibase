@@ -1,9 +1,9 @@
 package liquibase.structure.core;
 
+import liquibase.structure.AbstractDatabaseObject;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.DatabaseObjectImpl;
 
-public class Column extends DatabaseObjectImpl implements Comparable<Column> {
+public class Column extends AbstractDatabaseObject implements Comparable<Column> {
     private Relation relation;
     private String name;
     private Boolean nullable;

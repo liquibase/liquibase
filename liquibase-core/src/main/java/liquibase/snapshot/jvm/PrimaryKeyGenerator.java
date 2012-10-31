@@ -45,7 +45,7 @@ public class PrimaryKeyGenerator extends JdbcSnapshotGenerator {
                 if (returnKey == null) {
                     returnKey = new PrimaryKey();
                     CatalogAndSchema tableSchema = ((AbstractJdbcDatabase) database).getSchemaFromJdbcInfo(rs.getString("TABLE_CAT"), rs.getString("TABLE_SCHEMA"));
-                    returnKey.setTable((Table) snapshot.include(new Table().setName(rs.getString("TABLE_NAME")).setSchema(new Schema(tableSchema.getCatalogName(), tableSchema.getSchemaName()))));
+                    returnKey.setTable((Table) new Table().setName(rs.getString("TABLE_NAME")).setSchema(new Schema(tableSchema.getCatalogName(), tableSchema.getSchemaName())));
                     returnKey.setName(database.correctObjectName(rs.getString("PK_NAME"), PrimaryKey.class));
                 }
                 returnKey.addColumnName(position - 1, columnName);
@@ -78,7 +78,7 @@ public class PrimaryKeyGenerator extends JdbcSnapshotGenerator {
                 DatabaseMetaData metaData = getMetaData(database);
                 rs = metaData.getPrimaryKeys(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), table.getName());
                 if (rs.next()) {
-                    table.setPrimaryKey(snapshot.include(new PrimaryKey().setName(rs.getString("PK_NAME")).setTable(table)));
+                    table.setPrimaryKey(new PrimaryKey().setName(rs.getString("PK_NAME")).setTable(table));
                 }
 
                 rs.close();

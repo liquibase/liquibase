@@ -157,7 +157,7 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                 }
                 while (rs.next()) {
                     Index exampleIndex = new Index().setName(rs.getString("INDEX_NAME")).setTable(table);
-                    table.getIndexes().add(snapshot.include(exampleIndex));
+                    table.getIndexes().add(exampleIndex);
                 }
             } catch (Exception e) {
                 throw new DatabaseException(e);

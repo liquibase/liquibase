@@ -7,6 +7,7 @@ import liquibase.structure.core.Schema;
 
 import java.util.Iterator;
 import java.util.SortedSet;
+import java.util.UUID;
 
 public class SnapshotGeneratorChain {
     private Iterator<SnapshotGenerator> snapshotGenerators;
@@ -34,6 +35,10 @@ public class SnapshotGeneratorChain {
             return null;
         }
 
-        return snapshotGenerators.next().snapshot(example, snapshot, this);
+        T obj = snapshotGenerators.next().snapshot(example, snapshot, this);
+        if (obj != null) {
+            obj.setSnapshotId(UUID.randomUUID());
+        }
+        return obj;
     }
 }
