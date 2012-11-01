@@ -14,55 +14,18 @@ public class DiffControl {
     private Set<DiffStatusListener> statusListeners = new HashSet<DiffStatusListener>();
 
     private SchemaComparison[] schemaComparisons;
-    private List<Class<? extends DatabaseObject>> objectTypesToDiff = new ArrayList<Class<? extends DatabaseObject>>();
-    private boolean diffData = false;
 
     private String dataDir = null;
 
     public DiffControl() {
-        addDefaultTypes();
-
         schemaComparisons = new SchemaComparison[]{new SchemaComparison(new CatalogAndSchema(null, null), new CatalogAndSchema(null, null))};
     }
 
-    private void addDefaultTypes() {
-        objectTypesToDiff.add(Table.class);
-        objectTypesToDiff.add(View.class);
-        objectTypesToDiff.add(Column.class);
-        objectTypesToDiff.add(Index.class);
-        objectTypesToDiff.add(ForeignKey.class);
-        objectTypesToDiff.add(PrimaryKey.class);
-        objectTypesToDiff.add(UniqueConstraint.class);
-        objectTypesToDiff.add(Sequence.class);
-    }
     public DiffControl(SchemaComparison[] schemaComparison) {
-        this(schemaComparison, (Class[]) null);
-    }
-
-    public DiffControl(SchemaComparison[] schemaComparison, Class<? extends DatabaseObject>[] typesToDiff) {
-        if (typesToDiff == null) {
-            addDefaultTypes();
-        } else {
-            this.objectTypesToDiff = Arrays.asList(typesToDiff);
-        }
         this.schemaComparisons = schemaComparison;
     }
 
-    public DiffControl(SchemaComparison[] schemaComparison, String typesToDiff) {
-        this.schemaComparisons = schemaComparison;
-        readDiffTypesString(typesToDiff);
-    }
-
-    public DiffControl(CatalogAndSchema schema, Class<? extends DatabaseObject>... typesToDiff) {
-        this(new SchemaComparison[]{new SchemaComparison(schema, null)}, typesToDiff);
-    }
-
-    public DiffControl(CatalogAndSchema schema, String diffTypes) {
-        this.schemaComparisons = new SchemaComparison[] {new SchemaComparison(schema, schema)};
-        readDiffTypesString(diffTypes);
-    }
-
-    public DiffControl(String[] referenceVsComparisonSchemas, String diffTypes) {
+    public DiffControl(String[] referenceVsComparisonSchemas) {
         String[] splitReferenceSchemas = referenceVsComparisonSchemas[0].split(",");
         String[] splitComparisonSchemas = referenceVsComparisonSchemas[1].split(",");
         this.schemaComparisons = new SchemaComparison[splitReferenceSchemas.length];
@@ -85,43 +48,6 @@ public class DiffControl {
             CatalogAndSchema comparisonSchema = new CatalogAndSchema(comparisonCatalogName, comparisonSchemaName);
             this.schemaComparisons[i] = new SchemaComparison(referenceSchema, comparisonSchema);
         }
-
-        readDiffTypesString(diffTypes);
-    }
-
-    private void readDiffTypesString(String diffTypes) {
-        if (StringUtils.trimToNull(diffTypes) == null) {
-            addDefaultTypes();
-        } else {
-            Set<String> types = new HashSet<String>(Arrays.asList(diffTypes.toLowerCase().split("\\s*,\\s*")));
-
-            if (types.contains("tables")) {
-                objectTypesToDiff.add(Table.class);
-            }
-            if (types.contains("views")) {
-                objectTypesToDiff.add(View.class);
-            }
-            if (types.contains("columns")) {
-                objectTypesToDiff.add(Column.class);
-            }
-            if (types.contains("indexes")) {
-                objectTypesToDiff.add(Index.class);
-            }
-            if (types.contains("foreignkeys")) {
-                objectTypesToDiff.add(ForeignKey.class);
-            }
-            if (types.contains("primarykeys")) {
-                objectTypesToDiff.add(PrimaryKey.class);
-            }
-            if (types.contains("uniqueconstraints")) {
-                objectTypesToDiff.add(UniqueConstraint.class);
-            }
-            if (types.contains("sequences")) {
-                objectTypesToDiff.add(Sequence.class);
-            }
-
-            diffData = types.contains("data");
-        }
     }
 
     public SchemaComparison[] getSchemaComparisons() {
@@ -142,27 +68,6 @@ public class DiffControl {
         return schemas;
     }
 
-    public boolean shouldDiff(Class<? extends DatabaseObject> type) {
-        return objectTypesToDiff.contains(type);
-    }
-
-    public void setShouldDiff(Class<? extends DatabaseObject> type, boolean shouldDiff) {
-        if (shouldDiff) {
-            objectTypesToDiff.add(type);
-        } else {
-            objectTypesToDiff.remove(type);
-        }
-    }
-
-
-    public boolean shouldDiffData() {
-        return diffData;
-    }
-
-    public void setDiffData(boolean diffData) {
-        this.diffData = diffData;
-    }
-
     public Set<DiffStatusListener> getStatusListeners() {
         return statusListeners;
     }
@@ -181,20 +86,6 @@ public class DiffControl {
 
     public void setDataDir(String dataDir) {
         this.dataDir = dataDir;
-    }
-
-    public List<Class<? extends DatabaseObject>> getTypesToCompare() {
-        return objectTypesToDiff;
-    }
-
-    public SnapshotControl toSnapshotControl(DatabaseRole role) {
-        CatalogAndSchema[] diffSchemas = getSchemas(role);
-        CatalogAndSchema[] snapshotSchemas = new CatalogAndSchema[diffSchemas.length];
-        for (int i=0; i<diffSchemas.length; i++) {
-            snapshotSchemas[i] = new CatalogAndSchema(diffSchemas[i].getCatalogName(), diffSchemas[i].getSchemaName());
-        }
-
-        return new SnapshotControl();
     }
 
     public static enum DatabaseRole {

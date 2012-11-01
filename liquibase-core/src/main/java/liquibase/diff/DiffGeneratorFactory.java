@@ -6,6 +6,8 @@ import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.servicelocator.ServiceLocator;
 import liquibase.snapshot.DatabaseSnapshot;
+import liquibase.snapshot.SnapshotControl;
+import liquibase.snapshot.SnapshotGeneratorFactory;
 
 import java.util.*;
 
@@ -40,10 +42,6 @@ public class DiffGeneratorFactory {
     }
 
 
-    public DiffResult compare(Database referenceDatabase, Database comparisonDatabase, DiffControl diffControl) throws LiquibaseException {
-        return getGenerator(referenceDatabase, comparisonDatabase).compare(referenceDatabase, comparisonDatabase, diffControl);
-    }
-
     public DiffGenerator getGenerator(Database referenceDatabase, Database comparisonDatabase) {
         SortedSet<DiffGenerator> foundGenerators = new TreeSet<DiffGenerator>(new Comparator<DiffGenerator>() {
             public int compare(DiffGenerator o1, DiffGenerator o2) {
@@ -61,7 +59,6 @@ public class DiffGeneratorFactory {
             throw new UnexpectedLiquibaseException("Cannot find DiffGenerator for "+referenceDatabase.getShortName()+", "+comparisonDatabase.getShortName());
         }
 
-        DiffGenerator returnDiffGenerator;
         try {
             return foundGenerators.iterator().next().getClass().newInstance();
         } catch (Exception e) {
@@ -69,6 +66,14 @@ public class DiffGeneratorFactory {
         }
 
     }
+
+    public DiffResult compare(Database referenceDatabase, Database comparisonDatabase, DiffControl diffControl) throws LiquibaseException {
+        DatabaseSnapshot referenceSnapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(referenceDatabase.getDefaultSchema(), referenceDatabase, new SnapshotControl());
+        DatabaseSnapshot comparisonSnapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(comparisonDatabase.getDefaultSchema(), comparisonDatabase, new SnapshotControl());
+
+        return getGenerator(referenceDatabase, comparisonDatabase).compare(referenceSnapshot, comparisonSnapshot, diffControl);
+    }
+
 
     public DiffResult compare(DatabaseSnapshot referenceSnapshot, DatabaseSnapshot comparisonSnapshot, DiffControl diffControl) throws DatabaseException {
         return getGenerator(referenceSnapshot.getDatabase(), comparisonSnapshot.getDatabase()).compare(referenceSnapshot, comparisonSnapshot, diffControl);

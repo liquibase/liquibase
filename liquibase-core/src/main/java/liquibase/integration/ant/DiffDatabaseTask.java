@@ -3,6 +3,9 @@ package liquibase.integration.ant;
 import liquibase.CatalogAndSchema;
 import liquibase.Liquibase;
 import liquibase.database.Database;
+import liquibase.snapshot.DatabaseSnapshot;
+import liquibase.snapshot.SnapshotControl;
+import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.structure.core.Schema;
 import liquibase.diff.DiffControl;
 import liquibase.diff.DiffResult;
@@ -142,8 +145,11 @@ public class DiffDatabaseTask extends BaseLiquibaseTask {
             DiffControl diffControl = new DiffControl(new DiffControl.SchemaComparison[]{
                     new DiffControl.SchemaComparison(
                             new CatalogAndSchema(getReferenceDefaultCatalogName(), getReferenceDefaultSchemaName()),
-                            new CatalogAndSchema(getDefaultCatalogName(), getDefaultSchemaName()))}, getDiffTypes());
+                            new CatalogAndSchema(getDefaultCatalogName(), getDefaultSchemaName()))});
             diffControl.setDataDir(getDataDir());
+
+            DatabaseSnapshot referenceSnapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(referenceDatabase.getDefaultSchema(), referenceDatabase, new SnapshotControl(getDiffTypes()));
+            DatabaseSnapshot comparisonSnapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(liquibase.getDatabase().getDefaultSchema(), liquibase.getDatabase(), new SnapshotControl(getDiffTypes()));
 
             DiffResult diffResult = liquibase.diff(referenceDatabase, liquibase.getDatabase(), diffControl);
 //            diff.addStatusListener(new OutDiffStatusListener());

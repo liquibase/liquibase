@@ -21,18 +21,6 @@ public class StandardDiffGenerator implements DiffGenerator {
         return true;
     }
 
-    public DiffResult compare(Database referenceDatabase, Database comparisonDatabase, DiffControl diffControl) throws LiquibaseException {
-        DatabaseSnapshot referenceSnapshot = null;
-        DatabaseSnapshot comparisonSnapshot = null;
-        referenceSnapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(diffControl.getSchemas(DiffControl.DatabaseRole.REFERENCE), referenceDatabase, diffControl.toSnapshotControl(DiffControl.DatabaseRole.REFERENCE));
-        comparisonSnapshot = null;
-        if (comparisonDatabase != null) {
-            comparisonSnapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(diffControl.getSchemas(DiffControl.DatabaseRole.COMPARISON), comparisonDatabase, diffControl.toSnapshotControl(DiffControl.DatabaseRole.COMPARISON));
-        }
-
-        return compare(referenceSnapshot, comparisonSnapshot, diffControl);
-    }
-
     public DiffResult compare(DatabaseSnapshot referenceSnapshot, DatabaseSnapshot comparisonSnapshot, DiffControl diffControl) throws DatabaseException {
 
         if (comparisonSnapshot == null) {
@@ -42,7 +30,7 @@ public class StandardDiffGenerator implements DiffGenerator {
         DiffResult diffResult = new DiffResult(referenceSnapshot, comparisonSnapshot, diffControl);
         checkVersionInfo(referenceSnapshot, comparisonSnapshot, diffResult);
 
-        for (Class<? extends DatabaseObject> typeToCompare : diffControl.getTypesToCompare()) {
+        for (Class<? extends DatabaseObject> typeToCompare : diffResult.getComparedTypes()) {
             compareObjectType(typeToCompare, referenceSnapshot, comparisonSnapshot, diffResult);
         }
 

@@ -411,10 +411,12 @@ public abstract class AbstractIntegrationTest {
             boolean outputCsv = run == 1;
             runCompleteChangeLog();
 
-            DatabaseSnapshot originalSnapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(database.getDefaultSchema(), database, new SnapshotControl());
+            SnapshotControl snapshotControl = new SnapshotControl();
+//todo            diffControl.setDiffData(true);
+
+            DatabaseSnapshot originalSnapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(database.getDefaultSchema(), database, snapshotControl);
 
             DiffControl diffControl = new DiffControl();
-            diffControl.setDiffData(true);
             File tempFile = File.createTempFile("liquibase-test", ".xml");
             if (outputCsv) {
                 diffControl.setDataDir(new File(tempFile.getParentFile(), "liquibase-data").getCanonicalPath().replaceFirst("\\w:",""));

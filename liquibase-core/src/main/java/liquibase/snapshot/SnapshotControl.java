@@ -5,6 +5,7 @@ import liquibase.servicelocator.ServiceLocator;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Catalog;
 import liquibase.structure.core.Schema;
+import liquibase.util.StringUtils;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -27,6 +28,30 @@ public class SnapshotControl {
         }
         this.types.add(Catalog.class);
         this.types.add(Schema.class);
+    }
+
+    public SnapshotControl(String types) {
+        this.types = readTypesString(types);
+        this.types.add(Catalog.class);
+        this.types.add(Schema.class);
+    }
+
+    private Set<Class<? extends DatabaseObject>> readTypesString(String typesString) {
+        if (StringUtils.trimToNull(typesString) == null) {
+            return getDefaultTypes();
+        } else {
+            Set<Class<? extends DatabaseObject>> returnSet = new HashSet<Class<? extends DatabaseObject>>();
+
+            Set<String> typesToInclude = new HashSet<String>(Arrays.asList(typesString.toLowerCase().split("\\s*,\\s*")));
+
+            Class<? extends DatabaseObject>[] classes = ServiceLocator.getInstance().findClasses(DatabaseObject.class);
+            for (Class<? extends DatabaseObject> clazz : classes) {
+                if (typesToInclude.contains(clazz.getSimpleName().toLowerCase()) || typesToInclude.contains(clazz.getSimpleName().toLowerCase()+"s")) {
+                    returnSet.add(clazz);
+                }
+            }
+        }
+        return null;
     }
 
     private Set<Class<? extends DatabaseObject>> getDefaultTypes() {

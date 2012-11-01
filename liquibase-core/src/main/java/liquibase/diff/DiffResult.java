@@ -7,6 +7,7 @@ import liquibase.structure.DatabaseObject;
 import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 public class DiffResult {
 
@@ -55,6 +56,10 @@ public class DiffResult {
 
     public DiffControl getDiffControl() {
         return diffControl;
+    }
+
+    public Set<Class<? extends DatabaseObject>> getComparedTypes() {
+        return databaseObjectDiffs.keySet();
     }
 
     public <T extends DatabaseObject> DatabaseObjectDiff<T> getObjectDiff(Class<T> type) {
