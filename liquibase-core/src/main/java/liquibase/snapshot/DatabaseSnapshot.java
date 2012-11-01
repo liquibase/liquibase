@@ -169,7 +169,7 @@ public class DatabaseSnapshot {
         //noinspection unchecked
         Set<DatabaseObjectType> objects = (Set<DatabaseObjectType>) allFound.get(type);
         if (objects == null) {
-            return null;
+            return Collections.unmodifiableSet(new HashSet<DatabaseObjectType>());
         } else {
             return Collections.unmodifiableSet(objects);
         }

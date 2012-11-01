@@ -83,10 +83,6 @@ public abstract class AbstractJdbcDatabase implements Database {
         return toString();
     }
 
-    public Schema getSchema() {
-        return null;
-    }
-
     public boolean requiresPassword() {
         return true;
     }
@@ -1333,10 +1329,18 @@ public abstract class AbstractJdbcDatabase implements Database {
     }
 
     public final String getJdbcCatalogName(Schema schema) {
-        return getJdbcCatalogName(new CatalogAndSchema(schema.getCatalogName(), schema.getName()));
+        if (schema == null) {
+            return getJdbcCatalogName(getDefaultSchema());
+        } else {
+            return getJdbcCatalogName(new CatalogAndSchema(schema.getCatalogName(), schema.getName()));
+        }
     }
 
     public final String getJdbcSchemaName(Schema schema) {
-        return getJdbcSchemaName(new CatalogAndSchema(schema.getCatalogName(), schema.getName()));
+        if (schema == null) {
+            return getJdbcSchemaName(getDefaultSchema());
+        } else {
+            return getJdbcSchemaName(new CatalogAndSchema(schema.getCatalogName(), schema.getName()));
+        }
     }
 }

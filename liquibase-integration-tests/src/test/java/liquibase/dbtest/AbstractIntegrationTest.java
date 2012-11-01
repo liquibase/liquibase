@@ -104,34 +104,34 @@ public abstract class AbstractIntegrationTest {
                 database.rollback();
             }
 
-//            DatabaseSnapshotGeneratorFactory.resetAll();
-//            ExecutorService.getInstance().reset();
-//            LockService.resetAll();
-//
-//            database.checkDatabaseChangeLogLockTable();
-//
-//            if (database.getConnection() != null) {
-//                ((JdbcConnection) database.getConnection()).getUnderlyingConnection().createStatement().executeUpdate("drop table "+database.getDatabaseChangeLogLockTableName());
-//                database.commit();
-//            }
-//
-//            DatabaseSnapshotGeneratorFactory.resetAll();
-//            LockService.getInstance(database).forceReleaseLock();
-//            database.dropDatabaseObjects(CatalogAndSchema.DEFAULT);
-//
-//            if (database.supportsSchemas()) {
-//                database.dropDatabaseObjects(new CatalogAndSchema((String) null, DatabaseTestContext.ALT_SCHEMA));
-//            }
-//
-//            if (supportsAltCatalogTests()) {
-//                if (database.supportsSchemas() && database.supportsCatalogs()) {
-//                    database.dropDatabaseObjects(new CatalogAndSchema(DatabaseTestContext.ALT_CATALOG, DatabaseTestContext.ALT_SCHEMA));
-//                } else if (database.supportsCatalogs()) {
-//                    database.dropDatabaseObjects(new CatalogAndSchema((String) null, DatabaseTestContext.ALT_SCHEMA));
-//                }
-//            }
-//            database.commit();
-//            DatabaseSnapshotGeneratorFactory.resetAll();
+            SnapshotGeneratorFactory.resetAll();
+            ExecutorService.getInstance().reset();
+            LockService.resetAll();
+
+            database.checkDatabaseChangeLogLockTable();
+
+            if (database.getConnection() != null) {
+                ((JdbcConnection) database.getConnection()).getUnderlyingConnection().createStatement().executeUpdate("drop table "+database.getDatabaseChangeLogLockTableName());
+                database.commit();
+            }
+
+            SnapshotGeneratorFactory.resetAll();
+            LockService.getInstance(database).forceReleaseLock();
+            database.dropDatabaseObjects(CatalogAndSchema.DEFAULT);
+
+            if (database.supportsSchemas()) {
+                database.dropDatabaseObjects(new CatalogAndSchema((String) null, DatabaseTestContext.ALT_SCHEMA));
+            }
+
+            if (supportsAltCatalogTests()) {
+                if (database.supportsSchemas() && database.supportsCatalogs()) {
+                    database.dropDatabaseObjects(new CatalogAndSchema(DatabaseTestContext.ALT_CATALOG, DatabaseTestContext.ALT_SCHEMA));
+                } else if (database.supportsCatalogs()) {
+                    database.dropDatabaseObjects(new CatalogAndSchema((String) null, DatabaseTestContext.ALT_SCHEMA));
+                }
+            }
+            database.commit();
+            SnapshotGeneratorFactory.resetAll();
 
         }
     }
@@ -476,8 +476,8 @@ public abstract class AbstractIntegrationTest {
             }
 
             DatabaseSnapshot emptyAgainSnapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(database.getDefaultSchema(), database, new SnapshotControl());
-            assertEquals(0, emptyAgainSnapshot.get(Schema.class).iterator().next().getDatabaseObjects(Table.class).size());
-            assertEquals(0, emptyAgainSnapshot.get(Schema.class).iterator().next().getDatabaseObjects(View.class).size());
+            assertEquals(2, emptyAgainSnapshot.get(Table.class).size());
+            assertEquals(0, emptyAgainSnapshot.get(View.class).size());
         }
     }
 
