@@ -6,6 +6,7 @@ import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.servicelocator.ServiceLocator;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
+import liquibase.structurecompare.DatabaseObjectComparatorFactory;
 
 import java.lang.reflect.Field;
 import java.util.*;
@@ -155,7 +156,7 @@ public class DatabaseSnapshot {
             return null;
         }
         for (DatabaseObject obj : databaseObjects) {
-            if (obj.equals(example, database)) {
+            if (DatabaseObjectComparatorFactory.getInstance().isSameObject(obj, example, database)) {
                 //noinspection unchecked
                 return (DatabaseObjectType) obj;
             }
@@ -192,7 +193,7 @@ public class DatabaseSnapshot {
             return false;
         }
         for (DatabaseObject obj : databaseObjects) {
-            if (obj.equals(example, database)) {
+            if (DatabaseObjectComparatorFactory.getInstance().isSameObject(obj, example, database)) {
                 return true;
             }
         }

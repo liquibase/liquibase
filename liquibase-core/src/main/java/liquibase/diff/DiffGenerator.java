@@ -6,7 +6,7 @@ import liquibase.exception.LiquibaseException;
 import liquibase.servicelocator.PrioritizedService;
 import liquibase.snapshot.DatabaseSnapshot;
 
-public interface DiffGenerator extends PrioritizedService{
+public interface DiffGenerator extends PrioritizedService {
     DiffResult compare(DatabaseSnapshot referenceSnapshot, DatabaseSnapshot comparisonSnapshot, DiffControl diffControl) throws DatabaseException;
 
     boolean supports(Database referenceDatabase, Database comparisonDatabase);

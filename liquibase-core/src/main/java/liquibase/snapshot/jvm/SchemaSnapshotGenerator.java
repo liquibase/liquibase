@@ -10,6 +10,7 @@ import liquibase.snapshot.InvalidExampleException;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Catalog;
 import liquibase.structure.core.Schema;
+import liquibase.structurecompare.DatabaseObjectComparatorFactory;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -46,7 +47,7 @@ public class SchemaSnapshotGenerator extends JdbcSnapshotGenerator {
                     Catalog catalog = new Catalog(schemaFromJdbcInfo.getCatalogName());
 
                     Schema schema = new Schema(catalog, schemaFromJdbcInfo.getSchemaName());
-                    if (schema.equals(example, database)) {
+                    if (DatabaseObjectComparatorFactory.getInstance().isSameObject(schema, example, database)) {
                         if (match == null) {
                             match = schema;
                         } else {

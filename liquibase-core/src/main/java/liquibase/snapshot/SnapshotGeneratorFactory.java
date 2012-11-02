@@ -15,7 +15,8 @@ import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.util.*;
 
-public class SnapshotGeneratorFactory {
+public class
+        SnapshotGeneratorFactory {
 
     private static SnapshotGeneratorFactory instance;
 

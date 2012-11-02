@@ -110,32 +110,6 @@ public class Index extends AbstractDatabaseObject {
 		return associatedWith.contains(keyword);
 	}
 
-    @Override
-    public boolean equals(DatabaseObject otherObject, Database accordingTo) {
-        if (!(otherObject instanceof Index)) {
-            return false;
-        }
-        Index otherIndex = (Index) otherObject;
-
-        if (((Index) otherObject).getColumns().size() == 0) {
-            return super.equals(otherObject, accordingTo); //fall back to name
-        }
-
-        if (this.getTable() != null) {
-            return this.getTable().equals(((Index) otherObject).getTable(), accordingTo);
-        }
-
-        if (otherIndex.getColumns() != null & otherIndex.getColumns().size() > 0) {
-            for (int i=0; i<otherIndex.getColumns().size(); i++) {
-                if (! new Column().setName(getColumns().get(i)).equals(new Column().setName(otherIndex.getColumns().get(i)), accordingTo)) {
-                    return false;
-                }
-            }
-            return true;
-        }
-
-        throw new UnexpectedLiquibaseException("Nothing to compare");
-    }
 
 //    @Override
 //    public boolean equals(Object o) {

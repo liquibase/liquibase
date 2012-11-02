@@ -17,6 +17,7 @@ import liquibase.serializer.core.xml.XMLChangeLogSerializer;
 import liquibase.statement.DatabaseFunction;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.core.*;
+import liquibase.structurecompare.DatabaseObjectComparatorFactory;
 import liquibase.util.ISODateFormat;
 import liquibase.util.StringUtils;
 import liquibase.util.csv.CSVWriter;
@@ -651,7 +652,7 @@ public class DiffToChangeLog {
                 if (column.isPrimaryKey()) {
                     PrimaryKey primaryKey = null;
                     for (PrimaryKey pk : diffResult.getObjectDiff(PrimaryKey.class).getMissing()) {
-                        if (pk.getTable().equals(missingTable, diffResult.getComparisonSnapshot().getDatabase())) {
+                        if (DatabaseObjectComparatorFactory.getInstance().isSameObject(pk.getTable(), missingTable, diffResult.getComparisonSnapshot().getDatabase())) {
                             primaryKey = pk;
                         }
                     }
