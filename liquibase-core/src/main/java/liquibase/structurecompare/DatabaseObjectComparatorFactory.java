@@ -85,7 +85,12 @@ public class DatabaseObjectComparatorFactory {
         return createComparatorChain(object1.getClass(), accordingTo).isSameObject(object1, object2, accordingTo);
     }
 
-    private DatabaseObjectComparatorChain createComparatorChain(Class<? extends DatabaseObject> databaseObjectType, Database database) {
+    public boolean containsDifferences(DatabaseObject object1, DatabaseObject object2, Database accordingTo) {
+        return createComparatorChain(object1.getClass(), accordingTo).containsDifferences(object1, object2, accordingTo);
+
+    }
+
+        private DatabaseObjectComparatorChain createComparatorChain(Class<? extends DatabaseObject> databaseObjectType, Database database) {
         SortedSet<DatabaseObjectComparator> comparators = DatabaseObjectComparatorFactory.getInstance().getComparators(databaseObjectType, database);
         if (comparators == null || comparators.size() == 0) {
             return null;

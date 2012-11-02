@@ -18,8 +18,6 @@ public interface DatabaseObject extends Comparable{
 
     Schema getSchema();
 
-    boolean matches(DatabaseObject otherObject, Database accordingTo);
-
     boolean snapshotByDefault();
 
 }

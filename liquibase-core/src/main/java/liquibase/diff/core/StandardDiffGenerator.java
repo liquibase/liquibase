@@ -10,6 +10,7 @@ import liquibase.exception.DatabaseException;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Schema;
+import liquibase.structurecompare.DatabaseObjectComparatorFactory;
 
 import java.util.Set;
 
@@ -74,7 +75,7 @@ public class StandardDiffGenerator implements DiffGenerator {
                 if (comparisonObject == null) {
                     diffResult.getObjectDiff(type).addMissing(referenceObject);
                 } else {
-                    if (!referenceObject.matches(comparisonObject, comparisonSnapshot.getDatabase())) {
+                    if (!DatabaseObjectComparatorFactory.getInstance().containsDifferences(referenceObject, comparisonObject, comparisonSnapshot.getDatabase())) {
                         diffResult.getObjectDiff(type).addChanged(referenceObject);
                     }
                 }

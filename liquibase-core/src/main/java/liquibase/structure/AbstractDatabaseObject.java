@@ -24,16 +24,4 @@ public abstract class AbstractDatabaseObject implements DatabaseObject {
     public int compareTo(Object o) {
         return this.getName().compareTo(((AbstractDatabaseObject) o).getName());
     }
-
-    public boolean matches(DatabaseObject otherObject, Database accordingTo) {
-        if (otherObject == null) {
-            return false;
-        }
-
-//        if (!equals(otherObject, accordingTo)) {
-//            return false;
-//        }
-        return accordingTo.correctObjectName(getName(), otherObject.getClass()).equals(accordingTo.correctObjectName(otherObject.getName(), otherObject.getClass()));
-        //todo: better matching
-    }
 }

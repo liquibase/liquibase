@@ -1,6 +1,7 @@
 package liquibase.structurecompare;
 
 import liquibase.database.Database;
+import liquibase.diff.DatabaseObjectDiff;
 import liquibase.diff.DiffResult;
 import liquibase.structure.DatabaseObject;
 
@@ -15,5 +16,5 @@ public interface DatabaseObjectComparator {
 
     boolean isSameObject(DatabaseObject databaseObject1, DatabaseObject databaseObject2, Database accordingTo, DatabaseObjectComparatorChain chain);
 
-    DiffResult compare(DatabaseObject databaseObject, Database accordingTo);
+    boolean containsDifferences(DatabaseObject databaseObject1, DatabaseObject databaseObject2, Database accordingTo, DatabaseObjectComparatorChain chain);
 }

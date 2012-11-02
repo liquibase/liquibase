@@ -42,7 +42,7 @@ public class IndexComparator implements DatabaseObjectComparator {
         throw new UnexpectedLiquibaseException("Nothing to compare");
     }
 
-    public DiffResult compare(DatabaseObject databaseObject, Database accordingTo) {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    public boolean containsDifferences(DatabaseObject databaseObject1, DatabaseObject databaseObject2, Database accordingTo, DatabaseObjectComparatorChain chain) {
+        return chain.containsDifferences(databaseObject1, databaseObject2, accordingTo);
     }
 }
