@@ -5,7 +5,7 @@ import liquibase.structure.DatabaseObject;
 
 import java.util.List;
 
-public class ForeignKey extends AbstractDatabaseObject implements Comparable<ForeignKey> {
+public class ForeignKey extends AbstractDatabaseObject{
     private Table primaryKeyTable;
     private String primaryKeyColumns;
 
@@ -205,7 +205,9 @@ public class ForeignKey extends AbstractDatabaseObject implements Comparable<For
     }
 
 
-    public int compareTo(ForeignKey o) {
+    @Override
+    public int compareTo(Object other) {
+        ForeignKey o = (ForeignKey) other;
         int returnValue = 0;
         if (this.getForeignKeyTable() != null && o.getForeignKeyTable() != null) {
             returnValue = this.getForeignKeyTable().compareTo(o.getForeignKeyTable());

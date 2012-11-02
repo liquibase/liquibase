@@ -3,7 +3,7 @@ package liquibase.structure.core;
 import liquibase.structure.AbstractDatabaseObject;
 import liquibase.structure.DatabaseObject;
 
-public class Column extends AbstractDatabaseObject implements Comparable<Column> {
+public class Column extends AbstractDatabaseObject {
     private Relation relation;
     private String name;
     private Boolean nullable;
@@ -109,7 +109,9 @@ public class Column extends AbstractDatabaseObject implements Comparable<Column>
     }
 
 
-    public int compareTo(Column o) {
+    @Override
+    public int compareTo(Object other) {
+        Column o = (Column) other;
         try {
             //noinspection UnusedAssignment
             int returnValue = 0;

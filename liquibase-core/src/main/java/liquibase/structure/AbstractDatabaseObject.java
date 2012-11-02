@@ -21,6 +21,10 @@ public abstract class AbstractDatabaseObject implements DatabaseObject {
         return true;
     }
 
+    public int compareTo(Object o) {
+        return this.getName().compareTo(((AbstractDatabaseObject) o).getName());
+    }
+
     public boolean equals(DatabaseObject otherObject, Database accordingTo) {
         if (otherObject == null) {
             return false;
@@ -29,10 +33,18 @@ public abstract class AbstractDatabaseObject implements DatabaseObject {
             return otherObject.getName() == null;
         }
 
-        if (accordingTo.isCaseSensitive()) {
-            return this.getName().equals(otherObject.getName());
-        } else {
-            return this.getName().equalsIgnoreCase(otherObject.getName());
+        return accordingTo.correctObjectName(getName(), otherObject.getClass()).equals(accordingTo.correctObjectName(otherObject.getName(), otherObject.getClass()));
+    }
+
+    public boolean matches(DatabaseObject otherObject, Database accordingTo) {
+        if (otherObject == null) {
+            return false;
         }
+
+        if (!equals(otherObject, accordingTo)) {
+            return false;
+        }
+        return accordingTo.correctObjectName(getName(), otherObject.getClass()).equals(accordingTo.correctObjectName(otherObject.getName(), otherObject.getClass()));
+        //todo: better matching
     }
 }

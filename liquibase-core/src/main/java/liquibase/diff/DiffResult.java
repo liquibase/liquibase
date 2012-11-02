@@ -14,14 +14,13 @@ public class DiffResult {
     private DatabaseSnapshot referenceSnapshot;
     private DatabaseSnapshot comparisonSnapshot;
 
-    private StringDiff productName;
-    private StringDiff productVersion;
+    private DiffControl diffControl;
+
+    private StringDiff productNameDiff;
+    private StringDiff productVersionDiff;
 
     private Map<Class<? extends DatabaseObject>, DatabaseObjectDiff> databaseObjectDiffs = new HashMap<Class<? extends DatabaseObject>, DatabaseObjectDiff> ();
 
-    private DataDiff data = new DataDiff();
-
-    private DiffControl diffControl;
 
     public DiffResult(DatabaseSnapshot referenceDatabaseSnapshot, DatabaseSnapshot comparisonDatabaseSnapshot, DiffControl diffControl) {
         this.referenceSnapshot = referenceDatabaseSnapshot;
@@ -37,21 +36,21 @@ public class DiffResult {
         return comparisonSnapshot;
     }
 
-    public StringDiff getProductName() {
-        return productName;
+    public StringDiff getProductNameDiff() {
+        return productNameDiff;
     }
 
-    public void setProductName(StringDiff productName) {
-        this.productName = productName;
+    public void setProductNameDiff(StringDiff productNameDiff) {
+        this.productNameDiff = productNameDiff;
     }
 
-    public StringDiff getProductVersion() {
-        return productVersion;
+    public StringDiff getProductVersionDiff() {
+        return productVersionDiff;
     }
 
 
-    public void setProductVersion(StringDiff productVersion) {
-        this.productVersion = productVersion;
+    public void setProductVersionDiff(StringDiff productVersionDiff) {
+        this.productVersionDiff = productVersionDiff;
     }
 
     public DiffControl getDiffControl() {
@@ -69,10 +68,6 @@ public class DiffResult {
         return databaseObjectDiffs.get(type);
     }
     
-    public DataDiff getData() {
-        return data;
-    }
-
     public boolean areEqual() throws DatabaseException, IOException {
 //        boolean differencesInData = false;
 //        if (diffControl.shouldDiffData()) {
@@ -85,10 +80,6 @@ public class DiffResult {
             if (!diff.areEqual()) {
                 return false;
             }
-        }
-
-        if (!data.isEqual()) {
-            return false;
         }
 
         return true;

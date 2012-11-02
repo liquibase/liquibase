@@ -3,7 +3,7 @@ package liquibase.structure.core;
 import liquibase.structure.AbstractDatabaseObject;
 import liquibase.structure.DatabaseObject;
 
-public class Sequence extends AbstractDatabaseObject implements Comparable<Sequence> {
+public class Sequence extends AbstractDatabaseObject {
     private String name;
     private Schema schema;
 
@@ -19,11 +19,6 @@ public class Sequence extends AbstractDatabaseObject implements Comparable<Seque
     public Sequence setName(String name) {
         this.name = name;
         return this;
-    }
-
-
-    public int compareTo(Sequence o) {
-        return this.getName().compareTo(o.getName());
     }
 
 

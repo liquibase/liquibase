@@ -24,6 +24,7 @@ public class DatabaseSnapshot {
 
     public DatabaseSnapshot(Database database) {
         this.database = database;
+        this.snapshotControl = new SnapshotControl();
     }
 
     public SnapshotControl getSnapshotControl() {

@@ -22,8 +22,8 @@ public class DiffToPrintStream {
         out.println("Reference Database: " + diffResult.getReferenceSnapshot().getDatabase());
         out.println("Comparison Database: " + diffResult.getComparisonSnapshot().getDatabase());
 
-        printComparison("Product Name", diffResult.getProductName(), out);
-        printComparison("Product Version", diffResult.getProductVersion(), out);
+        printComparison("Product Name", diffResult.getProductNameDiff(), out);
+        printComparison("Product Version", diffResult.getProductVersionDiff(), out);
         
         for (Class<? extends DatabaseObject> type : diffResult.getComparedTypes()) {
             printSetComparison("Missing " + getTypeName(type), diffResult.getObjectDiff(type).getMissing(), out);

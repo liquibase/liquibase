@@ -8,7 +8,7 @@ import liquibase.util.StringUtils;
 
 import java.util.*;
 
-public class Index extends AbstractDatabaseObject implements Comparable<Index> {
+public class Index extends AbstractDatabaseObject {
 
 	/** Marks Index as associated with Primary Key [PK] */
 	public final static String MARK_PRIMARY_KEY = "primaryKey";
@@ -154,7 +154,9 @@ public class Index extends AbstractDatabaseObject implements Comparable<Index> {
 //        return name != null ? name.hashCode() : 0;
 //    }
 
-    public int compareTo(Index o) {
+    @Override
+    public int compareTo(Object other) {
+        Index o = (Index) other;
         int returnValue = this.table.getName().compareTo(o.table.getName());
 
         if (returnValue == 0) {

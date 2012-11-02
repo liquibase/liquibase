@@ -7,7 +7,7 @@ import liquibase.util.StringUtils;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PrimaryKey extends AbstractDatabaseObject implements Comparable<PrimaryKey> {
+public class PrimaryKey extends AbstractDatabaseObject {
     private String name;
     private List<String> columnNames = new ArrayList<String>();
     private Table table;
@@ -59,7 +59,8 @@ public class PrimaryKey extends AbstractDatabaseObject implements Comparable<Pri
     }
 
 
-    public int compareTo(PrimaryKey o) {
+    public int compareTo(Object other) {
+        PrimaryKey o = (PrimaryKey) other;
         int returnValue = this.getTable().getName().compareTo(o.getTable().getName());
         if (returnValue == 0) {
             returnValue = this.getColumnNames().compareTo(o.getColumnNames());

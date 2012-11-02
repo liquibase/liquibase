@@ -129,9 +129,9 @@ public class DiffToChangeLog {
         addMissingUniqueConstraintChanges(changeSets);
         addUnexpectedUniqueConstraintChanges(changeSets);
 
-        if (diffResult.getData().wasCompared()) {
-            addInsertDataChanges(changeSets, diffResult.getDiffControl().getDataDir());
-        }
+//todo        if (diffResult.getData().wasCompared()) {
+//            addInsertDataChanges(changeSets, diffResult.getDiffControl().getDataDir());
+//        }
 
         addMissingForeignKeyChanges(changeSets);
         addUnexpectedIndexChanges(changeSets);

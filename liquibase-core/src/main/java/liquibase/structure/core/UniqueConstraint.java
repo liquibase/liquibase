@@ -7,7 +7,7 @@ import liquibase.util.StringUtils;
 import java.util.ArrayList;
 import java.util.List;
 
-public class UniqueConstraint extends AbstractDatabaseObject implements Comparable<UniqueConstraint> {
+public class UniqueConstraint extends AbstractDatabaseObject {
 	private String name;
 	private Table table;
 	private List<String> columns = new ArrayList<String>();
@@ -124,10 +124,9 @@ public class UniqueConstraint extends AbstractDatabaseObject implements Comparab
 
 	}
 
-	/**
-	 * @see java.lang.Comparable#compareTo(java.lang.Object)
-	 */
-	public int compareTo(UniqueConstraint o) {
+	@Override
+    public int compareTo(Object other) {
+        UniqueConstraint o = (UniqueConstraint) other;
 		// Need check for nulls here due to NullPointerException using Postgres
 		String thisTableName;
 		String thatTableName;

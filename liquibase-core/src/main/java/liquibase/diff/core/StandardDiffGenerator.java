@@ -1,15 +1,17 @@
 package liquibase.diff.core;
 
+import liquibase.CatalogAndSchema;
 import liquibase.database.Database;
 import liquibase.diff.StringDiff;
 import liquibase.diff.DiffControl;
 import liquibase.diff.DiffGenerator;
 import liquibase.diff.DiffResult;
 import liquibase.exception.DatabaseException;
-import liquibase.exception.LiquibaseException;
 import liquibase.snapshot.DatabaseSnapshot;
-import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.Schema;
+
+import java.util.Set;
 
 public class StandardDiffGenerator implements DiffGenerator {
 
@@ -30,7 +32,10 @@ public class StandardDiffGenerator implements DiffGenerator {
         DiffResult diffResult = new DiffResult(referenceSnapshot, comparisonSnapshot, diffControl);
         checkVersionInfo(referenceSnapshot, comparisonSnapshot, diffResult);
 
-        for (Class<? extends DatabaseObject> typeToCompare : diffResult.getComparedTypes()) {
+        Set<Class<? extends DatabaseObject>> typesToCompare = referenceSnapshot.getSnapshotControl().getTypesToInclude();
+        typesToCompare.retainAll(comparisonSnapshot.getSnapshotControl().getTypesToInclude());
+
+        for (Class<? extends DatabaseObject> typeToCompare : typesToCompare) {
             compareObjectType(typeToCompare, referenceSnapshot, comparisonSnapshot, diffResult);
         }
 
@@ -47,42 +52,43 @@ public class StandardDiffGenerator implements DiffGenerator {
     protected void checkVersionInfo(DatabaseSnapshot referenceSnapshot, DatabaseSnapshot comparisonSnapshot, DiffResult diffResult) throws DatabaseException {
 
         if (comparisonSnapshot != null && comparisonSnapshot.getDatabase() != null) {
-            diffResult.setProductName(new StringDiff(referenceSnapshot.getDatabase().getDatabaseProductName(), comparisonSnapshot.getDatabase().getDatabaseProductName()));
-            diffResult.setProductVersion(new StringDiff(referenceSnapshot.getDatabase().getDatabaseProductVersion(), comparisonSnapshot.getDatabase().getDatabaseProductVersion()));
+            diffResult.setProductNameDiff(new StringDiff(referenceSnapshot.getDatabase().getDatabaseProductName(), comparisonSnapshot.getDatabase().getDatabaseProductName()));
+            diffResult.setProductVersionDiff(new StringDiff(referenceSnapshot.getDatabase().getDatabaseProductVersion(), comparisonSnapshot.getDatabase().getDatabaseProductVersion()));
         }
 
     }
 
     protected <T extends DatabaseObject> void compareObjectType(Class<T> type, DatabaseSnapshot referenceSnapshot, DatabaseSnapshot comparisonSnapshot, DiffResult diffResult) {
 
-//todo        for (DiffControl.SchemaComparison schemaComparison : diffResult.getDiffControl().getSchemaComparisons()) {
-//            Schema referenceSchema = referenceSnapshot.getDatabase().correctSchema(schemaComparison.getReferenceSchema());
-//            Schema comparisonSchema = null;
-//            if (comparisonSnapshot.getDatabase() != null) {
-//                comparisonSchema = comparisonSnapshot.getDatabase().correctSchema(schemaComparison.getComparisonSchema());
-//            }
-//            for (T referenceObject : referenceSnapshot.getDatabaseObjects(referenceSchema, type)) {
+        for (DiffControl.SchemaComparison schemaComparison : diffResult.getDiffControl().getSchemaComparisons()) {
+            CatalogAndSchema referenceSchema = referenceSnapshot.getDatabase().correctSchema(schemaComparison.getReferenceSchema());
+            CatalogAndSchema comparisonSchema = null;
+            if (comparisonSnapshot.getDatabase() != null) {
+                comparisonSchema = comparisonSnapshot.getDatabase().correctSchema(schemaComparison.getComparisonSchema());
+            }
+            for (T referenceObject : referenceSnapshot.get(type)) {
 //                if (referenceObject instanceof Table && referenceSnapshot.getDatabase().isLiquibaseTable(referenceSchema, referenceObject.getName())) {
 //                    continue;
 //                }
-//                if (comparisonSnapshot.contains(comparisonSchema, referenceObject)) {
-//                    if (!comparisonSnapshot.matches(comparisonSchema, referenceObject)) {
-//                        diffResult.getObjectDiff(type).addChanged(referenceObject);
-//                    }
-//                } else {
-//                    diffResult.getObjectDiff(type).addMissing(referenceObject);
-//                }
-//            }
+                T comparisonObject = comparisonSnapshot.get(referenceObject);
+                if (comparisonObject == null) {
+                    diffResult.getObjectDiff(type).addMissing(referenceObject);
+                } else {
+                    if (!referenceObject.matches(comparisonObject, comparisonSnapshot.getDatabase())) {
+                        diffResult.getObjectDiff(type).addChanged(referenceObject);
+                    }
+                }
+            }
 //
-//            for (T targetObject : comparisonSnapshot.getDatabaseObjects(comparisonSchema, type)) {
+            for (T comparisonObject : comparisonSnapshot.get(type)) {
 //                if (targetObject instanceof Table && comparisonSnapshot.getDatabase().isLiquibaseTable(comparisonSchema, targetObject.getName())) {
 //                    continue;
 //                }
-//                if (!referenceSnapshot.contains(referenceSchema, targetObject)) {
-//                    diffResult.getObjectDiff(type).addUnexpected(targetObject);
-//                }
+                if (referenceSnapshot.get(comparisonObject) == null) {
+                    diffResult.getObjectDiff(type).addUnexpected(comparisonObject);
+                }
 //            }
-//        }
+        }
 
         //todo: add logic for when container is missing or unexpected also
     }
@@ -173,5 +179,5 @@ public class StandardDiffGenerator implements DiffGenerator {
 //
 //        uniqueConstraints.removeAll( constraintsToRemove );
 //    }
-
+    }
 }
