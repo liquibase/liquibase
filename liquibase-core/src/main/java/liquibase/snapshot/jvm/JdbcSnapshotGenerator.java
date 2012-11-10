@@ -112,26 +112,4 @@ public abstract class JdbcSnapshotGenerator implements SnapshotGenerator {
         }
         return objectName;
     }
-
-    protected Set<String> listAllTables(CatalogAndSchema schema, Database database) throws DatabaseException {
-        Set<String> returnTables = new HashSet<String>();
-        ResultSet tableMetaDataRs = null;
-        try {
-            tableMetaDataRs = getMetaData(database).getTables(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), null, new String[]{"TABLE"});
-            while (tableMetaDataRs.next()) {
-                returnTables.add(tableMetaDataRs.getString("TABLE_NAME"));
-            }
-        } catch (SQLException e) {
-            throw new DatabaseException(e);
-        } finally {
-            try {
-                if (tableMetaDataRs != null) {
-                    tableMetaDataRs.close();
-                }
-            } catch (SQLException ignore) {
-            }
-        }
-        return returnTables;
-
-    }
 }
