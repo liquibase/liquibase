@@ -1,4 +1,4 @@
-package liquibase.structurecompare;
+package liquibase.diff.compare;
 
 import liquibase.database.Database;
 import liquibase.structure.DatabaseObject;

@@ -2,15 +2,11 @@ package liquibase.diff.core;
 
 import liquibase.CatalogAndSchema;
 import liquibase.database.Database;
-import liquibase.diff.StringDiff;
-import liquibase.diff.DiffControl;
-import liquibase.diff.DiffGenerator;
-import liquibase.diff.DiffResult;
+import liquibase.diff.*;
 import liquibase.exception.DatabaseException;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.core.Schema;
-import liquibase.structurecompare.DatabaseObjectComparatorFactory;
+import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 
 import java.util.Set;
 
@@ -75,8 +71,9 @@ public class StandardDiffGenerator implements DiffGenerator {
                 if (comparisonObject == null) {
                     diffResult.getObjectDiff(type).addMissing(referenceObject);
                 } else {
-                    if (!DatabaseObjectComparatorFactory.getInstance().containsDifferences(referenceObject, comparisonObject, comparisonSnapshot.getDatabase())) {
-                        diffResult.getObjectDiff(type).addChanged(referenceObject);
+                    ObjectDifferences differences = DatabaseObjectComparatorFactory.getInstance().findDifferences(referenceObject, comparisonObject, comparisonSnapshot.getDatabase());
+                    if (differences.hasDifferences()) {
+                        diffResult.getObjectDiff(type).addChanged(referenceObject, differences);
                     }
                 }
             }

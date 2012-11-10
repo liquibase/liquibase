@@ -15,6 +15,11 @@ public class Catalog extends AbstractDatabaseObject {
         this.name = name;
     }
 
+    @Override
+    public String toString() {
+        return name;
+    }
+
     public DatabaseObject[] getContainingObjects() {
         return null;
     }

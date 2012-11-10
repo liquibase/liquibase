@@ -6,7 +6,7 @@ import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.servicelocator.ServiceLocator;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
-import liquibase.structurecompare.DatabaseObjectComparatorFactory;
+import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 
 import java.lang.reflect.Field;
 import java.util.*;

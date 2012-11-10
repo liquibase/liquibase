@@ -1,12 +1,14 @@
 package liquibase.diff;
 
+import java.util.SortedMap;
 import java.util.SortedSet;
+import java.util.TreeMap;
 import java.util.TreeSet;
 
 public class DatabaseObjectDiff<Type> {
     private SortedSet<Type> missing = new TreeSet<Type>();
     private SortedSet<Type> unexpected = new TreeSet<Type>();
-    private SortedSet<Type> changed = new TreeSet<Type>();
+    private SortedMap<Type, ObjectDifferences> changed = new TreeMap<Type, ObjectDifferences>();
 
     public SortedSet<Type> getMissing() {
         return missing;
@@ -24,12 +26,12 @@ public class DatabaseObjectDiff<Type> {
         unexpected.add(obj);
     }
 
-    public SortedSet<Type> getChanged() {
+    public SortedMap<Type, ObjectDifferences> getChanged() {
         return changed;
     }
     
-    public void addChanged(Type obj) {
-        changed.add(obj);
+    public void addChanged(Type obj, ObjectDifferences differences) {
+        changed.put(obj, differences);
     }
 
     public boolean areEqual() {

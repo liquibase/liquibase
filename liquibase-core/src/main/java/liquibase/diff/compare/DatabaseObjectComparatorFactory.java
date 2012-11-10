@@ -1,6 +1,7 @@
-package liquibase.structurecompare;
+package liquibase.diff.compare;
 
 import liquibase.database.Database;
+import liquibase.diff.ObjectDifferences;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.servicelocator.ServiceLocator;
 import liquibase.structure.DatabaseObject;
@@ -85,8 +86,8 @@ public class DatabaseObjectComparatorFactory {
         return createComparatorChain(object1.getClass(), accordingTo).isSameObject(object1, object2, accordingTo);
     }
 
-    public boolean containsDifferences(DatabaseObject object1, DatabaseObject object2, Database accordingTo) {
-        return createComparatorChain(object1.getClass(), accordingTo).containsDifferences(object1, object2, accordingTo);
+    public ObjectDifferences findDifferences(DatabaseObject object1, DatabaseObject object2, Database accordingTo) {
+        return createComparatorChain(object1.getClass(), accordingTo).findDifferences(object1, object2, accordingTo);
 
     }
 

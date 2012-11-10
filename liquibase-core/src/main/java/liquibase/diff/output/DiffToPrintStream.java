@@ -1,12 +1,14 @@
 package liquibase.diff.output;
 
+import liquibase.diff.Difference;
+import liquibase.diff.ObjectDifferences;
 import liquibase.structure.DatabaseObject;
 import liquibase.diff.DiffResult;
 import liquibase.diff.StringDiff;
 import liquibase.exception.DatabaseException;
 
 import java.io.PrintStream;
-import java.util.SortedSet;
+import java.util.*;
 
 public class DiffToPrintStream {
 
@@ -24,11 +26,18 @@ public class DiffToPrintStream {
 
         printComparison("Product Name", diffResult.getProductNameDiff(), out);
         printComparison("Product Version", diffResult.getProductVersionDiff(), out);
-        
-        for (Class<? extends DatabaseObject> type : diffResult.getComparedTypes()) {
+
+        TreeSet<Class<? extends DatabaseObject>> types = new TreeSet<Class<? extends DatabaseObject>>(new Comparator<Class<? extends DatabaseObject>>() {
+            public int compare(Class<? extends DatabaseObject> o1, Class<? extends DatabaseObject> o2) {
+                return o1.getSimpleName().compareTo(o2.getSimpleName());
+            }
+        });
+        types.addAll(diffResult.getComparedTypes());
+        for (Class<? extends DatabaseObject> type : types) {
             printSetComparison("Missing " + getTypeName(type), diffResult.getObjectDiff(type).getMissing(), out);
             printSetComparison("Unexpected "+getTypeName(type), diffResult.getObjectDiff(type).getUnexpected(), out);
-            printSetComparison("Changed "+getTypeName(type), diffResult.getObjectDiff(type).getChanged(), out);
+
+            printChangedComparison("Changed " + getTypeName(type), diffResult.getObjectDiff(type).getChanged(), out);
 
         }
         
@@ -39,8 +48,24 @@ public class DiffToPrintStream {
         return type.getSimpleName().replaceAll("([A-Z])", " $1").trim() + "(s)";
     }
 
-    protected void printSetComparison(String title, SortedSet<?> objects,
-                                    PrintStream out) {
+    protected void printChangedComparison(String title, SortedMap<? extends DatabaseObject, ObjectDifferences> objects, PrintStream out) {
+        out.print(title + ": ");
+        if (objects.size() == 0) {
+            out.println("NONE");
+        } else {
+            out.println();
+            for (Map.Entry<? extends DatabaseObject, ObjectDifferences> object : objects.entrySet()) {
+                if (object.getValue().hasDifferences()) {
+                    out.println("     " + object.getKey());
+                    for (Difference difference : object.getValue().getDifferences()) {
+                        out.println("          " + difference.toString());
+                    }
+                }
+            }
+        }
+    }
+
+    protected void printSetComparison(String title, SortedSet<?> objects, PrintStream out) {
         out.print(title + ": ");
         if (objects.size() == 0) {
             out.println("NONE");

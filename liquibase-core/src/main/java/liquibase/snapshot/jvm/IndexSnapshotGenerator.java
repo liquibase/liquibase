@@ -256,7 +256,7 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                     }
                     if (returnIndex == null) {
                         returnIndex = new Index();
-                        returnIndex.setTable(((Index) example).getTable());
+                        returnIndex.setTable(table);
                         returnIndex.setName(indexName);
                         returnIndex.setUnique(!nonUnique);
                         returnIndex.setFilterCondition(filterCondition);

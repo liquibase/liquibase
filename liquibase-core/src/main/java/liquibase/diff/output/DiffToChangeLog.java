@@ -8,6 +8,7 @@ import liquibase.change.core.*;
 import liquibase.changelog.ChangeSet;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.diff.DiffResult;
+import liquibase.diff.ObjectDifferences;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.ExecutorService;
 import liquibase.logging.LogFactory;
@@ -17,7 +18,7 @@ import liquibase.serializer.core.xml.XMLChangeLogSerializer;
 import liquibase.statement.DatabaseFunction;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.core.*;
-import liquibase.structurecompare.DatabaseObjectComparatorFactory;
+import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.util.ISODateFormat;
 import liquibase.util.StringUtils;
 import liquibase.util.csv.CSVWriter;
@@ -452,7 +453,8 @@ public class DiffToChangeLog {
     }
 
     protected void addChangedViewChanges(List<ChangeSet> changes) {
-        for (View view : diffResult.getObjectDiff(View.class).getChanged()) {
+        for (Map.Entry<View, ObjectDifferences> viewChange : diffResult.getObjectDiff(View.class).getChanged().entrySet()) {
+            View view = viewChange.getKey();
 
             CreateViewChange change = new CreateViewChange();
             change.setViewName(view.getName());

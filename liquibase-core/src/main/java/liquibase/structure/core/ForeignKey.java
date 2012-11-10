@@ -115,7 +115,7 @@ public class ForeignKey extends AbstractDatabaseObject{
 
     @Override
     public String toString() {
-        return getName() + "(" + getForeignKeyTable() + "." + getForeignKeyColumns() + " ->" + getPrimaryKeyTable() + "." + getPrimaryKeyColumns() + ")";
+        return getName() + "(" + getForeignKeyTable() + "." + getForeignKeyColumns() + " -> " + getPrimaryKeyTable() + "." + getPrimaryKeyColumns() + ")";
     }
 
 

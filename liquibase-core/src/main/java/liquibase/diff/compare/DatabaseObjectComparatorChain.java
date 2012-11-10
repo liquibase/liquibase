@@ -1,6 +1,7 @@
-package liquibase.structurecompare;
+package liquibase.diff.compare;
 
 import liquibase.database.Database;
+import liquibase.diff.ObjectDifferences;
 import liquibase.structure.DatabaseObject;
 
 import java.util.Iterator;
@@ -38,26 +39,26 @@ public class DatabaseObjectComparatorChain {
         return comparators.next().isSameObject(object1, object2, accordingTo, this);
     }
 
-    public boolean containsDifferences(DatabaseObject object1, DatabaseObject object2, Database accordingTo) {
+    public ObjectDifferences findDifferences(DatabaseObject object1, DatabaseObject object2, Database accordingTo) {
         if (object1 == null && object2 == null) {
-            return true;
+            return new ObjectDifferences();
         }
         if (object1 == null && object2 != null) {
-            return false;
+            return new ObjectDifferences().addDifference("Reference value was null", "this", null, null);
         }
 
         if (object1 != null && object2 == null) {
-            return false;
+            return new ObjectDifferences().addDifference("Compared value was null", "this", null, null);
         }
 
         if (comparators == null) {
-            return true;
+            return new ObjectDifferences();
         }
 
         if (!comparators.hasNext()) {
-            return true;
+            return new ObjectDifferences();
         }
 
-        return comparators.next().containsDifferences(object1, object2, accordingTo, this);
+        return comparators.next().findDifferences(object1, object2, accordingTo, this);
     }
 }
