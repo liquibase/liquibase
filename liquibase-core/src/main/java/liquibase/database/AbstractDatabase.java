@@ -67,6 +67,7 @@ public abstract class AbstractDatabase implements Database {
 
     protected BigInteger defaultAutoIncrementStartWith = BigInteger.ONE;
     protected BigInteger defaultAutoIncrementBy = BigInteger.ONE;
+	private boolean generateSqlForFileOutput;
     
     protected AbstractDatabase() {
     }
@@ -1166,5 +1167,14 @@ public abstract class AbstractDatabase implements Database {
 
     public void enableForeignKeyChecks() throws DatabaseException {
         throw new DatabaseException("ForeignKeyChecks Management not supported");
+    }
+    
+    @Override
+    public void setGenerateSqlForFileOutput(boolean generateSqlForFileOutput) {
+    	this.generateSqlForFileOutput = generateSqlForFileOutput;    	
+    }
+    
+    public boolean getGenerateSqlForFileOutput() {
+    	return this.generateSqlForFileOutput;
     }
 }

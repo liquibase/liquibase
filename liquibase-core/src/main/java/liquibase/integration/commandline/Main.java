@@ -747,6 +747,9 @@ public class Main {
         Database database = CommandLineUtils.createDatabaseObject(classLoader, this.url, 
             this.username, this.password, this.driver, this.defaultSchemaName, 
             this.databaseClass, this.driverPropertiesFile);
+        
+        // -- set to false by default.  Set true for SQL generating commands
+        database.setGenerateSqlForFileOutput(false);
         try {
 
 
@@ -836,8 +839,10 @@ public class Main {
                 } else if ("updateCount".equalsIgnoreCase(command)) {
                     liquibase.update(Integer.parseInt(commandParams.iterator().next()), contexts);
                 } else if ("updateCountSQL".equalsIgnoreCase(command)) {
+                	database.setGenerateSqlForFileOutput(true);
                     liquibase.update(Integer.parseInt(commandParams.iterator().next()), contexts, getOutputWriter());
                 } else if ("updateSQL".equalsIgnoreCase(command)) {
+                	database.setGenerateSqlForFileOutput(true);
                     liquibase.update(contexts, getOutputWriter());
                 } else if ("rollback".equalsIgnoreCase(command)) {
                     if (commandParams == null || commandParams.size() == 0) {
@@ -856,11 +861,13 @@ public class Main {
                     if (commandParams == null || commandParams.size() == 0) {
                         throw new CommandLineParsingException("rollbackSQL requires a rollback tag");
                     }
+                    database.setGenerateSqlForFileOutput(true);
                     liquibase.rollback(commandParams.iterator().next(), contexts, getOutputWriter());
                 } else if ("rollbackToDateSQL".equalsIgnoreCase(command)) {
                     if (commandParams == null || commandParams.size() == 0) {
                         throw new CommandLineParsingException("rollbackToDateSQL requires a rollback date");
                     }
+                    database.setGenerateSqlForFileOutput(true);
                     liquibase.rollback(dateFormat.parse(commandParams.iterator().next()), contexts, getOutputWriter());
                 } else if ("rollbackCountSQL".equalsIgnoreCase(command)) {
                     if (commandParams == null || commandParams.size() == 0) {
@@ -869,12 +876,13 @@ public class Main {
 
                     liquibase.rollback(Integer.parseInt(commandParams.iterator().next()), contexts, getOutputWriter());
                 } else if ("futureRollbackSQL".equalsIgnoreCase(command)) {
+                	database.setGenerateSqlForFileOutput(true);
                     liquibase.futureRollbackSQL(contexts, getOutputWriter());
                 } else if ("futureRollbackCountSQL".equalsIgnoreCase(command)) {
                     if (commandParams == null || commandParams.size() == 0) {
                         throw new CommandLineParsingException("futureRollbackCountSQL requires a rollback count");
                     }
-
+                    database.setGenerateSqlForFileOutput(true);
                     liquibase.futureRollbackSQL(Integer.parseInt(commandParams.iterator().next()), contexts, getOutputWriter());
                 } else if ("updateTestingRollback".equalsIgnoreCase(command)) {
                     liquibase.updateTestingRollback(contexts);

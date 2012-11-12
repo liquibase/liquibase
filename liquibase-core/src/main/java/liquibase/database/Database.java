@@ -267,4 +267,22 @@ public interface Database extends DatabaseObject, PrioritizedService {
     void enableForeignKeyChecks() throws DatabaseException;
 
     public boolean isReservedWord(String string);
+    
+    /**
+     * This method will be called when Liquibase is invoked with a command that will result in a SQL file being
+     * generated as opposed to DDL/DML commands being executed against a JDBC connection.  In some instances,
+     * a Database implementation may produce different SQL for a file than it would for a JDBC connection.  For
+     * example, there may be a different end-of-command delimiter. 
+     * @param generateSqlForFileOutput true when the target output is a SQL file, false otherwise.
+     */
+    public void setGenerateSqlForFileOutput(boolean generateSqlForFileOutput);
+    
+    /**
+     * This method will return true when Liquibase is invoked with a command that will result in a SQL file being
+     * generated as opposed to DDL/DML commands being executed against a JDBC connection.  In some instances,
+     * a Database implementation may produce different SQL for a file than it would for a JDBC connection.  For
+     * example, there may be a different end-of-command delimiter. 
+     * @param generateSqlForFileOutput true when the target output is a SQL file, false otherwise.
+     */ 
+    public boolean getGenerateSqlForFileOutput();
 }

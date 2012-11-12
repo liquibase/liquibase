@@ -28,7 +28,9 @@ import java.util.Set;
 
 public class MockDatabase implements Database {
 
-    public int getPriority() {
+    private boolean generateSqlForFileOutput;
+
+	public int getPriority() {
         return PRIORITY_DEFAULT;
     }
 
@@ -466,4 +468,14 @@ public class MockDatabase implements Database {
     public boolean isReservedWord(String string) {
         return false;
     }
+
+	@Override
+	public void setGenerateSqlForFileOutput(boolean generateSqlForFileOutput) {
+		this.generateSqlForFileOutput = generateSqlForFileOutput;
+	}
+
+	@Override
+	public boolean getGenerateSqlForFileOutput() {
+		return generateSqlForFileOutput;
+	}
 }
