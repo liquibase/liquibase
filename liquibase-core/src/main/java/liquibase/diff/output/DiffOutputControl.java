@@ -1,17 +1,19 @@
 package liquibase.diff.output;
 
-public class DiffOutputConfig {
+public class DiffOutputControl {
     private boolean includeSchema;
     private boolean includeCatalog;
     private boolean includeTablespace;
 
-    public DiffOutputConfig() {
+    private String dataDir = null;
+
+    public DiffOutputControl() {
         includeSchema = true;
         includeCatalog = true;
         includeTablespace = true;
     }
 
-    public DiffOutputConfig(boolean includeCatalog, boolean includeSchema, boolean includeTablespace) {
+    public DiffOutputControl(boolean includeCatalog, boolean includeSchema, boolean includeTablespace) {
         this.includeSchema = includeSchema;
         this.includeCatalog = includeCatalog;
         this.includeTablespace = includeTablespace;
@@ -21,7 +23,7 @@ public class DiffOutputConfig {
         return includeSchema;
     }
 
-    public DiffOutputConfig setIncludeSchema(boolean includeSchema) {
+    public DiffOutputControl setIncludeSchema(boolean includeSchema) {
         this.includeSchema = includeSchema;
         return this;
     }
@@ -30,7 +32,7 @@ public class DiffOutputConfig {
         return includeCatalog;
     }
 
-    public DiffOutputConfig setIncludeCatalog(boolean includeCatalog) {
+    public DiffOutputControl setIncludeCatalog(boolean includeCatalog) {
         this.includeCatalog = includeCatalog;
         return this;
     }
@@ -39,8 +41,17 @@ public class DiffOutputConfig {
         return includeTablespace;
     }
 
-    public DiffOutputConfig setIncludeTablespace(boolean includeTablespace) {
+    public DiffOutputControl setIncludeTablespace(boolean includeTablespace) {
         this.includeTablespace = includeTablespace;
+        return this;
+    }
+
+    public String getDataDir() {
+        return dataDir;
+    }
+
+    public DiffOutputControl setDataDir(String dataDir) {
+        this.dataDir = dataDir;
         return this;
     }
 }

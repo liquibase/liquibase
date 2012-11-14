@@ -18,7 +18,7 @@ import java.sql.SQLException;
 public class ViewSnapshotGenerator extends JdbcSnapshotGenerator {
 
     public ViewSnapshotGenerator() {
-        super(View.class, Schema.class);
+        super(View.class, new Class[] { Schema.class });
     }
 
 //    public Boolean has(DatabaseObject example, DatabaseSnapshot snapshot, SnapshotGeneratorChain chain) throws DatabaseException {

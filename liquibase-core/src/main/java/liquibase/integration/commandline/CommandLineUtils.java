@@ -4,20 +4,19 @@ import liquibase.CatalogAndSchema;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.jvm.JdbcConnection;
-import liquibase.diff.DiffControl;
 import liquibase.diff.DiffGeneratorFactory;
 import liquibase.diff.DiffResult;
 import liquibase.diff.DiffStatusListener;
-import liquibase.diff.output.DiffOutputConfig;
-import liquibase.diff.output.DiffToChangeLog;
-import liquibase.diff.output.DiffToPrintStream;
+import liquibase.diff.compare.CompareControl;
+import liquibase.diff.output.DiffOutputControl;
+import liquibase.diff.output.changelog.DiffToChangeLog;
+import liquibase.diff.output.report.DiffToReport;
 import liquibase.exception.*;
 import liquibase.logging.LogFactory;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.SnapshotControl;
 import liquibase.snapshot.SnapshotGeneratorFactory;
-import liquibase.structure.DatabaseObject;
 import liquibase.util.StringUtils;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -114,46 +113,47 @@ public class CommandLineUtils {
     }
 
     public static void doDiff(Database referenceDatabase, Database targetDatabase) throws LiquibaseException {
-        DiffControl diffControl = new DiffControl();
-        diffControl.addStatusListener(new OutDiffStatusListener());
+        CompareControl compareControl = new CompareControl();
+//        compareControl.addStatusListener(new OutDiffStatusListener());
         DatabaseSnapshot referenceSnapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(referenceDatabase.getDefaultSchema(), referenceDatabase, new SnapshotControl());
         DatabaseSnapshot targetSnapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(targetDatabase.getDefaultSchema(), targetDatabase, new SnapshotControl());
-        DiffResult diffResult = DiffGeneratorFactory.getInstance().compare(referenceSnapshot, targetSnapshot, diffControl);
+        DiffResult diffResult = DiffGeneratorFactory.getInstance().compare(referenceSnapshot, targetSnapshot, compareControl);
 
         System.out.println("");
         System.out.println("Diff Results:");
-        new DiffToPrintStream(diffResult, System.out).print();
+        new DiffToReport(diffResult, System.out).print();
     }
 
     public static void doDiffToChangeLog(String changeLogFile,
                                          Database referenceDatabase,
                                          Database targetDatabase,
-                                         DiffOutputConfig diffOutputConfig)
+                                         DiffOutputControl diffOutputControl)
             throws LiquibaseException, IOException, ParserConfigurationException {
-        DiffControl diffControl = new DiffControl();
-        diffControl.addStatusListener(new OutDiffStatusListener());
+        CompareControl compareControl = new CompareControl();
+//        compareControl.addStatusListener(new OutDiffStatusListener());
 
         DatabaseSnapshot referenceSnapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(referenceDatabase.getDefaultSchema(), referenceDatabase, new SnapshotControl());
         DatabaseSnapshot targetSnapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(targetDatabase.getDefaultSchema(), targetDatabase, new SnapshotControl());
 
-        DiffResult diffResult = DiffGeneratorFactory.getInstance().compare(referenceSnapshot, targetSnapshot, diffControl);
+        DiffResult diffResult = DiffGeneratorFactory.getInstance().compare(referenceSnapshot, targetSnapshot, compareControl);
 
         if (changeLogFile == null) {
-            new DiffToChangeLog(diffResult, diffOutputConfig).print(System.out);
+            new DiffToChangeLog(diffResult, diffOutputControl).print(System.out);
         } else {
-            new DiffToChangeLog(diffResult, diffOutputConfig).print(changeLogFile);
+            new DiffToChangeLog(diffResult, diffOutputControl).print(changeLogFile);
         }
     }
 
-    public static void doGenerateChangeLog(String changeLogFile, Database originalDatabase, String catalogName, String schemaName, String snapshotTypes, String author, String context, String dataDir, DiffOutputConfig diffOutputConfig) throws DatabaseException, IOException, ParserConfigurationException, InvalidExampleException {
-        DiffControl diffControl = new DiffControl(new DiffControl.SchemaComparison[] {new DiffControl.SchemaComparison(new CatalogAndSchema(catalogName, schemaName), new CatalogAndSchema(catalogName, schemaName))});
-        diffControl.setDataDir(dataDir);
-        diffControl.addStatusListener(new OutDiffStatusListener());
+    public static void doGenerateChangeLog(String changeLogFile, Database originalDatabase, String catalogName, String schemaName, String snapshotTypes, String author, String context, String dataDir, DiffOutputControl diffOutputControl) throws DatabaseException, IOException, ParserConfigurationException, InvalidExampleException {
+        CompareControl compareControl = new CompareControl(new CompareControl.SchemaComparison[] {new CompareControl.SchemaComparison(new CatalogAndSchema(catalogName, schemaName), new CatalogAndSchema(catalogName, schemaName))});
+//        compareControl.addStatusListener(new OutDiffStatusListener());
 
-        DatabaseSnapshot originalDatabaseSnapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(diffControl.getSchemas(DiffControl.DatabaseRole.REFERENCE), originalDatabase, new SnapshotControl(snapshotTypes));
-        DiffResult diffResult = DiffGeneratorFactory.getInstance().compare(originalDatabaseSnapshot, SnapshotGeneratorFactory.getInstance().createSnapshot(diffControl.getSchemas(DiffControl.DatabaseRole.REFERENCE), null, new SnapshotControl(snapshotTypes)), diffControl);
+        diffOutputControl.setDataDir(dataDir);
 
-        DiffToChangeLog changeLogWriter = new DiffToChangeLog(diffResult, diffOutputConfig);
+        DatabaseSnapshot originalDatabaseSnapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(compareControl.getSchemas(CompareControl.DatabaseRole.REFERENCE), originalDatabase, new SnapshotControl(snapshotTypes));
+        DiffResult diffResult = DiffGeneratorFactory.getInstance().compare(originalDatabaseSnapshot, SnapshotGeneratorFactory.getInstance().createSnapshot(compareControl.getSchemas(CompareControl.DatabaseRole.REFERENCE), null, new SnapshotControl(snapshotTypes)), compareControl);
+
+        DiffToChangeLog changeLogWriter = new DiffToChangeLog(diffResult, diffOutputControl);
 
         changeLogWriter.setChangeSetAuthor(author);
         changeLogWriter.setChangeSetContext(context);

@@ -19,7 +19,7 @@ import java.util.Set;
 public class ForeignKeySnapshotGenerator extends JdbcSnapshotGenerator {
 
     public ForeignKeySnapshotGenerator() {
-        super(ForeignKey.class, Table.class);
+        super(ForeignKey.class, new Class[] { Table.class});
     }
 
 //    public Boolean has(DatabaseObject example, DatabaseSnapshot snapshot, SnapshotGeneratorChain chain) throws DatabaseException {

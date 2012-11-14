@@ -16,7 +16,7 @@ import java.sql.SQLException;
 
 public class TableSnapshotGenerator extends JdbcSnapshotGenerator {
     public TableSnapshotGenerator() {
-        super(Table.class, Schema.class);
+        super(Table.class, new Class[] { Schema.class});
     }
 
     @Override

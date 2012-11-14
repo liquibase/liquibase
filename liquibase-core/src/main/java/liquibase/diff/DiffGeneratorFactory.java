@@ -1,6 +1,7 @@
 package liquibase.diff;
 
 import liquibase.database.Database;
+import liquibase.diff.compare.CompareControl;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
@@ -67,7 +68,7 @@ public class DiffGeneratorFactory {
 
     }
 
-    public DiffResult compare(Database referenceDatabase, Database comparisonDatabase, DiffControl diffControl) throws LiquibaseException {
+    public DiffResult compare(Database referenceDatabase, Database comparisonDatabase, CompareControl compareControl) throws LiquibaseException {
         DatabaseSnapshot referenceSnapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(referenceDatabase.getDefaultSchema(), referenceDatabase, new SnapshotControl());
         DatabaseSnapshot comparisonSnapshot = null;
         if (comparisonDatabase == null) {
@@ -76,12 +77,12 @@ public class DiffGeneratorFactory {
             comparisonSnapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(comparisonDatabase.getDefaultSchema(), comparisonDatabase, new SnapshotControl());
         }
 
-        return getGenerator(referenceDatabase, comparisonDatabase).compare(referenceSnapshot, comparisonSnapshot, diffControl);
+        return getGenerator(referenceDatabase, comparisonDatabase).compare(referenceSnapshot, comparisonSnapshot, compareControl);
     }
 
 
-    public DiffResult compare(DatabaseSnapshot referenceSnapshot, DatabaseSnapshot comparisonSnapshot, DiffControl diffControl) throws DatabaseException {
-        return getGenerator(referenceSnapshot.getDatabase(), comparisonSnapshot.getDatabase()).compare(referenceSnapshot, comparisonSnapshot, diffControl);
+    public DiffResult compare(DatabaseSnapshot referenceSnapshot, DatabaseSnapshot comparisonSnapshot, CompareControl compareControl) throws DatabaseException {
+        return getGenerator(referenceSnapshot.getDatabase(), comparisonSnapshot.getDatabase()).compare(referenceSnapshot, comparisonSnapshot, compareControl);
 
     }
 

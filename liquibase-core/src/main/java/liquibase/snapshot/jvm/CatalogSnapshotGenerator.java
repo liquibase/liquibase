@@ -21,11 +21,6 @@ public class CatalogSnapshotGenerator extends JdbcSnapshotGenerator {
         super(Catalog.class);
     }
 
-//    public Boolean has(DatabaseObject example, DatabaseSnapshot snapshot, SnapshotGeneratorChain chain) throws DatabaseException {
-//        return chain.has(example, snapshot);  //To change body of implemented methods use File | Settings | File Templates.
-//    }
-
-
     @Override
     protected DatabaseObject snapshotObject(DatabaseObject example, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException {
         if (!(example instanceof Catalog)) {

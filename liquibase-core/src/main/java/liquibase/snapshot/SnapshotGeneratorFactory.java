@@ -2,6 +2,7 @@ package liquibase.snapshot;
 
 import liquibase.CatalogAndSchema;
 import liquibase.database.Database;
+import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.servicelocator.ServiceLocator;
@@ -15,8 +16,7 @@ import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.util.*;
 
-public class
-        SnapshotGeneratorFactory {
+public class SnapshotGeneratorFactory {
 
     private static SnapshotGeneratorFactory instance;
 
@@ -84,7 +84,16 @@ public class
 
 
     public boolean has(DatabaseObject example, Database database) throws DatabaseException, InvalidExampleException {
-        return createSnapshot(example, database) != null;
+        if (createSnapshot(example, database) != null) {
+            return true;
+        }
+        DatabaseSnapshot snapshot = createSnapshot(example.getSchema().toCatalogAndSchema(), database, new SnapshotControl(example.getClass()));
+        for (DatabaseObject obj : snapshot.get(example.getClass())) {
+            if (DatabaseObjectComparatorFactory.getInstance().isSameObject(example, obj, database)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public DatabaseSnapshot createSnapshot(CatalogAndSchema example, Database database, SnapshotControl snapshotControl) throws DatabaseException, InvalidExampleException {
@@ -110,7 +119,7 @@ public class
     }
 
     public <T extends DatabaseObject> T createSnapshot(T example, Database database) throws DatabaseException, InvalidExampleException {
-            return createSnapshot(example, database, new SnapshotControl());
+        return createSnapshot(example, database, new SnapshotControl());
     }
 
     public <T extends DatabaseObject> T createSnapshot(T example, Database database, SnapshotControl snapshotControl) throws DatabaseException, InvalidExampleException {

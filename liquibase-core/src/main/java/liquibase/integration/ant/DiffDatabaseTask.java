@@ -3,14 +3,13 @@ package liquibase.integration.ant;
 import liquibase.CatalogAndSchema;
 import liquibase.Liquibase;
 import liquibase.database.Database;
+import liquibase.diff.compare.CompareControl;
+import liquibase.diff.output.DiffOutputControl;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.SnapshotControl;
 import liquibase.snapshot.SnapshotGeneratorFactory;
-import liquibase.structure.core.Schema;
-import liquibase.diff.DiffControl;
 import liquibase.diff.DiffResult;
-import liquibase.diff.output.DiffOutputConfig;
-import liquibase.diff.output.DiffToChangeLog;
+import liquibase.diff.output.changelog.DiffToChangeLog;
 import liquibase.exception.DatabaseException;
 import liquibase.logging.LogFactory;
 import liquibase.util.StringUtils;
@@ -142,16 +141,18 @@ public class DiffDatabaseTask extends BaseLiquibaseTask {
             referenceDatabase = createDatabaseObject(getReferenceDriver(), getReferenceUrl(), getReferenceUsername(), getReferencePassword(), getReferenceDefaultCatalogName(), getReferenceDefaultSchemaName(), getDatabaseClass());
 
 
-            DiffControl diffControl = new DiffControl(new DiffControl.SchemaComparison[]{
-                    new DiffControl.SchemaComparison(
+            CompareControl compareControl = new CompareControl(new CompareControl.SchemaComparison[]{
+                    new CompareControl.SchemaComparison(
                             new CatalogAndSchema(getReferenceDefaultCatalogName(), getReferenceDefaultSchemaName()),
                             new CatalogAndSchema(getDefaultCatalogName(), getDefaultSchemaName()))});
-            diffControl.setDataDir(getDataDir());
+
+            DiffOutputControl diffOutputControl = new DiffOutputControl();
+            diffOutputControl.setDataDir(getDataDir());
 
             DatabaseSnapshot referenceSnapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(referenceDatabase.getDefaultSchema(), referenceDatabase, new SnapshotControl(getDiffTypes()));
             DatabaseSnapshot comparisonSnapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(liquibase.getDatabase().getDefaultSchema(), liquibase.getDatabase(), new SnapshotControl(getDiffTypes()));
 
-            DiffResult diffResult = liquibase.diff(referenceDatabase, liquibase.getDatabase(), diffControl);
+            DiffResult diffResult = liquibase.diff(referenceDatabase, liquibase.getDatabase(), compareControl);
 //            diff.addStatusListener(new OutDiffStatusListener());
 
             outputDiff(writer, diffResult, liquibase.getDatabase());
@@ -178,6 +179,6 @@ public class DiffDatabaseTask extends BaseLiquibaseTask {
     }
 
     protected void outputDiff(PrintStream writer, DiffResult diffResult, Database targetDatabase) throws Exception {
-        new DiffToChangeLog(diffResult, new DiffOutputConfig(getIncludeCatalog(), getIncludeSchema(), getIncludeTablespace())).print(writer);
+        new DiffToChangeLog(diffResult, new DiffOutputControl(getIncludeCatalog(), getIncludeSchema(), getIncludeTablespace())).print(writer);
     }
 }

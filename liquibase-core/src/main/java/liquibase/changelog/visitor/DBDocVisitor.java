@@ -120,7 +120,7 @@ public class DBDocVisitor implements ChangeSetVisitor {
 //        copyFile("liquibase/dbdoc/globalnav.html", rootOutputDir);
 //        copyFile("liquibase/dbdoc/overview-summary.html", rootOutputDir);
 //
-//        DatabaseSnapshot snapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(database, new DiffControl());
+//        DatabaseSnapshot snapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(database, new CompareControl());
 //
 //        new ChangeLogListWriter(rootOutputDir).writeHTML(changeLogs);
 //        for (Schema schema : snapshot.getSchemas()) {

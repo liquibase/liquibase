@@ -30,7 +30,7 @@ public abstract class JdbcSnapshotGenerator implements SnapshotGenerator {
         this.defaultFor = defaultFor;
     }
 
-    protected JdbcSnapshotGenerator(Class<? extends DatabaseObject> defaultFor, Class<? extends DatabaseObject>... addsTo) {
+    protected JdbcSnapshotGenerator(Class<? extends DatabaseObject> defaultFor, Class<? extends DatabaseObject>[] addsTo) {
         this.defaultFor = defaultFor;
         this.addsTo = addsTo;
     }

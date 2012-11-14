@@ -26,38 +26,8 @@ import java.util.Map;
 public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
 
     public ColumnSnapshotGenerator() {
-        super(Column.class, Table.class, View.class);
+        super(Column.class, new Class[] { Table.class, View.class});
     }
-
-//    public Boolean has(DatabaseObject example, DatabaseSnapshot snapshot, SnapshotGeneratorChain chain) throws DatabaseException {
-//        Database database = snapshot.getDatabase();
-//        if (example instanceof Column) {
-//
-//            Relation relation = ((Column) example).getRelation();
-//            Schema schema = relation.getSchema();
-//
-//            ResultSet columnsMetadataRs = null;
-//            try {
-//
-//                DatabaseMetaData databaseMetaData = getMetaData(database);
-//
-//                columnsMetadataRs = databaseMetaData.getColumns(database.getJdbcCatalogName(schema), database.getJdbcSchemaName(schema), database.correctObjectName(relation.getName(), Relation.class), database.correctObjectName(example.getName(), Column.class));
-//
-//                return columnsMetadataRs.next();
-//            } catch (Exception e) {
-//                throw new DatabaseException(e);
-//            } finally {
-//                if (columnsMetadataRs != null) {
-//                    try {
-//                        columnsMetadataRs.close();
-//                    } catch (SQLException ignored) {
-//                    }
-//                }
-//            }
-//        }
-//        return chain.has(example, snapshot);
-//    }
-
 
     @Override
     protected DatabaseObject snapshotObject(DatabaseObject example, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException {

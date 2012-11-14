@@ -1,8 +1,6 @@
 package liquibase.diff.compare.core;
 
 import liquibase.database.Database;
-import liquibase.diff.DatabaseObjectDiff;
-import liquibase.diff.DiffResult;
 import liquibase.diff.ObjectDifferences;
 import liquibase.structure.DatabaseObject;
 import liquibase.diff.compare.DatabaseObjectComparator;

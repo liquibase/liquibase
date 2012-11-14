@@ -3,16 +3,16 @@ package liquibase.dbtest;
 import liquibase.CatalogAndSchema;
 import liquibase.Liquibase;
 import liquibase.database.jvm.JdbcConnection;
+import liquibase.diff.compare.CompareControl;
+import liquibase.diff.output.report.DiffToReport;
 import liquibase.snapshot.*;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
 import liquibase.structure.core.View;
 import liquibase.datatype.DataTypeFactory;
-import liquibase.diff.DiffControl;
 import liquibase.diff.DiffGeneratorFactory;
-import liquibase.diff.output.DiffOutputConfig;
-import liquibase.diff.output.DiffToChangeLog;
-import liquibase.diff.output.DiffToPrintStream;
+import liquibase.diff.output.DiffOutputControl;
+import liquibase.diff.output.changelog.DiffToChangeLog;
 import liquibase.exception.ChangeLogParseException;
 import liquibase.exception.LiquibaseException;
 import liquibase.servicelocator.ServiceLocator;
@@ -391,12 +391,12 @@ public abstract class AbstractIntegrationTest {
 
         runCompleteChangeLog();
 
-        DiffResult diffResult = DiffGeneratorFactory.getInstance().compare(database, database, new DiffControl());
+        DiffResult diffResult = DiffGeneratorFactory.getInstance().compare(database, database, new CompareControl());
 
         try {
             assertTrue(diffResult.areEqual());
         } catch (AssertionError e) {
-            new DiffToPrintStream(diffResult, System.out).print();
+            new DiffToReport(diffResult, System.out).print();
             throw e;
         }
     }
@@ -412,22 +412,23 @@ public abstract class AbstractIntegrationTest {
             runCompleteChangeLog();
 
             SnapshotControl snapshotControl = new SnapshotControl();
-//todo            diffControl.setDiffData(true);
+//todo            compareControl.setDiffData(true);
 
             DatabaseSnapshot originalSnapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(database.getDefaultSchema(), database, snapshotControl);
 
-            DiffControl diffControl = new DiffControl();
+            CompareControl compareControl = new CompareControl();
+            DiffOutputControl diffOutputControl = new DiffOutputControl();
             File tempFile = File.createTempFile("liquibase-test", ".xml");
             if (outputCsv) {
-                diffControl.setDataDir(new File(tempFile.getParentFile(), "liquibase-data").getCanonicalPath().replaceFirst("\\w:",""));
+                diffOutputControl.setDataDir(new File(tempFile.getParentFile(), "liquibase-data").getCanonicalPath().replaceFirst("\\w:",""));
             }
 
-            DiffResult diffResult = DiffGeneratorFactory.getInstance().compare(database, null, diffControl);
+            DiffResult diffResult = DiffGeneratorFactory.getInstance().compare(database, null, compareControl);
 
 
             FileOutputStream output = new FileOutputStream(tempFile);
             try {
-                new DiffToChangeLog(diffResult, new DiffOutputConfig()).print(new PrintStream(output));
+                new DiffToChangeLog(diffResult, new DiffOutputControl()).print(new PrintStream(output));
                 output.flush();
             } finally {
                 output.close();
@@ -451,19 +452,19 @@ public abstract class AbstractIntegrationTest {
 
             DatabaseSnapshot migratedSnapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(database.getDefaultSchema(), database, new SnapshotControl());
 
-            DiffResult finalDiffResult = DiffGeneratorFactory.getInstance().compare(originalSnapshot, migratedSnapshot, new DiffControl());
+            DiffResult finalDiffResult = DiffGeneratorFactory.getInstance().compare(originalSnapshot, migratedSnapshot, new CompareControl());
             try {
                 assertTrue(finalDiffResult.areEqual());
             } catch (AssertionError e) {
-                new DiffToPrintStream(finalDiffResult, System.out).print();
+                new DiffToReport(finalDiffResult, System.out).print();
                 throw e;
             }
 
             //diff to empty and drop all
-            DiffResult emptyDiffResult = DiffGeneratorFactory.getInstance().compare(emptySnapshot, migratedSnapshot, new DiffControl());
+            DiffResult emptyDiffResult = DiffGeneratorFactory.getInstance().compare(emptySnapshot, migratedSnapshot, new CompareControl());
             output = new FileOutputStream(tempFile);
             try {
-                new DiffToChangeLog(emptyDiffResult, new DiffOutputConfig(true, true, true)).print(new PrintStream(output));
+                new DiffToChangeLog(emptyDiffResult, new DiffOutputControl(true, true, true)).print(new PrintStream(output));
                 output.flush();
             } finally {
                 output.close();
@@ -503,14 +504,14 @@ public abstract class AbstractIntegrationTest {
 
         DatabaseSnapshot originalSnapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(database.getDefaultSchema(), database, new SnapshotControl());
 
-        DiffControl diffControl = new DiffControl(new DiffControl.SchemaComparison[]{new DiffControl.SchemaComparison(CatalogAndSchema.DEFAULT, new CatalogAndSchema(null, "liquibaseb"))});
-        DiffResult diffResult = DiffGeneratorFactory.getInstance().compare(database, database, diffControl);
+        CompareControl compareControl = new CompareControl(new CompareControl.SchemaComparison[]{new CompareControl.SchemaComparison(CatalogAndSchema.DEFAULT, new CatalogAndSchema(null, "liquibaseb"))});
+        DiffResult diffResult = DiffGeneratorFactory.getInstance().compare(database, database, compareControl);
 
         File tempFile = File.createTempFile("liquibase-test", ".xml");
 
         FileOutputStream output = new FileOutputStream(tempFile);
         try {
-            new DiffToChangeLog(diffResult, new DiffOutputConfig()).print(new PrintStream(output));
+            new DiffToChangeLog(diffResult, new DiffOutputControl()).print(new PrintStream(output));
             output.flush();
         } finally {
             output.close();
@@ -548,8 +549,8 @@ public abstract class AbstractIntegrationTest {
 
         DatabaseSnapshot finalSnapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(database.getDefaultSchema(), database, new SnapshotControl());
 
-        DiffResult finalDiffResult = DiffGeneratorFactory.getInstance().compare(originalSnapshot, finalSnapshot, new DiffControl());
-        new DiffToPrintStream(finalDiffResult, System.out).print();
+        DiffResult finalDiffResult = DiffGeneratorFactory.getInstance().compare(originalSnapshot, finalSnapshot, new CompareControl());
+        new DiffToReport(finalDiffResult, System.out).print();
         assertTrue(finalDiffResult.areEqual());
     }
 
@@ -839,7 +840,7 @@ public abstract class AbstractIntegrationTest {
        Liquibase liquibase = createLiquibase(externalfkInitChangeLog);
        liquibase.update(contexts);
 
-       DiffResult diffResult = liquibase.diff(database, null, new DiffControl());
+       DiffResult diffResult = liquibase.diff(database, null, new CompareControl());
        DiffResultAssert.assertThat(diffResult).containsMissingForeignKeyWithName("fk_person_country");
    }
 

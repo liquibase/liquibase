@@ -65,12 +65,12 @@ public class GenerateChangeLogTask extends BaseLiquibaseTask {
 //			liquibase = createLiquibase();
 //
 //			Database database = liquibase.getDatabase();
-//            DiffControl diffControl = new DiffControl(new Schema(getDefaultCatalogName(), getDefaultSchemaName()), getDiffTypes());
-//            diffControl.setDataDir(getDataDir());
+//            CompareControl compareControl = new CompareControl(new Schema(getDefaultCatalogName(), getDefaultSchemaName()), getDiffTypes());
+//            compareControl.setDataDir(getDataDir());
 //
-//            DatabaseSnapshot referenceSnapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(database, diffControl, DiffControl.DatabaseRole.REFERENCE);
+//            DatabaseSnapshot referenceSnapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(database, compareControl, CompareControl.DatabaseRole.REFERENCE);
 //
-//            DiffResult diffResult = DiffGeneratorFactory.getInstance().compare(referenceSnapshot, new DatabaseSnapshot(database, new SnapshotControl()), diffControl);
+//            DiffResult diffResult = DiffGeneratorFactory.getInstance().compare(referenceSnapshot, new DatabaseSnapshot(database, new SnapshotControl()), compareControl);
 ////			diff.addStatusListener(new OutDiffStatusListener());
 //
 //            DiffOutputConfig diffOutputConfig = new DiffOutputConfig(getIncludeCatalog(), getIncludeSchema(), getIncludeTablespace());

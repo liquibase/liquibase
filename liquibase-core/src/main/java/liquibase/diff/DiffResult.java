@@ -1,31 +1,32 @@
 package liquibase.diff;
 
+import liquibase.diff.compare.CompareControl;
 import liquibase.exception.DatabaseException;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.structure.DatabaseObject;
 
 import java.io.*;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class DiffResult {
 
     private DatabaseSnapshot referenceSnapshot;
     private DatabaseSnapshot comparisonSnapshot;
 
-    private DiffControl diffControl;
+    private CompareControl compareControl;
 
     private StringDiff productNameDiff;
     private StringDiff productVersionDiff;
 
-    private Map<Class<? extends DatabaseObject>, DatabaseObjectDiff> databaseObjectDiffs = new HashMap<Class<? extends DatabaseObject>, DatabaseObjectDiff> ();
+    private Set<DatabaseObject> missingObjects = new HashSet<DatabaseObject>();
+    private Set<DatabaseObject> unexpectedObjects = new HashSet<DatabaseObject>();
+    private Map<DatabaseObject, ObjectDifferences> changedObjects = new HashMap<DatabaseObject, ObjectDifferences>();
 
 
-    public DiffResult(DatabaseSnapshot referenceDatabaseSnapshot, DatabaseSnapshot comparisonDatabaseSnapshot, DiffControl diffControl) {
+    public DiffResult(DatabaseSnapshot referenceDatabaseSnapshot, DatabaseSnapshot comparisonDatabaseSnapshot, CompareControl compareControl) {
         this.referenceSnapshot = referenceDatabaseSnapshot;
         this.comparisonSnapshot = comparisonDatabaseSnapshot;
-        this.diffControl = diffControl;
+        this.compareControl = compareControl;
     }
 
     public DatabaseSnapshot getReferenceSnapshot() {
@@ -53,35 +54,72 @@ public class DiffResult {
         this.productVersionDiff = productVersionDiff;
     }
 
-    public DiffControl getDiffControl() {
-        return diffControl;
+    public CompareControl getCompareControl() {
+        return compareControl;
     }
 
-    public Set<Class<? extends DatabaseObject>> getComparedTypes() {
-        return databaseObjectDiffs.keySet();
+    public Set<? extends DatabaseObject> getMissingObjects() {
+        return missingObjects;
     }
 
-    public <T extends DatabaseObject> DatabaseObjectDiff<T> getObjectDiff(Class<T> type) {
-        if (!databaseObjectDiffs.containsKey(type)) {
-            databaseObjectDiffs.put(type, new DatabaseObjectDiff());
+    public <T extends DatabaseObject> Set<T> getMissingObjects(Class<T> type) {
+        Set returnSet = new HashSet();
+        for (DatabaseObject obj : missingObjects) {
+            if (type.isAssignableFrom(obj.getClass())) {
+                returnSet.add(obj);
+            }
         }
-        return databaseObjectDiffs.get(type);
+        return returnSet;
     }
-    
+
+    public void addMissingObject(DatabaseObject obj) {
+        missingObjects.add(obj);
+    }
+
+    public Set<? extends DatabaseObject> getUnexpectedObjects() {
+        return unexpectedObjects;
+    }
+
+    public <T extends DatabaseObject> Set<T> getUnexpectedObjects(Class<T> type) {
+        Set returnSet = new HashSet();
+        for (DatabaseObject obj : unexpectedObjects) {
+            if (type.isAssignableFrom(obj.getClass())) {
+                returnSet.add(obj);
+            }
+        }
+        return returnSet;
+    }
+
+    public void addUnexpectedObject(DatabaseObject obj) {
+        unexpectedObjects.add(obj);
+    }
+
+    public Map<DatabaseObject, ObjectDifferences> getChangedObjects() {
+        return changedObjects;
+    }
+
+    public Map<DatabaseObject, ObjectDifferences> getChangedObjects(Class<? extends DatabaseObject> type) {
+        Map returnSet = new HashMap();
+        for (Map.Entry<DatabaseObject, ObjectDifferences> obj : changedObjects.entrySet()) {
+            if (type.isAssignableFrom(obj.getKey().getClass())) {
+                returnSet.put(obj.getKey(), obj.getValue());
+            }
+        }
+        return returnSet;
+    }
+
+    public void addChangedObject(DatabaseObject obj, ObjectDifferences differences) {
+        changedObjects.put(obj, differences);
+    }
+
     public boolean areEqual() throws DatabaseException, IOException {
 //        boolean differencesInData = false;
-//        if (diffControl.shouldDiffData()) {
+//        if (compareControl.shouldDiffData()) {
 //            List<ChangeSet> changeSets = new ArrayList<ChangeSet>();
 //            addInsertDataChanges(changeSets, dataDir);
 //            differencesInData = !changeSets.isEmpty();
 //        }
 
-        for (DatabaseObjectDiff diff : databaseObjectDiffs.values()) {
-            if (!diff.areEqual()) {
-                return false;
-            }
-        }
-
-        return true;
+        return missingObjects.size() == 0 && unexpectedObjects.size() == 0 && changedObjects.size() == 0;
     }
 }

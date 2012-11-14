@@ -151,11 +151,11 @@ public class DataTypeFactory {
     }
 
     public LiquibaseDataType from(DataType type) {
-        return null; //todo
+        return fromDescription(type.toString());
     }
 
     public LiquibaseDataType from(DatabaseDataType type) {
-        return null; //todo
+        return fromDescription(type.toString());
     }
 
     public String getTrueBooleanValue(Database database) {

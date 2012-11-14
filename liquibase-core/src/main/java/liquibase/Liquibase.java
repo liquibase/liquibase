@@ -7,10 +7,9 @@ import liquibase.changelog.visitor.*;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.DatabaseFactory;
-import liquibase.structure.core.Schema;
-import liquibase.diff.DiffControl;
 import liquibase.diff.DiffGeneratorFactory;
 import liquibase.diff.DiffResult;
+import liquibase.diff.compare.CompareControl;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.LockException;
@@ -763,8 +762,8 @@ public class Liquibase {
 //        }
     }
 
-    public DiffResult diff(Database referenceDatabase, Database targetDatabase, DiffControl diffControl) throws LiquibaseException {
-        return DiffGeneratorFactory.getInstance().compare(referenceDatabase, targetDatabase, diffControl);
+    public DiffResult diff(Database referenceDatabase, Database targetDatabase, CompareControl compareControl) throws LiquibaseException {
+        return DiffGeneratorFactory.getInstance().compare(referenceDatabase, targetDatabase, compareControl);
     }
 
     /**

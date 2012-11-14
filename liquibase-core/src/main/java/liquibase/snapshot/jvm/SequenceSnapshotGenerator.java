@@ -19,7 +19,7 @@ import java.util.List;
 public class SequenceSnapshotGenerator extends JdbcSnapshotGenerator {
 
     public SequenceSnapshotGenerator() {
-        super(Sequence.class, Schema.class);
+        super(Sequence.class, new Class[] { Schema.class});
     }
 
     @Override
