@@ -18,7 +18,7 @@ public class UnexpectedViewChangeGenerator implements UnexpectedObjectChangeGene
         return PRIORITY_NONE;
     }
 
-    public Change[] fixUnexpected(DatabaseObject unexpectedObject, DiffOutputControl control, Database referenceDatabase, Database comparisionDatabase, ChangeGeneratorChain chain) {
+    public Change[] fixUnexpected(DatabaseObject unexpectedObject, DiffOutputControl control, Database referenceDatabase, Database comparisonDatabase, ChangeGeneratorChain chain) {
         View view = (View) unexpectedObject;
 
         DropViewChange change = new DropViewChange();

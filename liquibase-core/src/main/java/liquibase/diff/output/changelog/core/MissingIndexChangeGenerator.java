@@ -19,7 +19,7 @@ public class MissingIndexChangeGenerator implements MissingObjectChangeGenerator
         return PRIORITY_NONE;
     }
 
-    public Change[] fixMissing(DatabaseObject missingObject, DiffOutputControl control, Database referenceDatabase, Database comparisionDatabase, ChangeGeneratorChain chain) {
+    public Change[] fixMissing(DatabaseObject missingObject, DiffOutputControl control, Database referenceDatabase, Database comparisonDatabase, ChangeGeneratorChain chain) {
         Index index = (Index) missingObject;
 
         CreateIndexChange change = new CreateIndexChange();

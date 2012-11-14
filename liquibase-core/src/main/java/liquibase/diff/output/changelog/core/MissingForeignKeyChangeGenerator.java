@@ -18,7 +18,7 @@ public class MissingForeignKeyChangeGenerator implements MissingObjectChangeGene
         return PRIORITY_NONE;
     }
 
-    public Change[] fixMissing(DatabaseObject missingObject, DiffOutputControl control, Database referenceDatabase, Database comparisionDatabase, ChangeGeneratorChain chain) {
+    public Change[] fixMissing(DatabaseObject missingObject, DiffOutputControl control, Database referenceDatabase, Database comparisonDatabase, ChangeGeneratorChain chain) {
         ForeignKey fk = (ForeignKey) missingObject;
 
         AddForeignKeyConstraintChange change = new AddForeignKeyConstraintChange();

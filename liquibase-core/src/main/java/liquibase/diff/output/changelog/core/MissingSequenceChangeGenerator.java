@@ -19,7 +19,7 @@ public class MissingSequenceChangeGenerator implements MissingObjectChangeGenera
         return PRIORITY_NONE;
     }
 
-    public Change[] fixMissing(DatabaseObject missingObject, DiffOutputControl control, Database referenceDatabase, Database comparisionDatabase, ChangeGeneratorChain chain) {
+    public Change[] fixMissing(DatabaseObject missingObject, DiffOutputControl control, Database referenceDatabase, Database comparisonDatabase, ChangeGeneratorChain chain) {
         Sequence sequence = (Sequence) missingObject;
 
         CreateSequenceChange change = new CreateSequenceChange();

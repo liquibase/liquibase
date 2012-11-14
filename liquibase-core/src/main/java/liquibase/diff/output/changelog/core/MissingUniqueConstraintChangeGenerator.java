@@ -18,7 +18,7 @@ public class MissingUniqueConstraintChangeGenerator implements MissingObjectChan
         return PRIORITY_NONE;
     }
 
-    public Change[] fixMissing(DatabaseObject missingObject, DiffOutputControl control, Database referenceDatabase, Database comparisionDatabase, ChangeGeneratorChain chain) {
+    public Change[] fixMissing(DatabaseObject missingObject, DiffOutputControl control, Database referenceDatabase, Database comparisonDatabase, ChangeGeneratorChain chain) {
         UniqueConstraint uc = (UniqueConstraint) missingObject;
 
         if (uc.getTable() == null) {

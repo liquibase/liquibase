@@ -18,7 +18,7 @@ public class UnexpectedUniqueConstraintChangeGenerator implements UnexpectedObje
         return PRIORITY_NONE;
     }
 
-    public Change[] fixUnexpected(DatabaseObject unexpectedObject, DiffOutputControl control, Database referenceDatabase, Database comparisionDatabase, ChangeGeneratorChain chain) {
+    public Change[] fixUnexpected(DatabaseObject unexpectedObject, DiffOutputControl control, Database referenceDatabase, Database comparisonDatabase, ChangeGeneratorChain chain) {
         UniqueConstraint uc = (UniqueConstraint) unexpectedObject;
         if (uc.getTable() == null) {
             return null;

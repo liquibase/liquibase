@@ -23,7 +23,7 @@ public class MissingColumnChangeGenerator implements MissingObjectChangeGenerato
 
     }
 
-    public Change[] fixMissing(DatabaseObject missingObject, DiffOutputControl control, Database referenceDatabase, Database comparisionDatabase, ChangeGeneratorChain chain) {
+    public Change[] fixMissing(DatabaseObject missingObject, DiffOutputControl control, Database referenceDatabase, Database comparisonDatabase, ChangeGeneratorChain chain) {
         Column column = (Column) missingObject;
 //        if (!shouldModifyColumn(column)) {
 //            continue;

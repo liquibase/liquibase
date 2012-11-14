@@ -18,7 +18,7 @@ public class UnexpectedForeignKeyChangeGenerator implements UnexpectedObjectChan
         return PRIORITY_NONE;
     }
 
-    public Change[] fixUnexpected(DatabaseObject unexpectedObject, DiffOutputControl control, Database referenceDatabase, Database comparisionDatabase, ChangeGeneratorChain chain) {
+    public Change[] fixUnexpected(DatabaseObject unexpectedObject, DiffOutputControl control, Database referenceDatabase, Database comparisonDatabase, ChangeGeneratorChain chain) {
         ForeignKey fk = (ForeignKey) unexpectedObject;
 
         DropForeignKeyConstraintChange change = new DropForeignKeyConstraintChange();

@@ -20,7 +20,7 @@ public class MissingPrimaryKeyChangeGenerator implements MissingObjectChangeGene
 
     }
 
-    public Change[] fixMissing(DatabaseObject missingObject, DiffOutputControl control, Database referenceDatabase, Database comparisionDatabase, ChangeGeneratorChain chain) {
+    public Change[] fixMissing(DatabaseObject missingObject, DiffOutputControl control, Database referenceDatabase, Database comparisonDatabase, ChangeGeneratorChain chain) {
         PrimaryKey pk = (PrimaryKey) missingObject;
 
         AddPrimaryKeyChange change = new AddPrimaryKeyChange();

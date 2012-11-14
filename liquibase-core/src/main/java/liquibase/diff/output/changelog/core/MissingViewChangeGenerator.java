@@ -18,7 +18,7 @@ public class MissingViewChangeGenerator implements MissingObjectChangeGenerator 
         return PRIORITY_NONE;
     }
 
-    public Change[] fixMissing(DatabaseObject missingObject, DiffOutputControl control, Database referenceDatabase, Database comparisionDatabase, ChangeGeneratorChain chain) {
+    public Change[] fixMissing(DatabaseObject missingObject, DiffOutputControl control, Database referenceDatabase, Database comparisonDatabase, ChangeGeneratorChain chain) {
         View view = (View) missingObject;
 
         CreateViewChange change = new CreateViewChange();

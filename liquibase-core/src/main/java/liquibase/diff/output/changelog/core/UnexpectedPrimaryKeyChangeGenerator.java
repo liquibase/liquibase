@@ -19,7 +19,7 @@ public class UnexpectedPrimaryKeyChangeGenerator implements UnexpectedObjectChan
         return PRIORITY_NONE;
     }
 
-    public Change[] fixUnexpected(DatabaseObject unexpectedObject, DiffOutputControl control, Database referenceDatabase, Database comparisionDatabase, ChangeGeneratorChain chain) {
+    public Change[] fixUnexpected(DatabaseObject unexpectedObject, DiffOutputControl control, Database referenceDatabase, Database comparisonDatabase, ChangeGeneratorChain chain) {
 //        if (!diffResult.getObjectDiff(Table.class).getUnexpected().contains(pk.getTable())) {
         PrimaryKey pk = (PrimaryKey) unexpectedObject;
         DropPrimaryKeyChange change = new DropPrimaryKeyChange();

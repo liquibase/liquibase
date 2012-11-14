@@ -18,7 +18,7 @@ public class UnexpectedSequenceChangeGenerator implements UnexpectedObjectChange
         return PRIORITY_NONE;
     }
 
-    public Change[] fixUnexpected(DatabaseObject unexpectedObject, DiffOutputControl control, Database referenceDatabase, Database comparisionDatabase, ChangeGeneratorChain chain) {
+    public Change[] fixUnexpected(DatabaseObject unexpectedObject, DiffOutputControl control, Database referenceDatabase, Database comparisonDatabase, ChangeGeneratorChain chain) {
         Sequence sequence = (Sequence) unexpectedObject;
 
         DropSequenceChange change = new DropSequenceChange();
