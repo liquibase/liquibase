@@ -9,6 +9,7 @@ import liquibase.diff.output.changelog.MissingObjectChangeGenerator;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.PrimaryKey;
+import liquibase.structure.core.Table;
 
 public class MissingPrimaryKeyChangeGenerator implements MissingObjectChangeGenerator {
 
@@ -18,6 +19,18 @@ public class MissingPrimaryKeyChangeGenerator implements MissingObjectChangeGene
         }
         return PRIORITY_NONE;
 
+    }
+
+    public Class<? extends DatabaseObject>[] runAfterTypes() {
+        return new Class[] {
+                Table.class,
+                Column.class
+        };
+
+    }
+
+    public Class<? extends DatabaseObject>[] runBeforeTypes() {
+        return null;
     }
 
     public Change[] fixMissing(DatabaseObject missingObject, DiffOutputControl control, Database referenceDatabase, Database comparisonDatabase, ChangeGeneratorChain chain) {

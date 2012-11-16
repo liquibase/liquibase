@@ -122,4 +122,8 @@ public class DiffResult {
 
         return missingObjects.size() == 0 && unexpectedObjects.size() == 0 && changedObjects.size() == 0;
     }
+
+    public Set<Class<? extends DatabaseObject>> getComparedTypes() {
+        return compareControl.getComparedTypes();
+    }
 }

@@ -12,4 +12,6 @@ public interface ChangeGenerator {
 
     int getPriority(Class<? extends DatabaseObject> objectType, Database database);
 
+    Class<? extends DatabaseObject>[] runAfterTypes();
+    Class<? extends DatabaseObject>[] runBeforeTypes();
 }

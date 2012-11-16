@@ -7,6 +7,7 @@ import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.changelog.ChangeGeneratorChain;
 import liquibase.diff.output.changelog.MissingObjectChangeGenerator;
 import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.Column;
 import liquibase.structure.core.Table;
 import liquibase.structure.core.UniqueConstraint;
 
@@ -16,6 +17,17 @@ public class MissingUniqueConstraintChangeGenerator implements MissingObjectChan
             return PRIORITY_DEFAULT;
         }
         return PRIORITY_NONE;
+    }
+
+    public Class<? extends DatabaseObject>[] runAfterTypes() {
+        return new Class[] {
+                Table.class,
+                Column.class
+        };
+    }
+
+    public Class<? extends DatabaseObject>[] runBeforeTypes() {
+        return null;
     }
 
     public Change[] fixMissing(DatabaseObject missingObject, DiffOutputControl control, Database referenceDatabase, Database comparisonDatabase, ChangeGeneratorChain chain) {

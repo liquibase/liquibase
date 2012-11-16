@@ -18,6 +18,14 @@ public class UnexpectedSequenceChangeGenerator implements UnexpectedObjectChange
         return PRIORITY_NONE;
     }
 
+    public Class<? extends DatabaseObject>[] runAfterTypes() {
+        return null;
+    }
+
+    public Class<? extends DatabaseObject>[] runBeforeTypes() {
+        return null;
+    }
+
     public Change[] fixUnexpected(DatabaseObject unexpectedObject, DiffOutputControl control, Database referenceDatabase, Database comparisonDatabase, ChangeGeneratorChain chain) {
         Sequence sequence = (Sequence) unexpectedObject;
 

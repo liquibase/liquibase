@@ -11,10 +11,7 @@ import liquibase.snapshot.SnapshotGeneratorChain;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.structure.DatabaseObject;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import java.util.*;
 
 public class ChangeGeneratorFactory {
     private static ChangeGeneratorFactory instance;
@@ -112,6 +109,38 @@ public class ChangeGeneratorFactory {
             return null;
         }
         return chain.fixChanged(changedObject, differences, control, referenceDatabase, comparisionDatabase);
+    }
+
+    public Set<Class<? extends DatabaseObject>> runAfterTypes(Class<? extends DatabaseObject> objectType, Database database) {
+        Set<Class<? extends DatabaseObject>> returnTypes = new HashSet<Class<? extends DatabaseObject>>();
+
+        for (Class generatorType : new Class[]{MissingObjectChangeGenerator.class, UnexpectedObjectChangeGenerator.class, ChangedObjectChangeGenerator.class}) {
+            SortedSet<ChangeGenerator> generators = getGenerators(generatorType, objectType, database);
+
+            for (ChangeGenerator generator : generators) {
+                Class<? extends DatabaseObject>[] types = generator.runAfterTypes();
+                if (types != null) {
+                    returnTypes.addAll(Arrays.asList(types));
+                }
+            }
+        }
+        return returnTypes;
+    }
+
+    public Set<Class<? extends DatabaseObject>> runBeforeTypes(Class<? extends DatabaseObject> objectType, Database database) {
+        Set<Class<? extends DatabaseObject>> returnTypes = new HashSet<Class<? extends DatabaseObject>>();
+
+        for (Class generatorType : new Class[]{MissingObjectChangeGenerator.class, UnexpectedObjectChangeGenerator.class, ChangedObjectChangeGenerator.class}) {
+            SortedSet<ChangeGenerator> generators = getGenerators(generatorType, objectType, database);
+
+            for (ChangeGenerator generator : generators) {
+                Class<? extends DatabaseObject>[] types = generator.runBeforeTypes();
+                if (types != null) {
+                    returnTypes.addAll(Arrays.asList(types));
+                }
+            }
+        }
+        return returnTypes;
     }
 
 

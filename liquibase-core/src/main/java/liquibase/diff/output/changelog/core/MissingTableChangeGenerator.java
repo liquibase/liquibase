@@ -25,6 +25,14 @@ public class MissingTableChangeGenerator implements MissingObjectChangeGenerator
         return PRIORITY_NONE;
     }
 
+    public Class<? extends DatabaseObject>[] runAfterTypes() {
+        return null;
+    }
+
+    public Class<? extends DatabaseObject>[] runBeforeTypes() {
+        return null;
+    }
+
     public Change[] fixMissing(DatabaseObject missingObject, DiffOutputControl control, Database referenceDatabase, Database comparisonDatabase, ChangeGeneratorChain chain) {
         Table missingTable = (Table) missingObject;
 

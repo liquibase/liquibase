@@ -9,6 +9,8 @@ import liquibase.diff.output.changelog.ChangeGeneratorChain;
 import liquibase.diff.output.changelog.ChangedObjectChangeGenerator;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Column;
+import liquibase.structure.core.PrimaryKey;
+import liquibase.structure.core.Table;
 import liquibase.structure.core.View;
 
 public class ChangedViewChangeGenerator implements ChangedObjectChangeGenerator {
@@ -17,6 +19,16 @@ public class ChangedViewChangeGenerator implements ChangedObjectChangeGenerator 
             return PRIORITY_DEFAULT;
         }
         return PRIORITY_NONE;
+    }
+
+    public Class<? extends DatabaseObject>[] runAfterTypes() {
+        return new Class[] {
+                Table.class
+        };
+    }
+
+    public Class<? extends DatabaseObject>[] runBeforeTypes() {
+        return null;
     }
 
     public Change[] fixChanged(DatabaseObject changedObject, ObjectDifferences differences, DiffOutputControl control, Database referenceDatabase, Database comparisonDatabase, ChangeGeneratorChain chain) {

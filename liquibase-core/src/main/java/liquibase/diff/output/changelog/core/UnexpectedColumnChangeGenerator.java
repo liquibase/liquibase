@@ -8,6 +8,8 @@ import liquibase.diff.output.changelog.ChangeGeneratorChain;
 import liquibase.diff.output.changelog.UnexpectedObjectChangeGenerator;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Column;
+import liquibase.structure.core.PrimaryKey;
+import liquibase.structure.core.Table;
 import liquibase.structure.core.View;
 
 public class UnexpectedColumnChangeGenerator implements UnexpectedObjectChangeGenerator {
@@ -16,6 +18,18 @@ public class UnexpectedColumnChangeGenerator implements UnexpectedObjectChangeGe
             return PRIORITY_DEFAULT;
         }
         return PRIORITY_NONE;
+    }
+
+    public Class<? extends DatabaseObject>[] runAfterTypes() {
+        return new Class[] {
+                Table.class
+        };
+    }
+
+    public Class<? extends DatabaseObject>[] runBeforeTypes() {
+        return new Class[] {
+                PrimaryKey.class
+        };
     }
 
     public Change[] fixUnexpected(DatabaseObject unexpectedObject, DiffOutputControl control, Database referenceDatabase, Database comparisonDatabase, ChangeGeneratorChain chain) {

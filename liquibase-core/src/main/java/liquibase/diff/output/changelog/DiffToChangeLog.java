@@ -2,23 +2,19 @@ package liquibase.diff.output.changelog;
 
 import liquibase.CatalogAndSchema;
 import liquibase.change.Change;
-import liquibase.change.ColumnConfig;
-import liquibase.change.ConstraintsConfig;
-import liquibase.change.core.*;
 import liquibase.changelog.ChangeSet;
-import liquibase.datatype.DataTypeFactory;
+import liquibase.database.Database;
 import liquibase.diff.DiffResult;
 import liquibase.diff.ObjectDifferences;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.exception.DatabaseException;
+import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.logging.LogFactory;
 import liquibase.serializer.ChangeLogSerializer;
 import liquibase.serializer.ChangeLogSerializerFactory;
 import liquibase.serializer.core.xml.XMLChangeLogSerializer;
-import liquibase.statement.DatabaseFunction;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
-import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.util.StringUtils;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -116,34 +112,27 @@ public class DiffToChangeLog {
      * the reference database
      */
     public void print(PrintStream out, ChangeLogSerializer changeLogSerializer) throws ParserConfigurationException, IOException, DatabaseException {
+
+        final ChangeGeneratorFactory changeGeneratorFactory = ChangeGeneratorFactory.getInstance();
+
+        List<Class<? extends DatabaseObject>> types = getOrderedOutputTypes(changeGeneratorFactory);
+
         List<ChangeSet> changeSets = new ArrayList<ChangeSet>();
 
-        ChangeGeneratorFactory changeGeneratorFactory = ChangeGeneratorFactory.getInstance();
-
-        for (DatabaseObject object : diffResult.getMissingObjects()) {
-            Change[] changes = changeGeneratorFactory.fixMissing(object, diffOutputControl, diffResult.getReferenceSnapshot().getDatabase(), diffResult.getComparisonSnapshot().getDatabase());
-            if (changes != null) {
-                for (Change change : changes) {
-                    changeSets.add(generateChangeSet(change));
-                }
+        for (Class<? extends DatabaseObject> type : types) {
+            for (DatabaseObject object : diffResult.getMissingObjects(type)) {
+                Change[] changes = changeGeneratorFactory.fixMissing(object, diffOutputControl, diffResult.getReferenceSnapshot().getDatabase(), diffResult.getComparisonSnapshot().getDatabase());
+                addToChangeSets(changes, changeSets);
             }
-        }
 
-        for (DatabaseObject object : diffResult.getUnexpectedObjects()) {
-            Change[] changes = changeGeneratorFactory.fixUnexpected(object, diffOutputControl, diffResult.getReferenceSnapshot().getDatabase(), diffResult.getComparisonSnapshot().getDatabase());
-            if (changes != null) {
-                for (Change change : changes) {
-                    changeSets.add(generateChangeSet(change));
-                }
+            for (DatabaseObject object : diffResult.getUnexpectedObjects(type)) {
+                Change[] changes = changeGeneratorFactory.fixUnexpected(object, diffOutputControl, diffResult.getReferenceSnapshot().getDatabase(), diffResult.getComparisonSnapshot().getDatabase());
+                addToChangeSets(changes, changeSets);
             }
-        }
 
-        for (Map.Entry<DatabaseObject, ObjectDifferences> entry : diffResult.getChangedObjects().entrySet()) {
-            Change[] changes = changeGeneratorFactory.fixChanged(entry.getKey(), entry.getValue(), diffOutputControl, diffResult.getReferenceSnapshot().getDatabase(), diffResult.getComparisonSnapshot().getDatabase());
-            if (changes != null) {
-                for (Change change : changes) {
-                    changeSets.add(generateChangeSet(change));
-                }
+            for (Map.Entry<DatabaseObject, ObjectDifferences> entry : diffResult.getChangedObjects(type).entrySet()) {
+                Change[] changes = changeGeneratorFactory.fixChanged(entry.getKey(), entry.getValue(), diffOutputControl, diffResult.getReferenceSnapshot().getDatabase(), diffResult.getComparisonSnapshot().getDatabase());
+                addToChangeSets(changes, changeSets);
             }
         }
 
@@ -174,6 +163,30 @@ public class DiffToChangeLog {
         changeLogSerializer.write(changeSets, out);
 
         out.flush();
+    }
+
+    private List<Class<? extends DatabaseObject>> getOrderedOutputTypes(final ChangeGeneratorFactory changeGeneratorFactory) {
+
+        Database comparisonDatabase = diffResult.getComparisonSnapshot().getDatabase();
+        Graph graph = new Graph();
+        for (Class<? extends DatabaseObject> type : diffResult.getReferenceSnapshot().getSnapshotControl().getTypesToInclude()) {
+            graph.addType(type);
+        }
+        List<Class<? extends DatabaseObject>> types = graph.sort(comparisonDatabase);
+
+//        System.out.println("Type order: ");
+//        for (Class<? extends DatabaseObject> type : types) {
+//            System.out.println("    " + type.getName());
+//        }
+        return types;
+    }
+
+    private void addToChangeSets(Change[] changes, List<ChangeSet> changeSets) {
+        if (changes != null) {
+            for (Change change : changes) {
+                changeSets.add(generateChangeSet(change));
+            }
+        }
     }
 
     protected ChangeSet generateChangeSet(Change change) {
@@ -367,5 +380,121 @@ public class DiffToChangeLog {
 //            throw new RuntimeException(e);
 //        }
 
+    }
+
+
+    private static class Graph {
+
+        private Map<Class<? extends DatabaseObject>, Node> allNodes = new HashMap<Class<? extends DatabaseObject>, Node>();
+
+        private void addType(Class<? extends DatabaseObject> type) {
+            allNodes.put(type, new Node(type));
+        }
+
+        public List<Class<? extends DatabaseObject>> sort(Database database) {
+            ChangeGeneratorFactory changeGeneratorFactory = ChangeGeneratorFactory.getInstance();
+            for (Class<? extends DatabaseObject> type : allNodes.keySet()) {
+                for (Class<? extends DatabaseObject> afterType : changeGeneratorFactory.runBeforeTypes(type, database)) {
+                    getNode(type).addEdge(getNode(afterType));
+                }
+
+                for (Class<? extends DatabaseObject> beforeType : changeGeneratorFactory.runAfterTypes(type, database)) {
+                    getNode(beforeType).addEdge(getNode(type));
+                }
+            }
+
+
+            //L <- Empty list that will contain the sorted elements
+            ArrayList<Node> L = new ArrayList<Node>();
+
+            //S <- Set of all nodes with no incoming edges
+            HashSet<Node> S = new HashSet<Node>();
+            for (Node n : allNodes.values()) {
+                if (n.inEdges.size() == 0) {
+                    S.add(n);
+                }
+            }
+
+            //while S is non-empty do
+            while (!S.isEmpty()) {
+                //remove a node n from S
+                Node n = S.iterator().next();
+                S.remove(n);
+
+                //insert n into L
+                L.add(n);
+
+                //for each node m with an edge e from n to m do
+                for (Iterator<Edge> it = n.outEdges.iterator(); it.hasNext(); ) {
+                    //remove edge e from the graph
+                    Edge e = it.next();
+                    Node m = e.to;
+                    it.remove();//Remove edge from n
+                    m.inEdges.remove(e);//Remove edge from m
+
+                    //if m has no other incoming edges then insert m into S
+                    if (m.inEdges.isEmpty()) {
+                        S.add(m);
+                    }
+                }
+            }
+            //Check to see if all edges are removed
+            for (Node n : allNodes.values()) {
+                if (!n.inEdges.isEmpty()) {
+                    throw new UnexpectedLiquibaseException("Cycle present, topological sort not possible");
+                }
+            }
+            List<Class<? extends DatabaseObject>> returnList = new ArrayList<Class<? extends DatabaseObject>>();
+            for (Node node : L) {
+                returnList.add(node.type);
+            }
+            return returnList;
+        }
+
+
+        private Node getNode(Class<? extends DatabaseObject> type) {
+            return allNodes.get(type);
+        }
+
+
+        static class Node {
+            public final Class<? extends DatabaseObject> type;
+            public final HashSet<Edge> inEdges;
+            public final HashSet<Edge> outEdges;
+
+            public Node(Class<? extends DatabaseObject> type) {
+                this.type = type;
+                inEdges = new HashSet<Edge>();
+                outEdges = new HashSet<Edge>();
+            }
+
+            public Node addEdge(Node node) {
+                Edge e = new Edge(this, node);
+                outEdges.add(e);
+                node.inEdges.add(e);
+                return this;
+            }
+
+            @Override
+            public String toString() {
+                return type.getName();
+            }
+        }
+
+        static class Edge {
+            public final Node from;
+            public final Node to;
+
+            public Edge(Node from, Node to) {
+                this.from = from;
+                this.to = to;
+            }
+
+            @Override
+            public boolean equals(Object obj) {
+                Edge e = (Edge) obj;
+                return e.from == from && e.to == to;
+            }
+        }
     }
 }

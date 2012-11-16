@@ -18,6 +18,16 @@ public class MissingViewChangeGenerator implements MissingObjectChangeGenerator 
         return PRIORITY_NONE;
     }
 
+    public Class<? extends DatabaseObject>[] runAfterTypes() {
+        return new Class[] {
+                Table.class
+        };
+    }
+
+    public Class<? extends DatabaseObject>[] runBeforeTypes() {
+        return null;
+    }
+
     public Change[] fixMissing(DatabaseObject missingObject, DiffOutputControl control, Database referenceDatabase, Database comparisonDatabase, ChangeGeneratorChain chain) {
         View view = (View) missingObject;
 
