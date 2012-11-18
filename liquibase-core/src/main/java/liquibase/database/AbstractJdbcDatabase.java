@@ -11,6 +11,8 @@ import liquibase.changelog.filter.ContextChangeSetFilter;
 import liquibase.changelog.filter.DbmsChangeSetFilter;
 import liquibase.database.core.*;
 import liquibase.database.jvm.JdbcConnection;
+import liquibase.diff.compare.DatabaseObjectComparator;
+import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.exception.*;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
@@ -215,11 +217,11 @@ public abstract class AbstractJdbcDatabase implements Database {
             if (schemaName == null) {
                 schemaName = getDefaultSchemaName();
             } else {
-                schemaName =  correctObjectName(schemaName, Schema.class);
+                schemaName = correctObjectName(schemaName, Schema.class);
             }
         } else if (!supportsCatalogs() && !supportsSchemas()) {
             return new CatalogAndSchema(null, null);
-        }  else if (supportsCatalogs()) { //schema is null
+        } else if (supportsCatalogs()) { //schema is null
             if (catalogName == null) {
                 if (schemaName == null) {
                     catalogName = getDefaultCatalogName();
@@ -228,7 +230,7 @@ public abstract class AbstractJdbcDatabase implements Database {
                 }
             }
             schemaName = catalogName;
-        }  else if (supportsSchemas()) {
+        } else if (supportsSchemas()) {
             if (schemaName == null) {
                 if (catalogName == null) {
                     schemaName = getDefaultSchemaName();
@@ -250,6 +252,7 @@ public abstract class AbstractJdbcDatabase implements Database {
         return new CatalogAndSchema(getDefaultCatalogName(), getDefaultSchemaName());
 
     }
+
     public String getDefaultSchemaName() {
 
         if (!supportsSchemas()) {
@@ -263,11 +266,11 @@ public abstract class AbstractJdbcDatabase implements Database {
 
         return defaultSchemaName;
     }
-    
-    /** 
+
+    /**
      * Overwrite this method to get the default schema name for the connection.
-     * 
-     * @return 
+     *
+     * @return
      */
     protected String doGetDefaultSchemaName() {
         try {
@@ -766,14 +769,14 @@ public abstract class AbstractJdbcDatabase implements Database {
                     }
                 }
 
-    //            for (Index index : snapshotGenerator.getIndexes()) {
-    //                DropIndexChange dropChange = new DropIndexChange();
-    //                dropChange.setIndexName(index.getName());
-    //                dropChange.setSchemaName(schema);
-    //                dropChange.setTableName(index.getTableName());
-    //
-    //                dropChanges.add(dropChange);
-    //            }
+                //            for (Index index : snapshotGenerator.getIndexes()) {
+                //                DropIndexChange dropChange = new DropIndexChange();
+                //                dropChange.setIndexName(index.getName());
+                //                dropChange.setSchemaName(schema);
+                //                dropChange.setTableName(index.getTableName());
+                //
+                //                dropChanges.add(dropChange);
+                //            }
 
                 for (Table table : schema.getDatabaseObjects(Table.class)) {
                     DropTableChange dropChange = new DropTableChange();
@@ -817,16 +820,26 @@ public abstract class AbstractJdbcDatabase implements Database {
     }
 
     public boolean supportsDropTableCascadeConstraints() {
-         return (this instanceof MSSQLDatabase
-                 || this instanceof FirebirdDatabase
-                 || this instanceof SQLiteDatabase
-                 || this instanceof SybaseDatabase
-                 || this instanceof SybaseASADatabase);
+        return (this instanceof MSSQLDatabase
+                || this instanceof FirebirdDatabase
+                || this instanceof SQLiteDatabase
+                || this instanceof SybaseDatabase
+                || this instanceof SybaseASADatabase);
     }
 
-    public boolean isSystemTable(CatalogAndSchema schema, String tableName) {
-        schema = correctSchema(schema);
-        return "information_schema".equalsIgnoreCase(schema.getSchemaName()) || getSystemTables().contains(tableName);
+    public boolean isSystemObject(DatabaseObject example) {
+        if (example.getSchema() != null && example.getSchema().getName().equalsIgnoreCase("information_schema")) {
+            return true;
+        }
+        if (example instanceof Table && getSystemTables().contains(example.getName())) {
+            return true;
+        }
+
+        if (example instanceof View && getSystemViews().contains(example.getName())) {
+            return true;
+        }
+
+        return false;
     }
 
     public boolean isSystemView(CatalogAndSchema schema, String viewName) {
@@ -839,15 +852,23 @@ public abstract class AbstractJdbcDatabase implements Database {
         return false;
     }
 
-    public boolean isLiquibaseTable(CatalogAndSchema schema, String tableName) {
-        if (!schema.equals(correctSchema(new CatalogAndSchema(getLiquibaseCatalogName(), getLiquibaseSchemaName())), this)) {
+    public boolean isLiquibaseObject(DatabaseObject object) {
+        if (object instanceof Table) {
+            if (DatabaseObjectComparatorFactory.getInstance().isSameObject(object.getSchema(), new Schema(getLiquibaseCatalogName(), getLiquibaseSchemaName()), this)) {
+                if (DatabaseObjectComparatorFactory.getInstance().isSameObject(object, new Table().setName(getDatabaseChangeLogTableName()), this)) {
+                    return true;
+                }
+                if (DatabaseObjectComparatorFactory.getInstance().isSameObject(object, new Table().setName(getDatabaseChangeLogLockTableName()), this)) {
+                    return true;
+                }
+            }
             return false;
+        } else if (object instanceof Column) {
+            return isLiquibaseObject(((Column) object).getRelation());
+        } else if (object instanceof Index) {
+            return isLiquibaseObject(((Index) object).getTable());
         }
-        if (isCaseSensitive()) {
-            return tableName.equals(this.getDatabaseChangeLogTableName()) || tableName.equals(this.getDatabaseChangeLogLockTableName());
-        } else {
-            return tableName.equalsIgnoreCase(this.getDatabaseChangeLogTableName()) || tableName.equalsIgnoreCase(this.getDatabaseChangeLogLockTableName());
-        }
+        return false;
     }
 
     // ------- DATABASE TAGGING METHODS ---- //
@@ -920,15 +941,15 @@ public abstract class AbstractJdbcDatabase implements Database {
             if (catalogName == null && schemaName == null) {
                 return escapeObjectName(objectName, objectType);
             } else if (catalogName == null || !this.supportsCatalogInObjectName()) {
-                return escapeObjectName(schemaName, Schema.class)+"."+ escapeObjectName(objectName, objectType);
+                return escapeObjectName(schemaName, Schema.class) + "." + escapeObjectName(objectName, objectType);
             } else {
-                return escapeObjectName(catalogName, Catalog.class)+"."+ escapeObjectName(schemaName, Schema.class)+"."+ escapeObjectName(objectName, objectType);
+                return escapeObjectName(catalogName, Catalog.class) + "." + escapeObjectName(schemaName, Schema.class) + "." + escapeObjectName(objectName, objectType);
             }
         } else {
             if (StringUtils.trimToNull(catalogName) == null) {
                 return escapeObjectName(objectName, objectType);
             } else {
-                return escapeObjectName(catalogName, Catalog.class)+"."+ escapeObjectName(objectName, objectType);
+                return escapeObjectName(catalogName, Catalog.class) + "." + escapeObjectName(objectName, objectType);
             }
         }
     }
@@ -1070,8 +1091,9 @@ public abstract class AbstractJdbcDatabase implements Database {
                 } else {
                     DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                     try {
-                        dateExecuted = df.parse((String)tmpDateExecuted);
-                    } catch (ParseException e) {}
+                        dateExecuted = df.parse((String) tmpDateExecuted);
+                    } catch (ParseException e) {
+                    }
                 }
                 String tag = rs.get("TAG") == null ? null : rs.get("TAG").toString();
                 String execType = rs.get("EXECTYPE") == null ? null : rs.get("EXECTYPE").toString();

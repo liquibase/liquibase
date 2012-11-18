@@ -5,6 +5,8 @@ import liquibase.CatalogAndSchema;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
 import liquibase.exception.DatabaseException;
+import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.View;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -128,40 +130,28 @@ public class MaxDBDatabase extends AbstractJdbcDatabase {
         if (currentDateTimeFunction != null) {
             return currentDateTimeFunction;
         }
-        
+
         return "TIMESTAMP";
     }
 
-    @Override
-    public boolean isSystemTable(CatalogAndSchema schema, String tableName) {
-        schema = correctSchema(schema);
-        if (super.isSystemTable(schema, tableName)) {
-            return true;
-        } else if ("DOMAIN".equalsIgnoreCase(schema.getSchemaName())) {
-            return true;
-        } else if ("SYSINFO".equalsIgnoreCase(schema.getSchemaName())) {
-            return true;
-        } else if ("SYSLOADER".equalsIgnoreCase(schema.getSchemaName())) {
-            return true;
-        } else if ("SYSDBA".equalsIgnoreCase(schema.getSchemaName())) {
-            return true;
-        }
-        return false;
-    }
 
     @Override
-    public boolean isSystemView(CatalogAndSchema schema, String tableName) {
-        schema = correctSchema(schema);
-        if (super.isSystemView(schema, tableName)) {
+    public boolean isSystemObject(DatabaseObject example) {
+        if (super.isSystemObject(example)) {
             return true;
-        } else if ("DOMAIN".equalsIgnoreCase(schema.getSchemaName())) {
-            return true;
-        } else if ("SYSINFO".equalsIgnoreCase(schema.getSchemaName())) {
-            return true;
-        } else if ("SYSLOADER".equalsIgnoreCase(schema.getSchemaName())) {
-            return true;
-        } else if ("SYSDBA".equalsIgnoreCase(schema.getSchemaName())) {
-            return true;
+        }
+        if (example instanceof View && example.getSchema() != null) {
+
+            if ("DOMAIN".equalsIgnoreCase(example.getSchema().getName())) {
+                return true;
+            } else if ("SYSINFO".equalsIgnoreCase(example.getSchema().getName())) {
+                return true;
+            } else if ("SYSLOADER".equalsIgnoreCase(example.getSchema().getName())) {
+                return true;
+            } else if ("SYSDBA".equalsIgnoreCase(example.getSchema().getName())) {
+                return true;
+            }
+
         }
         return false;
     }

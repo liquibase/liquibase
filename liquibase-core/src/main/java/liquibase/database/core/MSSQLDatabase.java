@@ -8,6 +8,7 @@ import liquibase.database.DatabaseConnection;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Index;
 import liquibase.structure.core.Schema;
+import liquibase.structure.core.Table;
 import liquibase.structure.core.View;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
@@ -213,17 +214,15 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
         return true;
     }
 
-
     @Override
-    public boolean isSystemTable(CatalogAndSchema schema, String tableName) {
-        schema = correctSchema(schema);
-        return super.isSystemTable(schema, tableName) || schema.getSchemaName().equals("sys");
-    }
-
-    @Override
-    public boolean isSystemView(CatalogAndSchema schema, String viewName) {
-        schema = correctSchema(schema);
-        return super.isSystemView(schema, viewName) || schema.getSchemaName().equals("sys");
+    public boolean isSystemObject(DatabaseObject example) {
+        if (example instanceof Table && example.getSchema().getName().equals("sys")) {
+            return true;
+        }
+        if (example instanceof View && example.getSchema().getName().equals("sys")) {
+            return true;
+        }
+        return super.isSystemObject(example);
     }
 
     public String generateDefaultConstraintName(String tableName, String columnName) {

@@ -147,11 +147,9 @@ public interface Database extends PrioritizedService {
 
     boolean doesTagExist(String tag) throws DatabaseException;
 
-    boolean isSystemTable(CatalogAndSchema schema, String tableName);
+    boolean isSystemObject(DatabaseObject example);
 
-    boolean isSystemView(CatalogAndSchema schema, String name);
-
-    boolean isLiquibaseTable(CatalogAndSchema schema, String tableName);
+    boolean isLiquibaseObject(DatabaseObject object);
 
     String getViewDefinition(CatalogAndSchema schema, String name) throws DatabaseException;
 

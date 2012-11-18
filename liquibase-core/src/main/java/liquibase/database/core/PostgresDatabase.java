@@ -9,6 +9,7 @@ import liquibase.exception.DatabaseException;
 import liquibase.executor.ExecutorService;
 import liquibase.logging.LogFactory;
 import liquibase.statement.core.RawSqlStatement;
+import liquibase.structure.core.Table;
 
 import java.math.BigInteger;
 import java.util.*;
@@ -145,7 +146,7 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
         if (currentDateTimeFunction != null) {
             return currentDateTimeFunction;
         }
-        
+
         return "NOW()";
     }
 
@@ -159,7 +160,6 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
         return super.getDatabaseChangeLogLockTableName().toLowerCase();
     }
 
-    
 
 //    public void dropDatabaseObjects(String schema) throws DatabaseException {
 //        try {
@@ -182,16 +182,19 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
 
 
     @Override
-    public boolean isSystemTable(CatalogAndSchema schema, String tableName) {
-        schema = correctSchema(schema);
-        return super.isSystemTable(schema, tableName)
-                || "pg_catalog".equals(schema.getSchemaName())
-                || "pg_toast".equals(schema.getSchemaName())
-                || tableName.endsWith("_seq")
-                || tableName.endsWith("_key")
-                || tableName.endsWith("_pkey")
-                || tableName.startsWith("idx_")
-                || tableName.startsWith("pk_");
+    public boolean isSystemObject(DatabaseObject example) {
+        if (example instanceof Table) {
+            if ("pg_catalog".equals(example.getSchema().getName())
+                    || "pg_toast".equals(example.getSchema().getName())
+                    || example.getName().endsWith("_seq")
+                    || example.getName().endsWith("_key")
+                    || example.getName().endsWith("_pkey")
+                    || example.getName().startsWith("idx_")
+                    || example.getName().startsWith("pk_")) {
+                return true;
+            }
+        }
+        return super.isSystemObject(example);
     }
 
     public boolean supportsTablespaces() {
@@ -205,14 +208,14 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
 
     @Override
     public boolean generateAutoIncrementStartWith(BigInteger startWith) {
-    	return false;
+        return false;
     }
 
     @Override
     public boolean generateAutoIncrementBy(BigInteger incrementBy) {
-    	return false;
+        return false;
     }
-    
+
     @Override
     public String escapeObjectName(String objectName, Class<? extends DatabaseObject> objectType) {
         if (objectName == null) {

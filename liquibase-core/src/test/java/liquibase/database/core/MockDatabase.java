@@ -279,16 +279,12 @@ public class MockDatabase implements Database {
         return false;
     }
 
-    public boolean isSystemTable(CatalogAndSchema schema, String tableName) {
+
+    public boolean isSystemObject(DatabaseObject example) {
         return false;
     }
 
-
-    public boolean isSystemView(CatalogAndSchema schema, String name) {
-        return false;
-    }
-
-    public boolean isLiquibaseTable(CatalogAndSchema schema, String tableName) {
+    public boolean isLiquibaseObject(DatabaseObject object) {
         return false;
     }
 

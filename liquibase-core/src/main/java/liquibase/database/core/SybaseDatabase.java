@@ -9,6 +9,8 @@ import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.logging.LogFactory;
 import liquibase.statement.core.GetViewDefinitionStatement;
+import liquibase.structure.core.Table;
+import liquibase.structure.core.View;
 
 import java.math.BigInteger;
 import java.util.HashSet;
@@ -200,18 +202,17 @@ public class SybaseDatabase extends AbstractJdbcDatabase {
         return true;
     }
 
-
     @Override
-    public boolean isSystemTable(CatalogAndSchema schema, String tableName) {
-        schema = correctSchema(schema);
-        return super.isSystemTable(schema, tableName) || schema.getSchemaName().equals("sys") || tableName.toLowerCase().startsWith("sybfi");
+    public boolean isSystemObject(DatabaseObject example) {
+        if (example instanceof Table && (example.getSchema().getName().equals("sys") || example.getSchema().getName().equals("sybfi"))) {
+            return true;
+        }
+        if (example instanceof View && (example.getSchema().getName().equals("sys") || example.getSchema().getName().equals("sybfi"))) {
+            return true;
+        }
+        return super.isSystemObject(example);
     }
 
-    @Override
-    public boolean isSystemView(CatalogAndSchema schema, String viewName) {
-        schema = correctSchema(schema);
-        return super.isSystemView(schema, viewName) || schema.getSchemaName().equals("sys") || viewName.toLowerCase().equals("sybfi");
-    }
 
     public String generateDefaultConstraintName(String tableName, String columnName) {
         return "DF_" + tableName + "_" + columnName;

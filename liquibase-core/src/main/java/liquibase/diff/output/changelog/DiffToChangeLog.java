@@ -121,7 +121,9 @@ public class DiffToChangeLog {
         for (Class<? extends DatabaseObject> type : types) {
             for (DatabaseObject object : diffResult.getMissingObjects(type)) {
                 Change[] changes = changeGeneratorFactory.fixMissing(object, diffOutputControl, diffResult.getReferenceSnapshot().getDatabase(), diffResult.getComparisonSnapshot().getDatabase());
-                addToChangeSets(changes, changeSets);
+                if (!diffResult.getReferenceSnapshot().getDatabase().isLiquibaseObject(object) && !diffResult.getReferenceSnapshot().getDatabase().isSystemObject(object)) {
+                    addToChangeSets(changes, changeSets);
+                }
             }
         }
 
@@ -129,7 +131,9 @@ public class DiffToChangeLog {
         for (Class<? extends DatabaseObject> type : types) {
             for (DatabaseObject object : diffResult.getUnexpectedObjects(type)) {
                 Change[] changes = changeGeneratorFactory.fixUnexpected(object, diffOutputControl, diffResult.getReferenceSnapshot().getDatabase(), diffResult.getComparisonSnapshot().getDatabase());
-                addToChangeSets(changes, changeSets);
+                if (!diffResult.getComparisonSnapshot().getDatabase().isLiquibaseObject(object) && !diffResult.getComparisonSnapshot().getDatabase().isSystemObject(object)) {
+                    addToChangeSets(changes, changeSets);
+                }
             }
         }
 
@@ -137,7 +141,9 @@ public class DiffToChangeLog {
         for (Class<? extends DatabaseObject> type : types) {
             for (Map.Entry<DatabaseObject, ObjectDifferences> entry : diffResult.getChangedObjects(type).entrySet()) {
                 Change[] changes = changeGeneratorFactory.fixChanged(entry.getKey(), entry.getValue(), diffOutputControl, diffResult.getReferenceSnapshot().getDatabase(), diffResult.getComparisonSnapshot().getDatabase());
-                addToChangeSets(changes, changeSets);
+                if (!diffResult.getReferenceSnapshot().getDatabase().isLiquibaseObject(entry.getKey()) && !diffResult.getReferenceSnapshot().getDatabase().isSystemObject(entry.getKey())) {
+                    addToChangeSets(changes, changeSets);
+                }
             }
         }
 
@@ -228,12 +234,6 @@ public class DiffToChangeLog {
 
     protected String generateId() {
         return idRoot + "-" + changeNumber++;
-    }
-
-    protected boolean shouldModifyColumn(Column column) {
-        CatalogAndSchema schema = column.getRelation().getSchema().toCatalogAndSchema();
-        return !diffResult.getReferenceSnapshot().getDatabase().isLiquibaseTable(schema, column.getRelation().getName());
-
     }
 
     protected void addInsertDataChanges(List<ChangeSet> changeSets, String dataDir) throws DatabaseException, IOException {

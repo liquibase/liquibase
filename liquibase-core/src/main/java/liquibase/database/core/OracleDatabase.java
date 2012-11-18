@@ -8,6 +8,7 @@ import liquibase.structure.DatabaseObject;
 import liquibase.exception.DatabaseException;
 import liquibase.logging.LogFactory;
 import liquibase.statement.DatabaseFunction;
+import liquibase.structure.core.Table;
 
 import java.lang.reflect.Method;
 import java.sql.Connection;
@@ -189,21 +190,22 @@ public class OracleDatabase extends AbstractJdbcDatabase {
     }
 
     @Override
-    public boolean isSystemTable(CatalogAndSchema schema, String tableName) {
-        if (super.isSystemTable(schema, tableName)) {
-            return true;
-        } else if (tableName.startsWith("BIN$")) { //oracle deleted table
-            return true;
-        } else if (tableName.startsWith("AQ$")) { //oracle AQ tables
-            return true;
-        } else if (tableName.startsWith("DR$")) { //oracle index tables
-            return true;
-        } else if (tableName.startsWith("SYS_IOT_OVER")) { //oracle system table
-            return true;
+    public boolean isSystemObject(DatabaseObject example) {
+        if (example instanceof Table) {
+            if (example.getName().startsWith("BIN$")) { //oracle deleted table
+                return true;
+            } else if (example.getName().startsWith("AQ$")) { //oracle AQ tables
+                return true;
+            } else if (example.getName().startsWith("DR$")) { //oracle index tables
+                return true;
+            } else if (example.getName().startsWith("SYS_IOT_OVER")) { //oracle system table
+                return true;
+            }
         }
-        return false;
+
+        return super.isSystemObject(example);
     }
-    
+
     public boolean supportsTablespaces() {
         return true;
     }
