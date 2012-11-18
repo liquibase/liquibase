@@ -5,6 +5,7 @@ import liquibase.database.Database;
 import liquibase.diff.ObjectDifferences;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.Column;
 
 import java.util.Iterator;
 import java.util.SortedSet;
@@ -33,6 +34,10 @@ public class ChangeGeneratorChain {
         }
 
         if (!changeGenerators.hasNext()) {
+            return null;
+        }
+
+        if (control.alreadyHandledMissing(missingObject, comparisionDatabase)) {
             return null;
         }
 

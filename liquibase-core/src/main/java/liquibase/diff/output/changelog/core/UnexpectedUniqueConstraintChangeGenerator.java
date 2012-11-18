@@ -14,21 +14,21 @@ import liquibase.structure.core.UniqueConstraint;
 
 public class UnexpectedUniqueConstraintChangeGenerator implements UnexpectedObjectChangeGenerator {
     public int getPriority(Class<? extends DatabaseObject> objectType, Database database) {
-        if (Sequence.class.isAssignableFrom(objectType)) {
+        if (UniqueConstraint.class.isAssignableFrom(objectType)) {
             return PRIORITY_DEFAULT;
         }
         return PRIORITY_NONE;
     }
 
     public Class<? extends DatabaseObject>[] runAfterTypes() {
+        return null;
+    }
+
+    public Class<? extends DatabaseObject>[] runBeforeTypes() {
         return new Class[] {
                 Table.class,
                 Column.class
         };
-    }
-
-    public Class<? extends DatabaseObject>[] runBeforeTypes() {
-        return null;
     }
 
     public Change[] fixUnexpected(DatabaseObject unexpectedObject, DiffOutputControl control, Database referenceDatabase, Database comparisonDatabase, ChangeGeneratorChain chain) {

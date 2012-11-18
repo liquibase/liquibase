@@ -53,6 +53,7 @@ public class MissingTableChangeGenerator implements MissingObjectChangeGenerator
         }
 
         PrimaryKey primaryKey = missingTable.getPrimaryKey();
+        control.setAlreadyHandledMissing(primaryKey);
 
         for (Column column : missingTable.getColumns()) {
             ColumnConfig columnConfig = new ColumnConfig();
@@ -114,6 +115,7 @@ public class MissingTableChangeGenerator implements MissingObjectChangeGenerator
             }
 
             change.addColumn(columnConfig);
+            control.setAlreadyHandledMissing(column);
         }
 
 

@@ -81,12 +81,6 @@ public class MissingColumnChangeGenerator implements MissingObjectChangeGenerato
             }
             constraintsConfig.setNullable(false);
         }
-        if (column.isUnique()) {
-            if (constraintsConfig == null) {
-                constraintsConfig = new ConstraintsConfig();
-            }
-            constraintsConfig.setUnique(true);
-        }
         if (constraintsConfig != null) {
             columnConfig.setConstraints(constraintsConfig);
         }

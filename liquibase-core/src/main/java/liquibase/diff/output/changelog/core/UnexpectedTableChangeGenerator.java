@@ -7,8 +7,7 @@ import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.changelog.ChangeGeneratorChain;
 import liquibase.diff.output.changelog.UnexpectedObjectChangeGenerator;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.core.Sequence;
-import liquibase.structure.core.Table;
+import liquibase.structure.core.*;
 
 public class UnexpectedTableChangeGenerator implements UnexpectedObjectChangeGenerator {
     public int getPriority(Class<? extends DatabaseObject> objectType, Database database) {
@@ -37,6 +36,10 @@ public class UnexpectedTableChangeGenerator implements UnexpectedObjectChangeGen
         if (control.isIncludeSchema()) {
             change.setSchemaName(unexpectedTable.getSchema().getName());
         }
+
+        for (Column column : unexpectedTable.getColumns()) {
+            control.setAlreadyHandledUnexpected(column);
+        };
 
         return new Change[] { change };
 

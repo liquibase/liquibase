@@ -8,6 +8,7 @@ import liquibase.diff.output.changelog.ChangeGeneratorChain;
 import liquibase.diff.output.changelog.MissingObjectChangeGenerator;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Column;
+import liquibase.structure.core.Index;
 import liquibase.structure.core.Table;
 import liquibase.structure.core.UniqueConstraint;
 
@@ -20,14 +21,14 @@ public class MissingUniqueConstraintChangeGenerator implements MissingObjectChan
     }
 
     public Class<? extends DatabaseObject>[] runAfterTypes() {
-        return new Class[] {
+        return new Class[]{
                 Table.class,
                 Column.class
         };
     }
 
     public Class<? extends DatabaseObject>[] runBeforeTypes() {
-        return null;
+        return new Class[]{Index.class};
     }
 
     public Change[] fixMissing(DatabaseObject missingObject, DiffOutputControl control, Database referenceDatabase, Database comparisonDatabase, ChangeGeneratorChain chain) {
@@ -53,6 +54,8 @@ public class MissingUniqueConstraintChangeGenerator implements MissingObjectChan
         change.setDeferrable(uc.isDeferrable());
         change.setInitiallyDeferred(uc.isInitiallyDeferred());
         change.setDisabled(uc.isDisabled());
+
+        control.setAlreadyHandledMissing(uc.getBackingIndex());
 
         return new Change[]{change};
 

@@ -111,33 +111,29 @@ public class ChangeGeneratorFactory {
         return chain.fixChanged(changedObject, differences, control, referenceDatabase, comparisionDatabase);
     }
 
-    public Set<Class<? extends DatabaseObject>> runAfterTypes(Class<? extends DatabaseObject> objectType, Database database) {
+    public Set<Class<? extends DatabaseObject>> runAfterTypes(Class<? extends DatabaseObject> objectType, Database database, Class<? extends ChangeGenerator> changeGeneratorType) {
         Set<Class<? extends DatabaseObject>> returnTypes = new HashSet<Class<? extends DatabaseObject>>();
 
-        for (Class generatorType : new Class[]{MissingObjectChangeGenerator.class, UnexpectedObjectChangeGenerator.class, ChangedObjectChangeGenerator.class}) {
-            SortedSet<ChangeGenerator> generators = getGenerators(generatorType, objectType, database);
+        SortedSet<ChangeGenerator> generators = getGenerators(changeGeneratorType, objectType, database);
 
-            for (ChangeGenerator generator : generators) {
-                Class<? extends DatabaseObject>[] types = generator.runAfterTypes();
-                if (types != null) {
-                    returnTypes.addAll(Arrays.asList(types));
-                }
+        for (ChangeGenerator generator : generators) {
+            Class<? extends DatabaseObject>[] types = generator.runAfterTypes();
+            if (types != null) {
+                returnTypes.addAll(Arrays.asList(types));
             }
         }
         return returnTypes;
     }
 
-    public Set<Class<? extends DatabaseObject>> runBeforeTypes(Class<? extends DatabaseObject> objectType, Database database) {
+    public Set<Class<? extends DatabaseObject>> runBeforeTypes(Class<? extends DatabaseObject> objectType, Database database, Class<? extends ChangeGenerator> changeGeneratorType) {
         Set<Class<? extends DatabaseObject>> returnTypes = new HashSet<Class<? extends DatabaseObject>>();
 
-        for (Class generatorType : new Class[]{MissingObjectChangeGenerator.class, UnexpectedObjectChangeGenerator.class, ChangedObjectChangeGenerator.class}) {
-            SortedSet<ChangeGenerator> generators = getGenerators(generatorType, objectType, database);
+        SortedSet<ChangeGenerator> generators = getGenerators(changeGeneratorType, objectType, database);
 
-            for (ChangeGenerator generator : generators) {
-                Class<? extends DatabaseObject>[] types = generator.runBeforeTypes();
-                if (types != null) {
-                    returnTypes.addAll(Arrays.asList(types));
-                }
+        for (ChangeGenerator generator : generators) {
+            Class<? extends DatabaseObject>[] types = generator.runBeforeTypes();
+            if (types != null) {
+                returnTypes.addAll(Arrays.asList(types));
             }
         }
         return returnTypes;

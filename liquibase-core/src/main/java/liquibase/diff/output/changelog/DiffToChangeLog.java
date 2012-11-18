@@ -115,21 +115,26 @@ public class DiffToChangeLog {
 
         final ChangeGeneratorFactory changeGeneratorFactory = ChangeGeneratorFactory.getInstance();
 
-        List<Class<? extends DatabaseObject>> types = getOrderedOutputTypes(changeGeneratorFactory);
-
         List<ChangeSet> changeSets = new ArrayList<ChangeSet>();
 
+        List<Class<? extends DatabaseObject>> types = getOrderedOutputTypes(MissingObjectChangeGenerator.class);
         for (Class<? extends DatabaseObject> type : types) {
             for (DatabaseObject object : diffResult.getMissingObjects(type)) {
                 Change[] changes = changeGeneratorFactory.fixMissing(object, diffOutputControl, diffResult.getReferenceSnapshot().getDatabase(), diffResult.getComparisonSnapshot().getDatabase());
                 addToChangeSets(changes, changeSets);
             }
+        }
 
+        types = getOrderedOutputTypes(UnexpectedObjectChangeGenerator.class);
+        for (Class<? extends DatabaseObject> type : types) {
             for (DatabaseObject object : diffResult.getUnexpectedObjects(type)) {
                 Change[] changes = changeGeneratorFactory.fixUnexpected(object, diffOutputControl, diffResult.getReferenceSnapshot().getDatabase(), diffResult.getComparisonSnapshot().getDatabase());
                 addToChangeSets(changes, changeSets);
             }
+        }
 
+        types = getOrderedOutputTypes(ChangedObjectChangeGenerator.class);
+        for (Class<? extends DatabaseObject> type : types) {
             for (Map.Entry<DatabaseObject, ObjectDifferences> entry : diffResult.getChangedObjects(type).entrySet()) {
                 Change[] changes = changeGeneratorFactory.fixChanged(entry.getKey(), entry.getValue(), diffOutputControl, diffResult.getReferenceSnapshot().getDatabase(), diffResult.getComparisonSnapshot().getDatabase());
                 addToChangeSets(changes, changeSets);
@@ -165,14 +170,14 @@ public class DiffToChangeLog {
         out.flush();
     }
 
-    private List<Class<? extends DatabaseObject>> getOrderedOutputTypes(final ChangeGeneratorFactory changeGeneratorFactory) {
+    private List<Class<? extends DatabaseObject>> getOrderedOutputTypes(Class<? extends ChangeGenerator> generatorType) {
 
         Database comparisonDatabase = diffResult.getComparisonSnapshot().getDatabase();
-        Graph graph = new Graph();
+        DependencyGraph graph = new DependencyGraph();
         for (Class<? extends DatabaseObject> type : diffResult.getReferenceSnapshot().getSnapshotControl().getTypesToInclude()) {
             graph.addType(type);
         }
-        List<Class<? extends DatabaseObject>> types = graph.sort(comparisonDatabase);
+        List<Class<? extends DatabaseObject>> types = graph.sort(comparisonDatabase, generatorType);
 
 //        System.out.println("Type order: ");
 //        for (Class<? extends DatabaseObject> type : types) {
@@ -383,7 +388,7 @@ public class DiffToChangeLog {
     }
 
 
-    private static class Graph {
+    private static class DependencyGraph {
 
         private Map<Class<? extends DatabaseObject>, Node> allNodes = new HashMap<Class<? extends DatabaseObject>, Node>();
 
@@ -391,14 +396,14 @@ public class DiffToChangeLog {
             allNodes.put(type, new Node(type));
         }
 
-        public List<Class<? extends DatabaseObject>> sort(Database database) {
+        public List<Class<? extends DatabaseObject>> sort(Database database, Class<? extends ChangeGenerator> generatorType) {
             ChangeGeneratorFactory changeGeneratorFactory = ChangeGeneratorFactory.getInstance();
             for (Class<? extends DatabaseObject> type : allNodes.keySet()) {
-                for (Class<? extends DatabaseObject> afterType : changeGeneratorFactory.runBeforeTypes(type, database)) {
+                for (Class<? extends DatabaseObject> afterType : changeGeneratorFactory.runBeforeTypes(type, database, generatorType)) {
                     getNode(type).addEdge(getNode(afterType));
                 }
 
-                for (Class<? extends DatabaseObject> beforeType : changeGeneratorFactory.runAfterTypes(type, database)) {
+                for (Class<? extends DatabaseObject> beforeType : changeGeneratorFactory.runAfterTypes(type, database, generatorType)) {
                     getNode(beforeType).addEdge(getNode(type));
                 }
             }
@@ -441,7 +446,22 @@ public class DiffToChangeLog {
             //Check to see if all edges are removed
             for (Node n : allNodes.values()) {
                 if (!n.inEdges.isEmpty()) {
-                    throw new UnexpectedLiquibaseException("Cycle present, topological sort not possible");
+                    String message = "Could not resolve " + generatorType.getSimpleName() + " dependencies due to dependency cycle. Dependencies: \n";
+                    for (Node node : allNodes.values()) {
+                        SortedSet<String> fromTypes = new TreeSet<String>();
+                        SortedSet<String> toTypes = new TreeSet<String>();
+                        for (Edge edge : node.inEdges) {
+                            fromTypes.add(edge.from.type.getSimpleName());
+                        }
+                        for (Edge edge : node.outEdges) {
+                            toTypes.add(edge.to.type.getSimpleName());
+                        }
+                        String from = StringUtils.join(fromTypes, ",");
+                        String to = StringUtils.join(toTypes, ",");
+                        message += "    ["+ from +"] -> "+ node.type.getSimpleName()+" -> [" + to +"]\n";
+                    }
+
+                    throw new UnexpectedLiquibaseException(message);
                 }
             }
             List<Class<? extends DatabaseObject>> returnList = new ArrayList<Class<? extends DatabaseObject>>();

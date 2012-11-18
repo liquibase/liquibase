@@ -59,6 +59,8 @@ public class MissingForeignKeyChangeGenerator implements MissingObjectChangeGene
 
         change.setReferencesUniqueColumn(fk.getReferencesUniqueColumn());
 
+        control.setAlreadyHandledMissing(fk.getBackingIndex());
+
         return new Change[] { change };
     }
 }

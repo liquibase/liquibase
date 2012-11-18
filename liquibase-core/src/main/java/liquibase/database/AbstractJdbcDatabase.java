@@ -1308,10 +1308,6 @@ public abstract class AbstractJdbcDatabase implements Database {
         throw new DatabaseException("ForeignKeyChecks Management not supported");
     }
 
-    public boolean equals(DatabaseObject otherObject, Database accordingTo) {
-        return otherObject.getClass().equals(this.getClass());
-    }
-
     public int getDataTypeMaxParameters(String dataTypeName) {
         return 2;
     }
