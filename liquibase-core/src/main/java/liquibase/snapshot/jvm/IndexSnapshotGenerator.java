@@ -10,6 +10,7 @@ import liquibase.snapshot.*;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
 
+import java.io.FileOutputStream;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -18,7 +19,7 @@ import java.util.*;
 
 public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
     public IndexSnapshotGenerator() {
-        super(Index.class, new Class[]{Table.class});
+        super(Index.class, new Class[]{Table.class, ForeignKey.class, UniqueConstraint.class});
     }
 
 
@@ -176,6 +177,15 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                 }
             }
         }
+//        if (foundObject instanceof ForeignKey) {
+//            ((ForeignKey) foundObject).setBackingIndex(new Index().setTable(((ForeignKey) foundObject).getForeignKeyTable()).setName(foundObject.getName()));
+//        }
+//        if (foundObject instanceof PrimaryKey) {
+//            ((PrimaryKey) foundObject).setBackingIndex(new Index().setTable(((PrimaryKey) foundObject).getTable()).setName(foundObject.getName()));
+//        }
+//        if (foundObject instanceof UniqueConstraint) {
+//            ((UniqueConstraint) foundObject).setBackingIndex(new Index().setTable(((UniqueConstraint) foundObject).getTable()).setName(foundObject.getName()));
+//        }
     }
 
     @Override

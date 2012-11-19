@@ -91,7 +91,7 @@ public class DatabaseObjectComparatorFactory {
 
     }
 
-        private DatabaseObjectComparatorChain createComparatorChain(Class<? extends DatabaseObject> databaseObjectType, Database database) {
+    private DatabaseObjectComparatorChain createComparatorChain(Class<? extends DatabaseObject> databaseObjectType, Database database) {
         SortedSet<DatabaseObjectComparator> comparators = DatabaseObjectComparatorFactory.getInstance().getComparators(databaseObjectType, database);
         if (comparators == null || comparators.size() == 0) {
             return null;

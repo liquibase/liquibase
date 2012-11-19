@@ -43,7 +43,16 @@ public class UnexpectedForeignKeyChangeGenerator implements UnexpectedObjectChan
             change.setBaseTableSchemaName(fk.getForeignKeyTable().getSchema().getName());
         }
 
-        control.setAlreadyHandledUnexpected(fk.getBackingIndex());
+        Index backingIndex = fk.getBackingIndex();
+        if (backingIndex == null) {
+            Index exampleIndex = new Index().setTable(fk.getForeignKeyTable());
+            for (String col : fk.getForeignKeyColumns().split("\\s*,\\s*")) {
+                exampleIndex.getColumns().add(col);
+            }
+            control.setAlreadyHandledUnexpected(exampleIndex);
+        } else {
+            control.setAlreadyHandledUnexpected(backingIndex);
+        }
 
         return new Change[] { change };
 

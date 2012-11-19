@@ -23,6 +23,10 @@ public class IndexComparator implements DatabaseObjectComparator {
             return true;
         }
 
+        if (!(databaseObject1 instanceof Index && databaseObject2 instanceof Index)) {
+            return false;
+        }
+
         Index thisIndex = (Index) databaseObject1;
         Index otherIndex = (Index) databaseObject2;
 
