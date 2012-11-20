@@ -68,6 +68,10 @@ public class ChangeGeneratorChain {
             return null;
         }
 
+        if (control.alreadyHandledUnexpected(unexpectedObject, comparisionDatabase)) {
+            return null;
+        }
+
         Change[] changes = ((UnexpectedObjectChangeGenerator) changeGenerators.next()).fixUnexpected(unexpectedObject, control, referenceDatabase, comparisionDatabase, this);
         if (changes == null) {
             return null;
@@ -92,6 +96,10 @@ public class ChangeGeneratorChain {
         }
 
         if (!changeGenerators.hasNext()) {
+            return null;
+        }
+
+        if (control.alreadyHandledChanged(changedObject, comparisionDatabase)) {
             return null;
         }
 

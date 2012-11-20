@@ -5,6 +5,8 @@ import liquibase.database.Database;
 import liquibase.database.core.InformixDatabase;
 import liquibase.database.core.OracleDatabase;
 import liquibase.database.jvm.JdbcConnection;
+import liquibase.diff.compare.DatabaseObjectComparator;
+import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.exception.DatabaseException;
 import liquibase.snapshot.*;
 import liquibase.structure.DatabaseObject;
@@ -177,22 +179,30 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                 }
             }
         }
-//        if (foundObject instanceof ForeignKey) {
-//            ((ForeignKey) foundObject).setBackingIndex(new Index().setTable(((ForeignKey) foundObject).getForeignKeyTable()).setName(foundObject.getName()));
-//        }
 //        if (foundObject instanceof PrimaryKey) {
 //            ((PrimaryKey) foundObject).setBackingIndex(new Index().setTable(((PrimaryKey) foundObject).getTable()).setName(foundObject.getName()));
 //        }
-//        if (foundObject instanceof UniqueConstraint) {
-//            ((UniqueConstraint) foundObject).setBackingIndex(new Index().setTable(((UniqueConstraint) foundObject).getTable()).setName(foundObject.getName()));
-//        }
+        if (foundObject instanceof UniqueConstraint) {
+            Index exampleIndex = new Index().setTable(((UniqueConstraint) foundObject).getTable()).setName(foundObject.getName());
+            exampleIndex.getColumns().addAll(((UniqueConstraint) foundObject).getColumns());
+            ((UniqueConstraint) foundObject).setBackingIndex(exampleIndex);
+        }
     }
 
     @Override
     protected DatabaseObject snapshotObject(DatabaseObject example, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException {
         Database database = snapshot.getDatabase();
         Table exampleTable = ((Index) example).getTable();
+
+        for (int i=0; i<((Index) example).getColumns().size(); i++) {
+            ((Index) example).getColumns().set(i, database.correctObjectName(((Index) example).getColumns().get(i), Column.class));
+        }
+
         Schema schema = new Schema(database.getDefaultCatalogName(), database.getDefaultSchemaName()); //todo exampleTable.getSchema();
+        String exampleName = example.getName();
+        if (exampleName != null) {
+            exampleName = database.correctObjectName(exampleName, Index.class);
+        }
 
         List<Table> tables = new ArrayList<Table>();
         if (exampleTable.getName() == null) {
@@ -201,6 +211,7 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
         } else {
             tables.add(exampleTable);
         }
+        Map<String, Index> foundIndexes = new HashMap<String, Index>();
         for (Table table : tables) {
             DatabaseMetaData databaseMetaData = null;
             ResultSet rs = null;
@@ -211,16 +222,15 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                 if (database instanceof OracleDatabase) {
                     //oracle getIndexInfo is buggy and slow.  See Issue 1824548 and http://forums.oracle.com/forums/thread.jspa?messageID=578383&#578383
                     statement = ((JdbcConnection) database.getConnection()).getUnderlyingConnection().createStatement();
-                    String sql = "SELECT INDEX_NAME, 3 AS TYPE, TABLE_NAME, COLUMN_NAME, COLUMN_POSITION AS ORDINAL_POSITION, null AS FILTER_CONDITION FROM ALL_IND_COLUMNS WHERE TABLE_OWNER='" + schema.getName() + "' AND TABLE_NAME='" + table.getName() + "' AND INDEX_NAME='" + example.getName() + "' ORDER BY INDEX_NAME, ORDINAL_POSITION";
+                    String sql = "SELECT INDEX_NAME, 3 AS TYPE, TABLE_NAME, COLUMN_NAME, COLUMN_POSITION AS ORDINAL_POSITION, null AS FILTER_CONDITION FROM ALL_IND_COLUMNS WHERE TABLE_OWNER='" + schema.getName() + "' AND TABLE_NAME='" + table.getName() + "' AND INDEX_NAME='" + exampleName + "' ORDER BY INDEX_NAME, ORDINAL_POSITION";
                     rs = statement.executeQuery(sql);
                 } else {
                     rs = databaseMetaData.getIndexInfo(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), database.correctObjectName(table.getName(), Table.class), false, true);
                 }
 
-                Index returnIndex = null;
                 while (rs.next()) {
                     String indexName = cleanNameFromDatabase(rs.getString("INDEX_NAME"), database);
-                    if (example.getName() != null && !indexName.equalsIgnoreCase(example.getName())) { //todo not ignorecase
+                    if (exampleName != null && !indexName.equals(exampleName)) {
                         continue;
                     }
                     /*
@@ -264,21 +274,20 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                         //nothing to index, not sure why these come through sometimes
                         continue;
                     }
+                    Index returnIndex = foundIndexes.get(indexName);
                     if (returnIndex == null) {
                         returnIndex = new Index();
                         returnIndex.setTable(table);
                         returnIndex.setName(indexName);
                         returnIndex.setUnique(!nonUnique);
                         returnIndex.setFilterCondition(filterCondition);
+                        foundIndexes.put(indexName, returnIndex);
                     }
 
                     for (int i = returnIndex.getColumns().size(); i < position; i++) {
                         returnIndex.getColumns().add(null);
                     }
                     returnIndex.getColumns().set(position - 1, columnName);
-                }
-                if (returnIndex != null) {
-                    return returnIndex;
                 }
             } catch (Exception e) {
                 throw new DatabaseException(e);
@@ -298,7 +307,19 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
             }
         }
 
-        return null;
+        if (exampleName != null) {
+            return foundIndexes.get(exampleName);
+        } else {
+            for (Index index : foundIndexes.values()) {
+                if (DatabaseObjectComparatorFactory.getInstance().isSameObject(index.getTable(), exampleTable, database)) {
+                    if (index.getColumnNames().equals(((Index) example).getColumnNames())) {
+                        return index;
+                    }
+                }
+            }
+            return null;
+        }
+
         //todo?
 //        Set<Index> indexesToRemove = new HashSet<Index>();
 

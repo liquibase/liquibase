@@ -21,12 +21,13 @@ public class UnexpectedForeignKeyChangeGenerator implements UnexpectedObjectChan
     }
 
     public Class<? extends DatabaseObject>[] runAfterTypes() {
-        return new Class[] { Index.class};
+        return null;
     }
 
     public Class<? extends DatabaseObject>[] runBeforeTypes() {
         return new Class[] {
-                Table.class
+                Table.class,
+                Index.class
         };
     }
 
@@ -44,15 +45,15 @@ public class UnexpectedForeignKeyChangeGenerator implements UnexpectedObjectChan
         }
 
         Index backingIndex = fk.getBackingIndex();
-        if (backingIndex == null) {
-            Index exampleIndex = new Index().setTable(fk.getForeignKeyTable());
-            for (String col : fk.getForeignKeyColumns().split("\\s*,\\s*")) {
-                exampleIndex.getColumns().add(col);
-            }
-            control.setAlreadyHandledUnexpected(exampleIndex);
-        } else {
+//        if (backingIndex == null) {
+//            Index exampleIndex = new Index().setTable(fk.getForeignKeyTable());
+//            for (String col : fk.getForeignKeyColumns().split("\\s*,\\s*")) {
+//                exampleIndex.getColumns().add(col);
+//            }
+//            control.setAlreadyHandledUnexpected(exampleIndex);
+//        } else {
             control.setAlreadyHandledUnexpected(backingIndex);
-        }
+//        }
 
         return new Change[] { change };
 

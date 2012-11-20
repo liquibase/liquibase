@@ -24,7 +24,8 @@ public class UnexpectedUniqueConstraintChangeGenerator implements UnexpectedObje
     public Class<? extends DatabaseObject>[] runBeforeTypes() {
         return new Class[] {
                 Table.class,
-                Column.class
+                Column.class,
+                Index.class
         };
     }
 
@@ -45,15 +46,15 @@ public class UnexpectedUniqueConstraintChangeGenerator implements UnexpectedObje
         change.setConstraintName(uc.getName());
 
         Index backingIndex = uc.getBackingIndex();
-        if (backingIndex == null) {
-            Index exampleIndex = new Index().setTable(uc.getTable());
-            for (String col : uc.getColumns()) {
-                exampleIndex.getColumns().add(col);
-            }
-            control.setAlreadyHandledUnexpected(exampleIndex);
-        } else {
+//        if (backingIndex == null) {
+//            Index exampleIndex = new Index().setTable(uc.getTable());
+//            for (String col : uc.getColumns()) {
+//                exampleIndex.getColumns().add(col);
+//            }
+//            control.setAlreadyHandledUnexpected(exampleIndex);
+//        } else {
             control.setAlreadyHandledUnexpected(backingIndex);
-        }
+//        }
 
         return new Change[] { change };
     }

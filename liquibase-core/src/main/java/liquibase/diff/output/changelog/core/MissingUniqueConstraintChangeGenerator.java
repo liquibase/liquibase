@@ -56,15 +56,15 @@ public class MissingUniqueConstraintChangeGenerator implements MissingObjectChan
         change.setDisabled(uc.isDisabled());
 
         Index backingIndex = uc.getBackingIndex();
-        if (backingIndex == null) {
-            Index exampleIndex = new Index().setTable(uc.getTable());
-            for (String col : uc.getColumns()) {
-                exampleIndex.getColumns().add(col);
-            }
-            control.setAlreadyHandledMissing(exampleIndex);
-        } else {
+//        if (backingIndex == null) {
+//            Index exampleIndex = new Index().setTable(uc.getTable());
+//            for (String col : uc.getColumns()) {
+//                exampleIndex.getColumns().add(col);
+//            }
+//            control.setAlreadyHandledMissing(exampleIndex);
+//        } else {
             control.setAlreadyHandledMissing(backingIndex);
-        }
+//        }
 
 
         return new Change[]{change};

@@ -127,7 +127,7 @@ public abstract class AbstractIntegrationTest {
                 if (database.supportsSchemas() && database.supportsCatalogs()) {
                     database.dropDatabaseObjects(new CatalogAndSchema(DatabaseTestContext.ALT_CATALOG, DatabaseTestContext.ALT_SCHEMA));
                 } else if (database.supportsCatalogs()) {
-                    database.dropDatabaseObjects(new CatalogAndSchema((String) null, DatabaseTestContext.ALT_SCHEMA));
+                    database.dropDatabaseObjects(new CatalogAndSchema(DatabaseTestContext.ALT_SCHEMA, null));
                 }
             }
             database.commit();

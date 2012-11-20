@@ -2,6 +2,7 @@ package liquibase.database.core;
 
 import java.math.BigInteger;
 
+import liquibase.CatalogAndSchema;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
 import liquibase.structure.DatabaseObject;
@@ -32,7 +33,10 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
         if (objectType.equals(PrimaryKey.class) && name.equals("PRIMARY")) {
             return null;
         } else {
-            return name;
+            if (name == null) {
+                return null;
+            }
+            return name.toLowerCase(); //todo: handle case sensitive
         }
     }
 
@@ -165,4 +169,10 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
     public void enableForeignKeyChecks() throws DatabaseException {
         ExecutorService.getInstance().getExecutor(this).execute(new RawSqlStatement("SET FOREIGN_KEY_CHECKS=1"));
     }
+
+    @Override
+    public CatalogAndSchema getSchemaFromJdbcInfo(String rawCatalogName, String rawSchemaName) {
+        return this.correctSchema(new CatalogAndSchema(rawCatalogName, null));
+    }
+
 }

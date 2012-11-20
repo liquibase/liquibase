@@ -12,7 +12,11 @@ public final class DefaultDatabaseObjectComparator implements DatabaseObjectComp
     }
 
     public boolean isSameObject(DatabaseObject databaseObject1, DatabaseObject databaseObject2, Database accordingTo, DatabaseObjectComparatorChain chain) {
-        return nameMatches(databaseObject1, databaseObject2, accordingTo);
+        if (databaseObject1.getClass().isAssignableFrom(databaseObject2.getClass()) || databaseObject2.getClass().isAssignableFrom(databaseObject1.getClass())) {
+            return nameMatches(databaseObject1, databaseObject2, accordingTo);
+        }
+        return false;
+
     }
 
     public ObjectDifferences findDifferences(DatabaseObject databaseObject1, DatabaseObject databaseObject2, Database accordingTo, DatabaseObjectComparatorChain chain) {
@@ -21,9 +25,9 @@ public final class DefaultDatabaseObjectComparator implements DatabaseObjectComp
 
         ObjectDifferences differences = new ObjectDifferences();
 
-        if (!object1Name.equals(object2Name)) {
-            differences.addDifference("name", object1Name, object2Name);
-        }
+//        if (!object1Name.equals(object2Name)) {
+//            differences.addDifference("name", object1Name, object2Name);
+//        }
 
         return differences;
     }

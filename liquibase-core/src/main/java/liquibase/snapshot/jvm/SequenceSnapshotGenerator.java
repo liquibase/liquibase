@@ -24,6 +24,9 @@ public class SequenceSnapshotGenerator extends JdbcSnapshotGenerator {
 
     @Override
     protected void addTo(DatabaseObject foundObject, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException {
+        if (!snapshot.getDatabase().supportsSequences()) {
+            return;
+        }
         if (foundObject instanceof Schema) {
             Schema schema = (Schema) foundObject;
             Database database = snapshot.getDatabase();

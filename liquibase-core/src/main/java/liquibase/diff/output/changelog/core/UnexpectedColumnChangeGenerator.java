@@ -20,14 +20,13 @@ public class UnexpectedColumnChangeGenerator implements UnexpectedObjectChangeGe
     public Class<? extends DatabaseObject>[] runAfterTypes() {
         return new Class[] {
                 PrimaryKey.class,
-                ForeignKey.class
+                ForeignKey.class,
+                Table.class
         };
     }
 
     public Class<? extends DatabaseObject>[] runBeforeTypes() {
-        return new Class[] {
-                Table.class,
-        };
+        return null;
     }
 
     public Change[] fixUnexpected(DatabaseObject unexpectedObject, DiffOutputControl control, Database referenceDatabase, Database comparisonDatabase, ChangeGeneratorChain chain) {

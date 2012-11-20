@@ -20,7 +20,8 @@ public class MissingForeignKeyChangeGenerator implements MissingObjectChangeGene
     public Class<? extends DatabaseObject>[] runAfterTypes() {
         return new Class[] {
                 Table.class,
-                Column.class
+                Column.class,
+                PrimaryKey.class
         };
     }
 
@@ -60,15 +61,15 @@ public class MissingForeignKeyChangeGenerator implements MissingObjectChangeGene
         change.setReferencesUniqueColumn(fk.getReferencesUniqueColumn());
 
         Index backingIndex = fk.getBackingIndex();
-        if (backingIndex == null) {
-            Index exampleIndex = new Index().setTable(fk.getForeignKeyTable());
-            for (String col : fk.getForeignKeyColumns().split("\\s*,\\s*")) {
-                exampleIndex.getColumns().add(col);
-            }
-            control.setAlreadyHandledMissing(exampleIndex);
-        } else {
+//        if (backingIndex == null) {
+//            Index exampleIndex = new Index().setTable(fk.getForeignKeyTable());
+//            for (String col : fk.getForeignKeyColumns().split("\\s*,\\s*")) {
+//                exampleIndex.getColumns().add(col);
+//            }
+//            control.setAlreadyHandledMissing(exampleIndex);
+//        } else {
             control.setAlreadyHandledMissing(backingIndex);
-        }
+//        }
 
         return new Change[] { change };
     }

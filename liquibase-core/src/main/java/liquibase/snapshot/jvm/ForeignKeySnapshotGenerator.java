@@ -13,6 +13,7 @@ import liquibase.structure.core.*;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -170,6 +171,10 @@ public class ForeignKeySnapshotGenerator extends JdbcSnapshotGenerator {
                 } else {
                     throw new RuntimeException("Unknown deferrablility result: " + deferrability);
                 }
+
+                Index exampleIndex = new Index().setTable(foreignKey.getForeignKeyTable());
+                exampleIndex.getColumns().addAll(Arrays.asList(foreignKey.getForeignKeyColumns().split("\\s*,\\s*")));
+                foreignKey.setBackingIndex(exampleIndex);
 
                 return foreignKey;
             }

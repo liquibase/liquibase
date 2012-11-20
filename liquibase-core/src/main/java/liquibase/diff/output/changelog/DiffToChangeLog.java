@@ -120,6 +120,9 @@ public class DiffToChangeLog {
         List<Class<? extends DatabaseObject>> types = getOrderedOutputTypes(MissingObjectChangeGenerator.class);
         for (Class<? extends DatabaseObject> type : types) {
             for (DatabaseObject object : diffResult.getMissingObjects(type)) {
+                if (object == null) {
+                    continue;
+                }
                 Change[] changes = changeGeneratorFactory.fixMissing(object, diffOutputControl, diffResult.getReferenceSnapshot().getDatabase(), diffResult.getComparisonSnapshot().getDatabase());
                 if (!diffResult.getReferenceSnapshot().getDatabase().isLiquibaseObject(object) && !diffResult.getReferenceSnapshot().getDatabase().isSystemObject(object)) {
                     addToChangeSets(changes, changeSets);

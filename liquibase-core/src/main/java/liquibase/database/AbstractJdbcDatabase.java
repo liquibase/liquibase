@@ -740,7 +740,7 @@ public abstract class AbstractJdbcDatabase implements Database {
         try {
             DatabaseSnapshot snapshot = null;
             try {
-                snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(schemaToDrop, this, new SnapshotControl());
+                snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(schemaToDrop, this, new SnapshotControl(Table.class, View.class, ForeignKey.class));
             } catch (LiquibaseException e) {
                 throw new UnexpectedLiquibaseException(e);
             }
@@ -828,7 +828,10 @@ public abstract class AbstractJdbcDatabase implements Database {
     }
 
     public boolean isSystemObject(DatabaseObject example) {
-        if (example.getSchema() != null && example.getSchema().getName().equalsIgnoreCase("information_schema")) {
+        if (example == null) {
+            return false;
+        }
+        if (example.getSchema() != null && example.getSchema().getName() != null && example.getSchema().getName().equalsIgnoreCase("information_schema")) {
             return true;
         }
         if (example instanceof Table && getSystemTables().contains(example.getName())) {
