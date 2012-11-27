@@ -21,21 +21,28 @@ public class LockDatabaseChangeLogGenerator extends AbstractSqlGenerator<LockDat
         return new ValidationErrors();
     }
 
+    private static String hostname;
+    private static String hostaddress;
+
+    static {
+        InetAddress localHost;
+        try {
+            localHost = NetUtil.getLocalHost();
+            hostname = localHost.getHostName();
+            hostaddress = localHost.getHostAddress();
+        } catch (Exception e) {
+            throw new UnexpectedLiquibaseException(e);
+        }
+    }
+
     public Sql[] generateSql(LockDatabaseChangeLogStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
     	String liquibaseSchema = null;
     		liquibaseSchema = database.getLiquibaseSchemaName();
 
-        InetAddress localHost;
-    	try {
-            localHost = NetUtil.getLocalHost();
-        } catch (Exception e) {
-            throw new UnexpectedLiquibaseException(e);
-        }
-
         UpdateStatement updateStatement = new UpdateStatement(liquibaseSchema, database.getDatabaseChangeLogLockTableName());
         updateStatement.addNewColumnValue("LOCKED", true);
         updateStatement.addNewColumnValue("LOCKGRANTED", new Timestamp(new java.util.Date().getTime()));
-        updateStatement.addNewColumnValue("LOCKEDBY", localHost.getHostName() + " (" + localHost.getHostAddress() + ")");
+        updateStatement.addNewColumnValue("LOCKEDBY", hostname + " (" + hostaddress + ")");
         updateStatement.setWhereClause(database.escapeColumnName(liquibaseSchema, database.getDatabaseChangeLogTableName(), "ID") + " = 1 AND " + database.escapeColumnName(liquibaseSchema, database.getDatabaseChangeLogTableName(), "LOCKED") + " = "+ TypeConverterFactory.getInstance().findTypeConverter(database).getBooleanType().getFalseBooleanValue());
 
         return SqlGeneratorFactory.getInstance().generateSql(updateStatement, database);
