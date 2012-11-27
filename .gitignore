@@ -1,13 +1,4 @@
-<<<<<<< HEAD
 target
 .project
 .settings
-=======
-target
-.project
-.settings
-.classpath
-liquibase.iws
-out
 *nb-configuration.xml
->>>>>>> eb02067... Ignoring nb-configuration.xml
