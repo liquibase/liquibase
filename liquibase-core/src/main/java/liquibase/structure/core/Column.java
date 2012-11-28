@@ -9,15 +9,11 @@ public class Column extends AbstractDatabaseObject {
     private Boolean nullable;
     private DataType type;
     private Object defaultValue;
-    private boolean primaryKey = false;
     private boolean unique = false;
     private boolean autoIncrement = false;
 
     private boolean certainDataType = true;
     private String remarks;
-
-	// used for PK's index configuration
-	private String tablespace;
 
     public Relation getRelation() {
         return relation;
@@ -36,10 +32,6 @@ public class Column extends AbstractDatabaseObject {
     }
 
 
-	public String getTablespace() {
-		return tablespace;
-	}
-
     public Schema getSchema() {
         Relation relation = getRelation();
         if (relation == null) {
@@ -47,11 +39,6 @@ public class Column extends AbstractDatabaseObject {
         }
         return relation.getSchema();
     }
-
-    public Column setTablespace(String tablespace) {
-		this.tablespace = tablespace;
-		return  this;
-	}
 
 	public String getName() {
         return name;
@@ -197,16 +184,6 @@ public class Column extends AbstractDatabaseObject {
         return isDataTypeDifferent(otherColumn) || isNullabilityDifferent(otherColumn);
     }
 
-
-    public boolean isPrimaryKey() {
-        return primaryKey;
-    }
-
-    public Column setPrimaryKey(boolean primaryKey) {
-        this.primaryKey = primaryKey;
-
-        return this;
-    }
 
     public boolean isCertainDataType() {
         return certainDataType;

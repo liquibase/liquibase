@@ -24,7 +24,6 @@ public class UnexpectedUniqueConstraintChangeGenerator implements UnexpectedObje
     public Class<? extends DatabaseObject>[] runBeforeTypes() {
         return new Class[] {
                 Table.class,
-                Column.class,
                 Index.class
         };
     }

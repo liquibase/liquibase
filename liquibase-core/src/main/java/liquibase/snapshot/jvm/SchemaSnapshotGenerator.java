@@ -28,14 +28,30 @@ public class SchemaSnapshotGenerator extends JdbcSnapshotGenerator {
         Database database = snapshot.getDatabase();
         ResultSet schemas = null;
         Schema match = null;
+        boolean passedCatalog = ((Schema) example).getCatalogName() != null;
+        boolean passedSchema = ((Schema) example).getName() != null;
+
         String catalogName = ((Schema) example).getCatalogName();
-        if (catalogName == null && database.supportsCatalogs()) {
-            catalogName = database.getDefaultCatalogName();
-        }
         String schemaName = example.getName();
-        if (schemaName == null && database.supportsCatalogs()) {
-            schemaName = database.getDefaultSchemaName();
+        if (database.supportsSchemas()) {
+            if (catalogName == null) {
+                catalogName = database.getDefaultCatalogName();
+            }
+            if (schemaName == null) {
+                schemaName = database.getDefaultSchemaName();
+            }
+        } else {
+            if (database.supportsCatalogs()) {
+                if (catalogName == null && schemaName != null) {
+                    catalogName = schemaName;
+                    schemaName = null;
+                }
+            } else {
+                catalogName = null;
+                schemaName = null;
+            }
         }
+
         example = new Schema(catalogName, schemaName);
 
         try {

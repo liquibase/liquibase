@@ -22,7 +22,7 @@ public class UnexpectedTableChangeGenerator implements UnexpectedObjectChangeGen
     }
 
     public Class<? extends DatabaseObject>[] runBeforeTypes() {
-        return null;
+        return new Class[] {Column.class, PrimaryKey.class};
     }
 
     public Change[] fixUnexpected(DatabaseObject unexpectedObject, DiffOutputControl control, Database referenceDatabase, Database comparisonDatabase, ChangeGeneratorChain chain) {
@@ -40,6 +40,7 @@ public class UnexpectedTableChangeGenerator implements UnexpectedObjectChangeGen
         for (Column column : unexpectedTable.getColumns()) {
             control.setAlreadyHandledUnexpected(column);
         };
+        control.setAlreadyHandledUnexpected(unexpectedTable.getPrimaryKey());
 
         return new Change[] { change };
 

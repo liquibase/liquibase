@@ -113,6 +113,14 @@ public class DiffToChangeLog {
      */
     public void print(PrintStream out, ChangeLogSerializer changeLogSerializer) throws ParserConfigurationException, IOException, DatabaseException {
 
+        List<ChangeSet> changeSets = generateChangeSets();
+
+        changeLogSerializer.write(changeSets, out);
+
+        out.flush();
+    }
+
+    public List<ChangeSet> generateChangeSets() {
         final ChangeGeneratorFactory changeGeneratorFactory = ChangeGeneratorFactory.getInstance();
 
         List<ChangeSet> changeSets = new ArrayList<ChangeSet>();
@@ -149,34 +157,7 @@ public class DiffToChangeLog {
                 }
             }
         }
-
-//        addMissingTableChanges(changeSets);
-//        addMissingColumnChanges(changeSets);
-//        addChangedColumnChanges(changeSets);
-//        addMissingPrimaryKeyChanges(changeSets);
-//        addUnexpectedPrimaryKeyChanges(changeSets);
-//        addUnexpectedForeignKeyChanges(changeSets);
-//        addMissingUniqueConstraintChanges(changeSets);
-//        addUnexpectedUniqueConstraintChanges(changeSets);
-//
-////todo        if (diffResult.getData().wasCompared()) {
-////            addInsertDataChanges(changeSets, diffResult.getCompareControl().getDataDir());
-////        }
-//
-//        addMissingForeignKeyChanges(changeSets);
-//        addUnexpectedIndexChanges(changeSets);
-//        addMissingIndexChanges(changeSets);
-//        addUnexpectedColumnChanges(changeSets);
-//        addMissingSequenceChanges(changeSets);
-//        addUnexpectedSequenceChanges(changeSets);
-//        addMissingViewChanges(changeSets);
-//        addUnexpectedViewChanges(changeSets);
-//        addChangedViewChanges(changeSets);
-//        addUnexpectedTableChanges(changeSets);
-
-        changeLogSerializer.write(changeSets, out);
-
-        out.flush();
+        return changeSets;
     }
 
     private List<Class<? extends DatabaseObject>> getOrderedOutputTypes(Class<? extends ChangeGenerator> generatorType) {

@@ -31,9 +31,11 @@ public class UniqueConstraint extends AbstractDatabaseObject {
 		return name;
 	}
 
-	public void setName(String constraintName) {
-		this.name = constraintName;
-	}
+	public UniqueConstraint setName(String constraintName) {
+        this.name = constraintName;
+        return this;
+
+    }
 
     public Schema getSchema() {
         if (table == null) {
@@ -47,9 +49,10 @@ public class UniqueConstraint extends AbstractDatabaseObject {
 		return table;
 	}
 
-	public void setTable(Table table) {
+	public UniqueConstraint setTable(Table table) {
 		this.table = table;
-	}
+        return this;
+    }
 
 	public List<String> getColumns() {
 		return columns;
@@ -59,25 +62,28 @@ public class UniqueConstraint extends AbstractDatabaseObject {
 		return deferrable;
 	}
 
-	public void setDeferrable(boolean deferrable) {
+	public UniqueConstraint setDeferrable(boolean deferrable) {
 		this.deferrable = deferrable;
-	}
+        return this;
+    }
 
 	public boolean isInitiallyDeferred() {
 		return initiallyDeferred;
 	}
 
-	public void setInitiallyDeferred(boolean initiallyDeferred) {
+	public UniqueConstraint setInitiallyDeferred(boolean initiallyDeferred) {
 		this.initiallyDeferred = initiallyDeferred;
-	}
+        return this;
+    }
 
 	public String getColumnNames() {
 		return StringUtils.join(columns, ", ");
 	}
 
-	public void setDisabled(boolean disabled) {
+	public UniqueConstraint setDisabled(boolean disabled) {
 		this.disabled = disabled;
-	}
+        return this;
+    }
 
 	public boolean isDisabled() {
 		return disabled;
@@ -87,8 +93,10 @@ public class UniqueConstraint extends AbstractDatabaseObject {
         return backingIndex;
     }
 
-    public void setBackingIndex(Index backingIndex) {
+    public UniqueConstraint setBackingIndex(Index backingIndex) {
         this.backingIndex = backingIndex;
+        return this;
+
     }
 
     @Override

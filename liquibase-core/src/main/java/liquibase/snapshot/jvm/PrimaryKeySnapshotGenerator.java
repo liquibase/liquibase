@@ -15,9 +15,9 @@ import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public class PrimaryKeyGenerator extends JdbcSnapshotGenerator {
+public class PrimaryKeySnapshotGenerator extends JdbcSnapshotGenerator {
 
-    public PrimaryKeyGenerator() {
+    public PrimaryKeySnapshotGenerator() {
         super(PrimaryKey.class, new Class[]{Table.class});
     }
 
@@ -28,6 +28,7 @@ public class PrimaryKeyGenerator extends JdbcSnapshotGenerator {
         String searchTableName = null;
         if (((PrimaryKey) example).getTable() != null) {
             searchTableName = ((PrimaryKey) example).getTable().getName();
+            searchTableName = database.correctObjectName(searchTableName, Table.class);
         }
 
         ResultSet rs = null;
@@ -36,7 +37,7 @@ public class PrimaryKeyGenerator extends JdbcSnapshotGenerator {
             rs = metaData.getPrimaryKeys(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), searchTableName);
             PrimaryKey returnKey = null;
             while (rs.next()) {
-                if (example.getName().equals(rs.getString("PK_NAME"))) {
+                if (example.getName() != null && !example.getName().equals(rs.getString("PK_NAME"))) {
                     continue;
                 }
                 String columnName = cleanNameFromDatabase(rs.getString("COLUMN_NAME"), database);
@@ -44,9 +45,9 @@ public class PrimaryKeyGenerator extends JdbcSnapshotGenerator {
 
                 if (returnKey == null) {
                     returnKey = new PrimaryKey();
-                    CatalogAndSchema tableSchema = ((AbstractJdbcDatabase) database).getSchemaFromJdbcInfo(rs.getString("TABLE_CAT"), rs.getString("TABLE_SCHEMA"));
+                    CatalogAndSchema tableSchema = ((AbstractJdbcDatabase) database).getSchemaFromJdbcInfo(rs.getString("TABLE_CAT"), rs.getString("TABLE_SCHEM"));
                     returnKey.setTable((Table) new Table().setName(rs.getString("TABLE_NAME")).setSchema(new Schema(tableSchema.getCatalogName(), tableSchema.getSchemaName())));
-                    returnKey.setName(database.correctObjectName(rs.getString("PK_NAME"), PrimaryKey.class));
+                    returnKey.setName(rs.getString("PK_NAME"));
                 }
                 returnKey.addColumnName(position - 1, columnName);
             }

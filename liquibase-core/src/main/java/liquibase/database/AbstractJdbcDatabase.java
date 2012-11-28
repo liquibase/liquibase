@@ -11,8 +11,13 @@ import liquibase.changelog.filter.ContextChangeSetFilter;
 import liquibase.changelog.filter.DbmsChangeSetFilter;
 import liquibase.database.core.*;
 import liquibase.database.jvm.JdbcConnection;
+import liquibase.diff.DiffGeneratorFactory;
+import liquibase.diff.DiffResult;
+import liquibase.diff.compare.CompareControl;
 import liquibase.diff.compare.DatabaseObjectComparator;
 import liquibase.diff.compare.DatabaseObjectComparatorFactory;
+import liquibase.diff.output.DiffOutputControl;
+import liquibase.diff.output.changelog.DiffToChangeLog;
 import liquibase.exception.*;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
@@ -740,80 +745,31 @@ public abstract class AbstractJdbcDatabase implements Database {
         try {
             DatabaseSnapshot snapshot = null;
             try {
-                snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(schemaToDrop, this, new SnapshotControl(Table.class, View.class, ForeignKey.class));
+                snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(schemaToDrop, this, new SnapshotControl());
             } catch (LiquibaseException e) {
                 throw new UnexpectedLiquibaseException(e);
             }
 
-            List<Change> dropChanges = new ArrayList<Change>();
+            DiffResult diffResult = DiffGeneratorFactory.getInstance().compare(new DatabaseSnapshot(this), snapshot, new CompareControl());
+            List<ChangeSet> changeSets = new DiffToChangeLog(diffResult, new DiffOutputControl(true, true, false)).generateChangeSets();
 
-            for (Schema schema : snapshot.get(Schema.class)) {
-                for (View view : schema.getDatabaseObjects(View.class)) {
-                    DropViewChange dropChange = new DropViewChange();
-                    dropChange.setViewName(view.getName());
-                    dropChange.setSchemaName(schema.getName());
-                    dropChange.setCatalogName(schema.getCatalogName());
-
-                    dropChanges.add(dropChange);
-                }
-
-                if (!supportsForeignKeyDisable()) {
-                    for (ForeignKey fk : schema.getDatabaseObjects(ForeignKey.class)) {
-                        DropForeignKeyConstraintChange dropFK = new DropForeignKeyConstraintChange();
-                        dropFK.setBaseTableSchemaName(schema.getName());
-                        dropFK.setBaseTableCatalogName(schema.getCatalogName());
-                        dropFK.setBaseTableName(fk.getForeignKeyTable().getName());
-                        dropFK.setConstraintName(fk.getName());
-
-                        dropChanges.add(dropFK);
-                    }
-                }
-
-                //            for (Index index : snapshotGenerator.getIndexes()) {
-                //                DropIndexChange dropChange = new DropIndexChange();
-                //                dropChange.setIndexName(index.getName());
-                //                dropChange.setSchemaName(schema);
-                //                dropChange.setTableName(index.getTableName());
-                //
-                //                dropChanges.add(dropChange);
-                //            }
-
-                for (Table table : schema.getDatabaseObjects(Table.class)) {
-                    DropTableChange dropChange = new DropTableChange();
-                    dropChange.setSchemaName(schema.getName());
-                    dropChange.setCatalogName(schema.getCatalogName());
-                    dropChange.setTableName(table.getName());
-                    if (supportsDropTableCascadeConstraints()) {
-                        dropChange.setCascadeConstraints(true);
-                    }
-
-                    dropChanges.add(dropChange);
-                }
-
-                if (this.supportsSequences()) {
-                    for (Sequence seq : schema.getDatabaseObjects(Sequence.class)) {
-                        DropSequenceChange dropChange = new DropSequenceChange();
-                        dropChange.setSequenceName(seq.getName());
-                        dropChange.setSchemaName(schema.getName());
-                        dropChange.setCatalogName(schema.getCatalogName());
-
-                        dropChanges.add(dropChange);
-                    }
-                }
-
-                final boolean reEnableFK = supportsForeignKeyDisable() && disableForeignKeyChecks();
-                try {
-                    for (Change change : dropChanges) {
-                        for (SqlStatement statement : change.generateStatements(this)) {
+            final boolean reEnableFK = supportsForeignKeyDisable() && disableForeignKeyChecks();
+            try {
+                for (ChangeSet changeSet : changeSets) {
+                    for (Change change : changeSet.getChanges()) {
+                        SqlStatement[] sqlStatements = change.generateStatements(this);
+                        for (SqlStatement statement : sqlStatements) {
                             ExecutorService.getInstance().getExecutor(this).execute(statement);
                         }
-                    }
-                } finally {
-                    if (reEnableFK) {
-                        enableForeignKeyChecks();
+
                     }
                 }
+            } finally {
+                if (reEnableFK) {
+                    enableForeignKeyChecks();
+                }
             }
+
         } finally {
             this.commit();
         }
@@ -870,6 +826,8 @@ public abstract class AbstractJdbcDatabase implements Database {
             return isLiquibaseObject(((Column) object).getRelation());
         } else if (object instanceof Index) {
             return isLiquibaseObject(((Index) object).getTable());
+        } else if (object instanceof PrimaryKey) {
+            return isLiquibaseObject(((PrimaryKey) object).getTable());
         }
         return false;
     }

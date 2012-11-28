@@ -87,7 +87,13 @@ public class SnapshotGeneratorFactory {
         if (createSnapshot(example, database) != null) {
             return true;
         }
-        DatabaseSnapshot snapshot = createSnapshot(example.getSchema().toCatalogAndSchema(), database, new SnapshotControl(example.getClass()));
+        CatalogAndSchema catalogAndSchema;
+        if (example.getSchema() == null) {
+            catalogAndSchema = database.getDefaultSchema();
+        } else {
+            catalogAndSchema = example.getSchema().toCatalogAndSchema();
+        }
+        DatabaseSnapshot snapshot = createSnapshot(catalogAndSchema, database, new SnapshotControl(example.getClass()));
         for (DatabaseObject obj : snapshot.get(example.getClass())) {
             if (DatabaseObjectComparatorFactory.getInstance().isSameObject(example, obj, database)) {
                 return true;

@@ -11,6 +11,7 @@ public class Table extends Relation {
     private List<ForeignKey> outgoingForeignKeys = new ArrayList<ForeignKey>();
     private List<ForeignKey> incomingForeignKeys = new ArrayList<ForeignKey>();
     private List<Index> indexes = new ArrayList<Index>();
+    private List<UniqueConstraint> uniqueConstraints = new ArrayList<UniqueConstraint>();
 
     public Table() {
     }
@@ -33,6 +34,10 @@ public class Table extends Relation {
 
     public List<Index> getIndexes() {
         return indexes;
+    }
+
+    public List<UniqueConstraint> getUniqueConstraints() {
+        return uniqueConstraints;
     }
 
     @Override

@@ -21,13 +21,13 @@ public class UnexpectedPrimaryKeyChangeGenerator implements UnexpectedObjectChan
     }
 
     public Class<? extends DatabaseObject>[] runAfterTypes() {
-        return null;
-    }
-
-    public Class<? extends DatabaseObject>[] runBeforeTypes() {
         return new Class[] {
                 Table.class,
         };
+    }
+
+    public Class<? extends DatabaseObject>[] runBeforeTypes() {
+        return null;
     }
 
     public Change[] fixUnexpected(DatabaseObject unexpectedObject, DiffOutputControl control, Database referenceDatabase, Database comparisonDatabase, ChangeGeneratorChain chain) {

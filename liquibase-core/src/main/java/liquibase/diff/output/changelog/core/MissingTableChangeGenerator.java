@@ -12,7 +12,6 @@ import liquibase.diff.output.changelog.MissingObjectChangeGenerator;
 import liquibase.statement.DatabaseFunction;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Column;
-import liquibase.structure.core.PrimaryKey;
 import liquibase.structure.core.Table;
 
 import java.util.Date;
@@ -52,25 +51,12 @@ public class MissingTableChangeGenerator implements MissingObjectChangeGenerator
             change.setRemarks(missingTable.getRemarks());
         }
 
-        PrimaryKey primaryKey = missingTable.getPrimaryKey();
-        control.setAlreadyHandledMissing(primaryKey);
-
         for (Column column : missingTable.getColumns()) {
             ColumnConfig columnConfig = new ColumnConfig();
             columnConfig.setName(column.getName());
             columnConfig.setType(column.getType().toString());
 
             ConstraintsConfig constraintsConfig = null;
-            if (column.isPrimaryKey()) {
-                    constraintsConfig = new ConstraintsConfig();
-                    constraintsConfig.setPrimaryKey(true);
-                    constraintsConfig.setPrimaryKeyTablespace(column.getTablespace());
-
-                    if (primaryKey != null) {
-                        constraintsConfig.setPrimaryKeyName(primaryKey.getName());
-//                        diffResult.getObjectDiff(PrimaryKey.class).getMissing().remove(primaryKey);
-                    }
-            }
 
             if (column.getType().isAutoIncrement()) {
                 columnConfig.setAutoIncrement(true);

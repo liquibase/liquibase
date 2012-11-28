@@ -1,33 +1,90 @@
 package liquibase.snapshot.jvm;
 
+import liquibase.database.AbstractJdbcDatabase;
+import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
+import liquibase.executor.ExecutorService;
 import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.SnapshotGeneratorChain;
 import liquibase.snapshot.DatabaseSnapshot;
+import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.core.UniqueConstraint;
+import liquibase.structure.core.*;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.*;
 
 public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
 
     public UniqueConstraintSnapshotGenerator() {
-        super(UniqueConstraint.class);
+        super(UniqueConstraint.class, new Class[]{Table.class});
     }
-
-//    public Boolean has(DatabaseObject example, DatabaseSnapshot snapshot, SnapshotGeneratorChain chain) throws DatabaseException {
-//        return chain.has(example, snapshot); // snapshot(example, database, snapshot) != null;
-//    }
-
 
     @Override
     protected DatabaseObject snapshotObject(DatabaseObject example, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException {
-        return null;  //TODO
+        Database database = snapshot.getDatabase();
+        UniqueConstraint exampleConstraint = (UniqueConstraint) example;
+        Table table = exampleConstraint.getTable();
+        Schema schema = table.getSchema();
+        String name = example.getName();
+
+        List<Map> metadata = ExecutorService.getInstance().getExecutor(database).queryForList(new RawSqlStatement("select const.CONSTRAINT_NAME, COLUMN_NAME " +
+                "from information_schema.table_constraints const " +
+                "join information_schema.key_column_usage col " +
+                "on const.constraint_schema=col.constraint_schema " +
+                "and const.table_name=col.table_name " +
+                "and const.constraint_name=col.constraint_name " +
+                "where const.constraint_schema='" + database.correctObjectName(schema.getCatalogName(), Catalog.class) + "' " +
+                "and const.table_name='" + database.correctObjectName(table.getName(), Table.class) + "'" +
+                "and const.constraint_name='" + database.correctObjectName(name, UniqueConstraint.class) + "'" +
+                "order by ordinal_position"));
+
+        if (metadata.size() == 0) {
+            return null;
+        }
+        UniqueConstraint constraint = new UniqueConstraint();
+        constraint.setTable(table);
+        constraint.setName((String) metadata.get(0).get("CONSTRAINT_NAME"));
+        for (Map<String, Object> col : metadata) {
+            constraint.getColumns().add((String) col.get("COLUMN_NAME"));
+        }
+
+        Index exampleIndex = new Index().setTable(constraint.getTable());
+        exampleIndex.getColumns().addAll(constraint.getColumns());
+        constraint.setBackingIndex(exampleIndex);
+
+
+        return constraint;
     }
+
 
     @Override
     protected void addTo(DatabaseObject foundObject, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException {
-        ///todo
-    }
 
+        if (foundObject instanceof Table) {
+            Table table = (Table) foundObject;
+            Database database = snapshot.getDatabase();
+            Schema schema;
+            schema = table.getSchema();
+
+            List<Map> metadata = ExecutorService.getInstance().getExecutor(database).queryForList(new RawSqlStatement("select * " +
+                    "from information_schema.table_constraints " +
+                    "where constraint_schema='" + database.correctObjectName(schema.getCatalogName(), Catalog.class) + "' " +
+                    "and constraint_type='UNIQUE' "+
+                    "and table_name='" + database.correctObjectName(table.getName(), Table.class) + "'"));
+
+
+            Set<String> seenConstraints = new HashSet<String>();
+
+            for (Map<String, Object> constraint : metadata) {
+                UniqueConstraint uq = new UniqueConstraint().setName((String) constraint.get("CONSTRAINT_NAME")).setTable(table);
+                if (seenConstraints.add(uq.getName())) {
+                    table.getUniqueConstraints().add(uq);
+                }
+            }
+        }
+    }
 
     //START CODE FROM PostgresDatabseSnapshotGenerator
 //    protected void readUniqueConstraints(DatabaseSnapshot snapshot, Schema schema, DatabaseMetaData databaseMetaData) throws DatabaseException, SQLException {
