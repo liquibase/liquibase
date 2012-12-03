@@ -43,6 +43,13 @@
           <groupId>org.springframework</groupId>
           <artifactId>spring</artifactId>
         </dependency>
+        
+        <dependency>
+            <groupId>org.jasypt</groupId>
+            <artifactId>jasypt</artifactId>
+            <version>1.9.0</version>
+        </dependency>
+        
     </dependencies>
 
     <build>

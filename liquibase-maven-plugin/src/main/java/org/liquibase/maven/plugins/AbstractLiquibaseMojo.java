@@ -7,21 +7,34 @@ import java.lang.reflect.Field;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
 
-import liquibase.*;
+import liquibase.Liquibase;
+import liquibase.database.Database;
+import liquibase.exception.DatabaseException;
+import liquibase.exception.LiquibaseException;
 import liquibase.integration.commandline.CommandLineUtils;
 import liquibase.logging.LogFactory;
 import liquibase.resource.CompositeResourceAccessor;
-import liquibase.resource.ResourceAccessor;
 import liquibase.resource.FileSystemResourceAccessor;
-import liquibase.database.Database;
-import liquibase.exception.*;
+import liquibase.resource.ResourceAccessor;
 import liquibase.util.ui.UIFactory;
+
 import org.apache.maven.artifact.manager.WagonManager;
-import org.apache.maven.plugin.*;
+import org.apache.maven.plugin.AbstractMojo;
+import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
+import org.jasypt.encryption.pbe.StandardPBEStringEncryptor;
+import org.jasypt.encryption.pbe.config.EnvironmentStringPBEConfig;
+import org.jasypt.properties.EncryptableProperties;
 
 /**
  * A base class for providing Liquibase {@link liquibase.Liquibase} functionality.
@@ -81,6 +94,13 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
      * @parameter expression="${liquibase.password}"
      */
     protected String password;
+    
+    /**
+     * The environment variable passing to Jasypt for the PBE config password.
+     * 
+     * @parameter expression="${liquibase.pbePasswordVariable}
+     */
+    protected String pbePasswordVariable;
 
     /**
      * Use an empty string as the password for the database connection. This should not be
@@ -482,7 +502,14 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
         if (propertiesInputStream == null) {
             throw new MojoExecutionException("Properties file InputStream is null.");
         }
-        Properties props = new Properties();
+        EnvironmentStringPBEConfig pbeConfig = new EnvironmentStringPBEConfig();
+        pbeConfig.setPasswordEnvName(pbePasswordVariable);
+
+        StandardPBEStringEncryptor encryptor = new StandardPBEStringEncryptor();
+        encryptor.setConfig(pbeConfig);
+
+        EncryptableProperties props = new EncryptableProperties(encryptor);
+
         try {
             props.load(propertiesInputStream);
         }
@@ -496,13 +523,19 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
                 key = (String) it.next();
                 Field field = MavenUtils.getDeclaredField(this.getClass(), key);
 
+                String value = (String) props.get(key);
+                if (value.startsWith("ENC")) // 'ENC' is the defined prefix of jasypt encrypted property values
+                {
+                    value = props.getProperty(key);
+                }
+                
                 if (propertyFileWillOverride) {
                     getLog().debug("  properties file setting value: " + field.getName());
-                    setFieldValue(field, props.get(key).toString());
+                    setFieldValue(field, value);
                 } else {
                     if (!isCurrentFieldValueSpecified(field)) {
                         getLog().debug("  properties file setting value: " + field.getName());
-                        setFieldValue(field, props.get(key).toString());
+                        setFieldValue(field, value);
                     }
                 }
             }

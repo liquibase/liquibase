@@ -25,7 +25,6 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
@@ -47,6 +46,10 @@ import liquibase.servicelocator.ServiceLocator;
 import liquibase.util.LiquibaseUtil;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
+
+import org.jasypt.encryption.pbe.StandardPBEStringEncryptor;
+import org.jasypt.encryption.pbe.config.EnvironmentStringPBEConfig;
+import org.jasypt.properties.EncryptableProperties;
 
 /**
  * Class for executing Liquibase via the command line.
@@ -79,6 +82,8 @@ public class Main {
     protected String referencePassword;
 
     protected String currentDateTimeFunction;
+    
+    protected String pbePasswordVariable;
 
     protected String command;
     protected Set<String> commandParams = new LinkedHashSet<String>();
@@ -362,7 +367,13 @@ public class Main {
 
 
     protected void parsePropertiesFile(InputStream propertiesInputStream) throws IOException, CommandLineParsingException {
-        Properties props = new Properties();
+        EnvironmentStringPBEConfig pbeConfig = new EnvironmentStringPBEConfig();
+        pbeConfig.setPasswordEnvName(pbePasswordVariable);
+
+        StandardPBEStringEncryptor encryptor = new StandardPBEStringEncryptor();
+        encryptor.setConfig(pbeConfig);
+
+        EncryptableProperties props = new EncryptableProperties(encryptor);
         props.load(propertiesInputStream);
 
         for (Map.Entry entry : props.entrySet()) {
@@ -378,6 +389,18 @@ public class Main {
 
                     if (currentValue == null) {
                         String value = entry.getValue().toString().trim();
+                        if (value.startsWith("ENC")) // 'ENC' is the defined prefix of jasypt encrypted property values
+                        {
+                            String env = System.getenv(pbePasswordVariable); 
+                            if (env == null || env.equals(""))
+                            {
+                                throw new RuntimeException("Unknown password for: '" + pbePasswordVariable + "'");
+                            }
+                            else
+                            {
+                                value = props.getProperty((String)entry.getKey());
+                            }
+                        }
                         if (field.getType().equals(Boolean.class)) {
                             field.set(this, Boolean.valueOf(value));
                         } else {
@@ -390,7 +413,7 @@ public class Main {
             }
         }
     }
-
+    
     protected void printHelp(List<String> errorMessages, PrintStream stream) {
         stream.println("Errors:");
         for (String message : errorMessages) {
@@ -508,6 +531,8 @@ public class Main {
         stream.println(" --currentDateTimeFunction=<value>          Overrides current date time function");
         stream.println("                                            used in SQL.");
         stream.println("                                            Useful for unsupported databases");
+        stream.println(" --pbePasswordVariable=<value>              Name of the environment variable");
+        stream.println("                                            containing the Jasypt PBE password");
         stream.println(" --help                                     Prints this message");
         stream.println(" --version                                  Prints this version information");
         stream.println("");
