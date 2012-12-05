@@ -460,16 +460,6 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
 ////    }
     //END CODE FROM SQLiteDatabaseSnapshotGenerator
 
-//    //method from H2DatabaseSNapshotGenerator
-//    protected Object readDefaultValue(Map<String, Object> columnMetadataResultSet, Column columnInfo, Database database) throws SQLException, DatabaseException {
-//        Object defaultValue = super.readDefaultValue(columnMetadataResultSet, columnInfo, database);
-//        if (defaultValue != null && defaultValue instanceof DatabaseFunction && ((DatabaseFunction) defaultValue).getValue().startsWith("NEXT VALUE FOR ")) {
-//            columnInfo.setAutoIncrement(true);
-//            return null;
-//        }
-//        return defaultValue;
-//    }
-
 
     //method was from DerbyDatabaseSnapshotGenerator
 //    @Override

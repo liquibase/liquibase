@@ -757,7 +757,6 @@ public abstract class AbstractJdbcDatabase implements Database {
             try {
                 for (ChangeSet changeSet : changeSets) {
                     for (Change change : changeSet.getChanges()) {
-                        System.out.println("Dropping "+change.getClass().getSimpleName());
                         SqlStatement[] sqlStatements = change.generateStatements(this);
                         for (SqlStatement statement : sqlStatements) {
                             ExecutorService.getInstance().getExecutor(this).execute(statement);
