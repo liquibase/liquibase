@@ -169,6 +169,12 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
         return super.escapeObjectName(indexName, Index.class);
     }
 
+    @Override
+    public String escapeTableName(String catalogName, String schemaName, String tableName) {
+        // MSSQL server does not support the schema name for the index -
+        return escapeObjectName(null, schemaName, tableName, Table.class);
+    }
+
     //    protected void dropForeignKeys(Connection conn) throws DatabaseException {
 //        Statement dropStatement = null;
 //        PreparedStatement fkStatement = null;
@@ -247,18 +253,14 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
 
     @Override
     public boolean supportsDropTableCascadeConstraints() {
-        try {
-            return this.getDatabaseMajorVersion() >= 10;
-        } catch (DatabaseException e) {
-            return true;
-        }
+        return false;
     }
 
     @Override
     public String escapeObjectName(String catalogName, String schemaName, String objectName, Class<? extends DatabaseObject> objectType) {
-        if (schemaName == null) {
-            schemaName = "dbo";
-        }
+//        if (schemaName == null) {
+//            schemaName = "dbo";
+//        }
         return super.escapeObjectName(catalogName, schemaName, objectName, objectType);
     }
 

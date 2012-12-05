@@ -8,6 +8,7 @@ import liquibase.diff.output.changelog.ChangeGeneratorChain;
 import liquibase.diff.output.changelog.MissingObjectChangeGenerator;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Column;
+import liquibase.structure.core.Index;
 import liquibase.structure.core.PrimaryKey;
 import liquibase.structure.core.Table;
 
@@ -30,7 +31,9 @@ public class MissingPrimaryKeyChangeGenerator implements MissingObjectChangeGene
     }
 
     public Class<? extends DatabaseObject>[] runBeforeTypes() {
-        return null;
+        return new Class[] {
+                Index.class
+        };
     }
 
     public Change[] fixMissing(DatabaseObject missingObject, DiffOutputControl control, Database referenceDatabase, Database comparisonDatabase, ChangeGeneratorChain chain) {
@@ -49,6 +52,8 @@ public class MissingPrimaryKeyChangeGenerator implements MissingObjectChangeGene
         if (control.isIncludeTablespace()) {
             change.setTablespace(pk.getTablespace());
         }
+
+        control.setAlreadyHandledMissing(pk.getBackingIndex());
 
         return new Change[] { change };
 

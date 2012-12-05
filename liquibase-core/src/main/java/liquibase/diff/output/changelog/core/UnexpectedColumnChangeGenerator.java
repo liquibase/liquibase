@@ -21,7 +21,7 @@ public class UnexpectedColumnChangeGenerator implements UnexpectedObjectChangeGe
         return new Class[] {
                 PrimaryKey.class,
                 ForeignKey.class,
-                Table.class
+                Table.class,
         };
     }
 
@@ -34,6 +34,9 @@ public class UnexpectedColumnChangeGenerator implements UnexpectedObjectChangeGe
 //        if (!shouldModifyColumn(column)) {
 //            continue;
 //        }
+        if (column.getRelation() instanceof View) {
+            return null;
+        }
 
         DropColumnChange change = new DropColumnChange();
         change.setTableName(column.getRelation().getName());

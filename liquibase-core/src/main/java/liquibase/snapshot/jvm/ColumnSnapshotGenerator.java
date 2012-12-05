@@ -2,6 +2,7 @@ package liquibase.snapshot.jvm;
 
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
+import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.core.MySQLDatabase;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
@@ -26,7 +27,7 @@ import java.util.Map;
 public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
 
     public ColumnSnapshotGenerator() {
-        super(Column.class, new Class[] { Table.class, View.class});
+        super(Column.class, new Class[]{Table.class, View.class});
     }
 
     @Override
@@ -43,7 +44,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
             columnMetadataRs = databaseMetaData.getColumns(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), database.correctObjectName(relation.getName(), Table.class), database.correctObjectName(example.getName(), Column.class));
 
             if (columnMetadataRs.next()) {
-                Map<String, Object> data = convertResultSetToMap(columnMetadataRs);
+                Map<String, Object> data = convertResultSetToMap(columnMetadataRs, database);
                 return readColumn(data, relation, database);
             } else {
                 return null;
@@ -118,7 +119,9 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
         if (table instanceof Table) {
             if (columnMetadataResultSet.containsKey("IS_AUTOINCREMENT")) {
                 String isAutoincrement = (String) columnMetadataResultSet.get("IS_AUTOINCREMENT");
-                if (isAutoincrement.equals("YES")) {
+                if (isAutoincrement == null) {
+                    column.setAutoIncrement(false);
+                } else if (isAutoincrement.equals("YES")) {
                     column.setAutoIncrement(true);
                 } else if (isAutoincrement.equals("NO")) {
                     column.setAutoIncrement(false);
@@ -185,6 +188,18 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
     }
 
     protected Object readDefaultValue(Map<String, Object> columnMetadataResultSet, Column columnInfo, Database database) throws SQLException, DatabaseException {
+        if (database instanceof MSSQLDatabase) {
+            Object defaultValue = columnMetadataResultSet.get("COLUMN_DEF");
+
+            if (defaultValue != null && defaultValue instanceof String) {
+                String newValue = null;
+                if (defaultValue.equals("(NULL)")) {
+                    newValue = null;
+                }
+                columnMetadataResultSet.put("COLUMN_DEF", newValue);
+            }
+        }
+
         Object val = columnMetadataResultSet.get("COLUMN_DEF");
 
         if (val instanceof String && val.equals("")) {
@@ -285,45 +300,21 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
         return val;
     }
 
-    protected Map<String, Object> convertResultSetToMap(ResultSet rs) throws SQLException {
-        Class[] types = new Class[]{ //matches tableMetadata.getColumns() types. Ugly, but otherwise get wrong types
-                null, //no zero index
-                String.class,
-                String.class,
-                String.class,
-                String.class,
-                int.class,
-                String.class,
-                int.class,
-                String.class,
-                int.class,
-                int.class,
-                int.class,
-                String.class,
-                String.class,
-                int.class,
-                int.class,
-                int.class,
-                int.class,
-                String.class,
-                String.class,
-                String.class,
-                String.class,
-                short.class,
-                String.class,
-                String.class
-        };
-
+    private Map<String, Object> convertResultSetToMap(ResultSet rs, Database database) throws SQLException {
         Map<String, Object> data = new HashMap<String, Object>();
-        for (int i = 1; i <= rs.getMetaData().getColumnCount(); i++) {
-            Class classType = types[i];
+        for (int i=1; i<= rs.getMetaData().getColumnCount(); i++) {
+            int type = rs.getMetaData().getColumnType(i);
             Object value;
-            if (classType.equals(String.class)) {
+            if (type == Types.VARCHAR || type == Types.CHAR || type == Types.LONGVARCHAR) {
                 value = rs.getString(i);
-            } else if (classType.equals(int.class)) {
+            } else if (type == Types.INTEGER || type == Types.NUMERIC) {
                 value = rs.getInt(i);
-            } else if (classType.equals(short.class)) {
-                value = rs.getShort(i);
+            }  else if (type == Types.SMALLINT) {
+                try {
+                    value = rs.getInt(i);
+                } catch (ClassCastException e) {
+                    value = rs.getString(i);
+                }
             } else {
                 value = rs.getObject(i);
             }

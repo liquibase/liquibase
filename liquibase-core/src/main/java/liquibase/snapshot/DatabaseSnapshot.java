@@ -63,6 +63,7 @@ public class DatabaseSnapshot {
                 knownNull.put(example.getClass(), collection);
             }
             collection.add(example);
+
         } else {
             Set<DatabaseObject> collection = allFound.get(object.getClass());
             if (collection == null) {

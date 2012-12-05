@@ -1,10 +1,12 @@
 package liquibase.datatype;
 
 import liquibase.database.Database;
-import liquibase.structure.core.DataType;
+import liquibase.datatype.core.BigIntType;
+import liquibase.datatype.core.IntType;
 import liquibase.datatype.core.UnknownType;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.servicelocator.ServiceLocator;
+import liquibase.structure.core.DataType;
 import liquibase.util.ObjectUtil;
 import liquibase.util.StringUtils;
 
@@ -88,6 +90,11 @@ public class DataTypeFactory {
         if (dataTypeName.matches(".+\\{.*")) {
             dataTypeName = dataTypeDefinition.replaceFirst("\\s*\\{.*", "");
         }
+        boolean primaryKey = false;
+        if (dataTypeName.endsWith(" identity")) {
+            dataTypeName = dataTypeName.replaceFirst(" identity$", "");
+            primaryKey = true;
+        }
 
         SortedSet<Class<? extends LiquibaseDataType>> classes = registry.get(dataTypeName.toLowerCase());
 
@@ -139,6 +146,13 @@ public class DataTypeFactory {
                     }
                 }
             }
+        }
+
+        if (primaryKey && liquibaseDataType instanceof IntType) {
+            ((IntType) liquibaseDataType).setAutoIncrement(true);
+        }
+        if (primaryKey && liquibaseDataType instanceof BigIntType) {
+            ((BigIntType) liquibaseDataType).setAutoIncrement(true);
         }
 
         return liquibaseDataType;

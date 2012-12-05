@@ -157,13 +157,15 @@ public class Index extends AbstractDatabaseObject {
         }
         if (table != null && columns != null) {
             stringBuffer.append(" on ").append(table.getName());
-            if (columns != null) {
+            if (columns != null && columns.size() > 0) {
                 stringBuffer.append("(");
                 for (String column : columns) {
                     stringBuffer.append(column).append(", ");
                 }
                 stringBuffer.delete(stringBuffer.length() - 2, stringBuffer.length());
                 stringBuffer.append(")");
+            } else {
+                stringBuffer.append("()");
             }
         }
         return stringBuffer.toString();

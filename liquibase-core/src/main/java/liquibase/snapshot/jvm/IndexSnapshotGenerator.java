@@ -158,10 +158,26 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                 } else {
                     rs = databaseMetaData.getIndexInfo(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), table.getName(), false, true);
                 }
+                Map<String, Index> foundIndexes = new HashMap<String, Index>();
                 while (rs.next()) {
-                    Index exampleIndex = new Index().setName(rs.getString("INDEX_NAME")).setTable(table);
+                    String indexName = rs.getString("INDEX_NAME");
+                    if (indexName == null) {
+                        continue;
+                    }
+
+                     Index index = foundIndexes.get(indexName);
+                    if (index == null) {
+                        index = new Index();
+                        index.setName(indexName);
+                        index.setTable(table);
+                    }
+                    index.getColumns().add(rs.getString("COLUMN_NAME"));
+                }
+
+                for (Index exampleIndex : foundIndexes.values()) {
                     table.getIndexes().add(exampleIndex);
                 }
+
             } catch (Exception e) {
                 throw new DatabaseException(e);
             } finally {
@@ -230,7 +246,10 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
 
                 while (rs.next()) {
                     String indexName = cleanNameFromDatabase(rs.getString("INDEX_NAME"), database);
-                    if (exampleName != null && !indexName.equals(exampleName)) {
+                    if (indexName == null) {
+                        continue;
+                    }
+                    if (exampleName != null && !exampleName.equals(indexName)) {
                         continue;
                     }
                     /*

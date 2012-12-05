@@ -44,7 +44,7 @@ public class IndexComparator implements DatabaseObjectComparator {
         }
 
         for (int i=0; i<otherIndex.getColumns().size(); i++) {
-            if (! DatabaseObjectComparatorFactory.getInstance().isSameObject(new Column().setName(thisIndex.getColumns().get(i)), new Column().setName(otherIndex.getColumns().get(i)), accordingTo)) {
+            if (! DatabaseObjectComparatorFactory.getInstance().isSameObject(new Column().setName(thisIndex.getColumns().get(i)).setRelation(thisIndex.getTable()), new Column().setName(otherIndex.getColumns().get(i)).setRelation(otherIndex.getTable()), accordingTo)) {
                 return false;
             }
         }

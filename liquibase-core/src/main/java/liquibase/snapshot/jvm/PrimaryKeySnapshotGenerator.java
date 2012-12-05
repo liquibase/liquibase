@@ -3,10 +3,12 @@ package liquibase.snapshot.jvm;
 import liquibase.CatalogAndSchema;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
+import liquibase.database.core.MSSQLDatabase;
 import liquibase.exception.DatabaseException;
 import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.Index;
 import liquibase.structure.core.PrimaryKey;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
@@ -14,6 +16,7 @@ import liquibase.structure.core.Table;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Arrays;
 
 public class PrimaryKeySnapshotGenerator extends JdbcSnapshotGenerator {
 
@@ -53,6 +56,14 @@ public class PrimaryKeySnapshotGenerator extends JdbcSnapshotGenerator {
             }
 
             rs.close();
+
+            Index exampleIndex = new Index().setTable(returnKey.getTable());
+            exampleIndex.getColumns().addAll(Arrays.asList(returnKey.getColumnNames().split("\\s*,\\s*")));
+            if (database instanceof MSSQLDatabase) { //index name matches PK name for better accuracy
+                exampleIndex.setName(returnKey.getName());
+            }
+            returnKey.setBackingIndex(exampleIndex);
+
             return returnKey;
         } catch (SQLException e) {
             throw new DatabaseException(e);

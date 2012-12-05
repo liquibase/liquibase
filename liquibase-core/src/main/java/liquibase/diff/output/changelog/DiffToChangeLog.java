@@ -31,6 +31,8 @@ public class DiffToChangeLog {
     private DiffResult diffResult;
     private DiffOutputControl diffOutputControl;
 
+    private static Set<Class> loggedOrderFor = new HashSet<Class>();
+
     public DiffToChangeLog(DiffResult diffResult, DiffOutputControl diffOutputControl) {
         this.diffResult = diffResult;
         this.diffOutputControl = diffOutputControl;
@@ -169,10 +171,15 @@ public class DiffToChangeLog {
         }
         List<Class<? extends DatabaseObject>> types = graph.sort(comparisonDatabase, generatorType);
 
-//        System.out.println("Type order: ");
-//        for (Class<? extends DatabaseObject> type : types) {
-//            System.out.println("    " + type.getName());
-//        }
+        if (!loggedOrderFor.contains(generatorType)) {
+            String log = generatorType.getSimpleName()+" type order: ";
+            for (Class<? extends DatabaseObject> type : types) {
+                log += "    " + type.getName();
+            }
+            LogFactory.getLogger().debug(log);
+            loggedOrderFor.add(generatorType);
+        }
+
         return types;
     }
 

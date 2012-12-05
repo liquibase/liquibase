@@ -21,14 +21,14 @@ public class UnexpectedViewChangeGenerator implements UnexpectedObjectChangeGene
     }
 
     public Class<? extends DatabaseObject>[] runAfterTypes() {
+        return null;
+    }
+
+    public Class<? extends DatabaseObject>[] runBeforeTypes() {
         return new Class[] {
                 Table.class,
                 Column.class
         };
-    }
-
-    public Class<? extends DatabaseObject>[] runBeforeTypes() {
-        return null;
     }
 
     public Change[] fixUnexpected(DatabaseObject unexpectedObject, DiffOutputControl control, Database referenceDatabase, Database comparisonDatabase, ChangeGeneratorChain chain) {
@@ -42,6 +42,11 @@ public class UnexpectedViewChangeGenerator implements UnexpectedObjectChangeGene
         if (control.isIncludeSchema()) {
             change.setSchemaName(view.getSchema().getName());
         }
+
+        for (Column column : view.getColumns()) {
+            control.setAlreadyHandledUnexpected(column);
+        };
+
 
         return new Change[]{change};
 

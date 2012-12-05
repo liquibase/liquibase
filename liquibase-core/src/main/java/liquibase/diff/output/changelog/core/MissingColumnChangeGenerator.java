@@ -13,6 +13,7 @@ import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.PrimaryKey;
 import liquibase.structure.core.Table;
+import liquibase.structure.core.View;
 
 public class MissingColumnChangeGenerator implements MissingObjectChangeGenerator {
 
@@ -39,6 +40,10 @@ public class MissingColumnChangeGenerator implements MissingObjectChangeGenerato
 //        if (!shouldModifyColumn(column)) {
 //            continue;
 //        }
+
+        if (column.getRelation() instanceof View) {
+            return null;
+        }
 
         AddColumnChange change = new AddColumnChange();
         change.setTableName(column.getRelation().getName());

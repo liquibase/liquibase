@@ -96,7 +96,8 @@ public class ForeignKeySnapshotGenerator extends JdbcSnapshotGenerator {
                 exportedKeyMetadataResultSet = getMetaData(database).getExportedKeys(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), database.correctObjectName(table.getName(), Table.class));
 
                 while (exportedKeyMetadataResultSet.next()) {
-                    ForeignKey fk = new ForeignKey().setName(exportedKeyMetadataResultSet.getString("FK_NAME")).setForeignKeyTable(table);
+                    Table fktable = (Table) new Table().setName(exportedKeyMetadataResultSet.getString("FKTABLE_NAME")).setSchema(new Schema(exportedKeyMetadataResultSet.getString("FKTABLE_CAT"), exportedKeyMetadataResultSet.getString("FKTABLE_SCHEM")));
+                    ForeignKey fk = new ForeignKey().setName(exportedKeyMetadataResultSet.getString("FK_NAME")).setForeignKeyTable(fktable);
                     if (seenFks.add(fk.getName())) {
                         table.getIncomingForeignKeys().add(fk);
                     }

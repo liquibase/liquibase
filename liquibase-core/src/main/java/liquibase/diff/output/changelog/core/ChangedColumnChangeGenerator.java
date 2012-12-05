@@ -7,10 +7,7 @@ import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.changelog.ChangeGeneratorChain;
 import liquibase.diff.output.changelog.ChangedObjectChangeGenerator;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.core.Column;
-import liquibase.structure.core.PrimaryKey;
-import liquibase.structure.core.Sequence;
-import liquibase.structure.core.Table;
+import liquibase.structure.core.*;
 
 public class ChangedColumnChangeGenerator implements ChangedObjectChangeGenerator {
     public int getPriority(Class<? extends DatabaseObject> objectType, Database database) {
@@ -33,6 +30,10 @@ public class ChangedColumnChangeGenerator implements ChangedObjectChangeGenerato
     }
 
     public Change[] fixChanged(DatabaseObject changedObject, ObjectDifferences differences, DiffOutputControl control, Database referenceDatabase, Database comparisonDatabase, ChangeGeneratorChain chain) {
+        if (((Column) changedObject).getRelation() instanceof View) {
+            return null;
+        }
+
         //TODO        for (Column column : diffResult.getObjectDiff(Column.class).getChanged()) {
 //            if (!shouldModifyColumn(column)) {
 //                continue;

@@ -757,6 +757,7 @@ public abstract class AbstractJdbcDatabase implements Database {
             try {
                 for (ChangeSet changeSet : changeSets) {
                     for (Change change : changeSet.getChanges()) {
+                        System.out.println("Dropping "+change.getClass().getSimpleName());
                         SqlStatement[] sqlStatements = change.generateStatements(this);
                         for (SqlStatement statement : sqlStatements) {
                             ExecutorService.getInstance().getExecutor(this).execute(statement);
@@ -885,9 +886,9 @@ public abstract class AbstractJdbcDatabase implements Database {
     }
 
     public String escapeObjectName(String catalogName, String schemaName, String objectName, Class<? extends DatabaseObject> objectType) {
-        CatalogAndSchema catalogAndSchema = this.correctSchema(catalogName, schemaName);
-        catalogName = catalogAndSchema.getCatalogName();
-        schemaName = catalogAndSchema.getSchemaName();
+//        CatalogAndSchema catalogAndSchema = this.correctSchema(catalogName, schemaName);
+//        catalogName = catalogAndSchema.getCatalogName();
+//        schemaName = catalogAndSchema.getSchemaName();
 
         if (catalogName == null && schemaName == null) {
             return escapeObjectName(objectName, objectType);

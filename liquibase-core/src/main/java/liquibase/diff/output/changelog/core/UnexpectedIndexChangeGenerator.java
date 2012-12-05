@@ -22,9 +22,7 @@ public class UnexpectedIndexChangeGenerator implements UnexpectedObjectChangeGen
     }
 
     public Class<? extends DatabaseObject>[] runBeforeTypes() {
-        return new Class[] {
-                Table.class,
-        };
+        return null;
     }
 
     public Change[] fixUnexpected(DatabaseObject unexpectedObject, DiffOutputControl control, Database referenceDatabase, Database comparisonDatabase, ChangeGeneratorChain chain) {

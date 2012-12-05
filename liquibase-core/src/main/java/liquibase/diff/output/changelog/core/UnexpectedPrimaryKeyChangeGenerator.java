@@ -7,10 +7,7 @@ import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.changelog.ChangeGeneratorChain;
 import liquibase.diff.output.changelog.UnexpectedObjectChangeGenerator;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.core.Column;
-import liquibase.structure.core.PrimaryKey;
-import liquibase.structure.core.Sequence;
-import liquibase.structure.core.Table;
+import liquibase.structure.core.*;
 
 public class UnexpectedPrimaryKeyChangeGenerator implements UnexpectedObjectChangeGenerator {
     public int getPriority(Class<? extends DatabaseObject> objectType, Database database) {
@@ -21,13 +18,13 @@ public class UnexpectedPrimaryKeyChangeGenerator implements UnexpectedObjectChan
     }
 
     public Class<? extends DatabaseObject>[] runAfterTypes() {
-        return new Class[] {
-                Table.class,
-        };
-    }
+        return null;
+       }
 
     public Class<? extends DatabaseObject>[] runBeforeTypes() {
-        return null;
+        return new Class[] {
+                Index.class
+        };
     }
 
     public Change[] fixUnexpected(DatabaseObject unexpectedObject, DiffOutputControl control, Database referenceDatabase, Database comparisonDatabase, ChangeGeneratorChain chain) {
@@ -42,6 +39,10 @@ public class UnexpectedPrimaryKeyChangeGenerator implements UnexpectedObjectChan
             change.setSchemaName(pk.getTable().getSchema().getName());
         }
         change.setConstraintName(pk.getName());
+
+        Index backingIndex = pk.getBackingIndex();
+        control.setAlreadyHandledUnexpected(backingIndex);
+
 
         return new Change[] { change };
 //        }

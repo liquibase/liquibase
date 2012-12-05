@@ -13,6 +13,7 @@ public class PrimaryKey extends AbstractDatabaseObject {
     private Table table;
     private boolean certainName = true;
 	private String tablespace;
+    private Index backingIndex;
 
     public DatabaseObject[] getContainingObjects() {
         return new DatabaseObject[] {
@@ -116,4 +117,13 @@ public class PrimaryKey extends AbstractDatabaseObject {
 	public void setTablespace(String tablespace) {
 		this.tablespace = tablespace;
 	}
+
+    public Index getBackingIndex() {
+        return backingIndex;
+    }
+
+    public PrimaryKey setBackingIndex(Index backingIndex) {
+        this.backingIndex = backingIndex;
+        return this;
+    }
 }
