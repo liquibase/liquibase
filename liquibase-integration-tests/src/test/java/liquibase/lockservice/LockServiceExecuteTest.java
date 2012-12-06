@@ -20,7 +20,7 @@ public class LockServiceExecuteTest {
     @Before
     public void setUp() throws DatabaseException, LockException {
         ExecutorService.getInstance().reset();
-        LockServiceImpl.resetAll();
+        LockServiceFactory.getInstance().resetAll();
 
         fixupLockTables();
     }
@@ -52,7 +52,7 @@ public class LockServiceExecuteTest {
 
     @After
     public void tearDown() throws LockException, DatabaseException {
-        LockServiceImpl.resetAll();
+        LockServiceFactory.getInstance().resetAll();
 
         fixupLockTables();
     }

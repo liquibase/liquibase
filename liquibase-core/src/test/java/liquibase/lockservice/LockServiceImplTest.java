@@ -22,14 +22,17 @@ import java.util.*;
 @SuppressWarnings({"EqualsWhichDoesntCheckParameterClass"})
 public class LockServiceImplTest {
 
+    private LockServiceImpl lockService;
+
     @Before
     public void before() {
-        LockServiceImpl.resetAll();
+        lockService = new LockServiceImpl();
+        lockService.reset();
     }
 
     @After
     public void after() {
-        LockServiceImpl.resetAll();
+        lockService.reset();
     }
 
     @Test
@@ -37,7 +40,6 @@ public class LockServiceImplTest {
         Database database = createMock(Database.class);
         replay(database);
 
-        LockServiceImpl lockService = new LockServiceImpl();
         lockService.setDatabase(database);
         assertFalse(lockService.hasChangeLogLock());
 

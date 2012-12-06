@@ -123,7 +123,7 @@ public abstract class AbstractIntegrationTest {
 
             DatabaseSnapshotGeneratorFactory.resetAll();
             ExecutorService.getInstance().reset();
-            LockServiceImpl.resetAll();
+            LockServiceFactory.getInstance().resetAll();
 
             database.checkDatabaseChangeLogLockTable();
 
