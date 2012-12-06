@@ -1,14 +1,17 @@
 package liquibase.test;
 
-import liquibase.database.Database;
-import liquibase.database.core.SQLiteDatabase;
-import liquibase.executor.ExecutorService;
-import liquibase.executor.jvm.JdbcExecutor;
-import liquibase.exception.MigrationFailedException;
-import liquibase.lockservice.LockService;
+import java.util.Set;
+
 import org.junit.ComparisonFailure;
 
-import java.util.Set;
+import liquibase.database.Database;
+import liquibase.database.core.SQLiteDatabase;
+import liquibase.exception.MigrationFailedException;
+import liquibase.executor.ExecutorService;
+import liquibase.executor.jvm.JdbcExecutor;
+import liquibase.lockservice.LockService;
+import liquibase.lockservice.LockServiceFactory;
+import liquibase.lockservice.LockServiceImpl;
 
 public class DatabaseTestTemplate {
     public void testOnAvailableDatabases(DatabaseTest test) throws Exception {
@@ -27,9 +30,10 @@ public class DatabaseTestTemplate {
             JdbcExecutor writeExecutor = new JdbcExecutor();
             writeExecutor.setDatabase(database);
             ExecutorService.getInstance().setExecutor(database, writeExecutor);
-            LockService.getInstance(database).reset();
+            LockService lockService = LockServiceFactory.getInstance().getLockService(database);
+            lockService.reset();
             if (database.getConnection() != null) {
-                LockService.getInstance(database).forceReleaseLock();
+                lockService.forceReleaseLock();
             }
 
             try {

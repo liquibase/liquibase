@@ -115,6 +115,7 @@ public class ServiceLocator {
                 addPackageToScan("liquibase.executor");
                 addPackageToScan("liquibase.snapshot");
                 addPackageToScan("liquibase.logging");
+                addPackageToScan("liquibase.lockservice");
                 addPackageToScan("liquibase.ext");
             }
         }
