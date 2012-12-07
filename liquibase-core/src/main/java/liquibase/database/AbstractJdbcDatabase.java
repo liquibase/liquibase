@@ -750,7 +750,7 @@ public abstract class AbstractJdbcDatabase implements Database {
                 throw new UnexpectedLiquibaseException(e);
             }
 
-            DiffResult diffResult = DiffGeneratorFactory.getInstance().compare(new DatabaseSnapshot(this), snapshot, new CompareControl());
+            DiffResult diffResult = DiffGeneratorFactory.getInstance().compare(new DatabaseSnapshot(this), snapshot, new CompareControl(snapshot.getSnapshotControl().getTypesToInclude()));
             List<ChangeSet> changeSets = new DiffToChangeLog(diffResult, new DiffOutputControl(true, true, false)).generateChangeSets();
 
             final boolean reEnableFK = supportsForeignKeyDisable() && disableForeignKeyChecks();

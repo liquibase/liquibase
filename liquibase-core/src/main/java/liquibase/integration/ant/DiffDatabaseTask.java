@@ -141,16 +141,19 @@ public class DiffDatabaseTask extends BaseLiquibaseTask {
             referenceDatabase = createDatabaseObject(getReferenceDriver(), getReferenceUrl(), getReferenceUsername(), getReferencePassword(), getReferenceDefaultCatalogName(), getReferenceDefaultSchemaName(), getDatabaseClass());
 
 
-            CompareControl compareControl = new CompareControl(new CompareControl.SchemaComparison[]{
-                    new CompareControl.SchemaComparison(
-                            new CatalogAndSchema(getReferenceDefaultCatalogName(), getReferenceDefaultSchemaName()),
-                            new CatalogAndSchema(getDefaultCatalogName(), getDefaultSchemaName()))});
 
             DiffOutputControl diffOutputControl = new DiffOutputControl();
             diffOutputControl.setDataDir(getDataDir());
 
             DatabaseSnapshot referenceSnapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(referenceDatabase.getDefaultSchema(), referenceDatabase, new SnapshotControl(getDiffTypes()));
             DatabaseSnapshot comparisonSnapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(liquibase.getDatabase().getDefaultSchema(), liquibase.getDatabase(), new SnapshotControl(getDiffTypes()));
+
+            CompareControl compareControl = new CompareControl(new CompareControl.SchemaComparison[]{
+                    new CompareControl.SchemaComparison(
+                            new CatalogAndSchema(getReferenceDefaultCatalogName(), getReferenceDefaultSchemaName()),
+                            new CatalogAndSchema(getDefaultCatalogName(), getDefaultSchemaName()))},
+                    referenceSnapshot.getSnapshotControl().getTypesToInclude()
+                    );
 
             DiffResult diffResult = liquibase.diff(referenceDatabase, liquibase.getDatabase(), compareControl);
 //            diff.addStatusListener(new OutDiffStatusListener());
