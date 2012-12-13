@@ -23,7 +23,8 @@ public class UpdateVisitor implements ChangeSetVisitor {
 
     public void visit(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database) throws LiquibaseException {
         ChangeSet.RunStatus runStatus = this.database.getRunStatus(changeSet);
-        log.pushContext("Changeset " + changeSet.getId());
+        //todo: consider json'ing the context?
+        log.pushContext(changeSet.toString(false));
         try {
         log.debug("Running Changeset:" + changeSet);
         ChangeSet.ExecType execType = changeSet.execute(databaseChangeLog, this.database);

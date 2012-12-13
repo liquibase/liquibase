@@ -13,7 +13,7 @@ public class UpdateVisitorTest {
         Database database = createMock(Database.class);
 
         ChangeSet changeSet = createMock(ChangeSet.class);
-        expect(changeSet.getId()).andReturn("A1");
+        expect(changeSet.toString(false)).andReturn("/my/change/changelog.xml::132::RobertReeves");
         expect(changeSet.execute(new DatabaseChangeLog("test.xml"), database)).andReturn(ChangeSet.ExecType.EXECUTED);
 
 
