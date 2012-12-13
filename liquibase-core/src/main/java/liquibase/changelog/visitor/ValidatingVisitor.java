@@ -34,6 +34,7 @@ public class ValidatingVisitor implements ChangeSetVisitor {
 
     private List<RanChangeSet> ranChangeSets;
     private Database database;
+    private Logger log = LogFactory.getLogger();
 
     public ValidatingVisitor(List<RanChangeSet> ranChangeSets) {
         this.ranChangeSets = ranChangeSets;
@@ -41,6 +42,7 @@ public class ValidatingVisitor implements ChangeSetVisitor {
 
     public void validate(Database database, DatabaseChangeLog changeLog) {
         this.database = database;
+
         PreconditionContainer preconditions = changeLog.getPreconditions();
         try {
             if (preconditions == null) {
@@ -57,7 +59,7 @@ public class ValidatingVisitor implements ChangeSetVisitor {
             try {
                 database.rollback();
             } catch (DatabaseException e) {
-                LogFactory.getLogger().warning("Error rolling back after precondition check", e);
+                log.warning("Error rolling back after precondition check", e);
             }
         }
     }
@@ -67,6 +69,7 @@ public class ValidatingVisitor implements ChangeSetVisitor {
     }
 
     public void visit(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database) {
+        log.pushContext(changeSet.toString(false));
         for (Change change : changeSet.getChanges()) {
             try {
                 change.init();
@@ -110,6 +113,7 @@ public class ValidatingVisitor implements ChangeSetVisitor {
         } else {
             seenChangeSets.add(changeSetString);
         }
+        log.popContext();
     }
 
     public List<ChangeSet> getInvalidMD5Sums() {

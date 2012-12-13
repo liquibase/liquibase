@@ -30,4 +30,8 @@ public interface Logger extends PrioritizedService {
 
     void debug(String message, Throwable e);
 
+    void pushContext(String context);
+
+    void popContext();
+
 }

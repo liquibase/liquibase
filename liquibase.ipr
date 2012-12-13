@@ -907,6 +907,17 @@
         <root url="jar://$MAVEN_REPOSITORY$/org/jboss/weld/se/weld-se/1.1.8.Final/weld-se-1.1.8.Final-sources.jar!/" />
       </SOURCES>
     </library>
+    <library name="Maven: org.json:json:20090211">
+      <CLASSES>
+        <root url="jar://$MAVEN_REPOSITORY$/org/json/json/20090211/json-20090211.jar!/" />
+      </CLASSES>
+      <JAVADOC>
+        <root url="jar://$MAVEN_REPOSITORY$/org/json/json/20090211/json-20090211-javadoc.jar!/" />
+      </JAVADOC>
+      <SOURCES>
+        <root url="jar://$MAVEN_REPOSITORY$/org/json/json/20090211/json-20090211-sources.jar!/" />
+      </SOURCES>
+    </library>
     <library name="Maven: org.liquibase:liquibase-core:test-jar:tests:2.0-SNAPSHOT">
       <CLASSES>
         <root url="jar://$MAVEN_REPOSITORY$/org/liquibase/liquibase-core/2.0-SNAPSHOT/liquibase-core-2.0-SNAPSHOT-tests.jar!/" />

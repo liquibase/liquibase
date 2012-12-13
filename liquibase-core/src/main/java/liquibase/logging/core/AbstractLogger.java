@@ -4,8 +4,12 @@ import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.logging.LogLevel;
 import liquibase.logging.Logger;
 
+import java.util.Stack;
+
 public abstract class AbstractLogger  implements Logger {
     private LogLevel logLevel;
+    private Stack<String> contextStack = new Stack<String>();
+
 
     public LogLevel getLogLevel() {
         return logLevel;
@@ -29,5 +33,23 @@ public abstract class AbstractLogger  implements Logger {
 
     public void setLogLevel(LogLevel level) {
         this.logLevel = level;
+    }
+
+
+    public void pushContext(String context) {
+        contextStack.push(context);
+    }
+
+    public void popContext() {
+        if (! contextStack.empty()) {
+            contextStack.pop();
+        }
+    }
+
+    String getContext() {
+        if ( contextStack.empty()) {
+            return "";
+        }
+        return contextStack.peek();
     }
 }

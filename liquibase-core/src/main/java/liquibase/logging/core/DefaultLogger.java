@@ -12,7 +12,7 @@ import java.util.Date;
 public class DefaultLogger extends AbstractLogger {
 
     private String name = "liquibase";
-    private PrintStream err = System.err;
+    private PrintStream stream = System.err;
 
     public DefaultLogger() {
         String passedLevel = System.getProperty("liquibase.defaultlogger.level");
@@ -31,6 +31,14 @@ public class DefaultLogger extends AbstractLogger {
         this.name = name;
     }
 
+    public String getName() {
+        return this.name;
+    }
+
+    protected PrintStream getStream() {
+        return stream;
+    }
+
     public void setLogLevel(String logLevel, String logFile) {
         setLogLevel(logLevel);
         if (logFile != null) {
@@ -41,7 +49,7 @@ public class DefaultLogger extends AbstractLogger {
                         throw new RuntimeException("Could not create logFile "+log.getAbsolutePath());
                     }
                 }
-                err = new PrintStream(log);
+                stream = new PrintStream(log);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -59,13 +67,18 @@ public class DefaultLogger extends AbstractLogger {
             return;
         }
         
-        err.println(logLevel+" "+DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(new Date())+ ":"+name + ": " + message);
+        stream.println(logLevel + " " + buildDate() + ":" + name + ":" + getContext() + ": " + message);
+    }
+
+
+    protected String buildDate() {
+        return DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(new Date());
     }
 
     public void severe(String message, Throwable e) {
         if (getLogLevel().compareTo(LogLevel.SEVERE) <=0) {
             print(LogLevel.SEVERE, message);
-            e.printStackTrace(err);
+            e.printStackTrace(stream);
         }
     }
 
@@ -78,7 +91,7 @@ public class DefaultLogger extends AbstractLogger {
     public void warning(String message, Throwable e) {
         if (getLogLevel().compareTo(LogLevel.WARNING) <=0) {
             print(LogLevel.WARNING, message);
-            e.printStackTrace(err);
+            e.printStackTrace(stream);
         }
     }
 
@@ -91,7 +104,7 @@ public class DefaultLogger extends AbstractLogger {
     public void info(String message, Throwable e) {
         if (getLogLevel().compareTo(LogLevel.INFO) <=0) {
             print(LogLevel.INFO, message);
-            e.printStackTrace(err);
+            e.printStackTrace(stream);
         }
     }
 
@@ -104,8 +117,9 @@ public class DefaultLogger extends AbstractLogger {
     public void debug(String message, Throwable e) {
         if (getLogLevel().compareTo(LogLevel.DEBUG) <=0) {
             print(LogLevel.DEBUG, message);
-            e.printStackTrace(err);
+            e.printStackTrace(stream);
         }
 
     }
+
 }
