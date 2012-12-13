@@ -13,6 +13,7 @@ public class RollbackVisitorTest {
         Database database = createMock(Database.class);
 
         ChangeSet changeSet = createMock(ChangeSet.class);
+        expect(changeSet.toString(false)).andReturn("/my/db/changelog.xml::addtables-24::devgal71");
         changeSet.rollback(database);
         expectLastCall();
 
