@@ -24,6 +24,10 @@ public class SqlGeneratorFactory {
 
     private List<SqlGenerator> generators = new ArrayList<SqlGenerator>();
 
+    //caches for expensive reflection based calls that slow down Liquibase initialization: CORE-1207
+    private final Map<Class<?>, Type[]> genericInterfacesCache = new HashMap<Class<?>, Type[]>();
+    private final Map<Class<?>, Type> genericSuperClassCache = new HashMap<Class<?>, Type>();
+
     private SqlGeneratorFactory() {
         Class[] classes;
         try {
@@ -89,7 +93,7 @@ public class SqlGeneratorFactory {
                     checkType(classType, statement, generator, database, validGenerators);
                 }
 
-                for (Type type : clazz.getGenericInterfaces()) {
+                for (Type type : getGenericInterfaces(clazz)) {
                     if (type instanceof ParameterizedType) {
                         checkType(type, statement, generator, database, validGenerators);
                     } else if (isTypeEqual(type, SqlGenerator.class)) {
@@ -99,11 +103,31 @@ public class SqlGeneratorFactory {
                         }
                     }
                 }
-                classType = clazz.getGenericSuperclass();
+                classType = getGenericSuperclass(clazz);
                 clazz = clazz.getSuperclass();
             }
         }
         return validGenerators;
+    }
+
+    private Type[] getGenericInterfaces(Class<?> clazz) {
+        if(genericInterfacesCache.containsKey(clazz)) {
+            return genericInterfacesCache.get(clazz);
+        }
+
+        Type[] genericInterfaces = clazz.getGenericInterfaces();
+        genericInterfacesCache.put(clazz, genericInterfaces);
+        return genericInterfaces;
+    }
+
+    private Type getGenericSuperclass(Class<?> clazz) {
+        if(genericSuperClassCache.containsKey(clazz)) {
+            return genericSuperClassCache.get(clazz);
+        }
+
+        Type genericSuperclass = clazz.getGenericSuperclass();
+        genericSuperClassCache.put(clazz, genericSuperclass);
+        return genericSuperclass;
     }
 
     private boolean isTypeEqual(Type aType, Class aClass) {
