@@ -61,25 +61,23 @@ public class TableSnapshotGenerator extends JdbcSnapshotGenerator {
             Database database = snapshot.getDatabase();
             Schema schema = (Schema) foundObject;
 
-            if (schema != null) {
-                ResultSet tableMetaDataRs = null;
-                try {
-                    tableMetaDataRs = getMetaData(database).getTables(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), null, new String[]{"TABLE"});
-                    while (tableMetaDataRs.next()) {
-                        String tableName = tableMetaDataRs.getString("TABLE_NAME");
-                        Table tableExample = (Table) new Table().setName(tableName).setSchema(schema);
+            ResultSet tableMetaDataRs = null;
+            try {
+                tableMetaDataRs = getMetaData(database).getTables(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), null, new String[]{"TABLE"});
+                while (tableMetaDataRs.next()) {
+                    String tableName = tableMetaDataRs.getString("TABLE_NAME");
+                    Table tableExample = (Table) new Table().setName(tableName).setSchema(schema);
 
-                        schema.addDatabaseObject(tableExample);
+                    schema.addDatabaseObject(tableExample);
+                }
+            } catch (SQLException e) {
+                throw new DatabaseException(e);
+            } finally {
+                try {
+                    if (tableMetaDataRs != null) {
+                        tableMetaDataRs.close();
                     }
-                } catch (SQLException e) {
-                    throw new DatabaseException(e);
-                } finally {
-                    try {
-                        if (tableMetaDataRs != null) {
-                            tableMetaDataRs.close();
-                        }
-                    } catch (SQLException ignore) {
-                    }
+                } catch (SQLException ignore) {
                 }
             }
         }

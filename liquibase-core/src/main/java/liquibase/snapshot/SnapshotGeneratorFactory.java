@@ -109,6 +109,7 @@ public class SnapshotGeneratorFactory {
     public DatabaseSnapshot createSnapshot(CatalogAndSchema[] examples, Database database, SnapshotControl snapshotControl) throws DatabaseException, InvalidExampleException {
         Schema[] schemas = new Schema[examples.length];
         for (int i = 0; i< schemas.length; i++) {
+            examples[i] = database.correctSchema(examples[i]);
             schemas[i] = new Schema(examples[i].getCatalogName(), examples[i].getSchemaName());
         }
         return createSnapshot(schemas, database, snapshotControl);

@@ -36,9 +36,18 @@ public class CatalogSnapshotGenerator extends JdbcSnapshotGenerator {
         example = new Catalog(catalogName);
 
         try {
-            catalogs = ((JdbcConnection) database.getConnection()).getMetaData().getCatalogs();
+            if (((AbstractJdbcDatabase) database).jdbcCallsCatalogsSchemas()) {
+                catalogs = ((JdbcConnection) database.getConnection()).getMetaData().getSchemas();
+            } else {
+                catalogs = ((JdbcConnection) database.getConnection()).getMetaData().getCatalogs();
+            }
             while (catalogs.next()) {
-                CatalogAndSchema schemaFromJdbcInfo = ((AbstractJdbcDatabase) database).getSchemaFromJdbcInfo(catalogs.getString("TABLE_CAT"), null);
+                CatalogAndSchema schemaFromJdbcInfo;
+                if (((AbstractJdbcDatabase) database).jdbcCallsCatalogsSchemas()) {
+                    schemaFromJdbcInfo = ((AbstractJdbcDatabase) database).getSchemaFromJdbcInfo(catalogs.getString("TABLE_SCHEM"), null);
+                } else {
+                    schemaFromJdbcInfo = ((AbstractJdbcDatabase) database).getSchemaFromJdbcInfo(catalogs.getString("TABLE_CAT"), null);
+                }
 
                 Catalog catalog = new Catalog(schemaFromJdbcInfo.getCatalogName());
 

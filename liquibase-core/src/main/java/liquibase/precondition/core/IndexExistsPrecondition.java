@@ -103,6 +103,7 @@ public class IndexExistsPrecondition implements Precondition {
                 throw new PreconditionFailedException("Index "+ name +" does not exist", changeLog, this);
             }
         } catch (Exception e) {
+            e.printStackTrace();
             throw new PreconditionErrorException(e, changeLog, this);
         }
     }

@@ -23,6 +23,10 @@ public class SnapshotGeneratorChain {
             return null;
         }
 
+        if (snapshot.getDatabase().isSystemObject(example)) {
+            return null;
+        }
+
         if (!snapshot.getSnapshotControl().shouldInclude(example.getClass())) {
             return null;
         }
@@ -36,7 +40,7 @@ public class SnapshotGeneratorChain {
         }
 
         T obj = snapshotGenerators.next().snapshot(example, snapshot, this);
-        if (obj != null) {
+        if (obj != null && obj.getSnapshotId() == null) {
             obj.setSnapshotId(UUID.randomUUID());
         }
         return obj;

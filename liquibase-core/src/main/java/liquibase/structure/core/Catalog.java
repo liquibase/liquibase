@@ -50,21 +50,4 @@ public class Catalog extends AbstractDatabaseObject {
     public int hashCode() {
         return name != null ? name.hashCode() : 0;
     }
-
-    public static class DatabaseSpecific extends Catalog {
-        private Database database;
-
-        public DatabaseSpecific(String name, Database database) {
-            super(name);
-            this.database = database;
-            if (name == null) {
-                this.name = null;
-            }
-        }
-
-        public Database getDatabase() {
-            return database;
-        }
-
-    }
 }

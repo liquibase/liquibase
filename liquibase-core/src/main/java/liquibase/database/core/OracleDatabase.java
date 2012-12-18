@@ -8,6 +8,8 @@ import liquibase.structure.DatabaseObject;
 import liquibase.exception.DatabaseException;
 import liquibase.logging.LogFactory;
 import liquibase.statement.DatabaseFunction;
+import liquibase.structure.core.Catalog;
+import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
 
 import java.lang.reflect.Method;
@@ -27,36 +29,39 @@ public class OracleDatabase extends AbstractJdbcDatabase {
 
     private Set<String> reservedWords = new HashSet<String>();
 
-	public OracleDatabase() {
-		// Setting list of Oracle's native functions
-		dateFunctions.add(new DatabaseFunction("SYSDATE"));
-		dateFunctions.add(new DatabaseFunction("SYSTIMESTAMP"));
+    public OracleDatabase() {
+        // Setting list of Oracle's native functions
+        dateFunctions.add(new DatabaseFunction("SYSDATE"));
+        dateFunctions.add(new DatabaseFunction("SYSTIMESTAMP"));
         dateFunctions.add(new DatabaseFunction("CURRENT_TIMESTAMP"));
-	}
+    }
 
-	public int getPriority() {
+    public int getPriority() {
         return PRIORITY_DEFAULT;
     }
 
     @Override
     public String correctObjectName(String objectName, Class<? extends DatabaseObject> objectType) {
+        if (objectName == null) {
+            return null;
+        }
         return objectName.toUpperCase();
     }
 
     @Override
     public void setConnection(DatabaseConnection conn) {
         try {
-        	Method wrappedConn = conn.getClass().getMethod("getWrappedConnection");
-        	wrappedConn.setAccessible(true);
-        	Connection sqlConn = (Connection)wrappedConn.invoke(conn);
+            Method wrappedConn = conn.getClass().getMethod("getWrappedConnection");
+            wrappedConn.setAccessible(true);
+            Connection sqlConn = (Connection) wrappedConn.invoke(conn);
             Method method = sqlConn.getClass().getMethod("setRemarksReporting", Boolean.TYPE);
             method.setAccessible(true);
             method.invoke(sqlConn, true);
 
             reservedWords.addAll(Arrays.asList(sqlConn.getMetaData().getSQLKeywords().toUpperCase().split(",\\s*")));
-            reservedWords.addAll(Arrays.asList("USER", "SESSION","RESOURCE")); //more reserved words not returned by driver
+            reservedWords.addAll(Arrays.asList("USER", "SESSION", "RESOURCE")); //more reserved words not returned by driver
         } catch (Exception e) {
-            LogFactory.getLogger().info("Could not set remarks reporting on OracleDatabase: "+e.getMessage());
+            LogFactory.getLogger().info("Could not set remarks reporting on OracleDatabase: " + e.getMessage());
             ; //cannot set it. That is OK
         }
         super.setConnection(conn);
@@ -73,6 +78,16 @@ public class OracleDatabase extends AbstractJdbcDatabase {
 
     public Integer getDefaultPort() {
         return 1521;
+    }
+
+    @Override
+    public String getJdbcCatalogName(CatalogAndSchema schema) {
+        return null;
+    }
+
+    @Override
+    public String getJdbcSchemaName(CatalogAndSchema schema) {
+        return schema.getCatalogName();
     }
 
     @Override
@@ -111,6 +126,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
 
     /**
      * Oracle supports catalogs in liquibase terms
+     *
      * @return
      */
     @Override
@@ -177,7 +193,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
             val.append(", 'HH24:MI:SS')");
             return val.toString();
         } else if (isDateTime(isoDate)) {
-            normalLiteral = normalLiteral.substring(0, normalLiteral.lastIndexOf('.'))+"'";
+            normalLiteral = normalLiteral.substring(0, normalLiteral.lastIndexOf('.')) + "'";
 
             StringBuffer val = new StringBuffer(26);
             val.append("to_date(");
@@ -191,7 +207,25 @@ public class OracleDatabase extends AbstractJdbcDatabase {
 
     @Override
     public boolean isSystemObject(DatabaseObject example) {
-        if (example instanceof Table) {
+        if (example == null) {
+            return false;
+        }
+
+        if (example instanceof Schema) {
+            if ("SYSTEM".equals(example.getName()) || "SYS".equals(example.getName()) || "CTXSYS".equals(example.getName())|| "XDB".equals(example.getName())) {
+                return true;
+            }
+            if ("SYSTEM".equals(example.getSchema().getCatalogName()) || "SYS".equals(example.getSchema().getCatalogName()) || "CTXSYS".equals(example.getSchema().getCatalogName()) || "XDB".equals(example.getSchema().getCatalogName())) {
+                return true;
+            }
+        }else if (isSystemObject(example.getSchema())) {
+            return true;
+        }
+        if (example instanceof Catalog) {
+            if (("SYSTEM".equals(example.getName()) || "SYS".equals(example.getName()) || "CTXSYS".equals(example.getName()) || "XDB".equals(example.getName()))) {
+                return true;
+            }
+        } else if (example instanceof Table) {
             if (example.getName().startsWith("BIN$")) { //oracle deleted table
                 return true;
             } else if (example.getName().startsWith("AQ$")) { //oracle AQ tables
@@ -250,5 +284,10 @@ public class OracleDatabase extends AbstractJdbcDatabase {
             return 0;
         }
         return super.getDataTypeMaxParameters(dataTypeName);
+    }
+
+    @Override
+    public boolean jdbcCallsCatalogsSchemas() {
+        return true;
     }
 }

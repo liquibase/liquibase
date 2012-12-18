@@ -23,4 +23,18 @@ public class CatalogAndSchema {
     public boolean equals(CatalogAndSchema catalogAndSchema, Database database) {
         return this.equals(catalogAndSchema); //todo: use database param or remove method
     }
+
+    @Override
+    public String toString() {
+        if (catalogName == null && schemaName == null) {
+            return "DEFAULT";
+        }
+        if (catalogName != null && schemaName == null) {
+            return catalogName;
+        }
+        if (catalogName == null && schemaName != null) {
+            return schemaName;
+        }
+        return catalogName+"."+schemaName;
+    }
 }

@@ -65,6 +65,9 @@ public class Schema extends AbstractDatabaseObject {
     }
 
     public String getCatalogName() {
+        if (catalog == null) {
+            return null;
+        }
         return catalog.getName();
     }
     

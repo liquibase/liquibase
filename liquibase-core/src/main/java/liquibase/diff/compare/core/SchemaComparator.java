@@ -30,6 +30,9 @@ public class SchemaComparator implements DatabaseObjectComparator {
         Schema otherSchema = (Schema) databaseObject2;
 
         if (accordingTo.supportsCatalogs()) {
+            if (thisSchema.getCatalog() == null) {
+                return otherSchema.getCatalog() == null || accordingTo.getDefaultCatalogName().equals(otherSchema.getCatalogName());
+            }
             if (!thisSchema.getCatalogName().equals(otherSchema.getCatalogName())) {
                 return false;
             }

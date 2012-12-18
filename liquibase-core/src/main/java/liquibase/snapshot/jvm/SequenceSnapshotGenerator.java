@@ -81,7 +81,7 @@ public class SequenceSnapshotGenerator extends JdbcSnapshotGenerator {
         } else if (database instanceof MaxDBDatabase) {
             return "SELECT SEQUENCE_NAME FROM DOMAIN.SEQUENCES WHERE OWNER = '" + schema.getName() + "'";
         } else if (database instanceof OracleDatabase) {
-            return "SELECT SEQUENCE_NAME FROM ALL_SEQUENCES WHERE SEQUENCE_OWNER = '" + schema.getName() + "'";
+            return "SELECT SEQUENCE_NAME FROM ALL_SEQUENCES WHERE SEQUENCE_OWNER = '" + schema.getCatalogName() + "'";
         } else if (database instanceof PostgresDatabase) {
             return "SELECT relname AS SEQUENCE_NAME FROM pg_class, pg_namespace " +
                     "WHERE relkind='S' " +

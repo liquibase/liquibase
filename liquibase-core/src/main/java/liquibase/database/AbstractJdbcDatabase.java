@@ -959,6 +959,10 @@ public abstract class AbstractJdbcDatabase implements Database {
         return true;
     }
 
+    public boolean jdbcCallsCatalogsSchemas() {
+        return false;
+    }
+
     public boolean supportsCatalogInObjectName() {
         return true;
     }

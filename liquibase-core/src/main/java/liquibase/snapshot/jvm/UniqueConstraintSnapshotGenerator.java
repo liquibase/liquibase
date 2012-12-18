@@ -4,6 +4,7 @@ import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.core.MySQLDatabase;
+import liquibase.database.core.OracleDatabase;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.ExecutorService;
 import liquibase.snapshot.InvalidExampleException;
@@ -85,6 +86,12 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
                     "where constraint_type = 'Unique' " +
                     "and constraint_schema='"+database.correctObjectName(schema.getName(), Schema.class)+"' "+
                     "and table_name='"+database.correctObjectName(table.getName(), Table.class)+"'";
+        } else if (database instanceof OracleDatabase) {
+            sql = "select uc.constraint_name, uc.table_name,uc.status,uc.deferrable,uc.deferred,ui.tablespace_name from all_constraints uc, all_cons_columns ucc, all_indexes ui " +
+                    "where uc.constraint_type='U' and uc.index_name = ui.index_name and uc.constraint_name = ucc.constraint_name " +
+                    "and uc.owner = '" + database.correctObjectName(schema.getCatalogName(), Catalog.class) + "' " +
+                    "and ui.table_owner = '" + database.correctObjectName(schema.getCatalogName(), Catalog.class) + "' " +
+                    "and ucc.owner = '" + database.correctObjectName(schema.getCatalogName(), Catalog.class) + "'";
         } else {
             sql = "select CONSTRAINT_NAME, CONSTRAINT_TYPE " +
                     "from information_schema.constraints " +
@@ -122,6 +129,9 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
                     "and TC.table_name='" + database.correctObjectName(example.getTable().getName(), Table.class) + "' " +
                     "and TC.Constraint_Name='" + database.correctObjectName(name, UniqueConstraint.class) + "'" +
                     "order by TC.Constraint_Name";
+        } else if (database instanceof OracleDatabase) {
+            sql = "select ucc.column_name from all_cons_columns ucc where ucc.constraint_name='"+database.correctObjectName(name, UniqueConstraint.class)+"' and ucc.owner='"+database.correctObjectName(schema.getCatalogName(), Catalog.class)+"' order by ucc.position";
+
         } else {
             sql = "select CONSTRAINT_NAME, COLUMN_LIST as COLUMN_NAME " +
                     "from information_schema.constraints " +

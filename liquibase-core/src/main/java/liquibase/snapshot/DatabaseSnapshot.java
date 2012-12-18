@@ -1,5 +1,6 @@
 package liquibase.snapshot;
 
+import liquibase.CatalogAndSchema;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
@@ -45,7 +46,16 @@ public class DatabaseSnapshot {
 //    }
 
     protected  <T extends DatabaseObject> T include(T example) throws DatabaseException, InvalidExampleException {
-        T existing = get(example);
+        if (database.isSystemObject(example)) {
+            return null;
+        }
+
+        if (example instanceof Schema && example.getName() == null && (((Schema) example).getCatalog() == null || ((Schema) example).getCatalogName() == null)) {
+            CatalogAndSchema catalogAndSchema = database.correctSchema(((Schema) example).toCatalogAndSchema());
+            example = (T) new Schema(catalogAndSchema.getCatalogName(), catalogAndSchema.getSchemaName());
+        }
+
+       T existing = get(example);
         if (existing != null) {
             return existing;
         }
