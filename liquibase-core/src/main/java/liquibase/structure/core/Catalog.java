@@ -1,23 +1,20 @@
 package liquibase.structure.core;
 
-import liquibase.database.Database;
 import liquibase.structure.AbstractDatabaseObject;
 import liquibase.structure.DatabaseObject;
 
 public class Catalog extends AbstractDatabaseObject {
 
-    protected String name;
-
     public Catalog() {
     }
 
     public Catalog(String name) {
-        this.name = name;
+        setAttribute("name", name);
     }
 
     @Override
     public String toString() {
-        return name;
+        return getName();
     }
 
     public DatabaseObject[] getContainingObjects() {
@@ -29,7 +26,7 @@ public class Catalog extends AbstractDatabaseObject {
     }
 
     public String getName() {
-        return name;
+        return getAttribute("name", String.class);
     }
     
     @Override
@@ -39,7 +36,7 @@ public class Catalog extends AbstractDatabaseObject {
 
         Catalog catalog = (Catalog) o;
 
-        if (name != null ? !name.equals(catalog.name) : catalog.name != null) return false;
+        if (getName() != null ? !getName().equals(catalog.getName()) : catalog.getName() != null) return false;
 
         return true;
     }
@@ -48,6 +45,6 @@ public class Catalog extends AbstractDatabaseObject {
 
     @Override
     public int hashCode() {
-        return name != null ? name.hashCode() : 0;
+        return getName() != null ? getName().hashCode() : 0;
     }
 }

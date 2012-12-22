@@ -82,31 +82,26 @@ public class DatabaseSnapshot {
             }
             collection.add(object);
 
-            includeNestedObjects(object);
+            try {
+                includeNestedObjects(object);
+            } catch (InstantiationException e) {
+                throw new UnexpectedLiquibaseException(e);
+            } catch (IllegalAccessException e) {
+                throw new UnexpectedLiquibaseException(e);
+            }
         }
         return object;
     }
 
-    private void includeNestedObjects(DatabaseObject object) throws DatabaseException, InvalidExampleException {
-        try {
-            Class clazz = object.getClass();
-            do {
-                for (Field field : clazz.getDeclaredFields()) {
-                    field.setAccessible(true);
-                    Object fieldValue = field.get(object);
-                    Object newFieldValue = replaceObject(fieldValue);
-                    if (fieldValue != newFieldValue) {
-                        field.set(object, newFieldValue);
-                    }
-
+    private void includeNestedObjects(DatabaseObject object) throws DatabaseException, InvalidExampleException, InstantiationException, IllegalAccessException {
+            for (String field : new HashSet<String>(object.getAttributes())) {
+                Object fieldValue = object.getAttribute(field, Object.class);
+                Object newFieldValue = replaceObject(fieldValue);
+                if (fieldValue != newFieldValue) {
+                    object.setAttribute(field, newFieldValue);
                 }
-                clazz = clazz.getSuperclass();
-            } while (clazz != null && !clazz.equals(Object.class));
-        } catch (IllegalAccessException e) {
-            throw new UnexpectedLiquibaseException(e);
-        } catch (InstantiationException e) {
-            throw new UnexpectedLiquibaseException(e);
-        }
+
+            }
     }
 
     private Object replaceObject(Object fieldValue) throws DatabaseException, InvalidExampleException, IllegalAccessException, InstantiationException {

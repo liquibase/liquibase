@@ -8,93 +8,91 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class UniqueConstraint extends AbstractDatabaseObject {
-	private String name;
-	private Table table;
-	private List<String> columns = new ArrayList<String>();
 
-	private boolean deferrable;
-	private boolean initiallyDeferred;
-	private boolean disabled;
-	
-    private Index backingIndex;
+    public UniqueConstraint() {
+        setAttribute("columns", new ArrayList());
+        setAttribute("deferrable", false);
+        setAttribute("initiallyDeferred", false);
+        setAttribute("disabled", false);
+    }
 
 	public DatabaseObject[] getContainingObjects() {
 		List<DatabaseObject> columns = new ArrayList<DatabaseObject>();
-		for (String column : this.columns) {
-			columns.add(new Column().setName(column).setRelation(table));
+		for (String column : this.getColumns()) {
+			columns.add(new Column().setName(column).setRelation(getTable()));
 		}
 
 		return columns.toArray(new DatabaseObject[columns.size()]);
 	}
 
 	public String getName() {
-		return name;
+		return getAttribute("name", String.class);
 	}
 
 	public UniqueConstraint setName(String constraintName) {
-        this.name = constraintName;
+        this.setAttribute("name", constraintName);
         return this;
 
     }
 
     public Schema getSchema() {
-        if (table == null) {
+        if (getTable() == null) {
             return null;
         }
 
-        return table.getSchema();
+        return getTable().getSchema();
     }
 
 	public Table getTable() {
-		return table;
+		return getAttribute("table", Table.class);
 	}
 
 	public UniqueConstraint setTable(Table table) {
-		this.table = table;
+		this.setAttribute("table", table);
         return this;
     }
 
 	public List<String> getColumns() {
-		return columns;
+		return getAttribute("columns", List.class);
 	}
 
 	public boolean isDeferrable() {
-		return deferrable;
+		return getAttribute("deferrable", Boolean.class);
 	}
 
 	public UniqueConstraint setDeferrable(boolean deferrable) {
-		this.deferrable = deferrable;
+		this.setAttribute("deferrable",  deferrable);
         return this;
     }
 
 	public boolean isInitiallyDeferred() {
-		return initiallyDeferred;
+		return getAttribute("initiallyDeferred", Boolean.class);
 	}
 
 	public UniqueConstraint setInitiallyDeferred(boolean initiallyDeferred) {
-		this.initiallyDeferred = initiallyDeferred;
+		this.setAttribute("initiallyDeferred", initiallyDeferred);
         return this;
     }
 
 	public String getColumnNames() {
-		return StringUtils.join(columns, ", ");
+		return StringUtils.join(getColumns(), ", ");
 	}
 
 	public UniqueConstraint setDisabled(boolean disabled) {
-		this.disabled = disabled;
+		this.setAttribute("disabled", disabled);
         return this;
     }
 
 	public boolean isDisabled() {
-		return disabled;
+		return getAttribute("disabled", Boolean.class);
 	}
 
     public Index getBackingIndex() {
-        return backingIndex;
+        return getAttribute("backingIndex", Index.class);
     }
 
     public UniqueConstraint setBackingIndex(Index backingIndex) {
-        this.backingIndex = backingIndex;
+        this.setAttribute("backingIndex", backingIndex);
         return this;
 
     }
@@ -154,11 +152,11 @@ public class UniqueConstraint extends AbstractDatabaseObject {
 	@Override
 	public int hashCode() {
 		int result = 0;
-		if (this.table != null) {
-			result = this.table.hashCode();
+		if (this.getTable() != null) {
+			result = this.getTable().hashCode();
 		}
-		if (this.name != null) {
-			result = 31 * result + this.name.toUpperCase().hashCode();
+		if (this.getName() != null) {
+			result = 31 * result + this.getName().toUpperCase().hashCode();
 		}
 		if (getColumnNames() != null) {
 			result = 31 * result + getColumnNames().hashCode();

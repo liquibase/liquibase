@@ -7,37 +7,36 @@ import java.util.Set;
 
 public class Table extends Relation {
 
-    private PrimaryKey primaryKey;
-    private List<ForeignKey> outgoingForeignKeys = new ArrayList<ForeignKey>();
-    private List<ForeignKey> incomingForeignKeys = new ArrayList<ForeignKey>();
-    private List<Index> indexes = new ArrayList<Index>();
-    private List<UniqueConstraint> uniqueConstraints = new ArrayList<UniqueConstraint>();
 
     public Table() {
+        setAttribute("outgoingForeignKeys", new ArrayList<ForeignKey>());
+        setAttribute("incomingForeignKeys", new ArrayList<ForeignKey>());
+        setAttribute("indexes", new ArrayList<Index>());
+        setAttribute("uniqueConstraints", new ArrayList<UniqueConstraint>());
     }
 
     public PrimaryKey getPrimaryKey() {
-        return primaryKey;
+        return getAttribute("primaryKey", PrimaryKey.class);
     }
 
     public void setPrimaryKey(PrimaryKey primaryKey) {
-        this.primaryKey = primaryKey;
+        this.setAttribute("primaryKey", primaryKey);
     }
 
     public List<ForeignKey> getOutgoingForeignKeys() {
-        return outgoingForeignKeys;
+        return getAttribute("outgoingForeignKeys", List.class);
     }
 
     public List<ForeignKey> getIncomingForeignKeys() {
-        return incomingForeignKeys;
+        return getAttribute("incomingForeignKeys", List.class);
     }
 
     public List<Index> getIndexes() {
-        return indexes;
+        return getAttribute("indexes", List.class);
     }
 
     public List<UniqueConstraint> getUniqueConstraints() {
-        return uniqueConstraints;
+        return getAttribute("uniqueConstraints", List.class);
     }
 
     @Override
@@ -47,22 +46,22 @@ public class Table extends Relation {
 
         Table that = (Table) o;
 
-        return name.equalsIgnoreCase(that.name);
+        return getName().equalsIgnoreCase(that.getName());
 
     }
 
     @Override
     public int hashCode() {
-        return name.toUpperCase().hashCode();
+        return getName().toUpperCase().hashCode();
     }
 
     @Override
     public String toString() {
-    	return getName();
+        return getName();
     }
 
     public Table setName(String name) {
-        this.name = name;
+        setAttribute("name", name);
         return this;
     }
 

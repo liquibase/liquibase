@@ -4,6 +4,7 @@ import liquibase.CatalogAndSchema;
 import liquibase.database.Database;
 import liquibase.structure.core.Schema;
 
+import java.util.Set;
 import java.util.UUID;
 
 public interface DatabaseObject extends Comparable{
@@ -20,4 +21,10 @@ public interface DatabaseObject extends Comparable{
 
     boolean snapshotByDefault();
 
+    Set<String> getAttributes();
+
+    <T> T getAttribute(String attribute, Class<T> type);
+
+    DatabaseObject setAttribute(String attribute, Object value);
 }
+

@@ -1,7 +1,6 @@
 package liquibase.structure.core;
 
 public class View extends Relation {
-    private String definition;
 
     public View() {
     }
@@ -12,11 +11,11 @@ public class View extends Relation {
     }
 
     public String getDefinition() {
-        return definition;
+        return getAttribute("definition", String.class);
     }
 
     public void setDefinition(String definition) {
-        this.definition = definition;
+        this.setAttribute("definition", definition);
     }
 
     @Override
@@ -26,13 +25,13 @@ public class View extends Relation {
 
         View that = (View) o;
 
-        return name.equalsIgnoreCase(that.name);
+        return getName().equalsIgnoreCase(that.getName());
 
     }
 
     @Override
     public int hashCode() {
-        return name.toUpperCase().hashCode();
+        return getName().toUpperCase().hashCode();
     }
 
     @Override
@@ -50,7 +49,7 @@ public class View extends Relation {
     }
 
     public View setName(String name) {
-        this.name = name;
+        this.setAttribute("name", name);
         return this;
     }
 

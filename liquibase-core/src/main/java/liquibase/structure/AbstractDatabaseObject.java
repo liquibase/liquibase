@@ -4,9 +4,14 @@ import liquibase.CatalogAndSchema;
 import liquibase.database.Database;
 import liquibase.exception.UnexpectedLiquibaseException;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 public abstract class AbstractDatabaseObject implements DatabaseObject {
+
+    private Map<String, Object> attributes = new HashMap<String, Object>();
 
     private UUID snapshotId;
 
@@ -27,5 +32,22 @@ public abstract class AbstractDatabaseObject implements DatabaseObject {
 
     public int compareTo(Object o) {
         return this.getName().compareTo(((AbstractDatabaseObject) o).getName());
+    }
+
+    public Set<String> getAttributes() {
+        return attributes.keySet();
+    }
+
+    public <T> T getAttribute(String attribute, Class<T> type) {
+        return (T) attributes.get(attribute);
+    }
+
+    public DatabaseObject setAttribute(String attribute, Object value) {
+        if (value == null) {
+            attributes.remove(attribute);
+        } else {
+            attributes.put(attribute, value);
+        }
+        return this;
     }
 }

@@ -9,23 +9,21 @@ import java.util.*;
 
 public class Schema extends AbstractDatabaseObject {
 
-    private Catalog catalog;
-    private String name;
-    private Map<Class<? extends DatabaseObject>, Set<DatabaseObject>> objects = new HashMap<Class<? extends DatabaseObject>, Set<DatabaseObject>>();
-
     public DatabaseObject[] getContainingObjects() {
         return null;
     }
 
     public Schema() {
+        setAttribute("objects",  new HashMap<Class<? extends DatabaseObject>, Set<DatabaseObject>>());
     }
 
     public Schema(String catalog, String schemaName) {
         catalog = StringUtils.trimToNull(catalog);
         schemaName = StringUtils.trimToNull(schemaName);
 
-        this.name = schemaName;
-        this.catalog = new Catalog(catalog);
+        setAttribute("name", schemaName);
+        setAttribute("catalog", new Catalog(catalog));
+        setAttribute("objects",  new HashMap<Class<? extends DatabaseObject>, Set<DatabaseObject>>());
     }
     
     public Schema(Catalog catalog, String name) {
@@ -33,7 +31,7 @@ public class Schema extends AbstractDatabaseObject {
     }
 
     public String getName() {
-        return name;
+        return getAttribute("name", String.class);
     }
     
     public Schema getSchema() {
@@ -41,7 +39,7 @@ public class Schema extends AbstractDatabaseObject {
     }
 
     public Catalog getCatalog() {
-        return catalog;
+        return getAttribute("catalog", Catalog.class);
     }
 
     @Override
@@ -51,37 +49,41 @@ public class Schema extends AbstractDatabaseObject {
 
         Schema schema = (Schema) o;
 
-        if (catalog != null ? !catalog.equals(schema.catalog) : schema.catalog != null) return false;
-        if (name != null ? !name.equals(schema.name) : schema.name != null) return false;
+        if (getCatalog() != null ? !getCatalog().equals(schema.getCatalog()) : schema.getCatalog() != null) return false;
+        if (getName() != null ? !getName().equals(schema.getName()) : schema.getName() != null) return false;
 
         return true;
     }
 
     @Override
     public int hashCode() {
-        int result = catalog != null ? catalog.hashCode() : 0;
-        result = 31 * result + (name != null ? name.hashCode() : 0);
+        int result = getCatalog() != null ? getCatalog().hashCode() : 0;
+        result = 31 * result + (getName() != null ? getName().hashCode() : 0);
         return result;
     }
 
     public String getCatalogName() {
-        if (catalog == null) {
+        if (getCatalog() == null) {
             return null;
         }
-        return catalog.getName();
+        return getCatalog().getName();
     }
     
     @Override
     public String toString() {
-        return catalog.getName()+"."+name;
+        return getCatalog().getName()+"."+getName();
     }
 
     public CatalogAndSchema toCatalogAndSchema() {
         return new CatalogAndSchema(getCatalogName(), getName());
     }
 
+    protected Map<Class<? extends DatabaseObject>, Set<DatabaseObject>> getObjects() {
+        return getAttribute("objects", Map.class);
+    }
+
     public <DatabaseObjectType extends DatabaseObject> List<DatabaseObjectType> getDatabaseObjects(Class<DatabaseObjectType> type) {
-        Set<DatabaseObjectType> databaseObjects = (Set<DatabaseObjectType>) this.objects.get(type);
+        Set<DatabaseObjectType> databaseObjects = (Set<DatabaseObjectType>) getObjects().get(type);
         if (databaseObjects == null) {
             return new ArrayList<DatabaseObjectType>();
         }
@@ -92,10 +94,10 @@ public class Schema extends AbstractDatabaseObject {
         if (databaseObject == null) {
             return;
         }
-        Set<DatabaseObject> objects = this.objects.get(databaseObject.getClass());
+        Set<DatabaseObject> objects = this.getObjects().get(databaseObject.getClass());
         if (objects == null) {
             objects = new HashSet<DatabaseObject>();
-            this.objects.put(databaseObject.getClass(), objects);
+            this.getObjects().put(databaseObject.getClass(), objects);
         }
         objects.add(databaseObject);
 

@@ -4,62 +4,62 @@ import liquibase.structure.AbstractDatabaseObject;
 import liquibase.structure.DatabaseObject;
 import liquibase.util.StringUtils;
 
+import javax.swing.text.TableView;
 import java.util.ArrayList;
 import java.util.List;
 
 public class PrimaryKey extends AbstractDatabaseObject {
-    private String name;
-    private List<String> columnNames = new ArrayList<String>();
-    private Table table;
-    private boolean certainName = true;
-	private String tablespace;
-    private Index backingIndex;
+
+    public PrimaryKey() {
+        setAttribute("columnNames", new ArrayList());
+    }
 
     public DatabaseObject[] getContainingObjects() {
         return new DatabaseObject[] {
-                table
+                getTable()
         };
     }
 
     public String getName() {
-        return name;
+        return getAttribute("name", String.class);
     }
 
     public PrimaryKey setName(String name) {
-        this.name = name;
+        this.setAttribute("name", name);
         return this;
     }
 
     public Schema getSchema() {
-        if (table == null) {
+        if (getTable() == null) {
             return null;
         }
-        return table.getSchema();
+        return getTable().getSchema();
     }
 
     public String getColumnNames() {
-        return StringUtils.join(columnNames, ", ");
+        return StringUtils.join(getColumnNamesAsList(), ", ");
     }
 
     public void addColumnName(int position, String columnName) {
-        if (position >= columnNames.size()) {
-            for (int i = columnNames.size()-1; i < position; i++) {
-                this.columnNames.add(null);
+        if (position >= getColumnNamesAsList().size()) {
+            for (int i = getColumnNamesAsList().size()-1; i < position; i++) {
+                this.getColumnNamesAsList().add(null);
             }
         }
-        this.columnNames.set(position, columnName);
+        this.getColumnNamesAsList().set(position, columnName);
     }
 
     public Table getTable() {
-        return table;
+        return getAttribute("table", Table.class);
     }
 
     public PrimaryKey setTable(Table table) {
-        this.table = table;
+        this.setAttribute("table", table);
         return this;
     }
 
 
+    @Override
     public int compareTo(Object other) {
         PrimaryKey o = (PrimaryKey) other;
         int returnValue = this.getTable().getName().compareTo(o.getTable().getName());
@@ -89,7 +89,7 @@ public class PrimaryKey extends AbstractDatabaseObject {
     public int hashCode() {
         int result;
         result = (getColumnNames() != null ? getColumnNames().hashCode() : 0);
-        result = 31 * result + (table.getName() != null ? table.getName().hashCode() : 0);
+        result = 31 * result + (getTable().getName() != null ? getTable().getName().hashCode() : 0);
         return result;
     }
 
@@ -99,31 +99,31 @@ public class PrimaryKey extends AbstractDatabaseObject {
     }
 
     public List<String> getColumnNamesAsList() {
-        return columnNames;
+        return getAttribute("columnNames", List.class);
     }
 
     public boolean isCertainName() {
-        return certainName;
+        return getAttribute("certainName", Boolean.class);
     }
 
     public void setCertainName(boolean certainName) {
-        this.certainName = certainName;
+        setAttribute("certainName", certainName);
     }
 
 	public String getTablespace() {
-		return tablespace;
+		return getAttribute("tablespace",String.class);
 	}
 
 	public void setTablespace(String tablespace) {
-		this.tablespace = tablespace;
+        setAttribute("tablespace", tablespace);
 	}
 
     public Index getBackingIndex() {
-        return backingIndex;
+        return getAttribute("backingIndex", Index.class);
     }
 
     public PrimaryKey setBackingIndex(Index backingIndex) {
-        this.backingIndex = backingIndex;
+        setAttribute("backingIndex", backingIndex);
         return this;
     }
 }

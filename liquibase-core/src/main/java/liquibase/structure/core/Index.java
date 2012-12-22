@@ -17,97 +17,92 @@ public class Index extends AbstractDatabaseObject {
 	/** Marks Index as associated with Unique Constraint [UC] */
 	public final static String MARK_UNIQUE_CONSTRAINT = "uniqueConstraint";
 
-    private String name;
-    private Table table;
-	private String tablespace;
-    private Boolean unique;
-    private List<String> columns = new ArrayList<String>();
-    private String filterCondition;
-	// Contain associations of index
-	// for example: foreignKey, primaryKey or uniqueConstraint
-	private Set<String> associatedWith = new HashSet<String>();
+    public Index() {
+        setAttribute("columns", new ArrayList<String>());
+        setAttribute("associatedWith", new HashSet<String>());
+    }
 
-	public DatabaseObject[] getContainingObjects() {
+    public DatabaseObject[] getContainingObjects() {
         return new DatabaseObject[] {
-                table
+                getTable()
         };
     }
 
     public String getName() {
-        return name;
+        return getAttribute("name", String.class);
     }
 
     public Index setName(String name) {
-        this.name = name;
+        this.setAttribute("name", name);
         return this;
     }
 
     public Schema getSchema() {
-        if (table == null) {
+        if (getTable() == null) {
             return null;
         }
         
-        return table.getSchema();
+        return getTable().getSchema();
     }
 
     public Table getTable() {
-        return table;
+        return getAttribute("table", Table.class);
     }
 
     public Index setTable(Table table) {
-        this.table = table;
+        this.setAttribute("table", table);
         return this;
     }
 
 	public String getTablespace() {
-		return tablespace;
+		return getAttribute("tablespace", String.class);
 	}
 
 	public Index setTablespace(String tablespace) {
-		this.tablespace = tablespace;
+        this.setAttribute("tablespace", tablespace);
         return this;
 	}
 
     public List<String> getColumns() {
-        return columns;
+        return getAttribute("columns", List.class);
     }
 
     public String getColumnNames() {
-        return StringUtils.join(columns, ", ");
+        return StringUtils.join(getColumns(), ", ");
     }
 
     public String getFilterCondition() {
-        return filterCondition;
+        return getAttribute("filterCondition", String.class);
     }
 
     public Index setFilterCondition(String filterCondition) {
-        this.filterCondition = filterCondition;
+        this.setAttribute("filterCondition", filterCondition);
         return this;
     }
 
     public Index setUnique(Boolean value) {
-        this.unique = value;
+        this.setAttribute("unique", value);
         return this;
     }
 
     public Boolean isUnique() {
-        return this.unique;
+        return getAttribute("unique", Boolean.class);
     }
 
 	public Set<String> getAssociatedWith() {
-		return associatedWith;
+		return getAttribute("associatedWith", Set.class);
 	}
 
 	public String getAssociatedWithAsString() {
-		return StringUtils.join(associatedWith, ",");
+		return StringUtils.join(getAssociatedWith(), ",");
 	}
 
 	public void addAssociatedWith(String item) {
-		associatedWith.add(item);
+		getAssociatedWith().add(item);
 	}
 
 	public boolean isAssociatedWith(String keyword) {
-		return associatedWith.contains(keyword);
+		return getAssociatedWith().contains(keyword);
 	}
 
 
@@ -131,7 +126,7 @@ public class Index extends AbstractDatabaseObject {
     @Override
     public int compareTo(Object other) {
         Index o = (Index) other;
-        int returnValue = this.table.getName().compareTo(o.table.getName());
+        int returnValue = this.getTable().getName().compareTo(o.getTable().getName());
 
         if (returnValue == 0) {
             String thisName = StringUtils.trimToEmpty(this.getName());
@@ -152,14 +147,14 @@ public class Index extends AbstractDatabaseObject {
     public String toString() {
         StringBuffer stringBuffer = new StringBuffer();
         stringBuffer.append(getName());
-        if (this.unique != null && !this.unique) {
+        if (this.isUnique() != null && !this.isUnique()) {
             stringBuffer.append(" unique ");
         }
-        if (table != null && columns != null) {
-            stringBuffer.append(" on ").append(table.getName());
-            if (columns != null && columns.size() > 0) {
+        if (getTable() != null && getColumns() != null) {
+            stringBuffer.append(" on ").append(getTable().getName());
+            if (getColumns() != null && getColumns().size() > 0) {
                 stringBuffer.append("(");
-                for (String column : columns) {
+                for (String column : getColumns()) {
                     stringBuffer.append(column).append(", ");
                 }
                 stringBuffer.delete(stringBuffer.length() - 2, stringBuffer.length());

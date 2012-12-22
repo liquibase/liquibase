@@ -10,16 +10,13 @@ import java.util.List;
  * A container of columns. Usually a table or view.
  */
 public abstract class Relation extends AbstractDatabaseObject {
-    private Schema schema;
-    protected String name;
-    private String remarks;
-    private List<Column> columns = new ArrayList<Column>();
 
     protected Relation() {
+        setAttribute("columns", new ArrayList());
     }
 
     public String getName() {
-        return name;
+        return getAttribute("name", String.class);
     }
 
     public DatabaseObject[] getContainingObjects() {
@@ -30,16 +27,16 @@ public abstract class Relation extends AbstractDatabaseObject {
     }
 
     public String getRemarks() {
-        return remarks;
+        return getAttribute("remarks", String.class);
     }
 
     public Relation setRemarks(String remarks) {
-        this.remarks = remarks;
+        setAttribute("remarks", remarks);
         return this;
     }
 
     public List<Column> getColumns() {
-        return columns;
+        return getAttribute("columns", List.class);
     }
 
     /**
@@ -59,14 +56,14 @@ public abstract class Relation extends AbstractDatabaseObject {
      * @return Returns the schema.
      */
     public Schema getSchema() {
-        return schema;
+        return getAttribute("schema", Schema.class);
     }
 
     /**
      * @param schema The schema to set.
      */
     public Relation setSchema(Schema schema) {
-        this.schema = schema;
+        setAttribute("schema", schema);
         return this;
     }
 

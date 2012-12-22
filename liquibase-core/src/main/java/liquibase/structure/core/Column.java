@@ -4,19 +4,14 @@ import liquibase.structure.AbstractDatabaseObject;
 import liquibase.structure.DatabaseObject;
 
 public class Column extends AbstractDatabaseObject {
-    private Relation relation;
-    private String name;
-    private Boolean nullable;
-    private DataType type;
-    private Object defaultValue;
-    private boolean unique = false;
-    private boolean autoIncrement = false;
 
-    private boolean certainDataType = true;
-    private String remarks;
+    public Column() {
+        setUnique(false);
+        setAutoIncrement(false);
+    }
 
     public Relation getRelation() {
-        return relation;
+        return (Relation) getAttribute("relation", Relation.class);
     }
 
     public DatabaseObject[] getContainingObjects() {
@@ -26,7 +21,7 @@ public class Column extends AbstractDatabaseObject {
     }
 
     public Column setRelation(Relation relation) {
-        this.relation = relation;
+        setAttribute("relation", relation);
 
         return this;
     }
@@ -41,57 +36,57 @@ public class Column extends AbstractDatabaseObject {
     }
 
 	public String getName() {
-        return name;
+        return (String) getAttribute("name", String.class);
     }
 
     public Column setName(String name) {
-        this.name = name;
+        setAttribute("name", name);
 
         return this;
     }
 
     public Boolean isNullable() {
-        return nullable;
+        return (Boolean) getAttribute("nullable", Boolean.class);
     }
 
     public Column setNullable(Boolean nullable) {
-        this.nullable = nullable;
+        setAttribute("nullable", nullable);
 
         return this;
     }
 
 
     public DataType getType() {
-        return type;
+        return (DataType) getAttribute("type", DataType.class);
     }
 
     public Column setType(DataType type) {
-        this.type = type;
+        setAttribute("type", type);
 
         return this;
     }
 
     public Object getDefaultValue() {
-        return defaultValue;
+        return getAttribute("defaultValue", Object.class);
     }
 
     public Column setDefaultValue(Object defaultValue) {
-        this.defaultValue = defaultValue;
+        setAttribute("defaultValue", defaultValue);
 
         return this;
     }
 
     public boolean isAutoIncrement() {
-        return autoIncrement;
+        return (Boolean) getAttribute("autoIncrement", Boolean.class);
     }
 
     public void setAutoIncrement(boolean autoIncrement) {
-        this.autoIncrement = autoIncrement;
+        setAttribute("autoIncrement", autoIncrement);
     }
 
     @Override
     public String toString() {
-        String tableOrViewName = relation.getName();
+        String tableOrViewName = getRelation().getName();
         return tableOrViewName +"."+getName();
     }
 
@@ -129,7 +124,7 @@ public class Column extends AbstractDatabaseObject {
 
             Column column = (Column) o;
 
-            return name.equalsIgnoreCase(column.name) && !(relation != null ? !relation.equals(column.relation) : column.relation != null);
+            return getName().equalsIgnoreCase(column.getName()) && !(getRelation() != null ? !getRelation().equals(column.getRelation()) : column.getRelation() != null);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -140,8 +135,8 @@ public class Column extends AbstractDatabaseObject {
     public int hashCode() {
         try {
             int result;
-            result = (relation != null ? relation.hashCode() : 0);
-            result = 31 * result + name.toUpperCase().hashCode();
+            result = (getRelation() != null ? getRelation().hashCode() : 0);
+            result = 31 * result + getName().toUpperCase().hashCode();
             return result;
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -149,11 +144,11 @@ public class Column extends AbstractDatabaseObject {
     }
 
     public boolean isUnique() {
-        return unique;
+        return (Boolean) getAttribute("unique", Boolean.class);
     }
 
     public Column setUnique(boolean unique) {
-        this.unique = unique;
+        setAttribute("unique", unique);
 
         return this;
     }
@@ -186,21 +181,21 @@ public class Column extends AbstractDatabaseObject {
 
 
     public boolean isCertainDataType() {
-        return certainDataType;
+        return (Boolean) getAttribute("certainDataType", Boolean.class);
     }
 
     public Column setCertainDataType(boolean certainDataType) {
-        this.certainDataType = certainDataType;
+        setAttribute("certainDataType", certainDataType);
 
         return this;
     }
 
     public String getRemarks() {
-        return remarks;
+        return (String) getAttribute("remarks", String.class);
     }
 
     public Column setRemarks(String remarks) {
-        this.remarks = remarks;
+        setAttribute("remarks", remarks);
 
         return this;
     }

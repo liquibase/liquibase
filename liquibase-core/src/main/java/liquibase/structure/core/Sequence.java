@@ -4,20 +4,17 @@ import liquibase.structure.AbstractDatabaseObject;
 import liquibase.structure.DatabaseObject;
 
 public class Sequence extends AbstractDatabaseObject {
-    private String name;
-    private Schema schema;
-
 
     public DatabaseObject[] getContainingObjects() {
         return null;
     }
 
     public String getName() {
-        return name;
+        return getAttribute("name", String.class);
     }
 
     public Sequence setName(String name) {
-        this.name = name;
+        this.setAttribute("name", name);
         return this;
     }
 
@@ -29,13 +26,13 @@ public class Sequence extends AbstractDatabaseObject {
 
         Sequence sequence = (Sequence) o;
 
-        return !(name != null ? !name.equalsIgnoreCase(sequence.name) : sequence.name != null);
+        return !(getName() != null ? !getName().equalsIgnoreCase(sequence.getName()) : sequence.getName() != null);
 
     }
 
     @Override
     public int hashCode() {
-        return (name != null ? name.toUpperCase().hashCode() : 0);
+        return (getName() != null ? getName().toUpperCase().hashCode() : 0);
     }
 
 
@@ -48,14 +45,14 @@ public class Sequence extends AbstractDatabaseObject {
 	 * @return Returns the schema.
 	 */
 	public Schema getSchema () {
-		return schema;
+		return getAttribute("schema", Schema.class);
 	}
 
 	/**
 	 * @param schema The schema to set.
 	 */
 	public Sequence setSchema (Schema schema) {
-		this.schema = schema;
+		this.setAttribute("schema", schema);
         return this;
 	}
 }
