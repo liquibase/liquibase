@@ -38,6 +38,8 @@ public class ColumnConfig {
     private BigInteger incrementBy;
     private String remarks;
     
+    private String after;
+    private Boolean first;
     
     public ColumnConfig(Column columnStructure) {
     	setName(columnStructure.getName());
@@ -375,7 +377,25 @@ public class ColumnConfig {
         return this;
     }
 
-    public String getValueBlob() {
+    public String getAfter() {
+		return after;
+	}
+
+	public ColumnConfig setAfter(String after) {
+		this.after = after;
+		return this;
+	}
+	
+	public Boolean getFirst() {
+		return first;
+	}
+
+	public ColumnConfig setFirst(Boolean first) {
+		this.first = first;
+		return this;
+	}
+
+	public String getValueBlob() {
         return valueBlob;
     }
 

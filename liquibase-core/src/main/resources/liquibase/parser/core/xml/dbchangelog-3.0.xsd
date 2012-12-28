@@ -278,6 +278,8 @@
 		<xsd:attribute name="startWith" type="xsd:long" />
 		<xsd:attribute name="incrementBy" type="xsd:long" />
 		<xsd:attribute name="remarks" type="xsd:string" />
+		<xsd:attribute name="after" type="xsd:string" />
+		<xsd:attribute name="first" type="booleanExp" />
 	</xsd:attributeGroup>
 
 	<xsd:attributeGroup name="dropTableAttributes">

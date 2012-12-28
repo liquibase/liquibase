@@ -1,6 +1,9 @@
 package liquibase.parser.core.xml;
 
+import java.util.List;
+
 import liquibase.change.Change;
+import liquibase.change.ColumnConfig;
 import liquibase.change.core.AddColumnChange;
 import liquibase.change.core.CreateTableChange;
 import liquibase.change.core.RawSQLChange;
@@ -360,4 +363,44 @@ public class XMLChangeLogSAXParserTest {
 		assertEquals("drop table rawsql", ((RawSQLChange) changeSet.getRollBackChanges()[0]).getSql());
 	}
 
+	@Test
+	public void addColumnAfter() throws Exception {
+        DatabaseChangeLog changeLog = new XMLChangeLogSAXParser().parse("liquibase/parser/core/xml/columnAfterChangeLog.xml", new ChangeLogParameters(), new JUnitResourceAccessor());
+        
+        // change 0
+        ChangeSet changeSet = changeLog.getChangeSets().get(0);
+        assertEquals("1", changeSet.getId());
+        
+        // change 1
+        changeSet = changeLog.getChangeSets().get(1);
+        assertEquals("2", changeSet.getId());
+
+        List<Change> changes = changeSet.getChanges();
+        assertEquals(1, changes.size());
+
+        Change change = changes.get(0);
+        assertTrue(change instanceof AddColumnChange);
+
+        List<ColumnConfig> columns = ((AddColumnChange) change).getColumns();
+        assertEquals(1, columns.size());
+        
+        ColumnConfig columnConfig = columns.get(0);
+        assertEquals("middlename", columnConfig.getName());
+        assertEquals("firstname", columnConfig.getAfter());
+        assertNull(columnConfig.getFirst());
+	}
+
+	@Test
+	public void addColumnFirst() throws Exception {
+        DatabaseChangeLog changeLog = new XMLChangeLogSAXParser().parse("liquibase/parser/core/xml/columnFirstChangeLog.xml", new ChangeLogParameters(), new JUnitResourceAccessor());
+        
+        ChangeSet changeSet = changeLog.getChangeSets().get(1);
+        List<Change> changes = changeSet.getChanges();
+        Change change = changes.get(0);
+        List<ColumnConfig> columns = ((AddColumnChange) change).getColumns();
+        
+        ColumnConfig columnConfig = columns.get(0);
+        assertEquals("middlename", columnConfig.getName());
+        assertTrue(columnConfig.getFirst());
+	}
 }
