@@ -383,6 +383,15 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
                     throw new RuntimeException("Could not determine column to add position info");
                 }
                 lastColumn.setPosition(addAtPosition);
+			} else if (change instanceof AddColumnChange && "before".equals(qName)) {
+				AddColumnConfig.Position addAtPosition = new AddColumnConfig.Position();
+				addAtPosition.setBeforeColumn(atts.getValue("column"));
+				
+				AddColumnConfig lastColumn = getLastColumnConfigFromChange();
+                if (lastColumn == null) {
+                    throw new RuntimeException("Could not determine column to add position info");
+                }
+                lastColumn.setPosition(addAtPosition);
 			} else if (change instanceof AddColumnChange && "atPosition".equals(qName)) {
 				AddColumnConfig.Position addAtPosition = new AddColumnConfig.Position();
 				setAllProperties(addAtPosition, atts);

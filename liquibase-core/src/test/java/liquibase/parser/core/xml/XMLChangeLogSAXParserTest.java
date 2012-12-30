@@ -400,6 +400,37 @@ public class XMLChangeLogSAXParserTest {
 	}
 
 	@Test
+	public void addColumnBefore() throws Exception {
+        DatabaseChangeLog changeLog = new XMLChangeLogSAXParser().parse("liquibase/parser/core/xml/columnBeforeChangeLog.xml", new ChangeLogParameters(), new JUnitResourceAccessor());
+        
+        // change 0
+        ChangeSet changeSet = changeLog.getChangeSets().get(0);
+        assertEquals("1", changeSet.getId());
+        
+        // change 1
+        changeSet = changeLog.getChangeSets().get(1);
+        assertEquals("2", changeSet.getId());
+
+        List<Change> changes = changeSet.getChanges();
+        assertEquals(1, changes.size());
+
+        Change change = changes.get(0);
+        assertTrue(change instanceof AddColumnChange);
+
+        List<AddColumnConfig> columns = ((AddColumnChange) change).getColumns();
+        assertEquals(1, columns.size());
+        
+        AddColumnConfig columnConfig = columns.get(0);
+        assertEquals("middlename", columnConfig.getName());
+        
+        AddColumnConfig.Position addAtPosition = columnConfig.getPosition();
+        assertNotNull(addAtPosition);
+        assertEquals("lastname", addAtPosition.getBeforeColumn());
+        assertNull(addAtPosition.getFirst());
+        assertNull(addAtPosition.getPosition());
+	}
+
+	@Test
 	public void addColumnFirst() throws Exception {
         DatabaseChangeLog changeLog = new XMLChangeLogSAXParser().parse("liquibase/parser/core/xml/columnFirstChangeLog.xml", new ChangeLogParameters(), new JUnitResourceAccessor());
         

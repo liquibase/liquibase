@@ -840,6 +840,11 @@
 											<xsd:attribute name="column" type="xsd:string" />
 										</xsd:complexType>
 									</xsd:element>
+									<xsd:element name="before">
+										<xsd:complexType>
+											<xsd:attribute name="column" type="xsd:string" />
+										</xsd:complexType>
+									</xsd:element>
 
 									<xsd:element name="atPosition">
 										<xsd:complexType>

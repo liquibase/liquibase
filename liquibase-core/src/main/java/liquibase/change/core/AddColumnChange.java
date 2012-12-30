@@ -8,6 +8,10 @@ import java.util.Set;
 import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.database.core.DB2Database;
+import liquibase.database.core.FirebirdDatabase;
+import liquibase.database.core.H2Database;
+import liquibase.database.core.HsqlDatabase;
+import liquibase.database.core.MySQLDatabase;
 import liquibase.exception.ValidationErrors;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.*;
@@ -81,7 +85,7 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
 
         List<SqlStatement> sql = new ArrayList<SqlStatement>();
 
-        for (ColumnConfig column : getColumns()) {
+        for (AddColumnConfig column : getColumns()) {
             Set<ColumnConstraint> constraints = new HashSet<ColumnConstraint>();
             if (column.getConstraints() != null) {
                 if (column.getConstraints().isNullable() != null && !column.getConstraints().isNullable()) {
@@ -111,6 +115,18 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
                     column.getDefaultValueObject(),
                     constraints.toArray(new ColumnConstraint[constraints.size()]));
 
+        	AddColumnConfig.Position position = column.getPosition();
+        	if (position != null) {
+	            if ((database instanceof MySQLDatabase) && (position.getAfterColumn() != null)) {
+					addColumnStatement.setAddAfterColumn(position.getAfterColumn());
+	            } else if (((database instanceof HsqlDatabase) || (database instanceof H2Database))
+	            		   && (position.getBeforeColumn() != null)) {
+					addColumnStatement.setAddBeforeColumn(position.getBeforeColumn());
+	            } else if ((database instanceof FirebirdDatabase) && (position.getPosition() != null)) {
+					addColumnStatement.setAddAtPosition(position.getPosition());
+	            }
+        	}
+            
             sql.add(addColumnStatement);
 
             if (database instanceof DB2Database) {

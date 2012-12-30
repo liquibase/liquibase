@@ -15,6 +15,7 @@ public class AddColumnConfig extends ColumnConfig {
 	
 	public static class Position {
 	    private String afterColumn;
+	    private String beforeColumn;
 	    private Integer position;
 
 	    public String getAfterColumn() {
@@ -25,6 +26,14 @@ public class AddColumnConfig extends ColumnConfig {
 			this.afterColumn = afterColumn;
 		}
 		
+	    public String getBeforeColumn() {
+			return beforeColumn;
+		}
+
+		public void setBeforeColumn(String beforeColumn) {
+			this.beforeColumn = beforeColumn;
+		}
+
 		public Boolean getFirst() {
 			return (position != null) ? position.equals(Integer.valueOf(1)) : null;
 		}
