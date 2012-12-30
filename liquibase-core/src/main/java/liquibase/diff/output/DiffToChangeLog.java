@@ -1,5 +1,6 @@
 package liquibase.diff.output;
 
+import liquibase.change.AddColumnConfig;
 import liquibase.change.Change;
 import liquibase.change.ColumnConfig;
 import liquibase.change.ConstraintsConfig;
@@ -579,7 +580,7 @@ public class DiffToChangeLog {
                 change.setSchemaName(column.getRelation().getSchema().getName());
             }
 
-            ColumnConfig columnConfig = new ColumnConfig();
+            AddColumnConfig columnConfig = new AddColumnConfig();
             columnConfig.setName(column.getName());
 
             String dataType = column.getType().toString();

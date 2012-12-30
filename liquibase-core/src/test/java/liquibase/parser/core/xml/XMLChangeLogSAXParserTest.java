@@ -1,22 +1,27 @@
 package liquibase.parser.core.xml;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
 import java.util.List;
 
+import liquibase.change.AddColumnConfig;
 import liquibase.change.Change;
-import liquibase.change.ColumnConfig;
 import liquibase.change.core.AddColumnChange;
 import liquibase.change.core.CreateTableChange;
 import liquibase.change.core.RawSQLChange;
 import liquibase.change.custom.CustomChangeWrapper;
 import liquibase.change.custom.ExampleCustomSqlChange;
+import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
-import liquibase.changelog.ChangeLogParameters;
 import liquibase.exception.ChangeLogParseException;
 import liquibase.precondition.core.OrPrecondition;
 import liquibase.precondition.core.PreconditionContainer;
 import liquibase.test.JUnitResourceAccessor;
-import static org.junit.Assert.*;
 
 import org.junit.Test;
 
@@ -381,13 +386,17 @@ public class XMLChangeLogSAXParserTest {
         Change change = changes.get(0);
         assertTrue(change instanceof AddColumnChange);
 
-        List<ColumnConfig> columns = ((AddColumnChange) change).getColumns();
+        List<AddColumnConfig> columns = ((AddColumnChange) change).getColumns();
         assertEquals(1, columns.size());
         
-        ColumnConfig columnConfig = columns.get(0);
+        AddColumnConfig columnConfig = columns.get(0);
         assertEquals("middlename", columnConfig.getName());
-        assertEquals("firstname", columnConfig.getAfter());
-        assertNull(columnConfig.getFirst());
+        
+        AddColumnConfig.Position addAtPosition = columnConfig.getPosition();
+        assertNotNull(addAtPosition);
+        assertEquals("firstname", addAtPosition.getAfterColumn());
+        assertNull(addAtPosition.getFirst());
+        assertNull(addAtPosition.getPosition());
 	}
 
 	@Test
@@ -397,10 +406,14 @@ public class XMLChangeLogSAXParserTest {
         ChangeSet changeSet = changeLog.getChangeSets().get(1);
         List<Change> changes = changeSet.getChanges();
         Change change = changes.get(0);
-        List<ColumnConfig> columns = ((AddColumnChange) change).getColumns();
+        List<AddColumnConfig> columns = ((AddColumnChange) change).getColumns();
         
-        ColumnConfig columnConfig = columns.get(0);
+        AddColumnConfig columnConfig = columns.get(0);
         assertEquals("middlename", columnConfig.getName());
-        assertTrue(columnConfig.getFirst());
+
+        AddColumnConfig.Position addAtPosition = columnConfig.getPosition();
+        assertNotNull(addAtPosition);
+		assertTrue(addAtPosition.getFirst());
+		assertEquals(Integer.valueOf(1), addAtPosition.getPosition());
 	}
 }

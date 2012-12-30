@@ -278,10 +278,8 @@
 		<xsd:attribute name="startWith" type="xsd:long" />
 		<xsd:attribute name="incrementBy" type="xsd:long" />
 		<xsd:attribute name="remarks" type="xsd:string" />
-		<xsd:attribute name="after" type="xsd:string" />
-		<xsd:attribute name="first" type="booleanExp" />
 	</xsd:attributeGroup>
-
+	
 	<xsd:attributeGroup name="dropTableAttributes">
         <xsd:attribute name="catalogName" type="xsd:string" />
 		<xsd:attribute name="schemaName" type="xsd:string" />
@@ -764,15 +762,15 @@
 	</xsd:element>
 
 
-	<xsd:element name="column">
-		<xsd:complexType mixed="true">
-			<xsd:sequence>
-				<xsd:element ref="constraints" minOccurs="0" />
-			</xsd:sequence>
-			<xsd:attributeGroup ref="column" />
-		</xsd:complexType>
-	</xsd:element>
+	<xsd:element name="column" type="columnType" />
 
+	<xsd:complexType name="columnType" mixed="true">
+		<xsd:sequence>
+			<xsd:element ref="constraints" minOccurs="0" />
+		</xsd:sequence>
+		<xsd:attributeGroup ref="column" />
+	</xsd:complexType>
+	
 	<!-- Children for createTable -->
 	<xsd:element name="createTable">
 		<xsd:complexType>
@@ -832,7 +830,27 @@
 	<xsd:element name="addColumn">
 		<xsd:complexType>
 			<xsd:sequence>
-				<xsd:element ref="column" minOccurs="1" maxOccurs="unbounded" />
+				<xsd:element name="column" minOccurs="1" maxOccurs="unbounded">
+					<xsd:complexType>
+						<xsd:complexContent mixed="true">
+							<xsd:extension base="columnType">
+								<xsd:choice>
+									<xsd:element name="after">
+										<xsd:complexType>
+											<xsd:attribute name="column" type="xsd:string" />
+										</xsd:complexType>
+									</xsd:element>
+
+									<xsd:element name="atPosition">
+										<xsd:complexType>
+											<xsd:attribute name="first" type="xsd:boolean" use="optional" />
+										</xsd:complexType>
+									</xsd:element>
+								</xsd:choice>
+							</xsd:extension>
+						</xsd:complexContent>
+					</xsd:complexType>
+				</xsd:element>
 			</xsd:sequence>
 			<xsd:attributeGroup ref="tableNameAttribute" />
 		</xsd:complexType>

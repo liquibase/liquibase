@@ -21,16 +21,12 @@ import liquibase.util.StringUtils;
  * Adds a column to an existing table.
  */
 @DatabaseChange(name="addColumn", description = "Add Column", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "table")
-public class AddColumnChange extends AbstractChange implements ChangeWithColumns<ColumnConfig> {
+public class AddColumnChange extends AbstractChange implements ChangeWithColumns<AddColumnConfig> {
 
     private String catalogName;
     private String schemaName;
     private String tableName;
-    private List<ColumnConfig> columns;
-
-    public AddColumnChange() {
-        columns = new ArrayList<ColumnConfig>();
-    }
+    private final List<AddColumnConfig> columns = new ArrayList<AddColumnConfig>();
 
     @DatabaseChangeProperty(mustApplyTo ="relation.catalog")
     public String getCatalogName() {
@@ -60,19 +56,15 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
     }
 
     @DatabaseChangeProperty(requiredForDatabase = "all")
-    public List<ColumnConfig> getColumns() {
+    public List<AddColumnConfig> getColumns() {
         return columns;
     }
 
-    public void setColumns(List<ColumnConfig> columns) {
-        this.columns = columns;
-    }
-
-    public void addColumn(ColumnConfig column) {
+    public void addColumn(AddColumnConfig column) {
         columns.add(column);
     }
 
-    public void removeColumn(ColumnConfig column) {
+    public void removeColumn(AddColumnConfig column) {
         columns.remove(column);
     }
 

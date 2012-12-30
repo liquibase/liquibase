@@ -1,5 +1,6 @@
 package liquibase.serializer.core.xml;
 
+import liquibase.change.AddColumnConfig;
 import liquibase.change.ColumnConfig;
 import liquibase.change.ConstraintsConfig;
 import liquibase.change.core.*;
@@ -48,7 +49,7 @@ public class XMLChangeLogSerializerTest {
     public void createNode_addColumnChange() throws Exception {
         AddColumnChange refactoring = new AddColumnChange();
         refactoring.setTableName("TAB");
-        ColumnConfig column = new ColumnConfig();
+        AddColumnConfig column = new AddColumnConfig();
         column.setName("NEWCOL");
         column.setType("TYP");
         refactoring.addColumn(column);

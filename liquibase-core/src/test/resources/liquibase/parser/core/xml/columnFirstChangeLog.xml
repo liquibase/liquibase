@@ -21,7 +21,9 @@
     <changeSet id="2" author="cmouttet">
     	<comment>add column after</comment>
     	<addColumn tableName="person">
-    		<column name="middlename" type="varchar(50)" first="true" />
+    		<column name="middlename" type="varchar(50)">
+    			<atPosition first="true" />
+    		</column>
     	</addColumn>
     </changeSet>
 </databaseChangeLog>

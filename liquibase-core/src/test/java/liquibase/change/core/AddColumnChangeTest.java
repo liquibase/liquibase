@@ -3,14 +3,14 @@ package liquibase.change.core;
 import java.math.BigInteger;
 
 import liquibase.change.AbstractChangeTest;
+import liquibase.change.AddColumnConfig;
 import liquibase.change.Change;
-import liquibase.change.ColumnConfig;
 import liquibase.change.ConstraintsConfig;
 import liquibase.database.Database;
 import liquibase.database.core.DB2Database;
-import liquibase.statement.SqlStatement;
 import liquibase.statement.ColumnConstraint;
 import liquibase.statement.ForeignKeyConstraint;
+import liquibase.statement.SqlStatement;
 import liquibase.statement.core.AddColumnStatement;
 import liquibase.statement.core.ReorganizeTableStatement;
 import liquibase.statement.core.UpdateStatement;
@@ -40,17 +40,24 @@ public class AddColumnChangeTest extends AbstractChangeTest {
         AddColumnChange change = new AddColumnChange();
         assertEquals(0, change.getColumns().size());
 
-        change.addColumn(new ColumnConfig().setName("a"));
+        AddColumnConfig column = new AddColumnConfig();
+        column.setName("a");
+		change.addColumn(column);
         assertEquals(1, change.getColumns().size());
 
-        change.addColumn(new ColumnConfig().setName("b"));
+        column = new AddColumnConfig();
+        column.setName("b");
+        change.addColumn(column);
         assertEquals(2, change.getColumns().size());
     }
 
     @Test
     public void removeColumn() throws Exception {
-        ColumnConfig columnA = new ColumnConfig().setName("a");
-        ColumnConfig columnB = new ColumnConfig().setName("b");
+    	AddColumnConfig columnA = new AddColumnConfig();
+    	columnA.setName("a");
+
+    	AddColumnConfig columnB = new AddColumnConfig();
+    	columnB.setName("b");
 
         AddColumnChange change = new AddColumnChange();
         assertEquals(0, change.getColumns().size());
@@ -75,7 +82,7 @@ public class AddColumnChangeTest extends AbstractChangeTest {
         refactoring.setSchemaName("SCHEMA");
         refactoring.setTableName("TAB");
 
-        ColumnConfig column = new ColumnConfig();
+        AddColumnConfig column = new AddColumnConfig();
         column.setName("NEWCOL");
         column.setType("TYP");
 
@@ -87,7 +94,7 @@ public class AddColumnChangeTest extends AbstractChangeTest {
         refactoring.addColumn(column);
 
         //Add the second column def to the same refactoring
-        column = new ColumnConfig();
+        column = new AddColumnConfig();
         column.setName("NEWCOL2");
         column.setType("TYP2");
         column.setConstraints(new ConstraintsConfig());
@@ -137,7 +144,7 @@ public class AddColumnChangeTest extends AbstractChangeTest {
         AddColumnChange refactoring = new AddColumnChange();
         refactoring.setSchemaName("SCHEMA");
         refactoring.setTableName("TAB");
-        ColumnConfig column = new ColumnConfig();
+        AddColumnConfig column = new AddColumnConfig();
         column.setName("NEWCOL");
         column.setType("TYP");
 
@@ -175,7 +182,7 @@ public class AddColumnChangeTest extends AbstractChangeTest {
         AddColumnChange refactoring = new AddColumnChange();
         refactoring.setSchemaName("SCHEMA");
         refactoring.setTableName("TAB");
-        ColumnConfig column = new ColumnConfig();
+        AddColumnConfig column = new AddColumnConfig();
         column.setName("NEWCOL");
         column.setType("TYP");
 
@@ -212,7 +219,7 @@ public class AddColumnChangeTest extends AbstractChangeTest {
         AddColumnChange refactoring = new AddColumnChange();
         refactoring.setSchemaName("SCHEMA");
         refactoring.setTableName("TAB");
-        ColumnConfig column = new ColumnConfig();
+        AddColumnConfig column = new AddColumnConfig();
         column.setName("NEWCOL");
         column.setType("TYP");
 
@@ -245,7 +252,7 @@ public class AddColumnChangeTest extends AbstractChangeTest {
         AddColumnChange refactoring = new AddColumnChange();
         refactoring.setSchemaName("SCHEMA");
         refactoring.setTableName("TAB");
-        ColumnConfig column = new ColumnConfig();
+        AddColumnConfig column = new AddColumnConfig();
         column.setName("NEWCOL");
         column.setType("TYP");
 
@@ -287,7 +294,7 @@ public class AddColumnChangeTest extends AbstractChangeTest {
         AddColumnChange refactoring = new AddColumnChange();
         refactoring.setSchemaName("SCHEMA");
         refactoring.setTableName("TAB");
-        ColumnConfig column = new ColumnConfig();
+        AddColumnConfig column = new AddColumnConfig();
         column.setName("NEWCOL");
         column.setType("TYP");
         column.setValue("SOME VALUE");
@@ -328,7 +335,7 @@ public class AddColumnChangeTest extends AbstractChangeTest {
         AddColumnChange refactoring = new AddColumnChange();
         refactoring.setSchemaName("SCHEMA");
         refactoring.setTableName("TAB");
-        ColumnConfig column = new ColumnConfig();
+        AddColumnConfig column = new AddColumnConfig();
         column.setName("NEWCOL");
         column.setType("TYP");
 
@@ -368,7 +375,7 @@ public class AddColumnChangeTest extends AbstractChangeTest {
         AddColumnChange refactoring = new AddColumnChange();
         refactoring.setSchemaName("SCHEMA");
         refactoring.setTableName("TAB");
-        ColumnConfig column = new ColumnConfig();
+        AddColumnConfig column = new AddColumnConfig();
         column.setName("NEWCOL");
         column.setType("TYP");
 
@@ -397,7 +404,7 @@ public class AddColumnChangeTest extends AbstractChangeTest {
         AddColumnChange refactoring = new AddColumnChange();
         refactoring.setSchemaName("SCHEMA");
         refactoring.setTableName("TAB");
-        ColumnConfig column = new ColumnConfig();
+        AddColumnConfig column = new AddColumnConfig();
         column.setName("NEWCOL");
         column.setType("TYP");
 
@@ -410,7 +417,7 @@ public class AddColumnChangeTest extends AbstractChangeTest {
 
         refactoring.addColumn(column);
 
-        column = new ColumnConfig();
+        column = new AddColumnConfig();
         column.setName("NEWCOL2");
         column.setType("TYP");
         refactoring.addColumn(column);
@@ -431,7 +438,7 @@ public class AddColumnChangeTest extends AbstractChangeTest {
     public void getConfirmationMessage() throws Exception {
         AddColumnChange refactoring = new AddColumnChange();
         refactoring.setTableName("TAB");
-        ColumnConfig column = new ColumnConfig();
+        AddColumnConfig column = new AddColumnConfig();
         column.setName("NEWCOL");
         column.setType("TYP");
         refactoring.addColumn(column);

@@ -45,6 +45,12 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
         if (database instanceof MySQLDatabase && statement.isAutoIncrement() && !statement.isPrimaryKey()) {
             validationErrors.addError("Cannot add a non-primary key identity column");
         }
+        
+        // TODO is this feature valid for other databases?
+        if ((statement.getAddAfterColumn() != null) && !(database instanceof MySQLDatabase)) {
+        	validationErrors.addError("Cannot add column on specific position");
+        }
+        
         return validationErrors;
     }
 
