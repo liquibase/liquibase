@@ -14,14 +14,10 @@ public class UpdateDataChange extends AbstractChange implements ChangeWithColumn
     private String catalogName;
     private String schemaName;
     private String tableName;
-    private List<ColumnConfig> columns;
+    private final List<ColumnConfig> columns = new ArrayList<ColumnConfig>();
 
     @TextNode(nodeName="where")
     private String whereClause;
-
-    public UpdateDataChange() {
-        columns = new ArrayList<ColumnConfig>();
-    }
 
     @DatabaseChangeProperty(mustApplyTo ="column.relation.catalog")
     public String getCatalogName() {
@@ -53,10 +49,6 @@ public class UpdateDataChange extends AbstractChange implements ChangeWithColumn
     @DatabaseChangeProperty(requiredForDatabase = "all")
     public List<ColumnConfig> getColumns() {
         return columns;
-    }
-
-    public void setColumns(List<ColumnConfig> columns) {
-        this.columns = columns;
     }
 
     public void addColumn(ColumnConfig column) {

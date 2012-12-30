@@ -25,11 +25,7 @@ public class InsertDataChange extends AbstractChange implements ChangeWithColumn
     private String catalogName;
     private String schemaName;
     private String tableName;
-    private List<ColumnConfig> columns;
-
-    public InsertDataChange() {
-        columns = new ArrayList<ColumnConfig>();
-    }
+    private final List<ColumnConfig> columns = new ArrayList<ColumnConfig>();
 
     @DatabaseChangeProperty(mustApplyTo ="table.catalog")
     public String getCatalogName() {
@@ -61,10 +57,6 @@ public class InsertDataChange extends AbstractChange implements ChangeWithColumn
     @DatabaseChangeProperty(requiredForDatabase = "all", mustApplyTo = "table.column")
     public List<ColumnConfig> getColumns() {
         return columns;
-    }
-
-    public void setColumns(List<ColumnConfig> columns) {
-        this.columns = columns;
     }
 
     public void addColumn(ColumnConfig column) {

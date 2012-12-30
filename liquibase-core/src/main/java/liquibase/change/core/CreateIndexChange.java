@@ -20,17 +20,12 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
     private String indexName;
     private Boolean unique;
     private String tablespace;
-    private List<ColumnConfig> columns;
+    private final List<ColumnConfig> columns = new ArrayList<ColumnConfig>();
 
 	// Contain associations of index
 	// for example: foreignKey, primaryKey or uniqueConstraint
     @DatabaseChangeProperty(includeInSerialization = false)
 	private String associatedWith;
-
-
-    public CreateIndexChange() {
-        columns = new ArrayList<ColumnConfig>();
-    }
 
     @DatabaseChangeProperty(requiredForDatabase = "all", mustApplyTo = "index")
     public String getIndexName() {
@@ -64,10 +59,6 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
     @DatabaseChangeProperty(requiredForDatabase = "all", mustApplyTo = "index.column")
     public List<ColumnConfig> getColumns() {
         return columns;
-    }
-
-    public void setColumns(List<ColumnConfig> columns) {
-        this.columns = columns;
     }
 
     public void addColumn(ColumnConfig column) {

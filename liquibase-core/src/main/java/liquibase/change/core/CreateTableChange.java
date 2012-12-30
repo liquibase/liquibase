@@ -21,16 +21,12 @@ import java.util.List;
 @DatabaseChange(name="createTable", description = "Create Table", priority = ChangeMetaData.PRIORITY_DEFAULT)
 public class CreateTableChange extends AbstractChange implements ChangeWithColumns<ColumnConfig> {
 
-    private List<ColumnConfig> columns;
+    private final List<ColumnConfig> columns = new ArrayList<ColumnConfig>();
     private String catalogName;
     private String schemaName;
     private String tableName;
     private String tablespace;
     private String remarks;
-
-    public CreateTableChange() {
-        columns = new ArrayList<ColumnConfig>();
-    }
 
     public SqlStatement[] generateStatements(Database database) {
 
@@ -120,10 +116,6 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
     @DatabaseChangeProperty(requiredForDatabase = "all")
     public List<ColumnConfig> getColumns() {
         return columns;
-    }
-
-    public void setColumns(List<ColumnConfig> columns) {
-        this.columns = columns;
     }
 
     public String getCatalogName() {
