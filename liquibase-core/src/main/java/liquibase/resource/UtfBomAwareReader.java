@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PushbackInputStream;
 import java.io.Reader;
+import java.nio.charset.Charset;
 
 /**
  * Reader that tries to identify the encoding by looking at the BOM. If no BOM
@@ -25,6 +26,11 @@ public class UtfBomAwareReader extends Reader {
 	private InputStreamReader is = null;
 	private String defaultCharsetName;
 
+	public UtfBomAwareReader(InputStream in) {
+		pis = new PushbackInputStream(in, 4);
+		this.defaultCharsetName = Charset.defaultCharset().name();
+	}
+	
 	public UtfBomAwareReader(InputStream in, String defaultCharsetName) {
 		pis = new PushbackInputStream(in, 4);
 		if (defaultCharsetName == null)

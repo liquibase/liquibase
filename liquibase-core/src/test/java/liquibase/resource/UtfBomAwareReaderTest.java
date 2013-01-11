@@ -130,6 +130,15 @@ public class UtfBomAwareReaderTest {
 		assertData();
 	}
 
+	@Test
+	public void testWithNoDefault() throws IOException {
+		reader = new UtfBomAwareReader(prepareStream(0x00, 0x00, 0xFE, 0xFF,
+				0x00, 0x00, 0x00, 0x61, 0x00, 0x00, 0x00, 0x62, 0x00, 0x00,
+				0x00, 0x63));
+		assertEncoding("UTF-32BE", Charset.defaultCharset().toString());
+		assertData();
+	}
+	
 	private void assertData() throws IOException {
 		assertEquals("abc", new BufferedReader(reader).readLine());
 		assertEmpty();
@@ -140,10 +149,14 @@ public class UtfBomAwareReaderTest {
 	}
 
 	private void assertEncoding(String expectedCharsetName) throws IOException {
+		assertEncoding(expectedCharsetName, "ISO8859_1");
+	}
+
+	private void assertEncoding(String expectedCharsetName, String expectedDefault) throws IOException {
 		String canonicalCharsetName = Charset.forName(reader.getEncoding())
 				.toString();
 
 		assertEquals(expectedCharsetName, canonicalCharsetName);
-		assertEquals("ISO8859_1", reader.getDefaultEncoding());
+		assertEquals(expectedDefault, reader.getDefaultEncoding());
 	}
 }
