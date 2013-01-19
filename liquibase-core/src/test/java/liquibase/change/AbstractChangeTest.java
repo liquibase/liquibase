@@ -52,7 +52,7 @@ public abstract class AbstractChangeTest {
         Map<String, String> seenCheckSums = new HashMap<String, String>();
         for (Field field : change.getClass().getDeclaredFields()) {
             field.setAccessible(true);
-            if (field.getName().startsWith("$VR") || field.getName().equals("serialVersionUID")) {
+            if (field.isSynthetic() || field.getName().startsWith("$VR") || field.getName().equals("serialVersionUID")) {
                 //code coverage related
             } else if (field.getName().equals("associatedWith")) {
                 //currently not used

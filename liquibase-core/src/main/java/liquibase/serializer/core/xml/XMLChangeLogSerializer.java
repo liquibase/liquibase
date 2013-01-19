@@ -151,7 +151,7 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
                 if (field.getName().equals("serialVersionUID")) {
                     continue;
                 }
-                if (field.getName().equals("$VRc")) { //from emma
+                if (field.isSynthetic() || field.getName().equals("$VRc")) { //from emma
                     continue;
                 }
 
@@ -188,7 +188,7 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
                 if (field.getName().equals("serialVersionUID")) {
                     continue;
                 }
-                if (field.getName().equals("$VRc")) { //from emma
+                if (field.isSynthetic() || field.getName().equals("$VRc")) { //from emma
                     continue;
                 }
                 
