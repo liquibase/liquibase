@@ -59,6 +59,10 @@ public abstract class DatabaseSnapshot {
             example = (T) new Schema(catalogAndSchema.getCatalogName(), catalogAndSchema.getSchemaName());
         }
 
+        if (!snapshotControl.shouldInclude(example.getClass())) {
+            return example;
+        }
+
        T existing = get(example);
         if (existing != null) {
             return existing;
@@ -113,6 +117,9 @@ public abstract class DatabaseSnapshot {
             return null;
         }
         if (fieldValue instanceof DatabaseObject) {
+            if (!snapshotControl.shouldInclude(((DatabaseObject) fieldValue).getClass())) {
+                return fieldValue;
+            }
             if (((DatabaseObject) fieldValue).getSnapshotId() == null) {
                 return include((DatabaseObject) fieldValue);
             } else {
@@ -129,6 +136,10 @@ public abstract class DatabaseSnapshot {
             List newValues = new ArrayList();
             while (fieldValueIterator.hasNext()) {
                 Object obj = fieldValueIterator.next();
+                if (fieldValue instanceof DatabaseObject && !snapshotControl.shouldInclude(((DatabaseObject) fieldValue).getClass())) {
+                    return fieldValue;
+                }
+
                 if (obj instanceof DatabaseObject && ((DatabaseObject) obj).getSnapshotId() == null) {
                     obj = include((DatabaseObject) obj);
                 }

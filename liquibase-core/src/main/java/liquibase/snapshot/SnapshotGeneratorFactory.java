@@ -84,7 +84,7 @@ public class SnapshotGeneratorFactory {
 
 
     public boolean has(DatabaseObject example, Database database) throws DatabaseException, InvalidExampleException {
-        if (createSnapshot(example, database) != null) {
+        if (createSnapshot(example, database, new SnapshotControl(example.getClass())) != null) {
             return true;
         }
         CatalogAndSchema catalogAndSchema;

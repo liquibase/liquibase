@@ -26,14 +26,10 @@ public class SnapshotControl {
         } else {
             this.types = new HashSet<Class<? extends DatabaseObject>>(Arrays.asList(types));
         }
-        this.types.add(Catalog.class);
-        this.types.add(Schema.class);
     }
 
     public SnapshotControl(String types) {
         this.types = readTypesString(types);
-        this.types.add(Catalog.class);
-        this.types.add(Schema.class);
     }
 
     private Set<Class<? extends DatabaseObject>> readTypesString(String typesString) {
