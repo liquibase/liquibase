@@ -6,6 +6,7 @@ import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.DatabaseSnapshot;
+import liquibase.snapshot.JdbcDatabaseSnapshot;
 import liquibase.statement.core.GetViewDefinitionStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Schema;
@@ -14,6 +15,7 @@ import liquibase.util.StringUtils;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 
 public class ViewSnapshotGenerator extends JdbcSnapshotGenerator {
 
@@ -49,14 +51,15 @@ public class ViewSnapshotGenerator extends JdbcSnapshotGenerator {
         Database database = snapshot.getDatabase();
         Schema schema = example.getSchema();
 
-        ResultSet viewsMetadataRs = null;
+        List<JdbcDatabaseSnapshot.CachedRow> viewsMetadataRs = null;
         try {
-            viewsMetadataRs = getMetaData(database).getTables(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), example.getName(), new String[]{"VIEW"});
-            if (viewsMetadataRs.next()) {
-                String rawViewName = viewsMetadataRs.getString("TABLE_NAME");
-                String rawSchemaName = StringUtils.trimToNull(viewsMetadataRs.getString("TABLE_SCHEM"));
-                String rawCatalogName = StringUtils.trimToNull(viewsMetadataRs.getString("TABLE_CAT"));
-                String remarks = viewsMetadataRs.getString("REMARKS");
+            viewsMetadataRs = ((JdbcDatabaseSnapshot) snapshot).getMetaData().getTables(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), example.getName(), new String[]{"VIEW"});
+            if (viewsMetadataRs.size() > 0) {
+                JdbcDatabaseSnapshot.CachedRow row = viewsMetadataRs.get(0);
+                String rawViewName = row.getString("TABLE_NAME");
+                String rawSchemaName = StringUtils.trimToNull(row.getString("TABLE_SCHEM"));
+                String rawCatalogName = StringUtils.trimToNull(row.getString("TABLE_CAT"));
+                String remarks = row.getString("REMARKS");
 
                 View view = new View().setName(cleanNameFromDatabase(rawViewName, database));
                 view.setRemarks(remarks);
@@ -76,13 +79,6 @@ public class ViewSnapshotGenerator extends JdbcSnapshotGenerator {
             }
         } catch (SQLException e) {
             throw new DatabaseException(e);
-        } finally {
-            try {
-                if (viewsMetadataRs != null) {
-                    viewsMetadataRs.close();
-                }
-            } catch (SQLException ignore) {
-            }
         }
     }
 
@@ -91,21 +87,14 @@ public class ViewSnapshotGenerator extends JdbcSnapshotGenerator {
         if (foundObject instanceof Schema) {
             Schema schema = (Schema) foundObject;
             Database database = snapshot.getDatabase();
-            ResultSet viewsMetadataRs = null;
+            List<JdbcDatabaseSnapshot.CachedRow> viewsMetadataRs = null;
             try {
-                viewsMetadataRs = getMetaData(database).getTables(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), null, new String[]{"VIEW"});
-                while (viewsMetadataRs.next()) {
-                    schema.addDatabaseObject(new View().setName(viewsMetadataRs.getString("TABLE_NAME")).setSchema(schema));
+                viewsMetadataRs = ((JdbcDatabaseSnapshot) snapshot).getMetaData().getTables(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), null, new String[]{"VIEW"});
+                for (JdbcDatabaseSnapshot.CachedRow row : viewsMetadataRs) {
+                    schema.addDatabaseObject(new View().setName(row.getString("TABLE_NAME")).setSchema(schema));
                 }
             } catch (SQLException e) {
                 throw new DatabaseException(e);
-            } finally {
-                try {
-                    if (viewsMetadataRs != null) {
-                        viewsMetadataRs.close();
-                    }
-                } catch (SQLException ignore) {
-                }
             }
         }
     }

@@ -12,7 +12,7 @@ import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import java.lang.reflect.Field;
 import java.util.*;
 
-public class DatabaseSnapshot {
+public abstract class DatabaseSnapshot {
 
     private SnapshotControl snapshotControl;
     private Database database;

@@ -116,7 +116,7 @@ public class SnapshotGeneratorFactory {
     }
 
     public DatabaseSnapshot createSnapshot(DatabaseObject[] examples, Database database, SnapshotControl snapshotControl) throws DatabaseException, InvalidExampleException {
-        DatabaseSnapshot snapshot = new DatabaseSnapshot(snapshotControl, database);
+        DatabaseSnapshot snapshot = new JdbcDatabaseSnapshot(snapshotControl, database);
 
         for (DatabaseObject example : examples) {
             snapshot.include(example);

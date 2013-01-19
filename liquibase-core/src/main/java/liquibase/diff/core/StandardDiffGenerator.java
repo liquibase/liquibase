@@ -6,6 +6,7 @@ import liquibase.diff.*;
 import liquibase.diff.compare.CompareControl;
 import liquibase.exception.DatabaseException;
 import liquibase.snapshot.DatabaseSnapshot;
+import liquibase.snapshot.JdbcDatabaseSnapshot;
 import liquibase.structure.DatabaseObject;
 import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 
@@ -24,7 +25,7 @@ public class StandardDiffGenerator implements DiffGenerator {
     public DiffResult compare(DatabaseSnapshot referenceSnapshot, DatabaseSnapshot comparisonSnapshot, CompareControl compareControl) throws DatabaseException {
 
         if (comparisonSnapshot == null) {
-            comparisonSnapshot = new DatabaseSnapshot(referenceSnapshot.getDatabase()); //, compareControl.toSnapshotControl(CompareControl.DatabaseRole.REFERENCE));
+            comparisonSnapshot = new JdbcDatabaseSnapshot(referenceSnapshot.getDatabase()); //, compareControl.toSnapshotControl(CompareControl.DatabaseRole.REFERENCE));
         }
 
         DiffResult diffResult = new DiffResult(referenceSnapshot, comparisonSnapshot, compareControl);

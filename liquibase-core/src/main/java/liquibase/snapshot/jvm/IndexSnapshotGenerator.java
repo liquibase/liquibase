@@ -144,23 +144,21 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
             schema = table.getSchema();
 
 
-            ResultSet rs = null;
-            Statement statement = null;
-            DatabaseMetaData databaseMetaData = null;
+            List<JdbcDatabaseSnapshot.CachedRow> rs = null;
+            JdbcDatabaseSnapshot.CachingDatabaseMetaData databaseMetaData = null;
             try {
-                databaseMetaData = getMetaData(database);
+                databaseMetaData = ((JdbcDatabaseSnapshot) snapshot).getMetaData();
 
                 if (database instanceof OracleDatabase) {
                     //oracle getIndexInfo is buggy and slow.  See Issue 1824548 and http://forums.oracle.com/forums/thread.jspa?messageID=578383&#578383
-                    statement = ((JdbcConnection) database.getConnection()).getUnderlyingConnection().createStatement();
                     String sql = "SELECT INDEX_NAME, COLUMN_NAME FROM ALL_IND_COLUMNS WHERE TABLE_OWNER='" + schema.getName() + "' AND TABLE_NAME='" + table.getName() + "'";
-                    rs = statement.executeQuery(sql);
+                    rs = databaseMetaData.query(sql);
                 } else {
                     rs = databaseMetaData.getIndexInfo(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), table.getName(), false, true);
                 }
                 Map<String, Index> foundIndexes = new HashMap<String, Index>();
-                while (rs.next()) {
-                    String indexName = rs.getString("INDEX_NAME");
+                for (JdbcDatabaseSnapshot.CachedRow row : rs) {
+                    String indexName = row.getString("INDEX_NAME");
                     if (indexName == null) {
                         continue;
                     }
@@ -171,7 +169,7 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                         index.setName(indexName);
                         index.setTable(table);
                     }
-                    index.getColumns().add(rs.getString("COLUMN_NAME"));
+                    index.getColumns().add(row.getString("COLUMN_NAME"));
                 }
 
                 for (Index exampleIndex : foundIndexes.values()) {
@@ -180,19 +178,6 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
 
             } catch (Exception e) {
                 throw new DatabaseException(e);
-            } finally {
-                if (rs != null) {
-                    try {
-                        rs.close();
-                    } catch (SQLException ignored) {
-                    }
-                }
-                if (statement != null) {
-                    try {
-                        statement.close();
-                    } catch (SQLException ignored) {
-                    }
-                }
             }
         }
 //        if (foundObject instanceof PrimaryKey) {
@@ -230,27 +215,25 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
         }
         Map<String, Index> foundIndexes = new HashMap<String, Index>();
         for (Table table : tables) {
-            DatabaseMetaData databaseMetaData = null;
-            ResultSet rs = null;
-            Statement statement = null;
+            JdbcDatabaseSnapshot.CachingDatabaseMetaData databaseMetaData = null;
+            List<JdbcDatabaseSnapshot.CachedRow> rs = null;
             try {
-                databaseMetaData = getMetaData(database);
+                databaseMetaData = ((JdbcDatabaseSnapshot) snapshot).getMetaData();
 
                 if (database instanceof OracleDatabase) {
                     //oracle getIndexInfo is buggy and slow.  See Issue 1824548 and http://forums.oracle.com/forums/thread.jspa?messageID=578383&#578383
-                    statement = ((JdbcConnection) database.getConnection()).getUnderlyingConnection().createStatement();
                     String sql = "SELECT INDEX_NAME, 3 AS TYPE, TABLE_NAME, COLUMN_NAME, COLUMN_POSITION AS ORDINAL_POSITION, null AS FILTER_CONDITION FROM ALL_IND_COLUMNS WHERE TABLE_OWNER='" + schema.getName() + "' AND TABLE_NAME='" + table.getName() + "'";
                     if (exampleName != null) {
                         sql += " AND INDEX_NAME='" + exampleName + "'";
                     }
                     sql += " ORDER BY INDEX_NAME, ORDINAL_POSITION";
-                    rs = statement.executeQuery(sql);
+                    rs = databaseMetaData.query(sql);
                 } else {
                     rs = databaseMetaData.getIndexInfo(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), database.correctObjectName(table.getName(), Table.class), false, true);
                 }
 
-                while (rs.next()) {
-                    String indexName = cleanNameFromDatabase(rs.getString("INDEX_NAME"), database);
+                for (JdbcDatabaseSnapshot.CachedRow row : rs) {
+                    String indexName = cleanNameFromDatabase(row.getString("INDEX_NAME"), database);
                     if (indexName == null) {
                         continue;
                     }
@@ -265,16 +248,14 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                     if (database instanceof InformixDatabase && indexName.startsWith(" ")) {
                         indexName = "_generated_index_" + indexName.substring(1);
                     }
-                    short type = rs.getShort("TYPE");
+                    short type = row.getShort("TYPE");
                     //                String tableName = rs.getString("TABLE_NAME");
-                    boolean nonUnique = true;
-                    try {
-                        nonUnique = rs.getBoolean("NON_UNIQUE");
-                    } catch (SQLException e) {
-                        //doesn't exist in all databases
+                    Boolean nonUnique = row.getBoolean("NON_UNIQUE");
+                    if (nonUnique == null) {
+                        nonUnique = true;
                     }
-                    String columnName = cleanNameFromDatabase(rs.getString("COLUMN_NAME"), database);
-                    short position = rs.getShort("ORDINAL_POSITION");
+                    String columnName = cleanNameFromDatabase(row.getString("COLUMN_NAME"), database);
+                    short position = row.getShort("ORDINAL_POSITION");
                     /*
                     * TODO maybe bug in jdbc driver? Need to investigate.
                     * If this "if" is commented out ArrayOutOfBoundsException is thrown
@@ -285,7 +266,7 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                             && position == 0) {
                         System.out.println(this.getClass().getName() + ": corrected position to " + ++position);
                     }
-                    String filterCondition = rs.getString("FILTER_CONDITION");
+                    String filterCondition = row.getString("FILTER_CONDITION");
 
                     if (type == DatabaseMetaData.tableIndexStatistic) {
                         continue;
@@ -315,19 +296,6 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                 }
             } catch (Exception e) {
                 throw new DatabaseException(e);
-            } finally {
-                if (rs != null) {
-                    try {
-                        rs.close();
-                    } catch (SQLException ignored) {
-                    }
-                }
-                if (statement != null) {
-                    try {
-                        statement.close();
-                    } catch (SQLException ignored) {
-                    }
-                }
             }
         }
 

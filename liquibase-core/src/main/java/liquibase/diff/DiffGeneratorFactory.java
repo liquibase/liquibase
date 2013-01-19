@@ -7,6 +7,7 @@ import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.servicelocator.ServiceLocator;
 import liquibase.snapshot.DatabaseSnapshot;
+import liquibase.snapshot.JdbcDatabaseSnapshot;
 import liquibase.snapshot.SnapshotControl;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 
@@ -72,7 +73,7 @@ public class DiffGeneratorFactory {
         DatabaseSnapshot referenceSnapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(referenceDatabase.getDefaultSchema(), referenceDatabase, new SnapshotControl());
         DatabaseSnapshot comparisonSnapshot = null;
         if (comparisonDatabase == null) {
-            comparisonSnapshot = new DatabaseSnapshot(referenceDatabase);
+            comparisonSnapshot = new JdbcDatabaseSnapshot(referenceDatabase);
         } else {
             comparisonSnapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(comparisonDatabase.getDefaultSchema(), comparisonDatabase, new SnapshotControl());
         }

@@ -85,14 +85,6 @@ public abstract class JdbcSnapshotGenerator implements SnapshotGenerator {
         statusListeners.add(listener);
     }
 
-    protected DatabaseMetaData getMetaData(Database database) throws SQLException {
-        DatabaseMetaData databaseMetaData = null;
-        if (database.getConnection() != null) {
-            databaseMetaData = ((JdbcConnection) database.getConnection()).getUnderlyingConnection().getMetaData();
-        }
-        return databaseMetaData;
-    }
-
     protected void updateListeners(String message) {
         if (this.statusListeners == null) {
             return;

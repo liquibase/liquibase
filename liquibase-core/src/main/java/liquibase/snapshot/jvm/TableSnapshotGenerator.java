@@ -6,6 +6,7 @@ import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.InvalidExampleException;
+import liquibase.snapshot.JdbcDatabaseSnapshot;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
 import liquibase.util.StringUtils;
@@ -13,6 +14,7 @@ import liquibase.util.StringUtils;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 
 public class TableSnapshotGenerator extends JdbcSnapshotGenerator {
     public TableSnapshotGenerator() {
@@ -25,32 +27,21 @@ public class TableSnapshotGenerator extends JdbcSnapshotGenerator {
         String objectName = example.getName();
         Schema schema = example.getSchema();
 
-        ResultSet rs = null;
+        List<JdbcDatabaseSnapshot.CachedRow> rs = null;
         try {
-            DatabaseMetaData metaData = getMetaData(database);
+            JdbcDatabaseSnapshot.CachingDatabaseMetaData metaData = ((JdbcDatabaseSnapshot) snapshot).getMetaData();
             rs = metaData.getTables(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), database.correctObjectName(objectName, Table.class), new String[]{"TABLE"});
 
             Table table;
-            try {
-                if (rs.next()) {
-                    table = readTable(rs, database);
-                } else {
-                    return null;
-                }
-            } finally {
-                rs.close();
+            if (rs.size() > 0) {
+                table = readTable(rs.get(0), database);
+            } else {
+                return null;
             }
 
             return table;
         } catch (SQLException e) {
             throw new DatabaseException(e);
-        } finally {
-            if (rs != null) {
-                try {
-                    rs.close();
-                } catch (SQLException ignore) {
-                }
-            }
         }
     }
 
@@ -61,31 +52,24 @@ public class TableSnapshotGenerator extends JdbcSnapshotGenerator {
             Database database = snapshot.getDatabase();
             Schema schema = (Schema) foundObject;
 
-            ResultSet tableMetaDataRs = null;
+            List<JdbcDatabaseSnapshot.CachedRow> tableMetaDataRs = null;
             try {
-                tableMetaDataRs = getMetaData(database).getTables(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), null, new String[]{"TABLE"});
-                while (tableMetaDataRs.next()) {
-                    String tableName = tableMetaDataRs.getString("TABLE_NAME");
+                tableMetaDataRs = ((JdbcDatabaseSnapshot) snapshot).getMetaData().getTables(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), null, new String[]{"TABLE"});
+                for (JdbcDatabaseSnapshot.CachedRow row : tableMetaDataRs) {
+                    String tableName = row.getString("TABLE_NAME");
                     Table tableExample = (Table) new Table().setName(tableName).setSchema(schema);
 
                     schema.addDatabaseObject(tableExample);
                 }
             } catch (SQLException e) {
                 throw new DatabaseException(e);
-            } finally {
-                try {
-                    if (tableMetaDataRs != null) {
-                        tableMetaDataRs.close();
-                    }
-                } catch (SQLException ignore) {
-                }
             }
         }
 
 
     }
 
-    protected Table readTable(ResultSet tableMetadataResultSet, Database database) throws SQLException, DatabaseException {
+    protected Table readTable(JdbcDatabaseSnapshot.CachedRow tableMetadataResultSet, Database database) throws SQLException, DatabaseException {
         String rawTableName = tableMetadataResultSet.getString("TABLE_NAME");
         String rawSchemaName = StringUtils.trimToNull(tableMetadataResultSet.getString("TABLE_SCHEM"));
         String rawCatalogName = StringUtils.trimToNull(tableMetadataResultSet.getString("TABLE_CAT"));

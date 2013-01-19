@@ -10,6 +10,7 @@ import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.logging.LogFactory;
 import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.DatabaseSnapshot;
+import liquibase.snapshot.JdbcDatabaseSnapshot;
 import liquibase.statement.DatabaseFunction;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
@@ -22,6 +23,7 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
@@ -36,28 +38,21 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
         Relation relation = ((Column) example).getRelation();
         Schema schema = relation.getSchema();
 
-        ResultSet columnMetadataRs = null;
+        List<JdbcDatabaseSnapshot.CachedRow> columnMetadataRs = null;
         try {
 
-            DatabaseMetaData databaseMetaData = getMetaData(database);
+            JdbcDatabaseSnapshot.CachingDatabaseMetaData databaseMetaData = ((JdbcDatabaseSnapshot) snapshot).getMetaData();
 
             columnMetadataRs = databaseMetaData.getColumns(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), database.correctObjectName(relation.getName(), Table.class), database.correctObjectName(example.getName(), Column.class));
 
-            if (columnMetadataRs.next()) {
-                Map<String, Object> data = convertResultSetToMap(columnMetadataRs, database);
+            if (columnMetadataRs.size() > 0) {
+                JdbcDatabaseSnapshot.CachedRow data = columnMetadataRs.get(0);
                 return readColumn(data, relation, database);
             } else {
                 return null;
             }
         } catch (Exception e) {
             throw new DatabaseException(e);
-        } finally {
-            if (columnMetadataRs != null) {
-                try {
-                    columnMetadataRs.close();
-                } catch (SQLException ignored) {
-                }
-            }
         }
     }
 
@@ -66,35 +61,28 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
         if (foundObject instanceof Relation) {
             Database database = snapshot.getDatabase();
             Relation relation = (Relation) foundObject;
-            ResultSet allColumnsMetadataRs = null;
+            List<JdbcDatabaseSnapshot.CachedRow> allColumnsMetadataRs = null;
             try {
 
-                DatabaseMetaData databaseMetaData = getMetaData(database);
+                JdbcDatabaseSnapshot.CachingDatabaseMetaData databaseMetaData = ((JdbcDatabaseSnapshot) snapshot).getMetaData();
 
                 Schema schema;
 
                 schema = relation.getSchema();
                 allColumnsMetadataRs = databaseMetaData.getColumns(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), relation.getName(), null);
 
-                while (allColumnsMetadataRs.next()) {
-                    Column exampleColumn = new Column().setRelation(relation).setName(allColumnsMetadataRs.getString("COLUMN_NAME"));
+                for (JdbcDatabaseSnapshot.CachedRow row : allColumnsMetadataRs) {
+                    Column exampleColumn = new Column().setRelation(relation).setName(row.getString("COLUMN_NAME"));
                     relation.getColumns().add(exampleColumn);
                 }
             } catch (Exception e) {
                 throw new DatabaseException(e);
-            } finally {
-                if (allColumnsMetadataRs != null) {
-                    try {
-                        allColumnsMetadataRs.close();
-                    } catch (SQLException ignored) {
-                    }
-                }
             }
         }
 
     }
 
-    protected Column readColumn(Map<String, Object> columnMetadataResultSet, Relation table, Database database) throws SQLException, DatabaseException {
+    protected Column readColumn(JdbcDatabaseSnapshot.CachedRow columnMetadataResultSet, Relation table, Database database) throws SQLException, DatabaseException {
         String rawTableName = (String) columnMetadataResultSet.get("TABLE_NAME");
         String rawColumnName = (String) columnMetadataResultSet.get("COLUMN_NAME");
         String rawSchemaName = StringUtils.trimToNull((String) columnMetadataResultSet.get("TABLE_SCHEM"));
@@ -106,7 +94,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
         column.setRelation(table);
         column.setRemarks(remarks);
 
-        int nullable = (Integer) columnMetadataResultSet.get("NULLABLE");
+        int nullable = columnMetadataResultSet.getInt("NULLABLE");
         if (nullable == DatabaseMetaData.columnNoNulls) {
             column.setNullable(false);
         } else if (nullable == DatabaseMetaData.columnNullable) {
@@ -117,7 +105,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
         }
 
         if (table instanceof Table) {
-            if (columnMetadataResultSet.containsKey("IS_AUTOINCREMENT")) {
+            if (columnMetadataResultSet.containsColumn("IS_AUTOINCREMENT")) {
                 String isAutoincrement = (String) columnMetadataResultSet.get("IS_AUTOINCREMENT");
                 if (isAutoincrement == null) {
                     column.setAutoIncrement(false);
@@ -161,20 +149,20 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
         return column;
     }
 
-    protected DataType readDataType(Map<String, Object> columnMetadataResultSet, Column column, Database database) throws SQLException {
+    protected DataType readDataType(JdbcDatabaseSnapshot.CachedRow columnMetadataResultSet, Column column, Database database) throws SQLException {
         String columnTypeName = (String) columnMetadataResultSet.get("TYPE_NAME");
 
-        int dataType = (Integer) columnMetadataResultSet.get("DATA_TYPE");
-        Integer columnSize = (Integer) columnMetadataResultSet.get("COLUMN_SIZE");
+        int dataType = columnMetadataResultSet.getInt("DATA_TYPE");
+        Integer columnSize = columnMetadataResultSet.getInt("COLUMN_SIZE");
 
-        Integer decimalDigits = (Integer) columnMetadataResultSet.get("DECIMAL_DIGITS");
+        Integer decimalDigits = columnMetadataResultSet.getInt("DECIMAL_DIGITS");
         if (decimalDigits != null && decimalDigits.equals(0)) {
             decimalDigits = null;
         }
 
-        Integer radix = (Integer) columnMetadataResultSet.get("NUM_PREC_RADIX");
+        Integer radix = columnMetadataResultSet.getInt("NUM_PREC_RADIX");
 
-        Integer characterOctetLength = (Integer) columnMetadataResultSet.get("CHAR_OCTET_LENGTH");
+        Integer characterOctetLength = columnMetadataResultSet.getInt("CHAR_OCTET_LENGTH");
 
         DataType type = new DataType(columnTypeName);
         type.setDataTypeId(dataType);
@@ -187,7 +175,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
         return type;
     }
 
-    protected Object readDefaultValue(Map<String, Object> columnMetadataResultSet, Column columnInfo, Database database) throws SQLException, DatabaseException {
+    protected Object readDefaultValue(JdbcDatabaseSnapshot.CachedRow columnMetadataResultSet, Column columnInfo, Database database) throws SQLException, DatabaseException {
         if (database instanceof MSSQLDatabase) {
             Object defaultValue = columnMetadataResultSet.get("COLUMN_DEF");
 
@@ -196,7 +184,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                 if (defaultValue.equals("(NULL)")) {
                     newValue = null;
                 }
-                columnMetadataResultSet.put("COLUMN_DEF", newValue);
+                columnMetadataResultSet.set("COLUMN_DEF", newValue);
             }
         }
 
