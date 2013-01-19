@@ -7,6 +7,7 @@ import liquibase.executor.jvm.RowMapperResultSetExtractor;
 
 import java.sql.*;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -36,6 +37,8 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
     public class CachingDatabaseMetaData {
         private DatabaseMetaData databaseMetaData;
 
+        private Map<String, List<CachedRow>> cachedResults = new HashMap<String, List<CachedRow>>();
+
         public CachingDatabaseMetaData(DatabaseMetaData metaData) {
             this.databaseMetaData = metaData;
         }
@@ -45,46 +48,105 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
         }
 
         public List<CachedRow> getExportedKeys(String catalogName, String schemaName, String table) throws SQLException {
-            return cacheResultSet(databaseMetaData.getExportedKeys(catalogName, schemaName, table));
+            String key = createKey("getExportedKeys", catalogName, schemaName, table);
+            if (hasCachedValue(key)) {
+                return getCachedValue(key);
+            }
+            return cacheResultSet(key, databaseMetaData.getExportedKeys(catalogName, schemaName, table));
+        }
+
+        private List<CachedRow> getCachedValue(String key) {
+            return cachedResults.get(key);
+        }
+
+        private boolean hasCachedValue(String key) {
+            return cachedResults.containsKey(key);
+        }
+
+        private String createKey(String methodName, Object... params) {
+            String key = methodName;
+            if (params != null) {
+                for (Object param : params) {
+                    key += ":"+param;
+                }
+            }
+            return key;
+        }
+
+        private List<CachedRow> cacheResultSet(String key, ResultSet rs) throws SQLException {
+            List list;
+            try {
+                list = (List) new RowMapperResultSetExtractor(new ColumnMapRowMapper()).extractData(rs);
+                for (int i=0; i<list.size(); i++) {
+                    list.set(i, new CachedRow((Map) list.get(i)));
+                }
+            } finally {
+                rs.close();
+            }
+
+            cachedResults.put(key, list);
+            return list;
+
         }
 
         public List<CachedRow> getImportedKeys(String catalogName, String schemaName, String table) throws SQLException {
-            return cacheResultSet(databaseMetaData.getImportedKeys(catalogName, schemaName, table));
+            String key = createKey("getImportedKeys", catalogName, schemaName, table);
+            if (hasCachedValue(key)) {
+                return getCachedValue(key);
+            }
+
+            return cacheResultSet(key, databaseMetaData.getImportedKeys(catalogName, schemaName, table));
         }
 
         public List<CachedRow> getIndexInfo(String catalogName, String schemaName, String table, boolean unique, boolean approximate) throws SQLException {
-            return cacheResultSet(databaseMetaData.getIndexInfo(catalogName, schemaName, table, unique, approximate));
+            String key = createKey("getIndexInfo", catalogName, schemaName, table, unique, approximate);
+            if (hasCachedValue(key)) {
+                return getCachedValue(key);
+            }
+
+            return cacheResultSet(key, databaseMetaData.getIndexInfo(catalogName, schemaName, table, unique, approximate));
         }
 
         public List<CachedRow> getColumns(String catalogName, String schemaName, String tableNamePattern, String columnNamePattern) throws SQLException {
-            return cacheResultSet(databaseMetaData.getColumns(catalogName, schemaName, tableNamePattern, columnNamePattern));
+            String key = createKey("getColumns", catalogName, schemaName, tableNamePattern, columnNamePattern);
+            if (hasCachedValue(key)) {
+                return getCachedValue(key);
+            }
+
+            return cacheResultSet(key, databaseMetaData.getColumns(catalogName, schemaName, tableNamePattern, columnNamePattern));
         }
 
         public List<CachedRow> getTables(String catalogName, String schemaName, String tableNamePattern, String[] types) throws SQLException {
-            return cacheResultSet(databaseMetaData.getTables(catalogName, schemaName, tableNamePattern, types));
+            String key = createKey("getTables", catalogName, schemaName, tableNamePattern, types);
+            if (hasCachedValue(key)) {
+                return getCachedValue(key);
+            }
+
+            return cacheResultSet(key, databaseMetaData.getTables(catalogName, schemaName, tableNamePattern, types));
         }
 
         public List<CachedRow> getPrimaryKeys(String catalogName, String schemaName, String table) throws SQLException {
-            return cacheResultSet(databaseMetaData.getPrimaryKeys(catalogName, schemaName, table));
+            String key = createKey("getPrimaryKeys", catalogName, schemaName, table);
+            if (hasCachedValue(key)) {
+                return getCachedValue(key);
+            }
+
+            return cacheResultSet(key, databaseMetaData.getPrimaryKeys(catalogName, schemaName, table));
         }
 
         public List<CachedRow> query(String sql) throws SQLException {
+            String key = createKey("query", sql);
+            if (hasCachedValue(key)) {
+                return getCachedValue(key);
+            }
+
             Statement statement = this.getDatabaseMetaData().getConnection().createStatement();
             try {
-                return cacheResultSet(statement.executeQuery(sql));
+                return cacheResultSet(key, statement.executeQuery(sql));
             } finally {
                 statement.close();
             }
         }
-    }
-
-    private List<CachedRow> cacheResultSet(ResultSet rs) throws SQLException {
-        List list = (List) new RowMapperResultSetExtractor(new ColumnMapRowMapper()).extractData(rs);
-        for (int i=0; i<list.size(); i++) {
-            list.set(i, new CachedRow((Map) list.get(i)));
-        }
-
-        return list;
     }
 
     public class CachedRow {
@@ -126,7 +188,15 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
         }
 
         public Boolean getBoolean(String columnName) {
-            return (Boolean) row.get(columnName);
+            Object o = row.get(columnName);
+            if (o instanceof Number) {
+                if (((Number) o).longValue() == 0) {
+                    return false;
+                } else {
+                    return true;
+                }
+            }
+            return (Boolean) o;
         }
     }
 

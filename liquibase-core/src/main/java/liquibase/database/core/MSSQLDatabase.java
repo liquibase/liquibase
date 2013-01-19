@@ -222,6 +222,10 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
 
     @Override
     public boolean isSystemObject(DatabaseObject example) {
+        if (example.getSchema() == null || example.getSchema().getName() == null) {
+            return super.isSystemObject(example);
+        }
+
         if (example instanceof Table && example.getSchema().getName().equals("sys")) {
             return true;
         }

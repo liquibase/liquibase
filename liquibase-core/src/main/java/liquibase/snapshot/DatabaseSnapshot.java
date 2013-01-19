@@ -46,6 +46,10 @@ public abstract class DatabaseSnapshot {
 //    }
 
     protected  <T extends DatabaseObject> T include(T example) throws DatabaseException, InvalidExampleException {
+        if (example == null) {
+            return null;
+        }
+
         if (database.isSystemObject(example)) {
             return null;
         }
