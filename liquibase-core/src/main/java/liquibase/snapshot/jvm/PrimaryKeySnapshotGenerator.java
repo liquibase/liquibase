@@ -9,10 +9,7 @@ import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.JdbcDatabaseSnapshot;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.core.Index;
-import liquibase.structure.core.PrimaryKey;
-import liquibase.structure.core.Schema;
-import liquibase.structure.core.Table;
+import liquibase.structure.core.*;
 
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
@@ -72,6 +69,10 @@ public class PrimaryKeySnapshotGenerator extends JdbcSnapshotGenerator {
 
     @Override
     protected void addTo(DatabaseObject foundObject, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException {
+        if (!snapshot.getSnapshotControl().shouldInclude(PrimaryKey.class)) {
+            return;
+        }
+
         if (foundObject instanceof Table) {
             Table table = (Table) foundObject;
             Database database = snapshot.getDatabase();

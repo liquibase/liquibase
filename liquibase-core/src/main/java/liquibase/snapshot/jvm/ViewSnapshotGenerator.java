@@ -9,6 +9,7 @@ import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.JdbcDatabaseSnapshot;
 import liquibase.statement.core.GetViewDefinitionStatement;
 import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.Column;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.View;
 import liquibase.util.StringUtils;
@@ -84,6 +85,10 @@ public class ViewSnapshotGenerator extends JdbcSnapshotGenerator {
 
     @Override
     protected void addTo(DatabaseObject foundObject, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException {
+        if (!snapshot.getSnapshotControl().shouldInclude(View.class)) {
+            return;
+        }
+
         if (foundObject instanceof Schema) {
             Schema schema = (Schema) foundObject;
             Database database = snapshot.getDatabase();

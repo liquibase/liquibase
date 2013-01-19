@@ -53,6 +53,10 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
     @Override
     protected void addTo(DatabaseObject foundObject, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException {
 
+        if (!snapshot.getSnapshotControl().shouldInclude(UniqueConstraint.class)) {
+            return;
+        }
+
         if (foundObject instanceof Table) {
             Table table = (Table) foundObject;
             Database database = snapshot.getDatabase();
