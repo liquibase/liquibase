@@ -177,14 +177,18 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
         public Integer getInt(String columnName) {
             Object o = row.get(columnName);
-            if (o instanceof Short) {
-                return ((Short) o).intValue();
+            if (o instanceof Number) {
+                return ((Number) o).intValue();
             }
             return (Integer) o;
         }
 
         public Short getShort(String columnName) {
-            return (Short) row.get(columnName);
+            Object o = row.get(columnName);
+            if (o instanceof Number) {
+                return ((Number) o).shortValue();
+            }
+            return (Short) o;
         }
 
         public Boolean getBoolean(String columnName) {

@@ -168,7 +168,10 @@ public class ForeignKeySnapshotGenerator extends JdbcSnapshotGenerator {
     }
 
 
-    protected ForeignKeyConstraintType convertToForeignKeyConstraintType(int jdbcType, Database database) throws DatabaseException {
+    protected ForeignKeyConstraintType convertToForeignKeyConstraintType(Integer jdbcType, Database database) throws DatabaseException {
+        if (jdbcType == null) {
+            return ForeignKeyConstraintType.importedKeyRestrict;
+        }
         if (database instanceof MSSQLDatabase) {
             /*
                  * The sp_fkeys stored procedure spec says that returned integer values of 0, 1 and 2

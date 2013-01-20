@@ -37,7 +37,7 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
         }
         UniqueConstraint constraint = new UniqueConstraint();
         constraint.setTable(table);
-        constraint.setName((String) metadata.get(0).get("CONSTRAINT_NAME"));
+        constraint.setName(example.getName());
         for (Map<String, Object> col : metadata) {
             constraint.getColumns().add((String) col.get("COLUMN_NAME"));
         }
@@ -93,6 +93,7 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
         } else if (database instanceof OracleDatabase) {
             sql = "select uc.constraint_name, uc.table_name,uc.status,uc.deferrable,uc.deferred,ui.tablespace_name from all_constraints uc, all_cons_columns ucc, all_indexes ui " +
                     "where uc.constraint_type='U' and uc.index_name = ui.index_name and uc.constraint_name = ucc.constraint_name " +
+                    "and uc.table_name = '" + database.correctObjectName(table.getName(), Table.class) + "' " +
                     "and uc.owner = '" + database.correctObjectName(schema.getCatalogName(), Catalog.class) + "' " +
                     "and ui.table_owner = '" + database.correctObjectName(schema.getCatalogName(), Catalog.class) + "' " +
                     "and ucc.owner = '" + database.correctObjectName(schema.getCatalogName(), Catalog.class) + "'";

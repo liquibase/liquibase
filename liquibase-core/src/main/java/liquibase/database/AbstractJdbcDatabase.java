@@ -893,11 +893,8 @@ public abstract class AbstractJdbcDatabase implements Database {
         if (catalogName == null && schemaName == null) {
             return escapeObjectName(objectName, objectType);
         }
-        if (!supportsCatalogs() && !supportsSchemas()) {
-            return escapeObjectName(objectName, objectType);
-        } else if (supportsCatalogs() && supportsSchemas()) {
-//            Schema schema = correctSchema(new Schema(catalogName, schemaName));
-//            return escapeObjectName(schema.getCatalogName())+"."+escapeObjectName(schema.getName())+"."+escapeObjectName(objectName);
+
+        if (supportsSchemas()) {
             catalogName = StringUtils.trimToNull(catalogName);
             schemaName = StringUtils.trimToNull(schemaName);
             if (catalogName == null && schemaName == null) {
@@ -907,12 +904,17 @@ public abstract class AbstractJdbcDatabase implements Database {
             } else {
                 return escapeObjectName(catalogName, Catalog.class) + "." + escapeObjectName(schemaName, Schema.class) + "." + escapeObjectName(objectName, objectType);
             }
-        } else {
-            if (StringUtils.trimToNull(catalogName) == null) {
-                return escapeObjectName(objectName, objectType);
-            } else {
+        } else if (supportsCatalogs()) {
+            if (StringUtils.trimToNull(catalogName) != null) {
                 return escapeObjectName(catalogName, Catalog.class) + "." + escapeObjectName(objectName, objectType);
+            } else if (StringUtils.trimToNull(schemaName) != null) { //they actually mean catalog name
+                return escapeObjectName(schemaName, Catalog.class) + "." + escapeObjectName(objectName, objectType);
+            } else {
+                return escapeObjectName(objectName, objectType);
             }
+
+        } else {
+            return escapeObjectName(objectName, objectType);
         }
     }
 
