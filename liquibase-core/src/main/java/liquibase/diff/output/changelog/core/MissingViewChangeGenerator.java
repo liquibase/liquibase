@@ -34,7 +34,7 @@ public class MissingViewChangeGenerator implements MissingObjectChangeGenerator 
         CreateViewChange change = new CreateViewChange();
         change.setViewName(view.getName());
         if (control.isIncludeCatalog()) {
-            change.setCatalogName(view.getSchema().getCatalog().getName());
+            change.setCatalogName(view.getSchema().getCatalogName());
         }
         if (control.isIncludeSchema()) {
             change.setSchemaName(view.getSchema().getName());

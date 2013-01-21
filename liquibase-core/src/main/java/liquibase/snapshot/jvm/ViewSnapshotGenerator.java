@@ -71,7 +71,7 @@ public class ViewSnapshotGenerator extends JdbcSnapshotGenerator {
                 try {
                     view.setDefinition(database.getViewDefinition(schemaFromJdbcInfo, view.getName()));
                 } catch (DatabaseException e) {
-                    throw new DatabaseException("Error getting " + database.getConnection().getURL() + " view with " + new GetViewDefinitionStatement(view.getSchema().getCatalog().getName(), view.getSchema().getName(), rawViewName), e);
+                    throw new DatabaseException("Error getting " + database.getConnection().getURL() + " view with " + new GetViewDefinitionStatement(view.getSchema().getCatalogName(), view.getSchema().getName(), rawViewName), e);
                 }
 
                 return view;

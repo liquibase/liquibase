@@ -75,6 +75,6 @@ public class SnapshotControl {
     }
 
     public boolean shouldInclude(Class<? extends DatabaseObject> type) {
-        return types.contains(type);
+        return type.equals(Catalog.class) || types.contains(type);
     }
 }

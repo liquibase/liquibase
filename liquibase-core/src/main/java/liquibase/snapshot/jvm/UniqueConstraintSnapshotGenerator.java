@@ -2,6 +2,7 @@ package liquibase.snapshot.jvm;
 
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
+import liquibase.database.core.DB2Database;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.core.MySQLDatabase;
 import liquibase.database.core.OracleDatabase;
@@ -97,6 +98,12 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
                     "and uc.owner = '" + database.correctObjectName(schema.getCatalogName(), Catalog.class) + "' " +
                     "and ui.table_owner = '" + database.correctObjectName(schema.getCatalogName(), Catalog.class) + "' " +
                     "and ucc.owner = '" + database.correctObjectName(schema.getCatalogName(), Catalog.class) + "'";
+        } else if (database instanceof DB2Database) {
+            sql = "select distinct k.constname as constraint_name from syscat.keycoluse k, syscat.tabconst t " +
+                    "where k.constname = t.constname " +
+                    "and t.tabname = '" + database.correctObjectName(table.getName(), Table.class) + "' " +
+                    "and t.tabschema = '" + database.correctObjectName(schema.getCatalogName(), Catalog.class) + "' " +
+                    "and t.type='U'";
         } else {
             sql = "select CONSTRAINT_NAME, CONSTRAINT_TYPE " +
                     "from information_schema.constraints " +
@@ -136,7 +143,12 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
                     "order by TC.Constraint_Name";
         } else if (database instanceof OracleDatabase) {
             sql = "select ucc.column_name from all_cons_columns ucc where ucc.constraint_name='"+database.correctObjectName(name, UniqueConstraint.class)+"' and ucc.owner='"+database.correctObjectName(schema.getCatalogName(), Catalog.class)+"' order by ucc.position";
-
+        } else if (database instanceof DB2Database) {
+            sql = "select k.colname as column_name from syscat.keycoluse k, syscat.tabconst t " +
+                    "where k.constname = t.constname " +
+                    "and t.type='U' " +
+                    "and k.constname='"+database.correctObjectName(name, UniqueConstraint.class)+"' "+
+                    "order by colseq";
         } else {
             sql = "select CONSTRAINT_NAME, COLUMN_LIST as COLUMN_NAME " +
                     "from information_schema.constraints " +

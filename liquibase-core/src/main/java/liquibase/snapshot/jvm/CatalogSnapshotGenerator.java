@@ -42,14 +42,12 @@ public class CatalogSnapshotGenerator extends JdbcSnapshotGenerator {
                 catalogs = ((JdbcConnection) database.getConnection()).getMetaData().getCatalogs();
             }
             while (catalogs.next()) {
-                CatalogAndSchema schemaFromJdbcInfo;
+                Catalog catalog;
                 if (((AbstractJdbcDatabase) database).jdbcCallsCatalogsSchemas()) {
-                    schemaFromJdbcInfo = ((AbstractJdbcDatabase) database).getSchemaFromJdbcInfo(catalogs.getString("TABLE_SCHEM"), null);
+                    catalog = new Catalog(catalogs.getString("TABLE_SCHEM"));
                 } else {
-                    schemaFromJdbcInfo = ((AbstractJdbcDatabase) database).getSchemaFromJdbcInfo(catalogs.getString("TABLE_CAT"), null);
+                    catalog = new Catalog(catalogs.getString("TABLE_CAT"));
                 }
-
-                Catalog catalog = new Catalog(schemaFromJdbcInfo.getCatalogName());
 
                 if (DatabaseObjectComparatorFactory.getInstance().isSameObject(catalog, example, database)) {
                     if (match == null) {

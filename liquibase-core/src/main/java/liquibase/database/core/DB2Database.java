@@ -7,6 +7,7 @@ import liquibase.database.jvm.JdbcConnection;
 import liquibase.structure.DatabaseObject;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.DateParseException;
+import liquibase.structure.core.Schema;
 import liquibase.util.JdbcUtils;
 
 import java.sql.ResultSet;
@@ -87,6 +88,9 @@ public class DB2Database extends AbstractJdbcDatabase {
 
     @Override
     public String correctObjectName(String objectName, Class<? extends DatabaseObject> objectType) {
+        if (objectName == null) {
+            return null;
+        }
         return objectName.toUpperCase();
     }
 
@@ -213,5 +217,9 @@ public class DB2Database extends AbstractJdbcDatabase {
         return schema.getCatalogName();
     }
 
+    @Override
+    public boolean jdbcCallsCatalogsSchemas() {
+        return true;
+    }
 
 }

@@ -41,7 +41,7 @@ public class UnexpectedColumnChangeGenerator implements UnexpectedObjectChangeGe
         DropColumnChange change = new DropColumnChange();
         change.setTableName(column.getRelation().getName());
         if (control.isIncludeCatalog()) {
-            change.setCatalogName(column.getRelation().getSchema().getCatalog().getName());
+            change.setCatalogName(column.getRelation().getSchema().getCatalogName());
         }
         if (control.isIncludeSchema()) {
             change.setSchemaName(column.getRelation().getSchema().getName());
