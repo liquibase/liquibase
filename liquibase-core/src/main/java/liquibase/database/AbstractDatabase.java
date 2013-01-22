@@ -61,6 +61,7 @@ public abstract class AbstractDatabase implements Database {
 
     private String databaseChangeLogTableName = System.getProperty("liquibase.databaseChangeLogTableName") == null ? "DatabaseChangeLog".toUpperCase() : System.getProperty("liquibase.databaseChangeLogTableName");
     private String databaseChangeLogLockTableName = System.getProperty("liquibase.databaseChangeLogLockTableName") == null ? "DatabaseChangeLogLock".toUpperCase() : System.getProperty("liquibase.databaseChangeLogLockTableName");
+    private String databaseChangeLogObjectsTablespace = System.getProperty("liquibase.databaseChangeLogObjectsTablespaceName");
     private String liquibaseSchemaName = System.getProperty("liquibase.schemaName") == null ? null : System.getProperty("liquibase.schemaName");
     private String liquibaseCatalogName = System.getProperty("liquibase.catalogName") == null ? null : System.getProperty("liquibase.catalogName");
 
@@ -539,6 +540,13 @@ public abstract class AbstractDatabase implements Database {
     }
 
     /**
+     * @see liquibase.database.Database#getChangeLogObjectsTablespace()
+     */
+    public String getChangeLogObjectsTablespace() {
+        return databaseChangeLogObjectsTablespace;
+    }
+
+    /**
      * @see liquibase.database.Database#setDatabaseChangeLogTableName(java.lang.String)
      */
     public void setDatabaseChangeLogTableName(String tableName) {
@@ -550,6 +558,13 @@ public abstract class AbstractDatabase implements Database {
      */
     public void setDatabaseChangeLogLockTableName(String tableName) {
         this.databaseChangeLogLockTableName = tableName;
+    }
+
+    /**
+     * @see liquibase.database.Database#setChangeLogObjectsTablespace(java.lang.String)
+     */
+    public void setChangeLogObjectsTablespace(String tablespace) {
+        this.databaseChangeLogObjectsTablespace = tablespace;
     }
 
     /**
