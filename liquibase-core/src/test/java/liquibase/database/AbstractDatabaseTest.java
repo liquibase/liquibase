@@ -25,7 +25,49 @@ public abstract class AbstractDatabaseTest {
 
     public abstract void getCurrentDateTimeFunction();
 
+    @Test
+    public void onlyAdjustAutoCommitOnMismatch() throws Exception {
+        // Train expectations for setConnection(). If getAutoCommit() returns the same value the Database wants, based
+        // on getAutoCommitMode(), it should _not_ call setAutoCommit(boolean) on the connection
+        DatabaseConnection connection = createStrictMock(DatabaseConnection.class);
+        expect(connection.getConnectionUserName()).andReturn("user");
+        expect(connection.getURL()).andReturn("URL");
+        expect(connection.getAutoCommit()).andReturn(getDatabase().getAutoCommitMode());
+        replay(connection);
 
+        getDatabase().setConnection(connection);
+        verify(connection);
+
+        // Reset the mock and train expectations for close(). Since the auto-commit mode was not adjusted while setting
+        // the connection, it should not be adjusted on close() either
+        reset(connection);
+        connection.close();
+        replay(connection);
+
+        getDatabase().close();
+        verify(connection);
+    }
+
+    @Test
+    public void restoreAutoCommitOnClose() throws Exception {
+        DatabaseConnection connection = createStrictMock(DatabaseConnection.class);
+        expect(connection.getConnectionUserName()).andReturn("user");
+        expect(connection.getURL()).andReturn("URL");
+        expect(connection.getAutoCommit()).andReturn(true);
+        connection.setAutoCommit(eq(false));
+        replay(connection);
+
+        getDatabase().setConnection(connection);
+        verify(connection);
+
+        reset(connection);
+        connection.setAutoCommit(eq(true));
+        connection.close();
+        replay(connection);
+
+        getDatabase().close();
+        verify(connection);
+    }
 
     @Test
     public void isCorrectDatabaseImplementation() throws Exception {
