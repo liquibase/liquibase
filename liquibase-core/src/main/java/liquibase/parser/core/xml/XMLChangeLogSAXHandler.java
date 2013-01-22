@@ -23,6 +23,7 @@ import java.util.jar.JarFile;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import liquibase.Liquibase;
 import liquibase.change.Change;
 import liquibase.change.ChangeFactory;
 import liquibase.change.ChangeWithColumns;
@@ -625,7 +626,15 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
 					&& localName.equals(change.getChangeMetaData().getName())) {
 				if (textString != null) {
 					if (change instanceof RawSQLChange) {
-						((RawSQLChange) change).setSql(changeLogParameters.expandExpressions(textString));
+						// We've already expanded expressions when we defined 'textString' above. If we enabled
+						// escaping, we cannot re-expand; the now-literal variables in the text would get
+						// incorrectly expanded. If we haven't enabled escaping, then retain the current behavior.
+						String expandedExpression = textString;
+						
+						if (false == ChangeLogParameters.EnableEscaping) {
+							expandedExpression = changeLogParameters.expandExpressions(textString);
+						}
+						((RawSQLChange) change).setSql(expandedExpression);
 					} else if (change instanceof CreateProcedureChange) {
 						((CreateProcedureChange) change)
 								.setProcedureBody(textString);
