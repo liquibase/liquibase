@@ -1,40 +1,34 @@
-package liquibase.sqlgenerator.core;
+package liquibase.informix.sqlgenerator.core;
 
 import liquibase.database.Database;
-import liquibase.database.core.InformixDatabase;
-import liquibase.database.core.SybaseDatabase;
 import liquibase.datatype.DataTypeFactory;
-import liquibase.exception.ValidationErrors;
-import liquibase.informix.sqlgenerator.core.InformixCreateDatabaseChangeLogTableGenerator;
 import liquibase.sql.Sql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
+import liquibase.sqlgenerator.core.CreateDatabaseChangeLogTableGenerator;
 import liquibase.statement.NotNullConstraint;
 import liquibase.statement.core.CreateDatabaseChangeLogTableStatement;
 import liquibase.statement.core.CreateTableStatement;
 
-public class CreateDatabaseChangeLogTableGenerator extends AbstractSqlGenerator<CreateDatabaseChangeLogTableStatement> {
+/**
+ * 
+ * @author Ivaylo Slavov
+ */
+public class InformixCreateDatabaseChangeLogTableGenerator extends CreateDatabaseChangeLogTableGenerator {
 
-    @Override
-    public boolean supports(CreateDatabaseChangeLogTableStatement statement, Database database) {
-        return (!(database instanceof SybaseDatabase));
-    }
-
-    public ValidationErrors validate(CreateDatabaseChangeLogTableStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-        return new ValidationErrors();
-    }
-
+	@Override
     public Sql[] generateSql(CreateDatabaseChangeLogTableStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-    	
-    	if (database instanceof InformixDatabase) {
-    		return new InformixCreateDatabaseChangeLogTableGenerator().generateSql(statement, database, sqlGeneratorChain);
-    	}
-    	
+    	/* XXX:
+    	 * Because Informix has some limitations on the primary key column cumulative size (same is for unique indices),
+    	 * the ID's column has been made the sole primary key, and also has a reduced size. 
+    	 * 
+    	 * The original configuration provided by the base class causes the database changelog table not to be created.
+    	 */
+    	   	
         CreateTableStatement createTableStatement = new CreateTableStatement(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName())
-                .setTablespace(database.getLiquibaseTablespaceName())
                 .addPrimaryKeyColumn("ID", DataTypeFactory.getInstance().fromDescription("VARCHAR(" + getIdColumnSize() + ")"), null, null, null, new NotNullConstraint())
-                .addPrimaryKeyColumn("AUTHOR", DataTypeFactory.getInstance().fromDescription("VARCHAR(" + getAuthorColumnSize() + ")"), null, null, null, new NotNullConstraint())
-                .addPrimaryKeyColumn("FILENAME", DataTypeFactory.getInstance().fromDescription("VARCHAR(" + getFilenameColumnSize() + ")"), null, null, null, new NotNullConstraint())
+                .addColumn("AUTHOR",DataTypeFactory.getInstance().fromDescription("VARCHAR(" + getAuthorColumnSize() + ")"), null, null, null, new NotNullConstraint())
+                .addColumn("FILENAME", DataTypeFactory.getInstance().fromDescription("VARCHAR(" + getFilenameColumnSize() + ")"), null, null, null, new NotNullConstraint())
                 .addColumn("DATEEXECUTED", DataTypeFactory.getInstance().fromDescription("datetime"), null, new NotNullConstraint())
                 .addColumn("ORDEREXECUTED", DataTypeFactory.getInstance().fromDescription("INT"), new NotNullConstraint())
                 .addColumn("EXECTYPE", DataTypeFactory.getInstance().fromDescription("VARCHAR(10)"), new NotNullConstraint())
@@ -47,14 +41,17 @@ public class CreateDatabaseChangeLogTableGenerator extends AbstractSqlGenerator<
         return SqlGeneratorFactory.getInstance().generateSql(createTableStatement, database);
     }
 
+    @Override
     protected String getIdColumnSize() {
         return "63";
     }
 
+    @Override
     protected String getAuthorColumnSize() {
         return "63";
     }
 
+    @Override
     protected String getFilenameColumnSize() {
         return "200";
     }

@@ -1,5 +1,6 @@
 package liquibase.statement.core;
 
+import liquibase.change.ColumnConfig;
 import liquibase.statement.AbstractSqlStatement;
 
 import java.util.Map;
@@ -42,5 +43,9 @@ public class InsertStatement extends AbstractSqlStatement {
 
     public Map<String, Object> getColumnValues() {
         return columnValues;
+    }
+    
+    public InsertStatement addColumn(ColumnConfig columnConfig) {
+    	return addColumnValue(columnConfig.getName(), columnConfig.getValueObject());
     }
 }

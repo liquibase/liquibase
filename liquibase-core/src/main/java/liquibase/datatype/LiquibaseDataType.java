@@ -23,6 +23,14 @@ public abstract class LiquibaseDataType implements PrioritizedService {
     private List<Object> parameters = new ArrayList<Object>();
     private String additionalInformation;
 
+    protected LiquibaseDataType(LiquibaseDataType originalType) {
+    	name = originalType.name;
+    	this.minParameters = originalType.minParameters;
+        this.maxParameters = originalType.maxParameters;
+        this.aliases = originalType.aliases;
+        this.priority = originalType.priority;
+    }
+    
     public LiquibaseDataType() {
         DataTypeInfo dataTypeAnnotation = this.getClass().getAnnotation(DataTypeInfo.class);
         this.name = dataTypeAnnotation.name();

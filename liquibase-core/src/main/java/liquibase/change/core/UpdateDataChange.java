@@ -3,6 +3,7 @@ package liquibase.change.core;
 import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.statement.SqlStatement;
+import liquibase.statement.UpdateExecutablePreparedStatement;
 import liquibase.statement.core.UpdateStatement;
 
 import java.util.ArrayList;
@@ -77,6 +78,22 @@ public class UpdateDataChange extends AbstractChange implements ChangeWithColumn
 
     public SqlStatement[] generateStatements(Database database) {
 
+    	boolean needsPreparedStatement = false;
+        for (ColumnConfig column : columns) {
+            if (column.getValueBlob() != null) {
+                needsPreparedStatement = true;
+            }
+            if (column.getValueClob() != null) {
+                needsPreparedStatement = true;
+            }
+        }
+
+        if (needsPreparedStatement) {
+            return new SqlStatement[] { 
+            		new UpdateExecutablePreparedStatement(database, catalogName, schemaName, tableName, columns)
+            };
+        }
+    	
         UpdateStatement statement = new UpdateStatement(getCatalogName(), getSchemaName(), getTableName());
 
         for (ColumnConfig column : columns) {

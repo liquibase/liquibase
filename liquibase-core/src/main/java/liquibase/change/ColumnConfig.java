@@ -207,6 +207,10 @@ public class ColumnConfig {
             return getValueDate();
         } else if (getValueComputed() != null) {
             return getValueComputed();
+        } else if (getValueClob() != null) {
+            return getValueClob();
+        } else if (getValueBlob() != null) {
+            return getValueBlob();
         }
         return null;
     }

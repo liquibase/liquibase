@@ -61,7 +61,7 @@ public class Liquibase {
         log = LogFactory.getLogger();
 
         if (changeLogFile != null) {
-            this.changeLogFile = changeLogFile.replace('\\', '/');  //convert to standard / if usign absolute path on windows
+            this.changeLogFile = changeLogFile.replace('\\', '/');  //convert to standard / if using absolute path on windows
         }
         this.resourceAccessor = resourceAccessor;
 

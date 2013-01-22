@@ -423,15 +423,15 @@
         <root url="jar://$MAVEN_REPOSITORY$/avalon-framework/avalon-framework/4.1.3/avalon-framework-4.1.3-sources.jar!/" />
       </SOURCES>
     </library>
-    <library name="Maven: cglib:cglib-nodep:2.1_3">
+    <library name="Maven: cglib:cglib-nodep:2.2">
       <CLASSES>
-        <root url="jar://$MAVEN_REPOSITORY$/cglib/cglib-nodep/2.1_3/cglib-nodep-2.1_3.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/cglib/cglib-nodep/2.2/cglib-nodep-2.2.jar!/" />
       </CLASSES>
       <JAVADOC>
-        <root url="jar://$MAVEN_REPOSITORY$/cglib/cglib-nodep/2.1_3/cglib-nodep-2.1_3-javadoc.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/cglib/cglib-nodep/2.2/cglib-nodep-2.2-javadoc.jar!/" />
       </JAVADOC>
       <SOURCES>
-        <root url="jar://$MAVEN_REPOSITORY$/cglib/cglib-nodep/2.1_3/cglib-nodep-2.1_3-sources.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/cglib/cglib-nodep/2.2/cglib-nodep-2.2-sources.jar!/" />
       </SOURCES>
     </library>
     <library name="Maven: classworlds:classworlds:1.1-alpha-2">
@@ -863,26 +863,26 @@
         <root url="jar://$MAVEN_REPOSITORY$/org/codehaus/plexus/plexus-utils/1.0.4/plexus-utils-1.0.4-sources.jar!/" />
       </SOURCES>
     </library>
-    <library name="Maven: org.easymock:easymock:2.2">
+    <library name="Maven: org.easymock:easymock:2.5.2">
       <CLASSES>
-        <root url="jar://$MAVEN_REPOSITORY$/org/easymock/easymock/2.2/easymock-2.2.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/org/easymock/easymock/2.5.2/easymock-2.5.2.jar!/" />
       </CLASSES>
       <JAVADOC>
-        <root url="jar://$MAVEN_REPOSITORY$/org/easymock/easymock/2.2/easymock-2.2-javadoc.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/org/easymock/easymock/2.5.2/easymock-2.5.2-javadoc.jar!/" />
       </JAVADOC>
       <SOURCES>
-        <root url="jar://$MAVEN_REPOSITORY$/org/easymock/easymock/2.2/easymock-2.2-sources.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/org/easymock/easymock/2.5.2/easymock-2.5.2-sources.jar!/" />
       </SOURCES>
     </library>
-    <library name="Maven: org.easymock:easymockclassextension:2.2">
+    <library name="Maven: org.easymock:easymockclassextension:2.5.2">
       <CLASSES>
-        <root url="jar://$MAVEN_REPOSITORY$/org/easymock/easymockclassextension/2.2/easymockclassextension-2.2.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/org/easymock/easymockclassextension/2.5.2/easymockclassextension-2.5.2.jar!/" />
       </CLASSES>
       <JAVADOC>
-        <root url="jar://$MAVEN_REPOSITORY$/org/easymock/easymockclassextension/2.2/easymockclassextension-2.2-javadoc.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/org/easymock/easymockclassextension/2.5.2/easymockclassextension-2.5.2-javadoc.jar!/" />
       </JAVADOC>
       <SOURCES>
-        <root url="jar://$MAVEN_REPOSITORY$/org/easymock/easymockclassextension/2.2/easymockclassextension-2.2-sources.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/org/easymock/easymockclassextension/2.5.2/easymockclassextension-2.5.2-sources.jar!/" />
       </SOURCES>
     </library>
     <library name="Maven: org.jboss.spec.javax.interceptor:jboss-interceptors-api_1.1_spec:1.0.0.Beta1">
@@ -934,6 +934,17 @@
         <root url="jar://$MAVEN_REPOSITORY$/org/liquibase/liquibase-core/2.0-SNAPSHOT/liquibase-core-2.0-SNAPSHOT-tests-sources.jar!/" />
         <root url="jar://$MAVEN_REPOSITORY$/org/liquibase/liquibase-core/2.0-SNAPSHOT/liquibase-core-2.0-SNAPSHOT-tests-sources.jar!/" />
         <root url="jar://$MAVEN_REPOSITORY$/org/liquibase/liquibase-core/2.0-SNAPSHOT/liquibase-core-2.0-SNAPSHOT-tests-sources.jar!/" />
+      </SOURCES>
+    </library>
+    <library name="Maven: org.objenesis:objenesis:1.2">
+      <CLASSES>
+        <root url="jar://$MAVEN_REPOSITORY$/org/objenesis/objenesis/1.2/objenesis-1.2.jar!/" />
+      </CLASSES>
+      <JAVADOC>
+        <root url="jar://$MAVEN_REPOSITORY$/org/objenesis/objenesis/1.2/objenesis-1.2-javadoc.jar!/" />
+      </JAVADOC>
+      <SOURCES>
+        <root url="jar://$MAVEN_REPOSITORY$/org/objenesis/objenesis/1.2/objenesis-1.2-sources.jar!/" />
       </SOURCES>
     </library>
     <library name="Maven: org.osgi:org.osgi.core:4.1.0">

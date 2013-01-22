@@ -88,7 +88,10 @@ public abstract class InsertOrUpdateGenerator extends AbstractSqlGenerator<Inser
         StringBuffer updateSqlString = new StringBuffer();
 
         UpdateGenerator update = new UpdateGenerator();
-        UpdateStatement updateStatement = new UpdateStatement(insertOrUpdateStatement.getCatalogName(), insertOrUpdateStatement.getSchemaName(),insertOrUpdateStatement.getTableName());
+        UpdateStatement updateStatement = new UpdateStatement(
+        		insertOrUpdateStatement.getCatalogName(), 
+        		insertOrUpdateStatement.getSchemaName(),
+        		insertOrUpdateStatement.getTableName());
         updateStatement.setWhereClause(whereClause + ";\n");
 
         String[] pkFields=insertOrUpdateStatement.getPrimaryKey().split(",");

@@ -66,6 +66,10 @@ public abstract class AbstractJdbcDatabase implements Database {
     protected List<DatabaseFunction> dateFunctions = new ArrayList<DatabaseFunction>();
 
     private List<RanChangeSet> ranChangeSetList;
+    
+    protected void resetRanChangeSetList() {
+    	ranChangeSetList = null;
+    }
 
     private static Pattern CREATE_VIEW_AS_PATTERN = Pattern.compile("^CREATE\\s+.*?VIEW\\s+.*?AS\\s+", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 

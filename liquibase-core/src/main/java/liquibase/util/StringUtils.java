@@ -87,8 +87,9 @@ public class StringUtils {
      * @return The String without the comments in
      */
     public static String stripComments(String multiLineSQL) {
-        String strippedDashDash = dashPattern.matcher(multiLineSQL).replaceAll("");
-        return commentPattern.matcher(strippedDashDash).replaceAll("").trim();
+        String strippedSingleLines = Pattern.compile("(.*?)\\s*\\-\\-.*\n").matcher(multiLineSQL).replaceAll("$1\n");
+        strippedSingleLines = Pattern.compile("(.*?)\\s*\\-\\-.*$").matcher(strippedSingleLines).replaceAll("$1\n");
+        return Pattern.compile("/\\*.*?\\*/", Pattern.DOTALL).matcher(strippedSingleLines).replaceAll("").trim();
     }
 
     public static String join(String[] array, String delimiter) {

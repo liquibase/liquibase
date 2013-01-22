@@ -3,8 +3,10 @@ package liquibase.change.core;
 import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.database.PreparedStatementFactory;
+import liquibase.database.core.InformixDatabase;
 import liquibase.exception.DatabaseException;
 import liquibase.statement.ExecutablePreparedStatement;
+import liquibase.statement.InsertExecutablePreparedStatement;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.InsertStatement;
 
@@ -85,10 +87,15 @@ public class InsertDataChange extends AbstractChange implements ChangeWithColumn
             if (column.getValueClob() != null) {
                 needsPreparedStatement = true;
             }
+//            if (column.getValueText() != null && database instanceof InformixDatabase) {
+//                needsPreparedStatement = true;
+//            }
         }
 
         if (needsPreparedStatement) {
-            return new SqlStatement[]{ new InsertExecutablePreparedStatement(database) };
+            return new SqlStatement[] { 
+            		new InsertExecutablePreparedStatement(database, catalogName, schemaName, tableName, columns)
+            };
         }
 
 
@@ -114,107 +121,5 @@ public class InsertDataChange extends AbstractChange implements ChangeWithColumn
      */
     public String getConfirmationMessage() {
         return "New row inserted into " + getTableName();
-    }
-
-
-    /**
-     * Handles INSERT Execution
-     */
-    public class InsertExecutablePreparedStatement implements ExecutablePreparedStatement {
-
-        private Database database;
-
-        InsertExecutablePreparedStatement(Database database) {
-            this.database = database;
-        }
-
-        public void execute(PreparedStatementFactory factory) throws DatabaseException {
-            // build the sql statement
-            StringBuilder sql = new StringBuilder("INSERT INTO ");
-            StringBuilder params = new StringBuilder("VALUES(");
-            sql.append(database.escapeTableName(getCatalogName(), getSchemaName(), getTableName()));
-            sql.append("(");
-            List<ColumnConfig> cols = new ArrayList<ColumnConfig>(getColumns().size());
-            for(ColumnConfig column : getColumns()) {
-                if(database.supportsAutoIncrement()
-                    && Boolean.TRUE.equals(column.isAutoIncrement())) {
-                    continue;
-                }
-                sql.append(database.escapeColumnName(getCatalogName(), getSchemaName(), getTableName(), column.getName()));
-                sql.append(", ");
-                params.append("?, ");
-                cols.add(column);
-            }
-            sql.deleteCharAt(sql.lastIndexOf(" "));
-            sql.deleteCharAt(sql.lastIndexOf(","));
-            params.deleteCharAt(params.lastIndexOf(" "));
-            params.deleteCharAt(params.lastIndexOf(","));
-            params.append(")");
-            sql.append(") ");
-            sql.append(params);
-
-            // create prepared statement
-            PreparedStatement stmt = factory.create(sql.toString());
-
-            try {
-                // attach params
-                int i = 1;  // index starts from 1
-                for(ColumnConfig col : cols) {
-                    if(col.getValue() != null) {
-                        stmt.setString(i, col.getValue());
-                    } else if(col.getValueBoolean() != null) {
-                        stmt.setBoolean(i, col.getValueBoolean());
-                    } else if(col.getValueNumeric() != null) {
-                        Number number = col.getValueNumeric();
-                        if(number instanceof Long) {
-                            stmt.setLong(i, number.longValue());
-                        } else if(number instanceof Integer) {
-                            stmt.setInt(i, number.intValue());
-                        } else if(number instanceof Double) {
-                            stmt.setDouble(i, number.doubleValue());
-                        } else if(number instanceof Float) {
-                            stmt.setFloat(i, number.floatValue());
-                        } else if(number instanceof BigDecimal) {
-                            stmt.setBigDecimal(i, (BigDecimal)number);
-                        } else if(number instanceof BigInteger) {
-                            stmt.setInt(i, number.intValue());
-                        }
-                    } else if(col.getValueDate() != null) {
-                        stmt.setDate(i, new java.sql.Date(col.getValueDate().getTime()));
-                    } else if(col.getValueBlob() != null) {
-                        try {
-                            File file = new File(col.getValueBlob());
-                            stmt.setBinaryStream(i, new BufferedInputStream(new FileInputStream(file)), (int) file.length());
-                        } catch (FileNotFoundException e) {
-                            throw new DatabaseException(e.getMessage(), e); // wrap
-                        }
-                    } else if(col.getValueClob() != null) {
-                        try {
-                            File file = new File(col.getValueClob());
-                            stmt.setCharacterStream(i, new BufferedReader(new FileReader(file)), (int) file.length());
-                        } catch(FileNotFoundException e) {
-                            throw new DatabaseException(e.getMessage(), e); // wrap
-                        }
-                    }
-                    i++;
-                }
-
-                // trigger execution
-                stmt.execute();
-            } catch(SQLException e) {
-                throw new DatabaseException(e);
-            } finally {
-            	// make sure database resources are released
-            	try {
-                	stmt.close();
-                } catch(SQLException e) {
-                	throw new DatabaseException(e);
-				}
-			}
-        }
-
-        public boolean skipOnUnsupported() {
-            return false;
-        }
     }
 }
