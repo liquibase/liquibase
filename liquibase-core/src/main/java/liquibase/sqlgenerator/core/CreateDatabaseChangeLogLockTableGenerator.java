@@ -23,7 +23,7 @@ public class CreateDatabaseChangeLogLockTableGenerator extends AbstractSqlGenera
 
     public Sql[] generateSql(CreateDatabaseChangeLogLockTableStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         CreateTableStatement createTableStatement = new CreateTableStatement(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName())
-                .setTablespace(database.getChangeLogObjectsTablespace())
+                .setTablespace(database.getLiquibaseTablespaceName())
                 .addPrimaryKeyColumn("ID", DataTypeFactory.getInstance().fromDescription("INT"), null, null, null, new NotNullConstraint())
                 .addColumn("LOCKED", DataTypeFactory.getInstance().fromDescription("BOOLEAN"), null, new NotNullConstraint())
                 .addColumn("LOCKGRANTED", DataTypeFactory.getInstance().fromDescription("DATETIME"))

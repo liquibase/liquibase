@@ -9,6 +9,8 @@ import liquibase.exception.ChangeLogParseException;
 import liquibase.exception.UnsupportedChangeException;
 import liquibase.logging.LogFactory;
 import liquibase.parser.ChangeLogParser;
+import liquibase.precondition.core.PreconditionContainer;
+import liquibase.precondition.core.SqlPrecondition;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.StringUtils;
 
@@ -62,6 +64,8 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
             RawSQLChange change = null;
             Pattern changeSetPattern = Pattern.compile("\\-\\-[\\s]*changeset (\\S+):(\\S+).*", Pattern.CASE_INSENSITIVE);
             Pattern rollbackPattern = Pattern.compile("\\s*\\-\\-[\\s]*rollback (.*)", Pattern.CASE_INSENSITIVE);
+            Pattern preconditionsPattern = Pattern.compile("\\s*\\-\\-[\\s]*preconditions(.*)", Pattern.CASE_INSENSITIVE);
+            Pattern preconditionPattern = Pattern.compile("\\s*\\-\\-[\\s]*precondition\\-([a-zA-Z0-9-]+) (.*)", Pattern.CASE_INSENSITIVE);
             Pattern stripCommentsPattern = Pattern.compile(".*stripComments:(\\w+).*", Pattern.CASE_INSENSITIVE);
             Pattern splitStatementsPattern = Pattern.compile(".*splitStatements:(\\w+).*", Pattern.CASE_INSENSITIVE);
             Pattern endDelimiterPattern = Pattern.compile(".*endDelimiter:(\\w+).*", Pattern.CASE_INSENSITIVE);
@@ -72,6 +76,9 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
             Pattern runInTransactionPattern = Pattern.compile(".*runInTransaction:(\\w+).*", Pattern.CASE_INSENSITIVE);
             Pattern dbmsPattern = Pattern.compile(".*dbms:(\\w+).*", Pattern.CASE_INSENSITIVE);
             Pattern failOnErrorPattern = Pattern.compile(".*failOnError:(\\w+).*", Pattern.CASE_INSENSITIVE);
+            Pattern onFailPattern = Pattern.compile(".*onFail:(\\w+).*", Pattern.CASE_INSENSITIVE);
+            Pattern onErrorPattern = Pattern.compile(".*onError:(\\w+).*", Pattern.CASE_INSENSITIVE);
+            Pattern onUpdateSqlPattern = Pattern.compile(".*onUpdateSQL:(\\w+).*", Pattern.CASE_INSENSITIVE);
 
             String line;
             while ((line = reader.readLine()) != null) {
@@ -140,9 +147,40 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                 } else {
                     if (changeSet != null) {
                         Matcher rollbackMatcher = rollbackPattern.matcher(line);
+                        Matcher preconditionsMatcher = preconditionsPattern.matcher(line);
+                        Matcher preconditionMatcher = preconditionPattern.matcher(line);
                         if (rollbackMatcher.matches()) {
                             if (rollbackMatcher.groupCount() == 1) {
                                 currentRollbackSql.append(rollbackMatcher.group(1)).append("\n");
+                            }
+                        } else if (preconditionsMatcher.matches()) {
+                            if (preconditionsMatcher.groupCount() == 1) {
+                                String body = preconditionsMatcher.group(1);
+                                Matcher onFailMatcher = onFailPattern.matcher(body);
+                                Matcher onErrorMatcher = onErrorPattern.matcher(body);
+                                Matcher onUpdateSqlMatcher = onUpdateSqlPattern.matcher(body);
+
+                                PreconditionContainer pc = new PreconditionContainer();
+                                pc.setOnFail(StringUtils.trimToNull(parseString(onFailMatcher)));
+                                pc.setOnError(StringUtils.trimToNull(parseString(onErrorMatcher)));
+                                pc.setOnSqlOutput(StringUtils.trimToNull(parseString(onUpdateSqlMatcher)));
+                                changeSet.setPreconditions(pc);
+                            }
+                        } else if (preconditionMatcher.matches()) {
+                            if (changeSet.getPreconditions() == null) {
+                                // create the defaults
+                                changeSet.setPreconditions(new PreconditionContainer());
+                            }
+                            if (preconditionMatcher.groupCount() == 2) {
+                                String name = StringUtils.trimToNull(preconditionMatcher.group(1));
+                                if (name != null) {
+                                    String body = preconditionMatcher.group(2).trim();
+                                    if ("sql-check".equals(name)) {
+                                        changeSet.getPreconditions().addNestedPrecondition(parseSqlCheckCondition(body));
+                                    } else {
+                                        throw new ChangeLogParseException("The '" + name + "' precondition type is not supported.");
+                                    }
+                                }
                             }
                         } else {
                             currentSql.append(line).append("\n");
@@ -181,6 +219,28 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
 
         return changeLog;
     }
+
+
+
+    private SqlPrecondition parseSqlCheckCondition(String body) throws ChangeLogParseException{
+        Pattern[] patterns = new Pattern[] {
+            Pattern.compile("^(?:expectedResult:)?(\\w+) (.*)", Pattern.CASE_INSENSITIVE),
+            Pattern.compile("^(?:expectedResult:)?'([^']+)' (.*)", Pattern.CASE_INSENSITIVE),
+            Pattern.compile("^(?:expectedResult:)?\"([^\"]+)\" (.*)", Pattern.CASE_INSENSITIVE)
+        };
+        for (Pattern pattern : patterns) {
+            Matcher matcher = pattern.matcher(body);
+            if (matcher.matches() && matcher.groupCount() == 2) {
+                SqlPrecondition p = new SqlPrecondition();
+                p.setExpectedResult(matcher.group(1));
+                p.setSql(matcher.group(2));
+                return p;
+            }
+        }
+        throw new ChangeLogParseException("Could not parse a SqlCheck precondition from '" + body + "'.");
+    }
+
+
 
     private String parseString(Matcher matcher) {
         String endDelimiter = null;

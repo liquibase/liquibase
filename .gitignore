@@ -1,6 +1,7 @@
 target
 .project
 .settings
+*nb-configuration.xml
 .classpath
 liquibase.iws
-out
+out                                

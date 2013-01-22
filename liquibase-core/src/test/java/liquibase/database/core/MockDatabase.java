@@ -474,6 +474,14 @@ public class MockDatabase implements Database {
 		return null;
 	}
 
+    public String getLiquibaseTablespaceName() {
+        return null;
+    }
+
+    public void setLiquibaseTablespaceName(String tablespaceName) {
+
+    }
+
     public int getNextChangeSetSequenceValue() throws LiquibaseException {
         return 1;
     }

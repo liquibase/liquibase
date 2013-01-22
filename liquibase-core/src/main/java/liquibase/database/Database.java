@@ -111,7 +111,9 @@ public interface Database extends DatabaseObject, PrioritizedService {
 
     String getDatabaseChangeLogLockTableName();
 
-    String getChangeLogObjectsTablespace();
+    String getLiquibaseTablespaceName();
+
+    void setLiquibaseTablespaceName(String tablespaceName);
 
     /**
      * Set the table name of the change log to the given table name

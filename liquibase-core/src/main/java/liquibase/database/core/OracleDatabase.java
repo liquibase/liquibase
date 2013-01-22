@@ -147,6 +147,21 @@ public class OracleDatabase extends AbstractDatabase {
         return "SYSTIMESTAMP";
     }
 
+    @Override
+    public String getDefaultSchemaName() {//NOPMD
+        return super.getDefaultSchemaName().toUpperCase();
+    }
+
+    @Override
+    public String escapeIndexName(String catalogName, String schemaName, String indexName) {
+        String escapedIndexName = indexName;
+        if (schemaName != null)
+        {
+            escapedIndexName = escapeDatabaseObject(schemaName, Schema.class) + "." + escapedIndexName;
+        }
+        return escapedIndexName;
+    }
+
     /**
      * Return an Oracle date literal with the same value as a string formatted using ISO 8601.
      * <p/>
