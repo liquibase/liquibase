@@ -203,7 +203,14 @@ public class InsertDataChange extends AbstractChange implements ChangeWithColumn
                 stmt.execute();
             } catch(SQLException e) {
                 throw new DatabaseException(e);
-            }
+            } finally {
+            	// make sure database resources are released
+            	try {
+                	stmt.close();
+                } catch(SQLException e) {
+                	throw new DatabaseException(e);
+				}
+			}
         }
 
         public boolean skipOnUnsupported() {
