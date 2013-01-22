@@ -7,11 +7,9 @@ import liquibase.changelog.visitor.*;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.DatabaseFactory;
-import liquibase.database.core.OracleDatabase;
-import liquibase.database.structure.Schema;
-import liquibase.diff.DiffControl;
 import liquibase.diff.DiffGeneratorFactory;
 import liquibase.diff.DiffResult;
+import liquibase.diff.compare.CompareControl;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.LockException;
@@ -518,18 +516,17 @@ public class Liquibase {
      * Drops all database objects owned by the current user.
      */
     public final void dropAll() throws DatabaseException, LockException {
-        dropAll(new Schema(getDatabase().getDefaultCatalogName(), getDatabase().getDefaultSchemaName()));
+        dropAll(new CatalogAndSchema(getDatabase().getDefaultCatalogName(), getDatabase().getDefaultSchemaName()));
     }
 
     /**
      * Drops all database objects owned by the current user.
      */                                      
-    public final void dropAll(Schema... schemas) throws DatabaseException {
+    public final void dropAll(CatalogAndSchema... schemas) throws DatabaseException {
         try {
             LockService.getInstance(database).waitForLock();
 
-            for (Schema schema : schemas) {
-                schema = database.correctSchema(schema);
+            for (CatalogAndSchema schema : schemas) {
                 log.info("Dropping Database Objects in schema: " + schema);
                 checkDatabaseChangeLogTable(false, null, null);
                 getDatabase().dropDatabaseObjects(schema);
@@ -818,8 +815,8 @@ public class Liquibase {
 //        }
     }
 
-    public DiffResult diff(Database referenceDatabase, Database targetDatabase, DiffControl diffControl) throws DatabaseException {
-        return DiffGeneratorFactory.getInstance().compare(referenceDatabase, targetDatabase, diffControl);
+    public DiffResult diff(Database referenceDatabase, Database targetDatabase, CompareControl compareControl) throws LiquibaseException {
+        return DiffGeneratorFactory.getInstance().compare(referenceDatabase, targetDatabase, compareControl);
     }
 
     /**

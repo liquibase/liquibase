@@ -35,7 +35,7 @@ import java.util.List;
  * @see liquibase.executor.Executor
  */
 @SuppressWarnings({"unchecked"})
-class RowMapperResultSetExtractor implements ResultSetExtractor {
+public class RowMapperResultSetExtractor implements ResultSetExtractor {
 
     private final RowMapper rowMapper;
 

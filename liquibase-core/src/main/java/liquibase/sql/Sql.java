@@ -1,6 +1,6 @@
 package liquibase.sql;
 
-import liquibase.database.structure.DatabaseObject;
+import liquibase.structure.DatabaseObject;
 
 import java.util.Collection;
 

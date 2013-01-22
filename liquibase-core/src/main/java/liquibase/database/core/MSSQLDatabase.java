@@ -1,12 +1,15 @@
 package liquibase.database.core;
 
 import java.sql.ResultSet;
-import liquibase.database.AbstractDatabase;
+
+import liquibase.CatalogAndSchema;
+import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
-import liquibase.database.structure.DatabaseObject;
-import liquibase.database.structure.Index;
-import liquibase.database.structure.Schema;
-import liquibase.database.structure.View;
+import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.Index;
+import liquibase.structure.core.Schema;
+import liquibase.structure.core.Table;
+import liquibase.structure.core.View;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.ExecutorService;
@@ -23,7 +26,7 @@ import liquibase.util.StringUtils;
 /**
  * Encapsulates MS-SQL database support.
  */
-public class MSSQLDatabase extends AbstractDatabase {
+public class MSSQLDatabase extends AbstractJdbcDatabase {
     public static final String PRODUCT_NAME = "Microsoft SQL Server";
     protected Set<String> systemTablesAndViews = new HashSet<String>();
 
@@ -163,7 +166,13 @@ public class MSSQLDatabase extends AbstractDatabase {
     @Override
     public String escapeIndexName(String catalogName, String schemaName, String indexName) {
         // MSSQL server does not support the schema name for the index -
-        return super.escapeDatabaseObject(indexName, Index.class);
+        return super.escapeObjectName(indexName, Index.class);
+    }
+
+    @Override
+    public String escapeTableName(String catalogName, String schemaName, String tableName) {
+        // MSSQL server does not support the schema name for the index -
+        return escapeObjectName(null, schemaName, tableName, Table.class);
     }
 
     //    protected void dropForeignKeys(Connection conn) throws DatabaseException {
@@ -211,17 +220,19 @@ public class MSSQLDatabase extends AbstractDatabase {
         return true;
     }
 
-
     @Override
-    public boolean isSystemTable(Schema schema, String tableName) {
-        schema = correctSchema(schema);
-        return super.isSystemTable(schema, tableName) || schema.getName().equals("sys");
-    }
+    public boolean isSystemObject(DatabaseObject example) {
+        if (example.getSchema() == null || example.getSchema().getName() == null) {
+            return super.isSystemObject(example);
+        }
 
-    @Override
-    public boolean isSystemView(Schema schema, String viewName) {
-        schema = correctSchema(schema);
-        return super.isSystemView(schema, viewName) || schema.getName().equals("sys");
+        if (example instanceof Table && example.getSchema().getName().equals("sys")) {
+            return true;
+        }
+        if (example instanceof View && example.getSchema().getName().equals("sys")) {
+            return true;
+        }
+        return super.isSystemObject(example);
     }
 
     public String generateDefaultConstraintName(String tableName, String columnName) {
@@ -230,7 +241,7 @@ public class MSSQLDatabase extends AbstractDatabase {
 
 
     @Override
-    public String escapeDatabaseObject(String objectName, Class<? extends DatabaseObject> objectType) {
+    public String escapeObjectName(String objectName, Class<? extends DatabaseObject> objectType) {
         return "["+objectName+"]";
     }
 
@@ -250,11 +261,11 @@ public class MSSQLDatabase extends AbstractDatabase {
     }
 
     @Override
-    public String escapeDatabaseObject(String catalogName, String schemaName, String objectName, Class<? extends DatabaseObject> objectType) {
-        if (schemaName == null) {
-            schemaName = "dbo";
-        }
-        return super.escapeDatabaseObject(catalogName, schemaName, objectName, objectType);
+    public String escapeObjectName(String catalogName, String schemaName, String objectName, Class<? extends DatabaseObject> objectType) {
+//        if (schemaName == null) {
+//            schemaName = "dbo";
+//        }
+        return super.escapeObjectName(catalogName, schemaName, objectName, objectType);
     }
 
     @Override
@@ -269,9 +280,9 @@ public class MSSQLDatabase extends AbstractDatabase {
 	}
 
       @Override
-    public String getViewDefinition(Schema schema, String viewName) throws DatabaseException {
+    public String getViewDefinition(CatalogAndSchema schema, String viewName) throws DatabaseException {
           schema = correctSchema(schema);
-        List<String> defLines = (List<String>) ExecutorService.getInstance().getExecutor(this).queryForList(new GetViewDefinitionStatement(schema.getCatalogName(), schema.getName(), viewName), String.class);
+        List<String> defLines = (List<String>) ExecutorService.getInstance().getExecutor(this).queryForList(new GetViewDefinitionStatement(schema.getCatalogName(), schema.getSchemaName(), viewName), String.class);
         StringBuffer sb = new StringBuffer();
         for (String defLine : defLines) {
             sb.append(defLine);
@@ -285,16 +296,15 @@ public class MSSQLDatabase extends AbstractDatabase {
     }
 
     /**
-     * SQLServer does not support specifying teh database name as a prefix to the object name
+     * SQLServer does not support specifying the database name as a prefix to the object name
      * @return
      */
     @Override
     public String escapeViewName(String catalogName, String schemaName, String viewName) {
-        schemaName = getAssumedSchemaName(catalogName, schemaName);
         if (StringUtils.trimToNull(schemaName) == null) {
-            return escapeDatabaseObject(viewName, View.class);
+            return escapeObjectName(viewName, View.class);
         } else {
-            return escapeDatabaseObject(schemaName, Schema.class)+"."+escapeDatabaseObject(viewName, Schema.class);
+            return escapeObjectName(schemaName, Schema.class)+"."+ escapeObjectName(viewName, Schema.class);
         }
 
     }

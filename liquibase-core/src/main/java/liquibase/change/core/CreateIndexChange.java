@@ -41,8 +41,6 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
         this.indexName = indexName;
     }
 
-
-
     @DatabaseChangeProperty(mustApplyTo ="index.schema")
     public String getSchemaName() {
         return schemaName;

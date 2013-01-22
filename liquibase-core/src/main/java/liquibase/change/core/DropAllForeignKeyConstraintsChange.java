@@ -5,13 +5,14 @@ import liquibase.change.DatabaseChange;
 import liquibase.change.ChangeMetaData;
 import liquibase.change.DatabaseChangeProperty;
 import liquibase.database.Database;
-import liquibase.database.structure.Table;
+import liquibase.structure.core.Table;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.FindForeignKeyConstraintsStatement;
+import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -95,7 +96,7 @@ public class DropAllForeignKeyConstraintsChange extends AbstractChange {
                             (String) result.get(FindForeignKeyConstraintsStatement.RESULT_COLUMN_BASE_TABLE_NAME);
                     String constraintName =
                             (String) result.get(FindForeignKeyConstraintsStatement.RESULT_COLUMN_CONSTRAINT_NAME);
-                    if (new Table(getBaseTableName()).equals(new Table(baseTableName), database)) {
+                    if (DatabaseObjectComparatorFactory.getInstance().isSameObject(new Table().setName(getBaseTableName()), new Table().setName(baseTableName), database)) {
                         if( !handledConstraints.contains(constraintName)) {
                             DropForeignKeyConstraintChange dropForeignKeyConstraintChange =
                                     new DropForeignKeyConstraintChange();

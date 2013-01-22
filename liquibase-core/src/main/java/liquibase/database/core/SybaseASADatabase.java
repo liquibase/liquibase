@@ -3,10 +3,10 @@
  */
 package liquibase.database.core;
 
-import liquibase.database.AbstractDatabase;
+import liquibase.CatalogAndSchema;
+import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
-import liquibase.database.structure.DatabaseObject;
-import liquibase.database.structure.Schema;
+import liquibase.structure.DatabaseObject;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 
@@ -18,7 +18,7 @@ import java.util.Set;
  * @author otaranenko
  *
  */
-public class SybaseASADatabase extends AbstractDatabase {
+public class SybaseASADatabase extends AbstractJdbcDatabase {
 
     private static final Set<String> systemTablesAndViews;
 
@@ -194,7 +194,7 @@ public class SybaseASADatabase extends AbstractDatabase {
 	}
 
 	@Override
-	public String getViewDefinition(Schema schema, String viewName)
+	public String getViewDefinition(CatalogAndSchema schema, String viewName)
 			throws DatabaseException {
 		// TODO Auto-generated method stub
 		return super.getViewDefinition(schema, viewName);
@@ -225,7 +225,7 @@ public class SybaseASADatabase extends AbstractDatabase {
     }
 
 	/* (non-Javadoc)
-	 * @see liquibase.database.AbstractDatabase#getAutoIncrementClause()
+	 * @see liquibase.database.AbstractJdbcDatabase#getAutoIncrementClause()
 	 */
 	@Override
 	protected String getAutoIncrementClause() {
@@ -255,7 +255,7 @@ public class SybaseASADatabase extends AbstractDatabase {
 	}
 
     @Override
-    public String escapeDatabaseObject(String objectName, Class<? extends DatabaseObject> objectType) {
+    public String escapeObjectName(String objectName, Class<? extends DatabaseObject> objectType) {
         return "\""+objectName+"\"";
     }
     

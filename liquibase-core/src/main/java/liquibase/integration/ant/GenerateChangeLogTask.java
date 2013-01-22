@@ -1,18 +1,6 @@
 package liquibase.integration.ant;
 
-import liquibase.Liquibase;
-import liquibase.database.Database;
-import liquibase.database.structure.Schema;
-import liquibase.diff.DiffControl;
-import liquibase.diff.DiffGeneratorFactory;
-import liquibase.diff.DiffResult;
-import liquibase.diff.output.DiffOutputConfig;
-import liquibase.diff.output.DiffToChangeLog;
-import liquibase.snapshot.DatabaseSnapshot;
-import liquibase.snapshot.DatabaseSnapshotGeneratorFactory;
 import org.apache.tools.ant.BuildException;
-
-import java.io.PrintStream;
 
 public class GenerateChangeLogTask extends BaseLiquibaseTask {
 
@@ -65,40 +53,40 @@ public class GenerateChangeLogTask extends BaseLiquibaseTask {
 
     @Override
 	public void execute() throws BuildException {
-        super.execute();
-        
-		Liquibase liquibase = null;
-		try {
-			PrintStream writer = createPrintStream();
-			if (writer == null) {
-				throw new BuildException("generateChangeLog requires outputFile to be set");
-			}
-
-			liquibase = createLiquibase();
-
-			Database database = liquibase.getDatabase();
-            DiffControl diffControl = new DiffControl(new Schema(getDefaultCatalogName(), getDefaultSchemaName()), getDiffTypes());
-            diffControl.setDataDir(getDataDir());
-
-            DatabaseSnapshot referenceSnapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(database, diffControl, DiffControl.DatabaseRole.REFERENCE);
-
-            DiffResult diffResult = DiffGeneratorFactory.getInstance().compare(referenceSnapshot, new DatabaseSnapshot(database, diffControl.getSchemas(DiffControl.DatabaseRole.REFERENCE)), diffControl);
-//			diff.addStatusListener(new OutDiffStatusListener());
-
-            DiffOutputConfig diffOutputConfig = new DiffOutputConfig(getIncludeCatalog(), getIncludeSchema(), getIncludeTablespace());
-			if (getChangeLogFile() == null) {
-				new DiffToChangeLog(diffResult, diffOutputConfig).print(writer);
-			} else {
-                new DiffToChangeLog(diffResult, diffOutputConfig).print(getChangeLogFile());
-			}
-
-			writer.flush();
-			writer.close();
-		} catch (Exception e) {
-			throw new BuildException(e);
-		} finally {
-			closeDatabase(liquibase);
-		}
+//TODO        super.execute();
+//
+//		Liquibase liquibase = null;
+//		try {
+//			PrintStream writer = createPrintStream();
+//			if (writer == null) {
+//				throw new BuildException("generateChangeLog requires outputFile to be set");
+//			}
+//
+//			liquibase = createLiquibase();
+//
+//			Database database = liquibase.getDatabase();
+//            CompareControl compareControl = new CompareControl(new Schema(getDefaultCatalogName(), getDefaultSchemaName()), getDiffTypes());
+//            compareControl.setDataDir(getDataDir());
+//
+//            DatabaseSnapshot referenceSnapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(database, compareControl, CompareControl.DatabaseRole.REFERENCE);
+//
+//            DiffResult diffResult = DiffGeneratorFactory.getInstance().compare(referenceSnapshot, new DatabaseSnapshot(database, new SnapshotControl()), compareControl);
+////			diff.addStatusListener(new OutDiffStatusListener());
+//
+//            DiffOutputConfig diffOutputConfig = new DiffOutputConfig(getIncludeCatalog(), getIncludeSchema(), getIncludeTablespace());
+//			if (getChangeLogFile() == null) {
+//				new DiffToChangeLog(diffResult, diffOutputConfig).print(writer);
+//			} else {
+//                new DiffToChangeLog(diffResult, diffOutputConfig).print(getChangeLogFile());
+//			}
+//
+//			writer.flush();
+//			writer.close();
+//		} catch (Exception e) {
+//			throw new BuildException(e);
+//		} finally {
+//			closeDatabase(liquibase);
+//		}
 	}
 
 }

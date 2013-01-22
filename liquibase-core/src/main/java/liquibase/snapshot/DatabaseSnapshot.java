@@ -1,203 +1,223 @@
 package liquibase.snapshot;
 
+import liquibase.CatalogAndSchema;
 import liquibase.database.Database;
-import liquibase.database.structure.*;
+import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.servicelocator.ServiceLocator;
+import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.*;
+import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 
+import java.lang.reflect.Field;
 import java.util.*;
 
-public class DatabaseSnapshot {
+public abstract class DatabaseSnapshot {
 
+    private SnapshotControl snapshotControl;
     private Database database;
+    private Map<Class<? extends DatabaseObject>, Set<DatabaseObject>> allFound = new HashMap<Class<? extends DatabaseObject>, Set<DatabaseObject>>();
+    private Map<Class<? extends DatabaseObject>, Set<DatabaseObject>> knownNull = new HashMap<Class<? extends DatabaseObject>, Set<DatabaseObject>>();
 
-    private Table databaseChangeLogTable;
-    private Table databaseChangeLogLockTable;
-    
-    private Map<Schema, SchemaSnapshot> schemaSnapshots = new HashMap<Schema, SchemaSnapshot>();
-
-    public DatabaseSnapshot(Database database, Schema[] schemas) {
+    DatabaseSnapshot(SnapshotControl snapshotControl, Database database) {
         this.database = database;
-        for (Schema schema : schemas) {
-            addSchema(schema);
-        }
+        this.snapshotControl = snapshotControl;
     }
 
+    public DatabaseSnapshot(Database database) {
+        this.database = database;
+        this.snapshotControl = new SnapshotControl();
+    }
+
+    public SnapshotControl getSnapshotControl() {
+        return snapshotControl;
+    }
 
     public Database getDatabase() {
         return database;
     }
 
-    public Set<Schema> getSchemas() {
-        return Collections.unmodifiableSet(schemaSnapshots.keySet());
-    }
+    /**
+     * Include the object described by the passed example object in this snapshot. Returns the object snapshot or null if the object does not exist in the database.
+     * If the same object was returned by an earlier include() call, the same object instance will be returned.
+     */
+//    public void include(DatabaseObject example) throws DatabaseException, InvalidExampleException {
+//        include(example, false);
+//    }
 
-    public <T extends DatabaseObject> Set<T> getDatabaseObjects(Schema schema, Class<T> type) {
-        if (database != null) {
-            schema = database.correctSchema(schema);
-        }
-
-        if (!schemaSnapshots.containsKey(schema)) {
-            return Collections.unmodifiableSet(new HashSet<T>());
-        }
-        Set<? extends DatabaseObject> snapshotItems = schemaSnapshots.get(schema).databaseObjects.get(type);
-        if (snapshotItems == null) {
-            return Collections.unmodifiableSet(new HashSet<T>());
-        }
-
-        //noinspection unchecked
-        return (Set<T>) Collections.unmodifiableSet(snapshotItems);
-    }
-
-    public <T extends DatabaseObject> T getDatabaseObject(Schema schema, String objectName, Class<T> type) {
-        schema = database.correctSchema(schema);
-
-        for (DatabaseObject object : getDatabaseObjects(schema, type)) {
-            if (object.equals(objectName, database)) {
-                //noinspection unchecked
-                return (T) object;
-            }
-        }
-        return null;
-    }
-
-    public <T extends DatabaseObject> T getDatabaseObject(Schema schema, DatabaseObject databaseObject, Class<T> type) {
-        schema = database.correctSchema(schema);
-
-        for (DatabaseObject object : getDatabaseObjects(schema, type)) {
-            if (object.equals(databaseObject)) {
-                //noinspection unchecked
-                return (T) object;
-            }
-        }
-        return null;
-    }
-
-    public void addSchema(Schema schema) {
-        if (database != null) {
-            schema = database.correctSchema(schema);
-        }
-        schemaSnapshots.put(schema, new SchemaSnapshot(schema));
-    }
-
-    public void addDatabaseObjects(DatabaseObject... objects) {
-
-        for (DatabaseObject object : objects) {
-            Schema schema = object.getSchema();
-            schema = database.correctSchema(schema);
-            
-            if (!schemaSnapshots.containsKey(schema)) {
-                addSchema(schema);
-            }
-            SchemaSnapshot schemaSnapshot = schemaSnapshots.get(schema);
-
-            if (!schemaSnapshot.databaseObjects.containsKey(object.getClass())) {
-                schemaSnapshot.databaseObjects.put(object.getClass(), new HashSet<DatabaseObject>());
-            }
-
-            schemaSnapshot.databaseObjects.get((object.getClass())).add(object);
-        }
-    }
-
-    public void removeDatabaseObjects(Schema schema, DatabaseObject... objects) {
-        SchemaSnapshot schemaSnapshot = schemaSnapshots.get(schema);
-        if (schemaSnapshot == null) {
-            return;
-        }
-
-        for (DatabaseObject object : objects) {
-            if (!schemaSnapshot.databaseObjects.containsKey(object.getClass())) {
-                return;
-            }
-
-            schemaSnapshot.databaseObjects.get((object.getClass())).remove(object);
-        }
-    }
-
-    public boolean isPrimaryKey(Column column) {
-        for (PrimaryKey pk : getDatabaseObjects(column.getRelation().getSchema(), PrimaryKey.class)) {
-            if (column.getRelation() == null) {
-                continue;
-            }
-            if (pk.getTable().equals(column.getRelation(), database)) {
-                if (pk.getColumnNamesAsList().contains(column.getName())) {
-                    return true;
-                }
-            }
-        }
-
-        return false;
-    }
-
-    public PrimaryKey getPrimaryKeyForTable(Schema schema, String tableName) {
-        Table table = getDatabaseObject(schema, tableName, Table.class);
-        if (table == null) {
+    protected  <T extends DatabaseObject> T include(T example) throws DatabaseException, InvalidExampleException {
+        if (example == null) {
             return null;
         }
-        return table.getPrimaryKey();
 
-    }
+        if (database.isSystemObject(example)) {
+            return null;
+        }
 
+        if (example instanceof Schema && example.getName() == null && (((Schema) example).getCatalog() == null || ((Schema) example).getCatalogName() == null)) {
+            CatalogAndSchema catalogAndSchema = database.correctSchema(((Schema) example).toCatalogAndSchema());
+            example = (T) new Schema(catalogAndSchema.getCatalogName(), catalogAndSchema.getSchemaName());
+        }
 
-    public Set<Column> getColumns(Schema schema) {
-        Set<Column> returnSet = new HashSet<Column>();
+        if (!snapshotControl.shouldInclude(example.getClass())) {
+            return example;
+        }
 
-        for (Table table : getDatabaseObjects(schema, Table.class)) {
-            for (Column column : table.getColumns()) {
-                returnSet.add(column);
+       T existing = get(example);
+        if (existing != null) {
+            return existing;
+        }
+        if (isKnownNull(example)) {
+            return null;
+        }
+
+        SnapshotGeneratorChain chain = createGeneratorChain(example.getClass(), database);
+        T object = chain.snapshot(example, this);
+
+        if (object == null) {
+            Set<DatabaseObject> collection = knownNull.get(example.getClass());
+            if (collection == null) {
+                collection = new HashSet<DatabaseObject>();
+                knownNull.put(example.getClass(), collection);
+            }
+            collection.add(example);
+
+        } else {
+            Set<DatabaseObject> collection = allFound.get(object.getClass());
+            if (collection == null) {
+                collection = new HashSet<DatabaseObject>();
+                allFound.put(object.getClass(), collection);
+            }
+            collection.add(object);
+
+            try {
+                includeNestedObjects(object);
+            } catch (InstantiationException e) {
+                throw new UnexpectedLiquibaseException(e);
+            } catch (IllegalAccessException e) {
+                throw new UnexpectedLiquibaseException(e);
             }
         }
-
-        return Collections.unmodifiableSet(returnSet);
+        return object;
     }
 
-    public Column getColumn(Schema schema, String tableName, String columnName) {
-        Table table = getDatabaseObject(schema, tableName, Table.class);
+    private void includeNestedObjects(DatabaseObject object) throws DatabaseException, InvalidExampleException, InstantiationException, IllegalAccessException {
+            for (String field : new HashSet<String>(object.getAttributes())) {
+                Object fieldValue = object.getAttribute(field, Object.class);
+                Object newFieldValue = replaceObject(fieldValue);
+                if (fieldValue != newFieldValue) {
+                    object.setAttribute(field, newFieldValue);
+                }
 
-        return table.getColumn(columnName);
+            }
     }
 
-    public boolean hasDatabaseChangeLogTable() {
-        return databaseChangeLogTable != null;
-    }
+    private Object replaceObject(Object fieldValue) throws DatabaseException, InvalidExampleException, IllegalAccessException, InstantiationException {
+        if (fieldValue == null) {
+            return null;
+        }
+        if (fieldValue instanceof DatabaseObject) {
+            if (!snapshotControl.shouldInclude(((DatabaseObject) fieldValue).getClass())) {
+                return fieldValue;
+            }
+            if (((DatabaseObject) fieldValue).getSnapshotId() == null) {
+                return include((DatabaseObject) fieldValue);
+            } else {
+                return fieldValue;
+            }
+            //            } else if (Set.class.isAssignableFrom(field.getType())) {
+            //                field.setAccessible(true);
+            //                Set fieldValue = field.get(object);
+            //                for (Object val : fieldValue) {
+            //
+            //                }
+        } else if (fieldValue instanceof Collection) {
+            Iterator fieldValueIterator = ((Collection) fieldValue).iterator();
+            List newValues = new ArrayList();
+            while (fieldValueIterator.hasNext()) {
+                Object obj = fieldValueIterator.next();
+                if (fieldValue instanceof DatabaseObject && !snapshotControl.shouldInclude(((DatabaseObject) fieldValue).getClass())) {
+                    return fieldValue;
+                }
 
-    public Table getDatabaseChangeLogTable() {
-        return databaseChangeLogTable;
-    }
+                if (obj instanceof DatabaseObject && ((DatabaseObject) obj).getSnapshotId() == null) {
+                    obj = include((DatabaseObject) obj);
+                }
+                if (obj != null) {
+                    newValues.add(obj);
+                }
+            }
+            Collection newCollection = (Collection) fieldValue.getClass().newInstance();
+            newCollection.addAll(newValues);
+            return newCollection;
+        } else if (fieldValue instanceof Map) {
+            Map newMap = (Map) fieldValue.getClass().newInstance();
+            for (Map.Entry entry : (Set<Map.Entry>) ((Map) fieldValue).entrySet()) {
+                Object key = replaceObject(entry.getKey());
+                Object value = replaceObject(entry.getValue());
 
-    public void setDatabaseChangeLogTable(Table table) {
-        this.databaseChangeLogTable = table;
-    }
+                if (key != null) {
+                    newMap.put(key, value);
+                }
+            }
 
-    public Table getDatabaseChangeLogLockTable() {
-        return databaseChangeLogLockTable;
-    }
+            return newMap;
 
-    public void setDatabaseChangeLogLockTable(Table table) {
-        this.databaseChangeLogLockTable = table;
-    }
-
-    public boolean contains(Schema schema, DatabaseObject databaseObject) {
-        return schemaSnapshots.containsKey(schema)
-                && schemaSnapshots.get(schema).databaseObjects.containsKey(databaseObject.getClass())
-                && schemaSnapshots.get(schema).databaseObjects.get(databaseObject.getClass()).contains(databaseObject);
-
-    }
-
-    public boolean matches(Schema schema, DatabaseObject databaseObject) {
-        DatabaseObject thisDatabaseObject = this.getDatabaseObject(schema, databaseObject, databaseObject.getClass());
-        return thisDatabaseObject != null;
-
-    }
-
-    private static class SchemaSnapshot {
-
-        private Schema schema;
-
-        private SchemaSnapshot(Schema schema) {
-            this.schema = schema;
         }
 
-        private Map<Class<? extends DatabaseObject>, Set<DatabaseObject>> databaseObjects = new HashMap<Class<? extends DatabaseObject>, Set<DatabaseObject>>();
+        return fieldValue;
+    }
 
+    /**
+     * Returns the object described by the passed example if it is already included in this snapshot.
+     */
+    public <DatabaseObjectType extends DatabaseObject> DatabaseObjectType get(DatabaseObjectType example) {
+        Set<DatabaseObject> databaseObjects = allFound.get(example.getClass());
+        if (databaseObjects == null) {
+            return null;
+        }
+        for (DatabaseObject obj : databaseObjects) {
+            if (DatabaseObjectComparatorFactory.getInstance().isSameObject(obj, example, database)) {
+                //noinspection unchecked
+                return (DatabaseObjectType) obj;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Returns all objects of the given type that are already included in this snapshot.
+     */
+    public <DatabaseObjectType extends  DatabaseObject> Set<DatabaseObjectType> get(Class<DatabaseObjectType> type) {
+        //noinspection unchecked
+        Set<DatabaseObjectType> objects = (Set<DatabaseObjectType>) allFound.get(type);
+        if (objects == null) {
+            return Collections.unmodifiableSet(new HashSet<DatabaseObjectType>());
+        } else {
+            return Collections.unmodifiableSet(objects);
+        }
+    }
+
+
+    private SnapshotGeneratorChain createGeneratorChain(Class<? extends DatabaseObject> databaseObjectType, Database database) {
+        SortedSet<SnapshotGenerator> generators = SnapshotGeneratorFactory.getInstance().getGenerators(databaseObjectType, database);
+        if (generators == null || generators.size() == 0) {
+            return null;
+        }
+        //noinspection unchecked
+        return new SnapshotGeneratorChain(generators);
+    }
+
+    private boolean isKnownNull(DatabaseObject example) {
+        Set<DatabaseObject> databaseObjects = knownNull.get(example.getClass());
+        if (databaseObjects == null) {
+            return false;
+        }
+        for (DatabaseObject obj : databaseObjects) {
+            if (DatabaseObjectComparatorFactory.getInstance().isSameObject(obj, example, database)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

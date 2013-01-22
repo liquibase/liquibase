@@ -3,10 +3,13 @@ package liquibase.precondition.core;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
-import liquibase.database.structure.Schema;
+import liquibase.snapshot.SnapshotGeneratorFactory;
+import liquibase.snapshot.SnapshotGeneratorFactory;
+import liquibase.structure.core.Index;
+import liquibase.structure.core.Schema;
 import liquibase.exception.*;
 import liquibase.precondition.Precondition;
-import liquibase.snapshot.DatabaseSnapshotGeneratorFactory;
+import liquibase.structure.core.Table;
 import liquibase.util.StringUtils;
 
 public class IndexExistsPrecondition implements Precondition {
@@ -71,10 +74,19 @@ public class IndexExistsPrecondition implements Precondition {
     public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet) throws PreconditionFailedException, PreconditionErrorException {
     	try {
             Schema schema = new Schema(getCatalogName(), getSchemaName());
-            if (database != null) {
-                schema = database.correctSchema(schema);
+            Index example = new Index();
+            example.setTable(new Table());
+            if (StringUtils.trimToNull(getTableName()) != null) {
+                example.getTable().setName(getTableName());
             }
-            if (!DatabaseSnapshotGeneratorFactory.getInstance().getGenerator(database).hasIndex(schema, getTableName(), getIndexName(), getColumnNames(), database)) {
+            example.getTable().setSchema(schema);
+            example.setName(getIndexName());
+            if (StringUtils.trimToNull(getColumnNames()) != null) {
+                for (String column : getColumnNames().split("\\s*,\\s*")) {
+                    example.getColumns().add(column);
+                }
+            }
+            if (!SnapshotGeneratorFactory.getInstance().has(example, database)) {
                 String name = "";
 
                 if (getIndexName() != null) {
@@ -90,7 +102,8 @@ public class IndexExistsPrecondition implements Precondition {
                 }
                 throw new PreconditionFailedException("Index "+ name +" does not exist", changeLog, this);
             }
-        } catch (DatabaseException e) {
+        } catch (Exception e) {
+            e.printStackTrace();
             throw new PreconditionErrorException(e, changeLog, this);
         }
     }

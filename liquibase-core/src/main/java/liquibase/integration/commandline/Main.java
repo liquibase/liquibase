@@ -33,7 +33,7 @@ import java.util.jar.JarFile;
 import liquibase.Liquibase;
 import liquibase.change.CheckSum;
 import liquibase.database.Database;
-import liquibase.diff.output.DiffOutputConfig;
+import liquibase.diff.output.DiffOutputControl;
 import liquibase.exception.CommandLineParsingException;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.ValidationFailedException;
@@ -764,16 +764,16 @@ public class Main {
             boolean includeCatalog = Boolean.parseBoolean(getCommandParam("includeCatalog", "false"));
             boolean includeSchema = Boolean.parseBoolean(getCommandParam("includeSchema", "false"));
             boolean includeTablespace = Boolean.parseBoolean(getCommandParam("includeTablespace", "false"));
-            DiffOutputConfig diffOutputConfig = new DiffOutputConfig(includeCatalog, includeSchema, includeTablespace);
+            DiffOutputControl diffOutputControl = new DiffOutputControl(includeCatalog, includeSchema, includeTablespace);
 
             if ("diff".equalsIgnoreCase(command)) {
                 CommandLineUtils.doDiff(createReferenceDatabaseFromCommandParams(commandParams), database);
                 return;
             } else if ("diffChangeLog".equalsIgnoreCase(command)) {
-                CommandLineUtils.doDiffToChangeLog(changeLogFile, createReferenceDatabaseFromCommandParams(commandParams), database, diffOutputConfig);
+                CommandLineUtils.doDiffToChangeLog(changeLogFile, createReferenceDatabaseFromCommandParams(commandParams), database, diffOutputControl);
                 return;
             } else if ("generateChangeLog".equalsIgnoreCase(command)) {
-                CommandLineUtils.doGenerateChangeLog(changeLogFile, database, defaultSchemaName, defaultCatalogName, StringUtils.trimToNull(diffTypes), StringUtils.trimToNull(changeSetAuthor), StringUtils.trimToNull(changeSetContext), StringUtils.trimToNull(dataOutputDirectory), diffOutputConfig);
+                CommandLineUtils.doGenerateChangeLog(changeLogFile, database, defaultSchemaName, defaultCatalogName, StringUtils.trimToNull(diffTypes), StringUtils.trimToNull(changeSetAuthor), StringUtils.trimToNull(changeSetContext), StringUtils.trimToNull(dataOutputDirectory), diffOutputControl);
                 return;
             }
 

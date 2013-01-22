@@ -3,7 +3,7 @@ package liquibase.sqlgenerator.core;
 import liquibase.change.ColumnConfig;
 import liquibase.database.Database;
 import liquibase.database.core.SQLiteDatabase;
-import liquibase.database.structure.Index;
+import liquibase.structure.core.Index;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.UnsupportedChangeException;

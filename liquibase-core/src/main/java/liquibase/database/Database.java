@@ -1,11 +1,13 @@
 package liquibase.database;
 
+import liquibase.CatalogAndSchema;
 import liquibase.change.Change;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.RanChangeSet;
-import liquibase.database.structure.DatabaseObject;
-import liquibase.database.structure.Schema;
+import liquibase.snapshot.SnapshotControl;
+import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.Schema;
 import liquibase.exception.*;
 import liquibase.servicelocator.PrioritizedService;
 import liquibase.sql.visitor.SqlVisitor;
@@ -15,11 +17,10 @@ import liquibase.statement.DatabaseFunction;
 import java.io.IOException;
 import java.io.Writer;
 import java.math.BigInteger;
-import java.sql.SQLException;
 import java.util.Date;
 import java.util.List;
 
-public interface Database extends DatabaseObject, PrioritizedService {
+public interface Database extends PrioritizedService {
 
     String databaseChangeLogTableName = "DatabaseChangeLog".toUpperCase();
     String databaseChangeLogLockTableName = "DatabaseChangeLogLock".toUpperCase();
@@ -144,19 +145,17 @@ public interface Database extends DatabaseObject, PrioritizedService {
 
     void checkDatabaseChangeLogLockTable() throws DatabaseException;
 
-    void dropDatabaseObjects(Schema schema) throws DatabaseException;
+    void dropDatabaseObjects(CatalogAndSchema schema) throws DatabaseException;
 
     void tag(String tagString) throws DatabaseException;
 
     boolean doesTagExist(String tag) throws DatabaseException;
 
-    boolean isSystemTable(Schema schema, String tableName);
+    boolean isSystemObject(DatabaseObject example);
 
-    boolean isSystemView(Schema schema, String name);
+    boolean isLiquibaseObject(DatabaseObject object);
 
-    boolean isLiquibaseTable(Schema schema, String tableName);
-
-    String getViewDefinition(Schema schema, String name) throws DatabaseException;
+    String getViewDefinition(CatalogAndSchema schema, String name) throws DatabaseException;
 
     String getDateLiteral(java.sql.Date date);
 
@@ -166,13 +165,13 @@ public interface Database extends DatabaseObject, PrioritizedService {
 
     String getDateLiteral(Date defaultDateValue);
 
-    String escapeDatabaseObject(String catalogname, String schemaName, String objectName, Class<? extends DatabaseObject> objectType);
+    String escapeObjectName(String catalogName, String schemaName, String objectName, Class<? extends DatabaseObject> objectType);
 
     String escapeTableName(String catalogName, String schemaName, String tableName);
 
     String escapeIndexName(String catalogName, String schemaName, String indexName);
 
-    String escapeDatabaseObject(String objectName, Class<? extends DatabaseObject> objectType);
+    String escapeObjectName(String objectName, Class<? extends DatabaseObject> objectType);
 
     /**
      * Escapes a single column name in a database-dependent manner so reserved words can be used as a column
@@ -277,18 +276,24 @@ public interface Database extends DatabaseObject, PrioritizedService {
 
     public boolean isReservedWord(String string);
 
-    Schema correctSchema(Schema schema);
+    /**
+     * Returns a new CatalogAndSchema adjusted for this database. Examples of adjustments include:
+     * fixes for case issues,
+     * replacing null schema or catalog names with the default values
+     * removing set schema or catalog names if they are not supported
+     * @param schema
+     * @return
+     */
+    CatalogAndSchema correctSchema(CatalogAndSchema schema);
 
     /**
      * Fix the object name to the format the database expects, handling changes in case, etc.
      */
     String correctObjectName(String name, Class<? extends DatabaseObject> objectType);
 
-    String getAssumedSchemaName(String catalogName, String schemaName);
-
-    String getAssumedCatalogName(String catalogName, String schemaName);
-
     boolean isFunction(String string);
 
     int getDataTypeMaxParameters(String dataTypeName);
+
+    CatalogAndSchema getDefaultSchema();
 }

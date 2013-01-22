@@ -1,16 +1,14 @@
 package liquibase.dbtest.h2;
 
-import liquibase.Liquibase;
 import liquibase.dbtest.AbstractIntegrationTest;
-import liquibase.diff.DiffControl;
 import liquibase.diff.DiffGeneratorFactory;
 import liquibase.diff.DiffResult;
-import liquibase.diff.output.DiffToPrintStream;
-import liquibase.snapshot.DatabaseSnapshot;
-import liquibase.snapshot.DatabaseSnapshotGeneratorFactory;
+import liquibase.diff.compare.CompareControl;
+import liquibase.diff.output.DiffOutputControl;
+import liquibase.diff.output.changelog.DiffToChangeLog;
+import liquibase.diff.output.report.DiffToReport;
+import liquibase.snapshot.*;
 import org.junit.Test;
-
-import java.util.Locale;
 
 public class H2IntegrationTest extends AbstractIntegrationTest {
 
@@ -26,8 +24,32 @@ public class H2IntegrationTest extends AbstractIntegrationTest {
 
         runCompleteChangeLog();
 
-        DiffResult diffResult = DiffGeneratorFactory.getInstance().compare(getDatabase(), null, new DiffControl());
-        new DiffToPrintStream(diffResult, System.out).print();
+        DiffResult diffResult = DiffGeneratorFactory.getInstance().compare(getDatabase(), null, new CompareControl());
+        new DiffToReport(diffResult, System.out).print();
+    }
+
+    @Test
+    public void diffToChangeLog() throws Exception{
+        if (getDatabase() == null) {
+            return;
+        }
+
+        runCompleteChangeLog();
+
+        DiffResult diffResult = DiffGeneratorFactory.getInstance().compare(getDatabase(), null, new CompareControl());
+        new DiffToChangeLog(diffResult, new DiffOutputControl(true, true, true)).print(System.out);
+    }
+
+    @Test
+    public void snapshot() throws Exception {
+        if (getDatabase() == null) {
+            return;
+        }
+
+
+        runCompleteChangeLog();
+        DatabaseSnapshot snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(getDatabase().getDefaultSchema(), getDatabase(), new SnapshotControl());
+        System.out.println(snapshot);
     }
 
     //    @Test

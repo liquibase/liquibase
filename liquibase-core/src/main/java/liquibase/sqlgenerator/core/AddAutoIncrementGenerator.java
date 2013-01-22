@@ -5,9 +5,9 @@ import liquibase.database.core.DerbyDatabase;
 import liquibase.database.core.H2Database;
 import liquibase.database.core.HsqlDatabase;
 import liquibase.database.core.MSSQLDatabase;
-import liquibase.database.structure.Column;
-import liquibase.database.structure.Schema;
-import liquibase.database.structure.Table;
+import liquibase.structure.core.Column;
+import liquibase.structure.core.Schema;
+import liquibase.structure.core.Table;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
@@ -58,7 +58,7 @@ public class AddAutoIncrementGenerator extends AbstractSqlGenerator<AddAutoIncre
 
         return new Sql[]{
             new UnparsedSql(sql, new Column()
-                .setRelation(new Table(statement.getTableName()).setSchema(new Schema(statement.getCatalogName(), statement.getSchemaName())))
+                .setRelation(new Table().setName(statement.getTableName()).setSchema(new Schema(statement.getCatalogName(), statement.getSchemaName())))
                 .setName(statement.getColumnName()))
         };
     }

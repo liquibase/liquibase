@@ -1,22 +1,20 @@
 package liquibase.database.core;
 
-import java.lang.reflect.Method;
 import java.sql.*;
 
-import liquibase.database.AbstractDatabase;
+import liquibase.CatalogAndSchema;
+import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.jvm.JdbcConnection;
-import liquibase.database.structure.DatabaseObject;
-import liquibase.database.structure.Schema;
+import liquibase.structure.DatabaseObject;
 import liquibase.exception.DatabaseException;
 import liquibase.logging.LogFactory;
 import liquibase.logging.Logger;
 
-import java.lang.reflect.Method;
 import java.sql.Driver;
 import java.util.Enumeration;
 
-public class DerbyDatabase extends AbstractDatabase {
+public class DerbyDatabase extends AbstractJdbcDatabase {
 
     private Logger log = LogFactory.getLogger();
 
@@ -105,7 +103,7 @@ public class DerbyDatabase extends AbstractDatabase {
     }
 
     @Override
-    public String getViewDefinition(Schema schema, String name) throws DatabaseException {
+    public String getViewDefinition(CatalogAndSchema schema, String name) throws DatabaseException {
         return super.getViewDefinition(schema, name).replaceFirst("CREATE VIEW \\w+ AS ", "");
     }
 

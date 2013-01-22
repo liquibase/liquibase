@@ -1,24 +1,26 @@
 package liquibase.database.core;
 
+import liquibase.CatalogAndSchema;
 import liquibase.change.ColumnConfig;
 import liquibase.change.core.CreateTableChange;
-import liquibase.database.AbstractDatabase;
+import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
-import liquibase.database.structure.*;
-import liquibase.diff.DiffControl;
 import liquibase.exception.DatabaseException;
+import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.UnsupportedChangeException;
 import liquibase.snapshot.DatabaseSnapshot;
-import liquibase.snapshot.DatabaseSnapshotGeneratorFactory;
+import liquibase.snapshot.SnapshotGeneratorFactory;
+import liquibase.snapshot.InvalidExampleException;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.*;
+import liquibase.structure.core.*;
 import liquibase.util.ISODateFormat;
 
 import java.math.BigInteger;
 import java.util.*;
 
-public class SQLiteDatabase extends AbstractDatabase {
+public class SQLiteDatabase extends AbstractJdbcDatabase {
 
     private Set<String> systemTables = new HashSet<String>();
 
@@ -77,7 +79,7 @@ public class SQLiteDatabase extends AbstractDatabase {
     }
 
     @Override
-    public String getViewDefinition(Schema schema, String viewName) throws DatabaseException {
+    public String getViewDefinition(CatalogAndSchema schema, String viewName) throws DatabaseException {
         return null;
     }
 
@@ -119,10 +121,15 @@ public class SQLiteDatabase extends AbstractDatabase {
             Database database, String catalogName, String schemaName, String tableName)
             throws UnsupportedChangeException, DatabaseException {
 
+        DatabaseSnapshot snapshot = null; //todo
         List<SqlStatement> statements = new ArrayList<SqlStatement>();
 
-        DatabaseSnapshot snapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(database,new DiffControl((Schema)null, (String) null));
-        Table table = snapshot.getDatabaseObject(new Schema(new Catalog(null), schemaName), tableName, Table.class);
+        Table table = null;
+        try {
+            table = SnapshotGeneratorFactory.getInstance().createSnapshot((Table) new Table().setName(tableName).setSchema(new Schema(new Catalog(null), null)), database);
+        } catch (InvalidExampleException e) {
+            throw new UnexpectedLiquibaseException(e);
+        }
 
         List<ColumnConfig> createColumns = new Vector<ColumnConfig>();
         List<ColumnConfig> copyColumns = new Vector<ColumnConfig>();
@@ -150,7 +157,7 @@ public class SQLiteDatabase extends AbstractDatabase {
         }
 
         List<Index> newIndices = new Vector<Index>();
-        for (Index index : snapshot.getDatabaseObjects(new Schema(new Catalog(null), schemaName), Index.class)) {
+        for (Index index : new ArrayList<Index>()) { //todo SnapshotGeneratorFactory.getInstance().getGenerator(Index.class, database).get(new Schema(new Catalog(null), schemaName), database)) {
             if (index.getTable().getName().equalsIgnoreCase(tableName)) {
                 if (alterTableVisitor.createThisIndex(index)) {
                     newIndices.add(index);

@@ -1,5 +1,6 @@
 package liquibase.database.core;
 
+import liquibase.CatalogAndSchema;
 import liquibase.Liquibase;
 import liquibase.change.Change;
 import liquibase.changelog.ChangeSet;
@@ -7,12 +8,10 @@ import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.RanChangeSet;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
-import liquibase.database.structure.DatabaseObject;
-import liquibase.database.structure.Schema;
-import liquibase.diff.DiffStatusListener;
+import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.Schema;
 import liquibase.exception.*;
 import liquibase.lockservice.DatabaseChangeLogLock;
-import liquibase.snapshot.DatabaseSnapshotGenerator;
 import liquibase.sql.visitor.SqlVisitor;
 import liquibase.statement.DatabaseFunction;
 import liquibase.statement.SqlStatement;
@@ -25,7 +24,6 @@ import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
 
 public class MockDatabase implements Database {
 
@@ -42,6 +40,10 @@ public class MockDatabase implements Database {
         return "Mock Database";
     }
 
+    public CatalogAndSchema getDefaultSchema() {
+        return new CatalogAndSchema("default", "default");
+    }
+
     public Integer getDefaultPort() {
         return null;
     }
@@ -52,10 +54,6 @@ public class MockDatabase implements Database {
 
     public boolean equals(DatabaseObject otherObject, Database accordingTo) {
         return otherObject.getName().equalsIgnoreCase(this.getName());
-    }
-
-    public boolean equals(String otherObjectName, Database accordingTo) {
-        return otherObjectName.equalsIgnoreCase(this.getName());
     }
 
     public void setCanCacheLiquibaseTableInfo(boolean canCacheLiquibaseTableInfo) {
@@ -271,7 +269,7 @@ public class MockDatabase implements Database {
     public void checkDatabaseChangeLogLockTable(Liquibase liquibase) throws DatabaseException, IOException {
     }
 
-    public void dropDatabaseObjects(Schema schema) throws DatabaseException {
+    public void dropDatabaseObjects(CatalogAndSchema schema) throws DatabaseException {
     }
 
     public void tag(String tagString) throws DatabaseException {
@@ -281,16 +279,12 @@ public class MockDatabase implements Database {
         return false;
     }
 
-    public boolean isSystemTable(Schema schema, String tableName) {
+
+    public boolean isSystemObject(DatabaseObject example) {
         return false;
     }
 
-
-    public boolean isSystemView(Schema schema, String name) {
-        return false;
-    }
-
-    public boolean isLiquibaseTable(Schema schema, String tableName) {
+    public boolean isLiquibaseObject(DatabaseObject object) {
         return false;
     }
 
@@ -298,7 +292,7 @@ public class MockDatabase implements Database {
         return false;
     }
 
-    public String getViewDefinition(Schema schema, String name) throws DatabaseException {
+    public String getViewDefinition(CatalogAndSchema schema, String name) throws DatabaseException {
         return null;
     }
 
@@ -422,10 +416,6 @@ public class MockDatabase implements Database {
         ;
     }
 
-    public DatabaseSnapshotGenerator createDatabaseSnapshot(String schema, Set<DiffStatusListener> statusListeners) throws DatabaseException {
-        return null;
-    }
-
     public boolean supportsRestrictForeignKeys() {
         return true;
     }
@@ -438,12 +428,12 @@ public class MockDatabase implements Database {
     	return true;
     }
 
-    public String escapeDatabaseObject(String objectName, Class<? extends DatabaseObject> objectType) {
+    public String escapeObjectName(String objectName, Class<? extends DatabaseObject> objectType) {
         return objectName;
     }
 
-    public String escapeDatabaseObject(String catalogname, String schemaName, String objectName, Class<? extends DatabaseObject> objectType) {
-        return catalogname+"."+schemaName+"."+objectName;
+    public String escapeObjectName(String catalogName, String schemaName, String objectName, Class<? extends DatabaseObject> objectType) {
+        return catalogName +"."+schemaName+"."+objectName;
     }
 
     public void executeStatements(Change change, DatabaseChangeLog changeLog, List<SqlVisitor> sqlVisitors) throws LiquibaseException, UnsupportedChangeException {
@@ -518,20 +508,12 @@ public class MockDatabase implements Database {
         return false;
     }
 
-    public Schema correctSchema(Schema schema) {
+    public CatalogAndSchema correctSchema(CatalogAndSchema schema) {
         return schema;
     }
 
     public String correctObjectName(String name, Class<? extends DatabaseObject> objectType) {
         return name;
-    }
-
-    public String getAssumedSchemaName(String catalogName, String schemaName) {
-        return schemaName;
-    }
-
-    public String getAssumedCatalogName(String catalogName, String schemaName) {
-        return catalogName;
     }
 
     public boolean isFunction(String string) {
@@ -543,5 +525,25 @@ public class MockDatabase implements Database {
 
     public int getDataTypeMaxParameters(String dataTypeName) {
         return 2;
+    }
+
+    public CatalogAndSchema getSchemaFromJdbcInfo(String rawCatalogName, String rawSchemaName) {
+        return new CatalogAndSchema(rawCatalogName, rawSchemaName);
+    }
+
+    public String getJdbcCatalogName(CatalogAndSchema schema) {
+        return schema.getCatalogName();
+    }
+
+    public String getJdbcSchemaName(CatalogAndSchema schema) {
+        return schema.getSchemaName();
+    }
+
+    public String getJdbcCatalogName(Schema schema) {
+        return schema.getCatalogName();
+    }
+
+    public String getJdbcSchemaName(Schema schema) {
+        return schema.getName();
     }
 }

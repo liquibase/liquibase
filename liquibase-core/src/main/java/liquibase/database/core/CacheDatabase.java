@@ -1,11 +1,11 @@
 package liquibase.database.core;
 
-import liquibase.database.AbstractDatabase;
+import liquibase.CatalogAndSchema;
+import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
-import liquibase.database.structure.Schema;
 import liquibase.exception.DatabaseException;
 
-public class CacheDatabase extends AbstractDatabase {
+public class CacheDatabase extends AbstractJdbcDatabase {
     public static final String PRODUCT_NAME = "cache";
 
 
@@ -74,7 +74,7 @@ public class CacheDatabase extends AbstractDatabase {
 
 
     @Override
-    public String getViewDefinition(Schema schema, String viewName) throws DatabaseException {
+    public String getViewDefinition(CatalogAndSchema schema, String viewName) throws DatabaseException {
         return null;
     }
 }

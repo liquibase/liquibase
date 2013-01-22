@@ -1,13 +1,13 @@
 package liquibase.database.core;
 
 import java.math.BigInteger;
-import java.sql.SQLException;
 
-import liquibase.database.AbstractDatabase;
+import liquibase.CatalogAndSchema;
+import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
-import liquibase.database.structure.DatabaseObject;
-import liquibase.database.structure.Index;
-import liquibase.database.structure.PrimaryKey;
+import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.Index;
+import liquibase.structure.core.PrimaryKey;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.ExecutorService;
 import liquibase.statement.core.RawSqlStatement;
@@ -15,7 +15,7 @@ import liquibase.statement.core.RawSqlStatement;
 /**
  * Encapsulates MySQL database support.
  */
-public class MySQLDatabase extends AbstractDatabase {
+public class MySQLDatabase extends AbstractJdbcDatabase {
     public static final String PRODUCT_NAME = "MySQL";
 
     public String getShortName() {
@@ -33,7 +33,10 @@ public class MySQLDatabase extends AbstractDatabase {
         if (objectType.equals(PrimaryKey.class) && name.equals("PRIMARY")) {
             return null;
         } else {
-            return name;
+            if (name == null) {
+                return null;
+            }
+            return name.toLowerCase(); //todo: handle case sensitive
         }
     }
 
@@ -131,7 +134,7 @@ public class MySQLDatabase extends AbstractDatabase {
     }
 
     @Override
-    public String escapeDatabaseObject(String objectName, Class<? extends DatabaseObject> objectType) {
+    public String escapeObjectName(String objectName, Class<? extends DatabaseObject> objectType) {
         return "`" + objectName + "`";
     }
 
@@ -147,7 +150,7 @@ public class MySQLDatabase extends AbstractDatabase {
 
     @Override
     public String escapeIndexName(String catalogName, String schemaName, String indexName) {
-        return escapeDatabaseObject(indexName, Index.class);
+        return escapeObjectName(indexName, Index.class);
     }
 
     @Override
@@ -166,4 +169,10 @@ public class MySQLDatabase extends AbstractDatabase {
     public void enableForeignKeyChecks() throws DatabaseException {
         ExecutorService.getInstance().getExecutor(this).execute(new RawSqlStatement("SET FOREIGN_KEY_CHECKS=1"));
     }
+
+    @Override
+    public CatalogAndSchema getSchemaFromJdbcInfo(String rawCatalogName, String rawSchemaName) {
+        return this.correctSchema(new CatalogAndSchema(rawCatalogName, null));
+    }
+
 }

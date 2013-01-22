@@ -1,14 +1,16 @@
 package liquibase.database.core;
 
-import liquibase.database.AbstractDatabase;
+import liquibase.CatalogAndSchema;
+import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
-import liquibase.database.structure.DatabaseObject;
-import liquibase.database.structure.Schema;
+import liquibase.structure.DatabaseObject;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.logging.LogFactory;
 import liquibase.statement.core.GetViewDefinitionStatement;
+import liquibase.structure.core.Table;
+import liquibase.structure.core.View;
 
 import java.math.BigInteger;
 import java.util.HashSet;
@@ -18,7 +20,7 @@ import java.util.Set;
 /**
  * Encapsulates Sybase ASE database support.
  */
-public class SybaseDatabase extends AbstractDatabase {
+public class SybaseDatabase extends AbstractJdbcDatabase {
     public static final String PRODUCT_NAME = "Adaptive Server Enterprise";
     protected Set<String> systemTablesAndViews = new HashSet<String>();
 
@@ -200,18 +202,17 @@ public class SybaseDatabase extends AbstractDatabase {
         return true;
     }
 
-
     @Override
-    public boolean isSystemTable(Schema schema, String tableName) {
-        schema = correctSchema(schema);
-        return super.isSystemTable(schema, tableName) || schema.getName().equals("sys") || tableName.toLowerCase().startsWith("sybfi");
+    public boolean isSystemObject(DatabaseObject example) {
+        if (example instanceof Table && (example.getSchema().getName().equals("sys") || example.getSchema().getName().equals("sybfi"))) {
+            return true;
+        }
+        if (example instanceof View && (example.getSchema().getName().equals("sys") || example.getSchema().getName().equals("sybfi"))) {
+            return true;
+        }
+        return super.isSystemObject(example);
     }
 
-    @Override
-    public boolean isSystemView(Schema schema, String viewName) {
-        schema = correctSchema(schema);
-        return super.isSystemView(schema, viewName) || schema.getName().equals("sys") || viewName.toLowerCase().equals("sybfi");
-    }
 
     public String generateDefaultConstraintName(String tableName, String columnName) {
         return "DF_" + tableName + "_" + columnName;
@@ -228,14 +229,14 @@ public class SybaseDatabase extends AbstractDatabase {
     }
 
     @Override
-    public String escapeDatabaseObject(String objectName, Class<? extends DatabaseObject> objectType) {
+    public String escapeObjectName(String objectName, Class<? extends DatabaseObject> objectType) {
         return "["+objectName+"]";
     }
 
 	@Override
-	public String getViewDefinition(Schema schema, String viewName) throws DatabaseException {
+	public String getViewDefinition(CatalogAndSchema schema, String viewName) throws DatabaseException {
         schema = correctSchema(schema);
-        GetViewDefinitionStatement statement = new GetViewDefinitionStatement(schema.getCatalogName(), schema.getName(), viewName);
+        GetViewDefinitionStatement statement = new GetViewDefinitionStatement(schema.getCatalogName(), schema.getSchemaName(), viewName);
         Executor executor = ExecutorService.getInstance().getExecutor(this);
         @SuppressWarnings("unchecked")
         List<String> definitionRows = (List<String>) executor.queryForList(statement, String.class);
@@ -248,7 +249,7 @@ public class SybaseDatabase extends AbstractDatabase {
 	
 	/** 
 	 * @return the major version if supported, otherwise -1
-	 * @see liquibase.database.AbstractDatabase#getDatabaseMajorVersion()
+	 * @see liquibase.database.AbstractJdbcDatabase#getDatabaseMajorVersion()
 	 */
 	@Override
     public int getDatabaseMajorVersion() throws DatabaseException {
@@ -263,7 +264,7 @@ public class SybaseDatabase extends AbstractDatabase {
 
 	/**
 	 * @return the minor version if supported, otherwise -1
-	 * @see liquibase.database.AbstractDatabase#getDatabaseMinorVersion()
+	 * @see liquibase.database.AbstractJdbcDatabase#getDatabaseMinorVersion()
 	 */
 	@Override
     public int getDatabaseMinorVersion() throws DatabaseException {

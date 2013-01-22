@@ -2,10 +2,10 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
 import liquibase.database.core.InformixDatabase;
-import liquibase.database.structure.Schema;
+import liquibase.structure.core.Schema;
 import liquibase.datatype.DataTypeFactory;
-import liquibase.database.structure.Column;
-import liquibase.database.structure.Table;
+import liquibase.structure.core.Column;
+import liquibase.structure.core.Table;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
@@ -36,7 +36,7 @@ public class AddDefaultValueGeneratorInformix extends AddDefaultValueGenerator {
 	@Override
 	public Sql[] generateSql(AddDefaultValueStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
 
-		Column column = new Column().setRelation(new Table(statement.getTableName()).setSchema(new Schema(statement.getCatalogName(), statement.getSchemaName())))
+		Column column = new Column().setRelation(new Table().setName(statement.getTableName()).setSchema(new Schema(statement.getCatalogName(), statement.getSchemaName())))
 				.setName(statement.getColumnName());
 		Object defaultValue = statement.getDefaultValue();
 		StringBuffer sql = new StringBuffer("ALTER TABLE ");

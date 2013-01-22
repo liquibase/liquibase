@@ -154,7 +154,7 @@ public class ServiceLocator {
         return classes[0];
     }
 
-    public Class[] findClasses(Class requiredInterface) throws ServiceNotFoundException {
+    public <T> Class<? extends T>[] findClasses(Class<T> requiredInterface) throws ServiceNotFoundException {
         logger.debug("ServiceLocator.findClasses for "+requiredInterface.getName());
 
             try {

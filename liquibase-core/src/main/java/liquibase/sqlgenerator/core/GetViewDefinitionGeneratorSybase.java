@@ -1,10 +1,9 @@
 package liquibase.sqlgenerator.core;
 
+import liquibase.CatalogAndSchema;
 import liquibase.database.Database;
 import liquibase.database.core.SybaseDatabase;
-import liquibase.database.structure.Schema;
-import liquibase.exception.DatabaseException;
-import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.structure.core.Schema;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
@@ -23,10 +22,10 @@ public class GetViewDefinitionGeneratorSybase extends GetViewDefinitionGenerator
 
     @Override
     public Sql[] generateSql(GetViewDefinitionStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-        Schema schema = database.correctSchema(new Schema(statement.getCatalogName(), statement.getSchemaName()));
+        CatalogAndSchema schema = database.correctSchema(new CatalogAndSchema(statement.getCatalogName(), statement.getSchemaName()));
 
         String sql = "select text from syscomments where id = object_id('" +
-                schema.getName() + "." +
+                schema.getSchemaName() + "." +
                 statement.getViewName() + "') order by colid";
 
         return new Sql[]{

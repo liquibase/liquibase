@@ -1,9 +1,9 @@
 package liquibase.database.core;
 
+import liquibase.CatalogAndSchema;
 import liquibase.database.DatabaseConnection;
-import liquibase.database.AbstractDatabase;
-import liquibase.database.structure.DatabaseObject;
-import liquibase.database.structure.Schema;
+import liquibase.database.AbstractJdbcDatabase;
+import liquibase.structure.DatabaseObject;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.DateParseException;
 import liquibase.statement.DatabaseFunction;
@@ -16,7 +16,7 @@ import java.util.Date;
 import java.util.Arrays;
 import java.util.List;
 
-public class H2Database extends AbstractDatabase {
+public class H2Database extends AbstractJdbcDatabase {
 
     private static String START_CONCAT = "CONCAT(";
     private static String END_CONCAT = ")";
@@ -92,7 +92,7 @@ public class H2Database extends AbstractDatabase {
     }
 
     @Override
-    public String getViewDefinition(Schema schema, String name) throws DatabaseException {
+    public String getViewDefinition(CatalogAndSchema schema, String name) throws DatabaseException {
         String definition = super.getViewDefinition(schema, name);
         if (!definition.startsWith("SELECT")) {
             definition = definition.replaceFirst(".*?\n", ""); //some h2 versions return "create view....as\nselect
@@ -190,7 +190,7 @@ public class H2Database extends AbstractDatabase {
 
 
     @Override
-    public String escapeDatabaseObject(String objectName, Class<? extends DatabaseObject> objectType) {
+    public String escapeObjectName(String objectName, Class<? extends DatabaseObject> objectType) {
     	if (objectName != null) {
             if (isReservedWord(objectName)) {
                 return "\""+objectName.toUpperCase()+"\"";

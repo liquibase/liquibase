@@ -1,0 +1,129 @@
+package liquibase.structure.core;
+
+import liquibase.structure.AbstractDatabaseObject;
+import liquibase.structure.DatabaseObject;
+import liquibase.util.StringUtils;
+
+import javax.swing.text.TableView;
+import java.util.ArrayList;
+import java.util.List;
+
+public class PrimaryKey extends AbstractDatabaseObject {
+
+    public PrimaryKey() {
+        setAttribute("columnNames", new ArrayList());
+    }
+
+    public DatabaseObject[] getContainingObjects() {
+        return new DatabaseObject[] {
+                getTable()
+        };
+    }
+
+    public String getName() {
+        return getAttribute("name", String.class);
+    }
+
+    public PrimaryKey setName(String name) {
+        this.setAttribute("name", name);
+        return this;
+    }
+
+    public Schema getSchema() {
+        if (getTable() == null) {
+            return null;
+        }
+        return getTable().getSchema();
+    }
+
+    public String getColumnNames() {
+        return StringUtils.join(getColumnNamesAsList(), ", ");
+    }
+
+    public void addColumnName(int position, String columnName) {
+        if (position >= getColumnNamesAsList().size()) {
+            for (int i = getColumnNamesAsList().size()-1; i < position; i++) {
+                this.getColumnNamesAsList().add(null);
+            }
+        }
+        this.getColumnNamesAsList().set(position, columnName);
+    }
+
+    public Table getTable() {
+        return getAttribute("table", Table.class);
+    }
+
+    public PrimaryKey setTable(Table table) {
+        this.setAttribute("table", table);
+        return this;
+    }
+
+
+    @Override
+    public int compareTo(Object other) {
+        PrimaryKey o = (PrimaryKey) other;
+        int returnValue = this.getTable().getName().compareTo(o.getTable().getName());
+        if (returnValue == 0) {
+            returnValue = this.getColumnNames().compareTo(o.getColumnNames());
+        }
+//        if (returnValue == 0) {
+//            returnValue = this.getName().compareTo(o.getName());
+//        }
+
+        return returnValue;
+    }
+
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        PrimaryKey that = (PrimaryKey) o;
+
+        return !(getColumnNames() != null ? !getColumnNames().equals(that.getColumnNames()) : that.getColumnNames() != null) && !(getTable().getName() != null ? !getTable().getName().equals(that.getTable().getName()) : that.getTable().getName() != null);
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result;
+        result = (getColumnNames() != null ? getColumnNames().hashCode() : 0);
+        result = 31 * result + (getTable().getName() != null ? getTable().getName().hashCode() : 0);
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        return getName() + " on " + getTable().getName() + "(" + getColumnNames() + ")";
+    }
+
+    public List<String> getColumnNamesAsList() {
+        return getAttribute("columnNames", List.class);
+    }
+
+    public boolean isCertainName() {
+        return getAttribute("certainName", Boolean.class);
+    }
+
+    public void setCertainName(boolean certainName) {
+        setAttribute("certainName", certainName);
+    }
+
+	public String getTablespace() {
+		return getAttribute("tablespace",String.class);
+	}
+
+	public void setTablespace(String tablespace) {
+        setAttribute("tablespace", tablespace);
+	}
+
+    public Index getBackingIndex() {
+        return getAttribute("backingIndex", Index.class);
+    }
+
+    public PrimaryKey setBackingIndex(Index backingIndex) {
+        setAttribute("backingIndex", backingIndex);
+        return this;
+    }
+}

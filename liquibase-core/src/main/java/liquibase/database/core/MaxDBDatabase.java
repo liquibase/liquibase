@@ -1,16 +1,18 @@
 package liquibase.database.core;
 
 
-import liquibase.database.AbstractDatabase;
+import liquibase.CatalogAndSchema;
+import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
-import liquibase.database.structure.Schema;
 import liquibase.exception.DatabaseException;
+import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.View;
 
 import java.util.HashSet;
 import java.util.Set;
 
 
-public class MaxDBDatabase extends AbstractDatabase {
+public class MaxDBDatabase extends AbstractJdbcDatabase {
 
     public static final String PRODUCT_NAME = "SAP DB";
     protected Set<String> systemTablesAndViews = new HashSet<String>();
@@ -128,40 +130,28 @@ public class MaxDBDatabase extends AbstractDatabase {
         if (currentDateTimeFunction != null) {
             return currentDateTimeFunction;
         }
-        
+
         return "TIMESTAMP";
     }
 
-    @Override
-    public boolean isSystemTable(Schema schema, String tableName) {
-        schema = correctSchema(schema);
-        if (super.isSystemTable(schema, tableName)) {
-            return true;
-        } else if ("DOMAIN".equalsIgnoreCase(schema.getName())) {
-            return true;
-        } else if ("SYSINFO".equalsIgnoreCase(schema.getName())) {
-            return true;
-        } else if ("SYSLOADER".equalsIgnoreCase(schema.getName())) {
-            return true;
-        } else if ("SYSDBA".equalsIgnoreCase(schema.getName())) {
-            return true;
-        }
-        return false;
-    }
 
     @Override
-    public boolean isSystemView(Schema schema, String tableName) {
-        schema = correctSchema(schema);
-        if (super.isSystemView(schema, tableName)) {
+    public boolean isSystemObject(DatabaseObject example) {
+        if (super.isSystemObject(example)) {
             return true;
-        } else if ("DOMAIN".equalsIgnoreCase(schema.getName())) {
-            return true;
-        } else if ("SYSINFO".equalsIgnoreCase(schema.getName())) {
-            return true;
-        } else if ("SYSLOADER".equalsIgnoreCase(schema.getName())) {
-            return true;
-        } else if ("SYSDBA".equalsIgnoreCase(schema.getName())) {
-            return true;
+        }
+        if (example instanceof View && example.getSchema() != null) {
+
+            if ("DOMAIN".equalsIgnoreCase(example.getSchema().getName())) {
+                return true;
+            } else if ("SYSINFO".equalsIgnoreCase(example.getSchema().getName())) {
+                return true;
+            } else if ("SYSLOADER".equalsIgnoreCase(example.getSchema().getName())) {
+                return true;
+            } else if ("SYSDBA".equalsIgnoreCase(example.getSchema().getName())) {
+                return true;
+            }
+
         }
         return false;
     }

@@ -10,11 +10,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import liquibase.CatalogAndSchema;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.jvm.JdbcConnection;
-import liquibase.database.structure.Schema;
-import liquibase.database.structure.Table;
+import liquibase.snapshot.SnapshotGeneratorFactory;
+import liquibase.structure.core.Table;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.database.example.ExampleCustomDatabase;
 import liquibase.database.core.MockDatabase;
@@ -26,7 +27,6 @@ import liquibase.statement.SqlStatement;
 import liquibase.test.TestContext;
 import liquibase.test.DatabaseTestContext;
 import liquibase.exception.DatabaseException;
-import liquibase.snapshot.DatabaseSnapshotGeneratorFactory;
 
 import org.junit.After;
 
@@ -49,7 +49,7 @@ public abstract class AbstractExecuteTest {
         testedDatabases = new HashSet<Class<? extends Database>>();
         this.statementUnderTest = null;
 
-        DatabaseSnapshotGeneratorFactory.resetAll();
+        SnapshotGeneratorFactory.resetAll();
     }
 
     protected abstract List<? extends SqlStatement> setupStatements(Database database);
@@ -177,7 +177,7 @@ public abstract class AbstractExecuteTest {
         while ((lastIndex = convertedSql.indexOf("[", lastIndex)) >= 0) {
             String objectName = convertedSql.substring(lastIndex + 1, convertedSql.indexOf("]", lastIndex));
             try {
-                convertedSql = convertedSql.replace("[" + objectName + "]", database.escapeDatabaseObject(objectName, Table.class));
+                convertedSql = convertedSql.replace("[" + objectName + "]", database.escapeObjectName(objectName, Table.class));
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -192,7 +192,7 @@ public abstract class AbstractExecuteTest {
             DatabaseConnection connection = database.getConnection();
             Statement connectionStatement = ((JdbcConnection) connection).getUnderlyingConnection().createStatement();
 
-            database.dropDatabaseObjects(Schema.DEFAULT);
+            database.dropDatabaseObjects(CatalogAndSchema.DEFAULT);
             try {
                 connectionStatement.executeUpdate("drop table " + database.escapeTableName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName()));
             } catch (SQLException e) {
@@ -207,7 +207,7 @@ public abstract class AbstractExecuteTest {
             connection.commit();
 
             if (database.supportsSchemas()) {
-                database.dropDatabaseObjects(new Schema(DatabaseTestContext.ALT_CATALOG, DatabaseTestContext.ALT_SCHEMA));
+                database.dropDatabaseObjects(new CatalogAndSchema(DatabaseTestContext.ALT_CATALOG, DatabaseTestContext.ALT_SCHEMA));
                 connection.commit();
 
                 try {

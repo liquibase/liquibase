@@ -1,12 +1,12 @@
 package liquibase.datatype;
 
 import liquibase.database.Database;
-import liquibase.database.structure.DataType;
 import liquibase.datatype.core.BigIntType;
 import liquibase.datatype.core.IntType;
 import liquibase.datatype.core.UnknownType;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.servicelocator.ServiceLocator;
+import liquibase.structure.core.DataType;
 import liquibase.util.ObjectUtil;
 import liquibase.util.StringUtils;
 
@@ -155,6 +155,13 @@ public class DataTypeFactory {
             ((BigIntType) liquibaseDataType).setAutoIncrement(true);
         }
 
+        if (primaryKey && liquibaseDataType instanceof IntType) {
+            ((IntType) liquibaseDataType).setAutoIncrement(true);
+        }
+        if (primaryKey && liquibaseDataType instanceof BigIntType) {
+            ((BigIntType) liquibaseDataType).setAutoIncrement(true);
+        }
+
         return liquibaseDataType;
 
     }
@@ -165,11 +172,11 @@ public class DataTypeFactory {
     }
 
     public LiquibaseDataType from(DataType type) {
-        return null; //todo
+        return fromDescription(type.toString());
     }
 
     public LiquibaseDataType from(DatabaseDataType type) {
-        return null; //todo
+        return fromDescription(type.toString());
     }
 
     public String getTrueBooleanValue(Database database) {

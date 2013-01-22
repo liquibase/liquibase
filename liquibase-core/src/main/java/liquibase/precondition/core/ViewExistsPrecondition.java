@@ -3,12 +3,12 @@ package liquibase.precondition.core;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
-import liquibase.database.structure.Schema;
+import liquibase.snapshot.SnapshotGeneratorFactory;
+import liquibase.snapshot.SnapshotGeneratorFactory;
+import liquibase.structure.core.Schema;
 import liquibase.exception.*;
 import liquibase.precondition.Precondition;
-import liquibase.snapshot.DatabaseSnapshot;
-import liquibase.snapshot.DatabaseSnapshotGeneratorFactory;
-import liquibase.util.StringUtils;
+import liquibase.structure.core.View;
 
 public class ViewExistsPrecondition implements Precondition {
     private String catalogName;
@@ -53,7 +53,7 @@ public class ViewExistsPrecondition implements Precondition {
     	try {
             currentCatalogName = getCatalogName();
             currentSchemaName = getSchemaName();
-            if (!DatabaseSnapshotGeneratorFactory.getInstance().getGenerator(database).hasView(database.correctSchema(new Schema(currentCatalogName, currentSchemaName)), getViewName(), database)) {
+            if (!SnapshotGeneratorFactory.getInstance().has(new View().setName(getViewName()).setSchema(new Schema(currentCatalogName, currentSchemaName)), database)) {
                 throw new PreconditionFailedException("View "+database.escapeTableName(currentCatalogName, currentSchemaName, getViewName())+" does not exist", changeLog, this);
             }
         } catch (PreconditionFailedException e) {

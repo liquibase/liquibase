@@ -3,13 +3,13 @@ package liquibase.precondition.core;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
-import liquibase.database.structure.Schema;
-import liquibase.database.structure.Sequence;
-import liquibase.diff.DiffControl;
+import liquibase.snapshot.SnapshotGeneratorFactory;
+import liquibase.snapshot.SnapshotGeneratorFactory;
+import liquibase.structure.core.Schema;
+import liquibase.structure.core.Sequence;
 import liquibase.exception.*;
 import liquibase.precondition.Precondition;
 import liquibase.snapshot.DatabaseSnapshot;
-import liquibase.snapshot.DatabaseSnapshotGeneratorFactory;
 
 public class SequenceExistsPrecondition implements Precondition {
     private String catalogName;
@@ -52,12 +52,11 @@ public class SequenceExistsPrecondition implements Precondition {
         DatabaseSnapshot snapshot;
         Schema schema = new Schema(getCatalogName(), getSchemaName());
         try {
-            snapshot = DatabaseSnapshotGeneratorFactory.getInstance().createSnapshot(database, new DiffControl(schema, Sequence.class));
-        } catch (DatabaseException e) {
+            if (!SnapshotGeneratorFactory.getInstance().has(new Sequence().setName(getSequenceName()).setSchema(schema), database)) {
+                throw new PreconditionFailedException("Sequence "+database.escapeSequenceName(getCatalogName(), getSchemaName(), getSequenceName())+" does not exist", changeLog, this);
+            }
+        } catch (LiquibaseException e) {
             throw new PreconditionErrorException(e, changeLog, this);
-        }
-        if (snapshot.getDatabaseObject(schema, getSequenceName(), Sequence.class) == null) {
-            throw new PreconditionFailedException("Sequence "+database.escapeSequenceName(getCatalogName(), getSchemaName(), getSequenceName())+" does not exist", changeLog, this);
         }
     }
 

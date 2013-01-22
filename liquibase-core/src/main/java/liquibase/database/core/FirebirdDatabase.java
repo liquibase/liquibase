@@ -1,16 +1,17 @@
 package liquibase.database.core;
 
-import liquibase.database.AbstractDatabase;
+import liquibase.CatalogAndSchema;
+import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
-import liquibase.database.structure.DatabaseObject;
-import liquibase.database.structure.Schema;
+import liquibase.structure.DatabaseObject;
 import liquibase.exception.DatabaseException;
+import liquibase.structure.core.Table;
 
 /**
  * Firebird database implementation.
  * SQL Syntax ref: http://www.ibphoenix.com/main.nfs?a=ibphoenix&page=ibp_60_sqlref
  */
-public class FirebirdDatabase extends AbstractDatabase {
+public class FirebirdDatabase extends AbstractJdbcDatabase {
 
     public boolean isCorrectDatabaseImplementation(DatabaseConnection conn) throws DatabaseException {
         return conn.getDatabaseProductName().startsWith("Firebird");
@@ -68,10 +69,12 @@ public class FirebirdDatabase extends AbstractDatabase {
     }
 
     @Override
-    public boolean isSystemTable(Schema schema, String tableName) {
-        return tableName.startsWith("RDB$") || super.isSystemTable(schema, tableName);
+    public boolean isSystemObject(DatabaseObject example) {
+        if (example instanceof Table && example.getName().startsWith("RDB$")) {
+            return true;
+        }
+        return super.isSystemObject(example);    //To change body of overridden methods use File | Settings | File Templates.
     }
-
 
     @Override
     public boolean supportsAutoIncrement() {

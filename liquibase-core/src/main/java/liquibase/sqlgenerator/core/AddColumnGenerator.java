@@ -1,11 +1,11 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
-import liquibase.database.structure.Schema;
+import liquibase.structure.core.Schema;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.database.core.*;
-import liquibase.database.structure.Column;
-import liquibase.database.structure.Table;
+import liquibase.structure.core.Column;
+import liquibase.structure.core.Table;
 import liquibase.exception.ValidationErrors;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.sql.Sql;
@@ -77,7 +77,7 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
 
         List<Sql> returnSql = new ArrayList<Sql>();
         returnSql.add(new UnparsedSql(alterTable, new Column()
-                .setRelation(new Table(statement.getTableName()).setSchema(new Schema(statement.getCatalogName(), statement.getSchemaName())))
+                .setRelation(new Table().setName(statement.getTableName()).setSchema(new Schema(statement.getCatalogName(), statement.getSchemaName())))
                 .setName(statement.getColumnName())));
 
         addForeignKeyStatements(statement, database, returnSql);

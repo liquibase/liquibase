@@ -21,7 +21,7 @@ import java.util.Map;
  * @author Spring Framework
  */
 @SuppressWarnings({"unchecked"})
-class ColumnMapRowMapper implements RowMapper {
+public class ColumnMapRowMapper implements RowMapper {
 
     public Object mapRow(ResultSet rs, int rowNum) throws SQLException {
         ResultSetMetaData rsmd = rs.getMetaData();

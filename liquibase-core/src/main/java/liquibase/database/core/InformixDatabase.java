@@ -1,8 +1,8 @@
 package liquibase.database.core;
 
-import liquibase.database.AbstractDatabase;
+import liquibase.CatalogAndSchema;
+import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
-import liquibase.database.structure.Schema;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.ExecutorService;
@@ -16,7 +16,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-public class InformixDatabase extends AbstractDatabase {
+public class InformixDatabase extends AbstractJdbcDatabase {
 	
 	private static final String PRODUCT_NAME = "Informix Dynamic Server";
     private static final String INTERVAL_FIELD_QUALIFIER = "HOUR TO FRACTION(5)";
@@ -163,9 +163,9 @@ public class InformixDatabase extends AbstractDatabase {
 	}
 
 	@Override
-	public String getViewDefinition(Schema schema, String viewName) throws DatabaseException {
+	public String getViewDefinition(CatalogAndSchema schema, String viewName) throws DatabaseException {
         schema = correctSchema(schema);
-		List<Map> retList = ExecutorService.getInstance().getExecutor(this).queryForList(new GetViewDefinitionStatement(schema.getCatalogName(), schema.getName(), viewName));
+		List<Map> retList = ExecutorService.getInstance().getExecutor(this).queryForList(new GetViewDefinitionStatement(schema.getCatalogName(), schema.getSchemaName(), viewName));
 		// building the view definition from the multiple rows
 		StringBuilder sb = new StringBuilder();
 		for (Map rowMap : retList) {

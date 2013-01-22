@@ -3,10 +3,13 @@ package liquibase.precondition.core;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
-import liquibase.database.structure.Schema;
+import liquibase.snapshot.SnapshotGeneratorFactory;
+import liquibase.structure.core.PrimaryKey;
+import liquibase.structure.core.Schema;
 import liquibase.exception.*;
 import liquibase.precondition.Precondition;
-import liquibase.snapshot.DatabaseSnapshotGeneratorFactory;
+import liquibase.structure.core.Table;
+import liquibase.util.StringUtils;
 
 public class PrimaryKeyExistsPrecondition implements Precondition {
     private String catalogName;
@@ -56,11 +59,20 @@ public class PrimaryKeyExistsPrecondition implements Precondition {
 
     public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet) throws PreconditionFailedException, PreconditionErrorException {
         try {
-            if (!DatabaseSnapshotGeneratorFactory.getInstance().getGenerator(database).hasPrimaryKey(new Schema(getCatalogName(), getSchemaName()), getTableName(), getPrimaryKeyName(), database)) {
+            PrimaryKey example = new PrimaryKey();
+            Table table = new Table();
+            table.setSchema(new Schema(getCatalogName(), getSchemaName()));
+            if (StringUtils.trimToNull(getTableName()) != null) {
+                table.setName(getTableName());
+            }
+            example.setTable(table);
+            example.setName(getPrimaryKeyName());
+
+            if (!SnapshotGeneratorFactory.getInstance().has(example, database)) {
                 if (tableName != null) {
-                    throw new PreconditionFailedException("Primary Key does not exist on "+database.escapeStringForDatabase(getTableName()), changeLog, this);
+                    throw new PreconditionFailedException("Primary Key does not exist on " + database.escapeStringForDatabase(getTableName()), changeLog, this);
                 } else {
-                    throw new PreconditionFailedException("Primary Key "+database.escapeStringForDatabase(getPrimaryKeyName())+" does not exist", changeLog, this);
+                    throw new PreconditionFailedException("Primary Key " + database.escapeStringForDatabase(getPrimaryKeyName()) + " does not exist", changeLog, this);
                 }
             }
         } catch (PreconditionFailedException e) {

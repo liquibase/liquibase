@@ -2,9 +2,9 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
 import liquibase.database.core.DB2Database;
-import liquibase.database.structure.Column;
-import liquibase.database.structure.Schema;
-import liquibase.database.structure.Table;
+import liquibase.structure.core.Column;
+import liquibase.structure.core.Schema;
+import liquibase.structure.core.Table;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
@@ -42,7 +42,7 @@ public class AddAutoIncrementGeneratorDB2 extends AddAutoIncrementGenerator {
             			statement.getStartWith(), statement.getIncrementBy()),
                 new Column()
                     .setRelation(
-                            new Table(statement.getTableName()).setSchema(new Schema(statement.getCatalogName(), statement.getSchemaName())))
+                            new Table().setName(statement.getTableName()).setSchema(new Schema(statement.getCatalogName(), statement.getSchemaName())))
                     .setName(statement.getColumnName()))
         };
     }

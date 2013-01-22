@@ -1,6 +1,6 @@
 package liquibase.database.core;
 
-import liquibase.database.AbstractDatabaseTest;
+import liquibase.database.AbstractJdbcDatabaseTest;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 import org.junit.Assert;
@@ -10,7 +10,7 @@ import org.junit.Test;
 /**
  * Tests for {@link MSSQLDatabase}
  */
-public class MSSQLDatabaseTest extends AbstractDatabaseTest {
+public class MSSQLDatabaseTest extends AbstractJdbcDatabaseTest {
 
     public MSSQLDatabaseTest() throws Exception {
         super(new MSSQLDatabase());

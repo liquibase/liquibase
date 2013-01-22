@@ -5,7 +5,7 @@ import liquibase.database.Database;
 import liquibase.database.core.DB2Database;
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.database.core.SQLiteDatabase.AlterTableVisitor;
-import liquibase.database.structure.Index;
+import liquibase.structure.core.Index;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.ReorganizeTableStatement;

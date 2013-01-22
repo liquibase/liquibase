@@ -1,6 +1,6 @@
 package liquibase.assertions;
 
-import liquibase.database.structure.ForeignKey;
+import liquibase.structure.core.ForeignKey;
 import liquibase.diff.DiffResult;
 import static org.junit.Assert.*;
 
@@ -28,7 +28,7 @@ public class DiffResultAssert {
      * @param fkName Foreign key name
      */
     public DiffResultAssert containsMissingForeignKeyWithName(String fkName) {
-        for(ForeignKey fk:diff.getObjectDiff(ForeignKey.class).getMissing()) {
+        for(ForeignKey fk:diff.getMissingObjects(ForeignKey.class)) {
             if(fk.getName().equalsIgnoreCase(fkName))
                 return this;
         }
