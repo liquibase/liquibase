@@ -6,3 +6,4 @@ target
 liquibase.iws
 out
 bin
+liquibase.integrationtest.local.properties
