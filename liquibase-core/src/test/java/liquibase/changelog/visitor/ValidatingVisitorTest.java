@@ -12,6 +12,13 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.ArrayList;
+import java.util.List;
+import liquibase.change.ChangeParameterMetaData;
+import liquibase.database.Database;
+import liquibase.exception.ValidationErrors;
+import liquibase.logging.LogFactory;
+import liquibase.sqlgenerator.SqlGeneratorFactory;
+import liquibase.statement.SqlStatement;
 
 public class ValidatingVisitorTest {
 
@@ -80,5 +87,49 @@ public class ValidatingVisitorTest {
         assertEquals(1, handler.getDuplicateChangeSets().size());
 
         assertFalse(handler.validationPassed());
+    }
+
+    @Test
+    public void visit_validateError() {
+
+        changeSet1.addChange(new CreateTableChange() {
+            @Override
+            public ValidationErrors validate(Database database) {
+                ValidationErrors changeValidationErrors = new ValidationErrors();
+                changeValidationErrors.addError("Test message");
+                return changeValidationErrors;
+            }
+        });
+
+        List<RanChangeSet> ran = new ArrayList<RanChangeSet>();
+        ValidatingVisitor handler = new ValidatingVisitor(ran);
+        handler.visit(changeSet1, new DatabaseChangeLog(), null);
+
+        assertEquals(1, handler.getValidationErrors().getErrorMessages().size());
+        assertTrue(handler.getValidationErrors().getErrorMessages().get(0).startsWith("Test message"));
+
+        assertFalse(handler.validationPassed());
+    }
+
+    @Test
+    public void visit_torunOnly() {
+
+        changeSet1.addChange(new CreateTableChange() {
+            @Override
+            public ValidationErrors validate(Database database) {
+                ValidationErrors changeValidationErrors = new ValidationErrors();
+                changeValidationErrors.addError("Test message");
+                return changeValidationErrors;
+            }
+        });
+
+        List<RanChangeSet> ran = new ArrayList<RanChangeSet>();
+        ran.add(new RanChangeSet(changeSet1));
+        ValidatingVisitor handler = new ValidatingVisitor(ran);
+        handler.visit(changeSet1, new DatabaseChangeLog(), null);
+
+        assertEquals(0, handler.getSetupExceptions().size());
+
+        assertTrue(handler.validationPassed());
     }
 }
