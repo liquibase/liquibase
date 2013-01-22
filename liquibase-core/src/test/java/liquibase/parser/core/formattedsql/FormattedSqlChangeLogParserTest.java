@@ -182,6 +182,19 @@ public class FormattedSqlChangeLogParserTest {
         assertTrue(changeLog.getChangeSets().get(6).getRollBackChanges()[0] instanceof RawSQLChange);
         assertEquals("drop table mysql_boo;", ((RawSQLChange) changeLog.getChangeSets().get(6).getRollBackChanges()[0]).getSql());
 
+        assertEquals("multicontext", changeLog.getChangeSets().get(7).getAuthor());
+        assertEquals("1", changeLog.getChangeSets().get(7).getId());
+        assertEquals(1, changeLog.getChangeSets().get(7).getChanges().size());
+        assertTrue(changeLog.getChangeSets().get(7).getChanges().get(0) instanceof RawSQLChange);
+        assertEquals("select 1;", ((RawSQLChange) changeLog.getChangeSets().get(7).getChanges().get(0)).getSql());
+        assertEquals(0, changeLog.getChangeSets().get(7).getRollBackChanges().length);
+        assertEquals(3, changeLog.getChangeSets().get(7).getContexts().size());
+        assertTrue(changeLog.getChangeSets().get(7).getContexts().contains("first"));
+        assertTrue(changeLog.getChangeSets().get(7).getContexts().contains("second"));
+        assertTrue(changeLog.getChangeSets().get(7).getContexts().contains("third"));
+        
+        
+
 
         ChangeSet cs = changeLog.getChangeSets().get(7);
         assertEquals("bboisvert", cs.getAuthor());
