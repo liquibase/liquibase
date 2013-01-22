@@ -22,6 +22,7 @@ import liquibase.datatype.core.IntType;
 import liquibase.sql.Sql;
 import liquibase.sqlgenerator.AbstractSqlGeneratorTest;
 import liquibase.statement.AutoIncrementConstraint;
+import liquibase.statement.ForeignKeyConstraint;
 import liquibase.statement.core.CreateTableStatement;
 import liquibase.test.TestContext;
 
@@ -914,5 +915,15 @@ public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTab
     			assertEquals("CREATE TABLE [CATALOG_NAME].[SCHEMA_NAME].[TABLE_NAME] ([COLUMN1_NAME] BIGINT IDENTITY NULL)", generatedSql[0].toSql());
     		}
     	}
-    } 
+    }
+
+    @Test
+    public void createReferencesSchemaEscaped() throws Exception {
+        Database database = new PostgresDatabase();
+        database.setDefaultSchemaName("my-schema");
+        CreateTableStatement statement = new CreateTableStatement(CATALOG_NAME, SCHEMA_NAME, TABLE_NAME);
+        statement.addColumnConstraint(new ForeignKeyConstraint("fk_test_parent", TABLE_NAME + "(id)").setColumn("id"));
+        Sql[] generatedSql = this.generatorUnderTest.generateSql(statement, database, null);
+        assertEquals("CREATE TABLE SCHEMA_NAME.TABLE_NAME (, CONSTRAINT fk_test_parent FOREIGN KEY (id) REFERENCES \"my-schema\".TABLE_NAME(id))", generatedSql[0].toSql());
+    }
 }
