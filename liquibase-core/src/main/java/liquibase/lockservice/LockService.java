@@ -53,7 +53,7 @@ public class LockService {
         return hasChangeLogLock;
     }
 
-    public void waitForLock() throws LockException {
+    public void waitForLock() throws LockException, DatabaseException {
 
         boolean locked = false;
         long timeToGiveUp = new Date().getTime() + changeLogLockWaitTime;
@@ -82,7 +82,8 @@ public class LockService {
         }
     }
 
-    public boolean acquireLock() throws LockException {
+    public boolean acquireLock() throws DatabaseException, LockException
+    {
         if (hasChangeLogLock) {
             return true;
         }
@@ -95,7 +96,8 @@ public class LockService {
 
             Boolean locked = (Boolean) ExecutorService.getInstance().getExecutor(database).queryForObject(new SelectFromDatabaseChangeLogLockStatement("LOCKED"), Boolean.class);
 
-            if (locked) {
+            if (locked)
+            {
                 return false;
             } else {
 
@@ -117,19 +119,15 @@ public class LockService {
                 database.setCanCacheLiquibaseTableInfo(true);
                 return true;
             }
-        } catch (Exception e) {
-            throw new LockException(e);
-        } finally {
-            try {
-                database.rollback();
-            } catch (DatabaseException e) {
-                ;
-            }
+        }
+        finally
+        {
+            database.rollback();
         }
 
     }
 
-    public void releaseLock() throws LockException {
+    public void releaseLock() throws DatabaseException, LockException {
         Executor executor = ExecutorService.getInstance().getExecutor(database);
         try {
             if (database.hasDatabaseChangeLogLockTable()) {
@@ -159,7 +157,7 @@ public class LockService {
         }
     }
 
-    public DatabaseChangeLogLock[] listLocks() throws LockException {
+    public DatabaseChangeLogLock[] listLocks() throws DatabaseException {
         try {
             if (!database.hasDatabaseChangeLogLockTable()) {
                 return new DatabaseChangeLogLock[0];
@@ -181,8 +179,10 @@ public class LockService {
                 }
             }
             return allLocks.toArray(new DatabaseChangeLogLock[allLocks.size()]);
-        } catch (Exception e) {
-            throw new LockException(e);
+        }
+        finally
+        {
+            database.rollback(); //Rollback to make sure any database explicitly imposed lock from the above SELECT statement gets released. CORE-1219 incident.
         }
     }
 
