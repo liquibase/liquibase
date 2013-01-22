@@ -175,9 +175,10 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
                 if (getChangeSet() != null && getChangeSet().getFailOnError() != null && !getChangeSet().getFailOnError()) {
                     Logger log = LogFactory.getLogger();
                     log.info("Change set " + getChangeSet().toString(false) + " failed, but failOnError was false.  Error: " + ule.getMessage());        
+                    return new SqlStatement[0];
+                } else {
+                    throw ule;
                 }
-
-            return new SqlStatement[0];
         } finally {
 			if (null != reader) {
 				try {
