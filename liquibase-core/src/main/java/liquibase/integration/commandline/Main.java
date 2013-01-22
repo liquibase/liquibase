@@ -246,7 +246,8 @@ public class Main {
             if (commandParams.size() > 0 && commandParams.iterator().next().startsWith("-")) {
                 messages.add("unexpected command parameters: "+commandParams);
             }
-        } else if ("status".equalsIgnoreCase(command)) {
+        } else if ("status".equalsIgnoreCase(command)
+                || "unexpectedChangeSets".equalsIgnoreCase(command)) {
             if (commandParams.size() > 0 && !commandParams.iterator().next().equalsIgnoreCase("--verbose")) {
                 messages.add("unexpected command parameters: "+commandParams);
             }
@@ -331,6 +332,7 @@ public class Main {
                 || "dropAll".equalsIgnoreCase(arg)
                 || "releaseLocks".equalsIgnoreCase(arg)
                 || "status".equalsIgnoreCase(arg)
+                || "unexpectedChangeSets".equalsIgnoreCase(arg)
                 || "validate".equalsIgnoreCase(arg)
                 || "help".equalsIgnoreCase(arg)
                 || "diff".equalsIgnoreCase(arg)
@@ -466,6 +468,9 @@ public class Main {
         stream.println("Maintenance Commands");
         stream.println(" tag <tag string>          'Tags' the current database state for future rollback");
         stream.println(" status [--verbose]        Outputs count (list if --verbose) of unrun changesets");
+        stream.println(" unexpectedChangeSets [--verbose]");
+        stream.println("                           Outputs count (list if --verbose) of changesets run");
+        stream.println("                           in the database that do not exist in the changelog.");
         stream.println(" validate                  Checks changelog for errors");
         stream.println(" calculateCheckSum <id>    Calculates and prints a checksum for the changeset");
         stream.println("                           with the given id in the format filepath::id::author.");
@@ -801,6 +806,14 @@ public class Main {
                     runVerbose = true;
                 }
                 liquibase.reportStatus(runVerbose, contexts, getOutputWriter());
+                return;
+            } else if ("unexpectedChangeSets".equalsIgnoreCase(command)) {
+                boolean runVerbose = false;
+
+                if (commandParams.contains("--verbose")) {
+                    runVerbose = true;
+                }
+                liquibase.reportUnexpectedChangeSets(runVerbose, contexts, getOutputWriter());
                 return;
             } else if ("validate".equalsIgnoreCase(command)) {
                 try {
