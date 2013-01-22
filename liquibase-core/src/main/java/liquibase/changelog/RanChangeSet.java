@@ -114,6 +114,11 @@ public class RanChangeSet {
         return result;
     }
 
+    @Override
+    public String toString() {
+        return getChangeLog() + "::" + getId() + "::" + getAuthor();
+    }
+
     public boolean isSameAs(ChangeSet changeSet) {
         return this.getChangeLog().replace('\\', '/').equalsIgnoreCase(changeSet.getFilePath().replace('\\', '/'))
                 && this.getId().equalsIgnoreCase(changeSet.getId())
