@@ -2,7 +2,6 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
 import liquibase.database.core.*;
-import liquibase.database.structure.Schema;
 import liquibase.exception.ValidationErrors;
 import liquibase.logging.LogFactory;
 import liquibase.sql.Sql;
@@ -12,6 +11,7 @@ import liquibase.statement.AutoIncrementConstraint;
 import liquibase.statement.ForeignKeyConstraint;
 import liquibase.statement.UniqueConstraint;
 import liquibase.statement.core.CreateTableStatement;
+import liquibase.structure.core.Schema;
 import liquibase.util.StringUtils;
 
 import java.util.Iterator;
@@ -164,7 +164,7 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
         	}
             String referencesString = fkConstraint.getReferences();
             if (!referencesString.contains(".") && database.getDefaultSchemaName() != null) {
-                referencesString = database.escapeDatabaseObject(database.getDefaultSchemaName(), Schema.class)+"."+referencesString;
+                referencesString = database.escapeObjectName(database.getDefaultSchemaName(), Schema.class)+"."+referencesString;
             }
             buffer.append(" FOREIGN KEY (")
                     .append(database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), fkConstraint.getColumn()))
