@@ -134,13 +134,20 @@ public class LiquibaseServletListener implements ServletContextListener {
 
                 Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(connection));
                 database.setDefaultSchemaName(this.defaultSchema);
+                String tablePrefix = servletContextEvent.getServletContext().getInitParameter("liquibase.parameter.tablePrefix");
+
+                if (tablePrefix != null) {
+                    database.setDatabaseChangeLogLockTableName(tablePrefix + database.getDatabaseChangeLogLockTableName());
+                    database.setDatabaseChangeLogTableName(tablePrefix + database.getDatabaseChangeLogTableName());
+                }
+
                 Liquibase liquibase = new Liquibase(getChangeLogFile(), new CompositeResourceAccessor(clFO,fsFO, threadClFO), database);
 
                 Enumeration<String> initParameters = servletContextEvent.getServletContext().getInitParameterNames();
                 while (initParameters.hasMoreElements()) {
                     String name = initParameters.nextElement().trim();
                     if (name.startsWith("liquibase.parameter.")) {
-                        liquibase.setChangeLogParameter(name.substring("liquibase.parameter".length()), servletContextEvent.getServletContext().getInitParameter(name));
+                        liquibase.setChangeLogParameter(name.substring("liquibase.parameter.".length()), servletContextEvent.getServletContext().getInitParameter(name));
                     }
                 }
 

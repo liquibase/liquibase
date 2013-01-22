@@ -4,5 +4,5 @@ target
 *nb-configuration.xml
 .classpath
 liquibase.iws
-out                       
+out
 bin
