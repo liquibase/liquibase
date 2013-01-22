@@ -2,6 +2,7 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
 import liquibase.database.core.*;
+import liquibase.datatype.DatabaseDataType;
 import liquibase.exception.ValidationErrors;
 import liquibase.informix.sqlgenerator.core.InformixCreateTableGenerator;
 import liquibase.logging.LogFactory;
@@ -49,9 +50,10 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
         List<String> primaryKeyColumns = new LinkedList<String>();
         while (columnIterator.hasNext()) {
             String column = columnIterator.next();
-            
+            DatabaseDataType columnType = statement.getColumnTypes().get(column).toDatabaseDataType(database);
             buffer.append(database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), column));
-            buffer.append(" ").append(statement.getColumnTypes().get(column).toDatabaseDataType(database));
+
+            buffer.append(" ").append(columnType);
 
             AutoIncrementConstraint autoIncrementConstraint = null;
             
@@ -87,7 +89,8 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
                 buffer.append(" PRIMARY KEY AUTOINCREMENT");
             }
 
-            if (statement.getDefaultValue(column) != null) {
+            // for the serial data type in postgres, there should be no default value
+            if (!columnType.isSerialDataType() && statement.getDefaultValue(column) != null) {
                 Object defaultValue = statement.getDefaultValue(column);
                 if (database instanceof MSSQLDatabase) {
                     buffer.append(" CONSTRAINT ").append(((MSSQLDatabase) database).generateDefaultConstraintName(statement.getTableName(), column));

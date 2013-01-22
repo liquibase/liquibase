@@ -103,6 +103,13 @@ public interface Database extends PrioritizedService {
 
     void setCurrentDateTimeFunction(String function);
 
+    /**
+     * Return the constructed next value expression for this sequence
+     * @param sequenceName sequence name
+     * @return The next value expression for this sequence
+     */
+    String generateSequenceNextValueFunction(String sequenceName);
+
 
     String getLineComment();
 
@@ -296,4 +303,14 @@ public interface Database extends PrioritizedService {
     int getDataTypeMaxParameters(String dataTypeName);
 
     CatalogAndSchema getDefaultSchema();
+
+    /**
+     * Types like int4 in postgres cannot have a modifier. e.g. int4(10)
+     * Checks whether the type is allowed to have a modifier
+     *
+     * @param typeName type name
+     * @return Whether data type can have a modifier
+     */
+    boolean dataTypeIsNotModifiable(String typeName);
 }
+

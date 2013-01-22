@@ -18,6 +18,10 @@ import java.text.SimpleDateFormat;
 public class DB2Database extends AbstractJdbcDatabase {
     private String defaultSchemaName;
 
+    public DB2Database() {
+        super.sequenceNextValueFunction = "nextval for %s";
+    }
+    
     public boolean isCorrectDatabaseImplementation(DatabaseConnection conn) throws DatabaseException {
         return conn.getDatabaseProductName().startsWith("DB2");
     }

@@ -62,8 +62,15 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     protected String currentDateTimeFunction;
 
+    /**
+     * The sequence name will be substituted into the string e.g. NEXTVAL('%s')
+     */
+    protected String sequenceNextValueFunction;
+
     // List of Database native functions.
     protected List<DatabaseFunction> dateFunctions = new ArrayList<DatabaseFunction>();
+
+    protected List<String> unmodifiableDataTypes = new ArrayList<String>();
 
     private List<RanChangeSet> ranChangeSetList;
     
@@ -91,6 +98,7 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     protected AbstractJdbcDatabase() {
         this.dateFunctions.add(new DatabaseFunction(getCurrentDateTimeFunction()));
+        this.sequenceNextValueFunction = "NEXTVAL('%s')";
     }
 
     public String getName() {
@@ -519,6 +527,13 @@ public abstract class AbstractJdbcDatabase implements Database {
         return returnString.toString().replaceFirst(" \\|\\| $", "");
     }
 
+    public String generateSequenceNextValueFunction(String sequenceName) {
+        if (sequenceNextValueFunction == null) {
+            return null;
+        }
+        return String.format(sequenceNextValueFunction, this.escapeObjectName(sequenceName, Sequence.class));
+    }
+
 // ------- DATABASECHANGELOG / DATABASECHANGELOGLOCK METHODS ---- //
 
     /**
@@ -808,11 +823,13 @@ public abstract class AbstractJdbcDatabase implements Database {
     }
 
     public boolean supportsDropTableCascadeConstraints() {
-        return (this instanceof MSSQLDatabase
-                || this instanceof FirebirdDatabase
+        return (this instanceof FirebirdDatabase
                 || this instanceof SQLiteDatabase
                 || this instanceof SybaseDatabase
-                || this instanceof SybaseASADatabase);
+                || this instanceof SybaseASADatabase
+                || this instanceof PostgresDatabase
+                || this instanceof OracleDatabase
+        );
     }
 
     public boolean isSystemObject(DatabaseObject example) {
@@ -1364,5 +1381,9 @@ public abstract class AbstractJdbcDatabase implements Database {
         } else {
             return getJdbcSchemaName(new CatalogAndSchema(schema.getCatalogName(), schema.getName()));
         }
+    }
+
+    public boolean dataTypeIsNotModifiable(final String typeName) {
+        return unmodifiableDataTypes.contains(typeName.toLowerCase());
     }
 }

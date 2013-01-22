@@ -35,6 +35,7 @@ import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 import liquibase.statement.DatabaseFunction;
 
+import liquibase.statement.SequenceFunction;
 import org.junit.Test;
 
 public class StringChangeLogSerializerTest {
@@ -295,6 +296,8 @@ public class StringChangeLogSerializerTest {
                 field.set(object, createColumnConfig());
             } else if (field.getType().equals(DatabaseFunction.class)) {
                 field.set(object, createDatabaseFunction());
+            } else if (field.getType().equals(SequenceFunction.class)) {
+                field.set(object, createSequenceFunction());
             } else if (field.getType().equals(ConstraintsConfig.class)) {
                 field.set(object, createConstraintsConfig());
             } else if (field.getType().getName().equals("liquibase.change.custom.CustomChange")) {
@@ -390,6 +393,12 @@ public class StringChangeLogSerializerTest {
 
     private DatabaseFunction createDatabaseFunction() throws Exception {
         DatabaseFunction function = new DatabaseFunction("FUNCTION_HERE");
+        setFields(function);
+        return function;
+    }
+
+    private SequenceFunction createSequenceFunction() throws Exception {
+        SequenceFunction function = new SequenceFunction("SEQUENCE_NAME");
         setFields(function);
         return function;
     }

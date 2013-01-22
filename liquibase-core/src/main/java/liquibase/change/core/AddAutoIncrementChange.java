@@ -9,6 +9,7 @@ import liquibase.change.DatabaseChangeProperty;
 import liquibase.database.Database;
 import liquibase.database.core.PostgresDatabase;
 import liquibase.statement.DatabaseFunction;
+import liquibase.statement.SequenceFunction;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.AddAutoIncrementStatement;
 import liquibase.statement.core.AddDefaultValueStatement;
@@ -97,7 +98,7 @@ public class AddAutoIncrementChange extends AbstractChange {
             return new SqlStatement[]{
                     new CreateSequenceStatement(catalogName, schemaName, sequenceName),
                     new SetNullableStatement(catalogName, schemaName, getTableName(), getColumnName(), null, false),
-                    new AddDefaultValueStatement(catalogName, schemaName, getTableName(), getColumnName(), getColumnDataType(), new DatabaseFunction("NEXTVAL('"+sequenceName+"')")),
+                    new AddDefaultValueStatement(catalogName, schemaName, getTableName(), getColumnName(), getColumnDataType(), new SequenceFunction(sequenceName)),
             };
         }
 

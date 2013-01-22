@@ -5,7 +5,7 @@ import liquibase.util.StringUtils;
 public class DatabaseDataType {
 
     private String type;
-    
+
     public DatabaseDataType(String type) {
         this.type = type;
     }
@@ -32,6 +32,14 @@ public class DatabaseDataType {
         }
     }
 
+    /**
+     * Mainly for postgres, check if the column is a serial data type.
+     * @return Whether the type is serial
+     */
+    public boolean isSerialDataType() {
+        return type.equalsIgnoreCase("serial") || type.equalsIgnoreCase("bigserial");
+    }
+
     public String toSql() {
         return toString();
     }
@@ -40,4 +48,13 @@ public class DatabaseDataType {
     public String toString() {
         return type;
     }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(final String type) {
+        this.type = type;
+    }
+
 }

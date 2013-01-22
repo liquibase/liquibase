@@ -546,4 +546,12 @@ public class MockDatabase implements Database {
     public String getJdbcSchemaName(Schema schema) {
         return schema.getName();
     }
+
+    public String generateSequenceNextValueFunction(final String sequenceName) {
+        return "NEXTVAL('" + sequenceName + "')";
+    }
+
+    public boolean dataTypeIsNotModifiable(String typeName) {
+        return true;
+    }
 }

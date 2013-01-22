@@ -12,6 +12,7 @@ import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.core.Table;
 
 import java.math.BigInteger;
+import java.sql.Types;
 import java.util.*;
 
 /**
@@ -28,7 +29,8 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
 
     public PostgresDatabase() {
         reservedWords.addAll(Arrays.asList("USER", "LIKE", "GROUP", "DATE", "ALL"));
-
+        super.sequenceNextValueFunction = "NEXTVAL('%s')";
+        super.unmodifiableDataTypes.addAll(Arrays.asList("bool", "int4", "int8", "float4", "float8", "numeric", "bigserial", "serial", "bytea", "timestamptz"));
 //        systemTablesAndViews.add("pg_logdir_ls");
 //        systemTablesAndViews.add("administrable_role_authorizations");
 //        systemTablesAndViews.add("applicable_roles");
@@ -114,11 +116,6 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
 
     public boolean supportsInitiallyDeferrableColumns() {
         return true;
-    }
-
-    @Override
-    public String correctObjectName(String objectName, Class<? extends DatabaseObject> objectType) {
-        return objectName.toLowerCase();
     }
 
     public boolean isCorrectDatabaseImplementation(DatabaseConnection conn) throws DatabaseException {
@@ -291,13 +288,14 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
         return searchPaths;
     }
 
+    @Override
+    protected String doGetDefaultSchemaName() {
+        return "public";
+    }
 
     private boolean catalogExists(String catalogName) throws DatabaseException {
-        if (catalogName != null) {
-            return runExistsQuery("select count(*) from information_schema.schemata where catalog_name='" + catalogName + "'");
-        } else {
-            return false;
-        }
+        return catalogName != null && runExistsQuery(
+                "select count(*) from information_schema.schemata where catalog_name='" + catalogName + "'");
     }
 
     private boolean schemaExists(String schemaName) throws DatabaseException {
