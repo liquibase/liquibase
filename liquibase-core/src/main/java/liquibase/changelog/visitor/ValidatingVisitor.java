@@ -55,7 +55,9 @@ public class ValidatingVisitor implements ChangeSetVisitor {
             errorPreconditions.addAll(e.getErrorPreconditions());
         } finally {
             try {
-                database.rollback();
+                if (database.getConnection() != null) {
+                    database.rollback();
+                }
             } catch (DatabaseException e) {
                 LogFactory.getLogger().warning("Error rolling back after precondition check", e);
             }
