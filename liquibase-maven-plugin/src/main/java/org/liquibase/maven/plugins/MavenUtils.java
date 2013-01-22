@@ -41,8 +41,8 @@ public class MavenUtils {
       log.info("Loading artfacts into URLClassLoader");
     }
     Set<URL> urls = new HashSet<URL>();
-
-    Set dependencies = project.getDependencyArtifacts();
+    // Find project dependencies, including the transitive ones.
+    Set dependencies = project.getArtifacts();
 	if (dependencies != null && !dependencies.isEmpty()) {
 		for (Iterator it = dependencies.iterator(); it.hasNext();) {
 			addArtifact(urls, (Artifact) it.next(), log, verbose);
