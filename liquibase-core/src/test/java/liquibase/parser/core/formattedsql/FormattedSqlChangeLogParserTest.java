@@ -57,6 +57,8 @@ public class FormattedSqlChangeLogParserTest {
             "  id int primary key\n" +
             ");\n" +
             "-- rollback drop table mysql_boo;\n" +
+            "-- changeset multicontext:1 context:first,second,third\n" +
+            "select 1;\n"+
             "--changeset bboisvert:with_preconditions\n" +
             "--preconditions onFail:MARK_RAN onerror:HALT onUpdateSql:FAIL\n" +
             // these aren't very clever
@@ -95,7 +97,7 @@ public class FormattedSqlChangeLogParserTest {
 
         assertEquals("asdf.sql", changeLog.getLogicalFilePath());
 
-        assertEquals(8, changeLog.getChangeSets().size());
+        assertEquals(9, changeLog.getChangeSets().size());
 
         assertEquals("nvoxland", changeLog.getChangeSets().get(0).getAuthor());
         assertEquals("1", changeLog.getChangeSets().get(0).getId());
@@ -196,7 +198,7 @@ public class FormattedSqlChangeLogParserTest {
         
 
 
-        ChangeSet cs = changeLog.getChangeSets().get(7);
+        ChangeSet cs = changeLog.getChangeSets().get(8);
         assertEquals("bboisvert", cs.getAuthor());
         assertEquals("with_preconditions", cs.getId());
         PreconditionContainer pc = cs.getPreconditions();
