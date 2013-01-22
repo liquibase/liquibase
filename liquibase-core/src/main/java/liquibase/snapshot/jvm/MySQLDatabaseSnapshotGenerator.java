@@ -2,11 +2,15 @@ package liquibase.snapshot.jvm;
 
 import liquibase.database.Database;
 import liquibase.database.core.MySQLDatabase;
+import liquibase.database.structure.Column;
+import liquibase.database.structure.DataType;
 import liquibase.database.structure.DatabaseObject;
 import liquibase.database.structure.Index;
 
+import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Map;
 
 public class MySQLDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerator {
 	
@@ -30,6 +34,17 @@ public class MySQLDatabaseSnapshotGenerator extends JdbcDatabaseSnapshotGenerato
             return false;
         }
         return super.includeInSnapshot(obj);
+    }
+
+    @Override
+    protected DataType readDataType(Map<String, Object> columnMetadataResultSet, Column column, Database database) throws SQLException {
+        DataType type = super.readDataType(columnMetadataResultSet, column, database);
+
+        if ("TINYTEXT".equalsIgnoreCase(type.getTypeName())) {
+            type.setColumnSize(null);
+        }
+
+        return type;
     }
 
     //    @Override
