@@ -154,6 +154,7 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
                 DropDefaultValueChange dropChange = new DropDefaultValueChange();
                 dropChange.setTableName(getTableName());
                 dropChange.setColumnName(aColumn.getName());
+                dropChange.setSchemaName(getSchemaName());
 
                 inverses.add(dropChange);
             }
