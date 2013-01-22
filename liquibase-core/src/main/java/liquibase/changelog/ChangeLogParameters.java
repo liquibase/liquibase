@@ -1,5 +1,7 @@
 package liquibase.changelog;
 
+import static liquibase.Liquibase.ENABLE_CHANGELOG_PROP_ESCAPING;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -11,6 +13,13 @@ import liquibase.database.Database;
 import liquibase.util.StringUtils;
 
 public class ChangeLogParameters {
+	
+	public static final boolean EnableEscaping;
+	
+	static {
+		String enableEscaping = System.getProperty(ENABLE_CHANGELOG_PROP_ESCAPING, "false");
+		EnableEscaping = Boolean.valueOf(enableEscaping);
+	}
 
     private List<ChangeLogParameter> changeLogParameters = new ArrayList<ChangeLogParameter>();
     private ExpressionExpander expressionExpander;
@@ -25,7 +34,8 @@ public class ChangeLogParameters {
         for (Map.Entry entry : System.getProperties().entrySet()) {
             changeLogParameters.add(new ChangeLogParameter(entry.getKey().toString(), entry.getValue()));
         }
-        this.expressionExpander = new ExpressionExpander(this);
+        
+        this.expressionExpander = new ExpressionExpander(this, EnableEscaping);
         this.currentDatabase = currentDatabase;
         this.currentContexts = new ArrayList<String>();
     }
@@ -143,10 +153,16 @@ public class ChangeLogParameters {
     }
 
     protected static class ExpressionExpander {
+    	private boolean enableEscaping;
         private ChangeLogParameters changeLogParameters;
 
         public ExpressionExpander(ChangeLogParameters changeLogParameters) {
+            this(changeLogParameters, false);
+        }
+        
+        public ExpressionExpander(ChangeLogParameters changeLogParameters, boolean enableEscaping) {
             this.changeLogParameters = changeLogParameters;
+            this.enableEscaping = enableEscaping;
         }
 
         public String expandExpressions(String text) {
@@ -160,13 +176,20 @@ public class ChangeLogParameters {
                 String expressionString = originalText.substring(matcher.start(), matcher.end());
                 String valueTolookup = expressionString.replaceFirst("\\$\\{", "").replaceFirst("\\}$", "");
 
-                int dotIndex = valueTolookup.indexOf('.');
-                Object value = changeLogParameters.getValue(valueTolookup);
+                Object value = enableEscaping && valueTolookup.startsWith(":") 
+                		? null 
+                		: changeLogParameters.getValue(valueTolookup);
 
                 if (value != null) {
                     text = text.replace(expressionString, value.toString());
                 }
             }
+            
+            // replace all escaped expressions with its literal
+            if (enableEscaping) {
+            	text = text.replaceAll("\\$\\{:(.+?)}", "\\$\\{$1}");
+            }
+            
             return text;
         }
     }
