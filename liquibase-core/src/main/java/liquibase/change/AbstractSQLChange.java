@@ -2,6 +2,7 @@ package liquibase.change;
 
 import liquibase.database.Database;
 import liquibase.database.core.MSSQLDatabase;
+import liquibase.exception.DatabaseException;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.util.StringUtils;
@@ -126,7 +127,14 @@ public abstract class AbstractSQLChange extends AbstractChange {
                  statement = statement.replaceAll("\n", "\r\n");
              }
 
-            returnStatements.add(new RawSqlStatement(statement, getEndDelimiter()));
+            String escapedStatement;
+			try {
+				escapedStatement = database.getConnection().nativeSQL(statement);
+			} catch (DatabaseException e) {
+				escapedStatement = statement;
+			}
+
+            returnStatements.add(new RawSqlStatement(escapedStatement, getEndDelimiter()));
         }
 
         return returnStatements.toArray(new SqlStatement[returnStatements.size()]);

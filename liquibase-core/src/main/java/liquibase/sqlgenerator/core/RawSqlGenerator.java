@@ -18,7 +18,7 @@ public class RawSqlGenerator extends AbstractSqlGenerator<RawSqlStatement> {
 
     public Sql[] generateSql(RawSqlStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         return new Sql[] {
-           new UnparsedSql(statement.getSql(), statement.getEndDelimiter())     
+           new UnparsedSql(statement.getSql(), statement.getEndDelimiter())
         };
     }
 }
