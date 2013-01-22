@@ -60,6 +60,7 @@ public abstract class AbstractDatabase implements Database {
     private String liquibaseSchemaName = System.getProperty("liquibase.schemaName") == null ? null : System.getProperty("liquibase.schemaName");
 
     private Integer lastChangeSetSequenceValue;
+    private Boolean previousAutoCommit;
 
     private boolean canCacheLiquibaseTableInfo = false;
     private boolean hasDatabaseChangeLogTable = false;
@@ -90,12 +91,24 @@ public abstract class AbstractDatabase implements Database {
     }
 
     public void setConnection(DatabaseConnection conn) {
-        LogFactory.getLogger().debug("Connected to "+conn.getConnectionUserName()+"@"+conn.getURL());
-        this.connection = conn;
+        LogFactory.getLogger().debug("Connected to " + conn.getConnectionUserName() + "@" + conn.getURL());
+        connection = conn;
+
         try {
-            connection.setAutoCommit(getAutoCommitMode());
-        } catch (DatabaseException sqle) {
-            LogFactory.getLogger().warning("Can not set auto commit to " + getAutoCommitMode() + " on connection");
+            boolean autoCommit = conn.getAutoCommit();
+            if (autoCommit == getAutoCommitMode()) {
+                // Don't adjust the auto-commit mode if it's already what the database wants it to be.
+                LogFactory.getLogger().debug("Not adjusting the auto commit mode; it is already " + autoCommit);
+            } else {
+                // Store the previous auto-commit mode, because the connection needs to be restored to it when this
+                // AbstractDatabase type is closed. This is important for systems which use connection pools.
+                previousAutoCommit = autoCommit;
+
+                LogFactory.getLogger().debug("Setting auto commit to " + getAutoCommitMode() + " from " + autoCommit);
+                connection.setAutoCommit(getAutoCommitMode());
+            }
+        } catch (DatabaseException e) {
+            LogFactory.getLogger().warning("Cannot set auto commit to " + getAutoCommitMode() + " on connection");
         }
     }
 
@@ -1031,13 +1044,18 @@ public abstract class AbstractDatabase implements Database {
     }
 
     public void close() throws DatabaseException {
-        try {
-            DatabaseConnection connection = getConnection();
-            if (connection != null) {
-                connection.close();
+        DatabaseConnection connection = getConnection();
+        if (connection != null) {
+            if (previousAutoCommit != null) {
+                try {
+                    connection.setAutoCommit(previousAutoCommit);
+                } catch (DatabaseException e) {
+                    LogFactory.getLogger().warning("Failed to restore the auto commit to " + previousAutoCommit);
+
+                    throw e;
+                }
             }
-        } catch (DatabaseException e) {
-            throw new DatabaseException(e);
+            connection.close();
         }
     }
 
