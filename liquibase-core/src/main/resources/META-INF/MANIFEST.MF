@@ -13,4 +13,5 @@ Liquibase-Package: liquibase.change,
  liquibase.diff,
  liquibase.structure,
  liquibase.structurecompare,
+ liquibase.lockservice,
  liquibase.ext
