@@ -267,7 +267,7 @@ public class StringChangeLogSerializerTest {
                 continue;
             }
             field.setAccessible(true);
-            if (field.getType().getName().equals("[[Z")) {
+            if (field.isSynthetic() || field.getType().getName().equals("[[Z")) {
                 //nothing, from emma
             } else if (field.getName().equals("serialVersionUID")) {
                 //nothing
