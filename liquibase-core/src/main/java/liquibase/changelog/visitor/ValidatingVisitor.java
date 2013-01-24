@@ -103,7 +103,7 @@ public class ValidatingVisitor implements ChangeSetVisitor {
             }
         }
 
-        if(ranChangeSet != null){
+        if(!databaseChangeLog.isSkipChecksumValidation() && ranChangeSet != null){
             if (!changeSet.isCheckSumValid(ranChangeSet.getLastCheckSum())) {
                 if (!changeSet.shouldRunOnChange()) {
                     invalidMD5Sums.add(changeSet);

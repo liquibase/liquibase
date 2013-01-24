@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.0.xsd
+        http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd"
+        logicalFilePath="original.changelog.xml">
+
+    <changeSet id="sample1" author="dbiggs">
+        <createTable tableName="dataTypeTest">
+            <column name="id" type="int" />
+            <column name="dateCol" type="date"/>
+            <column name="timeCol" type="time"/>
+            <column name="dateTimeCol" type="dateTime"/>
+            <column name="bigintcol" type="bigint"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="sample2" author="dbiggs">
+        <insert tableName="dataTypeTest">
+            <column name="id" valueNumeric="1"/>
+            <column name="dateCol" valueDate="2007-08-09"/>
+            <column name="timeCol" valueDate="13:14:15"/>
+            <column name="dateTimeCol" valueDate="2007-08-09T13:14:15"/>
+            <column name="bigintcol" valueNumeric="6"/>
+        </insert>
+    </changeSet>
+
+</databaseChangeLog>

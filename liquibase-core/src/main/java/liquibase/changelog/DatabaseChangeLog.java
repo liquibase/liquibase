@@ -21,6 +21,8 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
     private String physicalFilePath;
     private String logicalFilePath;
 
+    private boolean skipChecksumValidation = false;
+
     private List<ChangeSet> changeSets = new ArrayList<ChangeSet>();
     private ChangeLogParameters changeLogParameters;
 
@@ -79,6 +81,17 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
     @Override
     public String toString() {
         return getFilePath();
+    }
+
+    /**
+     * @return Whether validation of a changeset should occur
+     */
+    public boolean isSkipChecksumValidation() {
+        return skipChecksumValidation;
+    }
+
+    public void setSkipChecksumValidation(boolean skipChecksumValidation) {
+        this.skipChecksumValidation = skipChecksumValidation;
     }
 
     public int compareTo(DatabaseChangeLog o) {

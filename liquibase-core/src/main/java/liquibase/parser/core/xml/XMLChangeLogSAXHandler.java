@@ -135,6 +135,8 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
 				}
 				databaseChangeLog.setLogicalFilePath(atts
 						.getValue("logicalFilePath"));
+                databaseChangeLog.setSkipChecksumValidation(Boolean.TRUE.toString()
+                        .equalsIgnoreCase(atts.getValue("skipChecksumValidation")));
 			} else if ("include".equals(qName)) {
 				String fileName = atts.getValue("file");
 				fileName = fileName.replace('\\', '/');

@@ -23,24 +23,15 @@ import liquibase.exception.LiquibaseException;
 import liquibase.servicelocator.ServiceLocator;
 import liquibase.executor.ExecutorService;
 import liquibase.executor.Executor;
-import liquibase.changelog.ChangeSet;
-import liquibase.database.Database;
-import liquibase.database.DatabaseConnection;
-import liquibase.database.DatabaseFactory;
 import liquibase.diff.DiffResult;
 import liquibase.exception.DatabaseException;
-import liquibase.exception.LiquibaseException;
 import liquibase.exception.ValidationFailedException;
-import liquibase.executor.Executor;
-import liquibase.executor.ExecutorService;
 import liquibase.lockservice.LockService;
 import liquibase.lockservice.LockServiceFactory;
-import liquibase.lockservice.LockServiceImpl;
 import liquibase.logging.LogFactory;
 import liquibase.resource.CompositeResourceAccessor;
 import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.resource.ResourceAccessor;
-import liquibase.servicelocator.ServiceLocator;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.statement.core.DropTableStatement;
 import liquibase.test.DatabaseTestContext;
@@ -78,6 +69,9 @@ public abstract class AbstractIntegrationTest {
     private String externalEntityChangeLog;
     private String externalEntityChangeLog2;
     private String invalidReferenceChangeLog;
+    private String skipChecksumValidationOriginalChangeLog;
+    private String skipChecksumValidationUpdatedChangeLog;
+    private String skipChecksumValidationInvalidChangeLog;
 
     protected String contexts = "test, context-b";
     private Database database;
@@ -94,6 +88,9 @@ public abstract class AbstractIntegrationTest {
         this.externalEntityChangeLog= "changelogs/common/externalEntity.changelog.xml";
         this.externalEntityChangeLog2= "com/example/nonIncluded/externalEntity.changelog.xml";
         this.invalidReferenceChangeLog= "changelogs/common/invalid.reference.changelog.xml";
+        this.skipChecksumValidationOriginalChangeLog = "changelogs/common/skipChecksumValidation/original.changelog.xml";
+        this.skipChecksumValidationUpdatedChangeLog = "changelogs/common/skipChecksumValidation/updated.changelog.xml";
+        this.skipChecksumValidationInvalidChangeLog = "changelogs/common/skipChecksumValidation/invalid.changelog.xml";
 
         this.url = url;
 
@@ -861,6 +858,9 @@ public abstract class AbstractIntegrationTest {
 
     @Test
     public void invalidIncludeDoesntBreakLiquibase() throws Exception{
+        if (database == null) {
+            return;
+        }
         Liquibase liquibase = createLiquibase(invalidReferenceChangeLog);
         try {
             liquibase.update(null);
@@ -875,6 +875,9 @@ public abstract class AbstractIntegrationTest {
 
     @Test
     public void contextsWithHyphensWorkInFormattedSql() throws Exception {
+        if (database == null) {
+            return;
+        }
         Liquibase liquibase = createLiquibase("changelogs/common/sqlstyle/formatted.changelog.sql");
         liquibase.update("hyphen-context-using-sql,camelCaseContextUsingSql");
 
@@ -883,6 +886,43 @@ public abstract class AbstractIntegrationTest {
         assertNotNull(tableSnapshotGenerator.has(new Table().setName("camel_context"), database));
         assertNotNull(tableSnapshotGenerator.has(new Table().setName("bar_id"), database));
         assertNotNull(tableSnapshotGenerator.has(new Table().setName("foo_id"), database));
+    }
+
+    @Test
+    public void testUpdateAfterEditsToRanChangesets() throws Exception {
+        if (database == null) {
+            return;
+        }
+
+        Liquibase liquibase = createLiquibase(skipChecksumValidationOriginalChangeLog);
+        liquibase.update(this.contexts);
+
+        //run updated version
+        liquibase = createLiquibase(skipChecksumValidationUpdatedChangeLog);
+        try {
+            liquibase.update(this.contexts);
+        } catch (ValidationFailedException e) {
+            e.printDescriptiveError(System.out);
+            throw e;
+        }
+
+        // run invalid changelog, this one has updates but does not disable checksum validation so should fail.
+        liquibase = createLiquibase(skipChecksumValidationInvalidChangeLog);
+        try {
+            liquibase.update(this.contexts);
+            fail("Original changelog should have failed to execute successfully as ");
+        } catch (ValidationFailedException e) {
+            e.printDescriptiveError(System.out);
+        }
+
+        // original changelog should still run successfully as the checksums in the database are from this changelog
+        liquibase = createLiquibase(skipChecksumValidationOriginalChangeLog);
+        try {
+            liquibase.update(this.contexts);
+        } catch (ValidationFailedException e) {
+            e.printDescriptiveError(System.out);
+            throw e;
+        }
     }
 
 //   @Test
