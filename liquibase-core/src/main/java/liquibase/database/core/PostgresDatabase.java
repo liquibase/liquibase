@@ -181,14 +181,18 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
     @Override
     public boolean isSystemObject(DatabaseObject example) {
         if (example instanceof Table) {
-            if ("pg_catalog".equals(example.getSchema().getName())
-                    || "pg_toast".equals(example.getSchema().getName())
-                    || example.getName().endsWith("_seq")
+            if (example.getName().endsWith("_seq")
                     || example.getName().endsWith("_key")
                     || example.getName().endsWith("_pkey")
                     || example.getName().startsWith("idx_")
                     || example.getName().startsWith("pk_")) {
                 return true;
+            }
+            if (example.getSchema() != null) {
+                if ("pg_catalog".equals(example.getSchema().getName())
+                        || "pg_toast".equals(example.getSchema().getName())) {
+                    return true;
+                }
             }
         }
         return super.isSystemObject(example);

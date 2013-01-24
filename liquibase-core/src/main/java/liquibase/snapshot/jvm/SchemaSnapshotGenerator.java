@@ -11,6 +11,7 @@ import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Catalog;
 import liquibase.structure.core.Schema;
 import liquibase.diff.compare.DatabaseObjectComparatorFactory;
+import liquibase.util.JdbcUtils;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -58,7 +59,9 @@ public class SchemaSnapshotGenerator extends JdbcSnapshotGenerator {
             if (database.supportsSchemas()) {
                 schemas = ((JdbcConnection) database.getConnection()).getMetaData().getSchemas();
                 while (schemas.next()) {
-                    CatalogAndSchema schemaFromJdbcInfo = ((AbstractJdbcDatabase) database).getSchemaFromJdbcInfo(schemas.getString("TABLE_CATALOG"), schemas.getString("TABLE_SCHEM"));
+                    String tableCatalog = JdbcUtils.getValueForCaseInsensitiveColumn(schemas, "TABLE_CATALOG");
+                    String tableSchema = JdbcUtils.getValueForCaseInsensitiveColumn(schemas, "TABLE_SCHEM");
+                    CatalogAndSchema schemaFromJdbcInfo = ((AbstractJdbcDatabase) database).getSchemaFromJdbcInfo(tableCatalog, tableSchema);
 
                     Catalog catalog = new Catalog(schemaFromJdbcInfo.getCatalogName());
 
