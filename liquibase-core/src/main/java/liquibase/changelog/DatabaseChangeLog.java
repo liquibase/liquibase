@@ -21,6 +21,8 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
     private String physicalFilePath;
     private String logicalFilePath;
 
+    private boolean skipValidation;
+
     private List<ChangeSet> changeSets = new ArrayList<ChangeSet>();
     private ChangeLogParameters changeLogParameters;
 
@@ -81,6 +83,17 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         return getFilePath();
     }
 
+    /**
+     * @return Whether validation of a changeset should occur
+     */
+    public boolean isSkipValidation() {
+        return skipValidation;
+    }
+
+    public void setSkipValidation(boolean skipValidation) {
+        this.skipValidation = skipValidation;
+    }
+
     public int compareTo(DatabaseChangeLog o) {
         return getFilePath().compareTo(o.getFilePath());
     }
@@ -126,6 +139,15 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
     }
 
     public void validate(Database database, String... contexts) throws LiquibaseException {
+
+        /**
+         * Skip validation of this change log if skipValidation has been set to true.
+         * Intended for legacy change sets, improvements can be made without affecting users who have already run the old
+         * change sets.
+         */
+        if (skipValidation) {
+            return;
+        }
 
         ChangeLogIterator logIterator = new ChangeLogIterator(this, new DbmsChangeSetFilter(database), new ContextChangeSetFilter(contexts));
 

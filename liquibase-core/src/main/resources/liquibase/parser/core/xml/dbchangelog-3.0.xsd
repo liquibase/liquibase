@@ -228,6 +228,7 @@
 	<!-- Attributes for changeSet -->
 	<xsd:attributeGroup name="changeLogAttributes">
 		<xsd:attribute name="logicalFilePath" type="xsd:string" />
+        <xsd:attribute name="skipValidation"  type="xsd:boolean" />
 	</xsd:attributeGroup>
 
 	<!-- Attributes for changeSet -->

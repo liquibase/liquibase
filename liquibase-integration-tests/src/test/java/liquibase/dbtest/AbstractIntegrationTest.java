@@ -82,6 +82,8 @@ public abstract class AbstractIntegrationTest {
     protected String contexts = "test, context-b";
     private Database database;
     private String url;
+    private String skipValidationMasterChangelog;
+    private String skipValidationAlteredChangelog;
 
     protected AbstractIntegrationTest(String changelogDir, String url) throws Exception {
         LogFactory.setLoggingLevel("info");
@@ -94,6 +96,8 @@ public abstract class AbstractIntegrationTest {
         this.externalEntityChangeLog= "changelogs/common/externalEntity.changelog.xml";
         this.externalEntityChangeLog2= "com/example/nonIncluded/externalEntity.changelog.xml";
         this.invalidReferenceChangeLog= "changelogs/common/invalid.reference.changelog.xml";
+        this.skipValidationMasterChangelog= "changelogs/common/skipValidation/master.changelog.xml";
+        this.skipValidationAlteredChangelog= "changelogs/common/skipValidation/altered.master.changelog.xml";
 
         this.url = url;
 
@@ -861,6 +865,9 @@ public abstract class AbstractIntegrationTest {
 
     @Test
     public void invalidIncludeDoesntBreakLiquibase() throws Exception{
+        if (database == null) {
+            return;
+        }
         Liquibase liquibase = createLiquibase(invalidReferenceChangeLog);
         try {
             liquibase.update(null);
@@ -875,6 +882,9 @@ public abstract class AbstractIntegrationTest {
 
     @Test
     public void contextsWithHyphensWorkInFormattedSql() throws Exception {
+        if (database == null) {
+            return;
+        }
         Liquibase liquibase = createLiquibase("changelogs/common/sqlstyle/formatted.changelog.sql");
         liquibase.update("hyphen-context-using-sql,camelCaseContextUsingSql");
 
@@ -883,6 +893,25 @@ public abstract class AbstractIntegrationTest {
         assertNotNull(tableSnapshotGenerator.has(new Table().setName("camel_context"), database));
         assertNotNull(tableSnapshotGenerator.has(new Table().setName("bar_id"), database));
         assertNotNull(tableSnapshotGenerator.has(new Table().setName("foo_id"), database));
+    }
+
+    @Test
+    public void testUpdateAfterChangesToRanChangesets() throws Exception {
+        if (database == null) {
+            return;
+        }
+
+        Liquibase liquibase = createLiquibase(skipValidationMasterChangelog);
+        liquibase.update(this.contexts);
+
+        //run again to test that validation was skipped
+        liquibase = createLiquibase(skipValidationAlteredChangelog);
+        try {
+            liquibase.update(this.contexts);
+        } catch (ValidationFailedException e) {
+            e.printDescriptiveError(System.out);
+            throw e;
+        }
     }
 
 //   @Test
