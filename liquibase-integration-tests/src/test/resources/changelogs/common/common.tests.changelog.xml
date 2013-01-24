@@ -877,8 +877,8 @@
         <sql>select * from replace_view_test</sql>
     </changeSet>
 
-    <!-- should work for all databases but only tested on h2 and psotgres for now -->
-    <changeSet id="insertRecordWithSequence" author="dbiggs" dbms="postgresql, h2">
+    <!-- should work for all databases but only tested on h2, oracle and psotgres for now -->
+    <changeSet id="insertRecordWithSequence" author="dbiggs" dbms="postgresql, h2, oracle">
       <createTable tableName="insertTest">
         <column name="id" type="int">
           <constraints primaryKey="true"/>
@@ -889,7 +889,11 @@
 
       <insert tableName="insertTest">
         <column name="id" valueSequenceNext="insertTest_seq" />
-        <column name="stringValue" value="test value" />
+        <column name="stringValue" value="testVal1" />
+      </insert>
+      <insert tableName="insertTest">
+        <column name="id" valueSequenceNext="insertTest_seq" />
+        <column name="stringValue" value="testVal2" />
       </insert>
     </changeSet>
 </databaseChangeLog>
