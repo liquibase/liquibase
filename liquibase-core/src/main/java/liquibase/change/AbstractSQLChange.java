@@ -11,9 +11,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * A common parent for all SQL related changes regardless of where the sql was sourced from.
+ * A common parent for all raw SQL related changes regardless of where the sql was sourced from.
  * 
- * Implements the necessary logic to choose how it should be parsed to generate the statements.
+ * Implements the necessary logic to choose how the SQL string should be parsed to generate the statements.
  *
  */
 public abstract class AbstractSQLChange extends AbstractChange {
@@ -28,65 +28,78 @@ public abstract class AbstractSQLChange extends AbstractChange {
         splitStatements =true;
     }
 
+    /**
+     * {@inheritDoc}
+     * @param database
+     * @return
+     */
     @Override
     public boolean supports(Database database) {
         return true;
     }
 
     /**
-     * @param stripComments true if comments should be stripped out, otherwise false
-     */
-    public void setStripComments(Boolean stripComments) {
-        this.stripComments = stripComments;
-    }
-
-    /**
-     * 
-     * @return true if stripping comments, otherwise false
+     * Return if comments should be stripped from the SQL before passing it to the database.
      */
     public boolean isStrippingComments() {
         return stripComments;
     }
 
     /**
-     * If set to true then the sql will be split around any ; and \ngo\n entries in the sql and
-     * each line provided as a separate statement.
-     * 
-     * @param splitStatements set true if the SQL should be split, otherwise false
+     * Return true if comments should be stripped from the SQL before passing it to the database.
      */
-    public void setSplitStatements(Boolean splitStatements) {
-        this.splitStatements = splitStatements;
+    public void setStripComments(Boolean stripComments) {
+        this.stripComments = stripComments;
     }
-    
+
     /**
-     * 
-     * @return true if a multi-line file will be split, otherwise false
+     * Return if the SQL should be split into multiple statements before passing it to the database.
+     * By default, statements are split around ";" and "go" delimiters.
      */
     public boolean isSplittingStatements() {
         return splitStatements;
     }
 
+    /**
+     * Set whether SQL should be split into multiple statements.
+     */
+    public void setSplitStatements(Boolean splitStatements) {
+        this.splitStatements = splitStatements;
+    }
+
+    /**
+     * Return the raw SQL managed by this Change
+     */
     public String getSql() {
         return sql;
     }
 
     /**
-     * The raw SQL to use for this change.
+     * Set the raw SQL managed by this Change.
      */
     public void setSql(String sql) {
        this.sql = StringUtils.trimToNull(sql);
     }
 
+    /**
+     * Set the end delimiter used to split statements. Will return null if the default delimiter should be used.
+     *
+     * @see #splitStatements
+     */
     public String getEndDelimiter() {
         return endDelimiter;
     }
 
+    /**
+     * Set the end delimiter for splitting SQL statements. Set to null to use the default delimiter.
+     * @param endDelimiter
+     */
     public void setEndDelimiter(String endDelimiter) {
         this.endDelimiter = endDelimiter;
     }
 
     /**
-     * Calculates an MD5 from the contents of the file.
+     * Calculates the checksum based on the contained SQL.
      *
      * @see liquibase.change.AbstractChange#generateCheckSum()
      */
@@ -104,14 +117,10 @@ public abstract class AbstractSQLChange extends AbstractChange {
 
 
     /**
-     * Generates one or more statements depending on how the SQL should be parsed.
-     * If split statements is set to true then the SQL is split on the ; and go\n entries
-     * found in the sql text and each is made a separate statement.
-     *
-     * If stripping comments is true then any comments after -- on a line and any comments
-     * between /* and \*\/ will be stripped before the splitting is executed.
-     *
-     * The end result is one or more SQL statements split in the way the user requested
+     * Generates one or more SqlStatements depending on how the SQL should be parsed.
+     * If split statements is set to true then the SQL is split and each cpommand is made a separate SqlStatement.
+     * <p></p>
+     * If stripping comments is true then any comments are removed before the splitting is executed.
      */
     public SqlStatement[] generateStatements(Database database) {
 

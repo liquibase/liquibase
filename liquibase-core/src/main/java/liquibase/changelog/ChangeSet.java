@@ -64,6 +64,8 @@ public class ChangeSet implements Conditional {
         }
     }
 
+    private ChangeLogParameters changeLogParameters;
+
     /**
      * List of change objects defined in this changeset
      */
@@ -306,7 +308,7 @@ public class ChangeSet implements Conditional {
             if (!skipChange) {
                 for (Change change : changes) {
                     try {
-                        change.init();
+                        change.finishInitialization();
                     } catch (SetupException se) {
                         throw new MigrationFailedException(this, se);
                     }
@@ -480,7 +482,7 @@ public class ChangeSet implements Conditional {
     }
 
 
-    public boolean supportsRollback(Database database) {
+    public boolean supportsRollback(Database database) throws UnsupportedChangeException {
         if (rollBackChanges != null && rollBackChanges.size() > 0) {
             return true;
         }
@@ -586,4 +588,19 @@ public class ChangeSet implements Conditional {
     public List<SqlVisitor> getSqlVisitors() {
         return sqlVisitors;
     }
+
+    public ChangeLogParameters getChangeLogParameters() {
+        return changeLogParameters;
+    }
+
+    /**
+     * Called by the changelog parsing process to pass the {@link ChangeLogParameters}.
+     */
+    public void setChangeLogParameters(ChangeLogParameters changeLogParameters) {
+        this.changeLogParameters = changeLogParameters;
+    }
+
+
+
+
 }

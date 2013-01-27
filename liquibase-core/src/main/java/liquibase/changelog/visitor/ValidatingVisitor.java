@@ -6,8 +6,6 @@ import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.RanChangeSet;
 import liquibase.database.Database;
 import liquibase.exception.*;
-import liquibase.logging.Logger;
-import liquibase.precondition.core.DBMSPrecondition;
 import liquibase.precondition.core.ErrorPrecondition;
 import liquibase.precondition.core.FailedPrecondition;
 import liquibase.precondition.core.PreconditionContainer;
@@ -73,13 +71,13 @@ public class ValidatingVisitor implements ChangeSetVisitor {
         return ChangeSetVisitor.Direction.FORWARD;
     }
 
-    public void visit(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database) {
+    public void visit(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database) throws UnsupportedChangeException {
         RanChangeSet ranChangeSet = ranIndex.get(changeSet.toString(false));
         boolean ran = ranChangeSet != null;
         boolean shouldValidate = !ran || changeSet.shouldRunOnChange() || changeSet.shouldAlwaysRun();
         for (Change change : changeSet.getChanges()) {
             try {
-                change.init();
+                change.finishInitialization();
             } catch (SetupException se) {
                 setupExceptions.add(se);
             }

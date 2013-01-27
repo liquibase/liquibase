@@ -8,6 +8,8 @@ import liquibase.changelog.DatabaseChangeLog;
 import liquibase.database.core.MockDatabase;
 import liquibase.exception.SetupException;
 import static org.junit.Assert.*;
+
+import liquibase.exception.UnsupportedChangeException;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -33,7 +35,7 @@ public class ValidatingVisitorTest {
 
 
     @Test
-    public void visit_successful() {
+    public void visit_successful() throws UnsupportedChangeException {
         CreateTableChange change1 = new CreateTableChange();
         change1.setTableName("table1");
         ColumnConfig column1 = new ColumnConfig();
@@ -60,10 +62,10 @@ public class ValidatingVisitorTest {
     }
 
     @Test
-    public void visit_setupException() {
+    public void visit_setupException() throws UnsupportedChangeException {
         changeSet1.addChange(new CreateTableChange() {
             @Override
-            public void init() throws SetupException {
+            public void finishInitialization() throws SetupException {
                 throw new SetupException("Test message");
             }
         });
@@ -78,7 +80,7 @@ public class ValidatingVisitorTest {
     }
 
     @Test
-    public void visit_duplicate() {
+    public void visit_duplicate() throws UnsupportedChangeException {
 
         ValidatingVisitor handler = new ValidatingVisitor(new ArrayList<RanChangeSet>());
         handler.visit(changeSet1, new DatabaseChangeLog(), null);
@@ -90,7 +92,7 @@ public class ValidatingVisitorTest {
     }
 
     @Test
-    public void visit_validateError() {
+    public void visit_validateError() throws UnsupportedChangeException {
 
         changeSet1.addChange(new CreateTableChange() {
             @Override
@@ -112,7 +114,7 @@ public class ValidatingVisitorTest {
     }
 
     @Test
-    public void visit_torunOnly() {
+    public void visit_torunOnly() throws UnsupportedChangeException {
 
         changeSet1.addChange(new CreateTableChange() {
             @Override

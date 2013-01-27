@@ -8,6 +8,7 @@ import java.util.Set;
 import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.database.core.DB2Database;
+import liquibase.exception.UnsupportedChangeException;
 import liquibase.exception.ValidationErrors;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.*;
@@ -77,7 +78,7 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
     }
 
     @Override
-    public ValidationErrors validate(Database database) {
+    public ValidationErrors validate(Database database) throws UnsupportedChangeException {
         ValidationErrors validationErrors = super.validate(database);
         if (columns.size() == 0) {
             validationErrors.addError("'columns' is required");

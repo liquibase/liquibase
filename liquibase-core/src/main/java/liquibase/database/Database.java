@@ -152,7 +152,7 @@ public interface Database extends PrioritizedService {
 
     void checkDatabaseChangeLogLockTable() throws DatabaseException;
 
-    void dropDatabaseObjects(CatalogAndSchema schema) throws DatabaseException;
+    void dropDatabaseObjects(CatalogAndSchema schema) throws LiquibaseException;
 
     void tag(String tagString) throws DatabaseException;
 

@@ -5,6 +5,7 @@ import liquibase.change.DatabaseChange;
 import liquibase.change.ChangeMetaData;
 import liquibase.change.DatabaseChangeProperty;
 import liquibase.database.Database;
+import liquibase.exception.UnsupportedChangeException;
 import liquibase.structure.core.Table;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
@@ -120,7 +121,7 @@ public class DropAllForeignKeyConstraintsChange extends AbstractChange {
     }
 
     @Override
-    public boolean queriesDatabase(Database database) {
+    public boolean generateStatementsQueriesDatabase(Database database) throws UnsupportedChangeException {
         return true;
     }
 }

@@ -788,7 +788,7 @@ public abstract class AbstractJdbcDatabase implements Database {
     /**
      * Drops all objects owned by the connected user.
      */
-    public void dropDatabaseObjects(CatalogAndSchema schemaToDrop) throws DatabaseException {
+    public void dropDatabaseObjects(CatalogAndSchema schemaToDrop) throws LiquibaseException {
         try {
             DatabaseSnapshot snapshot = null;
             try {

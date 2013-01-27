@@ -6,6 +6,9 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * Static metadata about a Change
+ */
 public class ChangeMetaData implements PrioritizedService {
     public static final int PRIORITY_DEFAULT = 1;
 

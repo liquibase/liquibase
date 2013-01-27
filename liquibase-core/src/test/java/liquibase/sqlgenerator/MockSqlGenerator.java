@@ -37,7 +37,11 @@ public class MockSqlGenerator implements SqlGenerator {
         return supports;
     }
 
-    public boolean queriesDatabase(Database database) {
+    public boolean generateStatementsQueriesDatabase(Database database) {
+        return false;
+    }
+
+    public boolean generateRollbackStatementsQueriesDatabase(Database database) {
         return false;
     }
 

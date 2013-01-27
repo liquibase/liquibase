@@ -2,7 +2,6 @@ package liquibase.change;
 
 import java.util.Set;
 
-import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.structure.DatabaseObject;
@@ -16,113 +15,128 @@ import liquibase.statement.SqlStatement;
 
 /**
  * Interface all changes (refactorings) implement.
- * <p/>
- * <b>How changes are constructed and run when reading changelogs:</b>
- * <ol>
- * <li>As the changelog handler gets to each element inside a changeSet, it passes the tag name to liquibase.change.ChangeFactory
- * which looks through all the registered changes until it finds one with matching specified tag name</li>
- * <li>The ChangeFactory then constructs a new instance of the change</li>
- * <li>For each attribute in the XML node, reflection is used to call a corresponding set* method on the change class</li>
- * <li>The correct generateStatements(*) method is called for the current database</li>
- * </ol>
- * <p/>
- * <b>To implement a new change:</b>
- * <ol>
- * <li>Create a new class that implements Change (normally extend AbstractChange)</li>
- * <li>Implement the abstract generateStatements(*) methods which return the correct SQL calls for each database</li>
- * <li>Implement the createMessage() method to create a descriptive message for logs and dialogs
- * <li>Implement the createNode() method to generate an XML element based on the values in this change</li>
- * <li>Add the new class to the liquibase.change.ChangeFactory</li>
- * </ol>
- * <p><b>Implementing automatic rollback support</b><br><br>
- * The easiest way to allow automatic rollback support is by overriding the createInverses() method.
- * If there are no corresponding inverse changes, you can override the generateRollbackStatements(*) and canRollBack() methods.
- * <p/>
- * <b>Notes for generated SQL:</b><br>
- * Because migration and rollback scripts can be generated for execution at a different time, or against a different database,
- * changes you implement cannot directly reference data in the database.  For example, you cannot implement a change that selects
- * all rows from a database and modifies them based on the primary keys you find because when the SQL is actually run, those rows may not longer
- * exist and/or new rows may have been added.
- * <p/>
- * We chose the name "change" over "refactoring" because changes will sometimes change functionality whereas true refactoring will not.
+ *
+ * TODO: Describe changelog parsing process
  *
  * @see ChangeFactory
  * @see Database
  */
 public interface Change {
 
+    /**
+     * This method will be called by the changlelog parsing process after all of the
+     * properties have been set to allow the task to do any additional initialization logic.
+     */
+    public void finishInitialization() throws SetupException;
+
+    /**
+     * Returns metadata describing the change. The metadata is used to determine if a given change matches a tag in the changelog file and is supported by a database as well as
+     * descriptions of the change for documentation and runtime messages.
+     */
     public ChangeMetaData getChangeMetaData();
 
+    /**
+     * Returns the changeSet this Change is part of. Will return null if this instance was not constructed as part of a changelog file.
+     */
     public ChangeSet getChangeSet();
 
+    /**
+     * Sets the changeSet this Change is a part of. Called automatically by Liquibase during the changelog parsing process.
+     */
     public void setChangeSet(ChangeSet changeSet);
 
     /**
-     * Sets the fileOpener that should be used for any file loading and resource
-     * finding for files that are provided by the user.
-     */
+    * Sets the {@link ResourceAccessor} that should be used for any file and/or resource loading needed by this Change.
+    * Called automatically by Liquibase during the changelog parsing process.
+    */
     public void setResourceAccessor(ResourceAccessor resourceAccessor);
 
-
     /**
-     * This method will be called after the no arg constructor and all of the
-     * properties have been set to allow the task to do any heavy tasks or
-     * more importantly generate any exceptions to report to the user about
-     * the settings provided.
+     * Return true if this Change object supports the passed database. Used by the ChangeLog parsing process.
      */
-    public void init() throws SetupException;
+    boolean supports(Database database) throws UnsupportedChangeException;
 
-    boolean supports(Database database);
-
-    public Warnings warn(Database database);
-
-    public ValidationErrors validate(Database database);
-
-    public Set<DatabaseObject> getAffectedDatabaseObjects(Database database);
-    
     /**
-     * Calculates the checksum (currently MD5 hash) for the current configuration of this change.
+     * Generates warnings based on the configured Change instance. Warnings do not stop changelog execution, but are passed along to the end user for reference.
+     * Can return null or an empty Warnings object when there are no warnings.
+     *
+     * @throws UnsupportedChangeException if this change is not supported by the {@link Database} passed as argument
+     */
+    public Warnings warn(Database database) throws UnsupportedChangeException;
+
+    /**
+     * Generate errors based on the configured Change instance. If there are any validation errors, changelog processing will normally not occur.
+     * Can return null or empty ValidationErrors object when there are no errors.
+     *
+     * @throws UnsupportedChangeException if this change is not supported by the {@link Database} passed as argument
+     */
+    public ValidationErrors validate(Database database) throws UnsupportedChangeException;
+
+    /**
+     * Returns example {@link DatabaseObject} instances describing the objects affected by this change.
+     * This method is not called during the normal execution of a changelog, but but can be used as metadata for documentation or other integrations.
+     *
+     * @throws UnsupportedChangeException if this change is not supported by the {@link Database} passed as argument
+     */
+    public Set<DatabaseObject> getAffectedDatabaseObjects(Database database) throws UnsupportedChangeException;
+
+    /**
+     * Calculates the checksum of this Change based on the current configuration.
+     * The checksum should take into account all settings that would impact what actually happens to the database
+     * and <b>NOT</b> include any settings that do not impact the actual execution of the change.
      */
     public CheckSum generateCheckSum();
 
-     /**
-     * @return Confirmation message to be displayed after the change is executed
+    /**
+     * Confirmation message to be displayed after the change is executed. Should include relevant configuration settings to make it as helpful as possible.
+     * This method may be called outside the changelog execution process, such as in documentation generation.
      */
     public String getConfirmationMessage();
 
     /**
-     * Generates the SQL statements required to run the change
+     * Generates the {@link SqlStatement} objects required to run the change for the given database.
+     * <p></p>
+     * NOTE: This method may be called multiple times throughout the changelog execution process and may be called in documentation generation and other integration points as well.
+     * <p></p>
+     * <b>If this method reads from the current database state or uses any other logic that will be affected by whether previous changeSets have ran or not, you must return true from {@link #generateStatementsQueriesDatabase}.</b>
      *
-     * @param database databasethe target {@link liquibase.database.Database} associated to this change's statements
-     * @return an array of {@link String}s with the statements
+     * @throws UnsupportedChangeException if this change is not supported by the {@link Database} passed as argument
      */
-    public SqlStatement[] generateStatements(Database database);
-
-     /**
-     * Can this change be rolled back
-     *
-     * @return <i>true</i> if rollback is supported, <i>false</i> otherwise
-      * @param database
-     */
-    public boolean supportsRollback(Database database);
+    public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException;
 
     /**
-     * Generates the SQL statements required to roll back the change
+     * Returns true if this change reads from the database in the {@link #generateStatements(Database) } method.
+     * If true, this change cannot be used in an updateSql-style commands because Liquibase cannot know the {@link SqlStatement} objects until all changeSets prior have been actually executed.
+
+     * @throws UnsupportedChangeException if this change is not supported by the {@link Database} passed as argument
+     */
+    public boolean generateStatementsQueriesDatabase(Database database) throws UnsupportedChangeException;
+
+
+    /**
+     * Returns true if this change be rolled back for the given database.
      *
-     * @param database database databasethe target {@link Database} associated to this change's rollback statements
-     * @return an array of {@link String}s with the rollback statements
+     * @throws UnsupportedChangeException if this change is not supported by the {@link Database} passed as argument
+     */
+    public boolean supportsRollback(Database database) throws UnsupportedChangeException;
+
+    /**
+     * Generates the {@link SqlStatement} objects that would roll back the change.
+     * <p></p>
+     * NOTE: This method may be called multiple times throughout the changelog execution process and may be called in documentation generation and other integration points as well.
+     * <p></p>
+     * <b>If this method reads from the current database state or uses any other logic that will be affected by whether previous changeSets have been rolled back or not, you must return true from {@link #generateRollbackStatementsQueriesDatabase}.</b>
+     *
      * @throws UnsupportedChangeException  if this change is not supported by the {@link Database} passed as argument
      * @throws RollbackImpossibleException if rollback is not supported for this change
      */
     public SqlStatement[] generateRollbackStatements(Database database) throws UnsupportedChangeException, RollbackImpossibleException;
 
     /**
-     * Does this change require access to the database metadata?  If true, the change cannot be used in an updateSql-style command.
-     */
-    public boolean queriesDatabase(Database database);
+     * Returns true if this change reads from the database in the {@link #generateStatements(Database) } method.
+     * If true, this change cannot be used in an updateSql-style commands because Liquibase cannot know the {@link SqlStatement} objects until all changeSets prior have been actually executed.
 
-   /**
-    * @param changeLogParameters
-    */
-   public void setChangeLogParameters(ChangeLogParameters changeLogParameters);
+     * @throws UnsupportedChangeException if this change is not supported by the {@link Database} passed as argument
+     */
+    public boolean generateRollbackStatementsQueriesDatabase(Database database) throws UnsupportedChangeException;
 }

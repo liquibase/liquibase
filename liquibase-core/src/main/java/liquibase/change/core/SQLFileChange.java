@@ -71,7 +71,7 @@ public class SQLFileChange extends AbstractSQLChange {
     }
 
     @Override
-    public void init() throws SetupException {
+    public void finishInitialization() throws SetupException {
         if (path == null) {
             throw new SetupException("<sqlfile> - No path specified");
         }
@@ -182,8 +182,8 @@ public class SQLFileChange extends AbstractSQLChange {
 
     @Override
     public void setSql(String sql) {
-        if (getChangeLogParameters() != null) {
-            sql = getChangeLogParameters().expandExpressions(sql);
+        if (getChangeSet() != null && getChangeSet().getChangeLogParameters() != null) {
+            sql = getChangeSet().getChangeLogParameters().expandExpressions(sql);
         }
         super.setSql(sql);
     }
