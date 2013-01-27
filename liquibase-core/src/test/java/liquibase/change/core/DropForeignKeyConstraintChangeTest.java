@@ -1,10 +1,11 @@
 package liquibase.change.core;
 
-import liquibase.change.AbstractChangeTest;
+import liquibase.change.StandardChangeTest;
 import static org.junit.Assert.*;
+
 import org.junit.Test;
 
-public class DropForeignKeyConstraintChangeTest extends AbstractChangeTest {
+public class DropForeignKeyConstraintChangeTest extends StandardChangeTest {
  @Override
  @Test
     public void getRefactoringName() throws Exception {

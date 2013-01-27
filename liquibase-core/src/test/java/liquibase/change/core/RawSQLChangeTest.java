@@ -1,14 +1,15 @@
 package liquibase.change.core;
 
-import liquibase.change.AbstractChangeTest;
+import liquibase.change.StandardChangeTest;
 import static org.junit.Assert.*;
+
 import org.junit.Before;
 import org.junit.Test;
 
 /**
  * Tests for {@link RawSQLChange}
  */
-public abstract class RawSQLChangeTest extends AbstractChangeTest {
+public abstract class RawSQLChangeTest extends StandardChangeTest {
 
     private RawSQLChange refactoring;
 

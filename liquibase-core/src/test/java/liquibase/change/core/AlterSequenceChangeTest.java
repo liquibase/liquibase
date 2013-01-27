@@ -1,6 +1,6 @@
 package liquibase.change.core;
 
-import liquibase.change.AbstractChangeTest;
+import liquibase.change.StandardChangeTest;
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.statement.SqlStatement;
@@ -13,7 +13,7 @@ import java.math.BigInteger;
 /**
  * Tests for {@link AlterSequenceChange}
  */
-public class AlterSequenceChangeTest extends AbstractChangeTest {
+public class AlterSequenceChangeTest extends StandardChangeTest {
 
     @Override
     @Test

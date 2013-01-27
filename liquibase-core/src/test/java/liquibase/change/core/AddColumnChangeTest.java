@@ -2,7 +2,7 @@ package liquibase.change.core;
 
 import java.math.BigInteger;
 
-import liquibase.change.AbstractChangeTest;
+import liquibase.change.StandardChangeTest;
 import liquibase.change.Change;
 import liquibase.change.ColumnConfig;
 import liquibase.change.ConstraintsConfig;
@@ -20,7 +20,7 @@ import org.junit.Test;
 /**
  * Tests for {@link AddColumnChange}
  */
-public class AddColumnChangeTest extends AbstractChangeTest {
+public class AddColumnChangeTest extends StandardChangeTest {
 
 
     @Override

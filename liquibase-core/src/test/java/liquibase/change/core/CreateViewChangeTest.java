@@ -1,10 +1,11 @@
 package liquibase.change.core;
 
-import liquibase.change.AbstractChangeTest;
+import liquibase.change.StandardChangeTest;
 import static org.junit.Assert.*;
+
 import org.junit.Test;
 
-public class CreateViewChangeTest extends AbstractChangeTest {
+public class CreateViewChangeTest extends StandardChangeTest {
 
 
     @Override

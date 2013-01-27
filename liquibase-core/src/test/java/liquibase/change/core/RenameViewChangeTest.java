@@ -1,6 +1,6 @@
 package liquibase.change.core;
 
-import liquibase.change.AbstractChangeTest;
+import liquibase.change.StandardChangeTest;
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.statement.SqlStatement;
@@ -9,7 +9,7 @@ import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 
-public class RenameViewChangeTest extends AbstractChangeTest {
+public class RenameViewChangeTest extends StandardChangeTest {
 
     private RenameViewChange refactoring;
 

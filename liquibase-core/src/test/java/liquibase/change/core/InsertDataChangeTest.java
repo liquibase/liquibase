@@ -1,6 +1,6 @@
 package liquibase.change.core;
 
-import liquibase.change.AbstractChangeTest;
+import liquibase.change.StandardChangeTest;
 import liquibase.change.ColumnConfig;
 import liquibase.database.core.MockDatabase;
 import liquibase.statement.SqlStatement;
@@ -12,7 +12,7 @@ import org.junit.Test;
 /**
  * Tests for {@link InsertDataChange}
  */
-public class InsertDataChangeTest extends AbstractChangeTest {
+public class InsertDataChangeTest extends StandardChangeTest {
 
     InsertDataChange refactoring;
 

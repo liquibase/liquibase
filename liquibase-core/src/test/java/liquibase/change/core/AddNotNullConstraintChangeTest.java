@@ -1,6 +1,6 @@
 package liquibase.change.core;
 
-import liquibase.change.AbstractChangeTest;
+import liquibase.change.StandardChangeTest;
 import liquibase.database.Database;
 import liquibase.database.core.FirebirdDatabase;
 import liquibase.database.core.SQLiteDatabase;
@@ -10,7 +10,7 @@ import org.junit.Test;
 /**
  * Tests for {@link liquibase.change.core.AddNotNullConstraintChange}
  */
-public class AddNotNullConstraintChangeTest extends AbstractChangeTest {
+public class AddNotNullConstraintChangeTest extends StandardChangeTest {
 
     @Override
     @Test

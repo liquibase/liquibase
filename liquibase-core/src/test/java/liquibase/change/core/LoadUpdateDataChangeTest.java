@@ -2,7 +2,7 @@ package liquibase.change.core;
 
 import junit.framework.Assert;
 import static junit.framework.Assert.fail;
-import liquibase.change.AbstractChangeTest;
+import liquibase.change.StandardChangeTest;
 import liquibase.database.core.MockDatabase;
 import liquibase.exception.RollbackImpossibleException;
 import liquibase.exception.UnsupportedChangeException;
@@ -25,7 +25,7 @@ import java.lang.reflect.Method;
  * Time: 9:29:52 PM
  * To change this template use File | Settings | File Templates.
  */
-public class LoadUpdateDataChangeTest extends AbstractChangeTest {
+public class LoadUpdateDataChangeTest extends StandardChangeTest {
 
     LoadUpdateDataChange refactoring ;
 

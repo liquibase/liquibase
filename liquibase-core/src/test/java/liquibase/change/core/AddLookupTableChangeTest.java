@@ -1,13 +1,13 @@
 package liquibase.change.core;
 
-import liquibase.change.AbstractChangeTest;
+import liquibase.change.StandardChangeTest;
 import liquibase.database.Database;
 import liquibase.database.core.FirebirdDatabase;
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.statement.SqlStatement;
 import static org.junit.Assert.*;
 
-public class AddLookupTableChangeTest extends AbstractChangeTest {
+public class AddLookupTableChangeTest extends StandardChangeTest {
 
     @Override
     public void getRefactoringName() throws Exception {

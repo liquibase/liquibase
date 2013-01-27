@@ -5,7 +5,7 @@ import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 
-public class AbstractSQLChangeTest extends AbstractChangeTest {
+public class AbstractSQLChangeTest extends StandardChangeTest {
 
     private RawSQLChange refactoring;
     

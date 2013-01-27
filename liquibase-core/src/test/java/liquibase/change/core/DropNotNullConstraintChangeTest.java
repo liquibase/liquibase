@@ -1,6 +1,6 @@
 package liquibase.change.core;
 
-import liquibase.change.AbstractChangeTest;
+import liquibase.change.StandardChangeTest;
 import liquibase.database.Database;
 import liquibase.database.core.FirebirdDatabase;
 import liquibase.database.core.MockDatabase;
@@ -13,7 +13,7 @@ import org.junit.Test;
 /**
  * Tests for {@link DropNotNullConstraintChange}
  */
-public class DropNotNullConstraintChangeTest extends AbstractChangeTest {
+public class DropNotNullConstraintChangeTest extends StandardChangeTest {
 
     @Override
     @Test

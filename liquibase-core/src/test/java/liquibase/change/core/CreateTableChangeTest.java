@@ -1,6 +1,6 @@
 package liquibase.change.core;
 
-import liquibase.change.AbstractChangeTest;
+import liquibase.change.StandardChangeTest;
 import liquibase.change.Change;
 import liquibase.change.ColumnConfig;
 import liquibase.change.ConstraintsConfig;
@@ -16,7 +16,7 @@ import org.junit.Test;
 /**
  * Tests for {@link CreateTableChange}
  */
-public class CreateTableChangeTest extends AbstractChangeTest {
+public class CreateTableChangeTest extends StandardChangeTest {
 
     private CreateTableChange change;
 

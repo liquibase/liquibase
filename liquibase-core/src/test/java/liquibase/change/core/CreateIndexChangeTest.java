@@ -1,13 +1,14 @@
 package liquibase.change.core;
 
-import liquibase.change.AbstractChangeTest;
+import liquibase.change.StandardChangeTest;
 import static org.junit.Assert.*;
+
 import org.junit.Test;
 
 /**
  * Tests for {@link CreateIndexChange}
  */
-public class CreateIndexChangeTest extends AbstractChangeTest {
+public class CreateIndexChangeTest extends StandardChangeTest {
 
     @Override
     @Test

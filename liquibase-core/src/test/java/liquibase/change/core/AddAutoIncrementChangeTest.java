@@ -1,6 +1,6 @@
 package liquibase.change.core;
 
-import liquibase.change.AbstractChangeTest;
+import liquibase.change.StandardChangeTest;
 import liquibase.change.ChangeMetaData;
 import liquibase.database.Database;
 import liquibase.database.core.*;
@@ -12,7 +12,7 @@ import liquibase.statement.core.SetNullableStatement;
 import static org.junit.Assert.*;
 import org.junit.Test;
 
-public class AddAutoIncrementChangeTest extends AbstractChangeTest {
+public class AddAutoIncrementChangeTest extends StandardChangeTest {
 
     @Test
     public void constructor() {

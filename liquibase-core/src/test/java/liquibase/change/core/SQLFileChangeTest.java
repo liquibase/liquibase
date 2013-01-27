@@ -7,7 +7,7 @@ import static org.junit.Assert.fail;
 import java.lang.reflect.Field;
 import java.util.Map;
 
-import liquibase.change.AbstractChangeTest;
+import liquibase.change.StandardChangeTest;
 import liquibase.change.AbstractSQLChange;
 import liquibase.change.Change;
 import liquibase.changelog.ChangeLogParameters;
@@ -29,7 +29,7 @@ import org.junit.Test;
  * @author <a href="mailto:csuml@yahoo.co.uk">Paul Keeble</a>
  *
  */
-public class SQLFileChangeTest extends AbstractChangeTest {
+public class SQLFileChangeTest extends StandardChangeTest {
 	
 	private SQLFileChange change;
 	private String fileName;

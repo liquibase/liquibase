@@ -1,6 +1,6 @@
 package liquibase.change.core;
 
-import liquibase.change.AbstractChangeTest;
+import liquibase.change.StandardChangeTest;
 import liquibase.database.Database;
 import static org.junit.Assert.*;
 import org.junit.Test;
@@ -8,7 +8,7 @@ import org.junit.Test;
 /**
  * Tests for {@link CreateSequenceChange}
  */
-public class CreateSequenceChangeTest extends AbstractChangeTest {
+public class CreateSequenceChangeTest extends StandardChangeTest {
 
     @Override
     @Test

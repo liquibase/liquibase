@@ -1,6 +1,6 @@
 package liquibase.change.core;
 
-import liquibase.change.AbstractChangeTest;
+import liquibase.change.StandardChangeTest;
 import liquibase.database.core.MockDatabase;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.statement.SqlStatement;
@@ -12,7 +12,7 @@ import org.junit.Test;
 /**
  * Tests for {@link liquibase.change.core.AlterSequenceChange}
  */
-public class LoadDataChangeTest extends AbstractChangeTest {
+public class LoadDataChangeTest extends StandardChangeTest {
 
     @Override
     @Test

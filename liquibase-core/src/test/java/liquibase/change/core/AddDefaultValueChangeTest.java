@@ -1,6 +1,6 @@
 package liquibase.change.core;
 
-import liquibase.change.AbstractChangeTest;
+import liquibase.change.StandardChangeTest;
 import liquibase.database.core.MockDatabase;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.DatabaseFunction;
@@ -8,7 +8,7 @@ import liquibase.statement.core.AddDefaultValueStatement;
 import static org.junit.Assert.*;
 import org.junit.Test;
 
-public class AddDefaultValueChangeTest extends AbstractChangeTest {
+public class AddDefaultValueChangeTest extends StandardChangeTest {
 
     @Override
     @Test

@@ -1,6 +1,6 @@
 package liquibase.change.core;
 
-import liquibase.change.AbstractChangeTest;
+import liquibase.change.StandardChangeTest;
 import liquibase.database.Database;
 import static org.junit.Assert.*;
 import org.junit.Before;
@@ -9,7 +9,7 @@ import org.junit.Test;
 /**
  * Tests for {@link liquibase.change.core.DropSequenceChange}
  */
-public class DropSequenceChangeTest extends AbstractChangeTest {
+public class DropSequenceChangeTest extends StandardChangeTest {
 
     private DropSequenceChange change;
 

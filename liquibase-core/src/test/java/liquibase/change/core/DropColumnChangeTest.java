@@ -1,6 +1,6 @@
 package liquibase.change.core;
 
-import liquibase.change.AbstractChangeTest;
+import liquibase.change.StandardChangeTest;
 import liquibase.database.core.MockDatabase;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.DropColumnStatement;
@@ -10,7 +10,7 @@ import org.junit.Test;
 /**
  * Tests for {@link DropColumnChange}
  */
-public class DropColumnChangeTest extends AbstractChangeTest {
+public class DropColumnChangeTest extends StandardChangeTest {
 
     @Override
     @Test

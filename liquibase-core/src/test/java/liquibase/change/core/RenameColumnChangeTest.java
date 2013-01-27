@@ -1,6 +1,6 @@
 package liquibase.change.core;
 
-import liquibase.change.AbstractChangeTest;
+import liquibase.change.StandardChangeTest;
 import liquibase.database.Database;
 import liquibase.database.core.CacheDatabase;
 import liquibase.database.core.DB2Database;
@@ -15,7 +15,7 @@ import org.junit.Test;
 /**
  * Tests for {@link RenameColumnChange}
  */
-public class RenameColumnChangeTest extends AbstractChangeTest {
+public class RenameColumnChangeTest extends StandardChangeTest {
 
     RenameColumnChange refactoring;
 

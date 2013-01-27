@@ -1,6 +1,6 @@
 package liquibase.change.core;
 
-import liquibase.change.AbstractChangeTest;
+import liquibase.change.StandardChangeTest;
 import liquibase.database.Database;
 import liquibase.database.core.CacheDatabase;
 import liquibase.database.core.FirebirdDatabase;
@@ -14,7 +14,7 @@ import org.junit.Test;
 /**
  * Tests for {@link RenameTableChange}
  */
-public class RenameTableChangeTest extends AbstractChangeTest {
+public class RenameTableChangeTest extends StandardChangeTest {
 
     private RenameTableChange refactoring;
 

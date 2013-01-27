@@ -1,6 +1,6 @@
 package liquibase.change.core;
 
-import liquibase.change.AbstractChangeTest;
+import liquibase.change.StandardChangeTest;
 import liquibase.database.core.MockDatabase;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.DropTableStatement;
@@ -11,7 +11,7 @@ import org.junit.Test;
 /**
  * Tests for {@link DropTableChange}
  */
-public class DropTableChangeTest extends AbstractChangeTest {
+public class DropTableChangeTest extends StandardChangeTest {
     private DropTableChange change;
 
     @Before

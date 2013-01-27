@@ -1,12 +1,12 @@
 package liquibase.change.core;
 
-import liquibase.change.AbstractChangeTest;
+import liquibase.change.StandardChangeTest;
 import liquibase.database.Database;
 import liquibase.database.core.SQLiteDatabase;
 import static org.junit.Assert.*;
 import org.junit.Test;
 
-public class AddPrimaryKeyChangeTest extends AbstractChangeTest {
+public class AddPrimaryKeyChangeTest extends StandardChangeTest {
 
     @Override
     @Test
