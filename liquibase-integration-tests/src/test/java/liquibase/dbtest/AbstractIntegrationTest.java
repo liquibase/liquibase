@@ -213,7 +213,7 @@ public abstract class AbstractIntegrationTest {
 
     protected CatalogAndSchema[] getSchemasToDrop() throws DatabaseException {
         return new CatalogAndSchema[]{
-                new CatalogAndSchema(null, "liquibaseb".toUpperCase()),
+                new CatalogAndSchema(null, database.correctObjectName("liquibaseb", Schema.class)),
                 new CatalogAndSchema(null, database.getDefaultSchemaName())
         };
     }

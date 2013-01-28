@@ -3,6 +3,7 @@ package liquibase.snapshot.jvm;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
 import liquibase.database.core.DB2Database;
+import liquibase.database.core.HsqlDatabase;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.core.MySQLDatabase;
 import liquibase.database.core.OracleDatabase;
@@ -80,7 +81,7 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
 
     protected List<Map> listConstraints(Table table, Database database, Schema schema) throws DatabaseException {
         String sql = null;
-        if (database instanceof MySQLDatabase) {
+        if (database instanceof MySQLDatabase || database instanceof HsqlDatabase) {
             sql = "select CONSTRAINT_NAME " +
                     "from information_schema.table_constraints " +
                     "where constraint_schema='" + database.correctObjectName(schema.getCatalogName(), Catalog.class) + "' " +
@@ -123,7 +124,7 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
         String name = example.getName();
 
         String sql = null;
-        if (database instanceof MySQLDatabase) {
+        if (database instanceof MySQLDatabase || database instanceof HsqlDatabase) {
             sql = "select const.CONSTRAINT_NAME, COLUMN_NAME " +
                     "from information_schema.table_constraints const " +
                     "join information_schema.key_column_usage col " +
