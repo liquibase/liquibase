@@ -144,9 +144,8 @@ public class H2Database extends AbstractJdbcDatabase {
         return true;
     }
 
-
     @Override
-    public String getDefaultSchemaName() {
+    protected String doGetDefaultSchemaName() {
         return "PUBLIC";
     }
 
