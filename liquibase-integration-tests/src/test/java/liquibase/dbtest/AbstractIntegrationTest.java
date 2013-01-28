@@ -861,6 +861,9 @@ public abstract class AbstractIntegrationTest {
 
     @Test
     public void invalidIncludeDoesntBreakLiquibase() throws Exception{
+        if (database == null) {
+            return;
+        }
         Liquibase liquibase = createLiquibase(invalidReferenceChangeLog);
         try {
             liquibase.update(null);
@@ -875,6 +878,9 @@ public abstract class AbstractIntegrationTest {
 
     @Test
     public void contextsWithHyphensWorkInFormattedSql() throws Exception {
+        if (database == null) {
+            return;
+        }
         Liquibase liquibase = createLiquibase("changelogs/common/sqlstyle/formatted.changelog.sql");
         liquibase.update("hyphen-context-using-sql,camelCaseContextUsingSql");
 
