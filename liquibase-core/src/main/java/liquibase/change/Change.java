@@ -54,7 +54,7 @@ public interface Change {
     /**
      * Return true if this Change object supports the passed database. Used by the ChangeLog parsing process.
      */
-    boolean supports(Database database) throws UnsupportedChangeException;
+    boolean supports(Database database);
 
     /**
      * Generates warnings based on the configured Change instance. Warnings do not stop changelog execution, but are passed along to the end user for reference.
@@ -98,19 +98,17 @@ public interface Change {
      * <p></p>
      * NOTE: This method may be called multiple times throughout the changelog execution process and may be called in documentation generation and other integration points as well.
      * <p></p>
-     * <b>If this method reads from the current database state or uses any other logic that will be affected by whether previous changeSets have ran or not, you must return true from {@link #generateStatementsQueriesDatabase}.</b>
-     *
-     * @throws UnsupportedChangeException if this change is not supported by the {@link Database} passed as argument
+     * <b>If this method reads from the current database state or uses any other logic that will be affected by whether previous changeSets have ran or not, you must return true from {@link #generateStatementsVolatile}.</b>
      */
     public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException;
 
     /**
-     * Returns true if this change reads from the database in the {@link #generateStatements(Database) } method.
+     * Returns true if this change reads data from the database or other sources that would change during the course of an update in the {@link #generateStatements(Database) } method.
      * If true, this change cannot be used in an updateSql-style commands because Liquibase cannot know the {@link SqlStatement} objects until all changeSets prior have been actually executed.
 
      * @throws UnsupportedChangeException if this change is not supported by the {@link Database} passed as argument
      */
-    public boolean generateStatementsQueriesDatabase(Database database) throws UnsupportedChangeException;
+    public boolean generateStatementsVolatile(Database database) throws UnsupportedChangeException;
 
 
     /**
@@ -125,7 +123,7 @@ public interface Change {
      * <p></p>
      * NOTE: This method may be called multiple times throughout the changelog execution process and may be called in documentation generation and other integration points as well.
      * <p></p>
-     * <b>If this method reads from the current database state or uses any other logic that will be affected by whether previous changeSets have been rolled back or not, you must return true from {@link #generateRollbackStatementsQueriesDatabase}.</b>
+     * <b>If this method reads from the current database state or uses any other logic that will be affected by whether previous changeSets have been rolled back or not, you must return true from {@link #generateRollbackStatementsVolatile}.</b>
      *
      * @throws UnsupportedChangeException  if this change is not supported by the {@link Database} passed as argument
      * @throws RollbackImpossibleException if rollback is not supported for this change
@@ -133,10 +131,10 @@ public interface Change {
     public SqlStatement[] generateRollbackStatements(Database database) throws UnsupportedChangeException, RollbackImpossibleException;
 
     /**
-     * Returns true if this change reads from the database in the {@link #generateStatements(Database) } method.
+     * Returns true if this change reads data from the database or other sources that would change during the course of an update in the {@link #generateRollbackStatements(Database) } method.
      * If true, this change cannot be used in an updateSql-style commands because Liquibase cannot know the {@link SqlStatement} objects until all changeSets prior have been actually executed.
 
      * @throws UnsupportedChangeException if this change is not supported by the {@link Database} passed as argument
      */
-    public boolean generateRollbackStatementsQueriesDatabase(Database database) throws UnsupportedChangeException;
+    public boolean generateRollbackStatementsVolatile(Database database) throws UnsupportedChangeException;
 }

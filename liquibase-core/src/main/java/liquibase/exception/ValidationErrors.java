@@ -42,16 +42,21 @@ public class ValidationErrors {
         }
     }
 
-    public void addError(String message) {
+    public ValidationErrors addError(String message) {
         errorMessages.add(message);
+        return this;
     }
 
     public List<String> getErrorMessages() {
         return errorMessages;
     }
 
-    public void addAll(ValidationErrors validationErrors) {
+    public ValidationErrors addAll(ValidationErrors validationErrors) {
+        if (validationErrors == null) {
+            return this;
+        }
         this.errorMessages.addAll(validationErrors.getErrorMessages());
+        return this;
     }
 
     public void addAll(ValidationErrors validationErrors, ChangeSet changeSet) {

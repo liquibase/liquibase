@@ -21,6 +21,7 @@ import java.lang.reflect.Method;
  * <p></p>
  * By default, this base class relies on annotations such as {@link DatabaseChange} and {@link DatabaseChangeProperty}
  * and delegating logic to the {@link liquibase.sqlgenerator.SqlGenerator} objects created to do the actual change work.
+ * Place the @DatabaseChangeProperty annotations on the read get methods.
  */
 public abstract class AbstractChange implements Change {
 
@@ -56,7 +57,7 @@ public abstract class AbstractChange implements Change {
                 throw new UnexpectedLiquibaseException("No @DatabaseChange annotation for " + getClass().getName());
             }
 
-            Set<ChangeParameterMetaData> params = new HashSet<ChangeParameterMetaData>();
+            Map<String, ChangeParameterMetaData> params = new HashMap<String, ChangeParameterMetaData>();
             for (PropertyDescriptor property : Introspector.getBeanInfo(this.getClass()).getPropertyDescriptors()) {
                 Method readMethod = property.getReadMethod();
                 Method writeMethod = property.getWriteMethod();
@@ -64,7 +65,7 @@ public abstract class AbstractChange implements Change {
                     DatabaseChangeProperty annotation = readMethod.getAnnotation(DatabaseChangeProperty.class);
                     if (annotation == null || annotation.includeInMetaData()) {
                         ChangeParameterMetaData param = createChangeParameterMetadata(property.getDisplayName());
-                        params.add(param);
+                        params.put(param.getParameterName(), param);
                     }
                 }
 
@@ -97,7 +98,7 @@ public abstract class AbstractChange implements Change {
             }
         }
         if (property == null) {
-            throw new RuntimeException("Could not find property " + parameterName);
+            throw new UnexpectedLiquibaseException("Could not find property " + parameterName);
         }
 
         String type = property.getPropertyType().getSimpleName();
@@ -138,11 +139,16 @@ public abstract class AbstractChange implements Change {
     }
 
     /**
-     * Implementation delegates logic to the {@link liquibase.sqlgenerator.SqlGenerator#generateStatementsQueriesDatabase(Database) } method on the {@link SqlStatement} objects returned by {@link #generateStatements }
+     * Implementation delegates logic to the {@link liquibase.sqlgenerator.SqlGenerator#generateStatementsVolatile(Database) } method on the {@link SqlStatement} objects returned by {@link #generateStatements }.
+     * If no or null SqlStatements are returned by generateStatements then this method returns false.
      */
-    public boolean generateStatementsQueriesDatabase(Database database) throws UnsupportedChangeException {
-        for (SqlStatement statement : generateStatements(database)) {
-            if (SqlGeneratorFactory.getInstance().generateStatementsQueriesDatabase(statement, database)) {
+    public boolean generateStatementsVolatile(Database database) throws UnsupportedChangeException {
+        SqlStatement[] statements = generateStatements(database);
+        if (statements == null) {
+            return false;
+        }
+        for (SqlStatement statement : statements) {
+            if (SqlGeneratorFactory.getInstance().generateStatementsVolatile(statement, database)) {
                 return true;
             }
         }
@@ -150,11 +156,16 @@ public abstract class AbstractChange implements Change {
     }
 
     /**
-     * Implementation delegates logic to the {@link liquibase.sqlgenerator.SqlGenerator#generateRollbackStatementsQueriesDatabase(Database) } method on the {@link SqlStatement} objects returned by {@link #generateStatements }
+     * Implementation delegates logic to the {@link liquibase.sqlgenerator.SqlGenerator#generateRollbackStatementsVolatile(Database) } method on the {@link SqlStatement} objects returned by {@link #generateStatements }
+     * If no or null SqlStatements are returned by generateRollbackStatements then this method returns false.
      */
-    public boolean generateRollbackStatementsQueriesDatabase(Database database) throws UnsupportedChangeException {
-        for (SqlStatement statement : generateStatements(database)) {
-            if (SqlGeneratorFactory.getInstance().generateRollbackStatementsQueriesDatabase(statement, database)) {
+    public boolean generateRollbackStatementsVolatile(Database database) throws UnsupportedChangeException {
+        SqlStatement[] statements = generateStatements(database);
+        if (statements == null) {
+             return false;
+        }
+        for (SqlStatement statement : statements) {
+            if (SqlGeneratorFactory.getInstance().generateRollbackStatementsVolatile(statement, database)) {
                 return true;
             }
         }
@@ -162,25 +173,42 @@ public abstract class AbstractChange implements Change {
     }
 
     /**
-     * Implementation delegates logic to the {@link liquibase.sqlgenerator.SqlGenerator#supports(liquibase.statement.SqlStatement, liquibase.database.Database)} method on the {@link SqlStatement} objects returned by {@link #generateStatements }
+     * Implementation delegates logic to the {@link liquibase.sqlgenerator.SqlGenerator#supports(liquibase.statement.SqlStatement, liquibase.database.Database)} method on the {@link SqlStatement} objects returned by {@link #generateStatements }.
+     * If no or null SqlStatements are returned by generateStatements then this method returns true.
      */
-    public boolean supports(Database database) throws UnsupportedChangeException {
-        for (SqlStatement statement : generateStatements(database)) {
-            if (!SqlGeneratorFactory.getInstance().supports(statement, database)) {
-                return false;
+    public boolean supports(Database database) {
+        try {
+            SqlStatement[] statements = generateStatements(database);
+            if (statements == null) {
+                return true;
             }
+            for (SqlStatement statement : statements) {
+                if (!SqlGeneratorFactory.getInstance().supports(statement, database)) {
+                    return false;
+                }
+            }
+        } catch (UnsupportedChangeException e) {
+            return false;
         }
         return true;
     }
 
     /**
-     * Implementation delegates logic to the {@link liquibase.sqlgenerator.SqlGenerator#warn(liquibase.statement.SqlStatement, liquibase.database.Database, liquibase.sqlgenerator.SqlGeneratorChain)} method on the {@link SqlStatement} objects returned by {@link #generateStatements }
+     * Implementation delegates logic to the {@link liquibase.sqlgenerator.SqlGenerator#warn(liquibase.statement.SqlStatement, liquibase.database.Database, liquibase.sqlgenerator.SqlGeneratorChain)} method on the {@link SqlStatement} objects returned by {@link #generateStatements }.
+     * If a generated statement is not supported for the given database, no warning will be added since that is a validation error.
+     * If no or null SqlStatements are returned by generateStatements then this method returns no warnings.
      */
     public Warnings warn(Database database) throws UnsupportedChangeException {
         Warnings warnings = new Warnings();
-        for (SqlStatement statement : generateStatements(database)) {
+        SqlStatement[] statements = generateStatements(database);
+        if (statements == null) {
+            return warnings;
+        }
+        for (SqlStatement statement : statements) {
             if (SqlGeneratorFactory.getInstance().supports(statement, database)) {
                 warnings.addAll(SqlGeneratorFactory.getInstance().warn(statement, database));
+            } else if (statement.skipOnUnsupported()) {
+                warnings.addWarning(statement.getClass().getName()+" is not supported on " + database.getShortName() + ", but "+getChangeMetaData().getName() + " will still execute");
             }
         }
 
@@ -189,12 +217,14 @@ public abstract class AbstractChange implements Change {
 
     /**
      * Implementation checks the ChangeParameterMetaData for declared required fields
-     * and also delegates logic to the {@link liquibase.sqlgenerator.SqlGenerator#validate(liquibase.statement.SqlStatement, liquibase.database.Database, liquibase.sqlgenerator.SqlGeneratorChain)}  method on the {@link SqlStatement} objects returned by {@link #generateStatements }
+     * and also delegates logic to the {@link liquibase.sqlgenerator.SqlGenerator#validate(liquibase.statement.SqlStatement, liquibase.database.Database, liquibase.sqlgenerator.SqlGeneratorChain)}  method on the {@link SqlStatement} objects returned by {@link #generateStatements }.
+     * If no or null SqlStatements are returned by generateStatements then this method returns no errors.
+     * If there are no parameters than this method returns no errors
      */
     public ValidationErrors validate(Database database) throws UnsupportedChangeException {
         ValidationErrors changeValidationErrors = new ValidationErrors();
 
-        for (ChangeParameterMetaData param : getChangeMetaData().getParameters()) {
+        for (ChangeParameterMetaData param : getChangeMetaData().getParameters().values()) {
             if (param.isRequiredFor(database) && param.getCurrentValue(this) == null) {
                 changeValidationErrors.addError(param.getParameterName() + " is required for " + getChangeMetaData().getName() + " on " + database.getShortName());
             }
@@ -203,16 +233,19 @@ public abstract class AbstractChange implements Change {
             return changeValidationErrors;
         }
 
-        for (SqlStatement statement : generateStatements(database)) {
-            boolean supported = SqlGeneratorFactory.getInstance().supports(statement, database);
-            if (!supported) {
-                if (statement.skipOnUnsupported()) {
-                    LogFactory.getLogger().info(getChangeMetaData().getName() + " is not supported on " + database.getShortName() + " but will continue");
+        boolean sawUnsupportedError = false;
+        SqlStatement[] statements = generateStatements(database);
+        if (statements != null) {
+            for (SqlStatement statement : statements) {
+                boolean supported = SqlGeneratorFactory.getInstance().supports(statement, database);
+                if (!supported && !sawUnsupportedError) {
+                    if (!statement.skipOnUnsupported()) {
+                        changeValidationErrors.addError(getChangeMetaData().getName() + " is not supported on " + database.getShortName());
+                        sawUnsupportedError = true;
+                    }
                 } else {
-                    changeValidationErrors.addError(getChangeMetaData().getName() + " is not supported on " + database.getShortName());
+                    changeValidationErrors.addAll(SqlGeneratorFactory.getInstance().validate(statement, database));
                 }
-            } else {
-                changeValidationErrors.addAll(SqlGeneratorFactory.getInstance().validate(statement, database));
             }
         }
 
@@ -261,11 +294,11 @@ public abstract class AbstractChange implements Change {
 
     /**
      * Create inverse changes that can roll back this change. This method is intended
-     * to be overriden by Change implementations that have a logical inverse operation.
+     * to be overriden by Change implementations that have a logical inverse operation. Default implementation returns null.
      * <p/>
      * If {@link #generateRollbackStatements(liquibase.database.Database)} is overridden, this method may not be called.
      *
-     * @return Return null if there is no corresponding inverse and therefore automatic rollback is not possible.
+     * @return Return null if there is no corresponding inverse and therefore automatic rollback is not possible. Return an empty array to have a no-op rollback.
      * @also #generateRollbackStatements #supportsRollback
      */
     protected Change[] createInverses() {
@@ -292,8 +325,11 @@ public abstract class AbstractChange implements Change {
      */
     public Set<DatabaseObject> getAffectedDatabaseObjects(Database database) throws UnsupportedChangeException {
         Set<DatabaseObject> affectedObjects = new HashSet<DatabaseObject>();
-        for (SqlStatement statement : generateStatements(database)) {
-            affectedObjects.addAll(SqlGeneratorFactory.getInstance().getAffectedDatabaseObjects(statement, database));
+        SqlStatement[] statements = generateStatements(database);
+        if (statements != null) {
+            for (SqlStatement statement : statements) {
+                affectedObjects.addAll(SqlGeneratorFactory.getInstance().getAffectedDatabaseObjects(statement, database));
+            }
         }
 
         return affectedObjects;

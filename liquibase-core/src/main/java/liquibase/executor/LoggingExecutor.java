@@ -72,7 +72,7 @@ public class LoggingExecutor extends AbstractExecutor implements Executor {
 
     private void outputStatement(SqlStatement sql, List<SqlVisitor> sqlVisitors) throws DatabaseException {
         try {
-            if (SqlGeneratorFactory.getInstance().generateStatementsQueriesDatabase(sql, database)) {
+            if (SqlGeneratorFactory.getInstance().generateStatementsVolatile(sql, database)) {
                 throw new DatabaseException(sql.getClass().getSimpleName()+" requires access to up to date database metadata which is not available in SQL output mode");
             }
             for (String statement : applyVisitors(sql, sqlVisitors)) {

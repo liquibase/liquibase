@@ -7,12 +7,16 @@ public class Warnings {
 
     private List<String> messages = new ArrayList<String>();
 
-    public void addWarning(String warning) {
+    public Warnings addWarning(String warning) {
         messages.add(warning);
+        return this;
     }
 
-    public void addAll(Warnings warnings) {
-        this.messages.addAll(warnings.getMessages());
+    public Warnings addAll(Warnings warnings) {
+        if (warnings != null) {
+            this.messages.addAll(warnings.getMessages());
+        }
+        return this;
     }
 
     public List<String> getMessages() {

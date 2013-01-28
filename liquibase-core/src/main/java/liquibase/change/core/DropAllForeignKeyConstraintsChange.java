@@ -121,7 +121,7 @@ public class DropAllForeignKeyConstraintsChange extends AbstractChange {
     }
 
     @Override
-    public boolean generateStatementsQueriesDatabase(Database database) throws UnsupportedChangeException {
+    public boolean generateStatementsVolatile(Database database) throws UnsupportedChangeException {
         return true;
     }
 }

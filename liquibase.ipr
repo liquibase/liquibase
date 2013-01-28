@@ -890,6 +890,17 @@
         <root url="jar://$MAVEN_REPOSITORY$/org/easymock/easymockclassextension/2.5.2/easymockclassextension-2.5.2-sources.jar!/" />
       </SOURCES>
     </library>
+    <library name="Maven: org.javassist:javassist:3.17.1-GA">
+      <CLASSES>
+        <root url="jar://$MAVEN_REPOSITORY$/org/javassist/javassist/3.17.1-GA/javassist-3.17.1-GA.jar!/" />
+      </CLASSES>
+      <JAVADOC>
+        <root url="jar://$MAVEN_REPOSITORY$/org/javassist/javassist/3.17.1-GA/javassist-3.17.1-GA-javadoc.jar!/" />
+      </JAVADOC>
+      <SOURCES>
+        <root url="jar://$MAVEN_REPOSITORY$/org/javassist/javassist/3.17.1-GA/javassist-3.17.1-GA-sources.jar!/" />
+      </SOURCES>
+    </library>
     <library name="Maven: org.jboss.spec.javax.interceptor:jboss-interceptors-api_1.1_spec:1.0.0.Beta1">
       <CLASSES>
         <root url="jar://$MAVEN_REPOSITORY$/org/jboss/spec/javax/interceptor/jboss-interceptors-api_1.1_spec/1.0.0.Beta1/jboss-interceptors-api_1.1_spec-1.0.0.Beta1.jar!/" />
@@ -941,6 +952,17 @@
         <root url="jar://$MAVEN_REPOSITORY$/org/liquibase/liquibase-core/2.0-SNAPSHOT/liquibase-core-2.0-SNAPSHOT-tests-sources.jar!/" />
       </SOURCES>
     </library>
+    <library name="Maven: org.mockito:mockito-all:1.9.5">
+      <CLASSES>
+        <root url="jar://$MAVEN_REPOSITORY$/org/mockito/mockito-all/1.9.5/mockito-all-1.9.5.jar!/" />
+      </CLASSES>
+      <JAVADOC>
+        <root url="jar://$MAVEN_REPOSITORY$/org/mockito/mockito-all/1.9.5/mockito-all-1.9.5-javadoc.jar!/" />
+      </JAVADOC>
+      <SOURCES>
+        <root url="jar://$MAVEN_REPOSITORY$/org/mockito/mockito-all/1.9.5/mockito-all-1.9.5-sources.jar!/" />
+      </SOURCES>
+    </library>
     <library name="Maven: org.objenesis:objenesis:1.2">
       <CLASSES>
         <root url="jar://$MAVEN_REPOSITORY$/org/objenesis/objenesis/1.2/objenesis-1.2.jar!/" />
@@ -961,6 +983,72 @@
       </JAVADOC>
       <SOURCES>
         <root url="jar://$MAVEN_REPOSITORY$/org/osgi/org.osgi.core/4.1.0/org.osgi.core-4.1.0-sources.jar!/" />
+      </SOURCES>
+    </library>
+    <library name="Maven: org.powermock:powermock-api-mockito:1.5">
+      <CLASSES>
+        <root url="jar://$MAVEN_REPOSITORY$/org/powermock/powermock-api-mockito/1.5/powermock-api-mockito-1.5.jar!/" />
+      </CLASSES>
+      <JAVADOC>
+        <root url="jar://$MAVEN_REPOSITORY$/org/powermock/powermock-api-mockito/1.5/powermock-api-mockito-1.5-javadoc.jar!/" />
+      </JAVADOC>
+      <SOURCES>
+        <root url="jar://$MAVEN_REPOSITORY$/org/powermock/powermock-api-mockito/1.5/powermock-api-mockito-1.5-sources.jar!/" />
+      </SOURCES>
+    </library>
+    <library name="Maven: org.powermock:powermock-api-support:1.5">
+      <CLASSES>
+        <root url="jar://$MAVEN_REPOSITORY$/org/powermock/powermock-api-support/1.5/powermock-api-support-1.5.jar!/" />
+      </CLASSES>
+      <JAVADOC>
+        <root url="jar://$MAVEN_REPOSITORY$/org/powermock/powermock-api-support/1.5/powermock-api-support-1.5-javadoc.jar!/" />
+      </JAVADOC>
+      <SOURCES>
+        <root url="jar://$MAVEN_REPOSITORY$/org/powermock/powermock-api-support/1.5/powermock-api-support-1.5-sources.jar!/" />
+      </SOURCES>
+    </library>
+    <library name="Maven: org.powermock:powermock-core:1.5">
+      <CLASSES>
+        <root url="jar://$MAVEN_REPOSITORY$/org/powermock/powermock-core/1.5/powermock-core-1.5.jar!/" />
+      </CLASSES>
+      <JAVADOC>
+        <root url="jar://$MAVEN_REPOSITORY$/org/powermock/powermock-core/1.5/powermock-core-1.5-javadoc.jar!/" />
+      </JAVADOC>
+      <SOURCES>
+        <root url="jar://$MAVEN_REPOSITORY$/org/powermock/powermock-core/1.5/powermock-core-1.5-sources.jar!/" />
+      </SOURCES>
+    </library>
+    <library name="Maven: org.powermock:powermock-module-junit4-common:1.5">
+      <CLASSES>
+        <root url="jar://$MAVEN_REPOSITORY$/org/powermock/powermock-module-junit4-common/1.5/powermock-module-junit4-common-1.5.jar!/" />
+      </CLASSES>
+      <JAVADOC>
+        <root url="jar://$MAVEN_REPOSITORY$/org/powermock/powermock-module-junit4-common/1.5/powermock-module-junit4-common-1.5-javadoc.jar!/" />
+      </JAVADOC>
+      <SOURCES>
+        <root url="jar://$MAVEN_REPOSITORY$/org/powermock/powermock-module-junit4-common/1.5/powermock-module-junit4-common-1.5-sources.jar!/" />
+      </SOURCES>
+    </library>
+    <library name="Maven: org.powermock:powermock-module-junit4:1.5">
+      <CLASSES>
+        <root url="jar://$MAVEN_REPOSITORY$/org/powermock/powermock-module-junit4/1.5/powermock-module-junit4-1.5.jar!/" />
+      </CLASSES>
+      <JAVADOC>
+        <root url="jar://$MAVEN_REPOSITORY$/org/powermock/powermock-module-junit4/1.5/powermock-module-junit4-1.5-javadoc.jar!/" />
+      </JAVADOC>
+      <SOURCES>
+        <root url="jar://$MAVEN_REPOSITORY$/org/powermock/powermock-module-junit4/1.5/powermock-module-junit4-1.5-sources.jar!/" />
+      </SOURCES>
+    </library>
+    <library name="Maven: org.powermock:powermock-reflect:1.5">
+      <CLASSES>
+        <root url="jar://$MAVEN_REPOSITORY$/org/powermock/powermock-reflect/1.5/powermock-reflect-1.5.jar!/" />
+      </CLASSES>
+      <JAVADOC>
+        <root url="jar://$MAVEN_REPOSITORY$/org/powermock/powermock-reflect/1.5/powermock-reflect-1.5-javadoc.jar!/" />
+      </JAVADOC>
+      <SOURCES>
+        <root url="jar://$MAVEN_REPOSITORY$/org/powermock/powermock-reflect/1.5/powermock-reflect-1.5-sources.jar!/" />
       </SOURCES>
     </library>
     <library name="Maven: org.springframework:spring:2.0.6">

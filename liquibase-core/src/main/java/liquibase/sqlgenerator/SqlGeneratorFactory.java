@@ -177,18 +177,18 @@ public class SqlGeneratorFactory {
      * Return true if the SqlStatement class queries the database in any way to determine Statements to execute.
      * If the statement queries the database, it cannot be used in updateSql type operations
      */
-    public boolean generateStatementsQueriesDatabase(SqlStatement statement, Database database) {
+    public boolean generateStatementsVolatile(SqlStatement statement, Database database) {
         for (SqlGenerator generator : getGenerators(statement, database)) {
-            if (generator.generateStatementsQueriesDatabase(database)) {
+            if (generator.generateStatementsVolatile(database)) {
                 return true;
             }
         }
         return false;
     }
 
-    public boolean generateRollbackStatementsQueriesDatabase(SqlStatement statement, Database database) {
+    public boolean generateRollbackStatementsVolatile(SqlStatement statement, Database database) {
         for (SqlGenerator generator : getGenerators(statement, database)) {
-            if (generator.generateRollbackStatementsQueriesDatabase(database)) {
+            if (generator.generateRollbackStatementsVolatile(database)) {
                 return true;
             }
         }
