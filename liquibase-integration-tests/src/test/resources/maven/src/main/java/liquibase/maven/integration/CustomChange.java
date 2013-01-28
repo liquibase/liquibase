@@ -46,7 +46,7 @@ public class CustomChange implements CustomSqlChange,CustomSqlRollback{
         return new ValidationErrors();
     }
 
-    public SqlStatement[] generateRollbackStatements(Database database) throws CustomChangeException, UnsupportedChangeException, RollbackImpossibleException {
+    public SqlStatement[] generateRollbackStatements(Database database) throws CustomChangeException, RollbackImpossibleException {
         SqlStatement st[]=new SqlStatement[1];
         DeleteStatement ds=new DeleteStatement(null, null,"persons");
         ds.setWhereClause("id=1");

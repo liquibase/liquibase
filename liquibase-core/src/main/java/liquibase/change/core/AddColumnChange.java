@@ -78,7 +78,7 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
     }
 
     @Override
-    public ValidationErrors validate(Database database) throws UnsupportedChangeException {
+    public ValidationErrors validate(Database database) {
         ValidationErrors validationErrors = super.validate(database);
         if (columns.size() == 0) {
             validationErrors.addError("'columns' is required");

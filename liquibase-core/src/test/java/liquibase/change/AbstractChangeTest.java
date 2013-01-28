@@ -19,6 +19,7 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
+import java.beans.PropertyDescriptor;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;
@@ -123,7 +124,7 @@ public class AbstractChangeTest {
 
     @Test(expected = UnexpectedLiquibaseException.class)
     public void createChangeParameterMetadata_invalidParamNameEmptyParams() throws Exception {
-        assertNull(new ExampleParamlessAbstractChange().createChangeParameterMetadata("paramOne"));
+        new ExampleParamlessAbstractChange().createChangeParameterMetadata("paramOne");
     }
 
     @Test(expected = UnexpectedLiquibaseException.class)
@@ -196,6 +197,16 @@ public class AbstractChangeTest {
     }
 
     @Test
+    public void generateStatementsVolatile_unsupportedChangeException() throws UnsupportedChangeException {
+        assertFalse(new ExampleAbstractChange() {
+            @Override
+            public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
+                throw new UnsupportedChangeException("test exception");
+            }
+        }.generateStatementsVolatile(mock(Database.class)));
+    }
+
+    @Test
     public void generateRollbackStatementsVolatile() throws UnsupportedChangeException {
         Database database = mock(Database.class);
         final SqlStatement statement1No = mock(SqlStatement.class);
@@ -244,6 +255,16 @@ public class AbstractChangeTest {
             }
         }.generateRollbackStatementsVolatile(mock(Database.class)));
     }
+    @Test
+    public void generateRollbackStatementsVolatile_unsupportedChangeException() throws UnsupportedChangeException {
+        assertFalse(new ExampleAbstractChange() {
+            @Override
+            public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
+                throw new UnsupportedChangeException("test exception");
+            }
+        }.generateRollbackStatementsVolatile(mock(Database.class)));
+    }
+
 
     @Test
     public void supports() throws UnsupportedChangeException {
@@ -286,7 +307,9 @@ public class AbstractChangeTest {
 
         assertFalse(new ExampleAbstractChange() {
             @Override
-            public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException { throw new UnsupportedChangeException("Not Supported Test"); }
+            public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
+                throw new UnsupportedChangeException("Not Supported Test");
+            }
         }.supports(database));
 
     }
@@ -394,6 +417,16 @@ public class AbstractChangeTest {
     }
 
     @Test
+    public void warn_unsupportedChangeException() throws UnsupportedChangeException {
+        assertFalse(new ExampleAbstractChange() {
+            @Override
+            public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
+                throw new UnsupportedChangeException("test exception");
+            }
+        }.warn(mock(Database.class)).hasWarnings());
+    }
+
+    @Test
     public void validate_noStatements() throws UnsupportedChangeException {
         assertFalse(new ExampleAbstractChange() {
             @Override
@@ -408,6 +441,18 @@ public class AbstractChangeTest {
                 return new SqlStatement[0];
             }
         }.validate(mock(Database.class)).hasErrors());
+    }
+
+    @Test
+    public void validate_unsupportedChangeException() throws UnsupportedChangeException {
+        ValidationErrors errors = new ExampleParamlessAbstractChange() {
+            @Override
+            public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
+                throw new UnsupportedChangeException("test exception");
+            }
+        }.validate(new MySQLDatabase());
+        assertEquals(1, errors.getErrorMessages().size());
+        assertEquals("exampleParamelessAbstractChange is not supported on mysql", errors.getErrorMessages().get(0));
     }
 
     @Test
@@ -524,12 +569,15 @@ public class AbstractChangeTest {
         final Change change1 = mock(Change.class);
         final Change change2 = mock(Change.class);
 
+        when(change1.supports(database)).thenReturn(true);
+        when(change2.supports(database)).thenReturn(true);
+
         SqlStatement change1Statement1 = mock(SqlStatement.class);
         SqlStatement change1Statement2 = mock(SqlStatement.class);
         SqlStatement change2Statement = mock(SqlStatement.class);
 
-        PowerMockito.when(change1.generateStatements(database)).thenReturn(new SqlStatement[] {change1Statement1, change1Statement2});
-        PowerMockito.when(change2.generateStatements(database)).thenReturn(new SqlStatement[] {change2Statement});
+        when(change1.generateStatements(database)).thenReturn(new SqlStatement[] {change1Statement1, change1Statement2});
+        when(change2.generateStatements(database)).thenReturn(new SqlStatement[] {change2Statement});
 
         SqlStatement[] rollbackStatements = new ExampleParamlessAbstractChange() {
             @Override
@@ -567,6 +615,41 @@ public class AbstractChangeTest {
         }.generateRollbackStatements(database);
 
         assertEquals(0, rollbackStatements.length);
+    }
+
+    @Test(expected = RollbackImpossibleException.class)
+    public void generateRollbackStatements_unsupportedChangeException() throws RollbackImpossibleException {
+        new ExampleAbstractChange() {
+            @Override
+            protected Change[] createInverses()  {
+                try {
+                    Change change1 = mock(Change.class);
+                    when(change1.supports(any(Database.class))).thenReturn(true);
+                    when(change1.getChangeMetaData()).thenReturn(new ChangeMetaData("testChange", null, 1, null, null));
+                    when(change1.generateStatements(any(Database.class))).thenThrow(new UnsupportedChangeException("testing exception"));
+                    return new Change[] {
+                            change1
+                    };
+                } catch (UnsupportedChangeException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }.generateRollbackStatements(mock(Database.class));
+    }
+
+    @Test(expected = RollbackImpossibleException.class)
+    public void generateRollbackStatements_notSupportedChange() throws RollbackImpossibleException {
+        new ExampleAbstractChange() {
+            @Override
+            protected Change[] createInverses()  {
+                Change change1 = mock(Change.class);
+                when(change1.getChangeMetaData()).thenReturn(new ChangeMetaData("testChange", null, 1, null, null));
+                when(change1.supports(any(Database.class))).thenReturn(false);
+                return new Change[] {
+                        change1
+                };
+            }
+        }.generateRollbackStatements(mock(Database.class));
     }
 
     @Test
@@ -632,6 +715,17 @@ public class AbstractChangeTest {
             }
         }.getAffectedDatabaseObjects(mock(Database.class)).size());
     }
+
+    @Test
+    public void getAffectedDatabaseObjects_unsupportedChangeException() throws UnsupportedChangeException {
+        assertEquals(0, new ExampleParamlessAbstractChange() {
+            @Override
+            public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException {
+                throw new UnsupportedChangeException("test exception");
+            }
+        }.getAffectedDatabaseObjects(new MySQLDatabase()).size());
+    }
+
 
     @Test
     public void supportsRollback() {

@@ -24,7 +24,7 @@ public class ExampleCustomTaskChange implements CustomTaskChange, CustomTaskRoll
         System.out.println("Hello "+getHelloTo());
     }
 
-    public void rollback(Database database) throws CustomChangeException, UnsupportedChangeException, RollbackImpossibleException {
+    public void rollback(Database database) throws CustomChangeException, RollbackImpossibleException {
         System.out.println("Goodbye "+getHelloTo());
     }
 

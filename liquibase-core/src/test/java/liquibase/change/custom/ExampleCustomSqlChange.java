@@ -49,7 +49,7 @@ public class ExampleCustomSqlChange implements CustomSqlChange, CustomSqlRollbac
         };
     }
 
-    public SqlStatement[] generateRollbackStatements(Database database) throws UnsupportedChangeException, RollbackImpossibleException {
+    public SqlStatement[] generateRollbackStatements(Database database) throws RollbackImpossibleException {
         return new SqlStatement[]{
                 new RawSqlStatement("update "+tableName+" set "+columnName+" = null")
         };

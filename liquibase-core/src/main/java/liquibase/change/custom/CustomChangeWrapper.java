@@ -120,7 +120,7 @@ public class CustomChangeWrapper extends AbstractChange {
     }
 
     @Override
-    public SqlStatement[] generateRollbackStatements(Database database) throws UnsupportedChangeException, RollbackImpossibleException {
+    public SqlStatement[] generateRollbackStatements(Database database) throws RollbackImpossibleException {
         SqlStatement[] statements = null;
         try {
             configureCustomChange();
@@ -129,10 +129,10 @@ public class CustomChangeWrapper extends AbstractChange {
             } else if (customChange instanceof CustomTaskRollback) {
                 ((CustomTaskRollback) customChange).rollback(database);
             } else {
-                throw new UnsupportedChangeException("Unknown rollback type: "+customChange.getClass().getName());
+                throw new RollbackImpossibleException("Unknown rollback type: "+customChange.getClass().getName());
             }
         } catch (CustomChangeException e) {
-            throw new UnsupportedChangeException(e);
+            throw new RollbackImpossibleException(e);
         }
 
         if (statements == null) {

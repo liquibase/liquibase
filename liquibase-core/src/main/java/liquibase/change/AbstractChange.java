@@ -1,5 +1,6 @@
 package liquibase.change;
 
+import java.beans.IntrospectionException;
 import java.util.*;
 
 import liquibase.changelog.ChangeSet;
@@ -85,7 +86,7 @@ public abstract class AbstractChange implements Change {
      * @return
      * @throws Exception
      */
-    protected ChangeParameterMetaData createChangeParameterMetadata(String parameterName) throws Exception {
+    protected ChangeParameterMetaData createChangeParameterMetadata(String parameterName) throws IntrospectionException {
 
         String displayName = parameterName.replaceAll("([A-Z])", " $1");
         displayName = displayName.substring(0, 1).toUpperCase() + displayName.substring(1);
@@ -141,9 +142,15 @@ public abstract class AbstractChange implements Change {
     /**
      * Implementation delegates logic to the {@link liquibase.sqlgenerator.SqlGenerator#generateStatementsVolatile(Database) } method on the {@link SqlStatement} objects returned by {@link #generateStatements }.
      * If no or null SqlStatements are returned by generateStatements then this method returns false.
+     * Returns false if generateStatements throws UnsupportedChangeException.
      */
-    public boolean generateStatementsVolatile(Database database) throws UnsupportedChangeException {
-        SqlStatement[] statements = generateStatements(database);
+    public boolean generateStatementsVolatile(Database database) {
+        SqlStatement[] statements;
+        try {
+            statements = generateStatements(database);
+        } catch (UnsupportedChangeException e) {
+            return false;
+        }
         if (statements == null) {
             return false;
         }
@@ -158,9 +165,15 @@ public abstract class AbstractChange implements Change {
     /**
      * Implementation delegates logic to the {@link liquibase.sqlgenerator.SqlGenerator#generateRollbackStatementsVolatile(Database) } method on the {@link SqlStatement} objects returned by {@link #generateStatements }
      * If no or null SqlStatements are returned by generateRollbackStatements then this method returns false.
+     * Returns false if generateStatements throws UnsupportedChangeException.
      */
-    public boolean generateRollbackStatementsVolatile(Database database) throws UnsupportedChangeException {
-        SqlStatement[] statements = generateStatements(database);
+    public boolean generateRollbackStatementsVolatile(Database database) {
+        SqlStatement[] statements;
+        try {
+            statements = generateStatements(database);
+        } catch (UnsupportedChangeException e) {
+            return false;
+        }
         if (statements == null) {
              return false;
         }
@@ -198,9 +211,14 @@ public abstract class AbstractChange implements Change {
      * If a generated statement is not supported for the given database, no warning will be added since that is a validation error.
      * If no or null SqlStatements are returned by generateStatements then this method returns no warnings.
      */
-    public Warnings warn(Database database) throws UnsupportedChangeException {
+    public Warnings warn(Database database) {
         Warnings warnings = new Warnings();
-        SqlStatement[] statements = generateStatements(database);
+        SqlStatement[] statements;
+        try {
+            statements = generateStatements(database);
+        } catch (UnsupportedChangeException e) {
+            return warnings;
+        }
         if (statements == null) {
             return warnings;
         }
@@ -221,7 +239,7 @@ public abstract class AbstractChange implements Change {
      * If no or null SqlStatements are returned by generateStatements then this method returns no errors.
      * If there are no parameters than this method returns no errors
      */
-    public ValidationErrors validate(Database database) throws UnsupportedChangeException {
+    public ValidationErrors validate(Database database) {
         ValidationErrors changeValidationErrors = new ValidationErrors();
 
         for (ChangeParameterMetaData param : getChangeMetaData().getParameters().values()) {
@@ -233,20 +251,26 @@ public abstract class AbstractChange implements Change {
             return changeValidationErrors;
         }
 
+        String unsupportedWarning = getChangeMetaData().getName() + " is not supported on " + database.getShortName();
         boolean sawUnsupportedError = false;
-        SqlStatement[] statements = generateStatements(database);
-        if (statements != null) {
-            for (SqlStatement statement : statements) {
-                boolean supported = SqlGeneratorFactory.getInstance().supports(statement, database);
-                if (!supported && !sawUnsupportedError) {
-                    if (!statement.skipOnUnsupported()) {
-                        changeValidationErrors.addError(getChangeMetaData().getName() + " is not supported on " + database.getShortName());
-                        sawUnsupportedError = true;
+        try {
+            SqlStatement[] statements;
+            statements = generateStatements(database);
+            if (statements != null) {
+                for (SqlStatement statement : statements) {
+                    boolean supported = SqlGeneratorFactory.getInstance().supports(statement, database);
+                    if (!supported && !sawUnsupportedError) {
+                        if (!statement.skipOnUnsupported()) {
+                            changeValidationErrors.addError(unsupportedWarning);
+                            sawUnsupportedError = true;
+                        }
+                    } else {
+                        changeValidationErrors.addAll(SqlGeneratorFactory.getInstance().validate(statement, database));
                     }
-                } else {
-                    changeValidationErrors.addAll(SqlGeneratorFactory.getInstance().validate(statement, database));
                 }
             }
+        } catch (UnsupportedChangeException e) {
+            changeValidationErrors.addError(unsupportedWarning);
         }
 
         return changeValidationErrors;
@@ -255,7 +279,7 @@ public abstract class AbstractChange implements Change {
     /**
      * Implementation relies on value returned from {@link #createInverses()}.
      */
-    public SqlStatement[] generateRollbackStatements(Database database) throws UnsupportedChangeException, RollbackImpossibleException {
+    public SqlStatement[] generateRollbackStatements(Database database) throws RollbackImpossibleException {
         return generateRollbackStatementsFromInverse(database);
     }
 
@@ -274,10 +298,11 @@ public abstract class AbstractChange implements Change {
     }
 
     /*
-     * Generates rollback statements from the inverse changes returned by createInverses()
+     * Generates rollback statements from the inverse changes returned by createInverses().
+     * Throws RollbackImpossibleException if the changes created by createInverses() is not supported for the passed database.
      *
      */
-    private SqlStatement[] generateRollbackStatementsFromInverse(Database database) throws UnsupportedChangeException, RollbackImpossibleException {
+    private SqlStatement[] generateRollbackStatementsFromInverse(Database database) throws RollbackImpossibleException {
         Change[] inverses = createInverses();
         if (inverses == null) {
             throw new RollbackImpossibleException("No inverse to " + getClass().getName() + " created");
@@ -285,8 +310,15 @@ public abstract class AbstractChange implements Change {
 
         List<SqlStatement> statements = new ArrayList<SqlStatement>();
 
-        for (Change inverse : inverses) {
-            statements.addAll(Arrays.asList(inverse.generateStatements(database)));
+        try {
+            for (Change inverse : inverses) {
+                if (!inverse.supports(database)) {
+                    throw new RollbackImpossibleException(inverse.getChangeMetaData().getName()+" is not supported on "+database.getShortName());
+                }
+                statements.addAll(Arrays.asList(inverse.generateStatements(database)));
+            }
+        } catch (UnsupportedChangeException e) {
+            throw new RollbackImpossibleException(e);
         }
 
         return statements.toArray(new SqlStatement[statements.size()]);
@@ -322,10 +354,16 @@ public abstract class AbstractChange implements Change {
 
     /**
      * Implementation delegates logic to the {@link liquibase.sqlgenerator.SqlGeneratorFactory#getAffectedDatabaseObjects(liquibase.statement.SqlStatement, liquibase.database.Database)}  method on the {@link SqlStatement} objects returned by {@link #generateStatements }
+     * Returns empty set if change is not supported for the passed database
      */
-    public Set<DatabaseObject> getAffectedDatabaseObjects(Database database) throws UnsupportedChangeException {
+    public Set<DatabaseObject> getAffectedDatabaseObjects(Database database) {
         Set<DatabaseObject> affectedObjects = new HashSet<DatabaseObject>();
-        SqlStatement[] statements = generateStatements(database);
+        SqlStatement[] statements;
+        try {
+            statements = generateStatements(database);
+        } catch (UnsupportedChangeException e) {
+            return affectedObjects;
+        }
         if (statements != null) {
             for (SqlStatement statement : statements) {
                 affectedObjects.addAll(SqlGeneratorFactory.getInstance().getAffectedDatabaseObjects(statement, database));

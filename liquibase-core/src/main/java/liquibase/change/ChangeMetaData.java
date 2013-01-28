@@ -2,10 +2,7 @@ package liquibase.change;
 
 import liquibase.servicelocator.PrioritizedService;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Static metadata about a Change
@@ -21,6 +18,9 @@ public class ChangeMetaData implements PrioritizedService {
     private String[] appliesTo;
 
     public ChangeMetaData(String name, String description, int priority, String[] appliesTo, Map<String, ChangeParameterMetaData> parameters) {
+        if (parameters == null) {
+            parameters  = new HashMap<String, ChangeParameterMetaData>();
+        }
         this.name = name;
         this.description = description;
         this.priority = priority;
