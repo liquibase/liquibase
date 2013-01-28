@@ -27,6 +27,8 @@ public class BooleanType extends LiquibaseDataType {
             return new DatabaseDataType("BIT");
         } else if (database instanceof DerbyDatabase) {
             return new DatabaseDataType("SMALLINT");
+        } else if (database instanceof HsqlDatabase) {
+            return new DatabaseDataType("BOOLEAN");
         }
 
         return super.toDatabaseDataType(database);

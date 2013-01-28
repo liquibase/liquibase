@@ -25,6 +25,7 @@ public class HsqlDatabase extends AbstractJdbcDatabase {
     	super();
     	super.defaultAutoIncrementStartWith = BigInteger.ZERO;
         super.sequenceNextValueFunction = "NEXT VALUE FOR %s";
+        super.unquotedObjectsAreUppercased = Boolean.TRUE;
     }
     
     public boolean isCorrectDatabaseImplementation(DatabaseConnection conn) throws DatabaseException {
@@ -54,11 +55,6 @@ public class HsqlDatabase extends AbstractJdbcDatabase {
 
     public String getShortName() {
         return "hsqldb";
-    }
-
-    @Override
-    public String correctObjectName(String objectName, Class<? extends DatabaseObject> objectType) {
-        return objectName.toUpperCase();
     }
 
     @Override

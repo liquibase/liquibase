@@ -20,6 +20,9 @@ public abstract class AbstractDatabaseObject implements DatabaseObject {
     }
 
     public void setSnapshotId(UUID snapshotId) {
+        if (snapshotId == null) {
+            throw new UnexpectedLiquibaseException("Must be a non null uuid");
+        }
         if (this.snapshotId != null) {
             throw new UnexpectedLiquibaseException("snapshotId already set");
         }

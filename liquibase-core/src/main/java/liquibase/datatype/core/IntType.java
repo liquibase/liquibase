@@ -36,7 +36,7 @@ public class IntType extends LiquibaseDataType {
                 return new DatabaseDataType("SERIAL");
             }
         }
-        if (database instanceof MSSQLDatabase) {
+        if (database instanceof MSSQLDatabase || database instanceof HsqlDatabase) {
             return new DatabaseDataType("INT");
         }
         return super.toDatabaseDataType(database);
