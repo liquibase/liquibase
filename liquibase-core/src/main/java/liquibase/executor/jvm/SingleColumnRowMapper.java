@@ -1,10 +1,14 @@
 package liquibase.executor.jvm;
 
+import java.math.BigDecimal;
+import java.sql.Blob;
+import java.sql.Clob;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+
 import liquibase.util.JdbcUtils;
 import liquibase.util.NumberUtils;
-
-import java.math.BigDecimal;
-import java.sql.*;
 
 /**
  * RowMapper implementation that converts a single column into
@@ -63,8 +67,10 @@ class SingleColumnRowMapper implements RowMapper {
         // Validate column count.
         ResultSetMetaData rsmd = rs.getMetaData();
         int nrOfColumns = rsmd.getColumnCount();
-        if (nrOfColumns != 1) {
-            throw new SQLException("Returned too many rows");
+        if (nrOfColumns == 0) {
+            throw new SQLException("Returned no rows!");
+        } else if (nrOfColumns != 1) {
+            throw new SQLException("Returned too many rows: "+ nrOfColumns);
         }
 
         // Extract column value from JDBC ResultSet

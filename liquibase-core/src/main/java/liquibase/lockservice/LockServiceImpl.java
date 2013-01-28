@@ -1,6 +1,7 @@
 package liquibase.lockservice;
 
 import liquibase.database.Database;
+import liquibase.database.core.CassandraDatabase;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LockException;
 import liquibase.executor.Executor;
@@ -36,7 +37,11 @@ public class LockServiceImpl implements LockService {
     }
 
     public boolean supports(Database database) {
-        return true;
+    	if (database instanceof CassandraDatabase){
+    		return false;
+    	} else {
+    		return true;
+    	}
     }
 
     public void setDatabase(Database database) {
