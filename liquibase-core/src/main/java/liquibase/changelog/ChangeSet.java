@@ -551,6 +551,12 @@ public class ChangeSet implements Conditional {
     }
 
     public boolean isCheckSumValid(CheckSum storedCheckSum) {
+        // no need to generate the checksum if any has been set as the valid checksum
+        for (CheckSum validCheckSum : validCheckSums) {
+            if (validCheckSum.toString().equalsIgnoreCase("1:any")) {
+                return true;
+            }
+        }
         CheckSum currentMd5Sum = generateCheckSum();
         if (currentMd5Sum == null) {
             return true;
@@ -563,9 +569,6 @@ public class ChangeSet implements Conditional {
         }
 
         for (CheckSum validCheckSum : validCheckSums) {
-            if (validCheckSum.toString().equalsIgnoreCase("1:any")) {
-                return true;
-            }
             if (currentMd5Sum.equals(validCheckSum)) {
                 return true;
             }
