@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.0.xsd
+        http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd"
+        logicalFilePath="master.changelog.xml"
+        skipValidation="true">
+
+    <property name="table.name" value="paramter_table"/>
+    <property file="changelogs/common/dynamic.parameters.properties"/>
+    <property name="column1.name" value="updated-columnA"/>
+    <property name="column2.name" value="columnB"/>
+    <property name="real.int.type" value="int"/>
+    <property name="real.int.type" value="already-set-int"/>
+    <property name="true.boolean" value="${true}"/>
+
+    <changeSet id="datatype-1" author="nvoxland">
+        <preConditions>
+            <changeLogPropertyDefined property="real.int.type" value="int"/>
+        </preConditions>
+        <createTable tableName="dataTypeTest" schemaName="">
+            <column name="id" type="${real.int.type}">
+                <constraints primaryKey="${true.boolean}" nullable="false"/>
+            </column>
+            <column name="dateCol" type="date"/>
+            <column name="timeCol" type="time"/>
+            <column name="dateTimeCol" type="dateTime"/>
+            <column name="bigintcol" type="bigint"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="authortest" author="nvoxland">
+        <preConditions>
+            <sqlCheck expectedResult="1">select count(*) from DATABASECHANGELOG where AUTHOR='nvoxland' and ID='datatype-1';</sqlCheck>
+        </preConditions>
+    </changeSet>
+
+    <changeSet id="tagTest" author="nvoxland">
+        <tagDatabase tag="testTag"/>
+    </changeSet>
+
+    <changeSet id="datatypetest-2" author="nvoxland">
+        <insert tableName="dataTypeTest">
+            <column name="id" valueNumeric="1"/>
+            <column name="dateCol" valueDate="2007-08-09"/>
+            <column name="timeCol" valueDate="13:14:15"/>
+            <column name="dateTimeCol" valueDate="2007-08-09T13:14:15"/>
+            <column name="bigintcol" valueNumeric="4"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="defaultValueTest-1" author="nvoxland">
+        <preConditions onFail="MARK_RAN">
+            <not><dbms type="derby"/></not>
+            <not><dbms type="mysql"/></not> <!-- fails on set default now() -->
+        </preConditions>
+        <createTable tableName="defaultValueTest">
+            <column name="id" type="int"/>
+            <column name="intA" type="int"/>
+            <column name="textA" type="varchar(5)"/>
+            <column name="booleanA" type="boolean"/>
+            <column name="dateA" type="date"/>
+            <column name="timeA" type="time"/>
+            <column name="datetimeA" type="datetime"/>
+            <column name="datetimeB" type="datetime"/>
+            <column name="computedDate" type="datetime"/>
+        </createTable>
+
+        <addDefaultValue tableName="defaultValueTest" columnName="intA" defaultValueNumeric="1" columnDataType="int" />
+        <addDefaultValue tableName="defaultValueTest" columnName="textA" defaultValue="a" columnDataType="varchar(5)" />
+        <addDefaultValue tableName="defaultValueTest" columnName="booleanA" defaultValueBoolean="true" columnDataType="boolean" />
+        <addDefaultValue tableName="defaultValueTest" columnName="dateA" defaultValueDate="2007-08-09" columnDataType="date" />
+        <addDefaultValue tableName="defaultValueTest" columnName="timeA" defaultValueDate="14:15:16" columnDataType="time" />
+        <addDefaultValue tableName="defaultValueTest" columnName="datetimeA" defaultValueDate="2007-08-09T10:11:12" columnDataType="datetime" />
+        <addDefaultValue tableName="defaultValueTest" columnName="datetimeB" defaultValueDate="2007-08-09 10:11:12" columnDataType="datetime" />
+        <addDefaultValue tableName="defaultValueTest" columnName="computedDate" defaultValueComputed="CURRENT_TIMESTAMP()" columnDataType="datetime" />
+
+        <insert tableName="defaultValueTest">
+            <column name="id" valueNumeric="1"/>
+        </insert>
+    </changeSet>
+
+</databaseChangeLog>
