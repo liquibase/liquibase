@@ -24,8 +24,8 @@ public abstract class AbstractSQLChange extends AbstractChange {
     private String sql;
 
     protected AbstractSQLChange() {
-        stripComments= false;
-        splitStatements =true;
+        setStripComments(null);
+        setSplitStatements(null);
     }
 
     /**
@@ -47,9 +47,14 @@ public abstract class AbstractSQLChange extends AbstractChange {
 
     /**
      * Return true if comments should be stripped from the SQL before passing it to the database.
+     * Passing null sets stripComments to the default value (false).
      */
     public void setStripComments(Boolean stripComments) {
-        this.stripComments = stripComments;
+        if (stripComments == null) {
+            this.stripComments = false;
+        } else {
+            this.stripComments = stripComments;
+        }
     }
 
     /**
@@ -62,9 +67,14 @@ public abstract class AbstractSQLChange extends AbstractChange {
 
     /**
      * Set whether SQL should be split into multiple statements.
+     * Passing null sets stripComments to the default value (true).
      */
     public void setSplitStatements(Boolean splitStatements) {
-        this.splitStatements = splitStatements;
+        if (splitStatements == null) {
+            this.splitStatements = true;
+        } else {
+            this.splitStatements = splitStatements;
+        }
     }
 
     /**
@@ -75,7 +85,7 @@ public abstract class AbstractSQLChange extends AbstractChange {
     }
 
     /**
-     * Set the raw SQL managed by this Change.
+     * Set the raw SQL managed by this Change. The passed sql is trimmed and set to null if an empty string is passed.
      */
     public void setSql(String sql) {
        this.sql = StringUtils.trimToNull(sql);
@@ -109,18 +119,19 @@ public abstract class AbstractSQLChange extends AbstractChange {
         if (sql == null) {
             sql = "";
         }
-        return CheckSum.compute(this.endDelimiter+":"+
+        return CheckSum.compute(this.getEndDelimiter()+":"+
                 this.isSplittingStatements()+":"+
                 this.isStrippingComments()+":"+
-                sql.replaceAll("\r\n", "\n").replaceAll("\r", "\n")); //normalize line endings
+                normalizeLineEndings(sql)); //normalize line endings
     }
 
 
     /**
      * Generates one or more SqlStatements depending on how the SQL should be parsed.
-     * If split statements is set to true then the SQL is split and each cpommand is made a separate SqlStatement.
+     * If split statements is set to true then the SQL is split and each command is made into a separate SqlStatement.
      * <p></p>
      * If stripping comments is true then any comments are removed before the splitting is executed.
+     * The set SQL is passed through the {@link java.sql.Connection#nativeSQL} method if a connection is available.
      */
     public SqlStatement[] generateStatements(Database database) {
 
@@ -130,16 +141,18 @@ public abstract class AbstractSQLChange extends AbstractChange {
             return new SqlStatement[0];
         }
 
-        String processedSQL = getSql().replaceAll("\r\n", "\n").replaceAll("\r", "\n");
+        String processedSQL = normalizeLineEndings(sql);
         for (String statement : StringUtils.processMutliLineSQL(processedSQL, isStrippingComments(), isSplittingStatements(), getEndDelimiter())) {
             if (database instanceof MSSQLDatabase) {
                  statement = statement.replaceAll("\n", "\r\n");
              }
 
-            String escapedStatement;
+            String escapedStatement = statement;
 			try {
-				escapedStatement = database.getConnection().nativeSQL(statement);
-			} catch (DatabaseException e) {
+                if (database.getConnection() != null) {
+                    escapedStatement = database.getConnection().nativeSQL(statement);
+                }
+            } catch (DatabaseException e) {
 				escapedStatement = statement;
 			}
 
@@ -147,5 +160,9 @@ public abstract class AbstractSQLChange extends AbstractChange {
         }
 
         return returnStatements.toArray(new SqlStatement[returnStatements.size()]);
+    }
+
+    private String normalizeLineEndings(String string) {
+        return string.replaceAll("\r\n", "\n").replaceAll("\r", "\n");
     }
 }
