@@ -4,6 +4,7 @@ import liquibase.database.Database;
 import liquibase.database.core.HsqlDatabase;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.core.OracleDatabase;
+import liquibase.database.core.PostgresDatabase;
 import liquibase.datatype.DataTypeInfo;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
@@ -13,7 +14,7 @@ public class NVarcharType extends CharType {
 
     @Override
     public DatabaseDataType toDatabaseDataType(Database database) {
-        if (database instanceof HsqlDatabase) {
+        if (database instanceof HsqlDatabase || database instanceof PostgresDatabase) {
             return new DatabaseDataType("VARCHAR", getParameters());
         }
         if (database instanceof OracleDatabase) {
