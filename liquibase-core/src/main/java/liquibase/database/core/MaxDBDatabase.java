@@ -18,7 +18,8 @@ public class MaxDBDatabase extends AbstractJdbcDatabase {
     protected Set<String> systemTablesAndViews = new HashSet<String>();
 
     public MaxDBDatabase() {
-        super();
+        super.setCurrentDateTimeFunction("TIMESTAMP");
+        super.sequenceNextValueFunction="%s.NEXTVAL";
         systemTablesAndViews.add("---");
 
         systemTablesAndViews.add("ACTIVECONFIGURATION");
@@ -82,7 +83,6 @@ public class MaxDBDatabase extends AbstractJdbcDatabase {
         systemTablesAndViews.add("TRANSACTIONS");
         systemTablesAndViews.add("UNLOADEDSTATEMENTS");
         systemTablesAndViews.add("VERSION");
-        super.sequenceNextValueFunction = "%s.NEXTVAL";
 
     }
 
@@ -126,14 +126,6 @@ public class MaxDBDatabase extends AbstractJdbcDatabase {
             return "com.sap.dbtech.jdbc.DriverSapDB";
         }
         return null;
-    }
-
-    public String getCurrentDateTimeFunction() {
-        if (currentDateTimeFunction != null) {
-            return currentDateTimeFunction;
-        }
-
-        return "TIMESTAMP";
     }
 
 

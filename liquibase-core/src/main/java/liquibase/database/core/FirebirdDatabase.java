@@ -14,8 +14,8 @@ import liquibase.structure.core.Table;
 public class FirebirdDatabase extends AbstractJdbcDatabase {
 
     public FirebirdDatabase() {
-        super();
-        super.sequenceNextValueFunction = "NEXT VALUE FOR %s";
+        super.setCurrentDateTimeFunction("CURRENT_TIMESTAMP");
+        super.sequenceNextValueFunction="NEXT VALUE FOR %s";
     }
 
     public boolean isCorrectDatabaseImplementation(DatabaseConnection conn) throws DatabaseException {
@@ -53,14 +53,6 @@ public class FirebirdDatabase extends AbstractJdbcDatabase {
 
     public boolean supportsInitiallyDeferrableColumns() {
         return false;
-    }
-
-    public String getCurrentDateTimeFunction() {
-        if (currentDateTimeFunction != null) {
-            return currentDateTimeFunction;
-        }
-
-        return "CURRENT_TIMESTAMP";
     }
 
     public boolean supportsTablespaces() {

@@ -19,6 +19,7 @@ public class DB2Database extends AbstractJdbcDatabase {
     private String defaultSchemaName;
 
     public DB2Database() {
+        super.setCurrentDateTimeFunction("CURRENT TIMESTAMP");
         super.sequenceNextValueFunction = "nextval for %s";
     }
     
@@ -100,14 +101,6 @@ public class DB2Database extends AbstractJdbcDatabase {
 
     public boolean supportsInitiallyDeferrableColumns() {
         return false;
-    }
-
-    public String getCurrentDateTimeFunction() {
-        if (currentDateTimeFunction != null) {
-            return currentDateTimeFunction;
-        }
-
-        return "CURRENT TIMESTAMP";
     }
 
     /**

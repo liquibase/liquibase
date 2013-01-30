@@ -78,6 +78,14 @@
             <column name="dateTimeCol" valueDate="2007-08-09T13:14:15"/>
             <column name="bigintcol" valueNumeric="2"/>
         </insert>
+        <insert tableName="dataTypeTest">
+          <column name="id" valueNumeric="2"/>
+          <column name="dateCol" valueDate="current_datetime"/>
+          <column name="timeCol" valueComputed="current_datetime"/>
+          <column name="dateTimeCol" valueDate="current_datetime"/>
+          <column name="bigintcol" valueNumeric="2"/>
+        </insert>
+
     </changeSet>
 
     <changeSet id="defaultValueTest-1" author="nvoxland">
@@ -104,7 +112,7 @@
         <addDefaultValue tableName="defaultValueTest" columnName="timeA" defaultValueDate="14:15:16" columnDataType="time" />
         <addDefaultValue tableName="defaultValueTest" columnName="datetimeA" defaultValueDate="2007-08-09T10:11:12" columnDataType="datetime" />
         <addDefaultValue tableName="defaultValueTest" columnName="datetimeB" defaultValueDate="2007-08-09 10:11:12" columnDataType="datetime" />
-        <addDefaultValue tableName="defaultValueTest" columnName="computedDate" defaultValueComputed="CURRENT_TIMESTAMP()" columnDataType="datetime" />
+        <addDefaultValue tableName="defaultValueTest" columnName="computedDate" defaultValueComputed="current_datetime" columnDataType="datetime" />
 
         <insert tableName="defaultValueTest">
             <column name="id" valueNumeric="1"/>
@@ -375,6 +383,11 @@
             <column name="intCol" valueNumeric="12"/>
             <where>id=2</where>
         </update>
+
+      <update tableName="updateTest">
+        <column name="dateCol" valueComputed="current_datetime"/>
+        <where>id=2</where>
+      </update>
 
     </changeSet>
 

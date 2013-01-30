@@ -23,8 +23,9 @@ public class H2Database extends AbstractJdbcDatabase {
     private static String SEP_CONCAT = ", ";
 
     public H2Database() {
+        super.setCurrentDateTimeFunction("NOW()");
+        super.sequenceNextValueFunction = "nextval('%s')";
         this.dateFunctions.add(new DatabaseFunction("CURRENT_TIMESTAMP()"));
-        sequenceNextValueFunction = "nextval('%s')";
     }
 
     public String getShortName() {
@@ -245,14 +246,6 @@ public class H2Database extends AbstractJdbcDatabase {
 
     public boolean supportsInitiallyDeferrableColumns() {
         return false;
-    }
-
-    public String getCurrentDateTimeFunction() {
-        if (currentDateTimeFunction != null) {
-            return currentDateTimeFunction;
-        }
-
-        return "NOW()";
     }
 
 }

@@ -6,6 +6,7 @@ import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
+import liquibase.statement.DatabaseFunction;
 import liquibase.statement.SequenceFunction;
 import liquibase.statement.core.InsertStatement;
 
@@ -51,6 +52,9 @@ public class InsertGenerator extends AbstractSqlGenerator<InsertStatement> {
                 }
             } else if (newValue instanceof SequenceFunction) {
                 sql.append(database.generateSequenceNextValueFunction(newValue.toString()));
+            } else if (newValue instanceof DatabaseFunction
+                    && DatabaseFunction.CURRENT_DATE_TIME_PLACE_HOLDER.equalsIgnoreCase(newValue.toString())) {
+                sql.append(database.getCurrentDateTimeFunction());
             }
             else {
                 sql.append(newValue);

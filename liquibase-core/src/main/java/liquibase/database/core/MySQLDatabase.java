@@ -18,6 +18,10 @@ import liquibase.statement.core.RawSqlStatement;
 public class MySQLDatabase extends AbstractJdbcDatabase {
     public static final String PRODUCT_NAME = "MySQL";
 
+    public MySQLDatabase() {
+        super.setCurrentDateTimeFunction("NOW()");
+    }
+
     public String getShortName() {
         return "mysql";
     }
@@ -72,14 +76,6 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
 
     public boolean supportsInitiallyDeferrableColumns() {
         return false;
-    }
-
-    public String getCurrentDateTimeFunction() {
-        if (currentDateTimeFunction != null) {
-            return currentDateTimeFunction;
-        }
-
-        return "NOW()";
     }
 
     @Override

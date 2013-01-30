@@ -46,8 +46,9 @@ public class InformixDatabase extends AbstractJdbcDatabase {
     		Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
 	public InformixDatabase() {
-		super();
-		systemTablesAndViews.add("systables");
+        super.setCurrentDateTimeFunction("CURRENT " + DATETIME_FIELD_QUALIFIER);
+        super.sequenceNextValueFunction = "%s.NEXTVAL";
+        systemTablesAndViews.add("systables");
 		systemTablesAndViews.add("syscolumns");
 		systemTablesAndViews.add("sysindices");
 		systemTablesAndViews.add("systabauth");
@@ -110,7 +111,6 @@ public class InformixDatabase extends AbstractJdbcDatabase {
 
 		systemTablesAndViews.add("sysdomains");
 		systemTablesAndViews.add("sysindexes");
-        super.sequenceNextValueFunction = "%s.NEXTVAL";
 	}
 
 	@Override
@@ -152,14 +152,6 @@ public class InformixDatabase extends AbstractJdbcDatabase {
 		}
     }
 	
-	public String getCurrentDateTimeFunction() {
-        if (currentDateTimeFunction != null) {
-            return currentDateTimeFunction;
-        }
-
-		return "CURRENT " + DATETIME_FIELD_QUALIFIER;
-	}
-
 	public String getDefaultDriver(String url) {
 		if (url.startsWith("jdbc:informix-sqli")) {
 			return "com.informix.jdbc.IfxDriver";
