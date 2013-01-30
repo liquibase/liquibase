@@ -263,6 +263,7 @@
             <column name="uuidColumn" type="uuid"/>
             <column name="blobColumn" type="blob"/>
             <column name="clobColumn" type="clob"/>
+            <column name="longVarcharColumn" type="longvarchar"/>
             <column name="dateColumn" type="date"/>
             <column name="timeColumn" type="time"/>
             <column name="datetimeColumn" type="datetime"/>
