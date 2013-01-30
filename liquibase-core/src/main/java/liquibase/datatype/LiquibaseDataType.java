@@ -3,6 +3,7 @@ package liquibase.datatype;
 import liquibase.database.Database;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.servicelocator.PrioritizedService;
+import liquibase.statement.DatabaseFunction;
 import liquibase.statement.SequenceFunction;
 
 import java.util.ArrayList;
@@ -166,7 +167,7 @@ public abstract class LiquibaseDataType implements PrioritizedService {
 
     protected boolean isCurrentDateTimeFunction(String string, Database database) {
         return string.toLowerCase().startsWith("current_timestamp")
-                || string.toLowerCase().startsWith("current_datetime")
+                || string.toLowerCase().startsWith(DatabaseFunction.CURRENT_DATE_TIME_PLACE_HOLDER)
                 || database.getCurrentDateTimeFunction().equalsIgnoreCase(string);
     }
 }

@@ -37,6 +37,7 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
     }
 
     public MSSQLDatabase() {
+        super.setCurrentDateTimeFunction("GETDATE()");
         setDefaultSchemaName("dbo");
 
         systemTablesAndViews.add("syscolumns");
@@ -104,14 +105,6 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
             return "net.sourceforge.jtds.jdbc.Driver";
         }
         return null;
-    }
-
-    public String getCurrentDateTimeFunction() {
-        if (currentDateTimeFunction != null) {
-            return currentDateTimeFunction;
-        }
-
-        return "GETDATE()";
     }
 
     @Override

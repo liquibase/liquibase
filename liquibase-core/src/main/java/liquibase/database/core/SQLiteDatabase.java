@@ -28,16 +28,11 @@ public class SQLiteDatabase extends AbstractJdbcDatabase {
         systemTables.add("sqlite_sequence");
     }
 
-    public static final String PRODUCT_NAME = "SQLite";
-
-    public String getCurrentDateTimeFunction() {
-        if (currentDateTimeFunction != null) {
-            return currentDateTimeFunction;
-        }
-        
-        return "CURRENT_TIMESTAMP";
+    public SQLiteDatabase() {
+        super.setCurrentDateTimeFunction("CURRENT_TIMESTAMP");
     }
 
+    public static final String PRODUCT_NAME = "SQLite";
 
     public String getDefaultDriver(String url) {
         if (url.startsWith("jdbc:sqlite:")) {
@@ -58,7 +53,7 @@ public class SQLiteDatabase extends AbstractJdbcDatabase {
 
     @Override
     protected String getDefaultDatabaseProductName() {
-        return "SQLite";
+        return PRODUCT_NAME;
     }
 
     public Integer getDefaultPort() {
@@ -67,7 +62,7 @@ public class SQLiteDatabase extends AbstractJdbcDatabase {
 
     public boolean isCorrectDatabaseImplementation(DatabaseConnection conn)
             throws DatabaseException {
-        return "SQLite".equalsIgnoreCase(conn.getDatabaseProductName());
+        return PRODUCT_NAME.equalsIgnoreCase(conn.getDatabaseProductName());
     }
 
     public boolean supportsInitiallyDeferrableColumns() {

@@ -22,8 +22,9 @@ public class DerbyDatabase extends AbstractJdbcDatabase {
     protected int driverVersionMinor;
 
     public DerbyDatabase() {
-        determineDriverVersion();
+        super.setCurrentDateTimeFunction("CURRENT_TIMESTAMP");
         super.sequenceNextValueFunction = "NEXT VALUE FOR %s";
+        determineDriverVersion();
     }
 
     public boolean isCorrectDatabaseImplementation(DatabaseConnection conn) throws DatabaseException {
@@ -72,14 +73,6 @@ public class DerbyDatabase extends AbstractJdbcDatabase {
 
     public boolean supportsInitiallyDeferrableColumns() {
         return false;
-    }
-
-    public String getCurrentDateTimeFunction() {
-        if (currentDateTimeFunction != null) {
-            return currentDateTimeFunction;
-        }
-
-        return "CURRENT_TIMESTAMP";
     }
 
     @Override

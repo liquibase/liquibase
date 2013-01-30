@@ -11,7 +11,7 @@ public class Column extends AbstractDatabaseObject {
     }
 
     public Relation getRelation() {
-        return (Relation) getAttribute("relation", Relation.class);
+        return getAttribute("relation", Relation.class);
     }
 
     public DatabaseObject[] getContainingObjects() {
@@ -36,7 +36,7 @@ public class Column extends AbstractDatabaseObject {
     }
 
 	public String getName() {
-        return (String) getAttribute("name", String.class);
+        return getAttribute("name", String.class);
     }
 
     public Column setName(String name) {
@@ -46,7 +46,7 @@ public class Column extends AbstractDatabaseObject {
     }
 
     public Boolean isNullable() {
-        return (Boolean) getAttribute("nullable", Boolean.class);
+        return getAttribute("nullable", Boolean.class);
     }
 
     public Column setNullable(Boolean nullable) {
@@ -57,7 +57,7 @@ public class Column extends AbstractDatabaseObject {
 
 
     public DataType getType() {
-        return (DataType) getAttribute("type", DataType.class);
+        return getAttribute("type", DataType.class);
     }
 
     public Column setType(DataType type) {
@@ -77,7 +77,7 @@ public class Column extends AbstractDatabaseObject {
     }
 
     public boolean isAutoIncrement() {
-        return (Boolean) getAttribute("autoIncrement", Boolean.class);
+        return getAttribute("autoIncrement", Boolean.class);
     }
 
     public void setAutoIncrement(boolean autoIncrement) {
@@ -153,45 +153,8 @@ public class Column extends AbstractDatabaseObject {
         return this;
     }
 
-    public boolean isDataTypeDifferent(Column otherColumn) {
-        if (!this.isCertainDataType() || !otherColumn.isCertainDataType()) {
-            return false;
-        } else {
-            return !this.getType().equals(otherColumn.getType());
-        }
-    }
-
-    @SuppressWarnings({"SimplifiableIfStatement"})
-    public boolean isNullabilityDifferent(Column otherColumn) {
-        if (this.isNullable() == null && otherColumn.isNullable() == null) {
-            return false;
-        }
-        if (this.isNullable() == null && otherColumn.isNullable() != null) {
-            return true;
-        }
-        if (this.isNullable() != null && otherColumn.isNullable() == null) {
-            return true;
-        }
-        return !this.isNullable().equals(otherColumn.isNullable());
-    }
-
-    public boolean isDifferent(Column otherColumn) {
-        return isDataTypeDifferent(otherColumn) || isNullabilityDifferent(otherColumn);
-    }
-
-
-    public boolean isCertainDataType() {
-        return (Boolean) getAttribute("certainDataType", Boolean.class);
-    }
-
-    public Column setCertainDataType(boolean certainDataType) {
-        setAttribute("certainDataType", certainDataType);
-
-        return this;
-    }
-
     public String getRemarks() {
-        return (String) getAttribute("remarks", String.class);
+        return getAttribute("remarks", String.class);
     }
 
     public Column setRemarks(String remarks) {

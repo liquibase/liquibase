@@ -24,15 +24,12 @@ public class SybaseDatabase extends AbstractJdbcDatabase {
     public static final String PRODUCT_NAME = "Adaptive Server Enterprise";
     protected Set<String> systemTablesAndViews = new HashSet<String>();
 
-    public String getProductName() {
-        return "Sybase SQL Server";
-    }
-
     public String getShortName() {
         return "sybase";
     }
 
     public SybaseDatabase() {
+        super.setCurrentDateTimeFunction("GETDATE()");
         systemTablesAndViews.add("syscolumns");
         systemTablesAndViews.add("syscomments");
         systemTablesAndViews.add("sysdepends");
@@ -107,7 +104,7 @@ public class SybaseDatabase extends AbstractJdbcDatabase {
     // package private to facilitate testing
     boolean isSybaseProductName(String dbProductName) {
         return
-                "Adaptive Server Enterprise".equals(dbProductName)
+                PRODUCT_NAME.equals(dbProductName)
                 || "Sybase SQL Server".equals(dbProductName)
                 || "sql server".equals(dbProductName)
                 || "ASE".equals(dbProductName);
@@ -120,14 +117,6 @@ public class SybaseDatabase extends AbstractJdbcDatabase {
             return "net.sourceforge.jtds.jdbc.Driver";
         }
         return null;
-    }
-
-    public String getCurrentDateTimeFunction() {
-        if (currentDateTimeFunction != null) {
-            return currentDateTimeFunction;
-        }
-        
-        return "GETDATE()";
     }
 
     @Override
