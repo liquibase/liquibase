@@ -1,14 +1,15 @@
 package liquibase.util;
 
+import liquibase.statement.DatabaseFunction;
+import liquibase.statement.SequenceCurrentValueFunction;
+import liquibase.statement.SequenceNextValueFunction;
+
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
-
-import liquibase.statement.DatabaseFunction;
-import liquibase.statement.SequenceFunction;
 
 public class ObjectUtil {
 
@@ -58,11 +59,13 @@ public class ObjectUtil {
                     } else if (parameterType.equals(DatabaseFunction.class)) {
                         method.invoke(object, new DatabaseFunction(propertyValue));
                         return;
-                    } else if (parameterType.equals(SequenceFunction.class)) {
-                        method.invoke(object, new SequenceFunction(propertyValue));
+                    } else if (parameterType.equals(SequenceNextValueFunction.class)) {
+                        method.invoke(object, new SequenceNextValueFunction(propertyValue));
                         return;
-                    }
-                }
+                    } else if (parameterType.equals(SequenceCurrentValueFunction.class)) {
+                        method.invoke(object, new SequenceCurrentValueFunction(propertyValue));
+                        return;
+                    }                }
             }
         }
         throw new RuntimeException("Property '" + propertyName+"' not found on object type "+object.getClass().getName());

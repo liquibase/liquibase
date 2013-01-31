@@ -260,7 +260,9 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
         if (columnConfig.getDefaultValueComputed() != null) {
             element.setAttribute("defaultValueComputed", columnConfig.getDefaultValueComputed().toString());
         }
-
+        if (columnConfig.getDefaultValueSequenceNext() != null) {
+            element.setAttribute("defaultValueSequenceNext", columnConfig.getDefaultValueSequenceNext().toString());
+        }
         if (columnConfig.getValue() != null) {
             element.setAttribute("value", columnConfig.getValue());
         }
@@ -278,6 +280,9 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
         }
         if (columnConfig.getValueSequenceNext() != null) {
             element.setAttribute("valueSequenceNext", columnConfig.getValueSequenceNext().toString());
+        }
+        if (columnConfig.getValueSequenceCurrent() != null) {
+            element.setAttribute("valueSequenceNext", columnConfig.getValueSequenceCurrent().toString());
         }
         if (StringUtils.trimToNull(columnConfig.getRemarks()) != null) {
             element.setAttribute("remarks", columnConfig.getRemarks());

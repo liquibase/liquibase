@@ -3,7 +3,6 @@ package liquibase.database;
 import liquibase.CatalogAndSchema;
 import liquibase.change.Change;
 import liquibase.change.CheckSum;
-import liquibase.change.core.*;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.RanChangeSet;
@@ -14,7 +13,6 @@ import liquibase.database.jvm.JdbcConnection;
 import liquibase.diff.DiffGeneratorFactory;
 import liquibase.diff.DiffResult;
 import liquibase.diff.compare.CompareControl;
-import liquibase.diff.compare.DatabaseObjectComparator;
 import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.changelog.DiffToChangeLog;
@@ -66,6 +64,7 @@ public abstract class AbstractJdbcDatabase implements Database {
      * The sequence name will be substituted into the string e.g. NEXTVAL('%s')
      */
     protected String sequenceNextValueFunction;
+    protected String sequenceCurrentValueFunction;
 
     // List of Database native functions.
     protected List<DatabaseFunction> dateFunctions = new ArrayList<DatabaseFunction>();
@@ -73,7 +72,7 @@ public abstract class AbstractJdbcDatabase implements Database {
     protected List<String> unmodifiableDataTypes = new ArrayList<String>();
 
     private List<RanChangeSet> ranChangeSetList;
-    
+
     protected void resetRanChangeSetList() {
     	ranChangeSetList = null;
     }
@@ -525,13 +524,6 @@ public abstract class AbstractJdbcDatabase implements Database {
         }
 
         return returnString.toString().replaceFirst(" \\|\\| $", "");
-    }
-
-    public String generateSequenceNextValueFunction(String sequenceName) {
-        if (sequenceNextValueFunction == null) {
-            return null;
-        }
-        return String.format(sequenceNextValueFunction, this.escapeObjectName(sequenceName, Sequence.class));
     }
 
 // ------- DATABASECHANGELOG / DATABASECHANGELOGLOCK METHODS ---- //
@@ -1385,5 +1377,34 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     public boolean dataTypeIsNotModifiable(final String typeName) {
         return unmodifiableDataTypes.contains(typeName.toLowerCase());
+    }
+
+    public String generateDatabaseFunctionValue(final DatabaseFunction databaseFunction) {
+        if (databaseFunction.getValue() == null) {
+            return null;
+        }
+        if (isCurrentTimeFunction(databaseFunction.getValue().toLowerCase())) {
+            return getCurrentDateTimeFunction();
+        } else if (databaseFunction instanceof SequenceNextValueFunction) {
+            if (sequenceNextValueFunction == null) {
+                throw new RuntimeException(String.format("next value function for a sequence is not configured for database %s",
+                        getDefaultDatabaseProductName()));
+            }
+            return String.format(sequenceNextValueFunction, databaseFunction.getValue());
+        } else if (databaseFunction instanceof SequenceCurrentValueFunction) {
+            if (sequenceCurrentValueFunction == null) {
+                throw new RuntimeException(String.format("current value function for a sequence is not configured for database %s",
+                        getDefaultDatabaseProductName()));
+            }
+            return String.format(sequenceCurrentValueFunction, databaseFunction.getValue());
+        } else {
+            return databaseFunction.getValue();
+        }
+    }
+
+    private boolean isCurrentTimeFunction(String functionValue) {
+        return functionValue.startsWith("current_timestamp")
+                || functionValue.startsWith("current_datetime")
+                || getCurrentDateTimeFunction().equalsIgnoreCase(functionValue);
     }
 }

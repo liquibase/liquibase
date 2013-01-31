@@ -7,7 +7,7 @@ import liquibase.datatype.DataTypeFactory;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
-import liquibase.statement.SequenceFunction;
+import liquibase.statement.SequenceNextValueFunction;
 import liquibase.statement.core.AddDefaultValueStatement;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Schema;
@@ -37,14 +37,14 @@ public class AddDefaultValueGeneratorPostgres extends AddDefaultValueGenerator {
     public Sql[] generateSql(final AddDefaultValueStatement statement, final Database database,
                              final SqlGeneratorChain sqlGeneratorChain) {
 
-        if (!(statement.getDefaultValue() instanceof SequenceFunction)) {
+        if (!(statement.getDefaultValue() instanceof SequenceNextValueFunction)) {
             return super.generateSql(statement, database, sqlGeneratorChain);
         }
 
         List<Sql> commands = new ArrayList<Sql>(Arrays.asList(super.generateSql(statement, database, sqlGeneratorChain)));
         // for postgres, we need to also set the sequence to be owned by this table for true serial like functionality.
         // this will allow a drop table cascade to remove the sequence as well.
-        SequenceFunction sequenceFunction = (SequenceFunction) statement.getDefaultValue();
+        SequenceNextValueFunction sequenceFunction = (SequenceNextValueFunction) statement.getDefaultValue();
 
         Sql alterSequenceOwner = new UnparsedSql("ALTER SEQUENCE " + database.escapeSequenceName(statement.getCatalogName(),
                 statement.getSchemaName(), sequenceFunction.getValue()) + " OWNED BY " +

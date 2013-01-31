@@ -24,6 +24,7 @@ public class DerbyDatabase extends AbstractJdbcDatabase {
     public DerbyDatabase() {
         determineDriverVersion();
         super.sequenceNextValueFunction = "NEXT VALUE FOR %s";
+        super.sequenceCurrentValueFunction = "(SELECT currentvalue FROM sys.syssequences WHERE %s='SEQ_TYPE')";
     }
 
     public boolean isCorrectDatabaseImplementation(DatabaseConnection conn) throws DatabaseException {

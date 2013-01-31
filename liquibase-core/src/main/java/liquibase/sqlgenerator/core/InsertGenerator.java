@@ -6,7 +6,7 @@ import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
-import liquibase.statement.SequenceFunction;
+import liquibase.statement.DatabaseFunction;
 import liquibase.statement.core.InsertStatement;
 
 import java.util.Date;
@@ -49,8 +49,8 @@ public class InsertGenerator extends AbstractSqlGenerator<InsertStatement> {
                 } else {
                     sql.append(DataTypeFactory.getInstance().getFalseBooleanValue(database));
                 }
-            } else if (newValue instanceof SequenceFunction) {
-                sql.append(database.generateSequenceNextValueFunction(newValue.toString()));
+            } else if (newValue instanceof DatabaseFunction) {
+                sql.append(database.generateDatabaseFunctionValue((DatabaseFunction) newValue));
             }
             else {
                 sql.append(newValue);

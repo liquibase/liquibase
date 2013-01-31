@@ -19,7 +19,8 @@ public class DB2Database extends AbstractJdbcDatabase {
     private String defaultSchemaName;
 
     public DB2Database() {
-        super.sequenceNextValueFunction = "nextval for %s";
+        super.sequenceNextValueFunction = "NEXT VALUE FOR %s";
+        super.sequenceCurrentValueFunction = "PREVIOUS VALUE FOR %s";
     }
     
     public boolean isCorrectDatabaseImplementation(DatabaseConnection conn) throws DatabaseException {

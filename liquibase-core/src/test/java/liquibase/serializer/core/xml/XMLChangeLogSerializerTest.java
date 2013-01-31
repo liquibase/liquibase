@@ -4,7 +4,7 @@ import liquibase.change.ColumnConfig;
 import liquibase.change.ConstraintsConfig;
 import liquibase.change.core.*;
 import liquibase.resource.ClassLoaderResourceAccessor;
-import static org.junit.Assert.*;
+import liquibase.statement.SequenceNextValueFunction;
 import org.junit.Test;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
@@ -13,6 +13,11 @@ import org.w3c.dom.NodeList;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.math.BigInteger;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 public class XMLChangeLogSerializerTest {
     @Test
@@ -75,6 +80,7 @@ public class XMLChangeLogSerializerTest {
         change.setDefaultValueNumeric("42");
         change.setDefaultValueBoolean(true);
         change.setDefaultValueDate("2007-01-02");
+        change.setDefaultValueSequenceNext(new SequenceNextValueFunction("sampleSeq"));
 
         Element node = new XMLChangeLogSerializer(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()).createNode(change);
         assertEquals("addDefaultValue", node.getTagName());
@@ -85,7 +91,7 @@ public class XMLChangeLogSerializerTest {
         assertEquals("42", node.getAttribute("defaultValueNumeric"));
         assertEquals("true", node.getAttribute("defaultValueBoolean"));
         assertEquals("2007-01-02", node.getAttribute("defaultValueDate"));
-
+        assertEquals("sampleSeq", node.getAttribute("defaultValueSequenceNext"));
     }
 
     @Test

@@ -1,16 +1,17 @@
 package liquibase.change;
 
+import liquibase.statement.DatabaseFunction;
+import liquibase.statement.SequenceCurrentValueFunction;
+import liquibase.statement.SequenceNextValueFunction;
+import liquibase.structure.core.Column;
+import liquibase.structure.core.Table;
+import liquibase.util.ISODateFormat;
+
 import java.math.BigInteger;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.Date;
 import java.util.Locale;
-
-import liquibase.statement.SequenceFunction;
-import liquibase.structure.core.Column;
-import liquibase.statement.DatabaseFunction;
-import liquibase.structure.core.Table;
-import liquibase.util.ISODateFormat;
 
 /**
  * This class is the representation of the column tag in the XMl file
@@ -27,13 +28,15 @@ public class ColumnConfig {
     private String valueBlob;
     private String valueClob;
     private DatabaseFunction valueComputed;
-    private SequenceFunction valueSequenceNext;
+    private SequenceNextValueFunction valueSequenceNext;
+    private SequenceCurrentValueFunction valueSequenceCurrent;
 
     private String defaultValue;
     private Number defaultValueNumeric;
     private Date defaultValueDate;
     private Boolean defaultValueBoolean;
     private DatabaseFunction defaultValueComputed;
+    private SequenceNextValueFunction defaultValueSequenceNext;
 
     private ConstraintsConfig constraints;
     private Boolean autoIncrement;
@@ -173,12 +176,24 @@ public class ColumnConfig {
         return this;
     }
 
-    public SequenceFunction getValueSequenceNext() {
+    public ColumnConfig setValueSequenceNext(SequenceNextValueFunction valueSequenceNext) {
+        this.valueSequenceNext = valueSequenceNext;
+
+        return this;
+    }
+
+    public SequenceNextValueFunction getValueSequenceNext() {
         return valueSequenceNext;
     }
 
-    public void setValueSequenceNext(final SequenceFunction valueSequenceNext) {
-        this.valueSequenceNext = valueSequenceNext;
+    public ColumnConfig setValueSequenceCurrent(SequenceCurrentValueFunction valueSequenceCurrent) {
+        this.valueSequenceCurrent = valueSequenceCurrent;
+
+        return this;
+    }
+
+    public SequenceCurrentValueFunction getValueSequenceCurrent() {
+        return valueSequenceCurrent;
     }
 
     public Date getValueDate() {
@@ -223,6 +238,8 @@ public class ColumnConfig {
             return getValueBlob();
         } else if (getValueSequenceNext() != null) {
             return getValueSequenceNext();
+        } else if (getValueSequenceCurrent() != null) {
+            return getValueSequenceCurrent();
         }
         return null;
     }
@@ -325,6 +342,8 @@ public class ColumnConfig {
             return getDefaultValueDate();
         } else if (getDefaultValueComputed() != null) {
             return getDefaultValueComputed();
+        } else if (getDefaultValueSequenceNext() != null) {
+            return getDefaultValueSequenceNext();
         }
         return null;
     }
@@ -382,7 +401,8 @@ public class ColumnConfig {
                 || this.getDefaultValueBoolean() != null
                 || this.getDefaultValueDate() != null
                 || this.getDefaultValueNumeric() != null
-                || this.getDefaultValueComputed() != null;
+                || this.getDefaultValueComputed() != null
+                || this.getDefaultValueSequenceNext() != null;
     }
 
     public String getRemarks() {
@@ -408,5 +428,15 @@ public class ColumnConfig {
 
     public void setValueClob(String valueClob) {
         this.valueClob = valueClob;
+    }
+
+    public SequenceNextValueFunction getDefaultValueSequenceNext() {
+        return defaultValueSequenceNext;
+    }
+
+    public ColumnConfig setDefaultValueSequenceNext(SequenceNextValueFunction defaultValueSequenceNext) {
+        this.defaultValueSequenceNext = defaultValueSequenceNext;
+
+        return this;
     }
 }

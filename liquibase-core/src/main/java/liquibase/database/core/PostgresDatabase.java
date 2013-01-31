@@ -29,7 +29,8 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
 
     public PostgresDatabase() {
         reservedWords.addAll(Arrays.asList("USER", "LIKE", "GROUP", "DATE", "ALL"));
-        super.sequenceNextValueFunction = "NEXTVAL('%s')";
+        super.sequenceNextValueFunction = "nextval('%s')";
+        super.sequenceCurrentValueFunction = "currval('%s')";
         super.unmodifiableDataTypes.addAll(Arrays.asList("bool", "int4", "int8", "float4", "float8", "numeric", "bigserial", "serial", "bytea", "timestamptz"));
 //        systemTablesAndViews.add("pg_logdir_ls");
 //        systemTablesAndViews.add("administrable_role_authorizations");
