@@ -2,6 +2,7 @@ package liquibase.change.core;
 
 import liquibase.change.*;
 import liquibase.database.Database;
+import liquibase.statement.SequenceNextValueFunction;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.DatabaseFunction;
 import liquibase.statement.core.AddDefaultValueStatement;
@@ -27,6 +28,7 @@ public class AddDefaultValueChange extends AbstractChange {
     private String defaultValueDate;
     private Boolean defaultValueBoolean;
     private DatabaseFunction defaultValueComputed;
+    private SequenceNextValueFunction defaultValueSequenceNext;
 
     @DatabaseChangeProperty(mustApplyTo ="column.relation.catalog")
     public String getCatalogName() {
@@ -114,6 +116,14 @@ public class AddDefaultValueChange extends AbstractChange {
         this.defaultValueComputed = defaultValueComputed;
     }
 
+    public SequenceNextValueFunction getDefaultValueSequenceNext() {
+        return defaultValueSequenceNext;
+    }
+
+    public void setDefaultValueSequenceNext(SequenceNextValueFunction defaultValueSequenceNext) {
+        this.defaultValueSequenceNext = defaultValueSequenceNext;
+    }
+
     public SqlStatement[] generateStatements(Database database) {
         Object defaultValue = null;
 
@@ -135,6 +145,8 @@ public class AddDefaultValueChange extends AbstractChange {
             }
         } else if (getDefaultValueComputed() != null) {
             defaultValue = getDefaultValueComputed();
+        } else if (getDefaultValueSequenceNext() != null) {
+            defaultValue = getDefaultValueSequenceNext();
         }
         
         return new SqlStatement[]{

@@ -3,7 +3,7 @@ package liquibase.datatype;
 import liquibase.database.Database;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.servicelocator.PrioritizedService;
-import liquibase.statement.SequenceFunction;
+import liquibase.statement.DatabaseFunction;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -115,10 +115,8 @@ public abstract class LiquibaseDataType implements PrioritizedService {
     public String objectToSql(Object value, Database database) {
         if (value == null || value.toString().equalsIgnoreCase("null")) {
             return null;
-        } else if (value instanceof SequenceFunction) {
-            return database.generateSequenceNextValueFunction(value.toString());
-        } else if (isCurrentDateTimeFunction(value.toString(), database)) {
-            return database.getCurrentDateTimeFunction();
+        } else if (value instanceof DatabaseFunction) {
+            return database.generateDatabaseFunctionValue((DatabaseFunction) value);
         }
         return value.toString();
     }
@@ -164,9 +162,4 @@ public abstract class LiquibaseDataType implements PrioritizedService {
         return toString().hashCode();
     }
 
-    protected boolean isCurrentDateTimeFunction(String string, Database database) {
-        return string.toLowerCase().startsWith("current_timestamp")
-                || string.toLowerCase().startsWith("current_datetime")
-                || database.getCurrentDateTimeFunction().equalsIgnoreCase(string);
-    }
 }

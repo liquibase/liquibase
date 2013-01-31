@@ -547,11 +547,11 @@ public class MockDatabase implements Database {
         return schema.getName();
     }
 
-    public String generateSequenceNextValueFunction(final String sequenceName) {
-        return "NEXTVAL('" + sequenceName + "')";
-    }
-
     public boolean dataTypeIsNotModifiable(String typeName) {
         return true;
+    }
+
+    public String generateDatabaseFunctionValue(final DatabaseFunction databaseFunction) {
+        return null;  //To change body of implemented methods use File | Settings | File Templates.
     }
 }

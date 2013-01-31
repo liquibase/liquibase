@@ -103,14 +103,6 @@ public interface Database extends PrioritizedService {
 
     void setCurrentDateTimeFunction(String function);
 
-    /**
-     * Return the constructed next value expression for this sequence
-     * @param sequenceName sequence name
-     * @return The next value expression for this sequence
-     */
-    String generateSequenceNextValueFunction(String sequenceName);
-
-
     String getLineComment();
 
     String getAutoIncrementClause(BigInteger startWith, BigInteger incrementBy);
@@ -312,5 +304,13 @@ public interface Database extends PrioritizedService {
      * @return Whether data type can have a modifier
      */
     boolean dataTypeIsNotModifiable(String typeName);
+
+    /**
+     * Some function names are placeholders that need to be replaced with the specific database value.
+     * e.g. nextSequenceValue(sequenceName) should be replaced with NEXT_VAL('sequenceName') for Postgresql
+     * @param databaseFunction database function to check.
+     * @return the string value to use for an update or generate
+     */
+    String generateDatabaseFunctionValue(DatabaseFunction databaseFunction);
 }
 

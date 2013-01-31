@@ -18,7 +18,7 @@
     <preConditions>
         <changeLogPropertyDefined property="real.int.type"/>
         <changeLogPropertyDefined property="real.int.type" value="int"/>
-        
+
         <!--Check for some database properties-->
         <changeLogPropertyDefined property="database.autoIncrementClause"/>
         <changeLogPropertyDefined property="database.currentDateTimeFunction"/>
@@ -27,8 +27,8 @@
         <changeLogPropertyDefined property="database.databaseMajorVersion"/>
         <changeLogPropertyDefined property="database.databaseMinorVersion"/>
         <changeLogPropertyDefined property="database.databaseProductName"/>
-        <changeLogPropertyDefined property="database.databaseProductVersion"/>        
-        <changeLogPropertyDefined property="database.lineComment"/>        
+        <changeLogPropertyDefined property="database.databaseProductVersion"/>
+        <changeLogPropertyDefined property="database.lineComment"/>
         <changeLogPropertyDefined property="database.typeName"/>
         <changeLogPropertyDefined property="database.isSafeToRunUpdate"/>
         <changeLogPropertyDefined property="database.requiresPassword"/>
@@ -489,7 +489,7 @@
             </column>
         </createTable>
     </changeSet>
-    
+
     <changeSet id="changeLogParameters" author="nvoxland">
         <createTable tableName="${table.name}">
             <column name="id" type="int"/>
@@ -711,7 +711,7 @@
             <tableExists tableName="keepmodifysqltest"/>
         </preConditions>
     </changeSet>
-    
+
     <changeSet id="createTableWithDefault" author="nvoxland">
         <preConditions onFail="MARK_RAN">
             <not><dbms type="mysql"/></not> <!-- doesn't support default values as function -->
@@ -825,7 +825,7 @@
         <preConditions onFail="MARK_RAN">
             <not>
                 <tableExists tableName="test_table" />
-            </not>            
+            </not>
         </preConditions>
         <createTable tableName="test_table">
             <column name="key" type="number" />
@@ -895,5 +895,67 @@
         <column name="id" valueSequenceNext="insertTest_seq" />
         <column name="stringValue" value="testVal2" />
       </insert>
+
     </changeSet>
+
+  <!-- should work for all databases but only tested on h2, oracle and psotgres for now -->
+  <changeSet id="UpdateRecordWithSequence" author="dbiggs" dbms="postgresql, h2, oracle">
+    <createTable tableName="updateWithSequenceTest">
+      <column name="id" type="int">
+        <constraints primaryKey="true"/>
+      </column>
+      <column name="stringValue" type="varchar(10)" />
+    </createTable>
+    <createSequence sequenceName="updateTest_seq" />
+
+    <insert tableName="updateWithSequenceTest">
+      <column name="id" valueSequenceNext="updateTest_seq" />
+      <column name="stringValue" value="testVal1" />
+    </insert>
+
+    <update tableName="updateWithSequenceTest">
+      <column name="id" valueSequenceCurrent="updateTest_seq" />
+      <column name="stringValue" value="testVal3" />
+      <where>id=1</where>
+    </update>
+
+  </changeSet>
+
+  <!-- should work for all databases but only tested on h2, oracle and psotgres for now -->
+  <changeSet id="AddSequenceNextValueAsDefault" author="dbiggs" dbms="postgresql, h2, oracle">
+    <createSequence sequenceName="tableDefault_seq" />
+    <createTable tableName="insertWithDefaultSeq">
+      <column name="id" type="int" defaultValueSequenceNext="tableDefault_seq">
+        <constraints primaryKey="true"/>
+      </column>
+      <column name="stringValue" type="varchar(10)" />
+    </createTable>
+
+    <insert tableName="insertWithDefaultSeq">
+      <column name="stringValue" value="testVal1" />
+    </insert>
+
+    <insert tableName="insertWithDefaultSeq">
+      <column name="stringValue" value="testVal2" />
+    </insert>
+
+    <createTable tableName="tableToAddDefaultSeqTo">
+      <column name="id" type="int">
+        <constraints primaryKey="true"/>
+      </column>
+      <column name="stringValue" type="varchar(10)" />
+    </createTable>
+
+    <insert tableName="tableToAddDefaultSeqTo">
+      <column name="id" valueSequenceNext="tableDefault_seq" />
+      <column name="stringValue" value="testVal1" />
+    </insert>
+
+    <addDefaultValue tableName="tableToAddDefaultSeqTo" columnName="id" defaultValueSequenceNext="tableDefault_seq" />
+
+    <insert tableName="insertWithDefaultSeq">
+      <column name="stringValue" value="testVal2" />
+    </insert>
+
+  </changeSet>
 </databaseChangeLog>

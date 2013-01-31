@@ -24,7 +24,8 @@ public class H2Database extends AbstractJdbcDatabase {
 
     public H2Database() {
         this.dateFunctions.add(new DatabaseFunction("CURRENT_TIMESTAMP()"));
-        sequenceNextValueFunction = "nextval('%s')";
+        super.sequenceNextValueFunction = "NEXTVAL('%s')";
+        super.sequenceCurrentValueFunction = "CURRVAL('%s')";
     }
 
     public String getShortName() {
