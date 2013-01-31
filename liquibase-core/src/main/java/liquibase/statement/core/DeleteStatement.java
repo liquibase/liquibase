@@ -12,7 +12,7 @@ public class DeleteStatement extends AbstractSqlStatement {
     private String tableName;
     private String whereClause;
     private List<Object> whereParameters = new ArrayList<Object>();
-
+    private List<String> whereColumnNames = new ArrayList<String>();
 
     public DeleteStatement(String catalogName, String schemaName, String tableName) {
         this.catalogName  = catalogName;
@@ -38,23 +38,29 @@ public class DeleteStatement extends AbstractSqlStatement {
 
     public DeleteStatement setWhereClause(String whereClause) {
         this.whereClause = whereClause;
-
         return this;
     }
 
     public DeleteStatement addWhereParameter(Object value) {
         this.whereParameters.add(value);
-
         return this;
     }
 
     public DeleteStatement addWhereParameters(Object... value) {
         this.whereParameters.addAll(Arrays.asList(value));
+        return this;
+    }
 
+    public DeleteStatement addWhereColumnName(String value) {
+        this.whereColumnNames.add(value);
         return this;
     }
 
     public List<Object> getWhereParameters() {
         return whereParameters;
+    }
+
+    public List<String> getWhereColumnNames() {
+        return whereColumnNames;
     }
 }

@@ -375,7 +375,10 @@
             <column name="varcharColumn" value="new column 1 value"/>
             <column name="dateCol" valueDate="2008-01-01"/>
             <column name="intCol" valueNumeric="11"/>
-            <where>id=1</where>
+            <where>id=:value</where>
+            <whereParams>
+                <param valueNumeric="134" />
+            </whereParams>
         </update>
         <update tableName="updateTest">
             <column name="varcharColumn" value="new column 2 value"/>
@@ -909,6 +912,53 @@
         <column name="stringValue" value="testVal2" />
       </insert>
 
+    </changeSet>
+
+    <changeSet id="testDeleteWithParameters" author="dbiggs">
+        <createTable tableName="params_test">
+            <column name="id" type="int">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="string_value" type="varchar(10)" />
+        </createTable>
+
+        <insert tableName="params_test">
+            <column name="id" value="1" />
+            <column name="string_value" value="testVal1" />
+        </insert>
+        <insert tableName="params_test">
+            <column name="id" value="2" />
+            <column name="string_value" value="testVal2" />
+        </insert>
+
+        <delete tableName="params_test">
+            <where>:name = :value</where>
+            <whereParams>
+                <param name="string_value" value="testVal2" />
+            </whereParams>
+        </delete>
+    </changeSet>
+
+    <changeSet id="verifyDeleteWithParameters" author="dbiggs">
+        <preConditions>
+            <sqlCheck expectedResult="1">select count(*) from params_test;</sqlCheck>
+        </preConditions>
+    </changeSet>
+
+    <changeSet id="updateWithParameters" author="dbiggs">
+        <update tableName="params_test">
+            <column name="string_value" value="updatedVal" />
+            <where>:name=:value</where>
+            <whereParams>
+                <param name="string_value" value="testVal1"/>
+            </whereParams>
+        </update>
+    </changeSet>
+
+    <changeSet id="verifyUpdateWithParameters" author="dbiggs">
+        <preConditions>
+            <sqlCheck expectedResult="1">select count(*) from params_test where string_value = 'updatedVal';</sqlCheck>
+        </preConditions>
     </changeSet>
 
   <!-- should work for all databases but only tested on h2, oracle and psotgres for now -->
