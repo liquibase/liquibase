@@ -5,6 +5,7 @@ import liquibase.database.Database;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.DatabaseFunction;
 import liquibase.statement.core.AddDefaultValueStatement;
+import liquibase.structure.core.Column;
 import liquibase.util.ISODateFormat;
 
 import java.text.NumberFormat;
@@ -14,7 +15,7 @@ import java.util.Locale;
 /**
  * Sets a new default value to an existing column.
  */
-@DatabaseChange(name="addDefaultValue", description = "Add Default Value", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "column")
+@DatabaseChange(name="addDefaultValue", description = "Add Default Value", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = Column.class)
 public class AddDefaultValueChange extends AbstractChange {
 
     private String catalogName;

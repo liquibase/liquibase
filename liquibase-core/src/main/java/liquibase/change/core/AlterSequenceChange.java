@@ -7,13 +7,14 @@ import liquibase.change.DatabaseChangeProperty;
 import liquibase.database.Database;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.AlterSequenceStatement;
+import liquibase.structure.core.Sequence;
 
 import java.math.BigInteger;
 
 /**
  * Modifies properties of an existing sequence. StartValue is not allowed since we cannot alter the starting sequence number
  */
-@DatabaseChange(name="alterSequence", description = "Alter Sequence", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "sequence")
+@DatabaseChange(name="alterSequence", description = "Alter Sequence", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = Sequence.class)
 public class AlterSequenceChange extends AbstractChange {
 
     private String catalogName;

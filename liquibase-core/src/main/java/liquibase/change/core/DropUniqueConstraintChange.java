@@ -5,11 +5,12 @@ import liquibase.database.Database;
 import liquibase.database.core.SybaseASADatabase;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.DropUniqueConstraintStatement;
+import liquibase.structure.core.UniqueConstraint;
 
 /**
  * Removes an existing unique constraint.
  */
-@DatabaseChange(name="dropUniqueConstraint", description = "Drop Unique Constraint", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "uniqueConstraint")
+@DatabaseChange(name="dropUniqueConstraint", description = "Drop Unique Constraint", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = UniqueConstraint.class)
 public class DropUniqueConstraintChange extends AbstractChange {
     private String catalogName;
     private String schemaName;

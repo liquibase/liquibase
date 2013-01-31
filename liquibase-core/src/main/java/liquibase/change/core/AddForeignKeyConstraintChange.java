@@ -2,6 +2,7 @@ package liquibase.change.core;
 
 import liquibase.change.*;
 import liquibase.database.Database;
+import liquibase.structure.core.Column;
 import liquibase.structure.core.ForeignKeyConstraintType;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.statement.SqlStatement;
@@ -10,7 +11,7 @@ import liquibase.statement.core.AddForeignKeyConstraintStatement;
 /**
  * Adds a foreign key constraint to an existing column.
  */
- @DatabaseChange(name="addForeignKeyConstraint", description = "Add Foreign Key Constraint", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "column")
+ @DatabaseChange(name="addForeignKeyConstraint", description = "Add Foreign Key Constraint", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = Column.class)
 public class AddForeignKeyConstraintChange extends AbstractChange {
 
     private String baseTableCatalogName;

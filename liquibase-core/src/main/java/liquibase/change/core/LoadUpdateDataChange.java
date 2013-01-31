@@ -12,11 +12,12 @@ import liquibase.statement.SqlStatement;
 import liquibase.statement.core.DeleteStatement;
 import liquibase.statement.core.InsertOrUpdateStatement;
 import liquibase.statement.core.InsertStatement;
+import liquibase.structure.core.Table;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@DatabaseChange(name="loadUpdateData", description = "Smart Load Data", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "table")
+@DatabaseChange(name="loadUpdateData", description = "Smart Load Data", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = Table.class)
 public class LoadUpdateDataChange extends LoadDataChange {
     private String primaryKey;
 

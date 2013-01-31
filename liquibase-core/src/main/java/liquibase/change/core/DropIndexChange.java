@@ -7,11 +7,12 @@ import liquibase.change.DatabaseChangeProperty;
 import liquibase.database.Database;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.DropIndexStatement;
+import liquibase.structure.core.Index;
 
 /**
  * Drops an existing index.
  */
-@DatabaseChange(name="dropIndex", description = "Drop Index", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "index")
+@DatabaseChange(name="dropIndex", description = "Drop Index", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = Index.class)
 public class DropIndexChange extends AbstractChange {
 
     private String schemaName;

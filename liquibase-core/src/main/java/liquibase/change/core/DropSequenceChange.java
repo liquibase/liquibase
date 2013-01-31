@@ -7,11 +7,12 @@ import liquibase.change.DatabaseChangeProperty;
 import liquibase.database.Database;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.DropSequenceStatement;
+import liquibase.structure.core.Sequence;
 
 /**
  * Drops an existing sequence.
  */
-@DatabaseChange(name="dropSequence", description = "Drop Sequence", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "sequence")
+@DatabaseChange(name="dropSequence", description = "Drop Sequence", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = Sequence.class)
 public class DropSequenceChange extends AbstractChange {
 
     private String catalogName;

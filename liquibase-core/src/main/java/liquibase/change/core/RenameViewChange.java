@@ -4,11 +4,12 @@ import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RenameViewStatement;
+import liquibase.structure.core.View;
 
 /**
  * Renames an existing view.
  */
-@DatabaseChange(name="renameView", description = "Rename View", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "view")
+@DatabaseChange(name="renameView", description = "Rename View", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = View.class)
 public class RenameViewChange extends AbstractChange {
     private String catalogName;
     private String schemaName;

@@ -4,11 +4,12 @@ import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.DropDefaultValueStatement;
+import liquibase.structure.core.Column;
 
 /**
  * Removes the default value from an existing column.
  */
-@DatabaseChange(name="dropDefaultValue", description="Drop Default Value", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "column")
+@DatabaseChange(name="dropDefaultValue", description="Drop Default Value", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = Column.class)
 public class DropDefaultValueChange extends AbstractChange {
 
     private String catalogName;

@@ -5,6 +5,7 @@ import liquibase.database.Database;
 import liquibase.database.core.DB2Database;
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.database.core.SQLiteDatabase.AlterTableVisitor;
+import liquibase.structure.core.Column;
 import liquibase.structure.core.Index;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.statement.SqlStatement;
@@ -18,7 +19,7 @@ import java.util.List;
 /**
  * Adds a not-null constraint to an existing column.
  */
-@DatabaseChange(name="addNotNullConstraint", description = "Add Not-Null Constraint", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "column")
+@DatabaseChange(name="addNotNullConstraint", description = "Add Not-Null Constraint", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = Column.class)
 public class AddNotNullConstraintChange extends AbstractChange {
     private String catalogName;
     private String schemaName;

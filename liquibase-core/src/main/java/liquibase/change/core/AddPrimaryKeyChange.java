@@ -6,11 +6,12 @@ import liquibase.database.core.DB2Database;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.AddPrimaryKeyStatement;
 import liquibase.statement.core.ReorganizeTableStatement;
+import liquibase.structure.core.Column;
 
 /**
  * Creates a primary key out of an existing column or set of columns.
  */
-@DatabaseChange(name="addPrimaryKey", description = "Add Primary Key", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "column")
+@DatabaseChange(name="addPrimaryKey", description = "Add Primary Key", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = Column.class)
 public class AddPrimaryKeyChange extends AbstractChange {
 
     private String catalogName;

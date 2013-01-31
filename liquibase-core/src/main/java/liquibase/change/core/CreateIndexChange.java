@@ -4,6 +4,7 @@ import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.CreateIndexStatement;
+import liquibase.structure.core.Index;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,7 +12,7 @@ import java.util.List;
 /**
  * Creates an index on an existing column.
  */
-@DatabaseChange(name="createIndex", description = "Create Index", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "index")
+@DatabaseChange(name="createIndex", description = "Create Index", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = Index.class)
 public class CreateIndexChange extends AbstractChange implements ChangeWithColumns<ColumnConfig> {
 
     private String catalogName;

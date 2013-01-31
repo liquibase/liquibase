@@ -6,6 +6,7 @@ import liquibase.database.core.DB2Database;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.DropColumnStatement;
 import liquibase.statement.core.ReorganizeTableStatement;
+import liquibase.structure.core.Column;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,7 +14,7 @@ import java.util.List;
 /**
  * Drops an existing column from a table.
  */
-@DatabaseChange(name="dropColumn", description = "Drop Column", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "column")
+@DatabaseChange(name="dropColumn", description = "Drop Column", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = Column.class)
 public class DropColumnChange extends AbstractChange {
 
     private String catalogName;

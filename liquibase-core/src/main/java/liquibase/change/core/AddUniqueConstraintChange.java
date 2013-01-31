@@ -4,11 +4,12 @@ import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.AddUniqueConstraintStatement;
+import liquibase.structure.core.Column;
 
 /**
  * Adds a unique constraint to an existing column.
  */
-@DatabaseChange(name="addUniqueConstraint", description = "Add Unique Constraint", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "column")
+@DatabaseChange(name="addUniqueConstraint", description = "Add Unique Constraint", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = Column.class)
 public class AddUniqueConstraintChange extends AbstractChange {
 
     private String catalogName;

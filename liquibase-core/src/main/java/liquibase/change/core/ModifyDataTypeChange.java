@@ -7,8 +7,9 @@ import liquibase.change.DatabaseChangeProperty;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.ModifyDataTypeStatement;
 import liquibase.database.Database;
+import liquibase.structure.core.Column;
 
-@DatabaseChange(name="modifyDataType", description = "Modify data type", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "column")
+@DatabaseChange(name="modifyDataType", description = "Modify data type", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = Column.class)
 public class ModifyDataTypeChange extends AbstractChange {
 
     private String catalogName;

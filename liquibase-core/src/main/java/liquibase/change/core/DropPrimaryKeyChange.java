@@ -7,6 +7,7 @@ import liquibase.database.core.SQLiteDatabase.AlterTableVisitor;
 import liquibase.structure.core.Index;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.DropPrimaryKeyStatement;
+import liquibase.structure.core.PrimaryKey;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,7 +15,7 @@ import java.util.List;
 /**
  * Removes an existing primary key.
  */
-@DatabaseChange(name="dropPrimaryKey", description = "Drop Primary Key", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "primaryKey")
+@DatabaseChange(name="dropPrimaryKey", description = "Drop Primary Key", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = PrimaryKey.class)
 public class DropPrimaryKeyChange extends AbstractChange {
     private String catalogName;
     private String schemaName;

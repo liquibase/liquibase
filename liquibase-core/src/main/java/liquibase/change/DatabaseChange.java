@@ -1,5 +1,7 @@
 package liquibase.change;
 
+import liquibase.structure.DatabaseObject;
+
 import java.lang.annotation.*;
 
 @Retention(RetentionPolicy.RUNTIME)
@@ -9,6 +11,6 @@ public @interface DatabaseChange {
     String name();
     String description();
     int priority();
-    String[] appliesTo() default {"all"};
+    Class<? extends DatabaseObject>[] appliesTo() default {};
 
 }

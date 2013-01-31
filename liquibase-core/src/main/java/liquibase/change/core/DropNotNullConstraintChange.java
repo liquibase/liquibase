@@ -2,13 +2,15 @@ package liquibase.change.core;
 
 import liquibase.change.*;
 import liquibase.database.Database;
+import liquibase.statement.NotNullConstraint;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.SetNullableStatement;
+import liquibase.structure.core.Column;
 
 /**
  * Drops a not-null constraint from an existing column.
  */
-@DatabaseChange(name="dropNotNullConstraint", description = "Drop Not-Null Constraint", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "notNullConstraint")
+@DatabaseChange(name="dropNotNullConstraint", description = "Drop Not-Null Constraint", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = Column.class)
 public class DropNotNullConstraintChange extends AbstractChange {
 
     private String catalogName;

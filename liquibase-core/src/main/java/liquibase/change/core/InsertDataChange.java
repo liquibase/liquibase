@@ -9,6 +9,7 @@ import liquibase.statement.ExecutablePreparedStatement;
 import liquibase.statement.InsertExecutablePreparedStatement;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.InsertStatement;
+import liquibase.structure.core.Table;
 
 import java.io.*;
 import java.math.BigDecimal;
@@ -21,7 +22,7 @@ import java.util.List;
 /**
  * Inserts data into an existing table.
  */
-@DatabaseChange(name="insert", description = "Insert Row", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "table")
+@DatabaseChange(name="insert", description = "Insert Row", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = Table.class)
 public class InsertDataChange extends AbstractChange implements ChangeWithColumns<ColumnConfig> {
 
     private String catalogName;
