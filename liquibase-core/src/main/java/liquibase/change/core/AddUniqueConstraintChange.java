@@ -9,7 +9,7 @@ import liquibase.structure.core.Column;
 /**
  * Adds a unique constraint to an existing column.
  */
-@DatabaseChange(name="addUniqueConstraint", description = "Add Unique Constraint", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = Column.class)
+@DatabaseChange(name="addUniqueConstraint", description = "Add Unique Constraint", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "column")
 public class AddUniqueConstraintChange extends AbstractChange {
 
     private String catalogName;
@@ -23,7 +23,7 @@ public class AddUniqueConstraintChange extends AbstractChange {
     private Boolean initiallyDeferred;
     private Boolean disabled;
 
-    @DatabaseChangeProperty(mustApplyTo ="column.relation.catalog")
+    @DatabaseChangeProperty(mustEqualExisting ="column.relation.catalog")
     public String getCatalogName() {
         return catalogName;
     }
@@ -32,7 +32,7 @@ public class AddUniqueConstraintChange extends AbstractChange {
         this.catalogName = catalogName;
     }
 
-    @DatabaseChangeProperty(mustApplyTo ="column.relation.schema")
+    @DatabaseChangeProperty(mustEqualExisting ="column.relation.schema")
     public String getSchemaName() {
         return schemaName;
     }
@@ -41,7 +41,7 @@ public class AddUniqueConstraintChange extends AbstractChange {
         this.schemaName = schemaName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all",mustApplyTo = "column.relation")
+    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "column.relation")
     public String getTableName() {
         return tableName;
     }
@@ -50,7 +50,7 @@ public class AddUniqueConstraintChange extends AbstractChange {
         this.tableName = tableName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", mustApplyTo = "column")
+    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "column")
     public String getColumnNames() {
         return columnNames;
     }

@@ -21,9 +21,9 @@ public class ChangeMetaData implements PrioritizedService {
     private int priority;
 
     private Map<String, ChangeParameterMetaData> parameters;
-    private Class<? extends DatabaseObject>[] appliesTo;
+    private Set<String> appliesTo;
 
-    public ChangeMetaData(String name, String description, int priority, Class<? extends DatabaseObject>[] appliesTo, Map<String, ChangeParameterMetaData> parameters) {
+    public ChangeMetaData(String name, String description, int priority, String[] appliesTo, Map<String, ChangeParameterMetaData> parameters) {
         if (parameters == null) {
             parameters  = new HashMap<String, ChangeParameterMetaData>();
         }
@@ -34,7 +34,11 @@ public class ChangeMetaData implements PrioritizedService {
         this.description = description;
         this.priority = priority;
         this.parameters = Collections.unmodifiableMap(parameters);
-        this.appliesTo = appliesTo;
+
+        this.appliesTo = null;
+        if (appliesTo != null && appliesTo.length > 0) {
+            this.appliesTo = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(appliesTo)));
+        }
     }
 
     /**
@@ -66,11 +70,12 @@ public class ChangeMetaData implements PrioritizedService {
     }
 
     /**
-     * Returns the types of objects this change would apply to.
+     * Returns the types of DatabaseObjects this change would apply to.
      * Useful for documentation or integrations that present a user with what change commands are available for a given database type.
-     * If no information is known, returns null. Will never return an empty array, only null or a populated array.
+     * If no information is known, returns null. Will never return an empty set, only null or a populated set.
+     * The string value will correspond to the values returned by {@link liquibase.structure.DatabaseObject#getObjectTypeName()}
      */
-    public Class<? extends DatabaseObject>[] getAppliesTo() {
+    public Set<String> getAppliesTo() {
         return appliesTo;
     }
 }

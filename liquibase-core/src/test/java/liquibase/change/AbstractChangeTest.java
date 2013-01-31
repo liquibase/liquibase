@@ -15,11 +15,9 @@ import liquibase.structure.core.Table;
 import liquibase.structure.core.View;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
-import java.beans.PropertyDescriptor;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;
@@ -80,8 +78,7 @@ public class AbstractChangeTest {
         assertEquals("exampleAbstractChange", changeMetaData.getName());
         assertEquals("Used for the AbstractChangeTest unit test", changeMetaData.getDescription());
         assertEquals(1, changeMetaData.getPriority());
-        assertEquals(1, changeMetaData.getAppliesTo().length);
-        assertEquals("all", changeMetaData.getAppliesTo()[0]);
+        assertNull(null, changeMetaData.getAppliesTo());
 
         Map<String, ChangeParameterMetaData> parameters = changeMetaData.getParameters();
         assertEquals(3, parameters.size());
@@ -94,16 +91,15 @@ public class AbstractChangeTest {
         assertNotNull(paramOneMetaData);
         assertEquals("paramOne", paramOneMetaData.getParameterName());
         assertEquals("Param One", paramOneMetaData.getDisplayName());
-        assertEquals("String", paramOneMetaData.getType());
-        assertEquals("", paramOneMetaData.getMustApplyTo());
-        assertEquals(1, paramOneMetaData.getRequiredForDatabase().size());
-        assertEquals("none", paramOneMetaData.getRequiredForDatabase().iterator().next());
+        assertEquals("string", paramOneMetaData.getDataType());
+        assertEquals("", paramOneMetaData.getMustEqualExisting());
+        assertEquals(0, paramOneMetaData.getRequiredForDatabase().size());
 
         assertNotNull(paramTwoMetaData);
         assertEquals("paramTwo", paramTwoMetaData.getParameterName());
         assertEquals("Param Two", paramTwoMetaData.getDisplayName());
-        assertEquals("Integer", paramTwoMetaData.getType());
-        assertEquals("table", paramTwoMetaData.getMustApplyTo());
+        assertEquals("integer", paramTwoMetaData.getDataType());
+        assertEquals("table", paramTwoMetaData.getMustEqualExisting());
         assertEquals(2, paramTwoMetaData.getRequiredForDatabase().size());
         assertTrue(paramTwoMetaData.getRequiredForDatabase().contains("mysql"));
         assertTrue(paramTwoMetaData.getRequiredForDatabase().contains("mssql"));
@@ -790,7 +786,7 @@ public class AbstractChangeTest {
             this.paramOne = paramOne;
         }
 
-        @DatabaseChangeProperty(requiredForDatabase = {"mysql", "mssql"}, mustApplyTo = "table")
+        @DatabaseChangeProperty(requiredForDatabase = {"mysql", "mssql"}, mustEqualExisting = "table")
         public Integer getParamTwo() {
             return paramTwo;
         }

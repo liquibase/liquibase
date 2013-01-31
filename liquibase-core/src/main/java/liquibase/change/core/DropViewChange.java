@@ -12,14 +12,14 @@ import liquibase.structure.core.View;
 /**
  * Drops an existing view.
  */
-@DatabaseChange(name="dropView", description = "Drop View", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = View.class)
+@DatabaseChange(name="dropView", description = "Drop View", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "view")
 public class DropViewChange extends AbstractChange {
     private String catalogName;
     private String schemaName;
     private String viewName;
 
 
-    @DatabaseChangeProperty(mustApplyTo ="view.catalog")
+    @DatabaseChangeProperty(mustEqualExisting ="view.catalog")
     public String getCatalogName() {
         return catalogName;
     }
@@ -28,7 +28,7 @@ public class DropViewChange extends AbstractChange {
         this.catalogName = catalogName;
     }
 
-    @DatabaseChangeProperty(mustApplyTo ="view.schema")
+    @DatabaseChangeProperty(mustEqualExisting ="view.schema")
     public String getSchemaName() {
         return schemaName;
     }
@@ -37,7 +37,7 @@ public class DropViewChange extends AbstractChange {
         this.schemaName = schemaName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", mustApplyTo = "view")
+    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "view")
     public String getViewName() {
         return viewName;
     }

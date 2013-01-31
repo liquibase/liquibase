@@ -10,7 +10,7 @@ import liquibase.structure.core.UniqueConstraint;
 /**
  * Removes an existing unique constraint.
  */
-@DatabaseChange(name="dropUniqueConstraint", description = "Drop Unique Constraint", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = UniqueConstraint.class)
+@DatabaseChange(name="dropUniqueConstraint", description = "Drop Unique Constraint", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "uniqueConstraint")
 public class DropUniqueConstraintChange extends AbstractChange {
     private String catalogName;
     private String schemaName;
@@ -21,7 +21,7 @@ public class DropUniqueConstraintChange extends AbstractChange {
      */
     private String uniqueColumns;
 
-    @DatabaseChangeProperty(mustApplyTo ="uniqueConstraint.table.catalog")
+    @DatabaseChangeProperty(mustEqualExisting ="uniqueConstraint.table.catalog")
     public String getCatalogName() {
         return catalogName;
     }
@@ -30,7 +30,7 @@ public class DropUniqueConstraintChange extends AbstractChange {
         this.catalogName = catalogName;
     }
 
-    @DatabaseChangeProperty(mustApplyTo ="uniqueConstraint.table.schema")
+    @DatabaseChangeProperty(mustEqualExisting ="uniqueConstraint.table.schema")
     public String getSchemaName() {
         return schemaName;
     }
@@ -39,7 +39,7 @@ public class DropUniqueConstraintChange extends AbstractChange {
         this.schemaName = schemaName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", mustApplyTo = "uniqueConstraint.table")
+    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "uniqueConstraint.table")
     public String getTableName() {
         return tableName;
     }
@@ -48,7 +48,7 @@ public class DropUniqueConstraintChange extends AbstractChange {
         this.tableName = tableName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", mustApplyTo = "uniqueConstraint")
+    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "uniqueConstraint")
     public String getConstraintName() {
         return constraintName;
     }

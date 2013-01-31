@@ -3,6 +3,7 @@ package liquibase.structure;
 import liquibase.CatalogAndSchema;
 import liquibase.database.Database;
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.util.StringUtils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -14,6 +15,10 @@ public abstract class AbstractDatabaseObject implements DatabaseObject {
     private Map<String, Object> attributes = new HashMap<String, Object>();
 
     private UUID snapshotId;
+
+    public String getObjectTypeName() {
+        return StringUtils.lowerCaseFirst(getClass().getSimpleName());
+    }
 
     public UUID getSnapshotId() {
         return snapshotId;

@@ -167,4 +167,8 @@ public class StringUtils {
         String returnString = buffer.toString();
         return returnString.substring(0, returnString.length()-delimiter.length());
     }
+
+    public static String lowerCaseFirst(String string) {
+        return string.substring(0, 1).toLowerCase()+string.substring(1);
+    }
 }

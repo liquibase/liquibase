@@ -2,7 +2,6 @@ package liquibase.change.core;
 
 import liquibase.change.*;
 import liquibase.database.Database;
-import liquibase.statement.NotNullConstraint;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.SetNullableStatement;
 import liquibase.structure.core.Column;
@@ -10,7 +9,7 @@ import liquibase.structure.core.Column;
 /**
  * Drops a not-null constraint from an existing column.
  */
-@DatabaseChange(name="dropNotNullConstraint", description = "Drop Not-Null Constraint", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = Column.class)
+@DatabaseChange(name="dropNotNullConstraint", description = "Drop Not-Null Constraint", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "column")
 public class DropNotNullConstraintChange extends AbstractChange {
 
     private String catalogName;
@@ -19,7 +18,7 @@ public class DropNotNullConstraintChange extends AbstractChange {
     private String columnName;
     private String columnDataType;
 
-    @DatabaseChangeProperty(mustApplyTo ="notNullConstraint.table.catalog")
+    @DatabaseChangeProperty(mustEqualExisting ="notNullConstraint.table.catalog")
     public String getCatalogName() {
         return catalogName;
     }
@@ -28,7 +27,7 @@ public class DropNotNullConstraintChange extends AbstractChange {
         this.catalogName = catalogName;
     }
 
-    @DatabaseChangeProperty(mustApplyTo ="notNullConstraint.table.schema")
+    @DatabaseChangeProperty(mustEqualExisting ="notNullConstraint.table.schema")
     public String getSchemaName() {
         return schemaName;
     }
@@ -37,7 +36,7 @@ public class DropNotNullConstraintChange extends AbstractChange {
         this.schemaName = schemaName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", mustApplyTo = "notNullConstraint.table")
+    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "notNullConstraint.table")
     public String getTableName() {
         return tableName;
     }
@@ -46,7 +45,7 @@ public class DropNotNullConstraintChange extends AbstractChange {
         this.tableName = tableName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", mustApplyTo = "notNullConstraint.column")
+    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "notNullConstraint.column")
     public String getColumnName() {
         return columnName;
     }

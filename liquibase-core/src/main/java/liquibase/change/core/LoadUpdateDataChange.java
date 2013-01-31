@@ -17,7 +17,7 @@ import liquibase.structure.core.Table;
 import java.util.ArrayList;
 import java.util.List;
 
-@DatabaseChange(name="loadUpdateData", description = "Smart Load Data", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = Table.class)
+@DatabaseChange(name="loadUpdateData", description = "Smart Load Data", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "table")
 public class LoadUpdateDataChange extends LoadDataChange {
     private String primaryKey;
 

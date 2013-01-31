@@ -15,14 +15,14 @@ import java.util.List;
 /**
  * Removes an existing primary key.
  */
-@DatabaseChange(name="dropPrimaryKey", description = "Drop Primary Key", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = PrimaryKey.class)
+@DatabaseChange(name="dropPrimaryKey", description = "Drop Primary Key", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "primaryKey")
 public class DropPrimaryKeyChange extends AbstractChange {
     private String catalogName;
     private String schemaName;
     private String tableName;
     private String constraintName;
 
-    @DatabaseChangeProperty(mustApplyTo ="primaryKey.catalog")
+    @DatabaseChangeProperty(mustEqualExisting ="primaryKey.catalog")
     public String getCatalogName() {
         return catalogName;
     }
@@ -31,7 +31,7 @@ public class DropPrimaryKeyChange extends AbstractChange {
         this.catalogName = catalogName;
     }
 
-    @DatabaseChangeProperty(mustApplyTo ="primaryKey.schema")
+    @DatabaseChangeProperty(mustEqualExisting ="primaryKey.schema")
     public String getSchemaName() {
         return schemaName;
     }
@@ -40,7 +40,7 @@ public class DropPrimaryKeyChange extends AbstractChange {
         this.schemaName = schemaName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", mustApplyTo = "primaryKey.table")
+    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "primaryKey.table")
     public String getTableName() {
         return tableName;
     }
@@ -49,7 +49,7 @@ public class DropPrimaryKeyChange extends AbstractChange {
         this.tableName = tableName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", mustApplyTo = "primaryKey")
+    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "primaryKey")
     public String getConstraintName() {
         return constraintName;
     }

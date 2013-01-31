@@ -12,7 +12,7 @@ import java.util.List;
 /**
  * Creates an index on an existing column.
  */
-@DatabaseChange(name="createIndex", description = "Create Index", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = Index.class)
+@DatabaseChange(name="createIndex", description = "Create Index", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "index")
 public class CreateIndexChange extends AbstractChange implements ChangeWithColumns<ColumnConfig> {
 
     private String catalogName;
@@ -33,7 +33,7 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
         columns = new ArrayList<ColumnConfig>();
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", mustApplyTo = "index")
+    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "index")
     public String getIndexName() {
         return indexName;
     }
@@ -42,7 +42,7 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
         this.indexName = indexName;
     }
 
-    @DatabaseChangeProperty(mustApplyTo ="index.schema")
+    @DatabaseChangeProperty(mustEqualExisting ="index.schema")
     public String getSchemaName() {
         return schemaName;
     }
@@ -51,7 +51,7 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
         this.schemaName = schemaName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", mustApplyTo = "index.table")
+    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "index.table")
     public String getTableName() {
         return tableName;
     }
@@ -60,7 +60,7 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
         this.tableName = tableName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", mustApplyTo = "index.column")
+    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "index.column")
     public List<ColumnConfig> getColumns() {
         return columns;
     }

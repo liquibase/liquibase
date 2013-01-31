@@ -5,7 +5,6 @@ import liquibase.change.DatabaseChange;
 import liquibase.change.ChangeMetaData;
 import liquibase.change.DatabaseChangeProperty;
 import liquibase.database.Database;
-import liquibase.exception.UnsupportedChangeException;
 import liquibase.structure.core.Table;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
@@ -22,7 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-@DatabaseChange(name="dropAllForeignKeyConstraints", description = "Drop All Foreign Key Constraints", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = Table.class)
+@DatabaseChange(name="dropAllForeignKeyConstraints", description = "Drop All Foreign Key Constraints", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "table")
 public class DropAllForeignKeyConstraintsChange extends AbstractChange {
 
     private String baseTableCatalogName;
@@ -32,7 +31,7 @@ public class DropAllForeignKeyConstraintsChange extends AbstractChange {
     @DatabaseChangeProperty(includeInSerialization = false)
     private List<DropForeignKeyConstraintChange> childDropChanges;
 
-    @DatabaseChangeProperty(mustApplyTo ="table.catalog")
+    @DatabaseChangeProperty(mustEqualExisting ="table.catalog")
     public String getBaseTableCatalogName() {
         return baseTableCatalogName;
     }
@@ -41,7 +40,7 @@ public class DropAllForeignKeyConstraintsChange extends AbstractChange {
         this.baseTableCatalogName = baseTableCatalogName;
     }
 
-    @DatabaseChangeProperty(mustApplyTo ="table.schema")
+    @DatabaseChangeProperty(mustEqualExisting ="table.schema")
     public String getBaseTableSchemaName() {
         return baseTableSchemaName;
     }
@@ -50,7 +49,7 @@ public class DropAllForeignKeyConstraintsChange extends AbstractChange {
         this.baseTableSchemaName = baseTableSchemaName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", mustApplyTo = "table")
+    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "table")
     public String getBaseTableName() {
         return baseTableName;
     }

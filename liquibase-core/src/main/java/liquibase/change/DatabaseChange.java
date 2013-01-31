@@ -11,6 +11,6 @@ public @interface DatabaseChange {
     String name();
     String description();
     int priority();
-    Class<? extends DatabaseObject>[] appliesTo() default {};
+    String[] appliesTo() default {};
 
 }

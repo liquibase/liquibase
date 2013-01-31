@@ -7,7 +7,6 @@ import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.structure.DatabaseObject;
 import liquibase.exception.*;
-import liquibase.logging.LogFactory;
 import liquibase.resource.ResourceAccessor;
 import liquibase.serializer.core.string.StringChangeLogSerializer;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
@@ -102,19 +101,19 @@ public abstract class AbstractChange implements Change {
             throw new UnexpectedLiquibaseException("Could not find property " + parameterName);
         }
 
-        String type = property.getPropertyType().getSimpleName();
+        Class type = property.getPropertyType();
         DatabaseChangeProperty changePropertyAnnotation = property.getReadMethod().getAnnotation(DatabaseChangeProperty.class);
 
         String[] requiredForDatabase;
-        String mustApplyTo = null;
+        String mustEqualExisting = null;
         if (changePropertyAnnotation == null) {
             requiredForDatabase = new String[]{"none"};
         } else {
             requiredForDatabase = changePropertyAnnotation.requiredForDatabase();
-            mustApplyTo = changePropertyAnnotation.mustApplyTo();
+            mustEqualExisting = changePropertyAnnotation.mustEqualExisting();
         }
 
-        return new ChangeParameterMetaData(parameterName, displayName, type, requiredForDatabase, mustApplyTo);
+        return new ChangeParameterMetaData(parameterName, displayName, type, requiredForDatabase, mustEqualExisting);
     }
 
     /**

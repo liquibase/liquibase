@@ -19,14 +19,14 @@ public class ChangeMetaDataTest {
     public void constructor() {
         HashMap<String, ChangeParameterMetaData> params = new HashMap<String, ChangeParameterMetaData>();
         params.put("a", mock(ChangeParameterMetaData.class));
-        Class<? extends DatabaseObject>[] appliesTo = new Class[]{Table.class, Column.class};
+        String[] appliesTo = new String[] {"table", "column"};
         ChangeMetaData metaData = new ChangeMetaData("x", "y", 10, appliesTo, params);
 
         assertEquals("x", metaData.getName());
         assertEquals("y", metaData.getDescription());
         assertEquals(10, metaData.getPriority());
 
-        assertEquals(2, metaData.getAppliesTo().length);
+        assertEquals(2, metaData.getAppliesTo().size());
 
         assertEquals(1, metaData.getParameters().size());
         assertEquals("a", metaData.getParameters().keySet().iterator().next());
@@ -46,7 +46,7 @@ public class ChangeMetaDataTest {
 
     @Test
     public void constructor_emptyAppliesTo() {
-        ChangeMetaData metaData = new ChangeMetaData("x", "y", 5, new Class[0], null);
+        ChangeMetaData metaData = new ChangeMetaData("x", "y", 5, new String[0], null);
         assertNull("Empty appliesTo should convert to a null appliesTo", metaData.getAppliesTo());
     }
 

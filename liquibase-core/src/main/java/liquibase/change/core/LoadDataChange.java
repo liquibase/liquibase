@@ -19,7 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-@DatabaseChange(name="loadData", description = "Load Data", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = Table.class)
+@DatabaseChange(name="loadData", description = "Load Data", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "table")
 public class LoadDataChange extends AbstractChange implements ChangeWithColumns<LoadDataColumnConfig> {
 
     private String catalogName;
@@ -33,7 +33,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
 
     private List<LoadDataColumnConfig> columns = new ArrayList<LoadDataColumnConfig>();
 
-    @DatabaseChangeProperty(mustApplyTo ="table.catalog")
+    @DatabaseChangeProperty(mustEqualExisting ="table.catalog")
     public String getCatalogName() {
         return catalogName;
     }
@@ -42,7 +42,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
         this.catalogName = catalogName;
     }
 
-    @DatabaseChangeProperty(mustApplyTo ="table.schema")
+    @DatabaseChangeProperty(mustEqualExisting ="table.schema")
     public String getSchemaName() {
         return schemaName;
     }
@@ -51,7 +51,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
         this.schemaName = schemaName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", mustApplyTo = "table")
+    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "table")
     public String getTableName() {
         return tableName;
     }

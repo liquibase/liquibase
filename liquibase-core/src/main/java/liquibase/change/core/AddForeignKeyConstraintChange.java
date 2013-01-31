@@ -11,7 +11,7 @@ import liquibase.statement.core.AddForeignKeyConstraintStatement;
 /**
  * Adds a foreign key constraint to an existing column.
  */
- @DatabaseChange(name="addForeignKeyConstraint", description = "Add Foreign Key Constraint", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = Column.class)
+ @DatabaseChange(name="addForeignKeyConstraint", description = "Add Foreign Key Constraint", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "column")
 public class AddForeignKeyConstraintChange extends AbstractChange {
 
     private String baseTableCatalogName;
@@ -36,7 +36,7 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
 	// If FK referenced to such unique column this option should be set to true
 	private Boolean referencesUniqueColumn;
 
-    @DatabaseChangeProperty(mustApplyTo ="column.relation.catalog")
+    @DatabaseChangeProperty(mustEqualExisting ="column.relation.catalog")
     public String getBaseTableCatalogName() {
         return baseTableCatalogName;
     }
@@ -45,7 +45,7 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
         this.baseTableCatalogName = baseTableCatalogName;
     }
 
-    @DatabaseChangeProperty(mustApplyTo ="column.relation.schema")
+    @DatabaseChangeProperty(mustEqualExisting ="column.relation.schema")
     public String getBaseTableSchemaName() {
         return baseTableSchemaName;
     }
@@ -54,7 +54,7 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
         this.baseTableSchemaName = baseTableSchemaName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", mustApplyTo = "column.relation")
+    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "column.relation")
     public String getBaseTableName() {
         return baseTableName;
     }
@@ -63,7 +63,7 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
         this.baseTableName = baseTableName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", mustApplyTo = "column")
+    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "column")
     public String getBaseColumnNames() {
         return baseColumnNames;
     }

@@ -13,14 +13,14 @@ import liquibase.structure.core.ForeignKey;
 /**
  * Drops an existing foreign key constraint.
  */
-@DatabaseChange(name="dropForeignKeyConstraint", description = "Drop Foreign Key Constraint", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = ForeignKey.class)
+@DatabaseChange(name="dropForeignKeyConstraint", description = "Drop Foreign Key Constraint", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "foreignKey")
 public class DropForeignKeyConstraintChange extends AbstractChange {
     private String baseTableCatalogName;
     private String baseTableSchemaName;
     private String baseTableName;
     private String constraintName;
 
-    @DatabaseChangeProperty(mustApplyTo ="foreignKey.table.catalog")
+    @DatabaseChangeProperty(mustEqualExisting ="foreignKey.table.catalog")
     public String getBaseTableCatalogName() {
         return baseTableCatalogName;
     }
@@ -29,7 +29,7 @@ public class DropForeignKeyConstraintChange extends AbstractChange {
         this.baseTableCatalogName = baseTableCatalogName;
     }
 
-    @DatabaseChangeProperty(mustApplyTo ="foreignKey.table.schema")
+    @DatabaseChangeProperty(mustEqualExisting ="foreignKey.table.schema")
     public String getBaseTableSchemaName() {
         return baseTableSchemaName;
     }
@@ -38,7 +38,7 @@ public class DropForeignKeyConstraintChange extends AbstractChange {
         this.baseTableSchemaName = baseTableSchemaName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", mustApplyTo = "foreignKey.table")
+    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "foreignKey.table")
     public String getBaseTableName() {
         return baseTableName;
     }
@@ -47,7 +47,7 @@ public class DropForeignKeyConstraintChange extends AbstractChange {
         this.baseTableName = baseTableName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", mustApplyTo = "foreignKey")
+    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "foreignKey")
     public String getConstraintName() {
         return constraintName;
     }

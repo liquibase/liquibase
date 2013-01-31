@@ -15,7 +15,7 @@ import java.util.Locale;
 /**
  * Sets a new default value to an existing column.
  */
-@DatabaseChange(name="addDefaultValue", description = "Add Default Value", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = Column.class)
+@DatabaseChange(name="addDefaultValue", description = "Add Default Value", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "column")
 public class AddDefaultValueChange extends AbstractChange {
 
     private String catalogName;
@@ -29,7 +29,7 @@ public class AddDefaultValueChange extends AbstractChange {
     private Boolean defaultValueBoolean;
     private DatabaseFunction defaultValueComputed;
 
-    @DatabaseChangeProperty(mustApplyTo ="column.relation.catalog")
+    @DatabaseChangeProperty(mustEqualExisting ="column.relation.catalog")
     public String getCatalogName() {
         return catalogName;
     }
@@ -38,7 +38,7 @@ public class AddDefaultValueChange extends AbstractChange {
         this.catalogName = catalogName;
     }
 
-    @DatabaseChangeProperty(mustApplyTo ="column.relation.schema")
+    @DatabaseChangeProperty(mustEqualExisting ="column.relation.schema")
     public String getSchemaName() {
         return schemaName;
     }
@@ -47,7 +47,7 @@ public class AddDefaultValueChange extends AbstractChange {
         this.schemaName = schemaName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", mustApplyTo = "column.relation")
+    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "column.relation")
     public String getTableName() {
         return tableName;
     }
@@ -56,7 +56,7 @@ public class AddDefaultValueChange extends AbstractChange {
         this.tableName = tableName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", mustApplyTo = "column")
+    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "column")
     public String getColumnName() {
         return columnName;
     }

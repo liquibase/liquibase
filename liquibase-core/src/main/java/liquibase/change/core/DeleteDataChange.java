@@ -6,7 +6,7 @@ import liquibase.statement.SqlStatement;
 import liquibase.statement.core.DeleteStatement;
 import liquibase.structure.core.Table;
 
-@DatabaseChange(name="delete", description = "Delete Data", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = Table.class)
+@DatabaseChange(name="delete", description = "Delete Data", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "table")
 public class DeleteDataChange extends AbstractChange {
 
     private String catalogName;
@@ -16,7 +16,7 @@ public class DeleteDataChange extends AbstractChange {
     @TextNode(nodeName="where")
     private String whereClause;
 
-    @DatabaseChangeProperty(mustApplyTo ="table.catalog")
+    @DatabaseChangeProperty(mustEqualExisting ="table.catalog")
     public String getCatalogName() {
         return catalogName;
     }
@@ -25,7 +25,7 @@ public class DeleteDataChange extends AbstractChange {
         this.catalogName = catalogName;
     }
 
-    @DatabaseChangeProperty(mustApplyTo ="table.schema")
+    @DatabaseChangeProperty(mustEqualExisting ="table.schema")
     public String getSchemaName() {
         return schemaName;
     }
@@ -34,7 +34,7 @@ public class DeleteDataChange extends AbstractChange {
         this.schemaName = schemaName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", mustApplyTo = "table")
+    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "table")
     public String getTableName() {
         return tableName;
     }

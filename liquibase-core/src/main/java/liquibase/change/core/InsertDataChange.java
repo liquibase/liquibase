@@ -2,27 +2,18 @@ package liquibase.change.core;
 
 import liquibase.change.*;
 import liquibase.database.Database;
-import liquibase.database.PreparedStatementFactory;
-import liquibase.database.core.InformixDatabase;
-import liquibase.exception.DatabaseException;
-import liquibase.statement.ExecutablePreparedStatement;
 import liquibase.statement.InsertExecutablePreparedStatement;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.InsertStatement;
 import liquibase.structure.core.Table;
 
-import java.io.*;
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Inserts data into an existing table.
  */
-@DatabaseChange(name="insert", description = "Insert Row", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = Table.class)
+@DatabaseChange(name="insert", description = "Insert Row", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "table")
 public class InsertDataChange extends AbstractChange implements ChangeWithColumns<ColumnConfig> {
 
     private String catalogName;
@@ -34,7 +25,7 @@ public class InsertDataChange extends AbstractChange implements ChangeWithColumn
         columns = new ArrayList<ColumnConfig>();
     }
 
-    @DatabaseChangeProperty(mustApplyTo ="table.catalog")
+    @DatabaseChangeProperty(mustEqualExisting ="table.catalog")
     public String getCatalogName() {
         return catalogName;
     }
@@ -43,7 +34,7 @@ public class InsertDataChange extends AbstractChange implements ChangeWithColumn
         this.catalogName = catalogName;
     }
 
-    @DatabaseChangeProperty(mustApplyTo ="table.schema")
+    @DatabaseChangeProperty(mustEqualExisting ="table.schema")
     public String getSchemaName() {
         return schemaName;
     }
@@ -52,7 +43,7 @@ public class InsertDataChange extends AbstractChange implements ChangeWithColumn
         this.schemaName = schemaName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", mustApplyTo = "table")
+    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "table")
     public String getTableName() {
         return tableName;
     }
@@ -61,7 +52,7 @@ public class InsertDataChange extends AbstractChange implements ChangeWithColumn
         this.tableName = tableName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", mustApplyTo = "table.column")
+    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "table.column")
     public List<ColumnConfig> getColumns() {
         return columns;
     }

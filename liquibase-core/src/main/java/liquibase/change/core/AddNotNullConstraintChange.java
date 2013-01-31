@@ -19,7 +19,7 @@ import java.util.List;
 /**
  * Adds a not-null constraint to an existing column.
  */
-@DatabaseChange(name="addNotNullConstraint", description = "Add Not-Null Constraint", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = Column.class)
+@DatabaseChange(name="addNotNullConstraint", description = "Add Not-Null Constraint", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "column")
 public class AddNotNullConstraintChange extends AbstractChange {
     private String catalogName;
     private String schemaName;
@@ -28,7 +28,7 @@ public class AddNotNullConstraintChange extends AbstractChange {
     private String defaultNullValue;
     private String columnDataType;
 
-    @DatabaseChangeProperty(mustApplyTo ="column.relation.catalog")
+    @DatabaseChangeProperty(mustEqualExisting ="column.relation.catalog")
     public String getCatalogName() {
         return catalogName;
     }
@@ -37,7 +37,7 @@ public class AddNotNullConstraintChange extends AbstractChange {
         this.catalogName = catalogName;
     }
 
-    @DatabaseChangeProperty(mustApplyTo ="column.relation.schema")
+    @DatabaseChangeProperty(mustEqualExisting ="column.relation.schema")
     public String getSchemaName() {
         return schemaName;
     }
@@ -46,7 +46,7 @@ public class AddNotNullConstraintChange extends AbstractChange {
         this.schemaName = schemaName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", mustApplyTo = "column.relation")
+    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "column.relation")
     public String getTableName() {
         return tableName;
     }
@@ -55,7 +55,7 @@ public class AddNotNullConstraintChange extends AbstractChange {
         this.tableName = tableName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", mustApplyTo = "column.relation.column")
+    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "column.relation.column")
     public String getColumnName() {
         return columnName;
     }

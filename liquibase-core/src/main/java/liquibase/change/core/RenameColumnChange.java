@@ -15,7 +15,7 @@ import java.util.List;
 /**
  * Renames an existing column.
  */
-@DatabaseChange(name="renameColumn", description = "Rename Column", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = Column.class)
+@DatabaseChange(name="renameColumn", description = "Rename Column", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "column")
 public class RenameColumnChange extends AbstractChange {
 
     private String catalogName;
@@ -25,7 +25,7 @@ public class RenameColumnChange extends AbstractChange {
     private String newColumnName;
     private String columnDataType;
 
-    @DatabaseChangeProperty(mustApplyTo ="column.relation.catalog")
+    @DatabaseChangeProperty(mustEqualExisting ="column.relation.catalog")
     public String getCatalogName() {
         return catalogName;
     }
@@ -34,7 +34,7 @@ public class RenameColumnChange extends AbstractChange {
         this.catalogName = catalogName;
     }
 
-    @DatabaseChangeProperty(mustApplyTo ="column.relation.schema")
+    @DatabaseChangeProperty(mustEqualExisting ="column.relation.schema")
     public String getSchemaName() {
         return schemaName;
     }
@@ -43,7 +43,7 @@ public class RenameColumnChange extends AbstractChange {
         this.schemaName = schemaName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", mustApplyTo = "column.relation")
+    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "column.relation")
     public String getTableName() {
         return tableName;
     }
@@ -52,7 +52,7 @@ public class RenameColumnChange extends AbstractChange {
         this.tableName = tableName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", mustApplyTo = "column")
+    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "column")
     public String getOldColumnName() {
         return oldColumnName;
     }

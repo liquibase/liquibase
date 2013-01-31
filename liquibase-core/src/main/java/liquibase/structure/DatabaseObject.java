@@ -14,7 +14,9 @@ public interface DatabaseObject extends Comparable{
     public void setSnapshotId(UUID id);
 
     DatabaseObject[] getContainingObjects();
-    
+
+    String getObjectTypeName();
+
     String getName();
 
     Schema getSchema();
@@ -26,5 +28,6 @@ public interface DatabaseObject extends Comparable{
     <T> T getAttribute(String attribute, Class<T> type);
 
     DatabaseObject setAttribute(String attribute, Object value);
+
 }
 

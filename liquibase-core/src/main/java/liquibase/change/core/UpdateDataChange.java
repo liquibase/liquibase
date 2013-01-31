@@ -10,7 +10,7 @@ import liquibase.structure.core.Table;
 import java.util.ArrayList;
 import java.util.List;
 
-@DatabaseChange(name = "update", description = "Update Data", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = Table.class)
+@DatabaseChange(name = "update", description = "Update Data", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "table")
 public class UpdateDataChange extends AbstractChange implements ChangeWithColumns<ColumnConfig> {
 
     private String catalogName;
@@ -25,7 +25,7 @@ public class UpdateDataChange extends AbstractChange implements ChangeWithColumn
         columns = new ArrayList<ColumnConfig>();
     }
 
-    @DatabaseChangeProperty(mustApplyTo ="column.relation.catalog")
+    @DatabaseChangeProperty(mustEqualExisting ="column.relation.catalog")
     public String getCatalogName() {
         return catalogName;
     }
@@ -34,7 +34,7 @@ public class UpdateDataChange extends AbstractChange implements ChangeWithColumn
         this.catalogName = catalogName;
     }
 
-    @DatabaseChangeProperty(mustApplyTo ="column.relation.schema")
+    @DatabaseChangeProperty(mustEqualExisting ="column.relation.schema")
     public String getSchemaName() {
         return schemaName;
     }
@@ -43,7 +43,7 @@ public class UpdateDataChange extends AbstractChange implements ChangeWithColumn
         this.schemaName = schemaName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", mustApplyTo = "table")
+    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "table")
     public String getTableName() {
         return tableName;
     }

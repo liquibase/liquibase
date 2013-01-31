@@ -20,7 +20,7 @@ import java.util.List;
  * Extracts data from an existing column to create a lookup table.
  * A foreign key is created between the old column and the new lookup table.
  */
-@DatabaseChange(name="addLookupTable", description = "Add Lookup Table", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = Column.class)
+@DatabaseChange(name="addLookupTable", description = "Add Lookup Table", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "column")
 public class AddLookupTableChange extends AbstractChange {
 
     private String existingTableCatalogName;
@@ -43,7 +43,7 @@ public class AddLookupTableChange extends AbstractChange {
         this.existingTableCatalogName = existingTableCatalogName;
     }
 
-    @DatabaseChangeProperty(mustApplyTo ="column.relation.schema")
+    @DatabaseChangeProperty(mustEqualExisting ="column.relation.schema")
     public String getExistingTableSchemaName() {
         return existingTableSchemaName;
     }
@@ -52,7 +52,7 @@ public class AddLookupTableChange extends AbstractChange {
         this.existingTableSchemaName = existingTableSchemaName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", mustApplyTo = "column.relation")
+    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "column.relation")
     public String getExistingTableName() {
         return existingTableName;
     }
@@ -61,7 +61,7 @@ public class AddLookupTableChange extends AbstractChange {
         this.existingTableName = existingTableName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", mustApplyTo = "column")
+    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "column")
     public String getExistingColumnName() {
         return existingColumnName;
     }

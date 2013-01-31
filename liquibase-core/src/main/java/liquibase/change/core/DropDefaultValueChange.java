@@ -9,7 +9,7 @@ import liquibase.structure.core.Column;
 /**
  * Removes the default value from an existing column.
  */
-@DatabaseChange(name="dropDefaultValue", description="Drop Default Value", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = Column.class)
+@DatabaseChange(name="dropDefaultValue", description="Drop Default Value", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "column")
 public class DropDefaultValueChange extends AbstractChange {
 
     private String catalogName;
@@ -18,7 +18,7 @@ public class DropDefaultValueChange extends AbstractChange {
     private String columnName;
     private String columnDataType;
 
-    @DatabaseChangeProperty(mustApplyTo ="column.relation.catalog")
+    @DatabaseChangeProperty(mustEqualExisting ="column.relation.catalog")
     public String getCatalogName() {
         return catalogName;
     }
@@ -27,7 +27,7 @@ public class DropDefaultValueChange extends AbstractChange {
         this.catalogName = catalogName;
     }
 
-    @DatabaseChangeProperty(mustApplyTo ="column.relation.schema")
+    @DatabaseChangeProperty(mustEqualExisting ="column.relation.schema")
     public String getSchemaName() {
         return schemaName;
     }
@@ -36,7 +36,7 @@ public class DropDefaultValueChange extends AbstractChange {
         this.schemaName = schemaName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", mustApplyTo = "column.relation")
+    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "column.relation")
     public String getTableName() {
         return tableName;
     }
@@ -45,7 +45,7 @@ public class DropDefaultValueChange extends AbstractChange {
         this.tableName = tableName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", mustApplyTo = "column")
+    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "column")
     public String getColumnName() {
         return columnName;
     }

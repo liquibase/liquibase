@@ -14,7 +14,7 @@ import java.util.List;
 /**
  * Drops an existing column from a table.
  */
-@DatabaseChange(name="dropColumn", description = "Drop Column", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = Column.class)
+@DatabaseChange(name="dropColumn", description = "Drop Column", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "column")
 public class DropColumnChange extends AbstractChange {
 
     private String catalogName;
@@ -22,7 +22,7 @@ public class DropColumnChange extends AbstractChange {
     private String tableName;
     private String columnName;
 
-    @DatabaseChangeProperty(requiredForDatabase = "all",mustApplyTo = "column")
+    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "column")
     public String getColumnName() {
         return columnName;
     }
@@ -32,7 +32,7 @@ public class DropColumnChange extends AbstractChange {
     }
 
 
-    @DatabaseChangeProperty(mustApplyTo ="column.relation.schema.catalog")
+    @DatabaseChangeProperty(mustEqualExisting ="column.relation.schema.catalog")
     public String getCatalogName() {
         return catalogName;
     }
@@ -41,7 +41,7 @@ public class DropColumnChange extends AbstractChange {
         this.catalogName = catalogName;
     }
 
-    @DatabaseChangeProperty(mustApplyTo ="column.relation.schema")
+    @DatabaseChangeProperty(mustEqualExisting ="column.relation.schema")
     public String getSchemaName() {
         return schemaName;
     }
@@ -50,7 +50,7 @@ public class DropColumnChange extends AbstractChange {
         this.schemaName = schemaName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", mustApplyTo = "column.relation")
+    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "column.relation")
     public String getTableName() {
         return tableName;
     }

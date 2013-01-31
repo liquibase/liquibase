@@ -8,7 +8,6 @@ import java.util.Set;
 import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.database.core.DB2Database;
-import liquibase.exception.UnsupportedChangeException;
 import liquibase.exception.ValidationErrors;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.*;
@@ -22,7 +21,7 @@ import liquibase.util.StringUtils;
 /**
  * Adds a column to an existing table.
  */
-@DatabaseChange(name="addColumn", description = "Add Column", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = Table.class)
+@DatabaseChange(name="addColumn", description = "Add Column", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "table")
 public class AddColumnChange extends AbstractChange implements ChangeWithColumns<ColumnConfig> {
 
     private String catalogName;
@@ -34,7 +33,7 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
         columns = new ArrayList<ColumnConfig>();
     }
 
-    @DatabaseChangeProperty(mustApplyTo ="relation.catalog")
+    @DatabaseChangeProperty(mustEqualExisting ="relation.catalog")
     public String getCatalogName() {
         return catalogName;
     }
@@ -43,7 +42,7 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
         this.catalogName = catalogName;
     }
 
-    @DatabaseChangeProperty(mustApplyTo ="relation.schema")
+    @DatabaseChangeProperty(mustEqualExisting ="relation.schema")
     public String getSchemaName() {
         return schemaName;
     }
@@ -52,7 +51,7 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
         this.schemaName = schemaName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", mustApplyTo ="table")
+    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting ="table")
     public String getTableName() {
         return tableName;
     }

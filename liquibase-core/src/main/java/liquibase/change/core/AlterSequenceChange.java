@@ -14,7 +14,7 @@ import java.math.BigInteger;
 /**
  * Modifies properties of an existing sequence. StartValue is not allowed since we cannot alter the starting sequence number
  */
-@DatabaseChange(name="alterSequence", description = "Alter Sequence", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = Sequence.class)
+@DatabaseChange(name="alterSequence", description = "Alter Sequence", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "sequence")
 public class AlterSequenceChange extends AbstractChange {
 
     private String catalogName;
@@ -25,7 +25,7 @@ public class AlterSequenceChange extends AbstractChange {
     private BigInteger minValue;
     private Boolean ordered;
 
-    @DatabaseChangeProperty(mustApplyTo ="sequence.catalog")
+    @DatabaseChangeProperty(mustEqualExisting ="sequence.catalog")
     public String getCatalogName() {
         return catalogName;
     }
@@ -34,7 +34,7 @@ public class AlterSequenceChange extends AbstractChange {
         this.catalogName = catalogName;
     }
 
-    @DatabaseChangeProperty(mustApplyTo ="sequence.schema")
+    @DatabaseChangeProperty(mustEqualExisting ="sequence.schema")
     public String getSchemaName() {
         return schemaName;
     }
@@ -43,7 +43,7 @@ public class AlterSequenceChange extends AbstractChange {
         this.schemaName = schemaName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", mustApplyTo = "sequence")
+    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "sequence")
     public String getSequenceName() {
         return sequenceName;
     }

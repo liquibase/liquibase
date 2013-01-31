@@ -12,5 +12,5 @@ public @interface DatabaseChangeProperty {
     public boolean includeInMetaData() default true;
 
     public String[] requiredForDatabase() default "none";
-    public String mustApplyTo() default "";
+    public String mustEqualExisting() default "";
 }

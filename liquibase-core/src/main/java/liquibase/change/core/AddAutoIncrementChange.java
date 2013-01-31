@@ -8,7 +8,6 @@ import liquibase.change.ChangeMetaData;
 import liquibase.change.DatabaseChangeProperty;
 import liquibase.database.Database;
 import liquibase.database.core.PostgresDatabase;
-import liquibase.statement.DatabaseFunction;
 import liquibase.statement.SequenceFunction;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.AddAutoIncrementStatement;
@@ -22,7 +21,7 @@ import liquibase.structure.core.Column;
  * This change is only valid for databases with auto-increment/identity columns.
  * The current version does not support MS-SQL.
  */
-@DatabaseChange(name="addAutoIncrement", description = "Set Column as Auto-Increment", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = Column.class)
+@DatabaseChange(name="addAutoIncrement", description = "Set Column as Auto-Increment", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "column")
 public class AddAutoIncrementChange extends AbstractChange {
 
     private String catalogName;
@@ -33,7 +32,7 @@ public class AddAutoIncrementChange extends AbstractChange {
     private BigInteger startWith;
     private BigInteger incrementBy;
 
-    @DatabaseChangeProperty(mustApplyTo ="column.relation.catalog")
+    @DatabaseChangeProperty(mustEqualExisting ="column.relation.catalog")
     public String getCatalogName() {
         return catalogName;
     }
@@ -42,7 +41,7 @@ public class AddAutoIncrementChange extends AbstractChange {
         this.catalogName = catalogName;
     }
 
-    @DatabaseChangeProperty(mustApplyTo ="column.relation.schema")
+    @DatabaseChangeProperty(mustEqualExisting ="column.relation.schema")
     public String getSchemaName() {
         return schemaName;
     }
@@ -51,7 +50,7 @@ public class AddAutoIncrementChange extends AbstractChange {
         this.schemaName = schemaName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", mustApplyTo ="column.relation")
+    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting ="column.relation")
     public String getTableName() {
         return tableName;
     }
@@ -60,7 +59,7 @@ public class AddAutoIncrementChange extends AbstractChange {
         this.tableName = tableName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", mustApplyTo ="column")
+    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting ="column")
     public String getColumnName() {
         return columnName;
     }
