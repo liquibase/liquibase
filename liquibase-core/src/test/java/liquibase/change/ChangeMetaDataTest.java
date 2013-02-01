@@ -3,13 +3,16 @@ package liquibase.change;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Table;
+import liquibase.structure.core.View;
 import org.junit.Test;
 
 import java.util.HashMap;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertSame;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.matches;
 import static org.mockito.Mockito.mock;
 
@@ -53,5 +56,20 @@ public class ChangeMetaDataTest {
     @Test(expected = UnsupportedOperationException.class)
     public void getParameters() {
         new ChangeMetaData("x", "y", 1, null, new HashMap()).getParameters().put("new", mock(ChangeParameterMetaData.class));
+    }
+
+    @Test
+    public void appliesTo() {
+        ChangeMetaData metaData = new ChangeMetaData("x", "y", 5, new String[] {"table", "column"}, null);
+        assertTrue(metaData.appliesTo(new Table()));
+        assertTrue(metaData.appliesTo(new Column()));
+        assertFalse(metaData.appliesTo(new View()));
+    }
+
+    @Test
+    public void appliesTo_nullAppliesTo() {
+        ChangeMetaData metaData = new ChangeMetaData("x", "y", 5, new String[0], null);
+        assertFalse(metaData.appliesTo(new Table()));
+        assertFalse(metaData.appliesTo(new Column()));
     }
 }

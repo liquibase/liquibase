@@ -78,4 +78,8 @@ public class ChangeMetaData implements PrioritizedService {
     public Set<String> getAppliesTo() {
         return appliesTo;
     }
+
+    public boolean appliesTo(DatabaseObject databaseObject) {
+        return appliesTo != null && appliesTo.contains(databaseObject.getObjectTypeName());
+    }
 }
