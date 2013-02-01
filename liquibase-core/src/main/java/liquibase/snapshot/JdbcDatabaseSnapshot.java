@@ -179,6 +179,8 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
             Object o = row.get(columnName);
             if (o instanceof Number) {
                 return ((Number) o).intValue();
+            } else if (o instanceof String) {
+                return Integer.valueOf((String) o);
             }
             return (Integer) o;
         }
@@ -187,6 +189,8 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
             Object o = row.get(columnName);
             if (o instanceof Number) {
                 return ((Number) o).shortValue();
+            } else if (o instanceof String) {
+                return Short.valueOf((String) o);
             }
             return (Short) o;
         }
