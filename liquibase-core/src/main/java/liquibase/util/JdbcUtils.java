@@ -133,6 +133,7 @@ public abstract class JdbcUtils {
      * Checks whether a result set has a column matching the specified column name.
      * Case is ignored.
      *
+     * TODO: probably need to remove so liquibase works well with case sensitive databases as well.
      * @param rs result set to check
      * @param columnNameToCheck column name to check
      * @return The value if found, null if not found
