@@ -28,7 +28,7 @@ public class ColumnMapRowMapper implements RowMapper {
         int columnCount = rsmd.getColumnCount();
         Map mapOfColValues = createColumnMap(columnCount);
         for (int i = 1; i <= columnCount; i++) {
-            String key = getColumnKey(rsmd.getColumnName(i));
+            String key = getColumnKey(rsmd.getColumnLabel(i));
             Object obj = getColumnValue(rs, i);
             mapOfColValues.put(key, obj);
         }
