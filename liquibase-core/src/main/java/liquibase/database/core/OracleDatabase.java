@@ -35,18 +35,11 @@ public class OracleDatabase extends AbstractJdbcDatabase {
         dateFunctions.add(new DatabaseFunction("SYSTIMESTAMP"));
         dateFunctions.add(new DatabaseFunction("CURRENT_TIMESTAMP"));
         super.sequenceNextValueFunction = "%s.nextval";
+        super.unquotedObjectsAreUppercased = Boolean.TRUE;
     }
 
     public int getPriority() {
         return PRIORITY_DEFAULT;
-    }
-
-    @Override
-    public String correctObjectName(String objectName, Class<? extends DatabaseObject> objectType) {
-        if (objectName == null) {
-            return null;
-        }
-        return objectName.toUpperCase();
     }
 
     @Override

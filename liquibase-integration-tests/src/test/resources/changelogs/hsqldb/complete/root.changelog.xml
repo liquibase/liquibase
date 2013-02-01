@@ -319,7 +319,7 @@
     </changeSet>
 
     <changeSet id="61" author="nvoxland">
-        <createTable tableName="user">
+        <createTable tableName="sampleUser">
             <column name="id" type="int"/>
             <column name="user" type="int"/>
         </createTable>

@@ -23,8 +23,9 @@ public class H2Database extends AbstractJdbcDatabase {
     private static String SEP_CONCAT = ", ";
 
     public H2Database() {
-        this.dateFunctions.add(new DatabaseFunction("CURRENT_TIMESTAMP()"));
-        sequenceNextValueFunction = "nextval('%s')";
+        super.dateFunctions.add(new DatabaseFunction("CURRENT_TIMESTAMP()"));
+        super.sequenceNextValueFunction = "nextval('%s')";
+        super.unquotedObjectsAreUppercased = Boolean.TRUE;
     }
 
     public String getShortName() {
@@ -53,14 +54,6 @@ public class H2Database extends AbstractJdbcDatabase {
 
     public boolean isCorrectDatabaseImplementation(DatabaseConnection conn) throws DatabaseException {
         return "H2".equals(conn.getDatabaseProductName());
-    }
-
-    @Override
-    public String correctObjectName(String objectName, Class<? extends DatabaseObject> objectType) {
-        if (objectName == null) {
-            return null;
-        }
-        return objectName.toUpperCase();
     }
 
     //    public void dropDatabaseObjects(String schema) throws DatabaseException {

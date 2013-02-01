@@ -95,6 +95,8 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     protected BigInteger defaultAutoIncrementStartWith = BigInteger.ONE;
     protected BigInteger defaultAutoIncrementBy = BigInteger.ONE;
+    // most databases either lowercase or uppercase unuqoted objects such as table and column names.
+    protected Boolean unquotedObjectsAreUppercased = null;
 
     protected AbstractJdbcDatabase() {
         this.dateFunctions.add(new DatabaseFunction(getCurrentDateTimeFunction()));
@@ -276,7 +278,14 @@ public abstract class AbstractJdbcDatabase implements Database {
     }
 
     public String correctObjectName(String objectName, Class<? extends DatabaseObject> objectType) {
-        return objectName;
+        if (unquotedObjectsAreUppercased == null || objectName == null ||
+                (objectName.startsWith("\"") && objectName.endsWith("\""))) {
+            return objectName;
+        } else if (unquotedObjectsAreUppercased == Boolean.TRUE) {
+            return objectName.toUpperCase();
+        } else {
+            return objectName.toLowerCase();
+        }
     }
 
     public CatalogAndSchema getDefaultSchema() {
@@ -315,11 +324,11 @@ public abstract class AbstractJdbcDatabase implements Database {
     }
 
     public void setDefaultCatalogName(String defaultCatalogName) {
-        this.defaultCatalogName = defaultCatalogName;
+        this.defaultCatalogName = correctObjectName(defaultCatalogName, Catalog.class);
     }
 
     public void setDefaultSchemaName(String schemaName) {
-        this.defaultSchemaName = schemaName;
+        this.defaultSchemaName = correctObjectName(schemaName, Schema.class);
     }
 
     /**

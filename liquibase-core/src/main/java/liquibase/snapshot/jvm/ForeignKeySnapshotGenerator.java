@@ -142,17 +142,19 @@ public class ForeignKeySnapshotGenerator extends JdbcSnapshotGenerator {
                 ForeignKeyConstraintType deleteRule = convertToForeignKeyConstraintType(row.getInt("DELETE_RULE"), database);
                 foreignKey.setDeleteRule(deleteRule);
                 short deferrability = row.getShort("DEFERRABILITY");
-                if (deferrability == DatabaseMetaData.importedKeyInitiallyDeferred) {
+                // Hsqldb doesn't handle setting this property correctly, it sets it to 0.
+                // it should be set to DatabaseMetaData.importedKeyNotDeferrable(7)
+                if (deferrability == 0 || deferrability == DatabaseMetaData.importedKeyNotDeferrable) {
+                    foreignKey.setDeferrable(false);
+                    foreignKey.setInitiallyDeferred(false);
+                } else if (deferrability == DatabaseMetaData.importedKeyInitiallyDeferred) {
                     foreignKey.setDeferrable(true);
                     foreignKey.setInitiallyDeferred(true);
                 } else if (deferrability == DatabaseMetaData.importedKeyInitiallyImmediate) {
                     foreignKey.setDeferrable(true);
                     foreignKey.setInitiallyDeferred(false);
-                } else if (deferrability == DatabaseMetaData.importedKeyNotDeferrable) {
-                    foreignKey.setDeferrable(false);
-                    foreignKey.setInitiallyDeferred(false);
                 } else {
-                    throw new RuntimeException("Unknown deferrablility result: " + deferrability);
+                    throw new RuntimeException("Unknown deferrability result: " + deferrability);
                 }
 
                 Index exampleIndex = new Index().setTable(foreignKey.getForeignKeyTable());

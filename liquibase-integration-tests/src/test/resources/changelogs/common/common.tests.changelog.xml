@@ -484,7 +484,7 @@
             <column name="id" type="int">
                 <constraints primaryKey="true"/>
             </column>
-            <column name="ref" type="int">
+            <column name="referee" type="int">
                 <constraints foreignKeyName="fk_reftest" references="createtablenamedpk(id)"/>
             </column>
         </createTable>

@@ -48,7 +48,7 @@
     <orderEntry type="library" scope="PROVIDED" name="Maven: javax.annotation:jsr250-api:1.0" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: javax.inject:javax.inject:1" level="project" />
     <orderEntry type="library" name="Maven: org.jboss.weld.se:weld-se:1.1.8.Final" level="project" />
-    <orderEntry type="library" scope="TEST" name="Maven: hsqldb:hsqldb:1.8.0.7" level="project" />
+    <orderEntry type="library" scope="TEST" name="Maven: org.hsqldb:hsqldb:2.2.9" level="project" />
   </component>
 </module>
 
