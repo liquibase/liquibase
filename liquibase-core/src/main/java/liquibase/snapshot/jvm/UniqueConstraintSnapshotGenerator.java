@@ -6,6 +6,7 @@ import liquibase.database.core.DB2Database;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.core.MySQLDatabase;
 import liquibase.database.core.OracleDatabase;
+import liquibase.database.core.PostgresDatabase;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.ExecutorService;
 import liquibase.snapshot.InvalidExampleException;
@@ -80,7 +81,7 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
 
     protected List<Map> listConstraints(Table table, Database database, Schema schema) throws DatabaseException {
         String sql = null;
-        if (database instanceof MySQLDatabase) {
+        if (database instanceof MySQLDatabase || database instanceof PostgresDatabase) {
             sql = "select CONSTRAINT_NAME " +
                     "from information_schema.table_constraints " +
                     "where constraint_schema='" + database.correctObjectName(schema.getCatalogName(), Catalog.class) + "' " +

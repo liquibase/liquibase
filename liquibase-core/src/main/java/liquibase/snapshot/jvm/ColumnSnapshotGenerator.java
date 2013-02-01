@@ -25,6 +25,7 @@ import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Scanner;
 
 public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
 
@@ -157,6 +158,10 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
 
         int dataType = columnMetadataResultSet.getInt("DATA_TYPE");
         Integer columnSize = columnMetadataResultSet.getInt("COLUMN_SIZE");
+        // don't set size for types like int4, int8 etc
+        if (database.dataTypeIsNotModifiable(columnTypeName)) {
+            columnSize = null;
+        }
 
         Integer decimalDigits = columnMetadataResultSet.getInt("DECIMAL_DIGITS");
         if (decimalDigits != null && decimalDigits.equals(0)) {
@@ -192,103 +197,110 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
         }
 
         Object val = columnMetadataResultSet.get("COLUMN_DEF");
+        if (!(val instanceof String)) {
+            return val;
+        }
 
-        if (val instanceof String && val.equals("")) {
+        String stringVal = (String) val;
+        if (stringVal.isEmpty()) {
             return null;
         }
 
-        if (val instanceof String) {
-            String stringVal = (String) val;
-            if (stringVal.startsWith("'") && stringVal.endsWith("'")) {
-                stringVal = stringVal.substring(1, stringVal.length() - 1);
-            } else if (stringVal.startsWith("(") && stringVal.endsWith(")")) {
-                return new DatabaseFunction(stringVal.substring(1, stringVal.length() - 1));
-            }
+        if (stringVal.startsWith("'") && stringVal.endsWith("'")) {
+            stringVal = stringVal.substring(1, stringVal.length() - 1);
+        } else if (stringVal.startsWith("(") && stringVal.endsWith(")")) {
+            return new DatabaseFunction(stringVal.substring(1, stringVal.length() - 1));
+        }
 
-            int type = columnInfo.getType().getDataTypeId();
-            try {
-                if (type == Types.ARRAY) {
-                    return new DatabaseFunction(stringVal);
-                } else if (type == Types.BIGINT) {
-                    return new BigInteger(stringVal.trim());
-                } else if (type == Types.BINARY) {
-                    return new DatabaseFunction(stringVal.trim());
-                } else if (type == Types.BIT) {
-                    if (stringVal.startsWith("b'")) { //mysql returns boolean values as b'0' and b'1'
-                        stringVal = stringVal.replaceFirst("b'", "").replaceFirst("'$", "");
-                    }
-                    return new Integer(stringVal.trim());
-                } else if (type == Types.BLOB) {
-                    return new DatabaseFunction(stringVal);
-                } else if (type == Types.BOOLEAN) {
-                    return Boolean.valueOf(stringVal.trim());
-                } else if (type == Types.CHAR) {
-                    return stringVal;
-                } else if (type == Types.DATALINK) {
-                    return new DatabaseFunction(stringVal);
-                } else if (type == Types.DATE) {
-                    return new java.sql.Date(getDateFormat(database).parse(stringVal.trim()).getTime());
-                } else if (type == Types.DECIMAL) {
-                    return new BigDecimal(stringVal.trim());
-                } else if (type == Types.DISTINCT) {
-                    return new DatabaseFunction(stringVal);
-                } else if (type == Types.DOUBLE) {
-                    return Double.valueOf(stringVal.trim());
-                } else if (type == Types.FLOAT) {
-                    return Float.valueOf(stringVal.trim());
-                } else if (type == Types.INTEGER) {
-                    return Integer.valueOf(stringVal.trim());
-                } else if (type == Types.JAVA_OBJECT) {
-                    return new DatabaseFunction(stringVal);
-                } else if (type == Types.LONGNVARCHAR) {
-                    return stringVal;
-                } else if (type == Types.LONGVARBINARY) {
-                    return new DatabaseFunction(stringVal);
-                } else if (type == Types.LONGVARCHAR) {
-                    return stringVal;
-                } else if (type == Types.NCHAR) {
-                    return stringVal;
-                } else if (type == Types.NCLOB) {
-                    return stringVal;
-                } else if (type == Types.NULL) {
-                    return null;
-                } else if (type == Types.NUMERIC) {
-                    return new BigDecimal(stringVal.trim());
-                } else if (type == Types.NVARCHAR) {
-                    return stringVal;
-                } else if (type == Types.OTHER) {
-                    return new DatabaseFunction(stringVal);
-                } else if (type == Types.REAL) {
-                    return new BigDecimal(stringVal.trim());
-                } else if (type == Types.REF) {
-                    return new DatabaseFunction(stringVal);
-                } else if (type == Types.ROWID) {
-                    return new DatabaseFunction(stringVal);
-                } else if (type == Types.SMALLINT) {
-                    return Integer.valueOf(stringVal.trim());
-                } else if (type == Types.SQLXML) {
-                    return new DatabaseFunction(stringVal);
-                } else if (type == Types.STRUCT) {
-                    return new DatabaseFunction(stringVal);
-                } else if (type == Types.TIME) {
-                    return new java.sql.Time(getTimeFormat(database).parse(stringVal).getTime());
-                } else if (type == Types.TIMESTAMP) {
-                    return new Timestamp(getDateTimeFormat(database).parse(stringVal).getTime());
-                } else if (type == Types.TINYINT) {
-                    return Integer.valueOf(stringVal.trim());
-                } else if (type == Types.VARBINARY) {
-                    return new DatabaseFunction(stringVal);
-                } else if (type == Types.VARCHAR) {
-                    return stringVal;
-                } else {
-                    LogFactory.getLogger().info("Unknown type: " + type);
-                    return new DatabaseFunction(stringVal);
+        int type = columnInfo.getType().getDataTypeId();
+        String typeName = columnInfo.getType().getTypeName();
+        Scanner scanner = new Scanner(stringVal.trim());
+        try {
+            if (type == Types.ARRAY) {
+                return new DatabaseFunction(stringVal);
+            } else if (type == Types.BIGINT && scanner.hasNextBigInteger()) {
+                return scanner.nextBigInteger();
+            } else if (type == Types.BINARY) {
+                return new DatabaseFunction(stringVal.trim());
+            } else if (type == Types.BIT) {
+                if (stringVal.startsWith("b'")) { //mysql returns boolean values as b'0' and b'1'
+                    stringVal = stringVal.replaceFirst("b'", "").replaceFirst("'$", "");
                 }
-            } catch (ParseException e) {
+                stringVal = stringVal.trim();
+                if (scanner.hasNextBoolean()) {
+                    return scanner.nextBoolean();
+                } else {
+                    return new Integer(stringVal);
+                }
+            } else if (type == Types.BLOB) {
+                return new DatabaseFunction(stringVal);
+            } else if (type == Types.BOOLEAN && scanner.hasNextBoolean()) {
+                return scanner.nextBoolean();
+            } else if (type == Types.CHAR) {
+                return stringVal;
+            } else if (type == Types.DATALINK) {
+                return new DatabaseFunction(stringVal);
+            } else if (type == Types.DATE) {
+                return new java.sql.Date(getDateFormat(database).parse(stringVal.trim()).getTime());
+            } else if (type == Types.DECIMAL && scanner.hasNextBigDecimal()) {
+                return scanner.nextBigDecimal();
+            } else if (type == Types.DISTINCT) {
+                return new DatabaseFunction(stringVal);
+            } else if (type == Types.DOUBLE && scanner.hasNextDouble()) {
+                return scanner.nextDouble();
+            } else if (type == Types.FLOAT && scanner.hasNextFloat()) {
+                return scanner.nextFloat();
+            } else if (type == Types.INTEGER && scanner.hasNextInt()) {
+                return scanner.nextInt();
+            } else if (type == Types.JAVA_OBJECT) {
+                return new DatabaseFunction(stringVal);
+            } else if (type == Types.LONGNVARCHAR) {
+                return stringVal;
+            } else if (type == Types.LONGVARBINARY) {
+                return new DatabaseFunction(stringVal);
+            } else if (type == Types.LONGVARCHAR) {
+                return stringVal;
+            } else if (type == Types.NCHAR) {
+                return stringVal;
+            } else if (type == Types.NCLOB) {
+                return stringVal;
+            } else if (type == Types.NULL) {
+                return null;
+            } else if (type == Types.NUMERIC && scanner.hasNextBigDecimal()) {
+                return scanner.nextBigDecimal();
+            } else if (type == Types.NVARCHAR) {
+                return stringVal;
+            } else if (type == Types.OTHER) {
+                return new DatabaseFunction(stringVal);
+            } else if (type == Types.REAL) {
+                return new BigDecimal(stringVal.trim());
+            } else if (type == Types.REF) {
+                return new DatabaseFunction(stringVal);
+            } else if (type == Types.ROWID) {
+                return new DatabaseFunction(stringVal);
+            } else if (type == Types.SMALLINT && scanner.hasNextInt()) {
+                return scanner.nextInt();
+            } else if (type == Types.SQLXML) {
+                return new DatabaseFunction(stringVal);
+            } else if (type == Types.STRUCT) {
+                return new DatabaseFunction(stringVal);
+            } else if (type == Types.TIME) {
+                return new java.sql.Time(getTimeFormat(database).parse(stringVal).getTime());
+            } else if (type == Types.TIMESTAMP) {
+                return new Timestamp(getDateTimeFormat(database).parse(stringVal).getTime());
+            } else if (type == Types.TINYINT && scanner.hasNextInt()) {
+                return scanner.nextInt();
+            } else if (type == Types.VARBINARY) {
+                return new DatabaseFunction(stringVal);
+            } else if (type == Types.VARCHAR) {
+                return stringVal;
+            } else {
+                LogFactory.getLogger().info("Unknown default value: value [" + stringVal + "] type [" + typeName + " " + type + "]");
                 return new DatabaseFunction(stringVal);
             }
+        } catch (ParseException e) {
+            return new DatabaseFunction(stringVal);
         }
-        return val;
     }
 
     private Map<String, Object> convertResultSetToMap(ResultSet rs, Database database) throws SQLException {

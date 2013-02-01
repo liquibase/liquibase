@@ -129,5 +129,28 @@ public abstract class JdbcUtils {
         return results.iterator().next();
     }
 
+    /**
+     * Checks whether a result set has a column matching the specified column name.
+     * Case is ignored.
+     *
+     * @param rs result set to check
+     * @param columnNameToCheck column name to check
+     * @return The value if found, null if not found
+     */
+    public static String getValueForCaseInsensitiveColumn(ResultSet rs, String columnNameToCheck) throws SQLException {
+        ResultSetMetaData metadata = rs.getMetaData();
+        int numberOfColumns = metadata.getColumnCount();
+
+        // get the column names; column indexes start from 1
+        for (int i = 1; i < numberOfColumns + 1; i++) {
+            String columnName = metadata.getColumnLabel(i);
+            // Get the name of the column's table name
+            if (columnNameToCheck.equalsIgnoreCase(columnName)) {
+                return rs.getString(columnName);
+            }
+        }
+        return null;
+    }
+
 
 }
