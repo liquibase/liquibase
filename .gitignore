@@ -7,5 +7,5 @@ liquibase.iws
 out
 bin
 liquibase.integrationtest.local.properties
-liquibase
+/liquibase
 derby.log
