@@ -140,6 +140,9 @@ public class ColumnConfig {
     /**
      * The String value to set this column to. If you do not want the value set by {@link #setValue(String)}
      * use a more specific function like {@link #getValueNumeric()} or the more generic {@link #getValueObject()}
+     * <p></p>
+     * If performing an data manipulation operation, the setValue* functions should be used to set what the columns should be set to.
+     * If performing a data definition operation, this setValue* functions should be used to set what existing rows should be set to (may be different than the default value for new rows)
      */
     public String getValue() {
         return value;
@@ -147,8 +150,8 @@ public class ColumnConfig {
 
 
     /**
-     * Sets the string value this column should be set to. If you are trying to set a value type other than a string, use the more specific functions
-     * like {@link #setValueNumeric(Number)}.
+     * Sets the string value this column should be set to.
+     * If you are trying to set a value type other than a string, use the more specific functions like {@link #setValueNumeric(Number)}.
      * This method does no processing of the string. Any trimming is expected to be done beforehand. It does not conver the string "null" to null
      * so that you can set the string "null" as a value if you are feeling particularly crazy.
      */
