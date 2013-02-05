@@ -8,6 +8,7 @@ import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.RanChangeSet;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
+import liquibase.database.ObjectQuotingStrategy;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Schema;
 import liquibase.exception.*;
@@ -516,6 +517,10 @@ public class MockDatabase implements Database {
         return name;
     }
 
+    public String correctObjectName(String name, Class<? extends DatabaseObject> objectType, boolean quoteCorrectedName) {
+        return name;
+    }
+
     public boolean isFunction(String string) {
         if (string.endsWith("()")) {
             return true;
@@ -552,6 +557,9 @@ public class MockDatabase implements Database {
     }
 
     public String generateDatabaseFunctionValue(final DatabaseFunction databaseFunction) {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        return null;  
+    }
+
+    public void setObjectQuotingStrategy(ObjectQuotingStrategy quotingStrategy) {
     }
 }

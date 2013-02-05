@@ -1,6 +1,8 @@
 package liquibase.util;
 
+import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
+import liquibase.structure.core.Column;
 
 import java.sql.*;
 import java.util.Collection;
@@ -131,22 +133,23 @@ public abstract class JdbcUtils {
 
     /**
      * Checks whether a result set has a column matching the specified column name.
-     * Case is ignored.
+     * The column name is first changed to match the database format.
+     * E.g. an unquoted columnName in h2 will be converted to uppercase so the column name that is
+     * being checked for is really the uppercase version of the column name,
      *
-     * TODO: probably need to remove so liquibase works well with case sensitive databases as well.
      * @param rs result set to check
      * @param columnNameToCheck column name to check
      * @return The value if found, null if not found
      */
-    public static String getValueForCaseInsensitiveColumn(ResultSet rs, String columnNameToCheck) throws SQLException {
+    public static String getValueForColumn(ResultSet rs, String columnNameToCheck, Database database) throws SQLException {
         ResultSetMetaData metadata = rs.getMetaData();
         int numberOfColumns = metadata.getColumnCount();
-
+        String correctedColumnName = database.correctObjectName(columnNameToCheck, Column.class);
         // get the column names; column indexes start from 1
         for (int i = 1; i < numberOfColumns + 1; i++) {
             String columnName = metadata.getColumnLabel(i);
             // Get the name of the column's table name
-            if (columnNameToCheck.equalsIgnoreCase(columnName)) {
+            if (correctedColumnName.equals(columnName)) {
                 return rs.getString(columnName);
             }
         }

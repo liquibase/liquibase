@@ -208,6 +208,12 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
             if (constraints.getReferences() != null) {
                 constraintsElement.setAttribute("references", constraints.getReferences());
             }
+            if (constraints.getReferencedTableName() != null) {
+                constraintsElement.setAttribute("referencedTableName", constraints.getReferencedTableName());
+            }
+            if (constraints.getReferencedColumnNames() != null) {
+                constraintsElement.setAttribute("referencedTableName", constraints.getReferencedColumnNames());
+            }
             if (constraints.isDeferrable() != null) {
                 constraintsElement.setAttribute("deferrable", constraints.isDeferrable().toString());
             }

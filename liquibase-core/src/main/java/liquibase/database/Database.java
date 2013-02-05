@@ -312,5 +312,8 @@ public interface Database extends PrioritizedService {
      * @return the string value to use for an update or generate
      */
     String generateDatabaseFunctionValue(DatabaseFunction databaseFunction);
+
+    void setObjectQuotingStrategy(ObjectQuotingStrategy quotingStrategy);
+
 }
 

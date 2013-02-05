@@ -17,6 +17,8 @@ public class ConstraintsConfig implements LiquibaseSerializable {
     private String primaryKeyName;
     private String primaryKeyTablespace;
     private String references;
+    private String referencedTableName;
+    private String referencedColumnNames;
     private Boolean unique;
     private String uniqueConstraintName;
     private String checkConstraint;
@@ -253,6 +255,22 @@ public class ConstraintsConfig implements LiquibaseSerializable {
 		this.primaryKeyTablespace = primaryKeyTablespace;
         return this;
 	}
+
+    public String getReferencedTableName() {
+        return referencedTableName;
+    }
+
+    public void setReferencedTableName(String referencedTableName) {
+        this.referencedTableName = referencedTableName;
+    }
+
+    public String getReferencedColumnNames() {
+        return referencedColumnNames;
+    }
+
+    public void setReferencedColumnNames(String referencedColumnNames) {
+        this.referencedColumnNames = referencedColumnNames;
+    }
 
     private Boolean parseBoolean(String value) {
         value = StringUtils.trimToNull(value);

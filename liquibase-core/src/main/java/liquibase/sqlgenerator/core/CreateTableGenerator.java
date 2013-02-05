@@ -13,7 +13,9 @@ import liquibase.statement.AutoIncrementConstraint;
 import liquibase.statement.ForeignKeyConstraint;
 import liquibase.statement.UniqueConstraint;
 import liquibase.statement.core.CreateTableStatement;
+import liquibase.structure.core.Column;
 import liquibase.structure.core.Schema;
+import liquibase.structure.core.Table;
 import liquibase.util.StringUtils;
 
 import java.util.Iterator;
@@ -181,13 +183,23 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
                 buffer.append(database.escapeConstraintName(fkConstraint.getForeignKeyName()));
             }
             String referencesString = fkConstraint.getReferences();
-            if (!referencesString.contains(".") && database.getDefaultSchemaName() != null) {
-                referencesString = database.escapeObjectName(database.getDefaultSchemaName(), Schema.class)+"."+referencesString;
-            }
+
             buffer.append(" FOREIGN KEY (")
                     .append(database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), fkConstraint.getColumn()))
-                    .append(") REFERENCES ")
-                    .append(referencesString);
+                    .append(") REFERENCES ");
+            if (referencesString != null) {
+                if (!referencesString.contains(".") && database.getDefaultSchemaName() != null) {
+                    referencesString = database.getDefaultSchemaName() +"."+referencesString;
+                }
+                buffer.append(referencesString);
+            } else {
+                buffer.append(database.escapeObjectName(fkConstraint.getReferencedTableName(), Table.class))
+                    .append("(")
+                    .append(database.escapeColumnNameList(fkConstraint.getReferencedColumnNames()))
+                    .append(")");
+
+            }
+
 
             if (fkConstraint.isDeleteCascade()) {
                 buffer.append(" ON DELETE CASCADE");

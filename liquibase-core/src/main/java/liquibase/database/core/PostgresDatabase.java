@@ -3,6 +3,7 @@ package liquibase.database.core;
 import liquibase.CatalogAndSchema;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
+import liquibase.database.ObjectQuotingStrategy;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.structure.DatabaseObject;
 import liquibase.exception.DatabaseException;
@@ -23,8 +24,6 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
 
     private Set<String> systemTablesAndViews = new HashSet<String>();
 
-    private String defaultDatabaseSchemaName;
-
     private Set<String> reservedWords = new HashSet<String>();
 
     public PostgresDatabase() {
@@ -33,54 +32,7 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
         super.sequenceNextValueFunction = "nextval('%s')";
         super.sequenceCurrentValueFunction = "currval('%s')";
         super.unmodifiableDataTypes.addAll(Arrays.asList("bool", "int4", "int8", "float4", "float8", "numeric", "bigserial", "serial", "bytea", "timestamptz"));
-//        systemTablesAndViews.add("pg_logdir_ls");
-//        systemTablesAndViews.add("administrable_role_authorizations");
-//        systemTablesAndViews.add("applicable_roles");
-//        systemTablesAndViews.add("attributes");
-//        systemTablesAndViews.add("check_constraint_routine_usage");
-//        systemTablesAndViews.add("check_constraints");
-//        systemTablesAndViews.add("column_domain_usage");
-//        systemTablesAndViews.add("column_privileges");
-//        systemTablesAndViews.add("column_udt_usage");
-//        systemTablesAndViews.add("columns");
-//        systemTablesAndViews.add("constraint_column_usage");
-//        systemTablesAndViews.add("constraint_table_usage");
-//        systemTablesAndViews.add("data_type_privileges");
-//        systemTablesAndViews.add("domain_constraints");
-//        systemTablesAndViews.add("domain_udt_usage");
-//        systemTablesAndViews.add("domains");
-//        systemTablesAndViews.add("element_types");
-//        systemTablesAndViews.add("enabled_roles");
-//        systemTablesAndViews.add("key_column_usage");
-//        systemTablesAndViews.add("parameters");
-//        systemTablesAndViews.add("referential_constraints");
-//        systemTablesAndViews.add("role_column_grants");
-//        systemTablesAndViews.add("role_routine_grants");
-//        systemTablesAndViews.add("role_table_grants");
-//        systemTablesAndViews.add("role_usage_grants");
-//        systemTablesAndViews.add("routine_privileges");
-//        systemTablesAndViews.add("routines");
-//        systemTablesAndViews.add("schemata");
-//        systemTablesAndViews.add("sequences");
-//        systemTablesAndViews.add("sql_features");
-//        systemTablesAndViews.add("sql_implementation_info");
-//        systemTablesAndViews.add("sql_languages");
-//        systemTablesAndViews.add("sql_packages");
-//        systemTablesAndViews.add("sql_parts");
-//        systemTablesAndViews.add("sql_sizing");
-//        systemTablesAndViews.add("sql_sizing_profiles");
-//        systemTablesAndViews.add("table_constraints");
-//        systemTablesAndViews.add("table_privileges");
-//        systemTablesAndViews.add("tables");
-//        systemTablesAndViews.add("triggers");
-//        systemTablesAndViews.add("usage_privileges");
-//        systemTablesAndViews.add("view_column_usage");
-//        systemTablesAndViews.add("view_routine_usage");
-//        systemTablesAndViews.add("view_table_usage");
-//        systemTablesAndViews.add("views");
-//        systemTablesAndViews.add("information_schema_catalog_name");
-//        systemTablesAndViews.add("triggered_update_columns");
-//        systemTablesAndViews.add("book_pkey");
+        super.unquotedObjectsAreUppercased=false;
     }
 
     @Override
@@ -213,13 +165,13 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
 
     @Override
     public String escapeObjectName(String objectName, Class<? extends DatabaseObject> objectType) {
-        if (objectName == null) {
-            return null;
+        if (quotingStrategy != ObjectQuotingStrategy.LEGACY) {
+            return super.escapeObjectName(objectName, objectType);
         }
         if (objectName.contains("-") || hasMixedCase(objectName) || startsWithNumeric(objectName) || isReservedWord(objectName)) {
             return "\"" + objectName + "\"";
         } else {
-            return super.escapeObjectName(objectName, objectType);
+            return objectName;
         }
 
     }
@@ -233,15 +185,6 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
     */
     protected boolean hasMixedCase(String tableName) {
         return tableName.matches(".*[A-Z].*") && tableName.matches(".*[a-z].*");
-
-    }
-
-    /*
-    * Check if given string starts with numeric values that may cause problems and should be escaped.
-    */
-    private boolean startsWithNumeric(String tableName) {
-        return tableName.matches("^[0-9].*");
-
     }
 
     @Override

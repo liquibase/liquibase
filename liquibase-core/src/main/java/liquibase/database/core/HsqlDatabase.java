@@ -142,13 +142,8 @@ public class HsqlDatabase extends AbstractJdbcDatabase {
     }
 
     @Override
-    public String escapeObjectName(String objectName, Class<? extends DatabaseObject> objectType) {
-    	if (objectName != null) {
-            if (keywords.contains(objectName.toUpperCase())) {
-                return "\""+objectName+"\"";
-            }
-    	}
-        return objectName;
+    public boolean isReservedWord(String value) {
+        return keywords.contains(value.toUpperCase());
     }
 
     private static List keywords = Arrays.asList(

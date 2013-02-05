@@ -58,11 +58,13 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
                     statement.addColumnConstraint(new NotNullConstraint(column.getName()));
                 }
 
-                if (constraints.getReferences() != null) {
+                if (constraints.getReferences() != null ||
+                        (constraints.getReferencedTableName() != null && constraints.getReferencedColumnNames() != null)) {
                     if (StringUtils.trimToNull(constraints.getForeignKeyName()) == null) {
                         throw new UnexpectedLiquibaseException("createTable with references requires foreignKeyName");
                     }
-                    ForeignKeyConstraint fkConstraint = new ForeignKeyConstraint(constraints.getForeignKeyName(), constraints.getReferences());
+                    ForeignKeyConstraint fkConstraint = new ForeignKeyConstraint(constraints.getForeignKeyName(),
+                            constraints.getReferences(), constraints.getReferencedTableName(), constraints.getReferencedColumnNames());
                     fkConstraint.setColumn(column.getName());
                     fkConstraint.setDeleteCascade(constraints.isDeleteCascade() != null && constraints.isDeleteCascade());
                     fkConstraint.setInitiallyDeferred(constraints.isInitiallyDeferred() != null && constraints.isInitiallyDeferred());
