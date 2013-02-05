@@ -5,7 +5,6 @@ import liquibase.database.Database;
 import liquibase.statement.InsertExecutablePreparedStatement;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.InsertStatement;
-import liquibase.structure.core.Table;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -73,10 +72,10 @@ public class InsertDataChange extends AbstractChange implements ChangeWithColumn
 
         boolean needsPreparedStatement = false;
         for (ColumnConfig column : columns) {
-            if (column.getValueBlob() != null) {
+            if (column.getValueBlobFile() != null) {
                 needsPreparedStatement = true;
             }
-            if (column.getValueClob() != null) {
+            if (column.getValueClobFile() != null) {
                 needsPreparedStatement = true;
             }
 //            if (column.getValueText() != null && database instanceof InformixDatabase) {

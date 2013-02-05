@@ -11,7 +11,6 @@ public class DataType {
     private ColumnSizeUnit columnSizeUnit;
 
     private Integer decimalDigits;
-    private AutoIncrementInformation autoIncrementInformation;
     private Integer radix;
     private Integer characterOctetLength;
 
@@ -53,18 +52,6 @@ public class DataType {
 
     public void setDecimalDigits(Integer decimalDigits) {
         this.decimalDigits = decimalDigits;
-    }
-
-    public boolean isAutoIncrement() {
-        return autoIncrementInformation != null;
-    }
-
-    public AutoIncrementInformation getAutoIncrementInformation() {
-        return autoIncrementInformation;
-    }
-
-    public void setAutoIncrementInformation(AutoIncrementInformation autoIncrementInformation) {
-        this.autoIncrementInformation = autoIncrementInformation;
     }
 
     @Override
@@ -114,27 +101,5 @@ public class DataType {
     public static enum ColumnSizeUnit {
         BYTE,
         CHAR,
-    }
-
-    public static class AutoIncrementInformation {
-        private BigInteger startWith;
-        private BigInteger incrementBy;
-
-        public AutoIncrementInformation() {
-            this(BigInteger.valueOf(1),BigInteger.valueOf(1));
-        }
-
-        public AutoIncrementInformation(BigInteger startWith, BigInteger incrementBy) {
-            this.startWith = startWith;
-            this.incrementBy = incrementBy;
-        }
-
-        public BigInteger getStartWith() {
-            return startWith;
-        }
-
-        public BigInteger getIncrementBy() {
-            return incrementBy;
-        }
     }
 }

@@ -146,13 +146,11 @@ public class SQLiteDatabase extends AbstractJdbcDatabase {
             }
         }
         for (ColumnConfig column : alterTableVisitor.getColumnsToAdd()) {
-            ColumnConfig new_column = new ColumnConfig(column);
-            if (alterTableVisitor.createThisColumn(new_column)) {
-                createColumns.add(new_column);
+            if (alterTableVisitor.createThisColumn(column)) {
+                createColumns.add(column);
             }
-            ColumnConfig copy_column = new ColumnConfig(column);
-            if (alterTableVisitor.copyThisColumn(copy_column)) {
-                copyColumns.add(copy_column);
+            if (alterTableVisitor.copyThisColumn(column)) {
+                copyColumns.add(column);
             }
         }
 

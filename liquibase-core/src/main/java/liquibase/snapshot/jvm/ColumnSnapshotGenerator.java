@@ -112,14 +112,14 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
             if (columnMetadataResultSet.containsColumn("IS_AUTOINCREMENT")) {
                 String isAutoincrement = (String) columnMetadataResultSet.get("IS_AUTOINCREMENT");
                 if (isAutoincrement == null) {
-                    column.setAutoIncrement(false);
+                    column.setAutoIncrementInformation(null);
                 } else if (isAutoincrement.equals("YES")) {
-                    column.setAutoIncrement(true);
+                    column.setAutoIncrementInformation(new Column.AutoIncrementInformation());
                 } else if (isAutoincrement.equals("NO")) {
-                    column.setAutoIncrement(false);
+                    column.setAutoIncrementInformation(null);
                 } else if (isAutoincrement.equals("")) {
                     LogFactory.getLogger().info("Unknown auto increment state for column " + column.toString() + ". Assuming not auto increment");
-                    column.setAutoIncrement(false);
+                    column.setAutoIncrementInformation(null);
                 } else {
                     throw new UnexpectedLiquibaseException("Unknown is_autoincrement value: " + isAutoincrement);
                 }
@@ -131,9 +131,9 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                 ResultSet columnSelectRS = statement.executeQuery(selectStatement);
                 try {
                     if (columnSelectRS.getMetaData().isAutoIncrement(1)) {
-                        column.setAutoIncrement(true);
+                        column.setAutoIncrementInformation(new Column.AutoIncrementInformation());
                     } else {
-                        column.setAutoIncrement(false);
+                        column.setAutoIncrementInformation(null);
                     }
                 } finally {
                     try {

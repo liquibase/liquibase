@@ -58,7 +58,7 @@ public class MissingTableChangeGenerator implements MissingObjectChangeGenerator
 
             ConstraintsConfig constraintsConfig = null;
 
-            if (column.getType().isAutoIncrement()) {
+            if (column.isAutoIncrement()) {
                 columnConfig.setAutoIncrement(true);
             }
 
@@ -82,7 +82,7 @@ public class MissingTableChangeGenerator implements MissingObjectChangeGenerator
             Object defaultValue = column.getDefaultValue();
             if (defaultValue == null) {
                 // do nothing
-            } else if (column.getType().isAutoIncrement()) {
+            } else if (column.isAutoIncrement()) {
                 // do nothing
             } else if (defaultValue instanceof Date) {
                 columnConfig.setDefaultValueDate((Date) defaultValue);

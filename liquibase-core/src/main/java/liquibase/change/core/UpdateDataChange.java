@@ -5,7 +5,6 @@ import liquibase.database.Database;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.UpdateExecutablePreparedStatement;
 import liquibase.statement.core.UpdateStatement;
-import liquibase.structure.core.Table;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -81,10 +80,10 @@ public class UpdateDataChange extends AbstractChange implements ChangeWithColumn
 
     	boolean needsPreparedStatement = false;
         for (ColumnConfig column : columns) {
-            if (column.getValueBlob() != null) {
+            if (column.getValueBlobFile() != null) {
                 needsPreparedStatement = true;
             }
-            if (column.getValueClob() != null) {
+            if (column.getValueClobFile() != null) {
                 needsPreparedStatement = true;
             }
         }

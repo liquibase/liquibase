@@ -40,13 +40,14 @@ public class PrimaryKey extends AbstractDatabaseObject {
         return StringUtils.join(getColumnNamesAsList(), ", ");
     }
 
-    public void addColumnName(int position, String columnName) {
+    public PrimaryKey addColumnName(int position, String columnName) {
         if (position >= getColumnNamesAsList().size()) {
             for (int i = getColumnNamesAsList().size()-1; i < position; i++) {
                 this.getColumnNamesAsList().add(null);
             }
         }
         this.getColumnNamesAsList().set(position, columnName);
+        return this;
     }
 
     public Table getTable() {
@@ -106,16 +107,18 @@ public class PrimaryKey extends AbstractDatabaseObject {
         return getAttribute("certainName", Boolean.class);
     }
 
-    public void setCertainName(boolean certainName) {
+    public PrimaryKey setCertainName(boolean certainName) {
         setAttribute("certainName", certainName);
+        return this;
     }
 
 	public String getTablespace() {
 		return getAttribute("tablespace",String.class);
 	}
 
-	public void setTablespace(String tablespace) {
+	public PrimaryKey setTablespace(String tablespace) {
         setAttribute("tablespace", tablespace);
+        return this;
 	}
 
     public Index getBackingIndex() {

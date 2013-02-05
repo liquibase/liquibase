@@ -130,7 +130,7 @@ public class MergeColumnChange extends AbstractChange {
     				ColumnConfig new_column = new ColumnConfig();
     		        new_column.setName(getFinalColumnName());
     		        new_column.setType(getFinalColumnType());
-    				new_columns[0] = new ColumnConfig(new_column);
+    				new_columns[0] = new_column;
     				return new_columns;
     			}
     			public boolean copyThisColumn(ColumnConfig column) {

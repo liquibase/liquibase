@@ -3,15 +3,15 @@ package liquibase.structure.core;
 import liquibase.structure.AbstractDatabaseObject;
 import liquibase.structure.DatabaseObject;
 
+import java.math.BigInteger;
+
 public class Column extends AbstractDatabaseObject {
 
     public Column() {
-        setUnique(false);
-        setAutoIncrement(false);
     }
 
     public Relation getRelation() {
-        return (Relation) getAttribute("relation", Relation.class);
+        return getAttribute("relation", Relation.class);
     }
 
     public DatabaseObject[] getContainingObjects() {
@@ -36,7 +36,7 @@ public class Column extends AbstractDatabaseObject {
     }
 
 	public String getName() {
-        return (String) getAttribute("name", String.class);
+        return getAttribute("name", String.class);
     }
 
     public Column setName(String name) {
@@ -46,7 +46,7 @@ public class Column extends AbstractDatabaseObject {
     }
 
     public Boolean isNullable() {
-        return (Boolean) getAttribute("nullable", Boolean.class);
+        return getAttribute("nullable", Boolean.class);
     }
 
     public Column setNullable(Boolean nullable) {
@@ -57,7 +57,7 @@ public class Column extends AbstractDatabaseObject {
 
 
     public DataType getType() {
-        return (DataType) getAttribute("type", DataType.class);
+        return getAttribute("type", DataType.class);
     }
 
     public Column setType(DataType type) {
@@ -77,11 +77,15 @@ public class Column extends AbstractDatabaseObject {
     }
 
     public boolean isAutoIncrement() {
-        return (Boolean) getAttribute("autoIncrement", Boolean.class);
+        return getAutoIncrementInformation() != null;
     }
 
-    public void setAutoIncrement(boolean autoIncrement) {
-        setAttribute("autoIncrement", autoIncrement);
+    public AutoIncrementInformation getAutoIncrementInformation() {
+        return getAttribute("autoIncrementInformation", AutoIncrementInformation.class);
+    }
+
+    public void setAutoIncrementInformation(AutoIncrementInformation autoIncrementInformation) {
+        setAttribute("autoIncrementInformation", autoIncrementInformation);
     }
 
     @Override
@@ -143,16 +147,6 @@ public class Column extends AbstractDatabaseObject {
         }
     }
 
-    public boolean isUnique() {
-        return (Boolean) getAttribute("unique", Boolean.class);
-    }
-
-    public Column setUnique(boolean unique) {
-        setAttribute("unique", unique);
-
-        return this;
-    }
-
     public boolean isDataTypeDifferent(Column otherColumn) {
         if (!this.isCertainDataType() || !otherColumn.isCertainDataType()) {
             return false;
@@ -181,7 +175,7 @@ public class Column extends AbstractDatabaseObject {
 
 
     public boolean isCertainDataType() {
-        return (Boolean) getAttribute("certainDataType", Boolean.class);
+        return getAttribute("certainDataType", Boolean.class);
     }
 
     public Column setCertainDataType(boolean certainDataType) {
@@ -191,13 +185,35 @@ public class Column extends AbstractDatabaseObject {
     }
 
     public String getRemarks() {
-        return (String) getAttribute("remarks", String.class);
+        return getAttribute("remarks", String.class);
     }
 
     public Column setRemarks(String remarks) {
         setAttribute("remarks", remarks);
 
         return this;
+    }
+
+    public static class AutoIncrementInformation {
+        private BigInteger startWith;
+        private BigInteger incrementBy;
+
+        public AutoIncrementInformation() {
+            this(1,1);
+        }
+
+        public AutoIncrementInformation(Number startWith, Number incrementBy) {
+            this.startWith = BigInteger.valueOf(startWith.longValue());
+            this.incrementBy = BigInteger.valueOf(incrementBy.longValue());
+        }
+
+        public BigInteger getStartWith() {
+            return startWith;
+        }
+
+        public BigInteger getIncrementBy() {
+            return incrementBy;
+        }
     }
 }
 

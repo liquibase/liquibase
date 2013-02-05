@@ -56,7 +56,17 @@ public class UniqueConstraint extends AbstractDatabaseObject {
 		return getAttribute("columns", List.class);
 	}
 
-	public boolean isDeferrable() {
+    public UniqueConstraint addColumn(int position, String columnName) {
+        if (position >= getColumns().size()) {
+            for (int i = getColumns().size()-1; i < position; i++) {
+                this.getColumns().add(null);
+            }
+        }
+        this.getColumns().set(position, columnName);
+        return this;
+    }
+
+    public boolean isDeferrable() {
 		return getAttribute("deferrable", Boolean.class);
 	}
 

@@ -6,7 +6,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.io.StringReader;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.PreparedStatement;
@@ -83,16 +82,16 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
 		    }
 		} else if(col.getValueDate() != null) {
 		    stmt.setDate(i, new java.sql.Date(col.getValueDate().getTime()));
-		} else if(col.getValueBlob() != null) {
+		} else if(col.getValueBlobFile() != null) {
 		    try {
-		        File file = new File(col.getValueBlob());
+		        File file = new File(col.getValueBlobFile());
 		        stmt.setBinaryStream(i, new BufferedInputStream(new FileInputStream(file)), (int) file.length());
 		    } catch (FileNotFoundException e) {
 		        throw new DatabaseException(e.getMessage(), e); // wrap
 		    }
-		} else if(col.getValueClob() != null) {
+		} else if(col.getValueClobFile() != null) {
 		    try {
-		        File file = new File(col.getValueClob());
+		        File file = new File(col.getValueClobFile());
 		        stmt.setCharacterStream(i, new BufferedReader(new FileReader(file)), (int) file.length());
 		    } catch(FileNotFoundException e) {
 		        throw new DatabaseException(e.getMessage(), e); // wrap
