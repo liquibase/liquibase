@@ -15,6 +15,8 @@ import liquibase.util.StringUtils;
 
 /**
  * The standard configuration used by Change classes to represent a column.
+ * It is not required that a column-based Change uses this class, but parsers should look for it so it is a helpful convenience.
+ * The definitions of "defaultValue" and "value" will vary based on the Change and may not be applicable in all cases.
  */
 public class ColumnConfig {
     private String name;

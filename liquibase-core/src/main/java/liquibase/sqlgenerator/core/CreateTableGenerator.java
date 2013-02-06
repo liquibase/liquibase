@@ -222,8 +222,8 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
             buffer.append(",");
         }
 
-//        if (constraints != null && constraints.getCheck() != null) {
-//            buffer.append(constraints.getCheck()).append(" ");
+//        if (constraints != null && constraints.getCheckConstraint() != null) {
+//            buffer.append(constraints.getCheckConstraint()).append(" ");
 //        }
 //    }
 

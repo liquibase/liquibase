@@ -290,8 +290,8 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
         ConstraintsConfig constraints = columnConfig.getConstraints();
         if (constraints != null) {
             Element constraintsElement = currentChangeLogFileDOM.createElementNS(XMLChangeLogSAXParser.getDatabaseChangeLogNameSpace(), "constraints");
-            if (constraints.getCheck() != null) {
-                constraintsElement.setAttribute("check", constraints.getCheck());
+            if (constraints.getCheckConstraint() != null) {
+                constraintsElement.setAttribute("checkConstraint", constraints.getCheckConstraint());
             }
             if (constraints.getForeignKeyName() != null) {
                 constraintsElement.setAttribute("foreignKeyName", constraints.getForeignKeyName());

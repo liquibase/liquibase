@@ -257,7 +257,8 @@
 		<xsd:attribute name="deleteCascade" type="booleanExp" />
 		<xsd:attribute name="deferrable" type="booleanExp" />
 		<xsd:attribute name="initiallyDeferred" type="booleanExp" />
-	</xsd:attributeGroup>
+        <xsd:attribute name="checkConstraint" type="xsd:string" />
+    </xsd:attributeGroup>
 
 	<xsd:attributeGroup name="column">
 		<xsd:attribute name="name" type="xsd:string" use="required" />

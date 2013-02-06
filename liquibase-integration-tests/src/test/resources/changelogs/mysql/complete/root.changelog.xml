@@ -388,7 +388,7 @@
             <dropTable tableName="timestampusage"/>
         </rollback>
     </changeSet>
-    <changeSet id="correct-mysql-timestamp-check" author="nvoxland">
+    <changeSet id="correct-mysql-timestamp-checkConstraint" author="nvoxland">
         <preConditions>
             <sqlCheck expectedResult="1">select count(*) from timestampusage where test is not null</sqlCheck>
         </preConditions>
