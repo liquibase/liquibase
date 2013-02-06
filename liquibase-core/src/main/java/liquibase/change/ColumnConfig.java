@@ -11,6 +11,7 @@ import liquibase.statement.SequenceFunction;
 import liquibase.structure.core.*;
 import liquibase.statement.DatabaseFunction;
 import liquibase.util.ISODateFormat;
+import liquibase.util.StringUtils;
 
 /**
  * The standard configuration used by Change classes to represent a column.
@@ -215,6 +216,30 @@ public class ColumnConfig {
     }
 
     /**
+     * Set the valueBoolean based on a given string.
+     * If the passed value cannot be parsed as a date, it is assumed to be a function that returns a boolean.
+     * If the string "null" or an empty string is passed, it will set a null value.
+     * If "1" is passed, defaultValueBoolean is set to true. If 0 is passed, defaultValueBoolean is set to false
+     */
+    public ColumnConfig setValueBoolean(String valueBoolean) {
+        valueBoolean = StringUtils.trimToNull(valueBoolean);
+        if (valueBoolean == null || valueBoolean.equalsIgnoreCase("null")) {
+            this.valueBoolean = null;
+        } else {
+            if (valueBoolean.equalsIgnoreCase("true") || valueBoolean.equals("1")) {
+                this.valueBoolean = true;
+            } else if (valueBoolean.equalsIgnoreCase("false") || valueBoolean.equals("0")) {
+                this.valueBoolean = false;
+            } else {
+                this.valueComputed = new DatabaseFunction(valueBoolean);
+            }
+
+        }
+
+        return this;
+    }
+
+    /**
      * Return the function this column should be set from.
      * @see #setValue(String)
      */
@@ -403,9 +428,10 @@ public class ColumnConfig {
     /**
      * Set the date this column should default to. Supports any of the date or datetime formats handled by {@link ISODateFormat}.
      * If the passed value cannot be parsed as a date, it is assumed to be a function that returns a date.
-     * If the string "null" is passed, it will set a null value.
+     * If the string "null" or an empty string is passed, it will set a null value.
      */
     public ColumnConfig setDefaultValueDate(String defaultValueDate) {
+        defaultValueDate = StringUtils.trimToNull(defaultValueDate);
         if (defaultValueDate == null || defaultValueDate.equalsIgnoreCase("null")) {
             this.defaultValueDate = null;
         } else {
@@ -436,6 +462,30 @@ public class ColumnConfig {
 
     public ColumnConfig setDefaultValueBoolean(Boolean defaultValueBoolean) {
         this.defaultValueBoolean = defaultValueBoolean;
+
+        return this;
+    }
+
+    /**
+     * Set the defaultValueBoolean based on a given string.
+     * If the passed value cannot be parsed as a date, it is assumed to be a function that returns a boolean.
+     * If the string "null" or an empty string is passed, it will set a null value.
+     * If "1" is passed, defaultValueBoolean is set to true. If 0 is passed, defaultValueBoolean is set to false
+     */
+    public ColumnConfig setDefaultValueBoolean(String defaultValueBoolean) {
+        defaultValueBoolean = StringUtils.trimToNull(defaultValueBoolean);
+        if (defaultValueBoolean == null || defaultValueBoolean.equalsIgnoreCase("null")) {
+            this.defaultValueBoolean = null;
+        } else {
+            if (defaultValueBoolean.equalsIgnoreCase("true") || defaultValueBoolean.equals("1")) {
+                this.defaultValueBoolean = true;
+            } else if (defaultValueBoolean.equalsIgnoreCase("false") || defaultValueBoolean.equals("0")) {
+                this.defaultValueBoolean = false;
+            } else {
+                this.defaultValueComputed = new DatabaseFunction(defaultValueBoolean);
+            }
+
+        }
 
         return this;
     }

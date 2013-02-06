@@ -162,10 +162,31 @@ public class ColumnConfigTest {
 
     @Test
     public void setValueBoolean() {
-        assertNull(new ColumnConfig().setValueBoolean(null).getValueBoolean());
+        assertNull(new ColumnConfig().setValueBoolean((Boolean) null).getValueBoolean());
         assertEquals(true, new ColumnConfig().setValueBoolean(true).getValueBoolean());
         assertFalse(new ColumnConfig().setValueBoolean(false).getValueBoolean());
     }
+
+    @Test
+    public void setValueBoolean_string() {
+        assertNull(new ColumnConfig().setValueBoolean("null").getValueBoolean());
+        assertNull(new ColumnConfig().setValueBoolean("NULL").getValueBoolean());
+        assertNull(new ColumnConfig().setValueBoolean((String) null).getValueBoolean());
+        assertNull(new ColumnConfig().setValueBoolean("").getValueBoolean());
+        assertNull(new ColumnConfig().setValueBoolean(" ").getValueBoolean());
+
+        assertEquals(true, new ColumnConfig().setValueBoolean("true").getValueBoolean());
+        assertEquals(true, new ColumnConfig().setValueBoolean("TRUE").getValueBoolean());
+        assertEquals(true, new ColumnConfig().setValueBoolean("1").getValueBoolean());
+
+        assertEquals(false, new ColumnConfig().setValueBoolean("false").getValueBoolean());
+        assertEquals(false, new ColumnConfig().setValueBoolean("FALSE").getValueBoolean());
+        assertEquals(false, new ColumnConfig().setValueBoolean("0").getValueBoolean());
+
+        assertEquals("bool_val", new ColumnConfig().setValueBoolean("bool_val").getValueComputed().toString());
+        assertEquals("2", new ColumnConfig().setValueBoolean("2").getValueComputed().toString());
+    }
+
 
     @Test
     public void setValueComputed() {
@@ -251,6 +272,7 @@ public class ColumnConfigTest {
         assertNull(new ColumnConfig().setDefaultValueDate("null").getDefaultValueDate());
         assertNull(new ColumnConfig().setDefaultValueDate("NULL").getDefaultValueDate());
         assertNull(new ColumnConfig().setDefaultValueDate((Date) null).getDefaultValueDate());
+        assertNull(new ColumnConfig().setDefaultValueDate("").getDefaultValueDate());
 
         Date today = new Date();
         assertEquals(today, new ColumnConfig().setDefaultValueDate(today).getDefaultValueDate());
@@ -272,9 +294,29 @@ public class ColumnConfigTest {
 
     @Test
     public void setDefaultValueBoolean() {
-        assertNull(new ColumnConfig().setDefaultValueBoolean(null).getDefaultValueBoolean());
+        assertNull(new ColumnConfig().setDefaultValueBoolean((Boolean) null).getDefaultValueBoolean());
         assertEquals(true, new ColumnConfig().setDefaultValueBoolean(true).getDefaultValueBoolean());
         assertFalse(new ColumnConfig().setDefaultValueBoolean(false).getDefaultValueBoolean());
+    }
+
+    @Test
+    public void setDefaultValueBoolean_string() {
+        assertNull(new ColumnConfig().setDefaultValueBoolean("null").getDefaultValueBoolean());
+        assertNull(new ColumnConfig().setDefaultValueBoolean("NULL").getDefaultValueBoolean());
+        assertNull(new ColumnConfig().setDefaultValueBoolean((String) null).getDefaultValueBoolean());
+        assertNull(new ColumnConfig().setDefaultValueBoolean("").getDefaultValueBoolean());
+        assertNull(new ColumnConfig().setDefaultValueBoolean(" ").getDefaultValueBoolean());
+
+        assertEquals(true, new ColumnConfig().setDefaultValueBoolean("true").getDefaultValueBoolean());
+        assertEquals(true, new ColumnConfig().setDefaultValueBoolean("TRUE").getDefaultValueBoolean());
+        assertEquals(true, new ColumnConfig().setDefaultValueBoolean("1").getDefaultValueBoolean());
+
+        assertEquals(false, new ColumnConfig().setDefaultValueBoolean("false").getDefaultValueBoolean());
+        assertEquals(false, new ColumnConfig().setDefaultValueBoolean("FALSE").getDefaultValueBoolean());
+        assertEquals(false, new ColumnConfig().setDefaultValueBoolean("0").getDefaultValueBoolean());
+
+        assertEquals("bool_val", new ColumnConfig().setDefaultValueBoolean("bool_val").getDefaultValueComputed().toString());
+        assertEquals("2", new ColumnConfig().setDefaultValueBoolean("2").getDefaultValueComputed().toString());
     }
 
     @Test
