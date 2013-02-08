@@ -7,7 +7,6 @@ import liquibase.change.DatabaseChangeProperty;
 import liquibase.database.Database;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.DropIndexStatement;
-import liquibase.structure.core.Index;
 
 /**
  * Drops an existing index.
@@ -19,7 +18,7 @@ public class DropIndexChange extends AbstractChange {
     private String indexName;
     private String tableName;
 
-    @DatabaseChangeProperty(includeInSerialization = false)
+    @DatabaseChangeProperty(isChangeProperty = false)
     private String associatedWith;
     private String catalogName;
 

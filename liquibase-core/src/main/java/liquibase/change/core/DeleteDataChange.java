@@ -4,7 +4,6 @@ import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.DeleteStatement;
-import liquibase.structure.core.Table;
 
 @DatabaseChange(name="delete", description = "Delete Data", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "table")
 public class DeleteDataChange extends AbstractChange {
@@ -13,7 +12,7 @@ public class DeleteDataChange extends AbstractChange {
     private String schemaName;
     private String tableName;
 
-    @TextNode(nodeName="where")
+    @DatabaseChangeProperty(isNestedProperty = true)
     private String whereClause;
 
     @DatabaseChangeProperty(mustEqualExisting ="table.catalog")

@@ -264,7 +264,7 @@ public class StringChangeLogSerializerTest {
         }
         
         for (Field field : clazz.getDeclaredFields()) {
-            if (field.getAnnotation(DatabaseChangeProperty.class) != null && !field.getAnnotation(DatabaseChangeProperty.class).includeInSerialization()) {
+            if (field.getAnnotation(DatabaseChangeProperty.class) != null && !field.getAnnotation(DatabaseChangeProperty.class).isChangeProperty()) {
                 continue;
             }
             field.setAccessible(true);

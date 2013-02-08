@@ -25,13 +25,13 @@ import java.lang.reflect.Method;
  */
 public abstract class AbstractChange implements Change {
 
-    @DatabaseChangeProperty(includeInSerialization = false, includeInMetaData = false)
+    @DatabaseChangeProperty(isChangeProperty = false)
     private ChangeMetaData changeMetaData;
 
-    @DatabaseChangeProperty(includeInSerialization = false, includeInMetaData = false)
+    @DatabaseChangeProperty(isChangeProperty = false)
     private ResourceAccessor resourceAccessor;
 
-    @DatabaseChangeProperty(includeInSerialization = false, includeInMetaData = false)
+    @DatabaseChangeProperty(isChangeProperty = false)
     private ChangeSet changeSet;
 
     public AbstractChange() {
@@ -63,7 +63,7 @@ public abstract class AbstractChange implements Change {
                 Method writeMethod = property.getWriteMethod();
                 if (readMethod != null && writeMethod != null) {
                     DatabaseChangeProperty annotation = readMethod.getAnnotation(DatabaseChangeProperty.class);
-                    if (annotation == null || annotation.includeInMetaData()) {
+                    if (annotation == null || annotation.isChangeProperty()) {
                         ChangeParameterMetaData param = createChangeParameterMetadata(property.getDisplayName());
                         params.put(param.getParameterName(), param);
                     }
@@ -106,14 +106,16 @@ public abstract class AbstractChange implements Change {
 
         String[] requiredForDatabase;
         String mustEqualExisting = null;
+        boolean nestedProperty = false;
         if (changePropertyAnnotation == null) {
             requiredForDatabase = new String[]{"none"};
         } else {
             requiredForDatabase = changePropertyAnnotation.requiredForDatabase();
             mustEqualExisting = changePropertyAnnotation.mustEqualExisting();
+            nestedProperty = changePropertyAnnotation.isNestedProperty();
         }
 
-        return new ChangeParameterMetaData(parameterName, displayName, type, requiredForDatabase, mustEqualExisting);
+        return new ChangeParameterMetaData(parameterName, displayName, type, requiredForDatabase, mustEqualExisting, nestedProperty);
     }
 
     /**
@@ -126,7 +128,7 @@ public abstract class AbstractChange implements Change {
     /**
      * {@inheritDoc}
      */
-    @DatabaseChangeProperty(includeInMetaData = false)
+    @DatabaseChangeProperty(isChangeProperty = false)
     public ChangeSet getChangeSet() {
         return changeSet;
     }
@@ -346,7 +348,7 @@ public abstract class AbstractChange implements Change {
     /**
      * @{inheritDoc}
      */
-    @DatabaseChangeProperty(includeInMetaData = false)
+    @DatabaseChangeProperty(isChangeProperty = false)
     public ResourceAccessor getResourceAccessor() {
         return resourceAccessor;
     }

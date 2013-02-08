@@ -4,7 +4,6 @@ import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.CreateIndexStatement;
-import liquibase.structure.core.Index;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,7 +24,7 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
 
 	// Contain associations of index
 	// for example: foreignKey, primaryKey or uniqueConstraint
-    @DatabaseChangeProperty(includeInSerialization = false)
+    @DatabaseChangeProperty(isChangeProperty = false)
 	private String associatedWith;
 
 

@@ -53,7 +53,7 @@ public class StringChangeLogSerializer implements ChangeLogSerializer {
                 for (Field field : classToCheck.getDeclaredFields()) {
                     field.setAccessible(true);
                     DatabaseChangeProperty changePropertyAnnotation = field.getAnnotation(DatabaseChangeProperty.class);
-                    if (changePropertyAnnotation != null && !changePropertyAnnotation.includeInSerialization()) {
+                    if (changePropertyAnnotation != null && !changePropertyAnnotation.isChangeProperty()) {
                         continue;
                     }
                     if (field.getName().equals("serialVersionUID")) {

@@ -22,8 +22,9 @@ public class ChangeParameterMetaData {
     private String dataType;
     private Set<String> requiredForDatabase;
     private String mustEqualExisting;
+    private boolean nestedProperty;
 
-    public ChangeParameterMetaData(String parameterName, String displayName, Class dataType, String[] requiredForDatabase, String mustEqualExisting) {
+    public ChangeParameterMetaData(String parameterName, String displayName, Class dataType, String[] requiredForDatabase, String mustEqualExisting, boolean nestedProperty) {
         if (parameterName == null) {
             throw new UnexpectedLiquibaseException("Unexpected null parameterName");
         }
@@ -48,6 +49,7 @@ public class ChangeParameterMetaData {
         this.requiredForDatabase = Collections.unmodifiableSet(this.requiredForDatabase);
 
         this.mustEqualExisting = mustEqualExisting;
+        this.nestedProperty = nestedProperty;
     }
 
     /**
@@ -122,5 +124,13 @@ public class ChangeParameterMetaData {
      */
     public String getMustEqualExisting() {
         return mustEqualExisting;
+    }
+
+    /**
+     * Return if this parameter should be a "nested" object when serializing rather than being another field.
+     * For example, in XML using a child tag rather than an attribute if this returns true
+     */
+    public boolean isNestedProperty() {
+        return nestedProperty;
     }
 }

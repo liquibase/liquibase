@@ -17,7 +17,7 @@ public class UpdateDataChange extends AbstractChange implements ChangeWithColumn
     private String tableName;
     private List<ColumnConfig> columns;
 
-    @TextNode(nodeName="where")
+    @DatabaseChangeProperty(isNestedProperty = true)
     private String whereClause;
 
     public UpdateDataChange() {

@@ -13,7 +13,7 @@
     <property name="column2.name" value="columnB"/>
     <property name="real.int.type" value="int"/>
     <property name="real.int.type" value="already-set-int"/>
-    <property name="true.boolean" value="${true}"/>
+    <property name="true.boolean" value="true"/>
 
     <preConditions>
         <changeLogPropertyDefined property="real.int.type"/>

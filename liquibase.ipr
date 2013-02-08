@@ -281,6 +281,13 @@
   <component name="ProjectDetails">
     <option name="projectName" value="liquibase" />
   </component>
+  <component name="ProjectDictionaryState">
+    <dictionary name="nathan.voxland">
+      <words>
+        <w>liquibase</w>
+      </words>
+    </dictionary>
+  </component>
   <component name="ProjectKey">
     <option name="state" value="http://liquibase.jira.com/svn/CORE/trunk/liquibase.ipr" />
   </component>

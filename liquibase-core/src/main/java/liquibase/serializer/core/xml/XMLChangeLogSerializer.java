@@ -145,7 +145,7 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
             for (Field field : allFields) {
                 field.setAccessible(true);
                 DatabaseChangeProperty changePropertyAnnotation = field.getAnnotation(DatabaseChangeProperty.class);
-                if (changePropertyAnnotation != null && !changePropertyAnnotation.includeInSerialization()) {
+                if (changePropertyAnnotation != null && !changePropertyAnnotation.isChangeProperty()) {
                     continue;
                 }
                 if (field.getName().equals("serialVersionUID")) {
@@ -182,7 +182,7 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
             for (Field field : allFields) {
                 field.setAccessible(true);
                 DatabaseChangeProperty changePropertyAnnotation = field.getAnnotation(DatabaseChangeProperty.class);
-                if (changePropertyAnnotation != null && !changePropertyAnnotation.includeInSerialization()) {
+                if (changePropertyAnnotation != null && !changePropertyAnnotation.isChangeProperty()) {
                     continue;
                 }
                 if (field.getName().equals("serialVersionUID")) {
@@ -191,16 +191,15 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
                 if (field.isSynthetic() || field.getName().equals("$VRc")) { //from emma
                     continue;
                 }
-                
-                // String properties annotated with @TextNode are serialized as a child node
-                TextNode textNodeAnnotation = field.getAnnotation(TextNode.class);
-                if (textNodeAnnotation != null) {
+
+                String propertyName = field.getName();
+
+                if (changePropertyAnnotation != null && changePropertyAnnotation.isNestedProperty()) {
                     String textNodeContent = (String) field.get(change);
-                    node.appendChild(createNode(textNodeAnnotation.nodeName(), textNodeContent));
+                    node.appendChild(createNode(propertyName, textNodeContent));
                     continue;
                 }
                 
-                String propertyName = field.getName();
                 if (field.getType().equals(ColumnConfig.class)) {
                     node.appendChild(createNode((ColumnConfig) field.get(change)));
                 } else if (Collection.class.isAssignableFrom(field.getType())) {
@@ -398,7 +397,7 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
         for (String param : change.getParams()) {
             Element paramElement = currentChangeLogFileDOM.createElementNS(XMLChangeLogSAXParser.getDatabaseChangeLogNameSpace(), "param");
             paramElement.setAttribute("name", param);
-            paramElement.setAttribute("value", change.getParamValues().get(param));
+            paramElement.setAttribute("value", change.getParamValue(param));
 
             customElement.appendChild(paramElement);
         }

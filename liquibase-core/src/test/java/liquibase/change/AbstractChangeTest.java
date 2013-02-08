@@ -803,7 +803,7 @@ public class AbstractChangeTest {
             this.paramNoMetadata = paramNoMetadata;
         }
 
-        @DatabaseChangeProperty(includeInMetaData = false)
+        @DatabaseChangeProperty(isChangeProperty = false)
         public String getParamNotIncluded() {
             return paramNotIncluded;
         }
