@@ -171,4 +171,8 @@ public class StringUtils {
     public static String lowerCaseFirst(String string) {
         return string.substring(0, 1).toLowerCase()+string.substring(1);
     }
+
+    public static String upperCaseFirst(String string) {
+        return string.substring(0, 1).toUpperCase()+string.substring(1);
+    }
 }

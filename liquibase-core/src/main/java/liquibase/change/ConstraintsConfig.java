@@ -1,12 +1,16 @@
 package liquibase.change;
 
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.serializer.LiquibaseSerializable;
+import liquibase.serializer.ReflectionSerializer;
 import liquibase.util.StringUtils;
+
+import java.util.Set;
 
 /**
  * The standard configuration used by Change classes to represent a constraints on a column.
  */
-public class ConstraintsConfig {
+public class ConstraintsConfig implements LiquibaseSerializable {
 
     private Boolean nullable;
     private Boolean primaryKey;
@@ -266,4 +270,19 @@ public class ConstraintsConfig {
         }
     }
 
+    public String getSerializedObjectName() {
+        return "constraints";
+    }
+
+    public Set<String> getSerializableFields() {
+        return ReflectionSerializer.getInstance().getFields(this);
+    }
+
+    public Object getSerializableFieldValue(String field) {
+        return ReflectionSerializer.getInstance().getValue(this, field);
+    }
+
+    public SerializationType getSerializableFieldType(String field) {
+        return SerializationType.NAMED_FIELD;
+    }
 }

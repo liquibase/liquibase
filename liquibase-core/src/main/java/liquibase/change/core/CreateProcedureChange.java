@@ -15,7 +15,7 @@ public class CreateProcedureChange extends AbstractChange {
     private String comments;
     private String procedureBody;
 
-    @DatabaseChangeProperty(requiredForDatabase = "all")
+    @DatabaseChangeProperty(requiredForDatabase = "all", serializationType = SerializationType.DIRECT_VALUE)
     public String getProcedureBody() {
         return procedureBody;
     }

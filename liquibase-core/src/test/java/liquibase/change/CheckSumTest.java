@@ -9,9 +9,9 @@ public class CheckSumTest {
 
     @Test
     public void parse() {
-        String checksumString = "5:asdf";
+        String checksumString = "3:asdf";
         CheckSum checkSum = CheckSum.parse(checksumString);
-        assertEquals(5, checkSum.getVersion());
+        assertEquals(3, checkSum.getVersion());
         assertEquals(checksumString, checkSum.toString());
     }
 
@@ -30,7 +30,7 @@ public class CheckSumTest {
 
     @Test
     public void getCurrentVersion() {
-        assertEquals(4, CheckSum.getCurrentVersion());
+        assertEquals(5, CheckSum.getCurrentVersion());
     }
 
     @Test

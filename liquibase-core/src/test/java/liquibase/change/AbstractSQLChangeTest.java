@@ -8,8 +8,6 @@ import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RawSqlStatement;
 import org.junit.Test;
 
-import java.sql.Connection;
-
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -19,8 +17,8 @@ public class AbstractSQLChangeTest {
     @Test
     public void constructor() {
         AbstractSQLChange change = new ExampleAbstractSQLChange();
-        assertFalse(change.isStrippingComments());
-        assertTrue(change.isSplittingStatements());
+        assertFalse(change.isStripComments());
+        assertTrue(change.isSplitStatements());
         assertNull(change.getEndDelimiter());
     }
 
@@ -33,26 +31,26 @@ public class AbstractSQLChangeTest {
     public void setStrippingComments() {
         AbstractSQLChange change = new ExampleAbstractSQLChange();
         change.setStripComments(true);
-        assertTrue(change.isStrippingComments());
+        assertTrue(change.isStripComments());
 
         change.setStripComments(false);
-        assertFalse(change.isStrippingComments());
+        assertFalse(change.isStripComments());
 
         change.setStripComments(null);
-        assertFalse(change.isStrippingComments());
+        assertFalse(change.isStripComments());
     }
 
     @Test
     public void setSplittingStatements() {
         AbstractSQLChange change = new ExampleAbstractSQLChange();
         change.setSplitStatements(true);
-        assertTrue(change.isSplittingStatements());
+        assertTrue(change.isSplitStatements());
 
         change.setSplitStatements(false);
-        assertFalse(change.isSplittingStatements());
+        assertFalse(change.isSplitStatements());
 
         change.setSplitStatements(null);
-        assertTrue(change.isSplittingStatements());
+        assertTrue(change.isSplitStatements());
     }
 
     @Test

@@ -4,6 +4,7 @@ import java.util.Set;
 
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
+import liquibase.serializer.LiquibaseSerializable;
 import liquibase.structure.DatabaseObject;
 import liquibase.exception.RollbackImpossibleException;
 import liquibase.exception.SetupException;
@@ -21,7 +22,7 @@ import liquibase.statement.SqlStatement;
  * @see ChangeFactory
  * @see Database
  */
-public interface Change {
+public interface Change extends LiquibaseSerializable {
 
     /**
      * This method will be called by the changlelog parsing process after all of the

@@ -48,7 +48,7 @@ public class CreateViewChange extends AbstractChange {
 		this.viewName = viewName;
 	}
 
-    @DatabaseChangeProperty(requiredForDatabase = "all")
+    @DatabaseChangeProperty(requiredForDatabase = "all", serializationType = SerializationType.DIRECT_VALUE)
 	public String getSelectQuery() {
 		return selectQuery;
 	}

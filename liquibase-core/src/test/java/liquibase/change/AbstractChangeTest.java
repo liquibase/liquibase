@@ -6,6 +6,7 @@ import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.core.MySQLDatabase;
 import liquibase.exception.*;
 import liquibase.resource.ResourceAccessor;
+import liquibase.serializer.LiquibaseSerializable;
 import liquibase.serializer.core.string.StringChangeLogSerializer;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.SqlStatement;
@@ -713,6 +714,12 @@ public class AbstractChangeTest {
     }
 
     @Test
+    public void getSerializableFieldType() {
+        assertEquals(LiquibaseSerializable.SerializationType.NAMED_FIELD, new ExampleAbstractChange().getSerializableFieldType("paramOne"));
+        assertEquals(LiquibaseSerializable.SerializationType.NESTED_OBJECT, new ExampleAbstractChange().getSerializableFieldType("paramTwo"));
+    }
+
+    @Test
     public void getAffectedDatabaseObjects_unsupportedChangeException() throws UnsupportedChangeException {
         assertEquals(0, new ExampleParamlessAbstractChange() {
             @Override
@@ -786,7 +793,7 @@ public class AbstractChangeTest {
             this.paramOne = paramOne;
         }
 
-        @DatabaseChangeProperty(requiredForDatabase = {"mysql", "mssql"}, mustEqualExisting = "table")
+        @DatabaseChangeProperty(requiredForDatabase = {"mysql", "mssql"}, mustEqualExisting = "table", serializationType = SerializationType.NESTED_OBJECT)
         public Integer getParamTwo() {
             return paramTwo;
         }

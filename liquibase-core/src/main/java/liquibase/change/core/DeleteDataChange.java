@@ -12,7 +12,7 @@ public class DeleteDataChange extends AbstractChange {
     private String schemaName;
     private String tableName;
 
-    @DatabaseChangeProperty(isNestedProperty = true)
+    @DatabaseChangeProperty(serializationType = SerializationType.NESTED_OBJECT)
     private String whereClause;
 
     @DatabaseChangeProperty(mustEqualExisting ="table.catalog")

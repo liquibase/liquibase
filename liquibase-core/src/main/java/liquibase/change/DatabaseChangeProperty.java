@@ -1,5 +1,7 @@
 package liquibase.change;
 
+import liquibase.serializer.LiquibaseSerializable;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -29,5 +31,8 @@ public @interface DatabaseChangeProperty {
      */
     public String mustEqualExisting() default "";
 
-    boolean isNestedProperty() default false;
+    /**
+     * Format to use when serializing this Change via a {@link liquibase.serializer.ChangeLogSerializer}.
+     */
+    public LiquibaseSerializable.SerializationType serializationType() default LiquibaseSerializable.SerializationType.NAMED_FIELD;
 }

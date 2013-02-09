@@ -16,15 +16,7 @@ public interface ChangeLogSerializer {
 
     String[] getValidFileExtensions();
 
-    String serialize(DatabaseChangeLog databaseChangeLog);
-
-    String serialize(ChangeSet changeSet);
-    
-    String serialize(Change change);
-
-    String serialize(SqlVisitor visitor);
-
-    String serialize(ColumnConfig columnConfig);
+    String serialize(LiquibaseSerializable object);
 
 	void write(List<ChangeSet> changeSets, OutputStream out) throws IOException;
 

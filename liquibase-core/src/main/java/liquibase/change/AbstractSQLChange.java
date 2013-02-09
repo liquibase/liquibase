@@ -1,5 +1,6 @@
 package liquibase.change;
 
+import com.sun.istack.internal.NotNull;
 import liquibase.database.Database;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.exception.DatabaseException;
@@ -7,8 +8,7 @@ import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.util.StringUtils;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * A common parent for all raw SQL related changes regardless of where the sql was sourced from.
@@ -40,10 +40,14 @@ public abstract class AbstractSQLChange extends AbstractChange {
 
     /**
      * Return if comments should be stripped from the SQL before passing it to the database.
+     * <p></p>
+     * This will always return a non-null value and should be a boolean rather than a Boolean, but that breaks the Bean Standard.
      */
-    public boolean isStrippingComments() {
+    @NotNull
+    public Boolean isStripComments() {
         return stripComments;
     }
+
 
     /**
      * Return true if comments should be stripped from the SQL before passing it to the database.
@@ -60,8 +64,11 @@ public abstract class AbstractSQLChange extends AbstractChange {
     /**
      * Return if the SQL should be split into multiple statements before passing it to the database.
      * By default, statements are split around ";" and "go" delimiters.
+     * <p></p>
+     * This will always return a non-null value and should be a boolean rather than a Boolean, but that breaks the Bean Standard.
      */
-    public boolean isSplittingStatements() {
+    @NotNull
+    public Boolean isSplitStatements() {
         return splitStatements;
     }
 
@@ -80,6 +87,7 @@ public abstract class AbstractSQLChange extends AbstractChange {
     /**
      * Return the raw SQL managed by this Change
      */
+    @DatabaseChangeProperty(serializationType = SerializationType.DIRECT_VALUE)
     public String getSql() {
         return sql;
     }
@@ -120,8 +128,8 @@ public abstract class AbstractSQLChange extends AbstractChange {
             sql = "";
         }
         return CheckSum.compute(this.getEndDelimiter()+":"+
-                this.isSplittingStatements()+":"+
-                this.isStrippingComments()+":"+
+                this.isSplitStatements()+":"+
+                this.isStripComments()+":"+
                 normalizeLineEndings(sql)); //normalize line endings
     }
 
@@ -142,7 +150,7 @@ public abstract class AbstractSQLChange extends AbstractChange {
         }
 
         String processedSQL = normalizeLineEndings(sql);
-        for (String statement : StringUtils.processMutliLineSQL(processedSQL, isStrippingComments(), isSplittingStatements(), getEndDelimiter())) {
+        for (String statement : StringUtils.processMutliLineSQL(processedSQL, isStripComments(), isSplitStatements(), getEndDelimiter())) {
             if (database instanceof MSSQLDatabase) {
                  statement = statement.replaceAll("\n", "\r\n");
              }
@@ -165,4 +173,19 @@ public abstract class AbstractSQLChange extends AbstractChange {
     private String normalizeLineEndings(String string) {
         return string.replaceAll("\r\n", "\n").replaceAll("\r", "\n");
     }
+
+//    @Override
+//    public Set<String> getSerializableFields() {
+//        Set<String> fieldsToSerialize = new HashSet<String>(super.getSerializableFields());
+//        fieldsToSerialize.add("splitStatements");
+//        fieldsToSerialize.add("stripComments");
+//        return Collections.unmodifiableSet(fieldsToSerialize);
+//    }
+//
+//    @Override
+//    public Object getSerializableFieldValue(String field) {
+//        if (field.equals("splitStatements")) {
+//            return isSplitStatements();
+//        }
+//    }
 }

@@ -1,15 +1,12 @@
 package liquibase.serializer.core.xml;
 
 import liquibase.change.*;
-import liquibase.change.DatabaseChangeProperty;
-import liquibase.change.custom.CustomChangeWrapper;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
-import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.parser.core.xml.LiquibaseEntityResolver;
 import liquibase.parser.core.xml.XMLChangeLogSAXParser;
 import liquibase.serializer.ChangeLogSerializer;
-import liquibase.sql.visitor.SqlVisitor;
+import liquibase.serializer.LiquibaseSerializable;
 import liquibase.util.ISODateFormat;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
@@ -21,7 +18,6 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.*;
-import java.lang.reflect.Field;
 import java.util.*;
 
 public class XMLChangeLogSerializer implements ChangeLogSerializer {
@@ -40,7 +36,7 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
     }
 
     public String[] getValidFileExtensions() {
-        return new String[] {"xml"};
+        return new String[]{"xml"};
     }
 
 
@@ -48,71 +44,38 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
         return null; //todo
     }
 
-    public String serialize(Change change) {
+    public String serialize(LiquibaseSerializable object) {
         StringBuffer buffer = new StringBuffer();
-        nodeToStringBuffer(createNode(change), buffer);
+        nodeToStringBuffer(createNode(object), buffer);
         return buffer.toString();
     }
 
-    public String serialize(SqlVisitor visitor) {
-        StringBuffer buffer = new StringBuffer();
-        nodeToStringBuffer(createNode(visitor), buffer);
-        return buffer.toString();
-    }
-
-    public String serialize(ColumnConfig columnConfig) {
-        StringBuffer buffer = new StringBuffer();
-        nodeToStringBuffer(createNode(columnConfig), buffer);
-        return buffer.toString();
-    }
-
-    public String serialize(ChangeSet changeSet) {
-        StringBuffer buffer = new StringBuffer();
-        boolean tempDOM = false;
+    public void write(List<ChangeSet> changeSets, OutputStream out) throws IOException {
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder documentBuilder;
         try {
-            if (currentChangeLogFileDOM == null) {
-                currentChangeLogFileDOM = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
-                tempDOM = true;
-            }
+            documentBuilder = factory.newDocumentBuilder();
         } catch (ParserConfigurationException e) {
             throw new RuntimeException(e);
         }
-        nodeToStringBuffer(createNode(changeSet), buffer);
-        if (tempDOM) {
-            currentChangeLogFileDOM = null;
+        documentBuilder.setEntityResolver(new LiquibaseEntityResolver());
+
+        Document doc = documentBuilder.newDocument();
+        Element changeLogElement = doc.createElementNS(XMLChangeLogSAXParser.getDatabaseChangeLogNameSpace(), "databaseChangeLog");
+
+        changeLogElement.setAttribute("xmlns", XMLChangeLogSAXParser.getDatabaseChangeLogNameSpace());
+        changeLogElement.setAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
+        changeLogElement.setAttribute("xsi:schemaLocation", "http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-" + XMLChangeLogSAXParser.getSchemaVersion() + ".xsd");
+
+        doc.appendChild(changeLogElement);
+        setCurrentChangeLogFileDOM(doc);
+
+        for (ChangeSet changeSet : changeSets) {
+            doc.getDocumentElement().appendChild(createNode(changeSet));
         }
-        return buffer.toString();
 
+        new DefaultXmlWriter().write(doc, out);
     }
-
-
-	public void write(List<ChangeSet> changeSets, OutputStream out) throws IOException {
-		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-		DocumentBuilder documentBuilder;
-		try {
-			documentBuilder = factory.newDocumentBuilder();
-		}
-		catch(ParserConfigurationException e) {
-			throw new RuntimeException(e);
-		}
-		documentBuilder.setEntityResolver(new LiquibaseEntityResolver());
-
-		Document doc = documentBuilder.newDocument();
-		Element changeLogElement = doc.createElementNS(XMLChangeLogSAXParser.getDatabaseChangeLogNameSpace(), "databaseChangeLog");
-
-		changeLogElement.setAttribute("xmlns", XMLChangeLogSAXParser.getDatabaseChangeLogNameSpace());
-		changeLogElement.setAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
-		changeLogElement.setAttribute("xsi:schemaLocation", "http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-"+ XMLChangeLogSAXParser.getSchemaVersion()+ ".xsd");
-
-		doc.appendChild(changeLogElement);
-		setCurrentChangeLogFileDOM(doc);
-
-		for (ChangeSet changeSet : changeSets) {
-			doc.getDocumentElement().appendChild(createNode(changeSet));
-		}
-
-		new DefaultXmlWriter().write(doc, out);
-	}
 
     public void append(ChangeSet changeSet, File changeLogFile) throws IOException {
         FileInputStream in = new FileInputStream(changeLogFile);
@@ -124,7 +87,7 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
         if (!existingChangeLog.contains("</databaseChangeLog>")) {
             write(Arrays.asList(changeSet), out);
         } else {
-            existingChangeLog = existingChangeLog.replaceFirst("</databaseChangeLog>", serialize(changeSet)+"\n</databaseChangeLog>");
+            existingChangeLog = existingChangeLog.replaceFirst("</databaseChangeLog>", serialize(changeSet) + "\n</databaseChangeLog>");
 
             StreamUtil.copy(new ByteArrayInputStream(existingChangeLog.getBytes()), out);
         }
@@ -132,101 +95,43 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
         out.close();
     }
 
-    public Element createNode(SqlVisitor visitor) {
-        Element node = currentChangeLogFileDOM.createElementNS(XMLChangeLogSAXParser.getDatabaseChangeLogNameSpace(), visitor.getName());
-        try {
-            List<Field> allFields = new ArrayList<Field>();
-            Class classToExtractFieldsFrom = visitor.getClass();
-            while (!classToExtractFieldsFrom.equals(Object.class)) {
-                allFields.addAll(Arrays.asList(classToExtractFieldsFrom.getDeclaredFields()));
-                classToExtractFieldsFrom = classToExtractFieldsFrom.getSuperclass();
-            }
+    public Element createNode(LiquibaseSerializable object) {
+        Element node = currentChangeLogFileDOM.createElementNS(XMLChangeLogSAXParser.getDatabaseChangeLogNameSpace(), object.getSerializedObjectName());
 
-            for (Field field : allFields) {
-                field.setAccessible(true);
-                DatabaseChangeProperty changePropertyAnnotation = field.getAnnotation(DatabaseChangeProperty.class);
-                if (changePropertyAnnotation != null && !changePropertyAnnotation.isChangeProperty()) {
-                    continue;
-                }
-                if (field.getName().equals("serialVersionUID")) {
-                    continue;
-                }
-                if (field.isSynthetic() || field.getName().equals("$VRc")) { //from emma
-                    continue;
-                }
-
-
-                String propertyName = field.getName();
-                Object value = field.get(visitor);
-                if (value != null) {
-                    node.setAttribute(propertyName, value.toString());
-                }
-            }
-        } catch (Exception e) {
-            throw new UnexpectedLiquibaseException(e);
+        for (String field : object.getSerializableFields()) {
+            setValueOnNode(node, field, object.getSerializableFieldValue(field), object.getSerializableFieldType(field));
         }
 
         return node;
     }
 
-    public Element createNode(Change change) {
-        Element node = currentChangeLogFileDOM.createElementNS(XMLChangeLogSAXParser.getDatabaseChangeLogNameSpace(), change.getChangeMetaData().getName());
-        try {
-            List<Field> allFields = new ArrayList<Field>();
-            Class classToExtractFieldsFrom = change.getClass();
-            while (!classToExtractFieldsFrom.equals(Object.class)) {
-                allFields.addAll(Arrays.asList(classToExtractFieldsFrom.getDeclaredFields()));
-                classToExtractFieldsFrom = classToExtractFieldsFrom.getSuperclass();
-            }
-
-            for (Field field : allFields) {
-                field.setAccessible(true);
-                DatabaseChangeProperty changePropertyAnnotation = field.getAnnotation(DatabaseChangeProperty.class);
-                if (changePropertyAnnotation != null && !changePropertyAnnotation.isChangeProperty()) {
-                    continue;
-                }
-                if (field.getName().equals("serialVersionUID")) {
-                    continue;
-                }
-                if (field.isSynthetic() || field.getName().equals("$VRc")) { //from emma
-                    continue;
-                }
-
-                String propertyName = field.getName();
-
-                if (changePropertyAnnotation != null && changePropertyAnnotation.isNestedProperty()) {
-                    String textNodeContent = (String) field.get(change);
-                    node.appendChild(createNode(propertyName, textNodeContent));
-                    continue;
-                }
-                
-                if (field.getType().equals(ColumnConfig.class)) {
-                    node.appendChild(createNode((ColumnConfig) field.get(change)));
-                } else if (Collection.class.isAssignableFrom(field.getType())) {
-                    for (Object object : (Collection) field.get(change)) {
-                        if (object instanceof ColumnConfig) {
-                            node.appendChild(createNode((ColumnConfig) object));
-                        }
-                    }
-                } else {
-                    Object value = field.get(change);
-                    if (value != null) {
-                        if (propertyName.equals("procedureBody")
-                                || propertyName.equals("sql")
-                                || propertyName.equals("selectQuery")) {
-                            node.setTextContent(value.toString());
-                        } else {
-                            node.setAttribute(propertyName, value.toString());
-                        }
-                    }
-                }
-            }
-        } catch (Exception e) {
-            throw new UnexpectedLiquibaseException(e);
+    private void setValueOnNode(Element node, String objectName, Object value, LiquibaseSerializable.SerializationType serializationType) {
+        if (value == null) {
+            return;
         }
 
-        return node;
+        if (value instanceof Collection) {
+            for (Object child : (Collection) value) {
+                setValueOnNode(node, objectName, child, serializationType);
+            }
+        } else if (value instanceof Map) {
+            for (Map.Entry entry : (Set<Map.Entry>) ((Map) value).entrySet()) {
+                Element mapNode = currentChangeLogFileDOM.createElementNS(XMLChangeLogSAXParser.getDatabaseChangeLogNameSpace(), objectName);
+                setValueOnNode(mapNode, (String) entry.getKey(), entry.getValue(), serializationType);
+            }
+        } else if (value instanceof LiquibaseSerializable) {
+            node.appendChild(createNode((LiquibaseSerializable) value));
+        } else {
+            if (serializationType.equals(LiquibaseSerializable.SerializationType.NESTED_OBJECT)) {
+                node.appendChild(createNode(objectName, value.toString()));
+            } else if (serializationType.equals(LiquibaseSerializable.SerializationType.DIRECT_VALUE)) {
+                node.setTextContent(value.toString());
+            } else {
+                node.setAttribute(objectName, value.toString());
+            }
+        }
     }
+
 
     // create a XML node with nodeName and simple text content
     public Element createNode(String nodeName, String nodeContent) {
@@ -234,7 +139,7 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
         element.setTextContent(nodeContent);
         return element;
     }
-    
+
     public Element createNode(ColumnConfig columnConfig) {
         Element element = currentChangeLogFileDOM.createElementNS(XMLChangeLogSAXParser.getDatabaseChangeLogNameSpace(), "column");
         if (columnConfig.getName() != null) {
@@ -325,84 +230,13 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
                 constraintsElement.setAttribute("primaryKeyName", constraints.getPrimaryKeyName());
             }
 
-	        if (constraints.getPrimaryKeyTablespace() != null) {
+            if (constraints.getPrimaryKeyTablespace() != null) {
                 constraintsElement.setAttribute("primaryKeyTablespace", constraints.getPrimaryKeyTablespace());
             }
             element.appendChild(constraintsElement);
         }
 
         return element;
-    }
-
-    public Element createNode(ChangeSet changeSet) {
-        Element node = currentChangeLogFileDOM.createElementNS(XMLChangeLogSAXParser.getDatabaseChangeLogNameSpace(), "changeSet");
-        node.setAttribute("id", changeSet.getId());
-        node.setAttribute("author", changeSet.getAuthor());
-
-        if (changeSet.isAlwaysRun()) {
-            node.setAttribute("runAlways", "true");
-        }
-
-        if (changeSet.isRunOnChange()) {
-            node.setAttribute("runOnChange", "true");
-        }
-
-        if (changeSet.getFailOnError() != null) {
-            node.setAttribute("failOnError", changeSet.getFailOnError().toString());
-        }
-
-        if (changeSet.getContexts() != null && changeSet.getContexts().size() > 0) {
-            StringBuffer contextString = new StringBuffer();
-            for (String context : changeSet.getContexts()) {
-                contextString.append(context).append(",");
-            }
-            node.setAttribute("context", contextString.toString().replaceFirst(",$", ""));
-        }
-
-        if (changeSet.getDbmsSet() != null && changeSet.getDbmsSet().size() > 0) {
-            StringBuffer dbmsString = new StringBuffer();
-            for (String dbms : changeSet.getDbmsSet()) {
-                dbmsString.append(dbms).append(",");
-            }
-            node.setAttribute("dbms", dbmsString.toString().replaceFirst(",$", ""));
-        }
-
-        if (StringUtils.trimToNull(changeSet.getComments()) != null) {
-            Element commentsElement = currentChangeLogFileDOM.createElementNS(XMLChangeLogSAXParser.getDatabaseChangeLogNameSpace(), "comment");
-            Text commentsText = currentChangeLogFileDOM.createTextNode(changeSet.getComments());
-            commentsElement.appendChild(commentsText);
-            node.appendChild(commentsElement);
-        }
-
-
-        for (Change change : changeSet.getChanges()) {
-            node.appendChild(createNode(change));
-        }
-        if (changeSet.getRollBackChanges()!=null && changeSet.getRollBackChanges().length > 0) {
-            Element rollback = currentChangeLogFileDOM.createElement("rollback");
-            for (Change change : changeSet.getRollBackChanges()) {
-                rollback.appendChild(createNode(change));
-            }
-            node.appendChild( rollback );
-        }
-        
-        return node;
-    }
-
-
-    public Element createNode(CustomChangeWrapper change) {
-        Element customElement = currentChangeLogFileDOM.createElementNS(XMLChangeLogSAXParser.getDatabaseChangeLogNameSpace(), "custom");
-        customElement.setAttribute("class", change.getClassName());
-
-        for (String param : change.getParams()) {
-            Element paramElement = currentChangeLogFileDOM.createElementNS(XMLChangeLogSAXParser.getDatabaseChangeLogNameSpace(), "param");
-            paramElement.setAttribute("name", param);
-            paramElement.setAttribute("value", change.getParamValue(param));
-
-            customElement.appendChild(paramElement);
-        }
-
-        return customElement;
     }
 
     /*

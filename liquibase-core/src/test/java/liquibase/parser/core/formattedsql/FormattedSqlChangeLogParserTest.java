@@ -104,8 +104,8 @@ public class FormattedSqlChangeLogParserTest {
         assertEquals(1, changeLog.getChangeSets().get(0).getChanges().size());
         assertEquals("select * from table1;", ((RawSQLChange) changeLog.getChangeSets().get(0).getChanges().get(0)).getSql());
         assertNull(((RawSQLChange) changeLog.getChangeSets().get(0).getChanges().get(0)).getEndDelimiter());
-        assertTrue(((RawSQLChange) changeLog.getChangeSets().get(0).getChanges().get(0)).isSplittingStatements());
-        assertTrue(((RawSQLChange) changeLog.getChangeSets().get(0).getChanges().get(0)).isStrippingComments());
+        assertTrue(((RawSQLChange) changeLog.getChangeSets().get(0).getChanges().get(0)).isSplitStatements());
+        assertTrue(((RawSQLChange) changeLog.getChangeSets().get(0).getChanges().get(0)).isStripComments());
         assertFalse(changeLog.getChangeSets().get(0).isAlwaysRun());
         assertFalse(changeLog.getChangeSets().get(0).isRunOnChange());
         assertTrue(changeLog.getChangeSets().get(0).isRunInTransaction());
@@ -120,11 +120,11 @@ public class FormattedSqlChangeLogParserTest {
                 "  id int primary key\n" +
                 ");", ((RawSQLChange) changeLog.getChangeSets().get(1).getChanges().get(0)).getSql());
         assertEquals("X", ((RawSQLChange) changeLog.getChangeSets().get(1).getChanges().get(0)).getEndDelimiter());
-        assertFalse(((RawSQLChange) changeLog.getChangeSets().get(1).getChanges().get(0)).isSplittingStatements());
-        assertFalse(((RawSQLChange) changeLog.getChangeSets().get(1).getChanges().get(0)).isStrippingComments());
+        assertFalse(((RawSQLChange) changeLog.getChangeSets().get(1).getChanges().get(0)).isSplitStatements());
+        assertFalse(((RawSQLChange) changeLog.getChangeSets().get(1).getChanges().get(0)).isStripComments());
         assertEquals("X", ((RawSQLChange) changeLog.getChangeSets().get(1).getChanges().get(0)).getEndDelimiter());
-        assertFalse(((RawSQLChange) changeLog.getChangeSets().get(1).getChanges().get(0)).isSplittingStatements());
-        assertFalse(((RawSQLChange) changeLog.getChangeSets().get(1).getChanges().get(0)).isStrippingComments());
+        assertFalse(((RawSQLChange) changeLog.getChangeSets().get(1).getChanges().get(0)).isSplitStatements());
+        assertFalse(((RawSQLChange) changeLog.getChangeSets().get(1).getChanges().get(0)).isStripComments());
         assertTrue(changeLog.getChangeSets().get(1).isAlwaysRun());
         assertTrue(changeLog.getChangeSets().get(1).isRunOnChange());
         assertFalse(changeLog.getChangeSets().get(1).isRunInTransaction());
@@ -145,8 +145,8 @@ public class FormattedSqlChangeLogParserTest {
                 "  id int primary key\n" +
                 ");", ((RawSQLChange) changeLog.getChangeSets().get(2).getChanges().get(0)).getSql());
         assertNull(((RawSQLChange) changeLog.getChangeSets().get(2).getChanges().get(0)).getEndDelimiter());
-        assertTrue(((RawSQLChange) changeLog.getChangeSets().get(2).getChanges().get(0)).isSplittingStatements());
-        assertTrue(((RawSQLChange) changeLog.getChangeSets().get(2).getChanges().get(0)).isStrippingComments());
+        assertTrue(((RawSQLChange) changeLog.getChangeSets().get(2).getChanges().get(0)).isSplitStatements());
+        assertTrue(((RawSQLChange) changeLog.getChangeSets().get(2).getChanges().get(0)).isStripComments());
         assertEquals(1, changeLog.getChangeSets().get(2).getRollBackChanges().length);
         assertTrue(changeLog.getChangeSets().get(2).getRollBackChanges()[0] instanceof RawSQLChange);
         assertEquals("drop table table2;", ((RawSQLChange) changeLog.getChangeSets().get(2).getRollBackChanges()[0]).getSql());

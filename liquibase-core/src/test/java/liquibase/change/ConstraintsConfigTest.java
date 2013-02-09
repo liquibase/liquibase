@@ -1,9 +1,13 @@
 package liquibase.change;
 
 import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.serializer.LiquibaseSerializable;
 import org.junit.Test;
+
+import java.util.Set;
 
 public class ConstraintsConfigTest {
 
@@ -187,5 +191,31 @@ public class ConstraintsConfigTest {
     @Test
     public void setReferences() {
         assertEquals("xyz", new ConstraintsConfig().setReferences("xyz").getReferences());
+    }
+
+    @Test
+    public void getSerializedObjectName() {
+        assertEquals("constraints", new ConstraintsConfig().getSerializedObjectName());
+    }
+
+    @Test
+    public void getFieldsToSerialize() {
+        Set<String> fields = new ConstraintsConfig().getSerializableFields();
+        assertTrue(fields.contains("nullable"));
+        assertTrue(fields.contains("primaryKey"));
+        assertTrue(fields.contains("primaryKeyName"));
+        assertTrue(fields.contains("nullable"));
+    }
+
+    @Test
+    public void getSerializableFieldValue() {
+        assertFalse((Boolean) new ConstraintsConfig().getSerializableFieldValue("nullable"));
+        assertTrue((Boolean) new ConstraintsConfig().setNullable(true).getSerializableFieldValue("nullable"));
+
+    }
+
+    @Test
+    public void getFieldSerializationType() {
+        assertEquals(LiquibaseSerializable.SerializationType.NAMED_FIELD, new ConstraintsConfig().getSerializableFieldType("anythiny"));
     }
 }

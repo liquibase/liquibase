@@ -1,19 +1,12 @@
 package liquibase.serializer.core.string;
 
-import liquibase.change.Change;
-import liquibase.change.DatabaseChangeProperty;
-import liquibase.change.ColumnConfig;
-import liquibase.change.ConstraintsConfig;
-import liquibase.change.custom.CustomChange;
 import liquibase.changelog.ChangeSet;
-import liquibase.changelog.DatabaseChangeLog;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.serializer.ChangeLogSerializer;
-import liquibase.sql.visitor.SqlVisitor;
+import liquibase.serializer.LiquibaseSerializable;
 import liquibase.util.StringUtils;
 
 import java.io.File;
-import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -27,69 +20,37 @@ public class StringChangeLogSerializer implements ChangeLogSerializer {
     private static final int INDENT_LENGTH = 4;
 
     public String[] getValidFileExtensions() {
-        return new String[] {"txt"};
+        return new String[]{"txt"};
     }
 
-    public String serialize(DatabaseChangeLog databaseChangeLog) {
-        return null; //todo
-    }
-    
-    public String serialize(Change change) {
-        return change.getChangeMetaData().getName() + ":" + serializeObject(change, 1);
+    public String serialize(LiquibaseSerializable object) {
+        return object.getSerializedObjectName() + ":" + serializeObject(object, 1);
     }
 
-    public String serialize(SqlVisitor visitor) {
-        return visitor.getName() + ":" + serializeObject(visitor, 1);
-    }
-
-    private String serializeObject(Object objectToSerialize, int indent) {
+    private String serializeObject(LiquibaseSerializable objectToSerialize, int indent) {
         try {
             StringBuffer buffer = new StringBuffer();
             buffer.append("[");
 
             SortedSet<String> values = new TreeSet<String>();
-            Class<? extends Object> classToCheck = objectToSerialize.getClass();
-            while (!classToCheck.equals(Object.class)) {
-                for (Field field : classToCheck.getDeclaredFields()) {
-                    field.setAccessible(true);
-                    DatabaseChangeProperty changePropertyAnnotation = field.getAnnotation(DatabaseChangeProperty.class);
-                    if (changePropertyAnnotation != null && !changePropertyAnnotation.isChangeProperty()) {
-                        continue;
-                    }
-                    if (field.getName().equals("serialVersionUID")) {
-                        continue;
-                    }
-                    if (field.isSynthetic() || field.getName().equals("$VRc")) { //from emma
-                        continue;
-                    }
-                    if (field.getName().equals("serialVersionUID")) {
-                        continue;
-                    }
+            for (String field : objectToSerialize.getSerializableFields()) {
+                Object value = objectToSerialize.getSerializableFieldValue(field);
 
-                    String propertyName = field.getName();
-
-                    Object value = field.get(objectToSerialize);
-                    if (value instanceof ColumnConfig) {
-                        values.add(indent(indent) + serializeColumnConfig((ColumnConfig) field.get(objectToSerialize), indent + 1));
-                    } else if (value instanceof ConstraintsConfig) {
-                        values.add(indent(indent) + serializeConstraintsConfig((ConstraintsConfig) field.get(objectToSerialize), indent + 1));
-                    } else if (value instanceof CustomChange) {
-                        values.add(indent(indent) + serializeCustomChange((CustomChange) field.get(objectToSerialize), indent + 1));
-                    } else {
-                        if (value != null) {
-                            if (value instanceof Map) {
-                                values.add(indent(indent) + propertyName + "=" + serializeObject((Map) value, indent + 1));
-                            } else if (value instanceof Collection) {
-                                values.add(indent(indent) + propertyName + "=" + serializeObject((Collection) value, indent + 1));
-                            } else if (value instanceof Object[]) {
-                                values.add(indent(indent) + propertyName + "=" + serializeObject((Object[]) value, indent + 1));
-                            } else {
-                                values.add(indent(indent) + propertyName + "=\"" + value.toString() + "\"");
-                            }
+                if (value instanceof LiquibaseSerializable) {
+                    values.add(indent(indent) + serializeObject((LiquibaseSerializable) value, indent + 1));
+                } else {
+                    if (value != null) {
+                        if (value instanceof Map) {
+                            values.add(indent(indent) + field + "=" + serializeObject((Map) value, indent + 1));
+                        } else if (value instanceof Collection) {
+                            values.add(indent(indent) + field + "=" + serializeObject((Collection) value, indent + 1));
+                        } else if (value instanceof Object[]) {
+                            values.add(indent(indent) + field + "=" + serializeObject((Object[]) value, indent + 1));
+                        } else {
+                            values.add(indent(indent) + field + "=\"" + value.toString() + "\"");
                         }
                     }
                 }
-                classToCheck = classToCheck.getSuperclass();
             }
 
             if (values.size() > 0) {
@@ -117,10 +78,10 @@ public class StringChangeLogSerializer implements ChangeLogSerializer {
 
         String returnString = "[\n";
         for (Object object : collection) {
-            if (object instanceof ColumnConfig) {
-                returnString += indent(indent) + serializeColumnConfig((ColumnConfig) object, indent + 1) + ",\n";
+            if (object instanceof LiquibaseSerializable) {
+                returnString += indent(indent) + serializeObject((LiquibaseSerializable) object, indent + 1) + ",\n";
             } else {
-                returnString += indent(indent) + object.toString()+ ",\n";
+                returnString += indent(indent) + object.toString() + ",\n";
             }
         }
         returnString = returnString.replaceFirst(",$", "");
@@ -137,10 +98,10 @@ public class StringChangeLogSerializer implements ChangeLogSerializer {
 
         String returnString = "[\n";
         for (Object object : collection) {
-            if (object instanceof ColumnConfig) {
-                returnString += indent(indent) + serializeColumnConfig((ColumnConfig) object, indent + 1) + ",\n";
+            if (object instanceof LiquibaseSerializable) {
+                returnString += indent(indent) + serializeObject((LiquibaseSerializable) object, indent + 1) + ",\n";
             } else {
-                returnString += indent(indent) + object.toString()+ ",\n";
+                returnString += indent(indent) + object.toString() + ",\n";
             }
         }
         returnString = returnString.replaceFirst(",$", "");
@@ -157,7 +118,7 @@ public class StringChangeLogSerializer implements ChangeLogSerializer {
 
         String returnString = "{\n";
         for (Object key : new TreeSet(collection.keySet())) {
-            returnString += indent(indent) +  key.toString() +"=\""+collection.get(key)+ "\",\n";
+            returnString += indent(indent) + key.toString() + "=\"" + collection.get(key) + "\",\n";
         }
         returnString = returnString.replaceFirst(",$", "");
         returnString += indent(indent - 1) + "}";
@@ -166,29 +127,9 @@ public class StringChangeLogSerializer implements ChangeLogSerializer {
 
     }
 
-    public String serialize(ColumnConfig columnConfig) {
-        return null;
-    }
+    public void write(List<ChangeSet> changeSets, OutputStream out) throws IOException {
 
-    private String serializeColumnConfig(ColumnConfig columnConfig, int indent) {
-        return "column:" + serializeObject(columnConfig, indent);
     }
-
-    private String serializeConstraintsConfig(ConstraintsConfig constraintsConfig, int indent) {
-        return "constraints:" + serializeObject(constraintsConfig, indent);
-    }
-
-    private String serializeCustomChange(CustomChange customChange, int indent) {
-        return "customChange:" + serializeObject(customChange, indent);
-    }
-
-    public String serialize(ChangeSet changeSet) {
-        return null;
-    }
-
-	public void write(List<ChangeSet> changeSets, OutputStream out) throws IOException {
-		
-	}
 
     public void append(ChangeSet changeSet, File changeLogFile) throws IOException {
 

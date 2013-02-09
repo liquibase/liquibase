@@ -6,7 +6,10 @@ import java.text.ParseException;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
+import liquibase.serializer.LiquibaseSerializable;
+import liquibase.serializer.ReflectionSerializer;
 import liquibase.statement.SequenceFunction;
 import liquibase.structure.core.*;
 import liquibase.statement.DatabaseFunction;
@@ -18,7 +21,7 @@ import liquibase.util.StringUtils;
  * It is not required that a column-based Change uses this class, but parsers should look for it so it is a helpful convenience.
  * The definitions of "defaultValue" and "value" will vary based on the Change and may not be applicable in all cases.
  */
-public class ColumnConfig {
+public class ColumnConfig implements LiquibaseSerializable {
     private String name;
     private String type;
     private String value;
@@ -598,5 +601,21 @@ public class ColumnConfig {
     public ColumnConfig setRemarks(String remarks) {
         this.remarks = remarks;
         return this;
+    }
+
+    public String getSerializedObjectName() {
+        return "column";
+    }
+
+    public Set<String> getSerializableFields() {
+        return ReflectionSerializer.getInstance().getFields(this);
+    }
+
+    public Object getSerializableFieldValue(String field) {
+        return ReflectionSerializer.getInstance().getValue(this, field);
+    }
+
+    public SerializationType getSerializableFieldType(String field) {
+        return SerializationType.NAMED_FIELD;
     }
 }

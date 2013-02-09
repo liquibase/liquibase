@@ -25,26 +25,6 @@ public class MockChangeLogSerializer implements ChangeLogSerializer {
         return validExtensions;
     }
 
-    public String serialize(DatabaseChangeLog databaseChangeLog) {
-        return null;
-    }
-
-    public String serialize(ChangeSet changeSet) {
-        return null;
-    }
-
-    public String serialize(Change change) {
-        return null;
-    }
-
-    public String serialize(ColumnConfig columnConfig) {
-        return null;
-    }
-
-    public String serialize(SqlVisitor visitor) {
-        return null;  
-    }
-
 	public void write(List<ChangeSet> changeSets, OutputStream out)
 			throws IOException {
 		;
@@ -52,5 +32,9 @@ public class MockChangeLogSerializer implements ChangeLogSerializer {
 
     public void append(ChangeSet changeSet, File changeLogFile) throws IOException {
 
+    }
+
+    public String serialize(LiquibaseSerializable object) {
+        return null;
     }
 }

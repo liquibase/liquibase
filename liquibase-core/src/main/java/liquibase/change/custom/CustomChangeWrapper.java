@@ -6,6 +6,7 @@ import liquibase.change.ChangeMetaData;
 import liquibase.change.DatabaseChangeProperty;
 import liquibase.database.Database;
 import liquibase.exception.*;
+import liquibase.serializer.LiquibaseSerializable;
 import liquibase.statement.SqlStatement;
 import liquibase.util.ObjectUtil;
 
@@ -60,7 +61,7 @@ public class CustomChangeWrapper extends AbstractChange {
      * and assigns it to {@link #getCustomChange()}.
      * {@link #setClassLoader(ClassLoader)} must be called before this method. The passed class is constructed, but no parameters are set. They are set in {@link #generateStatements(liquibase.database.Database)}
      */
-    public void setClass(String className) throws CustomChangeException {
+    public CustomChangeWrapper setClass(String className) throws CustomChangeException {
         if (classLoader == null) {
             throw new CustomChangeException("CustomChangeWrapper classLoader not set");
         }
@@ -78,6 +79,8 @@ public class CustomChangeWrapper extends AbstractChange {
         } catch (Exception e) {
             throw new CustomChangeException(e);
         }
+
+        return this;
     }
 
     /**
@@ -219,4 +222,30 @@ public class CustomChangeWrapper extends AbstractChange {
         }
     }
 
+    @Override
+    public SerializationType getSerializableFieldType(String field) {
+        if (field.equals("class")) {
+            return SerializationType.NAMED_FIELD;
+        } else if (field.equals("param")) {
+            return SerializationType.NESTED_OBJECT;
+        } else {
+            throw new UnexpectedLiquibaseException("Unexpected CustomChangeWrapper field "+field);
+        }
+    }
+
+    @Override
+    public Object getSerializableFieldValue(String field) {
+        if (field.equals("class")) {
+            return getClassName();
+        } else if (field.equals("param")) {
+            return this.paramValues;
+        } else {
+            throw new UnexpectedLiquibaseException("Unexpected CustomChangeWrapper field "+field);
+        }
+    }
+
+    @Override
+    public Set<String> getSerializableFields() {
+        return new HashSet<String>(Arrays.asList("class", "param"));
+    }
 }

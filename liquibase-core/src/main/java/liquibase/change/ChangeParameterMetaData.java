@@ -3,10 +3,12 @@ package liquibase.change;
 import com.sun.istack.internal.NotNull;
 import liquibase.database.Database;
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.serializer.LiquibaseSerializable;
 import liquibase.util.StringUtils;
 
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -22,9 +24,9 @@ public class ChangeParameterMetaData {
     private String dataType;
     private Set<String> requiredForDatabase;
     private String mustEqualExisting;
-    private boolean nestedProperty;
+    private LiquibaseSerializable.SerializationType serializationType;
 
-    public ChangeParameterMetaData(String parameterName, String displayName, Class dataType, String[] requiredForDatabase, String mustEqualExisting, boolean nestedProperty) {
+    public ChangeParameterMetaData(String parameterName, String displayName, Class dataType, String[] requiredForDatabase, String mustEqualExisting, LiquibaseSerializable.SerializationType serializationType) {
         if (parameterName == null) {
             throw new UnexpectedLiquibaseException("Unexpected null parameterName");
         }
@@ -49,7 +51,7 @@ public class ChangeParameterMetaData {
         this.requiredForDatabase = Collections.unmodifiableSet(this.requiredForDatabase);
 
         this.mustEqualExisting = mustEqualExisting;
-        this.nestedProperty = nestedProperty;
+        this.serializationType = serializationType;
     }
 
     /**
@@ -103,7 +105,11 @@ public class ChangeParameterMetaData {
         try {
             for (PropertyDescriptor descriptor : Introspector.getBeanInfo(change.getClass()).getPropertyDescriptors()) {
                 if (descriptor.getDisplayName().equals(this.parameterName)) {
-                    return descriptor.getReadMethod().invoke(change);
+                    Method readMethod = descriptor.getReadMethod();
+                    if (readMethod == null) {
+                        readMethod  = change.getClass().getMethod("is"+StringUtils.upperCaseFirst(descriptor.getName()));
+                    }
+                    return readMethod.invoke(change);
                 }
             }
             throw new RuntimeException("Could not find readMethod for "+this.parameterName);
@@ -127,10 +133,9 @@ public class ChangeParameterMetaData {
     }
 
     /**
-     * Return if this parameter should be a "nested" object when serializing rather than being another field.
-     * For example, in XML using a child tag rather than an attribute if this returns true
+     * Return the {@link LiquibaseSerializable.SerializationType} to use when serializing this object.
      */
-    public boolean isNestedProperty() {
-        return nestedProperty;
+    public LiquibaseSerializable.SerializationType getSerializationType() {
+        return serializationType;
     }
 }

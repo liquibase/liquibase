@@ -2,6 +2,7 @@ package liquibase.change;
 
 import static org.junit.Assert.*;
 
+import liquibase.serializer.LiquibaseSerializable;
 import liquibase.statement.DatabaseFunction;
 import liquibase.statement.SequenceFunction;
 import liquibase.structure.core.*;
@@ -388,4 +389,13 @@ public class ColumnConfigTest {
         assertEquals("blob_file", new ColumnConfig().setValueBlobFile("blob_file").getValueBlobFile());
     }
 
+    @Test
+    public void getFieldSerializationType() {
+        assertEquals(LiquibaseSerializable.SerializationType.NAMED_FIELD, new ColumnConfig().getSerializableFieldType("anythiny"));
+    }
+
+    @Test
+    public void getSerializedObjectName() {
+        assertEquals("column", new ColumnConfig().getSerializedObjectName());
+    }
 }

@@ -14,6 +14,7 @@ import liquibase.precondition.Conditional;
 import liquibase.precondition.core.ErrorPrecondition;
 import liquibase.precondition.core.FailedPrecondition;
 import liquibase.precondition.core.PreconditionContainer;
+import liquibase.serializer.LiquibaseSerializable;
 import liquibase.sql.visitor.SqlVisitor;
 import liquibase.statement.SqlStatement;
 import liquibase.util.StreamUtil;
@@ -24,7 +25,7 @@ import java.util.*;
 /**
  * Encapsulates a changeSet and all its associated changes.
  */
-public class ChangeSet implements Conditional {
+public class ChangeSet implements Conditional, LiquibaseSerializable {
 
     public enum RunStatus {
         NOT_RAN, ALREADY_RAN, RUN_AGAIN, MARK_RAN, INVALID_MD5SUM
@@ -40,7 +41,7 @@ public class ChangeSet implements Conditional {
         ExecType(String value, boolean ranBefore, boolean ran) {
             this.value = value;
             this.ranBefore = ranBefore;
-	    this.ran = ran;
+            this.ran = ran;
         }
 
         public final String value;
@@ -342,7 +343,7 @@ public class ChangeSet implements Conditional {
                 log.debug("Failure Stacktrace", e);
                 execType = ExecType.FAILED;
             } else {
-                log.severe("Change Set "+toString(false)+" failed.  Error: "+e.getMessage(), e);
+                log.severe("Change Set " + toString(false) + " failed.  Error: " + e.getMessage(), e);
                 if (e instanceof MigrationFailedException) {
                     throw ((MigrationFailedException) e);
                 } else {
@@ -604,6 +605,103 @@ public class ChangeSet implements Conditional {
     }
 
 
+    public String getSerializedObjectName() {
+        return "changeSet";
+    }
 
+    public Set<String> getSerializableFields() {
+        return new HashSet<String>(Arrays.asList(
+                "id",
+                "author",
+                "runAlways",
+                "runOnChange",
+                "failOnError",
+                "context",
+                "dbms",
+                "comment",
+                "changes",
+                "rollback"));
 
+    }
+
+    public Object getSerializableFieldValue(String field) {
+        if (field.equals("id")) {
+            return this.getId();
+        }
+        if (field.equals("author")) {
+            return this.getAuthor();
+        }
+
+        if (field.equals("runAlways")) {
+            if (this.isAlwaysRun()) {
+                return true;
+            } else {
+                return null;
+            }
+        }
+
+        if (field.equals("runOnChange")) {
+            if (this.isRunOnChange()) {
+                return true;
+            } else {
+                return null;
+            }
+        }
+
+        if (field.equals("failOnError")) {
+            return this.getFailOnError();
+        }
+
+        if (field.equals("context")) {
+            if (this.getContexts() != null && this.getContexts().size() > 0) {
+                StringBuffer contextString = new StringBuffer();
+                for (String context : this.getContexts()) {
+                    contextString.append(context).append(",");
+                }
+                return contextString.toString().replaceFirst(",$", "");
+            } else {
+                return null;
+            }
+        }
+
+        if (field.equals("dbms")) {
+            if (this.getDbmsSet() != null && this.getDbmsSet().size() > 0) {
+                StringBuffer dbmsString = new StringBuffer();
+                for (String dbms : this.getDbmsSet()) {
+                    dbmsString.append(dbms).append(",");
+                }
+                return dbmsString.toString().replaceFirst(",$", "");
+            } else {
+                return null;
+            }
+        }
+
+        if (field.equals("comment")) {
+            return StringUtils.trimToNull(this.getComments());
+        }
+
+        if (field.equals("changes")) {
+            return getChanges();
+        }
+
+        if (field.equals("rollback")) {
+            if (this.getRollBackChanges() != null && this.getRollBackChanges().length > 0) {
+                return this.getRollBackChanges();
+            } else {
+                return null;
+            }
+        }
+
+        throw new UnexpectedLiquibaseException("Unexpected field request on changeSet: "+field);
+    }
+
+    public SerializationType getSerializableFieldType(String field) {
+        if (field.equals("comment") || field.equals("changes") || field.equals("rollback")) {
+            return SerializationType.NESTED_OBJECT;
+//        } else if (field.equals()) {
+//            return SerializationType.DIRECT_VALUE;
+        } else {
+            return SerializationType.NAMED_FIELD;
+        }
+    }
 }

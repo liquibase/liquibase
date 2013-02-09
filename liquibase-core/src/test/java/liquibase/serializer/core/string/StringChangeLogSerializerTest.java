@@ -44,8 +44,8 @@ public class StringChangeLogSerializerTest {
     public void serialized_CustomChange() throws Exception {
 
         String expectedString = "customChange:[\n" +
-                "    className=\"liquibase.change.custom.ExampleCustomSqlChange\"\n" +
-                "    paramValues={\n" +
+                "    class=\"liquibase.change.custom.ExampleCustomSqlChange\"\n" +
+                "    param={\n" +
                 "        columnName=\"column_name\",\n" +
                 "        newValue=\"new_value\",\n" +
                 "        tableName=\"table_name\"\n" +

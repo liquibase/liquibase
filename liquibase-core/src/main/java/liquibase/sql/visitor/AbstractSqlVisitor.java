@@ -1,6 +1,8 @@
 package liquibase.sql.visitor;
 
 import liquibase.change.CheckSum;
+import liquibase.serializer.LiquibaseSerializable;
+import liquibase.serializer.ReflectionSerializer;
 import liquibase.serializer.core.string.StringChangeLogSerializer;
 
 import java.util.Set;
@@ -38,4 +40,19 @@ public abstract class AbstractSqlVisitor implements SqlVisitor {
         return CheckSum.compute(new StringChangeLogSerializer().serialize(this));
     }
 
+    public Set<String> getSerializableFields() {
+        return ReflectionSerializer.getInstance().getFields(this);
+    }
+
+    public Object getSerializableFieldValue(String field) {
+        return ReflectionSerializer.getInstance().getValue(this, field);
+    }
+
+    public String getSerializedObjectName() {
+        return getName();
+    }
+
+    public SerializationType getSerializableFieldType(String field) {
+        return SerializationType.NAMED_FIELD;
+    }
 }

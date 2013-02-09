@@ -5,12 +5,14 @@ import java.util.*;
 
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
+import liquibase.serializer.LiquibaseSerializable;
 import liquibase.structure.DatabaseObject;
 import liquibase.exception.*;
 import liquibase.resource.ResourceAccessor;
 import liquibase.serializer.core.string.StringChangeLogSerializer;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.SqlStatement;
+import liquibase.util.StringUtils;
 
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
@@ -61,6 +63,13 @@ public abstract class AbstractChange implements Change {
             for (PropertyDescriptor property : Introspector.getBeanInfo(this.getClass()).getPropertyDescriptors()) {
                 Method readMethod = property.getReadMethod();
                 Method writeMethod = property.getWriteMethod();
+                if (readMethod == null) {
+                    try {
+                        readMethod = this.getClass().getMethod("is"+ StringUtils.upperCaseFirst(property.getName()));
+                    } catch (Exception ignore) {
+                        //it was worth a try
+                    }
+                }
                 if (readMethod != null && writeMethod != null) {
                     DatabaseChangeProperty annotation = readMethod.getAnnotation(DatabaseChangeProperty.class);
                     if (annotation == null || annotation.isChangeProperty()) {
@@ -85,7 +94,7 @@ public abstract class AbstractChange implements Change {
      * @return
      * @throws Exception
      */
-    protected ChangeParameterMetaData createChangeParameterMetadata(String parameterName) throws IntrospectionException {
+    protected ChangeParameterMetaData createChangeParameterMetadata(String parameterName) throws IntrospectionException, NoSuchMethodException {
 
         String displayName = parameterName.replaceAll("([A-Z])", " $1");
         displayName = displayName.substring(0, 1).toUpperCase() + displayName.substring(1);
@@ -102,20 +111,24 @@ public abstract class AbstractChange implements Change {
         }
 
         Class type = property.getPropertyType();
-        DatabaseChangeProperty changePropertyAnnotation = property.getReadMethod().getAnnotation(DatabaseChangeProperty.class);
+        Method readMethod = property.getReadMethod();
+        if (readMethod == null) {
+            readMethod = getClass().getMethod("is"+StringUtils.upperCaseFirst(property.getName()));
+        }
+        DatabaseChangeProperty changePropertyAnnotation = readMethod.getAnnotation(DatabaseChangeProperty.class);
 
         String[] requiredForDatabase;
         String mustEqualExisting = null;
-        boolean nestedProperty = false;
+        SerializationType serializationType = SerializationType.NAMED_FIELD;
         if (changePropertyAnnotation == null) {
             requiredForDatabase = new String[]{"none"};
         } else {
             requiredForDatabase = changePropertyAnnotation.requiredForDatabase();
             mustEqualExisting = changePropertyAnnotation.mustEqualExisting();
-            nestedProperty = changePropertyAnnotation.isNestedProperty();
+            serializationType = changePropertyAnnotation.serializationType();
         }
 
-        return new ChangeParameterMetaData(parameterName, displayName, type, requiredForDatabase, mustEqualExisting, nestedProperty);
+        return new ChangeParameterMetaData(parameterName, displayName, type, requiredForDatabase, mustEqualExisting, serializationType);
     }
 
     /**
@@ -372,5 +385,21 @@ public abstract class AbstractChange implements Change {
         }
 
         return affectedObjects;
+    }
+
+    public Set<String> getSerializableFields() {
+        return getChangeMetaData().getParameters().keySet();
+    }
+
+    public Object getSerializableFieldValue(String field) {
+        return getChangeMetaData().getParameters().get(field).getCurrentValue(this);
+    }
+
+    public String getSerializedObjectName() {
+        return getChangeMetaData().getName();
+    }
+
+    public SerializationType getSerializableFieldType(String field) {
+        return getChangeMetaData().getParameters().get(field).getSerializationType();
     }
 }

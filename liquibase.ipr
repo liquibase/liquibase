@@ -41,7 +41,34 @@
       <entry name="?*.ftl" />
       <entry name="?*.jar" />
     </wildcardResourcePatterns>
-    <annotationProcessing enabled="false" useClasspath="true" />
+    <annotationProcessing>
+      <profile default="true" name="Default" enabled="false">
+        <processorPath useClasspath="true" />
+      </profile>
+      <profile default="false" name="Maven default annotation processors profile" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="true" />
+        <module name="liquibase-core" />
+        <module name="liquibase-ext-change" />
+        <module name="liquibase-ext-changewithnestedtags" />
+        <module name="liquibase-ext-sqlgenerator" />
+        <module name="liquibase-integration-tests" />
+        <module name="liquibase-maven-plugin" />
+        <module name="liquibase-osgi" />
+      </profile>
+    </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="liquibase" target="1.5" />
+      <module name="liquibase-core" target="1.5" />
+      <module name="liquibase-ext-change" target="1.5" />
+      <module name="liquibase-ext-changewithnestedtags" target="1.5" />
+      <module name="liquibase-ext-sqlgenerator" target="1.5" />
+      <module name="liquibase-integration-tests" target="1.5" />
+      <module name="liquibase-maven-plugin" target="1.5" />
+      <module name="liquibase-osgi" target="1.5" />
+    </bytecodeTargetLevel>
   </component>
   <component name="CopyrightManager" default="">
     <module2copyright />
@@ -126,7 +153,7 @@
     <version value="1.0" />
   </component>
   <component name="JavacSettings">
-    <option name="ADDITIONAL_OPTIONS_STRING" value="-target 1.5 -encoding utf8" />
+    <option name="ADDITIONAL_OPTIONS_STRING" value=" -encoding utf8" />
   </component>
   <component name="JavadocGenerationManager">
     <option name="OUTPUT_DIRECTORY" />
