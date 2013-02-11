@@ -74,7 +74,7 @@ public abstract class AbstractJdbcDatabase implements Database {
     private List<RanChangeSet> ranChangeSetList;
 
     protected void resetRanChangeSetList() {
-    	ranChangeSetList = null;
+        ranChangeSetList = null;
     }
 
     private static Pattern CREATE_VIEW_AS_PATTERN = Pattern.compile("^CREATE\\s+.*?VIEW\\s+.*?AS\\s+", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
@@ -604,13 +604,13 @@ public abstract class AbstractJdbcDatabase implements Database {
             boolean liquibaseColumnNotRightSize = false;
             if (!connection.getDatabaseProductName().equals("SQLite")) {
                 Integer columnSize = changeLogTable.getColumn("LIQUIBASE").getType().getColumnSize();
-                liquibaseColumnNotRightSize =columnSize!=null &&  columnSize != 20;
+                liquibaseColumnNotRightSize = columnSize != null && columnSize != 20;
             }
             boolean hasOrderExecuted = changeLogTable.getColumn("ORDEREXECUTED") != null;
             boolean checksumNotRightSize = false;
             if (!connection.getDatabaseProductName().equals("SQLite")) {
                 Integer columnSize = changeLogTable.getColumn("MD5SUM").getType().getColumnSize();
-                checksumNotRightSize = columnSize!=null && columnSize  != 35;
+                checksumNotRightSize = columnSize != null && columnSize != 35;
             }
             boolean hasExecTypeColumn = changeLogTable.getColumn("EXECTYPE") != null;
 
@@ -1413,5 +1413,9 @@ public abstract class AbstractJdbcDatabase implements Database {
         return functionValue.startsWith("current_timestamp")
                 || functionValue.startsWith("current_datetime")
                 || getCurrentDateTimeFunction().equalsIgnoreCase(functionValue);
+    }
+
+    public String getCurrentDateTimeFunction() {
+        return currentDateTimeFunction;
     }
 }
