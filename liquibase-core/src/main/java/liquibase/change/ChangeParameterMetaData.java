@@ -1,6 +1,5 @@
 package liquibase.change;
 
-import com.sun.istack.internal.NotNull;
 import liquibase.database.Database;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.serializer.LiquibaseSerializable;
@@ -58,7 +57,6 @@ public class ChangeParameterMetaData {
      * Programmatic Name of the parameter. Will not contain spaces so it can be used for XMl tag names etc.
      * By convention, Change names should start be camel case starting with a lower case letter.
      */
-    @NotNull
     public String getParameterName() {
         return parameterName;
     }
@@ -66,7 +64,6 @@ public class ChangeParameterMetaData {
     /**
      * A more friendly name of the parameter.
      */
-    @NotNull
     public String getDisplayName() {
         return displayName;
     }
@@ -74,7 +71,6 @@ public class ChangeParameterMetaData {
     /**
      * Return the data type of value stored in this parameter. Used for documentation and integration purposes as well as validation.
      */
-    @NotNull
     public String getDataType() {
         return dataType;
     }
@@ -85,7 +81,6 @@ public class ChangeParameterMetaData {
      * If the parameter is required for no databases, this will return an empty set. Passing the string "none" to the constructor also results in an empty set.
      * This method will never return a null value
      */
-    @NotNull
     public Set<String> getRequiredForDatabase() {
         return requiredForDatabase;
     }

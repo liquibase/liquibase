@@ -1,6 +1,5 @@
 package liquibase.change;
 
-import com.sun.istack.internal.NotNull;
 import liquibase.database.Database;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.exception.DatabaseException;
@@ -43,7 +42,6 @@ public abstract class AbstractSQLChange extends AbstractChange {
      * <p></p>
      * This will always return a non-null value and should be a boolean rather than a Boolean, but that breaks the Bean Standard.
      */
-    @NotNull
     public Boolean isStripComments() {
         return stripComments;
     }
@@ -67,7 +65,6 @@ public abstract class AbstractSQLChange extends AbstractChange {
      * <p></p>
      * This will always return a non-null value and should be a boolean rather than a Boolean, but that breaks the Bean Standard.
      */
-    @NotNull
     public Boolean isSplitStatements() {
         return splitStatements;
     }
