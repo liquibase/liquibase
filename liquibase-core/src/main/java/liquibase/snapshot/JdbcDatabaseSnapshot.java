@@ -204,6 +204,9 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                     return true;
                 }
             }
+            if (o instanceof String) {
+                return Boolean.valueOf((String) o);
+            }
             return (Boolean) o;
         }
     }
