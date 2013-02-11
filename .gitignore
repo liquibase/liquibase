@@ -9,3 +9,10 @@ liquibase.iws
 liquibase.integrationtest.local.properties
 /liquibase
 /derby.log
+/liquibase-core/target/
+/liquibase-integration-tests/target/
+/liquibase-maven-plugin/target/
+/liquibase-osgi/target/
+/samples/liquibase-ext-change/target/
+/samples/liquibase-ext-changewithnestedtags/target/
+/samples/liquibase-ext-sqlgenerator/target/
