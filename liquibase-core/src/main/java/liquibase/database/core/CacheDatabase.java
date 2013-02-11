@@ -8,14 +8,8 @@ import liquibase.exception.DatabaseException;
 public class CacheDatabase extends AbstractJdbcDatabase {
     public static final String PRODUCT_NAME = "cache";
 
-
-
-    public String getCurrentDateTimeFunction() {
-        if (currentDateTimeFunction != null) {
-            return currentDateTimeFunction;
-        }
-
-        return "SYSDATE";
+    public CacheDatabase() {
+        super.setCurrentDateTimeFunction("SYSDATE");
     }
 
     public String getDefaultDriver(String url) {

@@ -97,11 +97,6 @@ public abstract class AbstractJdbcDatabase implements Database {
     // most databases either lowercase or uppercase unuqoted objects such as table and column names.
     protected Boolean unquotedObjectsAreUppercased = null;
 
-    protected AbstractJdbcDatabase() {
-        this.dateFunctions.add(new DatabaseFunction(getCurrentDateTimeFunction()));
-        this.sequenceNextValueFunction = "NEXTVAL('%s')";
-    }
-
     public String getName() {
         return toString();
     }
@@ -363,6 +358,7 @@ public abstract class AbstractJdbcDatabase implements Database {
     public void setCurrentDateTimeFunction(String function) {
         if (function != null) {
             this.currentDateTimeFunction = function;
+            this.dateFunctions.add(new DatabaseFunction(function));
         }
     }
 

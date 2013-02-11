@@ -28,6 +28,7 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
     private Set<String> reservedWords = new HashSet<String>();
 
     public PostgresDatabase() {
+        super.setCurrentDateTimeFunction("NOW()");
         reservedWords.addAll(Arrays.asList("USER", "LIKE", "GROUP", "DATE", "ALL"));
         super.sequenceNextValueFunction = "nextval('%s')";
         super.sequenceCurrentValueFunction = "currval('%s')";
@@ -138,14 +139,6 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
     @Override
     public boolean supportsSequences() {
         return true;
-    }
-
-    public String getCurrentDateTimeFunction() {
-        if (currentDateTimeFunction != null) {
-            return currentDateTimeFunction;
-        }
-
-        return "NOW()";
     }
 
     @Override

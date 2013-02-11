@@ -22,9 +22,9 @@ public class HsqlDatabase extends AbstractJdbcDatabase {
     private static String SEP_CONCAT = ", ";
 
     public HsqlDatabase() {
-    	super();
-    	super.defaultAutoIncrementStartWith = BigInteger.ZERO;
+    	super.setCurrentDateTimeFunction("NOW");
         super.sequenceNextValueFunction = "NEXT VALUE FOR %s";
+    	super.defaultAutoIncrementStartWith = BigInteger.ZERO;
         super.sequenceCurrentValueFunction = "CURRVAL('%s')";
     }
     
@@ -76,14 +76,6 @@ public class HsqlDatabase extends AbstractJdbcDatabase {
         return "PUBLIC";
     }
 
-    public String getCurrentDateTimeFunction() {
-        if (currentDateTimeFunction != null) {
-            return currentDateTimeFunction;
-        }
-
-        return "NOW";
-    }
-    
     @Override
     public String getConcatSql(String... values) {
         if (values == null) {

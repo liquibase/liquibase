@@ -162,4 +162,9 @@ public abstract class LiquibaseDataType implements PrioritizedService {
         return toString().hashCode();
     }
 
+    protected boolean isCurrentDateTimeFunction(String string, Database database) {
+        return string.toLowerCase().startsWith("current_timestamp")
+                || string.toLowerCase().startsWith(DatabaseFunction.CURRENT_DATE_TIME_PLACE_HOLDER)
+                || database.getCurrentDateTimeFunction().equalsIgnoreCase(string);
+    }
 }

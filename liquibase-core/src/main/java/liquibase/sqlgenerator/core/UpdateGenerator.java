@@ -62,8 +62,9 @@ public class UpdateGenerator extends AbstractSqlGenerator<UpdateStatement> {
             } else {
                 sqlString = DataTypeFactory.getInstance().getFalseBooleanValue(database);
             }
-        } else if (newValue instanceof DatabaseFunction) {
-            sqlString = database.generateDatabaseFunctionValue((DatabaseFunction) newValue);
+        } else if (newValue instanceof DatabaseFunction
+                && DatabaseFunction.CURRENT_DATE_TIME_PLACE_HOLDER.equalsIgnoreCase(newValue.toString())) {
+            sqlString = database.getCurrentDateTimeFunction();
         } else {
             sqlString = newValue.toString();
         }

@@ -2,6 +2,12 @@ package liquibase.statement;
 
 public class DatabaseFunction {
 
+    /**
+     * String value used for comparison. If a function matches this value then it should be replaces by the
+     * real current timestamp function.
+     */
+    public static final String CURRENT_DATE_TIME_PLACE_HOLDER = "current_datetime";
+
     private String value;
 
     public DatabaseFunction(String value) {

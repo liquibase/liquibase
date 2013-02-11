@@ -77,7 +77,7 @@ public class Column extends AbstractDatabaseObject {
     }
 
     public boolean isAutoIncrement() {
-        return getAutoIncrementInformation() != null;
+        return (Boolean) getAttribute("autoIncrement", Boolean.class);
     }
 
     public AutoIncrementInformation getAutoIncrementInformation() {

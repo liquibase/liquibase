@@ -122,23 +122,13 @@ public class SybaseASADatabase extends AbstractJdbcDatabase {
 	 */
 	public SybaseASADatabase() {
 		super();
+        super.setCurrentDateTimeFunction("now()");
 	}
 
     public int getPriority() {
         return PRIORITY_DEFAULT;
     }
     
-	/* (non-Javadoc)
-	 * @see liquibase.database.Database#getCurrentDateTimeFunction()
-	 */
-	public String getCurrentDateTimeFunction() {
-        if (currentDateTimeFunction != null) {
-            return currentDateTimeFunction;
-        }
-        
-		return "now()";
-	}
-
 	/* (non-Javadoc)
 	 * @see liquibase.database.Database#getDefaultDriver(java.lang.String)
 	 */
