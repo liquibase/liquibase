@@ -39,14 +39,8 @@ public class DateTimeType extends LiquibaseDataType {
     public String objectToSql(Object value, Database database) {
         if (value == null || value.toString().equalsIgnoreCase("null")) {
             return null;
-        } else if (value instanceof String && isCurrentDateTimeFunction(value.toString(), database)) {
-            return database.getCurrentDateTimeFunction();
         } else if (value instanceof DatabaseFunction) {
-            if (isCurrentDateTimeFunction(value.toString(), database)) {
-                return database.getCurrentDateTimeFunction();
-            } else {
-                return ((DatabaseFunction) value).getValue();
-            }
+            return database.generateDatabaseFunctionValue((DatabaseFunction) value);
         } else if (database.isFunction(value.toString())) {
             return value.toString();
         } else if (value instanceof String) {

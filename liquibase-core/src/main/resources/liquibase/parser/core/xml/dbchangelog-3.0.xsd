@@ -268,6 +268,7 @@
 		<xsd:attribute name="valueBoolean" type="xsd:string" />
 		<xsd:attribute name="valueDate" type="xsd:string" />
 		<xsd:attribute name="valueComputed" type="xsd:string" />
+        <xsd:attribute name="valueSequenceCurrent" type="xsd:string" />
         <xsd:attribute name="valueSequenceNext" type="xsd:string" />
         <xsd:attribute name="valueBlobFile" type="xsd:string"/>
         <xsd:attribute name="valueClobFile" type="xsd:string"/>
@@ -276,6 +277,8 @@
 		<xsd:attribute name="defaultValueDate" type="xsd:string" />
 		<xsd:attribute name="defaultValueBoolean" type="booleanExp" />
 		<xsd:attribute name="defaultValueComputed" type="xsd:string" />
+        <xsd:attribute name="defaultValueSequenceCurrent" type="xsd:string" />
+        <xsd:attribute name="defaultValueSequenceNext" type="xsd:string" />
 		<xsd:attribute name="autoIncrement" type="booleanExp" />
 		<xsd:attribute name="startWith" type="xsd:long" />
 		<xsd:attribute name="incrementBy" type="xsd:long" />
@@ -449,6 +452,7 @@
 			<xsd:attribute name="defaultValueDate" type="xsd:string" />
 			<xsd:attribute name="defaultValueBoolean" type="xsd:string" />
 			<xsd:attribute name="defaultValueComputed" type="xsd:string" />
+            <xsd:attribute name="defaultValueSequenceNext" type="xsd:string" />
 		</xsd:complexType>
 	</xsd:element>
 

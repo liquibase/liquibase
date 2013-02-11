@@ -1,5 +1,12 @@
 package liquibase.change;
 
+import liquibase.statement.DatabaseFunction;
+import liquibase.statement.SequenceCurrentValueFunction;
+import liquibase.statement.SequenceNextValueFunction;
+import liquibase.structure.core.Column;
+import liquibase.structure.core.Table;
+import liquibase.util.ISODateFormat;
+
 import java.math.BigInteger;
 import java.text.NumberFormat;
 import java.text.ParseException;
@@ -31,13 +38,15 @@ public class ColumnConfig implements LiquibaseSerializable {
     private String valueBlobFile;
     private String valueClobFile;
     private DatabaseFunction valueComputed;
-    private SequenceFunction valueSequenceNext;
+    private SequenceNextValueFunction valueSequenceNext;
+    private SequenceCurrentValueFunction valueSequenceCurrent;
 
     private String defaultValue;
     private Number defaultValueNumeric;
     private Date defaultValueDate;
     private Boolean defaultValueBoolean;
     private DatabaseFunction defaultValueComputed;
+    private SequenceNextValueFunction defaultValueSequenceNext;
 
     private ConstraintsConfig constraints;
     private Boolean autoIncrement;
@@ -259,18 +268,24 @@ public class ColumnConfig implements LiquibaseSerializable {
         return this;
     }
 
-    /**
-     * Return the sequence this column should be set from.
-     * @see #setValue(String)
-     */
-    public SequenceFunction getValueSequenceNext() {
-        return valueSequenceNext;
-    }
-
-    public ColumnConfig setValueSequenceNext(final SequenceFunction valueSequenceNext) {
+    public ColumnConfig setValueSequenceNext(SequenceNextValueFunction valueSequenceNext) {
         this.valueSequenceNext = valueSequenceNext;
 
         return this;
+    }
+
+    public SequenceNextValueFunction getValueSequenceNext() {
+        return valueSequenceNext;
+    }
+
+    public ColumnConfig setValueSequenceCurrent(SequenceCurrentValueFunction valueSequenceCurrent) {
+        this.valueSequenceCurrent = valueSequenceCurrent;
+
+        return this;
+    }
+
+    public SequenceCurrentValueFunction getValueSequenceCurrent() {
+        return valueSequenceCurrent;
     }
 
     /**
@@ -353,6 +368,8 @@ public class ColumnConfig implements LiquibaseSerializable {
             return getValueBlobFile();
         } else if (getValueSequenceNext() != null) {
             return getValueSequenceNext();
+        } else if (getValueSequenceCurrent() != null) {
+            return getValueSequenceCurrent();
         }
         return null;
     }
@@ -524,6 +541,8 @@ public class ColumnConfig implements LiquibaseSerializable {
             return getDefaultValueDate();
         } else if (getDefaultValueComputed() != null) {
             return getDefaultValueComputed();
+        } else if (getDefaultValueSequenceNext() != null) {
+            return getDefaultValueSequenceNext();
         }
         return null;
     }
@@ -588,7 +607,8 @@ public class ColumnConfig implements LiquibaseSerializable {
                 || this.getDefaultValueBoolean() != null
                 || this.getDefaultValueDate() != null
                 || this.getDefaultValueNumeric() != null
-                || this.getDefaultValueComputed() != null;
+                || this.getDefaultValueComputed() != null
+                || this.getDefaultValueSequenceNext() != null;
     }
 
     /**
@@ -615,6 +635,20 @@ public class ColumnConfig implements LiquibaseSerializable {
         return ReflectionSerializer.getInstance().getValue(this, field);
     }
 
+    public void setValueClob(String valueClob) {
+        this.valueClob = valueClob;
+    }
+
+    public SequenceNextValueFunction getDefaultValueSequenceNext() {
+        return defaultValueSequenceNext;
+    }
+
+    public ColumnConfig setDefaultValueSequenceNext(SequenceNextValueFunction defaultValueSequenceNext) {
+        this.defaultValueSequenceNext = defaultValueSequenceNext;
+
+        return this;
+    }
+    
     public SerializationType getSerializableFieldType(String field) {
         return SerializationType.NAMED_FIELD;
     }

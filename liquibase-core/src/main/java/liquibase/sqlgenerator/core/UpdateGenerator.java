@@ -6,6 +6,7 @@ import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
+import liquibase.statement.DatabaseFunction;
 import liquibase.statement.core.UpdateStatement;
 
 import java.util.Date;
@@ -61,6 +62,8 @@ public class UpdateGenerator extends AbstractSqlGenerator<UpdateStatement> {
             } else {
                 sqlString = DataTypeFactory.getInstance().getFalseBooleanValue(database);
             }
+        } else if (newValue instanceof DatabaseFunction) {
+            sqlString = database.generateDatabaseFunctionValue((DatabaseFunction) newValue);
         } else {
             sqlString = newValue.toString();
         }

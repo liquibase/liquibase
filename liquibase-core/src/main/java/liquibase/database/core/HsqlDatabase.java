@@ -25,7 +25,7 @@ public class HsqlDatabase extends AbstractJdbcDatabase {
     	super();
     	super.defaultAutoIncrementStartWith = BigInteger.ZERO;
         super.sequenceNextValueFunction = "NEXT VALUE FOR %s";
-        super.unquotedObjectsAreUppercased = Boolean.TRUE;
+        super.sequenceCurrentValueFunction = "CURRVAL('%s')";
     }
     
     public boolean isCorrectDatabaseImplementation(DatabaseConnection conn) throws DatabaseException {

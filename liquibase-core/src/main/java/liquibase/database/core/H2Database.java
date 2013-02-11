@@ -23,9 +23,9 @@ public class H2Database extends AbstractJdbcDatabase {
     private static String SEP_CONCAT = ", ";
 
     public H2Database() {
-        super.dateFunctions.add(new DatabaseFunction("CURRENT_TIMESTAMP()"));
-        super.sequenceNextValueFunction = "nextval('%s')";
-        super.unquotedObjectsAreUppercased = Boolean.TRUE;
+        this.dateFunctions.add(new DatabaseFunction("CURRENT_TIMESTAMP()"));
+        super.sequenceNextValueFunction = "NEXTVAL('%s')";
+        super.sequenceCurrentValueFunction = "CURRVAL('%s')";
     }
 
     public String getShortName() {
