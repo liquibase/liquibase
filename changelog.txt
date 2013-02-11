@@ -1,6 +1,35 @@
 Liquibase Core Changelog
 ===========================================
 
+Changes in version 3.0 (Under development)
+- Dropped Java 1.5 support
+- Major changes in diff and snapshot log
+- Support for "catalogs" in addition to schemas
+- Separated "diff" and "snapshot" logic for better modularity
+- Extension support for LockService
+- Extension support for defining new DataTypes
+- Extension support for defining new snapshot DatabaseObjects
+- Extension support for defining new Snapshot log
+- Extension support for how to compare DatabaseObjects
+- Better extension support for changelog generation
+- More object types are snapshotted
+- Changes can provide metadata helpful for IDE and other integrations
+- Added ability for objects to control how they are serialized via the LiquibaseSerializable interface
+- Can define tablespace for liquibase tables
+- Performance improvements
+- Ability to specify sequences to read values from on <insert>
+- Improve OSGi support
+- Support preconditions in formatted SQL
+- Maven supports generateChangeLog
+- Better support for case sensitive databases
+- API cleanup
+- Ability to SKIP columns in a CSV file
+- Improved Informix support
+- Support JDBC escape syntax in SQL
+- Added futureRollbackCountSQL
+- Support ${} params in formatted SQL
+- Many bug fixes
+
 Change in version 2.0.5 (2012.05.01) https://liquibase.jira.com/secure/ReleaseNote.jspa?projectId=10020&version=10360
 ----------------------
 - Reverted load blog/clob data from files feature
