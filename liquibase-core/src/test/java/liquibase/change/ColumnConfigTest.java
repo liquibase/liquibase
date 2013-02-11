@@ -4,7 +4,7 @@ import static org.junit.Assert.*;
 
 import liquibase.serializer.LiquibaseSerializable;
 import liquibase.statement.DatabaseFunction;
-import liquibase.statement.SequenceFunction;
+import liquibase.statement.SequenceNextValueFunction;
 import liquibase.structure.core.*;
 import org.junit.Test;
 
@@ -198,7 +198,7 @@ public class ColumnConfigTest {
     @Test
     public void setValueSequenceNext() {
         assertNull(new ColumnConfig().setValueSequenceNext(null).getValueSequenceNext());
-        assertEquals("my_seq", new ColumnConfig().setValueSequenceNext(new SequenceFunction("my_seq")).getValueSequenceNext().toString());
+        assertEquals("my_seq", new ColumnConfig().setValueSequenceNext(new SequenceNextValueFunction("my_seq")).getValueSequenceNext().toString());
     }
 
     @Test
@@ -222,7 +222,7 @@ public class ColumnConfigTest {
         assertEquals(5, new ColumnConfig().setValueNumeric(5).getValueObject());
         assertEquals("1993-02-11 13:22:44.006", new ColumnConfig().setValueDate("1993-02-11T13:22:44.006").getValueObject().toString());
         assertEquals("func", new ColumnConfig().setValueComputed(new DatabaseFunction("func")).getValueObject().toString());
-        assertEquals("seq_name", new ColumnConfig().setValueSequenceNext(new SequenceFunction("seq_name")).getValueObject().toString());
+        assertEquals("seq_name", new ColumnConfig().setValueSequenceNext(new SequenceNextValueFunction("seq_name")).getValueObject().toString());
         assertEquals("asdg", new ColumnConfig().setValueBlobFile("asdg").getValueObject());
         assertEquals("zxcv", new ColumnConfig().setValueClobFile("zxcv").getValueObject());
         assertEquals("A value", new ColumnConfig().setValue("A value").getValueObject());

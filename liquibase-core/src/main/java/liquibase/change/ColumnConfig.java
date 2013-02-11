@@ -17,7 +17,6 @@ import java.util.Set;
 
 import liquibase.serializer.LiquibaseSerializable;
 import liquibase.serializer.ReflectionSerializer;
-import liquibase.statement.SequenceFunction;
 import liquibase.structure.core.*;
 import liquibase.statement.DatabaseFunction;
 import liquibase.util.ISODateFormat;
@@ -633,10 +632,6 @@ public class ColumnConfig implements LiquibaseSerializable {
 
     public Object getSerializableFieldValue(String field) {
         return ReflectionSerializer.getInstance().getValue(this, field);
-    }
-
-    public void setValueClob(String valueClob) {
-        this.valueClob = valueClob;
     }
 
     public SequenceNextValueFunction getDefaultValueSequenceNext() {
