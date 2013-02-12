@@ -144,13 +144,6 @@
                     <skip>true</skip>
                 </configuration>
             </plugin>
-
-            <plugin>
-                <artifactId>maven-scm-plugin</artifactId>
-                <configuration>
-                    <pushChanges>false</pushChanges>
-                </configuration>
-            </plugin>
         </plugins>
 
         <testResources>
