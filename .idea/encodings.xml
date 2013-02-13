@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="Encoding" useUTFGuessing="true" native2AsciiForPropertiesFiles="false">
+    <file url="file://$PROJECT_DIR$" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/liquibase-core" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/liquibase-integration-tests" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/liquibase-maven-plugin" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/liquibase-osgi" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/samples/liquibase-ext-change" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/samples/liquibase-ext-changewithnestedtags" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/samples/liquibase-ext-sqlgenerator" charset="UTF-8" />
+  </component>
+</project>
+

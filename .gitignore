@@ -3,7 +3,7 @@
 /.settings
 *nb-configuration.xml
 /.classpath
-liquibase.iws
+/.idea/workspace.xml
 /out
 /bin
 liquibase.integrationtest.local.properties

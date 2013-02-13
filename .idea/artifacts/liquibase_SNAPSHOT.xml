@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" build-on-make="true" name="liquibase-SNAPSHOT">
+    <output-path>$PROJECT_DIR$/out/artifacts/liquibase_SNAPSHOT</output-path>
+    <root id="archive" name="liquibase_SNAPSHOT.jar">
+      <element id="module-output" name="liquibase-core" />
+    </root>
+  </artifact>
+</component>

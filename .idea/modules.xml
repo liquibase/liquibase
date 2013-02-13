@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/liquibase.iml" filepath="$PROJECT_DIR$/liquibase.iml" />
+      <module fileurl="file://$PROJECT_DIR$/liquibase-core/liquibase-core.iml" filepath="$PROJECT_DIR$/liquibase-core/liquibase-core.iml" />
+      <module fileurl="file://$PROJECT_DIR$/samples/liquibase-ext-change/liquibase-ext-change.iml" filepath="$PROJECT_DIR$/samples/liquibase-ext-change/liquibase-ext-change.iml" />
+      <module fileurl="file://$PROJECT_DIR$/samples/liquibase-ext-changewithnestedtags/liquibase-ext-changewithnestedtags.iml" filepath="$PROJECT_DIR$/samples/liquibase-ext-changewithnestedtags/liquibase-ext-changewithnestedtags.iml" />
+      <module fileurl="file://$PROJECT_DIR$/samples/liquibase-ext-sqlgenerator/liquibase-ext-sqlgenerator.iml" filepath="$PROJECT_DIR$/samples/liquibase-ext-sqlgenerator/liquibase-ext-sqlgenerator.iml" />
+      <module fileurl="file://$PROJECT_DIR$/liquibase-integration-tests/liquibase-integration-tests.iml" filepath="$PROJECT_DIR$/liquibase-integration-tests/liquibase-integration-tests.iml" />
+      <module fileurl="file://$PROJECT_DIR$/liquibase-maven-plugin/liquibase-maven-plugin.iml" filepath="$PROJECT_DIR$/liquibase-maven-plugin/liquibase-maven-plugin.iml" />
+      <module fileurl="file://$PROJECT_DIR$/liquibase-osgi/liquibase-osgi.iml" filepath="$PROJECT_DIR$/liquibase-osgi/liquibase-osgi.iml" />
+      <module fileurl="file://$PROJECT_DIR$/samples/samples.iml" filepath="$PROJECT_DIR$/samples/samples.iml" />
+    </modules>
+  </component>
+</project>
+
