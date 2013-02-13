@@ -31,7 +31,10 @@ public class DerbyDatabase extends AbstractDatabase {
     }
 
     public String getDefaultDriver(String url) {
-        if (url.startsWith("jdbc:derby")) {
+        // CORE-1230 - don't shutdown derby network server
+        if (url.startsWith("jdbc:derby://")) {
+            return "org.apache.derby.jdbc.ClientDriver";
+        } else if (url.startsWith("java:derby")) {
             return "org.apache.derby.jdbc.EmbeddedDriver";
         }
         return null;
