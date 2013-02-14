@@ -17,7 +17,7 @@ import liquibase.statement.SqlStatement;
 /**
  * Interface all changes (refactorings) implement.
  *
- * TODO: Describe changelog parsing process
+ * Instances of these objects are normally created via the {@link ChangeFactory } by {@link liquibase.parser.ChangeLogParser} implementations.
  *
  * @see ChangeFactory
  * @see Database

@@ -5,6 +5,11 @@ import liquibase.exception.CustomChangeException;
 import liquibase.exception.RollbackImpossibleException;
 import liquibase.exception.UnsupportedChangeException;
 
+/**
+ * Interface to implement that allows rollback of a custom task change.
+ *
+ * @see liquibase.change.custom.CustomTaskChange
+ */
 public interface CustomTaskRollback {
 
     /**
