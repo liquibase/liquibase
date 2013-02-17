@@ -10,11 +10,13 @@ public class ISODateFormat {
     private SimpleDateFormat dateTimeFormat = new SimpleDateFormat(DATE_TIME_FORMAT_STRING);
     private SimpleDateFormat dateTimeFormatWithDecimal = new SimpleDateFormat(DATE_TIME_FORMAT_STRING_WITH_DECIMAL);
     private SimpleDateFormat dateTimeFormatWithSpace = new SimpleDateFormat(DATE_TIME_FORMAT_STRING_WITH_SPACE);
+    private SimpleDateFormat dateTimeFormatWithSpaceAndDecimal = new SimpleDateFormat(DATE_TIME_FORMAT_STRING_WITH_SPACE_AND_DECIMAL);
     private SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm:ss");
     private SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
     private static final String DATE_TIME_FORMAT_STRING = "yyyy-MM-dd'T'HH:mm:ss";
     private static final String DATE_TIME_FORMAT_STRING_WITH_SPACE = "yyyy-MM-dd HH:mm:ss";
     private static final String DATE_TIME_FORMAT_STRING_WITH_DECIMAL = "yyyy-MM-dd'T'HH:mm:ss.S";
+    private static final String DATE_TIME_FORMAT_STRING_WITH_SPACE_AND_DECIMAL = "yyyy-MM-dd HH:mm:ss.S";
 
 
     public String format(java.sql.Date date) {
@@ -44,9 +46,11 @@ public class ISODateFormat {
     public Date parse(String dateAsString) throws ParseException {
         SimpleDateFormat dateTimeFormat = this.dateTimeFormat;
 
-        if (dateAsString.indexOf('.') >= 0) {
+        if (dateAsString.contains(".") && dateAsString.contains(" ")) {
+            dateTimeFormat = this.dateTimeFormatWithSpaceAndDecimal;
+        } else if (dateAsString.contains(".")) {
             dateTimeFormat = this.dateTimeFormatWithDecimal;
-        } else if (dateAsString.indexOf(' ') >= 0) {
+        } else if (dateAsString.contains(" ")) {
             dateTimeFormat = this.dateTimeFormatWithSpace;
         }
 
