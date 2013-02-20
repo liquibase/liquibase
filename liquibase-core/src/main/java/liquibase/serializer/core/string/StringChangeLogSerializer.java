@@ -23,7 +23,7 @@ public class StringChangeLogSerializer implements ChangeLogSerializer {
         return new String[]{"txt"};
     }
 
-    public String serialize(LiquibaseSerializable object) {
+    public String serialize(LiquibaseSerializable object, boolean pretty) {
         return object.getSerializedObjectName() + ":" + serializeObject(object, 1);
     }
 

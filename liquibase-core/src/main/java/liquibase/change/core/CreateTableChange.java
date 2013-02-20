@@ -119,6 +119,9 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
 
     @DatabaseChangeProperty(requiredForDatabase = "all")
     public List<ColumnConfig> getColumns() {
+        if (columns == null) {
+            return new ArrayList<ColumnConfig>();
+        }
         return columns;
     }
 

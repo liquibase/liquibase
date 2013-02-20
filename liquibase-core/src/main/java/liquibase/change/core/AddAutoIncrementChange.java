@@ -1,11 +1,9 @@
 package liquibase.change.core;
 
-import liquibase.change.AbstractChange;
-import liquibase.change.ChangeMetaData;
-import liquibase.change.DatabaseChange;
-import liquibase.change.DatabaseChangeProperty;
+import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.database.core.PostgresDatabase;
+import liquibase.database.core.SQLiteDatabase;
 import liquibase.statement.SequenceNextValueFunction;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.AddAutoIncrementStatement;
@@ -21,7 +19,10 @@ import java.math.BigInteger;
  * This change is only valid for databases with auto-increment/identity columns.
  * The current version does not support MS-SQL.
  */
-@DatabaseChange(name="addAutoIncrement", description = "Set Column as Auto-Increment", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "column")
+@DatabaseChange(name="addAutoIncrement", description = "Converts an existing column to be an auto-increment (a.k.a 'identity') column",
+        priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "column",
+        databaseNotes = {@DatabaseChangeNote(database = "sqlite", notes = "If the column type is not INTEGER it is converted to INTEGER")}
+)
 public class AddAutoIncrementChange extends AbstractChange {
 
     private String catalogName;
@@ -68,6 +69,7 @@ public class AddAutoIncrementChange extends AbstractChange {
         this.columnName = columnName;
     }
 
+    @DatabaseChangeProperty(description = "Current data type fo the column to make auto-increment", exampleValue = "int")
     public String getColumnDataType() {
         return columnDataType;
     }
@@ -76,6 +78,7 @@ public class AddAutoIncrementChange extends AbstractChange {
         this.columnDataType = columnDataType;
     }
 
+    @DatabaseChangeProperty(exampleValue = "100")
     public BigInteger getStartWith() {
     	return startWith;
     }
@@ -83,7 +86,8 @@ public class AddAutoIncrementChange extends AbstractChange {
     public void setStartWith(BigInteger startWith) {
     	this.startWith = startWith;
     }
-    
+
+    @DatabaseChangeProperty(exampleValue = "1")
     public BigInteger getIncrementBy() {
     	return incrementBy;
     }

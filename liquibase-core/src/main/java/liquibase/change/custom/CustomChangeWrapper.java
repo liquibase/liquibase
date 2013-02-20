@@ -25,22 +25,20 @@ public class CustomChangeWrapper extends AbstractChange {
     /**
      * Non-private access only for testing.
      */
-    @DatabaseChangeProperty(isChangeProperty = false)
     CustomChange customChange;
     
     private String className;
 
-    @DatabaseChangeProperty(isChangeProperty = false)
     private SortedSet<String> params = new TreeSet<String>();
 
     private Map<String, String> paramValues = new HashMap<String, String>();
 
-    @DatabaseChangeProperty(isChangeProperty = false)
     private ClassLoader classLoader;
 
     /**
      * Return the CustomChange instance created by the call to {@link #setClass(String)}.
      */
+    @DatabaseChangeProperty(isChangeProperty = false)
     public CustomChange getCustomChange() {
         return customChange;
     }
@@ -48,6 +46,7 @@ public class CustomChangeWrapper extends AbstractChange {
     /**
      * Returns the classloader to use when creating the CustomChange instance in {@link #setClass(String)}.
      */
+    @DatabaseChangeProperty(isChangeProperty = false)
     public ClassLoader getClassLoader() {
         return classLoader;
     }
@@ -103,6 +102,7 @@ public class CustomChangeWrapper extends AbstractChange {
     /**
      * Returns the parameters set by {@link #setParam(String, String)}. If no parameters are set, an empty set will be returned
      */
+    @DatabaseChangeProperty(isChangeProperty = false)
     public SortedSet<String> getParams() {
         return Collections.unmodifiableSortedSet(params);
     }

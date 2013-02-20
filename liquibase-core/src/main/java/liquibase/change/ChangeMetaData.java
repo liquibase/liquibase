@@ -22,8 +22,9 @@ public class ChangeMetaData implements PrioritizedService {
 
     private Map<String, ChangeParameterMetaData> parameters;
     private Set<String> appliesTo;
+    private HashMap<String, String> databaseNotes = new HashMap<String, String>();
 
-    public ChangeMetaData(String name, String description, int priority, String[] appliesTo, Map<String, ChangeParameterMetaData> parameters) {
+    public ChangeMetaData(String name, String description, int priority, String[] appliesTo, Map<String, String> databaseNotes, Map<String, ChangeParameterMetaData> parameters) {
         if (parameters == null) {
             parameters  = new HashMap<String, ChangeParameterMetaData>();
         }
@@ -38,6 +39,10 @@ public class ChangeMetaData implements PrioritizedService {
         this.appliesTo = null;
         if (appliesTo != null && appliesTo.length > 0) {
             this.appliesTo = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(appliesTo)));
+        }
+
+        if (databaseNotes != null) {
+            this.databaseNotes.putAll(databaseNotes);
         }
     }
 
@@ -60,6 +65,10 @@ public class ChangeMetaData implements PrioritizedService {
      */
     public int getPriority() {
         return priority;
+    }
+
+    public String getNotes(String database) {
+        return databaseNotes.get(database);
     }
 
     /**

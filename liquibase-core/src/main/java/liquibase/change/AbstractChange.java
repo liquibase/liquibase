@@ -5,7 +5,6 @@ import java.util.*;
 
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
-import liquibase.serializer.LiquibaseSerializable;
 import liquibase.structure.DatabaseObject;
 import liquibase.exception.*;
 import liquibase.resource.ResourceAccessor;
@@ -27,13 +26,10 @@ import java.lang.reflect.Method;
  */
 public abstract class AbstractChange implements Change {
 
-    @DatabaseChangeProperty(isChangeProperty = false)
     private ChangeMetaData changeMetaData;
 
-    @DatabaseChangeProperty(isChangeProperty = false)
     private ResourceAccessor resourceAccessor;
 
-    @DatabaseChangeProperty(isChangeProperty = false)
     private ChangeSet changeSet;
 
     public AbstractChange() {
@@ -80,7 +76,12 @@ public abstract class AbstractChange implements Change {
 
             }
 
-            return new ChangeMetaData(databaseChange.name(), databaseChange.description(), databaseChange.priority(), databaseChange.appliesTo(), params);
+            Map<String, String> notes = new HashMap<String, String>();
+            for (DatabaseChangeNote note : databaseChange.databaseNotes()) {
+                notes.put(note.database(), note.notes());
+            }
+
+            return new ChangeMetaData(databaseChange.name(), databaseChange.description(), databaseChange.priority(), databaseChange.appliesTo(), notes, params);
         } catch (Throwable e) {
             throw new UnexpectedLiquibaseException(e);
         }
@@ -119,6 +120,8 @@ public abstract class AbstractChange implements Change {
 
         String[] requiredForDatabase;
         String mustEqualExisting = null;
+        String description = null;
+        String example = null;
         SerializationType serializationType = SerializationType.NAMED_FIELD;
         if (changePropertyAnnotation == null) {
             requiredForDatabase = new String[]{"none"};
@@ -126,14 +129,17 @@ public abstract class AbstractChange implements Change {
             requiredForDatabase = changePropertyAnnotation.requiredForDatabase();
             mustEqualExisting = changePropertyAnnotation.mustEqualExisting();
             serializationType = changePropertyAnnotation.serializationType();
+            description = StringUtils.trimToNull(changePropertyAnnotation.description());
+            example = StringUtils.trimToNull(changePropertyAnnotation.exampleValue());
         }
 
-        return new ChangeParameterMetaData(parameterName, displayName, type, requiredForDatabase, mustEqualExisting, serializationType);
+        return new ChangeParameterMetaData(parameterName, displayName, description, example, type, requiredForDatabase, mustEqualExisting, serializationType);
     }
 
     /**
      * {@inheritDoc}
      */
+    @DatabaseChangeProperty(isChangeProperty = false)
     public ChangeMetaData getChangeMetaData() {
         return changeMetaData;
     }
@@ -308,7 +314,7 @@ public abstract class AbstractChange implements Change {
      * Implementation generates checksum by serializing the change with {@link StringChangeLogSerializer}
      */
     public CheckSum generateCheckSum() {
-        return CheckSum.compute(new StringChangeLogSerializer().serialize(this));
+        return CheckSum.compute(new StringChangeLogSerializer().serialize(this, false));
     }
 
     /*

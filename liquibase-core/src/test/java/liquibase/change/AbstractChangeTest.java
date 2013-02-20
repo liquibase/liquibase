@@ -622,7 +622,7 @@ public class AbstractChangeTest {
                 try {
                     Change change1 = mock(Change.class);
                     when(change1.supports(any(Database.class))).thenReturn(true);
-                    when(change1.getChangeMetaData()).thenReturn(new ChangeMetaData("testChange", null, 1, null, null));
+                    when(change1.getChangeMetaData()).thenReturn(new ChangeMetaData("testChange", null, 1, null, null, null));
                     when(change1.generateStatements(any(Database.class))).thenThrow(new UnsupportedChangeException("testing exception"));
                     return new Change[] {
                             change1
@@ -640,7 +640,7 @@ public class AbstractChangeTest {
             @Override
             protected Change[] createInverses()  {
                 Change change1 = mock(Change.class);
-                when(change1.getChangeMetaData()).thenReturn(new ChangeMetaData("testChange", null, 1, null, null));
+                when(change1.getChangeMetaData()).thenReturn(new ChangeMetaData("testChange", null, 1, null, null, null));
                 when(change1.supports(any(Database.class))).thenReturn(false);
                 return new Change[] {
                         change1
@@ -758,7 +758,7 @@ public class AbstractChangeTest {
     @Test
     public void generateCheckSum() {
         ExampleAbstractChange change = new ExampleAbstractChange();
-        String serializedChange = new StringChangeLogSerializer().serialize(change);
+        String serializedChange = new StringChangeLogSerializer().serialize(change, false);
 
         mockStatic(CheckSum.class);
         CheckSum checkSum = mock(CheckSum.class);

@@ -209,7 +209,7 @@ public class ConstraintsConfigTest {
 
     @Test
     public void getSerializableFieldValue() {
-        assertFalse((Boolean) new ConstraintsConfig().getSerializableFieldValue("nullable"));
+        assertNull(new ConstraintsConfig().getSerializableFieldValue("nullable"));
         assertTrue((Boolean) new ConstraintsConfig().setNullable(true).getSerializableFieldValue("nullable"));
 
     }

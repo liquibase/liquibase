@@ -18,7 +18,6 @@ public class DropIndexChange extends AbstractChange {
     private String indexName;
     private String tableName;
 
-    @DatabaseChangeProperty(isChangeProperty = false)
     private String associatedWith;
     private String catalogName;
 
@@ -59,6 +58,7 @@ public class DropIndexChange extends AbstractChange {
         return "Index " + getIndexName() + " dropped from table " + getTableName();
     }
 
+    @DatabaseChangeProperty(isChangeProperty = false)
     public String getAssociatedWith() {
         return associatedWith;
     }

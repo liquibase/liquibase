@@ -34,4 +34,6 @@ public @interface DatabaseChange {
      */
     String[] appliesTo() default {};
 
+    DatabaseChangeNote[] databaseNotes() default {};
+
 }

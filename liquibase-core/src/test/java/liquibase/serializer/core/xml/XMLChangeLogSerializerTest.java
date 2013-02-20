@@ -786,4 +786,53 @@ public class XMLChangeLogSerializerTest {
         assertEquals("VIEW_NAME", node.getAttribute("viewName"));
         assertEquals("SELECT * FROM EXISTING_TABLE", node.getTextContent());
     }
+
+    @Test
+    public void serialize_pretty() {
+        UpdateDataChange change = new UpdateDataChange();
+        change.setCatalogName("a");
+        change.setSchemaName("b");
+        change.setTableName("c");
+        change.setWhereClause("Some Text");
+
+        String out = new XMLChangeLogSerializer().serialize(change, true);
+        assertEquals("<update catalogName=\"a\"\n" +
+                "        schemaName=\"b\"\n" +
+                "        tableName=\"c\">\n" +
+                "    <whereClause>Some Text</whereClause>\n" +
+                "</update>", out);
+    }
+
+    @Test
+    public void serialize_pretty_nestedNodeWithAttributes() {
+        CreateTableChange change = new CreateTableChange();
+        change.setCatalogName("a");
+        change.setSchemaName("b");
+        change.setTableName("c");
+        change.addColumn(new ColumnConfig().setName("x").setDefaultValue("x1"));
+        change.addColumn(new ColumnConfig().setName("y").setDefaultValue("y1"));
+
+        String out = new XMLChangeLogSerializer().serialize(change, true);
+        assertEquals("<createTable catalogName=\"a\"\n" +
+                "        schemaName=\"b\"\n" +
+                "        tableName=\"c\">\n" +
+                "    <column defaultValue=\"x1\"\n" +
+                "            name=\"x\"/>\n" +
+                "    <column defaultValue=\"y1\"\n" +
+                "            name=\"y\"/>\n" +
+                "</createTable>", out);
+    }
+
+    @Test
+    public void serialize_pretty_justAttributes() {
+        AddAutoIncrementChange change = new AddAutoIncrementChange();
+        change.setCatalogName("a");
+        change.setSchemaName("b");
+        change.setTableName("c");
+
+        String out = new XMLChangeLogSerializer().serialize(change, true);
+        assertEquals("<addAutoIncrement catalogName=\"a\"\n" +
+                "        schemaName=\"b\"\n" +
+                "        tableName=\"c\"/>", out);
+    }
 }

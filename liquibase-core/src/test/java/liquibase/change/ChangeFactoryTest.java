@@ -170,7 +170,7 @@ public class ChangeFactoryTest {
     public static class Priority5Change extends CreateTableChange {
         @Override
         public ChangeMetaData getChangeMetaData() {
-            return new ChangeMetaData("createTable", null, 5, null, null);
+            return new ChangeMetaData("createTable", null, 5, null, null, null);
         }
     }
 
@@ -178,7 +178,7 @@ public class ChangeFactoryTest {
     public static class Priority10Change extends CreateTableChange {
         @Override
         public ChangeMetaData getChangeMetaData() {
-            return new ChangeMetaData("createTable", null, 10, null, null);
+            return new ChangeMetaData("createTable", null, 10, null, null, null);
         }
     }
 
@@ -186,7 +186,7 @@ public class ChangeFactoryTest {
     public static class AnotherPriority5Change extends CreateTableChange {
         @Override
         public ChangeMetaData getChangeMetaData() {
-            return new ChangeMetaData("createTable", null, 5, null, null);
+            return new ChangeMetaData("createTable", null, 5, null, null, null);
         }
     }
 
@@ -198,7 +198,7 @@ public class ChangeFactoryTest {
 
         @Override
         public ChangeMetaData getChangeMetaData() {
-            return new ChangeMetaData("createTable", null, 15, null, null);
+            return new ChangeMetaData("createTable", null, 15, null, null, null);
         }
     }
 
@@ -214,7 +214,7 @@ public class ChangeFactoryTest {
 
         @Override
         public ChangeMetaData getChangeMetaData() {
-            return new ChangeMetaData("createTable", null, 15, null, null);
+            return new ChangeMetaData("createTable", null, 15, null, null, null);
         }
     }
 }
