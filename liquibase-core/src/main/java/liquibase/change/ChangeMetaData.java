@@ -41,7 +41,9 @@ public class ChangeMetaData implements PrioritizedService {
             this.appliesTo = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(appliesTo)));
         }
 
-        this.databaseNotes.putAll(databaseNotes);
+        if (databaseNotes != null) {
+            this.databaseNotes.putAll(databaseNotes);
+        }
     }
 
     /**
