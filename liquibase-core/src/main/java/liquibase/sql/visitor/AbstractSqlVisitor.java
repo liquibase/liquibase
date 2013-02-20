@@ -37,7 +37,7 @@ public abstract class AbstractSqlVisitor implements SqlVisitor {
     }
 
     public CheckSum generateCheckSum() {
-        return CheckSum.compute(new StringChangeLogSerializer().serialize(this));
+        return CheckSum.compute(new StringChangeLogSerializer().serialize(this, false));
     }
 
     public Set<String> getSerializableFields() {

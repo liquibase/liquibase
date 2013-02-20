@@ -34,7 +34,7 @@ public class MockChangeLogSerializer implements ChangeLogSerializer {
 
     }
 
-    public String serialize(LiquibaseSerializable object) {
+    public String serialize(LiquibaseSerializable object, boolean pretty) {
         return null;
     }
 }

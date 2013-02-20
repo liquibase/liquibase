@@ -3,15 +3,15 @@ package liquibase.change;
 import liquibase.database.Database;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.serializer.LiquibaseSerializable;
+import liquibase.statement.DatabaseFunction;
+import liquibase.statement.SequenceNextValueFunction;
 import liquibase.util.StringUtils;
 
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.math.BigInteger;
+import java.util.*;
 
 /**
  * Static metadata about a {@link Change} parameter.
@@ -19,13 +19,15 @@ import java.util.Set;
  */
 public class ChangeParameterMetaData {
     private String parameterName;
+    private String description;
+    private String exampleValue;
     private String displayName;
     private String dataType;
     private Set<String> requiredForDatabase;
     private String mustEqualExisting;
     private LiquibaseSerializable.SerializationType serializationType;
 
-    public ChangeParameterMetaData(String parameterName, String displayName, Class dataType, String[] requiredForDatabase, String mustEqualExisting, LiquibaseSerializable.SerializationType serializationType) {
+    public ChangeParameterMetaData(String parameterName, String displayName, String description, String exampleValue, Class dataType, String[] requiredForDatabase, String mustEqualExisting, LiquibaseSerializable.SerializationType serializationType) {
         if (parameterName == null) {
             throw new UnexpectedLiquibaseException("Unexpected null parameterName");
         }
@@ -41,6 +43,8 @@ public class ChangeParameterMetaData {
 
         this.parameterName = parameterName;
         this.displayName = displayName;
+        this.description = description;
+        this.exampleValue = exampleValue;
         this.dataType = StringUtils.lowerCaseFirst(dataType.getSimpleName());
         if (requiredForDatabase == null) {
             requiredForDatabase = new String[0];
@@ -114,6 +118,37 @@ public class ChangeParameterMetaData {
     }
 
     /**
+     * Sets the value of this parameter on the given change.
+     */
+    public void setValue(Change change, Object value) {
+        if (value instanceof String && !dataType.equals("string")) {
+            try {
+                if (dataType.equals("bigInteger")) {
+                    value = new BigInteger((String) value);
+                } else {
+                    throw new UnexpectedLiquibaseException("Unknown Data Type: "+dataType);
+                }
+            } catch (Throwable e) {
+                throw new UnexpectedLiquibaseException("Cannot convert string value '"+value+"' to "+dataType+": "+e.getMessage());
+            }
+        }
+
+        try {
+            for (PropertyDescriptor descriptor : Introspector.getBeanInfo(change.getClass()).getPropertyDescriptors()) {
+                if (descriptor.getDisplayName().equals(this.parameterName)) {
+                    Method writeMethod = descriptor.getWriteMethod();
+                    if (writeMethod == null) {
+                        throw new UnexpectedLiquibaseException("Could not find writeMethod for "+this.parameterName);
+                    }
+                    writeMethod.invoke(change, value);
+                }
+            }
+        } catch (Exception e) {
+            throw new UnexpectedLiquibaseException("Error setting "+this.parameterName+" to "+value, e);
+        }
+    }
+
+    /**
      * Returns a dot-delimited chain of {@link liquibase.structure.DatabaseObject} fields describing what existing value this parameter would need to be set if applying the Change to a particular DatabaseObject.
      * <p></p>
      * For example, in an addColumn Change, the "name" parameter would return "column.name" because if you know of an existing Column object, the "name" parameter needs to be set to the column's name.
@@ -132,5 +167,55 @@ public class ChangeParameterMetaData {
      */
     public LiquibaseSerializable.SerializationType getSerializationType() {
         return serializationType;
+    }
+
+    public Object getExampleValue() {
+        if (exampleValue != null) {
+            return exampleValue;
+        }
+
+        Map standardExamples = new HashMap();
+        standardExamples.put("tableName", "person");
+        standardExamples.put("schemaName", "public");
+        standardExamples.put("catalogName", "cat");
+        standardExamples.put("columnName", "id");
+
+
+        if (standardExamples.containsKey(parameterName)) {
+            return standardExamples.get(parameterName);
+        }
+
+        if (dataType.equals("string")) {
+            return "A String";
+        } else if (dataType.equals("integer")) {
+            return 3;
+        } else if (dataType.equals("boolean")) {
+            return true;
+        } else if (dataType.equals("bigInteger")) {
+            return new BigInteger("371717");
+        } else if (dataType.equals("list")) {
+            return null; //"TODO";
+        } else if (dataType.equals("sequenceNextValueFunction")) {
+            return new SequenceNextValueFunction("seq_name");
+        } else if (dataType.equals("databaseFunction")) {
+            return new DatabaseFunction("now");
+        } else {
+            throw new  UnexpectedLiquibaseException("Unknown dataType "+dataType+" for "+getParameterName());
+        }
+    }
+
+    public String getDescription() {
+        if (description != null) {
+            return description;
+        }
+
+        Map<String, String> standardDescriptions = new HashMap<String, String>();
+        standardDescriptions.put("tableName", "Name of the table");
+        standardDescriptions.put("schemaName", "Name of the schema");
+        standardDescriptions.put("catalogName", "Name of the catalog");
+        standardDescriptions.put("columnName", "Name of the column");
+
+        return standardDescriptions.get(parameterName);
+
     }
 }

@@ -16,7 +16,7 @@ public interface ChangeLogSerializer {
 
     String[] getValidFileExtensions();
 
-    String serialize(LiquibaseSerializable object);
+    String serialize(LiquibaseSerializable object, boolean pretty);
 
 	void write(List<ChangeSet> changeSets, OutputStream out) throws IOException;
 

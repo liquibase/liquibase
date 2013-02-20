@@ -116,7 +116,7 @@ public abstract class StandardChangeTest {
     }
 
     protected void checkThatChecksumIsNew(Change change, Map<String, String> seenCheckSums, Field field) {
-        String serialized = new StringChangeLogSerializer().serialize(change);
+        String serialized = new StringChangeLogSerializer().serialize(change, false);
 
         CheckSum newCheckSum = change.generateCheckSum();
         if (seenCheckSums.containsKey(newCheckSum.toString())) {

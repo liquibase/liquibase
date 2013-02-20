@@ -17,7 +17,6 @@ public class UpdateDataChange extends AbstractChange implements ChangeWithColumn
     private String tableName;
     private List<ColumnConfig> columns;
 
-    @DatabaseChangeProperty(serializationType = SerializationType.NESTED_OBJECT)
     private String whereClause;
 
     public UpdateDataChange() {
@@ -68,6 +67,7 @@ public class UpdateDataChange extends AbstractChange implements ChangeWithColumn
         columns.remove(column);
     }
 
+    @DatabaseChangeProperty(serializationType = SerializationType.NESTED_OBJECT)
     public String getWhereClause() {
         return whereClause;
     }

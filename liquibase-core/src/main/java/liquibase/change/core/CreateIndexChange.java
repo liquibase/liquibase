@@ -24,7 +24,6 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
 
 	// Contain associations of index
 	// for example: foreignKey, primaryKey or uniqueConstraint
-    @DatabaseChangeProperty(isChangeProperty = false)
 	private String associatedWith;
 
 
@@ -61,6 +60,9 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
 
     @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "index.column")
     public List<ColumnConfig> getColumns() {
+        if (columns == null) {
+            return new ArrayList<ColumnConfig>();
+        }
         return columns;
     }
 
@@ -137,6 +139,7 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
 	 * <li>uniqueConstraint</li>
 	 * <li>none</li>
 	 * */
+    @DatabaseChangeProperty(isChangeProperty = false)
 	public String getAssociatedWith() {
 		return associatedWith;
 	}

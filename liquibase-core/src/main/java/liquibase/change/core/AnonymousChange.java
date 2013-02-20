@@ -14,7 +14,6 @@ import java.util.List;
 @DatabaseChange(name="anonymous", description = "Anonymous change", priority = ChangeMetaData.PRIORITY_DEFAULT)
 public class AnonymousChange extends AbstractChange {
 
-    @DatabaseChangeProperty(isChangeProperty = false)
     private List<SqlStatement> statements = new ArrayList<SqlStatement>();
 
     public AnonymousChange() {

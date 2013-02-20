@@ -30,7 +30,7 @@ public class MergeColumnChange extends AbstractChange {
 
     @Override
     public boolean supports(Database database) {
-        return supports(database) && !(database instanceof DerbyDatabase);
+        return super.supports(database) && !(database instanceof DerbyDatabase);
     }
 
     public String getCatalogName() {

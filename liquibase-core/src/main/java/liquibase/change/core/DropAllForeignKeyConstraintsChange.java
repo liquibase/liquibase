@@ -28,7 +28,6 @@ public class DropAllForeignKeyConstraintsChange extends AbstractChange {
     private String baseTableSchemaName;
     private String baseTableName;
 
-    @DatabaseChangeProperty(isChangeProperty = false)
     private List<DropForeignKeyConstraintChange> childDropChanges;
 
     @DatabaseChangeProperty(mustEqualExisting ="table.catalog")

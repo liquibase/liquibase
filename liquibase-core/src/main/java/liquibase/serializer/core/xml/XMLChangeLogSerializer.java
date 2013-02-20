@@ -3,6 +3,7 @@ package liquibase.serializer.core.xml;
 import liquibase.change.*;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
+import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.parser.core.xml.LiquibaseEntityResolver;
 import liquibase.parser.core.xml.XMLChangeLogSAXParser;
 import liquibase.serializer.ChangeLogSerializer;
@@ -25,6 +26,11 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
     private Document currentChangeLogFileDOM;
 
     public XMLChangeLogSerializer() {
+        try {
+            this.currentChangeLogFileDOM = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
+        } catch (ParserConfigurationException e) {
+            throw new UnexpectedLiquibaseException(e);
+        }
     }
 
     protected XMLChangeLogSerializer(Document currentChangeLogFileDOM) {
@@ -44,9 +50,13 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
         return null; //todo
     }
 
-    public String serialize(LiquibaseSerializable object) {
+    public String serialize(LiquibaseSerializable object, boolean pretty) {
         StringBuffer buffer = new StringBuffer();
-        nodeToStringBuffer(createNode(object), buffer);
+        int indent = -1;
+        if (pretty) {
+            indent = 0;
+        }
+        nodeToStringBuffer(createNode(object), buffer, indent);
         return buffer.toString();
     }
 
@@ -87,7 +97,7 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
         if (!existingChangeLog.contains("</databaseChangeLog>")) {
             write(Arrays.asList(changeSet), out);
         } else {
-            existingChangeLog = existingChangeLog.replaceFirst("</databaseChangeLog>", serialize(changeSet) + "\n</databaseChangeLog>");
+            existingChangeLog = existingChangeLog.replaceFirst("</databaseChangeLog>", serialize(changeSet, true) + "\n</databaseChangeLog>");
 
             StreamUtil.copy(new ByteArrayInputStream(existingChangeLog.getBytes()), out);
         }
@@ -252,7 +262,13 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
      * @param buffer a {@link StringBuffer} object used to hold the {@link String}
      *               representation of the change
      */
-    private void nodeToStringBuffer(Node node, StringBuffer buffer) {
+    private void nodeToStringBuffer(Node node, StringBuffer buffer, int indent) {
+        if (indent >= 0) {
+            if (indent > 0) {
+                buffer.append("\n");
+            }
+            buffer.append(StringUtils.repeat(" ", indent));
+        }
         buffer.append("<").append(node.getNodeName());
         SortedMap<String, String> attributeMap = new TreeMap<String, String>();
         NamedNodeMap attributes = node.getAttributes();
@@ -260,21 +276,46 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
             Node attribute = attributes.item(i);
             attributeMap.put(attribute.getNodeName(), attribute.getNodeValue());
         }
+        boolean firstAttribute = true;
         for (Map.Entry entry : attributeMap.entrySet()) {
             String value = (String) entry.getValue();
             if (value != null) {
-                buffer.append(" ").append(entry.getKey()).append("=\"").append(value).append("\"");
+                if (indent >= 0 && !firstAttribute) {
+                    buffer.append("\n").append(StringUtils.repeat(" ", indent)).append("        ");
+                } else {
+                    buffer.append(" ");
+                }
+                buffer.append(entry.getKey()).append("=\"").append(value).append("\"");
+                firstAttribute = false;
             }
         }
-        buffer.append(">").append(StringUtils.trimToEmpty(XMLUtil.getTextContent(node)));
+        String textContent = StringUtils.trimToEmpty(XMLUtil.getTextContent(node));
+        buffer.append(">").append(textContent);
+
+        boolean sawChildren = false;
         NodeList childNodes = node.getChildNodes();
         for (int i = 0; i < childNodes.getLength(); i++) {
             Node childNode = childNodes.item(i);
             if (childNode instanceof Element) {
-                nodeToStringBuffer(((Element) childNode), buffer);
+                int newIndent = indent;
+                if (newIndent >= 0) {
+                    newIndent += 4;
+                }
+                nodeToStringBuffer(childNode, buffer, newIndent);
+                sawChildren = true;
             }
         }
-        buffer.append("</").append(node.getNodeName()).append(">");
+        if (indent >= 0) {
+            if (sawChildren) {
+                buffer.append("\n").append(StringUtils.repeat(" ", indent));
+            }
+        }
+
+        if (!sawChildren && textContent.equals("")) {
+            buffer.replace(buffer.length()-1, buffer.length(), "/>");
+        } else {
+            buffer.append("</").append(node.getNodeName()).append(">");
+        }
     }
 
 }
