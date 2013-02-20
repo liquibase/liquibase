@@ -23,6 +23,7 @@ public class H2Database extends AbstractJdbcDatabase {
     private static String SEP_CONCAT = ", ";
 
     public H2Database() {
+        super.unquotedObjectsAreUppercased=true;
         super.setCurrentDateTimeFunction("NOW()");
         super.sequenceNextValueFunction = "nextval('%s')";
         this.dateFunctions.add(new DatabaseFunction("CURRENT_TIMESTAMP()"));
