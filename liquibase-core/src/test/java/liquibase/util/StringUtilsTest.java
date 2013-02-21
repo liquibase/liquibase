@@ -65,6 +65,22 @@ public class StringUtilsTest {
     }
     
     @Test
+    public void singleLongLineNoFollowOnLine() {
+        StringBuilder sqlBuilder = new StringBuilder();
+        for (int i = 0; i < 10000; ++i)
+            sqlBuilder.append(" A");
+        String sql = sqlBuilder.toString();
+        String comment = " -- with comment\n";
+        String totalLine=sql + comment ;
+        long start = System.currentTimeMillis();
+        String result = StringUtils.stripComments(totalLine);
+        long end = System.currentTimeMillis();
+        
+        assertEquals(sql.trim(),result);
+        assertTrue("Did not complete within 1 second", end - start <= 1000);
+    }
+    
+    @Test
     public void singleLineMultipleComments() {
         String sql = "Some text" ;
         String comment = " -- with comment";

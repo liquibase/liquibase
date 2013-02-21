@@ -78,8 +78,8 @@ public class StringUtils {
      * @return The String without the comments in
      */
     public static String stripComments(String multiLineSQL) {
-        String strippedSingleLines = Pattern.compile("(.*?)\\s*\\-\\-.*\n").matcher(multiLineSQL).replaceAll("$1\n");
-        strippedSingleLines = Pattern.compile("(.*?)\\s*\\-\\-.*$").matcher(strippedSingleLines).replaceAll("$1\n");
+        String strippedSingleLines = Pattern.compile("\\s*\\-\\-.*\n").matcher(multiLineSQL).replaceAll("\n");
+        strippedSingleLines = Pattern.compile("\\s*\\-\\-.*$").matcher(strippedSingleLines).replaceAll("\n");
         return Pattern.compile("/\\*.*?\\*/", Pattern.DOTALL).matcher(strippedSingleLines).replaceAll("").trim();
     }
 
