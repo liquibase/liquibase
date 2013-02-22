@@ -5,6 +5,7 @@ import liquibase.change.CheckSum;
 import liquibase.change.core.EmptyChange;
 import liquibase.change.core.RawSQLChange;
 import liquibase.database.Database;
+import liquibase.database.ObjectQuotingStrategy;
 import liquibase.exception.*;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
@@ -156,6 +157,8 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
      */
     private List<SqlVisitor> sqlVisitors = new ArrayList<SqlVisitor>();
 
+    private ObjectQuotingStrategy objectQuotingStrategy;
+
     public boolean shouldAlwaysRun() {
         return alwaysRun;
     }
@@ -165,10 +168,19 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
     }
 
     public ChangeSet(String id, String author, boolean alwaysRun, boolean runOnChange, String filePath, String contextList, String dbmsList) {
-        this(id, author, alwaysRun, runOnChange, filePath, contextList, dbmsList, true);
+        this(id, author, alwaysRun, runOnChange, filePath, contextList, dbmsList, true, ObjectQuotingStrategy.LEGACY);
     }
 
     public ChangeSet(String id, String author, boolean alwaysRun, boolean runOnChange, String filePath, String contextList, String dbmsList, boolean runInTransaction) {
+        this(id, author, alwaysRun, runOnChange, filePath, contextList, dbmsList, runInTransaction, ObjectQuotingStrategy.LEGACY);
+    }
+
+    public ChangeSet(String id, String author, boolean alwaysRun, boolean runOnChange, String filePath, String contextList, String dbmsList, ObjectQuotingStrategy quotingStrategy) {
+        this(id, author, alwaysRun, runOnChange, filePath, contextList, dbmsList, true, quotingStrategy);
+    }
+
+    public ChangeSet(String id, String author, boolean alwaysRun, boolean runOnChange, String filePath, String contextList, String dbmsList,
+                     boolean runInTransaction, ObjectQuotingStrategy quotingStrategy) {
         this.changes = new ArrayList<Change>();
         log = LogFactory.getLogger();
         this.id = id;
@@ -177,6 +189,7 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
         this.alwaysRun = alwaysRun;
         this.runOnChange = runOnChange;
         this.runInTransaction = runInTransaction;
+        this.objectQuotingStrategy = quotingStrategy;
         if (StringUtils.trimToNull(contextList) != null) {
             String[] strings = contextList.toLowerCase().split(",");
             contexts = new HashSet<String>();
@@ -230,6 +243,9 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
 
         Executor executor = ExecutorService.getInstance().getExecutor(database);
         try {
+            // set object quoting strategy
+            database.setObjectQuotingStrategy(objectQuotingStrategy);
+
             // set auto-commit based on runInTransaction if database supports DDL in transactions
             if (database.supportsDDLInTransaction()) {
                 database.setAutoCommit(!runInTransaction);
@@ -604,7 +620,10 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
         this.changeLogParameters = changeLogParameters;
     }
 
-
+    public ObjectQuotingStrategy getObjectQuotingStrategy() {
+        return objectQuotingStrategy;
+    }
+ 
     public String getSerializedObjectName() {
         return "changeSet";
     }

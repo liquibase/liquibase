@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.0.xsd"
+        objectQuotingStrategy="QUOTE_ALL_OBJECTS">
+
+    <changeSet id="1" author="dbiggs">
+        <preConditions onFail="MARK_RAN">
+            <expectedQuotingStrategy strategy="LEGACY"/>
+        </preConditions>
+        <dropTable tableName="DoesNotExist" />
+    </changeSet>
+
+    <changeSet id="2" author="dbiggs" objectQuotingStrategy="QUOTE_ONLY_RESERVED_WORDS">
+        <createTable tableName="allonecase">
+            <column name="id" type="int"/>
+        </createTable>
+
+        <sql>select id from allonecase</sql>
+    </changeSet>
+
+    <changeSet id="3" author="dbiggs">
+        <createTable tableName="mixedCase">
+            <column name="iD" type="int"/>
+        </createTable>
+
+        <sql>select "iD" from "mixedCase"</sql>
+    </changeSet>
+
+</databaseChangeLog>

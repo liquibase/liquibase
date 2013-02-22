@@ -25,7 +25,6 @@ public class H2Database extends AbstractJdbcDatabase {
     public H2Database() {
         super.unquotedObjectsAreUppercased=true;
         super.setCurrentDateTimeFunction("NOW()");
-        super.sequenceNextValueFunction = "nextval('%s')";
         this.dateFunctions.add(new DatabaseFunction("CURRENT_TIMESTAMP()"));
         super.sequenceNextValueFunction = "NEXTVAL('%s')";
         super.sequenceCurrentValueFunction = "CURRVAL('%s')";
@@ -184,16 +183,6 @@ public class H2Database extends AbstractJdbcDatabase {
     }
 
 
-
-    @Override
-    public String escapeObjectName(String objectName, Class<? extends DatabaseObject> objectType) {
-    	if (objectName != null) {
-            if (isReservedWord(objectName)) {
-                return "\""+objectName.toUpperCase()+"\"";
-            }
-    	}
-        return objectName;
-    }
 
     @Override
     public boolean isReservedWord(String objectName) {

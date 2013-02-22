@@ -42,6 +42,7 @@ import liquibase.change.custom.CustomChangeWrapper;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
+import liquibase.database.ObjectQuotingStrategy;
 import liquibase.exception.CustomChangeException;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.MigrationFailedException;
@@ -135,6 +136,12 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
 				}
 				databaseChangeLog.setLogicalFilePath(atts
 						.getValue("logicalFilePath"));
+                ObjectQuotingStrategy quotingStrategy = ObjectQuotingStrategy.LEGACY;
+                String quotingStrategyText = atts.getValue("objectQuotingStrategy");
+                if (quotingStrategyText != null) {
+                    quotingStrategy = ObjectQuotingStrategy.valueOf(quotingStrategyText);
+                }
+                databaseChangeLog.setObjectQuotingStrategy(quotingStrategy);
 			} else if ("include".equals(qName)) {
 				String fileName = atts.getValue("file");
 				fileName = fileName.replace('\\', '/');
@@ -242,9 +249,16 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
 					filePath = databaseChangeLog.getFilePath();
 				}
 
+
+                ObjectQuotingStrategy quotingStrategy = databaseChangeLog.getObjectQuotingStrategy();
+                String quotingStrategyText = atts.getValue("objectQuotingStrategy");
+                if (quotingStrategyText != null) {
+                    quotingStrategy = ObjectQuotingStrategy.valueOf(quotingStrategyText);
+                }
+
 				changeSet = new ChangeSet(atts.getValue("id"), atts.getValue("author"), alwaysRun, runOnChange, filePath,
 						atts.getValue("context"), atts.getValue("dbms"),
-						Boolean.valueOf(atts.getValue("runInTransaction")));
+						Boolean.valueOf(atts.getValue("runInTransaction")), quotingStrategy);
 				if (StringUtils.trimToNull(atts.getValue("failOnError")) != null) {
 					changeSet.setFailOnError(Boolean.parseBoolean(atts.getValue("failOnError")));
 				}

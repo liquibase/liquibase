@@ -4,6 +4,7 @@ import liquibase.change.core.RawSQLChange;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.ChangeLogParameters;
+import liquibase.database.ObjectQuotingStrategy;
 import liquibase.exception.ChangeLogParseException;
 import liquibase.parser.ChangeLogParser;
 import liquibase.resource.ResourceAccessor;
@@ -37,7 +38,7 @@ public class SqlChangeLogParser implements ChangeLogParser {
         change.setSplitStatements(false);
         change.setStripComments(false);
 
-        ChangeSet changeSet = new ChangeSet("raw", "includeAll", false, false, physicalChangeLogLocation, null, null, true);
+        ChangeSet changeSet = new ChangeSet("raw", "includeAll", false, false, physicalChangeLogLocation, null, null, true, ObjectQuotingStrategy.LEGACY);
         changeSet.addChange(change);
 
         DatabaseChangeLog changeLog = new DatabaseChangeLog();

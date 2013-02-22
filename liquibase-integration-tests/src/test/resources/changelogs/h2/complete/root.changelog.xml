@@ -3,7 +3,7 @@
 <databaseChangeLog
         xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.0.xsd">
 
     <preConditions onSqlOutput="IGNORE" >
             <dbms type="h2"/>
@@ -117,7 +117,7 @@
                 <constraints nullable="false"/>
             </column>
             <column name="person_id" type="int">
-                <constraints nullable="false" foreignKeyName="fk_test_person" references="person(id)"/>
+                <constraints nullable="false" foreignKeyName="fk_test_person" referencedTableName="person" referencedColumnNames="id"/>
             </column>
         </createTable>
     </changeSet>

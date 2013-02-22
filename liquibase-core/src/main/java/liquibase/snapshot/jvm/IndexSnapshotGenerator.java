@@ -158,7 +158,8 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                     String sql = "SELECT INDEX_NAME, COLUMN_NAME FROM ALL_IND_COLUMNS WHERE TABLE_OWNER='" + schema.getName() + "' AND TABLE_NAME='" + table.getName() + "'";
                     rs = databaseMetaData.query(sql);
                 } else {
-                    rs = databaseMetaData.getIndexInfo(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), table.getName(), false, true);
+                    rs = databaseMetaData.getIndexInfo(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema),
+                            ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), table.getName(), false, true);
                 }
                 Map<String, Index> foundIndexes = new HashMap<String, Index>();
                 for (JdbcDatabaseSnapshot.CachedRow row : rs) {
@@ -233,7 +234,9 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                     sql += " ORDER BY INDEX_NAME, ORDINAL_POSITION";
                     rs = databaseMetaData.query(sql);
                 } else {
-                    rs = databaseMetaData.getIndexInfo(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), database.correctObjectName(table.getName(), Table.class), false, true);
+                    rs = databaseMetaData.getIndexInfo(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema),
+                            ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema),
+                            database.correctObjectName(table.getName(), Table.class), false, true);
                 }
 
                 for (JdbcDatabaseSnapshot.CachedRow row : rs) {
