@@ -4,6 +4,7 @@ import liquibase.changelog.filter.ContextChangeSetFilter;
 import liquibase.changelog.filter.DbmsChangeSetFilter;
 import liquibase.changelog.visitor.ValidatingVisitor;
 import liquibase.database.Database;
+import liquibase.database.ObjectQuotingStrategy;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.ValidationFailedException;
 import liquibase.logging.LogFactory;
@@ -20,6 +21,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
     private PreconditionContainer preconditionContainer = new PreconditionContainer();
     private String physicalFilePath;
     private String logicalFilePath;
+    private ObjectQuotingStrategy objectQuotingStrategy;
 
     private List<ChangeSet> changeSets = new ArrayList<ChangeSet>();
     private ChangeLogParameters changeLogParameters;
@@ -74,6 +76,14 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         } else {
             return logicalFilePath;
         }
+    }
+
+    public ObjectQuotingStrategy getObjectQuotingStrategy() {
+        return objectQuotingStrategy;
+    }
+
+    public void setObjectQuotingStrategy(ObjectQuotingStrategy objectQuotingStrategy) {
+        this.objectQuotingStrategy = objectQuotingStrategy;
     }
 
     @Override

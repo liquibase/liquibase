@@ -73,6 +73,14 @@
         </xsd:restriction>
     </xsd:simpleType>
 
+    <xsd:simpleType name="objectQuotingStrategy">
+        <xsd:restriction base="xsd:string">
+            <xsd:enumeration value="LEGACY" />
+            <xsd:enumeration value="QUOTE_ALL_OBJECTS" />
+            <xsd:enumeration value="QUOTE_ONLY_RESERVED_WORDS" />
+        </xsd:restriction>
+    </xsd:simpleType>
+
 	<!-- This is the main (root) part of the xsd -->
 	<xsd:element name="databaseChangeLog">
 		<xsd:complexType>
@@ -228,6 +236,7 @@
 	<!-- Attributes for changeSet -->
 	<xsd:attributeGroup name="changeLogAttributes">
 		<xsd:attribute name="logicalFilePath" type="xsd:string" />
+        <xsd:attribute name="objectQuotingStrategy" type="objectQuotingStrategy" default="LEGACY" />
 	</xsd:attributeGroup>
 
 	<!-- Attributes for changeSet -->
@@ -242,6 +251,7 @@
         <xsd:attribute name="onValidationFail" type="onChangeSetValidationFail" />
 		<xsd:attribute name="runInTransaction" type="booleanExp" default="true" />
 		<xsd:attribute name="logicalFilePath" type="xsd:string" />
+        <xsd:attribute name="objectQuotingStrategy" type="objectQuotingStrategy" />
 	</xsd:attributeGroup>
 
 	<!-- Attributes for constraints -->
@@ -253,6 +263,8 @@
 		<xsd:attribute name="unique" type="booleanExp" />
 		<xsd:attribute name="uniqueConstraintName" type="xsd:string" />
 		<xsd:attribute name="references" type="xsd:string" />
+        <xsd:attribute name="referencedTableName" type="xsd:string"/>
+        <xsd:attribute name="referencedColumnNames" type="xsd:string"/>
 		<xsd:attribute name="foreignKeyName" type="xsd:string" />
 		<xsd:attribute name="deleteCascade" type="booleanExp" />
 		<xsd:attribute name="deferrable" type="booleanExp" />
@@ -723,6 +735,16 @@
 		</xsd:complexType>
 	</xsd:element>
 
+    <xsd:attributeGroup name="objectQuotingStrategyAttrib">
+        <xsd:attribute name="strategy" type="xsd:string" use="required" />
+    </xsd:attributeGroup>
+
+    <xsd:element name="expectedQuotingStrategy">
+        <xsd:complexType>
+            <xsd:attributeGroup ref="objectQuotingStrategyAttrib" />
+        </xsd:complexType>
+    </xsd:element>
+
 	<xsd:attributeGroup name="dropForeignKeyConstraintAttrib">
         <xsd:attribute name="baseTableCatalogName" type="xsd:string" />
 		<xsd:attribute name="baseTableSchemaName" type="xsd:string" />
@@ -1104,6 +1126,7 @@
 				<xsd:element ref="viewExists" maxOccurs="unbounded" />
 				<xsd:element ref="sqlCheck" maxOccurs="unbounded" />
 				<xsd:element ref="changeLogPropertyDefined" maxOccurs="unbounded" />
+                <xsd:element ref="expectedQuotingStrategy" maxOccurs="unbounded" />
 				<xsd:element ref="customPrecondition" maxOccurs="unbounded" />
 			</xsd:choice>
 		</xsd:sequence>

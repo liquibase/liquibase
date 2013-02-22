@@ -44,7 +44,8 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
 
             JdbcDatabaseSnapshot.CachingDatabaseMetaData databaseMetaData = ((JdbcDatabaseSnapshot) snapshot).getMetaData();
 
-            columnMetadataRs = databaseMetaData.getColumns(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), database.correctObjectName(relation.getName(), Table.class), database.correctObjectName(example.getName(), Column.class));
+            columnMetadataRs = databaseMetaData.getColumns(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema),
+                    database.correctObjectName(relation.getName(), Table.class), database.correctObjectName(example.getName(), Column.class));
 
             if (columnMetadataRs.size() > 0) {
                 JdbcDatabaseSnapshot.CachedRow data = columnMetadataRs.get(0);

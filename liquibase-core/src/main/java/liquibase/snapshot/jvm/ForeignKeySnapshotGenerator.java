@@ -73,7 +73,9 @@ public class ForeignKeySnapshotGenerator extends JdbcSnapshotGenerator {
             Set<String> seenFks = new HashSet<String>();
             List<JdbcDatabaseSnapshot.CachedRow> importedKeyMetadataResultSet = null;
             try {
-                importedKeyMetadataResultSet = ((JdbcDatabaseSnapshot) snapshot).getMetaData().getImportedKeys(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), database.correctObjectName(table.getName(), Table.class));
+                importedKeyMetadataResultSet = ((JdbcDatabaseSnapshot) snapshot).getMetaData().getImportedKeys(((AbstractJdbcDatabase) database)
+                        .getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema),
+                        database.correctObjectName(table.getName(), Table.class));
 
                 for (JdbcDatabaseSnapshot.CachedRow row : importedKeyMetadataResultSet) {
                     ForeignKey fk = new ForeignKey().setName(row.getString("FK_NAME")).setForeignKeyTable(table);
@@ -88,7 +90,8 @@ public class ForeignKeySnapshotGenerator extends JdbcSnapshotGenerator {
             seenFks = new HashSet<String>();
             List<JdbcDatabaseSnapshot.CachedRow> exportedKeyMetadataResultSet = null;
             try {
-                exportedKeyMetadataResultSet = ((JdbcDatabaseSnapshot) snapshot).getMetaData().getExportedKeys(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), database.correctObjectName(table.getName(), Table.class));
+                exportedKeyMetadataResultSet = ((JdbcDatabaseSnapshot) snapshot).getMetaData().getExportedKeys(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema),
+                        ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), database.correctObjectName(table.getName(), Table.class));
 
                 for (JdbcDatabaseSnapshot.CachedRow row : exportedKeyMetadataResultSet) {
                     Table fktable = (Table) new Table().setName(row.getString("FKTABLE_NAME")).setSchema(new Schema(row.getString("FKTABLE_CAT"), row.getString("FKTABLE_SCHEM")));

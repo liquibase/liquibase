@@ -92,21 +92,23 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
 
         for (ColumnConfig column : getColumns()) {
             Set<ColumnConstraint> constraints = new HashSet<ColumnConstraint>();
-            if (column.getConstraints() != null) {
-                if (column.getConstraints().isNullable() != null && !column.getConstraints().isNullable()) {
+            ConstraintsConfig constraintsConfig =column.getConstraints();
+            if (constraintsConfig != null) {
+                if (constraintsConfig.isNullable() != null && !constraintsConfig.isNullable()) {
                     constraints.add(new NotNullConstraint());
                 }
-                if (column.getConstraints().isUnique() != null && column.getConstraints().isUnique()) {
+                if (constraintsConfig.isUnique() != null && constraintsConfig.isUnique()) {
                 	constraints.add(new UniqueConstraint());
                 }
-                if (column.getConstraints().isPrimaryKey() != null && column.getConstraints().isPrimaryKey()) {
-                    constraints.add(new PrimaryKeyConstraint(column.getConstraints().getPrimaryKeyName()));
+                if (constraintsConfig.isPrimaryKey() != null && constraintsConfig.isPrimaryKey()) {
+                    constraints.add(new PrimaryKeyConstraint(constraintsConfig.getPrimaryKeyName()));
                 }
 
-                if (column.getConstraints().getReferences() != null) {
-                    constraints.add(new ForeignKeyConstraint(column.getConstraints().getForeignKeyName(), column.getConstraints().getReferences()));
+                if (constraintsConfig.getReferences() != null ||
+                        (constraintsConfig.getReferencedColumnNames() != null && constraintsConfig.getReferencedTableName() != null)) {
+                    constraints.add(new ForeignKeyConstraint(constraintsConfig.getForeignKeyName(), constraintsConfig.getReferences()
+                            , constraintsConfig.getReferencedTableName(), constraintsConfig.getReferencedColumnNames()));
                 }
-
             }
 
             if (column.isAutoIncrement() != null && column.isAutoIncrement()) {

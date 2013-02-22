@@ -8,6 +8,8 @@ import liquibase.exception.ValidationErrors;
 import liquibase.resource.ResourceAccessor;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RawSqlStatement;
+import liquibase.structure.core.Column;
+import liquibase.structure.core.Table;
 
 public class ExampleCustomSqlChange implements CustomSqlChange, CustomSqlRollback {
 
@@ -45,13 +47,15 @@ public class ExampleCustomSqlChange implements CustomSqlChange, CustomSqlRollbac
 
     public SqlStatement[] generateStatements(Database database) {
         return new SqlStatement[]{
-                new RawSqlStatement("update "+tableName+" set "+columnName+" = "+newValue)
+                new RawSqlStatement("update "+database.escapeObjectName(tableName, Table.class)
+                        +" set "+database.escapeObjectName(columnName, Column.class)+" = "+newValue)
         };
     }
 
     public SqlStatement[] generateRollbackStatements(Database database) throws RollbackImpossibleException {
         return new SqlStatement[]{
-                new RawSqlStatement("update "+tableName+" set "+columnName+" = null")
+                new RawSqlStatement("update "+database.correctObjectName(tableName, Table.class)
+                        +" set "+database.escapeObjectName(columnName, Column.class)+" = null")
         };
     }
 

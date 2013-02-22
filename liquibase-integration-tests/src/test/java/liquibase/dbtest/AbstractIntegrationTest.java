@@ -78,6 +78,7 @@ public abstract class AbstractIntegrationTest {
     private String externalEntityChangeLog;
     private String externalEntityChangeLog2;
     private String invalidReferenceChangeLog;
+    private String objectQuotingStrategyChangeLog;
 
     protected String contexts = "test, context-b";
     private Database database;
@@ -94,6 +95,7 @@ public abstract class AbstractIntegrationTest {
         this.externalEntityChangeLog= "changelogs/common/externalEntity.changelog.xml";
         this.externalEntityChangeLog2= "com/example/nonIncluded/externalEntity.changelog.xml";
         this.invalidReferenceChangeLog= "changelogs/common/invalid.reference.changelog.xml";
+        this.objectQuotingStrategyChangeLog = "changelogs/common/object.quoting.strategy.changelog.xml";
 
         this.url = url;
 
@@ -889,6 +891,15 @@ public abstract class AbstractIntegrationTest {
         assertNotNull(tableSnapshotGenerator.has(new Table().setName("camel_context"), database));
         assertNotNull(tableSnapshotGenerator.has(new Table().setName("bar_id"), database));
         assertNotNull(tableSnapshotGenerator.has(new Table().setName("foo_id"), database));
+    }
+
+    @Test
+    public void verifyObjectQuotingStrategy() throws Exception {
+        if (database == null) {
+            return;
+        }
+        Liquibase liquibase = createLiquibase(objectQuotingStrategyChangeLog);
+        liquibase.update(contexts);
     }
 
 //   @Test
