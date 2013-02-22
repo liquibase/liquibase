@@ -25,20 +25,32 @@ public class TableWriter extends HTMLWriter {
 
     @Override
     protected void writeCustomHTML(FileWriter fileWriter, Object object, List<Change> changes, Database database) throws IOException {
-        writeColumns(fileWriter, ((Table) object), database);
+    	final Table table = (Table) object;
+    	writeTableRemarks(fileWriter, table, database);
+		writeColumns(fileWriter, table, database);
     }
 
     private void writeColumns(FileWriter fileWriter, Table table, Database database) throws IOException {
         List<List<String>> cells = new ArrayList<List<String>>();
 
         for (Column column : table.getColumns()) {
-            cells.add(Arrays.asList(column.getType().toString(),
-                    "<A HREF=\"../columns/" + table.getName().toLowerCase() + "." + column.getName().toLowerCase() + ".html" + "\">" + column.getName() + "</A>"));
+            String remarks = column.getRemarks();
+            cells.add(Arrays.asList(TypeConverterFactory.getInstance().findTypeConverter(database).convertToDatabaseTypeString(column, database),
+                    "<A HREF=\"../columns/" + table.getName().toLowerCase() + "." + column.getName().toLowerCase() + ".html" + "\">" + column.getName() + "</A>",
+                    remarks != null ? remarks : ""));
             //todo: add foreign key info to columns?
         }
 
 
         writeTable("Current Columns", cells, fileWriter);
-
+    }
+    
+    private void writeTableRemarks(FileWriter fileWriter, Table table, Database database) throws IOException {
+        final String tableRemarks = table.getRemarks();
+        if (tableRemarks != null && tableRemarks.length() > 0) {
+        	final List<List<String>> cells = new ArrayList<List<String>>();
+        	cells.add(Arrays.asList(tableRemarks));
+        	writeTable("Table Description", cells, fileWriter);
+        }
     }
 }
