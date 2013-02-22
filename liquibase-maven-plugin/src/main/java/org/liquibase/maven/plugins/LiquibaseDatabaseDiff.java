@@ -110,11 +110,13 @@ public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
-        AuthenticationInfo referenceInfo = wagonManager.getAuthenticationInfo(referenceServer);
-        if (referenceInfo != null) {
-            referenceUsername = referenceInfo.getUserName();
-            referencePassword = referenceInfo.getPassword();
-        }
+    	if(referenceServer!=null) {
+    		AuthenticationInfo referenceInfo = wagonManager.getAuthenticationInfo(referenceServer);
+    		if (referenceInfo != null) {
+    			referenceUsername = referenceInfo.getUserName();
+    			referencePassword = referenceInfo.getPassword();
+    		}
+    	}
 
         super.execute();
     }
