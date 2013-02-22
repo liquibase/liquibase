@@ -1,5 +1,13 @@
 package liquibase.database.core;
 
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.regex.Pattern;
+
 import liquibase.CatalogAndSchema;
 import liquibase.change.CheckSum;
 import liquibase.changelog.ChangeSet;
@@ -13,7 +21,6 @@ import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
-import liquibase.informix.datatype.InformixDataTypeFactory;
 import liquibase.logging.LogFactory;
 import liquibase.snapshot.SnapshotControl;
 import liquibase.snapshot.SnapshotGeneratorFactory;
@@ -29,10 +36,6 @@ import liquibase.statement.core.UpdateChangeSetChecksumStatement;
 import liquibase.statement.core.UpdateStatement;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Table;
-
-import java.math.BigInteger;
-import java.util.*;
-import java.util.regex.Pattern;
 
 public class InformixDatabase extends AbstractJdbcDatabase {
 	

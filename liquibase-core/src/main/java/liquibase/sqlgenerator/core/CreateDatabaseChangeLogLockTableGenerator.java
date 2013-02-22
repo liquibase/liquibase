@@ -1,6 +1,7 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
+import liquibase.database.core.CassandraDatabase;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
@@ -29,9 +30,18 @@ public class CreateDatabaseChangeLogLockTableGenerator extends AbstractSqlGenera
                 .addColumn("LOCKGRANTED", DataTypeFactory.getInstance().fromDescription("DATETIME"))
                 .addColumn("LOCKEDBY", DataTypeFactory.getInstance().fromDescription("VARCHAR(255)"));
 
-        InsertStatement insertStatement = new InsertStatement(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName())
-                .addColumnValue("ID", 1)
-                .addColumnValue("LOCKED", Boolean.FALSE);
+        System.out.println("CreateDatabaseChangeLogLockTableGenerator cassandra? "+(database instanceof CassandraDatabase));
+        InsertStatement insertStatement;
+        if (database instanceof CassandraDatabase){
+        	// no support for AND in update
+        	insertStatement = new InsertStatement(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName())
+            .addColumnValue("ID", 1);
+        } else {
+        	insertStatement = new InsertStatement(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName())
+            .addColumnValue("ID", 1)
+            .addColumnValue("LOCKED", Boolean.FALSE);
+        }
+        
 
         List<Sql> sql = new ArrayList<Sql>();
 
