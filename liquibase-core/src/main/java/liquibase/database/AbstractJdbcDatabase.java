@@ -687,7 +687,7 @@ public abstract class AbstractJdbcDatabase implements Database {
                 if (ranChangeSet.getLastCheckSum() == null) {
                     ChangeSet changeSet = databaseChangeLog.getChangeSet(ranChangeSet);
                     if (changeSet != null && new ContextChangeSetFilter(contexts).accepts(changeSet) && new DbmsChangeSetFilter(this).accepts(changeSet)) {
-                        LogFactory.getLogger().info("Updating null or out of date checksum on changeSet " + changeSet + " to correct value");
+                        LogFactory.getLogger().debug("Updating null or out of date checksum on changeSet " + changeSet + " to correct value");
                         executor.execute(new UpdateChangeSetChecksumStatement(changeSet));
                     }
                 }
