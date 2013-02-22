@@ -1,7 +1,6 @@
 package liquibase.lockservice;
 
 import liquibase.database.Database;
-import liquibase.database.core.CassandraDatabase;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LockException;
 import liquibase.executor.Executor;
@@ -18,7 +17,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class LockServiceImpl implements LockService {
 
@@ -37,11 +35,7 @@ public class LockServiceImpl implements LockService {
     }
 
     public boolean supports(Database database) {
-    	if (database instanceof CassandraDatabase){
-    		return false;
-    	} else {
-    		return true;
-    	}
+        return true;
     }
 
     public void setDatabase(Database database) {
