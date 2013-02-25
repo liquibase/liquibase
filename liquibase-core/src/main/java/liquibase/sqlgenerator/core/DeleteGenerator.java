@@ -8,6 +8,7 @@ import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.DeleteStatement;
+import liquibase.structure.core.Column;
 
 public class DeleteGenerator extends AbstractSqlGenerator<DeleteStatement> {
 
@@ -27,8 +28,15 @@ public class DeleteGenerator extends AbstractSqlGenerator<DeleteStatement> {
 
         if (statement.getWhereClause() != null) {
             String fixedWhereClause = " WHERE " + statement.getWhereClause();
+            for (String columnName : statement.getWhereColumnNames()) {
+                if (columnName == null) {
+                    continue;
+                }
+                fixedWhereClause = fixedWhereClause.replaceFirst(":name",
+                        database.escapeObjectName(columnName, Column.class));
+            }
             for (Object param : statement.getWhereParameters()) {
-                fixedWhereClause = fixedWhereClause.replaceFirst("\\?", DataTypeFactory.getInstance().fromObject(param, database).objectToSql(param, database));
+                fixedWhereClause = fixedWhereClause.replaceFirst("\\?|:value", DataTypeFactory.getInstance().fromObject(param, database).objectToSql(param, database));
             }
             sql.append(" ").append(fixedWhereClause);
         }

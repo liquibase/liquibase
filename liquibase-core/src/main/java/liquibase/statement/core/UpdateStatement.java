@@ -10,6 +10,8 @@ public class UpdateStatement extends AbstractSqlStatement {
     private String tableName;
     private SortedMap<String, Object> newColumnValues = new TreeMap<String, Object>();
     private String whereClause;
+
+    private List<String> whereColumnNames = new ArrayList<String>();
     private List<Object> whereParameters = new ArrayList<Object>();
 
 
@@ -59,11 +61,22 @@ public class UpdateStatement extends AbstractSqlStatement {
         return this;
     }
 
+    public UpdateStatement addWhereColumnName(String value) {
+        this.whereColumnNames.add(value);
+
+        return this;
+    }
+
+
     public Map<String, Object> getNewColumnValues() {
         return newColumnValues;
     }
 
     public List<Object> getWhereParameters() {
         return whereParameters;
+    }
+
+    public List<String> getWhereColumnNames() {
+        return whereColumnNames;
     }
 }
