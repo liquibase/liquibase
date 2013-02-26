@@ -30,7 +30,7 @@ public class DropAllForeignKeyConstraintsChange extends AbstractChange {
 
     private List<DropForeignKeyConstraintChange> childDropChanges;
 
-    @DatabaseChangeProperty(mustEqualExisting ="table.catalog", description = "Name of the table containing columns constrained by foreign keys")
+    @DatabaseChangeProperty(mustEqualExisting ="table.catalog", description = "Name of the table containing columns constrained by foreign keys", since = "3.0")
     public String getBaseTableCatalogName() {
         return baseTableCatalogName;
     }

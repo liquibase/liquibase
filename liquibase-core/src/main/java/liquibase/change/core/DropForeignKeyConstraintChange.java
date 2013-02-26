@@ -20,7 +20,7 @@ public class DropForeignKeyConstraintChange extends AbstractChange {
     private String baseTableName;
     private String constraintName;
 
-    @DatabaseChangeProperty(mustEqualExisting ="foreignKey.table.catalog")
+    @DatabaseChangeProperty(mustEqualExisting ="foreignKey.table.catalog", since = "3.0")
     public String getBaseTableCatalogName() {
         return baseTableCatalogName;
     }

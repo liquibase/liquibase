@@ -73,6 +73,7 @@ public class AddLookupTableChange extends AbstractChange {
     }
 
 
+    @DatabaseChangeProperty(since = "3.0")
     public String getNewTableCatalogName() {
         return newTableCatalogName;
     }
