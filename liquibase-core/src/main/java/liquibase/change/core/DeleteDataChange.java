@@ -14,7 +14,7 @@ public class DeleteDataChange extends AbstractChange {
 
     private String whereClause;
 
-    @DatabaseChangeProperty(mustEqualExisting ="table.catalog")
+    @DatabaseChangeProperty(mustEqualExisting ="table.catalog", since = "3.0")
     public String getCatalogName() {
         return catalogName;
     }

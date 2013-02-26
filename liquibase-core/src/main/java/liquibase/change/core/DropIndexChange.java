@@ -67,6 +67,7 @@ public class DropIndexChange extends AbstractChange {
         this.associatedWith = associatedWith;
     }
 
+    @DatabaseChangeProperty(mustEqualExisting = "index.catalog", since = "3.0")
     public String getCatalogName() {
         return catalogName;
     }

@@ -23,6 +23,7 @@ public class CreateSequenceChange extends AbstractChange {
     private Boolean ordered;
     private Boolean cycle;
 
+    @DatabaseChangeProperty(since = "3.0")
     public String getCatalogName() {
         return catalogName;
     }

@@ -23,7 +23,7 @@ public class UpdateDataChange extends AbstractChange implements ChangeWithColumn
         columns = new ArrayList<ColumnConfig>();
     }
 
-    @DatabaseChangeProperty(mustEqualExisting ="column.relation.catalog")
+    @DatabaseChangeProperty(mustEqualExisting ="column.relation.catalog", since = "3.0")
     public String getCatalogName() {
         return catalogName;
     }

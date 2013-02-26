@@ -32,7 +32,7 @@ public class DropColumnChange extends AbstractChange {
     }
 
 
-    @DatabaseChangeProperty(mustEqualExisting ="column.relation.schema.catalog")
+    @DatabaseChangeProperty(mustEqualExisting ="column.relation.schema.catalog", since = "3.0")
     public String getCatalogName() {
         return catalogName;
     }

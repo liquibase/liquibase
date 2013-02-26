@@ -131,6 +131,7 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
         this.columns = columns;
     }
 
+    @DatabaseChangeProperty(since = "3.0")
     public String getCatalogName() {
         return catalogName;
     }

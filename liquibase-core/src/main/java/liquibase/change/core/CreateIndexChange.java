@@ -148,6 +148,7 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
 	}
 
 
+    @DatabaseChangeProperty(since = "3.0")
     public String getCatalogName() {
         return catalogName;
     }

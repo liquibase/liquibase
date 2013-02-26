@@ -21,7 +21,7 @@ public class DropUniqueConstraintChange extends AbstractChange {
      */
     private String uniqueColumns;
 
-    @DatabaseChangeProperty(mustEqualExisting ="uniqueConstraint.table.catalog")
+    @DatabaseChangeProperty(mustEqualExisting ="uniqueConstraint.table.catalog", since = "3.0")
     public String getCatalogName() {
         return catalogName;
     }

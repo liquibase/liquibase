@@ -19,6 +19,7 @@ public class DropSequenceChange extends AbstractChange {
     private String schemaName;
     private String sequenceName;
 
+    @DatabaseChangeProperty(mustEqualExisting = "sequence.catalog", since = "3.0")
     public String getCatalogName() {
         return catalogName;
     }

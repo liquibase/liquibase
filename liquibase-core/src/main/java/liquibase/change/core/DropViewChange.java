@@ -19,7 +19,7 @@ public class DropViewChange extends AbstractChange {
     private String viewName;
 
 
-    @DatabaseChangeProperty(mustEqualExisting ="view.catalog")
+    @DatabaseChangeProperty(mustEqualExisting ="view.catalog", since = "3.0")
     public String getCatalogName() {
         return catalogName;
     }

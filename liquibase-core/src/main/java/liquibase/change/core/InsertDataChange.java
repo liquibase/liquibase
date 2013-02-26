@@ -24,7 +24,7 @@ public class InsertDataChange extends AbstractChange implements ChangeWithColumn
         columns = new ArrayList<ColumnConfig>();
     }
 
-    @DatabaseChangeProperty(mustEqualExisting ="table.catalog")
+    @DatabaseChangeProperty(mustEqualExisting ="table.catalog", since = "3.0")
     public String getCatalogName() {
         return catalogName;
     }

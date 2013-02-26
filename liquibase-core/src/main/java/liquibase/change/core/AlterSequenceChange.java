@@ -25,7 +25,7 @@ public class AlterSequenceChange extends AbstractChange {
     private BigInteger minValue;
     private Boolean ordered;
 
-    @DatabaseChangeProperty(mustEqualExisting ="sequence.catalog")
+    @DatabaseChangeProperty(mustEqualExisting ="sequence.catalog", since = "3.0")
     public String getCatalogName() {
         return catalogName;
     }

@@ -47,7 +47,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
         return true;
     }
 
-    @DatabaseChangeProperty(mustEqualExisting ="table.catalog")
+    @DatabaseChangeProperty(mustEqualExisting ="table.catalog", since = "3.0")
     public String getCatalogName() {
         return catalogName;
     }

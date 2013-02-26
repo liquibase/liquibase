@@ -16,7 +16,7 @@ public class RenameViewChange extends AbstractChange {
     private String oldViewName;
     private String newViewName;
 
-    @DatabaseChangeProperty(mustEqualExisting ="view.catalog")
+    @DatabaseChangeProperty(mustEqualExisting ="view.catalog", since = "3.0")
     public String getCatalogName() {
         return catalogName;
     }

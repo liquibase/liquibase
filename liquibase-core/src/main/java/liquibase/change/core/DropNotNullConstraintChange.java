@@ -18,7 +18,7 @@ public class DropNotNullConstraintChange extends AbstractChange {
     private String columnName;
     private String columnDataType;
 
-    @DatabaseChangeProperty(mustEqualExisting ="notNullConstraint.table.catalog")
+    @DatabaseChangeProperty(mustEqualExisting ="notNullConstraint.table.catalog", since = "3.0")
     public String getCatalogName() {
         return catalogName;
     }

@@ -30,7 +30,7 @@ public class AddNotNullConstraintChange extends AbstractChange {
     private String defaultNullValue;
     private String columnDataType;
 
-    @DatabaseChangeProperty(mustEqualExisting ="column.relation.catalog")
+    @DatabaseChangeProperty(mustEqualExisting ="column.relation.catalog", since = "3.0")
     public String getCatalogName() {
         return catalogName;
     }

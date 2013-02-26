@@ -23,6 +23,7 @@ public class CreateViewChange extends AbstractChange {
 	private Boolean replaceIfExists;
 
 
+    @DatabaseChangeProperty(since = "3.0")
     public String getCatalogName() {
         return catalogName;
     }

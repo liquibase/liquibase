@@ -20,7 +20,7 @@ public class DropTableChange extends AbstractChange {
     private String tableName;
     private Boolean cascadeConstraints;
 
-    @DatabaseChangeProperty(mustEqualExisting ="table.schema")
+    @DatabaseChangeProperty(mustEqualExisting ="table.schema", since = "3.0")
     public String getCatalogName() {
         return catalogName;
     }
