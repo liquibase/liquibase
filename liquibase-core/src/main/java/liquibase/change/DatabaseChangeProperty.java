@@ -28,6 +28,11 @@ public @interface DatabaseChangeProperty {
     public String exampleValue() default "";
 
     /**
+     * Value to put into {@link liquibase.change.ChangeParameterMetaData#getExampleValue()}
+     */
+    public String since() default "";
+
+    /**
      * If false, this field or method will not be included in {@ChangeParameterMetaData}
      */
     public boolean isChangeProperty() default true;

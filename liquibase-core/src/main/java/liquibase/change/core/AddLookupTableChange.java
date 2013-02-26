@@ -20,7 +20,9 @@ import java.util.List;
  * Extracts data from an existing column to create a lookup table.
  * A foreign key is created between the old column and the new lookup table.
  */
-@DatabaseChange(name="addLookupTable", description = "Add Lookup Table", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "column")
+@DatabaseChange(name="addLookupTable",
+        description = "Creates a lookup table containing values stored in a column and creates a foreign key to the new table.",
+        priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "column")
 public class AddLookupTableChange extends AbstractChange {
 
     private String existingTableCatalogName;
@@ -52,7 +54,7 @@ public class AddLookupTableChange extends AbstractChange {
         this.existingTableSchemaName = existingTableSchemaName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "column.relation")
+    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "column.relation", description = "Name of the table containing the data to extract", exampleValue = "address")
     public String getExistingTableName() {
         return existingTableName;
     }
@@ -61,7 +63,7 @@ public class AddLookupTableChange extends AbstractChange {
         this.existingTableName = existingTableName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "column")
+    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "column", description = "Name of the column containing the data to extract", exampleValue = "state")
     public String getExistingColumnName() {
         return existingColumnName;
     }
@@ -87,7 +89,7 @@ public class AddLookupTableChange extends AbstractChange {
         this.newTableSchemaName = newTableSchemaName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all")
+    @DatabaseChangeProperty(requiredForDatabase = "all", description = "Name of lookup table to create", exampleValue = "state")
     public String getNewTableName() {
         return newTableName;
     }
@@ -96,7 +98,7 @@ public class AddLookupTableChange extends AbstractChange {
         this.newTableName = newTableName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all")
+    @DatabaseChangeProperty(requiredForDatabase = "all", description = "Name of the column in the new table to create", exampleValue = "abbreviation")
     public String getNewColumnName() {
         return newColumnName;
     }
@@ -105,7 +107,7 @@ public class AddLookupTableChange extends AbstractChange {
         this.newColumnName = newColumnName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all")
+    @DatabaseChangeProperty(requiredForDatabase = "informix,mysql,mssql", description = "Data type of the new table column", exampleValue = "char(2)")
     public String getNewColumnDataType() {
         return newColumnDataType;
     }
@@ -114,6 +116,7 @@ public class AddLookupTableChange extends AbstractChange {
         this.newColumnDataType = newColumnDataType;
     }
 
+    @DatabaseChangeProperty(description = "Name of the foreign-key constraint to create between the existing table and the lookup table", exampleValue = "fk_address_state")
     public String getConstraintName() {
         return constraintName;
     }

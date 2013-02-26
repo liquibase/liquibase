@@ -10,6 +10,8 @@ import liquibase.util.StringUtils;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.math.BigInteger;
 import java.util.*;
 
@@ -23,11 +25,12 @@ public class ChangeParameterMetaData {
     private String exampleValue;
     private String displayName;
     private String dataType;
+    private String since;
     private Set<String> requiredForDatabase;
     private String mustEqualExisting;
     private LiquibaseSerializable.SerializationType serializationType;
 
-    public ChangeParameterMetaData(String parameterName, String displayName, String description, String exampleValue, Class dataType, String[] requiredForDatabase, String mustEqualExisting, LiquibaseSerializable.SerializationType serializationType) {
+    public ChangeParameterMetaData(String parameterName, String displayName, String description, String exampleValue, String since, Type dataType, String[] requiredForDatabase, String mustEqualExisting, LiquibaseSerializable.SerializationType serializationType) {
         if (parameterName == null) {
             throw new UnexpectedLiquibaseException("Unexpected null parameterName");
         }
@@ -45,7 +48,11 @@ public class ChangeParameterMetaData {
         this.displayName = displayName;
         this.description = description;
         this.exampleValue = exampleValue;
-        this.dataType = StringUtils.lowerCaseFirst(dataType.getSimpleName());
+        if (dataType instanceof Class) {
+            this.dataType = StringUtils.lowerCaseFirst(((Class) dataType).getSimpleName());
+        } else if (dataType instanceof ParameterizedType) {
+            this.dataType = StringUtils.lowerCaseFirst(((Class) ((ParameterizedType) dataType).getRawType()).getSimpleName()+" of "+ StringUtils.lowerCaseFirst(((Class) ((ParameterizedType) dataType).getActualTypeArguments()[0]).getSimpleName()));
+        }
         if (requiredForDatabase == null) {
             requiredForDatabase = new String[0];
         }
@@ -55,6 +62,7 @@ public class ChangeParameterMetaData {
 
         this.mustEqualExisting = mustEqualExisting;
         this.serializationType = serializationType;
+        this.since = since;
     }
 
     /**
@@ -70,6 +78,10 @@ public class ChangeParameterMetaData {
      */
     public String getDisplayName() {
         return displayName;
+    }
+
+    public String getSince() {
+        return since;
     }
 
     /**

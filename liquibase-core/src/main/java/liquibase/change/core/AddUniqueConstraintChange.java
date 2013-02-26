@@ -9,7 +9,7 @@ import liquibase.structure.core.Column;
 /**
  * Adds a unique constraint to an existing column.
  */
-@DatabaseChange(name="addUniqueConstraint", description = "Add Unique Constraint", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "column")
+@DatabaseChange(name="addUniqueConstraint", description = "Adds a unique constrant to an existing column or set of columns.", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "column")
 public class AddUniqueConstraintChange extends AbstractChange {
 
     private String catalogName;
@@ -41,7 +41,7 @@ public class AddUniqueConstraintChange extends AbstractChange {
         this.schemaName = schemaName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "column.relation")
+    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "column.relation", description = "Name of the table to create the unique constraint on")
     public String getTableName() {
         return tableName;
     }
@@ -50,7 +50,8 @@ public class AddUniqueConstraintChange extends AbstractChange {
         this.tableName = tableName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "column")
+    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "column", description =
+            "Name of the column(s) to create the unique constraint on. Comma separated if multiple")
     public String getColumnNames() {
         return columnNames;
     }
@@ -59,7 +60,7 @@ public class AddUniqueConstraintChange extends AbstractChange {
         this.columnNames = columnNames;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all")
+    @DatabaseChangeProperty(requiredForDatabase = "all", description = "Name of the unique constraint")
     public String getConstraintName() {
         return constraintName;
     }
@@ -69,6 +70,7 @@ public class AddUniqueConstraintChange extends AbstractChange {
     }
 
 
+    @DatabaseChangeProperty(description = "'Tablespace' to create the index in. Corresponds to file group in mssql")
     public String getTablespace() {
         return tablespace;
     }

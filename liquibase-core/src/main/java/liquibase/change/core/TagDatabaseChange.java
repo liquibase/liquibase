@@ -5,12 +5,12 @@ import liquibase.database.Database;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.TagDatabaseStatement;
 
-@DatabaseChange(name="tagDatabase", description = "Tag Database", priority = ChangeMetaData.PRIORITY_DEFAULT)
+@DatabaseChange(name="tagDatabase", description = "Applies a tag to the database for future rollback", priority = ChangeMetaData.PRIORITY_DEFAULT, since = "1.6")
 public class TagDatabaseChange extends AbstractChange {
 
     private String tag;
 
-    @DatabaseChangeProperty(requiredForDatabase = "all")
+    @DatabaseChangeProperty(requiredForDatabase = "all", description = "Tag to apply", exampleValue = "version_1.3")
     public String getTag() {
         return tag;
     }

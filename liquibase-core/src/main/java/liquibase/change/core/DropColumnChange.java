@@ -14,7 +14,7 @@ import java.util.List;
 /**
  * Drops an existing column from a table.
  */
-@DatabaseChange(name="dropColumn", description = "Drop Column", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "column")
+@DatabaseChange(name="dropColumn", description = "Drop an existing column", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "column")
 public class DropColumnChange extends AbstractChange {
 
     private String catalogName;
@@ -22,7 +22,7 @@ public class DropColumnChange extends AbstractChange {
     private String tableName;
     private String columnName;
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "column")
+    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "column", description = "Name of the column to drop")
     public String getColumnName() {
         return columnName;
     }
@@ -50,7 +50,7 @@ public class DropColumnChange extends AbstractChange {
         this.schemaName = schemaName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "column.relation")
+    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "column.relation", description = "Name of the table containing the column to drop")
     public String getTableName() {
         return tableName;
     }

@@ -12,7 +12,7 @@ import liquibase.structure.core.Sequence;
 /**
  * Drops an existing sequence.
  */
-@DatabaseChange(name="dropSequence", description = "Drop Sequence", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "sequence")
+@DatabaseChange(name="dropSequence", description = "Drop an existing sequence", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "sequence")
 public class DropSequenceChange extends AbstractChange {
 
     private String catalogName;
@@ -36,7 +36,7 @@ public class DropSequenceChange extends AbstractChange {
         this.schemaName = schemaName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "sequence")
+    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "sequence", description = "Name of the sequence to drop")
     public String getSequenceName() {
         return sequenceName;
     }

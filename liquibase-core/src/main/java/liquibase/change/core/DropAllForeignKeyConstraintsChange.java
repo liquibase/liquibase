@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-@DatabaseChange(name="dropAllForeignKeyConstraints", description = "Drop All Foreign Key Constraints", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "table")
+@DatabaseChange(name="dropAllForeignKeyConstraints", description = "Drops all foreign key constraints for a table", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "table")
 public class DropAllForeignKeyConstraintsChange extends AbstractChange {
 
     private String baseTableCatalogName;
@@ -30,7 +30,7 @@ public class DropAllForeignKeyConstraintsChange extends AbstractChange {
 
     private List<DropForeignKeyConstraintChange> childDropChanges;
 
-    @DatabaseChangeProperty(mustEqualExisting ="table.catalog")
+    @DatabaseChangeProperty(mustEqualExisting ="table.catalog", description = "Name of the table containing columns constrained by foreign keys")
     public String getBaseTableCatalogName() {
         return baseTableCatalogName;
     }

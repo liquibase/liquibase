@@ -19,7 +19,15 @@ import java.util.*;
  * @see liquibase.change.custom.CustomSqlChange
  * @see liquibase.change.custom.CustomTaskChange
  */
-@DatabaseChange(name="customChange", description = "Custom Change", priority = ChangeMetaData.PRIORITY_DEFAULT)
+@DatabaseChange(name="customChange",
+        description = "Although Liquibase tries to provide a wide range of database refactorings, there are times you may want to create your own custom refactoring class.\n" +
+                "\n" +
+                "To create your own custom refactoring, simply create a class that implements the liquibase.change.custom.CustomSqlChange or liquibase.change.custom.CustomTaskChange interface and use the <custom> tag in your change set.\n" +
+                "\n" +
+                "If your change can be rolled back, implement the liquibase.change.custom.CustomSqlRollback interface as well.\n" +
+                "\n" +
+                "For a sample custom change class, see liquibase.change.custom.ExampleCustomSqlChange",
+        priority = ChangeMetaData.PRIORITY_DEFAULT)
 public class CustomChangeWrapper extends AbstractChange {
 
     /**
@@ -34,6 +42,11 @@ public class CustomChangeWrapper extends AbstractChange {
     private Map<String, String> paramValues = new HashMap<String, String>();
 
     private ClassLoader classLoader;
+
+    @Override
+    public boolean generateStatementsVolatile(Database database) {
+        return true;
+    }
 
     /**
      * Return the CustomChange instance created by the call to {@link #setClass(String)}.
@@ -86,6 +99,7 @@ public class CustomChangeWrapper extends AbstractChange {
      * Return the name of the custom class set in {@link #setClass(String)}
      * @return
      */
+    @DatabaseChangeProperty(description = "Name class that implements the custom change.")
     public String getClassName() {
         return className;
     }

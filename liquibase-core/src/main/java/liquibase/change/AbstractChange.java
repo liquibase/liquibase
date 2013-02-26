@@ -1,6 +1,7 @@
 package liquibase.change;
 
 import java.beans.IntrospectionException;
+import java.lang.reflect.Type;
 import java.util.*;
 
 import liquibase.changelog.ChangeSet;
@@ -111,17 +112,19 @@ public abstract class AbstractChange implements Change {
             throw new UnexpectedLiquibaseException("Could not find property " + parameterName);
         }
 
-        Class type = property.getPropertyType();
         Method readMethod = property.getReadMethod();
         if (readMethod == null) {
             readMethod = getClass().getMethod("is"+StringUtils.upperCaseFirst(property.getName()));
         }
+        Type type = readMethod.getGenericReturnType();
+
         DatabaseChangeProperty changePropertyAnnotation = readMethod.getAnnotation(DatabaseChangeProperty.class);
 
         String[] requiredForDatabase;
         String mustEqualExisting = null;
         String description = null;
         String example = null;
+        String since = null;
         SerializationType serializationType = SerializationType.NAMED_FIELD;
         if (changePropertyAnnotation == null) {
             requiredForDatabase = new String[]{"none"};
@@ -131,9 +134,10 @@ public abstract class AbstractChange implements Change {
             serializationType = changePropertyAnnotation.serializationType();
             description = StringUtils.trimToNull(changePropertyAnnotation.description());
             example = StringUtils.trimToNull(changePropertyAnnotation.exampleValue());
+            since = StringUtils.trimToNull(changePropertyAnnotation.since());
         }
 
-        return new ChangeParameterMetaData(parameterName, displayName, description, example, type, requiredForDatabase, mustEqualExisting, serializationType);
+        return new ChangeParameterMetaData(parameterName, displayName, description, example, since, type, requiredForDatabase, mustEqualExisting, serializationType);
     }
 
     /**
@@ -208,8 +212,12 @@ public abstract class AbstractChange implements Change {
     /**
      * Implementation delegates logic to the {@link liquibase.sqlgenerator.SqlGenerator#supports(liquibase.statement.SqlStatement, liquibase.database.Database)} method on the {@link SqlStatement} objects returned by {@link #generateStatements }.
      * If no or null SqlStatements are returned by generateStatements then this method returns true.
+     * If {@link #generateStatementsVolatile(liquibase.database.Database)} returns true, we cannot call generateStatements and so assume true.
      */
     public boolean supports(Database database) {
+        if (generateStatementsVolatile(database)) {
+            return true;
+        }
         try {
             SqlStatement[] statements = generateStatements(database);
             if (statements == null) {

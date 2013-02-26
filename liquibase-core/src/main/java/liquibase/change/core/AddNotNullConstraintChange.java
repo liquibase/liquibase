@@ -19,7 +19,9 @@ import java.util.List;
 /**
  * Adds a not-null constraint to an existing column.
  */
-@DatabaseChange(name="addNotNullConstraint", description = "Add Not-Null Constraint", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "column")
+@DatabaseChange(name="addNotNullConstraint",
+        description = "Adds a not-null constraint to an existing table. If a defaultNullValue attribute is passed, all null values for the column will be updated to the passed value before the constraint is applied.",
+        priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "column")
 public class AddNotNullConstraintChange extends AbstractChange {
     private String catalogName;
     private String schemaName;
@@ -46,7 +48,7 @@ public class AddNotNullConstraintChange extends AbstractChange {
         this.schemaName = schemaName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "column.relation")
+    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "column.relation", description = "Adds a not-null constraint to an existing table. If a defaultNullValue attribute is passed, all null values for the column will be updated to the passed value before the constraint is applied.")
     public String getTableName() {
         return tableName;
     }
@@ -55,7 +57,7 @@ public class AddNotNullConstraintChange extends AbstractChange {
         this.tableName = tableName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "column.relation.column")
+    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "column.relation.column", description = "Name of the column to add the constraint to")
     public String getColumnName() {
         return columnName;
     }
@@ -64,6 +66,7 @@ public class AddNotNullConstraintChange extends AbstractChange {
         this.columnName = columnName;
     }
 
+    @DatabaseChangeProperty(description = "Value to set all currently null values to. If not set, change will fail if null values exist", requiredForDatabase = {"informix","mssql","mysql"})
     public String getDefaultNullValue() {
         return defaultNullValue;
     }
@@ -72,6 +75,7 @@ public class AddNotNullConstraintChange extends AbstractChange {
         this.defaultNullValue = defaultNullValue;
     }
 
+    @DatabaseChangeProperty(description = "Current data type of the column")
     public String getColumnDataType() {
         return columnDataType;
     }

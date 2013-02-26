@@ -42,6 +42,7 @@ public abstract class AbstractSQLChange extends AbstractChange {
      * <p></p>
      * This will always return a non-null value and should be a boolean rather than a Boolean, but that breaks the Bean Standard.
      */
+    @DatabaseChangeProperty(description = "Set to true to remove any comments in the SQL before executing, otherwise false. Defaults to false if not set")
     public Boolean isStripComments() {
         return stripComments;
     }
@@ -65,6 +66,7 @@ public abstract class AbstractSQLChange extends AbstractChange {
      * <p></p>
      * This will always return a non-null value and should be a boolean rather than a Boolean, but that breaks the Bean Standard.
      */
+    @DatabaseChangeProperty(description = "Set to false to not have liquibase split statements on ;'s and GO's. Defaults to true if not set")
     public Boolean isSplitStatements() {
         return splitStatements;
     }
@@ -101,6 +103,7 @@ public abstract class AbstractSQLChange extends AbstractChange {
      *
      * @see #splitStatements
      */
+    @DatabaseChangeProperty(description = "Delimiter to apply to the end of the statement. Defaults to ';', may be set to ''.")
     public String getEndDelimiter() {
         return endDelimiter;
     }

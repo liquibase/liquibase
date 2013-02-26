@@ -11,7 +11,7 @@ import liquibase.structure.core.Column;
 /**
  * Creates a primary key out of an existing column or set of columns.
  */
-@DatabaseChange(name="addPrimaryKey", description = "Add Primary Key", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "column")
+@DatabaseChange(name="addPrimaryKey", description = "Adds creates a primary key out of an existing column or set of columns.", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "column")
 public class AddPrimaryKeyChange extends AbstractChange {
 
     private String catalogName;
@@ -21,7 +21,7 @@ public class AddPrimaryKeyChange extends AbstractChange {
     private String columnNames;
     private String constraintName;
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "column.relation")
+    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "column.relation", description = "Name of the table to create the primary key on")
     public String getTableName() {
         return tableName;
     }
@@ -48,7 +48,7 @@ public class AddPrimaryKeyChange extends AbstractChange {
         this.schemaName = schemaName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "column")
+    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "column", description = "Name of the column(s) to create the primary key on. Comma separated if multiple")
     public String getColumnNames() {
         return columnNames;
     }
@@ -57,6 +57,7 @@ public class AddPrimaryKeyChange extends AbstractChange {
         this.columnNames = columnNames;
     }
 
+    @DatabaseChangeProperty(description = "Name of primary key constraint", exampleValue = "pk_person")
     public String getConstraintName() {
         return constraintName;
     }

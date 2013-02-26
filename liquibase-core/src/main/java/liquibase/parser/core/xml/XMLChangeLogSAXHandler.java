@@ -404,7 +404,7 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
 				}
 				ColumnConfig lastColumn = null;
                 if (change instanceof ChangeWithColumns) {
-                    List<ColumnConfig> columns = ((ChangeWithColumns) change).getColumns();
+                    List<ColumnConfig> columns = ((ChangeWithColumns) change).getColumn();
                     if (columns != null && columns.size() > 0) {
                         lastColumn = columns.get(columns.size() - 1);
                     }
@@ -624,16 +624,13 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
 			} else if (change != null && qName.equals("column")
 					&& textString != null) {
 				if (change instanceof InsertDataChange) {
-					List<ColumnConfig> columns = ((InsertDataChange) change)
-							.getColumns();
+					List<ColumnConfig> columns = ((InsertDataChange) change).getColumn();
 					columns.get(columns.size() - 1).setValue(textString);
 				} else if (change instanceof UpdateDataChange) {
-					List<ColumnConfig> columns = ((UpdateDataChange) change)
-							.getColumns();
+					List<ColumnConfig> columns = ((UpdateDataChange) change).getColumn();
 					columns.get(columns.size() - 1).setValue(textString);
 				} else {
-					throw new RuntimeException("Unexpected column with text: "
-							+ textString);
+					throw new RuntimeException("Unexpected column with text: " + textString);
 				}
 				this.text = new StringBuffer();
 			} else if (change != null

@@ -13,7 +13,7 @@ import liquibase.structure.core.ForeignKey;
 /**
  * Drops an existing foreign key constraint.
  */
-@DatabaseChange(name="dropForeignKeyConstraint", description = "Drop Foreign Key Constraint", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "foreignKey")
+@DatabaseChange(name="dropForeignKeyConstraint", description = "Drops an existing foreign key", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "foreignKey")
 public class DropForeignKeyConstraintChange extends AbstractChange {
     private String baseTableCatalogName;
     private String baseTableSchemaName;
@@ -38,7 +38,7 @@ public class DropForeignKeyConstraintChange extends AbstractChange {
         this.baseTableSchemaName = baseTableSchemaName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "foreignKey.table")
+    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "foreignKey.table", description = "Name of the table containing the column constrained by the foreign key")
     public String getBaseTableName() {
         return baseTableName;
     }
@@ -47,7 +47,7 @@ public class DropForeignKeyConstraintChange extends AbstractChange {
         this.baseTableName = baseTableName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "foreignKey")
+    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "foreignKey", description = "Name of the foreign key constraint to drop", exampleValue = "fk_address_person")
     public String getConstraintName() {
         return constraintName;
     }

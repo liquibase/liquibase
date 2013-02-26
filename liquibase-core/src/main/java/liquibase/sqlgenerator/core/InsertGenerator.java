@@ -31,7 +31,10 @@ public class InsertGenerator extends AbstractSqlGenerator<InsertStatement> {
             sql.append(database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), column)).append(", ");
         }
         sql.deleteCharAt(sql.lastIndexOf(" "));
-        sql.deleteCharAt(sql.lastIndexOf(","));
+        int lastComma = sql.lastIndexOf(",");
+        if (lastComma >= 0) {
+            sql.deleteCharAt(lastComma);
+        }
 
         sql.append(") VALUES (");
 
@@ -59,7 +62,10 @@ public class InsertGenerator extends AbstractSqlGenerator<InsertStatement> {
         }
 
         sql.deleteCharAt(sql.lastIndexOf(" "));
-        sql.deleteCharAt(sql.lastIndexOf(","));
+        lastComma = sql.lastIndexOf(",");
+        if (lastComma >= 0) {
+            sql.deleteCharAt(lastComma);
+        }
 
         sql.append(")");
 

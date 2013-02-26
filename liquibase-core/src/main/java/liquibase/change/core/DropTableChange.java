@@ -12,7 +12,7 @@ import liquibase.structure.core.Table;
 /**
  * Drops an existing table.
  */
-@DatabaseChange(name="dropTable", description = "Drop Table", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "table")
+@DatabaseChange(name="dropTable", description = "Drops an existing table", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "table")
 public class DropTableChange extends AbstractChange {
 
     private String catalogName;
@@ -38,7 +38,7 @@ public class DropTableChange extends AbstractChange {
         this.schemaName = schemaName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "table")
+    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "table", description = "Name of the table to drop")
     public String getTableName() {
         return tableName;
     }

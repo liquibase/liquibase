@@ -10,7 +10,7 @@ import liquibase.structure.core.UniqueConstraint;
 /**
  * Removes an existing unique constraint.
  */
-@DatabaseChange(name="dropUniqueConstraint", description = "Drop Unique Constraint", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "uniqueConstraint")
+@DatabaseChange(name="dropUniqueConstraint", description = "Drops an existing unique constraint", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "uniqueConstraint")
 public class DropUniqueConstraintChange extends AbstractChange {
     private String catalogName;
     private String schemaName;
@@ -39,7 +39,7 @@ public class DropUniqueConstraintChange extends AbstractChange {
         this.schemaName = schemaName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "uniqueConstraint.table")
+    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "uniqueConstraint.table", description = "Name of the table to drop the unique constraint from")
     public String getTableName() {
         return tableName;
     }
@@ -48,7 +48,7 @@ public class DropUniqueConstraintChange extends AbstractChange {
         this.tableName = tableName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "uniqueConstraint")
+    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "uniqueConstraint", description = "Name of unique constraint to drop")
     public String getConstraintName() {
         return constraintName;
     }

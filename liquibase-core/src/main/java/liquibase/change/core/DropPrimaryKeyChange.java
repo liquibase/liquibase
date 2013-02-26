@@ -15,12 +15,20 @@ import java.util.List;
 /**
  * Removes an existing primary key.
  */
-@DatabaseChange(name="dropPrimaryKey", description = "Drop Primary Key", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "primaryKey")
+@DatabaseChange(name="dropPrimaryKey", description = "Drops an existing primary key", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "primaryKey")
 public class DropPrimaryKeyChange extends AbstractChange {
     private String catalogName;
     private String schemaName;
     private String tableName;
     private String constraintName;
+
+    @Override
+    public boolean generateStatementsVolatile(Database database) {
+        if (database instanceof SQLiteDatabase) {
+            return true;
+        }
+        return false;
+    }
 
     @DatabaseChangeProperty(mustEqualExisting ="primaryKey.catalog")
     public String getCatalogName() {
@@ -40,7 +48,7 @@ public class DropPrimaryKeyChange extends AbstractChange {
         this.schemaName = schemaName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "primaryKey.table")
+    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "primaryKey.table", description = "Name of the table to drop the primary key of")
     public String getTableName() {
         return tableName;
     }
@@ -49,7 +57,7 @@ public class DropPrimaryKeyChange extends AbstractChange {
         this.tableName = tableName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "primaryKey")
+    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "primaryKey", description = "Name of the primary key")
     public String getConstraintName() {
         return constraintName;
     }

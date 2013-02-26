@@ -28,7 +28,10 @@ public class UpdateGenerator extends AbstractSqlGenerator<UpdateStatement> {
             sql.append(",");
         }
 
-        sql.deleteCharAt(sql.lastIndexOf(","));
+        int lastComma = sql.lastIndexOf(",");
+        if (lastComma >= 0) {
+            sql.deleteCharAt(lastComma);
+        }
         if (statement.getWhereClause() != null) {
             String fixedWhereClause = "WHERE " + statement.getWhereClause().trim();
             for (Object param : statement.getWhereParameters()) {

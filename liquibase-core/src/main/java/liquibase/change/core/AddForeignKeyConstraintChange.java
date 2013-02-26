@@ -11,7 +11,7 @@ import liquibase.statement.core.AddForeignKeyConstraintStatement;
 /**
  * Adds a foreign key constraint to an existing column.
  */
- @DatabaseChange(name="addForeignKeyConstraint", description = "Add Foreign Key Constraint", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "column")
+ @DatabaseChange(name="addForeignKeyConstraint", description = "Adds a foreign key constraint to an existing column", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "column")
 public class AddForeignKeyConstraintChange extends AbstractChange {
 
     private String baseTableCatalogName;
@@ -54,7 +54,7 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
         this.baseTableSchemaName = baseTableSchemaName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "column.relation")
+    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "column.relation", description = "Name of the table containing the column to constrain", exampleValue = "address")
     public String getBaseTableName() {
         return baseTableName;
     }
@@ -63,7 +63,7 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
         this.baseTableName = baseTableName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "column")
+    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "column",description = "Name of column(s) to place the foreign key constraint on. Comma-separate if multiple", exampleValue = "person_id")
     public String getBaseColumnNames() {
         return baseColumnNames;
     }
@@ -88,7 +88,7 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
         this.referencedTableSchemaName = referencedTableSchemaName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all")
+    @DatabaseChangeProperty(requiredForDatabase = "all", description = "Name of the table the foreign key points to", exampleValue = "person")
     public String getReferencedTableName() {
         return referencedTableName;
     }
@@ -97,7 +97,7 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
         this.referencedTableName = referencedTableName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all")
+    @DatabaseChangeProperty(requiredForDatabase = "all", description = "Column(s) the foreign key points to. Comma-separate if multiple", exampleValue = "id")
     public String getReferencedColumnNames() {
         return referencedColumnNames;
     }
@@ -106,7 +106,7 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
         this.referencedColumnNames = referencedColumnNames;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all")
+    @DatabaseChangeProperty(requiredForDatabase = "all", description = "Name of the new foreign key constraint", exampleValue = "fk_address_person")
     public String getConstraintName() {
         return constraintName;
     }
@@ -119,6 +119,7 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
         return deferrable;
     }
 
+    @DatabaseChangeProperty(description = "Is the foreign key deferrable")
     public void setDeferrable(Boolean deferrable) {
         this.deferrable = deferrable;
     }
@@ -127,6 +128,7 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
         return initiallyDeferred;
     }
 
+    @DatabaseChangeProperty(description = "Is the foreign key initially deferred")
     public void setInitiallyDeferred(Boolean initiallyDeferred) {
         this.initiallyDeferred = initiallyDeferred;
     }
@@ -145,6 +147,7 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
         this.onUpdate = rule;
     }
 
+    @DatabaseChangeProperty(description = "ON UPDATE functionality. Possible values: 'CASCADE', 'SET NULL', 'SET DEFAULT', 'RESTRICT', 'NO ACTION'", exampleValue = "RESTRICT")
     public String getOnUpdate() {
         return onUpdate;
     }
@@ -153,6 +156,7 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
         this.onDelete = onDelete;
     }
 
+    @DatabaseChangeProperty(description = "ON DELETE functionality. Possible values: 'CASCADE', 'SET NULL', 'SET DEFAULT', 'RESTRICT', 'NO ACTION'", exampleValue = "CASCADE")
     public String getOnDelete() {
         return this.onDelete;
     }

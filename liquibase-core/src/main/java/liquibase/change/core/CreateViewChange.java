@@ -13,7 +13,7 @@ import java.util.List;
 /**
  * Creates a new view.
  */
-@DatabaseChange(name="createView", description = "Create View", priority = ChangeMetaData.PRIORITY_DEFAULT)
+@DatabaseChange(name="createView", description = "Create a new database view", priority = ChangeMetaData.PRIORITY_DEFAULT)
 public class CreateViewChange extends AbstractChange {
 
     private String catalogName;
@@ -39,7 +39,7 @@ public class CreateViewChange extends AbstractChange {
 		this.schemaName = schemaName;
 	}
 
-    @DatabaseChangeProperty(requiredForDatabase = "all")
+    @DatabaseChangeProperty(requiredForDatabase = "all", description = "Name of the view to create")
 	public String getViewName() {
 		return viewName;
 	}
@@ -48,7 +48,7 @@ public class CreateViewChange extends AbstractChange {
 		this.viewName = viewName;
 	}
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", serializationType = SerializationType.DIRECT_VALUE)
+    @DatabaseChangeProperty(requiredForDatabase = "all", serializationType = SerializationType.DIRECT_VALUE, description = "SQL for generating the view", exampleValue = "select id, name from person where id > 10")
 	public String getSelectQuery() {
 		return selectQuery;
 	}
@@ -57,6 +57,7 @@ public class CreateViewChange extends AbstractChange {
 		this.selectQuery = selectQuery;
 	}
 
+    @DatabaseChangeProperty(description = "Use 'create or replace' syntax", since = "1.5")
 	public Boolean getReplaceIfExists() {
 		return replaceIfExists;
 	}

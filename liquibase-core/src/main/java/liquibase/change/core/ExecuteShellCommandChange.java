@@ -27,14 +27,26 @@ import java.util.List;
 /**
  * Executes a given shell executable.
  */
-@DatabaseChange(name="executeCommand", description = "Execute Shell Command", priority = ChangeMetaData.PRIORITY_DEFAULT)
+@DatabaseChange(name="executeCommand",
+        description = "Executes a system command. Because this refactoring doesn't generate SQL like most, using LiquiBase commands such as migrateSQL may not work as expected. Therefore, if at all possible use refactorings that generate SQL.",
+        priority = ChangeMetaData.PRIORITY_DEFAULT)
 public class ExecuteShellCommandChange extends AbstractChange {
 
     private String executable;
     private List<String> os;
     private List<String> args = new ArrayList<String>();
 
-    @DatabaseChangeProperty(requiredForDatabase = "all")
+    @Override
+    public boolean generateStatementsVolatile(Database database) {
+        return true;
+    }
+
+    @Override
+    public boolean generateRollbackStatementsVolatile(Database database) {
+        return true;
+    }
+
+    @DatabaseChangeProperty(requiredForDatabase = "all", description = "Name of the executable to run", exampleValue = "mysqldump")
     public String getExecutable() {
         return executable;
     }
@@ -52,6 +64,7 @@ public class ExecuteShellCommandChange extends AbstractChange {
         this.os = StringUtils.splitAndTrim(os, ",");
     }
 
+    @DatabaseChangeProperty(description = "List of operating systems on which to execute the command (taken from the os.name Java system property)", exampleValue = "Windows 7")
     public List<String> getOs() {
         return os;
     }

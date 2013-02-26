@@ -14,7 +14,7 @@ import java.math.BigInteger;
 /**
  * Modifies properties of an existing sequence. StartValue is not allowed since we cannot alter the starting sequence number
  */
-@DatabaseChange(name="alterSequence", description = "Alter Sequence", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "sequence")
+@DatabaseChange(name="alterSequence", description = "Alter properties of an existing sequence", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "sequence")
 public class AlterSequenceChange extends AbstractChange {
 
     private String catalogName;
@@ -53,6 +53,7 @@ public class AlterSequenceChange extends AbstractChange {
     }
 
 
+    @DatabaseChangeProperty(description = "New amount the sequence should increment by")
     public BigInteger getIncrementBy() {
         return incrementBy;
     }
@@ -61,6 +62,7 @@ public class AlterSequenceChange extends AbstractChange {
         this.incrementBy = incrementBy;
     }
 
+    @DatabaseChangeProperty(description = "New maximum value for the sequence")
     public BigInteger getMaxValue() {
         return maxValue;
     }
@@ -69,6 +71,7 @@ public class AlterSequenceChange extends AbstractChange {
         this.maxValue = maxValue;
     }
 
+    @DatabaseChangeProperty(description = "New minimum value for the sequence")
     public BigInteger getMinValue() {
         return minValue;
     }
@@ -77,6 +80,7 @@ public class AlterSequenceChange extends AbstractChange {
         this.minValue = minValue;
     }
 
+    @DatabaseChangeProperty(description = "Does the sequence need to be guaranteed to be genererated inm the order of request?")
     public Boolean isOrdered() {
         return ordered;
     }

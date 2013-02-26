@@ -9,7 +9,7 @@ import liquibase.structure.core.Column;
 /**
  * Drops a not-null constraint from an existing column.
  */
-@DatabaseChange(name="dropNotNullConstraint", description = "Drop Not-Null Constraint", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "column")
+@DatabaseChange(name="dropNotNullConstraint", description = "Makes a column nullable", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "column")
 public class DropNotNullConstraintChange extends AbstractChange {
 
     private String catalogName;
@@ -36,7 +36,7 @@ public class DropNotNullConstraintChange extends AbstractChange {
         this.schemaName = schemaName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "notNullConstraint.table")
+    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "notNullConstraint.table", description = "Name of the table containing that the column to drop the constraint from")
     public String getTableName() {
         return tableName;
     }
@@ -45,7 +45,7 @@ public class DropNotNullConstraintChange extends AbstractChange {
         this.tableName = tableName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "notNullConstraint.column")
+    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "notNullConstraint.column", description = "Name of the column to drop the constraint from")
     public String getColumnName() {
         return columnName;
     }
@@ -54,6 +54,7 @@ public class DropNotNullConstraintChange extends AbstractChange {
         this.columnName = columnName;
     }
 
+    @DatabaseChangeProperty(description = "Current data type of the column", requiredForDatabase = {"postgres","mssql", "mysql"})
     public String getColumnDataType() {
         return columnDataType;
     }

@@ -17,7 +17,7 @@ import java.util.List;
 /**
  * Combines data from two existing columns into a new column and drops the original columns.
  */
-@DatabaseChange(name="mergeColumns", description = "Merge Column", priority = ChangeMetaData.PRIORITY_DEFAULT)
+@DatabaseChange(name="mergeColumns", description = "Concatenates the values in two columns, joins them by with string, and stores the resulting value in a new column.", priority = ChangeMetaData.PRIORITY_DEFAULT)
 public class MergeColumnChange extends AbstractChange {
 
     private String catalogName;
@@ -50,7 +50,7 @@ public class MergeColumnChange extends AbstractChange {
         this.schemaName = schemaName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all")
+    @DatabaseChangeProperty(requiredForDatabase = "all", description = "Name of the table containing the columns to join")
     public String getTableName() {
         return tableName;
     }
@@ -59,7 +59,7 @@ public class MergeColumnChange extends AbstractChange {
         this.tableName = tableName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all")
+    @DatabaseChangeProperty(requiredForDatabase = "all", description = "Name of the column containing the first half of the data", exampleValue = "first_name")
     public String getColumn1Name() {
         return column1Name;
     }
@@ -68,6 +68,7 @@ public class MergeColumnChange extends AbstractChange {
         this.column1Name = column1Name;
     }
 
+    @DatabaseChangeProperty(description = "String to place include between the values from column1 and column2 (may be empty)", exampleValue = " ")
     public String getJoinString() {
         return joinString;
     }
@@ -76,7 +77,7 @@ public class MergeColumnChange extends AbstractChange {
         this.joinString = joinString;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all")
+    @DatabaseChangeProperty(requiredForDatabase = "all", description = "Name of the column containing the second half of the data", exampleValue = "last_name")
     public String getColumn2Name() {
         return column2Name;
     }
@@ -85,7 +86,7 @@ public class MergeColumnChange extends AbstractChange {
         this.column2Name = column2Name;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all")
+    @DatabaseChangeProperty(requiredForDatabase = "all", description = "Name of the column to create", exampleValue = "full_name")
     public String getFinalColumnName() {
         return finalColumnName;
     }
@@ -94,13 +95,21 @@ public class MergeColumnChange extends AbstractChange {
         this.finalColumnName = finalColumnName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all")
+    @DatabaseChangeProperty(requiredForDatabase = "all", description = "Data type of the column to create", exampleValue = "varchar(255)")
     public String getFinalColumnType() {
         return finalColumnType;
     }
 
     public void setFinalColumnType(String finalColumnType) {
         this.finalColumnType = finalColumnType;
+    }
+
+    @Override
+    public boolean generateStatementsVolatile(Database database) {
+        if (database instanceof SQLiteDatabase) {
+            return true;
+        }
+        return false;
     }
 
     public SqlStatement[] generateStatements(Database database) {

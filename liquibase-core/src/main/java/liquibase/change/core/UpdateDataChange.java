@@ -9,7 +9,7 @@ import liquibase.statement.core.UpdateStatement;
 import java.util.ArrayList;
 import java.util.List;
 
-@DatabaseChange(name = "update", description = "Update Data", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "table")
+@DatabaseChange(name = "update", description = "Updates data in an existing table", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "table")
 public class UpdateDataChange extends AbstractChange implements ChangeWithColumns<ColumnConfig> {
 
     private String catalogName;
@@ -41,7 +41,7 @@ public class UpdateDataChange extends AbstractChange implements ChangeWithColumn
         this.schemaName = schemaName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "table")
+    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "table", description = "Name of the table to update data in")
     public String getTableName() {
         return tableName;
     }
@@ -50,8 +50,8 @@ public class UpdateDataChange extends AbstractChange implements ChangeWithColumn
         this.tableName = tableName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all")
-    public List<ColumnConfig> getColumns() {
+    @DatabaseChangeProperty(requiredForDatabase = "all", description = "Data to update")
+    public List<ColumnConfig> getColumn() {
         return columns;
     }
 
@@ -67,7 +67,7 @@ public class UpdateDataChange extends AbstractChange implements ChangeWithColumn
         columns.remove(column);
     }
 
-    @DatabaseChangeProperty(serializationType = SerializationType.NESTED_OBJECT)
+    @DatabaseChangeProperty(serializationType = SerializationType.NESTED_OBJECT, description = "Where clause for update statement", exampleValue = "id = 2")
     public String getWhereClause() {
         return whereClause;
     }

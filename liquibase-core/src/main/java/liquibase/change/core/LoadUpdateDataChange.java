@@ -17,9 +17,19 @@ import liquibase.structure.core.Table;
 import java.util.ArrayList;
 import java.util.List;
 
-@DatabaseChange(name="loadUpdateData", description = "Smart Load Data", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "table")
+@DatabaseChange(name="loadUpdateData",
+        description = "Loads or updates data from a CSV file into an existing table. Differs from loadData by issuing a SQL batch that checks for the existence of a record. If found, the record is UPDATEd, else the record is INSERTed. Also, generates DELETE statements for a rollback.\n" +
+                "\n" +
+                "A value of NULL in a cell will be converted to a database NULL rather than the string 'NULL'",
+        priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "table", since = "2.0")
 public class LoadUpdateDataChange extends LoadDataChange {
     private String primaryKey;
+
+    @Override
+    @DatabaseChangeProperty(description = "Name of the table to insert or update data in")
+    public String getTableName() {
+        return super.getTableName();
+    }
 
     public void setPrimaryKey(String primaryKey) throws LiquibaseException {
         if (primaryKey == null) {
@@ -28,7 +38,7 @@ public class LoadUpdateDataChange extends LoadDataChange {
         this.primaryKey = primaryKey;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all")
+    @DatabaseChangeProperty(requiredForDatabase = "all", description = "Comma delimited list of the columns for the primary key")
     public String getPrimaryKey() {
         return primaryKey;
     }

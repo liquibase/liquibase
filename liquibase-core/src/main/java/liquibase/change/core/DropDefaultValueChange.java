@@ -9,7 +9,7 @@ import liquibase.structure.core.Column;
 /**
  * Removes the default value from an existing column.
  */
-@DatabaseChange(name="dropDefaultValue", description="Drop Default Value", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "column")
+@DatabaseChange(name="dropDefaultValue", description="Removes the database default value for a column", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "column")
 public class DropDefaultValueChange extends AbstractChange {
 
     private String catalogName;
@@ -36,7 +36,7 @@ public class DropDefaultValueChange extends AbstractChange {
         this.schemaName = schemaName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "column.relation")
+    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "column.relation", description = "Name of the table to containing the column")
     public String getTableName() {
         return tableName;
     }
@@ -45,7 +45,7 @@ public class DropDefaultValueChange extends AbstractChange {
         this.tableName = tableName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "column")
+    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "column", description = "Name of column to drop the default value from")
     public String getColumnName() {
         return columnName;
     }

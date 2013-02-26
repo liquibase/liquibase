@@ -5,7 +5,7 @@ import liquibase.database.Database;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.DeleteStatement;
 
-@DatabaseChange(name="delete", description = "Delete Data", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "table")
+@DatabaseChange(name="delete", description = "Deletes data from an existing table", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "table")
 public class DeleteDataChange extends AbstractChange {
 
     private String catalogName;
@@ -32,7 +32,7 @@ public class DeleteDataChange extends AbstractChange {
         this.schemaName = schemaName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "table")
+    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "table", description = "Name of the table to delete data from")
     public String getTableName() {
         return tableName;
     }
@@ -41,7 +41,7 @@ public class DeleteDataChange extends AbstractChange {
         this.tableName = tableName;
     }
 
-    @DatabaseChangeProperty(serializationType = SerializationType.NESTED_OBJECT)
+    @DatabaseChangeProperty(serializationType = SerializationType.NESTED_OBJECT, description = "Where clause for delete statement", exampleValue = "id = 2")
     public String getWhereClause() {
         return whereClause;
     }

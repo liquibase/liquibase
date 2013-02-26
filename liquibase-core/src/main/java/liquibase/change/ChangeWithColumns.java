@@ -15,6 +15,6 @@ public interface ChangeWithColumns<T extends ColumnConfig> {
     /**
      * Return all the {@link ColumnConfig} objects defined for this {@link Change }
      */
-    public List<T> getColumns();
+    public List<T> getColumn();
 
 }

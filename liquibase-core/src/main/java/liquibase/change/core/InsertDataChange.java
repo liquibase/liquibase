@@ -12,7 +12,7 @@ import java.util.List;
 /**
  * Inserts data into an existing table.
  */
-@DatabaseChange(name="insert", description = "Insert Row", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "table")
+@DatabaseChange(name="insert", description = "Inserts data into an existing table", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "table")
 public class InsertDataChange extends AbstractChange implements ChangeWithColumns<ColumnConfig> {
 
     private String catalogName;
@@ -42,7 +42,7 @@ public class InsertDataChange extends AbstractChange implements ChangeWithColumn
         this.schemaName = schemaName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "table")
+    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "table", description = "Name of the table to insert data into")
     public String getTableName() {
         return tableName;
     }
@@ -51,8 +51,8 @@ public class InsertDataChange extends AbstractChange implements ChangeWithColumn
         this.tableName = tableName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "table.column")
-    public List<ColumnConfig> getColumns() {
+    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "table.column", description = "Data to insert into columns")
+    public List<ColumnConfig> getColumn() {
         return columns;
     }
 

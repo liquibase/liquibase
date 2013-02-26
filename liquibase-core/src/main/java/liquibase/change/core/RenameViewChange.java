@@ -9,7 +9,7 @@ import liquibase.structure.core.View;
 /**
  * Renames an existing view.
  */
-@DatabaseChange(name="renameView", description = "Rename View", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "view")
+@DatabaseChange(name="renameView", description = "Renames an existing view", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "view")
 public class RenameViewChange extends AbstractChange {
     private String catalogName;
     private String schemaName;
@@ -34,7 +34,7 @@ public class RenameViewChange extends AbstractChange {
         this.schemaName = schemaName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "view")
+    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "view", description = "Name of the view to rename")
     public String getOldViewName() {
         return oldViewName;
     }
@@ -43,7 +43,7 @@ public class RenameViewChange extends AbstractChange {
         this.oldViewName = oldViewName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all")
+    @DatabaseChangeProperty(requiredForDatabase = "all", description = "Name to rename the view to")
     public String getNewViewName() {
         return newViewName;
     }

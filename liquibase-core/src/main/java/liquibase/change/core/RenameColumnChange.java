@@ -15,7 +15,7 @@ import java.util.List;
 /**
  * Renames an existing column.
  */
-@DatabaseChange(name="renameColumn", description = "Rename Column", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "column")
+@DatabaseChange(name="renameColumn", description = "Renames an existing column", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "column")
 public class RenameColumnChange extends AbstractChange {
 
     private String catalogName;
@@ -43,7 +43,7 @@ public class RenameColumnChange extends AbstractChange {
         this.schemaName = schemaName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "column.relation")
+    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "column.relation", description = "Name of the table containing that the column to rename")
     public String getTableName() {
         return tableName;
     }
@@ -52,7 +52,7 @@ public class RenameColumnChange extends AbstractChange {
         this.tableName = tableName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "column")
+    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "column", description = "Name of the existing column to rename")
     public String getOldColumnName() {
         return oldColumnName;
     }
@@ -61,7 +61,7 @@ public class RenameColumnChange extends AbstractChange {
         this.oldColumnName = oldColumnName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all")
+    @DatabaseChangeProperty(requiredForDatabase = "all", description = "Name to rename the column to")
     public String getNewColumnName() {
         return newColumnName;
     }
@@ -70,6 +70,7 @@ public class RenameColumnChange extends AbstractChange {
         this.newColumnName = newColumnName;
     }
 
+    @DatabaseChangeProperty(requiredForDatabase = "mysql", description = "Data type of the column")
     public String getColumnDataType() {
         return columnDataType;
     }

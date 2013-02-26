@@ -19,7 +19,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-@DatabaseChange(name="loadData", description = "Load Data", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "table")
+@DatabaseChange(name="loadData",
+        description = "Loads data from a CSV file into an existing table. A value of NULL in a cell will be converted to a database NULL rather than the string “NULL”\n" +
+                "\n" +
+                "Date/Time values included in the CSV file should be in ISO formathttp://en.wikipedia.org/wiki/ISO_8601 in order to be parsed correctly by Liquibase. Liquibase will initially set the date format to be “yyyy-MM-dd'T'HH:mm:ss” and then it checks for two special cases which will override the data format string.\n" +
+                "\n" +
+                "If the string representing the date/time includes a ”.”, then the date format is changed to “yyyy-MM-dd'T'HH:mm:ss.S”\n" +
+                "If the string representing the date/time includes a space, then the date format is changed to “yyyy-MM-dd HH:mm:ss”\n" +
+                "Once the date format string is set, Liquibase will then call the SimpleDateFormat.parse() method attempting to parse the input string so that it can return a Date/Time. If problems occur, then a ParseException is thrown and the input string is treated as a String for the INSERT command to be generated.",
+        priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "table",
+        since="1.7")
 public class LoadDataChange extends AbstractChange implements ChangeWithColumns<LoadDataColumnConfig> {
 
     private String catalogName;
@@ -32,6 +41,11 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
 
 
     private List<LoadDataColumnConfig> columns = new ArrayList<LoadDataColumnConfig>();
+
+    @Override
+    public boolean supports(Database database) {
+        return true;
+    }
 
     @DatabaseChangeProperty(mustEqualExisting ="table.catalog")
     public String getCatalogName() {
@@ -51,7 +65,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
         this.schemaName = schemaName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "table")
+    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "table", description = "Name of the table to insert data into")
     public String getTableName() {
         return tableName;
     }
@@ -60,7 +74,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
         this.tableName = tableName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all")
+    @DatabaseChangeProperty(requiredForDatabase = "all", description = "CSV file to load", exampleValue = "com/example/users.csv")
     public String getFile() {
         return file;
     }
@@ -69,6 +83,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
         this.file = file;
     }
 
+    @DatabaseChangeProperty(exampleValue = "UTF-8", description = "Encoding of the CSV file (defaults to UTF-8)")
     public String getEncoding() {
         return encoding;
     }
@@ -97,7 +112,8 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
       	columns.add(column);
     }
 
-    public List<LoadDataColumnConfig> getColumns() {
+    @DatabaseChangeProperty(description = "Defines how the data should be loaded.")
+    public List<LoadDataColumnConfig> getColumn() {
         return columns;
     }
 

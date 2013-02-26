@@ -38,13 +38,13 @@ public class AddColumnChangeTest extends StandardChangeTest {
     @Test
     public void addColumn() throws Exception {
         AddColumnChange change = new AddColumnChange();
-        assertEquals(0, change.getColumns().size());
+        assertEquals(0, change.getColumn().size());
 
         change.addColumn(new ColumnConfig().setName("a"));
-        assertEquals(1, change.getColumns().size());
+        assertEquals(1, change.getColumn().size());
 
         change.addColumn(new ColumnConfig().setName("b"));
-        assertEquals(2, change.getColumns().size());
+        assertEquals(2, change.getColumn().size());
     }
 
     @Test
@@ -53,19 +53,19 @@ public class AddColumnChangeTest extends StandardChangeTest {
         ColumnConfig columnB = new ColumnConfig().setName("b");
 
         AddColumnChange change = new AddColumnChange();
-        assertEquals(0, change.getColumns().size());
+        assertEquals(0, change.getColumn().size());
 
         change.removeColumn(columnA);
-        assertEquals(0, change.getColumns().size());
+        assertEquals(0, change.getColumn().size());
 
         change.addColumn(columnA);
-        assertEquals(1, change.getColumns().size());
+        assertEquals(1, change.getColumn().size());
 
         change.removeColumn(columnB);
-        assertEquals(1, change.getColumns().size());
+        assertEquals(1, change.getColumn().size());
 
         change.removeColumn(columnA);
-        assertEquals(0, change.getColumns().size());
+        assertEquals(0, change.getColumn().size());
     }
 
     @Override

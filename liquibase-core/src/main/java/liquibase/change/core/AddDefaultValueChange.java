@@ -16,7 +16,10 @@ import java.util.Locale;
 /**
  * Sets a new default value to an existing column.
  */
-@DatabaseChange(name="addDefaultValue", description = "Add Default Value", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "column")
+@DatabaseChange(name="addDefaultValue",
+        description = "Adds a default value to the database definition for the specified column.\n" +
+                "One of defaultValue, defaultValueNumeric, defaultValueBoolean or defaultValueDate must be set",
+        priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "column")
 public class AddDefaultValueChange extends AbstractChange {
 
     private String catalogName;
@@ -49,7 +52,7 @@ public class AddDefaultValueChange extends AbstractChange {
         this.schemaName = schemaName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "column.relation")
+    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "column.relation",description = "Name of the table to containing the column", exampleValue = "file")
     public String getTableName() {
         return tableName;
     }
@@ -58,7 +61,7 @@ public class AddDefaultValueChange extends AbstractChange {
         this.tableName = tableName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "column")
+    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "column", description = "Name of the column to add a default value to", exampleValue = "fileName")
     public String getColumnName() {
         return columnName;
     }
@@ -75,6 +78,7 @@ public class AddDefaultValueChange extends AbstractChange {
 		this.columnDataType = columnDataType;
 	}
 
+    @DatabaseChangeProperty(description = "Default value", exampleValue = "newfile.txt")
     public String getDefaultValue() {
         return defaultValue;
     }
