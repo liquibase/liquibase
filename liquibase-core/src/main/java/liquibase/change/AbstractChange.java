@@ -6,6 +6,8 @@ import java.util.*;
 
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
+import liquibase.database.DatabaseFactory;
+import liquibase.logging.LogFactory;
 import liquibase.structure.DatabaseObject;
 import liquibase.exception.*;
 import liquibase.resource.ResourceAccessor;
@@ -164,8 +166,8 @@ public abstract class AbstractChange implements Change {
     }
 
     /**
-     * Implementation delegates logic to the {@link liquibase.sqlgenerator.SqlGenerator#generateStatementsVolatile(Database) } method on the {@link SqlStatement} objects returned by {@link #generateStatements }.
-     * If no or null SqlStatements are returned by generateStatements then this method returns false.
+     * Implementation delegates logic to the {@link liquibase.sqlgenerator.SqlGenerator#generateStatementsIsVolatile(Database) } method on the {@link SqlStatement} objects returned by {@link #generateStatements }.
+     * If zero or null SqlStatements are returned by generateStatements then this method returns false.
      * Returns false if generateStatements throws UnsupportedChangeException.
      */
     public boolean generateStatementsVolatile(Database database) {
@@ -187,7 +189,7 @@ public abstract class AbstractChange implements Change {
     }
 
     /**
-     * Implementation delegates logic to the {@link liquibase.sqlgenerator.SqlGenerator#generateRollbackStatementsVolatile(Database) } method on the {@link SqlStatement} objects returned by {@link #generateStatements }
+     * Implementation delegates logic to the {@link liquibase.sqlgenerator.SqlGenerator#generateRollbackStatementsIsVolatile(Database) } method on the {@link SqlStatement} objects returned by {@link #generateStatements }
      * If no or null SqlStatements are returned by generateRollbackStatements then this method returns false.
      * Returns false if generateStatements throws UnsupportedChangeException.
      */

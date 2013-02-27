@@ -1,6 +1,7 @@
 package liquibase.sqlgenerator;
 
 import liquibase.database.Database;
+import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.structure.DatabaseObject;
 import liquibase.exception.ValidationErrors;
 import liquibase.exception.Warnings;
@@ -179,7 +180,7 @@ public class SqlGeneratorFactory {
      */
     public boolean generateStatementsVolatile(SqlStatement statement, Database database) {
         for (SqlGenerator generator : getGenerators(statement, database)) {
-            if (generator.generateStatementsVolatile(database)) {
+            if (generator.generateStatementsIsVolatile(database)) {
                 return true;
             }
         }
@@ -188,7 +189,7 @@ public class SqlGeneratorFactory {
 
     public boolean generateRollbackStatementsVolatile(SqlStatement statement, Database database) {
         for (SqlGenerator generator : getGenerators(statement, database)) {
-            if (generator.generateRollbackStatementsVolatile(database)) {
+            if (generator.generateRollbackStatementsIsVolatile(database)) {
                 return true;
             }
         }
@@ -201,7 +202,11 @@ public class SqlGeneratorFactory {
 
     public ValidationErrors validate(SqlStatement statement, Database database) {
         //noinspection unchecked
-        return createGeneratorChain(statement, database).validate(statement, database);
+        SqlGeneratorChain generatorChain = createGeneratorChain(statement, database);
+        if (generatorChain == null) {
+            throw new UnexpectedLiquibaseException("Unable to create generator chain for "+statement.getClass().getName()+" on "+database.getShortName());
+        }
+        return generatorChain.validate(statement, database);
     }
 
     public Warnings warn(SqlStatement statement, Database database) {
