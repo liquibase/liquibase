@@ -12,6 +12,7 @@ import liquibase.structure.core.Table;
 import liquibase.util.StringUtils;
 import liquibase.util.csv.CSVReader;
 
+import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -267,6 +268,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
             if (stream == null) {
                 throw new RuntimeException(getFile() + " could not be found");
             }
+            stream = new BufferedInputStream(stream);
             return CheckSum.compute(stream, true);
         } catch (IOException e) {
             throw new RuntimeException(e);
