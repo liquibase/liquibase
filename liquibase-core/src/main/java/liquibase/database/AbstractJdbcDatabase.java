@@ -914,7 +914,7 @@ public abstract class AbstractJdbcDatabase implements Database {
     }
 
     public boolean doesTagExist(String tag) throws DatabaseException {
-        int count = ExecutorService.getInstance().getExecutor(this).queryForInt(new SelectFromDatabaseChangeLogStatement(new SelectFromDatabaseChangeLogStatement.ByTag("tag"), "COUNT(*)"));
+        int count = ExecutorService.getInstance().getExecutor(this).queryForInt(new SelectFromDatabaseChangeLogStatement(new SelectFromDatabaseChangeLogStatement.ByTag(tag), "COUNT(*)"));
         return count > 0;
     }
 
