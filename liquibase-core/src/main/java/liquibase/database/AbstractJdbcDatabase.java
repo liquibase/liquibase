@@ -1258,7 +1258,7 @@ public abstract class AbstractJdbcDatabase implements Database {
     }
 
     /**
-     * Default implementation, just look for "local" IPs
+     * Default implementation, just look for "local" IPs. If the database returns a null URL we return false since we don't know it's safe to run the update.
      *
      * @throws liquibase.exception.DatabaseException
      *
@@ -1269,6 +1269,9 @@ public abstract class AbstractJdbcDatabase implements Database {
             return true;
         }
         String url = connection.getURL();
+        if (url == null) {
+            return false;
+        }
         return (url.contains("localhost")) || (url.contains("127.0.0.1"));
     }
 
