@@ -60,7 +60,7 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
     }
 
     @DatabaseChangeProperty(requiredForDatabase = "all", description = "Column constraint and foreign key information. Setting the \"defaultValue\" attribute will specify a default value for the column. Setting the \"value\" attribute will set all rows existing to the specified value without modifying the column default.")
-    public List<ColumnConfig> getColumn() {
+    public List<ColumnConfig> getColumns() {
         return column;
     }
 
@@ -89,7 +89,7 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
 
         List<SqlStatement> sql = new ArrayList<SqlStatement>();
 
-        for (ColumnConfig column : getColumn()) {
+        for (ColumnConfig column : getColumns()) {
             Set<ColumnConstraint> constraints = new HashSet<ColumnConstraint>();
             ConstraintsConfig constraintsConfig =column.getConstraints();
             if (constraintsConfig != null) {
@@ -134,7 +134,7 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
             }
         }
 
-      for (ColumnConfig column : getColumn()) {
+      for (ColumnConfig column : getColumns()) {
           String columnRemarks = StringUtils.trimToNull(column.getRemarks());
           if (columnRemarks != null) {
               SetColumnRemarksStatement remarksStatement = new SetColumnRemarksStatement(catalogName, schemaName, tableName, column.getName(), columnRemarks);

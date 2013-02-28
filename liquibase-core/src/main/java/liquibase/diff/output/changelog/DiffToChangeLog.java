@@ -137,7 +137,7 @@ public class DiffToChangeLog {
                 }
                 String objectName = object.getName();
                 Database targetDatabase = diffResult.getReferenceSnapshot().getDatabase();
-                if (!objectName.equals(targetDatabase.correctObjectName(objectName, object.getClass()))) {
+                if (objectName != null && !objectName.equals(targetDatabase.correctObjectName(objectName, object.getClass()))) {
                     quotingStrategy = ObjectQuotingStrategy.QUOTE_ALL_OBJECTS;
                 }
                 Change[] changes = changeGeneratorFactory.fixMissing(object, diffOutputControl, diffResult.getReferenceSnapshot().getDatabase(), diffResult.getComparisonSnapshot().getDatabase());
@@ -155,7 +155,7 @@ public class DiffToChangeLog {
                 if (!diffResult.getComparisonSnapshot().getDatabase().isLiquibaseObject(object) && !diffResult.getComparisonSnapshot().getDatabase().isSystemObject(object)) {
                     String objectName = object.getName();
                     Database targetDatabase = diffResult.getReferenceSnapshot().getDatabase();
-                    if (!objectName.equals(targetDatabase.correctObjectName(objectName, object.getClass()))) {
+                    if (objectName != null && !objectName.equals(targetDatabase.correctObjectName(objectName, object.getClass()))) {
                         quotingStrategy = ObjectQuotingStrategy.QUOTE_ALL_OBJECTS;
                     }
                     addToChangeSets(changes, changeSets, quotingStrategy);
