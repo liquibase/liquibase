@@ -30,6 +30,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
     private Set<String> reservedWords = new HashSet<String>();
 
     public OracleDatabase() {
+        super.unquotedObjectsAreUppercased=true;
         super.setCurrentDateTimeFunction("SYSTIMESTAMP");
         // Setting list of Oracle's native functions
         dateFunctions.add(new DatabaseFunction("SYSDATE"));
