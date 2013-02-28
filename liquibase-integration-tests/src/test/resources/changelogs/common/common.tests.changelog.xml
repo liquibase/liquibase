@@ -191,6 +191,13 @@
         </sql>
     </changeSet>
 
+    <changeSet id="continue-preconditions-dont-fire" author="nvoxland">
+        <preConditions onError="CONTINUE">
+            <sqlCheck expectedResult="3">Invalid SQL</sqlCheck>
+        </preConditions>
+        <sql>More invalid SQL. should not run due to "continue"</sql>
+    </changeSet>
+    
     <changeSet id="add-column-test1" author="alan">
         <preConditions onFail="MARK_RAN">
             <not>

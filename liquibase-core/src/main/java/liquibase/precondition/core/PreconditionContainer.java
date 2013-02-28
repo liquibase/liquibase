@@ -228,6 +228,7 @@ public class PreconditionContainer extends AndPrecondition {
 
             if (this.getOnError().equals(PreconditionContainer.ErrorOption.CONTINUE)) {
                 LogFactory.getLogger().info("Continuing past: " + toString() + " despite precondition error:\n " + message);
+                throw e;
             } else if (this.getOnError().equals(PreconditionContainer.ErrorOption.WARN)) {
                 LogFactory.getLogger().warning("Continuing past: " + toString() + " despite precondition error:\n " + message);
             } else {
