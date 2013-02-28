@@ -51,7 +51,7 @@ public class UpdateDataChange extends AbstractChange implements ChangeWithColumn
     }
 
     @DatabaseChangeProperty(requiredForDatabase = "all", description = "Data to update")
-    public List<ColumnConfig> getColumn() {
+    public List<ColumnConfig> getColumns() {
         return columns;
     }
 
