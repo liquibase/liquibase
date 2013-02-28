@@ -20,12 +20,7 @@ import java.util.TreeSet;
 
 import liquibase.change.*;
 import liquibase.change.DatabaseChangeProperty;
-import liquibase.change.core.AddColumnChange;
-import liquibase.change.core.AddForeignKeyConstraintChange;
-import liquibase.change.core.AddUniqueConstraintChange;
-import liquibase.change.core.LoadDataColumnConfig;
-import liquibase.change.core.RawSQLChange;
-import liquibase.change.core.SQLFileChange;
+import liquibase.change.core.*;
 import liquibase.change.custom.CustomChangeWrapper;
 import liquibase.change.custom.CustomSqlChange;
 import liquibase.change.custom.ExampleCustomSqlChange;
@@ -405,5 +400,21 @@ public class StringChangeLogSerializerTest {
         setFields(config);
         return config;
     }
-  
+
+    @Test
+    public void serialize_withDoubleOnJava6() {
+        InsertDataChange change = new InsertDataChange();
+        change.setTableName("NUMBER_TABLE");
+        change.addColumn(new ColumnConfig().setName("VALUE").setValueNumeric(new Double("0.001")));
+        String out = new StringChangeLogSerializer().serialize(change, true);
+        assertEquals("insert:[\n" +
+                "    column=[\n" +
+                "        [\n" +
+                "            name=\"VALUE\"\n" +
+                "            valueNumeric=\"0.001\"\n" +
+                "        ]\n" +
+                "    ]\n" +
+                "    tableName=\"NUMBER_TABLE\"\n" +
+                "]", out);
+    }
 }

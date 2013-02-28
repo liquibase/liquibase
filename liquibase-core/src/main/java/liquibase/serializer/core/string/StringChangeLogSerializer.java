@@ -47,7 +47,13 @@ public class StringChangeLogSerializer implements ChangeLogSerializer {
                         } else if (value instanceof Object[]) {
                             values.add(indent(indent) + field + "=" + serializeObject((Object[]) value, indent + 1));
                         } else {
-                            values.add(indent(indent) + field + "=\"" + value.toString() + "\"");
+                            String valueString = value.toString();
+                            if (value instanceof Double || value instanceof Float) { //java 6 adds additional zeros to the end of doubles and floats
+                                if (valueString.contains(".")) {
+                                    valueString = valueString.replaceFirst("0*$","");
+                                }
+                            }
+                            values.add(indent(indent) + field + "=\"" + valueString + "\"");
                         }
                     }
                 }

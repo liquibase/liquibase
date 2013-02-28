@@ -55,7 +55,7 @@ public class UpdateDataChange extends AbstractChange implements ChangeWithColumn
         return columns;
     }
 
-    public void setColumns(List<ColumnConfig> columns) {
+    public void setColumn(List<ColumnConfig> columns) {
         this.columns = columns;
     }
 
