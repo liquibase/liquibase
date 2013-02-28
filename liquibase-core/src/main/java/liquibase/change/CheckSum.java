@@ -1,7 +1,9 @@
 package liquibase.change;
 
 import liquibase.util.MD5Util;
+import liquibase.util.StringUtils;
 
+import java.io.IOException;
 import java.io.InputStream;
 
 /**
@@ -39,21 +41,43 @@ public class CheckSum {
      * Return the current CheckSum algorithm version.
      */
     public static int getCurrentVersion() {
-        return 5;
+        return 6;
     }
 
     /**
      * Compute a checksum of the given string.
      */
     public static CheckSum compute(String valueToChecksum) {
-        return new CheckSum(MD5Util.computeMD5(valueToChecksum), getCurrentVersion());
+        return new CheckSum(MD5Util.computeMD5(StringUtils.standardizeLineEndings(valueToChecksum)), getCurrentVersion());
     }
 
     /**
      * Compute a checksum of the given data stream.
      */
-    public static CheckSum compute(InputStream stream) {
-        return new CheckSum(MD5Util.computeMD5(stream), getCurrentVersion());
+    public static CheckSum compute(final InputStream stream, boolean standardizeLineEndings) {
+        InputStream newStream = stream;
+        if (standardizeLineEndings) {
+            newStream = new InputStream() {
+                int lastChar = 'X';
+
+                @Override
+                public int read() throws IOException {
+                    int read = stream.read();
+                    int returnChar = read;
+                    if (returnChar == '\r') {
+                        returnChar = '\n';
+                    }
+                    if (lastChar == '\r' && returnChar == '\n') {
+                        returnChar = stream.read(); //read next char
+                    }
+
+                    lastChar = read;
+                    return returnChar;
+                }
+            };
+        }
+
+        return new CheckSum(MD5Util.computeMD5(newStream), getCurrentVersion());
     }
 
     @Override

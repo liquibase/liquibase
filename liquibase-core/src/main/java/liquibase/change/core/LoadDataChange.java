@@ -267,7 +267,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
             if (stream == null) {
                 throw new RuntimeException(getFile() + " could not be found");
             }
-            return CheckSum.compute(stream);
+            return CheckSum.compute(stream, true);
         } catch (IOException e) {
             throw new RuntimeException(e);
         } finally {

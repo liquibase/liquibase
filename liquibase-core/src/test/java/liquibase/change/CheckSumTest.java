@@ -44,7 +44,7 @@ public class CheckSumTest {
     @Test
     public void compute_Stream() {
         String valueToHash = "asdf";
-        CheckSum checkSum = CheckSum.compute(new ByteArrayInputStream(valueToHash.getBytes()));
+        CheckSum checkSum = CheckSum.compute(new ByteArrayInputStream(valueToHash.getBytes()), false);
         assertEquals(CheckSum.getCurrentVersion(), checkSum.getVersion());
         assertFalse(checkSum.toString().equals(valueToHash));
         assertEquals(CheckSum.compute(valueToHash).toString(), checkSum.toString());
@@ -68,5 +68,20 @@ public class CheckSumTest {
 
         assertFalse(CheckSum.parse("9:asdf").equals(12));
         assertFalse(CheckSum.parse("9:asdf").equals(null));
+    }
+
+    @Test
+    public void compute_lineEndingsDontMatter() {
+        String checkSum = CheckSum.compute("a string\nwith\nlines").toString();
+        assertEquals(checkSum, CheckSum.compute("a string\rwith\rlines").toString());
+        assertEquals(checkSum, CheckSum.compute("a string\r\nwith\r\nlines").toString());
+        assertEquals(checkSum, CheckSum.compute("a string\rwith\nlines").toString());
+
+        assertFalse(checkSum.equals(CheckSum.compute("a string\n\nwith\n\nlines").toString()));
+
+        assertEquals(checkSum, CheckSum.compute(new ByteArrayInputStream("a string\nwith\nlines".getBytes()), true).toString());
+        assertEquals(checkSum, CheckSum.compute(new ByteArrayInputStream("a string\rwith\rlines".getBytes()), true).toString());
+        assertEquals(checkSum, CheckSum.compute(new ByteArrayInputStream("a string\r\nwith\r\nlines".getBytes()), true).toString());
+        assertEquals(checkSum, CheckSum.compute(new ByteArrayInputStream("a string\rwith\r\nlines".getBytes()), true).toString());
     }
 }

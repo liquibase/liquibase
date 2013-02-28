@@ -175,4 +175,11 @@ public class StringUtils {
     public static String upperCaseFirst(String string) {
         return string.substring(0, 1).toUpperCase()+string.substring(1);
     }
+
+    public static String standardizeLineEndings(String string) {
+        if (string == null) {
+            return null;
+        }
+        return string.replace("\r\n", "\n").replace("\r","\n");
+    }
 }
