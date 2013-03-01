@@ -1,6 +1,7 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
+import liquibase.database.ObjectQuotingStrategy;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
@@ -21,6 +22,12 @@ public class UpdateGenerator extends AbstractSqlGenerator<UpdateStatement> {
     }
 
     public Sql[] generateSql(UpdateStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+        // always use LEGACY quoting strategy if working with liquibase objects
+        ObjectQuotingStrategy currentStrategy = database.getObjectQuotingStrategy();
+        if (statement.isForLiquibaseObject()) {
+            database.setObjectQuotingStrategy(ObjectQuotingStrategy.LEGACY);
+        }
+
         StringBuffer sql = new StringBuffer("UPDATE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " SET");
         for (String column : statement.getNewColumnValues().keySet()) {
             sql.append(" ").append(database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), column)).append(" = ");
@@ -40,6 +47,7 @@ public class UpdateGenerator extends AbstractSqlGenerator<UpdateStatement> {
             sql.append(" ").append(fixedWhereClause);
         }
 
+        database.setObjectQuotingStrategy(currentStrategy);
         return new Sql[]{
                 new UnparsedSql(sql.toString())
         };

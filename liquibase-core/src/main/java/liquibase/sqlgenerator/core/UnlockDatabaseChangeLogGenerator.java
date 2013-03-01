@@ -1,6 +1,7 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
+import liquibase.database.ObjectQuotingStrategy;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sqlgenerator.SqlGenerator;
@@ -16,14 +17,20 @@ public class UnlockDatabaseChangeLogGenerator extends AbstractSqlGenerator<Unloc
     }
 
     public Sql[] generateSql(UnlockDatabaseChangeLogStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-    	String liquibaseSchema = database.getLiquibaseSchemaName();
+    	// use LEGACY quoting strategy when dealing with liquibase objects
+        ObjectQuotingStrategy currentStrategy = database.getObjectQuotingStrategy();
+        database.setObjectQuotingStrategy(ObjectQuotingStrategy.LEGACY);
+
+        String liquibaseSchema = database.getLiquibaseSchemaName();
 
         UpdateStatement releaseStatement = new UpdateStatement(database.getLiquibaseCatalogName(), liquibaseSchema, database.getDatabaseChangeLogLockTableName());
         releaseStatement.addNewColumnValue("LOCKED", false);
         releaseStatement.addNewColumnValue("LOCKGRANTED", null);
         releaseStatement.addNewColumnValue("LOCKEDBY", null);
         releaseStatement.setWhereClause(database.escapeColumnName(database.getLiquibaseCatalogName(), liquibaseSchema, database.getDatabaseChangeLogTableName(), "ID")+" = 1");
+        releaseStatement.setForLiquibaseObject(true);
 
+        database.setObjectQuotingStrategy(currentStrategy);
         return SqlGeneratorFactory.getInstance().generateSql(releaseStatement, database);
     }
 }

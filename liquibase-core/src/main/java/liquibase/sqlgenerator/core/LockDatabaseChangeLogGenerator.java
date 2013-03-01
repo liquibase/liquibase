@@ -1,6 +1,7 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
+import liquibase.database.ObjectQuotingStrategy;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
@@ -38,6 +39,9 @@ public class LockDatabaseChangeLogGenerator extends AbstractSqlGenerator<LockDat
     	String liquibaseSchema = database.getLiquibaseSchemaName();
         String liquibaseCatalog = database.getLiquibaseCatalogName();
 
+        // always use LEGACY quoting strategy for liquibase objects.
+        ObjectQuotingStrategy currentStrategy = database.getObjectQuotingStrategy();
+        database.setObjectQuotingStrategy(ObjectQuotingStrategy.LEGACY);
 
 
         UpdateStatement updateStatement = new UpdateStatement(liquibaseCatalog, liquibaseSchema, database.getDatabaseChangeLogLockTableName());
@@ -45,7 +49,9 @@ public class LockDatabaseChangeLogGenerator extends AbstractSqlGenerator<LockDat
         updateStatement.addNewColumnValue("LOCKGRANTED", new Timestamp(new java.util.Date().getTime()));
         updateStatement.addNewColumnValue("LOCKEDBY", hostname + " (" + hostaddress + ")");
         updateStatement.setWhereClause(database.escapeColumnName(liquibaseCatalog, liquibaseSchema, database.getDatabaseChangeLogTableName(), "ID") + " = 1 AND " + database.escapeColumnName(liquibaseCatalog, liquibaseSchema, database.getDatabaseChangeLogTableName(), "LOCKED") + " = "+ DataTypeFactory.getInstance().fromDescription("boolean").objectToSql(false, database));
+        updateStatement.setForLiquibaseObject(true);
 
+        database.setObjectQuotingStrategy(currentStrategy);
         return SqlGeneratorFactory.getInstance().generateSql(updateStatement, database);
 
     }

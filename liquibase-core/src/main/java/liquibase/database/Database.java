@@ -313,7 +313,18 @@ public interface Database extends PrioritizedService {
      */
     String generateDatabaseFunctionValue(DatabaseFunction databaseFunction);
 
+    /**
+     * Strategy for quoting of objects.
+     * E.g. QUOTE_ALL_OBJECTS will quote all objects thus maintaining case.
+     *
+     * @param quotingStrategy quoting strategy to use
+     */
     void setObjectQuotingStrategy(ObjectQuotingStrategy quotingStrategy);
+
+    /**
+     * @return The current quoting strategy used by the database.
+     */
+    ObjectQuotingStrategy getObjectQuotingStrategy();
 
 }
 

@@ -1,6 +1,7 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
+import liquibase.database.ObjectQuotingStrategy;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
@@ -20,6 +21,10 @@ public class SelectFromDatabaseChangeLogGenerator extends AbstractSqlGenerator<S
     }
 
     public Sql[] generateSql(SelectFromDatabaseChangeLogStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+        // always use LEGACY quoting strategy if working with liquibase objects
+        ObjectQuotingStrategy currentStrategy = database.getObjectQuotingStrategy();
+        database.setObjectQuotingStrategy(ObjectQuotingStrategy.LEGACY);
+
         String sql = "SELECT " + StringUtils.join(statement.getColumnsToSelect(), ",").toUpperCase() + " FROM " +
                 database.escapeTableName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName());
 
@@ -37,6 +42,8 @@ public class SelectFromDatabaseChangeLogGenerator extends AbstractSqlGenerator<S
         if (statement.getOrderByColumns() != null && statement.getOrderByColumns().length > 0) {
             sql += " ORDER BY "+StringUtils.join(statement.getOrderByColumns(), ", ").toUpperCase();
         }
+
+        database.setObjectQuotingStrategy(currentStrategy);
 
         return new Sql[]{
                 new UnparsedSql(sql)

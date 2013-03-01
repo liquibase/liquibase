@@ -29,9 +29,12 @@ public class CreateDatabaseChangeLogLockTableGenerator extends AbstractSqlGenera
                 .addColumn("LOCKGRANTED", DataTypeFactory.getInstance().fromDescription("DATETIME"))
                 .addColumn("LOCKEDBY", DataTypeFactory.getInstance().fromDescription("VARCHAR(255)"));
 
+        createTableStatement.setForLiquibaseObject(true);
+
         InsertStatement insertStatement = new InsertStatement(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName())
                 .addColumnValue("ID", 1)
                 .addColumnValue("LOCKED", Boolean.FALSE);
+        insertStatement.setForLiquibaseObject(true);
 
         List<Sql> sql = new ArrayList<Sql>();
 

@@ -1409,6 +1409,10 @@ public abstract class AbstractJdbcDatabase implements Database {
         this.quotingStrategy = quotingStrategy;
     }
 
+    public ObjectQuotingStrategy getObjectQuotingStrategy() {
+        return this.quotingStrategy;
+    }
+
     public String generateDatabaseFunctionValue(final DatabaseFunction databaseFunction) {
         if (databaseFunction.getValue() == null) {
             return null;

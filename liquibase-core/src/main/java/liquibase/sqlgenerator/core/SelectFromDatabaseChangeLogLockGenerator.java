@@ -1,6 +1,7 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
+import liquibase.database.ObjectQuotingStrategy;
 import liquibase.database.core.OracleDatabase;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
@@ -20,7 +21,11 @@ public class SelectFromDatabaseChangeLogLockGenerator extends AbstractSqlGenerat
     }
 
     public Sql[] generateSql(SelectFromDatabaseChangeLogLockStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-    	String liquibaseSchema;
+        // always use LEGACY quoting strategy if working with liquibase objects
+        ObjectQuotingStrategy currentStrategy = database.getObjectQuotingStrategy();
+        database.setObjectQuotingStrategy(ObjectQuotingStrategy.LEGACY);
+
+        String liquibaseSchema;
    		liquibaseSchema = database.getLiquibaseSchemaName();
 		
 		String[] columns = statement.getColumnsToSelect();
@@ -37,6 +42,8 @@ public class SelectFromDatabaseChangeLogLockGenerator extends AbstractSqlGenerat
         if (database instanceof OracleDatabase) {
             sql += " FOR UPDATE";
         }
+
+        database.setObjectQuotingStrategy(currentStrategy);
         return new Sql[] {
                 new UnparsedSql(sql)
         };
