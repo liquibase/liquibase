@@ -113,7 +113,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
     }
 
     @DatabaseChangeProperty(description = "Defines how the data should be loaded.")
-    public List<LoadDataColumnConfig> getColumn() {
+    public List<LoadDataColumnConfig> getColumns() {
         return columns;
     }
 

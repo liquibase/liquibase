@@ -52,7 +52,7 @@ public class InsertDataChange extends AbstractChange implements ChangeWithColumn
     }
 
     @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "table.column", description = "Data to insert into columns")
-    public List<ColumnConfig> getColumn() {
+    public List<ColumnConfig> getColumns() {
         return columns;
     }
 
