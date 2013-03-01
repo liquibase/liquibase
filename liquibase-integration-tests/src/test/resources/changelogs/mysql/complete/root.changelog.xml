@@ -200,7 +200,7 @@
     </changeSet>
 
     <changeSet id="25.1" author="nvoxland">
-        <addNotNullConstraint tableName="address" columnName="id" columnDataType="int"/>
+        <addNotNullConstraint tableName="address" columnName="id" columnDataType="int" defaultNullValue="0"/>
     </changeSet>
 
     <changeSet id="25.2" author="nvoxland">

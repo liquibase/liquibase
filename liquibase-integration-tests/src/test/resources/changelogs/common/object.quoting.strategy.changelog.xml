@@ -28,19 +28,28 @@
             <column name="testId" type="int" />
         </createTable>
 
-        <sql>select "iD" from "mixedCase"</sql>
     </changeSet>
 
-    <changeSet id="4" author="dbiggs">
+     <changeSet id="4" author="dbiggs" dbms="oracle,h2,hsqldb,postgresql">
+       <comment>Verify databases that use quoting</comment>
+       <sql>select "iD" from "mixedCase"</sql>
+     </changeSet>
+
+    <changeSet id="5" author="dbiggs" dbms="mysql">
+      <comment>Verify mysql, everything is always case sensitive in mysql</comment>
+      <sql>select iD from mixedCase</sql>
+    </changeSet>
+
+    <changeSet id="6" author="dbiggs">
         <createIndex tableName="mixedCase" indexName="testIndex">
           <column name="testId"/>
         </createIndex>
     </changeSet>
 
-   <changeSet id="5" author="dbiggs">
-     <preConditions>
-        <indexExists indexName="testIndex" />
-     </preConditions>
-   </changeSet>
+     <changeSet id="7" author="dbiggs">
+       <preConditions>
+          <indexExists indexName="testIndex" />
+       </preConditions>
+     </changeSet>
 
 </databaseChangeLog>

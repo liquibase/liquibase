@@ -149,7 +149,7 @@
     </changeSet>
 
     <changeSet id="nullable-1" author="nvoxland">
-        <addNotNullConstraint tableName="compoundPKTest" columnName="name" columnDataType="varchar(255)"/>
+        <addNotNullConstraint tableName="compoundPKTest" columnName="name" columnDataType="varchar(255)" defaultNullValue="testValue"/>
     </changeSet>
     <changeSet id="nullable-2" author="nvoxland">
         <dropNotNullConstraint tableName="compoundPKTest" columnName="name" columnDataType="varchar(255)"/>
@@ -317,7 +317,7 @@
     </changeSet>
 
     <changeSet id="makeNotnulltest" author="nvoxland">
-        <addNotNullConstraint tableName="commonTypesTest" columnName="intColumn" columnDataType="int"/>
+        <addNotNullConstraint tableName="commonTypesTest" columnName="intColumn" columnDataType="int" defaultNullValue="0"/>
     </changeSet>
 
     <changeSet id="makenulltest" author="nvoxland">
