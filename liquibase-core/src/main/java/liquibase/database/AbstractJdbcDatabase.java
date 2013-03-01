@@ -65,7 +65,8 @@ public abstract class AbstractJdbcDatabase implements Database {
      */
     protected String sequenceNextValueFunction;
     protected String sequenceCurrentValueFunction;
-    protected String quotingCharacter = "\"";
+    protected String quotingStartCharacter = "\"";
+    protected String quotingEndCharacter = "\"";
 
     // List of Database native functions.
     protected List<DatabaseFunction> dateFunctions = new ArrayList<DatabaseFunction>();
@@ -276,7 +277,8 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     public String correctObjectName(String objectName, Class<? extends DatabaseObject> objectType) {
         if (quotingStrategy == ObjectQuotingStrategy.QUOTE_ALL_OBJECTS || unquotedObjectsAreUppercased == null
-                || objectName == null || (objectName.startsWith(quotingCharacter) && objectName.endsWith(quotingCharacter))) {
+                || objectName == null || (objectName.startsWith(quotingStartCharacter) && objectName.endsWith(
+                quotingEndCharacter))) {
             return objectName;
         } else if (unquotedObjectsAreUppercased == Boolean.TRUE) {
             return objectName.toUpperCase();
@@ -979,9 +981,9 @@ public abstract class AbstractJdbcDatabase implements Database {
         if (objectName == null || quotingStrategy == ObjectQuotingStrategy.LEGACY) {
             return objectName;
         } else if (objectName.contains("-") || startsWithNumeric(objectName) || isReservedWord(objectName)) {
-            return quotingCharacter + objectName + quotingCharacter;
+            return quotingStartCharacter + objectName + quotingEndCharacter;
         } else if (quotingStrategy == ObjectQuotingStrategy.QUOTE_ALL_OBJECTS) {
-            return quotingCharacter + objectName + quotingCharacter;
+            return quotingStartCharacter + objectName + quotingEndCharacter;
         }
         return objectName;
     }

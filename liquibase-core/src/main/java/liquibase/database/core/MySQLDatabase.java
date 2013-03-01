@@ -20,6 +20,9 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
 
     public MySQLDatabase() {
         super.setCurrentDateTimeFunction("NOW()");
+        // objects in mysql are always case sensitive
+        super.quotingStartCharacter ="";
+        super.quotingEndCharacter="";
     }
 
     public String getShortName() {
@@ -37,10 +40,7 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
         if (objectType.equals(PrimaryKey.class) && name.equals("PRIMARY")) {
             return null;
         } else {
-            if (name == null) {
-                return null;
-            }
-            return name.toLowerCase(); //todo: handle case sensitive
+            return super.correctObjectName(name, objectType);
         }
     }
 
