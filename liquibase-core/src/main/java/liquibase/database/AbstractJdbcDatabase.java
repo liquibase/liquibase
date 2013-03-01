@@ -1009,15 +1009,18 @@ public abstract class AbstractJdbcDatabase implements Database {
     }
 
     public String escapeColumnNameList(String columnNames) {
+        return escapeColumnNameArray(columnNames.split(","));
+    }
+
+    public String escapeColumnNameArray(final String[] columnNames) {
         StringBuffer sb = new StringBuffer();
-        for (String columnName : columnNames.split(",")) {
+        for (String columnName : columnNames) {
             if (sb.length() > 0) {
                 sb.append(", ");
             }
             sb.append(escapeObjectName(columnName.trim(), Column.class));
         }
         return sb.toString();
-
     }
 
     public boolean supportsSchemas() {
@@ -1110,8 +1113,10 @@ public abstract class AbstractJdbcDatabase implements Database {
         ranChangeSetList = new ArrayList<RanChangeSet>();
         if (hasDatabaseChangeLogTable()) {
             LogFactory.getLogger().info("Reading from " + databaseChangeLogTableName);
-            SqlStatement select = new SelectFromDatabaseChangeLogStatement("FILENAME", "AUTHOR", "ID", "MD5SUM", "DATEEXECUTED", "ORDEREXECUTED", "TAG", "EXECTYPE", "DESCRIPTION").setOrderBy("DATEEXECUTED ASC", "ORDEREXECUTED ASC");
-            List<Map> results = ExecutorService.getInstance().getExecutor(this).queryForList(select);
+            SqlStatement select = new SelectFromDatabaseChangeLogStatement("FILENAME", "AUTHOR", "ID", "MD5SUM", "DATEEXECUTED", "ORDEREXECUTED", "TAG", "EXECTYPE", "DESCRIPTION")
+                    .setOrderBy(new SelectFromDatabaseChangeLogStatement.OrderByColumn("DATEEXECUTED", "ASC"),
+                                new SelectFromDatabaseChangeLogStatement.OrderByColumn("ORDEREXECUTED", "ASC"));
+                            List < Map > results = ExecutorService.getInstance().getExecutor(this).queryForList(select);
             for (Map rs : results) {
                 String fileName = rs.get("FILENAME").toString();
                 String author = rs.get("AUTHOR").toString();
@@ -1440,5 +1445,15 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     public String getCurrentDateTimeFunction() {
         return currentDateTimeFunction;
+    }
+
+    public String correctSystemObjectName(final String name, final Class<? extends DatabaseObject> objectType) {
+        if (name == null || unquotedObjectsAreUppercased == true) {
+            return name;
+        } else if (unquotedObjectsAreUppercased) {
+            return name.toUpperCase();
+        } else {
+            return name.toLowerCase();
+        }
     }
 }

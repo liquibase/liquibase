@@ -16,6 +16,7 @@ public class GetNextChangeSetSequenceValueGenerator extends AbstractSqlGenerator
     }
 
     public Sql[] generateSql(GetNextChangeSetSequenceValueStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-        return SqlGeneratorFactory.getInstance().generateSql(new SelectFromDatabaseChangeLogStatement("MAX(ORDEREXECUTED)"), database);
+        return SqlGeneratorFactory.getInstance().generateSql(new SelectFromDatabaseChangeLogStatement(
+                new SelectFromDatabaseChangeLogStatement.SelectableColumn("ORDEREXECUTED", "MAX")), database);
     }
 }

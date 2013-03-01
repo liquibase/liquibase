@@ -9,13 +9,22 @@ import liquibase.changelog.RanChangeSet;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.ObjectQuotingStrategy;
-import liquibase.structure.DatabaseObject;
-import liquibase.structure.core.Schema;
-import liquibase.exception.*;
+import liquibase.exception.DatabaseException;
+import liquibase.exception.DatabaseHistoryException;
+import liquibase.exception.DateParseException;
+import liquibase.exception.LiquibaseException;
+import liquibase.exception.LockException;
+import liquibase.exception.RollbackImpossibleException;
+import liquibase.exception.StatementNotSupportedOnDatabaseException;
+import liquibase.exception.UnsupportedChangeException;
 import liquibase.lockservice.DatabaseChangeLogLock;
 import liquibase.sql.visitor.SqlVisitor;
 import liquibase.statement.DatabaseFunction;
 import liquibase.statement.SqlStatement;
+import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.Schema;
+import liquibase.util.StringUtils;
+import org.hsqldb.lib.StringUtil;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -325,6 +334,10 @@ public class MockDatabase implements Database {
         return columnNames;
     }
 
+    public String escapeColumnNameArray(final String[] columnNames) {
+        return StringUtils.join(columnNames, ",");
+    }
+
     public String escapeSequenceName(String catalogName, String schemaName, String sequenceName) {
         if (sequenceName == null) {
             return sequenceName;
@@ -514,6 +527,10 @@ public class MockDatabase implements Database {
     }
 
     public String correctObjectName(String name, Class<? extends DatabaseObject> objectType) {
+        return name;
+    }
+
+    public String correctSystemObjectName(final String name, final Class<? extends DatabaseObject> objectType) {
         return name;
     }
 
