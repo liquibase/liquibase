@@ -979,14 +979,8 @@ public abstract class AbstractJdbcDatabase implements Database {
             return objectName;
         } else if (objectName.contains("-") || startsWithNumeric(objectName) || isReservedWord(objectName)) {
             return "\""+objectName+"\"";
-        } else if (quotingStrategy == ObjectQuotingStrategy.QUOTE_ALL_OBJECTS && unquotedObjectsAreUppercased != null) {
-            // only quote if the case does not match the default behavior
-            if (unquotedObjectsAreUppercased && !objectName.toUpperCase().equals(objectName)) {
-                // if left unquoted, the name would be uppercased but it's currently not uppercased
-                return "\"" + objectName + "\"";
-            } else if (!unquotedObjectsAreUppercased && !objectName.toLowerCase().equals(objectName)) {
-                return "\"" + objectName + "\"";
-            }
+        } else if (quotingStrategy == ObjectQuotingStrategy.QUOTE_ALL_OBJECTS) {
+            return "\"" + objectName + "\"";
         }
         return objectName;
     }
