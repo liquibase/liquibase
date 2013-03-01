@@ -4,11 +4,12 @@ import liquibase.CatalogAndSchema;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.jvm.JdbcConnection;
-import liquibase.structure.DatabaseObject;
 import liquibase.exception.DatabaseException;
 import liquibase.logging.LogFactory;
 import liquibase.statement.DatabaseFunction;
+import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Catalog;
+import liquibase.structure.core.Index;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
 
@@ -18,7 +19,6 @@ import java.sql.ResultSet;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.regex.Pattern;
 
 /**
  * Encapsulates Oracle database support.
@@ -149,7 +149,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
 
     @Override
     public String escapeIndexName(String catalogName, String schemaName, String indexName) {
-        String escapedIndexName = indexName;
+        String escapedIndexName = escapeObjectName(indexName, Index.class);
         if (schemaName != null)
         {
             escapedIndexName = escapeObjectName(schemaName, Schema.class) + "." + escapedIndexName;

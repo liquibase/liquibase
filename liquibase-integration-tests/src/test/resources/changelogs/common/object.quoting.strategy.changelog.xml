@@ -25,9 +25,22 @@
     <changeSet id="3" author="dbiggs">
         <createTable tableName="mixedCase">
             <column name="iD" type="int"/>
+            <column name="testId" type="int" />
         </createTable>
 
         <sql>select "iD" from "mixedCase"</sql>
     </changeSet>
+
+    <changeSet id="4" author="dbiggs">
+        <createIndex tableName="mixedCase" indexName="testIndex">
+          <column name="testId"/>
+        </createIndex>
+    </changeSet>
+
+   <changeSet id="5" author="dbiggs">
+     <preConditions>
+        <indexExists indexName="testIndex" />
+     </preConditions>
+   </changeSet>
 
 </databaseChangeLog>
