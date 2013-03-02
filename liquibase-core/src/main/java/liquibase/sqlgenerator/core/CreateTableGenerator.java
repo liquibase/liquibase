@@ -1,6 +1,7 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
+import liquibase.database.ObjectQuotingStrategy;
 import liquibase.database.core.*;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.exception.ValidationErrors;
@@ -13,8 +14,6 @@ import liquibase.statement.AutoIncrementConstraint;
 import liquibase.statement.ForeignKeyConstraint;
 import liquibase.statement.UniqueConstraint;
 import liquibase.statement.core.CreateTableStatement;
-import liquibase.structure.core.Column;
-import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
 import liquibase.util.StringUtils;
 
@@ -37,7 +36,11 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
     		AbstractSqlGenerator<CreateTableStatement> gen = new InformixCreateTableGenerator();
     		return gen.generateSql(statement, database, sqlGeneratorChain);
     	}
-    	
+    	// set quoting strategy to LEGACY if working with liquibase objects.
+        ObjectQuotingStrategy currentStrategy = database.getObjectQuotingStrategy();
+        if (statement.isForLiquibaseObject()) {
+            database.setObjectQuotingStrategy(ObjectQuotingStrategy.LEGACY);
+        }
     	
         StringBuffer buffer = new StringBuffer();
         buffer.append("CREATE TABLE ").append(database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName())).append(" ");
@@ -260,6 +263,8 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
                 sql += " TABLESPACE " + statement.getTablespace();
             }
         }
+
+        database.setObjectQuotingStrategy(currentStrategy);
 
         return new Sql[] {
                 new UnparsedSql(sql)

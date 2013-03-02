@@ -12,6 +12,7 @@ import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
+import liquibase.statement.AbstractSqlStatement;
 import liquibase.statement.DatabaseFunction;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.InsertStatement;
@@ -34,7 +35,7 @@ public class MarkChangeSetRanGenerator extends AbstractSqlGenerator<MarkChangeSe
 
         ChangeSet changeSet = statement.getChangeSet();
 
-        SqlStatement runStatement;
+        AbstractSqlStatement runStatement;
         try {
             if (statement.getExecType().equals(ChangeSet.ExecType.FAILED) || statement.getExecType().equals(ChangeSet.ExecType.SKIPPED)) {
                 return new Sql[0]; //don't mark
@@ -74,12 +75,12 @@ public class MarkChangeSetRanGenerator extends AbstractSqlGenerator<MarkChangeSe
         } catch (LiquibaseException e) {
             throw new UnexpectedLiquibaseException(e);
         }
-
+        runStatement.setForLiquibaseObject(true);
         return SqlGeneratorFactory.getInstance().generateSql(runStatement, database);
     }
 
     private String limitSize(String string) {
-        int maxLength = 255;
+        int maxLength = 250;
         if (string.length() > maxLength) {
             return string.substring(0, maxLength - 3) + "...";
         }

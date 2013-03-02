@@ -43,7 +43,7 @@ public class CreateDatabaseChangeLogTableGenerator extends AbstractSqlGenerator<
                 .addColumn("COMMENTS", DataTypeFactory.getInstance().fromDescription("VARCHAR(255)"))
                 .addColumn("TAG", DataTypeFactory.getInstance().fromDescription("VARCHAR(255)"))
                 .addColumn("LIQUIBASE", DataTypeFactory.getInstance().fromDescription("VARCHAR(20)"));
-
+        createTableStatement.setForLiquibaseObject(true);
         return SqlGeneratorFactory.getInstance().generateSql(createTableStatement, database);
     }
 

@@ -65,6 +65,8 @@ public abstract class AbstractJdbcDatabase implements Database {
      */
     protected String sequenceNextValueFunction;
     protected String sequenceCurrentValueFunction;
+    protected String quotingStartCharacter = "\"";
+    protected String quotingEndCharacter = "\"";
 
     // List of Database native functions.
     protected List<DatabaseFunction> dateFunctions = new ArrayList<DatabaseFunction>();
@@ -275,7 +277,8 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     public String correctObjectName(String objectName, Class<? extends DatabaseObject> objectType) {
         if (quotingStrategy == ObjectQuotingStrategy.QUOTE_ALL_OBJECTS || unquotedObjectsAreUppercased == null
-                || objectName == null || (objectName.startsWith("\"") && objectName.endsWith("\""))) {
+                || objectName == null || (objectName.startsWith(quotingStartCharacter) && objectName.endsWith(
+                quotingEndCharacter))) {
             return objectName;
         } else if (unquotedObjectsAreUppercased == Boolean.TRUE) {
             return objectName.toUpperCase();
@@ -978,15 +981,9 @@ public abstract class AbstractJdbcDatabase implements Database {
         if (objectName == null || quotingStrategy == ObjectQuotingStrategy.LEGACY) {
             return objectName;
         } else if (objectName.contains("-") || startsWithNumeric(objectName) || isReservedWord(objectName)) {
-            return "\""+objectName+"\"";
-        } else if (quotingStrategy == ObjectQuotingStrategy.QUOTE_ALL_OBJECTS && unquotedObjectsAreUppercased != null) {
-            // only quote if the case does not match the default behavior
-            if (unquotedObjectsAreUppercased && !objectName.toUpperCase().equals(objectName)) {
-                // if left unquoted, the name would be uppercased but it's currently not uppercased
-                return "\"" + objectName + "\"";
-            } else if (!unquotedObjectsAreUppercased && !objectName.toLowerCase().equals(objectName)) {
-                return "\"" + objectName + "\"";
-            }
+            return quotingStartCharacter + objectName + quotingEndCharacter;
+        } else if (quotingStrategy == ObjectQuotingStrategy.QUOTE_ALL_OBJECTS) {
+            return quotingStartCharacter + objectName + quotingEndCharacter;
         }
         return objectName;
     }
@@ -1410,6 +1407,10 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     public void setObjectQuotingStrategy(ObjectQuotingStrategy quotingStrategy) {
         this.quotingStrategy = quotingStrategy;
+    }
+
+    public ObjectQuotingStrategy getObjectQuotingStrategy() {
+        return this.quotingStrategy;
     }
 
     public String generateDatabaseFunctionValue(final DatabaseFunction databaseFunction) {
