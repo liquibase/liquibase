@@ -51,7 +51,8 @@ public class TableExistsPrecondition implements Precondition {
     }
     public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet) throws PreconditionFailedException, PreconditionErrorException {
     	try {
-            if (!SnapshotGeneratorFactory.getInstance().has(new Table().setName(getTableName()).setSchema(new Schema(getCatalogName(), getSchemaName())), database)) {
+            String correctedTableName = database.correctObjectName(getTableName(), Table.class);
+            if (!SnapshotGeneratorFactory.getInstance().has(new Table().setName(correctedTableName).setSchema(new Schema(getCatalogName(), getSchemaName())), database)) {
                 throw new PreconditionFailedException("Table "+database.escapeTableName(getCatalogName(), getSchemaName(), getTableName())+" does not exist", changeLog, this);
             }
         } catch (PreconditionFailedException e) {

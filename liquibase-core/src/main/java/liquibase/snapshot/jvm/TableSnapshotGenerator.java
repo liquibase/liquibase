@@ -31,7 +31,7 @@ public class TableSnapshotGenerator extends JdbcSnapshotGenerator {
         try {
             JdbcDatabaseSnapshot.CachingDatabaseMetaData metaData = ((JdbcDatabaseSnapshot) snapshot).getMetaData();
             rs = metaData.getTables(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema),
-                    database.correctObjectName(objectName, Table.class), new String[]{"TABLE"});
+                    objectName, new String[]{"TABLE"});
 
             Table table;
             if (rs.size() > 0) {

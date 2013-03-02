@@ -800,6 +800,8 @@ public abstract class AbstractJdbcDatabase implements Database {
      * Drops all objects owned by the connected user.
      */
     public void dropDatabaseObjects(CatalogAndSchema schemaToDrop) throws LiquibaseException {
+        ObjectQuotingStrategy currentStrategy = this.getObjectQuotingStrategy();
+        this.setObjectQuotingStrategy(ObjectQuotingStrategy.QUOTE_ALL_OBJECTS);
         try {
             DatabaseSnapshot snapshot = null;
             try {
@@ -829,6 +831,7 @@ public abstract class AbstractJdbcDatabase implements Database {
             }
 
         } finally {
+            this.setObjectQuotingStrategy(currentStrategy);
             this.commit();
         }
     }
@@ -1413,6 +1416,10 @@ public abstract class AbstractJdbcDatabase implements Database {
         this.quotingStrategy = quotingStrategy;
     }
 
+    public ObjectQuotingStrategy getObjectQuotingStrategy() {
+        return this.quotingStrategy;
+    }
+
     public String generateDatabaseFunctionValue(final DatabaseFunction databaseFunction) {
         if (databaseFunction.getValue() == null) {
             return null;
@@ -1424,13 +1431,13 @@ public abstract class AbstractJdbcDatabase implements Database {
                 throw new RuntimeException(String.format("next value function for a sequence is not configured for database %s",
                         getDefaultDatabaseProductName()));
             }
-            return String.format(sequenceNextValueFunction, databaseFunction.getValue());
+            return String.format(sequenceNextValueFunction, escapeObjectName(databaseFunction.getValue(), Sequence.class));
         } else if (databaseFunction instanceof SequenceCurrentValueFunction) {
             if (sequenceCurrentValueFunction == null) {
                 throw new RuntimeException(String.format("current value function for a sequence is not configured for database %s",
                         getDefaultDatabaseProductName()));
             }
-            return String.format(sequenceCurrentValueFunction, databaseFunction.getValue());
+            return String.format(sequenceCurrentValueFunction, escapeObjectName(databaseFunction.getValue(), Sequence.class));
         } else {
             return databaseFunction.getValue();
         }

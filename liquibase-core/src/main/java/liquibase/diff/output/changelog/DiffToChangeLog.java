@@ -130,15 +130,10 @@ public class DiffToChangeLog {
         List<ChangeSet> changeSets = new ArrayList<ChangeSet>();
         List<Class<? extends DatabaseObject>> types = getOrderedOutputTypes(MissingObjectChangeGenerator.class);
         for (Class<? extends DatabaseObject> type : types) {
-            ObjectQuotingStrategy quotingStrategy = ObjectQuotingStrategy.LEGACY;
+            ObjectQuotingStrategy quotingStrategy = ObjectQuotingStrategy.QUOTE_ALL_OBJECTS;
             for (DatabaseObject object : diffResult.getMissingObjects(type)) {
                 if (object == null) {
                     continue;
-                }
-                String objectName = object.getName();
-                Database targetDatabase = diffResult.getReferenceSnapshot().getDatabase();
-                if (objectName != null && !objectName.equals(targetDatabase.correctObjectName(objectName, object.getClass()))) {
-                    quotingStrategy = ObjectQuotingStrategy.QUOTE_ALL_OBJECTS;
                 }
                 Change[] changes = changeGeneratorFactory.fixMissing(object, diffOutputControl, diffResult.getReferenceSnapshot().getDatabase(), diffResult.getComparisonSnapshot().getDatabase());
                 if (!diffResult.getReferenceSnapshot().getDatabase().isLiquibaseObject(object) && !diffResult.getReferenceSnapshot().getDatabase().isSystemObject(object)) {
@@ -149,15 +144,10 @@ public class DiffToChangeLog {
 
         types = getOrderedOutputTypes(UnexpectedObjectChangeGenerator.class);
         for (Class<? extends DatabaseObject> type : types) {
-            ObjectQuotingStrategy quotingStrategy = ObjectQuotingStrategy.LEGACY;
+            ObjectQuotingStrategy quotingStrategy = ObjectQuotingStrategy.QUOTE_ALL_OBJECTS;
             for (DatabaseObject object : diffResult.getUnexpectedObjects(type)) {
                 Change[] changes = changeGeneratorFactory.fixUnexpected(object, diffOutputControl, diffResult.getReferenceSnapshot().getDatabase(), diffResult.getComparisonSnapshot().getDatabase());
                 if (!diffResult.getComparisonSnapshot().getDatabase().isLiquibaseObject(object) && !diffResult.getComparisonSnapshot().getDatabase().isSystemObject(object)) {
-                    String objectName = object.getName();
-                    Database targetDatabase = diffResult.getReferenceSnapshot().getDatabase();
-                    if (objectName != null && !objectName.equals(targetDatabase.correctObjectName(objectName, object.getClass()))) {
-                        quotingStrategy = ObjectQuotingStrategy.QUOTE_ALL_OBJECTS;
-                    }
                     addToChangeSets(changes, changeSets, quotingStrategy);
                 }
             }
@@ -165,15 +155,10 @@ public class DiffToChangeLog {
 
         types = getOrderedOutputTypes(ChangedObjectChangeGenerator.class);
         for (Class<? extends DatabaseObject> type : types) {
-            ObjectQuotingStrategy quotingStrategy = ObjectQuotingStrategy.LEGACY;
+            ObjectQuotingStrategy quotingStrategy = ObjectQuotingStrategy.QUOTE_ALL_OBJECTS;
             for (Map.Entry<DatabaseObject, ObjectDifferences> entry : diffResult.getChangedObjects(type).entrySet()) {
                 Change[] changes = changeGeneratorFactory.fixChanged(entry.getKey(), entry.getValue(), diffOutputControl, diffResult.getReferenceSnapshot().getDatabase(), diffResult.getComparisonSnapshot().getDatabase());
                 if (!diffResult.getReferenceSnapshot().getDatabase().isLiquibaseObject(entry.getKey()) && !diffResult.getReferenceSnapshot().getDatabase().isSystemObject(entry.getKey())) {
-                    String objectName = entry.getKey().getName();
-                    Database targetDatabase = diffResult.getReferenceSnapshot().getDatabase();
-                    if (!objectName.equals(targetDatabase.correctObjectName(objectName, entry.getKey().getClass()))) {
-                        quotingStrategy = ObjectQuotingStrategy.QUOTE_ALL_OBJECTS;
-                    }
                     addToChangeSets(changes, changeSets, quotingStrategy);
                 }
             }

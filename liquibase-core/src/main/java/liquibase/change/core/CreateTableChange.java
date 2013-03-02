@@ -128,7 +128,7 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
         return columns;
     }
 
-    public void setColumn(List<ColumnConfig> columns) {
+    public void setColumns(List<ColumnConfig> columns) {
         this.columns = columns;
     }
 

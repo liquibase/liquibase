@@ -317,7 +317,7 @@
     </changeSet>
 
     <changeSet id="makeNotnulltest" author="nvoxland">
-        <addNotNullConstraint tableName="commonTypesTest" columnName="intColumn" columnDataType="int" defaultNullValue="0"/>
+        <addNotNullConstraint tableName="commonTypesTest" columnName="intColumn" columnDataType="int"/>
     </changeSet>
 
     <changeSet id="makenulltest" author="nvoxland">
@@ -979,11 +979,15 @@
   </changeSet>
 
   <changeSet id="checkUtf8HandledCorrectly" author="Mohammad Nadeem">
+    <createTable tableName="testUtf8Insert">
+      <column name="stringValue" type="varchar(10)" />
+    </createTable>
+
 
     <sql>
       <![CDATA[  
-	    insert into insertWithDefaultSeq (stringValue) value ('€');
-        insert into insertWithDefaultSeq (stringValue) value ('£');
+	    insert into testUtf8Insert (stringValue) values ('€');
+        insert into testUtf8Insert (stringValue) values ('£');
         ]]>
     </sql>
   </changeSet>

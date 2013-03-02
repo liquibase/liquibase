@@ -28,6 +28,7 @@ import liquibase.changelog.visitor.*;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.DatabaseFactory;
+import liquibase.database.ObjectQuotingStrategy;
 import liquibase.database.core.OracleDatabase;
 import liquibase.diff.DiffGeneratorFactory;
 import liquibase.diff.DiffResult;
@@ -134,6 +135,7 @@ public class Liquibase {
             changeLogIterator.run(new UpdateVisitor(database), database);
         } finally {
             try {
+                database.setObjectQuotingStrategy(ObjectQuotingStrategy.LEGACY);
                 lockService.releaseLock();
             } catch (LockException e) {
                 log.severe("Could not release lock", e);
