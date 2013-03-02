@@ -5,13 +5,14 @@ import liquibase.change.ColumnConfig;
 import liquibase.change.ConstraintsConfig;
 import liquibase.change.core.CreateTableChange;
 import liquibase.database.Database;
-import liquibase.diff.compare.DatabaseObjectComparatorFactory;
+import liquibase.database.core.MySQLDatabase;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.changelog.ChangeGeneratorChain;
 import liquibase.diff.output.changelog.MissingObjectChangeGenerator;
 import liquibase.statement.DatabaseFunction;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Column;
+import liquibase.structure.core.PrimaryKey;
 import liquibase.structure.core.Table;
 
 import java.util.Date;
@@ -35,6 +36,8 @@ public class MissingTableChangeGenerator implements MissingObjectChangeGenerator
     public Change[] fixMissing(DatabaseObject missingObject, DiffOutputControl control, Database referenceDatabase, Database comparisonDatabase, ChangeGeneratorChain chain) {
         Table missingTable = (Table) missingObject;
 
+        PrimaryKey primaryKey = missingTable.getPrimaryKey();
+
 //        if (control.diffResult.getReferenceSnapshot().getDatabase().isLiquibaseTable(missingTable.getSchema().toCatalogAndSchema(), missingTable.getName())) {
 //            continue;
 //        }
@@ -56,19 +59,28 @@ public class MissingTableChangeGenerator implements MissingObjectChangeGenerator
             columnConfig.setName(column.getName());
             columnConfig.setType(column.getType().toString());
 
-            ConstraintsConfig constraintsConfig = null;
-
             if (column.isAutoIncrement()) {
                 columnConfig.setAutoIncrement(true);
             }
 
-            if (column.isNullable() != null && !column.isNullable()) {
-                if (constraintsConfig == null) {
-                    constraintsConfig = new ConstraintsConfig();
+            ConstraintsConfig constraintsConfig = null;
+            // In MySQL, the primary key must be specified at creation for an autoincrement column
+            if (column.isAutoIncrement() && primaryKey != null && primaryKey.getColumnNamesAsList().contains(column.getName())) {
+                constraintsConfig = new ConstraintsConfig();
+                constraintsConfig.setPrimaryKey(true);
+                constraintsConfig.setPrimaryKeyTablespace(primaryKey.getTablespace());
+                // MySQL sets some primary key names as PRIMARY which is invalid
+                if (comparisonDatabase instanceof MySQLDatabase && "PRIMARY".equals(primaryKey.getName())) {
+                    constraintsConfig.setPrimaryKeyName(null);
+                } else  {
+                    constraintsConfig.setPrimaryKeyName(primaryKey.getName());
                 }
-
+                control.setAlreadyHandledMissing(primaryKey);
+            } else if (column.isNullable() != null && !column.isNullable()) {
+                constraintsConfig = new ConstraintsConfig();
                 constraintsConfig.setNullable(false);
             }
+
 //                if (column.isUnique()) {
 //					if (constraintsConfig == null) {
 //						constraintsConfig = new ConstraintsConfig();

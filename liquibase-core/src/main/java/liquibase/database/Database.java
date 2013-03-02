@@ -192,6 +192,15 @@ public interface Database extends PrioritizedService {
      */
     String escapeColumnNameList(String columnNames);
 
+    /**
+     * Escapes an array of column names in a database-dependent manner so reserved words can be used as a column
+     * name (i.e. "return").
+     *
+     * @param columnNames array of column names
+     * @return escaped column name list
+     */
+    String escapeColumnNameArray(String[] columnNames);
+
 //    Set<UniqueConstraint> findUniqueConstraints(String schema) throws DatabaseException;
 
     boolean supportsTablespaces();
@@ -289,6 +298,13 @@ public interface Database extends PrioritizedService {
      * Fix the object name to the format the database expects, handling changes in case, etc.
      */
     String correctObjectName(String name, Class<? extends DatabaseObject> objectType);
+
+    /**
+     * Fix the object name to the format the database expects.
+     * Different to correctObjectName in that the quoting strategy is ignored.
+     * System table and column names are not affected by quoting strategy.
+     */
+    String correctSystemObjectName(String name, Class<? extends DatabaseObject> objectType);
 
     boolean isFunction(String string);
 

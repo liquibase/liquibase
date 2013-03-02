@@ -26,10 +26,11 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
     private String catalogName;
     private String schemaName;
     private String tableName;
-    private List<ColumnConfig> column;
+    private List<ColumnConfig> columns;
+
 
     public AddColumnChange() {
-        column = new ArrayList<ColumnConfig>();
+        columns = new ArrayList<ColumnConfig>();
     }
 
     @DatabaseChangeProperty(mustEqualExisting ="relation.catalog", since = "3.0")
@@ -60,26 +61,26 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
     }
 
     @DatabaseChangeProperty(requiredForDatabase = "all", description = "Column constraint and foreign key information. Setting the \"defaultValue\" attribute will specify a default value for the column. Setting the \"value\" attribute will set all rows existing to the specified value without modifying the column default.")
-    public List<ColumnConfig> getColumn() {
-        return column;
+    public List<ColumnConfig> getColumns() {
+        return columns;
     }
 
-    public void setColumn(List<ColumnConfig> column) {
-        this.column = column;
+    public void setColumns(List<ColumnConfig> columns) {
+        this.columns = columns;
     }
 
     public void addColumn(ColumnConfig column) {
-        this.column.add(column);
+        this.columns.add(column);
     }
 
     public void removeColumn(ColumnConfig column) {
-        this.column.remove(column);
+        this.columns.remove(column);
     }
 
     @Override
     public ValidationErrors validate(Database database) {
         ValidationErrors validationErrors = super.validate(database);
-        if (column.size() == 0) {
+        if (columns.size() == 0) {
             validationErrors.addError("'columns' is required");
         }
         return validationErrors;
@@ -89,7 +90,7 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
 
         List<SqlStatement> sql = new ArrayList<SqlStatement>();
 
-        for (ColumnConfig column : getColumn()) {
+        for (ColumnConfig column : getColumns()) {
             Set<ColumnConstraint> constraints = new HashSet<ColumnConstraint>();
             ConstraintsConfig constraintsConfig =column.getConstraints();
             if (constraintsConfig != null) {
@@ -134,7 +135,7 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
             }
         }
 
-      for (ColumnConfig column : getColumn()) {
+      for (ColumnConfig column : getColumns()) {
           String columnRemarks = StringUtils.trimToNull(column.getRemarks());
           if (columnRemarks != null) {
               SetColumnRemarksStatement remarksStatement = new SetColumnRemarksStatement(catalogName, schemaName, tableName, column.getName(), columnRemarks);
@@ -151,7 +152,7 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
     protected Change[] createInverses() {
         List<Change> inverses = new ArrayList<Change>();
 
-        for (ColumnConfig aColumn : column) {
+        for (ColumnConfig aColumn : columns) {
             if (aColumn.hasDefaultValue()) {
                 DropDefaultValueChange dropChange = new DropDefaultValueChange();
                 dropChange.setTableName(getTableName());
@@ -173,11 +174,13 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
     }
 
     public String getConfirmationMessage() {
-        List<String> names = new ArrayList<String>(column.size());
-        for (ColumnConfig col : column) {
+        List<String> names = new ArrayList<String>(columns.size());
+        for (ColumnConfig col : columns) {
             names.add(col.getName() + "(" + col.getType() + ")");
         }
 
         return "Columns " + StringUtils.join(names, ",") + " added to " + tableName;
     }
+
+
 }

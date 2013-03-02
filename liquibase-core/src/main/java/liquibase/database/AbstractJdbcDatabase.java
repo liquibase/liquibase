@@ -65,6 +65,8 @@ public abstract class AbstractJdbcDatabase implements Database {
      */
     protected String sequenceNextValueFunction;
     protected String sequenceCurrentValueFunction;
+    protected String quotingStartCharacter = "\"";
+    protected String quotingEndCharacter = "\"";
 
     // List of Database native functions.
     protected List<DatabaseFunction> dateFunctions = new ArrayList<DatabaseFunction>();
@@ -275,7 +277,8 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     public String correctObjectName(String objectName, Class<? extends DatabaseObject> objectType) {
         if (quotingStrategy == ObjectQuotingStrategy.QUOTE_ALL_OBJECTS || unquotedObjectsAreUppercased == null
-                || objectName == null || (objectName.startsWith("\"") && objectName.endsWith("\""))) {
+                || objectName == null || (objectName.startsWith(quotingStartCharacter) && objectName.endsWith(
+                quotingEndCharacter))) {
             return objectName;
         } else if (unquotedObjectsAreUppercased == Boolean.TRUE) {
             return objectName.toUpperCase();
@@ -978,15 +981,9 @@ public abstract class AbstractJdbcDatabase implements Database {
         if (objectName == null || quotingStrategy == ObjectQuotingStrategy.LEGACY) {
             return objectName;
         } else if (objectName.contains("-") || startsWithNumeric(objectName) || isReservedWord(objectName)) {
-            return "\""+objectName+"\"";
-        } else if (quotingStrategy == ObjectQuotingStrategy.QUOTE_ALL_OBJECTS && unquotedObjectsAreUppercased != null) {
-            // only quote if the case does not match the default behavior
-            if (unquotedObjectsAreUppercased && !objectName.toUpperCase().equals(objectName)) {
-                // if left unquoted, the name would be uppercased but it's currently not uppercased
-                return "\"" + objectName + "\"";
-            } else if (!unquotedObjectsAreUppercased && !objectName.toLowerCase().equals(objectName)) {
-                return "\"" + objectName + "\"";
-            }
+            return quotingStartCharacter + objectName + quotingEndCharacter;
+        } else if (quotingStrategy == ObjectQuotingStrategy.QUOTE_ALL_OBJECTS) {
+            return quotingStartCharacter + objectName + quotingEndCharacter;
         }
         return objectName;
     }
@@ -1012,15 +1009,18 @@ public abstract class AbstractJdbcDatabase implements Database {
     }
 
     public String escapeColumnNameList(String columnNames) {
+        return escapeColumnNameArray(columnNames.split(","));
+    }
+
+    public String escapeColumnNameArray(final String[] columnNames) {
         StringBuffer sb = new StringBuffer();
-        for (String columnName : columnNames.split(",")) {
+        for (String columnName : columnNames) {
             if (sb.length() > 0) {
                 sb.append(", ");
             }
             sb.append(escapeObjectName(columnName.trim(), Column.class));
         }
         return sb.toString();
-
     }
 
     public boolean supportsSchemas() {
@@ -1113,8 +1113,10 @@ public abstract class AbstractJdbcDatabase implements Database {
         ranChangeSetList = new ArrayList<RanChangeSet>();
         if (hasDatabaseChangeLogTable()) {
             LogFactory.getLogger().info("Reading from " + databaseChangeLogTableName);
-            SqlStatement select = new SelectFromDatabaseChangeLogStatement("FILENAME", "AUTHOR", "ID", "MD5SUM", "DATEEXECUTED", "ORDEREXECUTED", "TAG", "EXECTYPE", "DESCRIPTION").setOrderBy("DATEEXECUTED ASC", "ORDEREXECUTED ASC");
-            List<Map> results = ExecutorService.getInstance().getExecutor(this).queryForList(select);
+            SqlStatement select = new SelectFromDatabaseChangeLogStatement("FILENAME", "AUTHOR", "ID", "MD5SUM", "DATEEXECUTED", "ORDEREXECUTED", "TAG", "EXECTYPE", "DESCRIPTION")
+                    .setOrderBy(new SelectFromDatabaseChangeLogStatement.OrderByColumn("DATEEXECUTED", "ASC"),
+                                new SelectFromDatabaseChangeLogStatement.OrderByColumn("ORDEREXECUTED", "ASC"));
+                            List < Map > results = ExecutorService.getInstance().getExecutor(this).queryForList(select);
             for (Map rs : results) {
                 String fileName = rs.get("FILENAME").toString();
                 String author = rs.get("AUTHOR").toString();
@@ -1443,5 +1445,15 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     public String getCurrentDateTimeFunction() {
         return currentDateTimeFunction;
+    }
+
+    public String correctSystemObjectName(final String name, final Class<? extends DatabaseObject> objectType) {
+        if (name == null || unquotedObjectsAreUppercased == true) {
+            return name;
+        } else if (unquotedObjectsAreUppercased) {
+            return name.toUpperCase();
+        } else {
+            return name.toLowerCase();
+        }
     }
 }

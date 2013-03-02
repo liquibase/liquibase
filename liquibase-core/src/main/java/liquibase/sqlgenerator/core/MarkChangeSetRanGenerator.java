@@ -79,7 +79,7 @@ public class MarkChangeSetRanGenerator extends AbstractSqlGenerator<MarkChangeSe
     }
 
     private String limitSize(String string) {
-        int maxLength = 255;
+        int maxLength = 250;
         if (string.length() > maxLength) {
             return string.substring(0, maxLength - 3) + "...";
         }

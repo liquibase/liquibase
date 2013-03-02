@@ -149,7 +149,7 @@
     </changeSet>
 
     <changeSet id="nullable-1" author="nvoxland">
-        <addNotNullConstraint tableName="compoundPKTest" columnName="name" columnDataType="varchar(255)"/>
+        <addNotNullConstraint tableName="compoundPKTest" columnName="name" columnDataType="varchar(255)" defaultNullValue="testValue"/>
     </changeSet>
     <changeSet id="nullable-2" author="nvoxland">
         <dropNotNullConstraint tableName="compoundPKTest" columnName="name" columnDataType="varchar(255)"/>
@@ -310,7 +310,7 @@
     </changeSet>
 
     <changeSet id="makeNotnulltest" author="nvoxland">
-        <addNotNullConstraint tableName="commonTypesTest" columnName="intColumn" columnDataType="int"/>
+        <addNotNullConstraint tableName="commonTypesTest" columnName="intColumn" columnDataType="int" defaultNullValue="0"/>
     </changeSet>
 
     <changeSet id="makenulltest" author="nvoxland">
@@ -934,8 +934,8 @@
 
   </changeSet>
 
-  <!-- should work for all databases but only tested on h2, oracle and psotgres for now -->
-  <changeSet id="AddSequenceNextValueAsDefault" author="dbiggs" dbms="postgresql, h2, oracle">
+  <!-- should work for all databases but only tested on h2 and psotgres for now, oracle actually does not support sequences as default values -->
+  <changeSet id="AddSequenceNextValueAsDefault" author="dbiggs" dbms="postgresql, h2">
     <createSequence sequenceName="tableDefault_seq" />
     <createTable tableName="insertWithDefaultSeq">
       <column name="id" type="int" defaultValueSequenceNext="tableDefault_seq">

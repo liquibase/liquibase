@@ -60,8 +60,8 @@ public class SchemaSnapshotGenerator extends JdbcSnapshotGenerator {
             if (database.supportsSchemas()) {
                 schemas = ((JdbcConnection) database.getConnection()).getMetaData().getSchemas();
                 while (schemas.next()) {
-                    String tableCatalog = JdbcUtils.getValueForColumn(schemas,"TABLE_CATALOG", database);
-                    String tableSchema = JdbcUtils.getValueForColumn(schemas, "TABLE_SCHEM", database);
+                    String tableCatalog = JdbcUtils.getValueForColumn(schemas, database.correctSystemObjectName("TABLE_CATALOG", Column.class));
+                    String tableSchema = JdbcUtils.getValueForColumn(schemas, database.correctSystemObjectName("TABLE_SCHEM", Column.class));
                     CatalogAndSchema schemaFromJdbcInfo = ((AbstractJdbcDatabase) database).getSchemaFromJdbcInfo(tableCatalog, tableSchema);
 
                     Catalog catalog = new Catalog(schemaFromJdbcInfo.getCatalogName());
