@@ -37,6 +37,9 @@ public class CreateSequenceGenerator extends AbstractSqlGenerator<CreateSequence
         StringBuffer buffer = new StringBuffer();
         buffer.append("CREATE SEQUENCE ");
         buffer.append(database.escapeSequenceName(statement.getCatalogName(), statement.getSchemaName(), statement.getSequenceName()));
+        if (database instanceof HsqlDatabase) {
+            buffer.append(" AS BIGINT ");
+        }
         if (statement.getStartValue() != null) {
             buffer.append(" START WITH ").append(statement.getStartValue());
         }
