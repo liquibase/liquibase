@@ -15,8 +15,8 @@ public class ISODateFormat {
     private SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
     private static final String DATE_TIME_FORMAT_STRING = "yyyy-MM-dd'T'HH:mm:ss";
     private static final String DATE_TIME_FORMAT_STRING_WITH_SPACE = "yyyy-MM-dd HH:mm:ss";
-    private static final String DATE_TIME_FORMAT_STRING_WITH_DECIMAL = "yyyy-MM-dd'T'HH:mm:ss.S";
-    private static final String DATE_TIME_FORMAT_STRING_WITH_SPACE_AND_DECIMAL = "yyyy-MM-dd HH:mm:ss.S";
+    private static final String DATE_TIME_FORMAT_STRING_WITH_DECIMAL = "yyyy-MM-dd'T'HH:mm:ss.SSS";
+    private static final String DATE_TIME_FORMAT_STRING_WITH_SPACE_AND_DECIMAL = "yyyy-MM-dd HH:mm:ss.SSS";
 
 
     public String format(java.sql.Date date) {

@@ -46,6 +46,7 @@ import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.CompositeResourceAccessor;
 import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.servicelocator.ServiceLocator;
+import liquibase.util.ISODateFormat;
 import liquibase.util.LiquibaseUtil;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
@@ -845,7 +846,6 @@ public class Main {
                 return;
             }
 
-            DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
             try {
                 if ("update".equalsIgnoreCase(command)) {
                     liquibase.update(contexts);
@@ -872,7 +872,7 @@ public class Main {
                     if (commandParams == null || commandParams.size() == 0) {
                         throw new CommandLineParsingException("rollback requires a rollback date");
                     }
-                    liquibase.rollback(dateFormat.parse(commandParams.iterator().next()), contexts);
+                    liquibase.rollback(new ISODateFormat().parse(commandParams.iterator().next()), contexts);
                 } else if ("rollbackCount".equalsIgnoreCase(command)) {
                     liquibase.rollback(Integer.parseInt(commandParams.iterator().next()), contexts);
 
@@ -885,7 +885,7 @@ public class Main {
                     if (commandParams == null || commandParams.size() == 0) {
                         throw new CommandLineParsingException("rollbackToDateSQL requires a rollback date");
                     }
-                    liquibase.rollback(dateFormat.parse(commandParams.iterator().next()), contexts, getOutputWriter());
+                    liquibase.rollback(new ISODateFormat().parse(commandParams.iterator().next()), contexts, getOutputWriter());
                 } else if ("rollbackCountSQL".equalsIgnoreCase(command)) {
                     if (commandParams == null || commandParams.size() == 0) {
                         throw new CommandLineParsingException("rollbackCountSQL requires a rollback tag");

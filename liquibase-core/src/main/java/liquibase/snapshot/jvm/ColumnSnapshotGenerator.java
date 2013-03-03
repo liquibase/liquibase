@@ -342,7 +342,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
         if (database instanceof MySQLDatabase) {
             return new SimpleDateFormat("yyyy-MM-dd HH:mm:SS"); //no ms in mysql
         }
-        return new SimpleDateFormat("yyyy-MM-dd HH:mm:SS.S");
+        return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
     }
 
 

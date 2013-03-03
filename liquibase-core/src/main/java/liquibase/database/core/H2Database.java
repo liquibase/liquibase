@@ -173,7 +173,7 @@ public class H2Database extends AbstractJdbcDatabase {
         try {
             if (isDateTime(isoDate)) {
                 ISODateFormat isoTimestampFormat = new ISODateFormat();
-                DateFormat dbTimestampFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S");
+                DateFormat dbTimestampFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
                 returnString = dbTimestampFormat.format(isoTimestampFormat.parse(isoDate));
             }
         } catch (ParseException e) {

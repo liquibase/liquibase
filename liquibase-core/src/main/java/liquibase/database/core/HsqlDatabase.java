@@ -106,7 +106,7 @@ public class HsqlDatabase extends AbstractJdbcDatabase {
         try {
             if (isDateTime(isoDate)) {
                 ISODateFormat isoTimestampFormat = new ISODateFormat();
-                DateFormat dbTimestampFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S");
+                DateFormat dbTimestampFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
                 returnString = dbTimestampFormat.format(isoTimestampFormat.parse(isoDate));
             }
         } catch (ParseException e) {
@@ -119,7 +119,7 @@ public class HsqlDatabase extends AbstractJdbcDatabase {
     public Date parseDate(String dateAsString) throws DateParseException {
         try {
             if (dateAsString.indexOf(" ") > 0) {
-                return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S").parse(dateAsString);
+                return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS").parse(dateAsString);
             } else {
                 if (dateAsString.indexOf(":") > 0) {
                     return new SimpleDateFormat("HH:mm:ss").parse(dateAsString);
