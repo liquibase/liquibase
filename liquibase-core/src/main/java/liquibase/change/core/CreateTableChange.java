@@ -5,6 +5,7 @@ import liquibase.database.Database;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.datatype.LiquibaseDataType;
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.exception.ValidationErrors;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.*;
 import liquibase.statement.core.CreateTableStatement;
@@ -30,6 +31,22 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
 
     public CreateTableChange() {
         columns = new ArrayList<ColumnConfig>();
+    }
+
+    @Override
+    public ValidationErrors validate(Database database) {
+        ValidationErrors validationErrors = new ValidationErrors();
+        validationErrors.addAll(super.validate(database));
+
+        for (ColumnConfig columnConfig : columns) {
+            if (columnConfig.getType() == null) {
+                validationErrors.addError("column 'type' is required for all columns");
+            }
+            if (columnConfig.getName() == null) {
+                validationErrors.addError("column 'name' is required for all columns");
+            }
+        }
+        return validationErrors;
     }
 
     public SqlStatement[] generateStatements(Database database) {
