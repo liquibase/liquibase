@@ -1,6 +1,9 @@
 package liquibase.util;
 
 import java.io.*;
+import java.nio.charset.Charset;
+
+import liquibase.resource.UtfBomAwareReader;
 
 /**
  * Utilities for working with streams.
@@ -22,9 +25,7 @@ public class StreamUtil {
      * @throws IOException If there is an error reading the stream.
      */
     public static String getStreamContents(InputStream ins) throws IOException {
-
-        InputStreamReader reader = new InputStreamReader(ins);
-        return getReaderContents(reader);
+        return getReaderContents(new UtfBomAwareReader(ins));
     }
 
     /**
@@ -36,11 +37,29 @@ public class StreamUtil {
      * @return The contents of the input stream as a String
      * @throws IOException If there is an error reading the stream.
      */
-    public static String getStreamContents(InputStream ins, String charsetName) throws IOException {
+	public static String getStreamContents(InputStream ins, String charsetName)
+			throws IOException {
+		UtfBomAwareReader reader;
 
-        InputStreamReader reader = (charsetName != null) ? new InputStreamReader(ins, charsetName) : new InputStreamReader(ins);
-        return getReaderContents(reader);
-    }
+		if (charsetName == null) {
+			reader = new UtfBomAwareReader(ins);
+		} else {
+			String charsetCanonicalName = Charset.forName(charsetName).name();
+			String encoding;
+
+			reader = new UtfBomAwareReader(ins, charsetName);
+			encoding = Charset.forName(reader.getEncoding()).name();
+
+			if (charsetCanonicalName.startsWith("UTF")
+					&& !charsetCanonicalName.equals(encoding)) {
+				reader.close();
+				throw new IllegalArgumentException("Expected encoding was '"
+						+ charsetCanonicalName + "' but a BOM was detected for '"
+						+ encoding + "'");
+			}
+		}
+		return getReaderContents(reader);
+	}
     
     /**
      * Reads all the characters into a String.
