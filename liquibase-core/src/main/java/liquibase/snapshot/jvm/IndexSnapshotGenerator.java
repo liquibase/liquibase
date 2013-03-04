@@ -215,7 +215,6 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
             DatabaseSnapshot tableSnapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(schema.toCatalogAndSchema(), database, new SnapshotControl(Table.class, Schema.class, Catalog.class)); //todo: don't get from Factory
             tables.addAll(tableSnapshot.get(Table.class));
         } else {
-            exampleTable.setName(database.correctObjectName(exampleTable.getName(), Table.class));
             tables.add(exampleTable);
         }
         Map<String, Index> foundIndexes = new HashMap<String, Index>();
@@ -235,8 +234,7 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                     rs = databaseMetaData.query(sql);
                 } else {
                     rs = databaseMetaData.getIndexInfo(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema),
-                            ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema),
-                            database.correctObjectName(table.getName(), Table.class), false, true);
+                            ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), table.getName(), false, true);
                 }
 
                 for (JdbcDatabaseSnapshot.CachedRow row : rs) {

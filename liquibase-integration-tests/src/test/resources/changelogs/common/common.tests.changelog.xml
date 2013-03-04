@@ -149,7 +149,7 @@
     </changeSet>
 
     <changeSet id="nullable-1" author="nvoxland">
-        <addNotNullConstraint tableName="compoundPKTest" columnName="name" columnDataType="varchar(255)"/>
+        <addNotNullConstraint tableName="compoundPKTest" columnName="name" columnDataType="varchar(255)" defaultNullValue="testValue"/>
     </changeSet>
     <changeSet id="nullable-2" author="nvoxland">
         <dropNotNullConstraint tableName="compoundPKTest" columnName="name" columnDataType="varchar(255)"/>
@@ -941,8 +941,8 @@
 
   </changeSet>
 
-  <!-- should work for all databases but only tested on h2, oracle and psotgres for now -->
-  <changeSet id="AddSequenceNextValueAsDefault" author="dbiggs" dbms="postgresql, h2, oracle">
+  <!-- should work for all databases but only tested on h2 and psotgres for now, oracle actually does not support sequences as default values -->
+  <changeSet id="AddSequenceNextValueAsDefault" author="dbiggs" dbms="postgresql, h2">
     <createSequence sequenceName="tableDefault_seq" />
     <createTable tableName="insertWithDefaultSeq">
       <column name="id" type="int" defaultValueSequenceNext="tableDefault_seq">
@@ -979,11 +979,15 @@
   </changeSet>
 
   <changeSet id="checkUtf8HandledCorrectly" author="Mohammad Nadeem">
+    <createTable tableName="testUtf8Insert">
+      <column name="stringValue" type="varchar(10)" />
+    </createTable>
+
 
     <sql>
       <![CDATA[  
-	    insert into insertWithDefaultSeq (stringValue) value ('€');
-        insert into insertWithDefaultSeq (stringValue) value ('£');
+	    insert into testUtf8Insert (stringValue) values ('€');
+        insert into testUtf8Insert (stringValue) values ('£');
         ]]>
     </sql>
   </changeSet>

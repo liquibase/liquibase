@@ -173,7 +173,18 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
         } else {
             return objectName;
         }
+    }
 
+    @Override
+    public String correctObjectName(String objectName, Class<? extends DatabaseObject> objectType) {
+        if (objectName == null || quotingStrategy != ObjectQuotingStrategy.LEGACY) {
+            return super.correctObjectName(objectName, objectType);
+        }
+        if (objectName.contains("-") || hasMixedCase(objectName) || startsWithNumeric(objectName) || isReservedWord(objectName)) {
+            return objectName;
+        } else {
+            return objectName.toLowerCase();
+        }
     }
 
     /*

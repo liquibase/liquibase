@@ -315,5 +315,7 @@ public interface Database extends PrioritizedService {
 
     void setObjectQuotingStrategy(ObjectQuotingStrategy quotingStrategy);
 
+    ObjectQuotingStrategy getObjectQuotingStrategy();
+
 }
 

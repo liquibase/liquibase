@@ -7,6 +7,7 @@ import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.DatabaseFactory;
+import liquibase.database.ObjectQuotingStrategy;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.diff.compare.CompareControl;
 import liquibase.diff.output.report.DiffToReport;
@@ -902,7 +903,9 @@ public abstract class AbstractIntegrationTest {
             return;
         }
         Liquibase liquibase = createLiquibase(objectQuotingStrategyChangeLog);
+        clearDatabase(liquibase);
         liquibase.update(contexts);
+        clearDatabase(liquibase);
     }
 
 //   @Test

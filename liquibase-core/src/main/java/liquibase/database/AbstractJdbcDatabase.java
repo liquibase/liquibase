@@ -65,6 +65,8 @@ public abstract class AbstractJdbcDatabase implements Database {
      */
     protected String sequenceNextValueFunction;
     protected String sequenceCurrentValueFunction;
+    protected String quotingStartCharacter = "\"";
+    protected String quotingEndCharacter = "\"";
 
     // List of Database native functions.
     protected List<DatabaseFunction> dateFunctions = new ArrayList<DatabaseFunction>();
@@ -275,7 +277,8 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     public String correctObjectName(String objectName, Class<? extends DatabaseObject> objectType) {
         if (quotingStrategy == ObjectQuotingStrategy.QUOTE_ALL_OBJECTS || unquotedObjectsAreUppercased == null
-                || objectName == null || (objectName.startsWith("\"") && objectName.endsWith("\""))) {
+                || objectName == null || (objectName.startsWith(quotingStartCharacter) && objectName.endsWith(
+                quotingEndCharacter))) {
             return objectName;
         } else if (unquotedObjectsAreUppercased == Boolean.TRUE) {
             return objectName.toUpperCase();
@@ -797,6 +800,8 @@ public abstract class AbstractJdbcDatabase implements Database {
      * Drops all objects owned by the connected user.
      */
     public void dropDatabaseObjects(CatalogAndSchema schemaToDrop) throws LiquibaseException {
+        ObjectQuotingStrategy currentStrategy = this.getObjectQuotingStrategy();
+        this.setObjectQuotingStrategy(ObjectQuotingStrategy.QUOTE_ALL_OBJECTS);
         try {
             DatabaseSnapshot snapshot = null;
             try {
@@ -826,6 +831,7 @@ public abstract class AbstractJdbcDatabase implements Database {
             }
 
         } finally {
+            this.setObjectQuotingStrategy(currentStrategy);
             this.commit();
         }
     }
@@ -978,15 +984,9 @@ public abstract class AbstractJdbcDatabase implements Database {
         if (objectName == null || quotingStrategy == ObjectQuotingStrategy.LEGACY) {
             return objectName;
         } else if (objectName.contains("-") || startsWithNumeric(objectName) || isReservedWord(objectName)) {
-            return "\""+objectName+"\"";
-        } else if (quotingStrategy == ObjectQuotingStrategy.QUOTE_ALL_OBJECTS && unquotedObjectsAreUppercased != null) {
-            // only quote if the case does not match the default behavior
-            if (unquotedObjectsAreUppercased && !objectName.toUpperCase().equals(objectName)) {
-                // if left unquoted, the name would be uppercased but it's currently not uppercased
-                return "\"" + objectName + "\"";
-            } else if (!unquotedObjectsAreUppercased && !objectName.toLowerCase().equals(objectName)) {
-                return "\"" + objectName + "\"";
-            }
+            return quotingStartCharacter + objectName + quotingEndCharacter;
+        } else if (quotingStrategy == ObjectQuotingStrategy.QUOTE_ALL_OBJECTS) {
+            return quotingStartCharacter + objectName + quotingEndCharacter;
         }
         return objectName;
     }
@@ -1416,6 +1416,10 @@ public abstract class AbstractJdbcDatabase implements Database {
         this.quotingStrategy = quotingStrategy;
     }
 
+    public ObjectQuotingStrategy getObjectQuotingStrategy() {
+        return this.quotingStrategy;
+    }
+
     public String generateDatabaseFunctionValue(final DatabaseFunction databaseFunction) {
         if (databaseFunction.getValue() == null) {
             return null;
@@ -1427,13 +1431,13 @@ public abstract class AbstractJdbcDatabase implements Database {
                 throw new RuntimeException(String.format("next value function for a sequence is not configured for database %s",
                         getDefaultDatabaseProductName()));
             }
-            return String.format(sequenceNextValueFunction, databaseFunction.getValue());
+            return String.format(sequenceNextValueFunction, escapeObjectName(databaseFunction.getValue(), Sequence.class));
         } else if (databaseFunction instanceof SequenceCurrentValueFunction) {
             if (sequenceCurrentValueFunction == null) {
                 throw new RuntimeException(String.format("current value function for a sequence is not configured for database %s",
                         getDefaultDatabaseProductName()));
             }
-            return String.format(sequenceCurrentValueFunction, databaseFunction.getValue());
+            return String.format(sequenceCurrentValueFunction, escapeObjectName(databaseFunction.getValue(), Sequence.class));
         } else {
             return databaseFunction.getValue();
         }
