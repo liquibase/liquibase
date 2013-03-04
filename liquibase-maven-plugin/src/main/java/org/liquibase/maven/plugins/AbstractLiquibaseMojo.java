@@ -398,7 +398,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
             for (int i = 0; i < classpathElements.size(); ++i) {
                 urls[i] = new File((String) classpathElements.get(i)).toURL();
             }
-            return new URLClassLoader(urls, this.getClass().getClassLoader());
+            return new URLClassLoader(urls, getMavenArtifactClassLoader());
         } catch (Exception e) {
             throw new MojoExecutionException("Failed to create project classloader", e);
         }
