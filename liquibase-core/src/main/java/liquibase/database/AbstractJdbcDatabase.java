@@ -477,7 +477,7 @@ public abstract class AbstractJdbcDatabase implements Database {
             autoIncrementClause += getAutoIncrementOpening();
 
             if (generateStartWith) {
-                autoIncrementClause += String.format(getAutoIncrementStartWithClause(), startWith);
+                autoIncrementClause += String.format(getAutoIncrementStartWithClause(), (startWith == null) ? defaultAutoIncrementStartWith : startWith);
             }
 
             if (generateIncrementBy) {
@@ -485,7 +485,7 @@ public abstract class AbstractJdbcDatabase implements Database {
                     autoIncrementClause += ", ";
                 }
 
-                autoIncrementClause += String.format(getAutoIncrementByClause(), incrementBy);
+                autoIncrementClause += String.format(getAutoIncrementByClause(), (incrementBy == null) ? defaultAutoIncrementBy : incrementBy);
             }
 
             autoIncrementClause += getAutoIncrementClosing();

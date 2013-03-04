@@ -1,5 +1,6 @@
 package liquibase.database.core;
 
+import java.math.BigInteger;
 import java.sql.ResultSet;
 
 import liquibase.CatalogAndSchema;
@@ -112,6 +113,16 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
     	return "IDENTITY";
     }
     
+    @Override
+    protected boolean generateAutoIncrementStartWith(BigInteger startWith) {
+        return true;
+    }
+
+    @Override
+    protected boolean generateAutoIncrementBy(BigInteger incrementBy) {
+        return true;
+    }
+
     @Override
     protected String getAutoIncrementStartWithClause() {
     	return "%d";
