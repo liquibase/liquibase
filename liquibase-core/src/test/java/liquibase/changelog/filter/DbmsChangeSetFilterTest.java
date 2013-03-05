@@ -25,6 +25,7 @@ public class DbmsChangeSetFilterTest  {
         assertTrue(filter.accepts(new ChangeSet(null, null, false, false, null,null, "mysql, oracle")));
         assertFalse(filter.accepts(new ChangeSet(null, null, false, false, null,null, "oracle")));
         assertTrue(filter.accepts(new ChangeSet(null, null, false, false, null, null, null)));
+        assertFalse(filter.accepts(new ChangeSet(null, null, false, false, null,null, "h2,!mysql")));
     }
 
 //    @Test

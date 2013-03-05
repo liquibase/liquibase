@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.0.xsd">
+
+  <preConditions>
+    <dbms type="h2"/>
+  </preConditions>
+
+  <changeSet id="1" author="dbiggs" dbms="!oracle">
+    <createTable tableName="testDbmsExclude">
+      <column name="sampleField" type="varchar(50)"/>
+    </createTable>
+  </changeSet>
+
+  <changeSet id="2" author="dbiggs" dbms="!h2">
+    <comment>Should never be executed by h2</comment>
+    <dropTable tableName="testDbmsExclude" />
+  </changeSet>
+
+  <changeSet id="3" author="dbiggs">
+    <preConditions>
+      <tableExists tableName="testDbmsExclude" />
+    </preConditions>
+  </changeSet>
+
+</databaseChangeLog>
