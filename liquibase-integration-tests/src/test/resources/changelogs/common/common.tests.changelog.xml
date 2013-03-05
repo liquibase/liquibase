@@ -521,6 +521,12 @@
         </createTable>
     </changeSet>
 
+    <changeSet id="changeLogParametersPrecondition" author="nvoxland">
+        <preConditions>
+            <sqlCheck expectedResult="0">select count(*) from ${table.name}</sqlCheck>
+        </preConditions>
+    </changeSet>
+
     <changeSet id="customPreCondition" author="nvoxland">
         <preConditions>
             <customPrecondition className="liquibase.precondition.ExampleCustomPrecondition">
