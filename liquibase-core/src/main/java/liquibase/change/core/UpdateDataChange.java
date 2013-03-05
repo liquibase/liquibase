@@ -10,76 +10,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 @DatabaseChange(name = "update", description = "Updates data in an existing table", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "table")
-public class UpdateDataChange extends AbstractChange implements ChangeWithColumns<ColumnConfig> {
-
-    private String catalogName;
-    private String schemaName;
-    private String tableName;
-    private List<ColumnConfig> columns;
-
-    private String whereClause;
+public class UpdateDataChange extends AbstractModifyDataChange implements ChangeWithColumns<ColumnConfig> {
 
     public UpdateDataChange() {
-        columns = new ArrayList<ColumnConfig>();
-    }
-
-    @DatabaseChangeProperty(mustEqualExisting ="column.relation.catalog", since = "3.0")
-    public String getCatalogName() {
-        return catalogName;
-    }
-
-    public void setCatalogName(String catalogName) {
-        this.catalogName = catalogName;
-    }
-
-    @DatabaseChangeProperty(mustEqualExisting ="column.relation.schema")
-    public String getSchemaName() {
-        return schemaName;
-    }
-
-    public void setSchemaName(String schemaName) {
-        this.schemaName = schemaName;
-    }
-
-    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "table", description = "Name of the table to update data in")
-    public String getTableName() {
-        return tableName;
-    }
-
-    public void setTableName(String tableName) {
-        this.tableName = tableName;
-    }
-
-    @DatabaseChangeProperty(requiredForDatabase = "all", description = "Data to update")
-    public List<ColumnConfig> getColumn() {
-        return columns;
-    }
-
-    public void setColumn(List<ColumnConfig> columns) {
-        this.columns = columns;
-    }
-
-    public void addColumn(ColumnConfig column) {
-        columns.add(column);
-    }
-
-    public void removeColumn(ColumnConfig column) {
-        columns.remove(column);
-    }
-
-    @DatabaseChangeProperty(serializationType = SerializationType.NESTED_OBJECT, description = "Where clause for update statement", exampleValue = "id = 2")
-    public String getWhereClause() {
-        return whereClause;
-    }
-
-    public void setWhereClause(String whereClause) {
-        this.whereClause = whereClause;
     }
 
     public SqlStatement[] generateStatements(Database database) {
 
     	boolean needsPreparedStatement = false;
-        for (ColumnConfig column : columns) {
+        for (ColumnConfig column : getColumn()) {
             if (column.getValueBlobFile() != null) {
                 needsPreparedStatement = true;
             }
@@ -96,11 +35,18 @@ public class UpdateDataChange extends AbstractChange implements ChangeWithColumn
     	
         UpdateStatement statement = new UpdateStatement(getCatalogName(), getSchemaName(), getTableName());
 
-        for (ColumnConfig column : columns) {
+        for (ColumnConfig column : getColumn()) {
             statement.addNewColumnValue(column.getName(), column.getValueObject());
         }
 
         statement.setWhereClause(whereClause);
+
+        for (ColumnConfig whereParam : whereParams) {
+            if (whereParam.getName() != null) {
+                statement.addWhereColumnName(whereParam.getName());
+            }
+            statement.addWhereParameter(whereParam.getValueObject());
+        }
 
         return new SqlStatement[]{
                 statement

@@ -298,6 +298,17 @@
 		<xsd:attribute name="remarks" type="xsd:string" />
 	</xsd:attributeGroup>
 
+    <xsd:attributeGroup name="param">
+        <xsd:attribute name="name" type="xsd:string" />
+        <xsd:attribute name="value" type="xsd:string" />
+        <xsd:attribute name="valueNumeric" type="xsd:string" />
+        <xsd:attribute name="valueBoolean" type="xsd:string" />
+        <xsd:attribute name="valueDate" type="xsd:string" />
+        <xsd:attribute name="valueComputed" type="xsd:string" />
+        <xsd:attribute name="valueSequenceNext" type="xsd:string" />
+        <xsd:attribute name="valueSequenceCurrent" type="xsd:string" />
+    </xsd:attributeGroup>
+
 	<xsd:attributeGroup name="dropTableAttributes">
         <xsd:attribute name="catalogName" type="xsd:string" />
 		<xsd:attribute name="schemaName" type="xsd:string" />
@@ -800,6 +811,12 @@
 		</xsd:complexType>
 	</xsd:element>
 
+    <xsd:element name="param">
+        <xsd:complexType>
+            <xsd:attributeGroup ref="param" />
+        </xsd:complexType>
+    </xsd:element>
+
 	<!-- Children for createTable -->
 	<xsd:element name="createTable">
 		<xsd:complexType>
@@ -840,16 +857,26 @@
 		<xsd:complexType mixed="true">
 			<xsd:sequence>
 				<xsd:element ref="column" minOccurs="1" maxOccurs="unbounded" />
-				<xsd:element name="where" minOccurs="0" maxOccurs="1" />
+                <xsd:element name="where" minOccurs="0" maxOccurs="1" />
+                <xsd:element ref="whereParams" minOccurs="0" maxOccurs="1" />
 			</xsd:sequence>
 			<xsd:attributeGroup ref="tableNameAttribute" />
 		</xsd:complexType>
 	</xsd:element>
 
+    <xsd:element name="whereParams">
+        <xsd:complexType mixed="true">
+            <xsd:sequence>
+                <xsd:element ref="param" minOccurs="1" maxOccurs="unbounded" />
+            </xsd:sequence>
+        </xsd:complexType>
+    </xsd:element>
+
 	<xsd:element name="delete">
 		<xsd:complexType mixed="true">
 			<xsd:sequence>
-				<xsd:element name="where" minOccurs="0" maxOccurs="1" />
+                <xsd:element name="where" minOccurs="0" maxOccurs="1" />
+                <xsd:element ref="whereParams" minOccurs="0" maxOccurs="1" />
 			</xsd:sequence>
 			<xsd:attributeGroup ref="tableNameAttribute" />
 		</xsd:complexType>

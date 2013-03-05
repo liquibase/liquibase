@@ -18,6 +18,7 @@ import liquibase.change.ChangeFactory;
 import liquibase.change.ChangeWithColumns;
 import liquibase.change.ColumnConfig;
 import liquibase.change.ConstraintsConfig;
+import liquibase.change.core.AbstractModifyDataChange;
 import liquibase.change.core.CreateProcedureChange;
 import liquibase.change.core.CreateViewChange;
 import liquibase.change.core.DeleteDataChange;
@@ -386,18 +387,24 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
 				} else {
 					column = new ColumnConfig();
 				}
-				for (int i = 0; i < atts.getLength(); i++) {
-					String attributeName = atts.getQName(i);
-					String attributeValue = atts.getValue(i);
-					setProperty(column, attributeName, attributeValue);
-				}
-				if (change instanceof ChangeWithColumns) {
+                populateColumnFromAttributes(atts, column);
+                if (change instanceof ChangeWithColumns) {
 					((ChangeWithColumns) change).addColumn(column);
 				} else {
 					throw new RuntimeException("Unexpected column tag for "
 							+ change.getClass().getName());
 				}
-			} else if (change != null && "constraints".equals(qName)) {
+			} else if (change != null && "whereParams".equals(qName)) {
+                if (!(change instanceof AbstractModifyDataChange)) {
+                    throw new RuntimeException("Unexpected change: "
+                            + change.getClass().getName());
+                }
+            } else if (change != null && change instanceof AbstractModifyDataChange && "param".equals(qName)) {
+                ColumnConfig param = new ColumnConfig();
+                populateColumnFromAttributes(atts, param);
+                ((AbstractModifyDataChange) change).addWhereParam(param);
+            }
+            else if (change != null && "constraints".equals(qName)) {
 				ConstraintsConfig constraints = new ConstraintsConfig();
 				for (int i = 0; i < atts.getLength(); i++) {
 					String attributeName = atts.getQName(i);
@@ -418,19 +425,14 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
                     throw new RuntimeException("Could not determine column to add constraint to");
                 }
 				lastColumn.setConstraints(constraints);
-			} else if ("param".equals(qName)) {
-				if (change instanceof CustomChangeWrapper) {
-					if (atts.getValue("value") == null) {
-						paramName = atts.getValue("name");
-						text = new StringBuffer();
-					} else {
-						((CustomChangeWrapper) change).setParam(atts
-								.getValue("name"), atts.getValue("value"));
-					}
-				} else {
-					throw new MigrationFailedException(changeSet,
-							"'param' unexpected in " + qName);
-				}
+			} else if ("param".equals(qName) && change instanceof CustomChangeWrapper) {
+                if (atts.getValue("value") == null) {
+                    paramName = atts.getValue("name");
+                    text = new StringBuffer();
+                } else {
+                    ((CustomChangeWrapper) change).setParam(atts
+                            .getValue("name"), atts.getValue("value"));
+                }
 			} else if ("where".equals(qName)) {
 				text = new StringBuffer();
 			} else if ("property".equals(qName)) {
@@ -496,7 +498,15 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
 		}
 	}
 
-	protected boolean handleIncludedChangeLog(String fileName,
+    private void populateColumnFromAttributes(Attributes atts, ColumnConfig column) throws IllegalAccessException, InvocationTargetException, CustomChangeException {
+        for (int i = 0; i < atts.getLength(); i++) {
+            String attributeName = atts.getQName(i);
+            String attributeValue = atts.getValue(i);
+            setProperty(column, attributeName, attributeValue);
+        }
+    }
+
+    protected boolean handleIncludedChangeLog(String fileName,
 			boolean isRelativePath, String relativeBaseFileName)
 			throws LiquibaseException {
 		if (!(fileName.endsWith(".xml") || fileName.endsWith(".sql"))) {
@@ -598,16 +608,14 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
 				((RawSQLChange) change).setComments(textString);
 				text = new StringBuffer();
 			} else if (change != null && "where".equals(qName)) {
-				if (change instanceof UpdateDataChange) {
-					((UpdateDataChange) change).setWhereClause(textString);
-				} else if (change instanceof DeleteDataChange) {
-					((DeleteDataChange) change).setWhereClause(textString);
+				if (change instanceof AbstractModifyDataChange) {
+					((AbstractModifyDataChange) change).setWhereClause(textString);
 				} else {
 					throw new RuntimeException("Unexpected change type: "
 							+ change.getClass().getName());
 				}
 				text = new StringBuffer();
-			} else if (change != null
+            } else if (change != null
 					&& change instanceof CreateProcedureChange
 					&& "comment".equals(qName)) {
 				((CreateProcedureChange) change).setComments(textString);
@@ -635,6 +643,12 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
 					throw new RuntimeException("Unexpected column with text: " + textString);
 				}
 				this.text = new StringBuffer();
+            } else if (change != null && change instanceof AbstractModifyDataChange && qName.equals("param")
+                        && textString != null) {
+                    List<ColumnConfig> columns = ((AbstractModifyDataChange) change)
+                            .getWhereParams();
+                    columns.get(columns.size() - 1).setValue(textString);
+                    this.text = new StringBuffer();
 			} else if (change != null
 					&& localName.equals(change.getChangeMetaData().getName())) {
 				if (textString != null) {
