@@ -1028,13 +1028,13 @@
     </insert>
   </changeSet>
 
-  <changeSet id="checkUtf8HandledCorrectly" author="Mohammad Nadeem">
+  <!--<changeSet id="checkUtf8HandledCorrectly" author="Mohammad Nadeem">-->
 
-    <sql>
-      <![CDATA[  
-	    insert into insertWithDefaultSeq (stringValue) value ('€');
-        insert into insertWithDefaultSeq (stringValue) value ('£');
-        ]]>
-    </sql>
-  </changeSet>
+    <!--<sql>-->
+      <!--<![CDATA[  -->
+	    <!--insert into insertWithDefaultSeq (stringValue) value ('€');-->
+        <!--insert into insertWithDefaultSeq (stringValue) value ('£');-->
+        <!--]]>-->
+    <!--</sql>-->
+  <!--</changeSet>-->
 </databaseChangeLog>

@@ -38,7 +38,7 @@ public class DeleteGenerator extends AbstractSqlGenerator<DeleteStatement> {
                         database.escapeObjectName(columnName, Column.class));
             }
             for (Object param : statement.getWhereParameters()) {
-                fixedWhereClause = fixedWhereClause.replaceFirst("\\?|:value", Pattern.quote(DataTypeFactory.getInstance().fromObject(param, database).objectToSql(param, database)));
+                fixedWhereClause = fixedWhereClause.replaceFirst("\\?|:value", DataTypeFactory.getInstance().fromObject(param, database).objectToSql(param, database).replaceAll("\\$", "\\$"));
             }
             sql.append(" ").append(fixedWhereClause);
         }

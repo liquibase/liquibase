@@ -48,6 +48,7 @@ public abstract class AbstractModifyDataChange extends AbstractChange {
         this.tableName = tableName;
     }
 
+    @DatabaseChangeProperty(serializationType = SerializationType.NESTED_OBJECT)
     public String getWhereClause() {
         return whereClause;
     }

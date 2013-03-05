@@ -12,7 +12,27 @@ import java.util.List;
 @DatabaseChange(name = "update", description = "Updates data in an existing table", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "table")
 public class UpdateDataChange extends AbstractModifyDataChange implements ChangeWithColumns<ColumnConfig> {
 
+    private List<ColumnConfig> columns;
+
     public UpdateDataChange() {
+        columns = new ArrayList<ColumnConfig>();
+    }
+
+    @DatabaseChangeProperty(requiredForDatabase = "all", description = "Data to update")
+    public List<ColumnConfig> getColumn() {
+        return columns;
+    }
+
+    public void setColumn(List<ColumnConfig> columns) {
+        this.columns = columns;
+    }
+
+    public void addColumn(ColumnConfig column) {
+        columns.add(column);
+    }
+
+    public void removeColumn(ColumnConfig column) {
+        columns.remove(column);
     }
 
     public SqlStatement[] generateStatements(Database database) {
