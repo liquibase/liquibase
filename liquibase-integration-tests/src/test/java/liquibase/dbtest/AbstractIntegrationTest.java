@@ -200,11 +200,15 @@ public abstract class AbstractIntegrationTest {
     }
 
     protected void runCompleteChangeLog() throws Exception {
-        Liquibase liquibase = createLiquibase(completeChangeLog);
+        runChangeLog(completeChangeLog);
+    }
+
+    protected void runChangeLog(String changelogFile) throws Exception {
+        Liquibase liquibase = createLiquibase(changelogFile);
         clearDatabase(liquibase);
 
         //run again to test changelog testing logic
-        liquibase = createLiquibase(completeChangeLog);
+        liquibase = createLiquibase(changelogFile);
         try {
             liquibase.update(this.contexts);
         } catch (ValidationFailedException e) {

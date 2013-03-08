@@ -333,8 +333,12 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
 
                 log.debug("Reading ChangeSet: " + toString());
                 for (Change change : getChanges()) {
-                    database.executeStatements(change, databaseChangeLog, sqlVisitors);
-                    log.debug(change.getConfirmationMessage());
+                    if (change.includes(database)) {
+                        database.executeStatements(change, databaseChangeLog, sqlVisitors);
+                        log.debug(change.getConfirmationMessage());
+                    } else {
+                        log.debug("Change " + change.getSerializedObjectName() + " not included for database " + database.getShortName());
+                    }
                 }
 
                 if (runInTransaction) {

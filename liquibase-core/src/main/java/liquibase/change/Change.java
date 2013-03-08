@@ -58,6 +58,11 @@ public interface Change extends LiquibaseSerializable {
     boolean supports(Database database);
 
     /**
+     * @return Whether this change should run for the specified database
+     */
+    boolean includes(Database database);
+
+    /**
      * Generates warnings based on the configured Change instance. Warnings do not stop changelog execution, but are passed along to the end user for reference.
      * Can return null or an empty Warnings object when there are no warnings.
      */

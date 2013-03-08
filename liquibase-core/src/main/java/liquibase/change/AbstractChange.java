@@ -29,6 +29,8 @@ import java.lang.reflect.Method;
  */
 public abstract class AbstractChange implements Change {
 
+    private String dbms;
+
     private ChangeMetaData changeMetaData;
 
     private ResourceAccessor resourceAccessor;
@@ -236,6 +238,14 @@ public abstract class AbstractChange implements Change {
         return true;
     }
 
+    public boolean includes(final Database database) {
+        if (dbms == null || dbms.trim().isEmpty()) {
+            return true;
+        }
+        List<String> dbmsList = StringUtils.splitAndTrim(dbms, ",");
+        return dbmsList.contains(database.getShortName());
+    }
+
     /**
      * Implementation delegates logic to the {@link liquibase.sqlgenerator.SqlGenerator#warn(liquibase.statement.SqlStatement, liquibase.database.Database, liquibase.sqlgenerator.SqlGeneratorChain)} method on the {@link SqlStatement} objects returned by {@link #generateStatements }.
      * If a generated statement is not supported for the given database, no warning will be added since that is a validation error.
@@ -401,6 +411,18 @@ public abstract class AbstractChange implements Change {
         }
 
         return affectedObjects;
+    }
+
+    /**
+     * @return A comma separated list of dbms' that this change will be run for. Will run for all dbms' if empty or null.
+     */
+    @DatabaseChangeProperty(since = "3.0", exampleValue = "h2, oracle")
+    public String getDbms() {
+        return dbms;
+    }
+
+    public void setDbms(final String dbms) {
+        this.dbms = dbms;
     }
 
     public Set<String> getSerializableFields() {
