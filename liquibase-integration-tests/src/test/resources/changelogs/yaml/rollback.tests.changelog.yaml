@@ -1,0 +1,119 @@
+databaseChangeLog:
+  - changeSet:
+      id: multiRollbackTest
+      author: rs
+      failOnError: false
+      changes:
+        - createTable:
+            tableName: multiRollback1
+            column:
+            - column:
+                name: id
+                type: int
+        - createTable:
+            tableName: multiRollback2
+            column:
+              - column:
+                  name: id
+                  type: int
+        - createTable:
+            tableName: multiRollback3
+            column:
+              - column:
+                  name: id
+                  type: int
+      rollback:
+        - sql:
+            sql: drop table multiRollback1;
+        - sql:
+            sql: drop table multiRollback2;
+        - sql:
+            sql: drop table multiRollback3;
+
+  - changeSet:
+      id: changeRollback
+      author: nvoxland
+      changes:
+        - createTable:
+            tableName: changeRollback1
+            column:
+              - column:
+                  name: id
+                  type: int
+      rollback:
+        - dropTable:
+            tableName: changeRollback1
+
+  - changeSet:
+      id: changeRollback2-create
+      author: nvoxland
+      changes:
+        - createTable:
+            tableName: changeRollback2
+            column:
+              - column:
+                  name: id
+                  type: int
+
+  - changeSet:
+      id: changeRollback2-drop
+      author: nvoxland
+      changes:
+        - dropTable:
+            tableName: changeRollback2
+#      - rollback:
+#          changeSetId: changeRollback2-create
+#          changeSetAuthor: nvoxland
+
+  - changeSet:
+      id: noRollback
+      author: nvoxland
+      changes:
+        - sql:
+            sql: insert into multiRollback3 (id) values (1)
+      rollback:
+
+  - changeSet:
+      id: applyToRollback-false
+      author: nvoxland
+      changes:
+        - createTable:
+            tableName: applytorollback
+            column:
+              - column:
+                  name: id
+                  type: int
+                  constraints:
+                    nullable: false
+      modifySql:
+        applyToRollback: false
+        dbms: h2,derby,hsql
+        append value: ; alter table applytorollback add primary key(id)
+
+  - changeSet:
+      id: applyToRollback-true
+      author: nvoxland
+      changes:
+        - createTable:
+            tableName: applytorollbackREPLACE
+            column:
+              - column:
+                name: id
+                type: int
+      modifySql:
+        applyToRollback: true
+        replace:
+          replace: REPLACE
+          with: true
+
+  - changeSet:
+      id: sqlfiletest
+      author: nvoxland
+      changes:
+        - sqlFile:
+            stripComments: true
+            path: changelogs/common/rollbackinclude/createTables.sql
+      rollback:
+        - sqlFile:
+              stripComments: true
+              path: changelogs/common/rollbackinclude/rollbackTables.sql

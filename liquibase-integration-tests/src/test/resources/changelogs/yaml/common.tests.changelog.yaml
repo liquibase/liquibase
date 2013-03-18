@@ -1,0 +1,624 @@
+databaseChangeLog:
+  - property:
+      name: table.name
+      value: paramter_table
+  - property:
+      file: changelogs/common/dynamic.parameters.properties
+  - property:
+      name: column1.name
+      value: updated-columnA
+  - property:
+      name: column2.name
+      value: columnB
+  - property:
+      name: real.int.type
+      value: int
+  - property:
+      name: real.int.type 
+      value: already-set-int
+  - property:
+      name: true.boolean 
+      value: true
+
+  - preConditions:
+      - changeLogPropertyDefined:
+          property: real.int.type
+      - changeLogPropertyDefined:
+          property: real.int.type
+          value: int
+
+#        Check for some database properties
+      - changeLogPropertyDefined:
+          property: database.autoIncrementClause
+      - changeLogPropertyDefined:
+          property: database.currentDateTimeFunction
+      - changeLogPropertyDefined:
+          property: database.databaseChangeLogLockTableName
+      - changeLogPropertyDefined:
+          property: database.databaseChangeLogTableName
+      - changeLogPropertyDefined:
+          property: database.databaseMajorVersion
+      - changeLogPropertyDefined:
+          property: database.databaseMinorVersion
+      - changeLogPropertyDefined:
+          property: database.databaseProductName
+      - changeLogPropertyDefined:
+          property: database.databaseProductVersion
+      - changeLogPropertyDefined: 
+          property: database.lineComment
+      - changeLogPropertyDefined: 
+          property: database.typeName
+      - changeLogPropertyDefined: 
+          property: database.isSafeToRunUpdate
+      - changeLogPropertyDefined: 
+          property: database.requiresPassword
+      - changeLogPropertyDefined: 
+          property: database.requiresUsername
+      - changeLogPropertyDefined: 
+          property: database.supportsForeignKeyDisable
+      - changeLogPropertyDefined: 
+          property: database.supportsInitiallyDeferrableColumns
+      - changeLogPropertyDefined: 
+          property: database.supportsRestrictForeignKeys
+      - changeLogPropertyDefined: 
+          property: database.supportsSchemas
+      - changeLogPropertyDefined: 
+          property: database.supportsSequences
+      - changeLogPropertyDefined: 
+          property: database.supportsTablespaces
+        
+        
+  - include:
+      file: changelogs/common/included.failingprecondition.changelog.xml
+
+  - changeSet:
+      id: datatypetest-1
+      author: nvoxland
+      validCheckSums:
+        - e5b7b29ce3a75640858cd022501852d2
+      preConditions:
+        - changeLogPropertyDefined:
+            property: real.int.type
+        - changeLogPropertyDefined:
+            property: real.int.type
+            value: int
+      changes:
+        - createTable:
+            tableName: dataTypeTest
+            schemaName: ""
+            columns:
+              - column:
+                  name: id
+                  type: ${real.int.type}
+                  constraints:
+                    primaryKey: ${true.boolean}
+                    nullable: false
+              - column:
+                  name: dateCol
+                  type: date
+              - column:
+                  name: timeCol
+                  type: time
+              - column:
+                  name: dateTimeCol
+                  type: dateTime
+              - column:
+                  name: bigintcol
+                  type: bigint
+
+  - changeSet: 
+      id: authortest 
+      author: nvoxland
+      preConditions:
+        - sqlCheck: 
+            expectedResult: 1
+            sql: select count(*) from DATABASECHANGELOG where AUTHOR='nvoxland' and ID='datatypetest-1';
+
+  - changeSet: 
+      id: tagTest 
+      author: nvoxland
+      changes:
+        - tagDatabase:
+            tag: testTag
+
+  - changeSet: 
+      id: datatypetest-2 
+      author: nvoxland
+      validCheckSums:
+        - ANY
+      changes:
+        - insert: 
+            tableName: dataTypeTest
+            columns:
+              - column: 
+                  name: id 
+                  valueNumeric: 1
+              - column: 
+                  name: dateCol 
+                  valueDate: "2007-08-09"
+              - column: 
+                  name: timeCol 
+                  valueDate: "13:14:15"
+              - column: 
+                  name: dateTimeCol 
+                  valueDate: "2007-08-09T13:14:15"
+              - column: 
+                  name: bigintcol 
+                  valueNumeric: 2
+        - insert:
+            tableName: dataTypeTest
+            columns:
+              - column:
+                  name: id
+                  valueNumeric: 2
+              - column:
+                  name: dateCol
+                  valueDate: current_datetime
+              - column:
+                  name: timeCol
+                  valueComputed: current_datetime
+              - column:
+                  name: dateTimeCol
+                  valueDate: current_datetime
+              - column:
+                  name: bigintcol
+                  valueNumeric: 2
+  
+  - changeSet: 
+      id: defaultValueTest-1 
+      author: nvoxland
+      preConditions: 
+          - onFail: MARK_RAN
+          - not:
+              - dbms: 
+                  type: derby
+          - not:
+              - dbms: 
+                  type: mysql
+      changes:
+        - createTable: 
+            tableName: defaultValueTest
+            columns:
+              -  column: 
+                  name: id 
+                  type: int
+              - column: 
+                  name: intA 
+                  type: int
+              - column: 
+                  name: textA 
+                  type: varchar(5)
+              - column:
+                  name: booleanA
+                  type: boolean
+              - column:
+                  name: dateA
+                  type: date
+              - column:
+                  name: timeA
+                  type: time
+              - column:
+                  name: datetimeA
+                  type: datetime
+              - column:
+                  name: datetimeB
+                  type: datetime
+              - column:
+                  name: computedDate
+                  type: datetime
+
+        - addDefaultValue:
+            tableName: defaultValueTest
+            columnName: intA
+            defaultValueNumeric: 1
+            columnDataType: int
+        - addDefaultValue:
+            tableName: defaultValueTest
+            columnName: textA
+            defaultValue: a
+            columnDataType: varchar(5)
+        - addDefaultValue:
+            tableName: defaultValueTest
+            columnName: booleanA
+            defaultValueBoolean: true
+            columnDataType: boolean
+        - addDefaultValue:
+            tableName: defaultValueTest
+            columnName: dateA
+            defaultValueDate: "2007-08-09"
+            columnDataType: date
+        - addDefaultValue:
+            tableName: defaultValueTest
+            columnName: timeA
+            defaultValueDate: "14:15:16"
+            columnDataType: time
+        - addDefaultValue:
+            tableName: defaultValueTest
+            columnName: datetimeA
+            defaultValueDate: "2007-08-09T10:11:12"
+            columnDataType: datetime
+        - addDefaultValue:
+            tableName: defaultValueTest
+            columnName: datetimeB
+            defaultValueDate: "2007-08-09 10:11:12"
+            columnDataType: datetime
+        - addDefaultValue:
+            tableName: defaultValueTest
+            columnName: computedDate
+            defaultValueComputed: current_datetime
+            columnDataType: datetime
+
+        - insert:
+            tableName: defaultValueTest
+            columns:
+              - column:
+                  name: id
+                  valueNumeric: 1
+
+  - changeSet:
+      id: defaultValueTest-2
+      author: nvoxland
+      changes:
+        - createTable:
+            tableName: defaultValueTest2
+            columns:
+              - column:
+                  name: id
+                  type: int
+              - column:
+                  name: intA
+                  type: int
+                  defaultValueNumeric: 1
+              - column:
+                  name: textA
+                  type: varchar(5)
+                  defaultValue: a
+              - column:
+                  name: booleanA
+                  type: boolean
+                  defaultValueBoolean: true
+              - column:
+                  name: dateA
+                  type: date
+                  defaultValueDate: "2007-08-09"
+              - column:
+                  name: timeA
+                  type: time
+                  defaultValueDate: "14:15:16"
+              - column:
+                  name: datetimeA
+                  type: datetime
+                  defaultValueDate: "2007-08-09T10:11:12"
+              - column:
+                  name: datetimeB
+                  type: datetime
+                  defaultValueDate: "2007-08-09 10:11:12"
+
+        - insert:
+            tableName: defaultValueTest2
+            columns:
+              - column:
+                  name: id
+                  valueNumeric: 1
+
+  - changeSet:
+      id: compoundIndexTest
+      author: nvoxland
+      changes:
+        - createTable:
+            tableName: compoundIndexTest
+            columns:
+              - column:
+                  name: id
+                  type: int
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: firstname
+                  type: varchar(10)
+              - column:
+                  name: lastname
+                  type: varchar(10)
+        - createIndex:
+            indexName: idx_compoundtest
+            tableName: compoundIndexTest
+            columns:
+              - column:
+                  name: firstname
+              - column:
+                  name: lastname
+
+  - changeSet:
+      id: hasIndexPrecondition
+      author: nvoxland
+      dbms: oracle,mssql,mysql,h2,hsql,postgresql  # can checkConstraint with or without table name, derby doesn't work with just column names
+      preConditions:
+        - indexExists:
+            indexName: idx_compoundtest
+        - indexExists:
+            tableName: compoundIndexTest
+            indexName: idx_compoundtest
+        - indexExists:
+            tableName: compoundIndexTest
+            columnNames: firstname, lastname
+
+  - changeSet:
+      id: commentTest
+      author: nvoxland
+      comment: Creates a table and updates a value with actual SQL. Mainly for testing the comment tags
+      changes:
+        - createTable:
+            tableName: commenttest
+            columns:
+              - column:
+                  name: id
+                  type: int
+        - sql:
+            comment: Insert value into commenttest
+            sql: >
+              insert into commenttest (id) values (1);
+              insert into commenttest (id) values (2);
+              insert into commenttest (id) values (3);
+
+  - changeSet:
+      id: continue-preconditions-dont-fire
+      author: nvoxland
+      preConditions:
+        - onError: CONTINUE
+        - sqlCheck:
+            expectedResult: 3
+            sql: Invalid SQL
+      changes:
+        - sql:
+            sql: More invalid SQL. should not run due to "continue"
+
+  - changeSet:
+      id: add-column-test1
+      author: alan
+      preConditions:
+        - onFail: MARK_RAN
+        - not:
+            - or:
+                - dbms:
+                    type: h2
+                - dbms:
+                    type: hsqldb
+      comment: Testing bug reported on mailing list
+      changes:
+        - createTable:
+            tableName: ADD_COLUMN_TEST_TABLE
+            columns:
+              - column:
+                  name: id
+                  type: int
+
+        - addColumn:
+            tableName: ADD_COLUMN_TEST_TABLE
+            columns:
+              - column:
+                  name: A_NEW_COLUMN
+                  type: int
+                  defaultValueNumeric: 1
+                  constraints:
+                    nullable: false
+                    unique: true
+                    uniqueConstraintName: uq_addcoltest1
+
+  - changeSet:
+      id: contextstest-1
+      author: nvoxland
+      comment: Test how contexts work
+      changes:
+        - createTable:
+            tableName: contextsTest
+            columns:
+              - column:
+                  name: id
+                  type: varchar(255)
+
+
+  - changeSet:
+      id: contextstest-2
+      author: nvoxland
+      context: context-a
+      changes:
+        - insert:
+            tableName: contextsTest
+            columns:
+              - column:
+                  name: id
+                  value: context a
+
+  - changeSet:
+      id: contextstest-3
+      author: nvoxland
+      context: context-a, context-b
+      changes:
+        - insert:
+            tableName: contextsTest
+            columns:
+              - column:
+                  name: id
+                  value: a and b
+
+  - changeSet:
+      id: contextstest-4
+      author: nvoxland
+      context: context-b
+      changes:
+        - insert:
+            tableName: contextsTest
+            columns:
+              - column:
+                  name: id
+                  value: context b
+
+  - changeSet:
+      id: contextstest-5
+      author: nvoxland
+      context: ""
+      changes:
+        - insert:
+            tableName: contextsTest
+            columns:
+              - column:
+                  name: id
+                  value: empty contexts
+
+  - changeSet:
+      id: contextstest-6
+      author: nvoxland
+      changes:
+        - insert:
+            tableName: contextsTest
+            columns:
+              - column:
+                  name: id
+                  value: null contexts
+
+
+  - changeSet:
+      id: sampleCSVData-table
+      author: nvoxland
+      changes:
+        - createTable:
+            tableName: csvdata
+            columns:
+              - column:
+                  name: name
+                  type: varchar(50)
+              - column:
+                  name: username
+                  type: varchar(50)
+              - column:
+                  name: security_level
+                  type: int
+              - column:
+                  name: last_login
+                  type: datetime
+              - column:
+                  name: locked
+                  type: boolean
+
+  - changeSet:
+      id: sampleCSVData
+      author: nvoxland
+      changes:
+        - loadData:
+            tableName: csvdata
+            file: changelogs/sample.data1.csv
+  - changeSet:
+      id: sampleTSVData
+      author: nvoxland
+      changes:
+        - loadData:
+            tableName: csvdata
+            file: changelogs/sample.data1.tsv
+            separator: \t
+
+#  - changeSet:
+#      id: customPreCondition
+#      author: nvoxland
+#      preConditions:
+#        - customPrecondition:
+#            className: liquibase.precondition.ExampleCustomPrecondition
+#            params:
+#              - param:
+#                  name: name
+#                  value: Sample Name
+#              - param:
+#                  name: count
+#                  value: 3
+
+
+  - changeSet:
+      id: replaceSqlTest
+      author: nvoxland
+      changes:
+        - createTable:
+            tableName: replaceTest
+            columns:
+              - column:
+                  name: id
+                  type: int
+
+      modifySql:
+        - replace:
+            replace: replaceTest
+            with: replacedTest
+        - replace:
+            dbms: mysql,derby
+            replace: )
+            with:
+        - append:
+            dbms: mysql,derby
+            value: ", name varchar(255)"
+        - append:
+            dbms: mysql
+            value:  engine innodb
+
+  - includeAll:
+      path: changelogs/common/pathincluded/
+
+  - include:
+      file: includerelative\pathinclude1.changelog.xml
+      relativeToChangelogFile: true # try with dos style path
+
+  - changeSet:
+      id: comma'Ttest
+      author: n'voxland
+      comment: We are testing that 's are being escaped correctly
+      changes:
+        - createTable:
+            tableName: commatest
+            remarks: Some 'ing remarks go here
+            columns:
+              - column:
+                  name: id
+                  type: int
+                  constraints:
+                      primaryKey: true
+                      nullable: false
+
+  - changeSet:
+      id: sqlFileTest
+      author: nvoxland
+      runOnChange: true
+      changes:
+        - sqlFile:
+            path: rollbackinclude/createTables.sql
+            relativeToChangelogFile: true
+            stripComments: true
+
+  - changeSet:
+      id: movedFromTest
+      author: nvoxland
+      logicalFilePath: /where/it/was.xml
+      changes:
+        - createTable:
+            tableName: movedFromTest
+            columns:
+              - column:
+                  name: id
+                  type: int
+
+  - changeSet:
+      id: modifySqlWithContext
+      author: nvoxland
+      dbms: h2,mysql  # oracle has problems with this due to quoting from the original table name
+      changes:
+        - createTable:
+            tableName: INVALID TABLE NAME
+            columns:
+              - column:
+                  name: id
+                  type: int
+      modifySql:
+        - replace:
+            context: test
+            replace: INVALID TABLE NAME
+            with: validTableName
+
+  - includeAll:
+      path: com/example/packaged

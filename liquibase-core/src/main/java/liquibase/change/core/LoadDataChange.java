@@ -3,6 +3,7 @@ package liquibase.change.core;
 import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.exception.Warnings;
 import liquibase.logging.LogFactory;
 import liquibase.logging.Logger;
 import liquibase.resource.ResourceAccessor;
@@ -98,6 +99,9 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
 	}
 
 	public void setSeparator(String separator) {
+        if (separator.equals("\\t")) {
+            separator = "\t";
+        }
 		this.separator = separator;
 	}
 
@@ -114,7 +118,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
     }
 
     @DatabaseChangeProperty(description = "Defines how the data should be loaded.")
-    public List<LoadDataColumnConfig> getColumn() {
+    public List<LoadDataColumnConfig> getColumns() {
         return columns;
     }
 
@@ -281,5 +285,10 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
                 }
             }
         }
+    }
+
+    @Override
+    public Warnings warn(Database database) {
+        return null;
     }
 }

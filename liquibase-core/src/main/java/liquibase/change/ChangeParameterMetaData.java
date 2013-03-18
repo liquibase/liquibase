@@ -137,6 +137,8 @@ public class ChangeParameterMetaData {
             try {
                 if (dataType.equals("bigInteger")) {
                     value = new BigInteger((String) value);
+                } else if (dataType.equals("databaseFunction")) {
+                    value = new DatabaseFunction((String) value);
                 } else {
                     throw new UnexpectedLiquibaseException("Unknown Data Type: "+dataType);
                 }
@@ -151,6 +153,14 @@ public class ChangeParameterMetaData {
                     Method writeMethod = descriptor.getWriteMethod();
                     if (writeMethod == null) {
                         throw new UnexpectedLiquibaseException("Could not find writeMethod for "+this.parameterName);
+                    }
+                    Class<?> expectedWriteType = writeMethod.getParameterTypes()[0];
+                    if (value != null && !expectedWriteType.isAssignableFrom(value.getClass())) {
+                        if (expectedWriteType.equals(String.class)) {
+                            value = value.toString();
+                        } else {
+                            throw new UnexpectedLiquibaseException("Could not convert "+value.getClass().getName()+" to "+expectedWriteType.getName());
+                        }
                     }
                     writeMethod.invoke(change, value);
                 }

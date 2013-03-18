@@ -19,11 +19,11 @@ public class UpdateDataChange extends AbstractModifyDataChange implements Change
     }
 
     @DatabaseChangeProperty(requiredForDatabase = "all", description = "Data to update")
-    public List<ColumnConfig> getColumn() {
+    public List<ColumnConfig> getColumns() {
         return columns;
     }
 
-    public void setColumn(List<ColumnConfig> columns) {
+    public void setColumns(List<ColumnConfig> columns) {
         this.columns = columns;
     }
 
@@ -38,7 +38,7 @@ public class UpdateDataChange extends AbstractModifyDataChange implements Change
     public SqlStatement[] generateStatements(Database database) {
 
     	boolean needsPreparedStatement = false;
-        for (ColumnConfig column : getColumn()) {
+        for (ColumnConfig column : getColumns()) {
             if (column.getValueBlobFile() != null) {
                 needsPreparedStatement = true;
             }
@@ -55,7 +55,7 @@ public class UpdateDataChange extends AbstractModifyDataChange implements Change
     	
         UpdateStatement statement = new UpdateStatement(getCatalogName(), getSchemaName(), getTableName());
 
-        for (ColumnConfig column : getColumn()) {
+        for (ColumnConfig column : getColumns()) {
             statement.addNewColumnValue(column.getName(), column.getValueObject());
         }
 

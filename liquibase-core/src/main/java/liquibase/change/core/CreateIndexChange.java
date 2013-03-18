@@ -59,14 +59,14 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
     }
 
     @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "index.column", description = "Column(s) to add to the index")
-    public List<ColumnConfig> getColumn() {
+    public List<ColumnConfig> getColumns() {
         if (columns == null) {
             return new ArrayList<ColumnConfig>();
         }
         return columns;
     }
 
-    public void setColumn(List<ColumnConfig> columns) {
+    public void setColumns(List<ColumnConfig> columns) {
         this.columns = columns;
     }
 
@@ -86,7 +86,7 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
 
     public SqlStatement[] generateStatements(Database database) {
         List<String> columns = new ArrayList<String>();
-        for (ColumnConfig column : getColumn()) {
+        for (ColumnConfig column : getColumns()) {
             columns.add(column.getName());
         }
 
@@ -98,7 +98,7 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
 					    getTableName(),
 					    this.isUnique(),
 					    getAssociatedWith(),
-					    columns.toArray(new String[getColumn().size()]))
+					    columns.toArray(new String[getColumns().size()]))
 					    .setTablespace(getTablespace())
 	    };
     }

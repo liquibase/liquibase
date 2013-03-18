@@ -286,7 +286,7 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
         for (Map.Entry entry : attributeMap.entrySet()) {
             String value = (String) entry.getValue();
             if (value != null) {
-                if (indent >= 0 && !firstAttribute) {
+                if (indent >= 0 && !firstAttribute && attributeMap.size() > 2) {
                     buffer.append("\n").append(StringUtils.repeat(" ", indent)).append("        ");
                 } else {
                     buffer.append(" ");

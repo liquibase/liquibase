@@ -303,7 +303,7 @@ public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTab
 //
 //        assertEquals(0, statement.getForeignKeyConstraints().size());
 //
-//        statement.addColumnConstraint(new ForeignKeyConstraint("fk_test", "fkTable(id)").setColumn("id"));
+//        statement.addColumnConstraint(new ForeignKeyConstraint("fk_test", "fkTable(id)").setColumns("id"));
 //
 //        assertEquals(1, statement.getForeignKeyConstraints().size());
 //        assertEquals("fk_test", statement.getForeignKeyConstraints().iterator().next().getForeignKeyName());

@@ -3,7 +3,6 @@ package liquibase.change.core;
 import liquibase.change.AbstractSQLChange;
 import liquibase.change.DatabaseChange;
 import liquibase.change.ChangeMetaData;
-import liquibase.change.DatabaseChangeProperty;
 
 /**
  * Allows execution of arbitrary SQL.  This change can be used when existing changes are either don't exist,
@@ -24,7 +23,7 @@ import liquibase.change.DatabaseChangeProperty;
         priority = ChangeMetaData.PRIORITY_DEFAULT)
 public class RawSQLChange extends AbstractSQLChange {
 
-    private String comments;
+    private String comment;
     
     public RawSQLChange() {
     }
@@ -33,12 +32,12 @@ public class RawSQLChange extends AbstractSQLChange {
         setSql(sql);
     }
 
-    public String getComments() {
-        return comments;
+    public String getComment() {
+        return comment;
     }
 
-    public void setComments(String comments) {
-        this.comments = comments;
+    public void setComment(String comment) {
+        this.comment = comment;
     }
 
     public String getConfirmationMessage() {

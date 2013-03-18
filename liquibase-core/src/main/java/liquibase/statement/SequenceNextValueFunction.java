@@ -5,6 +5,10 @@ package liquibase.statement;
  */
 public class SequenceNextValueFunction extends DatabaseFunction {
 
+    public SequenceNextValueFunction() {
+        this("UNSET");
+    }
+
     public SequenceNextValueFunction(String sequenceName) {
         super(sequenceName);
     }

@@ -52,7 +52,7 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
     public SqlStatement[] generateStatements(Database database) {
 
         CreateTableStatement statement = new CreateTableStatement(getCatalogName(), getSchemaName(), getTableName());
-        for (ColumnConfig column : getColumn()) {
+        for (ColumnConfig column : getColumns()) {
             ConstraintsConfig constraints = column.getConstraints();
             boolean isAutoIncrement = column.isAutoIncrement() != null && column.isAutoIncrement();
 
@@ -111,7 +111,7 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
             }
         }
 
-        for (ColumnConfig column : getColumn()) {
+        for (ColumnConfig column : getColumns()) {
             String columnRemarks = StringUtils.trimToNull(column.getRemarks());
             if (columnRemarks != null) {
                 SetColumnRemarksStatement remarksStatement = new SetColumnRemarksStatement(catalogName, schemaName, tableName, column.getName(), columnRemarks);
@@ -137,14 +137,14 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
     }
 
     @DatabaseChangeProperty(requiredForDatabase = "all")
-    public List<ColumnConfig> getColumn() {
+    public List<ColumnConfig> getColumns() {
         if (columns == null) {
             return new ArrayList<ColumnConfig>();
         }
         return columns;
     }
 
-    public void setColumn(List<ColumnConfig> columns) {
+    public void setColumns(List<ColumnConfig> columns) {
         this.columns = columns;
     }
 
