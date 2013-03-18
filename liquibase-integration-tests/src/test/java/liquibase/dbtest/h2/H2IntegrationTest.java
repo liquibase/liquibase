@@ -12,8 +12,12 @@ import org.junit.Test;
 
 public class H2IntegrationTest extends AbstractIntegrationTest {
 
+    private final String dbmsExcludeChangelog;
+
     public H2IntegrationTest() throws Exception {
         super("h2", "jdbc:h2:mem:liquibase");
+
+        this.dbmsExcludeChangelog = "changelogs/h2/complete/dbms.exclude.changelog.xml";
     }
 
     @Test
@@ -50,6 +54,11 @@ public class H2IntegrationTest extends AbstractIntegrationTest {
         runCompleteChangeLog();
         DatabaseSnapshot snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(getDatabase().getDefaultSchema(), getDatabase(), new SnapshotControl());
         System.out.println(snapshot);
+    }
+
+    @Test
+    public void h2IsExcludedFromRunningChangeset() throws Exception {
+        runChangeLogFile(dbmsExcludeChangelog);
     }
 
     //    @Test
