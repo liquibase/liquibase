@@ -562,4 +562,8 @@ public class MockDatabase implements Database {
 
     public void setObjectQuotingStrategy(ObjectQuotingStrategy quotingStrategy) {
     }
+
+    public ObjectQuotingStrategy getObjectQuotingStrategy() {
+        return ObjectQuotingStrategy.LEGACY;
+    }
 }

@@ -3,6 +3,7 @@ package liquibase.changelog.visitor;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.database.Database;
+import liquibase.database.ObjectQuotingStrategy;
 import liquibase.exception.LiquibaseException;
 import liquibase.logging.LogFactory;
 import liquibase.logging.Logger;
@@ -28,7 +29,8 @@ public class UpdateVisitor implements ChangeSetVisitor {
         if (!runStatus.equals(ChangeSet.RunStatus.NOT_RAN)) {
             execType = ChangeSet.ExecType.RERAN;
         }
-
+        // reset object quoting strategy after running changeset
+        this.database.setObjectQuotingStrategy(ObjectQuotingStrategy.LEGACY);
         this.database.markChangeSetExecStatus(changeSet, execType);
 
         this.database.commit();

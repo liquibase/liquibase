@@ -66,7 +66,7 @@ public class AddNotNullConstraintChange extends AbstractChange {
         this.columnName = columnName;
     }
 
-    @DatabaseChangeProperty(description = "Value to set all currently null values to. If not set, change will fail if null values exist", requiredForDatabase = {"informix","mssql","mysql"})
+    @DatabaseChangeProperty(description = "Value to set all currently null values to. If not set, change will fail if null values exist", requiredForDatabase = {"informix","mssql"})
     public String getDefaultNullValue() {
         return defaultNullValue;
     }
@@ -98,7 +98,7 @@ public class AddNotNullConstraintChange extends AbstractChange {
             
             statements.add(new UpdateStatement(getCatalogName(), getSchemaName(), getTableName())
                     .addNewColumnValue(getColumnName(), defaultValue)
-                    .setWhereClause(getColumnName() + " IS NULL"));
+                    .setWhereClause(database.escapeObjectName(getColumnName(), Column.class) + " IS NULL"));
         }
         
     	statements.add(new SetNullableStatement(getCatalogName(), getSchemaName(), getTableName(), getColumnName(), getColumnDataType(), false));

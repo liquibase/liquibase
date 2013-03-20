@@ -3,6 +3,7 @@ package liquibase.snapshot.jvm;
 import liquibase.CatalogAndSchema;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
+import liquibase.database.ObjectQuotingStrategy;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.snapshot.DatabaseSnapshot;
@@ -56,6 +57,9 @@ public class SchemaSnapshotGenerator extends JdbcSnapshotGenerator {
 
         example = new Schema(catalogName, schemaName);
 
+        // use LEGACY quoting since we're dealing with system objects
+        ObjectQuotingStrategy currentStrategy = database.getObjectQuotingStrategy();
+        database.setObjectQuotingStrategy(ObjectQuotingStrategy.LEGACY);
         try {
             if (database.supportsSchemas()) {
                 schemas = ((JdbcConnection) database.getConnection()).getMetaData().getSchemas();
@@ -83,6 +87,7 @@ public class SchemaSnapshotGenerator extends JdbcSnapshotGenerator {
         } catch (SQLException e) {
             throw new DatabaseException(e);
         } finally {
+            database.setObjectQuotingStrategy(currentStrategy);
             if (schemas != null) {
                 try {
                     schemas.close();

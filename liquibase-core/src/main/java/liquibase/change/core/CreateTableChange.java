@@ -30,6 +30,7 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
     private String remarks;
 
     public CreateTableChange() {
+        super();
         columns = new ArrayList<ColumnConfig>();
     }
 
@@ -198,4 +199,6 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
     public String getConfirmationMessage() {
         return "Table " + tableName + " created";
     }
+
+
 }

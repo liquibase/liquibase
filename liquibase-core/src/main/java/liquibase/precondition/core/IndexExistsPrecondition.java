@@ -5,6 +5,7 @@ import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.snapshot.SnapshotGeneratorFactory;
+import liquibase.structure.core.Column;
 import liquibase.structure.core.Index;
 import liquibase.structure.core.Schema;
 import liquibase.exception.*;
@@ -77,13 +78,13 @@ public class IndexExistsPrecondition implements Precondition {
             Index example = new Index();
             example.setTable(new Table());
             if (StringUtils.trimToNull(getTableName()) != null) {
-                example.getTable().setName(getTableName());
+                example.getTable().setName(database.correctObjectName(getTableName(), Table.class));
             }
             example.getTable().setSchema(schema);
-            example.setName(getIndexName());
+            example.setName(database.correctObjectName(getIndexName(), Index.class));
             if (StringUtils.trimToNull(getColumnNames()) != null) {
                 for (String column : getColumnNames().split("\\s*,\\s*")) {
-                    example.getColumns().add(column);
+                    example.getColumns().add(database.correctObjectName(column, Column.class));
                 }
             }
             if (!SnapshotGeneratorFactory.getInstance().has(example, database)) {
