@@ -1,8 +1,6 @@
 package liquibase.integration.spring;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.URL;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -139,6 +137,8 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 
     private boolean shouldRun = true;
 
+    private File rollbackFile;
+
     public SpringLiquibase() {
         super();
     }
@@ -251,6 +251,7 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
         try {
             c = getDataSource().getConnection();
             liquibase = createLiquibase(c);
+            generateRollbackFile(liquibase);
             performUpdate(liquibase);
         } catch (SQLException e) {
             throw new DatabaseException(e);
@@ -265,6 +266,16 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
             }
         }
 
+    }
+
+    private void generateRollbackFile(Liquibase liquibase) throws LiquibaseException {
+        if(rollbackFile != null) {
+            try {
+                liquibase.futureRollbackSQL(getContexts(), new FileWriter(rollbackFile));
+            } catch (IOException e) {
+                throw new LiquibaseException("Unable to generate rollback file.", e);
+            }
+        }
     }
 
     protected void performUpdate(Liquibase liquibase) throws LiquibaseException {
@@ -334,6 +345,10 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 
     public ResourceLoader getResourceLoader() {
         return resourceLoader;
+    }
+
+    public void setRollbackFile(File rollbackFile) {
+        this.rollbackFile = rollbackFile;
     }
 
     @Override
