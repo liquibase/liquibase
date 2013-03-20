@@ -101,6 +101,7 @@ public class H2IntegrationTest extends AbstractIntegrationTest {
             e.printDescriptiveError(System.out);
             throw e;
         }
+    }
 
 
 
