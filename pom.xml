@@ -164,6 +164,14 @@
                 <scope>test</scope>
             </dependency>
 
+
+            <dependency>
+                <groupId>org.yaml</groupId>
+                <artifactId>snakeyaml</artifactId>
+                <version>1.12</version>
+                <optional>true</optional>
+            </dependency>
+
             <!-- JDBC drivers -->
             <dependency>
                 <groupId>org.hsqldb</groupId>

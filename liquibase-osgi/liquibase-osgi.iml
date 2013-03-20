@@ -14,9 +14,9 @@
           <property key="Embed-Transitive" value="true" />
           <property key="DynamicImport-Package" value="net.sf.cglib.*" />
           <property key="-include" value="src/main/resources/META-INF/MANIFEST.MF" />
-          <property key="Bundle-ClassPath" value=".,weld-se-1.1.8.Final.jar,liquibase-core-3.0.0-beta2-SNAPSHOT.jar" />
-          <property key="Include-Resource" value="weld-se-1.1.8.Final.jar=$MAVEN_REPOSITORY$/org/jboss/weld/se/weld-se/1.1.8.Final/weld-se-1.1.8.Final.jar,liquibase-core-3.0.0-beta2-SNAPSHOT.jar=$MODULE_DIR$/../liquibase-core/pom.xml" />
-          <property key="Embedded-Artifacts" value="weld-se-1.1.8.Final.jar;g=&quot;org.jboss.weld.se&quot;;a=&quot;weld-se&quot;;v=&quot;1.1.8.Final&quot;,liquibase-core-3.0.0-beta2-SNAPSHOT.jar;g=&quot;org.liquibase&quot;;a=&quot;liquibase-core&quot;;v=&quot;3.0.0-beta2-SNAPSHOT&quot;" />
+          <property key="Bundle-ClassPath" value=".,weld-se-1.1.8.Final.jar,snakeyaml-1.12.jar,liquibase-core-3.0.0-beta2-SNAPSHOT.jar" />
+          <property key="Include-Resource" value="weld-se-1.1.8.Final.jar=$MAVEN_REPOSITORY$/org/jboss/weld/se/weld-se/1.1.8.Final/weld-se-1.1.8.Final.jar,snakeyaml-1.12.jar=$MAVEN_REPOSITORY$/org/yaml/snakeyaml/1.12/snakeyaml-1.12.jar,liquibase-core-3.0.0-beta2-SNAPSHOT.jar=$MODULE_DIR$/../liquibase-core/pom.xml" />
+          <property key="Embedded-Artifacts" value="weld-se-1.1.8.Final.jar;g=&quot;org.jboss.weld.se&quot;;a=&quot;weld-se&quot;;v=&quot;1.1.8.Final&quot;,snakeyaml-1.12.jar;g=&quot;org.yaml&quot;;a=&quot;snakeyaml&quot;;v=&quot;1.12&quot;,liquibase-core-3.0.0-beta2-SNAPSHOT.jar;g=&quot;org.liquibase&quot;;a=&quot;liquibase-core&quot;;v=&quot;3.0.0-beta2-SNAPSHOT&quot;" />
         </additionalProperties>
         <additionalJARContents />
       </configuration>
@@ -34,6 +34,7 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="liquibase-core" />
     <orderEntry type="library" name="Maven: org.jboss.weld.se:weld-se:1.1.8.Final" level="project" />
+    <orderEntry type="library" name="Maven: org.yaml:snakeyaml:1.12" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: org.osgi:org.osgi.core:4.1.0" level="project" />
   </component>
 </module>
