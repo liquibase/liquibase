@@ -826,6 +826,7 @@
 				<xsd:element ref="column" maxOccurs="unbounded" />
 			</xsd:sequence>
 			<xsd:attributeGroup ref="tableNameAttribute" />
+            <xsd:attribute name="dbms" type="xsd:string" />
 		</xsd:complexType>
 	</xsd:element>
 

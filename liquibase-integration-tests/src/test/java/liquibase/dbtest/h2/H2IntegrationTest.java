@@ -15,10 +15,12 @@ import org.junit.Test;
 public class H2IntegrationTest extends AbstractIntegrationTest {
 
     private final String changeSpecifyDbmsChangeLog;
+    private final String dbmsExcludeChangelog;
 
     public H2IntegrationTest() throws Exception {
         super("h2", "jdbc:h2:mem:liquibase");
         this.changeSpecifyDbmsChangeLog = "changelogs/h2/complete/change.specify.dbms.changelog.xml";
+        this.dbmsExcludeChangelog = "changelogs/h2/complete/dbms.exclude.changelog.xml";
     }
 
     @Test
