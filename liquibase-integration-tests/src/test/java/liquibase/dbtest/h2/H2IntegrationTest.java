@@ -59,7 +59,7 @@ public class H2IntegrationTest extends AbstractIntegrationTest {
 
     @Test
     public void canSpecifyDbmsForIndividualChanges() throws Exception {
-        runChangeLog(changeSpecifyDbmsChangeLog);
+        runChangeLogFile(changeSpecifyDbmsChangeLog);
     }
 
     @Test
