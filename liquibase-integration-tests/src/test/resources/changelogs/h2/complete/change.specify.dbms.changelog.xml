@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.0.xsd">
+  <preConditions>
+    <dbms type="h2"/>
+  </preConditions>
+
+  <changeSet id="1" author="dbiggs">
+    <createTable tableName="testChangeDbms">
+      <column name="sampleColumn" type="varchar(50)"/>
+    </createTable>
+    <!-- sql will cause error if it was run -->
+    <sql dbms="oracle">select * from tableThatDoesNotExist</sql>
+    <insert tableName="testChangeDbms" dbms="h2">
+      <column name="sampleColumn" value="testValue"/>
+    </insert>
+  </changeSet>
+
+  <changeSet id="2" author="dbiggs">
+    <preConditions>
+      <sqlCheck expectedResult="1">select count(*) from testChangeDbms</sqlCheck>
+    </preConditions>
+  </changeSet>
+</databaseChangeLog>
