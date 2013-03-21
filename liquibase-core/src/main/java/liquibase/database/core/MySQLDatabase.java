@@ -40,7 +40,14 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
         if (objectType.equals(PrimaryKey.class) && name.equals("PRIMARY")) {
             return null;
         } else {
-            return super.correctObjectName(name, objectType);
+            name = super.correctObjectName(name, objectType);
+            if (name == null) {
+                return null;
+            }
+            if (!this.isCaseSensitive()) {
+                return name.toLowerCase();
+            }
+            return name;
         }
     }
 

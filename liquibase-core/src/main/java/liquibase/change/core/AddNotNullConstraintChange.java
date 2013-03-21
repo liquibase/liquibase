@@ -66,7 +66,7 @@ public class AddNotNullConstraintChange extends AbstractChange {
         this.columnName = columnName;
     }
 
-    @DatabaseChangeProperty(description = "Value to set all currently null values to. If not set, change will fail if null values exist", requiredForDatabase = {"informix","mssql"})
+    @DatabaseChangeProperty(description = "Value to set all currently null values to. If not set, change will fail if null values exist")
     public String getDefaultNullValue() {
         return defaultNullValue;
     }

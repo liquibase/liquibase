@@ -238,12 +238,18 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                 }
 
                 for (JdbcDatabaseSnapshot.CachedRow row : rs) {
-                    String indexName = cleanNameFromDatabase(row.getString("INDEX_NAME"), database);
+                    String indexName = database.correctObjectName(cleanNameFromDatabase(row.getString("INDEX_NAME"), database), Index.class);
                     if (indexName == null) {
                         continue;
                     }
-                    if (exampleName != null && !exampleName.equals(indexName)) {
-                        continue;
+                    if (database.isCaseSensitive()) {
+                        if (exampleName != null && !exampleName.equals(indexName)) {
+                            continue;
+                        }
+                    } else {
+                        if (exampleName != null && !exampleName.equalsIgnoreCase(indexName)) {
+                            continue;
+                        }
                     }
                     /*
                     * TODO Informix generates indexnames with a leading blank if no name given.
