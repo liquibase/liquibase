@@ -25,7 +25,7 @@ public class DropTableChangeTest extends StandardChangeTest {
     @Override
     @Test
     public void getRefactoringName() throws Exception {
-        assertEquals("Drop Table", change.getChangeMetaData().getDescription());
+        assertEquals("dropTable", change.getChangeMetaData().getName());
     }
 
     @Override

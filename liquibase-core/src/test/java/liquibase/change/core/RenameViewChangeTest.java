@@ -21,7 +21,7 @@ public class RenameViewChangeTest extends StandardChangeTest {
     @Override
     @Test
     public void getRefactoringName() throws Exception {
-        assertEquals("Rename View", refactoring.getChangeMetaData().getDescription());
+        assertEquals("renameView", refactoring.getChangeMetaData().getName());
     }
 
     @Override

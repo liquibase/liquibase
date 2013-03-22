@@ -13,7 +13,7 @@ public class DropPrimaryKeyChangeTest extends StandardChangeTest {
         @Override
         @Test
     public void getRefactoringName() throws Exception {
-        assertEquals("Drop Primary Key", new DropPrimaryKeyChange().getChangeMetaData().getDescription());
+        assertEquals("dropPrimaryKey", new DropPrimaryKeyChange().getChangeMetaData().getName());
     }
 
     @Override

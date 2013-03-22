@@ -30,7 +30,7 @@ public class CheckSumTest {
 
     @Test
     public void getCurrentVersion() {
-        assertEquals(5, CheckSum.getCurrentVersion());
+        assertEquals(6, CheckSum.getCurrentVersion());
     }
 
     @Test

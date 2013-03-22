@@ -26,7 +26,7 @@ public class RenameTableChangeTest extends StandardChangeTest {
     @Override
     @Test
     public void getRefactoringName() throws Exception {
-        assertEquals("Rename Table", refactoring.getChangeMetaData().getDescription());
+        assertEquals("renameTable", refactoring.getChangeMetaData().getName());
     }
 
     @Override

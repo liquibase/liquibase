@@ -17,8 +17,6 @@ public class AddAutoIncrementChangeTest extends StandardChangeTest {
     @Test
     public void constructor() {
         AddAutoIncrementChange change = new AddAutoIncrementChange();
-        assertEquals("addAutoIncrement", change.getChangeMetaData().getName());
-        assertEquals("Set Column as Auto-Increment", change.getChangeMetaData().getDescription());
         assertEquals("column", change.getChangeMetaData().getAppliesTo().iterator().next());
     }
 
@@ -56,7 +54,7 @@ public class AddAutoIncrementChangeTest extends StandardChangeTest {
     @Override
     @Test
     public void getRefactoringName() throws Exception {
-        assertEquals("Set Column as Auto-Increment", new AddAutoIncrementChange().getChangeMetaData().getDescription());
+        assertEquals("addAutoIncrement", new AddAutoIncrementChange().getChangeMetaData().getName());
     }
 
     @Override

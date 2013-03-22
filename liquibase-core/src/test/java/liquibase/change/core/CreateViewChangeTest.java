@@ -11,7 +11,7 @@ public class CreateViewChangeTest extends StandardChangeTest {
     @Override
     @Test
     public void getRefactoringName() throws Exception {
-        assertEquals("Create View", new CreateViewChange().getChangeMetaData().getDescription());
+        assertEquals("createView", new CreateViewChange().getChangeMetaData().getName());
     }
 
     @Override

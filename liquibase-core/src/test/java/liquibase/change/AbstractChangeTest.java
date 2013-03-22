@@ -82,7 +82,8 @@ public class AbstractChangeTest {
         assertNull(null, changeMetaData.getAppliesTo());
 
         Map<String, ChangeParameterMetaData> parameters = changeMetaData.getParameters();
-        assertEquals(3, parameters.size());
+        assertEquals(4, parameters.size());
+        ChangeParameterMetaData dbmsMetaData = parameters.get("dbms");
         ChangeParameterMetaData paramOneMetaData = parameters.get("paramOne");
         ChangeParameterMetaData paramTwoMetaData = parameters.get("paramTwo");
         ChangeParameterMetaData paramNoMetaData = parameters.get("paramNoMetadata");
@@ -105,6 +106,9 @@ public class AbstractChangeTest {
         assertTrue(paramTwoMetaData.getRequiredForDatabase().contains("mysql"));
         assertTrue(paramTwoMetaData.getRequiredForDatabase().contains("mssql"));
 
+        assertNotNull(dbmsMetaData);
+        assertTrue(dbmsMetaData.getExampleValue().toString().contains("h2"));
+
         assertNotNull(paramNoMetaData);
         assertNull(paramNotIncludedMetaData);
         assertNull("Properties with no write method should not be included", paramNoWriteMethodMetaData);
@@ -116,7 +120,7 @@ public class AbstractChangeTest {
         ChangeMetaData changeMetaData = change.createChangeMetaData();
 
         Map<String, ChangeParameterMetaData> parameters = changeMetaData.getParameters();
-        assertEquals(0, parameters.size());
+        assertEquals(1, parameters.size());
     }
 
     @Test(expected = UnexpectedLiquibaseException.class)

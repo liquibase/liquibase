@@ -9,7 +9,7 @@ public class DropForeignKeyConstraintChangeTest extends StandardChangeTest {
  @Override
  @Test
     public void getRefactoringName() throws Exception {
-        assertEquals("Drop Foreign Key Constraint", new DropForeignKeyConstraintChange().getChangeMetaData().getDescription());
+        assertEquals("dropForeignKeyConstraint", new DropForeignKeyConstraintChange().getChangeMetaData().getName());
     }
 
     @Override

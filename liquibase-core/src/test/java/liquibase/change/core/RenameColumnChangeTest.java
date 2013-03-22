@@ -32,7 +32,7 @@ public class RenameColumnChangeTest extends StandardChangeTest {
     @Override
     @Test
     public void getRefactoringName() throws Exception {
-        assertEquals("Rename Column", refactoring.getChangeMetaData().getDescription());
+        assertEquals("renameColumn", refactoring.getChangeMetaData().getName());
     }
 
     @Override

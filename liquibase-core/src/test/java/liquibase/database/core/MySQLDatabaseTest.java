@@ -46,14 +46,14 @@ public class MySQLDatabaseTest extends AbstractJdbcDatabaseTest {
     @Test
     public void escapeTableName_noSchema() {
         Database database = getDatabase();
-        assertEquals("`tableName`", database.escapeTableName(null, null, "tableName"));
+        assertEquals("tableName", database.escapeTableName(null, null, "tableName"));
     }
 
     @Override
     @Test
     public void escapeTableName_withSchema() {
         Database database = getDatabase();
-        assertEquals("`catalogName`.`tableName`", database.escapeTableName("catalogName", "schemaName", "tableName"));
+        assertEquals("catalogName.tableName", database.escapeTableName("catalogName", "schemaName", "tableName"));
     }
 
 }

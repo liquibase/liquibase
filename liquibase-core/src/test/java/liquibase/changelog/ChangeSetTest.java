@@ -18,14 +18,16 @@ public class ChangeSetTest {
 
         assertEquals("Empty", changeSet.getDescription());
 
-        changeSet.addChange(new InsertDataChange());
-        assertEquals("Insert Row", changeSet.getDescription());
+        String insertDescription = "Inserts data into an existing table";
 
         changeSet.addChange(new InsertDataChange());
-        assertEquals("Insert Row (x2)", changeSet.getDescription());
+        assertEquals(insertDescription, changeSet.getDescription());
+
+        changeSet.addChange(new InsertDataChange());
+        assertEquals(insertDescription + " (x2)", changeSet.getDescription());
 
         changeSet.addChange(new CreateTableChange());
-        assertEquals("Insert Row (x2), Create Table", changeSet.getDescription());
+        assertEquals(insertDescription + " (x2), Create Table", changeSet.getDescription());
     }
     
     @Test

@@ -1,9 +1,13 @@
 package liquibase.change;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import liquibase.database.Database;
+import liquibase.exception.ValidationErrors;
+import liquibase.serializer.core.string.StringChangeLogSerializer;
+import liquibase.statement.DatabaseFunction;
+import liquibase.statement.SequenceNextValueFunction;
+import liquibase.statement.SqlStatement;
+import liquibase.test.TestContext;
+import org.junit.Test;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -14,19 +18,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import liquibase.database.Database;
-import liquibase.exception.ValidationErrors;
-import liquibase.serializer.core.string.StringChangeLogSerializer;
-import liquibase.statement.DatabaseFunction;
-import liquibase.statement.SqlStatement;
-import liquibase.test.TestContext;
-
-import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * Base test class for changes
  */
 public abstract class StandardChangeTest {
+
+    protected Change testChangeInstance;
 
     @Test
     public abstract void getRefactoringName() throws Exception;
@@ -57,6 +59,10 @@ public abstract class StandardChangeTest {
             } else if (field.getName().equals("associatedWith")) {
                 //currently not used
             } else  if (String.class.isAssignableFrom(field.getType())) {
+                // comment field should be ignored as it should not impact checksum
+                if (field.getName().equals("comment")) {
+                    continue;
+                }
                 field.set(change, "asdghasdgasdg");
                 checkThatChecksumIsNew(change, seenCheckSums, field);
                 field.set(change, "gsgasdgasdggasdg sdg a");
@@ -70,6 +76,11 @@ public abstract class StandardChangeTest {
                 field.set(change, 6532);
                 checkThatChecksumIsNew(change, seenCheckSums, field);
                 field.set(change, -52352);
+                checkThatChecksumIsNew(change, seenCheckSums, field);
+            } else if (SequenceNextValueFunction.class.isAssignableFrom(field.getType())) {
+                field.set(change, new SequenceNextValueFunction("Sequence1"));
+                checkThatChecksumIsNew(change, seenCheckSums, field);
+                field.set(change, new SequenceNextValueFunction("Sequence2"));
                 checkThatChecksumIsNew(change, seenCheckSums, field);
             } else if (DatabaseFunction.class.isAssignableFrom(field.getType())) {
                 field.set(change, new DatabaseFunction("FUNC1"));
@@ -107,6 +118,9 @@ public abstract class StandardChangeTest {
     }
 
     private Change createClassUnderTest() throws InstantiationException, IllegalAccessException, InvocationTargetException, NoSuchMethodException, ClassNotFoundException {
+        if (testChangeInstance != null) {
+            return testChangeInstance;
+        }
         String className = getClass().getName().replaceAll("Test$", "");
         if (className.indexOf("Abstract") > 0) {
             return null;
@@ -124,26 +138,6 @@ public abstract class StandardChangeTest {
         }
         seenCheckSums.put(newCheckSum.toString(), serialized);
     }
-
-//    @Test
-//    public void saveStatement() throws Exception {
-//        Change change = new AbstractChange("test", "Test Refactoring", ChangeMetaData.PRIORITY_DEFAULT) {
-//            public SqlStatement[] generateStatements(Database database) {
-//                return new SqlStatement[]{new RawSqlStatement("GENERATED STATEMENT")};
-//            }
-//
-//            public String getConfirmationMessage() {
-//                return null;
-//            }
-//        };
-//
-//        StringWriter stringWriter = new StringWriter();
-//
-//        OracleDatabase database = new OracleDatabase();
-//        database.saveStatements(change, new ArrayList<SqlVisitor>(), stringWriter);
-//
-//        assertEquals("GENERATED STATEMENT;" + StreamUtil.getLineSeparator() + StreamUtil.getLineSeparator(), stringWriter.getBuffer().toString());
-//    }
 
 //todo: reintroduce    @Test
 //    public void executeStatement() throws Exception {
@@ -289,7 +283,7 @@ public abstract class StandardChangeTest {
             return;
         }
         for (Database database : TestContext.getInstance().getAllDatabases()) {
-            if (change.supports(database)) {
+            if (!change.supports(database)) {
                 ValidationErrors validationErrors = change.validate(database);
                 assertTrue("no errors found for "+database.getClass().getName(), validationErrors.hasErrors());
             }

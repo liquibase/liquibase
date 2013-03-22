@@ -12,6 +12,7 @@ import liquibase.change.core.CreateTableChange;
 import liquibase.change.core.DropTableChange;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.servicelocator.LiquibaseService;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -29,6 +30,11 @@ public class ChangeFactoryTest {
     public void setup() {
         ChangeFactory.reset();
         SometimesExceptionThrowingChange.timesCalled = 0;
+    }
+
+    @After
+    public void resetRegistry() {
+        ChangeFactory.reset();
     }
 
     @Test

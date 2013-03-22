@@ -4,6 +4,8 @@ import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.database.Database;
 import static org.easymock.classextension.EasyMock.*;
+
+import liquibase.database.ObjectQuotingStrategy;
 import org.junit.Test;
 
 public class UpdateVisitorTest {
@@ -11,6 +13,7 @@ public class UpdateVisitorTest {
     @Test
     public void visit_unrun() throws Exception {
         Database database = createMock(Database.class);
+        database.setObjectQuotingStrategy(ObjectQuotingStrategy.LEGACY);
 
         ChangeSet changeSet = createMock(ChangeSet.class);
         expect(changeSet.execute(new DatabaseChangeLog("test.xml"), database)).andReturn(ChangeSet.ExecType.EXECUTED);

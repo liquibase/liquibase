@@ -19,7 +19,7 @@ public class InsertOrUpdateGeneratorOracleTest {
         statement.addColumnValue("col2","value2");
         Sql[] sql = generator.generateSql( statement, database,  null);
         String theSql = sql[0].toSql();
-        assertTrue(theSql.contains("INSERT INTO mycatalog.mytable (col2, pk_col1) VALUES ('value2', 'value1');"));
+        assertTrue(theSql.contains("INSERT INTO mycatalog.mytable (pk_col1, col2) VALUES ('value1', 'value2');"));
         assertTrue(theSql.contains("UPDATE mycatalog.mytable"));
         String[] sqlLines = theSql.split("\n");
         int lineToCheck = 0;
@@ -33,7 +33,7 @@ public class InsertOrUpdateGeneratorOracleTest {
         lineToCheck++;
         assertEquals("IF v_reccount = 0 THEN",sqlLines[lineToCheck].trim());
         lineToCheck++;
-        assertEquals("INSERT INTO mycatalog.mytable (col2, pk_col1) VALUES ('value2', 'value1');",sqlLines[lineToCheck]);
+        assertEquals("INSERT INTO mycatalog.mytable (pk_col1, col2) VALUES ('value1', 'value2');",sqlLines[lineToCheck]);
         lineToCheck++;
         assertEquals("ELSIF v_reccount = 1 THEN",sqlLines[lineToCheck].trim());
         lineToCheck++;

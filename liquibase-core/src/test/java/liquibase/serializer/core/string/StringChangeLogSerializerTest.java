@@ -5,6 +5,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.math.BigInteger;
@@ -30,6 +31,8 @@ import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 import liquibase.statement.DatabaseFunction;
 
+import liquibase.statement.SequenceCurrentValueFunction;
+import liquibase.statement.SequenceNextValueFunction;
 import org.junit.Test;
 
 public class StringChangeLogSerializerTest {
@@ -87,7 +90,7 @@ public class StringChangeLogSerializerTest {
 
         assertEquals("addColumn:[\n" +
                 "    columns=[\n" +
-                "        column:[\n" +
+                "        [\n" +
                 "            name=\"COLUMN_NAME\"\n" +
                 "        ]\n" +
                 "    ]\n" +
@@ -103,10 +106,10 @@ public class StringChangeLogSerializerTest {
 
         assertEquals("addColumn:[\n" +
                 "    columns=[\n" +
-                "        column:[\n" +
+                "        [\n" +
                 "            name=\"COLUMN_NAME\"\n" +
                 "        ],\n" +
-                "        column:[\n" +
+                "        [\n" +
                 "            autoIncrement=\"true\"\n" +
                 "            name=\"COLUMN2_NAME\"\n" +
                 "            valueNumeric=\"52\"\n" +
@@ -266,7 +269,10 @@ public class StringChangeLogSerializerTest {
                 //nothing, from emma
             } else if (field.getName().equals("serialVersionUID")) {
                 //nothing
-            } else if (field.getType().equals(Logger.class)) {
+            } else if (Modifier.isStatic(field.getModifiers())) {
+                // nothing if it is static
+            }
+            else if (field.getType().equals(Logger.class)) {
                 //nothing
             } else if (field.getType().equals(ResourceAccessor.class)) {
                 //nothing
@@ -288,6 +294,10 @@ public class StringChangeLogSerializerTest {
                 field.set(object, createBoolean());
             } else if (field.getType().equals(ColumnConfig.class)) {
                 field.set(object, createColumnConfig());
+            } else if (field.getType().equals(SequenceNextValueFunction.class)) {
+                field.set(object, createSequenceNextValueFunction());
+            } else if (field.getType().equals(SequenceCurrentValueFunction.class)) {
+                field.set(object, createSequenceCurrentValueFunction());
             } else if (field.getType().equals(DatabaseFunction.class)) {
                 field.set(object, createDatabaseFunction());
             } else if (field.getType().equals(ConstraintsConfig.class)) {
@@ -310,7 +320,7 @@ public class StringChangeLogSerializerTest {
                         } else if (field.getType().equals(SortedSet.class)) {
                             collection = new TreeSet();
                         } else {
-                            throw new RuntimeException("Unknow collection type: " + field.getType().getName());
+                            throw new RuntimeException("Unknown collection type: " + field.getType().getName());
                         }
                         if (typeToCreate.equals(ColumnConfig.class)) {
                             collection.add(createColumnConfig());
@@ -389,6 +399,18 @@ public class StringChangeLogSerializerTest {
         return function;
     }
 
+    private SequenceNextValueFunction createSequenceNextValueFunction() throws Exception {
+        SequenceNextValueFunction function = new SequenceNextValueFunction("Sequence1");
+        setFields(function);
+        return function;
+    }
+
+    private SequenceCurrentValueFunction createSequenceCurrentValueFunction() throws Exception {
+        SequenceCurrentValueFunction function = new SequenceCurrentValueFunction("Sequence1");
+        setFields(function);
+        return function;
+    }
+
     private ConstraintsConfig createConstraintsConfig() throws Exception {
         ConstraintsConfig config = new ConstraintsConfig();
         setFields(config);
@@ -408,7 +430,7 @@ public class StringChangeLogSerializerTest {
         change.addColumn(new ColumnConfig().setName("VALUE").setValueNumeric(new Double("0.001")));
         String out = new StringChangeLogSerializer().serialize(change, true);
         assertEquals("insert:[\n" +
-                "    column=[\n" +
+                "    columns=[\n" +
                 "        [\n" +
                 "            name=\"VALUE\"\n" +
                 "            valueNumeric=\"0.001\"\n" +

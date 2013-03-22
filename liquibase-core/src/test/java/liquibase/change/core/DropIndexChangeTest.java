@@ -15,7 +15,7 @@ public class DropIndexChangeTest extends StandardChangeTest {
     @Override
     @Test
     public void getRefactoringName() throws Exception {
-        assertEquals("Drop Index", new DropIndexChange().getChangeMetaData().getDescription());
+        assertEquals("dropIndex", new DropIndexChange().getChangeMetaData().getName());
     }
 
     @Override

@@ -11,7 +11,7 @@ public class AddPrimaryKeyChangeTest extends StandardChangeTest {
     @Override
     @Test
     public void getRefactoringName() throws Exception {
-        assertEquals("Add Primary Key", new AddPrimaryKeyChange().getChangeMetaData().getDescription());
+        assertEquals("addPrimaryKey", new AddPrimaryKeyChange().getChangeMetaData().getName());
     }
 
     @Override
