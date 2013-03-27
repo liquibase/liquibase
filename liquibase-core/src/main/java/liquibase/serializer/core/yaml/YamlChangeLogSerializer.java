@@ -4,6 +4,9 @@ import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.serializer.ChangeLogSerializer;
 import liquibase.serializer.LiquibaseSerializable;
+import liquibase.statement.DatabaseFunction;
+import liquibase.statement.SequenceCurrentValueFunction;
+import liquibase.statement.SequenceNextValueFunction;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.introspector.FieldProperty;
@@ -13,6 +16,7 @@ import org.yaml.snakeyaml.nodes.MappingNode;
 import org.yaml.snakeyaml.nodes.Node;
 import org.yaml.snakeyaml.nodes.NodeTuple;
 import org.yaml.snakeyaml.nodes.Tag;
+import org.yaml.snakeyaml.representer.Represent;
 import org.yaml.snakeyaml.representer.Representer;
 
 import java.beans.IntrospectionException;
@@ -20,6 +24,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.reflect.Type;
+import java.sql.Timestamp;
 import java.util.*;
 
 public class YamlChangeLogSerializer implements ChangeLogSerializer {
@@ -97,6 +102,11 @@ public class YamlChangeLogSerializer implements ChangeLogSerializer {
 
     public static class LiquibaseRepresenter extends Representer {
 
+        public LiquibaseRepresenter() {
+            multiRepresenters.put(DatabaseFunction.class, new AsStringRepresenter());
+            multiRepresenters.put(SequenceNextValueFunction.class, new AsStringRepresenter());
+            multiRepresenters.put(SequenceCurrentValueFunction.class, new AsStringRepresenter());
+        }
 
         @Override
         protected Tag getTag(Class<?> clazz, Tag defaultTag) {
@@ -157,6 +167,12 @@ public class YamlChangeLogSerializer implements ChangeLogSerializer {
             @Override
             public Object get(Object object) {
                 return ((LiquibaseSerializable) object).getSerializableFieldValue(getName());
+            }
+        }
+
+        private class AsStringRepresenter implements Represent {
+            public Node representData(Object data) {
+                return representScalar(Tag.STR, data.toString());
             }
         }
     }

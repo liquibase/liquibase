@@ -2,12 +2,7 @@ package liquibase.snapshot.jvm;
 
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
-import liquibase.database.core.DB2Database;
-import liquibase.database.core.HsqlDatabase;
-import liquibase.database.core.MSSQLDatabase;
-import liquibase.database.core.MySQLDatabase;
-import liquibase.database.core.OracleDatabase;
-import liquibase.database.core.PostgresDatabase;
+import liquibase.database.core.*;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.ExecutorService;
 import liquibase.snapshot.InvalidExampleException;
@@ -106,6 +101,8 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
                     "and t.tabname = '" + database.correctObjectName(table.getName(), Table.class) + "' " +
                     "and t.tabschema = '" + database.correctObjectName(schema.getCatalogName(), Catalog.class) + "' " +
                     "and t.type='U'";
+        } else if (database instanceof FirebirdDatabase) {
+            sql = "SELECT RDB$INDEX_NAME FROM RDB$INDICES WHERE RDB$RELATION_NAME='"+database.correctObjectName(table.getName(), Table.class)+"' AND RDB$UNIQUE_FLAG IS NOT NULL);";
         } else {
             sql = "select CONSTRAINT_NAME, CONSTRAINT_TYPE " +
                     "from information_schema.constraints " +

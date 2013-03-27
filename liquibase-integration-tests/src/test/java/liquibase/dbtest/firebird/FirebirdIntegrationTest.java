@@ -9,7 +9,7 @@ import liquibase.exception.DatabaseException;
 
 /**
  * To configure database:
- * create database 'c:\firebird\liquibase.fdb' page_size 8192;
+ * create database 'c:\firebird\liquibase.fdb' page_size 8192
  * user 'liquibase' password 'liquibase';
  *
  * connecting later:
