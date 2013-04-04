@@ -7,6 +7,8 @@ import liquibase.statement.SqlStatement;
 import liquibase.statement.core.InsertStatement;
 
 import static org.junit.Assert.*;
+
+import liquibase.test.JUnitResourceAccessor;
 import org.junit.Test;
 
 /**
@@ -29,7 +31,7 @@ public class LoadDataChangeTest extends StandardChangeTest {
         refactoring.setFile("liquibase/change/core/empty.data.csv");
         refactoring.setSeparator(",");
 
-        refactoring.setResourceAccessor(new ClassLoaderResourceAccessor());
+        refactoring.setResourceAccessor(new JUnitResourceAccessor());
 
         SqlStatement[] sqlStatements = refactoring.generateStatements(new MockDatabase());
 
