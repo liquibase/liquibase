@@ -1,5 +1,7 @@
 package liquibase.change;
 
+import liquibase.database.Database;
+import liquibase.database.core.H2Database;
 import liquibase.servicelocator.PrioritizedService;
 import liquibase.structure.DatabaseObject;
 
@@ -24,9 +26,9 @@ public class ChangeMetaData implements PrioritizedService {
     private Set<String> appliesTo;
     private HashMap<String, String> databaseNotes = new HashMap<String, String>();
 
-    public ChangeMetaData(String name, String description, int priority, String[] appliesTo, Map<String, String> databaseNotes, Map<String, ChangeParameterMetaData> parameters) {
+    public ChangeMetaData(String name, String description, int priority, String[] appliesTo, Map<String, String> databaseNotes, Set<ChangeParameterMetaData> parameters) {
         if (parameters == null) {
-            parameters  = new HashMap<String, ChangeParameterMetaData>();
+            parameters  = new HashSet<ChangeParameterMetaData>();
         }
         if (appliesTo != null && appliesTo.length == 0) {
             appliesTo  = null;
@@ -34,7 +36,12 @@ public class ChangeMetaData implements PrioritizedService {
         this.name = name;
         this.description = description;
         this.priority = priority;
-        this.parameters = Collections.unmodifiableMap(parameters);
+
+        this.parameters = new HashMap<String, ChangeParameterMetaData>();
+        for (ChangeParameterMetaData param : parameters) {
+            this.parameters.put(param.getParameterName(), param);
+        }
+        this.parameters = Collections.unmodifiableMap(this.parameters);
 
         this.appliesTo = null;
         if (appliesTo != null && appliesTo.length > 0) {
@@ -75,7 +82,21 @@ public class ChangeMetaData implements PrioritizedService {
      * Return the parameters of this Change. Will never return a null map, only an empty or populated map.
      */
     public Map<String, ChangeParameterMetaData> getParameters() {
-        return parameters;
+        return Collections.unmodifiableMap(parameters);
+    }
+
+    /**
+     *  Returns the required parameters for this change for the given database. Will never return a null map, only an empty or populated map.
+     */
+    public Map<String, ChangeParameterMetaData> getRequiredParameters(Database database) {
+        Map<String, ChangeParameterMetaData> returnMap = new HashMap<String, ChangeParameterMetaData>();
+
+        for (ChangeParameterMetaData metaData : parameters.values()) {
+            if (metaData.isRequiredFor(database)) {
+                returnMap.put(metaData.getParameterName(), metaData);
+            }
+        }
+        return returnMap;
     }
 
     /**

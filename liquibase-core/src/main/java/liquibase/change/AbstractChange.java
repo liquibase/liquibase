@@ -60,7 +60,7 @@ public abstract class AbstractChange implements Change {
                 throw new UnexpectedLiquibaseException("No @DatabaseChange annotation for " + getClass().getName());
             }
 
-            Map<String, ChangeParameterMetaData> params = new HashMap<String, ChangeParameterMetaData>();
+            Set<ChangeParameterMetaData> params = new HashSet<ChangeParameterMetaData>();
             for (PropertyDescriptor property : Introspector.getBeanInfo(this.getClass()).getPropertyDescriptors()) {
                 Method readMethod = property.getReadMethod();
                 Method writeMethod = property.getWriteMethod();
@@ -74,8 +74,7 @@ public abstract class AbstractChange implements Change {
                 if (readMethod != null && writeMethod != null) {
                     DatabaseChangeProperty annotation = readMethod.getAnnotation(DatabaseChangeProperty.class);
                     if (annotation == null || annotation.isChangeProperty()) {
-                        ChangeParameterMetaData param = createChangeParameterMetadata(property.getDisplayName());
-                        params.put(param.getParameterName(), param);
+                        params.add(createChangeParameterMetadata(property.getDisplayName()));
                     }
                 }
 
