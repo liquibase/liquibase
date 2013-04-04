@@ -76,17 +76,12 @@ public class MissingTableChangeGenerator implements MissingObjectChangeGenerator
                     constraintsConfig.setPrimaryKeyName(primaryKey.getName());
                 }
                 control.setAlreadyHandledMissing(primaryKey);
+                control.setAlreadyHandledMissing(primaryKey.getBackingIndex());
             } else if (column.isNullable() != null && !column.isNullable()) {
                 constraintsConfig = new ConstraintsConfig();
                 constraintsConfig.setNullable(false);
             }
 
-//                if (column.isUnique()) {
-//					if (constraintsConfig == null) {
-//						constraintsConfig = new ConstraintsConfig();
-//					}
-//					constraintsConfig.setUnique(true);
-//				}
             if (constraintsConfig != null) {
                 columnConfig.setConstraints(constraintsConfig);
             }

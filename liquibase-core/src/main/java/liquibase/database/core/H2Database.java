@@ -231,4 +231,8 @@ public class H2Database extends AbstractJdbcDatabase {
         return false;
     }
 
+    @Override
+    protected String getAutoIncrementClause() {
+        return "AUTO_INCREMENT";
+    }
 }
