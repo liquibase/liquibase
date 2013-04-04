@@ -75,7 +75,7 @@ public class AddNotNullConstraintChange extends AbstractChange {
         this.defaultNullValue = defaultNullValue;
     }
 
-    @DatabaseChangeProperty(description = "Current data type of the column")
+    @DatabaseChangeProperty(description = "Current data type of the column", requiredForDatabase = {"informix", "mssql", "h2", "mysql"})
     public String getColumnDataType() {
         return columnDataType;
     }

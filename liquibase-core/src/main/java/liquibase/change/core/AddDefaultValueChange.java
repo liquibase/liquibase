@@ -69,7 +69,8 @@ public class AddDefaultValueChange extends AbstractChange {
     public void setColumnName(String columnName) {
         this.columnName = columnName;
     }
-    
+
+    @DatabaseChangeProperty(requiredForDatabase = {"informix"}, description = "Current data type of the column to add default value to", exampleValue = "int")
     public String getColumnDataType() {
 		return columnDataType;
 	}
@@ -78,7 +79,7 @@ public class AddDefaultValueChange extends AbstractChange {
 		this.columnDataType = columnDataType;
 	}
 
-    @DatabaseChangeProperty(description = "Default value", exampleValue = "newfile.txt")
+    @DatabaseChangeProperty(description = "Default value", exampleValue = "Something Else", requiredForDatabase = "all")
     public String getDefaultValue() {
         return defaultValue;
     }

@@ -54,7 +54,7 @@ public class DropNotNullConstraintChange extends AbstractChange {
         this.columnName = columnName;
     }
 
-    @DatabaseChangeProperty(description = "Current data type of the column", requiredForDatabase = {"postgres","mssql", "mysql"})
+    @DatabaseChangeProperty(description = "Current data type of the column", requiredForDatabase = {"postgres","mssql", "mysql", "h2", "informix"})
     public String getColumnDataType() {
         return columnDataType;
     }

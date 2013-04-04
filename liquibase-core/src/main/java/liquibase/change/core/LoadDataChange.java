@@ -212,6 +212,11 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
 		}
     }
 
+    @Override
+    public boolean generateStatementsVolatile(Database database) {
+        return false;
+    }
+
     protected CSVReader getCSVReader() throws IOException {
         ResourceAccessor opener = getResourceAccessor();
         if (opener == null) {

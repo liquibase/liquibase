@@ -69,7 +69,7 @@ public class AddAutoIncrementChange extends AbstractChange {
         this.columnName = columnName;
     }
 
-    @DatabaseChangeProperty(description = "Current data type fo the column to make auto-increment", exampleValue = "int")
+    @DatabaseChangeProperty(description = "Current data type of the column to make auto-increment", exampleValue = "int", requiredForDatabase = {"all"})
     public String getColumnDataType() {
         return columnDataType;
     }

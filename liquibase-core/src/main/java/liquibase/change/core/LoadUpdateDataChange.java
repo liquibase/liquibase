@@ -26,7 +26,7 @@ public class LoadUpdateDataChange extends LoadDataChange {
     private String primaryKey;
 
     @Override
-    @DatabaseChangeProperty(description = "Name of the table to insert or update data in")
+    @DatabaseChangeProperty(description = "Name of the table to insert or update data in", requiredForDatabase = "all")
     public String getTableName() {
         return super.getTableName();
     }

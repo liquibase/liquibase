@@ -108,7 +108,7 @@ public class AddLookupTableChange extends AbstractChange {
         this.newColumnName = newColumnName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "informix,mysql,mssql", description = "Data type of the new table column", exampleValue = "char(2)")
+    @DatabaseChangeProperty(requiredForDatabase = {"informix","mysql","mssql","h2","derby"}, description = "Data type of the new table column", exampleValue = "char(2)")
     public String getNewColumnDataType() {
         return newColumnDataType;
     }

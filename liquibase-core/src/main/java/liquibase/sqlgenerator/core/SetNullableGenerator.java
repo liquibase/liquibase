@@ -82,7 +82,10 @@ public class SetNullableGenerator extends AbstractSqlGenerator<SetNullableStatem
         returnList.add(new UnparsedSql(sql));
 
         if (database instanceof DB2Database) {
-            returnList.addAll(Arrays.asList(SqlGeneratorFactory.getInstance().generateSql(new ReorganizeTableStatement(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()), database)));
+            Sql[] a = SqlGeneratorFactory.getInstance().generateSql(new ReorganizeTableStatement(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()), database);
+            if (a != null) {
+                returnList.addAll(Arrays.asList(a));
+            }
         }
 
         return returnList.toArray(new Sql[returnList.size()]);

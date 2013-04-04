@@ -35,6 +35,11 @@ public class AddAutoIncrementGeneratorSQLite extends AddAutoIncrementGenerator {
     }
 
     @Override
+    public boolean generateStatementsIsVolatile(Database database) {
+        return true;
+    }
+
+    @Override
     public Sql[] generateSql(final AddAutoIncrementStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         List<Sql> statements = new ArrayList<Sql>();
 
