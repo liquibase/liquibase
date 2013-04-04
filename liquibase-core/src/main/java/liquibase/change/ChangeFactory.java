@@ -88,6 +88,13 @@ public class ChangeFactory {
 
 
     /**
+     * Returns all defined changes in the registry. Returned set is not modifiable.
+     */
+    public Set<String> getDefinedChanges() {
+        return Collections.unmodifiableSet(registry.keySet());
+    }
+
+    /**
      * Clear the registry of all Changes found. Normally used for testing.
      */
     public void clear() {
