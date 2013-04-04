@@ -46,7 +46,7 @@ public class InsertDataChangeTest extends StandardChangeTest {
     @Override
     @Test
     public void getRefactoringName() throws Exception {
-        assertEquals("Insert Row", refactoring.getChangeMetaData().getDescription());
+        assertEquals("insert", refactoring.getChangeMetaData().getName());
     }
 
     @Override

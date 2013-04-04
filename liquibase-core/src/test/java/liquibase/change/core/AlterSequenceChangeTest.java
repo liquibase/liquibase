@@ -18,7 +18,7 @@ public class AlterSequenceChangeTest extends StandardChangeTest {
     @Override
     @Test
     public void getRefactoringName() throws Exception {
-        assertEquals("Alter Sequence", new AlterSequenceChange().getChangeMetaData().getDescription());
+        assertEquals("alterSequence", new AlterSequenceChange().getChangeMetaData().getName());
     }
 
     @Override

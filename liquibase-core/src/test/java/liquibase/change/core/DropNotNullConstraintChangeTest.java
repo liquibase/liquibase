@@ -18,7 +18,7 @@ public class DropNotNullConstraintChangeTest extends StandardChangeTest {
     @Override
     @Test
     public void getRefactoringName() throws Exception {
-        assertEquals("Drop Not-Null Constraint", new DropNotNullConstraintChange().getChangeMetaData().getDescription());
+        assertEquals("dropNotNullConstraint", new DropNotNullConstraintChange().getChangeMetaData().getName());
     }
 
     @Override

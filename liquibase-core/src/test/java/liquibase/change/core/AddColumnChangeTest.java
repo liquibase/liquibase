@@ -32,7 +32,7 @@ public class AddColumnChangeTest extends StandardChangeTest {
     @Test
     public void getRefactoringName() throws Exception {
         AddColumnChange refactoring = new AddColumnChange();
-        assertEquals("Add Column", refactoring.getChangeMetaData().getDescription());
+        assertEquals("addColumn", refactoring.getChangeMetaData().getName());
     }
 
     @Test

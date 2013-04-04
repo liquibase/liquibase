@@ -10,7 +10,7 @@ public abstract class CreateProcedureChangeTest extends StandardChangeTest {
     @Override
     @Test
     public void getRefactoringName() throws Exception {
-        assertEquals("Create Procedure", new CreateProcedureChange().getChangeMetaData().getDescription());
+        assertEquals("Create Procedure", new CreateProcedureChange().getChangeMetaData().getName());
     }
 
 //    @Test

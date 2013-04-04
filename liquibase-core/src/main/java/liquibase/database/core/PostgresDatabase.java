@@ -165,7 +165,7 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
 
     @Override
     public String escapeObjectName(String objectName, Class<? extends DatabaseObject> objectType) {
-        if (quotingStrategy != ObjectQuotingStrategy.LEGACY) {
+        if (objectName == null || quotingStrategy != ObjectQuotingStrategy.LEGACY) {
             return super.escapeObjectName(objectName, objectType);
         }
         if (objectName.contains("-") || hasMixedCase(objectName) || startsWithNumeric(objectName) || isReservedWord(objectName)) {

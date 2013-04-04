@@ -176,7 +176,7 @@ public class SQLFileChangeTest extends StandardChangeTest {
     @Override
     @Test
 	public void getRefactoringName() throws Exception {
-		assertEquals("SQL From File", change.getChangeMetaData().getDescription());
+		assertEquals("sqlFile", change.getChangeMetaData().getName());
 
 	}
 

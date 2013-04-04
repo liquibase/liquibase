@@ -20,7 +20,7 @@ public class TagDatabaseChangeTest extends StandardChangeTest {
     @Override
     @Test
     public void getRefactoringName() throws Exception {
-        assertEquals("Tag Database", refactoring.getChangeMetaData().getDescription());
+        assertEquals("tagDatabase", refactoring.getChangeMetaData().getName());
     }
 
     @Override

@@ -34,10 +34,12 @@ public class LoadUpdateDataChangeTest extends StandardChangeTest {
         refactoring = new LoadUpdateDataChange();
     }
 
+    @Override
     public void getRefactoringName() throws Exception {
-        assertEquals("Smart Load Data", refactoring.getChangeMetaData().getDescription());
+        assertEquals("loadUpdateData", refactoring.getChangeMetaData().getName());
     }
 
+    @Override
     public void generateStatement() throws Exception {
 
         MockDatabase database = new MockDatabase();
