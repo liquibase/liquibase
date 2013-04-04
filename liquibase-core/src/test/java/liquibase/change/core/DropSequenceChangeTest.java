@@ -22,7 +22,7 @@ public class DropSequenceChangeTest extends StandardChangeTest {
     @Override
     @Test
     public void getRefactoringName() throws Exception {
-        assertEquals("Drop Sequence", new DropSequenceChange().getChangeMetaData().getDescription());
+        assertEquals("dropSequence", new DropSequenceChange().getChangeMetaData().getName());
     }
 
     @Override

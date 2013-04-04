@@ -15,7 +15,7 @@ public class AddNotNullConstraintChangeTest extends StandardChangeTest {
     @Override
     @Test
     public void getRefactoringName() throws Exception {
-        assertEquals("Add Not-Null Constraint", new AddNotNullConstraintChange().getChangeMetaData().getDescription());
+        assertEquals("addNotNullConstraint", new AddNotNullConstraintChange().getChangeMetaData().getName());
     }
 
     @Override

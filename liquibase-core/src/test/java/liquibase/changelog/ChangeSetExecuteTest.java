@@ -3,6 +3,7 @@ package liquibase.changelog;
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
 import liquibase.database.Database;
+import liquibase.database.ObjectQuotingStrategy;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
@@ -29,12 +30,14 @@ public class ChangeSetExecuteTest {
     	Database database = createMock(Database.class);
     	expect(database.supportsDDLInTransaction()).andStubReturn(true);
     	expect(database.getAutoCommitMode()).andStubReturn(false);
+        database.setObjectQuotingStrategy(ObjectQuotingStrategy.LEGACY);
     	return database;
     }
     
     private Database createMockDatabaseThatDoesNotSupportDdlInTran() {
     	Database database = createMock(Database.class);
-    	expect(database.supportsDDLInTransaction()).andStubReturn(false);
+    	database.setObjectQuotingStrategy(ObjectQuotingStrategy.LEGACY);
+        expect(database.supportsDDLInTransaction()).andStubReturn(false);
     	expect(database.getAutoCommitMode()).andStubReturn(true);
     	return database;
     }

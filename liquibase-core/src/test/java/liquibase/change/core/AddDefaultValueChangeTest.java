@@ -166,7 +166,7 @@ public class AddDefaultValueChangeTest extends StandardChangeTest {
 
     @Override
     public void getRefactoringName() throws Exception {
-        assertEquals("Add Default Value", new AddDefaultValueChange().getChangeMetaData().getDescription());
+        assertEquals("addDefaultValue", new AddDefaultValueChange().getChangeMetaData().getName());
     }
 
     @Override

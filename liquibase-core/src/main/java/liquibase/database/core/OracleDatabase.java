@@ -144,7 +144,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
 
     @Override
     public String getDefaultSchemaName() {//NOPMD
-        return super.getDefaultSchemaName().toUpperCase();
+        return super.getDefaultSchemaName() == null ? null : super.getDefaultSchemaName().toUpperCase();
     }
 
     @Override

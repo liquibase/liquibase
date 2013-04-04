@@ -12,7 +12,7 @@ public class DropViewChangeTest  extends StandardChangeTest {
     @Override
     @Test
     public void getRefactoringName() throws Exception {
-        assertEquals("Drop View", new DropViewChange().getChangeMetaData().getDescription());
+        assertEquals("dropView", new DropViewChange().getChangeMetaData().getName());
     }
 
     @Override

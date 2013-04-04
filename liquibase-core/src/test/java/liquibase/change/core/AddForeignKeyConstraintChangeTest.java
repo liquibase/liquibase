@@ -54,7 +54,7 @@ public class AddForeignKeyConstraintChangeTest  extends StandardChangeTest {
 
       @Override
       public void getRefactoringName() throws Exception {
-        assertEquals("Add Foreign Key Constraint", new AddForeignKeyConstraintChange().getChangeMetaData().getDescription());
+        assertEquals("addForeignKeyConstraint", new AddForeignKeyConstraintChange().getChangeMetaData().getName());
     }
 
     @Override

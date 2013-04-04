@@ -816,10 +816,8 @@ public class XMLChangeLogSerializerTest {
         assertEquals("<createTable catalogName=\"a\"\n" +
                 "        schemaName=\"b\"\n" +
                 "        tableName=\"c\">\n" +
-                "    <column defaultValue=\"x1\"\n" +
-                "            name=\"x\"/>\n" +
-                "    <column defaultValue=\"y1\"\n" +
-                "            name=\"y\"/>\n" +
+                "    <column defaultValue=\"x1\" name=\"x\"/>\n" +
+                "    <column defaultValue=\"y1\" name=\"y\"/>\n" +
                 "</createTable>", out);
     }
 

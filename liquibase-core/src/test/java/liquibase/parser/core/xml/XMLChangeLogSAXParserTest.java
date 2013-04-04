@@ -9,6 +9,7 @@ import liquibase.change.custom.ExampleCustomSqlChange;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.ChangeLogParameters;
+import liquibase.database.core.MockDatabase;
 import liquibase.exception.ChangeLogParseException;
 import liquibase.precondition.core.OrPrecondition;
 import liquibase.precondition.core.PreconditionContainer;
@@ -108,7 +109,7 @@ public class XMLChangeLogSAXParserTest {
         change = changeSet.getChanges().get(0);
         assertTrue(change instanceof CustomChangeWrapper);
         CustomChangeWrapper wrapper = (CustomChangeWrapper) change;
-        wrapper.generateStatements(null);
+        wrapper.generateStatements(new MockDatabase());
         assertTrue(wrapper.getCustomChange() instanceof ExampleCustomSqlChange);
         ExampleCustomSqlChange exChg = (ExampleCustomSqlChange) wrapper.getCustomChange();
         assertEquals("table", exChg.getTableName());

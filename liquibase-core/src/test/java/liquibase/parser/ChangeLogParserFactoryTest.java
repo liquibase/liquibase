@@ -67,7 +67,7 @@ public class ChangeLogParserFactoryTest {
 	@Test
     public void builtInGeneratorsAreFound() {
         List<ChangeLogParser> generators = ChangeLogParserFactory.getInstance().getParsers();
-        assertEquals(3, generators.size());
+        assertEquals(5, generators.size());
     }
 
     @Test

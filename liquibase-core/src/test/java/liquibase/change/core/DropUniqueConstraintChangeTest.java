@@ -24,7 +24,7 @@ public class DropUniqueConstraintChangeTest  extends StandardChangeTest {
     @Override
     @Test
     public void getRefactoringName() throws Exception {
-        assertEquals("Drop Unique Constraint", change.getChangeMetaData().getDescription());
+        assertEquals("dropUniqueConstraint", change.getChangeMetaData().getName());
     }
 
     @Override

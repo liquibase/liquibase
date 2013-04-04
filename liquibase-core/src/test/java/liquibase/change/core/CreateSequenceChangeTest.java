@@ -13,7 +13,7 @@ public class CreateSequenceChangeTest extends StandardChangeTest {
     @Override
     @Test
     public void getRefactoringName() throws Exception {
-        assertEquals("Create Sequence", new CreateSequenceChange().getChangeMetaData().getDescription());
+        assertEquals("createSequence", new CreateSequenceChange().getChangeMetaData().getName());
     }
 
     @Override

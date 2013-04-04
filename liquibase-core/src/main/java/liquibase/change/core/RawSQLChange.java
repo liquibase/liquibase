@@ -3,7 +3,6 @@ package liquibase.change.core;
 import liquibase.change.AbstractSQLChange;
 import liquibase.change.DatabaseChange;
 import liquibase.change.ChangeMetaData;
-
 /**
  * Allows execution of arbitrary SQL.  This change can be used when existing changes are either don't exist,
  * are not flexible enough, or buggy. 

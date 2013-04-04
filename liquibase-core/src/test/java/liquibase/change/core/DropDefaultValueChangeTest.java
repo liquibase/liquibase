@@ -14,7 +14,7 @@ public class DropDefaultValueChangeTest extends StandardChangeTest {
     @Override
     @Test
     public void getRefactoringName() throws Exception {
-        assertEquals("Drop Default Value", new DropDefaultValueChange().getChangeMetaData().getDescription());
+        assertEquals("dropDefaultValue", new DropDefaultValueChange().getChangeMetaData().getName());
     }
 
     @Override

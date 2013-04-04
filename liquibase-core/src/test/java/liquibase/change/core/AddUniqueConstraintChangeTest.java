@@ -11,7 +11,7 @@ public class AddUniqueConstraintChangeTest extends StandardChangeTest {
     @Override
     @Test
     public void getRefactoringName() throws Exception {
-        assertEquals("Add Unique Constraint", new AddUniqueConstraintChange().getChangeMetaData().getDescription());
+        assertEquals("addUniqueConstraint", new AddUniqueConstraintChange().getChangeMetaData().getName());
     }
 
     @Override

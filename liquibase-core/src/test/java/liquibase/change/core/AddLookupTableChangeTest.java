@@ -11,7 +11,7 @@ public class AddLookupTableChangeTest extends StandardChangeTest {
 
     @Override
     public void getRefactoringName() throws Exception {
-        assertEquals("Add Lookup Table", new AddLookupTableChange().getChangeMetaData().getDescription());
+        assertEquals("addLookupTable", new AddLookupTableChange().getChangeMetaData().getName());
     }
 
     @Override

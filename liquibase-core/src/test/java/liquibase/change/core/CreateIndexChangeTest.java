@@ -13,7 +13,7 @@ public class CreateIndexChangeTest extends StandardChangeTest {
     @Override
     @Test
     public void getRefactoringName() throws Exception {
-        assertEquals("Create Index", new CreateIndexChange().getChangeMetaData().getDescription());
+        assertEquals("createIndex", new CreateIndexChange().getChangeMetaData().getName());
     }
 
     @Override

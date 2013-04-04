@@ -17,7 +17,7 @@ public class LoadDataChangeTest extends StandardChangeTest {
     @Override
     @Test
     public void getRefactoringName() throws Exception {
-        assertEquals("Load Data", new LoadDataChange().getChangeMetaData().getDescription());
+        assertEquals("loadData", new LoadDataChange().getChangeMetaData().getName());
     }
 
 

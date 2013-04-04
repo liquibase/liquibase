@@ -15,7 +15,7 @@ public class DropColumnChangeTest extends StandardChangeTest {
     @Override
     @Test
     public void getRefactoringName() throws Exception {
-        assertEquals("Drop Column", new DropColumnChange().getChangeMetaData().getDescription());
+        assertEquals("dropColumn", new DropColumnChange().getChangeMetaData().getName());
     }
 
     @Override
