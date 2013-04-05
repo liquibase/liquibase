@@ -1,0 +1,4 @@
+-- Database: sqlite
+-- Change Parameter: baseTableName=A String
+-- Database: sqlite
+-- Change Parameter: constraintName=fk_address_person

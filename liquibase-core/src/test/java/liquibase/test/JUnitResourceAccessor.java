@@ -30,6 +30,9 @@ public class JUnitResourceAccessor implements ResourceAccessor {
     }
 
     public InputStream getResourceAsStream(String file) throws IOException {
+        if (file == null) {
+            return null;
+        }
         return classLoader.getResourceAsStream(file);
     }
 

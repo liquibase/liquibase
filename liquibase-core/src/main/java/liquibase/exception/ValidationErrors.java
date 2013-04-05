@@ -2,6 +2,7 @@ package liquibase.exception;
 
 import liquibase.database.Database;
 import liquibase.changelog.ChangeSet;
+import liquibase.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -63,5 +64,18 @@ public class ValidationErrors {
         for (String message : validationErrors.getErrorMessages()) {
             this.errorMessages.add(message+", "+changeSet);
         }
+    }
+
+    @Override
+    public String toString() {
+        if (getErrorMessages().size() == 0) {
+            return "No errors";
+        }
+        return StringUtils.join(getErrorMessages(), "; ");
+    }
+
+    @Override
+    public int hashCode() {
+        return toString().hashCode();
     }
 }

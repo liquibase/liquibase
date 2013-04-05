@@ -1,0 +1,11 @@
+-- Database: maxdb
+-- Change Parameter: baseColumnNames=person_id
+-- Database: maxdb
+-- Change Parameter: baseTableName=address
+-- Database: maxdb
+-- Change Parameter: constraintName=fk_address_person
+-- Database: maxdb
+-- Change Parameter: referencedColumnNames=id
+-- Database: maxdb
+-- Change Parameter: referencedTableName=person
+ALTER TABLE address ADD CONSTRAINT fk_address_person FOREIGN KEY (person_id) REFERENCES person (id);

@@ -39,12 +39,14 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.addAll(super.validate(database));
 
-        for (ColumnConfig columnConfig : columns) {
-            if (columnConfig.getType() == null) {
-                validationErrors.addError("column 'type' is required for all columns");
-            }
-            if (columnConfig.getName() == null) {
-                validationErrors.addError("column 'name' is required for all columns");
+        if (columns != null) {
+            for (ColumnConfig columnConfig : columns) {
+                if (columnConfig.getType() == null) {
+                    validationErrors.addError("column 'type' is required for all columns");
+                }
+                if (columnConfig.getName() == null) {
+                    validationErrors.addError("column 'name' is required for all columns");
+                }
             }
         }
         return validationErrors;

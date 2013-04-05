@@ -1,0 +1,11 @@
+-- Database: sybase
+-- Change Parameter: baseColumnNames=person_id
+-- Database: sybase
+-- Change Parameter: baseTableName=address
+-- Database: sybase
+-- Change Parameter: constraintName=fk_address_person
+-- Database: sybase
+-- Change Parameter: referencedColumnNames=id
+-- Database: sybase
+-- Change Parameter: referencedTableName=person
+ALTER TABLE [address] ADD CONSTRAINT [fk_address_person] FOREIGN KEY ([person_id]) REFERENCES [person] ([id]);

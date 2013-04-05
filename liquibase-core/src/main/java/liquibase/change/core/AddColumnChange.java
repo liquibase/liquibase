@@ -77,15 +77,6 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
         this.columns.remove(column);
     }
 
-    @Override
-    public ValidationErrors validate(Database database) {
-        ValidationErrors validationErrors = super.validate(database);
-        if (columns.size() == 0) {
-            validationErrors.addError("'columns' is required");
-        }
-        return validationErrors;
-    }
-
     public SqlStatement[] generateStatements(Database database) {
 
         List<SqlStatement> sql = new ArrayList<SqlStatement>();

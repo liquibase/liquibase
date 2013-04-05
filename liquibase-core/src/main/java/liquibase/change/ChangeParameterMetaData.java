@@ -223,7 +223,7 @@ public class ChangeParameterMetaData {
             return new DatabaseFunction("now");
         } else if (dataType.equals("list of columnConfig")) {
             ArrayList<ColumnConfig> list = new ArrayList<ColumnConfig>();
-            list.add(new ColumnConfig().setName("id"));
+            list.add(new ColumnConfig().setName("id").setType("int"));
             return list;
         } else {
             throw new  UnexpectedLiquibaseException("Unknown dataType "+dataType+" for "+getParameterName());

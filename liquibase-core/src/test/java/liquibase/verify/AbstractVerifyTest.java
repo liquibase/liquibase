@@ -1,0 +1,85 @@
+package liquibase.verify;
+
+import liquibase.util.StringUtils;
+import org.junit.Rule;
+import org.junit.rules.TestName;
+
+import java.io.*;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.util.regex.Pattern;
+
+import static org.junit.Assert.assertEquals;
+
+public class AbstractVerifyTest {
+
+    @Rule
+    public TestName name = new TestName();
+
+    protected static class TestState {
+        private File stateFile;
+        private File savedStateDir;
+        private String testName;
+        private String testGroup;
+        private String stateName;
+        private Type type;
+
+        private StringBuilder stateContent = new StringBuilder();
+
+        public TestState(String testName, String testGroup, String stateName, Type type) {
+            this.type = type;
+            this.testName = testName;
+            this.testGroup = testGroup;
+            this.stateName = stateName;
+
+            this.savedStateDir = new File("liquibase-core/src/test/java/liquibase/verify/saved_state/"+testName+"/"+testGroup);
+            this.stateFile = new File(savedStateDir, stateName+"."+type.name().toLowerCase());
+
+        }
+
+        public void addComment(String comment) {
+            stateContent.append(Pattern.compile("^", Pattern.MULTILINE).matcher(comment).replaceAll("-- ")).append("\n");
+        }
+
+        public void addValue(String value) {
+            stateContent.append(value).append("\n");
+        }
+
+        public void save() throws Exception{
+            savedStateDir.mkdirs();
+
+            BufferedWriter outputStream = new BufferedWriter(new FileWriter(stateFile));
+            outputStream.write(stateContent.toString());
+            outputStream.flush();
+            outputStream.close();
+        }
+
+        public void test() throws Exception {
+            String existingContent = readExistingValue();
+            if (existingContent.equals("") && StringUtils.trimToNull(stateContent.toString()) != null) {
+                save();
+            } else {
+                assertEquals("Unexpected difference in "+stateFile.getAbsolutePath(), existingContent, stateContent.toString());
+            }
+        }
+
+        private String readExistingValue() throws IOException {
+            StringBuilder content = new StringBuilder();
+            if (stateFile.exists()) {
+                BufferedReader reader = new BufferedReader(new FileReader(stateFile));
+
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    content.append(line).append("\n");
+                }
+                reader.close();
+            }
+
+            return content.toString();
+        }
+
+        public enum Type {
+            SQL
+        }
+    }
+}

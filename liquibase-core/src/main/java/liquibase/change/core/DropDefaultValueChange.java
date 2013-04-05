@@ -53,7 +53,8 @@ public class DropDefaultValueChange extends AbstractChange {
     public void setColumnName(String columnName) {
         this.columnName = columnName;
     }
-    
+
+    @DatabaseChangeProperty(requiredForDatabase = "informix")
     public String getColumnDataType() {
 		return columnDataType;
 	}

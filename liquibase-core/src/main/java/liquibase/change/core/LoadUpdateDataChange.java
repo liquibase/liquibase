@@ -32,9 +32,6 @@ public class LoadUpdateDataChange extends LoadDataChange {
     }
 
     public void setPrimaryKey(String primaryKey) throws LiquibaseException {
-        if (primaryKey == null) {
-            throw new LiquibaseException("primaryKey cannot be null.");
-        }
         this.primaryKey = primaryKey;
     }
 
