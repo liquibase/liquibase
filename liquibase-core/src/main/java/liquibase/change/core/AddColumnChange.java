@@ -8,7 +8,6 @@ import java.util.Set;
 import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.database.core.DB2Database;
-import liquibase.exception.ValidationErrors;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.*;
 import liquibase.statement.core.AddColumnStatement;
@@ -89,7 +88,7 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
                     constraints.add(new NotNullConstraint());
                 }
                 if (constraintsConfig.isUnique() != null && constraintsConfig.isUnique()) {
-                	constraints.add(new UniqueConstraint());
+                    constraints.add(new UniqueConstraint());
                 }
                 if (constraintsConfig.isPrimaryKey() != null && constraintsConfig.isPrimaryKey()) {
                     constraints.add(new PrimaryKeyConstraint(constraintsConfig.getPrimaryKeyName()));

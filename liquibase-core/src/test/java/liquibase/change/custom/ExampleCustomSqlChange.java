@@ -3,7 +3,6 @@ package liquibase.change.custom;
 import liquibase.database.Database;
 import liquibase.exception.RollbackImpossibleException;
 import liquibase.exception.SetupException;
-import liquibase.exception.UnsupportedChangeException;
 import liquibase.exception.ValidationErrors;
 import liquibase.resource.ResourceAccessor;
 import liquibase.statement.SqlStatement;

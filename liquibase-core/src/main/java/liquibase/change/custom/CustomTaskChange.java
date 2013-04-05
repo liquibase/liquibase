@@ -19,7 +19,6 @@ public interface CustomTaskChange extends CustomChange {
      * Method called to run the change logic.
      * @param database
      * @throws liquibase.exception.CustomChangeException an exception occurs while processing this change
-     * @throws liquibase.exception.UnsupportedChangeException if this change is not supported by the {@link liquibase.database.Database} passed as argument
      */
     public void execute(Database database) throws CustomChangeException;
 }

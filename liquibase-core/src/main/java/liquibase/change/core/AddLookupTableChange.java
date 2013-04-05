@@ -10,7 +10,6 @@ import liquibase.database.core.SybaseASADatabase;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.statement.core.ReorganizeTableStatement;
-import liquibase.structure.core.Column;
 
 import java.util.ArrayList;
 import java.util.Arrays;

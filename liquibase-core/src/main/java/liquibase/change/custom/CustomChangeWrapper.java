@@ -6,7 +6,6 @@ import liquibase.change.ChangeMetaData;
 import liquibase.change.DatabaseChangeProperty;
 import liquibase.database.Database;
 import liquibase.exception.*;
-import liquibase.serializer.LiquibaseSerializable;
 import liquibase.statement.SqlStatement;
 import liquibase.util.ObjectUtil;
 
@@ -71,7 +70,7 @@ public class CustomChangeWrapper extends AbstractChange {
     /**
      * Specify the name of the class to use as the CustomChange. This method instantiates the class using {@link #getClassLoader()} or fallback methods
      * and assigns it to {@link #getCustomChange()}.
-     * {@link #setClassLoader(ClassLoader)} must be called before this method. The passed class is constructed, but no parameters are set. They are set in {@link #generateStatements(liquibase.database.Database)}
+     * {@link #setClassLoader(ClassLoader)} must be called before this method. The passed class is constructed, but no parameters are set. They are set in {@link liquibase.change.Change#generateStatements(liquibase.database.Database)}
      */
     public CustomChangeWrapper setClass(String className) throws CustomChangeException {
         if (classLoader == null) {
@@ -105,7 +104,7 @@ public class CustomChangeWrapper extends AbstractChange {
     }
 
     /**
-     * Specify a parameter on the CustomChange object to set before executing {@link #generateStatements(liquibase.database.Database)}  or {@link #generateRollbackStatements(liquibase.database.Database)} on it.
+     * Specify a parameter on the CustomChange object to set before executing {@link liquibase.change.Change#generateStatements(liquibase.database.Database)}  or {@link #generateRollbackStatements(liquibase.database.Database)} on it.
      * The CustomChange class must have a set method for the given parameter. For example, to call setParam("lastName", "X") you must have a method setLastName(String val) on your class.
      */
     public void setParam(String name, String value) {

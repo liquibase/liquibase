@@ -84,8 +84,8 @@ public class InsertDataChange extends AbstractChange implements ChangeWithColumn
         }
 
         if (needsPreparedStatement) {
-            return new SqlStatement[] { 
-            		new InsertExecutablePreparedStatement(database, catalogName, schemaName, tableName, columns)
+            return new SqlStatement[] {
+                    new InsertExecutablePreparedStatement(database, catalogName, schemaName, tableName, columns)
             };
         }
 

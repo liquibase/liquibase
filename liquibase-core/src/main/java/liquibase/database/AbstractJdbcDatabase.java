@@ -1276,7 +1276,7 @@ public abstract class AbstractJdbcDatabase implements Database {
         return (url.contains("localhost")) || (url.contains("127.0.0.1"));
     }
 
-    public void executeStatements(Change change, DatabaseChangeLog changeLog, List<SqlVisitor> sqlVisitors) throws LiquibaseException, UnsupportedChangeException {
+    public void executeStatements(Change change, DatabaseChangeLog changeLog, List<SqlVisitor> sqlVisitors) throws LiquibaseException {
         SqlStatement[] statements = change.generateStatements(this);
 
         execute(statements, sqlVisitors);
@@ -1300,7 +1300,7 @@ public abstract class AbstractJdbcDatabase implements Database {
     }
 
 
-    public void saveStatements(Change change, List<SqlVisitor> sqlVisitors, Writer writer) throws IOException, UnsupportedChangeException, StatementNotSupportedOnDatabaseException, LiquibaseException {
+    public void saveStatements(Change change, List<SqlVisitor> sqlVisitors, Writer writer) throws IOException, StatementNotSupportedOnDatabaseException, LiquibaseException {
         SqlStatement[] statements = change.generateStatements(this);
         for (SqlStatement statement : statements) {
             for (Sql sql : SqlGeneratorFactory.getInstance().generateSql(statement, this)) {
@@ -1309,7 +1309,7 @@ public abstract class AbstractJdbcDatabase implements Database {
         }
     }
 
-    public void executeRollbackStatements(Change change, List<SqlVisitor> sqlVisitors) throws LiquibaseException, UnsupportedChangeException, RollbackImpossibleException {
+    public void executeRollbackStatements(Change change, List<SqlVisitor> sqlVisitors) throws LiquibaseException, RollbackImpossibleException {
         SqlStatement[] statements = change.generateRollbackStatements(this);
         List<SqlVisitor> rollbackVisitors = new ArrayList<SqlVisitor>();
         if (sqlVisitors != null) {
@@ -1322,7 +1322,7 @@ public abstract class AbstractJdbcDatabase implements Database {
         execute(statements, rollbackVisitors);
     }
 
-    public void saveRollbackStatement(Change change, List<SqlVisitor> sqlVisitors, Writer writer) throws IOException, UnsupportedChangeException, RollbackImpossibleException, StatementNotSupportedOnDatabaseException, LiquibaseException {
+    public void saveRollbackStatement(Change change, List<SqlVisitor> sqlVisitors, Writer writer) throws IOException, RollbackImpossibleException, StatementNotSupportedOnDatabaseException, LiquibaseException {
         SqlStatement[] statements = change.generateRollbackStatements(this);
         for (SqlStatement statement : statements) {
             for (Sql sql : SqlGeneratorFactory.getInstance().generateSql(statement, this)) {

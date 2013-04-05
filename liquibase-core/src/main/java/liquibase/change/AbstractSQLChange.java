@@ -156,7 +156,7 @@ public abstract class AbstractSQLChange extends AbstractChange {
              }
 
             String escapedStatement = statement;
-			try {
+            try {
                 if (database.getConnection() != null) {
                     escapedStatement = database.getConnection().nativeSQL(statement);
                 }

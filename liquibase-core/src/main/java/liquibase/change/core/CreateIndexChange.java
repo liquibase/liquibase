@@ -91,7 +91,7 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
         }
 
 	    return new SqlStatement[]{
-			    new CreateIndexStatement(
+                new CreateIndexStatement(
 					    getIndexName(),
                         getCatalogName(),
 					    getSchemaName(),

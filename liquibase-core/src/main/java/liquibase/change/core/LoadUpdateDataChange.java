@@ -6,13 +6,11 @@ import liquibase.change.DatabaseChangeProperty;
 import liquibase.database.Database;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.RollbackImpossibleException;
-import liquibase.exception.UnsupportedChangeException;
 import liquibase.exception.LiquibaseException;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.DeleteStatement;
 import liquibase.statement.core.InsertOrUpdateStatement;
 import liquibase.statement.core.InsertStatement;
-import liquibase.structure.core.Table;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -132,7 +132,7 @@ public class MergeColumnChange extends AbstractChange {
         statements.add(new RawSqlStatement(updateStatement));
         
         if (database instanceof SQLiteDatabase) {
-        	// SQLite does not support this ALTER TABLE operation until now.
+            // SQLite does not support this ALTER TABLE operation until now.
 			// For more information see: http://www.sqlite.org/omitted.html
 			// This is a small work around...
     		

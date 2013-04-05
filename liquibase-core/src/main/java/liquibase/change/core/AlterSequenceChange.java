@@ -7,7 +7,6 @@ import liquibase.change.DatabaseChangeProperty;
 import liquibase.database.Database;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.AlterSequenceStatement;
-import liquibase.structure.core.Sequence;
 
 import java.math.BigInteger;
 

@@ -7,7 +7,6 @@ import liquibase.database.core.SQLiteDatabase.AlterTableVisitor;
 import liquibase.structure.core.Index;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.DropPrimaryKeyStatement;
-import liquibase.structure.core.PrimaryKey;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -67,8 +66,8 @@ public class DropPrimaryKeyChange extends AbstractChange {
     }
 
     public SqlStatement[] generateStatements(Database database) {
-    	
-    	if (database instanceof SQLiteDatabase) {
+
+        if (database instanceof SQLiteDatabase) {
     		// return special statements for SQLite databases
     		return generateStatementsForSQLiteDatabase(database);
         }

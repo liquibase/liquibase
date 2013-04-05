@@ -4,7 +4,6 @@ import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.AddUniqueConstraintStatement;
-import liquibase.structure.core.Column;
 
 /**
  * Adds a unique constraint to an existing column.

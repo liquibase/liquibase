@@ -5,7 +5,6 @@ import liquibase.database.Database;
 import liquibase.database.core.SybaseASADatabase;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.DropUniqueConstraintStatement;
-import liquibase.structure.core.UniqueConstraint;
 
 /**
  * Removes an existing unique constraint.
@@ -71,7 +70,7 @@ public class DropUniqueConstraintChange extends AbstractChange {
 //    		// return special statements for SQLite databases
 //    		return generateStatementsForSQLiteDatabase(database);
 //        }
-    	DropUniqueConstraintStatement statement = new DropUniqueConstraintStatement(getCatalogName(), getSchemaName(), getTableName(), getConstraintName());
+        DropUniqueConstraintStatement statement = new DropUniqueConstraintStatement(getCatalogName(), getSchemaName(), getTableName(), getConstraintName());
     	if (database instanceof SybaseASADatabase) {
     		statement.setUniqueColumns(uniqueColumns);
     	}

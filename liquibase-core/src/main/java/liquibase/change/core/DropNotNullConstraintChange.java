@@ -4,7 +4,6 @@ import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.SetNullableStatement;
-import liquibase.structure.core.Column;
 
 /**
  * Drops a not-null constraint from an existing column.
@@ -64,7 +63,7 @@ public class DropNotNullConstraintChange extends AbstractChange {
     }
 
     public SqlStatement[] generateStatements(Database database) {
-    	
+
 //todo    	if (database instanceof SQLiteDatabase) {
 //    		// return special statements for SQLite databases
 //    		return generateStatementsForSQLiteDatabase(database);

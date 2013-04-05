@@ -6,7 +6,6 @@ import liquibase.database.core.DB2Database;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.AddPrimaryKeyStatement;
 import liquibase.statement.core.ReorganizeTableStatement;
-import liquibase.structure.core.Column;
 
 /**
  * Creates a primary key out of an existing column or set of columns.

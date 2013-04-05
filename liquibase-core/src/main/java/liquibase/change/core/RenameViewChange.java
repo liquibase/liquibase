@@ -4,7 +4,6 @@ import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RenameViewStatement;
-import liquibase.structure.core.View;
 
 /**
  * Renames an existing view.

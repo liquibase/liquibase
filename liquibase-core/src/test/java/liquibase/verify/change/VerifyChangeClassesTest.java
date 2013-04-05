@@ -6,24 +6,16 @@ import liquibase.change.ChangeMetaData;
 import liquibase.change.ChangeParameterMetaData;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
-import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.exception.UnsupportedChangeException;
 import liquibase.exception.ValidationErrors;
-import liquibase.resource.ResourceAccessor;
 import liquibase.serializer.LiquibaseSerializable;
 import liquibase.serializer.core.string.StringChangeLogSerializer;
 import liquibase.sql.Sql;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.test.JUnitResourceAccessor;
-import liquibase.util.StringUtils;
 import liquibase.verify.AbstractVerifyTest;
 import org.junit.Test;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.StringWriter;
-import java.net.URL;
 import java.util.*;
 
 import static org.junit.Assert.assertFalse;

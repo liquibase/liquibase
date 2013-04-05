@@ -498,12 +498,12 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
         }
     }
 
-    public void addRollbackChange(Change change) throws UnsupportedChangeException {
+    public void addRollbackChange(Change change) {
         rollBackChanges.add(change);
     }
 
 
-    public boolean supportsRollback(Database database) throws UnsupportedChangeException {
+    public boolean supportsRollback(Database database) {
         if (rollBackChanges != null && rollBackChanges.size() > 0) {
             return true;
         }

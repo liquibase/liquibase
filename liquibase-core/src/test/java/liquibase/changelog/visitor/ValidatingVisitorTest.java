@@ -9,18 +9,14 @@ import liquibase.database.core.MockDatabase;
 import liquibase.exception.SetupException;
 import static org.junit.Assert.*;
 
-import liquibase.exception.UnsupportedChangeException;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;
-import liquibase.change.ChangeParameterMetaData;
+
 import liquibase.database.Database;
 import liquibase.exception.ValidationErrors;
-import liquibase.logging.LogFactory;
-import liquibase.sqlgenerator.SqlGeneratorFactory;
-import liquibase.statement.SqlStatement;
 
 public class ValidatingVisitorTest {
 
@@ -35,7 +31,7 @@ public class ValidatingVisitorTest {
 
 
     @Test
-    public void visit_successful() throws UnsupportedChangeException {
+    public void visit_successful() throws Exception {
         CreateTableChange change1 = new CreateTableChange();
         change1.setTableName("table1");
         ColumnConfig column1 = new ColumnConfig();
@@ -62,7 +58,7 @@ public class ValidatingVisitorTest {
     }
 
     @Test
-    public void visit_setupException() throws UnsupportedChangeException {
+    public void visit_setupException() throws Exception {
         changeSet1.addChange(new CreateTableChange() {
             @Override
             public void finishInitialization() throws SetupException {
@@ -80,7 +76,7 @@ public class ValidatingVisitorTest {
     }
 
     @Test
-    public void visit_duplicate() throws UnsupportedChangeException {
+    public void visit_duplicate() throws Exception {
 
         ValidatingVisitor handler = new ValidatingVisitor(new ArrayList<RanChangeSet>());
         handler.visit(changeSet1, new DatabaseChangeLog(), null);
@@ -92,7 +88,7 @@ public class ValidatingVisitorTest {
     }
 
     @Test
-    public void visit_validateError() throws UnsupportedChangeException {
+    public void visit_validateError() throws Exception {
 
         changeSet1.addChange(new CreateTableChange() {
             @Override
@@ -114,7 +110,7 @@ public class ValidatingVisitorTest {
     }
 
     @Test
-    public void visit_torunOnly() throws UnsupportedChangeException {
+    public void visit_torunOnly() throws Exception {
 
         changeSet1.addChange(new CreateTableChange() {
             @Override

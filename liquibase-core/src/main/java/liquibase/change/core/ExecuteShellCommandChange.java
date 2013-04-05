@@ -94,7 +94,7 @@ public class ExecuteShellCommandChange extends AbstractChange {
         boolean nonExecutedMode = false;
         Executor executor = ExecutorService.getInstance().getExecutor(database);
         if (executor instanceof LoggingExecutor) {
-        	nonExecutedMode = true;
+            nonExecutedMode = true;
         }
         
         if (shouldRun && !nonExecutedMode) {

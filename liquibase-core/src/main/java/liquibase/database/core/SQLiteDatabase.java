@@ -8,7 +8,6 @@ import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.exception.UnsupportedChangeException;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.snapshot.InvalidExampleException;
@@ -114,7 +113,7 @@ public class SQLiteDatabase extends AbstractJdbcDatabase {
     public static List<SqlStatement> getAlterTableStatements(
             AlterTableVisitor alterTableVisitor,
             Database database, String catalogName, String schemaName, String tableName)
-            throws UnsupportedChangeException, DatabaseException {
+            throws DatabaseException {
 
         DatabaseSnapshot snapshot = null; //todo
         List<SqlStatement> statements = new ArrayList<SqlStatement>();

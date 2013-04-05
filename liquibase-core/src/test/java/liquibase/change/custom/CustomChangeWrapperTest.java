@@ -1,7 +1,6 @@
 package liquibase.change.custom;
 
 import junit.framework.Assert;
-import liquibase.change.DatabaseChange;
 import liquibase.database.Database;
 import liquibase.exception.*;
 import liquibase.resource.ResourceAccessor;

@@ -3,10 +3,10 @@ package liquibase.sqlgenerator.core;
 import liquibase.change.ColumnConfig;
 import liquibase.database.Database;
 import liquibase.database.core.SQLiteDatabase;
+import liquibase.exception.LiquibaseException;
 import liquibase.structure.core.Index;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.exception.UnsupportedChangeException;
 import liquibase.sql.Sql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
@@ -73,8 +73,6 @@ public class AddAutoIncrementGeneratorSQLite extends AddAutoIncrementGenerator {
             }
         } catch (DatabaseException e) {
             e.printStackTrace();
-        } catch (UnsupportedChangeException e) {
-            throw new UnexpectedLiquibaseException(e);
         }
 
         return statements.toArray(new Sql[statements.size()]);

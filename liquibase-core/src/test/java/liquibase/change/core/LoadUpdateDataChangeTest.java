@@ -5,7 +5,6 @@ import static junit.framework.Assert.fail;
 import liquibase.change.StandardChangeTest;
 import liquibase.database.core.MockDatabase;
 import liquibase.exception.RollbackImpossibleException;
-import liquibase.exception.UnsupportedChangeException;
 import liquibase.exception.LiquibaseException;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.statement.SqlStatement;
@@ -63,6 +62,7 @@ public class LoadUpdateDataChangeTest extends StandardChangeTest {
         assertEquals("name", ((InsertOrUpdateStatement) sqlStatements[0]).getPrimaryKey());
     }
 
+    @Override
     public void getConfirmationMessage() throws Exception {
         LoadUpdateDataChange refactoring = new LoadUpdateDataChange();
         refactoring.setTableName("TABLE_NAME");
@@ -117,21 +117,6 @@ public class LoadUpdateDataChangeTest extends StandardChangeTest {
     }
 
     @Test
-    public void primaryKeyNullThrowsException() {
-        LoadUpdateDataChange change = new LoadUpdateDataChange();
-
-        try
-        {
-            change.setPrimaryKey(null);
-            fail("setPrimaryKey did not throw InvalidArgumentException as expected.");
-        }
-        catch(LiquibaseException e)
-        {
-        }
-    }
-
-
-    @Test
     public void getWhereClause() throws LiquibaseException {
         MockDatabase database = new MockDatabase();
         LoadUpdateDataChange change = new LoadUpdateDataChange();
@@ -157,7 +142,7 @@ public class LoadUpdateDataChangeTest extends StandardChangeTest {
     }
 
     @Test
-    public void generateRollbacksForData1CSV() throws UnsupportedChangeException, RollbackImpossibleException, LiquibaseException {
+    public void generateRollbacksForData1CSV() throws Exception {
         MockDatabase database = new MockDatabase();
 
         LoadUpdateDataChange change = new LoadUpdateDataChange();

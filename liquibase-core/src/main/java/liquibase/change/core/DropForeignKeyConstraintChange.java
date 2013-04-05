@@ -8,7 +8,6 @@ import liquibase.database.Database;
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.DropForeignKeyConstraintStatement;
-import liquibase.structure.core.ForeignKey;
 
 /**
  * Drops an existing foreign key constraint.
@@ -57,8 +56,8 @@ public class DropForeignKeyConstraintChange extends AbstractChange {
     }
 
     public SqlStatement[] generateStatements(Database database) {
-    	
-    	if (database instanceof SQLiteDatabase) {
+
+        if (database instanceof SQLiteDatabase) {
     		// return special statements for SQLite databases
     		return generateStatementsForSQLiteDatabase();
     	} 

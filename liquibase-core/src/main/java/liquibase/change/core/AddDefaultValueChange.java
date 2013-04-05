@@ -6,7 +6,6 @@ import liquibase.statement.SequenceNextValueFunction;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.DatabaseFunction;
 import liquibase.statement.core.AddDefaultValueStatement;
-import liquibase.structure.core.Column;
 import liquibase.util.ISODateFormat;
 
 import java.text.NumberFormat;
@@ -141,7 +140,7 @@ public class AddDefaultValueChange extends AbstractChange {
             try {
                 defaultValue = NumberFormat.getInstance(Locale.US).parse(getDefaultValueNumeric());
             } catch (ParseException e) {
-            	defaultValue = new DatabaseFunction(getDefaultValueNumeric());
+                defaultValue = new DatabaseFunction(getDefaultValueNumeric());
             }
         } else if (getDefaultValueDate() != null) {
             try {

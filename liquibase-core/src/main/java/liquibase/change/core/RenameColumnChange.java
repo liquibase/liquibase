@@ -4,7 +4,6 @@ import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.database.core.SQLiteDatabase.AlterTableVisitor;
-import liquibase.structure.core.Column;
 import liquibase.structure.core.Index;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RenameColumnStatement;
@@ -87,7 +86,7 @@ public class RenameColumnChange extends AbstractChange {
 
     	return new SqlStatement[] { new RenameColumnStatement(
                 getCatalogName(),
-    			getSchemaName(),
+                getSchemaName(),
     			getTableName(), getOldColumnName(), getNewColumnName(), 
     			getColumnDataType())
         };

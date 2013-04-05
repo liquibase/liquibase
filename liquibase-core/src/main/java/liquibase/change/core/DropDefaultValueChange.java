@@ -4,7 +4,6 @@ import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.DropDefaultValueStatement;
-import liquibase.structure.core.Column;
 
 /**
  * Removes the default value from an existing column.
@@ -69,7 +68,7 @@ public class DropDefaultValueChange extends AbstractChange {
 //    		// return special statements for SQLite databases
 //    		return generateStatementsForSQLiteDatabase(database);
 //        }
-    	
+
         return new SqlStatement[]{
                 new DropDefaultValueStatement(getCatalogName(), getSchemaName(), getTableName(), getColumnName(), getColumnDataType()),
         };

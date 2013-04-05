@@ -8,7 +8,6 @@ import liquibase.serializer.LiquibaseSerializable;
 import liquibase.structure.DatabaseObject;
 import liquibase.exception.RollbackImpossibleException;
 import liquibase.exception.SetupException;
-import liquibase.exception.UnsupportedChangeException;
 import liquibase.exception.ValidationErrors;
 import liquibase.exception.Warnings;
 import liquibase.resource.ResourceAccessor;
@@ -100,7 +99,7 @@ public interface Change extends LiquibaseSerializable {
      * <p></p>
      * <b>If this method reads from the current database state or uses any other logic that will be affected by whether previous changeSets have ran or not, you must return true from {@link #generateStatementsVolatile}.</b>
      */
-    public SqlStatement[] generateStatements(Database database) throws UnsupportedChangeException;
+    public SqlStatement[] generateStatements(Database database);
 
     /**
      * Returns true if this change reads data from the database or other sources that would change during the course of an update in the {@link #generateStatements(Database) } method.
@@ -128,8 +127,6 @@ public interface Change extends LiquibaseSerializable {
     /**
      * Returns true if this change reads data from the database or other sources that would change during the course of an update in the {@link #generateRollbackStatements(Database) } method.
      * If true, this change cannot be used in an updateSql-style commands because Liquibase cannot know the {@link SqlStatement} objects until all changeSets prior have been actually executed.
-
-     * @throws UnsupportedChangeException if this change is not supported by the {@link Database} passed as argument
      */
     public boolean generateRollbackStatementsVolatile(Database database);
 }

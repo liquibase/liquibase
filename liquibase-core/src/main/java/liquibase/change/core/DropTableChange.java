@@ -7,7 +7,6 @@ import liquibase.change.DatabaseChangeProperty;
 import liquibase.database.Database;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.DropTableStatement;
-import liquibase.structure.core.Table;
 
 /**
  * Drops an existing table.

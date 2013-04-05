@@ -2,7 +2,6 @@ package liquibase.change.core;
 
 import liquibase.change.*;
 import liquibase.database.Database;
-import liquibase.structure.core.Column;
 import liquibase.structure.core.ForeignKeyConstraintType;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.statement.SqlStatement;
@@ -232,7 +231,7 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
                         .setInitiallyDeferred(initiallyDeferred)
                         .setOnUpdate(getOnUpdate())
                         .setOnDelete(getOnDelete())
-		                .setReferencesUniqueColumn(getReferencesUniqueColumn())
+                        .setReferencesUniqueColumn(getReferencesUniqueColumn())
         };
     }
 

@@ -9,7 +9,6 @@ import liquibase.logging.Logger;
 import liquibase.resource.ResourceAccessor;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.InsertStatement;
-import liquibase.structure.core.Table;
 import liquibase.util.StringUtils;
 import liquibase.util.csv.CSVReader;
 
@@ -202,7 +201,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
                     throw ule;
                 }
         } finally {
-			if (null != reader) {
+            if (null != reader) {
 				try {
 					reader.close();
 				} catch (IOException e) {

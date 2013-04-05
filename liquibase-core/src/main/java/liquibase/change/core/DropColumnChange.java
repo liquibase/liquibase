@@ -6,7 +6,6 @@ import liquibase.database.core.DB2Database;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.DropColumnStatement;
 import liquibase.statement.core.ReorganizeTableStatement;
-import liquibase.structure.core.Column;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -65,7 +64,7 @@ public class DropColumnChange extends AbstractChange {
 //        	// return special statements for SQLite databases
 //    		return generateStatementsForSQLiteDatabase(database);
 //		}
-			
+
         List<SqlStatement> statements = new ArrayList<SqlStatement>();
 
         statements.add(new DropColumnStatement(getCatalogName(), getSchemaName(), getTableName(), getColumnName()));
