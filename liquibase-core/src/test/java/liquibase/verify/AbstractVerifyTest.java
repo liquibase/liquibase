@@ -1,6 +1,7 @@
 package liquibase.verify;
 
 import liquibase.util.StringUtils;
+import org.junit.ComparisonFailure;
 import org.junit.Rule;
 import org.junit.rules.TestName;
 
@@ -59,7 +60,15 @@ public class AbstractVerifyTest {
             if (existingContent.equals("") && StringUtils.trimToNull(stateContent.toString()) != null) {
                 save();
             } else {
-                assertEquals("Unexpected difference in "+stateFile.getAbsolutePath(), existingContent, stateContent.toString());
+                try {
+                    assertEquals("Unexpected difference in "+stateFile.getAbsolutePath(), existingContent, stateContent.toString());
+                } catch (ComparisonFailure e) {
+                    if ("overwrite".equals(System.getProperty("liquibase.verify.mode"))) {
+                        save();
+                    } else {
+                        throw e;
+                    }
+                }
             }
         }
 

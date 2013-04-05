@@ -1,8 +1,6 @@
 -- Database: db2i
 -- Change Parameter: file=com/example/users.csv
--- Database: db2i
 -- Change Parameter: primaryKey=A String
--- Database: db2i
 -- Change Parameter: tableName=person
 BEGIN ATOMIC
 	DECLARE v_reccount INTEGER;

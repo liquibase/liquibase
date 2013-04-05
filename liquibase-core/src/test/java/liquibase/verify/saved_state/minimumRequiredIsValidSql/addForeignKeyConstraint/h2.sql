@@ -1,11 +1,7 @@
 -- Database: h2
 -- Change Parameter: baseColumnNames=person_id
--- Database: h2
 -- Change Parameter: baseTableName=address
--- Database: h2
 -- Change Parameter: constraintName=fk_address_person
--- Database: h2
 -- Change Parameter: referencedColumnNames=id
--- Database: h2
 -- Change Parameter: referencedTableName=person
 ALTER TABLE address ADD CONSTRAINT fk_address_person FOREIGN KEY (person_id) REFERENCES person (id);

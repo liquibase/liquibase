@@ -3,6 +3,5 @@
 --     name="id"
 --     type="int"
 -- ], ]
--- Database: informix
 -- Change Parameter: tableName=person
 UPDATE person SET id = NULL;

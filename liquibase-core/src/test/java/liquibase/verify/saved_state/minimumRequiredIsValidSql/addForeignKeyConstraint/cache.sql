@@ -1,11 +1,7 @@
 -- Database: cache
 -- Change Parameter: baseColumnNames=person_id
--- Database: cache
 -- Change Parameter: baseTableName=address
--- Database: cache
 -- Change Parameter: constraintName=fk_address_person
--- Database: cache
 -- Change Parameter: referencedColumnNames=id
--- Database: cache
 -- Change Parameter: referencedTableName=person
 ALTER TABLE address ADD CONSTRAINT fk_address_person FOREIGN KEY (person_id) REFERENCES person (id);

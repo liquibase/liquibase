@@ -1,10 +1,7 @@
 -- Database: sybase
 -- Change Parameter: existingColumnName=state
--- Database: sybase
 -- Change Parameter: existingTableName=address
--- Database: sybase
 -- Change Parameter: newColumnName=abbreviation
--- Database: sybase
 -- Change Parameter: newTableName=state
 CREATE TABLE [state] AS SELECT DISTINCT state AS abbreviation FROM [dbo].[address] WHERE state IS NOT NULL;
 ALTER TABLE [state] MODIFY [abbreviation] NOT NULL;

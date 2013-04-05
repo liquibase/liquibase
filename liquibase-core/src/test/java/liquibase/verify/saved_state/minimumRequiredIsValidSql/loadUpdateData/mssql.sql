@@ -1,8 +1,6 @@
 -- Database: mssql
 -- Change Parameter: file=com/example/users.csv
--- Database: mssql
 -- Change Parameter: primaryKey=A String
--- Database: mssql
 -- Change Parameter: tableName=person
 DECLARE @reccount integer
 SELECT @reccount = count(*) FROM [person] WHERE [A String] = NULL

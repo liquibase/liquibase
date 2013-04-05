@@ -3,6 +3,5 @@
 --     name="id"
 --     type="int"
 -- ], ]
--- Database: h2
 -- Change Parameter: tableName=person
 INSERT INTO person (id) VALUES (NULL);

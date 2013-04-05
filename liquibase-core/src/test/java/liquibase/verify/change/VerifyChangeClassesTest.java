@@ -34,6 +34,8 @@ public class VerifyChangeClassesTest extends AbstractVerifyTest {
                 }
 
                 TestState state = new TestState(name.getMethodName(), changeName, database.getShortName(), TestState.Type.SQL);
+                state.addComment("Database: "+database.getShortName());
+
                 Change change = changeFactory.create(changeName);
                 if (!change.supports(database)) {
                     continue;
@@ -50,7 +52,6 @@ public class VerifyChangeClassesTest extends AbstractVerifyTest {
                     Object paramValue = param.getExampleValue();
                     String serializedValue;
                     serializedValue = formatParameter(paramValue);
-                    state.addComment("Database: "+database.getShortName());
                     state.addComment("Change Parameter: "+ param.getParameterName()+"="+ serializedValue);
                     param.setValue(change, paramValue);
                 }

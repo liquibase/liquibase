@@ -1,8 +1,6 @@
 -- Database: postgresql
 -- Change Parameter: file=com/example/users.csv
--- Database: postgresql
 -- Change Parameter: primaryKey=A String
--- Database: postgresql
 -- Change Parameter: tableName=person
 DO
 $$

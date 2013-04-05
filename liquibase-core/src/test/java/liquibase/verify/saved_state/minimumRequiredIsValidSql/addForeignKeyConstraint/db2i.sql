@@ -1,11 +1,7 @@
 -- Database: db2i
 -- Change Parameter: baseColumnNames=person_id
--- Database: db2i
 -- Change Parameter: baseTableName=address
--- Database: db2i
 -- Change Parameter: constraintName=fk_address_person
--- Database: db2i
 -- Change Parameter: referencedColumnNames=id
--- Database: db2i
 -- Change Parameter: referencedTableName=person
 ALTER TABLE address ADD CONSTRAINT fk_address_person FOREIGN KEY (person_id) REFERENCES person (id);

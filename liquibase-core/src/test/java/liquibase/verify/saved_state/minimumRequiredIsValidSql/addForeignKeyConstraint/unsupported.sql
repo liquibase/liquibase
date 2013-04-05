@@ -1,11 +1,7 @@
 -- Database: unsupported
 -- Change Parameter: baseColumnNames=person_id
--- Database: unsupported
 -- Change Parameter: baseTableName=address
--- Database: unsupported
 -- Change Parameter: constraintName=fk_address_person
--- Database: unsupported
 -- Change Parameter: referencedColumnNames=id
--- Database: unsupported
 -- Change Parameter: referencedTableName=person
 ALTER TABLE address ADD CONSTRAINT fk_address_person FOREIGN KEY (person_id) REFERENCES person (id);

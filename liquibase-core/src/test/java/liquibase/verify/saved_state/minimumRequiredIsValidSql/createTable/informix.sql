@@ -3,6 +3,5 @@
 --     name="id"
 --     type="int"
 -- ], ]
--- Database: informix
 -- Change Parameter: tableName=person
 CREATE TABLE person (id INT);

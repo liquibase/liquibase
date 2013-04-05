@@ -3,6 +3,5 @@
 --     name="id"
 --     type="int"
 -- ], ]
--- Database: maxdb
 -- Change Parameter: tableName=person
 CREATE TABLE person (id INT);

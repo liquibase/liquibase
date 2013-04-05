@@ -3,6 +3,5 @@
 --     name="id"
 --     type="int"
 -- ], ]
--- Database: maxdb
 -- Change Parameter: tableName=person
 UPDATE person SET id = NULL;

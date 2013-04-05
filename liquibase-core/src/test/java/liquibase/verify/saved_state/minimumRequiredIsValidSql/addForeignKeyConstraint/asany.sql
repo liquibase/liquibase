@@ -1,11 +1,7 @@
 -- Database: asany
 -- Change Parameter: baseColumnNames=person_id
--- Database: asany
 -- Change Parameter: baseTableName=address
--- Database: asany
 -- Change Parameter: constraintName=fk_address_person
--- Database: asany
 -- Change Parameter: referencedColumnNames=id
--- Database: asany
 -- Change Parameter: referencedTableName=person
 ALTER TABLE address ADD CONSTRAINT fk_address_person FOREIGN KEY (person_id) REFERENCES person (id);

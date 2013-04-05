@@ -1,11 +1,7 @@
 -- Database: derby
 -- Change Parameter: baseColumnNames=person_id
--- Database: derby
 -- Change Parameter: baseTableName=address
--- Database: derby
 -- Change Parameter: constraintName=fk_address_person
--- Database: derby
 -- Change Parameter: referencedColumnNames=id
--- Database: derby
 -- Change Parameter: referencedTableName=person
 ALTER TABLE address ADD CONSTRAINT fk_address_person FOREIGN KEY (person_id) REFERENCES person (id);

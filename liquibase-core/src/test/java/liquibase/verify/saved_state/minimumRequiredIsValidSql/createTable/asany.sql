@@ -3,6 +3,5 @@
 --     name="id"
 --     type="int"
 -- ], ]
--- Database: asany
 -- Change Parameter: tableName=person
 CREATE TABLE person (id INT NULL);

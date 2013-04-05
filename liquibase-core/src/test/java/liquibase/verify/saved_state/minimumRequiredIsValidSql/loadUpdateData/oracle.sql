@@ -1,8 +1,6 @@
 -- Database: oracle
 -- Change Parameter: file=com/example/users.csv
--- Database: oracle
 -- Change Parameter: primaryKey=A String
--- Database: oracle
 -- Change Parameter: tableName=person
 DECLARE
 	v_reccount NUMBER := 0;
