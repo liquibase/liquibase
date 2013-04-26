@@ -1,5 +1,6 @@
 package liquibase.change.core;
 
+import liquibase.change.ChangeFactory;
 import liquibase.change.StandardChangeTest;
 import liquibase.database.Database;
 import liquibase.database.core.MockDatabase;
@@ -24,7 +25,7 @@ public class DropUniqueConstraintChangeTest  extends StandardChangeTest {
     @Override
     @Test
     public void getRefactoringName() throws Exception {
-        assertEquals("dropUniqueConstraint", change.getChangeMetaData().getName());
+        assertEquals("dropUniqueConstraint", ChangeFactory.getInstance().getChangeMetaData(change).getName());
     }
 
     @Override

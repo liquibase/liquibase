@@ -1,5 +1,6 @@
 package liquibase.change.core;
 
+import liquibase.change.ChangeFactory;
 import liquibase.change.StandardChangeTest;
 import liquibase.database.Database;
 import liquibase.database.core.MockDatabase;
@@ -13,7 +14,7 @@ public class DropPrimaryKeyChangeTest extends StandardChangeTest {
         @Override
         @Test
     public void getRefactoringName() throws Exception {
-        assertEquals("dropPrimaryKey", new DropPrimaryKeyChange().getChangeMetaData().getName());
+        assertEquals("dropPrimaryKey", ChangeFactory.getInstance().getChangeMetaData(new DropPrimaryKeyChange()).getName());
     }
 
     @Override

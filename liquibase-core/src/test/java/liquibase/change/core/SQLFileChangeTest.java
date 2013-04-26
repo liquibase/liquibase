@@ -7,6 +7,7 @@ import static org.junit.Assert.fail;
 import java.lang.reflect.Field;
 import java.util.Map;
 
+import liquibase.change.ChangeFactory;
 import liquibase.change.StandardChangeTest;
 import liquibase.change.AbstractSQLChange;
 import liquibase.change.Change;
@@ -176,7 +177,7 @@ public class SQLFileChangeTest extends StandardChangeTest {
     @Override
     @Test
 	public void getRefactoringName() throws Exception {
-		assertEquals("sqlFile", change.getChangeMetaData().getName());
+		assertEquals("sqlFile", ChangeFactory.getInstance().getChangeMetaData(change).getName());
 
 	}
 

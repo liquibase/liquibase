@@ -6,6 +6,7 @@ import liquibase.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 public class ValidationErrors {
@@ -77,5 +78,25 @@ public class ValidationErrors {
     @Override
     public int hashCode() {
         return toString().hashCode();
+    }
+
+    public List<String> getRequiredErrorMessages() {
+        List<String> requiredErrorMessages = new ArrayList<String>();
+        for (String message : errorMessages) {
+            if (message.contains("is required")) {
+                requiredErrorMessages.add(message);
+            }
+        }
+        return Collections.unmodifiableList(requiredErrorMessages);
+    }
+
+    public List<String> getUnsupportedErrorMessages() {
+        List<String> unsupportedErrorMessages = new ArrayList<String>();
+        for (String message : errorMessages) {
+            if (message.contains(" is not allowed on ")) {
+                unsupportedErrorMessages.add(message);
+            }
+        }
+        return Collections.unmodifiableList(unsupportedErrorMessages);
     }
 }

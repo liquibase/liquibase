@@ -100,6 +100,20 @@ public class ChangeMetaData implements PrioritizedService {
     }
 
     /**
+     *  Returns the optional parameters for this change for the given database. Will never return a null map, only an empty or populated map.
+     */
+    public Map<String, ChangeParameterMetaData> getOptionalParameters(Database database) {
+        Map<String, ChangeParameterMetaData> returnMap = new HashMap<String, ChangeParameterMetaData>();
+
+        for (ChangeParameterMetaData metaData : parameters.values()) {
+            if (!metaData.isRequiredFor(database)) {
+                returnMap.put(metaData.getParameterName(), metaData);
+            }
+        }
+        return returnMap;
+    }
+
+    /**
      * Returns the types of DatabaseObjects this change would apply to.
      * Useful for documentation or integrations that present a user with what change commands are available for a given database type.
      * If no information is known, returns null. Will never return an empty set, only null or a populated set.

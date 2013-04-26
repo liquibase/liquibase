@@ -67,7 +67,7 @@ public class CreateSequenceChange extends AbstractChange {
         this.incrementBy = incrementBy;
     }
 
-    @DatabaseChangeProperty(description = "The maximum value of the sequence", exampleValue = "1000")
+    @DatabaseChangeProperty(description = "The maximum value of the sequence", exampleValue = "1000", supportsDatabase = "!h2")
     public BigInteger getMaxValue() {
         return maxValue;
     }

@@ -1,5 +1,6 @@
 package liquibase.change.core;
 
+import liquibase.change.ChangeFactory;
 import liquibase.change.StandardChangeTest;
 import static org.junit.Assert.*;
 
@@ -11,7 +12,7 @@ public class CreateViewChangeTest extends StandardChangeTest {
     @Override
     @Test
     public void getRefactoringName() throws Exception {
-        assertEquals("createView", new CreateViewChange().getChangeMetaData().getName());
+        assertEquals("createView", ChangeFactory.getInstance().getChangeMetaData(new CreateViewChange()).getName());
     }
 
     @Override

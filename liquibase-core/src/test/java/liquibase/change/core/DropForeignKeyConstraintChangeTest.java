@@ -1,5 +1,6 @@
 package liquibase.change.core;
 
+import liquibase.change.ChangeFactory;
 import liquibase.change.StandardChangeTest;
 import static org.junit.Assert.*;
 
@@ -9,7 +10,7 @@ public class DropForeignKeyConstraintChangeTest extends StandardChangeTest {
  @Override
  @Test
     public void getRefactoringName() throws Exception {
-        assertEquals("dropForeignKeyConstraint", new DropForeignKeyConstraintChange().getChangeMetaData().getName());
+        assertEquals("dropForeignKeyConstraint", ChangeFactory.getInstance().getChangeMetaData(new DropForeignKeyConstraintChange()).getName());
     }
 
     @Override

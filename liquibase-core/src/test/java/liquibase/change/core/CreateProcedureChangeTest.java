@@ -1,5 +1,6 @@
 package liquibase.change.core;
 
+import liquibase.change.ChangeFactory;
 import liquibase.change.StandardChangeTest;
 import static org.junit.Assert.*;
 
@@ -10,7 +11,7 @@ public abstract class CreateProcedureChangeTest extends StandardChangeTest {
     @Override
     @Test
     public void getRefactoringName() throws Exception {
-        assertEquals("Create Procedure", new CreateProcedureChange().getChangeMetaData().getName());
+        assertEquals("Create Procedure", ChangeFactory.getInstance().getChangeMetaData(new CreateProcedureChange()).getName());
     }
 
 //    @Test

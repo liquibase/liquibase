@@ -18,8 +18,12 @@ public class ChangeFactory {
     private static ChangeFactory instance;
 
     private Map<String, SortedSet<Class<? extends Change>>> registry = new ConcurrentHashMap<String, SortedSet<Class<? extends Change>>>();
+    private Map<Class<? extends Change>, ChangeMetaData> metaDataByClass = new ConcurrentHashMap<Class<? extends Change>, ChangeMetaData>();
 
     private ChangeFactory() {
+    }
+
+    private void init() {
         Class<? extends Change>[] classes;
         classes = ServiceLocator.getInstance().findClasses(Change.class);
 
@@ -35,6 +39,7 @@ public class ChangeFactory {
     public static synchronized ChangeFactory getInstance() {
         if (instance == null) {
             instance = new ChangeFactory();
+            instance.init();
         }
         return instance;
     }
@@ -53,12 +58,14 @@ public class ChangeFactory {
      */
     public void register(Class<? extends Change> changeClass) {
         try {
-            String name = changeClass.newInstance().getChangeMetaData().getName();
+            Change instance = changeClass.newInstance();
+            ChangeMetaData metaData = getChangeMetaData(instance);
+            String name = metaData.getName();
             if (registry.get(name) == null) {
                 registry.put(name, new TreeSet<Class<? extends Change>>(new Comparator<Class<? extends Change>>() {
                     public int compare(Class<? extends Change> o1, Class<? extends Change> o2) {
                         try {
-                            return -1 * new Integer(o1.newInstance().getChangeMetaData().getPriority()).compareTo(o2.newInstance().getChangeMetaData().getPriority());
+                            return -1 * new Integer(getChangeMetaData(o1.newInstance()).getPriority()).compareTo(getChangeMetaData(o2.newInstance()).getPriority());
                         } catch (Exception e) {
                             throw new UnexpectedLiquibaseException(e);
                         }
@@ -69,6 +76,13 @@ public class ChangeFactory {
         } catch (Exception e) {
             throw new UnexpectedLiquibaseException(e);
         }
+    }
+
+    public ChangeMetaData getChangeMetaData(Change change) {
+        if (!metaDataByClass.containsKey(change.getClass())) {
+            metaDataByClass.put(change.getClass(), change.createChangeMetaData());
+        }
+        return metaDataByClass.get(change.getClass());
     }
 
     /**
@@ -99,6 +113,7 @@ public class ChangeFactory {
      */
     public void clear() {
         registry.clear();
+        metaDataByClass.clear();
     }
 
     /**

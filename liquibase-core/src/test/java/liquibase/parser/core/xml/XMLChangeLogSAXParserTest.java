@@ -1,6 +1,7 @@
 package liquibase.parser.core.xml;
 
 import liquibase.change.Change;
+import liquibase.change.ChangeFactory;
 import liquibase.change.core.AddColumnChange;
 import liquibase.change.core.CreateTableChange;
 import liquibase.change.core.RawSQLChange;
@@ -38,7 +39,7 @@ public class XMLChangeLogSAXParserTest {
         assertEquals("Some comments go here", changeSet.getComments());
 
         Change change = changeSet.getChanges().get(0);
-        assertEquals("createTable", change.getChangeMetaData().getName());
+        assertEquals("createTable", ChangeFactory.getInstance().getChangeMetaData(change).getName());
         assertTrue(change instanceof CreateTableChange);
     }
 
@@ -63,7 +64,7 @@ public class XMLChangeLogSAXParserTest {
         assertFalse(changeSet.shouldRunOnChange());
 
         Change change = changeSet.getChanges().get(0);
-        assertEquals("createTable", change.getChangeMetaData().getName());
+        assertEquals("createTable", ChangeFactory.getInstance().getChangeMetaData(change).getName());
         assertTrue(change instanceof CreateTableChange);
 
         // change 1
@@ -80,11 +81,11 @@ public class XMLChangeLogSAXParserTest {
         assertTrue(changeSet.getRollBackChanges()[1] instanceof RawSQLChange);
 
         change = changeSet.getChanges().get(0);
-        assertEquals("addColumn", change.getChangeMetaData().getName());
+        assertEquals("addColumn", ChangeFactory.getInstance().getChangeMetaData(change).getName());
         assertTrue(change instanceof AddColumnChange);
 
         change = changeSet.getChanges().get(1);
-        assertEquals("addColumn", change.getChangeMetaData().getName());
+        assertEquals("addColumn", ChangeFactory.getInstance().getChangeMetaData(change).getName());
         assertTrue(change instanceof AddColumnChange);
 
         // change 2
@@ -98,7 +99,7 @@ public class XMLChangeLogSAXParserTest {
         assertFalse(changeSet.shouldRunOnChange());
 
         change = changeSet.getChanges().get(0);
-        assertEquals("createTable", change.getChangeMetaData().getName());
+        assertEquals("createTable", ChangeFactory.getInstance().getChangeMetaData(change).getName());
         assertTrue(change instanceof CreateTableChange);
 
 
@@ -182,7 +183,7 @@ public class XMLChangeLogSAXParserTest {
 
 
         Change change = changeSet.getChanges().get(0);
-        assertEquals("createTable", change.getChangeMetaData().getName());
+        assertEquals("createTable", ChangeFactory.getInstance().getChangeMetaData(change).getName());
         assertTrue(change instanceof CreateTableChange);
         assertEquals("employee", ((CreateTableChange) change).getTableName());
 
@@ -194,7 +195,7 @@ public class XMLChangeLogSAXParserTest {
         assertEquals("liquibase/parser/core/xml/simpleChangeLog.xml", changeSet.getFilePath());
 
         change = changeSet.getChanges().get(0);
-        assertEquals("createTable", change.getChangeMetaData().getName());
+        assertEquals("createTable", ChangeFactory.getInstance().getChangeMetaData(change).getName());
         assertTrue(change instanceof CreateTableChange);
         assertEquals("person", ((CreateTableChange) change).getTableName());
 
@@ -206,7 +207,7 @@ public class XMLChangeLogSAXParserTest {
         assertEquals(nestedFileName, changeSet.getFilePath());
 
         change = changeSet.getChanges().get(0);
-        assertEquals("addColumn", change.getChangeMetaData().getName());
+        assertEquals("addColumn", ChangeFactory.getInstance().getChangeMetaData(change).getName());
         assertTrue(change instanceof AddColumnChange);
         assertEquals("employee", ((AddColumnChange) change).getTableName());
 	}
@@ -251,7 +252,7 @@ public class XMLChangeLogSAXParserTest {
         assertEquals(doubleNestedFileName, changeSet.getFilePath());
 
         Change change = changeSet.getChanges().get(0);
-        assertEquals("createTable", change.getChangeMetaData().getName());
+        assertEquals("createTable", ChangeFactory.getInstance().getChangeMetaData(change).getName());
         assertTrue(change instanceof CreateTableChange);
         assertEquals("partner", ((CreateTableChange) change).getTableName());
 
@@ -263,7 +264,7 @@ public class XMLChangeLogSAXParserTest {
         assertEquals(nestedFileName, changeSet.getFilePath());
 
         change = changeSet.getChanges().get(0);
-        assertEquals("createTable", change.getChangeMetaData().getName());
+        assertEquals("createTable", ChangeFactory.getInstance().getChangeMetaData(change).getName());
         assertTrue(change instanceof CreateTableChange);
         assertEquals("employee", ((CreateTableChange) change).getTableName());
 
@@ -275,7 +276,7 @@ public class XMLChangeLogSAXParserTest {
         assertEquals("liquibase/parser/core/xml/simpleChangeLog.xml", changeSet.getFilePath());
 
         change = changeSet.getChanges().get(0);
-        assertEquals("createTable", change.getChangeMetaData().getName());
+        assertEquals("createTable", ChangeFactory.getInstance().getChangeMetaData(change).getName());
         assertTrue(change instanceof CreateTableChange);
         assertEquals("person", ((CreateTableChange) change).getTableName());
 
@@ -287,7 +288,7 @@ public class XMLChangeLogSAXParserTest {
         assertEquals(nestedFileName, changeSet.getFilePath());
 
         change = changeSet.getChanges().get(0);
-        assertEquals("addColumn", change.getChangeMetaData().getName());
+        assertEquals("addColumn", ChangeFactory.getInstance().getChangeMetaData(change).getName());
         assertTrue(change instanceof AddColumnChange);
         assertEquals("employee", ((AddColumnChange) change).getTableName());
 	}
@@ -333,7 +334,7 @@ public class XMLChangeLogSAXParserTest {
         assertEquals("Some comments go here", changeSet.getComments());
 
         Change change = changeSet.getChanges().get(0);
-        assertEquals("createTable", change.getChangeMetaData().getName());
+        assertEquals("createTable", ChangeFactory.getInstance().getChangeMetaData(change).getName());
         assertTrue(change instanceof CreateTableChange);
     }
 

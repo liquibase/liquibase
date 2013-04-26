@@ -1,5 +1,6 @@
 package liquibase.change.core;
 
+import liquibase.change.ChangeFactory;
 import liquibase.change.StandardChangeTest;
 import liquibase.database.Database;
 import liquibase.database.core.SQLiteDatabase;
@@ -11,7 +12,7 @@ public class AddPrimaryKeyChangeTest extends StandardChangeTest {
     @Override
     @Test
     public void getRefactoringName() throws Exception {
-        assertEquals("addPrimaryKey", new AddPrimaryKeyChange().getChangeMetaData().getName());
+        assertEquals("addPrimaryKey", ChangeFactory.getInstance().getChangeMetaData(new AddPrimaryKeyChange()).getName());
     }
 
     @Override

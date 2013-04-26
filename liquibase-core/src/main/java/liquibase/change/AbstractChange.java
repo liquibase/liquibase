@@ -1,6 +1,5 @@
 package liquibase.change;
 
-import java.beans.IntrospectionException;
 import java.lang.reflect.Type;
 import java.util.*;
 
@@ -19,24 +18,21 @@ import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
 
 /**
- * Standard superclass to simplify {@link Change } implementations. You can implement Change directly, this class is purely for convenience.
+ * Standard superclass to simplify {@link Change } implementations. You can implement Change directly, this class is purely for convenience but recommended.
  * <p></p>
  * By default, this base class relies on annotations such as {@link DatabaseChange} and {@link DatabaseChangeProperty}
  * and delegating logic to the {@link liquibase.sqlgenerator.SqlGenerator} objects created to do the actual change work.
- * Place the @DatabaseChangeProperty annotations on the read get methods.
+ * Place the @DatabaseChangeProperty annotations on the read "get" methods to control property metadata.
  */
 public abstract class AbstractChange implements Change {
 
     private String dbms;
-
-    private ChangeMetaData changeMetaData;
 
     private ResourceAccessor resourceAccessor;
 
     private ChangeSet changeSet;
 
     public AbstractChange() {
-        this.changeMetaData = createChangeMetaData();
     }
 
     /**
@@ -47,10 +43,11 @@ public abstract class AbstractChange implements Change {
     }
 
     /**
-     * Generate the ChangeMetaData for this class. Default implementation reads from the @{@link DatabaseChange } annotation.
-     * Override to add more or different information to the ChangeMetaData returned by {@link #getChangeMetaData()}.
+     * Generate the ChangeMetaData for this class. Default implementation reads from the @{@link DatabaseChange } annotation
+     * and calls out to {@link #createChangeParameterMetadata(String)} for each property.
+     * @throws UnexpectedLiquibaseException if no @DatabaseChange annotation on this Change class
      */
-    protected ChangeMetaData createChangeMetaData() {
+    public ChangeMetaData createChangeMetaData() {
         try {
             DatabaseChange databaseChange = this.getClass().getAnnotation(DatabaseChange.class);
 
@@ -90,63 +87,136 @@ public abstract class AbstractChange implements Change {
     }
 
     /**
-     * Called by {@link #createChangeMetaData()} to create metadata for a given parameter.
-     * The default implementation reads from a @{@link DatabaseChangeProperty} annotation on the field.
+     * Called by {@link #createChangeMetaData()} to create metadata for a given parameter. It finds the method that corresponds to the parameter
+     * and calls the corresponding create*MetaData methods such as {@link #createRequiredDatabasesMetaData(String, DatabaseChangeProperty)} to determine the
+     * correct values for the ChangeParameterMetaData fields.
      *
-     * @param parameterName
-     * @return
-     * @throws Exception
+     * @throws UnexpectedLiquibaseException if the passed parameter does not exist
      */
-    protected ChangeParameterMetaData createChangeParameterMetadata(String parameterName) throws IntrospectionException, NoSuchMethodException {
+    protected ChangeParameterMetaData createChangeParameterMetadata(String parameterName)  {
 
-        String displayName = parameterName.replaceAll("([A-Z])", " $1");
-        displayName = displayName.substring(0, 1).toUpperCase() + displayName.substring(1);
+        try {
+            String displayName = parameterName.replaceAll("([A-Z])", " $1");
+            displayName = displayName.substring(0, 1).toUpperCase() + displayName.substring(1);
 
-        PropertyDescriptor property = null;
-        for (PropertyDescriptor prop : Introspector.getBeanInfo(this.getClass()).getPropertyDescriptors()) {
-            if (prop.getDisplayName().equals(parameterName)) {
-                property = prop;
-                break;
+            PropertyDescriptor property = null;
+            for (PropertyDescriptor prop : Introspector.getBeanInfo(this.getClass()).getPropertyDescriptors()) {
+                if (prop.getDisplayName().equals(parameterName)) {
+                    property = prop;
+                    break;
+                }
             }
-        }
-        if (property == null) {
-            throw new UnexpectedLiquibaseException("Could not find property " + parameterName);
-        }
+            if (property == null) {
+                throw new UnexpectedLiquibaseException("Could not find property " + parameterName);
+            }
 
-        Method readMethod = property.getReadMethod();
-        if (readMethod == null) {
-            readMethod = getClass().getMethod("is"+StringUtils.upperCaseFirst(property.getName()));
+            Method readMethod = property.getReadMethod();
+            if (readMethod == null) {
+                readMethod = getClass().getMethod("is"+StringUtils.upperCaseFirst(property.getName()));
+            }
+            Type type = readMethod.getGenericReturnType();
+
+            DatabaseChangeProperty changePropertyAnnotation = readMethod.getAnnotation(DatabaseChangeProperty.class);
+
+            String mustEqualExisting = createMustEqualExistingMetaData(parameterName, changePropertyAnnotation);
+            String description = createDescriptionMetaData(parameterName, changePropertyAnnotation);
+            String example = createExampleValueMetaData(parameterName, changePropertyAnnotation);
+            String since = createSinceMetaData(parameterName, changePropertyAnnotation);
+            SerializationType serializationType = createSerializationTypeMetaData(parameterName, changePropertyAnnotation);
+            String[] requiredForDatabase = createRequiredDatabasesMetaData(parameterName, changePropertyAnnotation);
+            String[] supportsDatabase = createSupportedDatabasesMetaData(parameterName, changePropertyAnnotation);
+
+
+            return new ChangeParameterMetaData(parameterName, displayName, description, example, since, type, requiredForDatabase, supportsDatabase, mustEqualExisting, serializationType, this );
+        } catch (Exception e) {
+            throw new UnexpectedLiquibaseException(e);
         }
-        Type type = readMethod.getGenericReturnType();
-
-        DatabaseChangeProperty changePropertyAnnotation = readMethod.getAnnotation(DatabaseChangeProperty.class);
-
-        String[] requiredForDatabase;
-        String mustEqualExisting = null;
-        String description = null;
-        String example = null;
-        String since = null;
-        SerializationType serializationType = SerializationType.NAMED_FIELD;
-        if (changePropertyAnnotation == null) {
-            requiredForDatabase = new String[]{"none"};
-        } else {
-            requiredForDatabase = changePropertyAnnotation.requiredForDatabase();
-            mustEqualExisting = changePropertyAnnotation.mustEqualExisting();
-            serializationType = changePropertyAnnotation.serializationType();
-            description = StringUtils.trimToNull(changePropertyAnnotation.description());
-            example = StringUtils.trimToNull(changePropertyAnnotation.exampleValue());
-            since = StringUtils.trimToNull(changePropertyAnnotation.since());
-        }
-
-        return new ChangeParameterMetaData(parameterName, displayName, description, example, since, type, requiredForDatabase, mustEqualExisting, serializationType);
     }
 
     /**
-     * {@inheritDoc}
+     * Create the {@link ChangeParameterMetaData} "since" value. Uses the value on the DatabaseChangeProperty annotation or returns null as a default.
      */
-    @DatabaseChangeProperty(isChangeProperty = false)
-    public ChangeMetaData getChangeMetaData() {
-        return changeMetaData;
+    @SuppressWarnings("UnusedParameters")
+    protected String createSinceMetaData(String parameterName, DatabaseChangeProperty changePropertyAnnotation) {
+        if (changePropertyAnnotation == null) {
+            return null;
+        }
+        return StringUtils.trimToNull(changePropertyAnnotation.since());
+    }
+
+    /**
+     * Create the {@link ChangeParameterMetaData} "description" value. Uses the value on the DatabaseChangeProperty annotation or returns null as a default.
+     */
+    @SuppressWarnings("UnusedParameters")
+    protected String createDescriptionMetaData(String parameterName, DatabaseChangeProperty changePropertyAnnotation) {
+        if (changePropertyAnnotation == null) {
+            return null;
+        }
+        return StringUtils.trimToNull(changePropertyAnnotation.description());
+    }
+
+    /**
+     * Create the {@link ChangeParameterMetaData} "serializationType" value. Uses the value on the DatabaseChangeProperty annotation or returns {@link SerializationType}.NAMED_FIELD as a default.
+     */
+    @SuppressWarnings("UnusedParameters")
+    protected SerializationType createSerializationTypeMetaData(String parameterName, DatabaseChangeProperty changePropertyAnnotation) {
+        if (changePropertyAnnotation == null) {
+            return SerializationType.NAMED_FIELD;
+        }
+        return changePropertyAnnotation.serializationType();
+    }
+
+    /**
+     * Create the {@link ChangeParameterMetaData} "mustEqual" value. Uses the value on the DatabaseChangeProperty annotation or returns null as a default.
+     */
+    @SuppressWarnings("UnusedParameters")
+    protected String createMustEqualExistingMetaData(String parameterName, DatabaseChangeProperty changePropertyAnnotation) {
+        if (changePropertyAnnotation == null) {
+            return null;
+        }
+
+        return changePropertyAnnotation.mustEqualExisting();
+    }
+
+    /**
+     * Create the {@link ChangeParameterMetaData} "example" value. Uses the value on the DatabaseChangeProperty annotation or returns null as a default.
+     */
+    @SuppressWarnings("UnusedParameters")
+    protected String createExampleValueMetaData(String parameterName, DatabaseChangeProperty changePropertyAnnotation) {
+        if (changePropertyAnnotation == null) {
+            return null;
+        }
+
+        return StringUtils.trimToNull(changePropertyAnnotation.exampleValue());
+    }
+
+    /**
+     * Create the {@link ChangeParameterMetaData} "requiredDatabases" value.
+     * Uses the value on the DatabaseChangeProperty annotation or returns an array containing the string "COMPUTE" as a default.
+     * "COMPUTE" will cause ChangeParameterMetaData to attempt to determine the required databases based on the generated Statements
+     */
+    @SuppressWarnings("UnusedParameters")
+    protected String[] createRequiredDatabasesMetaData(String parameterName, DatabaseChangeProperty changePropertyAnnotation) {
+        if (changePropertyAnnotation == null) {
+            return new String[]{"COMPUTE"};
+        } else {
+            return changePropertyAnnotation.requiredForDatabase();
+        }
+    }
+
+    /**
+     * Create the {@link ChangeParameterMetaData} "supportedDatabase" value.
+     * Uses the value on the DatabaseChangeProperty annotation or returns an array containing the string "COMPUTE" as a default.
+     * "COMPUTE" will cause ChangeParameterMetaData to attempt to determine the required databases based on the generated Statements
+     */
+    @SuppressWarnings("UnusedParameters")
+    protected String[] createSupportedDatabasesMetaData(String parameterName, DatabaseChangeProperty changePropertyAnnotation) {
+        if (changePropertyAnnotation == null) {
+            return new String[]{"COMPUTE"};
+        } else {
+            return changePropertyAnnotation.supportsDatabase();
+        }
+
     }
 
     /**
@@ -219,14 +289,6 @@ public abstract class AbstractChange implements Change {
         return true;
     }
 
-    public boolean includes(final Database database) {
-        if (dbms == null || dbms.trim().isEmpty()) {
-            return true;
-        }
-        List<String> dbmsList = StringUtils.splitAndTrim(dbms, ",");
-        return dbmsList.contains(database.getShortName());
-    }
-
     /**
      * Implementation delegates logic to the {@link liquibase.sqlgenerator.SqlGenerator#warn(liquibase.statement.SqlStatement, liquibase.database.Database, liquibase.sqlgenerator.SqlGeneratorChain)} method on the {@link SqlStatement} objects returned by {@link #generateStatements }.
      * If a generated statement is not supported for the given database, no warning will be added since that is a validation error.
@@ -234,6 +296,10 @@ public abstract class AbstractChange implements Change {
      */
     public Warnings warn(Database database) {
         Warnings warnings = new Warnings();
+        if (generateStatementsVolatile(database)) {
+            return warnings;
+        }
+
         SqlStatement[] statements = generateStatements(database);
         if (statements == null) {
             return warnings;
@@ -242,7 +308,7 @@ public abstract class AbstractChange implements Change {
             if (SqlGeneratorFactory.getInstance().supports(statement, database)) {
                 warnings.addAll(SqlGeneratorFactory.getInstance().warn(statement, database));
             } else if (statement.skipOnUnsupported()) {
-                warnings.addWarning(statement.getClass().getName()+" is not supported on " + database.getShortName() + ", but "+getChangeMetaData().getName() + " will still execute");
+                warnings.addWarning(statement.getClass().getName()+" is not supported on " + database.getShortName() + ", but "+ChangeFactory.getInstance().getChangeMetaData(this).getName() + " will still execute");
             }
         }
 
@@ -258,16 +324,16 @@ public abstract class AbstractChange implements Change {
     public ValidationErrors validate(Database database) {
         ValidationErrors changeValidationErrors = new ValidationErrors();
 
-        for (ChangeParameterMetaData param : getChangeMetaData().getParameters().values()) {
+        for (ChangeParameterMetaData param : ChangeFactory.getInstance().getChangeMetaData(this).getParameters().values()) {
             if (param.isRequiredFor(database) && param.getCurrentValue(this) == null) {
-                changeValidationErrors.addError(param.getParameterName() + " is required for " + getChangeMetaData().getName() + " on " + database.getShortName());
+                changeValidationErrors.addError(param.getParameterName() + " is required for " + ChangeFactory.getInstance().getChangeMetaData(this).getName() + " on " + database.getShortName());
             }
         }
         if (changeValidationErrors.hasErrors()) {
             return changeValidationErrors;
         }
 
-        String unsupportedWarning = getChangeMetaData().getName() + " is not supported on " + database.getShortName();
+        String unsupportedWarning = ChangeFactory.getInstance().getChangeMetaData(this).getName() + " is not supported on " + database.getShortName();
         boolean sawUnsupportedError = false;
         SqlStatement[] statements;
         statements = generateStatements(database);
@@ -325,7 +391,7 @@ public abstract class AbstractChange implements Change {
         try {
             for (Change inverse : inverses) {
                 if (!inverse.supports(database)) {
-                    throw new RollbackImpossibleException(inverse.getChangeMetaData().getName()+" is not supported on "+database.getShortName());
+                    throw new RollbackImpossibleException(ChangeFactory.getInstance().getChangeMetaData(inverse).getName()+" is not supported on "+database.getShortName());
                 }
                 statements.addAll(Arrays.asList(inverse.generateStatements(database)));
             }
@@ -382,30 +448,21 @@ public abstract class AbstractChange implements Change {
     }
 
     /**
-     * @return A comma separated list of dbms' that this change will be run for. Will run for all dbms' if empty or null.
+     * Returns the fields on this change that are serializable.
      */
-    @DatabaseChangeProperty(since = "3.0", exampleValue = "h2, oracle")
-    public String getDbms() {
-        return dbms;
-    }
-
-    public void setDbms(final String dbms) {
-        this.dbms = dbms;
-    }
-
     public Set<String> getSerializableFields() {
-        return getChangeMetaData().getParameters().keySet();
+        return ChangeFactory.getInstance().getChangeMetaData(this).getParameters().keySet();
     }
 
     public Object getSerializableFieldValue(String field) {
-        return getChangeMetaData().getParameters().get(field).getCurrentValue(this);
+        return ChangeFactory.getInstance().getChangeMetaData(this).getParameters().get(field).getCurrentValue(this);
     }
 
     public String getSerializedObjectName() {
-        return getChangeMetaData().getName();
+        return ChangeFactory.getInstance().getChangeMetaData(this).getName();
     }
 
     public SerializationType getSerializableFieldType(String field) {
-        return getChangeMetaData().getParameters().get(field).getSerializationType();
+        return ChangeFactory.getInstance().getChangeMetaData(this).getParameters().get(field).getSerializationType();
     }
 }

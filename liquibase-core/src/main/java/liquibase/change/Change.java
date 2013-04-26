@@ -29,11 +29,7 @@ public interface Change extends LiquibaseSerializable {
      */
     public void finishInitialization() throws SetupException;
 
-    /**
-     * Returns metadata describing the change. The metadata is used to determine if a given change matches a tag in the changelog file and is supported by a database as well as
-     * descriptions of the change for documentation and runtime messages.
-     */
-    public ChangeMetaData getChangeMetaData();
+    public ChangeMetaData createChangeMetaData();
 
     /**
      * Returns the changeSet this Change is part of. Will return null if this instance was not constructed as part of a changelog file.
@@ -55,11 +51,6 @@ public interface Change extends LiquibaseSerializable {
      * Return true if this Change object supports the passed database. Used by the ChangeLog parsing process.
      */
     boolean supports(Database database);
-
-    /**
-     * @return Whether this change should run for the specified database
-     */
-    boolean includes(Database database);
 
     /**
      * Generates warnings based on the configured Change instance. Warnings do not stop changelog execution, but are passed along to the end user for reference.

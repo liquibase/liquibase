@@ -78,7 +78,7 @@ public class AddDefaultValueChange extends AbstractChange {
 		this.columnDataType = columnDataType;
 	}
 
-    @DatabaseChangeProperty(description = "Default value", exampleValue = "Something Else", requiredForDatabase = "all")
+    @DatabaseChangeProperty(description = "Default value", exampleValue = "Something Else")
     public String getDefaultValue() {
         return defaultValue;
     }

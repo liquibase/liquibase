@@ -2,10 +2,14 @@ package liquibase.change.core;
 
 import liquibase.change.*;
 import liquibase.database.Database;
+import liquibase.database.DatabaseFactory;
 import liquibase.structure.core.ForeignKeyConstraintType;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.AddForeignKeyConstraintStatement;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Adds a foreign key constraint to an existing column.
@@ -34,6 +38,22 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
 	// Some databases supports creation of FK with references to column marked as unique, not primary
 	// If FK referenced to such unique column this option should be set to true
 	private Boolean referencesUniqueColumn;
+
+    @Override
+    protected String[] createSupportedDatabasesMetaData(String parameterName, DatabaseChangeProperty changePropertyAnnotation) {
+        if (parameterName.equals("deferrable") || parameterName.equals("initiallyDeferred")) {
+            List<String> supported = new ArrayList<String>();
+            for (Database database : DatabaseFactory.getInstance().getImplementedDatabases()) {
+                if (database.supportsInitiallyDeferrableColumns()) {
+                    supported.add(database.getShortName());
+                }
+            }
+            return supported.toArray(new String[supported.size()]);
+
+        } else {
+            return super.createSupportedDatabasesMetaData(parameterName, changePropertyAnnotation);
+        }
+    }
 
     @DatabaseChangeProperty(mustEqualExisting ="column.relation.catalog", since = "3.0")
     public String getBaseTableCatalogName() {
@@ -115,20 +135,20 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
         this.constraintName = constraintName;
     }
 
+    @DatabaseChangeProperty(description = "Is the foreign key deferrable")
     public Boolean getDeferrable() {
         return deferrable;
     }
 
-    @DatabaseChangeProperty(description = "Is the foreign key deferrable")
     public void setDeferrable(Boolean deferrable) {
         this.deferrable = deferrable;
     }
 
+    @DatabaseChangeProperty(description = "Is the foreign key initially deferred")
     public Boolean getInitiallyDeferred() {
         return initiallyDeferred;
     }
 
-    @DatabaseChangeProperty(description = "Is the foreign key initially deferred")
     public void setInitiallyDeferred(Boolean initiallyDeferred) {
         this.initiallyDeferred = initiallyDeferred;
     }

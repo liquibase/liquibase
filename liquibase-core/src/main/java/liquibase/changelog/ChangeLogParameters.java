@@ -10,6 +10,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import liquibase.database.Database;
+import liquibase.database.DatabaseList;
 import liquibase.util.StringUtils;
 
 public class ChangeLogParameters {
@@ -144,8 +145,8 @@ public class ChangeLogParameters {
                 }
             }
 
-            if (isValid && validDatabases != null && validDatabases.size() > 0) {
-                isValid = validDatabases.contains(currentDatabase.getShortName());
+            if (isValid) {
+                isValid = DatabaseList.definitionMatches(validDatabases, currentDatabase, true);
             }
 
             return isValid;

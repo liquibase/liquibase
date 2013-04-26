@@ -1,5 +1,6 @@
 package liquibase.change.core;
 
+import liquibase.change.ChangeFactory;
 import liquibase.change.StandardChangeTest;
 import liquibase.database.core.MockDatabase;
 import liquibase.resource.ClassLoaderResourceAccessor;
@@ -19,7 +20,7 @@ public class LoadDataChangeTest extends StandardChangeTest {
     @Override
     @Test
     public void getRefactoringName() throws Exception {
-        assertEquals("loadData", new LoadDataChange().getChangeMetaData().getName());
+        assertEquals("loadData", ChangeFactory.getInstance().getChangeMetaData(new LoadDataChange()).getName());
     }
 
 

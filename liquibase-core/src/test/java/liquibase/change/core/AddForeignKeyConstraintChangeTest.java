@@ -1,5 +1,6 @@
 package liquibase.change.core;
 
+import liquibase.change.ChangeFactory;
 import liquibase.change.StandardChangeTest;
 import liquibase.database.Database;
 import liquibase.database.core.MockDatabase;
@@ -54,7 +55,7 @@ public class AddForeignKeyConstraintChangeTest  extends StandardChangeTest {
 
       @Override
       public void getRefactoringName() throws Exception {
-        assertEquals("addForeignKeyConstraint", new AddForeignKeyConstraintChange().getChangeMetaData().getName());
+        assertEquals("addForeignKeyConstraint", ChangeFactory.getInstance().getChangeMetaData(new AddForeignKeyConstraintChange()).getName());
     }
 
     @Override

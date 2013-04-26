@@ -1,5 +1,6 @@
 package liquibase.change.core;
 
+import liquibase.change.ChangeFactory;
 import liquibase.change.StandardChangeTest;
 import liquibase.change.ColumnConfig;
 import liquibase.database.core.MockDatabase;
@@ -46,7 +47,7 @@ public class InsertDataChangeTest extends StandardChangeTest {
     @Override
     @Test
     public void getRefactoringName() throws Exception {
-        assertEquals("insert", refactoring.getChangeMetaData().getName());
+        assertEquals("insert", ChangeFactory.getInstance().getChangeMetaData(refactoring).getName());
     }
 
     @Override

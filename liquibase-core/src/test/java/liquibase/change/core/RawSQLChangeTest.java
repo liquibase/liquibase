@@ -1,5 +1,6 @@
 package liquibase.change.core;
 
+import liquibase.change.ChangeFactory;
 import liquibase.change.StandardChangeTest;
 import static org.junit.Assert.*;
 
@@ -21,7 +22,7 @@ public abstract class RawSQLChangeTest extends StandardChangeTest {
     @Override
     @Test
     public void getRefactoringName() throws Exception {
-        assertEquals("Custom SQL", new RawSQLChange().getChangeMetaData().getName());
+        assertEquals("Custom SQL", ChangeFactory.getInstance().getChangeMetaData(new RawSQLChange()).getName());
     }
 
 //    @Test

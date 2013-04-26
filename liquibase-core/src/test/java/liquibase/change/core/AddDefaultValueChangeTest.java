@@ -1,5 +1,6 @@
 package liquibase.change.core;
 
+import liquibase.change.ChangeFactory;
 import liquibase.change.StandardChangeTest;
 import liquibase.database.core.MockDatabase;
 import liquibase.statement.SqlStatement;
@@ -166,7 +167,7 @@ public class AddDefaultValueChangeTest extends StandardChangeTest {
 
     @Override
     public void getRefactoringName() throws Exception {
-        assertEquals("addDefaultValue", new AddDefaultValueChange().getChangeMetaData().getName());
+        assertEquals("addDefaultValue", ChangeFactory.getInstance().getChangeMetaData(new AddDefaultValueChange()).getName());
     }
 
     @Override

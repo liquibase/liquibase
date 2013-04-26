@@ -1,5 +1,6 @@
 package liquibase.change.core;
 
+import liquibase.change.ChangeFactory;
 import liquibase.change.StandardChangeTest;
 import liquibase.database.core.MockDatabase;
 import liquibase.statement.SqlStatement;
@@ -15,7 +16,7 @@ public class DropColumnChangeTest extends StandardChangeTest {
     @Override
     @Test
     public void getRefactoringName() throws Exception {
-        assertEquals("dropColumn", new DropColumnChange().getChangeMetaData().getName());
+        assertEquals("dropColumn", ChangeFactory.getInstance().getChangeMetaData(new DropColumnChange()).getName());
     }
 
     @Override

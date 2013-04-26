@@ -1,5 +1,6 @@
 package liquibase.change.core;
 
+import liquibase.change.ChangeFactory;
 import liquibase.change.StandardChangeTest;
 import liquibase.change.ChangeMetaData;
 import liquibase.database.Database;
@@ -17,7 +18,7 @@ public class AddAutoIncrementChangeTest extends StandardChangeTest {
     @Test
     public void constructor() {
         AddAutoIncrementChange change = new AddAutoIncrementChange();
-        assertEquals("column", change.getChangeMetaData().getAppliesTo().iterator().next());
+        assertEquals("column", ChangeFactory.getInstance().getChangeMetaData(change).getAppliesTo().iterator().next());
     }
 
     @Override
@@ -54,7 +55,7 @@ public class AddAutoIncrementChangeTest extends StandardChangeTest {
     @Override
     @Test
     public void getRefactoringName() throws Exception {
-        assertEquals("addAutoIncrement", new AddAutoIncrementChange().getChangeMetaData().getName());
+        assertEquals("addAutoIncrement", ChangeFactory.getInstance().getChangeMetaData(new AddAutoIncrementChange()).getName());
     }
 
     @Override
@@ -80,7 +81,7 @@ public class AddAutoIncrementChangeTest extends StandardChangeTest {
     @Test
     public void changeMetaDataCreatedCorrectly() {
         AddAutoIncrementChange change = new AddAutoIncrementChange();
-        ChangeMetaData metaData = change.getChangeMetaData();
+        ChangeMetaData metaData = ChangeFactory.getInstance().getChangeMetaData(change);
         assertEquals("addAutoIncrement", metaData.getName());
 
     }

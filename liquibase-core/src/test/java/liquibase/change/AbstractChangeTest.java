@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.Set;
 
 import static junit.framework.Assert.*;
+import static liquibase.test.Assert.assertArraysEqual;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
@@ -34,18 +35,6 @@ import static org.powermock.api.mockito.PowerMockito.mockStatic;
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({SqlGeneratorFactory.class, CheckSum.class})
 public class AbstractChangeTest {
-
-    @Test
-    public void constructor() {
-        final ChangeMetaData metaData = mock(ChangeMetaData.class);
-        AbstractChange change = new ExampleAbstractChange() {
-            @Override
-            protected ChangeMetaData createChangeMetaData() {
-                return metaData;
-            }
-        };
-        assertSame(metaData, change.getChangeMetaData());
-    }
 
     @Test
     public void finishInitialization() throws SetupException {
@@ -65,7 +54,7 @@ public class AbstractChangeTest {
                 public SqlStatement[] generateStatements(Database database) {
                     return null;
                 }
-            };
+            }.createChangeMetaData();
             fail("Did not throw exception");
         } catch (UnexpectedLiquibaseException e) {
             assertTrue("Incorrect message: "+e.getMessage(), e.getMessage().startsWith("liquibase.exception.UnexpectedLiquibaseException: No @DatabaseChange annotation for "));
@@ -635,7 +624,89 @@ public class AbstractChangeTest {
         assertSame(checkSum, new ExampleAbstractChange().generateCheckSum());
     }
 
+    @Test
+    public void createSinceMetaData() {
+        DatabaseChangeProperty property = mock(DatabaseChangeProperty.class);
+        when(property.since()).thenReturn("3.4");
+        assertEquals("3.4", new ExampleAbstractChange().createSinceMetaData("x", property));
+    }
 
+    @Test
+    public void createSinceMetaData_nullAnnotation() {
+        assertNull(new ExampleAbstractChange().createSinceMetaData("x", null));
+    }
+
+    @Test
+    public void createDescriptionMetaData() {
+        DatabaseChangeProperty property = mock(DatabaseChangeProperty.class);
+        when(property.description()).thenReturn("test me");
+        assertEquals("test me", new ExampleAbstractChange().createDescriptionMetaData("x", property));
+    }
+
+    @Test
+    public void createDescriptionMetaData_nullAnnotation() {
+        assertNull(new ExampleAbstractChange().createDescriptionMetaData("x", null));
+    }
+
+    @Test
+    public void createSerializationTypeMetaData() {
+        DatabaseChangeProperty property = mock(DatabaseChangeProperty.class);
+        when(property.serializationType()).thenReturn(LiquibaseSerializable.SerializationType.NESTED_OBJECT);
+        assertEquals(LiquibaseSerializable.SerializationType.NESTED_OBJECT, new ExampleAbstractChange().createSerializationTypeMetaData("x", property));
+    }
+
+    @Test
+    public void createSerializationTypeMetaData_nullAnnotation() {
+        assertEquals(LiquibaseSerializable.SerializationType.NAMED_FIELD, new ExampleAbstractChange().createSerializationTypeMetaData("x", null));
+    }
+
+    @Test
+    public void createMustEqualExistingMetaData() {
+        DatabaseChangeProperty property = mock(DatabaseChangeProperty.class);
+        when(property.mustEqualExisting()).thenReturn("table");
+        assertEquals("table", new ExampleAbstractChange().createMustEqualExistingMetaData("x", property));
+    }
+
+    @Test
+    public void createMustEqualExistingMetaData_nullAnnotation() {
+        assertNull(new ExampleAbstractChange().createMustEqualExistingMetaData("x", null));
+    }
+
+    @Test
+    public void createExampleMetaData() {
+        DatabaseChangeProperty property = mock(DatabaseChangeProperty.class);
+        when(property.exampleValue()).thenReturn("int");
+        assertEquals("int", new ExampleAbstractChange().createExampleValueMetaData("x", property));
+    }
+
+    @Test
+    public void createExampleMetaData_nullAnnotation() {
+        assertNull(new ExampleAbstractChange().createExampleValueMetaData("x", null));
+    }
+
+    @Test
+    public void createRequiredDatabasesMetaData() {
+        DatabaseChangeProperty property = mock(DatabaseChangeProperty.class);
+        when(property.requiredForDatabase()).thenReturn(new String[] {"a", "b"});
+        assertArraysEqual(new String[]{"a", "b"}, new ExampleAbstractChange().createRequiredDatabasesMetaData("x", property));
+    }
+
+    @Test
+    public void createRequiredDatabasesMetaData_nullAnnotation() {
+        assertArraysEqual(new String[]{"COMPUTE"}, new ExampleAbstractChange().createRequiredDatabasesMetaData("x", null));
+    }
+
+    @Test
+    public void createSupportedDatabasesMetaData() {
+        DatabaseChangeProperty property = mock(DatabaseChangeProperty.class);
+        when(property.supportsDatabase()).thenReturn(new String[] {"a", "b"});
+        assertArraysEqual(new String[]{"a", "b"}, new ExampleAbstractChange().createSupportedDatabasesMetaData("x", property));
+    }
+
+    @Test
+    public void createSupportedDatabasesMetaData_nullAnnotation() {
+        assertArraysEqual(new String[]{"COMPUTE"}, new ExampleAbstractChange().createSupportedDatabasesMetaData("x", null));
+    }
     @DatabaseChange(name = "exampleAbstractChange", description = "Used for the AbstractChangeTest unit test", priority = 1)
     private static class ExampleAbstractChange extends AbstractChange {
 

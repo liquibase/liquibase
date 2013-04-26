@@ -43,6 +43,11 @@ public @interface DatabaseChangeProperty {
     public String[] requiredForDatabase() default "none";
 
     /**
+     * Value to put into {@link ChangeParameterMetaData#getSupportedDatabases()}
+     */
+    public String[] supportsDatabase() default "COMPUTE";
+
+    /**
      * Value to put into {@link liquibase.change.ChangeParameterMetaData#getMustEqualExisting()}
      */
     public String mustEqualExisting() default "";

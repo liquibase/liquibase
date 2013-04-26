@@ -13,8 +13,10 @@ import liquibase.sql.Sql;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.test.JUnitResourceAccessor;
+import liquibase.util.StringUtils;
 import liquibase.verify.AbstractVerifyTest;
 import org.junit.Test;
+import sun.plugin2.os.windows.FLASHWINFO;
 
 import java.util.*;
 
@@ -34,7 +36,7 @@ public class VerifyChangeClassesTest extends AbstractVerifyTest {
                 }
 
                 TestState state = new TestState(name.getMethodName(), changeName, database.getShortName(), TestState.Type.SQL);
-                state.addComment("Database: "+database.getShortName());
+                state.addComment("Database: " + database.getShortName());
 
                 Change change = changeFactory.create(changeName);
                 if (!change.supports(database)) {
@@ -43,7 +45,7 @@ public class VerifyChangeClassesTest extends AbstractVerifyTest {
                 if (change.generateStatementsVolatile(database)) {
                     continue;
                 }
-                ChangeMetaData changeMetaData = change.getChangeMetaData();
+                ChangeMetaData changeMetaData = ChangeFactory.getInstance().getChangeMetaData(change);
 
                 change.setResourceAccessor(new JUnitResourceAccessor());
 
@@ -52,21 +54,21 @@ public class VerifyChangeClassesTest extends AbstractVerifyTest {
                     Object paramValue = param.getExampleValue();
                     String serializedValue;
                     serializedValue = formatParameter(paramValue);
-                    state.addComment("Change Parameter: "+ param.getParameterName()+"="+ serializedValue);
+                    state.addComment("Change Parameter: " + param.getParameterName() + "=" + serializedValue);
                     param.setValue(change, paramValue);
                 }
 
                 ValidationErrors errors = change.validate(database);
-                assertFalse("Validation errors for " + changeMetaData.getName() + " on "+database.getShortName()+": " +errors.toString(), errors.hasErrors());
+                assertFalse("Validation errors for " + changeMetaData.getName() + " on " + database.getShortName() + ": " + errors.toString(), errors.hasErrors());
 
                 SqlStatement[] sqlStatements = change.generateStatements(database);
                 for (SqlStatement statement : sqlStatements) {
                     Sql[] sql = SqlGeneratorFactory.getInstance().generateSql(statement, database);
                     if (sql == null) {
-                        System.out.println("Null sql for "+statement+" on "+database.getShortName());
+                        System.out.println("Null sql for " + statement + " on " + database.getShortName());
                     } else {
                         for (Sql line : sql) {
-                            state.addValue(line.toSql()+";");
+                            state.addValue(line.toSql() + ";");
                         }
                     }
                 }
@@ -91,7 +93,7 @@ public class VerifyChangeClassesTest extends AbstractVerifyTest {
                 if (change.generateStatementsVolatile(database)) {
                     continue;
                 }
-                ChangeMetaData changeMetaData = change.getChangeMetaData();
+                ChangeMetaData changeMetaData = ChangeFactory.getInstance().getChangeMetaData(change);
 
                 change.setResourceAccessor(new JUnitResourceAccessor());
 
@@ -102,7 +104,7 @@ public class VerifyChangeClassesTest extends AbstractVerifyTest {
                     param.setValue(change, paramValue);
                 }
 
-                for (int i=0; i<requiredParams.size(); i++) {
+                for (int i = 0; i < requiredParams.size(); i++) {
                     String paramToRemove = requiredParams.get(i);
                     ChangeParameterMetaData paramToRemoveMetadata = changeMetaData.getParameters().get(paramToRemove);
                     Object currentValue = paramToRemoveMetadata.getCurrentValue(change);
@@ -111,8 +113,110 @@ public class VerifyChangeClassesTest extends AbstractVerifyTest {
                     assertTrue(change.validate(database).hasErrors());
                     paramToRemoveMetadata.setValue(change, currentValue);
                 }
-          }
+            }
         }
+    }
+
+    @Test
+    public void extraParamsIsValidSql() throws Exception {
+        ChangeFactory changeFactory = ChangeFactory.getInstance();
+        for (String changeName : changeFactory.getDefinedChanges()) {
+            for (Database database : DatabaseFactory.getInstance().getImplementedDatabases()) {
+                if (database.getShortName() == null) {
+                    continue;
+                }
+
+                TestState state = new TestState(name.getMethodName(), changeName, database.getShortName(), TestState.Type.SQL);
+                state.addComment("Database: " + database.getShortName());
+
+                Change baseChange = changeFactory.create(changeName);
+                if (!baseChange.supports(database)) {
+                    continue;
+                }
+                if (baseChange.generateStatementsVolatile(database)) {
+                    continue;
+                }
+                ChangeMetaData changeMetaData = ChangeFactory.getInstance().getChangeMetaData(baseChange);
+                ArrayList<String> optionalParameters = new ArrayList<String>(changeMetaData.getOptionalParameters(database).keySet());
+                Collections.sort(optionalParameters);
+
+                List<List<String>> paramLists = powerSet(optionalParameters);
+                Collections.sort(paramLists, new Comparator<List<String>>() {
+                    public int compare(List<String> o1, List<String> o2) {
+                        int comp = Integer.valueOf(o1.size()).compareTo(o2.size());
+                        if (comp == 0) {
+                            comp =  StringUtils.join(o1,",").compareTo(StringUtils.join(o2, ","));
+                        }
+                        return comp;
+                    }
+                });
+                for (List<String> permutation : paramLists) {
+                    System.out.println(StringUtils.join(permutation, ","));
+                    Change change = changeFactory.create(changeName);
+                    change.setResourceAccessor(new JUnitResourceAccessor());
+//
+                    for (String paramName : new TreeSet<String>(changeMetaData.getRequiredParameters(database).keySet())) {
+                        ChangeParameterMetaData param = changeMetaData.getParameters().get(paramName);
+                        Object paramValue = param.getExampleValue();
+                        String serializedValue;
+                        serializedValue = formatParameter(paramValue);
+                        state.addComment("Required Change Parameter: "+ param.getParameterName()+"="+ serializedValue);
+                        param.setValue(change, paramValue);
+                    }
+
+                    for (String paramName : permutation) {
+                        ChangeParameterMetaData param = changeMetaData.getParameters().get(paramName);
+                        if (!param.supports(database)) {
+                            continue;
+                        }
+                        Object paramValue = param.getExampleValue();
+                        String serializedValue;
+                        serializedValue = formatParameter(paramValue);
+                        state.addComment("Optional Change Parameter: "+ param.getParameterName()+"="+ serializedValue);
+                        param.setValue(change, paramValue);
+
+                    }
+
+                    ValidationErrors errors = change.validate(database);
+                    assertFalse("Validation errors for " + changeMetaData.getName() + " on "+database.getShortName()+": " +errors.toString(), errors.hasErrors());
+//
+//                    SqlStatement[] sqlStatements = change.generateStatements(database);
+//                    for (SqlStatement statement : sqlStatements) {
+//                        Sql[] sql = SqlGeneratorFactory.getInstance().generateSql(statement, database);
+//                        if (sql == null) {
+//                            System.out.println("Null sql for "+statement+" on "+database.getShortName());
+//                        } else {
+//                            for (Sql line : sql) {
+//                                state.addValue(line.toSql()+";");
+//                            }
+//                        }
+//                    }
+//                    state.test();
+                }
+            }
+        }
+    }
+
+    private List<List<String>> powerSet(List<String> baseSet) {
+        List<List<String>> returnList = new LinkedList<List<String>>();
+
+        if (baseSet.isEmpty()) {
+            returnList.add(new ArrayList<String>());
+            return returnList;
+        }
+        List<String> list = new ArrayList<String>(baseSet);
+        String head = list.get(0);
+        List<String> rest = new ArrayList<String>(list.subList(1, list.size()));
+        for (List<String> set : powerSet(rest)) {
+            List<String> newSet = new ArrayList<String>();
+            newSet.add(head);
+            newSet.addAll(set);
+            returnList.add(newSet);
+            returnList.add(set);
+        }
+        return returnList;
+
+
     }
 
     private String formatParameter(Object paramValue) {
@@ -120,7 +224,7 @@ public class VerifyChangeClassesTest extends AbstractVerifyTest {
         if (paramValue instanceof Collection) {
             serializedValue = "[";
             for (Object obj : (Collection) paramValue) {
-                serializedValue += formatParameter(obj)+", ";
+                serializedValue += formatParameter(obj) + ", ";
             }
             serializedValue += "]";
         } else if (paramValue instanceof LiquibaseSerializable) {

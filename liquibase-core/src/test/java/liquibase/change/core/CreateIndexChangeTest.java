@@ -1,5 +1,6 @@
 package liquibase.change.core;
 
+import liquibase.change.ChangeFactory;
 import liquibase.change.StandardChangeTest;
 import static org.junit.Assert.*;
 
@@ -13,7 +14,7 @@ public class CreateIndexChangeTest extends StandardChangeTest {
     @Override
     @Test
     public void getRefactoringName() throws Exception {
-        assertEquals("createIndex", new CreateIndexChange().getChangeMetaData().getName());
+        assertEquals("createIndex", ChangeFactory.getInstance().getChangeMetaData(new CreateIndexChange()).getName());
     }
 
     @Override

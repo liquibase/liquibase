@@ -18,7 +18,7 @@ public class BaseSQLChangeTest extends StandardChangeTest {
     @Override
     @Test
     public void getRefactoringName() throws Exception {
-        assertEquals("sql", new RawSQLChange().getChangeMetaData().getName());
+        assertEquals("sql", ChangeFactory.getInstance().getChangeMetaData(new RawSQLChange()).getName());
     }
 
     @Override

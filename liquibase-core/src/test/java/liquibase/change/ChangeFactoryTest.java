@@ -117,7 +117,7 @@ public class ChangeFactoryTest {
 
         assertEquals(3, factory.getRegistry().size());
 
-        factory.unregister(change.getChangeMetaData().getName());
+        factory.unregister(ChangeFactory.getInstance().getChangeMetaData(change).getName());
         assertEquals(2, factory.getRegistry().size());
     }
 
@@ -175,7 +175,7 @@ public class ChangeFactoryTest {
     @LiquibaseService(skip = true)
     public static class Priority5Change extends CreateTableChange {
         @Override
-        public ChangeMetaData getChangeMetaData() {
+        public ChangeMetaData createChangeMetaData() {
             return new ChangeMetaData("createTable", null, 5, null, null, null);
         }
     }
@@ -183,7 +183,7 @@ public class ChangeFactoryTest {
     @LiquibaseService(skip = true)
     public static class Priority10Change extends CreateTableChange {
         @Override
-        public ChangeMetaData getChangeMetaData() {
+        public ChangeMetaData createChangeMetaData() {
             return new ChangeMetaData("createTable", null, 10, null, null, null);
         }
     }
@@ -191,7 +191,7 @@ public class ChangeFactoryTest {
     @LiquibaseService(skip = true)
     public static class AnotherPriority5Change extends CreateTableChange {
         @Override
-        public ChangeMetaData getChangeMetaData() {
+        public ChangeMetaData createChangeMetaData() {
             return new ChangeMetaData("createTable", null, 5, null, null, null);
         }
     }
@@ -203,7 +203,7 @@ public class ChangeFactoryTest {
         }
 
         @Override
-        public ChangeMetaData getChangeMetaData() {
+        public ChangeMetaData createChangeMetaData() {
             return new ChangeMetaData("createTable", null, 15, null, null, null);
         }
     }
@@ -219,7 +219,7 @@ public class ChangeFactoryTest {
         }
 
         @Override
-        public ChangeMetaData getChangeMetaData() {
+        public ChangeMetaData createChangeMetaData() {
             return new ChangeMetaData("createTable", null, 15, null, null, null);
         }
     }

@@ -1,10 +1,14 @@
 package liquibase.change;
 
 import liquibase.database.Database;
+import liquibase.database.DatabaseFactory;
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.exception.ValidationErrors;
 import liquibase.serializer.LiquibaseSerializable;
+import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.DatabaseFunction;
 import liquibase.statement.SequenceNextValueFunction;
+import liquibase.statement.SqlStatement;
 import liquibase.util.StringUtils;
 
 import java.beans.Introspector;
@@ -27,10 +31,11 @@ public class ChangeParameterMetaData {
     private String dataType;
     private String since;
     private Set<String> requiredForDatabase;
+    private Set<String> supportedDatabases;
     private String mustEqualExisting;
     private LiquibaseSerializable.SerializationType serializationType;
 
-    public ChangeParameterMetaData(String parameterName, String displayName, String description, String exampleValue, String since, Type dataType, String[] requiredForDatabase, String mustEqualExisting, LiquibaseSerializable.SerializationType serializationType) {
+    public ChangeParameterMetaData(String parameterName, String displayName, String description, String exampleValue, String since, Type dataType, String[] requiredForDatabase, String[] supportedDatabases, String mustEqualExisting, LiquibaseSerializable.SerializationType serializationType, Change change) {
         if (parameterName == null) {
             throw new UnexpectedLiquibaseException("Unexpected null parameterName");
         }
@@ -53,16 +58,100 @@ public class ChangeParameterMetaData {
         } else if (dataType instanceof ParameterizedType) {
             this.dataType = StringUtils.lowerCaseFirst(((Class) ((ParameterizedType) dataType).getRawType()).getSimpleName()+" of "+ StringUtils.lowerCaseFirst(((Class) ((ParameterizedType) dataType).getActualTypeArguments()[0]).getSimpleName()));
         }
-        if (requiredForDatabase == null) {
-            requiredForDatabase = new String[0];
-        }
-        this.requiredForDatabase = new HashSet<String>(Arrays.asList(requiredForDatabase));
-        this.requiredForDatabase.remove("none");
-        this.requiredForDatabase = Collections.unmodifiableSet(this.requiredForDatabase);
 
         this.mustEqualExisting = mustEqualExisting;
         this.serializationType = serializationType;
         this.since = since;
+
+        analyzeSupportedDatabases(supportedDatabases, change);
+        analyzeRequiredDatabases(requiredForDatabase, change);
+
+    }
+
+    private void analyzeSupportedDatabases(String[] supportedDatabases, Change change) {
+        if (supportedDatabases == null) {
+            supportedDatabases = new String[] {"COMPUTED"};
+        }
+
+        if (supportedDatabases.length == 1 && StringUtils.join(supportedDatabases, ",").equals("COMPUTE")) {
+            List<String> computedSupported = new ArrayList<String>();
+            try {
+                for (Database database : DatabaseFactory.getInstance().getImplementedDatabases()) {
+                    if (change.generateStatementsVolatile(database)) {
+                        computedSupported = new ArrayList<String>(Arrays.asList("all"));
+                        break;
+                    }  else {
+                        Change testChange = change.getClass().newInstance();
+                        ValidationErrors originalErrors = getStatementErrors(testChange, database);
+                        this.setValue(change, this.getExampleValue());
+                        ValidationErrors finalErrors = getStatementErrors(testChange, database);
+                        if (finalErrors.getUnsupportedErrorMessages().size() == originalErrors.getUnsupportedErrorMessages().size()) {
+                            computedSupported.add(database.getShortName());
+                        }
+                    }
+                }
+
+                if (computedSupported.size() == DatabaseFactory.getInstance().getImplementedDatabases().size()) {
+                    supportedDatabases = new String[] {"all"};
+                } else {
+                    supportedDatabases = computedSupported.toArray(new String[computedSupported.size()]);
+                }
+            } catch (Exception e) {
+                supportedDatabases = new String[]{"all"};
+            }
+        }
+
+        this.supportedDatabases = new HashSet<String>(Arrays.asList(supportedDatabases));
+        this.supportedDatabases.remove("none");
+        this.supportedDatabases = Collections.unmodifiableSet(this.supportedDatabases);
+    }
+
+
+    private void analyzeRequiredDatabases(String[] requiredDatabases, Change change) {
+        if (requiredDatabases == null) {
+            requiredDatabases = new String[] {"COMPUTED"};
+        }
+
+        if (requiredDatabases.length == 1 && StringUtils.join(requiredDatabases, ",").equals("COMPUTE")) {
+            List<String> computedRequired = new ArrayList<String>();
+            try {
+                for (Database database : DatabaseFactory.getInstance().getImplementedDatabases()) {
+                    if (change.generateStatementsVolatile(database)) {
+                        computedRequired = new ArrayList<String>(Arrays.asList("none"));
+                        break;
+                    }  else {
+                        Change testChange = change.getClass().newInstance();
+                        ValidationErrors originalErrors = getStatementErrors(testChange, database);
+                        this.setValue(change, this.getExampleValue());
+                        ValidationErrors finalErrors = getStatementErrors(testChange, database);
+                        if (finalErrors.getRequiredErrorMessages().size() == originalErrors.getRequiredErrorMessages().size()) {
+                            computedRequired.add(database.getShortName());
+                        }
+                    }
+                }
+
+                if (computedRequired.size() == DatabaseFactory.getInstance().getImplementedDatabases().size()) {
+                    requiredDatabases = new String[] {"none"};
+                } else {
+                    requiredDatabases = computedRequired.toArray(new String[computedRequired.size()]);
+                }
+            } catch (Exception e) {
+                requiredDatabases = new String[]{"none"};
+            }
+        }
+
+        this.requiredForDatabase = new HashSet<String>(Arrays.asList(requiredDatabases));
+        this.requiredForDatabase.remove("none");
+        this.requiredForDatabase = Collections.unmodifiableSet(this.requiredForDatabase);
+    }
+
+    private ValidationErrors getStatementErrors(Change testChange, Database database) {
+        ValidationErrors errors = new ValidationErrors();
+        SqlStatement[] statements = testChange.generateStatements(database);
+        for (SqlStatement statement : statements) {
+            errors.addAll(SqlGeneratorFactory.getInstance().validate(statement, database));
+        }
+        return errors;
     }
 
     /**
@@ -101,6 +190,10 @@ public class ChangeParameterMetaData {
         return requiredForDatabase;
     }
 
+    public Set<String> getSupportedDatabases() {
+        return supportedDatabases;
+    }
+
     /**
      * A convenience method for testing the value returned by {@link #getRequiredForDatabase()} against a given database.
      * Returns true if the {@link Database#getShortName()} method is contained in the required databases or the required database list contains the string "all"
@@ -108,6 +201,11 @@ public class ChangeParameterMetaData {
     public boolean isRequiredFor(Database database) {
         return requiredForDatabase.contains("all") || requiredForDatabase.contains(database.getShortName());
     }
+
+    public boolean supports(Database database) {
+        return supportedDatabases.contains("all") || supportedDatabases.contains(database.getShortName());
+    }
+
 
     /**
      * Returns the current value of this parameter for the given Change.

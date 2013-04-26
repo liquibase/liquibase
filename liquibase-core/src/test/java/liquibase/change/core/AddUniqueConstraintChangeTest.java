@@ -1,5 +1,6 @@
 package liquibase.change.core;
 
+import liquibase.change.ChangeFactory;
 import liquibase.change.StandardChangeTest;
 import liquibase.database.Database;
 import liquibase.database.core.SQLiteDatabase;
@@ -11,7 +12,7 @@ public class AddUniqueConstraintChangeTest extends StandardChangeTest {
     @Override
     @Test
     public void getRefactoringName() throws Exception {
-        assertEquals("addUniqueConstraint", new AddUniqueConstraintChange().getChangeMetaData().getName());
+        assertEquals("addUniqueConstraint", ChangeFactory.getInstance().getChangeMetaData(new AddUniqueConstraintChange()).getName());
     }
 
     @Override

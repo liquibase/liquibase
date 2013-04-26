@@ -1,9 +1,6 @@
 package liquibase.change.core;
 
-import liquibase.change.StandardChangeTest;
-import liquibase.change.Change;
-import liquibase.change.ColumnConfig;
-import liquibase.change.ConstraintsConfig;
+import liquibase.change.*;
 import liquibase.database.core.MockDatabase;
 import liquibase.statement.ForeignKeyConstraint;
 import liquibase.statement.SqlStatement;
@@ -28,7 +25,7 @@ public class CreateTableChangeTest extends StandardChangeTest {
     @Override
     @Test
     public void getRefactoringName() throws Exception {
-        assertEquals("createTable", change.getChangeMetaData().getName());
+        assertEquals("createTable", ChangeFactory.getInstance().getChangeMetaData(change).getName());
     }
 
     @Override

@@ -3,24 +3,20 @@ package liquibase.change;
 import liquibase.database.core.H2Database;
 import liquibase.database.core.MySQLDatabase;
 import liquibase.database.core.OracleDatabase;
-import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Table;
 import liquibase.structure.core.View;
-import org.junit.Assert;
 import org.junit.Test;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Set;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertSame;
+import static liquibase.test.Assert.assertSetsEqual;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.matches;
 import static org.mockito.Mockito.mock;
 
 public class ChangeMetaDataTest {
@@ -28,7 +24,7 @@ public class ChangeMetaDataTest {
     @Test
     public void constructor() {
         HashSet<ChangeParameterMetaData> params = new HashSet<ChangeParameterMetaData>();
-        params.add(new ChangeParameterMetaData("a", "a", null, null, null, Integer.class, null, null, null));
+        params.add(new ChangeParameterMetaData("a", "a", null, null, null, Integer.class, null, null, null, null,  null));
 
         HashMap<String, String> notes = new HashMap<String, String>();
         notes.put("db1", "note1");
@@ -84,25 +80,29 @@ public class ChangeMetaDataTest {
     @Test
     public void getRequiredParameters() {
         HashSet<ChangeParameterMetaData> parameters = new HashSet<ChangeParameterMetaData>();
-        parameters.add(new ChangeParameterMetaData("noneRequired", "x", null, null, null, Integer.class, new String[]{"none"}, null, null));
-        parameters.add(new ChangeParameterMetaData("allRequired", "x", null, null, null, Integer.class, new String[]{"all"}, null, null));
-        parameters.add(new ChangeParameterMetaData("h2Required", "x", null, null, null, Integer.class, new String[] {"h2"}, null, null));
-        parameters.add(new ChangeParameterMetaData("oracleRequired", "x", null, null, null, Integer.class, new String[] {"oracle"}, null, null));
+        parameters.add(new ChangeParameterMetaData("noneRequired", "x", null, null, null, Integer.class, new String[]{"none"}, null, null, null, null));
+        parameters.add(new ChangeParameterMetaData("allRequired", "x", null, null, null, Integer.class, new String[]{"all"}, null, null, null,  null));
+        parameters.add(new ChangeParameterMetaData("h2Required", "x", null, null, null, Integer.class, new String[] {"h2"}, null, null, null,  null));
+        parameters.add(new ChangeParameterMetaData("oracleRequired", "x", null, null, null, Integer.class, new String[] {"oracle"}, null, null, null,  null));
         ChangeMetaData changeMetaData = new ChangeMetaData("x", "y", 1, null, null, parameters);
 
-        assertSetEquals(new String[]{"allRequired", "h2Required"}, changeMetaData.getRequiredParameters(new H2Database()).keySet());
-        assertSetEquals(new String[]{"allRequired", "oracleRequired"}, changeMetaData.getRequiredParameters(new OracleDatabase()).keySet());
-        assertSetEquals(new String[]{"allRequired"}, changeMetaData.getRequiredParameters(new MySQLDatabase()).keySet());
+        assertSetsEqual(new String[]{"allRequired", "h2Required"}, changeMetaData.getRequiredParameters(new H2Database()).keySet());
+        assertSetsEqual(new String[]{"allRequired", "oracleRequired"}, changeMetaData.getRequiredParameters(new OracleDatabase()).keySet());
+        assertSetsEqual(new String[]{"allRequired"}, changeMetaData.getRequiredParameters(new MySQLDatabase()).keySet());
     }
 
-    private void assertSetEquals(String[] expected, Set<String> set) {
-        Assert.assertEquals("Set size does not match", expected.length, set.size());
-        for (String string : expected) {
-            Assert.assertTrue("Missing expected element "+string, set.contains(string));
-        }
-        for (String found : set) {
-            Assert.assertTrue("Unexpected element in set: "+found, Arrays.asList(expected).contains(found));
-        }
+    @Test
+    public void getOptionalParameters() {
+        HashSet<ChangeParameterMetaData> parameters = new HashSet<ChangeParameterMetaData>();
+        parameters.add(new ChangeParameterMetaData("noneRequired", "x", null, null, null, Integer.class, new String[]{"none"}, null, null, null,  null));
+        parameters.add(new ChangeParameterMetaData("allRequired", "x", null, null, null, Integer.class, new String[]{"all"}, null, null, null,  null));
+        parameters.add(new ChangeParameterMetaData("h2Required", "x", null, null, null, Integer.class, new String[] {"h2"}, null, null, null,  null));
+        parameters.add(new ChangeParameterMetaData("oracleRequired", "x", null, null, null, Integer.class, new String[] {"oracle"}, null, null, null,  null));
+        ChangeMetaData changeMetaData = new ChangeMetaData("x", "y", 1, null, null, parameters);
+
+        assertSetsEqual(new String[]{"noneRequired", "oracleRequired"}, changeMetaData.getOptionalParameters(new H2Database()).keySet());
+        assertSetsEqual(new String[]{"noneRequired", "h2Required"}, changeMetaData.getOptionalParameters(new OracleDatabase()).keySet());
+        assertSetsEqual(new String[]{"noneRequired", "h2Required", "oracleRequired"}, changeMetaData.getOptionalParameters(new MySQLDatabase()).keySet());
     }
 
     @Test

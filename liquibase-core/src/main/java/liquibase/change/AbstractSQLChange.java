@@ -15,16 +15,26 @@ import java.util.*;
  * Implements the necessary logic to choose how the SQL string should be parsed to generate the statements.
  *
  */
-public abstract class AbstractSQLChange extends AbstractChange {
+public abstract class AbstractSQLChange extends AbstractChange implements DbmsTargetedChange {
 
     private boolean stripComments;
     private boolean splitStatements;
     private String endDelimiter;
     private String sql;
+    private String dbms;
 
     protected AbstractSQLChange() {
         setStripComments(null);
         setSplitStatements(null);
+    }
+
+    @DatabaseChangeProperty(since = "3.0", exampleValue = "h2, oracle")
+    public String getDbms() {
+        return dbms;
+    }
+
+    public void setDbms(final String dbms) {
+        this.dbms = dbms;
     }
 
     /**

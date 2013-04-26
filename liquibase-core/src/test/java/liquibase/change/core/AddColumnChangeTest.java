@@ -2,10 +2,7 @@ package liquibase.change.core;
 
 import java.math.BigInteger;
 
-import liquibase.change.StandardChangeTest;
-import liquibase.change.Change;
-import liquibase.change.ColumnConfig;
-import liquibase.change.ConstraintsConfig;
+import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.database.core.DB2Database;
 import liquibase.statement.SqlStatement;
@@ -32,7 +29,7 @@ public class AddColumnChangeTest extends StandardChangeTest {
     @Test
     public void getRefactoringName() throws Exception {
         AddColumnChange refactoring = new AddColumnChange();
-        assertEquals("addColumn", refactoring.getChangeMetaData().getName());
+        assertEquals("addColumn", ChangeFactory.getInstance().getChangeMetaData(refactoring).getName());
     }
 
     @Test

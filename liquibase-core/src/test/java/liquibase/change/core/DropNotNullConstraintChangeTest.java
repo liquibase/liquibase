@@ -1,5 +1,6 @@
 package liquibase.change.core;
 
+import liquibase.change.ChangeFactory;
 import liquibase.change.StandardChangeTest;
 import liquibase.database.Database;
 import liquibase.database.core.FirebirdDatabase;
@@ -18,7 +19,7 @@ public class DropNotNullConstraintChangeTest extends StandardChangeTest {
     @Override
     @Test
     public void getRefactoringName() throws Exception {
-        assertEquals("dropNotNullConstraint", new DropNotNullConstraintChange().getChangeMetaData().getName());
+        assertEquals("dropNotNullConstraint", ChangeFactory.getInstance().getChangeMetaData(new DropNotNullConstraintChange()).getName());
     }
 
     @Override

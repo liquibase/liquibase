@@ -2,6 +2,7 @@ package liquibase.dbdoc;
 
 import liquibase.Liquibase;
 import liquibase.change.Change;
+import liquibase.change.ChangeFactory;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.database.Database;
@@ -58,7 +59,7 @@ public class PendingSQLWriter extends HTMLWriter {
                 try {
                     thisChangeSet.execute(databaseChangeLog, this.database);
                 } catch (MigrationFailedException e) {
-                    fileWriter.append("EXECUTION ERROR: ").append(change.getChangeMetaData().getDescription()).append(": ").append(e.getMessage()).append("\n\n");
+                    fileWriter.append("EXECUTION ERROR: ").append(ChangeFactory.getInstance().getChangeMetaData(change).getDescription()).append(": ").append(e.getMessage()).append("\n\n");
                 }
             }
             fileWriter.append("</pre></code>");

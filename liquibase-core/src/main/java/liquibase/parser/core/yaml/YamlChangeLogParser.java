@@ -101,7 +101,7 @@ public class YamlChangeLogParser implements ChangeLogParser {
                                 }
 
                                 for (Map.Entry<String, Object> param : ((Map<String, Object>) changeMap.get(changeName)).entrySet()) {
-                                    ChangeParameterMetaData changeParameterMetaData = change.getChangeMetaData().getParameters().get(param.getKey());
+                                    ChangeParameterMetaData changeParameterMetaData = ChangeFactory.getInstance().getChangeMetaData(change).getParameters().get(param.getKey());
                                     if (changeParameterMetaData == null) {
                                         throw new ChangeLogParseException("Unexpected parameter " + param.getKey() + " for " + changeName);
                                     }

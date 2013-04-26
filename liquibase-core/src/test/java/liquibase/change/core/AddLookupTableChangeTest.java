@@ -1,5 +1,6 @@
 package liquibase.change.core;
 
+import liquibase.change.ChangeFactory;
 import liquibase.change.StandardChangeTest;
 import liquibase.database.Database;
 import liquibase.database.core.FirebirdDatabase;
@@ -11,7 +12,7 @@ public class AddLookupTableChangeTest extends StandardChangeTest {
 
     @Override
     public void getRefactoringName() throws Exception {
-        assertEquals("addLookupTable", new AddLookupTableChange().getChangeMetaData().getName());
+        assertEquals("addLookupTable", ChangeFactory.getInstance().getChangeMetaData(new AddLookupTableChange()).getName());
     }
 
     @Override

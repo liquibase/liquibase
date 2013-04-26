@@ -2,6 +2,8 @@ package liquibase.change.core;
 
 import junit.framework.Assert;
 import static junit.framework.Assert.fail;
+
+import liquibase.change.ChangeFactory;
 import liquibase.change.StandardChangeTest;
 import liquibase.database.core.MockDatabase;
 import liquibase.exception.RollbackImpossibleException;
@@ -35,7 +37,7 @@ public class LoadUpdateDataChangeTest extends StandardChangeTest {
 
     @Override
     public void getRefactoringName() throws Exception {
-        assertEquals("loadUpdateData", refactoring.getChangeMetaData().getName());
+        assertEquals("loadUpdateData", ChangeFactory.getInstance().getChangeMetaData(refactoring).getName());
     }
 
     @Override

@@ -1,10 +1,13 @@
 package liquibase.changelog;
 
 import liquibase.change.Change;
+import liquibase.change.ChangeFactory;
 import liquibase.change.CheckSum;
+import liquibase.change.DbmsTargetedChange;
 import liquibase.change.core.EmptyChange;
 import liquibase.change.core.RawSQLChange;
 import liquibase.database.Database;
+import liquibase.database.DatabaseList;
 import liquibase.database.ObjectQuotingStrategy;
 import liquibase.exception.*;
 import liquibase.executor.Executor;
@@ -333,7 +336,7 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
 
                 log.debug("Reading ChangeSet: " + toString());
                 for (Change change : getChanges()) {
-                    if (change.includes(database)) {
+                    if ((!(change instanceof DbmsTargetedChange)) || DatabaseList.definitionMatches(((DbmsTargetedChange) change).getDbms(), database, true)) {
                         database.executeStatements(change, databaseChangeLog, sqlVisitors);
                         log.debug(change.getConfirmationMessage());
                     } else {
@@ -531,10 +534,10 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
             } else if (changeCount > 1) {
                 returnString.append(" (x").append(changeCount).append(")");
                 returnString.append(", ");
-                returnString.append(change.getChangeMetaData().getDescription());
+                returnString.append(ChangeFactory.getInstance().getChangeMetaData(change).getDescription());
                 changeCount = 1;
             } else {
-                returnString.append(", ").append(change.getChangeMetaData().getDescription());
+                returnString.append(", ").append(ChangeFactory.getInstance().getChangeMetaData(change).getDescription());
                 changeCount = 1;
             }
             lastChangeClass = change.getClass();

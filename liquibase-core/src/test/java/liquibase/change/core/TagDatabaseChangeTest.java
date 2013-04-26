@@ -1,5 +1,6 @@
 package liquibase.change.core;
 
+import liquibase.change.ChangeFactory;
 import liquibase.change.StandardChangeTest;
 import liquibase.database.core.MockDatabase;
 import liquibase.statement.SqlStatement;
@@ -20,7 +21,7 @@ public class TagDatabaseChangeTest extends StandardChangeTest {
     @Override
     @Test
     public void getRefactoringName() throws Exception {
-        assertEquals("tagDatabase", refactoring.getChangeMetaData().getName());
+        assertEquals("tagDatabase", ChangeFactory.getInstance().getChangeMetaData(refactoring).getName());
     }
 
     @Override

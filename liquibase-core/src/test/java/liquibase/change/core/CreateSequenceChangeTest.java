@@ -1,5 +1,6 @@
 package liquibase.change.core;
 
+import liquibase.change.ChangeFactory;
 import liquibase.change.StandardChangeTest;
 import liquibase.database.Database;
 import static org.junit.Assert.*;
@@ -13,7 +14,7 @@ public class CreateSequenceChangeTest extends StandardChangeTest {
     @Override
     @Test
     public void getRefactoringName() throws Exception {
-        assertEquals("createSequence", new CreateSequenceChange().getChangeMetaData().getName());
+        assertEquals("createSequence", ChangeFactory.getInstance().getChangeMetaData(new CreateSequenceChange()).getName());
     }
 
     @Override

@@ -649,7 +649,7 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
                     columns.get(columns.size() - 1).setValue(textString);
                     this.text = new StringBuffer();
 			} else if (change != null
-					&& localName.equals(change.getChangeMetaData().getName())) {
+					&& localName.equals(ChangeFactory.getInstance().getChangeMetaData(change).getName())) {
 				if (textString != null) {
 					if (change instanceof RawSQLChange) {
 						// We've already expanded expressions when we defined 'textString' above. If we enabled
@@ -673,7 +673,7 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
 						((StopChange) change).setMessage(textString);
 					} else {
 						throw new RuntimeException("Unexpected text in "
-								+ change.getChangeMetaData().getName());
+                                + ChangeFactory.getInstance().getChangeMetaData(change).getName());
 					}
 				}
 				text = null;

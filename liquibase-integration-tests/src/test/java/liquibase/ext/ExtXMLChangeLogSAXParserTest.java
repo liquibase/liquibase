@@ -33,12 +33,12 @@ public class ExtXMLChangeLogSAXParserTest {
         assertEquals("2", changeSet.getId());
         assertEquals(1, changeSet.getChanges().size());
         Change change = changeSet.getChanges().get(0);
-        assertEquals("sampleChange", change.getChangeMetaData().getName());
+        assertEquals("sampleChange", ChangeFactory.getInstance().getChangeMetaData(change).getName());
 
         changeSet = changeLog.getChangeSets().get(2);
         change = changeSet.getChanges().get(0);
         assertEquals(1, changeSet.getChanges().size());
-        assertEquals("changeWithNestedTags", change.getChangeMetaData().getName());
+        assertEquals("changeWithNestedTags", ChangeFactory.getInstance().getChangeMetaData(change).getName());
 
         Object child1 = change.getClass().getMethod("getChild").invoke(change);
         assertNotNull(child1);

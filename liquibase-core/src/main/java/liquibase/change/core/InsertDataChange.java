@@ -13,12 +13,13 @@ import java.util.List;
  * Inserts data into an existing table.
  */
 @DatabaseChange(name="insert", description = "Inserts data into an existing table", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "table")
-public class InsertDataChange extends AbstractChange implements ChangeWithColumns<ColumnConfig> {
+public class InsertDataChange extends AbstractChange implements ChangeWithColumns<ColumnConfig>, DbmsTargetedChange {
 
     private String catalogName;
     private String schemaName;
     private String tableName;
     private List<ColumnConfig> columns;
+    private String dbms;
 
     public InsertDataChange() {
         columns = new ArrayList<ColumnConfig>();
@@ -113,4 +114,14 @@ public class InsertDataChange extends AbstractChange implements ChangeWithColumn
     public String getConfirmationMessage() {
         return "New row inserted into " + getTableName();
     }
+
+    @DatabaseChangeProperty(since = "3.0", exampleValue = "h2, oracle")
+    public String getDbms() {
+        return dbms;
+    }
+
+    public void setDbms(final String dbms) {
+        this.dbms = dbms;
+    }
+
 }
