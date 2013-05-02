@@ -42,7 +42,7 @@ public class RenameColumnChange extends AbstractChange {
         this.schemaName = schemaName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "column.relation", description = "Name of the table containing that the column to rename")
+    @DatabaseChangeProperty(mustEqualExisting = "column.relation", description = "Name of the table containing that the column to rename")
     public String getTableName() {
         return tableName;
     }
@@ -51,7 +51,7 @@ public class RenameColumnChange extends AbstractChange {
         this.tableName = tableName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "column", description = "Name of the existing column to rename")
+    @DatabaseChangeProperty(mustEqualExisting = "column", description = "Name of the existing column to rename")
     public String getOldColumnName() {
         return oldColumnName;
     }
@@ -60,7 +60,7 @@ public class RenameColumnChange extends AbstractChange {
         this.oldColumnName = oldColumnName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", description = "Name to rename the column to")
+    @DatabaseChangeProperty(description = "Name to rename the column to")
     public String getNewColumnName() {
         return newColumnName;
     }
@@ -69,7 +69,7 @@ public class RenameColumnChange extends AbstractChange {
         this.newColumnName = newColumnName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "mysql", description = "Data type of the column")
+    @DatabaseChangeProperty(description = "Data type of the column")
     public String getColumnDataType() {
         return columnDataType;
     }

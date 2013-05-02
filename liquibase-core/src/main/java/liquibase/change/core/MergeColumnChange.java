@@ -50,7 +50,7 @@ public class MergeColumnChange extends AbstractChange {
         this.schemaName = schemaName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", description = "Name of the table containing the columns to join")
+    @DatabaseChangeProperty(description = "Name of the table containing the columns to join")
     public String getTableName() {
         return tableName;
     }
@@ -59,7 +59,7 @@ public class MergeColumnChange extends AbstractChange {
         this.tableName = tableName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", description = "Name of the column containing the first half of the data", exampleValue = "first_name")
+    @DatabaseChangeProperty(description = "Name of the column containing the first half of the data", exampleValue = "first_name")
     public String getColumn1Name() {
         return column1Name;
     }
@@ -77,7 +77,7 @@ public class MergeColumnChange extends AbstractChange {
         this.joinString = joinString;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", description = "Name of the column containing the second half of the data", exampleValue = "last_name")
+    @DatabaseChangeProperty(description = "Name of the column containing the second half of the data", exampleValue = "last_name")
     public String getColumn2Name() {
         return column2Name;
     }
@@ -86,7 +86,7 @@ public class MergeColumnChange extends AbstractChange {
         this.column2Name = column2Name;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", description = "Name of the column to create", exampleValue = "full_name")
+    @DatabaseChangeProperty(description = "Name of the column to create", exampleValue = "full_name")
     public String getFinalColumnName() {
         return finalColumnName;
     }
@@ -95,7 +95,7 @@ public class MergeColumnChange extends AbstractChange {
         this.finalColumnName = finalColumnName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", description = "Data type of the column to create", exampleValue = "varchar(255)")
+    @DatabaseChangeProperty(description = "Data type of the column to create", exampleValue = "varchar(255)")
     public String getFinalColumnType() {
         return finalColumnType;
     }

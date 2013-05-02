@@ -39,7 +39,7 @@ public abstract class AbstractModifyDataChange extends AbstractChange {
         this.schemaName = schemaName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "table")
+    @DatabaseChangeProperty(mustEqualExisting= "table")
     public String getTableName() {
         return tableName;
     }

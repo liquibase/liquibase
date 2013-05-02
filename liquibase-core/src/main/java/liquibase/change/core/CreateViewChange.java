@@ -40,7 +40,7 @@ public class CreateViewChange extends AbstractChange {
 		this.schemaName = schemaName;
 	}
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", description = "Name of the view to create")
+    @DatabaseChangeProperty(description = "Name of the view to create")
 	public String getViewName() {
 		return viewName;
 	}
@@ -49,7 +49,7 @@ public class CreateViewChange extends AbstractChange {
 		this.viewName = viewName;
 	}
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", serializationType = SerializationType.DIRECT_VALUE, description = "SQL for generating the view", exampleValue = "select id, name from person where id > 10")
+    @DatabaseChangeProperty(serializationType = SerializationType.DIRECT_VALUE, description = "SQL for generating the view", exampleValue = "select id, name from person where id > 10")
 	public String getSelectQuery() {
 		return selectQuery;
 	}

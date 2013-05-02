@@ -43,7 +43,7 @@ public class ModifyDataTypeChange extends AbstractChange {
         this.schemaName = schemaName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "column.relation")
+    @DatabaseChangeProperty(mustEqualExisting = "column.relation")
     public String getTableName() {
         return tableName;
     }
@@ -52,7 +52,7 @@ public class ModifyDataTypeChange extends AbstractChange {
         this.tableName = tableName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "column")
+    @DatabaseChangeProperty(mustEqualExisting = "column")
     public String getColumnName() {
         return columnName;
     }
@@ -61,7 +61,7 @@ public class ModifyDataTypeChange extends AbstractChange {
         this.columnName = columnName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all")
+    @DatabaseChangeProperty()
     public String getNewDataType() {
         return newDataType;
     }

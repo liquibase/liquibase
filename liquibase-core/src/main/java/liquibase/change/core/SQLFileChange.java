@@ -44,7 +44,7 @@ public class SQLFileChange extends AbstractSQLChange {
     private Boolean relativeToChangelogFile;
 
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", description = "The file path of the SQL file to load")
+    @DatabaseChangeProperty(description = "The file path of the SQL file to load", requiredForDatabase = "all")
     public String getPath() {
         return path;
     }

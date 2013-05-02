@@ -48,7 +48,7 @@ public class AddNotNullConstraintChange extends AbstractChange {
         this.schemaName = schemaName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "column.relation", description = "Adds a not-null constraint to an existing table. If a defaultNullValue attribute is passed, all null values for the column will be updated to the passed value before the constraint is applied.")
+    @DatabaseChangeProperty(mustEqualExisting = "column.relation", description = "Adds a not-null constraint to an existing table. If a defaultNullValue attribute is passed, all null values for the column will be updated to the passed value before the constraint is applied.")
     public String getTableName() {
         return tableName;
     }
@@ -57,7 +57,7 @@ public class AddNotNullConstraintChange extends AbstractChange {
         this.tableName = tableName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "column.relation.column", description = "Name of the column to add the constraint to")
+    @DatabaseChangeProperty(mustEqualExisting = "column.relation.column", description = "Name of the column to add the constraint to")
     public String getColumnName() {
         return columnName;
     }
@@ -75,7 +75,7 @@ public class AddNotNullConstraintChange extends AbstractChange {
         this.defaultNullValue = defaultNullValue;
     }
 
-    @DatabaseChangeProperty(description = "Current data type of the column", requiredForDatabase = {"informix", "mssql", "h2", "mysql"})
+    @DatabaseChangeProperty(description = "Current data type of the column")
     public String getColumnDataType() {
         return columnDataType;
     }

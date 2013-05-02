@@ -53,7 +53,7 @@ public class AddLookupTableChange extends AbstractChange {
         this.existingTableSchemaName = existingTableSchemaName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "column.relation", description = "Name of the table containing the data to extract", exampleValue = "address")
+    @DatabaseChangeProperty(mustEqualExisting = "column.relation", description = "Name of the table containing the data to extract", exampleValue = "address")
     public String getExistingTableName() {
         return existingTableName;
     }
@@ -62,7 +62,7 @@ public class AddLookupTableChange extends AbstractChange {
         this.existingTableName = existingTableName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "column", description = "Name of the column containing the data to extract", exampleValue = "state")
+    @DatabaseChangeProperty(mustEqualExisting = "column", description = "Name of the column containing the data to extract", exampleValue = "state")
     public String getExistingColumnName() {
         return existingColumnName;
     }
@@ -89,7 +89,7 @@ public class AddLookupTableChange extends AbstractChange {
         this.newTableSchemaName = newTableSchemaName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", description = "Name of lookup table to create", exampleValue = "state")
+    @DatabaseChangeProperty(description = "Name of lookup table to create", exampleValue = "state")
     public String getNewTableName() {
         return newTableName;
     }
@@ -98,7 +98,7 @@ public class AddLookupTableChange extends AbstractChange {
         this.newTableName = newTableName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", description = "Name of the column in the new table to create", exampleValue = "abbreviation")
+    @DatabaseChangeProperty(description = "Name of the column in the new table to create", exampleValue = "abbreviation")
     public String getNewColumnName() {
         return newColumnName;
     }
@@ -107,7 +107,7 @@ public class AddLookupTableChange extends AbstractChange {
         this.newColumnName = newColumnName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = {"informix","mysql","mssql","h2","derby"}, description = "Data type of the new table column", exampleValue = "char(2)")
+    @DatabaseChangeProperty(description = "Data type of the new table column", exampleValue = "char(2)")
     public String getNewColumnDataType() {
         return newColumnDataType;
     }

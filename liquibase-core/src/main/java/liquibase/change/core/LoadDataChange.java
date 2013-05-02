@@ -66,7 +66,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
         this.schemaName = schemaName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "table", description = "Name of the table to insert data into")
+    @DatabaseChangeProperty(mustEqualExisting = "table", description = "Name of the table to insert data into", requiredForDatabase = "all")
     public String getTableName() {
         return tableName;
     }
@@ -75,7 +75,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
         this.tableName = tableName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", description = "CSV file to load", exampleValue = "com/example/users.csv")
+    @DatabaseChangeProperty(description = "CSV file to load", exampleValue = "com/example/users.csv", requiredForDatabase = "all")
     public String getFile() {
         return file;
     }
@@ -116,7 +116,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
       	columns.add(column);
     }
 
-    @DatabaseChangeProperty(description = "Defines how the data should be loaded.")
+    @DatabaseChangeProperty(description = "Defines how the data should be loaded.", requiredForDatabase = "all")
     public List<LoadDataColumnConfig> getColumns() {
         return columns;
     }

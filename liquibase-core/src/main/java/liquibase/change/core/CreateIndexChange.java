@@ -31,7 +31,7 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
         columns = new ArrayList<ColumnConfig>();
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "index", description = "Name of the index to create")
+    @DatabaseChangeProperty(mustEqualExisting = "index", description = "Name of the index to create")
     public String getIndexName() {
         return indexName;
     }
@@ -49,7 +49,7 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
         this.schemaName = schemaName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "index.table", description = "Name of the table to add the index to", exampleValue = "user")
+    @DatabaseChangeProperty(mustEqualExisting = "index.table", description = "Name of the table to add the index to", exampleValue = "user")
     public String getTableName() {
         return tableName;
     }
@@ -58,7 +58,7 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
         this.tableName = tableName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "index.column", description = "Column(s) to add to the index")
+    @DatabaseChangeProperty(mustEqualExisting = "index.column", description = "Column(s) to add to the index", requiredForDatabase = "all")
     public List<ColumnConfig> getColumns() {
         if (columns == null) {
             return new ArrayList<ColumnConfig>();

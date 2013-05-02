@@ -17,7 +17,7 @@ public class CreateProcedureChange extends AbstractChange {
     private String comments;
     private String procedureBody;
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", serializationType = SerializationType.DIRECT_VALUE,
+    @DatabaseChangeProperty(serializationType = SerializationType.DIRECT_VALUE,
     exampleValue = "CREATE OR REPLACE PROCEDURE testHello\n" +
             "    IS\n" +
             "    BEGIN\n" +

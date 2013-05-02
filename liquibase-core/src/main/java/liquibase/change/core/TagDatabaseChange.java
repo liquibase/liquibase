@@ -10,7 +10,7 @@ public class TagDatabaseChange extends AbstractChange {
 
     private String tag;
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", description = "Tag to apply", exampleValue = "version_1.3")
+    @DatabaseChangeProperty(description = "Tag to apply", exampleValue = "version_1.3")
     public String getTag() {
         return tag;
     }

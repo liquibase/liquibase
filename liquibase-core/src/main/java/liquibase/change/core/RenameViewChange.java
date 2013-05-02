@@ -33,7 +33,7 @@ public class RenameViewChange extends AbstractChange {
         this.schemaName = schemaName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "view", description = "Name of the view to rename")
+    @DatabaseChangeProperty(mustEqualExisting = "view", description = "Name of the view to rename")
     public String getOldViewName() {
         return oldViewName;
     }
@@ -42,7 +42,7 @@ public class RenameViewChange extends AbstractChange {
         this.oldViewName = oldViewName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", description = "Name to rename the view to")
+    @DatabaseChangeProperty(description = "Name to rename the view to")
     public String getNewViewName() {
         return newViewName;
     }

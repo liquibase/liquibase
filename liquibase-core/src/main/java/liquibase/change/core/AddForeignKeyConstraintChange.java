@@ -73,7 +73,7 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
         this.baseTableSchemaName = baseTableSchemaName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "column.relation", description = "Name of the table containing the column to constrain", exampleValue = "address")
+    @DatabaseChangeProperty(mustEqualExisting = "column.relation", description = "Name of the table containing the column to constrain", exampleValue = "address")
     public String getBaseTableName() {
         return baseTableName;
     }
@@ -82,7 +82,7 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
         this.baseTableName = baseTableName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "column",description = "Name of column(s) to place the foreign key constraint on. Comma-separate if multiple", exampleValue = "person_id")
+    @DatabaseChangeProperty(mustEqualExisting = "column",description = "Name of column(s) to place the foreign key constraint on. Comma-separate if multiple", exampleValue = "person_id")
     public String getBaseColumnNames() {
         return baseColumnNames;
     }
@@ -108,7 +108,7 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
         this.referencedTableSchemaName = referencedTableSchemaName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", description = "Name of the table the foreign key points to", exampleValue = "person")
+    @DatabaseChangeProperty(description = "Name of the table the foreign key points to", exampleValue = "person")
     public String getReferencedTableName() {
         return referencedTableName;
     }
@@ -117,7 +117,7 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
         this.referencedTableName = referencedTableName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", description = "Column(s) the foreign key points to. Comma-separate if multiple", exampleValue = "id")
+    @DatabaseChangeProperty(description = "Column(s) the foreign key points to. Comma-separate if multiple", exampleValue = "id")
     public String getReferencedColumnNames() {
         return referencedColumnNames;
     }
@@ -126,7 +126,7 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
         this.referencedColumnNames = referencedColumnNames;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", description = "Name of the new foreign key constraint", exampleValue = "fk_address_person")
+    @DatabaseChangeProperty(description = "Name of the new foreign key constraint", exampleValue = "fk_address_person")
     public String getConstraintName() {
         return constraintName;
     }

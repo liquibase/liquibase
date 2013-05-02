@@ -18,7 +18,7 @@ public class UpdateDataChange extends AbstractModifyDataChange implements Change
         columns = new ArrayList<ColumnConfig>();
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", description = "Data to update")
+    @DatabaseChangeProperty(description = "Data to update", requiredForDatabase = "all")
     public List<ColumnConfig> getColumns() {
         return columns;
     }

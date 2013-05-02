@@ -50,7 +50,7 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
         this.schemaName = schemaName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting ="table", description = "Name of the table to add the column to")
+    @DatabaseChangeProperty(mustEqualExisting ="table", description = "Name of the table to add the column to")
     public String getTableName() {
         return tableName;
     }
@@ -59,7 +59,7 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
         this.tableName = tableName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", description = "Column constraint and foreign key information. Setting the \"defaultValue\" attribute will specify a default value for the column. Setting the \"value\" attribute will set all rows existing to the specified value without modifying the column default.")
+    @DatabaseChangeProperty(description = "Column constraint and foreign key information. Setting the \"defaultValue\" attribute will specify a default value for the column. Setting the \"value\" attribute will set all rows existing to the specified value without modifying the column default.", requiredForDatabase = "all")
     public List<ColumnConfig> getColumns() {
         return columns;
     }
@@ -79,6 +79,12 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
     public SqlStatement[] generateStatements(Database database) {
 
         List<SqlStatement> sql = new ArrayList<SqlStatement>();
+
+        if (getColumns().size() == 0) {
+            return new SqlStatement[] {
+                    new AddColumnStatement(catalogName, schemaName, tableName, null, null, null)
+            };
+        }
 
         for (ColumnConfig column : getColumns()) {
             Set<ColumnConstraint> constraints = new HashSet<ColumnConstraint>();

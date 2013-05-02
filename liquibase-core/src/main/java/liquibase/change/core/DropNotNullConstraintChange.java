@@ -35,7 +35,7 @@ public class DropNotNullConstraintChange extends AbstractChange {
         this.schemaName = schemaName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "notNullConstraint.table", description = "Name of the table containing that the column to drop the constraint from")
+    @DatabaseChangeProperty(mustEqualExisting = "notNullConstraint.table", description = "Name of the table containing that the column to drop the constraint from")
     public String getTableName() {
         return tableName;
     }
@@ -44,7 +44,7 @@ public class DropNotNullConstraintChange extends AbstractChange {
         this.tableName = tableName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "notNullConstraint.column", description = "Name of the column to drop the constraint from")
+    @DatabaseChangeProperty(mustEqualExisting = "notNullConstraint.column", description = "Name of the column to drop the constraint from")
     public String getColumnName() {
         return columnName;
     }
@@ -53,7 +53,7 @@ public class DropNotNullConstraintChange extends AbstractChange {
         this.columnName = columnName;
     }
 
-    @DatabaseChangeProperty(description = "Current data type of the column", requiredForDatabase = {"postgres","mssql", "mysql", "h2", "informix"})
+    @DatabaseChangeProperty(description = "Current data type of the column")
     public String getColumnDataType() {
         return columnDataType;
     }

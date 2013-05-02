@@ -47,7 +47,7 @@ public class DropPrimaryKeyChange extends AbstractChange {
         this.schemaName = schemaName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "primaryKey.table", description = "Name of the table to drop the primary key of")
+    @DatabaseChangeProperty(mustEqualExisting = "primaryKey.table", description = "Name of the table to drop the primary key of")
     public String getTableName() {
         return tableName;
     }
@@ -56,7 +56,7 @@ public class DropPrimaryKeyChange extends AbstractChange {
         this.tableName = tableName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "primaryKey", description = "Name of the primary key")
+    @DatabaseChangeProperty(mustEqualExisting = "primaryKey", description = "Name of the primary key")
     public String getConstraintName() {
         return constraintName;
     }

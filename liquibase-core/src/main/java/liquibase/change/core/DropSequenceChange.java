@@ -36,7 +36,7 @@ public class DropSequenceChange extends AbstractChange {
         this.schemaName = schemaName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "sequence", description = "Name of the sequence to drop")
+    @DatabaseChangeProperty(mustEqualExisting = "sequence", description = "Name of the sequence to drop")
     public String getSequenceName() {
         return sequenceName;
     }

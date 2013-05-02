@@ -46,7 +46,7 @@ public class ExecuteShellCommandChange extends AbstractChange {
         return true;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", description = "Name of the executable to run", exampleValue = "mysqldump")
+    @DatabaseChangeProperty(description = "Name of the executable to run", exampleValue = "mysqldump", requiredForDatabase = "all")
     public String getExecutable() {
         return executable;
     }

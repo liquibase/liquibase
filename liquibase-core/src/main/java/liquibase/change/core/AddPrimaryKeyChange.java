@@ -20,7 +20,7 @@ public class AddPrimaryKeyChange extends AbstractChange {
     private String columnNames;
     private String constraintName;
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "column.relation", description = "Name of the table to create the primary key on")
+    @DatabaseChangeProperty(mustEqualExisting = "column.relation", description = "Name of the table to create the primary key on")
     public String getTableName() {
         return tableName;
     }
@@ -47,7 +47,7 @@ public class AddPrimaryKeyChange extends AbstractChange {
         this.schemaName = schemaName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "column", description = "Name of the column(s) to create the primary key on. Comma separated if multiple")
+    @DatabaseChangeProperty(mustEqualExisting = "column", description = "Name of the column(s) to create the primary key on. Comma separated if multiple")
     public String getColumnNames() {
         return columnNames;
     }

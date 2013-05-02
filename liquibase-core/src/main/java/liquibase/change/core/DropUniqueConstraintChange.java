@@ -38,7 +38,7 @@ public class DropUniqueConstraintChange extends AbstractChange {
         this.schemaName = schemaName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "uniqueConstraint.table", description = "Name of the table to drop the unique constraint from")
+    @DatabaseChangeProperty(mustEqualExisting = "uniqueConstraint.table", description = "Name of the table to drop the unique constraint from")
     public String getTableName() {
         return tableName;
     }
@@ -47,7 +47,7 @@ public class DropUniqueConstraintChange extends AbstractChange {
         this.tableName = tableName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "uniqueConstraint", description = "Name of unique constraint to drop")
+    @DatabaseChangeProperty(mustEqualExisting = "uniqueConstraint", description = "Name of unique constraint to drop")
     public String getConstraintName() {
         return constraintName;
     }

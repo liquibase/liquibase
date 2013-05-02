@@ -127,7 +127,7 @@ public abstract class AbstractChange implements Change {
             String[] supportsDatabase = createSupportedDatabasesMetaData(parameterName, changePropertyAnnotation);
 
 
-            return new ChangeParameterMetaData(parameterName, displayName, description, example, since, type, requiredForDatabase, supportsDatabase, mustEqualExisting, serializationType, this );
+            return new ChangeParameterMetaData(this, parameterName, displayName, description, example, since, type, requiredForDatabase, supportsDatabase, mustEqualExisting, serializationType);
         } catch (Exception e) {
             throw new UnexpectedLiquibaseException(e);
         }
@@ -198,7 +198,7 @@ public abstract class AbstractChange implements Change {
     @SuppressWarnings("UnusedParameters")
     protected String[] createRequiredDatabasesMetaData(String parameterName, DatabaseChangeProperty changePropertyAnnotation) {
         if (changePropertyAnnotation == null) {
-            return new String[]{"COMPUTE"};
+            return new String[]{ChangeParameterMetaData.COMPUTE};
         } else {
             return changePropertyAnnotation.requiredForDatabase();
         }
@@ -212,7 +212,7 @@ public abstract class AbstractChange implements Change {
     @SuppressWarnings("UnusedParameters")
     protected String[] createSupportedDatabasesMetaData(String parameterName, DatabaseChangeProperty changePropertyAnnotation) {
         if (changePropertyAnnotation == null) {
-            return new String[]{"COMPUTE"};
+            return new String[]{ChangeParameterMetaData.COMPUTE};
         } else {
             return changePropertyAnnotation.supportsDatabase();
         }

@@ -37,7 +37,7 @@ public class DropTableChange extends AbstractChange {
         this.schemaName = schemaName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "table", description = "Name of the table to drop")
+    @DatabaseChangeProperty(mustEqualExisting = "table", description = "Name of the table to drop")
     public String getTableName() {
         return tableName;
     }

@@ -43,7 +43,7 @@ public class InsertDataChange extends AbstractChange implements ChangeWithColumn
         this.schemaName = schemaName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "table", description = "Name of the table to insert data into")
+    @DatabaseChangeProperty(mustEqualExisting = "table", description = "Name of the table to insert data into")
     public String getTableName() {
         return tableName;
     }
@@ -52,7 +52,7 @@ public class InsertDataChange extends AbstractChange implements ChangeWithColumn
         this.tableName = tableName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "table.column", description = "Data to insert into columns")
+    @DatabaseChangeProperty(mustEqualExisting = "table.column", description = "Data to insert into columns", requiredForDatabase = "all")
     public List<ColumnConfig> getColumns() {
         return columns;
     }

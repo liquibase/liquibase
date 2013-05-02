@@ -35,7 +35,7 @@ public class DropDefaultValueChange extends AbstractChange {
         this.schemaName = schemaName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "column.relation", description = "Name of the table to containing the column")
+    @DatabaseChangeProperty(mustEqualExisting = "column.relation", description = "Name of the table to containing the column")
     public String getTableName() {
         return tableName;
     }
@@ -44,7 +44,7 @@ public class DropDefaultValueChange extends AbstractChange {
         this.tableName = tableName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "column", description = "Name of column to drop the default value from")
+    @DatabaseChangeProperty(mustEqualExisting = "column", description = "Name of column to drop the default value from")
     public String getColumnName() {
         return columnName;
     }
@@ -53,7 +53,7 @@ public class DropDefaultValueChange extends AbstractChange {
         this.columnName = columnName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "informix")
+    @DatabaseChangeProperty()
     public String getColumnDataType() {
 		return columnDataType;
 	}

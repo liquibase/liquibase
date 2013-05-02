@@ -30,7 +30,7 @@ public class DropIndexChange extends AbstractChange {
         this.schemaName = schemaName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "index", description = "Name of the index to drop")
+    @DatabaseChangeProperty(mustEqualExisting = "index", description = "Name of the index to drop")
     public String getIndexName() {
         return indexName;
     }
@@ -39,7 +39,7 @@ public class DropIndexChange extends AbstractChange {
         this.indexName = indexName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "index.table", description = "Name fo the indexed table.")
+    @DatabaseChangeProperty(mustEqualExisting = "index.table", description = "Name fo the indexed table.")
     public String getTableName() {
         return tableName;
     }

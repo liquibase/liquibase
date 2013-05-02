@@ -51,7 +51,7 @@ public class AddDefaultValueChange extends AbstractChange {
         this.schemaName = schemaName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "column.relation",description = "Name of the table to containing the column", exampleValue = "file")
+    @DatabaseChangeProperty(mustEqualExisting = "column.relation",description = "Name of the table to containing the column", exampleValue = "file")
     public String getTableName() {
         return tableName;
     }
@@ -60,7 +60,7 @@ public class AddDefaultValueChange extends AbstractChange {
         this.tableName = tableName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "column", description = "Name of the column to add a default value to", exampleValue = "fileName")
+    @DatabaseChangeProperty(mustEqualExisting = "column", description = "Name of the column to add a default value to", exampleValue = "fileName")
     public String getColumnName() {
         return columnName;
     }
@@ -69,7 +69,7 @@ public class AddDefaultValueChange extends AbstractChange {
         this.columnName = columnName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = {"informix"}, description = "Current data type of the column to add default value to", exampleValue = "int")
+    @DatabaseChangeProperty(description = "Current data type of the column to add default value to", exampleValue = "int")
     public String getColumnDataType() {
 		return columnDataType;
 	}

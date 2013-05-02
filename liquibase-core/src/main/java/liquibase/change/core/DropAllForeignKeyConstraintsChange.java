@@ -48,7 +48,7 @@ public class DropAllForeignKeyConstraintsChange extends AbstractChange {
         this.baseTableSchemaName = baseTableSchemaName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "table")
+    @DatabaseChangeProperty(mustEqualExisting = "table", requiredForDatabase = "all")
     public String getBaseTableName() {
         return baseTableName;
     }

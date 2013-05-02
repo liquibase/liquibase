@@ -40,7 +40,7 @@ public class AddUniqueConstraintChange extends AbstractChange {
         this.schemaName = schemaName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "column.relation", description = "Name of the table to create the unique constraint on")
+    @DatabaseChangeProperty(mustEqualExisting = "column.relation", description = "Name of the table to create the unique constraint on")
     public String getTableName() {
         return tableName;
     }
@@ -49,7 +49,7 @@ public class AddUniqueConstraintChange extends AbstractChange {
         this.tableName = tableName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "column", description =
+    @DatabaseChangeProperty(mustEqualExisting = "column", description =
             "Name of the column(s) to create the unique constraint on. Comma separated if multiple")
     public String getColumnNames() {
         return columnNames;
@@ -59,7 +59,7 @@ public class AddUniqueConstraintChange extends AbstractChange {
         this.columnNames = columnNames;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", description = "Name of the unique constraint")
+    @DatabaseChangeProperty(description = "Name of the unique constraint")
     public String getConstraintName() {
         return constraintName;
     }

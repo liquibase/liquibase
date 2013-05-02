@@ -24,6 +24,10 @@ import java.util.*;
  * Instances of this class are tracked within {@link ChangeMetaData} and are immutable.
  */
 public class ChangeParameterMetaData {
+
+    public static final String COMPUTE = "COMPUTE";
+
+    private Change change;
     private String parameterName;
     private String description;
     private String exampleValue;
@@ -35,7 +39,7 @@ public class ChangeParameterMetaData {
     private String mustEqualExisting;
     private LiquibaseSerializable.SerializationType serializationType;
 
-    public ChangeParameterMetaData(String parameterName, String displayName, String description, String exampleValue, String since, Type dataType, String[] requiredForDatabase, String[] supportedDatabases, String mustEqualExisting, LiquibaseSerializable.SerializationType serializationType, Change change) {
+    public ChangeParameterMetaData(Change change, String parameterName, String displayName, String description, String exampleValue, String since, Type dataType, String[] requiredForDatabase, String[] supportedDatabases, String mustEqualExisting, LiquibaseSerializable.SerializationType serializationType) {
         if (parameterName == null) {
             throw new UnexpectedLiquibaseException("Unexpected null parameterName");
         }
@@ -49,6 +53,7 @@ public class ChangeParameterMetaData {
             throw new UnexpectedLiquibaseException("Unexpected null dataType");
         }
 
+        this.change = change;
         this.parameterName = parameterName;
         this.displayName = displayName;
         this.description = description;
@@ -56,93 +61,100 @@ public class ChangeParameterMetaData {
         if (dataType instanceof Class) {
             this.dataType = StringUtils.lowerCaseFirst(((Class) dataType).getSimpleName());
         } else if (dataType instanceof ParameterizedType) {
-            this.dataType = StringUtils.lowerCaseFirst(((Class) ((ParameterizedType) dataType).getRawType()).getSimpleName()+" of "+ StringUtils.lowerCaseFirst(((Class) ((ParameterizedType) dataType).getActualTypeArguments()[0]).getSimpleName()));
+            this.dataType = StringUtils.lowerCaseFirst(((Class) ((ParameterizedType) dataType).getRawType()).getSimpleName() + " of " + StringUtils.lowerCaseFirst(((Class) ((ParameterizedType) dataType).getActualTypeArguments()[0]).getSimpleName()));
         }
 
         this.mustEqualExisting = mustEqualExisting;
         this.serializationType = serializationType;
         this.since = since;
 
-        analyzeSupportedDatabases(supportedDatabases, change);
-        analyzeRequiredDatabases(requiredForDatabase, change);
-
+        this.supportedDatabases = Collections.unmodifiableSet(analyzeSupportedDatabases(supportedDatabases));
+        this.requiredForDatabase = Collections.unmodifiableSet(analyzeRequiredDatabases(requiredForDatabase));
     }
 
-    private void analyzeSupportedDatabases(String[] supportedDatabases, Change change) {
+    protected Set<String> analyzeSupportedDatabases(String[] supportedDatabases) {
         if (supportedDatabases == null) {
-            supportedDatabases = new String[] {"COMPUTED"};
+            supportedDatabases = new String[]{ChangeParameterMetaData.COMPUTE};
         }
 
-        if (supportedDatabases.length == 1 && StringUtils.join(supportedDatabases, ",").equals("COMPUTE")) {
-            List<String> computedSupported = new ArrayList<String>();
-            try {
-                for (Database database : DatabaseFactory.getInstance().getImplementedDatabases()) {
-                    if (change.generateStatementsVolatile(database)) {
-                        computedSupported = new ArrayList<String>(Arrays.asList("all"));
-                        break;
-                    }  else {
+        Set<String> computedDatabases = new HashSet<String>();
+
+        if (supportedDatabases.length == 1 && StringUtils.join(supportedDatabases, ",").equals(ChangeParameterMetaData.COMPUTE)) {
+            int validDatabases = 0;
+            for (Database database : DatabaseFactory.getInstance().getImplementedDatabases()) {
+                if (database.getShortName() == null || database.getShortName().equals("unsupported")) {
+                    continue;
+                }
+                if (!change.supports(database)) {
+                    continue;
+                }
+                try {
+                    if (!change.generateStatementsVolatile(database)) {
                         Change testChange = change.getClass().newInstance();
                         ValidationErrors originalErrors = getStatementErrors(testChange, database);
-                        this.setValue(change, this.getExampleValue());
+                        this.setValue(testChange, this.getExampleValue());
                         ValidationErrors finalErrors = getStatementErrors(testChange, database);
-                        if (finalErrors.getUnsupportedErrorMessages().size() == originalErrors.getUnsupportedErrorMessages().size()) {
-                            computedSupported.add(database.getShortName());
+                        if (finalErrors.getUnsupportedErrorMessages().size() == 0 || finalErrors.getUnsupportedErrorMessages().size() == originalErrors.getUnsupportedErrorMessages().size()) {
+                            computedDatabases.add(database.getShortName());
                         }
+                        validDatabases++;
                     }
+                } catch (Exception ignore) {
                 }
-
-                if (computedSupported.size() == DatabaseFactory.getInstance().getImplementedDatabases().size()) {
-                    supportedDatabases = new String[] {"all"};
-                } else {
-                    supportedDatabases = computedSupported.toArray(new String[computedSupported.size()]);
-                }
-            } catch (Exception e) {
-                supportedDatabases = new String[]{"all"};
             }
-        }
 
-        this.supportedDatabases = new HashSet<String>(Arrays.asList(supportedDatabases));
-        this.supportedDatabases.remove("none");
-        this.supportedDatabases = Collections.unmodifiableSet(this.supportedDatabases);
+            if (validDatabases == 0) {
+                return new HashSet<String>(Arrays.asList("all"));
+            } else if (computedDatabases.size() == validDatabases) {
+                computedDatabases = new HashSet<String>(Arrays.asList("all"));
+            }
+
+            computedDatabases.remove("none");
+
+            return computedDatabases;
+        } else {
+            return new HashSet<String>(Arrays.asList(supportedDatabases));
+        }
     }
 
 
-    private void analyzeRequiredDatabases(String[] requiredDatabases, Change change) {
+    protected Set<String> analyzeRequiredDatabases(String[] requiredDatabases) {
         if (requiredDatabases == null) {
-            requiredDatabases = new String[] {"COMPUTED"};
+            requiredDatabases = new String[]{ChangeParameterMetaData.COMPUTE};
         }
 
-        if (requiredDatabases.length == 1 && StringUtils.join(requiredDatabases, ",").equals("COMPUTE")) {
-            List<String> computedRequired = new ArrayList<String>();
-            try {
-                for (Database database : DatabaseFactory.getInstance().getImplementedDatabases()) {
-                    if (change.generateStatementsVolatile(database)) {
-                        computedRequired = new ArrayList<String>(Arrays.asList("none"));
-                        break;
-                    }  else {
+        Set<String> computedDatabases = new HashSet<String>();
+
+        if (requiredDatabases.length == 1 && StringUtils.join(requiredDatabases, ",").equals(ChangeParameterMetaData.COMPUTE)) {
+            int validDatabases = 0;
+            for (Database database : DatabaseFactory.getInstance().getImplementedDatabases()) {
+                try {
+                    if (!change.generateStatementsVolatile(database)) {
                         Change testChange = change.getClass().newInstance();
                         ValidationErrors originalErrors = getStatementErrors(testChange, database);
-                        this.setValue(change, this.getExampleValue());
+                        this.setValue(testChange, this.getExampleValue());
                         ValidationErrors finalErrors = getStatementErrors(testChange, database);
-                        if (finalErrors.getRequiredErrorMessages().size() == originalErrors.getRequiredErrorMessages().size()) {
-                            computedRequired.add(database.getShortName());
+                        if (originalErrors.getRequiredErrorMessages().size() > 0 && finalErrors.getRequiredErrorMessages().size() < originalErrors.getRequiredErrorMessages().size()) {
+                            computedDatabases.add(database.getShortName());
                         }
+                        validDatabases++;
                     }
+                } catch (Exception ignore) {
                 }
-
-                if (computedRequired.size() == DatabaseFactory.getInstance().getImplementedDatabases().size()) {
-                    requiredDatabases = new String[] {"none"};
-                } else {
-                    requiredDatabases = computedRequired.toArray(new String[computedRequired.size()]);
-                }
-            } catch (Exception e) {
-                requiredDatabases = new String[]{"none"};
             }
-        }
 
-        this.requiredForDatabase = new HashSet<String>(Arrays.asList(requiredDatabases));
-        this.requiredForDatabase.remove("none");
-        this.requiredForDatabase = Collections.unmodifiableSet(this.requiredForDatabase);
+            if (validDatabases == 0) {
+                return new HashSet<String>();
+            } else if (computedDatabases.size() == validDatabases) {
+                computedDatabases = new HashSet<String>(Arrays.asList("all"));
+            }
+
+            computedDatabases.remove("none");
+
+            return computedDatabases;
+        } else {
+            return new HashSet<String>(Arrays.asList(requiredDatabases));
+        }
     }
 
     private ValidationErrors getStatementErrors(Change testChange, Database database) {
@@ -216,12 +228,12 @@ public class ChangeParameterMetaData {
                 if (descriptor.getDisplayName().equals(this.parameterName)) {
                     Method readMethod = descriptor.getReadMethod();
                     if (readMethod == null) {
-                        readMethod  = change.getClass().getMethod("is"+StringUtils.upperCaseFirst(descriptor.getName()));
+                        readMethod = change.getClass().getMethod("is" + StringUtils.upperCaseFirst(descriptor.getName()));
                     }
                     return readMethod.invoke(change);
                 }
             }
-            throw new RuntimeException("Could not find readMethod for "+this.parameterName);
+            throw new RuntimeException("Could not find readMethod for " + this.parameterName);
         } catch (Exception e) {
             throw new UnexpectedLiquibaseException(e);
         }
@@ -238,10 +250,10 @@ public class ChangeParameterMetaData {
                 } else if (dataType.equals("databaseFunction")) {
                     value = new DatabaseFunction((String) value);
                 } else {
-                    throw new UnexpectedLiquibaseException("Unknown Data Type: "+dataType);
+                    throw new UnexpectedLiquibaseException("Unknown Data Type: " + dataType);
                 }
             } catch (Throwable e) {
-                throw new UnexpectedLiquibaseException("Cannot convert string value '"+value+"' to "+dataType+": "+e.getMessage());
+                throw new UnexpectedLiquibaseException("Cannot convert string value '" + value + "' to " + dataType + ": " + e.getMessage());
             }
         }
 
@@ -250,21 +262,21 @@ public class ChangeParameterMetaData {
                 if (descriptor.getDisplayName().equals(this.parameterName)) {
                     Method writeMethod = descriptor.getWriteMethod();
                     if (writeMethod == null) {
-                        throw new UnexpectedLiquibaseException("Could not find writeMethod for "+this.parameterName);
+                        throw new UnexpectedLiquibaseException("Could not find writeMethod for " + this.parameterName);
                     }
                     Class<?> expectedWriteType = writeMethod.getParameterTypes()[0];
                     if (value != null && !expectedWriteType.isAssignableFrom(value.getClass())) {
                         if (expectedWriteType.equals(String.class)) {
                             value = value.toString();
                         } else {
-                            throw new UnexpectedLiquibaseException("Could not convert "+value.getClass().getName()+" to "+expectedWriteType.getName());
+                            throw new UnexpectedLiquibaseException("Could not convert " + value.getClass().getName() + " to " + expectedWriteType.getName());
                         }
                     }
                     writeMethod.invoke(change, value);
                 }
             }
         } catch (Exception e) {
-            throw new UnexpectedLiquibaseException("Error setting "+this.parameterName+" to "+value, e);
+            throw new UnexpectedLiquibaseException("Error setting " + this.parameterName + " to " + value, e);
         }
     }
 
@@ -324,7 +336,7 @@ public class ChangeParameterMetaData {
             list.add(new ColumnConfig().setName("id").setType("int"));
             return list;
         } else {
-            throw new  UnexpectedLiquibaseException("Unknown dataType "+dataType+" for "+getParameterName());
+            throw new UnexpectedLiquibaseException("Unknown dataType " + dataType + " for " + getParameterName());
         }
     }
 
@@ -339,7 +351,7 @@ public class ChangeParameterMetaData {
         standardDescriptions.put("catalogName", "Name of the catalog");
         standardDescriptions.put("columnName", "Name of the column");
 
-        return standardDescriptions.get(parameterName);
+        return StringUtils.trimToEmpty(standardDescriptions.get(parameterName));
 
     }
 }

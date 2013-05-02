@@ -21,7 +21,7 @@ public class DropColumnChange extends AbstractChange {
     private String tableName;
     private String columnName;
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "column", description = "Name of the column to drop")
+    @DatabaseChangeProperty(mustEqualExisting = "column", description = "Name of the column to drop")
     public String getColumnName() {
         return columnName;
     }
@@ -49,7 +49,7 @@ public class DropColumnChange extends AbstractChange {
         this.schemaName = schemaName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "column.relation", description = "Name of the table containing the column to drop")
+    @DatabaseChangeProperty(mustEqualExisting = "column.relation", description = "Name of the table containing the column to drop")
     public String getTableName() {
         return tableName;
     }

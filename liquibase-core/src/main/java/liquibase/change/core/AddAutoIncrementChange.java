@@ -49,7 +49,7 @@ public class AddAutoIncrementChange extends AbstractChange {
         this.schemaName = schemaName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting ="column.relation")
+    @DatabaseChangeProperty(mustEqualExisting ="column.relation")
     public String getTableName() {
         return tableName;
     }
@@ -58,7 +58,7 @@ public class AddAutoIncrementChange extends AbstractChange {
         this.tableName = tableName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting ="column")
+    @DatabaseChangeProperty(mustEqualExisting ="column")
     public String getColumnName() {
         return columnName;
     }
@@ -67,7 +67,7 @@ public class AddAutoIncrementChange extends AbstractChange {
         this.columnName = columnName;
     }
 
-    @DatabaseChangeProperty(description = "Current data type of the column to make auto-increment", exampleValue = "int", requiredForDatabase = {"all"})
+    @DatabaseChangeProperty(description = "Current data type of the column to make auto-increment", exampleValue = "int")
     public String getColumnDataType() {
         return columnDataType;
     }

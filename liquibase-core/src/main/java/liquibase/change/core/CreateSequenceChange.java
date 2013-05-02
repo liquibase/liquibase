@@ -40,7 +40,7 @@ public class CreateSequenceChange extends AbstractChange {
         this.schemaName = schemaName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", description = "Name of the sequence to create")
+    @DatabaseChangeProperty(description = "Name of the sequence to create")
     public String getSequenceName() {
         return sequenceName;
     }
@@ -67,7 +67,7 @@ public class CreateSequenceChange extends AbstractChange {
         this.incrementBy = incrementBy;
     }
 
-    @DatabaseChangeProperty(description = "The maximum value of the sequence", exampleValue = "1000", supportsDatabase = "!h2")
+    @DatabaseChangeProperty(description = "The maximum value of the sequence", exampleValue = "1000")
     public BigInteger getMaxValue() {
         return maxValue;
     }

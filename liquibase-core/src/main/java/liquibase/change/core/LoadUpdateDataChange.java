@@ -33,7 +33,7 @@ public class LoadUpdateDataChange extends LoadDataChange {
         this.primaryKey = primaryKey;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", description = "Comma delimited list of the columns for the primary key")
+    @DatabaseChangeProperty(description = "Comma delimited list of the columns for the primary key", requiredForDatabase = "all")
     public String getPrimaryKey() {
         return primaryKey;
     }

@@ -36,7 +36,7 @@ public class DropViewChange extends AbstractChange {
         this.schemaName = schemaName;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "all", mustEqualExisting = "view", description = "Name of the view to drop")
+    @DatabaseChangeProperty(mustEqualExisting = "view", description = "Name of the view to drop")
     public String getViewName() {
         return viewName;
     }

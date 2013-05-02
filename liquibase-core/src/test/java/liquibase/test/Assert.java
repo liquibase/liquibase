@@ -1,12 +1,14 @@
 package liquibase.test;
 
+import liquibase.util.StringUtils;
+
 import java.util.Arrays;
 import java.util.Set;
 
 public class Assert
 {
     public static void assertSetsEqual(String[] expected, Set<String> set) {
-        org.junit.Assert.assertEquals("Set size does not match", expected.length, set.size());
+        org.junit.Assert.assertEquals("Set size does not match: "+ StringUtils.join(expected, ",")+" vs "+StringUtils.join(set, ","), expected.length, set.size());
         for (String string : expected) {
             org.junit.Assert.assertTrue("Missing expected element " + string, set.contains(string));
         }
