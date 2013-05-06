@@ -39,6 +39,8 @@ public class AddAutoIncrementGenerator extends AbstractSqlGenerator<AddAutoIncre
 
         validationErrors.checkRequiredField("columnName", statement.getColumnName());
         validationErrors.checkRequiredField("tableName", statement.getTableName());
+        validationErrors.checkRequiredField("columnDataType", statement.getColumnDataType());
+
 
         return validationErrors;
     }

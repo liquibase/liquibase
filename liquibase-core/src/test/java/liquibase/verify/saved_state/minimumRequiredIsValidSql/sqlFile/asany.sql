@@ -1,2 +1,2 @@
 -- Database: asany
--- Change Parameter: path=A String
+-- Change Parameter: path=my/path/file.sql

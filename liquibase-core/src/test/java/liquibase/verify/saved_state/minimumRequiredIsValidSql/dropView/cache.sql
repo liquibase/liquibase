@@ -1,3 +1,3 @@
 -- Database: cache
--- Change Parameter: viewName=A String
-DROP VIEW A String;
+-- Change Parameter: viewName=v_person
+DROP VIEW v_person;

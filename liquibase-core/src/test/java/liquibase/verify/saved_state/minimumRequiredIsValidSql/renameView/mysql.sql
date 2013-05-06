@@ -1,4 +1,4 @@
 -- Database: mysql
--- Change Parameter: newViewName=A String
--- Change Parameter: oldViewName=A String
-RENAME TABLE A String TO A String;
+-- Change Parameter: newViewName=v_person
+-- Change Parameter: oldViewName=v_person
+RENAME TABLE v_person TO v_person;

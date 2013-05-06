@@ -1,3 +1,3 @@
 -- Database: postgresql
--- Change Parameter: sequenceName=A String
-DROP SEQUENCE "A String" CASCADE;
+-- Change Parameter: sequenceName=seq_id
+DROP SEQUENCE seq_id CASCADE;

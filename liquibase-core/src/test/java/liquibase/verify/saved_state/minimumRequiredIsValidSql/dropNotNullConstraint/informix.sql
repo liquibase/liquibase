@@ -1,5 +1,5 @@
 -- Database: informix
--- Change Parameter: columnDataType=A String
+-- Change Parameter: columnDataType=int
 -- Change Parameter: columnName=id
 -- Change Parameter: tableName=person
-ALTER TABLE person MODIFY (id A STRING);
+ALTER TABLE person MODIFY (id INT);

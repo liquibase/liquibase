@@ -28,7 +28,7 @@ public class AddUniqueConstraintGeneratorInformix extends AddUniqueConstraintGen
 	public Sql[] generateSql(AddUniqueConstraintStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
 
 		final String sqlNoContraintNameTemplate = "ALTER TABLE %s ADD CONSTRAINT UNIQUE (%s)";
-		final String sqlTemplate = "ALTER TABLE %s ADD CONSTRAINT UNIQUE (%s) CONSTRAint %s";
+		final String sqlTemplate = "ALTER TABLE %s ADD CONSTRAINT UNIQUE (%s) CONSTRAINT %s";
 		if (statement.getConstraintName() == null) {
 			return new Sql[] {
 				new UnparsedSql(String.format(sqlNoContraintNameTemplate 

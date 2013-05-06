@@ -1,5 +1,5 @@
 -- Database: cache
 -- Change Parameter: columnName=id
--- Change Parameter: newDataType=A String
+-- Change Parameter: newDataType=int
 -- Change Parameter: tableName=person
-ALTER TABLE person ALTER COLUMN id A STRING;
+ALTER TABLE person ALTER COLUMN id INT;

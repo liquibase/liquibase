@@ -1,4 +1,4 @@
 -- Database: sybase
--- Change Parameter: newTableName=A String
--- Change Parameter: oldTableName=A String
-RENAME [A String] TO [A String];
+-- Change Parameter: newTableName=person
+-- Change Parameter: oldTableName=person
+RENAME [person] TO [person];

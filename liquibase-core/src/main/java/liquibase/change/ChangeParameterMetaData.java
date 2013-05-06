@@ -311,10 +311,28 @@ public class ChangeParameterMetaData {
         standardExamples.put("schemaName", "public");
         standardExamples.put("catalogName", "cat");
         standardExamples.put("columnName", "id");
+        standardExamples.put("columnNames", "id, name");
+        standardExamples.put("indexName", "idx_address");
+        standardExamples.put("columnDataType", "int");
+        standardExamples.put("dataType", "int");
+        standardExamples.put("sequenceName", "seq_id");
+        standardExamples.put("viewName", "v_person");
+        standardExamples.put("constraintName", "const_name");
+        standardExamples.put("primaryKey", "pk_id");
+
 
 
         if (standardExamples.containsKey(parameterName)) {
             return standardExamples.get(parameterName);
+        }
+
+        for (String prefix : new String[] {"base", "new", "old"}) {
+            if (parameterName.startsWith(prefix)) {
+                String mainName = StringUtils.lowerCaseFirst(parameterName.replaceFirst("^"+prefix, ""));
+                if (standardExamples.containsKey(mainName)) {
+                    return standardExamples.get(mainName);
+                }
+            }
         }
 
         if (dataType.equals("string")) {

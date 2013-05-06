@@ -111,7 +111,6 @@ public class XMLChangeLogSerializerTest {
         change.setOnDelete("CASCADE");
         change.setOnUpdate("CASCADE");
         change.setInitiallyDeferred(true);
-        change.setReferencesUniqueColumn(false);
 
         Element node = new XMLChangeLogSerializer(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()).createNode(change);
         assertEquals("addForeignKeyConstraint", node.getTagName());
@@ -124,7 +123,6 @@ public class XMLChangeLogSerializerTest {
         assertEquals("REF_COL_NAME", node.getAttribute("referencedColumnNames"));
         assertEquals("true", node.getAttribute("deferrable"));
         assertEquals("true", node.getAttribute("initiallyDeferred"));
-        assertEquals("false", node.getAttribute("referencesUniqueColumn"));
         assertEquals("CASCADE", node.getAttribute("onDelete"));
         assertEquals("CASCADE", node.getAttribute("onUpdate"));
 

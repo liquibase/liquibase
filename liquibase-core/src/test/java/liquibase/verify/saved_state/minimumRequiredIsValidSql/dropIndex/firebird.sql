@@ -1,4 +1,3 @@
 -- Database: firebird
--- Change Parameter: indexName=A String
--- Change Parameter: tableName=person
-DROP INDEX A String;
+-- Change Parameter: indexName=idx_address
+DROP INDEX idx_address;

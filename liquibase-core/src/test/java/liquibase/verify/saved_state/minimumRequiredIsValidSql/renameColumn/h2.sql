@@ -1,5 +1,5 @@
 -- Database: h2
--- Change Parameter: newColumnName=A String
--- Change Parameter: oldColumnName=A String
+-- Change Parameter: newColumnName=id
+-- Change Parameter: oldColumnName=id
 -- Change Parameter: tableName=person
-ALTER TABLE person ALTER COLUMN A String RENAME TO A String;
+ALTER TABLE person ALTER COLUMN id RENAME TO id;

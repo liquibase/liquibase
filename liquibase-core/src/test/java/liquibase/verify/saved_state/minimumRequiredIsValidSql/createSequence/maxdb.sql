@@ -1,3 +1,3 @@
 -- Database: maxdb
--- Change Parameter: sequenceName=A String
-CREATE SEQUENCE A String;
+-- Change Parameter: sequenceName=seq_id
+CREATE SEQUENCE seq_id;

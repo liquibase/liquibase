@@ -1,4 +1,4 @@
 -- Database: maxdb
--- Change Parameter: constraintName=A String
+-- Change Parameter: constraintName=const_name
 -- Change Parameter: tableName=person
-DROP INDEX A String ON person;
+DROP INDEX const_name ON person;

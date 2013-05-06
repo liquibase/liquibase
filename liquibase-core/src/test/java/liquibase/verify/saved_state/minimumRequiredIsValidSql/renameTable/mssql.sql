@@ -1,4 +1,4 @@
 -- Database: mssql
--- Change Parameter: newTableName=A String
--- Change Parameter: oldTableName=A String
-exec sp_rename '[A String]', 'A String';
+-- Change Parameter: newTableName=person
+-- Change Parameter: oldTableName=person
+exec sp_rename '[person]', 'person';

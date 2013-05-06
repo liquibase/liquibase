@@ -68,7 +68,10 @@ public class VerifyChangeClassesTest extends AbstractVerifyTest {
                         System.out.println("Null sql for " + statement + " on " + database.getShortName());
                     } else {
                         for (Sql line : sql) {
-                            state.addValue(line.toSql() + ";");
+                            String sqlLine = line.toSql();
+                            assertFalse("Change "+changeMetaData.getName()+" contains 'null' for "+database.getShortName()+": "+sqlLine, sqlLine.contains(" null "));
+
+                            state.addValue(sqlLine + ";");
                         }
                     }
                 }
@@ -110,7 +113,7 @@ public class VerifyChangeClassesTest extends AbstractVerifyTest {
                     Object currentValue = paramToRemoveMetadata.getCurrentValue(change);
                     paramToRemoveMetadata.setValue(change, null);
 
-                    assertTrue(change.validate(database).hasErrors());
+                    assertTrue("No errors even with "+changeMetaData.getName()+" with a null "+paramToRemove+" on "+database.getShortName(), change.validate(database).hasErrors());
                     paramToRemoveMetadata.setValue(change, currentValue);
                 }
             }
@@ -151,7 +154,6 @@ public class VerifyChangeClassesTest extends AbstractVerifyTest {
                     }
                 });
                 for (List<String> permutation : paramLists) {
-                    System.out.println(StringUtils.join(permutation, ","));
                     Change change = changeFactory.create(changeName);
                     change.setResourceAccessor(new JUnitResourceAccessor());
 //

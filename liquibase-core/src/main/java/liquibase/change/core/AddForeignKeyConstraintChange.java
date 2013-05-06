@@ -35,10 +35,6 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
     private String onUpdate;
     private String onDelete;
 
-	// Some databases supports creation of FK with references to column marked as unique, not primary
-	// If FK referenced to such unique column this option should be set to true
-	private Boolean referencesUniqueColumn;
-
     @Override
     protected String[] createSupportedDatabasesMetaData(String parameterName, DatabaseChangeProperty changePropertyAnnotation) {
         if (parameterName.equals("deferrable") || parameterName.equals("initiallyDeferred")) {
@@ -181,14 +177,6 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
         return this.onDelete;
     }
 
-	public Boolean getReferencesUniqueColumn() {
-		return referencesUniqueColumn;
-	}
-
-	public void setReferencesUniqueColumn(Boolean referencesUniqueColumn) {
-		this.referencesUniqueColumn = referencesUniqueColumn;
-	}
-
 	public void setOnDelete(ForeignKeyConstraintType rule) {
         if (rule == null) {
             //nothing
@@ -251,7 +239,6 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
                         .setInitiallyDeferred(initiallyDeferred)
                         .setOnUpdate(getOnUpdate())
                         .setOnDelete(getOnDelete())
-                        .setReferencesUniqueColumn(getReferencesUniqueColumn())
         };
     }
 

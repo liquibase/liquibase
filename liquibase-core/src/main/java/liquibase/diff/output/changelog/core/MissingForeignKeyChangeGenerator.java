@@ -58,8 +58,6 @@ public class MissingForeignKeyChangeGenerator implements MissingObjectChangeGene
         change.setOnUpdate(fk.getUpdateRule());
         change.setOnDelete(fk.getDeleteRule());
 
-        change.setReferencesUniqueColumn(fk.getReferencesUniqueColumn());
-
         Index backingIndex = fk.getBackingIndex();
 //        if (backingIndex == null) {
 //            Index exampleIndex = new Index().setTable(fk.getForeignKeyTable());

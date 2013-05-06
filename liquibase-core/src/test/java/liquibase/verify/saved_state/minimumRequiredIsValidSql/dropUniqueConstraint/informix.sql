@@ -1,4 +1,4 @@
 -- Database: informix
--- Change Parameter: constraintName=A String
+-- Change Parameter: constraintName=const_name
 -- Change Parameter: tableName=person
-ALTER TABLE person DROP CONSTRAINT A String;
+ALTER TABLE person DROP CONSTRAINT const_name;

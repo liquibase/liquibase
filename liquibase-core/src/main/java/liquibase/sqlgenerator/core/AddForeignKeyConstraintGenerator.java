@@ -17,9 +17,6 @@ public class AddForeignKeyConstraintGenerator extends AbstractSqlGenerator<AddFo
     @Override
     @SuppressWarnings({"SimplifiableIfStatement"})
     public boolean supports(AddForeignKeyConstraintStatement statement, Database database) {
-        if (statement.getReferencesUniqueColumn() && !(database instanceof OracleDatabase)) {
-            return false;
-        }
         return (!(database instanceof SQLiteDatabase));
     }
 
@@ -35,6 +32,7 @@ public class AddForeignKeyConstraintGenerator extends AbstractSqlGenerator<AddFo
         validationErrors.checkRequiredField("baseTableNames", addForeignKeyConstraintStatement.getBaseTableName());
         validationErrors.checkRequiredField("referencedColumnNames", addForeignKeyConstraintStatement.getReferencedColumnNames());
         validationErrors.checkRequiredField("referencedTableName", addForeignKeyConstraintStatement.getReferencedTableName());
+        validationErrors.checkRequiredField("constraintName", addForeignKeyConstraintStatement.getConstraintName());
 
         return validationErrors;
     }

@@ -1,4 +1,4 @@
 -- Database: mysql
--- Change Parameter: constraintName=A String
+-- Change Parameter: constraintName=const_name
 -- Change Parameter: tableName=person
-ALTER TABLE person DROP KEY A String;
+ALTER TABLE person DROP KEY const_name;

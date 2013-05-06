@@ -19,6 +19,7 @@ public class DropUniqueConstraintGenerator extends AbstractSqlGenerator<DropUniq
     public ValidationErrors validate(DropUniqueConstraintStatement dropUniqueConstraintStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("tableName", dropUniqueConstraintStatement.getTableName());
+        validationErrors.checkRequiredField("constraintName", dropUniqueConstraintStatement.getConstraintName());
         return validationErrors;
     }
 

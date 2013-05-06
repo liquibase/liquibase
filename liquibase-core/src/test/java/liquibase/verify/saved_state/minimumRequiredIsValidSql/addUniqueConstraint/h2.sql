@@ -1,5 +1,4 @@
 -- Database: h2
--- Change Parameter: columnNames=A String
--- Change Parameter: constraintName=A String
+-- Change Parameter: columnNames=id, name
 -- Change Parameter: tableName=person
-ALTER TABLE person ADD CONSTRAINT A String UNIQUE (A String);
+ALTER TABLE person ADD UNIQUE (id, name);

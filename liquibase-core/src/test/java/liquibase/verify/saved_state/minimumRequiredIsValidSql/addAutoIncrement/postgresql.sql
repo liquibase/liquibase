@@ -1,5 +1,4 @@
 -- Database: postgresql
--- Change Parameter: columnDataType=int
 -- Change Parameter: columnName=id
 -- Change Parameter: tableName=person
 CREATE SEQUENCE person_id_seq;

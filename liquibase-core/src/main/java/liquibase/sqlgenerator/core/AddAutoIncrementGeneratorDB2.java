@@ -2,6 +2,7 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
 import liquibase.database.core.DB2Database;
+import liquibase.exception.ValidationErrors;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
@@ -20,6 +21,19 @@ public class AddAutoIncrementGeneratorDB2 extends AddAutoIncrementGenerator {
     @Override
     public boolean supports(AddAutoIncrementStatement statement, Database database) {
         return database instanceof DB2Database;
+    }
+
+    @Override
+    public ValidationErrors validate(
+            AddAutoIncrementStatement statement,
+            Database database,
+            SqlGeneratorChain sqlGeneratorChain) {
+        ValidationErrors validationErrors = new ValidationErrors();
+
+        validationErrors.checkRequiredField("columnName", statement.getColumnName());
+        validationErrors.checkRequiredField("tableName", statement.getTableName());
+
+        return validationErrors;
     }
 
     @Override

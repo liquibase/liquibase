@@ -1,5 +1,5 @@
 -- Database: mssql
--- Change Parameter: columnDataType=A String
+-- Change Parameter: columnDataType=int
 -- Change Parameter: columnName=id
 -- Change Parameter: tableName=person
-ALTER TABLE [person] ALTER COLUMN [id] A STRING NOT NULL;
+ALTER TABLE [person] ALTER COLUMN [id] INT NOT NULL;

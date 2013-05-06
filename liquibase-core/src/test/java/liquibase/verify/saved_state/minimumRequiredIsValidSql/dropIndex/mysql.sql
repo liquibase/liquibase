@@ -1,4 +1,4 @@
 -- Database: mysql
--- Change Parameter: indexName=A String
+-- Change Parameter: indexName=idx_address
 -- Change Parameter: tableName=person
-DROP INDEX A String ON person;
+DROP INDEX idx_address ON person;

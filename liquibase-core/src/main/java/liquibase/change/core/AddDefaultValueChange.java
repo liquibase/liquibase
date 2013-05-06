@@ -88,6 +88,7 @@ public class AddDefaultValueChange extends AbstractChange {
     }
 
 
+    @DatabaseChangeProperty(requiredForDatabase = "none")
     public String getDefaultValueNumeric() {
         return defaultValueNumeric;
     }
@@ -96,6 +97,7 @@ public class AddDefaultValueChange extends AbstractChange {
         this.defaultValueNumeric = defaultValueNumeric;
     }
 
+    @DatabaseChangeProperty(requiredForDatabase = "none")
     public String getDefaultValueDate() {
         return defaultValueDate;
     }
@@ -105,6 +107,7 @@ public class AddDefaultValueChange extends AbstractChange {
     }
 
 
+    @DatabaseChangeProperty(requiredForDatabase = "none")
     public Boolean getDefaultValueBoolean() {
         return defaultValueBoolean;
     }
@@ -113,6 +116,7 @@ public class AddDefaultValueChange extends AbstractChange {
         this.defaultValueBoolean = defaultValueBoolean;
     }
 
+    @DatabaseChangeProperty(requiredForDatabase = "none")
     public DatabaseFunction getDefaultValueComputed() {
         return defaultValueComputed;
     }
@@ -121,6 +125,7 @@ public class AddDefaultValueChange extends AbstractChange {
         this.defaultValueComputed = defaultValueComputed;
     }
 
+    @DatabaseChangeProperty(requiredForDatabase = "none")
     public SequenceNextValueFunction getDefaultValueSequenceNext() {
         return defaultValueSequenceNext;
     }

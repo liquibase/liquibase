@@ -1,5 +1,5 @@
 -- Database: asany
--- Change Parameter: newColumnName=A String
--- Change Parameter: oldColumnName=A String
+-- Change Parameter: newColumnName=id
+-- Change Parameter: oldColumnName=id
 -- Change Parameter: tableName=person
-ALTER TABLE person RENAME A String TO A String;
+ALTER TABLE person RENAME id TO id;

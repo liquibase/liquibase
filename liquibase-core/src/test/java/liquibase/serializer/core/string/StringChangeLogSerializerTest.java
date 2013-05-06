@@ -132,7 +132,6 @@ public class StringChangeLogSerializerTest {
         change.setConstraintName("FK_TEST");
         change.setDeferrable(true);
         change.setInitiallyDeferred(true);
-	    change.setReferencesUniqueColumn(false);
         change.setDeleteCascade(true);
         change.setOnDelete("SET NULL");
         change.setOnUpdate("NO ACTION");
@@ -152,7 +151,6 @@ public class StringChangeLogSerializerTest {
                 "    referencedColumnNames=\"COLA, COLB\"\n" +
                 "    referencedTableName=\"REF_TABLE\"\n" +
                 "    referencedTableSchemaName=\"REF_SCHEM\"\n" +
-                "    referencesUniqueColumn=\"false\"\n" +
                 "]", new StringChangeLogSerializer().serialize(change, false));
 
     }

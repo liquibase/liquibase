@@ -1,3 +1,3 @@
 -- Database: unsupported
--- Change Parameter: sequenceName=A String
-ALTER SEQUENCE A String;
+-- Change Parameter: sequenceName=seq_id
+ALTER SEQUENCE seq_id;

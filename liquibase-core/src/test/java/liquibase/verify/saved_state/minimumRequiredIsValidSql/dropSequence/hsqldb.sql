@@ -1,3 +1,3 @@
 -- Database: hsqldb
--- Change Parameter: sequenceName=A String
-DROP SEQUENCE A String;
+-- Change Parameter: sequenceName=seq_id
+DROP SEQUENCE seq_id;

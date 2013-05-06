@@ -3,6 +3,5 @@
 --     name="id"
 --     type="int"
 -- ], ]
--- Change Parameter: indexName=A String
 -- Change Parameter: tableName=user
-CREATE INDEX "A String" ON "user"(id);
+CREATE INDEX ON "user"(id);

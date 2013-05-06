@@ -1,4 +1,4 @@
 -- Database: mssql
--- Change Parameter: indexName=A String
+-- Change Parameter: indexName=idx_address
 -- Change Parameter: tableName=person
-DROP INDEX [person].A String;
+DROP INDEX [person].idx_address;

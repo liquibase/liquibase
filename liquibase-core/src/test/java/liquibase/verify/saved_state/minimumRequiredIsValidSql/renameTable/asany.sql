@@ -1,4 +1,4 @@
 -- Database: asany
--- Change Parameter: newTableName=A String
--- Change Parameter: oldTableName=A String
-ALTER TABLE A String RENAME A String;
+-- Change Parameter: newTableName=person
+-- Change Parameter: oldTableName=person
+ALTER TABLE person RENAME person;

@@ -1,5 +1,5 @@
 -- Database: derby
--- Change Parameter: newColumnName=A String
--- Change Parameter: oldColumnName=A String
+-- Change Parameter: newColumnName=id
+-- Change Parameter: oldColumnName=id
 -- Change Parameter: tableName=person
-RENAME COLUMN person.A String TO A String;
+RENAME COLUMN person.id TO id;

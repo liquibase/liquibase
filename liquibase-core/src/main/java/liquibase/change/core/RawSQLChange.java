@@ -3,6 +3,8 @@ package liquibase.change.core;
 import liquibase.change.AbstractSQLChange;
 import liquibase.change.DatabaseChange;
 import liquibase.change.ChangeMetaData;
+import liquibase.change.DatabaseChangeProperty;
+
 /**
  * Allows execution of arbitrary SQL.  This change can be used when existing changes are either don't exist,
  * are not flexible enough, or buggy. 
@@ -29,6 +31,13 @@ public class RawSQLChange extends AbstractSQLChange {
 
     public RawSQLChange(String sql) {
         setSql(sql);
+    }
+
+
+    @Override
+    @DatabaseChangeProperty(serializationType = SerializationType.DIRECT_VALUE, exampleValue = "insert into person (name) values ('Bob');", requiredForDatabase = "all")
+    public String getSql() {
+        return super.getSql();
     }
 
     public String getComment() {

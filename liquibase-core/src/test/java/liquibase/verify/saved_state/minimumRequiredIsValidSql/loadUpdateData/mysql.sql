@@ -1,6 +1,6 @@
 -- Database: mysql
 -- Change Parameter: file=com/example/users.csv
--- Change Parameter: primaryKey=A String
+-- Change Parameter: primaryKey=pk_id
 -- Change Parameter: tableName=person
 INSERT INTO person (username,  fullname) VALUES ('nvoxland', ' Nathan Voxland')
 ON DUPLICATE KEY UPDATE username = 'username', fullname = ' fullname';

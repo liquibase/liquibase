@@ -7,10 +7,6 @@ import java.util.List;
 
 public class ForeignKey extends AbstractDatabaseObject{
 
-    public ForeignKey() {
-        setReferencesUniqueColumn(false);
-    }
-
     public DatabaseObject[] getContainingObjects() {
 
 
@@ -142,15 +138,6 @@ public class ForeignKey extends AbstractDatabaseObject{
         return getAttribute("deleteRule", ForeignKeyConstraintType.class);
     }
 
-	public boolean getReferencesUniqueColumn() {
-		return getAttribute("referencesUniqueColumn", Boolean.class);
-	}
-
-	public ForeignKey setReferencesUniqueColumn(boolean referencesUniqueColumn) {
-        this.setAttribute("referencesUniqueColumn", referencesUniqueColumn);
-        return this;
-	}
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -165,8 +152,7 @@ public class ForeignKey extends AbstractDatabaseObject{
         return getForeignKeyColumns().equalsIgnoreCase(that.getForeignKeyColumns())
                 && getForeignKeyTable().equals(that.getForeignKeyTable())
                 && getPrimaryKeyColumns().equalsIgnoreCase(that.getPrimaryKeyColumns())
-                && getPrimaryKeyTable().equals(that.getPrimaryKeyTable())
-		        && getReferencesUniqueColumn() == that.getReferencesUniqueColumn();
+                && getPrimaryKeyTable().equals(that.getPrimaryKeyTable());
     }
 
     @Override
