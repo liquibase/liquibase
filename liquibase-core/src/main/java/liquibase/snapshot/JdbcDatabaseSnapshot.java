@@ -6,10 +6,7 @@ import liquibase.executor.jvm.ColumnMapRowMapper;
 import liquibase.executor.jvm.RowMapperResultSetExtractor;
 
 import java.sql.*;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
     private CachingDatabaseMetaData cachingDatabaseMetaData;
@@ -108,12 +105,25 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
         }
 
         public List<CachedRow> getColumns(String catalogName, String schemaName, String tableNamePattern, String columnNamePattern) throws SQLException {
-            String key = createKey("getColumns", catalogName, schemaName, tableNamePattern, columnNamePattern);
+            String key = createKey("getColumns", catalogName, schemaName, tableNamePattern);
+            List<CachedRow> returnList;
             if (hasCachedValue(key)) {
-                return getCachedValue(key);
+                returnList = getCachedValue(key);
+            } else {
+                returnList = cacheResultSet(key, databaseMetaData.getColumns(catalogName, schemaName, tableNamePattern, null));
             }
 
-            return cacheResultSet(key, databaseMetaData.getColumns(catalogName, schemaName, tableNamePattern, columnNamePattern));
+            if (columnNamePattern != null) {
+                List<CachedRow> filteredList = new ArrayList<CachedRow>();
+                for (CachedRow row : returnList) {
+                    if (row.getString("COLUMN_NAME").equals(columnNamePattern)) {
+                        filteredList.add(row);
+                    }
+                }
+                return filteredList;
+            } else {
+                return returnList;
+            }
         }
 
         public List<CachedRow> getTables(String catalogName, String schemaName, String tableNamePattern, String[] types) throws SQLException {
