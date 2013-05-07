@@ -10,6 +10,7 @@ import java.util.*;
 
 public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
     private CachingDatabaseMetaData cachingDatabaseMetaData;
+    private int tablesOfColumnsFetched = 0;
 
     public JdbcDatabaseSnapshot(SnapshotControl snapshotControl, Database database) {
         super(snapshotControl, database);
@@ -104,24 +105,56 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
             return cacheResultSet(key, databaseMetaData.getIndexInfo(catalogName, schemaName, table, unique, approximate));
         }
 
+        /**
+         * Return the columns for the given catalog, schema, table, and column.
+         * Because this query can be expensive on some databases (I'm looking at you, Oracle), after a couple calls for different tables it will give up and get all columns for all tables.
+         * To override when this
+         */
         public List<CachedRow> getColumns(String catalogName, String schemaName, String tableNamePattern, String columnNamePattern) throws SQLException {
-            String key = createKey("getColumns", catalogName, schemaName, tableNamePattern);
+            String byTableKey = createKey("getColumns", catalogName, schemaName, tableNamePattern);
+            String allTablesKey = createKey("getColumns", catalogName, schemaName);
             List<CachedRow> returnList;
-            if (hasCachedValue(key)) {
-                returnList = getCachedValue(key);
+
+            boolean needToFilter = false;
+            if (hasCachedValue(byTableKey)) {
+                returnList = getCachedValue(byTableKey);
+            } else if (hasCachedValue(allTablesKey)) {
+                returnList = getCachedValue(allTablesKey);
+                needToFilter = true;
             } else {
-                returnList = cacheResultSet(key, databaseMetaData.getColumns(catalogName, schemaName, tableNamePattern, null));
+                tablesOfColumnsFetched++;
+
+                if (shouldCacheAllTableColumns()) {
+                    returnList = cacheResultSet(allTablesKey, databaseMetaData.getColumns(catalogName, schemaName, null, null));
+                    needToFilter = true;
+                } else {
+                    returnList = cacheResultSet(byTableKey, databaseMetaData.getColumns(catalogName, schemaName, tableNamePattern, null));
+                }
             }
 
-            if (columnNamePattern != null) {
+            if (columnNamePattern != null || needToFilter) {
                 List<CachedRow> filteredList = new ArrayList<CachedRow>();
                 for (CachedRow row : returnList) {
-                    if (row.getString("COLUMN_NAME").equals(columnNamePattern)) {
-                        filteredList.add(row);
+                    if (getDatabase().isCaseSensitive()) {
+                        if (row.getString("TABLE_NAME").equals(tableNamePattern))
+                            if (columnNamePattern == null || row.getString("COLUMN_NAME").equals(columnNamePattern)) {
+                                filteredList.add(row);
+                            }
+                    } else {
+                        if (row.getString("TABLE_NAME").equalsIgnoreCase(tableNamePattern))
+                            if (columnNamePattern == null || row.getString("COLUMN_NAME").equalsIgnoreCase(columnNamePattern)) {
+                                filteredList.add(row);
+                            }
                     }
+                }
+                if (filteredList.size() == 0) {
+                    System.out.println("zero size");
                 }
                 return filteredList;
             } else {
+                if (returnList.size() == 0) {
+                    System.out.println("zero size");
+                }
                 return returnList;
             }
         }
@@ -157,6 +190,10 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                 statement.close();
             }
         }
+    }
+
+    protected boolean shouldCacheAllTableColumns() {
+        return tablesOfColumnsFetched == 4;
     }
 
     public class CachedRow {

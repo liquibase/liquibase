@@ -38,6 +38,7 @@ import liquibase.test.DatabaseTestContext;
 import liquibase.test.JUnitResourceAccessor;
 import liquibase.test.TestContext;
 import liquibase.util.RegexMatcher;
+import liquibase.util.StreamUtil;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
