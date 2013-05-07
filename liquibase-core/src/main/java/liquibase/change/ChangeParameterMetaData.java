@@ -151,10 +151,11 @@ public class ChangeParameterMetaData {
 
             computedDatabases.remove("none");
 
-            return computedDatabases;
         } else {
-            return new HashSet<String>(Arrays.asList(requiredDatabases));
+            computedDatabases = new HashSet<String>(Arrays.asList(requiredDatabases));
         }
+        computedDatabases.remove("none");
+        return computedDatabases;
     }
 
     private ValidationErrors getStatementErrors(Change testChange, Database database) {

@@ -71,7 +71,7 @@ public class AbstractChangeTest {
         assertNull(null, changeMetaData.getAppliesTo());
 
         Map<String, ChangeParameterMetaData> parameters = changeMetaData.getParameters();
-        assertEquals(4, parameters.size());
+        assertEquals(3, parameters.size());
         ChangeParameterMetaData dbmsMetaData = parameters.get("dbms");
         ChangeParameterMetaData paramOneMetaData = parameters.get("paramOne");
         ChangeParameterMetaData paramTwoMetaData = parameters.get("paramTwo");
@@ -95,9 +95,6 @@ public class AbstractChangeTest {
         assertTrue(paramTwoMetaData.getRequiredForDatabase().contains("mysql"));
         assertTrue(paramTwoMetaData.getRequiredForDatabase().contains("mssql"));
 
-        assertNotNull(dbmsMetaData);
-        assertTrue(dbmsMetaData.getExampleValue().toString().contains("h2"));
-
         assertNotNull(paramNoMetaData);
         assertNull(paramNotIncludedMetaData);
         assertNull("Properties with no write method should not be included", paramNoWriteMethodMetaData);
@@ -109,7 +106,7 @@ public class AbstractChangeTest {
         ChangeMetaData changeMetaData = change.createChangeMetaData();
 
         Map<String, ChangeParameterMetaData> parameters = changeMetaData.getParameters();
-        assertEquals(1, parameters.size());
+        assertEquals(0, parameters.size());
     }
 
     @Test(expected = UnexpectedLiquibaseException.class)
@@ -706,61 +703,6 @@ public class AbstractChangeTest {
     @Test
     public void createSupportedDatabasesMetaData_nullAnnotation() {
         assertArraysEqual(new String[]{"COMPUTE"}, new ExampleAbstractChange().createSupportedDatabasesMetaData("x", null));
-    }
-    @DatabaseChange(name = "exampleAbstractChange", description = "Used for the AbstractChangeTest unit test", priority = 1)
-    private static class ExampleAbstractChange extends AbstractChange {
-
-        private String paramOne;
-        private Integer paramTwo;
-        private String paramNoMetadata;
-        private String paramNotIncluded;
-
-        public String getConfirmationMessage() {
-            return "Test Confirmation Message";
-        }
-
-        public SqlStatement[] generateStatements(Database database) {
-            return null;
-        }
-
-        @DatabaseChangeProperty
-        public String getParamOne() {
-            return paramOne;
-        }
-
-        public void setParamOne(String paramOne) {
-            this.paramOne = paramOne;
-        }
-
-        @DatabaseChangeProperty(requiredForDatabase = {"mysql", "mssql"}, mustEqualExisting = "table", serializationType = SerializationType.NESTED_OBJECT)
-        public Integer getParamTwo() {
-            return paramTwo;
-        }
-
-        public void setParamTwo(Integer paramTwo) {
-            this.paramTwo = paramTwo;
-        }
-
-        public String getParamNoMetadata() {
-            return paramNoMetadata;
-        }
-
-        public void setParamNoMetadata(String paramNoMetadata) {
-            this.paramNoMetadata = paramNoMetadata;
-        }
-
-        @DatabaseChangeProperty(isChangeProperty = false)
-        public String getParamNotIncluded() {
-            return paramNotIncluded;
-        }
-
-        public void setParamNotIncluded(String paramNotIncluded) {
-            this.paramNotIncluded = paramNotIncluded;
-        }
-
-        public String getNotWriteMethod() {
-            return null;
-        }
     }
 
     @DatabaseChange(name = "exampleParamelessAbstractChange", description = "Used for the AbstractChangeTest unit test", priority = 1)

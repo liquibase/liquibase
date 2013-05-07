@@ -15,7 +15,7 @@ public class ChangeParameterMetaDataTest {
 
     @Test
     public void constructor() {
-        ChangeParameterMetaData metaData = new ChangeParameterMetaData(null, "x", "y", "desc", "examp", "2.1", Integer.class, new String[]{"mysql", "mssql"}, new String[] {"h2", "mysql","mssql"}, "column", LiquibaseSerializable.SerializationType.NESTED_OBJECT);
+        ChangeParameterMetaData metaData = new ChangeParameterMetaData(new ExampleAbstractChange(), "x", "y", "desc", "examp", "2.1", Integer.class, new String[]{"mysql", "mssql"}, new String[] {"h2", "mysql","mssql"}, "column", LiquibaseSerializable.SerializationType.NESTED_OBJECT);
         assertEquals("x", metaData.getParameterName()) ;
         assertEquals("y", metaData.getDisplayName());
         assertEquals("integer", metaData.getDataType());
@@ -38,28 +38,28 @@ public class ChangeParameterMetaDataTest {
     @Test
     public void constructor_badValues() {
         try {
-            new ChangeParameterMetaData(null, null, "y", null, null, null,String.class, null, null, null, LiquibaseSerializable.SerializationType.NAMED_FIELD);
+            new ChangeParameterMetaData(new ExampleAbstractChange(), null, "y", null, null, null,String.class, null, null, null, LiquibaseSerializable.SerializationType.NAMED_FIELD);
             fail("Did not throw exception");
         } catch (UnexpectedLiquibaseException e) {
             assertEquals("Unexpected null parameterName", e.getMessage());
         }
 
         try {
-            new ChangeParameterMetaData(null, "x tag", "y", null, null,null, String.class, null, null, null,LiquibaseSerializable.SerializationType.NAMED_FIELD);
+            new ChangeParameterMetaData(new ExampleAbstractChange(), "x tag", "y", null, null,null, String.class, null, null, null,LiquibaseSerializable.SerializationType.NAMED_FIELD);
             fail("Did not throw exception");
         } catch (UnexpectedLiquibaseException e) {
             assertEquals("Unexpected space in parameterName", e.getMessage());
         }
 
         try {
-            new ChangeParameterMetaData(null, "x", null, null, null,null, String.class, null, null, null,LiquibaseSerializable.SerializationType.NAMED_FIELD);
+            new ChangeParameterMetaData(new ExampleAbstractChange(), "x", null, null, null,null, String.class, null, null, null,LiquibaseSerializable.SerializationType.NAMED_FIELD);
             fail("Did not throw exception");
         } catch (UnexpectedLiquibaseException e) {
             assertEquals("Unexpected null displayName", e.getMessage());
         }
 
         try {
-            new ChangeParameterMetaData(null, "x", "y", null, null, null, null, null,null, null,LiquibaseSerializable.SerializationType.NAMED_FIELD);
+            new ChangeParameterMetaData(new ExampleAbstractChange(), "x", "y", null, null, null, null, null,null, null,LiquibaseSerializable.SerializationType.NAMED_FIELD);
             fail("Did not throw exception");
         } catch (UnexpectedLiquibaseException e) {
             assertEquals("Unexpected null dataType", e.getMessage());
@@ -68,34 +68,34 @@ public class ChangeParameterMetaDataTest {
 
     @Test
     public void getRequiredForDatabase_nullPassedInReturnsEmptySet() {
-        assertEquals(0, new ChangeParameterMetaData(null, "x", "y", null, null,null, Integer.class, null, null,null, LiquibaseSerializable.SerializationType.NAMED_FIELD).getRequiredForDatabase().size());
+        assertEquals(0, new ChangeParameterMetaData(new ExampleAbstractChange(), "x", "y", null, null,null, Integer.class, null, null,null, LiquibaseSerializable.SerializationType.NAMED_FIELD).getRequiredForDatabase().size());
     }
 
     @Test
     public void getRequiredForDatabase_nonePassedReturnsEmptySet() {
-        assertEquals(0, new ChangeParameterMetaData(null, "x", "y", null, null,null, Integer.class, new String[] {"none"}, null, null,LiquibaseSerializable.SerializationType.NAMED_FIELD).getRequiredForDatabase().size());
+        assertEquals(0, new ChangeParameterMetaData(new ExampleAbstractChange(), "x", "y", null, null,null, Integer.class, new String[] {"none"}, null, null,LiquibaseSerializable.SerializationType.NAMED_FIELD).getRequiredForDatabase().size());
     }
 
     @Test(expected = UnsupportedOperationException.class)
     public void getRequiredForDatabase_immutable() {
-        new ChangeParameterMetaData(null, "x", "y", null, null,null, Integer.class, new String[] {"mysql"}, null, null,LiquibaseSerializable.SerializationType.NAMED_FIELD).getRequiredForDatabase().add("mssql");
+        new ChangeParameterMetaData(new ExampleAbstractChange(), "x", "y", null, null,null, Integer.class, new String[] {"mysql"}, null, null,LiquibaseSerializable.SerializationType.NAMED_FIELD).getRequiredForDatabase().add("mssql");
     }
 
     @Test
     public void isRequiredFor() {
-        assertTrue(new ChangeParameterMetaData(null, "x", "y", null, null,null, Integer.class, new String[]{"mysql"}, null, null,LiquibaseSerializable.SerializationType.NAMED_FIELD).isRequiredFor(new MySQLDatabase()));
-        assertTrue(new ChangeParameterMetaData(null, "x", "y", null, null,null, Integer.class, new String[]{"mysql"}, null, null,LiquibaseSerializable.SerializationType.NAMED_FIELD).isRequiredFor(new MySQLDatabase() {})); //mysql database subclass
-        assertFalse(new ChangeParameterMetaData(null, "x", "y", null, null,null, Integer.class, new String[]{"mysql"}, null, null,LiquibaseSerializable.SerializationType.NAMED_FIELD).isRequiredFor(new MSSQLDatabase()));
+        assertTrue(new ChangeParameterMetaData(new ExampleAbstractChange(), "x", "y", null, null,null, Integer.class, new String[]{"mysql"}, null, null,LiquibaseSerializable.SerializationType.NAMED_FIELD).isRequiredFor(new MySQLDatabase()));
+        assertTrue(new ChangeParameterMetaData(new ExampleAbstractChange(), "x", "y", null, null,null, Integer.class, new String[]{"mysql"}, null, null,LiquibaseSerializable.SerializationType.NAMED_FIELD).isRequiredFor(new MySQLDatabase() {})); //mysql database subclass
+        assertFalse(new ChangeParameterMetaData(new ExampleAbstractChange(), "x", "y", null, null,null, Integer.class, new String[]{"mysql"}, null, null,LiquibaseSerializable.SerializationType.NAMED_FIELD).isRequiredFor(new MSSQLDatabase()));
 
-        assertTrue(new ChangeParameterMetaData(null, "x", "y", null, null,null, Integer.class, new String[]{"mysql", "mssql"}, null, null,LiquibaseSerializable.SerializationType.NAMED_FIELD).isRequiredFor(new MySQLDatabase()));
-        assertTrue(new ChangeParameterMetaData(null, "x", "y", null, null,null, Integer.class, new String[]{"mysql", "mssql"}, null, null,LiquibaseSerializable.SerializationType.NAMED_FIELD).isRequiredFor(new MSSQLDatabase()));
-        assertFalse(new ChangeParameterMetaData(null, "x", "y", null, null,null, Integer.class, new String[]{"mysql", "mssql"}, null, null,LiquibaseSerializable.SerializationType.NAMED_FIELD).isRequiredFor(new OracleDatabase()));
+        assertTrue(new ChangeParameterMetaData(new ExampleAbstractChange(), "x", "y", null, null,null, Integer.class, new String[]{"mysql", "mssql"}, null, null,LiquibaseSerializable.SerializationType.NAMED_FIELD).isRequiredFor(new MySQLDatabase()));
+        assertTrue(new ChangeParameterMetaData(new ExampleAbstractChange(), "x", "y", null, null,null, Integer.class, new String[]{"mysql", "mssql"}, null, null,LiquibaseSerializable.SerializationType.NAMED_FIELD).isRequiredFor(new MSSQLDatabase()));
+        assertFalse(new ChangeParameterMetaData(new ExampleAbstractChange(), "x", "y", null, null,null, Integer.class, new String[]{"mysql", "mssql"}, null, null,LiquibaseSerializable.SerializationType.NAMED_FIELD).isRequiredFor(new OracleDatabase()));
 
-        assertTrue(new ChangeParameterMetaData(null, "x", "y", null, null,null, Integer.class, new String[]{"all"}, null, null,LiquibaseSerializable.SerializationType.NAMED_FIELD).isRequiredFor(new OracleDatabase()));
-        assertTrue(new ChangeParameterMetaData(null, "x", "y", null, null,null, Integer.class, new String[]{"all"}, null, null,LiquibaseSerializable.SerializationType.NAMED_FIELD).isRequiredFor(new MySQLDatabase()));
+        assertTrue(new ChangeParameterMetaData(new ExampleAbstractChange(), "x", "y", null, null,null, Integer.class, new String[]{"all"}, null, null,LiquibaseSerializable.SerializationType.NAMED_FIELD).isRequiredFor(new OracleDatabase()));
+        assertTrue(new ChangeParameterMetaData(new ExampleAbstractChange(), "x", "y", null, null,null, Integer.class, new String[]{"all"}, null, null,LiquibaseSerializable.SerializationType.NAMED_FIELD).isRequiredFor(new MySQLDatabase()));
 
-        assertFalse(new ChangeParameterMetaData(null, "x", "y", null, null,null, Integer.class, new String[]{}, null, null,LiquibaseSerializable.SerializationType.NAMED_FIELD).isRequiredFor(new OracleDatabase()));
-        assertFalse(new ChangeParameterMetaData(null, "x", "y", null, null,null, Integer.class, new String[]{}, null, null,LiquibaseSerializable.SerializationType.NAMED_FIELD).isRequiredFor(new MySQLDatabase()));
+        assertFalse(new ChangeParameterMetaData(new ExampleAbstractChange(), "x", "y", null, null,null, Integer.class, new String[]{}, null, null,LiquibaseSerializable.SerializationType.NAMED_FIELD).isRequiredFor(new OracleDatabase()));
+        assertFalse(new ChangeParameterMetaData(new ExampleAbstractChange(), "x", "y", null, null,null, Integer.class, new String[]{}, null, null,LiquibaseSerializable.SerializationType.NAMED_FIELD).isRequiredFor(new MySQLDatabase()));
     }
 
     @Test
@@ -104,9 +104,9 @@ public class ChangeParameterMetaDataTest {
         change.setTableName("newTable");
         change.setCatalogName("newCatalog");
 
-        ChangeParameterMetaData tableNameMetaData = new ChangeParameterMetaData(null, "tableName", "New Table", null, null,null, String.class, null,null, null, LiquibaseSerializable.SerializationType.NAMED_FIELD);
-        ChangeParameterMetaData catalogNameMetaData = new ChangeParameterMetaData(null, "catalogName", "New Catalog", null, null,null, String.class, null, null,null, LiquibaseSerializable.SerializationType.NAMED_FIELD);
-        ChangeParameterMetaData remarksMetaData = new ChangeParameterMetaData(null, "remarks", "Remarks", null, null,null, String.class, null, null,null, LiquibaseSerializable.SerializationType.NAMED_FIELD);
+        ChangeParameterMetaData tableNameMetaData = new ChangeParameterMetaData(new ExampleAbstractChange(), "tableName", "New Table", null, null,null, String.class, null,null, null, LiquibaseSerializable.SerializationType.NAMED_FIELD);
+        ChangeParameterMetaData catalogNameMetaData = new ChangeParameterMetaData(new ExampleAbstractChange(), "catalogName", "New Catalog", null, null,null, String.class, null, null,null, LiquibaseSerializable.SerializationType.NAMED_FIELD);
+        ChangeParameterMetaData remarksMetaData = new ChangeParameterMetaData(new ExampleAbstractChange(), "remarks", "Remarks", null, null,null, String.class, null, null,null, LiquibaseSerializable.SerializationType.NAMED_FIELD);
 
         assertEquals("newTable", tableNameMetaData.getCurrentValue(change));
         assertEquals("newCatalog", catalogNameMetaData.getCurrentValue(change));
@@ -119,7 +119,7 @@ public class ChangeParameterMetaDataTest {
     @Test(expected = UnexpectedLiquibaseException.class)
     public void getCurrentValue_badParam() {
         CreateTableChange change = new CreateTableChange();
-        ChangeParameterMetaData badParamMetaData = new ChangeParameterMetaData(null, "badParameter", "Doesn't really exist", null, null,null, Integer.class, null,null, null, LiquibaseSerializable.SerializationType.NAMED_FIELD);
+        ChangeParameterMetaData badParamMetaData = new ChangeParameterMetaData(new ExampleAbstractChange(), "badParameter", "Doesn't really exist", null, null,null, Integer.class, null,null, null, LiquibaseSerializable.SerializationType.NAMED_FIELD);
         badParamMetaData.getCurrentValue(change);
 
     }

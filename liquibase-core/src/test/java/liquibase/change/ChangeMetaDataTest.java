@@ -24,7 +24,7 @@ public class ChangeMetaDataTest {
     @Test
     public void constructor() {
         HashSet<ChangeParameterMetaData> params = new HashSet<ChangeParameterMetaData>();
-        params.add(new ChangeParameterMetaData(null, "a", "a", null, null, null, Integer.class, null, null, null, null));
+        params.add(new ChangeParameterMetaData(new ExampleAbstractChange(), "a", "a", null, null, null, Integer.class, null, null, null, null));
 
         HashMap<String, String> notes = new HashMap<String, String>();
         notes.put("db1", "note1");
@@ -80,10 +80,10 @@ public class ChangeMetaDataTest {
     @Test
     public void getRequiredParameters() {
         HashSet<ChangeParameterMetaData> parameters = new HashSet<ChangeParameterMetaData>();
-        parameters.add(new ChangeParameterMetaData(null, "noneRequired", "x", null, null, null, Integer.class, new String[]{"none"}, null, null, null));
-        parameters.add(new ChangeParameterMetaData(null, "allRequired", "x", null, null, null, Integer.class, new String[]{"all"}, null, null, null));
-        parameters.add(new ChangeParameterMetaData(null, "h2Required", "x", null, null, null, Integer.class, new String[] {"h2"}, null, null, null));
-        parameters.add(new ChangeParameterMetaData(null, "oracleRequired", "x", null, null, null, Integer.class, new String[] {"oracle"}, null, null, null));
+        parameters.add(new ChangeParameterMetaData(new ExampleAbstractChange(), "noneRequired", "x", null, null, null, Integer.class, new String[]{"none"}, null, null, null));
+        parameters.add(new ChangeParameterMetaData(new ExampleAbstractChange(), "allRequired", "x", null, null, null, Integer.class, new String[]{"all"}, null, null, null));
+        parameters.add(new ChangeParameterMetaData(new ExampleAbstractChange(), "h2Required", "x", null, null, null, Integer.class, new String[] {"h2"}, null, null, null));
+        parameters.add(new ChangeParameterMetaData(new ExampleAbstractChange(), "oracleRequired", "x", null, null, null, Integer.class, new String[] {"oracle"}, null, null, null));
         ChangeMetaData changeMetaData = new ChangeMetaData("x", "y", 1, null, null, parameters);
 
         assertSetsEqual(new String[]{"allRequired", "h2Required"}, changeMetaData.getRequiredParameters(new H2Database()).keySet());
@@ -94,10 +94,10 @@ public class ChangeMetaDataTest {
     @Test
     public void getOptionalParameters() {
         HashSet<ChangeParameterMetaData> parameters = new HashSet<ChangeParameterMetaData>();
-        parameters.add(new ChangeParameterMetaData(null, "noneRequired", "x", null, null, null, Integer.class, new String[]{"none"}, null, null, null));
-        parameters.add(new ChangeParameterMetaData(null, "allRequired", "x", null, null, null, Integer.class, new String[]{"all"}, null, null, null));
-        parameters.add(new ChangeParameterMetaData(null, "h2Required", "x", null, null, null, Integer.class, new String[] {"h2"}, null, null, null));
-        parameters.add(new ChangeParameterMetaData(null, "oracleRequired", "x", null, null, null, Integer.class, new String[] {"oracle"}, null, null, null));
+        parameters.add(new ChangeParameterMetaData(new ExampleAbstractChange(), "noneRequired", "x", null, null, null, Integer.class, new String[]{"none"}, null, null, null));
+        parameters.add(new ChangeParameterMetaData(new ExampleAbstractChange(), "allRequired", "x", null, null, null, Integer.class, new String[]{"all"}, null, null, null));
+        parameters.add(new ChangeParameterMetaData(new ExampleAbstractChange(), "h2Required", "x", null, null, null, Integer.class, new String[] {"h2"}, null, null, null));
+        parameters.add(new ChangeParameterMetaData(new ExampleAbstractChange(), "oracleRequired", "x", null, null, null, Integer.class, new String[] {"oracle"}, null, null, null));
         ChangeMetaData changeMetaData = new ChangeMetaData("x", "y", 1, null, null, parameters);
 
         assertSetsEqual(new String[]{"noneRequired", "oracleRequired"}, changeMetaData.getOptionalParameters(new H2Database()).keySet());
