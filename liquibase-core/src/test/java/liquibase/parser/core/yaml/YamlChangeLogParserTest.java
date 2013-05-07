@@ -22,7 +22,7 @@ public class YamlChangeLogParserTest {
             "      changes:\n" +
             "      - createTable:\n" +
             "          tableName: testTable\n" +
-            "          column:\n" +
+            "          columns:\n" +
             "          - column:\n" +
             "              name: id\n" +
             "              type: int\n" +

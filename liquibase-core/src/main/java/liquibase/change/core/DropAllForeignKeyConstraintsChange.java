@@ -28,8 +28,6 @@ public class DropAllForeignKeyConstraintsChange extends AbstractChange {
     private String baseTableSchemaName;
     private String baseTableName;
 
-    private List<DropForeignKeyConstraintChange> childDropChanges;
-
     @DatabaseChangeProperty(mustEqualExisting ="table.catalog", description = "Name of the table containing columns constrained by foreign keys", since = "3.0")
     public String getBaseTableCatalogName() {
         return baseTableCatalogName;
@@ -60,9 +58,7 @@ public class DropAllForeignKeyConstraintsChange extends AbstractChange {
     public SqlStatement[] generateStatements(Database database) {
         List<SqlStatement> sqlStatements = new ArrayList<SqlStatement>();
 
-        if (childDropChanges == null) {
-            generateChildren(database);
-        }
+        List<DropForeignKeyConstraintChange> childDropChanges = generateChildren(database);
 
         if (childDropChanges != null) {
             for (DropForeignKeyConstraintChange change : childDropChanges) {
@@ -77,9 +73,9 @@ public class DropAllForeignKeyConstraintsChange extends AbstractChange {
         return "Foreign keys on base table " + getBaseTableName() + " dropped";
     }
 
-    private void generateChildren(Database database) {
+    private List<DropForeignKeyConstraintChange> generateChildren(Database database) {
         // Make a new list
-        childDropChanges = new ArrayList<DropForeignKeyConstraintChange>();
+        List<DropForeignKeyConstraintChange> childDropChanges = new ArrayList<DropForeignKeyConstraintChange>();
 
         Executor executor = ExecutorService.getInstance().getExecutor(database);
 
@@ -113,6 +109,9 @@ public class DropAllForeignKeyConstraintsChange extends AbstractChange {
                     }
                 }
             }
+
+            return childDropChanges;
+
         } catch (DatabaseException e) {
             throw new UnexpectedLiquibaseException("Failed to find foreign keys for table: " + getBaseTableName(), e);
         }

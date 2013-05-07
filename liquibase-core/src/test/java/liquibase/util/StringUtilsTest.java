@@ -93,16 +93,6 @@ public class StringUtilsTest {
     }
     
     @Test
-    public void singleLineWithFollowupLine() {
-        String sql = "Some text" ;
-        String comment = "-- with comment";
-        String totalLine=sql + comment + newline + sql ;
-        String result = StringUtils.stripComments(totalLine);
-        
-        assertEquals(sql + newline + sql,result);
-    }
-    
-    @Test
     public void multiLineOnOwnLine() {
         String sql = "/*Some text\nmore text*/" ;
         
