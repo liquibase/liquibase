@@ -34,6 +34,10 @@ public class BlobType extends LiquibaseDataType {
         if (database instanceof OracleDatabase) {
             return new DatabaseDataType("BLOB");
         }
+
+        if (database instanceof FirebirdDatabase) {
+            return new DatabaseDataType("BLOB");
+        }
         return super.toDatabaseDataType(database);
     }
 

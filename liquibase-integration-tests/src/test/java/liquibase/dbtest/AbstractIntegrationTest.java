@@ -47,10 +47,7 @@ import java.io.*;
 import java.net.URL;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Date;
-import java.util.Enumeration;
-import java.util.List;
-import java.util.Properties;
+import java.util.*;
 
 import static junit.framework.Assert.*;
 
@@ -897,6 +894,10 @@ public abstract class AbstractIntegrationTest {
         if (database == null) {
             return;
         }
+        if (!Arrays.asList("oracle,h2,hsqldb,postgresql,mysql").contains(database.getShortName())) {
+            return;
+        }
+
         Liquibase liquibase = createLiquibase(objectQuotingStrategyChangeLog);
         clearDatabase(liquibase);
         liquibase.update(contexts);

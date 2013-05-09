@@ -1,5 +1,7 @@
 package liquibase.changelog.visitor;
 
+import liquibase.change.ColumnConfig;
+import liquibase.change.core.CreateTableChange;
 import liquibase.database.Database;
 import liquibase.exception.ValidationErrors;
 import java.util.ArrayList;
@@ -43,9 +45,9 @@ public class ValidatingVisitorPreConditionsTest {
         changeSet1 = new ChangeSet("1", "testAuthor", false, false, "path/changelog", null, null);
         changeLog.addChangeSet(changeSet1);
 
-        CreateSequenceChange change1 = new CreateSequenceChange();
-        change1.setSequenceName("seq_test");
-        change1.setStartValue(BigInteger.ZERO);
+        CreateTableChange change1 = new CreateTableChange();
+        change1.setTableName("valid_test");
+        change1.addColumn(new ColumnConfig().setName("id").setType("int"));
         changeSet1.addChange(change1);
 
     }

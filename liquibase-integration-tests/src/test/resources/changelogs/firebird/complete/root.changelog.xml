@@ -82,13 +82,13 @@
             <column name="name" value="Widgets Inc."/>
         </insert>
     </changeSet>
-    <changeSet id="7a" author="nvoxland">
-        <addColumn tableName="company">
-            <column name="company_id" type="int">
-                <constraints nullable="true" foreignKeyName="fk_employee_company" references="employee(id)"/>
-            </column>
-        </addColumn>
-    </changeSet>
+    <!--<changeSet id="7a" author="nvoxland">-->
+        <!--<addColumn tableName="company">-->
+            <!--<column name="company_id" type="int">-->
+                <!--<constraints nullable="true" foreignKeyName="fk_employee_company" references="employee(id)"/>-->
+            <!--</column>-->
+        <!--</addColumn>-->
+    <!--</changeSet>-->
     <!--<changeSet id="8" author="bjohnson">-->
         <!--<dropNotNullConstraint tableName="employee" columnName="name" columnDataType="varchar(50)"/>-->
     <!--</changeSet>-->

@@ -54,12 +54,14 @@ public class PrimaryKeySnapshotGenerator extends JdbcSnapshotGenerator {
                 returnKey.addColumnName(position - 1, columnName);
             }
 
-            Index exampleIndex = new Index().setTable(returnKey.getTable());
-            exampleIndex.getColumns().addAll(Arrays.asList(returnKey.getColumnNames().split("\\s*,\\s*")));
-            if (database instanceof MSSQLDatabase) { //index name matches PK name for better accuracy
-                exampleIndex.setName(returnKey.getName());
+            if (returnKey != null) {
+                Index exampleIndex = new Index().setTable(returnKey.getTable());
+                exampleIndex.getColumns().addAll(Arrays.asList(returnKey.getColumnNames().split("\\s*,\\s*")));
+                if (database instanceof MSSQLDatabase) { //index name matches PK name for better accuracy
+                    exampleIndex.setName(returnKey.getName());
+                }
+                returnKey.setBackingIndex(exampleIndex);
             }
-            returnKey.setBackingIndex(exampleIndex);
 
             return returnKey;
         } catch (SQLException e) {

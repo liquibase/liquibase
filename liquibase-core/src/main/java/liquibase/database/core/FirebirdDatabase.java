@@ -84,10 +84,15 @@ public class FirebirdDatabase extends AbstractJdbcDatabase {
     }
 
     @Override
+    public boolean supportsCatalogs() {
+        return false;
+    }
+
+    @Override
     public String correctObjectName(String objectName, Class<? extends DatabaseObject> objectType) {
         if (objectName == null) {
             return null;
         }
-        return objectName.toUpperCase();
+        return objectName.toUpperCase().trim();
     }
 }

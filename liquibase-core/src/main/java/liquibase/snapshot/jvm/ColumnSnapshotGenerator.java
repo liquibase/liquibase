@@ -2,6 +2,7 @@ package liquibase.snapshot.jvm;
 
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
+import liquibase.database.core.FirebirdDatabase;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.core.MySQLDatabase;
 import liquibase.database.jvm.JdbcConnection;
@@ -156,6 +157,15 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
 
     protected DataType readDataType(JdbcDatabaseSnapshot.CachedRow columnMetadataResultSet, Column column, Database database) throws SQLException {
         String columnTypeName = (String) columnMetadataResultSet.get("TYPE_NAME");
+
+        if (database instanceof FirebirdDatabase) {
+            if (columnTypeName.equals("BLOB SUB_TYPE 0")) {
+                columnTypeName = "BLOB";
+            }
+            if (columnTypeName.equals("BLOB SUB_TYPE 1")) {
+                columnTypeName = "CLOB";
+            }
+        }
 
         int dataType = columnMetadataResultSet.getInt("DATA_TYPE");
         Integer columnSize = columnMetadataResultSet.getInt("COLUMN_SIZE");

@@ -683,8 +683,12 @@ public abstract class AbstractJdbcDatabase implements Database {
         }
 
         for (SqlStatement sql : statementsToExecute) {
-            executor.execute(sql);
-            this.commit();
+            if (SqlGeneratorFactory.getInstance().supports(sql, this)) {
+                executor.execute(sql);
+                this.commit();
+            } else {
+                LogFactory.getLogger().info("Cannot run "+sql.getClass().getSimpleName()+" on "+this.getShortName()+" when checking databasechangelog table");
+            }
         }
 
         if (updateExistingNullChecksums) {

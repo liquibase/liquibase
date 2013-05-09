@@ -11,7 +11,7 @@ public class SmallIntType extends LiquibaseDataType {
 
     @Override
     public DatabaseDataType toDatabaseDataType(Database database) {
-        if (database instanceof DB2Database || database instanceof DerbyDatabase) {
+        if (database instanceof DB2Database || database instanceof DerbyDatabase || database instanceof FirebirdDatabase) {
             return new DatabaseDataType("SMALLINT"); //always smallint regardless of parameters passed
         }
         return super.toDatabaseDataType(database);

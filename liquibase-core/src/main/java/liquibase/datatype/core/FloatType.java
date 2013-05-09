@@ -1,10 +1,23 @@
 package liquibase.datatype.core;
 
+import liquibase.database.Database;
+import liquibase.database.core.DB2Database;
+import liquibase.database.core.DerbyDatabase;
+import liquibase.database.core.FirebirdDatabase;
 import liquibase.datatype.DataTypeInfo;
+import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
 
 @DataTypeInfo(name="float", aliases = {"java.sql.Types.FLOAT","java.lang.Float"}, minParameters = 0, maxParameters = 2, priority = LiquibaseDataType.PRIORITY_DEFAULT)
 public class FloatType  extends LiquibaseDataType {
+
+    @Override
+    public DatabaseDataType toDatabaseDataType(Database database) {
+        if (database instanceof FirebirdDatabase) {
+            return new DatabaseDataType("FLOAT");
+        }
+        return super.toDatabaseDataType(database);
+    }
 
     //sqlite
     //        } else if (columnTypeString.equals("REAL") ||

@@ -2,6 +2,7 @@ package liquibase.snapshot;
 
 import liquibase.database.Database;
 import liquibase.database.jvm.JdbcConnection;
+import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.jvm.ColumnMapRowMapper;
 import liquibase.executor.jvm.RowMapperResultSetExtractor;
 
@@ -129,6 +130,9 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                     needToFilter = true;
                 } else {
                     returnList = cacheResultSet(byTableKey, databaseMetaData.getColumns(catalogName, schemaName, tableNamePattern, null));
+                    if (returnList.size() == 0) {
+                        throw new UnexpectedLiquibaseException("No Columns found for "+tableNamePattern);
+                    }
                 }
             }
 

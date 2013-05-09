@@ -62,7 +62,7 @@ public class TableSnapshotGenerator extends JdbcSnapshotGenerator {
                 tableMetaDataRs = ((JdbcDatabaseSnapshot) snapshot).getMetaData().getTables(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), null, new String[]{"TABLE"});
                 for (JdbcDatabaseSnapshot.CachedRow row : tableMetaDataRs) {
                     String tableName = row.getString("TABLE_NAME");
-                    Table tableExample = (Table) new Table().setName(tableName).setSchema(schema);
+                    Table tableExample = (Table) new Table().setName(cleanNameFromDatabase(tableName, database)).setSchema(schema);
 
                     schema.addDatabaseObject(tableExample);
                 }

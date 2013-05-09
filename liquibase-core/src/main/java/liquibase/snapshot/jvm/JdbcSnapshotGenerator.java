@@ -99,6 +99,7 @@ public abstract class JdbcSnapshotGenerator implements SnapshotGenerator {
         if (objectName == null) {
             return null;
         }
+        objectName = objectName.trim();
         if (database instanceof PostgresDatabase) {
             return objectName.replaceAll("\"", "");
         }

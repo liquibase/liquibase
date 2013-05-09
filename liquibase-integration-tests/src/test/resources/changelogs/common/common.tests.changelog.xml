@@ -148,10 +148,10 @@
         </createTable>
     </changeSet>
 
-    <changeSet id="nullable-1" author="nvoxland">
+    <changeSet id="nullable-1" author="nvoxland" dbms="!firebird">
         <addNotNullConstraint tableName="compoundPKTest" columnName="name" columnDataType="varchar(255)" defaultNullValue="testValue"/>
     </changeSet>
-    <changeSet id="nullable-2" author="nvoxland">
+    <changeSet id="nullable-2" author="nvoxland" dbms="!firebird">
         <dropNotNullConstraint tableName="compoundPKTest" columnName="name" columnDataType="varchar(255)"/>
     </changeSet>
 
@@ -316,11 +316,11 @@
         </createTable>
     </changeSet>
 
-    <changeSet id="makeNotnulltest" author="nvoxland">
+    <changeSet id="makeNotnulltest" author="nvoxland" dbms="!firebird">
         <addNotNullConstraint tableName="commonTypesTest" columnName="intColumn" columnDataType="int"/>
     </changeSet>
 
-    <changeSet id="makenulltest" author="nvoxland">
+    <changeSet id="makenulltest" author="nvoxland" dbms="!firebird">
         <dropNotNullConstraint tableName="commonTypesTest" columnName="intColumn" columnDataType="int"/>
     </changeSet>
 
@@ -862,7 +862,7 @@
         </createTable>
     </changeSet>
 
-    <changeSet id="seq-test" author="nvoxland">
+    <changeSet id="seq-test" author="nvoxland" onValidationFail="MARK_RAN">
         <comment>Database that don't support sequences will just continue on</comment>
         <createSequence sequenceName="seqtestonall"/>
     </changeSet>
@@ -1035,15 +1035,15 @@
   </changeSet>
 
   <changeSet id="checkUtf8HandledCorrectly" author="Mohammad Nadeem">
-    <createTable tableName="testUtf8Insert">
-      <column name="stringValue" type="varchar(10)" />
+    <createTable tableName="testutf8insert">
+      <column name="stringvalue" type="varchar(10)" />
     </createTable>
 
 
     <sql>
       <![CDATA[  
-	    insert into testUtf8Insert (stringValue) values ('€');
-        insert into testUtf8Insert (stringValue) values ('£');
+	    insert into testutf8insert (stringvalue) values ('€');
+        insert into testutf8insert (stringvalue) values ('£');
         ]]>
     </sql>
   </changeSet>

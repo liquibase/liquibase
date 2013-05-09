@@ -334,19 +334,23 @@ public abstract class AbstractChange implements Change {
         }
 
         String unsupportedWarning = ChangeFactory.getInstance().getChangeMetaData(this).getName() + " is not supported on " + database.getShortName();
-        boolean sawUnsupportedError = false;
-        SqlStatement[] statements;
-        statements = generateStatements(database);
-        if (statements != null) {
-            for (SqlStatement statement : statements) {
-                boolean supported = SqlGeneratorFactory.getInstance().supports(statement, database);
-                if (!supported && !sawUnsupportedError) {
-                    if (!statement.skipOnUnsupported()) {
-                        changeValidationErrors.addError(unsupportedWarning);
-                        sawUnsupportedError = true;
+        if (!this.supports(database)) {
+            changeValidationErrors.addError(unsupportedWarning);
+        } else {
+            boolean sawUnsupportedError = false;
+            SqlStatement[] statements;
+            statements = generateStatements(database);
+            if (statements != null) {
+                for (SqlStatement statement : statements) {
+                    boolean supported = SqlGeneratorFactory.getInstance().supports(statement, database);
+                    if (!supported && !sawUnsupportedError) {
+                        if (!statement.skipOnUnsupported()) {
+                            changeValidationErrors.addError(unsupportedWarning);
+                            sawUnsupportedError = true;
+                        }
+                    } else {
+                        changeValidationErrors.addAll(SqlGeneratorFactory.getInstance().validate(statement, database));
                     }
-                } else {
-                    changeValidationErrors.addAll(SqlGeneratorFactory.getInstance().validate(statement, database));
                 }
             }
         }

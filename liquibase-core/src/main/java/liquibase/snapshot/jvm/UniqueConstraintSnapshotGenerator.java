@@ -67,7 +67,7 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
             Set<String> seenConstraints = new HashSet<String>();
 
             for (Map<String, Object> constraint : metadata) {
-                UniqueConstraint uq = new UniqueConstraint().setName((String) constraint.get("CONSTRAINT_NAME")).setTable(table);
+                UniqueConstraint uq = new UniqueConstraint().setName(cleanNameFromDatabase((String) constraint.get("CONSTRAINT_NAME"), database)).setTable(table);
                 if (seenConstraints.add(uq.getName())) {
                     table.getUniqueConstraints().add(uq);
                 }
@@ -102,7 +102,12 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
                     "and t.tabschema = '" + database.correctObjectName(schema.getCatalogName(), Catalog.class) + "' " +
                     "and t.type='U'";
         } else if (database instanceof FirebirdDatabase) {
-            sql = "SELECT RDB$INDEX_NAME FROM RDB$INDICES WHERE RDB$RELATION_NAME='"+database.correctObjectName(table.getName(), Table.class)+"' AND RDB$UNIQUE_FLAG IS NOT NULL);";
+            sql = "SELECT RDB$INDICES.RDB$INDEX_NAME AS CONSTRAINT_NAME FROM RDB$INDICES " +
+                    "LEFT JOIN RDB$RELATION_CONSTRAINTS ON RDB$RELATION_CONSTRAINTS.RDB$INDEX_NAME = RDB$INDICES.RDB$INDEX_NAME " +
+                    "WHERE RDB$INDICES.RDB$RELATION_NAME='"+database.correctObjectName(table.getName(), Table.class)+"' " +
+                    "AND RDB$INDICES.RDB$UNIQUE_FLAG IS NOT NULL " +
+                    "AND RDB$RELATION_CONSTRAINTS.RDB$CONSTRAINT_TYPE != 'PRIMARY KEY' "+
+                    "AND NOT(RDB$INDICES.RDB$INDEX_NAME LIKE 'RDB$%')";
         } else {
             sql = "select CONSTRAINT_NAME, CONSTRAINT_TYPE " +
                     "from information_schema.constraints " +
@@ -148,14 +153,32 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
                     "and t.type='U' " +
                     "and k.constname='"+database.correctObjectName(name, UniqueConstraint.class)+"' "+
                     "order by colseq";
+        } else if (database instanceof FirebirdDatabase) {
+            sql = "SELECT RDB$INDEX_SEGMENTS.RDB$FIELD_NAME AS column_name " +
+                    "FROM RDB$INDEX_SEGMENTS " +
+                    "LEFT JOIN RDB$INDICES ON RDB$INDICES.RDB$INDEX_NAME = RDB$INDEX_SEGMENTS.RDB$INDEX_NAME " +
+                    "WHERE UPPER(RDB$INDICES.RDB$INDEX_NAME)='"+database.correctObjectName(name, UniqueConstraint.class)+"' " +
+                    "ORDER BY RDB$INDEX_SEGMENTS.RDB$FIELD_POSITION";
         } else {
+            String catalogName = database.correctObjectName(schema.getCatalogName(), Catalog.class);
+            String schemaName = database.correctObjectName(schema.getName(), Schema.class);
+            String constraintName = database.correctObjectName(name, UniqueConstraint.class);
+            String tableName = database.correctObjectName(table.getName(), Table.class);
             sql = "select CONSTRAINT_NAME, COLUMN_LIST as COLUMN_NAME " +
                     "from information_schema.constraints " +
-                    "where constraint_schema='" + database.correctObjectName(schema.getName(), Schema.class) + "' " +
-                    "and constraint_catalog='" + database.correctObjectName(schema.getCatalogName(), Catalog.class) + "' " +
-                    "and constraint_type='UNIQUE' " +
-                    "and table_name='" + database.correctObjectName(table.getName(), Table.class) + "' "+
-                       "and constraint_name='" + database.correctObjectName(name, UniqueConstraint.class) + "'";
+                    "where constraint_type='UNIQUE' ";
+            if (catalogName != null) {
+                sql += "and constraint_catalog='" + catalogName + "' ";
+            }
+            if (schemaName != null) {
+                sql += "and constraint_schema='" + schemaName + "' ";
+            }
+            if (tableName != null) {
+                sql += "and table_name='" + tableName + "' ";
+            }
+            if (constraintName != null) {
+                sql += "and constraint_name='" + constraintName + "'";
+            }
         }
         return ExecutorService.getInstance().getExecutor(database).queryForList(new RawSqlStatement(sql));
     }
