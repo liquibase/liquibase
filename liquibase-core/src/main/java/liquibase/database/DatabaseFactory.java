@@ -11,7 +11,7 @@ import java.util.*;
 
 public class DatabaseFactory {
     private static DatabaseFactory instance;
-    private List<Database> implementedDatabases = new ArrayList<Database>();
+    private Map<String, SortedSet<Database>> implementedDatabases = new HashMap<String, SortedSet<Database>>();
 
     protected DatabaseFactory() {
         try {
@@ -43,20 +43,23 @@ public class DatabaseFactory {
      * Returns instances of all implemented database types.
      */
     public List<Database> getImplementedDatabases() {
-        return implementedDatabases;
+        List<Database> returnList = new ArrayList<Database>();
+        for (SortedSet<Database> set : implementedDatabases.values()) {
+            returnList.add(set.iterator().next());
+        }
+        return returnList;
     }
 
     public void register(Database database) {
-        implementedDatabases.add(0, database);
+        if (!implementedDatabases.containsKey(database.getShortName())) {
+            implementedDatabases.put(database.getShortName(), new TreeSet<Database>(new TreeSet<Database>(new DatabaseComparator())));
+        }
+        implementedDatabases.get(database.getShortName()).add(database);
     }
 
     public Database findCorrectDatabaseImplementation(DatabaseConnection connection) throws DatabaseException {
 
-        SortedSet<Database> foundDatabases = new TreeSet<Database>(new Comparator<Database>() {
-            public int compare(Database o1, Database o2) {
-                return -1 * new Integer(o1.getPriority()).compareTo(o2.getPriority());
-            }
-        });
+        SortedSet<Database> foundDatabases = new TreeSet<Database>(new DatabaseComparator());
 
         for (Database implementedDatabase : getImplementedDatabases()) {
             if (implementedDatabase.isCorrectDatabaseImplementation(connection)) {
@@ -100,4 +103,9 @@ public class DatabaseFactory {
         implementedDatabases.clear();
     }
 
+    private static class DatabaseComparator implements Comparator<Database> {
+        public int compare(Database o1, Database o2) {
+            return -1 * new Integer(o1.getPriority()).compareTo(o2.getPriority());
+        }
+    }
 }

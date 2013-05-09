@@ -451,6 +451,11 @@ public class AbstractChangeTest {
 
         ValidationErrors errors = new ExampleParamlessAbstractChange() {
             @Override
+            public boolean supports(Database database) {
+                return true;
+            }
+
+            @Override
             public SqlStatement[] generateStatements(Database database) {
                 return new SqlStatement[]{statementSkip, statementFails};
             }

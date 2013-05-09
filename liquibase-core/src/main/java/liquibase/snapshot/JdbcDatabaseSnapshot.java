@@ -5,6 +5,7 @@ import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.jvm.ColumnMapRowMapper;
 import liquibase.executor.jvm.RowMapperResultSetExtractor;
+import liquibase.structure.core.Table;
 
 import java.sql.*;
 import java.util.*;
@@ -131,7 +132,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                 } else {
                     returnList = cacheResultSet(byTableKey, databaseMetaData.getColumns(catalogName, schemaName, tableNamePattern, null));
                     if (returnList.size() == 0) {
-                        throw new UnexpectedLiquibaseException("No Columns found for "+tableNamePattern);
+                        throw new UnexpectedLiquibaseException("No Columns found for table "+tableNamePattern);
                     }
                 }
             }
