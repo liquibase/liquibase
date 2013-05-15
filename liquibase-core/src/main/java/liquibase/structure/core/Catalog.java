@@ -28,7 +28,13 @@ public class Catalog extends AbstractDatabaseObject {
     public String getName() {
         return getAttribute("name", String.class);
     }
-    
+
+    public Catalog setName(String name) {
+        setAttribute("name", name);
+        return this;
+    }
+
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

@@ -36,7 +36,7 @@ public class DerbyDatabase extends AbstractJdbcDatabase {
         // CORE-1230 - don't shutdown derby network server
         if (url.startsWith("jdbc:derby://")) {
             return "org.apache.derby.jdbc.ClientDriver";
-        } else if (url.startsWith("java:derby")) {
+        } else if (url.startsWith("jdbc:derby") || url.startsWith("java:derby")) {
             return "org.apache.derby.jdbc.EmbeddedDriver";
         }
         return null;
@@ -44,6 +44,16 @@ public class DerbyDatabase extends AbstractJdbcDatabase {
 
     public int getPriority() {
         return PRIORITY_DEFAULT;
+    }
+
+    @Override
+    public boolean supportsSchemas() {
+        return false;
+    }
+
+    @Override
+    public boolean jdbcCallsCatalogsSchemas() {
+        return true;
     }
 
     public Integer getDefaultPort() {
@@ -57,6 +67,9 @@ public class DerbyDatabase extends AbstractJdbcDatabase {
 
     @Override
     public String correctObjectName(String objectName, Class<? extends DatabaseObject> objectType) {
+        if (objectName == null) {
+            return null;
+        }
         return objectName.toUpperCase();
     }
 
@@ -166,7 +179,7 @@ public class DerbyDatabase extends AbstractJdbcDatabase {
     }
 
     @Override
-    protected String doGetDefaultSchemaName() {
+    protected String doGetDefaultCatalogName() throws DatabaseException {
         try {
             ResultSet resultSet = ((JdbcConnection) getConnection()).prepareStatement("select current schema from sysibm.sysdummy1").executeQuery();
             resultSet.next();
@@ -177,4 +190,9 @@ public class DerbyDatabase extends AbstractJdbcDatabase {
         return null;
     }
 
+
+    @Override
+    public boolean supportsCatalogInObjectName(Class<? extends DatabaseObject> type) {
+        return true;
+    }
 }

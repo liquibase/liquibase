@@ -4,6 +4,7 @@ import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.exception.DatabaseException;
+import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.ExecutorService;
 import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.SnapshotGeneratorChain;
@@ -11,6 +12,7 @@ import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
+import liquibase.util.StringUtils;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -108,6 +110,14 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
                     "AND RDB$INDICES.RDB$UNIQUE_FLAG IS NOT NULL " +
                     "AND RDB$RELATION_CONSTRAINTS.RDB$CONSTRAINT_TYPE != 'PRIMARY KEY' "+
                     "AND NOT(RDB$INDICES.RDB$INDEX_NAME LIKE 'RDB$%')";
+        } else if (database instanceof DerbyDatabase) {
+            sql = "select c.constraintname as CONSTRAINT_NAME " +
+                    "from sys.systables t, sys.sysconstraints c, sys.sysschemas s " +
+                    "where t.tablename = '"+database.correctObjectName(table.getName(), Table.class)+"' " +
+                    "and s.schemaname='"+database.correctObjectName(schema.getCatalogName(), Catalog.class)+"' "+
+                    "and t.tableid = c.tableid " +
+                    "and t.schemaid=s.schemaid " +
+                    "and c.type = 'U'";
         } else {
             sql = "select CONSTRAINT_NAME, CONSTRAINT_TYPE " +
                     "from information_schema.constraints " +
@@ -153,6 +163,39 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
                     "and t.type='U' " +
                     "and k.constname='"+database.correctObjectName(name, UniqueConstraint.class)+"' "+
                     "order by colseq";
+        } else if (database instanceof DerbyDatabase) {
+            sql = "SELECT cg.descriptor as descriptor, t.tablename " +
+                    "FROM sys.sysconglomerates cg "+
+                    "JOIN sys.syskeys k ON cg.conglomerateid = k.conglomerateid "+
+                    "JOIN sys.sysconstraints c ON c.constraintid = k.constraintid " +
+                    "JOIN sys.systables t ON c.tableid = t.tableid "+
+                    "WHERE c.constraintname='"+database.correctObjectName(name, UniqueConstraint.class)+"'";
+            List<Map> rows = ExecutorService.getInstance().getExecutor(database).queryForList(new RawSqlStatement(sql));
+
+            List<Map> returnList = new ArrayList<Map>();
+            if (rows.size() == 0) {
+                return returnList;
+            } else if (rows.size() > 1) {
+                throw new UnexpectedLiquibaseException("Got multiple rows back querying unique constraints");
+            } else {
+                Map rowData = rows.get(0);
+                String descriptor = rowData.get("DESCRIPTOR").toString();
+                descriptor = descriptor.replaceFirst(".*\\(","").replaceFirst("\\).*","");
+                for (String columnNumber : StringUtils.splitAndTrim(descriptor, ",")) {
+                    String columnName = (String) ExecutorService.getInstance().getExecutor(database).queryForObject(new RawSqlStatement(
+                            "select c.columnname from sys.syscolumns c " +
+                                    "join sys.systables t on t.tableid=c.referenceid " +
+                                    "where t.tablename='"+rowData.get("TABLENAME")+"' and c.columnnumber=" + columnNumber), String.class);
+
+                    Map<String, String> row = new HashMap<String, String>();
+                    row.put("COLUMN_NAME", columnName);
+                    returnList.add(row);
+                }
+                return returnList;
+            }
+
+
+
         } else if (database instanceof FirebirdDatabase) {
             sql = "SELECT RDB$INDEX_SEGMENTS.RDB$FIELD_NAME AS column_name " +
                     "FROM RDB$INDEX_SEGMENTS " +

@@ -60,12 +60,12 @@ public class AddAutoIncrementExecuteTest extends AbstractExecuteTest {
 
 
         assertCorrect("alter table [table_name] add [table_name] column_name default 42 null", SybaseDatabase.class);
-        assertCorrect("alter table [dbo].[table_name] add [table_name] column_name constraint df_table_name_table_name default 42", MSSQLDatabase.class);
+        assertCorrect("alter table [table_name] add [table_name] column_name constraint df_table_name_table_name default 42", MSSQLDatabase.class);
 //        assertCorrect("alter table [table_name] add [column_name] integer default 42", SQLiteDatabase.class);
         assertCorrect("not supported. fixme!!", SQLiteDatabase.class);
         assertCorrect("alter table table_name add table_name column_name default 42", PostgresDatabase.class, InformixDatabase.class, OracleDatabase.class, DerbyDatabase.class, HsqlDatabase.class, DB2Database.class, H2Database.class, CacheDatabase.class, FirebirdDatabase.class, MaxDBDatabase.class);
         assertCorrect("alter table [table_name] add [table_name] column_name default 42 null", SybaseASADatabase.class);
-        assertCorrect("alter table `table_name` add `table_name` column_name default 42", MySQLDatabase.class);
+        assertCorrect("alter table table_name add table_name column_name default 42", MySQLDatabase.class);
         assertCorrectOnRest("ALTER TABLE [table_name] ADD [column_name] int DEFAULT 42");
     }
 
@@ -89,8 +89,8 @@ public class AddAutoIncrementExecuteTest extends AbstractExecuteTest {
 
         assertCorrect("ALTER TABLE [table_name] ADD [column_name] int DEFAULT 42 NOT NULL", SybaseASADatabase.class, SybaseDatabase.class);
         assertCorrect("alter table table_name add column_name int default 42 not null", InformixDatabase.class);
-        assertCorrect("alter table [dbo].[table_name] add [column_name] int not null constraint df_table_name_column_name default 42", MSSQLDatabase.class);
-        assertCorrect("alter table table_name add column_name int default 42 not null", OracleDatabase.class, DerbyDatabase.class, HsqlDatabase.class, DB2Database.class, H2Database.class, FirebirdDatabase.class);
+        assertCorrect("alter table [table_name] add [column_name] int not null constraint df_table_name_column_name default 42", MSSQLDatabase.class);
+        assertCorrect("alter table table_name add column_name integer default 42 not null", OracleDatabase.class, DerbyDatabase.class, HsqlDatabase.class, DB2Database.class, H2Database.class, FirebirdDatabase.class);
         assertCorrect("not supported. fixme!!", SQLiteDatabase.class);
         assertCorrectOnRest("ALTER TABLE [table_name] ADD [column_name] int NOT NULL DEFAULT 42");
     }

@@ -566,4 +566,8 @@ public class MockDatabase implements Database {
     public ObjectQuotingStrategy getObjectQuotingStrategy() {
         return ObjectQuotingStrategy.LEGACY;
     }
+
+    public boolean supportsCatalogInObjectName(Class<? extends DatabaseObject> type) {
+        return true;
+    }
 }

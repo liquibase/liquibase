@@ -19,6 +19,8 @@ public interface DatabaseObject extends Comparable{
 
     String getName();
 
+    <T> T setName(String name);
+
     Schema getSchema();
 
     boolean snapshotByDefault();

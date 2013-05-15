@@ -200,7 +200,7 @@ public interface Database extends PrioritizedService {
 
     boolean supportsSchemas();
 
-    boolean supportsCatalogInObjectName();
+    boolean supportsCatalogInObjectName(Class<? extends DatabaseObject> type);
 
     String generatePrimaryKeyName(String tableName);
 

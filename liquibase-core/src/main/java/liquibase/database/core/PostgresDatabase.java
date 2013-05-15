@@ -84,7 +84,7 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
     }
 
     @Override
-    public boolean supportsCatalogInObjectName() {
+    public boolean supportsCatalogInObjectName(Class<? extends DatabaseObject> type) {
         return false;
     }
 

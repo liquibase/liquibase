@@ -137,11 +137,6 @@ public class HsqlDatabase extends AbstractJdbcDatabase {
     }
 
     @Override
-    public String escapeObjectName(String catalogName, String schemaName, String objectName, Class<? extends DatabaseObject> objectType) {
-        return super.escapeObjectName(null, schemaName, objectName, objectType);
-    }
-
-    @Override
     public boolean isReservedWord(String value) {
         return keywords.contains(value.toUpperCase());
     }

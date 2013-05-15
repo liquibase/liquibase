@@ -33,7 +33,13 @@ public class Schema extends AbstractDatabaseObject {
     public String getName() {
         return getAttribute("name", String.class);
     }
-    
+
+
+    public Schema setName(String name) {
+        setAttribute("name", name);
+        return this;
+    }
+
     public Schema getSchema() {
         return this;
     }

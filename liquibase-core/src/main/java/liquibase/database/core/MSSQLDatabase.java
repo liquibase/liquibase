@@ -269,14 +269,6 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
     }
 
     @Override
-    public String escapeObjectName(String catalogName, String schemaName, String objectName, Class<? extends DatabaseObject> objectType) {
-//        if (schemaName == null) {
-//            schemaName = "dbo";
-//        }
-        return super.escapeObjectName(catalogName, schemaName, objectName, objectType);
-    }
-
-    @Override
 	public String getDefaultSchemaName() {
         String defaultSchemaName = super.getDefaultSchemaName();
         if (defaultSchemaName == null) {

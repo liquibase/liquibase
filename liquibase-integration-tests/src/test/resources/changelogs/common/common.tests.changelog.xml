@@ -78,7 +78,7 @@
             <column name="dateTimeCol" valueDate="2007-08-09T13:14:15"/>
             <column name="bigintcol" valueNumeric="2"/>
         </insert>
-        <insert tableName="dataTypeTest">
+        <insert tableName="dataTypeTest" dbms="!derby">
           <column name="id" valueNumeric="2"/>
           <column name="dateCol" valueDate="current_datetime"/>
           <column name="timeCol" valueComputed="current_datetime"/>
@@ -346,7 +346,7 @@
         </addColumn>
     </changeSet>
 
-    <changeSet author="nvoxland" id="updateTest">
+    <changeSet author="nvoxland" id="updateTest" dbms="!derby">
         <createTable tableName="updateTest">
             <column name="id" type="int"/>
             <column name="varcharColumn" type="varchar(255)"/>
@@ -936,11 +936,11 @@
         </createTable>
 
         <insert tableName="params_test">
-            <column name="id" value="1" />
+            <column name="id" valueNumeric="1" />
             <column name="string_value" value="testVal1" />
         </insert>
         <insert tableName="params_test">
-            <column name="id" value="2" />
+            <column name="id" valueNumeric="2" />
             <column name="string_value" value="testVal2" />
         </insert>
 

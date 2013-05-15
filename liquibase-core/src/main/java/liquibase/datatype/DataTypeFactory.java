@@ -147,7 +147,7 @@ public class DataTypeFactory {
                     try {
                         ObjectUtil.setProperty(liquibaseDataType, paramAndValue[0], paramAndValue[1]);
                     } catch (Exception e) {
-                        throw new RuntimeException("Unknown property "+paramAndValue[0]+" for "+liquibaseDataType.getClass().getName());
+                        throw new RuntimeException("Unknown property "+paramAndValue[0]+" for "+liquibaseDataType.getClass().getName()+" "+liquibaseDataType.toString());
                     }
                 }
             }

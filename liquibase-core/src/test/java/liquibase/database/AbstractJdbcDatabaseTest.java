@@ -2,6 +2,8 @@ package liquibase.database;
 
 import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
+
+import liquibase.structure.core.Table;
 import org.junit.Test;
 
 /**
@@ -82,7 +84,11 @@ public abstract class AbstractJdbcDatabaseTest {
     @Test
     public void escapeTableName_withSchema() {
         Database database = getDatabase();
-        assertEquals("catalogName.schemaName.tableName", database.escapeTableName("catalogName", "schemaName", "tableName"));
+        if (database.supportsCatalogInObjectName(Table.class)) {
+            assertEquals("catalogName.schemaName.tableName", database.escapeTableName("catalogName", "schemaName", "tableName"));
+        } else {
+            assertEquals("schemaName.tableName", database.escapeTableName("catalogName", "schemaName", "tableName"));
+        }
     }
 
 //    @Test

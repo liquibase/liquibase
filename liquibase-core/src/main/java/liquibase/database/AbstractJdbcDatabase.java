@@ -963,9 +963,12 @@ public abstract class AbstractJdbcDatabase implements Database {
         if (supportsSchemas()) {
             catalogName = StringUtils.trimToNull(catalogName);
             schemaName = StringUtils.trimToNull(schemaName);
+            if (!supportsCatalogInObjectName(objectType)) {
+                catalogName = null;
+            }
             if (catalogName == null && schemaName == null) {
                 return escapeObjectName(objectName, objectType);
-            } else if (catalogName == null || !this.supportsCatalogInObjectName()) {
+            } else if (catalogName == null || !this.supportsCatalogInObjectName(objectType)) {
                 return escapeObjectName(schemaName, Schema.class) + "." + escapeObjectName(objectName, objectType);
             } else {
                 return escapeObjectName(catalogName, Catalog.class) + "." + escapeObjectName(schemaName, Schema.class) + "." + escapeObjectName(objectName, objectType);
@@ -1039,8 +1042,8 @@ public abstract class AbstractJdbcDatabase implements Database {
         return false;
     }
 
-    public boolean supportsCatalogInObjectName() {
-        return true;
+    public boolean supportsCatalogInObjectName(Class<? extends DatabaseObject> type) {
+        return false;
     }
 
     public String generatePrimaryKeyName(String tableName) {

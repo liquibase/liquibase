@@ -60,9 +60,9 @@ public class ColumnExistsPrecondition implements Precondition {
     public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet) throws PreconditionFailedException, PreconditionErrorException {
         Column example = new Column();
         if (StringUtils.trimToNull(getTableName()) != null) {
-            example.setRelation(new Table().setName(getTableName()).setSchema(new Schema(getCatalogName(), getSchemaName())));
+            example.setRelation(new Table().setName(database.correctObjectName(getTableName(), Table.class)).setSchema(new Schema(getCatalogName(), getSchemaName())));
         }
-        example.setName(getColumnName());
+        example.setName(database.correctObjectName(getColumnName(), Column.class));
 
         try {
             if (!SnapshotGeneratorFactory.getInstance().has(example, database)) {

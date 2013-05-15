@@ -14,6 +14,8 @@ import liquibase.CatalogAndSchema;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.jvm.JdbcConnection;
+import liquibase.exception.LiquibaseException;
+import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.structure.core.Table;
 import liquibase.datatype.DataTypeFactory;
@@ -139,8 +141,8 @@ public abstract class AbstractExecuteTest {
     }
 
     private String replaceType(String type, String baseString, Database database) {
-        return baseString.replaceAll(" " + type + " ", " " + DataTypeFactory.getInstance().fromDescription(type) + " ")
-                .replaceAll(" " + type + ",", " " + DataTypeFactory.getInstance().fromDescription(type) + ",");
+        return baseString.replaceAll(" " + type + " ", " " + DataTypeFactory.getInstance().fromDescription(type).toDatabaseDataType(database).toString() + " ")
+                .replaceAll(" " + type + ",", " " + DataTypeFactory.getInstance().fromDescription(type).toDatabaseDataType(database).toString() + ",");
     }
 
     private String replaceDatabaseClauses(String convertedSql, Database database) {
@@ -192,7 +194,11 @@ public abstract class AbstractExecuteTest {
             DatabaseConnection connection = database.getConnection();
             Statement connectionStatement = ((JdbcConnection) connection).getUnderlyingConnection().createStatement();
 
-            database.dropDatabaseObjects(CatalogAndSchema.DEFAULT);
+            try {
+                database.dropDatabaseObjects(CatalogAndSchema.DEFAULT);
+            } catch (Throwable e) {
+                throw new UnexpectedLiquibaseException("Error dropping objects for database "+database.getShortName(), e);
+            }
             try {
                 connectionStatement.executeUpdate("drop table " + database.escapeTableName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName()));
             } catch (SQLException e) {

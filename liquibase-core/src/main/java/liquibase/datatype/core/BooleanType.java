@@ -87,7 +87,7 @@ public class BooleanType extends LiquibaseDataType {
             return "0";
         }
         if (database instanceof InformixDatabase) {
-            return "f";
+            return "'f'";
         }
         return "FALSE";
     }
@@ -100,7 +100,7 @@ public class BooleanType extends LiquibaseDataType {
             return "1";
         }
         if (database instanceof InformixDatabase) {
-            return "t";
+            return "'t'";
         }
         return "TRUE";
     }
