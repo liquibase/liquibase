@@ -3,6 +3,7 @@ package liquibase.sqlgenerator.core;
 import liquibase.database.Database;
 import liquibase.database.core.H2Database;
 import liquibase.database.core.HsqlDatabase;
+import liquibase.datatype.DataTypeFactory;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
@@ -39,7 +40,7 @@ public class AddAutoIncrementGeneratorHsqlH2 extends AddAutoIncrementGenerator {
             			statement.getTableName(),
             			statement.getColumnName())
             		+ " "
-            		+ statement.getColumnDataType()
+            		+ DataTypeFactory.getInstance().fromDescription(statement.getColumnDataType())
             		+ " "
             		+ database.getAutoIncrementClause(
             			statement.getStartWith(), statement.getIncrementBy()),

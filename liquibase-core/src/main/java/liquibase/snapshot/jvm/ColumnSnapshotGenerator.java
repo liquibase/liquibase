@@ -305,7 +305,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
             } else if (type == Types.VARCHAR) {
                 return stringVal;
             } else {
-                LogFactory.getLogger().info("Unknown default value: value [" + stringVal + "] type [" + typeName + " " + type + "]");
+                LogFactory.getLogger().info("Unknown default value: value '" + stringVal + "' type " + typeName + " (" + type + "), assuming it is a function");
                 return new DatabaseFunction(stringVal);
             }
         } catch (ParseException e) {

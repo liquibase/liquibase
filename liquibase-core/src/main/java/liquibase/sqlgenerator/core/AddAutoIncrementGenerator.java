@@ -54,7 +54,7 @@ public class AddAutoIncrementGenerator extends AbstractSqlGenerator<AddAutoIncre
             + " MODIFY "
             + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName())
             + " "
-            + DataTypeFactory.getInstance().fromDescription(statement.getColumnDataType() + "{autoIncrement:true}")
+            + DataTypeFactory.getInstance().fromDescription(statement.getColumnDataType() + "{autoIncrement:true}").toDatabaseDataType(database)
             + " " 
             + database.getAutoIncrementClause(statement.getStartWith(), statement.getIncrementBy());
 

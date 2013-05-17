@@ -42,11 +42,6 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
             constraint.getColumns().add((String) col.get("COLUMN_NAME"));
         }
 
-        Index exampleIndex = new Index().setTable(constraint.getTable());
-        exampleIndex.getColumns().addAll(constraint.getColumns());
-        constraint.setBackingIndex(exampleIndex);
-
-
         return constraint;
     }
 
