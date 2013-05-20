@@ -1,1 +1,22 @@
-<beans/>
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://java.sun.com/xml/ns/javaee" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:weld="http://jboss.org/schema/weld/beans"
+    xsi:schemaLocation="
+      http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/beans_1_0.xsd
+      http://jboss.org/schema/weld/beans http://jboss.org/schema/weld/beans_1_1.xsd">
+
+    <weld:scan>
+        <weld:include name="**"/>
+        <weld:exclude name="liquibase.integration.ant.**">
+            <weld:if-class-available name="!org.apache.tools.ant.Task"/>
+        </weld:exclude>
+        <weld:exclude name="liquibase.integration.servlet.**">
+            <weld:if-class-available name="!javax.servlet.ServletContext"/>
+        </weld:exclude>
+        <weld:exclude name="liquibase.integration.spring.**">
+            <weld:if-class-available name="!org.springframework.beans.factory.InitializingBean"/>
+        </weld:exclude>
+    </weld:scan>
+
+</beans>
