@@ -16,13 +16,11 @@ import liquibase.test.JUnitResourceAccessor;
 import liquibase.util.StringUtils;
 import liquibase.verify.AbstractVerifyTest;
 import org.junit.Test;
-import sun.plugin2.os.windows.FLASHWINFO;
 
 import java.util.*;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 public class VerifyChangeClassesTest extends AbstractVerifyTest {
 
