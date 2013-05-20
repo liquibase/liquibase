@@ -841,8 +841,7 @@ public abstract class AbstractJdbcDatabase implements Database {
     }
 
     public boolean supportsDropTableCascadeConstraints() {
-        return (this instanceof FirebirdDatabase
-                || this instanceof SQLiteDatabase
+        return (this instanceof SQLiteDatabase
                 || this instanceof SybaseDatabase
                 || this instanceof SybaseASADatabase
                 || this instanceof PostgresDatabase
