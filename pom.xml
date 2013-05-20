@@ -4,7 +4,7 @@
 
     <groupId>org.liquibase</groupId>
     <artifactId>liquibase-parent</artifactId>
-    <version>3.0.0-beta3-SNAPSHOT</version>
+    <version>3.0.0-rc1-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>Liquibase Parent Configuration</name>
@@ -239,7 +239,7 @@
                             <configuration>
                                 <rules>
                                     <requireJavaVersion>
-                                        <version>1.5</version>
+                                        <version>1.6</version>
                                     </requireJavaVersion>
                                 </rules>
                             </configuration>
