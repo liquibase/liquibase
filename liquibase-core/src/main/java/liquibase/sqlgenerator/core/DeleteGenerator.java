@@ -9,6 +9,8 @@ import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.DeleteStatement;
 import liquibase.structure.core.Column;
+import liquibase.structure.core.Relation;
+import liquibase.structure.core.Table;
 
 import java.util.regex.Pattern;
 
@@ -43,6 +45,10 @@ public class DeleteGenerator extends AbstractSqlGenerator<DeleteStatement> {
             sql.append(" ").append(fixedWhereClause);
         }
 
-        return new Sql[]{new UnparsedSql(sql.toString())};
+        return new Sql[]{new UnparsedSql(sql.toString(), getAffectedTable(statement))};
+    }
+
+    protected Relation getAffectedTable(DeleteStatement statement) {
+        return new Table().setName(statement.getTableName()).setSchema(statement.getCatalogName(), statement.getSchemaName());
     }
 }

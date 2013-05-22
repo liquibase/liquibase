@@ -9,6 +9,8 @@ import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.CopyRowsStatement;
+import liquibase.structure.core.Relation;
+import liquibase.structure.core.Table;
 
 public class CopyRowsGenerator extends AbstractSqlGenerator<CopyRowsStatement> {
 
@@ -40,7 +42,11 @@ public class CopyRowsGenerator extends AbstractSqlGenerator<CopyRowsStatement> {
         }
 
         return new Sql[]{
-                new UnparsedSql(sql.toString())
+                new UnparsedSql(sql.toString(), getAffectedTable(statement))
         };
+    }
+
+    protected Relation getAffectedTable(CopyRowsStatement statement) {
+        return new Table().setName(statement.getTargetTable()).setSchema(null, null);
     }
 }

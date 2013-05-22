@@ -9,6 +9,7 @@ import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.DropSequenceStatement;
+import liquibase.structure.core.Sequence;
 
 public class DropSequenceGenerator extends AbstractSqlGenerator<DropSequenceStatement> {
 
@@ -32,7 +33,11 @@ public class DropSequenceGenerator extends AbstractSqlGenerator<DropSequenceStat
             sql += " RESTRICT";
         }
         return new Sql[] {
-                new UnparsedSql(sql)
+                new UnparsedSql(sql, getAffectedSequence(statement))
         };
+    }
+
+    protected Sequence getAffectedSequence(DropSequenceStatement statement) {
+        return new Sequence().setName(statement.getSequenceName()).setSchema(statement.getCatalogName(), statement.getSchemaName());
     }
 }

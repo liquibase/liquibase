@@ -7,6 +7,8 @@ import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.ClearDatabaseChangeLogTableStatement;
+import liquibase.structure.core.Relation;
+import liquibase.structure.core.Table;
 
 public class ClearDatabaseChangeLogTableGenerator extends AbstractSqlGenerator<ClearDatabaseChangeLogTableStatement> {
 
@@ -19,6 +21,12 @@ public class ClearDatabaseChangeLogTableGenerator extends AbstractSqlGenerator<C
         if (schemaName == null) {
             schemaName = database.getLiquibaseSchemaName();
         }
-        return new Sql[] { new UnparsedSql("DELETE FROM " + database.escapeTableName(database.getLiquibaseCatalogName(), schemaName, database.getDatabaseChangeLogTableName())) };
+        return new Sql[] {
+                new UnparsedSql("DELETE FROM " + database.escapeTableName(database.getLiquibaseCatalogName(), schemaName, database.getDatabaseChangeLogTableName()),
+                        getAffectedTable(database, schemaName)) };
+    }
+
+    protected Relation getAffectedTable(Database database, String schemaName) {
+        return new Table().setName(database.getDatabaseChangeLogTableName()).setSchema(database.getLiquibaseCatalogName(), schemaName);
     }
 }

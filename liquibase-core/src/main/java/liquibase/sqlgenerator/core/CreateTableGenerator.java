@@ -14,6 +14,7 @@ import liquibase.statement.ForeignKeyConstraint;
 import liquibase.statement.UniqueConstraint;
 import liquibase.statement.core.CreateTableStatement;
 import liquibase.structure.core.Column;
+import liquibase.structure.core.Relation;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
 import liquibase.util.StringUtils;
@@ -262,8 +263,12 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
         }
 
         return new Sql[] {
-                new UnparsedSql(sql)
+                new UnparsedSql(sql, getAffectedTable(statement))
         };
+    }
+
+    protected Relation getAffectedTable(CreateTableStatement statement) {
+        return new Table().setName(statement.getTableName()).setSchema(new Schema(statement.getCatalogName(), statement.getSchemaName()));
     }
 
     private boolean constraintNameAfterUnique(Database database) {

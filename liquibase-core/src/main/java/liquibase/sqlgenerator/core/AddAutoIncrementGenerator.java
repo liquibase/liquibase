@@ -59,9 +59,13 @@ public class AddAutoIncrementGenerator extends AbstractSqlGenerator<AddAutoIncre
             + database.getAutoIncrementClause(statement.getStartWith(), statement.getIncrementBy());
 
         return new Sql[]{
-            new UnparsedSql(sql, new Column()
-                .setRelation(new Table().setName(statement.getTableName()).setSchema(new Schema(statement.getCatalogName(), statement.getSchemaName())))
-                .setName(statement.getColumnName()))
+            new UnparsedSql(sql, getAffectedColumn(statement))
         };
+    }
+
+    protected Column getAffectedColumn(AddAutoIncrementStatement statement) {
+        return new Column()
+            .setRelation(new Table().setName(statement.getTableName()).setSchema(new Schema(statement.getCatalogName(), statement.getSchemaName())))
+            .setName(statement.getColumnName());
     }
 }

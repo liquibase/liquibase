@@ -54,4 +54,8 @@ public class Sequence extends AbstractDatabaseObject {
 		this.setAttribute("schema", schema);
         return this;
 	}
+
+    public Sequence setSchema(String catalog, String schema) {
+        return setSchema(new Schema(catalog, schema));
+    }
 }

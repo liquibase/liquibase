@@ -2,23 +2,29 @@ package liquibase.structure.core;
 
 import liquibase.structure.AbstractDatabaseObject;
 import liquibase.structure.DatabaseObject;
+import liquibase.util.StringUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class ForeignKey extends AbstractDatabaseObject{
 
     public DatabaseObject[] getContainingObjects() {
 
+        List<Column> objects = new ArrayList<Column>();
+        if (getPrimaryKeyColumns() != null) {
+            for (String column : StringUtils.splitAndTrim(getPrimaryKeyColumns(), ",")) {
+                objects.add(new Column().setName(column).setRelation(getPrimaryKeyTable()));
+            }
+        }
 
-        return new DatabaseObject[] {
-                new Column()
-                        .setName(getPrimaryKeyColumns())
-                        .setRelation(getPrimaryKeyTable()),
-                new Column()
-                        .setName(getForeignKeyColumns())
-                        .setRelation(getForeignKeyTable())
+        if (getForeignKeyColumns() != null) {
+            for (String column : StringUtils.splitAndTrim(getForeignKeyColumns(), ",")) {
+                objects.add(new Column().setName(column).setRelation(getForeignKeyTable()));
+            }
+        }
 
-        };
+        return objects.toArray(new DatabaseObject[objects.size()]);
     }
 
     public Schema getSchema() {

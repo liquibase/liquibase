@@ -4,12 +4,14 @@ import liquibase.CatalogAndSchema;
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.informix.sqlgenerator.core.InformixCreateViewGenerator;
+import liquibase.structure.core.Relation;
 import liquibase.structure.core.Schema;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.CreateViewStatement;
+import liquibase.structure.core.View;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -68,8 +70,12 @@ public class CreateViewGenerator extends AbstractSqlGenerator<CreateViewStatemen
         } else {
             createClause = "CREATE " + (statement.isReplaceIfExists() ? "OR REPLACE " : "") + "VIEW";
         }
-        sql.add(new UnparsedSql(createClause + " " + database.escapeViewName(statement.getCatalogName(), statement.getSchemaName(), statement.getViewName()) + " AS " + statement.getSelectQuery()));
+        sql.add(new UnparsedSql(createClause + " " + database.escapeViewName(statement.getCatalogName(), statement.getSchemaName(), statement.getViewName()) + " AS " + statement.getSelectQuery(), getAffectedView(statement)));
 
         return sql.toArray(new Sql[sql.size()]);
+    }
+
+    protected Relation getAffectedView(CreateViewStatement statement) {
+        return new View().setName(statement.getViewName()).setSchema(statement.getCatalogName(), statement.getSchemaName());
     }
 }

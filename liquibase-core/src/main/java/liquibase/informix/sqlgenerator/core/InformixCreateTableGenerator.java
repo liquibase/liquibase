@@ -15,6 +15,8 @@ import liquibase.statement.AutoIncrementConstraint;
 import liquibase.statement.ForeignKeyConstraint;
 import liquibase.statement.UniqueConstraint;
 import liquibase.statement.core.CreateTableStatement;
+import liquibase.structure.core.Schema;
+import liquibase.structure.core.Table;
 import liquibase.util.StringUtils;
 
 
@@ -162,7 +164,7 @@ public class InformixCreateTableGenerator extends AbstractSqlGenerator<CreateTab
             sql += " IN " + statement.getTablespace();
         }
 
-        return new Sql[] { new UnparsedSql(sql) };
+        return new Sql[] { new UnparsedSql(sql, new Table().setName(statement.getTableName()).setSchema(new Schema(statement.getCatalogName(), statement.getSchemaName()))) };
 	}
 
 	private boolean constraintNameAfterUnique(Database database) {

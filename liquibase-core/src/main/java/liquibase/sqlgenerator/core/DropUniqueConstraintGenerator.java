@@ -8,6 +8,10 @@ import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.DropUniqueConstraintStatement;
+import liquibase.structure.core.Column;
+import liquibase.structure.core.Table;
+import liquibase.structure.core.UniqueConstraint;
+import liquibase.util.StringUtils;
 
 public class DropUniqueConstraintGenerator extends AbstractSqlGenerator<DropUniqueConstraintStatement> {
 
@@ -38,7 +42,18 @@ public class DropUniqueConstraintGenerator extends AbstractSqlGenerator<DropUniq
         }
 
         return new Sql[] {
-                new UnparsedSql(sql)
+                new UnparsedSql(sql, getAffectedUniqueConstraint(statement))
         };
+    }
+
+    protected UniqueConstraint getAffectedUniqueConstraint(DropUniqueConstraintStatement statement) {
+        UniqueConstraint constraint = new UniqueConstraint().setName(statement.getConstraintName()).setTable((Table) new Table().setName(statement.getTableName()).setSchema(statement.getCatalogName(), statement.getSchemaName()));
+        if (statement.getUniqueColumns() != null) {
+            int i = 0;
+            for (String column : StringUtils.splitAndTrim(statement.getUniqueColumns(), ",")) {
+                constraint.addColumn(i++, column);
+            }
+        }
+        return constraint;
     }
 }

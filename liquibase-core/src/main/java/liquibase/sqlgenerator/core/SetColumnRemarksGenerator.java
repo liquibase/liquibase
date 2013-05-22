@@ -10,6 +10,8 @@ import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.SetColumnRemarksStatement;
+import liquibase.structure.core.Column;
+import liquibase.structure.core.Table;
 
 public class SetColumnRemarksGenerator extends AbstractSqlGenerator<SetColumnRemarksStatement> {
 	@Override
@@ -35,14 +37,18 @@ public class SetColumnRemarksGenerator extends AbstractSqlGenerator<SetColumnRem
 			return new Sql[] {
 					new UnparsedSql("LABEL ON " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " ("
 							+ database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName())
-							+ " TEXT IS '" + database.escapeStringForDatabase(statement.getRemarks()) + "')"),
+							+ " TEXT IS '" + database.escapeStringForDatabase(statement.getRemarks()) + "')", getAffectedColumn(statement)),
 					new UnparsedSql("LABEL ON COLUMN " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + "."
 							+ database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName())
-							+ " IS '" + database.escapeStringForDatabase(statement.getRemarks()) + "'") };
+							+ " IS '" + database.escapeStringForDatabase(statement.getRemarks()) + "'", getAffectedColumn(statement)) };
 		}
 
 		return new Sql[] { new UnparsedSql("COMMENT ON COLUMN " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName())
 				+ "." + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " IS '"
-				+ database.escapeStringForDatabase(statement.getRemarks()) + "'") };
+				+ database.escapeStringForDatabase(statement.getRemarks()) + "'", getAffectedColumn(statement)) };
 	}
+
+    protected Column getAffectedColumn(SetColumnRemarksStatement statement) {
+        return new Column().setName(statement.getColumnName()).setRelation(new Table().setName(statement.getTableName()).setSchema(statement.getCatalogName(), statement.getSchemaName()));
+    }
 }

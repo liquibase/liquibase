@@ -67,6 +67,10 @@ public abstract class Relation extends AbstractDatabaseObject {
         return this;
     }
 
+    public Relation setSchema(String catalog, String schema) {
+        return setSchema(new Schema(catalog, schema));
+    }
+
     public int compareTo(Relation o) {
         return this.getName().compareToIgnoreCase(o.getName());
     }

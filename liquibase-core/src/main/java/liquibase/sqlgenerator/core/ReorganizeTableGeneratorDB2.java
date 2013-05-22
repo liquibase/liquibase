@@ -9,6 +9,8 @@ import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.ReorganizeTableStatement;
+import liquibase.structure.core.Relation;
+import liquibase.structure.core.Table;
 
 public class ReorganizeTableGeneratorDB2 extends AbstractSqlGenerator<ReorganizeTableStatement> {
     @Override
@@ -31,7 +33,8 @@ public class ReorganizeTableGeneratorDB2 extends AbstractSqlGenerator<Reorganize
         try {
             if (database.getDatabaseMajorVersion() >= 9) {
                 return new Sql[]{
-                        new UnparsedSql("CALL SYSPROC.ADMIN_CMD ('REORG TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + "')")
+                        new UnparsedSql("CALL SYSPROC.ADMIN_CMD ('REORG TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + "')",
+                                getAffectedTable(statement))
                 };
             } else {
                 return null;
@@ -39,5 +42,9 @@ public class ReorganizeTableGeneratorDB2 extends AbstractSqlGenerator<Reorganize
         } catch (DatabaseException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    protected Relation getAffectedTable(ReorganizeTableStatement statement) {
+        return new Table().setName(statement.getTableName()).setSchema(statement.getCatalogName(), statement.getSchemaName());
     }
 }

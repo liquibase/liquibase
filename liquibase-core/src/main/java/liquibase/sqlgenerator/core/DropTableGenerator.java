@@ -9,6 +9,8 @@ import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.DropTableStatement;
+import liquibase.structure.core.Relation;
+import liquibase.structure.core.Table;
 
 public class DropTableGenerator extends AbstractSqlGenerator<DropTableStatement> {
 
@@ -32,7 +34,11 @@ public class DropTableGenerator extends AbstractSqlGenerator<DropTableStatement>
         }
 
         return new Sql[]{
-                new UnparsedSql(buffer.toString())
+                new UnparsedSql(buffer.toString(), getAffectedTable(statement))
         };
+    }
+
+    protected Relation getAffectedTable(DropTableStatement statement) {
+        return new Table().setName(statement.getTableName()).setSchema(statement.getCatalogName(), statement.getSchemaName());
     }
 }

@@ -36,8 +36,6 @@ public class AddDefaultValueGeneratorInformix extends AddDefaultValueGenerator {
 	@Override
 	public Sql[] generateSql(AddDefaultValueStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
 
-		Column column = new Column().setRelation(new Table().setName(statement.getTableName()).setSchema(new Schema(statement.getCatalogName(), statement.getSchemaName())))
-				.setName(statement.getColumnName());
 		Object defaultValue = statement.getDefaultValue();
 		StringBuffer sql = new StringBuffer("ALTER TABLE ");
 		sql.append(database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()));
@@ -50,7 +48,7 @@ public class AddDefaultValueGeneratorInformix extends AddDefaultValueGenerator {
 		sql.append(DataTypeFactory.getInstance().fromObject(defaultValue, database)
 				.objectToSql(defaultValue, database));
 		sql.append(")");
-		UnparsedSql unparsedSql = new UnparsedSql(sql.toString(), column);
+		UnparsedSql unparsedSql = new UnparsedSql(sql.toString(), getAffectedColumn(statement));
 		return new Sql[] { unparsedSql };
 	}
 }

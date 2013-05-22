@@ -9,6 +9,8 @@ import liquibase.database.core.*;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
+import liquibase.structure.core.Relation;
+import liquibase.structure.core.Table;
 
 public class ModifyDataTypeGenerator extends AbstractSqlGenerator<ModifyDataTypeStatement> {
 
@@ -46,7 +48,11 @@ public class ModifyDataTypeGenerator extends AbstractSqlGenerator<ModifyDataType
         // add column type
         alterTable += DataTypeFactory.getInstance().fromDescription(statement.getNewDataType()).toDatabaseDataType(database);
 
-        return new Sql[]{new UnparsedSql(alterTable)};
+        return new Sql[]{new UnparsedSql(alterTable, getAffectedTable(statement))};
+    }
+
+    protected Relation getAffectedTable(ModifyDataTypeStatement statement) {
+        return new Table().setName(statement.getTableName()).setSchema(statement.getCatalogName(), statement.getSchemaName());
     }
 
     /**

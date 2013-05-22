@@ -10,6 +10,9 @@ import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.DropDefaultValueStatement;
+import liquibase.structure.core.Column;
+import liquibase.structure.core.Relation;
+import liquibase.structure.core.Table;
 
 public class DropDefaultValueGenerator extends AbstractSqlGenerator<DropDefaultValueStatement> {
 
@@ -70,7 +73,11 @@ public class DropDefaultValueGenerator extends AbstractSqlGenerator<DropDefaultV
          }
 
         return new Sql[] {
-                new UnparsedSql(sql)
+                new UnparsedSql(sql, getAffectedColumn(statement))
         };
+    }
+
+    protected Column getAffectedColumn(DropDefaultValueStatement statement) {
+        return new Column().setName(statement.getColumnName()).setRelation(new Table().setName(statement.getTableName()).setSchema(statement.getCatalogName(), statement.getSchemaName()));
     }
 }

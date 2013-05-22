@@ -7,6 +7,8 @@ import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.DropViewStatement;
+import liquibase.structure.core.Relation;
+import liquibase.structure.core.View;
 
 public class DropViewGenerator extends AbstractSqlGenerator<DropViewStatement> {
 
@@ -18,7 +20,11 @@ public class DropViewGenerator extends AbstractSqlGenerator<DropViewStatement> {
 
     public Sql[] generateSql(DropViewStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         return new Sql[] {
-                new UnparsedSql("DROP VIEW " + database.escapeViewName(statement.getCatalogName(), statement.getSchemaName(), statement.getViewName()))
+                new UnparsedSql("DROP VIEW " + database.escapeViewName(statement.getCatalogName(), statement.getSchemaName(), statement.getViewName()), getAffectedView(statement))
         };
+    }
+
+    protected Relation getAffectedView(DropViewStatement statement) {
+        return new View().setName(statement.getViewName()).setSchema(statement.getCatalogName(), statement.getSchemaName());
     }
 }

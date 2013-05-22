@@ -14,31 +14,29 @@ git push --tags
 
 mvn -Darguments="-DskipTests=true" release:perform
 
-upload target/checkout/liquibase-maven-integration/target/site to phpinclude
-upload target/checkout/liquibase-core/target/site to phpinclude
+upload target/checkout/liquibase-core/target/liquibase-3.0.0-*.zip and *-.tar.gz to sourceforge
 
-upload new version of site to server
-update version info on /download
+upload target/checkout/liquibase-maven-plugin/target/site to phpinclude
+copy target/checkout/liquibase-core/target/site/apidocs to liquibase.github.io/javadoc
+update version info and links in liquibase.github.io/download/index.md
+commit and push liquibase.github.io
+
 release version on jira
 
 release on sonatype
 - log in to oss.sonatype.org
 - staging repositories->select "org.liquibase..."
-- run "close"
+- run "close" in top toolbar
 - select "org.liquibase..."
-- run "release"
+- run "release" on top toolbar (will 
+
+Test:
+- download files from download/index.html
+- new jars are at http://mvnrepository.com/artifact/org.liquibase/liquibase-core
 
 POST MESSAGES TO:
 - forum
 - blog
-- mailing list
-
-
-- sourceforge project
-- javalobby
-- freshmeat
-- wikipedia
-- Newly supported database lists
 
  Sample messages:
 --------------------------------------------------------

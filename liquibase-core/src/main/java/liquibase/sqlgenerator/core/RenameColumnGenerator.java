@@ -6,9 +6,10 @@ import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
-import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.RenameColumnStatement;
+import liquibase.structure.core.Column;
+import liquibase.structure.core.Table;
 
 public class RenameColumnGenerator extends AbstractSqlGenerator<RenameColumnStatement> {
 
@@ -55,7 +56,15 @@ public class RenameColumnGenerator extends AbstractSqlGenerator<RenameColumnStat
         }
 
         return new Sql[] {
-                new UnparsedSql(sql)
+                new UnparsedSql(sql, getAffectedOldColumn(statement), getAffectedNewColumn(statement))
         };
+    }
+
+    protected Column getAffectedOldColumn(RenameColumnStatement statement) {
+        return new Column().setName(statement.getOldColumnName()).setRelation(new Table().setName(statement.getTableName()).setSchema(statement.getCatalogName(), statement.getSchemaName()));
+    }
+
+    protected Column getAffectedNewColumn(RenameColumnStatement statement) {
+        return new Column().setName(statement.getNewColumnName()).setRelation(new Table().setName(statement.getTableName()).setSchema(statement.getCatalogName(), statement.getSchemaName()));
     }
 }

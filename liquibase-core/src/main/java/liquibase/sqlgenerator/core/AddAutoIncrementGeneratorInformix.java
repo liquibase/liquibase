@@ -54,10 +54,7 @@ public class AddAutoIncrementGeneratorInformix extends AddAutoIncrementGenerator
             			statement.getColumnName())
             		+ " "
             		+ DataTypeFactory.getInstance().fromDescription(statement.getColumnDataType() + "{autoIncrement:true}").toDatabaseDataType(database),
-                new Column()
-                    .setRelation(
-                            new Table().setName(statement.getTableName()).setSchema(new Schema(statement.getCatalogName(), statement.getSchemaName())))
-                    .setName(statement.getColumnName()))
+                getAffectedColumn(statement))
         };
     }
 }

@@ -8,6 +8,7 @@ import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.ReindexStatement;
+import liquibase.structure.core.Table;
 
 public class ReindexGeneratorSQLite extends AbstractSqlGenerator<ReindexStatement> {
     @Override
@@ -28,7 +29,7 @@ public class ReindexGeneratorSQLite extends AbstractSqlGenerator<ReindexStatemen
 
     public Sql[] generateSql(ReindexStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         return new Sql[] {
-                new UnparsedSql("REINDEX "+database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()))
+                new UnparsedSql("REINDEX "+database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()), new Table().setName(statement.getTableName()).setSchema(statement.getCatalogName(), statement.getSchemaName()))
         };
     }
 }

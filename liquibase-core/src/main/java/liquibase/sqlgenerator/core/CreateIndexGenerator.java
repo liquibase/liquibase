@@ -8,6 +8,7 @@ import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.CreateIndexStatement;
+import liquibase.structure.core.Table;
 import liquibase.util.StringUtils;
 
 import java.util.Arrays;
@@ -77,6 +78,10 @@ public class CreateIndexGenerator extends AbstractSqlGenerator<CreateIndexStatem
 		    }
 	    }
 
-	    return new Sql[]{new UnparsedSql(buffer.toString())};
+	    return new Sql[]{new UnparsedSql(buffer.toString(), getAffectedIndex(statement))};
+    }
+
+    protected Index getAffectedIndex(CreateIndexStatement statement) {
+        return new Index().setName(statement.getIndexName()).setTable((Table) new Table().setName(statement.getTableName()).setSchema(statement.getTableCatalogName(), statement.getTableSchemaName()));
     }
 }

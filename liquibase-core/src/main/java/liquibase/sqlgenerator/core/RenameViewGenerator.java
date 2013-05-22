@@ -5,9 +5,10 @@ import liquibase.database.core.*;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
-import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.RenameViewStatement;
+import liquibase.structure.core.Relation;
+import liquibase.structure.core.View;
 
 public class RenameViewGenerator extends AbstractSqlGenerator<RenameViewStatement> {
 
@@ -15,7 +16,7 @@ public class RenameViewGenerator extends AbstractSqlGenerator<RenameViewStatemen
     public boolean supports(RenameViewStatement statement, Database database) {
         return !(database instanceof DerbyDatabase
                 || database instanceof HsqlDatabase
-                 || database  instanceof H2Database
+                || database instanceof H2Database
                 || database instanceof DB2Database
                 || database instanceof CacheDatabase
                 || database instanceof FirebirdDatabase
@@ -49,7 +50,18 @@ public class RenameViewGenerator extends AbstractSqlGenerator<RenameViewStatemen
         }
 
         return new Sql[]{
-                new UnparsedSql(sql)
+                new UnparsedSql(sql,
+                        getAffectedOldView(statement),
+                        getAffectedNewView(statement)
+                )
         };
+    }
+
+    protected Relation getAffectedNewView(RenameViewStatement statement) {
+        return new View().setName(statement.getNewViewName()).setSchema(statement.getCatalogName(), statement.getSchemaName());
+    }
+
+    protected Relation getAffectedOldView(RenameViewStatement statement) {
+        return new View().setName(statement.getOldViewName()).setSchema(statement.getCatalogName(), statement.getSchemaName());
     }
 }

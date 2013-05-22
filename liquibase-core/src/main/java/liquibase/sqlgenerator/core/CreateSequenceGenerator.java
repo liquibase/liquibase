@@ -8,6 +8,7 @@ import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.CreateSequenceStatement;
+import liquibase.structure.core.Sequence;
 
 public class CreateSequenceGenerator extends AbstractSqlGenerator<CreateSequenceStatement> {
 
@@ -64,6 +65,10 @@ public class CreateSequenceGenerator extends AbstractSqlGenerator<CreateSequence
             }
         }
 
-        return new Sql[]{new UnparsedSql(buffer.toString())};
+        return new Sql[]{new UnparsedSql(buffer.toString(), getAffectedSequence(statement))};
+    }
+
+    protected Sequence getAffectedSequence(CreateSequenceStatement statement) {
+        return new Sequence().setName(statement.getSequenceName()).setSchema(statement.getCatalogName(), statement.getSchemaName());
     }
 }

@@ -11,6 +11,8 @@ import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.AddForeignKeyConstraintStatement;
+import liquibase.structure.core.ForeignKey;
+import liquibase.structure.core.Table;
 
 public class AddForeignKeyConstraintGenerator extends AbstractSqlGenerator<AddForeignKeyConstraintStatement> {
 
@@ -92,7 +94,11 @@ public class AddForeignKeyConstraintGenerator extends AbstractSqlGenerator<AddFo
 	    }
 
 	    return new Sql[]{
-			    new UnparsedSql(sb.toString())
+			    new UnparsedSql(sb.toString(), getAffectedForeignKey(statement))
 	    };
+    }
+
+    protected ForeignKey getAffectedForeignKey(AddForeignKeyConstraintStatement statement) {
+        return new ForeignKey().setName(statement.getConstraintName()).setForeignKeyColumns(statement.getBaseColumnNames()).setForeignKeyTable((Table) new Table().setName(statement.getBaseTableName()).setSchema(statement.getBaseTableCatalogName(), statement.getBaseTableSchemaName()));
     }
 }

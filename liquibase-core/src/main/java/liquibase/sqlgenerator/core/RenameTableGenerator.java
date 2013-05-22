@@ -2,6 +2,7 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
 import liquibase.database.core.*;
+import liquibase.structure.core.Relation;
 import liquibase.structure.core.Table;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
@@ -35,7 +36,7 @@ public class RenameTableGenerator extends AbstractSqlGenerator<RenameTableStatem
             sql = "ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getOldTableName()) + " RENAME " + database.escapeObjectName(statement.getNewTableName(), Table.class);
         } else if ((database instanceof DerbyDatabase) || (database instanceof MaxDBDatabase) || (database instanceof InformixDatabase)) {
             sql = "RENAME TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getOldTableName()) + " TO " + database.escapeObjectName(statement.getNewTableName(), Table.class);
-        } else if (database instanceof HsqlDatabase || database  instanceof H2Database) {
+        } else if (database instanceof HsqlDatabase || database instanceof H2Database) {
             sql = "ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getOldTableName()) + " RENAME TO " + database.escapeObjectName(statement.getNewTableName(), Table.class);
         } else if (database instanceof OracleDatabase) {
             sql = "ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getOldTableName()) + " RENAME TO " + database.escapeObjectName(statement.getNewTableName(), Table.class);
@@ -47,8 +48,19 @@ public class RenameTableGenerator extends AbstractSqlGenerator<RenameTableStatem
             sql = "RENAME " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getOldTableName()) + " TO " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getNewTableName());
         }
 
-        return new Sql[] {
-                new UnparsedSql(sql)
-        };  //To change body of implemented methods use File | Settings | File Templates.
+        return new Sql[]{
+                new UnparsedSql(sql,
+                        getAffectedOldTable(statement),
+                        getAffectedNewTable(statement)
+                )
+        };
+    }
+
+    protected Relation getAffectedNewTable(RenameTableStatement statement) {
+        return new Table().setName(statement.getNewTableName()).setSchema(statement.getCatalogName(), statement.getSchemaName());
+    }
+
+    protected Relation getAffectedOldTable(RenameTableStatement statement) {
+        return new Table().setName(statement.getOldTableName()).setSchema(statement.getCatalogName(), statement.getSchemaName());
     }
 }

@@ -15,6 +15,7 @@ import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.sqlgenerator.core.AbstractSqlGenerator;
 import liquibase.statement.core.CreateViewStatement;
+import liquibase.structure.core.View;
 
 public class InformixCreateViewGenerator extends AbstractSqlGenerator<CreateViewStatement> {
 
@@ -39,7 +40,7 @@ public class InformixCreateViewGenerator extends AbstractSqlGenerator<CreateView
         if (statement.isReplaceIfExists()) {
         	return new Sql[] {
     			new UnparsedSql("DROP VIEW IF EXISTS " + viewName),
-                new UnparsedSql(createClause)
+                new UnparsedSql(createClause, new View().setName(viewName).setSchema(statement.getCatalogName(), statement.getViewName()))
             };
         }
         return new Sql[] {

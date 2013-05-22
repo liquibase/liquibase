@@ -50,12 +50,13 @@ public class AddDefaultValueGeneratorPostgres extends AddDefaultValueGenerator {
                 statement.getSchemaName(), sequenceFunction.getValue()) + " OWNED BY " +
                 database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + "."
                 + database.escapeObjectName(statement.getColumnName(), Column.class),
-                new Column()
-                        .setRelation(new Table().setName(statement.getTableName()).setSchema(new Schema(statement.getCatalogName(), statement.getSchemaName())))
-                        .setName(statement.getColumnName()),
-                new Sequence()
-                        .setName(sequenceFunction.getValue()));
+                getAffectedColumn(statement),
+                getAffectedSequence(sequenceFunction));
         commands.add(alterSequenceOwner);
         return commands.toArray(new Sql[commands.size()]);
+    }
+
+    protected Sequence getAffectedSequence(SequenceNextValueFunction sequenceFunction) {
+        return new Sequence().setName(sequenceFunction.getValue());
     }
 }

@@ -10,6 +10,8 @@ import liquibase.statement.core.InsertOrUpdateStatement;
 import liquibase.statement.core.UpdateStatement;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
+import liquibase.structure.core.Relation;
+import liquibase.structure.core.Table;
 
 import java.util.HashSet;
 
@@ -143,7 +145,11 @@ public abstract class InsertOrUpdateGenerator extends AbstractSqlGenerator<Inser
         completeSql.append(getPostUpdateStatements());
 
         return new Sql[]{
-                new UnparsedSql(completeSql.toString())
+                new UnparsedSql(completeSql.toString(), getAffectedTable(insertOrUpdateStatement))
         };
+    }
+
+    protected Table getAffectedTable(InsertOrUpdateStatement insertOrUpdateStatement) {
+        return (Table) new Table().setName(insertOrUpdateStatement.getTableName()).setSchema(insertOrUpdateStatement.getCatalogName(), insertOrUpdateStatement.getSchemaName());
     }
 }

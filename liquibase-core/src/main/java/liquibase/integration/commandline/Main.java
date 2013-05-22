@@ -148,7 +148,7 @@ public class Main {
                 if (e.getCause() instanceof ValidationFailedException) {
                     ((ValidationFailedException) e.getCause()).printDescriptiveError(System.err);
                 } else {
-                    System.err.println("Liquibase Update Failed: " + message);
+                    System.err.println("Liquibase "+main.command+" Failed: " + message);
                     LogFactory.getLogger().severe(message, e);
                     System.err.println(generateLogLevelWarningMessage());
                 }
@@ -920,6 +920,9 @@ public class Main {
 
     private String getCommandParam(String paramName, String defaultValue) throws CommandLineParsingException {
         for (String param : commandParams) {
+            if (!param.contains("=")) {
+                return null;
+            }
             String[] splitArg = splitArg(param);
 
             String attributeName = splitArg[0];

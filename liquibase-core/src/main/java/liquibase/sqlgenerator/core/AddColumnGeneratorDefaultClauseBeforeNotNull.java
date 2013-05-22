@@ -85,9 +85,7 @@ public class AddColumnGeneratorDefaultClauseBeforeNotNull extends AddColumnGener
         }
 
         List<Sql> returnSql = new ArrayList<Sql>();
-        returnSql.add(new UnparsedSql(alterTable, new Column()
-                        .setRelation(new Table().setName(statement.getTableName()).setSchema(new Schema(statement.getCatalogName(), statement.getSchemaName())))
-                        .setName(statement.getColumnName())));
+        returnSql.add(new UnparsedSql(alterTable, getAffectedColumn(statement)));
 
         addForeignKeyStatements(statement, database, returnSql);
 

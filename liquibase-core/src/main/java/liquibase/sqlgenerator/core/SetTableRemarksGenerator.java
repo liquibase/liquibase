@@ -11,6 +11,8 @@ import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.SetTableRemarksStatement;
+import liquibase.structure.core.Relation;
+import liquibase.structure.core.Table;
 
 public class SetTableRemarksGenerator extends AbstractSqlGenerator<SetTableRemarksStatement> {
 
@@ -44,6 +46,10 @@ public class SetTableRemarksGenerator extends AbstractSqlGenerator<SetTableRemar
 					+ database.escapeStringForDatabase(remarks) + "'";
 		}
 
-		return new Sql[] { new UnparsedSql(sql) };
+		return new Sql[] { new UnparsedSql(sql, getAffectedTable(statement)) };
 	}
+
+    protected Relation getAffectedTable(SetTableRemarksStatement statement) {
+        return new Table().setName(statement.getTableName()).setSchema(statement.getCatalogName(), statement.getSchemaName());
+    }
 }

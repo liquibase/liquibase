@@ -9,6 +9,8 @@ import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.DatabaseFunction;
 import liquibase.statement.core.UpdateStatement;
 import liquibase.structure.core.Column;
+import liquibase.structure.core.Relation;
+import liquibase.structure.core.Table;
 
 import java.util.Date;
 
@@ -49,8 +51,12 @@ public class UpdateGenerator extends AbstractSqlGenerator<UpdateStatement> {
         }
 
         return new Sql[]{
-                new UnparsedSql(sql.toString())
+                new UnparsedSql(sql.toString(), getAffectedTable(statement))
         };
+    }
+
+    protected Relation getAffectedTable(UpdateStatement statement) {
+        return new Table().setName(statement.getTableName()).setSchema(statement.getCatalogName(), statement.getSchemaName());
     }
 
     private String convertToString(Object newValue, Database database) {

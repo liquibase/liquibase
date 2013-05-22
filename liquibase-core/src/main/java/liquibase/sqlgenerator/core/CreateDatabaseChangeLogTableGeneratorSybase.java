@@ -8,6 +8,8 @@ import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.CreateDatabaseChangeLogTableStatement;
+import liquibase.structure.core.Relation;
+import liquibase.structure.core.Table;
 
 public class CreateDatabaseChangeLogTableGeneratorSybase extends AbstractSqlGenerator<CreateDatabaseChangeLogTableStatement> {
     @Override
@@ -26,7 +28,7 @@ public class CreateDatabaseChangeLogTableGeneratorSybase extends AbstractSqlGene
 
     public Sql[] generateSql(CreateDatabaseChangeLogTableStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         return new Sql[] {
-                new UnparsedSql("CREATE TABLE " + database.escapeTableName(database.getDefaultCatalogName(), database.getDefaultSchemaName(), database.getDatabaseChangeLogTableName()) + " (ID VARCHAR(150) NOT NULL, " +
+                new UnparsedSql("CREATE TABLE " + database.escapeTableName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName()) + " (ID VARCHAR(150) NOT NULL, " +
                 "AUTHOR VARCHAR(150) NOT NULL, " +
                 "FILENAME VARCHAR(255) NOT NULL, " +
                 "DATEEXECUTED " + DataTypeFactory.getInstance().fromDescription("datetime").toDatabaseDataType(database) + " NOT NULL, " +
@@ -37,7 +39,12 @@ public class CreateDatabaseChangeLogTableGeneratorSybase extends AbstractSqlGene
                 "COMMENTS VARCHAR(255) NULL, " +
                 "TAG VARCHAR(255) NULL, " +
                 "LIQUIBASE VARCHAR(20) NULL, " +
-                "PRIMARY KEY(ID, AUTHOR, FILENAME))")
+                "PRIMARY KEY(ID, AUTHOR, FILENAME))",
+                        getAffectedTable(database))
         };  //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+    protected Relation getAffectedTable(Database database) {
+        return new Table().setName(database.getDatabaseChangeLogTableName()).setSchema(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName());
     }
 }
