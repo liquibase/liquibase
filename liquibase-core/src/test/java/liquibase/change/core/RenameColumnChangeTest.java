@@ -56,8 +56,7 @@ public class RenameColumnChangeTest extends StandardChangeTest {
 
     @Override
     protected boolean changeIsUnsupported(Database database) {
-        return database instanceof DB2Database
-                || database instanceof CacheDatabase
+        return database instanceof CacheDatabase
                 || database instanceof SQLiteDatabase;
     }
 }

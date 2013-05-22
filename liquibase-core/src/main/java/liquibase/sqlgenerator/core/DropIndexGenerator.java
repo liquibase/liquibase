@@ -52,6 +52,10 @@ public class DropIndexGenerator extends AbstractSqlGenerator<DropIndexStatement>
     }
 
     protected Index getAffectedIndex(DropIndexStatement statement) {
-        return new Index().setName(statement.getIndexName()).setTable((Table) new Table().setName(statement.getTableName()).setSchema(statement.getTableCatalogName(), statement.getTableSchemaName()));
+        Table table = null;
+        if (statement.getTableName() != null) {
+            table = (Table) new Table().setName(statement.getTableName()).setSchema(statement.getTableCatalogName(), statement.getTableSchemaName());
+        }
+        return new Index().setName(statement.getIndexName()).setTable(table);
     }
 }
