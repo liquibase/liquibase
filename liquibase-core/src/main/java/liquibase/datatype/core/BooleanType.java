@@ -20,7 +20,7 @@ public class BooleanType extends LiquibaseDataType {
         } else if (database instanceof MSSQLDatabase) {
             return new DatabaseDataType("BIT");
         } else if (database instanceof MySQLDatabase) {
-            return new DatabaseDataType("TINYINT", 1);
+            return new DatabaseDataType("BIT", 1);
         } else if (database instanceof OracleDatabase) {
             return new DatabaseDataType("NUMBER", 1);
         } else if (database instanceof SybaseASADatabase || database instanceof SybaseDatabase) {
