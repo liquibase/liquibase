@@ -36,7 +36,7 @@ public class DatabaseDataType {
      * Mainly for postgres, check if the column is a serial data type.
      * @return Whether the type is serial
      */
-    public boolean isSerialDataType() {
+    public boolean isAutoIncrement() {
         return type.equalsIgnoreCase("serial") || type.equalsIgnoreCase("bigserial");
     }
 

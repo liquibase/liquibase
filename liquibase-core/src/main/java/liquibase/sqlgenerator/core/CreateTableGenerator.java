@@ -11,14 +11,17 @@ import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.AutoIncrementConstraint;
 import liquibase.statement.ForeignKeyConstraint;
+import liquibase.statement.SqlStatement;
 import liquibase.statement.UniqueConstraint;
+import liquibase.statement.core.AlterSequenceStatement;
 import liquibase.statement.core.CreateTableStatement;
-import liquibase.structure.core.Column;
 import liquibase.structure.core.Relation;
 import liquibase.structure.core.Schema;
+import liquibase.structure.core.Sequence;
 import liquibase.structure.core.Table;
 import liquibase.util.StringUtils;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -38,7 +41,8 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
     		AbstractSqlGenerator<CreateTableStatement> gen = new InformixCreateTableGenerator();
     		return gen.generateSql(statement, database, sqlGeneratorChain);
     	}
-    	
+
+        List<Sql> additionalSql = new ArrayList<Sql>();
     	
         StringBuffer buffer = new StringBuffer();
         buffer.append("CREATE TABLE ").append(database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName())).append(" ");
@@ -93,7 +97,7 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
             }
 
             // for the serial data type in postgres, there should be no default value
-            if (!columnType.isSerialDataType() && statement.getDefaultValue(column) != null) {
+            if (!columnType.isAutoIncrement() && statement.getDefaultValue(column) != null) {
                 Object defaultValue = statement.getDefaultValue(column);
                 if (database instanceof MSSQLDatabase) {
                     buffer.append(" CONSTRAINT ").append(((MSSQLDatabase) database).generateDefaultConstraintName(statement.getTableName(), column));
@@ -109,6 +113,11 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
                 
                     if (!"".equals(autoIncrementClause)) {
                         buffer.append(" ").append(autoIncrementClause);
+                    }
+
+                    if (database instanceof PostgresDatabase && autoIncrementConstraint.getStartWith() != null) {
+                        String sequenceName = statement.getTableName()+"_"+column+"_seq";
+                        additionalSql.add(new UnparsedSql("alter sequence "+database.escapeSequenceName(statement.getCatalogName(), statement.getSchemaName(), sequenceName)+" start with "+autoIncrementConstraint.getStartWith(), new Sequence().setName(sequenceName).setSchema(statement.getCatalogName(), statement.getSchemaName())));
                     }
                 } else {
                     LogFactory.getLogger().warning(database.getShortName()+" does not support autoincrement columns as request for "+(database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName())));
@@ -262,9 +271,8 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
             }
         }
 
-        return new Sql[] {
-                new UnparsedSql(sql, getAffectedTable(statement))
-        };
+        additionalSql.add(0, new UnparsedSql(sql, getAffectedTable(statement)));
+        return additionalSql.toArray(new Sql[additionalSql.size()]);
     }
 
     protected Relation getAffectedTable(CreateTableStatement statement) {
