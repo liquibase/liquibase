@@ -67,6 +67,11 @@ public class CreateViewGenerator extends AbstractSqlGenerator<CreateViewStatemen
             } else {
                 createClause = "CREATE VIEW";
             }
+        } else if (database instanceof PostgresDatabase) {
+            if (statement.isReplaceIfExists()) {
+                sql.add(new UnparsedSql("DROP VIEW IF EXISTS "+database.escapeViewName(statement.getCatalogName(), statement.getSchemaName(), statement.getViewName())));
+            }
+            createClause = "CREATE VIEW";
         } else {
             createClause = "CREATE " + (statement.isReplaceIfExists() ? "OR REPLACE " : "") + "VIEW";
         }
