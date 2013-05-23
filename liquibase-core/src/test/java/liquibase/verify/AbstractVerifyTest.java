@@ -33,7 +33,11 @@ public class AbstractVerifyTest {
             this.testGroup = testGroup;
             this.stateName = stateName;
 
-            this.savedStateDir = new File("liquibase-core/src/test/java/liquibase/verify/saved_state/"+testName+"/"+testGroup);
+            File liquibaseRootDir = new File(".");
+            if (liquibaseRootDir.getName().equals("liquibase-core")) {
+                liquibaseRootDir = liquibaseRootDir.getParentFile();
+            }
+            this.savedStateDir = new File(liquibaseRootDir, "liquibase-core/src/test/java/liquibase/verify/saved_state/"+testName+"/"+testGroup);
             this.stateFile = new File(savedStateDir, stateName+"."+type.name().toLowerCase());
 
         }

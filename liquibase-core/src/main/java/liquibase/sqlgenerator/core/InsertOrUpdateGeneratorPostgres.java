@@ -2,6 +2,7 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
 import liquibase.database.core.PostgresDatabase;
+import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
@@ -11,7 +12,14 @@ import liquibase.statement.core.InsertOrUpdateStatement;
 public class InsertOrUpdateGeneratorPostgres extends InsertOrUpdateGenerator {
 	@Override
     public boolean supports(InsertOrUpdateStatement statement, Database database) {
-		return database instanceof PostgresDatabase;
+		if (database instanceof PostgresDatabase) {
+            try {
+                return database.getDatabaseMajorVersion() >= 9;
+            } catch (DatabaseException e) {
+                return true;
+            }
+        }
+        return false;
 	}
 
 	@Override
