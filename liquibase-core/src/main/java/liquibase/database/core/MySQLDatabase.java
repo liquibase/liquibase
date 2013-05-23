@@ -173,4 +173,12 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
         return this.correctSchema(new CatalogAndSchema(rawCatalogName, null));
     }
 
+    @Override
+    public String escapeStringForDatabase(String string) {
+        string = super.escapeStringForDatabase(string);
+        if (string == null) {
+            return null;
+        }
+        return string.replace("\\", "\\\\");
+    }
 }

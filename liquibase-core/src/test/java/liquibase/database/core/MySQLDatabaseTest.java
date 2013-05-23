@@ -56,4 +56,9 @@ public class MySQLDatabaseTest extends AbstractJdbcDatabaseTest {
         assertEquals("catalogName.tableName", database.escapeTableName("catalogName", "schemaName", "tableName"));
     }
 
+    @Test
+    public void escapeStringForDatabase_withBackslashes() {
+        Assert.assertEquals("\\\\0", database.escapeStringForDatabase("\\0"));
+    }
+
 }
