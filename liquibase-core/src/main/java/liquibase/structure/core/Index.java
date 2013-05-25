@@ -67,6 +67,16 @@ public class Index extends AbstractDatabaseObject {
         return getAttribute("columns", List.class);
     }
 
+    public Index addColumn(String column) {
+        getColumns().add(column);
+        return this;
+    }
+
+    public Index setColumns(String columns) {
+        getColumns().addAll(StringUtils.splitAndTrim(columns, ","));
+        return this;
+    }
+
     public String getColumnNames() {
         return StringUtils.join(getColumns(), ", ");
     }

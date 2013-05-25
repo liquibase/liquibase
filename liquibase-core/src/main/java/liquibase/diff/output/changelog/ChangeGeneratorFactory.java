@@ -104,7 +104,7 @@ public class ChangeGeneratorFactory {
     }
 
     public Change[] fixChanged(DatabaseObject changedObject, ObjectDifferences differences, DiffOutputControl control, Database referenceDatabase, Database comparisionDatabase) {
-        ChangeGeneratorChain chain = createGeneratorChain(UnexpectedObjectChangeGenerator.class, changedObject.getClass(), referenceDatabase);
+        ChangeGeneratorChain chain = createGeneratorChain(ChangedObjectChangeGenerator.class, changedObject.getClass(), referenceDatabase);
         if (chain == null) {
             return null;
         }

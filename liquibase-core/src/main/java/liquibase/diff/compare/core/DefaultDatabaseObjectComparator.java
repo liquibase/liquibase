@@ -25,9 +25,9 @@ public final class DefaultDatabaseObjectComparator implements DatabaseObjectComp
 
         ObjectDifferences differences = new ObjectDifferences();
 
-//        if (!object1Name.equals(object2Name)) {
-//            differences.addDifference("name", object1Name, object2Name);
-//        }
+        if (!nameMatches(databaseObject1, databaseObject2, accordingTo)) {
+            differences.addDifference("name", object1Name, object2Name);
+        }
 
         return differences;
     }
@@ -36,6 +36,9 @@ public final class DefaultDatabaseObjectComparator implements DatabaseObjectComp
         String object1Name = accordingTo.correctObjectName(databaseObject1.getName(), databaseObject1.getClass());
         String object2Name = accordingTo.correctObjectName(databaseObject2.getName(), databaseObject2.getClass());
 
+        if (object1Name == null && object2Name == null) {
+            return true;
+        }
         if (object1Name == null || object2Name == null) {
             return false;
         }

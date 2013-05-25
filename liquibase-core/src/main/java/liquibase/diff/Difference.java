@@ -7,10 +7,13 @@ public class Difference {
     private Object comparedValue;
 
     public Difference(String field, Object referenceValue, Object comparedValue) {
-        this(field+" changed from '"+referenceValue+"' to '"+comparedValue+"'", field, referenceValue, comparedValue);
+        this(null, field, referenceValue, comparedValue);
     }
 
     public Difference(String message, String field, Object referenceValue, Object comparedValue) {
+        if (message == null) {
+            message = field+" changed from '"+referenceValue+"' to '"+comparedValue+"'";
+        }
         this.message = message;
         this.field = field;
         this.referenceValue = referenceValue;

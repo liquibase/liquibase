@@ -56,6 +56,11 @@ public class UniqueConstraint extends AbstractDatabaseObject {
 		return getAttribute("columns", List.class);
 	}
 
+    public UniqueConstraint setColumns(String columnNames) {
+        this.getColumns().addAll(StringUtils.splitAndTrim(columnNames, ","));
+        return this;
+    }
+
     public UniqueConstraint addColumn(int position, String columnName) {
         if (position >= getColumns().size()) {
             for (int i = getColumns().size()-1; i < position; i++) {
