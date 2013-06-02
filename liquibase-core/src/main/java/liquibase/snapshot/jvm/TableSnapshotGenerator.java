@@ -79,6 +79,9 @@ public class TableSnapshotGenerator extends JdbcSnapshotGenerator {
         String rawSchemaName = StringUtils.trimToNull(tableMetadataResultSet.getString("TABLE_SCHEM"));
         String rawCatalogName = StringUtils.trimToNull(tableMetadataResultSet.getString("TABLE_CAT"));
         String remarks = StringUtils.trimToNull(tableMetadataResultSet.getString("REMARKS"));
+        if (remarks != null) {
+            remarks = remarks.replace("''", "'"); //come back escaped sometimes
+        }
 
         Table table = new Table().setName(cleanNameFromDatabase(rawTableName, database));
         table.setRemarks(remarks);

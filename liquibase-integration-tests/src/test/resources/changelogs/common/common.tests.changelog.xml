@@ -885,7 +885,7 @@
         </createTable>
     </changeSet>
 
-    <changeSet id="number-type" author="nvoxland">
+    <changeSet id="number-type" author="nvoxland" dbms="!firebird">
         <createTable tableName="numbertest">
             <column name="id" type="numeric"/>
         </createTable>

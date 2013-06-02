@@ -61,6 +61,10 @@ public class ViewSnapshotGenerator extends JdbcSnapshotGenerator {
                 String rawSchemaName = StringUtils.trimToNull(row.getString("TABLE_SCHEM"));
                 String rawCatalogName = StringUtils.trimToNull(row.getString("TABLE_CAT"));
                 String remarks = row.getString("REMARKS");
+                if (remarks != null) {
+                    remarks = remarks.replace("''", "'"); //come back escaped sometimes
+                }
+
 
                 View view = new View().setName(cleanNameFromDatabase(rawViewName, database));
                 view.setRemarks(remarks);

@@ -7,25 +7,18 @@ import liquibase.diff.compare.DatabaseObjectComparatorChain;
 import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Column;
-import liquibase.structure.core.PrimaryKey;
+import liquibase.structure.core.ForeignKey;
 
-public class PrimaryKeyComparator implements DatabaseObjectComparator {
+public class ForeignKeyComparator implements DatabaseObjectComparator {
     public int getPriority(Class<? extends DatabaseObject> objectType, Database database) {
-        if (PrimaryKey.class.isAssignableFrom(objectType)) {
+        if (ForeignKey.class.isAssignableFrom(objectType)) {
             return PRIORITY_TYPE;
         }
         return PRIORITY_NONE;
     }
 
     public boolean isSameObject(DatabaseObject databaseObject1, DatabaseObject databaseObject2, Database accordingTo, DatabaseObjectComparatorChain chain) {
-        if (!(databaseObject1 instanceof PrimaryKey && databaseObject2 instanceof PrimaryKey)) {
-            return false;
-        }
-
-        PrimaryKey thisPrimaryKey = (PrimaryKey) databaseObject1;
-        PrimaryKey otherPrimaryKey = (PrimaryKey) databaseObject2;
-
-        return DatabaseObjectComparatorFactory.getInstance().isSameObject(thisPrimaryKey.getTable(), otherPrimaryKey.getTable(), accordingTo);
+        return chain.isSameObject(databaseObject1, databaseObject2, accordingTo);
     }
 
 

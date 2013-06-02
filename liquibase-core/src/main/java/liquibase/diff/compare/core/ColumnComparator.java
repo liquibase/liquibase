@@ -35,6 +35,11 @@ public class ColumnComparator implements DatabaseObjectComparator {
 
     public ObjectDifferences findDifferences(DatabaseObject databaseObject1, DatabaseObject databaseObject2, Database accordingTo, DatabaseObjectComparatorChain chain) {
         ObjectDifferences differences = chain.findDifferences(databaseObject1, databaseObject2, accordingTo);
+        differences.removeDifference("autoIncrementInformation");
+
+        differences.removeDifference("defaultValue");
+//        differences.compare("defaultValue", databaseObject1, databaseObject2, new ObjectDifferences.ToStringCompareFunction()); //often differences between what database reports even if they are the same
+
         return differences;
     }
 }

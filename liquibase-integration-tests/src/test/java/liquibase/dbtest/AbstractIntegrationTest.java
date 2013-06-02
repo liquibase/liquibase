@@ -408,7 +408,7 @@ public abstract class AbstractIntegrationTest {
         try {
             assertTrue(diffResult.areEqual());
         } catch (AssertionError e) {
-            new DiffToReport(diffResult, System.out).print();
+            new DiffToReport(diffResult, System.err).print();
             throw e;
         }
     }
@@ -468,7 +468,7 @@ public abstract class AbstractIntegrationTest {
             try {
                 assertTrue(finalDiffResult.areEqual());
             } catch (AssertionError e) {
-                new DiffToReport(finalDiffResult, System.out).print();
+                new DiffToReport(finalDiffResult, System.err).print();
                 throw e;
             }
 

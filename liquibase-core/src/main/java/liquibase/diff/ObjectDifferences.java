@@ -2,6 +2,7 @@ package liquibase.diff;
 
 import liquibase.database.Database;
 import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.DataType;
 
 import java.util.*;
 
@@ -37,7 +38,7 @@ public class ObjectDifferences {
 
         boolean different;
         if (referenceValue == null && compareValue == null) {
-            different = true;
+            different = false;
         } else if (referenceValue == null || compareValue == null) {
             different = false;
         } else {
@@ -73,6 +74,21 @@ public class ObjectDifferences {
         }
     }
 
+    public static class ToStringCompareFunction implements CompareFunction {
+
+        public boolean areEqual(Object referenceValue, Object compareToValue) {
+            if (referenceValue == null && compareToValue == null) {
+                return true;
+            }
+            if (referenceValue == null || compareToValue == null) {
+                return false;
+            }
+
+            return referenceValue.toString().equals(compareToValue.toString());
+
+        }
+    }
+
     public static class DatabaseObjectNameCompareFunction implements CompareFunction {
 
         private final Database accordingTo;
@@ -81,6 +97,7 @@ public class ObjectDifferences {
         public DatabaseObjectNameCompareFunction(Class<? extends DatabaseObject> type, Database accordingTo) {
             this.type = type;
             this.accordingTo = accordingTo;
+
         }
 
         public boolean areEqual(Object referenceValue, Object compareToValue) {
@@ -99,8 +116,28 @@ public class ObjectDifferences {
                     return true;
                 }
             }
-            String object1Name = accordingTo.correctObjectName((String) referenceValue, type);
-            String object2Name = accordingTo.correctObjectName((String) compareToValue, type);
+
+            if (referenceValue == null && compareToValue == null) {
+                return true;
+            }
+            if (referenceValue == null || compareToValue == null) {
+                return false;
+            }
+
+
+            String object1Name;
+            if (referenceValue instanceof DatabaseObject) {
+                object1Name = accordingTo.correctObjectName(((DatabaseObject) referenceValue).getAttribute("name", String.class), type);
+            } else {
+                object1Name = referenceValue.toString();
+            }
+
+            String object2Name;
+            if (compareToValue instanceof DatabaseObject) {
+                object2Name = accordingTo.correctObjectName(((DatabaseObject) compareToValue).getAttribute("name", String.class), type);
+            } else {
+                object2Name = referenceValue.toString();
+            }
 
             if (object1Name == null && object2Name == null) {
                 return true;

@@ -5,6 +5,7 @@ import liquibase.database.Database;
 import liquibase.database.core.FirebirdDatabase;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.core.MySQLDatabase;
+import liquibase.database.core.OracleDatabase;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
@@ -93,6 +94,10 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
         String rawSchemaName = StringUtils.trimToNull((String) columnMetadataResultSet.get("TABLE_SCHEM"));
         String rawCatalogName = StringUtils.trimToNull((String) columnMetadataResultSet.get("TABLE_CAT"));
         String remarks = StringUtils.trimToNull((String) columnMetadataResultSet.get("REMARKS"));
+        if (remarks != null) {
+            remarks = remarks.replace("''", "'"); //come back escaped sometimes
+        }
+
 
         Column column = new Column();
         column.setName(rawColumnName);
@@ -166,11 +171,16 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
             }
         }
 
+        DataType.ColumnSizeUnit columnSizeUnit = DataType.ColumnSizeUnit.BYTE;
+
         int dataType = columnMetadataResultSet.getInt("DATA_TYPE");
         Integer columnSize = columnMetadataResultSet.getInt("COLUMN_SIZE");
         // don't set size for types like int4, int8 etc
         if (database.dataTypeIsNotModifiable(columnTypeName)) {
             columnSize = null;
+        }  else if (database instanceof OracleDatabase && columnTypeName.equals("NVARCHAR2")) {
+            columnSize = columnSize / 2; //oracle returns value in bytes, not chars
+            columnSizeUnit = DataType.ColumnSizeUnit.CHAR;
         }
 
         Integer decimalDigits = columnMetadataResultSet.getInt("DECIMAL_DIGITS");
@@ -188,7 +198,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
         type.setDecimalDigits(decimalDigits);
         type.setRadix(radix);
         type.setCharacterOctetLength(characterOctetLength);
-        type.setColumnSizeUnit(DataType.ColumnSizeUnit.BYTE);
+        type.setColumnSizeUnit(columnSizeUnit);
 
         return type;
     }

@@ -21,7 +21,7 @@ public class OracleIntegrationTest extends AbstractIntegrationTest {
     private String viewOnSchemaChangeLog;
 
     public OracleIntegrationTest() throws Exception {
-        super("oracle", "jdbc:oracle:thin:@" + getDatabaseServerHostname("Oracle") + "/XE");
+        super("oracle", "jdbc:oracle:thin:@" + getDatabaseServerHostname("Oracle") + ":1521:XE");
         this.indexOnSchemaChangeLog = "changelogs/oracle/complete/indexOnSchema.xml";
         this.viewOnSchemaChangeLog = "changelogs/oracle/complete/viewOnSchema.xml";
     }

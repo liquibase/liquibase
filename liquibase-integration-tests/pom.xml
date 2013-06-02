@@ -118,7 +118,7 @@
                 <dependency>
                     <groupId>oracle</groupId>
                     <artifactId>oracle-ojdbc14</artifactId>
-                    <version>10.2.0.2</version>
+                    <version>10.2.0.5</version>
                     <scope>test</scope>
                 </dependency>
             </dependencies>

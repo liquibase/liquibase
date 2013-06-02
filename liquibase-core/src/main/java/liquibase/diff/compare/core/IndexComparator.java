@@ -19,10 +19,6 @@ public class IndexComparator implements DatabaseObjectComparator {
     }
 
     public boolean isSameObject(DatabaseObject databaseObject1, DatabaseObject databaseObject2, Database accordingTo, DatabaseObjectComparatorChain chain) {
-        if (chain.isSameObject(databaseObject1, databaseObject2, accordingTo)) {
-            return true;
-        }
-
         if (!(databaseObject1 instanceof Index && databaseObject2 instanceof Index)) {
             return false;
         }
@@ -31,7 +27,7 @@ public class IndexComparator implements DatabaseObjectComparator {
         Index otherIndex = (Index) databaseObject2;
 
         if (thisIndex.getColumns().size() == 0 || otherIndex.getColumns().size() == 0) {
-            return false;
+            return chain.isSameObject(databaseObject1, databaseObject2, accordingTo);
         }
 
         if (!DatabaseObjectComparatorFactory.getInstance().isSameObject(thisIndex.getTable(), otherIndex.getTable(), accordingTo)) {
@@ -48,6 +44,7 @@ public class IndexComparator implements DatabaseObjectComparator {
                 return false;
             }
         }
+
         return true;
     }
 
@@ -55,7 +52,9 @@ public class IndexComparator implements DatabaseObjectComparator {
     public ObjectDifferences findDifferences(DatabaseObject databaseObject1, DatabaseObject databaseObject2, Database accordingTo, DatabaseObjectComparatorChain chain) {
         ObjectDifferences differences = chain.findDifferences(databaseObject1, databaseObject2, accordingTo);
         differences.removeDifference("name");
-        differences.compare(null, "columns", databaseObject1, databaseObject2, new ObjectDifferences.DatabaseObjectNameCompareFunction(Index.class, accordingTo));
+
+        differences.removeDifference("columns");
+        differences.compare("columns", databaseObject1, databaseObject2, new ObjectDifferences.DatabaseObjectNameCompareFunction(Index.class, accordingTo));
         return differences;
     }
 }
