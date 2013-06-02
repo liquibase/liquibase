@@ -8,9 +8,7 @@ import java.io.Writer;
 public class MarkNextChangeSetRanTask extends BaseLiquibaseTask {
 
     @Override
-    public void execute() throws BuildException {
-
-        super.execute();
+    public void executeWithLiquibaseClassloader() throws BuildException {
 
         if (!shouldRun()) {
             return;

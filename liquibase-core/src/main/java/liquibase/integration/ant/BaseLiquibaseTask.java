@@ -33,7 +33,7 @@ import java.util.logging.LogRecord;
  * Base class for all Ant Liquibase tasks.  This class sets up Liquibase and defines parameters
  * that are common to all tasks.
  */
-public class BaseLiquibaseTask extends Task {
+public abstract class BaseLiquibaseTask extends Task {
     private String changeLogFile;
     private String driver;
     private String url;
@@ -59,14 +59,21 @@ public class BaseLiquibaseTask extends Task {
     }
 
     @Override
-    public void execute() throws BuildException {
+    public final void execute() throws BuildException {
         super.execute();
 
         AntClassLoader loader = getProject().createClassLoader(classpath);
         loader.setParent(this.getClass().getClassLoader());
         loader.setThreadContextLoader();
 
+        try {
+            executeWithLiquibaseClassloader();
+        } finally {
+            loader.resetThreadContextLoader();
+        }
     }
+
+    protected abstract void executeWithLiquibaseClassloader() throws BuildException;
 
     public boolean isPromptOnNonLocalDatabase() {
         return promptOnNonLocalDatabase;

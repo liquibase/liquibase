@@ -11,9 +11,7 @@ import java.io.Writer;
 public class DatabaseRollbackFutureTask extends BaseLiquibaseTask {
 
     @Override
-    public void execute() throws BuildException {
-        super.execute();
-
+    public void executeWithLiquibaseClassloader() throws BuildException {
         Liquibase liquibase = null;
         try {
             Writer writer = createOutputWriter();

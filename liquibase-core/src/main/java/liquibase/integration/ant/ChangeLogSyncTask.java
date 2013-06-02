@@ -9,9 +9,7 @@ import java.io.Writer;
 public class ChangeLogSyncTask extends BaseLiquibaseTask {
 
     @Override
-    public void execute() throws BuildException {
-        super.execute();
-
+    public void executeWithLiquibaseClassloader() throws BuildException {
         if (!shouldRun()) {
             return;
         }

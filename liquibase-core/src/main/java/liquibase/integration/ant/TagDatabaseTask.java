@@ -17,7 +17,7 @@ public class TagDatabaseTask extends BaseLiquibaseTask {
     }
 
     @Override
-    public void execute() throws BuildException {
+    public void executeWithLiquibaseClassloader() throws BuildException {
         if (StringUtils.trimToNull(getTag()) == null) {
             throw new BuildException("tagDatabase requires tag parameter to be set");
         }
@@ -26,8 +26,6 @@ public class TagDatabaseTask extends BaseLiquibaseTask {
             return;
         }
         
-        super.execute();
-
         Liquibase liquibase = null;
         try {
             liquibase = createLiquibase();

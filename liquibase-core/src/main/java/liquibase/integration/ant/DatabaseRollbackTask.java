@@ -46,7 +46,7 @@ public class DatabaseRollbackTask extends BaseLiquibaseTask {
     }
 
     @Override
-    public void execute() throws BuildException {
+    public void executeWithLiquibaseClassloader() throws BuildException {
         if (getRollbackDate() == null && getRollbackCount() == null && getRollbackTag() == null) {
             throw new BuildException("rollbackDatabase requires rollbackTag, rollbackDate, or rollbackCount to be set");
         }
@@ -54,8 +54,6 @@ public class DatabaseRollbackTask extends BaseLiquibaseTask {
         if (!shouldRun()) {
             return;
         }
-
-        super.execute();
 
         Liquibase liquibase = null;
         try {

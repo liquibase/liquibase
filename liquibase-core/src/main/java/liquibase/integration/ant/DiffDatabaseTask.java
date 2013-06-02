@@ -121,12 +121,10 @@ public class DiffDatabaseTask extends BaseLiquibaseTask {
     }
 
     @Override
-    public void execute() throws BuildException {
+    public void executeWithLiquibaseClassloader() throws BuildException {
         if (StringUtils.trimToNull(getReferenceUrl()) == null) {
             throw new BuildException("diffDatabase requires referenceUrl to be set");
         }
-
-        super.execute();    
 
         Liquibase liquibase = null;
         Database referenceDatabase = null;

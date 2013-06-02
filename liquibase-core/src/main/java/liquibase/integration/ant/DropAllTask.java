@@ -31,9 +31,7 @@ public class DropAllTask extends BaseLiquibaseTask {
     }
 
     @Override
-    public void execute() throws BuildException {
-
-        super.execute();
+    public void executeWithLiquibaseClassloader() throws BuildException {
 
         if (!shouldRun()) {
             return;
