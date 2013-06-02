@@ -439,6 +439,9 @@ public abstract class AbstractChange implements Change {
      * Returns empty set if change is not supported for the passed database
      */
     public Set<DatabaseObject> getAffectedDatabaseObjects(Database database) {
+        if (this.generateStatementsVolatile(database)) {
+            return new HashSet<DatabaseObject>();
+        }
         Set<DatabaseObject> affectedObjects = new HashSet<DatabaseObject>();
         SqlStatement[] statements = generateStatements(database);
 
