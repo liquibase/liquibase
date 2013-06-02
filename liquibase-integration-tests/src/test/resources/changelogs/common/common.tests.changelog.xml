@@ -1047,4 +1047,18 @@
         ]]>
     </sql>
   </changeSet>
+
+
+    <changeSet id="CORE-977-setup" author="nvoxland">
+        <createTable tableName="instrument">
+            <column name="name" type="varchar(3)"><constraints primaryKey="true"/></column>
+            <column name="other" type="int"/>
+        </createTable>
+    </changeSet>
+    <changeSet id="CORE-977" author="nvoxland">
+        <loadUpdateData tableName="instrument" file="changelogs/common/instrument.csv" primaryKey="name">
+            <column header="name" type="STRING"/>
+        </loadUpdateData>
+    </changeSet>
+
 </databaseChangeLog>

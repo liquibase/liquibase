@@ -425,4 +425,9 @@
             <column name="ID" type="STRING"/>
         </loadUpdateData>
     </changeSet>
+
+    <changeSet id="CORE-1227" author="nvoxland">
+        <sql>CREATE TABLE archive (ar_namespace INT(10) DEFAULT 0 NOT NULL, ar_title LONGBLOB NOT NULL, ar_text MEDIUMBLOB NOT NULL, ar_comment TINYBLOB NOT NULL, ar_user INT(10) DEFAULT 0 NOT NULL, ar_user_text LONGBLOB NOT NULL, ar_timestamp BINARY(14) NOT NULL, ar_minor_edit TINYINT(3) DEFAULT 0 NOT NULL, ar_flags TINYBLOB NOT NULL, ar_rev_id INT(10) NULL, ar_text_id INT(10) NULL, ar_deleted TINYINT(3) DEFAULT 0 NOT NULL, ar_len INT(10) NULL, ar_page_id INT(10) NULL, ar_parent_id INT(10) NULL, ar_sha1 LONGBLOB NOT NULL)</sql>
+        <sql>CREATE INDEX name_title_timestamp ON archive(ar_namespace, ar_title ( 255 ), ar_timestamp)</sql>
+    </changeSet>
 </databaseChangeLog>
