@@ -1055,7 +1055,7 @@
             <column name="other" type="int"/>
         </createTable>
     </changeSet>
-    <changeSet id="CORE-977" author="nvoxland">
+    <changeSet id="CORE-977" author="nvoxland" dbms="!hsqldb"> <!-- currently failing due to a bug in hsql 2.2.9 -->
         <loadUpdateData tableName="instrument" file="changelogs/common/instrument.csv" primaryKey="name">
             <column header="name" type="STRING"/>
         </loadUpdateData>

@@ -59,17 +59,20 @@ public class InsertOrUpdateGeneratorHsql extends InsertOrUpdateGenerator {
 
 		StringBuilder sql = new StringBuilder("UPDATE SET ");
 
-		String[] pkFields = insertOrUpdateStatement.getPrimaryKey().split(",");
-		HashSet<String> hashPkFields = new HashSet<String>(Arrays.asList(pkFields));
+//		String[] pkFields = insertOrUpdateStatement.getPrimaryKey().split(",");
+//		HashSet<String> hashPkFields = new HashSet<String>(Arrays.asList(pkFields));
 		for (String columnKey : insertOrUpdateStatement.getColumnValues().keySet()) {
-			if (!hashPkFields.contains(columnKey)) {
+//			if (!hashPkFields.contains(columnKey)) {
 				sql.append(columnKey).append(" = ");
 				sql.append(convertToString(insertOrUpdateStatement.getColumnValue(columnKey), database));
 				sql.append(",");
-			}
+//			}
 		}
-		sql.deleteCharAt(sql.lastIndexOf(","));
-		return sql.toString();
+        int lastComma = sql.lastIndexOf(",");
+        if (lastComma > -1) {
+            sql.deleteCharAt(lastComma);
+        }
+        return sql.toString();
 	}
 
 	// Copied from liquibase.sqlgenerator.core.InsertOrUpdateGeneratorMySQL
