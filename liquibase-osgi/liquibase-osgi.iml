@@ -32,9 +32,6 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="module" module-name="liquibase-core" />
-    <orderEntry type="library" name="Maven: org.yaml:snakeyaml:1.12" level="project" />
-    <orderEntry type="library" scope="PROVIDED" name="Maven: org.osgi:org.osgi.core:4.1.0" level="project" />
   </component>
 </module>
 
