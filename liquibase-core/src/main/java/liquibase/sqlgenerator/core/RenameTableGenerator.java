@@ -29,7 +29,7 @@ public class RenameTableGenerator extends AbstractSqlGenerator<RenameTableStatem
         if (database instanceof MSSQLDatabase) {
             sql = "exec sp_rename '" + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getOldTableName()) + "', '" + statement.getNewTableName() + '\'';
     	} else if (database instanceof SybaseDatabase) {
-			sql = "sp_rename '" + statement.getOldTableName() + "', '" + statement.getNewTableName() + '\'';
+			sql = "exec sp_rename '" + statement.getOldTableName() + "', '" + statement.getNewTableName() + '\'';
         } else if (database instanceof MySQLDatabase) {
             sql = "ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getOldTableName()) + " RENAME " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getNewTableName());
         } else if (database instanceof PostgresDatabase) {
