@@ -48,6 +48,7 @@ import liquibase.precondition.core.SqlPrecondition;
 import liquibase.resource.ResourceAccessor;
 import liquibase.sql.visitor.SqlVisitor;
 import liquibase.sql.visitor.SqlVisitorFactory;
+import liquibase.util.FileUtil;
 import liquibase.util.ObjectUtil;
 import liquibase.util.StringUtils;
 import liquibase.util.file.FilenameUtils;
@@ -791,7 +792,6 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
         File tempDir = File.createTempFile("liquibase-sax", ".dir");
         tempDir.delete();
         tempDir.mkdir();
-//        tempDir.deleteOnExit();
 
         JarFile jarFile = new JarFile(zipfile);
         Enumeration<JarEntry> entries = jarFile.entries();
@@ -800,6 +800,8 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
             File entryFile = new File(tempDir, entry.getName());
             entryFile.mkdirs();
         }
+
+        FileUtil.forceDeleteOnExit(tempDir);
 
         return tempDir;
     }

@@ -37,6 +37,7 @@ import liquibase.statement.core.DropTableStatement;
 import liquibase.test.DatabaseTestContext;
 import liquibase.test.JUnitResourceAccessor;
 import liquibase.test.TestContext;
+import liquibase.util.FileUtil;
 import liquibase.util.RegexMatcher;
 import liquibase.util.StreamUtil;
 import org.junit.After;
@@ -431,6 +432,7 @@ public abstract class AbstractIntegrationTest {
             CompareControl compareControl = new CompareControl();
             DiffOutputControl diffOutputControl = new DiffOutputControl();
             File tempFile = File.createTempFile("liquibase-test", ".xml");
+            FileUtil.forceDeleteOnExit(tempFile);
             if (outputCsv) {
                 diffOutputControl.setDataDir(new File(tempFile.getParentFile(), "liquibase-data").getCanonicalPath().replaceFirst("\\w:",""));
             }
@@ -765,10 +767,11 @@ public abstract class AbstractIntegrationTest {
         File outputDir = File.createTempFile("liquibase-dbdoctest", "dir");
         outputDir.delete();
         outputDir.mkdir();
-        outputDir.deleteOnExit();
 
         liquibase = createLiquibase(completeChangeLog);
         liquibase.generateDocumentation(outputDir.getAbsolutePath(), this.contexts);
+
+        FileUtil.forceDeleteOnExit(outputDir);
     }
 
 
