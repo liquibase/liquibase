@@ -159,7 +159,7 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
             return new SqlStatement[0];
         }
 
-        String processedSQL = prepareSqlForChecksum(sql);
+        String processedSQL = normalizeLineEndings(sql);
         for (String statement : StringUtils.processMutliLineSQL(processedSQL, isStripComments(), isSplitStatements(), getEndDelimiter())) {
             if (database instanceof MSSQLDatabase) {
                  statement = statement.replaceAll("\n", "\r\n");
@@ -178,6 +178,10 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
         }
 
         return returnStatements.toArray(new SqlStatement[returnStatements.size()]);
+    }
+
+    protected String normalizeLineEndings(String string) {
+        return string.replaceAll("\r\n", "\n").replaceAll("\r", "\n");
     }
 
     protected String prepareSqlForChecksum(String string) {
