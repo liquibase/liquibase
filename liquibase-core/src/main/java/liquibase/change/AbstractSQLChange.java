@@ -140,7 +140,7 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
         return CheckSum.compute(this.getEndDelimiter()+":"+
                 this.isSplitStatements()+":"+
                 this.isStripComments()+":"+
-                normalizeLineEndings(sql)); //normalize line endings
+                prepareSqlForChecksum(sql)); //normalize line endings
     }
 
 
@@ -159,7 +159,7 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
             return new SqlStatement[0];
         }
 
-        String processedSQL = normalizeLineEndings(sql);
+        String processedSQL = prepareSqlForChecksum(sql);
         for (String statement : StringUtils.processMutliLineSQL(processedSQL, isStripComments(), isSplitStatements(), getEndDelimiter())) {
             if (database instanceof MSSQLDatabase) {
                  statement = statement.replaceAll("\n", "\r\n");
@@ -180,8 +180,13 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
         return returnStatements.toArray(new SqlStatement[returnStatements.size()]);
     }
 
-    private String normalizeLineEndings(String string) {
-        return string.replaceAll("\r\n", "\n").replaceAll("\r", "\n");
+    protected String prepareSqlForChecksum(String string) {
+        string = string.trim(); //remove begininng and trailig space
+        string = string.replace("\r\n", "\n").replace("\r", "\n"); //ensure line endings are consistent (for next replacements) across OS types
+        string = string.replaceAll("\\s*\\n\\s*", " "); //remove line endings, preserving them as a space. Collapse any whitespace around them into the same space
+        string = string.replaceAll("\\s+", " "); //collapse duplicate spaces
+
+        return string;
     }
 
 //    @Override

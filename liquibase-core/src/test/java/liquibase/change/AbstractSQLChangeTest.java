@@ -189,6 +189,33 @@ public class AbstractSQLChangeTest {
     }
 
     @Test
+    public void normalizeSql() {
+        assertEquals("single line String", new ExampleAbstractSQLChange().prepareSqlForChecksum("single line String"));
+        assertEquals("single line string with whitespace", new ExampleAbstractSQLChange().prepareSqlForChecksum("single line string with      whitespace"));
+        assertEquals("multiple line string", new ExampleAbstractSQLChange().prepareSqlForChecksum("\r\nmultiple\r\nline\r\nstring\r\n"));
+        assertEquals("multiple line string", new ExampleAbstractSQLChange().prepareSqlForChecksum("\rmultiple\rline\rstring\r"));
+
+
+        String version1 = new ExampleAbstractSQLChange().prepareSqlForChecksum("INSERT INTO recommendation_list(instanceId, name, publicId)\n" +
+                "SELECT DISTINCT instanceId, \"default\" as name, \"default\" as publicId\n" +
+                "FROM recommendation;");
+
+        assertEquals("INSERT INTO recommendation_list(instanceId, name, publicId) SELECT DISTINCT instanceId, \"default\" as name, \"default\" as publicId FROM recommendation;", version1);
+
+        String version2 = new ExampleAbstractSQLChange().prepareSqlForChecksum("INSERT INTO \n" +
+                "    recommendation_list(instanceId, name, publicId)\n" +
+                "SELECT \n" +
+                "    DISTINCT \n" +
+                "        instanceId, \n" +
+                "          \"default\" as name, \n" +
+                "          \"default\" as publicId\n" +
+                "   FROM \n" +
+                "       recommendation;");
+
+        assertEquals(version1, version2);
+    }
+
+    @Test
     public void generateStatements_willCallNativeSqlIfPossible() throws DatabaseException {
         ExampleAbstractSQLChange change = new ExampleAbstractSQLChange("SOME SQL");
 
