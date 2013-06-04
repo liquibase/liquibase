@@ -41,7 +41,7 @@ public class CheckSum {
      * Return the current CheckSum algorithm version.
      */
     public static int getCurrentVersion() {
-        return 6;
+        return 7;
     }
 
     /**
