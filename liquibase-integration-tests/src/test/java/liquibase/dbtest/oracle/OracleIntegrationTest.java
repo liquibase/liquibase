@@ -26,6 +26,12 @@ public class OracleIntegrationTest extends AbstractIntegrationTest {
         this.viewOnSchemaChangeLog = "changelogs/oracle/complete/viewOnSchema.xml";
     }
 
+    @Override
+    @Test
+    public void testRunChangeLog() throws Exception {
+        super.testRunChangeLog();    //To change body of overridden methods use File | Settings | File Templates.
+    }
+
     @Test
     public void indexCreatedOnCorrectSchema() throws Exception {
          if (this.getDatabase() == null) {

@@ -1061,4 +1061,14 @@
         </loadUpdateData>
     </changeSet>
 
+    <changeSet id="CORE-1307" author="nvoxland" dbms="oracle">
+        <preConditions>
+            <not>
+                <sequenceExists sequenceName=" ALL_UPPER_CASE_SEQUENCE" />
+            </not>
+            </preConditions>
+    </changeSet>
+
+
+
 </databaseChangeLog>

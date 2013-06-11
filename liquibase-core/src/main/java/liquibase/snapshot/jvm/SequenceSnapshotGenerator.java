@@ -46,16 +46,26 @@ public class SequenceSnapshotGenerator extends JdbcSnapshotGenerator {
     }
 
     @Override
-    protected DatabaseObject snapshotObject(DatabaseObject example, DatabaseSnapshot snapshot) {
+    protected DatabaseObject snapshotObject(DatabaseObject example, DatabaseSnapshot snapshot) throws DatabaseException {
         Database database = snapshot.getDatabase();
         if (!database.supportsSequences()) {
             return null;
         }
-        Sequence seq = new Sequence();
-        seq.setName(example.getName());
-        seq.setSchema(example.getSchema());
 
-        return seq;
+        List<String> sequenceNames = (List<String>) ExecutorService.getInstance().getExecutor(database).queryForList(new RawSqlStatement(getSelectSequenceSql(example.getSchema(), database)), String.class);
+        for (String name : sequenceNames) {
+            if ((database.isCaseSensitive() && name.equals(example.getName())
+                    || (!database.isCaseSensitive() && name.equalsIgnoreCase(example.getName())))) {
+                Sequence seq = new Sequence();
+                seq.setName(name);
+                seq.setSchema(example.getSchema());
+
+                return seq;
+
+            }
+        }
+
+        return null;
     }
 
     protected String getSelectSequenceSql(Schema schema, Database database) {

@@ -26,8 +26,6 @@ import java.lang.reflect.Method;
  */
 public abstract class AbstractChange implements Change {
 
-    private String dbms;
-
     private ResourceAccessor resourceAccessor;
 
     private ChangeSet changeSet;
