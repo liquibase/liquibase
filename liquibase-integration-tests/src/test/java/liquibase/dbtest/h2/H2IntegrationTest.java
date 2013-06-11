@@ -109,9 +109,13 @@ public class H2IntegrationTest extends AbstractIntegrationTest {
         }
     }
 
+    @Test
+    @Override
+    public void generateChangeLog_noChanges() throws Exception {
+        super.generateChangeLog_noChanges();    //To change body of overridden methods use File | Settings | File Templates.
+    }
 
-
-        //    @Test
+    //    @Test
 //    public void testUpdateWithTurkishLocale() throws Exception {
 //        Locale originalDefault = Locale.getDefault();
 //

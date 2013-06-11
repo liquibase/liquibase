@@ -907,6 +907,20 @@ public abstract class AbstractIntegrationTest {
         clearDatabase(liquibase);
     }
 
+    @Test
+    public void generateChangeLog_noChanges() throws Exception{
+        if (database == null) {
+            return;
+        }
+
+        runCompleteChangeLog();
+
+        DiffResult diffResult = DiffGeneratorFactory.getInstance().compare(database, database, new CompareControl());
+
+        DiffToChangeLog changeLogWriter = new DiffToChangeLog(diffResult, new DiffOutputControl(false, false, false));
+        assertEquals(0, changeLogWriter.generateChangeSets().size());
+    }
+
 //   @Test
 //   public void testXMLInclude() throws Exception{
 //       if (database == null) {
