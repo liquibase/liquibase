@@ -28,7 +28,7 @@
         </fileSet>
         <fileSet>
             <directory>${project.build.directory}/site/apidocs</directory>
-            <outputDirectory>docs</outputDirectory>
+            <outputDirectory>javadoc</outputDirectory>
             <includes>
                 <include>**/*</include>
             </includes>
@@ -47,4 +47,13 @@
         <!--<fileMode>0777</fileMode>-->
         <!--</file>-->
     </files>
+    <dependencySets>
+        <dependencySet>
+            <outputDirectory>lib</outputDirectory>
+            <excludes>
+                <exclude>org.liquibase:liquibase-core</exclude>
+            </excludes>
+        </dependencySet>
+    </dependencySets>
+
 </assembly>
