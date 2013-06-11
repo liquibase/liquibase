@@ -705,30 +705,6 @@ public abstract class AbstractIntegrationTest {
     }
 
     @Test
-    public void testExecuteExtChangelog() throws Exception {
-        if (database == null) {
-            return;
-        }
-
-        try {
-            String extChangelog = "changelogs/common/ext.changelog.xml";
-            Liquibase liquibase = createLiquibase(extChangelog);
-            clearDatabase(liquibase);
-
-            //run again to test changelog testing logic
-            liquibase = createLiquibase(extChangelog);
-            try {
-                liquibase.update(this.contexts);
-            } catch (ValidationFailedException e) {
-                e.printDescriptiveError(System.out);
-                throw e;
-            }
-        } finally {
-            ServiceLocator.reset();
-        }
-    }
-
-    @Test
     public void testRollbackToChange() throws Exception {
         if (database == null) {
             return;

@@ -27,18 +27,4 @@ public class ExtServiceLocatorTest {
     public void teardown() {
         ServiceLocator.reset();
     }
-
-
-    @Test
-    public void getClasses_sampleJar() throws Exception {
-        ServiceLocator instance = ServiceLocator.getInstance();
-        Class[] classes = instance.findClasses(SqlGenerator.class);
-        for (Class clazz : classes) {
-            if (clazz.getName().equals("liquibase.ext.samplesqlgenerator.SampleUpdateGenerator")) {
-                return;
-            }
-        }
-        fail("Did not find SampleUpdateGenerator");
-    }
-
 }

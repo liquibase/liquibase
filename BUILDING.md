@@ -6,11 +6,6 @@ Liquibase core is currently built using Maven 3.  Liquibase's modules are organi
 + liqubase-integration-tests   
 + liquibase-maven-plugin      
 + liquibase-osgi
-+ samples
-   + liquibase-ext-change
-   + liquibase-ext-changewithnestedtags
-   + liquibase-ext-sqlgenerator
-
 
 Building with the <code>maven package</code> command will compile, run
 tests and build the packages.

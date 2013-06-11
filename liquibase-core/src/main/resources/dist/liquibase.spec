@@ -182,7 +182,7 @@ EOF
 %files
 %defattr(-,root,root)
 %attr(0755,root,root) %{_sysconfdir}/profile.d/%{name}.sh
-%doc docs/* samples changelog.txt LICENSE.txt
+%doc docs/* changelog.txt LICENSE.txt
 %{_libdir}/%{name}
 %{_bindir}/%{name}
 
