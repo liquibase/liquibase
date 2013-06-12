@@ -648,6 +648,8 @@ public class Liquibase {
 
         DatabaseChangeLog changeLog = ChangeLogParserFactory.getInstance().getParser(changeLogFile, resourceAccessor).parse(changeLogFile, changeLogParameters, resourceAccessor);
 
+        checkDatabaseChangeLogTable(true, changeLog, contexts);
+
         changeLog.validate(database, contexts);
 
         ChangeLogIterator logIterator = getStandardChangelogIterator(contexts, changeLog);
