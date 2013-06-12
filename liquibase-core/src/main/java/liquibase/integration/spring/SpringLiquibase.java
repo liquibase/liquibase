@@ -102,13 +102,9 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
         }
 
         private String adjustClasspath(String file) {
-            return isClasspathPrefixPresent(parentFile) && !isPrefixPresent(file)
+            return isPrefixPresent(parentFile) && !isPrefixPresent(file)
                     ? ResourceLoader.CLASSPATH_URL_PREFIX + file
                     : file;
-        }
-
-        public boolean isClasspathPrefixPresent(String file) {
-            return file.startsWith(ResourceLoader.CLASSPATH_URL_PREFIX);
         }
 
         public boolean isPrefixPresent(String file) {
