@@ -464,7 +464,11 @@ public class DiffToChangeLog {
 
 
         private Node getNode(Class<? extends DatabaseObject> type) {
-            return allNodes.get(type);
+            Node node = allNodes.get(type);
+            if (node == null) {
+                node = new Node(type);
+            }
+            return node;
         }
 
 

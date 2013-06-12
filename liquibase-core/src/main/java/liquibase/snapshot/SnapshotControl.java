@@ -46,8 +46,8 @@ public class SnapshotControl {
                     returnSet.add(clazz);
                 }
             }
+            return returnSet;
         }
-        return null;
     }
 
     private Set<Class<? extends DatabaseObject>> getDefaultTypes() {
@@ -75,6 +75,6 @@ public class SnapshotControl {
     }
 
     public boolean shouldInclude(Class<? extends DatabaseObject> type) {
-        return type != null && type.equals(Catalog.class) || types.contains(type);
+        return type.equals(Catalog.class) || types.contains(type);
     }
 }
