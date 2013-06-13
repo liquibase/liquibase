@@ -136,7 +136,7 @@ public class UniqueConstraint extends AbstractDatabaseObject {
 			} else if (null == that.getTable()) {
 				result = false;
 			} else {
-				result = this.getTable().getName().equals(
+				result = this.getTable().getName().equalsIgnoreCase(
 						that.getTable().getName());
 			}
 		}
@@ -154,12 +154,9 @@ public class UniqueConstraint extends AbstractDatabaseObject {
 		thisTableName = null == this.getTable() ? "" : this.getTable()
 				.getName();
 		thatTableName = null == o.getTable() ? "" : o.getTable().getName();
-		int returnValue = thisTableName.compareTo(thatTableName);
+		int returnValue = thisTableName.compareToIgnoreCase(thatTableName);
 		if (returnValue == 0) {
-			returnValue = this.getName().compareTo(o.getName());
-		}
-		if (returnValue == 0) {
-			returnValue = this.getColumnNames().compareTo(o.getColumnNames());
+			returnValue = this.getColumnNames().compareToIgnoreCase(o.getColumnNames());
 		}
 		return returnValue;
 	}
@@ -174,7 +171,7 @@ public class UniqueConstraint extends AbstractDatabaseObject {
 			result = 31 * result + this.getName().toUpperCase().hashCode();
 		}
 		if (getColumnNames() != null) {
-			result = 31 * result + getColumnNames().hashCode();
+			result = 31 * result + getColumnNames().toUpperCase().hashCode();
 		}
 		return result;
 	}
