@@ -5,6 +5,27 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.io.Writer;
 import java.text.DateFormat;
+import java.util.Date;
+import java.util.List;
+
+import liquibase.changelog.ChangeLogIterator;
+import liquibase.changelog.ChangeLogParameters;
+import liquibase.changelog.ChangeSet;
+import liquibase.changelog.DatabaseChangeLog;
+import liquibase.changelog.RanChangeSet;
+import liquibase.changelog.filter.AfterTagChangeSetFilter;
+import liquibase.changelog.filter.AlreadyRanChangeSetFilter;
+import liquibase.changelog.filter.ContextChangeSetFilter;
+import liquibase.changelog.filter.CountChangeSetFilter;
+import liquibase.changelog.filter.DbmsChangeSetFilter;
+import liquibase.changelog.filter.ExecutedAfterChangeSetFilter;
+import liquibase.changelog.filter.NotRanChangeSetFilter;
+import liquibase.changelog.filter.ShouldRunChangeSetFilter;
+import liquibase.changelog.visitor.ChangeLogSyncVisitor;
+import liquibase.changelog.visitor.DBDocVisitor;
+import liquibase.changelog.visitor.ListVisitor;
+import liquibase.changelog.visitor.RollbackVisitor;
+import liquibase.changelog.visitor.UpdateVisitor;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -231,7 +252,10 @@ public class Liquibase {
         executor.comment("*********************************************************************");
         executor.comment("Change Log: " + changeLogFile);
         executor.comment("Ran at: " + DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(new Date()));
-        executor.comment("Against: " + getDatabase().getConnection().getConnectionUserName() + "@" + getDatabase().getConnection().getURL());
+        DatabaseConnection connection = getDatabase().getConnection();
+        if (connection != null) {
+            executor.comment("Against: " + connection.getConnectionUserName() + "@" + connection.getURL());
+        }
         executor.comment("Liquibase version: " + LiquibaseUtil.getBuildVersion());
         executor.comment("*********************************************************************" + StreamUtil.getLineSeparator());
         
