@@ -1,7 +1,15 @@
 package liquibase.sqlgenerator.core;
 
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+
 import liquibase.database.Database;
-import liquibase.database.core.*;
+import liquibase.database.core.DB2Database;
+import liquibase.database.core.InformixDatabase;
+import liquibase.database.core.MSSQLDatabase;
+import liquibase.database.core.OracleDatabase;
+import liquibase.database.core.SybaseASADatabase;
 import liquibase.structure.core.Index;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
@@ -10,10 +18,6 @@ import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.CreateIndexStatement;
 import liquibase.structure.core.Table;
 import liquibase.util.StringUtils;
-
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
 
 public class CreateIndexGenerator extends AbstractSqlGenerator<CreateIndexStatement> {
 
@@ -78,6 +82,9 @@ public class CreateIndexGenerator extends AbstractSqlGenerator<CreateIndexStatem
 		    }
 	    }
 
+        if (database instanceof OracleDatabase) {
+            buffer.append(" parallel 3 nologging ");
+        }
 	    return new Sql[]{new UnparsedSql(buffer.toString(), getAffectedIndex(statement))};
     }
 
