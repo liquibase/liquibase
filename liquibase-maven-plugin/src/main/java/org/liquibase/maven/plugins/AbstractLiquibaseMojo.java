@@ -222,6 +222,13 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
      */
     private Map expressionVariables;
 
+
+    /*
+    @parameter expression="$ {liquibase.outputFileEncoding}
+            "
+            */
+    protected String outputFileEncoding;
+
     public void execute() throws MojoExecutionException, MojoFailureException {
         getLog().info(MavenUtils.LOG_SEPARATOR);
 

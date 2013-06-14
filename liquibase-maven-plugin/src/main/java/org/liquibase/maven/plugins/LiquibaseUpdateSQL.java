@@ -64,7 +64,13 @@ public class LiquibaseUpdateSQL extends AbstractLiquibaseUpdateMojo {
 									+ migrationSqlOutputFile.getAbsolutePath());
 				}
 			}
-			outputWriter = new FileWriter(migrationSqlOutputFile);
+            if (outputFileEncoding==null) {
+                getLog().info("Char encoding not set! The created file will be system dependent!");
+                outputWriter = new FileWriter(migrationSqlOutputFile);
+            } else {
+                getLog().debug("Writing output file with [" + outputFileEncoding + "] file encoding.");
+                outputWriter = new BufferedWriter(new OutputStreamWriter( new FileOutputStream(migrationSqlOutputFile), outputFileEncoding));
+            }
 		} catch (IOException e) {
 			getLog().error(e);
 			throw new MojoExecutionException(
