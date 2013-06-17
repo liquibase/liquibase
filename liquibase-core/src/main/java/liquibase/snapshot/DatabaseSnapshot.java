@@ -37,6 +37,15 @@ public abstract class DatabaseSnapshot {
         this.snapshotControl = new SnapshotControl();
     }
 
+    public Table getTable(String name) {
+        for (Table table : get(Table.class)) {
+            if (table.getName().equalsIgnoreCase(name)) {
+                return table;
+            }
+        }
+        throw new IllegalArgumentException("table not found: " + name);
+    }
+
     public SnapshotControl getSnapshotControl() {
         return snapshotControl;
     }
@@ -91,12 +100,7 @@ public abstract class DatabaseSnapshot {
             collection.add(example);
 
         } else {
-            Set<DatabaseObject> collection = allFound.get(object.getClass());
-            if (collection == null) {
-                collection = new HashSet<DatabaseObject>();
-                allFound.put(object.getClass(), collection);
-            }
-            collection.add(object);
+            add(object);
 
             try {
                 includeNestedObjects(object);
@@ -107,6 +111,15 @@ public abstract class DatabaseSnapshot {
             }
         }
         return object;
+    }
+
+    public  <T extends DatabaseObject> void add(T object) {
+        Set<DatabaseObject> collection = allFound.get(object.getClass());
+        if (collection == null) {
+            collection = new HashSet<DatabaseObject>();
+            allFound.put(object.getClass(), collection);
+        }
+        collection.add(object);
     }
 
     private void includeNestedObjects(DatabaseObject object) throws DatabaseException, InvalidExampleException, InstantiationException, IllegalAccessException {
