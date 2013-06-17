@@ -1,10 +1,11 @@
-package liquibase.informix.sqlgenerator.core;
+package liquibase.sqlgenerator.core;
 
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
 import liquibase.database.Database;
+import liquibase.database.core.InformixDatabase;
 import liquibase.exception.ValidationErrors;
 import liquibase.logging.LogFactory;
 import liquibase.sql.Sql;
@@ -25,10 +26,19 @@ import liquibase.util.StringUtils;
  * 
  * @author islavov
  */
-public class InformixCreateTableGenerator extends AbstractSqlGenerator<CreateTableStatement> {
+public class CreateTableGeneratorInformix extends AbstractSqlGenerator<CreateTableStatement> {
 
+    @Override
+    public boolean supports(CreateTableStatement statement, Database database) {
+        return database instanceof InformixDatabase;
+    }
 
-	public ValidationErrors validate(CreateTableStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    @Override
+    public int getPriority() {
+        return PRIORITY_DATABASE;
+    }
+
+    public ValidationErrors validate(CreateTableStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
 
 		return null;
 	}

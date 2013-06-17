@@ -1,7 +1,7 @@
 Liquibase Core Changelog
 ===========================================
 
-Changes in version 3.0 (Under development)
+Changes in version 3.0 (2013.06.17)
 - Dropped Java 1.5 support
 - Major changes in diff and snapshot log
 - Support for "catalogs" in addition to schemas

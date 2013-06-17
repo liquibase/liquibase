@@ -22,6 +22,9 @@ public class DoubleType  extends LiquibaseDataType {
         if (database instanceof PostgresDatabase) {
             return new DatabaseDataType("DOUBLE PRECISION");
         }
+        if (database instanceof InformixDatabase) {
+            return new DatabaseDataType("DOUBLE PRECISION");
+        }
         return super.toDatabaseDataType(database);
     }
 }

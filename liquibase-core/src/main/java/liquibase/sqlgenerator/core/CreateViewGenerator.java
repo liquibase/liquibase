@@ -3,9 +3,7 @@ package liquibase.sqlgenerator.core;
 import liquibase.CatalogAndSchema;
 import liquibase.database.Database;
 import liquibase.database.core.*;
-import liquibase.informix.sqlgenerator.core.InformixCreateViewGenerator;
 import liquibase.structure.core.Relation;
-import liquibase.structure.core.Schema;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
@@ -21,7 +19,7 @@ public class CreateViewGenerator extends AbstractSqlGenerator<CreateViewStatemen
     public ValidationErrors validate(CreateViewStatement createViewStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
     	
     	if (database instanceof InformixDatabase) {
-    		return new InformixCreateViewGenerator().validate(createViewStatement, database, sqlGeneratorChain);
+    		return new CreateViewGeneratorInformix().validate(createViewStatement, database, sqlGeneratorChain);
     	}
     	
         ValidationErrors validationErrors = new ValidationErrors();
@@ -39,7 +37,7 @@ public class CreateViewGenerator extends AbstractSqlGenerator<CreateViewStatemen
     public Sql[] generateSql(CreateViewStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
     	
     	if (database instanceof InformixDatabase) {
-    		return new InformixCreateViewGenerator().generateSql(statement, database, sqlGeneratorChain);
+    		return new CreateViewGeneratorInformix().generateSql(statement, database, sqlGeneratorChain);
     	}
     	
         String createClause;
