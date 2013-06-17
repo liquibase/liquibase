@@ -323,32 +323,6 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
         }
     }
 
-    private Map<String, Object> convertResultSetToMap(ResultSet rs, Database database) throws SQLException {
-        Map<String, Object> data = new HashMap<String, Object>();
-        for (int i=1; i<= rs.getMetaData().getColumnCount(); i++) {
-            int type = rs.getMetaData().getColumnType(i);
-            Object value;
-            if (type == Types.VARCHAR || type == Types.CHAR || type == Types.LONGVARCHAR) {
-                value = rs.getString(i);
-            } else if (type == Types.INTEGER || type == Types.NUMERIC) {
-                value = rs.getInt(i);
-            }  else if (type == Types.SMALLINT) {
-                try {
-                    value = rs.getInt(i);
-                } catch (ClassCastException e) {
-                    value = rs.getString(i);
-                }
-            } else {
-                value = rs.getObject(i);
-            }
-            if (rs.wasNull()) {
-                value = null;
-            }
-            data.put(rs.getMetaData().getColumnName(i), value);
-        }
-        return data;
-    }
-
     protected DateFormat getDateFormat(Database database) {
         return new SimpleDateFormat("yyyy-MM-dd");
     }
