@@ -174,10 +174,10 @@ public class Main {
 
     private static String generateLogLevelWarningMessage() {
         Logger logger = LogFactory.getLogger();
-        if (logger == null || logger.getLogLevel() == null || (logger.getLogLevel().equals(LogLevel.DEBUG))) {
+        if (logger != null && logger.getLogLevel() != null && (logger.getLogLevel().equals(LogLevel.OFF))) {
             return "";
         } else {
-            return "\n\nFor more information, use the --logLevel flag)";
+            return "\n\nFor more information, use the --logLevel flag";
         }
     }
 
