@@ -833,6 +833,7 @@ public abstract class AbstractJdbcDatabase implements Database {
                     enableForeignKeyChecks();
                 }
             }
+            ExecutorService.getInstance().getExecutor(this).execute(new ClearDatabaseChangeLogTableStatement(this.getLiquibaseCatalogName(), this.getLiquibaseSchemaName()));
 
         } finally {
             this.setObjectQuotingStrategy(currentStrategy);
