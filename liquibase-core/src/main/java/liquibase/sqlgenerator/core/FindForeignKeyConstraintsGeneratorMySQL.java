@@ -45,6 +45,7 @@ public class FindForeignKeyConstraintsGeneratorMySQL extends AbstractSqlGenerato
         sb.append("AND RC.CONSTRAINT_NAME = KCU.CONSTRAINT_NAME ");
         sb.append("AND RC.TABLE_NAME = '").append(statement.getBaseTableName()).append("' ");
         sb.append("AND RC.CONSTRAINT_SCHEMA = '").append(schema.getCatalogName()).append("'");
+        sb.append("AND KCU.TABLE_SCHEMA = '").append(schema.getCatalogName()).append("'");
         return new Sql[]{
                 new UnparsedSql(sb.toString())
         };
