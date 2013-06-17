@@ -54,6 +54,7 @@ public class SequenceSnapshotGenerator extends JdbcSnapshotGenerator {
 
         List<String> sequenceNames = (List<String>) ExecutorService.getInstance().getExecutor(database).queryForList(new RawSqlStatement(getSelectSequenceSql(example.getSchema(), database)), String.class);
         for (String name : sequenceNames) {
+            name = cleanNameFromDatabase(name, database);
             if ((database.isCaseSensitive() && name.equals(example.getName())
                     || (!database.isCaseSensitive() && name.equalsIgnoreCase(example.getName())))) {
                 Sequence seq = new Sequence();
