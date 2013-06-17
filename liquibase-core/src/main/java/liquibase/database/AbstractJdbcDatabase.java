@@ -833,7 +833,16 @@ public abstract class AbstractJdbcDatabase implements Database {
                     enableForeignKeyChecks();
                 }
             }
-            ExecutorService.getInstance().getExecutor(this).execute(new ClearDatabaseChangeLogTableStatement(this.getLiquibaseCatalogName(), this.getLiquibaseSchemaName()));
+            try {
+                ExecutorService.getInstance().getExecutor(this).execute(new DropTableStatement(this.getLiquibaseCatalogName(), this.getLiquibaseSchemaName(), this.getDatabaseChangeLogTableName(), false));
+            } catch (DatabaseException e) {
+                LogFactory.getLogger().info("Error dropping "+this.getDatabaseChangeLogTableName(), e);
+            }
+            try {
+                ExecutorService.getInstance().getExecutor(this).execute(new DropTableStatement(this.getLiquibaseCatalogName(), this.getLiquibaseSchemaName(), this.getDatabaseChangeLogLockTableName(), false));
+            } catch (DatabaseException e) {
+                LogFactory.getLogger().info("Error dropping "+this.getDatabaseChangeLogLockTableName(), e);
+            }
 
         } finally {
             this.setObjectQuotingStrategy(currentStrategy);
