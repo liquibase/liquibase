@@ -138,9 +138,6 @@ public class Main {
                 main.doMigration();
             } catch (Throwable e) {
                 String message = e.getMessage();
-                if (e.getCause() != null) {
-                    message = e.getCause().getMessage();
-                }
                 if (message == null) {
                     message = "Unknown Reason";
                 }
@@ -617,7 +614,7 @@ public class Main {
             this.promptForNonLocalDatabase = Boolean.FALSE;
         }
         if (this.logLevel == null) {
-            this.logLevel = "info";
+            this.logLevel = "off";
         }
         if (this.includeSystemClasspath == null) {
             this.includeSystemClasspath = Boolean.TRUE;
