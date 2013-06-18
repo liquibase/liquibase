@@ -22,7 +22,6 @@ public class FindForeignKeyConstraintsGeneratorHsql extends AbstractSqlGenerator
         return database instanceof HsqlDatabase;
     }
 
-    @Override
     public ValidationErrors validate(FindForeignKeyConstraintsStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain)
     {
         ValidationErrors validationErrors = new ValidationErrors();
@@ -30,7 +29,6 @@ public class FindForeignKeyConstraintsGeneratorHsql extends AbstractSqlGenerator
         return validationErrors;
     }
 
-    @Override
     public Sql[] generateSql(FindForeignKeyConstraintsStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain)
     {
         StringBuilder sb = new StringBuilder();
