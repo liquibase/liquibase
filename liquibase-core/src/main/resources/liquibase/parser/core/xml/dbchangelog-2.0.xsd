@@ -1061,6 +1061,8 @@
 				<xsd:element ref="sqlCheck" maxOccurs="unbounded" />
 				<xsd:element ref="changeLogPropertyDefined" maxOccurs="unbounded" />
 				<xsd:element ref="customPrecondition" maxOccurs="unbounded" />
+				<xsd:any namespace="##other" processContents="lax" minOccurs="0"
+					maxOccurs="unbounded" />
 			</xsd:choice>
 		</xsd:sequence>
 
