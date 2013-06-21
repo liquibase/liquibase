@@ -26,7 +26,7 @@ import liquibase.util.StringUtils;
  * 
  * @author islavov
  */
-public class CreateTableGeneratorInformix extends AbstractSqlGenerator<CreateTableStatement> {
+public class CreateTableGeneratorInformix extends CreateTableGenerator {
 
     @Override
     public boolean supports(CreateTableStatement statement, Database database) {
@@ -38,12 +38,8 @@ public class CreateTableGeneratorInformix extends AbstractSqlGenerator<CreateTab
         return PRIORITY_DATABASE;
     }
 
-    public ValidationErrors validate(CreateTableStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-
-		return null;
-	}
-
-	public Sql[] generateSql(CreateTableStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+	@Override
+    public Sql[] generateSql(CreateTableStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
 		StringBuilder buffer = new StringBuilder();
 
         buffer.append("CREATE TABLE ").append(database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName())).append(" ");
