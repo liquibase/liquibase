@@ -35,11 +35,12 @@ public class RawSQLChange extends AbstractSQLChange {
 
 
     @Override
-    @DatabaseChangeProperty(serializationType = SerializationType.DIRECT_VALUE, exampleValue = "insert into person (name) values ('Bob');", requiredForDatabase = "all")
+    @DatabaseChangeProperty(serializationType = SerializationType.DIRECT_VALUE, exampleValue = "insert into person (name) values ('Bob')", requiredForDatabase = "all")
     public String getSql() {
         return super.getSql();
     }
 
+    @DatabaseChangeProperty(serializationType = SerializationType.NESTED_OBJECT, exampleValue = "What about Bob?")
     public String getComment() {
         return comment;
     }

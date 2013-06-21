@@ -113,7 +113,7 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
      *
      * @see #splitStatements
      */
-    @DatabaseChangeProperty(description = "Delimiter to apply to the end of the statement. Defaults to ';', may be set to ''.")
+    @DatabaseChangeProperty(description = "Delimiter to apply to the end of the statement. Defaults to ';', may be set to ''.", exampleValue = "\\nGO")
     public String getEndDelimiter() {
         return endDelimiter;
     }
