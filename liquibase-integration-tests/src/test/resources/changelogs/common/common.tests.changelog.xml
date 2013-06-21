@@ -1075,5 +1075,16 @@
         </createTable>
     </changeSet>
 
+    <include file="changelogs/common/included.yaml"/>
+    <include file="changelogs/common/included.json"/>
+    <include file="changelogs/common/included.sql"/>
+
+    <changeSet id="included-check" author="nvoxland">
+        <preConditions>
+            <tableExists tableName="included_yaml"/>
+            <tableExists tableName="included_json"/>
+            <tableExists tableName="included_json"/>
+        </preConditions>
+    </changeSet>
 
 </databaseChangeLog>

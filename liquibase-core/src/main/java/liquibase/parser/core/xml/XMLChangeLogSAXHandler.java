@@ -38,6 +38,7 @@ import liquibase.exception.LiquibaseException;
 import liquibase.exception.MigrationFailedException;
 import liquibase.logging.LogFactory;
 import liquibase.logging.Logger;
+import liquibase.parser.ChangeLogParser;
 import liquibase.parser.ChangeLogParserFactory;
 import liquibase.precondition.CustomPreconditionWrapper;
 import liquibase.precondition.Precondition;
@@ -509,15 +510,17 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
     protected boolean handleIncludedChangeLog(String fileName,
 			boolean isRelativePath, String relativeBaseFileName)
 			throws LiquibaseException {
-		if (!(fileName.endsWith(".xml") || fileName.endsWith(".sql"))) {
-			log.debug(relativeBaseFileName + "/" + fileName
-					+ " is not a recognized file type");
-			return false;
-		}
 
         if (fileName.equalsIgnoreCase(".svn") || fileName.equalsIgnoreCase("cvs")) {
             return false;
         }
+
+        ChangeLogParser changeLogParser = ChangeLogParserFactory.getInstance().getParser(fileName, resourceAccessor);
+		if (changeLogParser == null) {
+			log.warning("included file "+relativeBaseFileName + "/" + fileName + " is not a recognized file type");
+			return false;
+		}
+
 
 		if (isRelativePath) {
 			// workaround for FilenameUtils.normalize() returning null for relative paths like ../conf/liquibase.xml
