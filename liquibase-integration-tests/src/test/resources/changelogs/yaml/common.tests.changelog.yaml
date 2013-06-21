@@ -114,7 +114,7 @@ databaseChangeLog:
             expectedResult: 1
             sql: select count(*) from DATABASECHANGELOG where AUTHOR='nvoxland' and ID='datatypetest-1';
 
-  - changeSet: 
+  - changeSet:
       id: tagTest 
       author: nvoxland
       changes:
@@ -558,12 +558,19 @@ databaseChangeLog:
             dbms: mysql
             value:  engine innodb
 
-  - includeAll:
-      path: changelogs/common/pathincluded/
+#  - includeAll:
+#      path: changelogs/common/pathincluded/
 
   - include:
       file: includerelative\pathinclude1.changelog.xml
       relativeToChangelogFile: true # try with dos style path
+
+  - changeSet:
+      id: includecheck
+      author: nvoxland
+      preConditions:
+        - tableExists:
+            tableName: relpathinclude1
 
   - changeSet:
       id: comma'Ttest
@@ -620,5 +627,5 @@ databaseChangeLog:
             replace: INVALID TABLE NAME
             with: validTableName
 
-  - includeAll:
-      path: com/example/packaged
+#  - includeAll:
+#      path: com/example/packaged
