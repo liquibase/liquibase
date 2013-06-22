@@ -10,6 +10,9 @@ import liquibase.test.MockResourceAccessor;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
@@ -105,6 +108,33 @@ public class LiquibaseTest {
         new Liquibase("com/example/test.xml", new MockResourceAccessor(), database).setCurrentDateTimeFunction(testFunction);
         verify(database).setCurrentDateTimeFunction(testFunction);
     }
+
+    @Test
+    public void update_passedStringContext() throws LiquibaseException {
+        LiquibaseDelegate liquibase = new LiquibaseDelegate() {
+            @Override
+            public void update(Contexts contexts) throws LiquibaseException {
+                objectToVerify = contexts;
+            }
+        };
+
+        liquibase.update("test");
+        assertEquals("test", liquibase.objectToVerify.toString());
+        liquibase.reset();
+
+        liquibase.update("");
+        assertEquals("", liquibase.objectToVerify.toString());
+        liquibase.reset();
+
+        liquibase.update((String) null);
+        assertEquals("", liquibase.objectToVerify.toString());
+        liquibase.reset();
+
+        liquibase.update("test1, test2");
+        assertEquals("test1,test2", liquibase.objectToVerify.toString());
+        liquibase.reset();
+    }
+
 
 //todo: reintroduce    @Test
 //    public void isSaveToRunMigration() throws Exception {
@@ -222,4 +252,34 @@ public class LiquibaseTest {
 //            };
 //        }
 //    }
+
+    /**
+     * Convenience helper class for testing Liquibase methods that simply delegate to another.
+     * To use, create a subclass that overrides the method delegated to with an implementation that stores whatever params are being passed.
+     * After calling the delegating method in your test, assert against the objectToVerify
+     */
+    private static class LiquibaseDelegate extends Liquibase {
+
+        /**
+         * If using a single parameter, store in here
+         */
+        protected Object objectToVerify;
+
+        /**
+         * If using multiple parameters, store them here
+         */
+        protected Map<String, Object> objectsToVerify = new HashMap<String, Object>();
+
+        private LiquibaseDelegate() throws LiquibaseException {
+            super("com/example/test.xml", new MockResourceAccessor(), mock(Database.class));
+        }
+
+        /**
+         * Resets the object(s)ToVerify so this delegate can be reused in a test.
+         */
+        public void reset() {
+            objectToVerify = null;
+            objectsToVerify.clear();
+        }
+    }
 }
