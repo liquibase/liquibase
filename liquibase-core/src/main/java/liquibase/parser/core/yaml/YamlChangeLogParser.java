@@ -1,7 +1,7 @@
 package liquibase.parser.core.yaml;
 
+import liquibase.Contexts;
 import liquibase.change.*;
-import liquibase.change.core.LoadDataChange;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
@@ -23,16 +23,13 @@ import liquibase.sql.visitor.SqlVisitorFactory;
 import liquibase.statement.DatabaseFunction;
 import liquibase.statement.SequenceCurrentValueFunction;
 import liquibase.statement.SequenceNextValueFunction;
-import liquibase.util.ISODateFormat;
 import liquibase.util.ObjectUtil;
 import liquibase.util.file.FilenameUtils;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
-import java.text.ParseException;
 import java.util.*;
 
 public class YamlChangeLogParser implements ChangeLogParser {
@@ -40,7 +37,11 @@ public class YamlChangeLogParser implements ChangeLogParser {
     protected Logger log = LogFactory.getLogger();
 
     public boolean supports(String changeLogFile, ResourceAccessor resourceAccessor) {
-        return changeLogFile.endsWith(".yaml");
+        return changeLogFile.endsWith("."+ getSupportedFileExtension());
+    }
+
+    protected String getSupportedFileExtension() {
+        return "yaml";
     }
 
     public int getPriority() {
@@ -57,7 +58,7 @@ public class YamlChangeLogParser implements ChangeLogParser {
             try {
                 changeLogAsMap = yaml.loadAs(changeLogStream, Map.class);
             } catch (Exception e) {
-                throw new ChangeLogParseException("Syntax error in yaml: " + e.getMessage(), e);
+                throw new ChangeLogParseException("Syntax error in "+getSupportedFileExtension()+": " + e.getMessage(), e);
             }
 
             DatabaseChangeLog changeLog = new DatabaseChangeLog(physicalChangeLogLocation);
@@ -244,7 +245,7 @@ public class YamlChangeLogParser implements ChangeLogParser {
                                     } else if (param.equals("context")) {
                                         String value = getValue(visitorParams, param, String.class, changeLogParameters);
                                         String context = value.toString().replace(" ", "");
-                                        sqlVisitor.setContexts(new HashSet<String>(Arrays.asList(context.split(","))));
+                                        sqlVisitor.setContexts(new Contexts(context.split(",")));
                                     } else if (param.equals("applyToRollback")) {
                                         Boolean value = getValue(visitorParams, param, Boolean.class, changeLogParameters);
                                         sqlVisitor.setApplyToRollback(value);
@@ -327,7 +328,7 @@ public class YamlChangeLogParser implements ChangeLogParser {
                     handleIncludedChangeLog(file, isRelativeToChangelogFile, physicalChangeLogLocation, changeLog, changeLogParameters, resourceAccessor);
 
                 } else if (objectType.equals("includeAll")) {
-                    throw new ChangeLogParseException("includeAll not yet supported in yaml");
+                    throw new ChangeLogParseException("includeAll not yet supported in "+getSupportedFileExtension());
 //                    Map<String, Object> includeAllMap = (Map) nestedMap.get("includeAll");
 //                    String path = getValue(includeAllMap, "path", String.class, changeLogParameters);
 //                    if (path == null) {
