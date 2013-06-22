@@ -163,7 +163,7 @@ public class Liquibase {
      * To run in "no contextx mode", pass a null or empty context object.
      */
     public void update(Contexts contexts) throws LiquibaseException {
-        LockService lockService = getLockService();
+        LockService lockService = LockServiceFactory.getInstance().getLockService(database);
         lockService.waitForLock();
 
         changeLogParameters.setContexts(contexts);
@@ -207,7 +207,7 @@ public class Liquibase {
 
         outputHeader("Update Database Script");
 
-        LockService lockService = getLockService();
+        LockService lockService = LockServiceFactory.getInstance().getLockService(database);
         lockService.waitForLock();
 
         try {
@@ -231,7 +231,7 @@ public class Liquibase {
     public void update(int changesToApply, Contexts contexts) throws LiquibaseException {
         changeLogParameters.setContexts(contexts);
 
-        LockService lockService = getLockService();
+        LockService lockService = LockServiceFactory.getInstance().getLockService(database);
         lockService.waitForLock();
 
         try {
@@ -322,7 +322,7 @@ public class Liquibase {
     public void rollback(int changesToRollback, Contexts contexts) throws LiquibaseException {
         changeLogParameters.setContexts(contexts);
 
-        LockService lockService = getLockService();
+        LockService lockService = LockServiceFactory.getInstance().getLockService(database);
         lockService.waitForLock();
 
         try {
@@ -376,7 +376,7 @@ public class Liquibase {
     public void rollback(String tagToRollBackTo, Contexts contexts) throws LiquibaseException {
         changeLogParameters.setContexts(contexts);
 
-        LockService lockService = getLockService();
+        LockService lockService = LockServiceFactory.getInstance().getLockService(database);
         lockService.waitForLock();
 
         try {
@@ -428,7 +428,7 @@ public class Liquibase {
     public void rollback(Date dateToRollBackTo, Contexts contexts) throws LiquibaseException {
         changeLogParameters.setContexts(contexts);
 
-        LockService lockService = getLockService();
+        LockService lockService = LockServiceFactory.getInstance().getLockService(database);
         lockService.waitForLock();
 
         try {
@@ -531,7 +531,7 @@ public class Liquibase {
     public void markNextChangeSetRan(Contexts contexts) throws LiquibaseException {
         changeLogParameters.setContexts(contexts);
 
-        LockService lockService = getLockService();
+        LockService lockService = LockServiceFactory.getInstance().getLockService(database);
         lockService.waitForLock();
 
         try {
@@ -568,7 +568,7 @@ public class Liquibase {
 
         outputHeader("SQL to roll back currently unexecuted changes");
 
-        LockService lockService = getLockService();
+        LockService lockService = LockServiceFactory.getInstance().getLockService(database);
         lockService.waitForLock();
 
         try {
@@ -628,7 +628,7 @@ public class Liquibase {
      */
     public final void dropAll(CatalogAndSchema... schemas) throws DatabaseException {
         try {
-            getLockService().waitForLock();
+            LockServiceFactory.getInstance().getLockService(database).waitForLock();
 
             for (CatalogAndSchema schema : schemas) {
                 log.info("Dropping Database Objects in schema: " + schema);
@@ -643,7 +643,7 @@ public class Liquibase {
             throw new DatabaseException(e);
         } finally {
             try {
-                getLockService().releaseLock();
+                LockServiceFactory.getInstance().getLockService(database).releaseLock();
             } catch (LockException e) {
                 log.severe("Unable to release lock: " + e.getMessage());
             }
@@ -654,7 +654,7 @@ public class Liquibase {
      * 'Tags' the database for future rollback
      */
     public void tag(String tagString) throws LiquibaseException {
-        LockService lockService = getLockService();
+        LockService lockService = LockServiceFactory.getInstance().getLockService(database);
         lockService.waitForLock();
 
         try {
@@ -692,7 +692,7 @@ public class Liquibase {
         }
 
         getDatabase().checkDatabaseChangeLogTable(updateExistingNullChecksums, databaseChangeLog, contexts);
-        if (!getLockService().hasChangeLogLock()) {
+        if (!LockServiceFactory.getInstance().getLockService(database).hasChangeLogLock()) {
             getDatabase().checkDatabaseChangeLogLockTable();
         }
     }
@@ -713,7 +713,7 @@ public class Liquibase {
     public DatabaseChangeLogLock[] listLocks() throws LiquibaseException {
         checkDatabaseChangeLogTable(false, null, new Contexts());
 
-        return getLockService().listLocks();
+        return LockServiceFactory.getInstance().getLockService(database).listLocks();
     }
 
     public void reportLocks(PrintStream out) throws LiquibaseException {
@@ -731,7 +731,7 @@ public class Liquibase {
     public void forceReleaseLocks() throws LiquibaseException {
         checkDatabaseChangeLogTable(false, null, new Contexts());
 
-        getLockService().forceReleaseLock();
+        LockServiceFactory.getInstance().getLockService(database).forceReleaseLock();
     }
 
     public List<ChangeSet> listUnrunChangeSets(String contexts) throws LiquibaseException {
@@ -850,7 +850,7 @@ public class Liquibase {
      */
     public void clearCheckSums() throws LiquibaseException {
         log.info("Clearing database change log checksums");
-        LockService lockService = getLockService();
+        LockService lockService = LockServiceFactory.getInstance().getLockService(database);
         lockService.waitForLock();
 
         try {
@@ -904,7 +904,7 @@ public class Liquibase {
     public void generateDocumentation(String outputDirectory, Contexts contexts) throws LiquibaseException {
         log.info("Generating Database Documentation");
         changeLogParameters.setContexts(contexts);
-        LockService lockService = getLockService();
+        LockService lockService = LockServiceFactory.getInstance().getLockService(database);
         lockService.waitForLock();
 
         try {
@@ -955,9 +955,5 @@ public class Liquibase {
 
     public void setChangeLogParameter(String key, Object value) {
         this.changeLogParameters.set(key, value);
-    }
-
-    private LockService getLockService() {
-        return LockServiceFactory.getInstance().getLockService(database);
     }
 }
