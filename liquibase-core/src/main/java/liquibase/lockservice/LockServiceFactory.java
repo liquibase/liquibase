@@ -30,7 +30,20 @@ public class LockServiceFactory {
 		return instance;
 	}
 
-	private LockServiceFactory() {
+    /**
+     * Set the instance used by this singleton. Used primarily for testing.
+     * @param lockServiceFactory
+     */
+    public static void setInstance(LockServiceFactory lockServiceFactory) {
+        LockServiceFactory.instance = lockServiceFactory;
+    }
+
+
+    public static void reset() {
+        instance = null;
+    }
+
+    private LockServiceFactory() {
 		Class<? extends LockService>[] classes;
 		try {
 			classes = ServiceLocator.getInstance().findClasses(LockService.class);
