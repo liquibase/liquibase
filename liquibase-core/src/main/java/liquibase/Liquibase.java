@@ -153,13 +153,14 @@ public class Liquibase {
 
 
     /**
-     * Executes Liquibase "update" logic which ensures that the configured {@link Database} is up to dat according to the configured changelog file. To run in "no contextx mode", pass a null or empty context object.
+     * Convience method for {@link #update(Contexts)} that constructs the Context object from the passed string.
      */
     public void update(String contexts) throws LiquibaseException {
         this.update(new Contexts(contexts));
     }
     /**
-     * Executes Liquibase "update" logic which ensures that the configured {@link Database} is up to dat according to the configured changelog file. To run in "no contextx mode", pass a null or empty context object.
+     * Executes Liquibase "update" logic which ensures that the configured {@link Database} is up to dat according to the configured changelog file.
+     * To run in "no contextx mode", pass a null or empty context object.
      */
     public void update(Contexts contexts) throws LiquibaseException {
         LockService lockService = getLockService();

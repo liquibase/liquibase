@@ -2,10 +2,7 @@ package liquibase;
 
 import liquibase.util.StringUtils;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 public class Contexts extends HashSet<String> {
 
@@ -40,5 +37,10 @@ public class Contexts extends HashSet<String> {
     @Override
     public boolean add(String s) {
         return super.add(s.toLowerCase());
+    }
+
+    @Override
+    public String toString() {
+        return StringUtils.join(new TreeSet(this),",");
     }
 }
