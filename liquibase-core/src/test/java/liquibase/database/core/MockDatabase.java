@@ -1,6 +1,7 @@
 package liquibase.database.core;
 
 import liquibase.CatalogAndSchema;
+import liquibase.Contexts;
 import liquibase.Liquibase;
 import liquibase.change.Change;
 import liquibase.changelog.ChangeSet;
@@ -366,6 +367,10 @@ public class MockDatabase implements Database {
     }
 
     public void checkDatabaseChangeLogTable(boolean updateExistingNullChecksums, DatabaseChangeLog databaseChangeLog, String[] contexts) throws DatabaseException {
+        ;
+    }
+
+    public void checkDatabaseChangeLogTable(boolean updateExistingNullChecksums, DatabaseChangeLog databaseChangeLog, Contexts contexts) throws DatabaseException {
         ;
     }
 

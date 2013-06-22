@@ -13,6 +13,7 @@ import java.util.jar.JarFile;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import liquibase.Contexts;
 import liquibase.change.Change;
 import liquibase.change.ChangeFactory;
 import liquibase.change.ChangeWithColumns;
@@ -80,7 +81,7 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
 
 	private boolean inModifySql = false;
 	private Set<String> modifySqlDbmsList;
-	private Set<String> modifySqlContexts;
+	private Contexts modifySqlContexts;
 	private boolean modifySqlAppliedOnRollback = false;
 
 	protected XMLChangeLogSAXHandler(String physicalChangeLogLocation,
@@ -335,8 +336,7 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
 							.splitAndTrim(atts.getValue("dbms"), ","));
 				}
 				if (StringUtils.trimToNull(atts.getValue("context")) != null) {
-					modifySqlContexts = new HashSet<String>(StringUtils
-							.splitAndTrim(atts.getValue("context"), ","));
+					modifySqlContexts = new Contexts(atts.getValue("context"));
 				}
 				if (StringUtils.trimToNull(atts.getValue("applyToRollback")) != null) {
 					modifySqlAppliedOnRollback = Boolean.valueOf(atts

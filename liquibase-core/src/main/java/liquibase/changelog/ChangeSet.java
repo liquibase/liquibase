@@ -1,5 +1,6 @@
 package liquibase.changelog;
 
+import liquibase.Contexts;
 import liquibase.change.Change;
 import liquibase.change.ChangeFactory;
 import liquibase.change.CheckSum;
@@ -106,7 +107,7 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
     /**
      * Runtime contexts in which the changeSet will be executed.  If null or empty, will execute regardless of contexts set
      */
-    private Set<String> contexts;
+    private Contexts contexts;
 
     /**
      * Databases for which this changeset should run.  The string values should match the value returned from Database.getShortName()
@@ -195,13 +196,7 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
         this.runOnChange = runOnChange;
         this.runInTransaction = runInTransaction;
         this.objectQuotingStrategy = quotingStrategy;
-        if (StringUtils.trimToNull(contextList) != null) {
-            String[] strings = contextList.toLowerCase().split(",");
-            contexts = new HashSet<String>();
-            for (String string : strings) {
-                contexts.add(string.trim().toLowerCase());
-            }
-        }
+        this.contexts = new Contexts(contextList);
         if (StringUtils.trimToNull(dbmsList) != null) {
             String[] strings = dbmsList.toLowerCase().split(",");
             dbmsSet = new HashSet<String>();
@@ -452,7 +447,7 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
         return author;
     }
 
-    public Set<String> getContexts() {
+    public Contexts getContexts() {
         return contexts;
     }
 

@@ -118,6 +118,9 @@ public class H2Database extends AbstractJdbcDatabase {
 
     @Override
     public boolean isSafeToRunUpdate() throws DatabaseException {
+        if (getConnection() == null) {
+            return true;
+        }
         String url = getConnection().getURL();
         boolean isLocalURL = (
                 super.isSafeToRunUpdate()

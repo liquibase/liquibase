@@ -1,6 +1,7 @@
 package liquibase.database;
 
 import liquibase.CatalogAndSchema;
+import liquibase.Contexts;
 import liquibase.change.Change;
 import liquibase.change.CheckSum;
 import liquibase.changelog.ChangeSet;
@@ -587,15 +588,18 @@ public abstract class AbstractJdbcDatabase implements Database {
         this.liquibaseTablespaceName = tablespace;
     }
 
-    /**
-     * This method will check the database ChangeLog table used to keep track of
-     * the changes in the file. If the table does not exist it will create one
-     * otherwise it will not do anything besides outputting a log message.
-     *
-     * @param updateExistingNullChecksums
-     * @param contexts
-     */
     public void checkDatabaseChangeLogTable(boolean updateExistingNullChecksums, DatabaseChangeLog databaseChangeLog, String... contexts) throws DatabaseException {
+        checkDatabaseChangeLogTable(updateExistingNullChecksums, databaseChangeLog, new Contexts(contexts));
+    }
+        /**
+         * This method will check the database ChangeLog table used to keep track of
+         * the changes in the file. If the table does not exist it will create one
+         * otherwise it will not do anything besides outputting a log message.
+         *
+         * @param updateExistingNullChecksums
+         * @param contexts
+         */
+    public void checkDatabaseChangeLogTable(boolean updateExistingNullChecksums, DatabaseChangeLog databaseChangeLog, Contexts contexts) throws DatabaseException {
         Executor executor = ExecutorService.getInstance().getExecutor(this);
 
         Table changeLogTable = null;

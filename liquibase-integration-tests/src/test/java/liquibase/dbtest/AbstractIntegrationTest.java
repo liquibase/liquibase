@@ -1,6 +1,7 @@
 package liquibase.dbtest;
 
 import liquibase.CatalogAndSchema;
+import liquibase.Contexts;
 import liquibase.Liquibase;
 import liquibase.test.DiffResultAssert;
 import liquibase.changelog.ChangeSet;
@@ -601,13 +602,13 @@ public abstract class AbstractIntegrationTest {
         clearDatabase(liquibase);
 
         liquibase = createLiquibase(completeChangeLog);
-        liquibase.checkDatabaseChangeLogTable(false, null, null);
+        liquibase.checkDatabaseChangeLogTable(false, null, new Contexts());
         liquibase.tag("empty");
 
         liquibase = createLiquibase(rollbackChangeLog);
-        liquibase.update(null);
+        liquibase.update(new Contexts());
 
-        liquibase.rollback("empty", null);
+        liquibase.rollback("empty", new Contexts());
 
     }
 
@@ -847,7 +848,7 @@ public abstract class AbstractIntegrationTest {
         }
         Liquibase liquibase = createLiquibase(invalidReferenceChangeLog);
         try {
-            liquibase.update(null);
+            liquibase.update(new Contexts());
             fail("Did not fail with invalid include");
         } catch (ChangeLogParseException ignored) {
             //expected

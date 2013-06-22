@@ -9,8 +9,10 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import liquibase.Contexts;
 import liquibase.database.Database;
 import liquibase.database.DatabaseList;
+import liquibase.exception.DatabaseException;
 import liquibase.util.StringUtils;
 
 public class ChangeLogParameters {
@@ -25,31 +27,63 @@ public class ChangeLogParameters {
     private List<ChangeLogParameter> changeLogParameters = new ArrayList<ChangeLogParameter>();
     private ExpressionExpander expressionExpander;
     private Database currentDatabase;
-    private List<String> currentContexts;
+    private Contexts currentContexts;
 
     public ChangeLogParameters() {
         this(null);
     }
 
-    public ChangeLogParameters(Database currentDatabase) {
+    public ChangeLogParameters(Database database) {
         for (Map.Entry entry : System.getProperties().entrySet()) {
             changeLogParameters.add(new ChangeLogParameter(entry.getKey().toString(), entry.getValue()));
         }
-        
-        this.expressionExpander = new ExpressionExpander(this, EnableEscaping);
-        this.currentDatabase = currentDatabase;
-        this.currentContexts = new ArrayList<String>();
-    }
 
-    public void addContext(String context) {
-        this.currentContexts.add(context);
-    }
-
-    public void setContexts(Collection<String> contexts) {
-        this.currentContexts = new ArrayList<String>();
-        if (contexts != null) {
-            this.currentContexts.addAll(contexts);
+        if (database != null) {
+            this.set("database.autoIncrementClause", database.getAutoIncrementClause(null, null));
+            this.set("database.currentDateTimeFunction", database.getCurrentDateTimeFunction());
+            this.set("database.databaseChangeLogLockTableName", database.getDatabaseChangeLogLockTableName());
+            this.set("database.databaseChangeLogTableName", database.getDatabaseChangeLogTableName());
+            try {
+                this.set("database.databaseMajorVersion", database.getDatabaseMajorVersion());
+            } catch (DatabaseException ignore) {
+            }
+            try {
+                this.set("database.databaseMinorVersion", database.getDatabaseMinorVersion());
+            } catch (DatabaseException ignore) {
+            }
+            this.set("database.databaseProductName", database.getDatabaseProductName());
+            try {
+                this.set("database.databaseProductVersion", database.getDatabaseProductVersion());
+            } catch (DatabaseException ignore) {
+            }
+            this.set("database.defaultCatalogName", database.getDefaultCatalogName());
+            this.set("database.defaultSchemaName", database.getDefaultSchemaName());
+            this.set("database.defaultSchemaNamePrefix", StringUtils.trimToNull(database.getDefaultSchemaName()) == null ? "" : "." + database.getDefaultSchemaName());
+            this.set("database.lineComment", database.getLineComment());
+            this.set("database.liquibaseSchemaName", database.getLiquibaseSchemaName());
+            this.set("database.typeName", database.getShortName());
+            try {
+                this.set("database.isSafeToRunUpdate", database.isSafeToRunUpdate());
+            } catch (DatabaseException ignore) {
+            }
+            this.set("database.requiresPassword", database.requiresPassword());
+            this.set("database.requiresUsername", database.requiresUsername());
+            this.set("database.supportsForeignKeyDisable", database.supportsForeignKeyDisable());
+            this.set("database.supportsInitiallyDeferrableColumns", database.supportsInitiallyDeferrableColumns());
+            this.set("database.supportsRestrictForeignKeys", database.supportsRestrictForeignKeys());
+            this.set("database.supportsSchemas", database.supportsSchemas());
+            this.set("database.supportsSequences", database.supportsSequences());
+            this.set("database.supportsTablespaces", database.supportsTablespaces());
         }
+
+
+        this.expressionExpander = new ExpressionExpander(this, EnableEscaping);
+        this.currentDatabase = database;
+        this.currentContexts = new Contexts();
+    }
+
+    public void setContexts(Contexts contexts) {
+        this.currentContexts = contexts;
     }
 
     public void set(String paramter, Object value) {
@@ -57,6 +91,9 @@ public class ChangeLogParameters {
     }
 
     public void set(String key, String value, String contexts, String databases) {
+        set(key, value, new Contexts(contexts), databases);
+    }
+    public void set(String key, String value, Contexts contexts, String databases) {
         changeLogParameters.add(new ChangeLogParameter(key, value, contexts, databases));
     }
 
@@ -92,7 +129,7 @@ public class ChangeLogParameters {
     private class ChangeLogParameter {
         private String key;
         private Object value;
-        private List<String> validContexts;
+        private Contexts validContexts;
         private List<String> validDatabases;
 
         public ChangeLogParameter(String key, Object value) {
@@ -101,10 +138,14 @@ public class ChangeLogParameters {
         }
 
         public ChangeLogParameter(String key, Object value, String validContexts, String validDatabases) {
-            this(key, value, StringUtils.splitAndTrim(validContexts, ","), StringUtils.splitAndTrim(validDatabases, ","));
+            this(key, value, new Contexts(validContexts), StringUtils.splitAndTrim(validDatabases, ","));
         }
 
-        public ChangeLogParameter(String key, Object value, List<String> validContexts, List<String> validDatabases) {
+        private ChangeLogParameter(String key, Object value, Contexts validContexts, String validDatabases) {
+            this(key, value, validContexts, StringUtils.splitAndTrim(validDatabases, ","));
+        }
+
+        public ChangeLogParameter(String key, Object value, Contexts validContexts, List<String> validDatabases) {
             this.key = key;
             this.value = value;
             this.validContexts = validContexts;
@@ -123,7 +164,7 @@ public class ChangeLogParameters {
             return validDatabases;
         }
 
-        public List<String> getValidContexts() {
+        public Contexts getValidContexts() {
             return validContexts;
         }
 

@@ -1,5 +1,6 @@
 package liquibase.changelog;
 
+import liquibase.Contexts;
 import org.junit.Before;
 import org.junit.Test;
 import static org.junit.Assert.*;
@@ -31,7 +32,7 @@ public class ChangeLogParametersTest {
     public void setParameterValue_doubleSetButSecondWrongDatabase() {
         ChangeLogParameters changeLogParameters = new ChangeLogParameters(new H2Database());
 
-        changeLogParameters.set("doubleSet", "originalValue", null, "baddb");
+        changeLogParameters.set("doubleSet", "originalValue", new Contexts(), "baddb");
         changeLogParameters.set("doubleSet", "newValue");
 
         assertEquals("newValue", changeLogParameters.getValue("doubleSet"));
@@ -41,7 +42,7 @@ public class ChangeLogParametersTest {
     public void setParameterValue_multiDatabase() {
         ChangeLogParameters changeLogParameters = new ChangeLogParameters(new H2Database());
 
-        changeLogParameters.set("doubleSet", "originalValue", null, "baddb, h2");
+        changeLogParameters.set("doubleSet", "originalValue", new Contexts(), "baddb, h2");
 
         assertEquals("originalValue", changeLogParameters.getValue("doubleSet"));
     }
@@ -49,7 +50,7 @@ public class ChangeLogParametersTest {
     @Test
     public void setParameterValue_rightDBWrongContext() {
         ChangeLogParameters changeLogParameters = new ChangeLogParameters(new H2Database());
-        changeLogParameters.setContexts(Arrays.asList("junit"));
+        changeLogParameters.setContexts(new Contexts("junit"));
 
         changeLogParameters.set("doubleSet", "originalValue", "anotherContext", "baddb, h2");
 
@@ -58,7 +59,7 @@ public class ChangeLogParametersTest {
    @Test
     public void setParameterValue_rightDBRightContext() {
         ChangeLogParameters changeLogParameters = new ChangeLogParameters(new H2Database());
-        changeLogParameters.setContexts(Arrays.asList("junit"));
+        changeLogParameters.setContexts(new Contexts("junit"));
 
         changeLogParameters.set("doubleSet", "originalValue", "junit", "baddb, h2");
 

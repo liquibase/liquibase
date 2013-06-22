@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Set;
 
 import liquibase.CatalogAndSchema;
+import liquibase.Contexts;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.jvm.JdbcConnection;
@@ -90,7 +91,7 @@ public abstract class AbstractExecuteTest {
                     testedDatabases.add(database.getClass());
 
                     if (database.getConnection() != null) {
-                        database.checkDatabaseChangeLogTable(false, null, null);
+                        database.checkDatabaseChangeLogTable(false, null, new Contexts());
                         database.checkDatabaseChangeLogLockTable();
                     }
 
