@@ -1,5 +1,6 @@
 package liquibase.sql.visitor;
 
+import liquibase.Contexts;
 import liquibase.change.CheckSum;
 import liquibase.serializer.LiquibaseSerializable;
 import liquibase.serializer.ReflectionSerializer;
@@ -10,7 +11,7 @@ import java.util.Set;
 public abstract class AbstractSqlVisitor implements SqlVisitor {
     private Set<String> applicableDbms;
     private boolean applyToRollback;
-    private Set<String> contexts;
+    private Contexts contexts;
 
     public Set<String> getApplicableDbms() {
         return applicableDbms;
@@ -28,11 +29,11 @@ public abstract class AbstractSqlVisitor implements SqlVisitor {
         this.applyToRollback = applyToRollback;
     }
 
-    public Set<String> getContexts() {
+    public Contexts getContexts() {
         return contexts;
     }
 
-    public void setContexts(Set<String> contexts) {
+    public void setContexts(Contexts contexts) {
         this.contexts = contexts;
     }
 

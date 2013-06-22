@@ -1,0 +1,16 @@
+This file acts as a scratch pad for notes during development of Liquibase that need to make their way into
+documentation, announcements, have issues created or anywhere else.
+
+As parts of this content is moved to its permanent homes, it will be deleted.
+
+---------------------------------------------------------------------
+Pre-3.1 Development Notes
+---------------------------------------------------------------------
+
+API changes:
+- liquibase.Context
+Introduced new liquibase.Contexts class in favor of the mix of Strings, List<String>, Set<String> String... and other types of variables that was used before.
+Kept existing interfaces for the most part for backwards compatibility, but need to mark them all as deprecated.
+
+ - liquibase.DbmsSet
+ TODO: Need to do somethign like liquibase.Context but for dbms usage

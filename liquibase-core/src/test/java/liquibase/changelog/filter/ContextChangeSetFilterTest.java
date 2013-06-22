@@ -1,5 +1,6 @@
 package liquibase.changelog.filter;
 
+import liquibase.Contexts;
 import liquibase.changelog.ChangeSet;
 
 import static org.junit.Assert.*;
@@ -17,7 +18,7 @@ public class ContextChangeSetFilterTest {
     private static final class TestSqlVisitor extends AbstractSqlVisitor {
 
         public TestSqlVisitor(final String... contexts) {
-            setContexts(new HashSet<String>(Arrays.asList(contexts)));
+            setContexts(new Contexts(contexts));
         }
 
         public String modifySql(String sql, Database database) {

@@ -13,7 +13,7 @@ public class DatabaseFactory {
     private static DatabaseFactory instance;
     private Map<String, SortedSet<Database>> implementedDatabases = new HashMap<String, SortedSet<Database>>();
 
-    protected DatabaseFactory() {
+    private DatabaseFactory() {
         try {
             Class[] classes = ServiceLocator.getInstance().findClasses(Database.class);
 
@@ -37,6 +37,13 @@ public class DatabaseFactory {
 
     public static void reset() {
         instance = new DatabaseFactory();
+    }
+
+    /**
+     * Set singleton instance. Primarily used in testing
+     */
+    public static void setInstance(DatabaseFactory databaseFactory) {
+        instance = databaseFactory;
     }
 
     /**

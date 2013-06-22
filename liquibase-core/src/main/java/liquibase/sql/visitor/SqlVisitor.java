@@ -1,5 +1,6 @@
 package liquibase.sql.visitor;
 
+import liquibase.Contexts;
 import liquibase.change.CheckSum;
 import liquibase.database.Database;
 import liquibase.serializer.LiquibaseSerializable;
@@ -21,9 +22,9 @@ public interface SqlVisitor extends LiquibaseSerializable {
 
     boolean isApplyToRollback();
 
-    Set<String> getContexts();
+    Contexts getContexts();
 
-    void setContexts(Set<String> contexts);
+    void setContexts(Contexts contexts);
 
     CheckSum generateCheckSum();
 

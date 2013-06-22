@@ -109,7 +109,7 @@ public class FormattedSqlChangeLogParserTest {
         assertFalse(changeLog.getChangeSets().get(0).isAlwaysRun());
         assertFalse(changeLog.getChangeSets().get(0).isRunOnChange());
         assertTrue(changeLog.getChangeSets().get(0).isRunInTransaction());
-        assertNull(changeLog.getChangeSets().get(0).getContexts());
+        assertEquals(0, changeLog.getChangeSets().get(0).getContexts().size());
         assertNull(changeLog.getChangeSets().get(0).getDbmsSet());
 
 
