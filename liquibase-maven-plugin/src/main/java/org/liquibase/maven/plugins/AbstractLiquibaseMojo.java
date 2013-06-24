@@ -452,7 +452,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
         getLog().info(indent + "driver: " + driver);
         getLog().info(indent + "url: " + url);
         getLog().info(indent + "username: " + username);
-        getLog().info(indent + "password: " + password);
+        getLog().info(indent + "password: " + "*****");
         getLog().info(indent + "use empty password: " + emptyPassword);
         getLog().info(indent + "properties file: " + propertyFile);
         getLog().info(indent + "properties file will override? " + propertyFileWillOverride);
