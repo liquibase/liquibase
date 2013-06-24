@@ -517,6 +517,14 @@ databaseChangeLog:
             file: changelogs/sample.data1.tsv
             separator: \t
 
+  - changeSet:
+      id: sampleDataCheck
+      author: nvoxland
+      preConditions:
+        - sqlCheck:
+            expectedResult: 4
+            sql: select count(*) from csvdata;
+
 #  - changeSet:
 #      id: customPreCondition
 #      author: nvoxland
