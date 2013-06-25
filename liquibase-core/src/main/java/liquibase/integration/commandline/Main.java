@@ -138,9 +138,6 @@ public class Main {
                 main.doMigration();
             } catch (Throwable e) {
                 String message = e.getMessage();
-                if (e.getCause() != null) {
-                    message = e.getCause().getMessage();
-                }
                 if (message == null) {
                     message = "Unknown Reason";
                 }
@@ -177,10 +174,10 @@ public class Main {
 
     private static String generateLogLevelWarningMessage() {
         Logger logger = LogFactory.getLogger();
-        if (logger == null || logger.getLogLevel() == null || (logger.getLogLevel().equals(LogLevel.DEBUG))) {
+        if (logger != null && logger.getLogLevel() != null && (logger.getLogLevel().equals(LogLevel.OFF))) {
             return "";
         } else {
-            return "\n\nFor more information, use the --logLevel flag)";
+            return "\n\nFor more information, use the --logLevel flag";
         }
     }
 
@@ -617,7 +614,7 @@ public class Main {
             this.promptForNonLocalDatabase = Boolean.FALSE;
         }
         if (this.logLevel == null) {
-            this.logLevel = "info";
+            this.logLevel = "off";
         }
         if (this.includeSystemClasspath == null) {
             this.includeSystemClasspath = Boolean.TRUE;

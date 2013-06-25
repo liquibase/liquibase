@@ -2,27 +2,24 @@
 <module org.jetbrains.idea.maven.project.MavenProjectsManager.isMavenModule="true" type="JAVA_MODULE" version="4">
   <component name="FacetManager">
     <facet type="Osmorc" name="OSGi">
-      <configuration manifestGenerationMode="Manually" manifestLocation="src/main/resources/META-INF/MANIFEST.MF" jarfileLocation="liquibase-osgi-3.0.0-rc1-SNAPSHOT.jar" outputPathType="CompilerOutputPath" bndFileLocation="" bundlorFileLocation="" bundleActivator="liquibase.osgi.LiquibaseActivator" bundleSymbolicName="org.liquibase.osgi" bundleVersion="3.0.0.rc1-SNAPSHOT" ignoreFilePattern="" useProjectDefaultManifestFileLocation="false" alwaysRebuildBundleJAR="false" doNotSynchronizeWithMaven="false">
+      <configuration manifestGenerationMode="Manually" manifestLocation="src/main/resources/META-INF/MANIFEST.MF" jarfileLocation="liquibase-osgi-3.0.0-SNAPSHOT.jar" outputPathType="CompilerOutputPath" bndFileLocation="" bundlorFileLocation="" bundleActivator="liquibase.osgi.LiquibaseActivator" bundleSymbolicName="org.liquibase.osgi" bundleVersion="3.0.0.SNAPSHOT" ignoreFilePattern="" useProjectDefaultManifestFileLocation="false" alwaysRebuildBundleJAR="false" doNotSynchronizeWithMaven="false">
         <additionalProperties>
-          <property key="Bundle-Description" value="Liquibase is a tool for managing and executing database changes." />
-          <property key="Bundle-Vendor" value="Liquibase.org" />
-          <property key="Bundle-DocURL" value="http://www.liquibase.org" />
           <property key="Bundle-Name" value="Liquibase with OSGI Support" />
-          <property key="Export-Package" value="liquibase.*;version=&quot;3.0.0-rc1-SNAPSHOT&quot;" />
-          <property key="Import-Package" value="liquibase.*;version=&quot;3.0.0-rc1-SNAPSHOT&quot;,org.slf4j;version=&quot;[1.5,2.0)&quot;,javax.*;resolution:=optional,org.apache.tools.ant.*;resolution:=optional,org.springframework.*;resolution:=optional,org.w3c.*;resolution:=optional,org.xml.*;resolution:=optional,org.osgi.framework.*;resolution:=optional,javax.enterprise.*;resolution:=optional,com.sun.*;resolution:=optional,sun.misc.*;resolution:=optional,org.apache.commons.lang.text;resolution:=optional," />
+          <property key="Export-Package" value="liquibase.*;version=&quot;3.0.0-SNAPSHOT&quot;" />
+          <property key="Import-Package" value="liquibase.*;version=&quot;3.0.0-SNAPSHOT&quot;,org.slf4j;version=&quot;[1.5,2.0)&quot;,javax.*;resolution:=optional,org.apache.tools.ant.*;resolution:=optional,org.springframework.*;resolution:=optional,org.w3c.*;resolution:=optional,org.xml.*;resolution:=optional,org.osgi.framework.*;resolution:=optional,javax.enterprise.*;resolution:=optional,com.sun.*;resolution:=optional,sun.misc.*;resolution:=optional,org.apache.commons.lang.text;resolution:=optional," />
           <property key="Embed-Dependency" value="*;scope=compile|runtime;type=!pom;inline=false;artifactId=!slf4j-api" />
           <property key="Embed-Transitive" value="true" />
           <property key="DynamicImport-Package" value="net.sf.cglib.*" />
           <property key="-include" value="src/main/resources/META-INF/MANIFEST.MF" />
-          <property key="Bundle-ClassPath" value=".,snakeyaml-1.12.jar,liquibase-core-3.0.0-rc1-SNAPSHOT.jar" />
-          <property key="Include-Resource" value="snakeyaml-1.12.jar=$MAVEN_REPOSITORY$/org/yaml/snakeyaml/1.12/snakeyaml-1.12.jar,liquibase-core-3.0.0-rc1-SNAPSHOT.jar=$MODULE_DIR$/../liquibase-core/pom.xml" />
-          <property key="Embedded-Artifacts" value="snakeyaml-1.12.jar;g=&quot;org.yaml&quot;;a=&quot;snakeyaml&quot;;v=&quot;1.12&quot;,liquibase-core-3.0.0-rc1-SNAPSHOT.jar;g=&quot;org.liquibase&quot;;a=&quot;liquibase-core&quot;;v=&quot;3.0.0-rc1-SNAPSHOT&quot;" />
+          <property key="Bundle-ClassPath" value=".,liquibase-core-3.0.0-SNAPSHOT.jar" />
+          <property key="Include-Resource" value="liquibase-core-3.0.0-SNAPSHOT.jar=/home/gregor/source/liquibase/liquibase-core/pom.xml" />
+          <property key="Embedded-Artifacts" value="liquibase-core-3.0.0-SNAPSHOT.jar;g=&quot;org.liquibase&quot;;a=&quot;liquibase-core&quot;;v=&quot;3.0.0-SNAPSHOT&quot;" />
         </additionalProperties>
         <additionalJARContents />
       </configuration>
     </facet>
   </component>
-  <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_1_5" inherit-compiler-output="false">
+  <component name="NewModuleRootManager" inherit-compiler-output="false">
     <output url="file://$MODULE_DIR$/target/classes" />
     <output-test url="file://$MODULE_DIR$/target/test-classes" />
     <content url="file://$MODULE_DIR$">
@@ -33,7 +30,6 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="liquibase-core" />
-    <orderEntry type="library" name="Maven: org.yaml:snakeyaml:1.12" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: org.osgi:org.osgi.core:4.1.0" level="project" />
   </component>
 </module>

@@ -46,8 +46,8 @@ public class SnapshotControl {
                     returnSet.add(clazz);
                 }
             }
+            return returnSet;
         }
-        return null;
     }
 
     private Set<Class<? extends DatabaseObject>> getDefaultTypes() {

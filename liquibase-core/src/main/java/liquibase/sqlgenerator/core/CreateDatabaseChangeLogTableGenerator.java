@@ -5,7 +5,6 @@ import liquibase.database.core.InformixDatabase;
 import liquibase.database.core.SybaseDatabase;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.ValidationErrors;
-import liquibase.informix.sqlgenerator.core.InformixCreateDatabaseChangeLogTableGenerator;
 import liquibase.sql.Sql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
@@ -27,7 +26,7 @@ public class CreateDatabaseChangeLogTableGenerator extends AbstractSqlGenerator<
     public Sql[] generateSql(CreateDatabaseChangeLogTableStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
     	
     	if (database instanceof InformixDatabase) {
-    		return new InformixCreateDatabaseChangeLogTableGenerator().generateSql(statement, database, sqlGeneratorChain);
+    		return new CreateDatabaseChangeLogTableGeneratorInformix().generateSql(statement, database, sqlGeneratorChain);
     	}
     	
         CreateTableStatement createTableStatement = new CreateTableStatement(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName())

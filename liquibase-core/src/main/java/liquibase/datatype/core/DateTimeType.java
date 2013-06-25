@@ -21,10 +21,9 @@ public class DateTimeType extends LiquibaseDataType {
                 || database instanceof OracleDatabase) {
             return new DatabaseDataType("TIMESTAMP");
         }
-        //XXX: This is now handled by the InformixDateTimeType
-        //if (database instanceof InformixDatabase) {
-        //    return new DatabaseDataType("DATETIME YEAR TO FRACTION", 5);
-        //}
+        if (database instanceof InformixDatabase) {
+            return new DatabaseDataType("DATETIME YEAR TO FRACTION", 5);
+        }
         if (database instanceof PostgresDatabase) {
             return new DatabaseDataType("TIMESTAMP WITH TIME ZONE");
         }

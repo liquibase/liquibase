@@ -37,8 +37,8 @@ public class ContextChangeSetFilter implements ChangeSetFilter {
         for (SqlVisitor visitor : changeSet.getSqlVisitors()) {
             if (visitor.getContexts() != null && visitor.getContexts().size() > 0) {
                 boolean shouldRemove = true;
-                for (String context : contexts) {
-                    if (visitor.getContexts().contains(context.toLowerCase())) {
+                for (String context : visitor.getContexts()) {
+                    if (contexts.contains(context.toLowerCase())) {
                         shouldRemove = false;
                     }
                 }

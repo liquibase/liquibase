@@ -1,6 +1,6 @@
 package liquibase.logging;
 
 public enum LogLevel {
-    OFF, DEBUG, INFO, WARNING, SEVERE;
+    DEBUG, INFO, WARNING, SEVERE, OFF;
 
 }

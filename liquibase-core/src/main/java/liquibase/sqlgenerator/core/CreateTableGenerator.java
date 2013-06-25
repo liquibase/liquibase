@@ -4,16 +4,13 @@ import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.exception.ValidationErrors;
-import liquibase.informix.sqlgenerator.core.InformixCreateTableGenerator;
 import liquibase.logging.LogFactory;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.AutoIncrementConstraint;
 import liquibase.statement.ForeignKeyConstraint;
-import liquibase.statement.SqlStatement;
 import liquibase.statement.UniqueConstraint;
-import liquibase.statement.core.AlterSequenceStatement;
 import liquibase.statement.core.CreateTableStatement;
 import liquibase.structure.core.Relation;
 import liquibase.structure.core.Schema;
@@ -38,7 +35,7 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
     public Sql[] generateSql(CreateTableStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
     	
     	if (database instanceof InformixDatabase) {
-    		AbstractSqlGenerator<CreateTableStatement> gen = new InformixCreateTableGenerator();
+    		AbstractSqlGenerator<CreateTableStatement> gen = new CreateTableGeneratorInformix();
     		return gen.generateSql(statement, database, sqlGeneratorChain);
     	}
 

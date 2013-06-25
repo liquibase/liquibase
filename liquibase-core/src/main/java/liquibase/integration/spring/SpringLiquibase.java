@@ -29,16 +29,16 @@ import org.springframework.core.io.ResourceLoader;
 
 /**
  * A Spring-ified wrapper for Liquibase.
- *
+ * <p/>
  * Example Configuration:
- * <p>
- * <p>
+ * <p/>
+ * <p/>
  * This Spring configuration example will cause liquibase to run
  * automatically when the Spring context is initialized. It will load
  * <code>db-changelog.xml</code> from the classpath and apply it against
  * <code>myDataSource</code>.
- * <p>
- *
+ * <p/>
+ * <p/>
  * <pre>
  * &lt;bean id=&quot;myLiquibase&quot;
  *          class=&quot;liquibase.spring.SpringLiquibase&quot;
@@ -84,8 +84,7 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
             try {
                 Resource resource = getResource(file);
                 return resource.getInputStream();
-            }
-            catch ( FileNotFoundException ex ) {
+            } catch (FileNotFoundException ex) {
                 return null;
             }
         }
@@ -103,13 +102,18 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
         }
 
         private String adjustClasspath(String file) {
-            return isClasspathPrefixPresent(parentFile) && !isClasspathPrefixPresent(file)
+            return isPrefixPresent(parentFile) && !isPrefixPresent(file)
                     ? ResourceLoader.CLASSPATH_URL_PREFIX + file
                     : file;
         }
 
-        public boolean isClasspathPrefixPresent(String file) {
-            return file.startsWith(ResourceLoader.CLASSPATH_URL_PREFIX);
+        public boolean isPrefixPresent(String file) {
+            if (file.startsWith("classpath") ||
+                    file.startsWith("file:") ||
+                    file.startsWith("url:")) {
+                return true;
+            }
+            return false;
         }
 
         public ClassLoader toClassLoader() {
@@ -129,7 +133,7 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 
     private String contexts;
 
-     private Map<String, String> parameters;
+    private Map<String, String> parameters;
 
     private String defaultSchema;
 
@@ -168,9 +172,8 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
         } finally {
             if (connection != null) {
                 try {
-                    if (!connection.getAutoCommit())
-                    {
-                      connection.rollback();
+                    if (!connection.getAutoCommit()) {
+                        connection.rollback();
                     }
                     connection.close();
                 } catch (Exception e) {
@@ -269,7 +272,7 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
     }
 
     private void generateRollbackFile(Liquibase liquibase) throws LiquibaseException {
-        if(rollbackFile != null) {
+        if (rollbackFile != null) {
             try {
                 liquibase.futureRollbackSQL(getContexts(), new FileWriter(rollbackFile));
             } catch (IOException e) {
@@ -285,7 +288,7 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
     protected Liquibase createLiquibase(Connection c) throws LiquibaseException {
         Liquibase liquibase = new Liquibase(getChangeLog(), createResourceOpener(), createDatabase(c));
         if (parameters != null) {
-            for(Map.Entry<String, String> entry: parameters.entrySet()) {
+            for (Map.Entry<String, String> entry : parameters.entrySet()) {
                 liquibase.setChangeLogParameter(entry.getKey(), entry.getValue());
             }
         }
@@ -300,6 +303,7 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
     /**
      * Subclasses may override this method add change some database settings such as
      * default schema before returning the database object.
+     *
      * @param c
      * @return a Database implementation retrieved from the {@link DatabaseFactory}.
      * @throws DatabaseException
@@ -353,6 +357,6 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 
     @Override
     public String toString() {
-        return getClass().getName()+"("+this.getResourceLoader().toString()+")";
+        return getClass().getName() + "(" + this.getResourceLoader().toString() + ")";
     }
 }

@@ -1069,6 +1069,11 @@
             </preConditions>
     </changeSet>
 
+    <changeSet id="   id with spaces   " author="  author with spaces ">
+        <createTable tableName="trailing_space_test">
+            <column name="id" type="int"/>
+        </createTable>
+    </changeSet>
 
 
 </databaseChangeLog>
