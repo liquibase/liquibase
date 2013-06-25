@@ -1,2 +1,0 @@
--- Database: h2
--- Change Parameter: path=my/path/file.sql
