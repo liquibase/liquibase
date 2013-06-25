@@ -1,6 +1,13 @@
 Liquibase Core Changelog
 ===========================================
 
+Changes in version 3.1 (2013.06.25)
+- [CORE-898] - Custom precondition xsd failing
+- [CORE-1171] - Maven plugin displaying password in plain text
+- [CORE-1320] - Cannot include YAML file
+- [CORE-1323] - Conversion from char to SMALLINT is unsupported
+- [CORE-1324] - Formatted SQL does not support contexts such as "some-context" or "some/context"
+
 Changes in version 3.0 (2013.06.17)
 - Dropped Java 1.5 support
 - Major changes in diff and snapshot log
