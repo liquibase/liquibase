@@ -223,7 +223,6 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
                             continue;
                         }
                         includedChangeLogs.add(path);
-                        includedChangeLogs.add(path);
                     }
                 }
                 if (resourceFilter != null) {
