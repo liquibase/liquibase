@@ -104,7 +104,9 @@ public class IndexExistsPrecondition implements Precondition {
                 throw new PreconditionFailedException("Index "+ name +" does not exist", changeLog, this);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            if (e instanceof PreconditionFailedException) {
+                throw (((PreconditionFailedException) e));
+            }
             throw new PreconditionErrorException(e, changeLog, this);
         }
     }
