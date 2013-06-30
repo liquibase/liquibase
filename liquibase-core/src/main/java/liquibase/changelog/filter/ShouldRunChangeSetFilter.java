@@ -27,7 +27,7 @@ public class ShouldRunChangeSetFilter implements ChangeSetFilter {
             if (ranChangeSet.getId().equals(changeSet.getId())
                     && ranChangeSet.getAuthor().equals(changeSet.getAuthor())
                     && isPathEquals(changeSet, ranChangeSet)) {
-                if (changeSet.shouldAlwaysRun() && ranChangeSet.getLastCheckSum() != null) {
+                if (changeSet.shouldAlwaysRun()) {
                     return true;
                 } else if (changeSet.shouldRunOnChange() && !changeSet.generateCheckSum().equals(ranChangeSet.getLastCheckSum())) {
                     return true;
