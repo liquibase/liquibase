@@ -514,12 +514,13 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
             return false;
         }
 
-        ChangeLogParser changeLogParser = ChangeLogParserFactory.getInstance().getParser(fileName, resourceAccessor);
-		if (changeLogParser == null) {
-			log.warning("included file "+relativeBaseFileName + "/" + fileName + " is not a recognized file type");
-			return false;
-		}
-
+        ChangeLogParser changeLogParser = null;
+        try {
+            changeLogParser = ChangeLogParserFactory.getInstance().getParser(fileName, resourceAccessor);
+        } catch (LiquibaseException e) {
+            log.warning("included file "+relativeBaseFileName + "/" + fileName + " is not a recognized file type");
+            return false;
+        }
 
 		if (isRelativePath) {
 			// workaround for FilenameUtils.normalize() returning null for relative paths like ../conf/liquibase.xml
