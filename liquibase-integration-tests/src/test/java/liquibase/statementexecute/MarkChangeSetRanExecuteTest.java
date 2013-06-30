@@ -36,7 +36,7 @@ public class MarkChangeSetRanExecuteTest extends AbstractExecuteTest {
 
     @Test
     public void generateSql_insert() throws Exception {
-        this.statementUnderTest = new MarkChangeSetRanStatement(new ChangeSet("a", "b", false, false, "c", "e", "f"), ChangeSet.ExecType.EXECUTED);
+        this.statementUnderTest = new MarkChangeSetRanStatement(new ChangeSet("a", "b", false, false, "c", "e", "f", null), ChangeSet.ExecType.EXECUTED);
         String version = LiquibaseUtil.getBuildVersion().replaceAll("SNAPSHOT", "SNP");
         assertCorrect("insert into [dbo].[databasechangelog] ([id], [author], [filename], [dateexecuted], [orderexecuted], [md5sum], [description], [comments], [exectype], [liquibase]) values ('a', 'b', 'c', getdate(), 1, '7:d41d8cd98f00b204e9800998ecf8427e', 'empty', '', 'executed', '"+version+"')", MSSQLDatabase.class);
         assertCorrect("insert into databasechangelog (id, author, filename, dateexecuted, orderexecuted, md5sum, description, comments, exectype, liquibase) values ('a', 'b', 'c', timestamp, 1, '7:d41d8cd98f00b204e9800998ecf8427e', 'empty', '', 'executed', '"+version+"')",MaxDBDatabase.class);
@@ -54,7 +54,7 @@ public class MarkChangeSetRanExecuteTest extends AbstractExecuteTest {
 
     @Test
     public void generateSql_update() throws Exception {
-        this.statementUnderTest = new MarkChangeSetRanStatement(new ChangeSet("a", "b", false, false, "c", "e", "f"), ChangeSet.ExecType.RERAN);
+        this.statementUnderTest = new MarkChangeSetRanStatement(new ChangeSet("a", "b", false, false, "c", "e", "f", null), ChangeSet.ExecType.RERAN);
         assertCorrect("update [dbo].[databasechangelog] set [dateexecuted] = NOW(), [exectype] = 'reran', [md5sum] = '7:d41d8cd98f00b204e9800998ecf8427e' where id='a' and author='b' and filename='c'", MSSQLDatabase.class);
         assertCorrect("update [databasechangelog] set [dateexecuted] = timestamp, [exectype] = 'reran', [md5sum] = '7:d41d8cd98f00b204e9800998ecf8427e' where id='a' and author='b' and filename='c'", MaxDBDatabase.class);
         assertCorrect("update [databasechangelog] set [dateexecuted] = sysdate, [exectype] = 'reran', [md5sum] = '7:d41d8cd98f00b204e9800998ecf8427e' where id='a' and author='b' and filename='c'", CacheDatabase.class);

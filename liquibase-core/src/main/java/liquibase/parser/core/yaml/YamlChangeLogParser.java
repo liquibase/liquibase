@@ -83,7 +83,8 @@ public class YamlChangeLogParser implements ChangeLogParser {
                             getValue(changeSetMap, "runOnChange", boolean.class, false, changeLogParameters),
                             physicalChangeLogLocation,
                             getValue(changeSetMap, "context", String.class, changeLogParameters),
-                            getValue(changeSetMap, "dbms", String.class, changeLogParameters)
+                            getValue(changeSetMap, "dbms", String.class, changeLogParameters),
+                            changeLog
                     );
 
                     try {

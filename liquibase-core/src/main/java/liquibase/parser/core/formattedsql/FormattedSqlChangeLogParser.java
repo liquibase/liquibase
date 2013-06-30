@@ -126,7 +126,7 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                     String context = parseString(contextPatternMatcher);
                     String dbms = parseString(dbmsPatternMatcher);
 
-                    changeSet = new ChangeSet(changeSetPatternMatcher.group(2), changeSetPatternMatcher.group(1), runAlways, runOnChange, physicalChangeLogLocation, context, dbms, runInTransaction, changeLog.getObjectQuotingStrategy());
+                    changeSet = new ChangeSet(changeSetPatternMatcher.group(2), changeSetPatternMatcher.group(1), runAlways, runOnChange, physicalChangeLogLocation, context, dbms, runInTransaction, changeLog.getObjectQuotingStrategy(), changeLog);
                     changeSet.setFailOnError(failOnError);
                     changeLog.addChangeSet(changeSet);
 

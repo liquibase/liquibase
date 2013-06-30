@@ -915,7 +915,7 @@ public abstract class AbstractJdbcDatabase implements Database {
         try {
             int totalRows = ExecutorService.getInstance().getExecutor(this).queryForInt(new SelectFromDatabaseChangeLogStatement("COUNT(*)"));
             if (totalRows == 0) {
-                ChangeSet emptyChangeSet = new ChangeSet(String.valueOf(new Date().getTime()), "liquibase", false, false, "liquibase-internal", null, null, quotingStrategy);
+                ChangeSet emptyChangeSet = new ChangeSet(String.valueOf(new Date().getTime()), "liquibase", false, false, "liquibase-internal", null, null, quotingStrategy, null);
                 this.markChangeSetExecStatus(emptyChangeSet, ChangeSet.ExecType.EXECUTED);
             }
 

@@ -23,7 +23,7 @@ public class JsonChangeLogSerializerTest {
         addColumnChange.addColumn(new ColumnConfig().setName("col2").setDefaultValueDate(new Date(0)));
         addColumnChange.addColumn(new ColumnConfig().setName("col2").setDefaultValueSequenceNext(new SequenceNextValueFunction("seq_me")));
 
-        ChangeSet changeSet = new ChangeSet("1", "nvoxland", false, false, "path/to/file.json", null, null);
+        ChangeSet changeSet = new ChangeSet("1", "nvoxland", false, false, "path/to/file.json", null, null, null);
         changeSet.addChange(addColumnChange);
         assertEquals("{\n" +
                 "  \"changeSet\": {\n" +

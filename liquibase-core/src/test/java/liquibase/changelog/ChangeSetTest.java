@@ -14,7 +14,7 @@ public class ChangeSetTest {
 
     @Test
     public void getDescriptions() {
-        ChangeSet changeSet = new ChangeSet("testId", "testAuthor", false, false,null, null, null);
+        ChangeSet changeSet = new ChangeSet("testId", "testAuthor", false, false,null, null, null, null);
 
         assertEquals("Empty", changeSet.getDescription());
 
@@ -32,8 +32,8 @@ public class ChangeSetTest {
     
     @Test
     public void generateCheckSum() {
-        ChangeSet changeSet1 = new ChangeSet("testId", "testAuthor", false, false,null, null, null);
-        ChangeSet changeSet2 = new ChangeSet("testId", "testAuthor", false, false,null, null, null);
+        ChangeSet changeSet1 = new ChangeSet("testId", "testAuthor", false, false,null, null, null, null);
+        ChangeSet changeSet2 = new ChangeSet("testId", "testAuthor", false, false,null, null, null, null);
 
         AddDefaultValueChange change = new AddDefaultValueChange();
         change.setSchemaName("SCHEMA_NAME");
@@ -56,7 +56,7 @@ public class ChangeSetTest {
 
     @Test
     public void isCheckSumValid_validCheckSum() {
-        ChangeSet changeSet = new ChangeSet("1", "2",false, false, "/test.xml",null, null);
+        ChangeSet changeSet = new ChangeSet("1", "2",false, false, "/test.xml",null, null, null);
         CheckSum checkSum = changeSet.generateCheckSum();
 
         assertTrue(changeSet.isCheckSumValid(checkSum));
@@ -66,7 +66,7 @@ public class ChangeSetTest {
     public void isCheckSumValid_invalidCheckSum() {
         CheckSum checkSum = CheckSum.parse("2:asdf");
 
-        ChangeSet changeSet = new ChangeSet("1", "2",false, false, "/test.xml",null, null);
+        ChangeSet changeSet = new ChangeSet("1", "2",false, false, "/test.xml",null, null, null);
         assertFalse(changeSet.isCheckSumValid(checkSum));
     }
 
@@ -74,7 +74,7 @@ public class ChangeSetTest {
     public void isCheckSumValid_differentButValidCheckSum() {
         CheckSum checkSum = CheckSum.parse("2:asdf");
 
-        ChangeSet changeSet = new ChangeSet("1", "2",false, false, "/test.xml",null, null);
+        ChangeSet changeSet = new ChangeSet("1", "2",false, false, "/test.xml",null, null, null);
         changeSet.addValidCheckSum(changeSet.generateCheckSum().toString());
 
         assertTrue(changeSet.isCheckSumValid(checkSum));
