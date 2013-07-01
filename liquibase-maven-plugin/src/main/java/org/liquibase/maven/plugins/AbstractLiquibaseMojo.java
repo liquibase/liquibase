@@ -223,10 +223,11 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     private Map expressionVariables;
 
 
-    /*
-    @parameter expression="$ {liquibase.outputFileEncoding}
-            "
-            */
+    /**
+     * Flag to set the character encoding of the output file produced by Liquibase during the updateSQL phase.
+     *
+     * @parameter expression="${liquibase.outputFileEncoding}"
+     */
     protected String outputFileEncoding;
 
     public void execute() throws MojoExecutionException, MojoFailureException {
