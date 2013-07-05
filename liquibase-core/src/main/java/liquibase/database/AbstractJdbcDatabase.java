@@ -774,17 +774,25 @@ public abstract class AbstractJdbcDatabase implements Database {
             this.hasDatabaseChangeLogLockTable = true;
         }
     }
+    
+    private Boolean caseSensitive;
 
     public boolean isCaseSensitive() {
-        if (connection != null) {
-            try {
-                return ((JdbcConnection) connection).getUnderlyingConnection().getMetaData().supportsMixedCaseIdentifiers();
-            } catch (SQLException e) {
-                LogFactory.getLogger().warning("Cannot determine case sensitivity from JDBC driver", e);
-                return false;
+    	if (caseSensitive == null) {
+            if (connection != null) {
+                try {
+                	caseSensitive = Boolean.valueOf(((JdbcConnection) connection).getUnderlyingConnection().getMetaData().supportsMixedCaseIdentifiers());
+                } catch (SQLException e) {
+                    LogFactory.getLogger().warning("Cannot determine case sensitivity from JDBC driver", e);
+                }
             }
         }
-        return false;
+    	
+    	if (caseSensitive == null) {
+            return false;
+    	} else {
+    		return caseSensitive.booleanValue();
+    	}
     }
 
     public boolean isReservedWord(String string) {
