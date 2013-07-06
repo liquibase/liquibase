@@ -538,7 +538,7 @@ public class Main {
         stream.println("'liquibase.properties' that is read from the current working directory.");
         stream.println("");
         stream.println("Full documentation is available at");
-        stream.println("http://www.liquibase.org/manual/command_line");
+        stream.println("http://www.liquibase.org/documentation/command_line.html");
         stream.println("");
     }
 
