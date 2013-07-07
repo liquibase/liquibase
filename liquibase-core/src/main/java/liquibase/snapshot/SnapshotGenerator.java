@@ -15,4 +15,6 @@ public interface SnapshotGenerator {
     int getPriority(Class<? extends DatabaseObject> objectType, Database database);
 
     <T extends DatabaseObject> T snapshot(T example, DatabaseSnapshot snapshot, SnapshotGeneratorChain chain) throws DatabaseException, InvalidExampleException;
+
+    Class<? extends DatabaseObject>[] addsTo();
 }

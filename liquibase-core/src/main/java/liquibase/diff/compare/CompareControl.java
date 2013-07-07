@@ -1,17 +1,18 @@
 package liquibase.diff.compare;
 
 import liquibase.CatalogAndSchema;
+import liquibase.database.Database;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.logging.LogFactory;
 import liquibase.servicelocator.ServiceLocator;
+import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.DatabaseObjectFactory;
 
 import java.util.HashSet;
 import java.util.Set;
 
 public class CompareControl {
-
-    private static Set<Class<? extends DatabaseObject>> defaultTypes;
 
     private CompareControl.SchemaComparison[] schemaComparisons;
     private Set<Class<? extends DatabaseObject>> compareTypes = new HashSet<Class<? extends DatabaseObject>>();
@@ -22,12 +23,17 @@ public class CompareControl {
 
     public CompareControl(Set<Class<? extends DatabaseObject>> compareTypes) {
         schemaComparisons = new SchemaComparison[]{new SchemaComparison(new CatalogAndSchema(null, null), new CatalogAndSchema(null, null))};
-        initCompareTypes(compareTypes);
+        setTypes(compareTypes);
     }
 
     public CompareControl(SchemaComparison[] schemaComparison, Set<Class<? extends DatabaseObject>> compareTypes) {
         this.schemaComparisons = schemaComparison;
-        initCompareTypes(compareTypes);
+        setTypes(compareTypes);
+    }
+
+    public CompareControl(SchemaComparison[] schemaComparison, String compareTypes) {
+        this.schemaComparisons = schemaComparison;
+        setTypes(DatabaseObjectFactory.getInstance().parseTypes(compareTypes));
     }
 
     public CompareControl(String[] referenceVsComparisonSchemas, Set<Class<? extends DatabaseObject>> compareTypes) {
@@ -53,36 +59,17 @@ public class CompareControl {
             CatalogAndSchema comparisonSchema = new CatalogAndSchema(comparisonCatalogName, comparisonSchemaName);
             this.schemaComparisons[i] = new SchemaComparison(referenceSchema, comparisonSchema);
 
-            initCompareTypes(compareTypes);
+            setTypes(compareTypes);
         }
     }
 
-    private void initCompareTypes(Set<Class<? extends DatabaseObject>> compareTypes) {
-        if (compareTypes == null || compareTypes.size() == 0) {
-            compareTypes = getDefaultTypes();
+    protected void setTypes(Set<Class<? extends DatabaseObject>> types) {
+        if (types == null || types.size() == 0) {
+            types = DatabaseObjectFactory.getInstance().getStandardTypes();
         }
-        this.compareTypes = compareTypes;
+        this.compareTypes = types;
     }
 
-    private Set<Class<? extends DatabaseObject>> getDefaultTypes() {
-        if (defaultTypes == null) {
-            Set<Class<? extends DatabaseObject>> set = new HashSet<Class<? extends DatabaseObject>>();
-
-            Class<? extends DatabaseObject>[] classes = ServiceLocator.getInstance().findClasses(DatabaseObject.class);
-            for (Class<? extends DatabaseObject> clazz : classes) {
-                try {
-                    if (clazz.newInstance().snapshotByDefault()) {
-                        set.add(clazz);
-                    }
-                } catch (Exception e) {
-                    LogFactory.getLogger().info("Cannot construct "+clazz.getName()+" to determine if it should be included in the snapshot by default");
-                }
-            }
-
-            defaultTypes = set;
-        }
-        return defaultTypes;
-    }
     public Set<Class<? extends DatabaseObject>> getComparedTypes() {
         return compareTypes;
     }

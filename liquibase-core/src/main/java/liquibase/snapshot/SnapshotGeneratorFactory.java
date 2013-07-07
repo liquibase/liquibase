@@ -84,7 +84,7 @@ public class SnapshotGeneratorFactory {
 
 
     public boolean has(DatabaseObject example, Database database) throws DatabaseException, InvalidExampleException {
-        if (createSnapshot(example, database, new SnapshotControl(example.getClass())) != null) {
+        if (createSnapshot(example, database, new SnapshotControl(database, example.getClass())) != null) {
             return true;
         }
         CatalogAndSchema catalogAndSchema;
@@ -93,7 +93,7 @@ public class SnapshotGeneratorFactory {
         } else {
             catalogAndSchema = example.getSchema().toCatalogAndSchema();
         }
-        DatabaseSnapshot snapshot = createSnapshot(catalogAndSchema, database, new SnapshotControl(example.getClass()));
+        DatabaseSnapshot snapshot = createSnapshot(catalogAndSchema, database, new SnapshotControl(database, example.getClass()));
         for (DatabaseObject obj : snapshot.get(example.getClass())) {
             if (DatabaseObjectComparatorFactory.getInstance().isSameObject(example, obj, database)) {
                 return true;
@@ -129,7 +129,7 @@ public class SnapshotGeneratorFactory {
     }
 
     public <T extends DatabaseObject> T createSnapshot(T example, Database database) throws DatabaseException, InvalidExampleException {
-        return createSnapshot(example, database, new SnapshotControl());
+        return createSnapshot(example, database, new SnapshotControl(database));
     }
 
     public <T extends DatabaseObject> T createSnapshot(T example, Database database, SnapshotControl snapshotControl) throws DatabaseException, InvalidExampleException {
@@ -173,5 +173,27 @@ public class SnapshotGeneratorFactory {
 
     public static void resetAll() {
         instance = null;
+    }
+
+    public Set<Class<? extends DatabaseObject>> getContainerTypes(Class<? extends DatabaseObject> type, Database database) {
+        Set<Class<? extends DatabaseObject>>  returnSet = new HashSet<Class<? extends DatabaseObject>>();
+
+        getContainerTypes(type, database, returnSet);
+
+        return returnSet;
+    }
+
+    private void getContainerTypes(Class<? extends DatabaseObject> type, Database database, Set<Class<? extends DatabaseObject>>  returnSet) {
+        if (!returnSet.add(type)) {
+            return;
+        }
+        SortedSet<SnapshotGenerator> generators = getGenerators(type, database);
+        if (generators != null && generators.size() > 0) {
+            for (Class<? extends DatabaseObject> newType : generators.iterator().next().addsTo()) {
+                returnSet.add(newType);
+                getContainerTypes(newType, database, returnSet);
+            }
+        }
+
     }
 }

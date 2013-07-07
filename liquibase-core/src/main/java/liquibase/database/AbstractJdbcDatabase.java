@@ -593,7 +593,7 @@ public abstract class AbstractJdbcDatabase implements Database {
 
         Table changeLogTable = null;
         try {
-            changeLogTable = SnapshotGeneratorFactory.getInstance().getDatabaseChangeLogTable(new SnapshotControl(Table.class, Column.class), this);
+            changeLogTable = SnapshotGeneratorFactory.getInstance().getDatabaseChangeLogTable(new SnapshotControl(this, Table.class, Column.class), this);
         } catch (LiquibaseException e) {
             throw new UnexpectedLiquibaseException(e);
         }
@@ -809,7 +809,7 @@ public abstract class AbstractJdbcDatabase implements Database {
         try {
             DatabaseSnapshot snapshot = null;
             try {
-                snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(schemaToDrop, this, new SnapshotControl());
+                snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(schemaToDrop, this, new SnapshotControl(this));
             } catch (LiquibaseException e) {
                 throw new UnexpectedLiquibaseException(e);
             }

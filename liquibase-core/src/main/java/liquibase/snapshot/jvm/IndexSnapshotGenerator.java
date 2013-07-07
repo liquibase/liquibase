@@ -214,7 +214,7 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
 
         List<Table> tables = new ArrayList<Table>();
         if (exampleTable.getName() == null) {
-            DatabaseSnapshot tableSnapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(schema.toCatalogAndSchema(), database, new SnapshotControl(Table.class, Schema.class, Catalog.class)); //todo: don't get from Factory
+            DatabaseSnapshot tableSnapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(schema.toCatalogAndSchema(), database, new SnapshotControl(snapshot.getDatabase(), Table.class, Schema.class, Catalog.class)); //todo: don't get from Factory
             tables.addAll(tableSnapshot.get(Table.class));
         } else {
             tables.add(exampleTable);

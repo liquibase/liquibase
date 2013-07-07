@@ -31,7 +31,8 @@ public class StandardDiffGenerator implements DiffGenerator {
         DiffResult diffResult = new DiffResult(referenceSnapshot, comparisonSnapshot, compareControl);
         checkVersionInfo(referenceSnapshot, comparisonSnapshot, diffResult);
 
-        Set<Class<? extends DatabaseObject>> typesToCompare = referenceSnapshot.getSnapshotControl().getTypesToInclude();
+        Set<Class<? extends DatabaseObject>> typesToCompare = compareControl.getComparedTypes();
+        typesToCompare.retainAll(referenceSnapshot.getSnapshotControl().getTypesToInclude());
         typesToCompare.retainAll(comparisonSnapshot.getSnapshotControl().getTypesToInclude());
 
         for (Class<? extends DatabaseObject> typeToCompare : typesToCompare) {

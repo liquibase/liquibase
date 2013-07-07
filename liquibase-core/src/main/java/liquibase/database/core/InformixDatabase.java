@@ -188,7 +188,7 @@ public class InformixDatabase extends AbstractJdbcDatabase {
 	public void checkDatabaseChangeLogTable(boolean updateExistingNullChecksums, DatabaseChangeLog databaseChangeLog, String... contexts) throws DatabaseException {
         Executor executor = ExecutorService.getInstance().getExecutor(this);
 
-        Table changeLogTable = SnapshotGeneratorFactory.getInstance().getDatabaseChangeLogTable(new SnapshotControl(Table.class, Column.class), this);
+        Table changeLogTable = SnapshotGeneratorFactory.getInstance().getDatabaseChangeLogTable(new SnapshotControl(this, Table.class, Column.class), this);
 
         List<SqlStatement> statementsToExecute = new ArrayList<SqlStatement>();
 
