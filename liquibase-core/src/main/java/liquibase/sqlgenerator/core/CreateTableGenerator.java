@@ -2,6 +2,7 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
 import liquibase.database.core.*;
+import liquibase.database.ext.HanaDBDatabase;
 import liquibase.exception.ValidationErrors;
 import liquibase.logging.LogFactory;
 import liquibase.sql.Sql;
@@ -130,7 +131,7 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
         	// This constraint is added after the column type.
 
 	        if (statement.getPrimaryKeyConstraint() != null && statement.getPrimaryKeyConstraint().getColumns().size() > 0) {
-	        	if (!(database instanceof InformixDatabase)) {
+                if (!(database instanceof InformixDatabase) && !(database instanceof HanaDBDatabase)) {
 		            String pkName = StringUtils.trimToNull(statement.getPrimaryKeyConstraint().getConstraintName());
 		            if (pkName == null) {
 		                // TODO ORA-00972: identifier is too long
