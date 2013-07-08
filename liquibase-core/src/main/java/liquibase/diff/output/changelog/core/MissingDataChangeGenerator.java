@@ -6,6 +6,7 @@ import liquibase.change.core.InsertDataChange;
 import liquibase.change.core.LoadDataChange;
 import liquibase.change.core.LoadDataColumnConfig;
 import liquibase.database.Database;
+import liquibase.database.jvm.JdbcConnection;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.changelog.ChangeGeneratorChain;
 import liquibase.diff.output.changelog.MissingObjectChangeGenerator;
@@ -22,6 +23,9 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -49,6 +53,8 @@ public class MissingDataChangeGenerator implements MissingObjectChangeGenerator 
     }
 
     public Change[] fixMissing(DatabaseObject missingObject, DiffOutputControl outputControl, Database referenceDatabase, Database comparisionDatabase, ChangeGeneratorChain chain) {
+        Statement stmt = null;
+        ResultSet rs = null;
         try {
             Data data = (Data) missingObject;
 
@@ -59,13 +65,14 @@ public class MissingDataChangeGenerator implements MissingObjectChangeGenerator 
 
             String sql = "SELECT * FROM " + referenceDatabase.escapeTableName(table.getSchema().getCatalogName(), table.getSchema().getName(), table.getName());
 
-            List<Map> rs = ExecutorService.getInstance().getExecutor(referenceDatabase).queryForList(new RawSqlStatement(sql));
+            stmt = ((JdbcConnection) referenceDatabase.getConnection()).createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+            stmt.setFetchSize(1000);
+            rs = stmt.executeQuery(sql);
 
-            if (rs.size() == 0) {
-                return null;
+            List<String> columnNames = new ArrayList<String>();
+            for (int i=0; i< rs.getMetaData().getColumnCount(); i++) {
+                columnNames.add(rs.getMetaData().getColumnName(i+1));
             }
-
-            List<String> columnNames = new ArrayList<String>(rs.get(0).keySet());
 
             // if dataDir is not null, print out a csv file and use loadData
             // tag
@@ -93,11 +100,11 @@ public class MissingDataChangeGenerator implements MissingObjectChangeGenerator 
                 }
                 outputFile.writeNext(line);
 
-                for (Map row : rs) {
+                while (rs.next()) {
                     line = new String[columnNames.size()];
 
                     for (int i = 0; i < columnNames.size(); i++) {
-                        Object value = row.get(columnNames.get(i).toUpperCase());
+                        Object value = rs.getObject(i + 1);
                         if (dataTypes[i] == null && value != null) {
                             if (value instanceof Number) {
                                 dataTypes[i] = "NUMERIC";
@@ -150,7 +157,7 @@ public class MissingDataChangeGenerator implements MissingObjectChangeGenerator 
                 };
             } else { // if dataDir is null, build and use insert tags
                 List<Change> changes = new ArrayList<Change>();
-                for (Map row : rs) {
+                while (rs.next()) {
                     InsertDataChange change = new InsertDataChange();
                     if (outputControl.isIncludeCatalog()) {
                         change.setCatalogName(table.getSchema().getCatalog().getName());
@@ -165,7 +172,7 @@ public class MissingDataChangeGenerator implements MissingObjectChangeGenerator 
                         ColumnConfig column = new ColumnConfig();
                         column.setName(columnNames.get(i));
 
-                        Object value = row.get(columnNames.get(i).toUpperCase());
+                        Object value = rs.getObject(i + 1);
                         if (value == null) {
                             column.setValue(null);
                         } else if (value instanceof Number) {
@@ -192,6 +199,17 @@ public class MissingDataChangeGenerator implements MissingObjectChangeGenerator 
             }
         } catch (Exception e) {
             throw new UnexpectedLiquibaseException(e);
+        } finally {
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException ignore) { }
+            }
+            if (stmt != null) {
+                try {
+                    stmt.close();
+                } catch (SQLException ignore) { }
+            }
         }
     }
 }

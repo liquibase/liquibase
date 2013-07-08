@@ -17,4 +17,5 @@ public interface ChangeWithColumns<T extends ColumnConfig> {
      */
     public List<T> getColumns();
 
+    public void setColumns(List<T> columns);
 }
