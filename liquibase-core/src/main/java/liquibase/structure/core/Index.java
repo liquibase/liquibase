@@ -10,12 +10,12 @@ import java.util.*;
 
 public class Index extends AbstractDatabaseObject {
 
-	/** Marks Index as associated with Primary Key [PK] */
-	public final static String MARK_PRIMARY_KEY = "primaryKey";
-	/** Marks Index as associated with Foreign Key [FK] */
-	public final static String MARK_FOREIGN_KEY = "foreignKey";
-	/** Marks Index as associated with Unique Constraint [UC] */
-	public final static String MARK_UNIQUE_CONSTRAINT = "uniqueConstraint";
+    /** Marks Index as associated with Primary Key [PK] */
+    public final static String MARK_PRIMARY_KEY = "primaryKey";
+    /** Marks Index as associated with Foreign Key [FK] */
+    public final static String MARK_FOREIGN_KEY = "foreignKey";
+    /** Marks Index as associated with Unique Constraint [UC] */
+    public final static String MARK_UNIQUE_CONSTRAINT = "uniqueConstraint";
 
     public Index() {
         setAttribute("columns", new ArrayList<String>());
@@ -54,7 +54,7 @@ public class Index extends AbstractDatabaseObject {
         return this;
     }
 
-	public String getTablespace() {
+    public String getTablespace() {
 		return getAttribute("tablespace", String.class);
 	}
 
@@ -99,19 +99,19 @@ public class Index extends AbstractDatabaseObject {
         return getAttribute("unique", Boolean.class);
     }
 
-	public Set<String> getAssociatedWith() {
+    public Set<String> getAssociatedWith() {
 		return getAttribute("associatedWith", Set.class);
 	}
 
-	public String getAssociatedWithAsString() {
+    public String getAssociatedWithAsString() {
 		return StringUtils.join(getAssociatedWith(), ",");
 	}
 
-	public void addAssociatedWith(String item) {
+    public void addAssociatedWith(String item) {
 		getAssociatedWith().add(item);
 	}
 
-	public boolean isAssociatedWith(String keyword) {
+    public boolean isAssociatedWith(String keyword) {
 		return getAssociatedWith().contains(keyword);
 	}
 
@@ -139,18 +139,21 @@ public class Index extends AbstractDatabaseObject {
         int returnValue = this.getTable().getName().compareTo(o.getTable().getName());
 
         if (returnValue == 0) {
-            String thisName = StringUtils.trimToEmpty(this.getName());
-            String oName = StringUtils.trimToEmpty(o.getName());
-            returnValue = thisName.compareTo(oName);
+            returnValue = getColumnNames().compareToIgnoreCase(o.getColumnNames());
         }
 
-        //We should not have two indexes that have the same name and tablename
-        /*if (returnValue == 0) {
-        	returnValue = this.getColumnName().compareTo(o.getColumnName());
-        }*/
-
+        if (returnValue == 0) {
+            returnValue = getUniqueValue().compareTo(o.getUniqueValue());
+        }
 
         return returnValue;
+    }
+
+    private Integer getUniqueValue() {
+        if (isUnique() == null) {
+            return 0;
+        }
+        return isUnique() ? 1 : 2;
     }
 
     @Override
@@ -163,7 +166,7 @@ public class Index extends AbstractDatabaseObject {
         if (getTable() != null && getColumns() != null) {
             stringBuffer.append(" on ").append(getTable().getName());
             if (getColumns() != null && getColumns().size() > 0) {
-                stringBuffer.append("(");
+            stringBuffer.append("(");
                 for (String column : getColumns()) {
                     stringBuffer.append(column).append(", ");
                 }

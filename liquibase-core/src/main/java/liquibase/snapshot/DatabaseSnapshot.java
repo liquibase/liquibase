@@ -1,16 +1,24 @@
 package liquibase.snapshot;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.SortedSet;
+
 import liquibase.CatalogAndSchema;
 import liquibase.database.Database;
+import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.servicelocator.ServiceLocator;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.core.*;
-import liquibase.diff.compare.DatabaseObjectComparatorFactory;
-
-import java.lang.reflect.Field;
-import java.util.*;
+import liquibase.structure.core.Schema;
+import liquibase.structure.core.Table;
 
 public abstract class DatabaseSnapshot {
 
@@ -29,6 +37,15 @@ public abstract class DatabaseSnapshot {
         this.snapshotControl = new SnapshotControl();
     }
 
+    public Table getTable(String name) {
+        for (Table table : get(Table.class)) {
+            if (table.getName().equalsIgnoreCase(name)) {
+                return table;
+            }
+        }
+        throw new IllegalArgumentException("table not found: " + name);
+    }
+
     public SnapshotControl getSnapshotControl() {
         return snapshotControl;
     }
@@ -45,7 +62,7 @@ public abstract class DatabaseSnapshot {
 //        include(example, false);
 //    }
 
-    protected  <T extends DatabaseObject> T include(T example) throws DatabaseException, InvalidExampleException {
+    public <T extends DatabaseObject> T include(T example) throws DatabaseException, InvalidExampleException {
         if (example == null) {
             return null;
         }
@@ -83,12 +100,7 @@ public abstract class DatabaseSnapshot {
             collection.add(example);
 
         } else {
-            Set<DatabaseObject> collection = allFound.get(object.getClass());
-            if (collection == null) {
-                collection = new HashSet<DatabaseObject>();
-                allFound.put(object.getClass(), collection);
-            }
-            collection.add(object);
+            add(object);
 
             try {
                 includeNestedObjects(object);
@@ -99,6 +111,15 @@ public abstract class DatabaseSnapshot {
             }
         }
         return object;
+    }
+
+    public  <T extends DatabaseObject> void add(T object) {
+        Set<DatabaseObject> collection = allFound.get(object.getClass());
+        if (collection == null) {
+            collection = new HashSet<DatabaseObject>();
+            allFound.put(object.getClass(), collection);
+        }
+        collection.add(object);
     }
 
     private void includeNestedObjects(DatabaseObject object) throws DatabaseException, InvalidExampleException, InstantiationException, IllegalAccessException {
@@ -198,6 +219,11 @@ public abstract class DatabaseSnapshot {
         }
     }
 
+    public void remove(DatabaseObject object) {
+        for (Set<DatabaseObject> set : allFound.values()) {
+            set.remove(object);
+        }
+    }
 
     private SnapshotGeneratorChain createGeneratorChain(Class<? extends DatabaseObject> databaseObjectType, Database database) {
         SortedSet<SnapshotGenerator> generators = SnapshotGeneratorFactory.getInstance().getGenerators(databaseObjectType, database);

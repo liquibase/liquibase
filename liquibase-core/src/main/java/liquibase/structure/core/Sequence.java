@@ -1,6 +1,9 @@
 package liquibase.structure.core;
 
 import liquibase.structure.AbstractDatabaseObject;
+
+import java.math.BigInteger;
+import liquibase.structure.AbstractDatabaseObject;
 import liquibase.structure.DatabaseObject;
 
 public class Sequence extends AbstractDatabaseObject {
@@ -33,7 +36,8 @@ public class Sequence extends AbstractDatabaseObject {
     public int hashCode() {
         return (getName() != null ? getName().toUpperCase().hashCode() : 0);
     }
-
+    private BigInteger startValue;
+    private BigInteger incrementBy;
 
     @Override
     public String toString() {
@@ -55,6 +59,21 @@ public class Sequence extends AbstractDatabaseObject {
         return this;
 	}
 
+    public BigInteger getStartValue() {
+        return startValue;
+    }
+
+    public void setStartValue(BigInteger startValue) {
+        this.startValue = startValue;
+    }
+
+    public BigInteger getIncrementBy() {
+        return incrementBy;
+    }
+
+    public void setIncrementBy(BigInteger incrementBy) {
+        this.incrementBy = incrementBy;
+    }
     public Sequence setSchema(String catalog, String schema) {
         return setSchema(new Schema(catalog, schema));
     }
