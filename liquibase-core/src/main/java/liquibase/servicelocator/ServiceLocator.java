@@ -114,11 +114,15 @@ public class ServiceLocator {
                 addPackageToScan("liquibase.database");
                 addPackageToScan("liquibase.parser");
                 addPackageToScan("liquibase.precondition");
+                addPackageToScan("liquibase.datatype");
                 addPackageToScan("liquibase.serializer");
                 addPackageToScan("liquibase.sqlgenerator");
                 addPackageToScan("liquibase.executor");
                 addPackageToScan("liquibase.snapshot");
                 addPackageToScan("liquibase.logging");
+                addPackageToScan("liquibase.diff");
+                addPackageToScan("liquibase.structure");
+                addPackageToScan("liquibase.structurecompare");
                 addPackageToScan("liquibase.lockservice");
                 addPackageToScan("liquibase.ext");
             }
