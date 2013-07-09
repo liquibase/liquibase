@@ -17,6 +17,7 @@ import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
 import liquibase.util.ISODateFormat;
+import liquibase.util.JdbcUtils;
 import liquibase.util.csv.CSVWriter;
 
 import java.io.BufferedWriter;
@@ -104,7 +105,7 @@ public class MissingDataChangeGenerator implements MissingObjectChangeGenerator 
                     line = new String[columnNames.size()];
 
                     for (int i = 0; i < columnNames.size(); i++) {
-                        Object value = rs.getObject(i + 1);
+                        Object value = JdbcUtils.getResultSetValue(rs, i + 1);
                         if (dataTypes[i] == null && value != null) {
                             if (value instanceof Number) {
                                 dataTypes[i] = "NUMERIC";
@@ -160,7 +161,7 @@ public class MissingDataChangeGenerator implements MissingObjectChangeGenerator 
                 while (rs.next()) {
                     InsertDataChange change = new InsertDataChange();
                     if (outputControl.isIncludeCatalog()) {
-                        change.setCatalogName(table.getSchema().getCatalog().getName());
+                        change.setCatalogName(table.getSchema().getCatalogName());
                     }
                     if (outputControl.isIncludeSchema()) {
                         change.setSchemaName(table.getSchema().getName());
@@ -172,7 +173,7 @@ public class MissingDataChangeGenerator implements MissingObjectChangeGenerator 
                         ColumnConfig column = new ColumnConfig();
                         column.setName(columnNames.get(i));
 
-                        Object value = rs.getObject(i + 1);
+                        Object value = JdbcUtils.getResultSetValue(rs, i + 1);
                         if (value == null) {
                             column.setValue(null);
                         } else if (value instanceof Number) {

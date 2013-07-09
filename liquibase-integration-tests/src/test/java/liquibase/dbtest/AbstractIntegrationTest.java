@@ -273,16 +273,18 @@ public abstract class AbstractIntegrationTest {
             statement = ((JdbcConnection) database.getConnection()).getUnderlyingConnection().createStatement();
             try {
                 statement.execute("drop table " + database.escapeTableName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName()));
+                statement.close();
+                database.commit();
             } catch (Exception e) {
-                //ok
+                e.printStackTrace();
             }
             try {
                 statement.execute("drop table " + database.escapeTableName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName()));
+                statement.close();
+                database.commit();
             } catch (Exception e) {
-                //ok
+                e.printStackTrace();
             }
-            statement.close();
-            database.commit();
         } catch (SQLException e) {
             throw new DatabaseException(e);
         }

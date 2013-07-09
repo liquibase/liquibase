@@ -55,8 +55,8 @@ import java.util.regex.Pattern;
 public abstract class AbstractJdbcDatabase implements Database {
 
     private DatabaseConnection connection;
-    private String defaultCatalogName;
-    private String defaultSchemaName;
+    protected String defaultCatalogName;
+    protected String defaultSchemaName;
 
     protected String currentDateTimeFunction;
 
@@ -212,9 +212,13 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     public String getDefaultCatalogName() {
         if (defaultCatalogName == null) {
+            if (defaultSchemaName != null && !this.supportsSchemas()) {
+                return defaultSchemaName;
+            }
+
             if (connection != null) {
                 try {
-                    defaultCatalogName = doGetDefaultCatalogName();
+                    defaultCatalogName = getConnectionCatalogName();
                 } catch (DatabaseException e) {
                     LogFactory.getLogger().info("Error getting default catalog", e);
                 }
@@ -223,7 +227,7 @@ public abstract class AbstractJdbcDatabase implements Database {
         return defaultCatalogName;
     }
 
-    protected String doGetDefaultCatalogName() throws DatabaseException {
+    protected String getConnectionCatalogName() throws DatabaseException {
         return connection.getCatalog();
     }
 
@@ -299,7 +303,7 @@ public abstract class AbstractJdbcDatabase implements Database {
         }
 
         if (defaultSchemaName == null && connection != null) {
-            defaultSchemaName = doGetDefaultSchemaName();
+            defaultSchemaName = getConnectionSchemaName();
         }
 
 
@@ -311,7 +315,10 @@ public abstract class AbstractJdbcDatabase implements Database {
      *
      * @return
      */
-    protected String doGetDefaultSchemaName() {
+    protected String getConnectionSchemaName() {
+        if (connection == null) {
+            return null;
+        }
         try {
             ResultSet resultSet = ((JdbcConnection) connection).prepareCall("call current_schema").executeQuery();
             resultSet.next();
@@ -672,13 +679,13 @@ public abstract class AbstractJdbcDatabase implements Database {
             executor.comment("Create Database Change Log Table");
             SqlStatement createTableStatement = new CreateDatabaseChangeLogTableStatement();
             if (!canCreateChangeLogTable()) {
-                throw new DatabaseException("Cannot create " + escapeTableName(getDefaultCatalogName(), getDefaultSchemaName(), getDatabaseChangeLogTableName()) + " table for your database.\n\n" +
+                throw new DatabaseException("Cannot create " + escapeTableName(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName()) + " table for your database.\n\n" +
                         "Please construct it manually using the following SQL as a base and re-run Liquibase:\n\n" +
                         createTableStatement);
             }
             // If there is no table in the database for recording change history create one.
             statementsToExecute.add(createTableStatement);
-            LogFactory.getLogger().info("Creating database history table with name: " + escapeTableName(getDefaultCatalogName(), getDefaultSchemaName(), getDatabaseChangeLogTableName()));
+            LogFactory.getLogger().info("Creating database history table with name: " + escapeTableName(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName()));
 //                }
         }
 
@@ -962,13 +969,17 @@ public abstract class AbstractJdbcDatabase implements Database {
 //        catalogName = catalogAndSchema.getCatalogName();
 //        schemaName = catalogAndSchema.getSchemaName();
 
-        if (catalogName == null && schemaName == null) {
-            return escapeObjectName(objectName, objectType);
-        }
-
         if (supportsSchemas()) {
             catalogName = StringUtils.trimToNull(catalogName);
             schemaName = StringUtils.trimToNull(schemaName);
+
+            if (catalogName == null) {
+                catalogName = this.getDefaultCatalogName();
+            }
+            if (schemaName == null) {
+                schemaName = this.getDefaultSchemaName();
+            }
+
             if (!supportsCatalogInObjectName(objectType)) {
                 catalogName = null;
             }
@@ -980,12 +991,23 @@ public abstract class AbstractJdbcDatabase implements Database {
                 return escapeObjectName(catalogName, Catalog.class) + "." + escapeObjectName(schemaName, Schema.class) + "." + escapeObjectName(objectName, objectType);
             }
         } else if (supportsCatalogs()) {
-            if (StringUtils.trimToNull(catalogName) != null) {
+            catalogName = StringUtils.trimToNull(catalogName);
+            schemaName = StringUtils.trimToNull(schemaName);
+
+            if (catalogName != null) {
                 return escapeObjectName(catalogName, Catalog.class) + "." + escapeObjectName(objectName, objectType);
-            } else if (StringUtils.trimToNull(schemaName) != null) { //they actually mean catalog name
-                return escapeObjectName(schemaName, Catalog.class) + "." + escapeObjectName(objectName, objectType);
             } else {
-                return escapeObjectName(objectName, objectType);
+                if (schemaName != null) { //they actually mean catalog name
+                    return escapeObjectName(schemaName, Catalog.class) + "." + escapeObjectName(objectName, objectType);
+                } else {
+                    catalogName = this.getDefaultCatalogName();
+
+                    if (catalogName == null) {
+                        return escapeObjectName(objectName, objectType);
+                    } else {
+                        return escapeObjectName(catalogName, Catalog.class) + "." + escapeObjectName(objectName, objectType);
+                    }
+                }
             }
 
         } else {

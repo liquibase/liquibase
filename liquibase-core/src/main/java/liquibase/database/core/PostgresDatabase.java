@@ -237,7 +237,7 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
     }
 
     @Override
-    protected String doGetDefaultSchemaName() {
+    protected String getConnectionSchemaName() {
         return "public";
     }
 

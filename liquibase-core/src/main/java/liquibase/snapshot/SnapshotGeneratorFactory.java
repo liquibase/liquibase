@@ -189,9 +189,12 @@ public class SnapshotGeneratorFactory {
         }
         SortedSet<SnapshotGenerator> generators = getGenerators(type, database);
         if (generators != null && generators.size() > 0) {
-            for (Class<? extends DatabaseObject> newType : generators.iterator().next().addsTo()) {
-                returnSet.add(newType);
-                getContainerTypes(newType, database, returnSet);
+            SnapshotGenerator generator = generators.iterator().next();
+            if (generator.addsTo() != null) {
+                for (Class<? extends DatabaseObject> newType : generator.addsTo()) {
+                    returnSet.add(newType);
+                    getContainerTypes(newType, database, returnSet);
+                }
             }
         }
 

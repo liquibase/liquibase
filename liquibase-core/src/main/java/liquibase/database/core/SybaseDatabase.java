@@ -209,8 +209,12 @@ public class SybaseDatabase extends AbstractJdbcDatabase {
 
     @Override
     public String getDefaultSchemaName() {
-        return "dbo";
+        if (defaultSchemaName == null) {
+            defaultSchemaName = getConnectionSchemaName();
+        }
+        return defaultSchemaName;
     }
+
 
     @Override
     public boolean supportsRestrictForeignKeys() {

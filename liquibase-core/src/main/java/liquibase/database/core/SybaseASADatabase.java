@@ -178,9 +178,9 @@ public class SybaseASADatabase extends AbstractJdbcDatabase {
         }
     }
 
-	@Override
-	public String getDefaultSchemaName() {
-		return "DBA";
+    @Override
+    protected String getConnectionSchemaName() {
+        return "DBA";
 	}
 
 	@Override
