@@ -96,6 +96,13 @@ public class DataTypeFactory {
             primaryKey = true;
         }
 
+        String[] splitTypeName = dataTypeName.split("\\s+", 2);
+        dataTypeName = splitTypeName[0];
+        String additionalInfo = null;
+        if (splitTypeName.length > 1) {
+            additionalInfo = splitTypeName[1];
+        }
+
         SortedSet<Class<? extends LiquibaseDataType>> classes = registry.get(dataTypeName.toLowerCase());
 
         LiquibaseDataType liquibaseDataType = null;
@@ -113,6 +120,7 @@ public class DataTypeFactory {
             liquibaseDataType = new UnknownType(dataTypeName);
 
         }
+        liquibaseDataType.setAdditionalInformation(additionalInfo);
 
         if (dataTypeDefinition.matches(".+\\s*\\(.*")) {
             String paramStrings = dataTypeDefinition.replaceFirst(".*?\\(", "").replaceFirst("\\).*", "");
