@@ -5,6 +5,11 @@ import liquibase.structure.DatabaseObject;
 
 public class Data extends AbstractDatabaseObject {
 
+    @Override
+    public boolean snapshotByDefault() {
+        return false;
+    }
+
     public Table getTable() {
         return getAttribute("table", Table.class);
     }
