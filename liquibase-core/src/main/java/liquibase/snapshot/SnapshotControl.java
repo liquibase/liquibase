@@ -39,6 +39,7 @@ public class SnapshotControl {
         this.types = new HashSet<Class<? extends DatabaseObject>>();
         for (Class<? extends DatabaseObject> type : types) {
             this.types.addAll(SnapshotGeneratorFactory.getInstance().getContainerTypes(type, database));
+            this.types.add(type);
         }
     }
 
