@@ -276,6 +276,7 @@ public abstract class AbstractIntegrationTest {
                 statement.close();
                 database.commit();
             } catch (Exception e) {
+                System.out.println("Probably expected error dropping databasechangelog table");
                 e.printStackTrace();
             }
             try {
@@ -283,6 +284,7 @@ public abstract class AbstractIntegrationTest {
                 statement.close();
                 database.commit();
             } catch (Exception e) {
+                System.out.println("Probably expected error dropping databasechangeloglock table");
                 e.printStackTrace();
             }
         } catch (SQLException e) {

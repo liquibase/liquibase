@@ -84,7 +84,10 @@ public class SnapshotGeneratorFactory {
 
 
     public boolean has(DatabaseObject example, Database database) throws DatabaseException, InvalidExampleException {
-        if (createSnapshot(example, database, new SnapshotControl(database, example.getClass())) != null) {
+        List<Class<? extends DatabaseObject>> types = new ArrayList<Class<? extends DatabaseObject>>(getContainerTypes(example.getClass(), database));
+        types.add(example.getClass());
+
+        if (createSnapshot(example, database, new SnapshotControl(database,  types.toArray(new Class[types.size()]))) != null) {
             return true;
         }
         CatalogAndSchema catalogAndSchema;

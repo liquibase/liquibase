@@ -54,7 +54,7 @@ public class IndexComparator implements DatabaseObjectComparator {
         differences.removeDifference("name");
 
         differences.removeDifference("columns");
-        differences.compare("columns", databaseObject1, databaseObject2, new ObjectDifferences.DatabaseObjectNameCompareFunction(Index.class, accordingTo));
+        differences.compare("columns", databaseObject1, databaseObject2, new ObjectDifferences.DatabaseObjectNameCompareFunction(Column.class, accordingTo));
         return differences;
     }
 }

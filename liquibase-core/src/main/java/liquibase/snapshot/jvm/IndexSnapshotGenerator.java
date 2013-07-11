@@ -218,7 +218,12 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
             DatabaseSnapshot tableSnapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(schema.toCatalogAndSchema(), database, new SnapshotControl(snapshot.getDatabase(), Table.class, Schema.class, Catalog.class)); //todo: don't get from Factory
             tables.addAll(tableSnapshot.get(Table.class));
         } else {
-            tables.add(snapshot.get(exampleTable));
+            Table snapshotTable = snapshot.get(exampleTable);
+            if (snapshotTable == null) {
+                tables.add(exampleTable);
+            } else {
+                tables.add(snapshotTable);
+            }
         }
         Map<String, Index> foundIndexes = new HashMap<String, Index>();
         for (Table table : tables) {

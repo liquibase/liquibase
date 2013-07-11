@@ -7,6 +7,7 @@ import liquibase.diff.compare.DatabaseObjectComparator;
 import liquibase.diff.compare.DatabaseObjectComparatorChain;
 import liquibase.structure.core.DataType;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -46,6 +47,8 @@ public final class DefaultDatabaseObjectComparator implements DatabaseObjectComp
                 compareFunction = new ObjectDifferences.DatabaseObjectNameCompareFunction(type, accordingTo);
             } else if (attribute1 instanceof DataType || attribute2 instanceof DataType) {
                 compareFunction = new ObjectDifferences.ToStringCompareFunction();
+            } else if (attribute1 instanceof Collection || attribute2 instanceof Collection) {
+                compareFunction = new ObjectDifferences.OrderedCollectionCompareFunction(new ObjectDifferences.StandardCompareFunction());
             } else {
                 compareFunction = new ObjectDifferences.StandardCompareFunction();
             }

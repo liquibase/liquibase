@@ -33,10 +33,13 @@ public class ErrorPrecondition {
         }
 
         String causeMessage = cause.getMessage();
+        if (causeMessage == null) {
+            causeMessage = this.cause.getMessage();
+        }
         if (changeLog == null) {
             return causeMessage;
         } else {
-            return changeLog.toString()+" : "+ causeMessage;
+            return changeLog.toString()+" : "+ precondition.toString()+" : "+causeMessage;
         }
     }
 }

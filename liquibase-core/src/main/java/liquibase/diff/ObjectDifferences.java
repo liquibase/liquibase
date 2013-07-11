@@ -154,4 +154,54 @@ public class ObjectDifferences {
         }
     }
 
+    public static class OrderedCollectionCompareFunction implements CompareFunction {
+
+        private StandardCompareFunction compareFunction;
+
+        public OrderedCollectionCompareFunction(StandardCompareFunction compareFunction) {
+            this.compareFunction = compareFunction;
+        }
+
+        public boolean areEqual(Object referenceValue, Object compareToValue) {
+            if (referenceValue == null && compareToValue == null) {
+                return true;
+            }
+            if (referenceValue == null || compareToValue == null) {
+                return false;
+            }
+
+            if (!(referenceValue instanceof Collection) || (!(compareToValue instanceof Collection))) {
+                return false;
+            }
+
+            if (((Collection) referenceValue).size() != ((Collection) compareToValue).size()) {
+                return false;
+            }
+
+            Iterator referenceIterator = ((Collection) referenceValue).iterator();
+            Iterator compareIterator = ((Collection) compareToValue).iterator();
+
+            while (referenceIterator.hasNext()) {
+                Object referenceObj = referenceIterator.next();
+                Object compareObj = compareIterator.next();
+
+                if (referenceObj instanceof DatabaseObject) {
+                    if (!compareFunction.areEqual(referenceObj, compareObj)) {
+                        return false;
+                    }
+                }
+            }
+
+            for (Object obj : ((Collection) referenceValue)) {
+                if (!((Collection) compareToValue).contains(obj)) {
+                    return false;
+                }
+            }
+
+            return referenceValue.equals(compareToValue);
+
+        }
+    }
+
+
 }
