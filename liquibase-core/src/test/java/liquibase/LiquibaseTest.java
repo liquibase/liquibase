@@ -49,15 +49,16 @@ public class LiquibaseTest {
 //        testLiquibase = new TestLiquibase();
         mockResourceAccessor = new MockResourceAccessor();
         mockDatabase = mock(Database.class);
+        mockLockService = mock(LockService.class);
         mockLockServiceFactory = mock(LockServiceFactory.class);
 
         LockServiceFactory.setInstance(mockLockServiceFactory);
-        when(mockLockServiceFactory.getLockService(mockDatabase)).thenReturn(mockLockService);
+        when(mockLockServiceFactory.getLockService(isA(Database.class))).thenReturn(mockLockService);
     }
 
     @After
     public void after() {
-        reset(mockResourceAccessor, mockDatabase, mockLockServiceFactory);
+        reset(mockDatabase, mockLockServiceFactory, mockLockService);
         LockServiceFactory.reset();
     }
 
@@ -154,7 +155,6 @@ public class LiquibaseTest {
 
     @Test
     public void update() throws LiquibaseException {
-        LockServiceFactory.setInstance(mock(LockServiceFactory.class));
         Liquibase liquibase = new Liquibase("com/example/test.xml", mockResourceAccessor, mockDatabase);
 
         liquibase.update(new Contexts("a", "b"));
