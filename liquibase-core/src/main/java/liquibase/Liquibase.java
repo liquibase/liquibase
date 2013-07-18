@@ -171,15 +171,15 @@ public class Liquibase {
         try {
             DatabaseChangeLog changeLog = ChangeLogParserFactory.getInstance().getParser(changeLogFile, resourceAccessor).parse(changeLogFile, changeLogParameters, resourceAccessor);
 
-            checkDatabaseChangeLogTable(true, changeLog, contexts);
+            checkLiquibaseTables(true, changeLog, contexts);
 
             changeLog.validate(database, contexts);
             ChangeLogIterator changeLogIterator = getStandardChangelogIterator(contexts, changeLog);
 
             changeLogIterator.run(new UpdateVisitor(database), database);
         } finally {
+            database.setObjectQuotingStrategy(ObjectQuotingStrategy.LEGACY);
             try {
-                database.setObjectQuotingStrategy(ObjectQuotingStrategy.LEGACY);
                 lockService.releaseLock();
             } catch (LockException e) {
                 log.severe("Could not release lock", e);
@@ -187,7 +187,7 @@ public class Liquibase {
         }
     }
 
-    private ChangeLogIterator getStandardChangelogIterator(Contexts contexts, DatabaseChangeLog changeLog) throws DatabaseException {
+    protected ChangeLogIterator getStandardChangelogIterator(Contexts contexts, DatabaseChangeLog changeLog) throws DatabaseException {
         return new ChangeLogIterator(changeLog,
                 new ShouldRunChangeSetFilter(database),
                 new ContextChangeSetFilter(contexts),
@@ -238,7 +238,7 @@ public class Liquibase {
 
             DatabaseChangeLog changeLog = ChangeLogParserFactory.getInstance().getParser(changeLogFile, resourceAccessor).parse(changeLogFile, changeLogParameters, resourceAccessor);
 
-            checkDatabaseChangeLogTable(true, changeLog, contexts);
+            checkLiquibaseTables(true, changeLog, contexts);
             changeLog.validate(database, contexts);
 
             ChangeLogIterator logIterator = new ChangeLogIterator(changeLog,
@@ -327,7 +327,7 @@ public class Liquibase {
 
         try {
             DatabaseChangeLog changeLog = ChangeLogParserFactory.getInstance().getParser(changeLogFile, resourceAccessor).parse(changeLogFile, changeLogParameters, resourceAccessor);
-            checkDatabaseChangeLogTable(false, changeLog, contexts);
+            checkLiquibaseTables(false, changeLog, contexts);
 
             changeLog.validate(database, contexts);
 
@@ -382,7 +382,7 @@ public class Liquibase {
         try {
 
             DatabaseChangeLog changeLog = ChangeLogParserFactory.getInstance().getParser(changeLogFile, resourceAccessor).parse(changeLogFile, changeLogParameters, resourceAccessor);
-            checkDatabaseChangeLogTable(false, changeLog, contexts);
+            checkLiquibaseTables(false, changeLog, contexts);
 
             changeLog.validate(database, contexts);
 
@@ -433,7 +433,7 @@ public class Liquibase {
 
         try {
             DatabaseChangeLog changeLog = ChangeLogParserFactory.getInstance().getParser(changeLogFile, resourceAccessor).parse(changeLogFile, changeLogParameters, resourceAccessor);
-            checkDatabaseChangeLogTable(false, changeLog, contexts);
+            checkLiquibaseTables(false, changeLog, contexts);
             changeLog.validate(database, contexts);
 
             List<RanChangeSet> ranChangeSetList = database.getRanChangeSetList();
@@ -485,7 +485,7 @@ public class Liquibase {
 
         try {
             DatabaseChangeLog changeLog = ChangeLogParserFactory.getInstance().getParser(changeLogFile, resourceAccessor).parse(changeLogFile, changeLogParameters, resourceAccessor);
-            checkDatabaseChangeLogTable(true, changeLog, contexts);
+            checkLiquibaseTables(true, changeLog, contexts);
             changeLog.validate(database, contexts);
 
             ChangeLogIterator logIterator = new ChangeLogIterator(changeLog,
@@ -536,7 +536,7 @@ public class Liquibase {
 
         try {
             DatabaseChangeLog changeLog = ChangeLogParserFactory.getInstance().getParser(changeLogFile, resourceAccessor).parse(changeLogFile, changeLogParameters, resourceAccessor);
-            checkDatabaseChangeLogTable(false, changeLog, contexts);
+            checkLiquibaseTables(false, changeLog, contexts);
             changeLog.validate(database, contexts);
 
             ChangeLogIterator logIterator = new ChangeLogIterator(changeLog,
@@ -573,7 +573,7 @@ public class Liquibase {
 
         try {
             DatabaseChangeLog changeLog = ChangeLogParserFactory.getInstance().getParser(changeLogFile, resourceAccessor).parse(changeLogFile, changeLogParameters, resourceAccessor);
-            checkDatabaseChangeLogTable(false, changeLog, contexts);
+            checkLiquibaseTables(false, changeLog, contexts);
             changeLog.validate(database, contexts);
 
             ChangeLogIterator logIterator;
@@ -632,9 +632,9 @@ public class Liquibase {
 
             for (CatalogAndSchema schema : schemas) {
                 log.info("Dropping Database Objects in schema: " + schema);
-                checkDatabaseChangeLogTable(false, null, new Contexts());
+                checkLiquibaseTables(false, null, new Contexts());
                 getDatabase().dropDatabaseObjects(schema);
-                checkDatabaseChangeLogTable(false, null, new Contexts());
+                checkLiquibaseTables(false, null, new Contexts());
                 log.debug("Objects dropped successfully");
             }
         } catch (DatabaseException e) {
@@ -658,7 +658,7 @@ public class Liquibase {
         lockService.waitForLock();
 
         try {
-            checkDatabaseChangeLogTable(false, null, new Contexts());
+            checkLiquibaseTables(false, null, new Contexts());
             getDatabase().tag(tagString);
         } finally {
             lockService.releaseLock();
@@ -678,23 +678,9 @@ public class Liquibase {
         update(contexts);
     }
 
-
-    /**
-     * @deprecated Use {@link #checkDatabaseChangeLogTable}
-     */
-    public void checkDatabaseChangeLogTable(boolean updateExistingNullChecksums, DatabaseChangeLog databaseChangeLog, String contexts) throws LiquibaseException {
-        checkDatabaseChangeLogTable(updateExistingNullChecksums, databaseChangeLog, new Contexts(contexts));
-    }
-
-    public void checkDatabaseChangeLogTable(boolean updateExistingNullChecksums, DatabaseChangeLog databaseChangeLog, Contexts contexts) throws LiquibaseException {
-        if (updateExistingNullChecksums && databaseChangeLog == null) {
-            throw new LiquibaseException("changeLog parameter is required if updating existing checksums");
-        }
-
+    public void checkLiquibaseTables(boolean updateExistingNullChecksums, DatabaseChangeLog databaseChangeLog, Contexts contexts) throws LiquibaseException {
         getDatabase().checkDatabaseChangeLogTable(updateExistingNullChecksums, databaseChangeLog, contexts);
-        if (!LockServiceFactory.getInstance().getLockService(database).hasChangeLogLock()) {
-            getDatabase().checkDatabaseChangeLogLockTable();
-        }
+        getDatabase().checkDatabaseChangeLogLockTable();
     }
 
     /**
@@ -711,7 +697,7 @@ public class Liquibase {
      * Display change log lock information.
      */
     public DatabaseChangeLogLock[] listLocks() throws LiquibaseException {
-        checkDatabaseChangeLogTable(false, null, new Contexts());
+        checkLiquibaseTables(false, null, new Contexts());
 
         return LockServiceFactory.getInstance().getLockService(database).listLocks();
     }
@@ -729,7 +715,7 @@ public class Liquibase {
     }
 
     public void forceReleaseLocks() throws LiquibaseException {
-        checkDatabaseChangeLogTable(false, null, new Contexts());
+        checkLiquibaseTables(false, null, new Contexts());
 
         LockServiceFactory.getInstance().getLockService(database).forceReleaseLock();
     }
@@ -743,7 +729,7 @@ public class Liquibase {
 
         DatabaseChangeLog changeLog = ChangeLogParserFactory.getInstance().getParser(changeLogFile, resourceAccessor).parse(changeLogFile, changeLogParameters, resourceAccessor);
 
-        checkDatabaseChangeLogTable(true, changeLog, contexts);
+        checkLiquibaseTables(true, changeLog, contexts);
 
         changeLog.validate(database, contexts);
 
@@ -854,7 +840,7 @@ public class Liquibase {
         lockService.waitForLock();
 
         try {
-            checkDatabaseChangeLogTable(false, null, new Contexts());
+            checkLiquibaseTables(false, null, new Contexts());
 
             UpdateStatement updateStatement = new UpdateStatement(getDatabase().getLiquibaseCatalogName(), getDatabase().getLiquibaseSchemaName(), getDatabase().getDatabaseChangeLogTableName());
             updateStatement.addNewColumnValue("MD5SUM", null);
@@ -909,7 +895,7 @@ public class Liquibase {
 
         try {
             DatabaseChangeLog changeLog = ChangeLogParserFactory.getInstance().getParser(changeLogFile, resourceAccessor).parse(changeLogFile, changeLogParameters, resourceAccessor);
-            checkDatabaseChangeLogTable(false, changeLog, new Contexts());
+            checkLiquibaseTables(false, changeLog, new Contexts());
 
             changeLog.validate(database, contexts);
 

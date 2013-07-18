@@ -19,6 +19,7 @@ import liquibase.changelog.filter.DbmsChangeSetFilter;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
 import liquibase.exception.DatabaseException;
+import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
@@ -187,6 +188,10 @@ public class InformixDatabase extends AbstractJdbcDatabase {
 	
 	@Override
 	public void checkDatabaseChangeLogTable(boolean updateExistingNullChecksums, DatabaseChangeLog databaseChangeLog, Contexts contexts) throws DatabaseException {
+        if (updateExistingNullChecksums && databaseChangeLog == null) {
+            throw new DatabaseException("changeLog parameter is required if updating existing checksums");
+        }
+
         Executor executor = ExecutorService.getInstance().getExecutor(this);
 
         Table changeLogTable = SnapshotGeneratorFactory.getInstance().getDatabaseChangeLogTable(new SnapshotControl(this, Table.class, Column.class), this);

@@ -86,6 +86,10 @@ public class ChangeLogParameters {
         this.currentContexts = contexts;
     }
 
+    public Contexts getContexts() {
+        return currentContexts;
+    }
+
     public void set(String paramter, Object value) {
         changeLogParameters.add(new ChangeLogParameter(paramter, value));
     }
