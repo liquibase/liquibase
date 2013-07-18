@@ -40,7 +40,6 @@ import liquibase.test.JUnitResourceAccessor;
 import liquibase.test.TestContext;
 import liquibase.util.FileUtil;
 import liquibase.util.RegexMatcher;
-import liquibase.util.StreamUtil;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -602,7 +601,7 @@ public abstract class AbstractIntegrationTest {
         clearDatabase(liquibase);
 
         liquibase = createLiquibase(completeChangeLog);
-        liquibase.checkDatabaseChangeLogTable(false, null, new Contexts());
+        liquibase.checkLiquibaseTables(false, null, new Contexts());
         liquibase.tag("empty");
 
         liquibase = createLiquibase(rollbackChangeLog);

@@ -32,7 +32,6 @@ public class LockServiceFactory {
 
     /**
      * Set the instance used by this singleton. Used primarily for testing.
-     * @param lockServiceFactory
      */
     public static void setInstance(LockServiceFactory lockServiceFactory) {
         LockServiceFactory.instance = lockServiceFactory;

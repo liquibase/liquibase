@@ -600,6 +600,10 @@ public abstract class AbstractJdbcDatabase implements Database {
          * @param contexts
          */
     public void checkDatabaseChangeLogTable(boolean updateExistingNullChecksums, DatabaseChangeLog databaseChangeLog, Contexts contexts) throws DatabaseException {
+        if (updateExistingNullChecksums && databaseChangeLog == null) {
+            throw new DatabaseException("changeLog parameter is required if updating existing checksums");
+        }
+
         Executor executor = ExecutorService.getInstance().getExecutor(this);
 
         Table changeLogTable = null;
