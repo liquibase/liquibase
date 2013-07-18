@@ -42,6 +42,7 @@ import liquibase.lockservice.LockService;
 import liquibase.lockservice.LockServiceFactory;
 import liquibase.logging.LogFactory;
 import liquibase.logging.Logger;
+import liquibase.parser.ChangeLogParser;
 import liquibase.parser.ChangeLogParserFactory;
 import liquibase.resource.ResourceAccessor;
 import liquibase.statement.core.RawSqlStatement;
@@ -169,14 +170,15 @@ public class Liquibase {
         changeLogParameters.setContexts(contexts);
 
         try {
-            DatabaseChangeLog changeLog = ChangeLogParserFactory.getInstance().getParser(changeLogFile, resourceAccessor).parse(changeLogFile, changeLogParameters, resourceAccessor);
+            ChangeLogParser parser = ChangeLogParserFactory.getInstance().getParser(changeLogFile, resourceAccessor);
+            DatabaseChangeLog changeLog = parser.parse(changeLogFile, changeLogParameters, resourceAccessor);
+            changeLog.validate(database, contexts);
 
             checkLiquibaseTables(true, changeLog, contexts);
 
-            changeLog.validate(database, contexts);
             ChangeLogIterator changeLogIterator = getStandardChangelogIterator(contexts, changeLog);
 
-            changeLogIterator.run(new UpdateVisitor(database), database);
+            changeLogIterator.run(createUpdateVisitor(), database);
         } finally {
             database.setObjectQuotingStrategy(ObjectQuotingStrategy.LEGACY);
             try {
@@ -185,6 +187,10 @@ public class Liquibase {
                 log.severe("Could not release lock", e);
             }
         }
+    }
+
+    protected UpdateVisitor createUpdateVisitor() {
+        return new UpdateVisitor(database);
     }
 
     protected ChangeLogIterator getStandardChangelogIterator(Contexts contexts, DatabaseChangeLog changeLog) throws DatabaseException {
@@ -247,7 +253,7 @@ public class Liquibase {
                     new DbmsChangeSetFilter(database),
                     new CountChangeSetFilter(changesToApply));
 
-            logIterator.run(new UpdateVisitor(database), database);
+            logIterator.run(createUpdateVisitor(), database);
         } finally {
             lockService.releaseLock();
         }
