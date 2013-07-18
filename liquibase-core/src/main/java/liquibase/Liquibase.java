@@ -160,7 +160,7 @@ public class Liquibase {
     }
     /**
      * Executes Liquibase "update" logic which ensures that the configured {@link Database} is up to dat according to the configured changelog file.
-     * To run in "no contextx mode", pass a null or empty context object.
+     * To run in "no context mode", pass a null or empty context object.
      */
     public void update(Contexts contexts) throws LiquibaseException {
         LockService lockService = LockServiceFactory.getInstance().getLockService(database);
