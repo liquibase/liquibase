@@ -175,6 +175,7 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                         index = new Index();
                         index.setName(indexName);
                         index.setTable(table);
+                        foundIndexes.put(indexName, index);
                     }
                     index.getColumns().add(row.getString("COLUMN_NAME"));
                 }
@@ -214,10 +215,15 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
 
         List<Table> tables = new ArrayList<Table>();
         if (exampleTable.getName() == null) {
-            DatabaseSnapshot tableSnapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(schema.toCatalogAndSchema(), database, new SnapshotControl(Table.class, Schema.class, Catalog.class)); //todo: don't get from Factory
+            DatabaseSnapshot tableSnapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(schema.toCatalogAndSchema(), database, new SnapshotControl(snapshot.getDatabase(), Table.class, Schema.class, Catalog.class)); //todo: don't get from Factory
             tables.addAll(tableSnapshot.get(Table.class));
         } else {
-            tables.add(exampleTable);
+            Table snapshotTable = snapshot.get(exampleTable);
+            if (snapshotTable == null) {
+                tables.add(exampleTable);
+            } else {
+                tables.add(snapshotTable);
+            }
         }
         Map<String, Index> foundIndexes = new HashMap<String, Index>();
         for (Table table : tables) {
@@ -317,8 +323,14 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
         } else {
             for (Index index : foundIndexes.values()) {
                 if (DatabaseObjectComparatorFactory.getInstance().isSameObject(index.getTable(), exampleTable, database)) {
-                    if (index.getColumnNames().equals(((Index) example).getColumnNames())) {
-                        return index;
+                    if (database.isCaseSensitive()) {
+                        if (index.getColumnNames().equals(((Index) example).getColumnNames())) {
+                            return index;
+                        }
+                    } else {
+                        if (index.getColumnNames().equalsIgnoreCase(((Index) example).getColumnNames())) {
+                            return index;
+                        }
                     }
                 }
             }

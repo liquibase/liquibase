@@ -205,7 +205,7 @@ public class SQLFileChangeTest extends StandardChangeTest {
       ChangeLogParameters changeLogParameters = new ChangeLogParameters();
       changeLogParameters.set("table.prefix", "prfx");
       changeLogParameters.set("some.other.prop", "nofx");
-       ChangeSet changeSet = new ChangeSet("x", "y", true, true, null, null, null);
+       ChangeSet changeSet = new ChangeSet("x", "y", true, true, null, null, null, null);
        changeSet.setChangeLogParameters(changeLogParameters);
        change.setChangeSet(changeSet);
       

@@ -78,7 +78,17 @@ public abstract class JdbcUtils {
      * @see java.sql.Timestamp
      */
     public static Object getResultSetValue(ResultSet rs, int index) throws SQLException {
-        Object obj = rs.getObject(index);
+        Object obj = null;
+        try {
+            obj = rs.getObject(index);
+        } catch (SQLException e) {
+            if (e.getMessage().equals("The conversion from char to SMALLINT is unsupported.")) {
+                //issue with sqlserver jdbc 3.0 http://social.msdn.microsoft.com/Forums/sqlserver/en-US/2c908b45-6f75-484a-a891-5e8206f8844f/conversion-error-in-the-jdbc-30-driver-when-accessing-metadata
+                obj = rs.getString(index);
+            } else {
+                throw e;
+            }
+        }
         if (obj instanceof Blob) {
             obj = rs.getBytes(index);
         } else if (obj instanceof Clob) {

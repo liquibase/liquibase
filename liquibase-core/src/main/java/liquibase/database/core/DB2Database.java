@@ -16,7 +16,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 
 public class DB2Database extends AbstractJdbcDatabase {
-    private String defaultSchemaName;
 
     public DB2Database() {
         super.setCurrentDateTimeFunction("CURRENT TIMESTAMP");
@@ -64,31 +63,39 @@ public class DB2Database extends AbstractJdbcDatabase {
 
     @Override
     public String getDefaultCatalogName() {
-        if (defaultSchemaName == null) {
-            if (getConnection() == null) {
-                return null;
-            }
-            Statement stmt = null;
-            ResultSet rs = null;
-            try {
-                stmt = ((JdbcConnection) getConnection()).createStatement();
-                rs = stmt.executeQuery("select current schema from sysibm.sysdummy1");
-                if (rs.next()) {
-                    String result = rs.getString(1);
-                    if (result != null) {
-                        this.defaultSchemaName = result;
-                    } else {
-                        this.defaultSchemaName = super.getDefaultSchemaName();
-                    }
-                }
-            } catch (Exception e) {
-                throw new RuntimeException("Could not determine current schema", e);
-            } finally {
-                JdbcUtils.closeResultSet(rs);
-                JdbcUtils.closeStatement(stmt);
-            }
 
+        if (defaultCatalogName != null) {
+            return defaultSchemaName;
         }
+
+        if (defaultSchemaName != null) {
+            return defaultSchemaName;
+        }
+
+
+        if (getConnection() == null) {
+            return null;
+        }
+        Statement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = ((JdbcConnection) getConnection()).createStatement();
+            rs = stmt.executeQuery("select current schema from sysibm.sysdummy1");
+            if (rs.next()) {
+                String result = rs.getString(1);
+                if (result != null) {
+                    this.defaultSchemaName = result;
+                } else {
+                    this.defaultSchemaName = super.getDefaultSchemaName();
+                }
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Could not determine current schema", e);
+        } finally {
+            JdbcUtils.closeResultSet(rs);
+            JdbcUtils.closeStatement(stmt);
+        }
+
         return defaultSchemaName;
     }
 

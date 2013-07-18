@@ -123,7 +123,16 @@ public class SQLFileChange extends AbstractSQLChange {
      */
     private boolean loadFromFileSystem(String file) throws SetupException {
         if (relativeToChangelogFile != null && relativeToChangelogFile) {
-            file = getChangeSet().getFilePath().replaceFirst("/[^/]*$", "") + "/" + file;
+            String base;
+            if (getChangeSet().getChangeLog() == null) {
+                base = getChangeSet().getFilePath();
+            } else {
+                base = getChangeSet().getChangeLog().getPhysicalFilePath().replaceAll("\\\\","/");
+            }
+            if (!base.contains("/")) {
+                base = ".";
+            }
+            file = base.replaceFirst("/[^/]*$", "") + "/" + file;
         }
 
         InputStream fis = null;
@@ -161,7 +170,17 @@ public class SQLFileChange extends AbstractSQLChange {
      */
     private boolean loadFromClasspath(String file) {
         if (relativeToChangelogFile != null && relativeToChangelogFile) {
-            file = getChangeSet().getFilePath().replaceFirst("/[^/]*$", "") + "/" + file;
+            String base;
+            if (getChangeSet().getChangeLog() == null) {
+                base = getChangeSet().getFilePath();
+            } else {
+                base = getChangeSet().getChangeLog().getPhysicalFilePath().replaceAll("\\\\","/");
+            }
+            if (!base.contains("/")) {
+                base = ".";
+            }
+
+            file = base.replaceFirst("/[^/]*$", "") + "/" + file;
         }
 
         InputStream in = null;

@@ -49,7 +49,7 @@ public class ChangeSetExecuteTest {
     }
     
     private ChangeSet createTestChangeSet(boolean runInTransaction) {
-    	return new ChangeSet("test-id", "test-author", false, false, "/test.xml", null, null, runInTransaction);
+    	return new ChangeSet("test-id", "test-author", false, false, "/test.xml", null, null, runInTransaction, null);
     }
     
     @Test

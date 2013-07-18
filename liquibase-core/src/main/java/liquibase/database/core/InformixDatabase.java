@@ -189,7 +189,7 @@ public class InformixDatabase extends AbstractJdbcDatabase {
 	public void checkDatabaseChangeLogTable(boolean updateExistingNullChecksums, DatabaseChangeLog databaseChangeLog, Contexts contexts) throws DatabaseException {
         Executor executor = ExecutorService.getInstance().getExecutor(this);
 
-        Table changeLogTable = SnapshotGeneratorFactory.getInstance().getDatabaseChangeLogTable(new SnapshotControl(Table.class, Column.class), this);
+        Table changeLogTable = SnapshotGeneratorFactory.getInstance().getDatabaseChangeLogTable(new SnapshotControl(this, Table.class, Column.class), this);
 
         List<SqlStatement> statementsToExecute = new ArrayList<SqlStatement>();
 
@@ -332,13 +332,13 @@ public class InformixDatabase extends AbstractJdbcDatabase {
             executor.comment("Create Database Change Log Table");
             SqlStatement createTableStatement = new CreateDatabaseChangeLogTableStatement();
             if (!canCreateChangeLogTable()) {
-                throw new DatabaseException("Cannot create " + escapeTableName(getDefaultCatalogName(), getDefaultSchemaName(), getDatabaseChangeLogTableName()) + " table for your database.\n\n" +
+                throw new DatabaseException("Cannot create " + escapeTableName(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName()) + " table for your database.\n\n" +
                         "Please construct it manually using the following SQL as a base and re-run Liquibase:\n\n" +
                         createTableStatement);
             }
             // If there is no table in the database for recording change history create one.
             statementsToExecute.add(createTableStatement);
-            LogFactory.getLogger().info("Creating database history table with name: " + escapeTableName(getDefaultCatalogName(), getDefaultSchemaName(), getDatabaseChangeLogTableName()));
+            LogFactory.getLogger().info("Creating database history table with name: " + escapeTableName(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName()));
 //                }
         }
 

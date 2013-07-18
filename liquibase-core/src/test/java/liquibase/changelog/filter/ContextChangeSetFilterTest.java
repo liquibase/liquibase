@@ -36,66 +36,66 @@ public class ContextChangeSetFilterTest {
     public void emptyContexts() {
         ContextChangeSetFilter filter = new ContextChangeSetFilter();
 
-        assertTrue(filter.accepts(new ChangeSet(null, null, false, false, null, "test1", null)));
-        assertTrue(filter.accepts(new ChangeSet(null, null, false, false, null, "test2", null)));
-        assertTrue(filter.accepts(new ChangeSet(null, null, false, false, null, "test1, test2", null)));
-        assertTrue(filter.accepts(new ChangeSet(null, null, false, false, null, null, null)));
+        assertTrue(filter.accepts(new ChangeSet(null, null, false, false, null, "test1", null, null)));
+        assertTrue(filter.accepts(new ChangeSet(null, null, false, false, null, "test2", null, null)));
+        assertTrue(filter.accepts(new ChangeSet(null, null, false, false, null, "test1, test2", null, null)));
+        assertTrue(filter.accepts(new ChangeSet(null, null, false, false, null, null, null, null)));
     }
 
     @Test
     public void nullContexts() {
         ContextChangeSetFilter filter = new ContextChangeSetFilter();
 
-        assertTrue(filter.accepts(new ChangeSet(null, null, false, false, null, "test1", null)));
-        assertTrue(filter.accepts(new ChangeSet(null, null, false, false, null, "test2", null)));
-        assertTrue(filter.accepts(new ChangeSet(null, null, false, false, null, "test1, test2", null)));
-        assertTrue(filter.accepts(new ChangeSet(null, null, false, false, null, null, null)));
+        assertTrue(filter.accepts(new ChangeSet(null, null, false, false, null, "test1", null, null)));
+        assertTrue(filter.accepts(new ChangeSet(null, null, false, false, null, "test2", null, null)));
+        assertTrue(filter.accepts(new ChangeSet(null, null, false, false, null, "test1, test2", null, null)));
+        assertTrue(filter.accepts(new ChangeSet(null, null, false, false, null, null, null, null)));
     }
 
     @Test
     public void nullListContexts() {
         ContextChangeSetFilter filter = new ContextChangeSetFilter();
 
-        assertTrue(filter.accepts(new ChangeSet(null, null, false, false, null, "test1", null)));
-        assertTrue(filter.accepts(new ChangeSet(null, null, false, false, null, "test2", null)));
-        assertTrue(filter.accepts(new ChangeSet(null, null, false, false, null, "test1, test2", null)));
-        assertTrue(filter.accepts(new ChangeSet(null, null, false, false, null, null, null)));
+        assertTrue(filter.accepts(new ChangeSet(null, null, false, false, null, "test1", null, null)));
+        assertTrue(filter.accepts(new ChangeSet(null, null, false, false, null, "test2", null, null)));
+        assertTrue(filter.accepts(new ChangeSet(null, null, false, false, null, "test1, test2", null, null)));
+        assertTrue(filter.accepts(new ChangeSet(null, null, false, false, null, null, null, null)));
     }
 
     @Test
     public void singleContexts() {
         ContextChangeSetFilter filter = new ContextChangeSetFilter("TEST1");
 
-        assertTrue(filter.accepts(new ChangeSet(null, null, false, false, null, "test1", null)));
-        assertTrue(filter.accepts(new ChangeSet(null, null, false, false, null, "test1, test2", null)));
-        assertFalse(filter.accepts(new ChangeSet(null, null, false, false, null, "test2", null)));
-        assertTrue(filter.accepts(new ChangeSet(null, null, false, false, null, null, null)));
+        assertTrue(filter.accepts(new ChangeSet(null, null, false, false, null, "test1", null, null)));
+        assertTrue(filter.accepts(new ChangeSet(null, null, false, false, null, "test1, test2", null, null)));
+        assertFalse(filter.accepts(new ChangeSet(null, null, false, false, null, "test2", null, null)));
+        assertTrue(filter.accepts(new ChangeSet(null, null, false, false, null, null, null, null)));
     }
 
     @Test
     public void multiContexts() {
         ContextChangeSetFilter filter = new ContextChangeSetFilter("test1", "test2");
 
-        assertTrue(filter.accepts(new ChangeSet(null, null, false, false, null, "test1", null)));
-        assertTrue(filter.accepts(new ChangeSet(null, null, false, false, null, "test2", null)));
-        assertTrue(filter.accepts(new ChangeSet(null, null, false, false, null, "test1, test2", null)));
-        assertFalse(filter.accepts(new ChangeSet(null, null, false, false, null, "test3", null)));
-        assertTrue(filter.accepts(new ChangeSet(null, null, false, false, null, "test3, test1", null)));
-        assertTrue(filter.accepts(new ChangeSet(null, null, false, false, null, "test3, TEST1", null)));
-        assertTrue(filter.accepts(new ChangeSet(null, null, false, false, null, null, null)));
+        assertTrue(filter.accepts(new ChangeSet(null, null, false, false, null, "test1", null, null)));
+        assertTrue(filter.accepts(new ChangeSet(null, null, false, false, null, "test2", null, null)));
+        assertTrue(filter.accepts(new ChangeSet(null, null, false, false, null, "test1, test2", null, null)));
+        assertFalse(filter.accepts(new ChangeSet(null, null, false, false, null, "test3", null, null)));
+        assertTrue(filter.accepts(new ChangeSet(null, null, false, false, null, "test3, test1", null, null)));
+        assertTrue(filter.accepts(new ChangeSet(null, null, false, false, null, "test3, TEST1", null, null)));
+        assertTrue(filter.accepts(new ChangeSet(null, null, false, false, null, null, null, null)));
     }
 
     @Test
     public void multiContextsSingeParameter() {
         ContextChangeSetFilter filter = new ContextChangeSetFilter("test1, test2");
 
-        assertTrue(filter.accepts(new ChangeSet(null, null, false, false, null, "test1", null)));
-        assertTrue(filter.accepts(new ChangeSet(null, null, false, false, null, "test2", null)));
-        assertTrue(filter.accepts(new ChangeSet(null, null, false, false, null, "test1, test2", null)));
-        assertFalse(filter.accepts(new ChangeSet(null, null, false, false, null, "test3", null)));
-        assertTrue(filter.accepts(new ChangeSet(null, null, false, false, null, "test3, test1", null)));
-        assertTrue(filter.accepts(new ChangeSet(null, null, false, false, null, "test3, TEST1", null)));
-        assertTrue(filter.accepts(new ChangeSet(null, null, false, false, null, null, null)));
+        assertTrue(filter.accepts(new ChangeSet(null, null, false, false, null, "test1", null, null)));
+        assertTrue(filter.accepts(new ChangeSet(null, null, false, false, null, "test2", null, null)));
+        assertTrue(filter.accepts(new ChangeSet(null, null, false, false, null, "test1, test2", null, null)));
+        assertFalse(filter.accepts(new ChangeSet(null, null, false, false, null, "test3", null, null)));
+        assertTrue(filter.accepts(new ChangeSet(null, null, false, false, null, "test3, test1", null, null)));
+        assertTrue(filter.accepts(new ChangeSet(null, null, false, false, null, "test3, TEST1", null, null)));
+        assertTrue(filter.accepts(new ChangeSet(null, null, false, false, null, null, null, null)));
     }
 
 
@@ -103,7 +103,7 @@ public class ContextChangeSetFilterTest {
     public void visitorContextFilterLowerLower() {
         ContextChangeSetFilter filter = new ContextChangeSetFilter("test1");
 
-        ChangeSet changeSet = new ChangeSet(null, null, false, false, null, null, null);
+        ChangeSet changeSet = new ChangeSet(null, null, false, false, null, null, null, null);
         changeSet.addSqlVisitor(new TestSqlVisitor("test1"));
 
         assertTrue(filter.accepts(changeSet));
@@ -115,7 +115,7 @@ public class ContextChangeSetFilterTest {
     public void visitorContextFilterUpperLower() {
         ContextChangeSetFilter filter = new ContextChangeSetFilter("TEST1");
 
-        ChangeSet changeSet = new ChangeSet(null, null, false, false, null, null, null);
+        ChangeSet changeSet = new ChangeSet(null, null, false, false, null, null, null, null);
         changeSet.addSqlVisitor(new TestSqlVisitor("test1"));
 
         assertTrue(filter.accepts(changeSet));
@@ -127,7 +127,7 @@ public class ContextChangeSetFilterTest {
     public void visitorContextFilterUpperUpper() {
         ContextChangeSetFilter filter = new ContextChangeSetFilter("TEST1");
 
-        ChangeSet changeSet = new ChangeSet(null, null, false, false, null, null, null);
+        ChangeSet changeSet = new ChangeSet(null, null, false, false, null, null, null, null);
         changeSet.addSqlVisitor(new TestSqlVisitor("TEST1"));
 
         assertTrue(filter.accepts(changeSet));
@@ -139,7 +139,7 @@ public class ContextChangeSetFilterTest {
     public void visitorContextFilterLowerUpper() {
         ContextChangeSetFilter filter = new ContextChangeSetFilter("test1");
 
-        ChangeSet changeSet = new ChangeSet(null, null, false, false, null, null, null);
+        ChangeSet changeSet = new ChangeSet(null, null, false, false, null, null, null, null);
         changeSet.addSqlVisitor(new TestSqlVisitor("TEST1"));
 
         assertTrue(filter.accepts(changeSet));

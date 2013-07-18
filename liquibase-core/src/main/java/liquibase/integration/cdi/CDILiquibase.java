@@ -6,6 +6,7 @@ import liquibase.database.DatabaseFactory;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
+import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.integration.cdi.annotations.LiquibaseType;
 import liquibase.logging.LogFactory;
 import liquibase.logging.Logger;
@@ -90,7 +91,7 @@ public class CDILiquibase implements Extension {
     }
 
     @PostConstruct
-    public void onStartup() throws LiquibaseException {
+    public void onStartup() {
         log.info("Booting Liquibase " + LiquibaseUtil.getBuildVersion());
         String hostName;
         try {
@@ -107,7 +108,11 @@ public class CDILiquibase implements Extension {
             return;
         }
         initialized = true;
-        performUpdate();
+        try {
+            performUpdate();
+        } catch (LiquibaseException e) {
+            throw new UnexpectedLiquibaseException(e);
+        }
     }
 
     private void performUpdate() throws LiquibaseException {

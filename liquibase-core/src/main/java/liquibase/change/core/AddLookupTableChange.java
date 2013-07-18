@@ -156,8 +156,8 @@ public class AddLookupTableChange extends AbstractChange {
         String newTableCatalogName = getNewTableCatalogName();
         String newTableSchemaName = getNewTableSchemaName();
 
-        String existingTableCatalogName = getExistingTableCatalogName() == null?database.getDefaultCatalogName():getExistingTableCatalogName();
-        String existingTableSchemaName = getExistingTableSchemaName() == null?database.getDefaultSchemaName():getExistingTableSchemaName();
+        String existingTableCatalogName = getExistingTableCatalogName();
+        String existingTableSchemaName = getExistingTableSchemaName();
 
         SqlStatement[] createTablesSQL = {new RawSqlStatement("CREATE TABLE " + database.escapeTableName(newTableCatalogName, newTableSchemaName, getNewTableName()) + " AS SELECT DISTINCT " + getExistingColumnName() + " AS " + getNewColumnName() + " FROM " + database.escapeTableName(existingTableCatalogName, existingTableSchemaName, getExistingTableName()) + " WHERE " + getExistingColumnName() + " IS NOT NULL")};
         if (database instanceof MSSQLDatabase) {

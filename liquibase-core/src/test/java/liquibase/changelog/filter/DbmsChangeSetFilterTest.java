@@ -21,11 +21,11 @@ public class DbmsChangeSetFilterTest  {
     public void singleDbms() {
         DbmsChangeSetFilter filter = new DbmsChangeSetFilter(new MySQLDatabase());
 
-        assertTrue(filter.accepts(new ChangeSet(null, null, false, false, null,null, "mysql")));
-        assertTrue(filter.accepts(new ChangeSet(null, null, false, false, null,null, "mysql, oracle")));
-        assertFalse(filter.accepts(new ChangeSet(null, null, false, false, null,null, "oracle")));
-        assertTrue(filter.accepts(new ChangeSet(null, null, false, false, null, null, null)));
-        assertFalse(filter.accepts(new ChangeSet(null, null, false, false, null,null, "h2,!mysql")));
+        assertTrue(filter.accepts(new ChangeSet(null, null, false, false, null,null, "mysql", null)));
+        assertTrue(filter.accepts(new ChangeSet(null, null, false, false, null,null, "mysql, oracle", null)));
+        assertFalse(filter.accepts(new ChangeSet(null, null, false, false, null,null, "oracle", null)));
+        assertTrue(filter.accepts(new ChangeSet(null, null, false, false, null, null, null, null)));
+        assertFalse(filter.accepts(new ChangeSet(null, null, false, false, null,null, "h2,!mysql", null)));
     }
 
 //    @Test

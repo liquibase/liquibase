@@ -120,7 +120,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
     }
 
     @Override
-    protected String doGetDefaultCatalogName() throws DatabaseException {
+    protected String getConnectionCatalogName() throws DatabaseException {
         try {
             ResultSet resultSet = ((JdbcConnection) getConnection()).prepareCall("select sys_context( 'userenv', 'current_schema' ) from dual").executeQuery();
             resultSet.next();
@@ -143,8 +143,8 @@ public class OracleDatabase extends AbstractJdbcDatabase {
     }
 
     @Override
-    public String getDefaultSchemaName() {//NOPMD
-        return super.getDefaultSchemaName() == null ? null : super.getDefaultSchemaName().toUpperCase();
+    public String getDefaultCatalogName() {//NOPMD
+        return super.getDefaultCatalogName() == null ? null : super.getDefaultCatalogName().toUpperCase();
     }
 
     @Override

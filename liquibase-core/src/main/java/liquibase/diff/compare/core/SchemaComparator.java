@@ -45,6 +45,9 @@ public class SchemaComparator implements DatabaseObjectComparator {
 
 
     public ObjectDifferences findDifferences(DatabaseObject databaseObject1, DatabaseObject databaseObject2, Database accordingTo, DatabaseObjectComparatorChain chain) {
-        return chain.findDifferences(databaseObject1, databaseObject2, accordingTo);
+        ObjectDifferences differences = new ObjectDifferences();
+        differences.compare("name", databaseObject1, databaseObject2, new ObjectDifferences.DatabaseObjectNameCompareFunction(Schema.class, accordingTo));
+
+        return differences;
     }
 }

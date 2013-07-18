@@ -42,7 +42,7 @@ public class ValidatingVisitorPreConditionsTest {
     public void setUp() {
         changeLog = new DatabaseChangeLog();
 
-        changeSet1 = new ChangeSet("1", "testAuthor", false, false, "path/changelog", null, null);
+        changeSet1 = new ChangeSet("1", "testAuthor", false, false, "path/changelog", null, null, null);
         changeLog.addChangeSet(changeSet1);
 
         CreateTableChange change1 = new CreateTableChange();

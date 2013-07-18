@@ -1,7 +1,32 @@
 Liquibase Core Changelog
 ===========================================
 
-Changes in version 3.0 (2013.06.17)
+Changes in versino 3.0.2 (2013.07.11)
+- [CORE-628] - Specify the output encoding that liquibase should use to output data in Maven
+- [CORE-169] - Oracle TIMESTAMPS not exported correctly
+- [CORE-1301] - defaultschemaName not used
+- [CORE-1315] - Database Objects do not get dropped on DB2
+- [CORE-1317] - Not all FK Constraints get dropped on Oracle
+- [CORE-1318] - Not all FK Constraints get dropped on SQL Server
+- [CORE-1328] - includeAll trying to process invalid file types, should only process valid change log types
+- [CORE-1331] - If logicalFilePath attribute is set on databaseChangeLog, I am unable to use relativeToChangelogFile="true" on
+- [CORE-1332] - includeAll of changelog files throws duplicate identifiers error
+- [CORE-1335] - Data export support broken in 3.0
+- [CORE-1336] - AutoIncrement not working with some types
+- [CORE-1337] - Problem with changeset defined as runAlways="true"
+- [CORE-1339] - NPE on update if default ServiceLocator.packagesToScan is used
+- [CORE-1340] - indexExists Changesets throwing PreconditionErrorException instead of PreconditionFailedException
+- [CORE-1341] - foreignKeyConstraintExists precondition broken
+- [CORE-1347] - dropAll function work incorrectly when table has 2 foreign keys
+
+Changes in version 3.0.1 (2013.06.25)
+- [CORE-898] - Custom precondition xsd failing
+- [CORE-1171] - Maven plugin displaying password in plain text
+- [CORE-1320] - Cannot include YAML file
+- [CORE-1323] - Conversion from char to SMALLINT is unsupported
+- [CORE-1324] - Formatted SQL does not support contexts such as "some-context" or "some/context"
+
+Changes in version 3.0.0 (2013.06.17)
 - Dropped Java 1.5 support
 - Major changes in diff and snapshot log
 - Support for "catalogs" in addition to schemas

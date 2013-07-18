@@ -1,7 +1,6 @@
 package org.liquibase.maven.plugins;
 
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
 
@@ -73,7 +72,7 @@ public class LiquibaseChangeLogSyncSQLMojo extends
 									+ migrationSqlOutputFile.getAbsolutePath());
 				}
 			}
-			outputWriter = new FileWriter(migrationSqlOutputFile);
+			outputWriter = getOutputWriter(migrationSqlOutputFile);;
 		} catch (IOException e) {
 			getLog().error(e);
 			throw new MojoExecutionException(
