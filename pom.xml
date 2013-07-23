@@ -28,9 +28,9 @@
     </issueManagement>
 
     <scm>
-        <connection>scm:git:https://github.com/liquibase/liquibase.git</connection>
-        <url>scm:git:https://github.com/liquibase/liquibase.git</url>
-        <developerConnection>scm:git:https://github.com/liquibase/liquibase.git</developerConnection>
+        <connection>scm:git:https://github.com/skelter/liquibase.git</connection>
+        <url>scm:git:https://github.com/skelter/liquibase.git</url>
+        <developerConnection>scm:git:https://github.com/skelter/liquibase.git</developerConnection>
     </scm>
 
     <developers>
