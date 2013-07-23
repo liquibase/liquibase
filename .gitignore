@@ -1,15 +1,26 @@
-/target
-/.project
-/.settings
+# ignore maven target dir
+target
+
+# ignore eclipse project files
+.project
+.settings
+.classpath
+
+# ignore netbeans project files
 *nb-configuration.xml
-/.classpath
+
+# ignore select intellij IDEA files
 /.idea/workspace.xml
+liquibase.iws
+
+# ignore build outputs
 /out
 /bin
-liquibase.integrationtest.local.properties
 /liquibase
+
+# ignore local configuration
+liquibase.integrationtest.local.properties
+
+# ignore logs
 /derby.log
-/liquibase-core/target/
-/liquibase-integration-tests/target/
-/liquibase-maven-plugin/target/
-/liquibase-osgi/target/
+
