@@ -304,6 +304,7 @@
         </plugins>
     </reporting>
 
+    <!-- We don't want to polute the world's sonatype repo with our specific build yet
     <distributionManagement>
         <repository>
             <uniqueVersion>false</uniqueVersion>
@@ -319,6 +320,7 @@
             <url>https://oss.sonatype.org/content/repositories/snapshots</url>
         </snapshotRepository>
     </distributionManagement>
+    -->
 
     <profiles>
         <profile>
