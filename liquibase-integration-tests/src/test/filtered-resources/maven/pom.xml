@@ -10,7 +10,7 @@
     <url>http://www.liquibase.org</url>
     <dependencies>
         <dependency>
-            <groupId>org.liquibase</groupId>
+            <groupId>com.datical</groupId>
             <artifactId>liquibase-core</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -19,7 +19,7 @@
     <build>
         <plugins>
             <plugin>
-                <groupId>org.liquibase</groupId>
+                <groupId>com.datical</groupId>
                 <artifactId>liquibase-maven-plugin</artifactId>
                 <version>${project.version}</version>
 				<dependencies>

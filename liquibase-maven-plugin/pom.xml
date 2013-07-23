@@ -10,8 +10,8 @@
 
     <parent>
         <artifactId>liquibase-parent</artifactId>
-        <groupId>org.liquibase</groupId>
-        <version>3.0.1</version>
+        <groupId>com.datical</groupId>
+        <version>3.0.1.1-SNAPSHOT</version>
     </parent>
 
     <dependencies>
@@ -26,7 +26,7 @@
         </dependency>
 
         <dependency>
-            <groupId>org.liquibase</groupId>
+            <groupId>com.datical</groupId>
             <artifactId>liquibase-core</artifactId>
             <version>${project.version}</version>
         </dependency>

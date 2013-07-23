@@ -7,9 +7,9 @@
     <packaging>bundle</packaging>
 
     <parent>
-        <groupId>org.liquibase</groupId>
+        <groupId>com.datical</groupId>
         <artifactId>liquibase-parent</artifactId>
-        <version>3.0.1</version>
+        <version>3.0.1.1-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -19,7 +19,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.liquibase</groupId>
+            <groupId>com.datical</groupId>
             <artifactId>liquibase-core</artifactId>
             <version>${liquibase.version}</version>
         </dependency>
