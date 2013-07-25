@@ -6,12 +6,10 @@ import liquibase.database.structure.type.*;
 
 public class HanaDBTypeConverter extends AbstractTypeConverter {
 
-    @Override
     public int getPriority() {
         return PRIORITY_DATABASE;
     }
 
-    @Override
     public boolean supports(Database database) {
         return database instanceof HanaDBDatabase;
     }

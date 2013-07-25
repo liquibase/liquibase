@@ -266,7 +266,6 @@ public class HanaDBDatabase extends AbstractDatabase {
         systemTablesAndViews.add("STATISTICS_ALERTS");
     }
 
-    @Override
     public int getPriority() {
         return PRIORITY_DEFAULT;
     }
@@ -276,12 +275,10 @@ public class HanaDBDatabase extends AbstractDatabase {
         return systemTablesAndViews;
     }
 
-    @Override
     public String getTypeName() {
         return "hanadb";
     }
 
-    @Override
     public boolean supportsInitiallyDeferrableColumns() {
         return false;
     }
@@ -291,12 +288,10 @@ public class HanaDBDatabase extends AbstractDatabase {
         return true;
     }
 
-    @Override
     public boolean isCorrectDatabaseImplementation(DatabaseConnection conn) throws DatabaseException {
         return PRODUCT_NAME.equalsIgnoreCase(conn.getDatabaseProductName());
     }
 
-    @Override
     public String getDefaultDriver(String url) {
         if (url.startsWith("jdbc:sapdb")) {
             return "com.sap.db.jdbc.Driver";
@@ -304,7 +299,6 @@ public class HanaDBDatabase extends AbstractDatabase {
         return null;
     }
 
-    @Override
     public String getCurrentDateTimeFunction() {
         if (currentDateTimeFunction != null) {
             return currentDateTimeFunction;
@@ -346,7 +340,6 @@ public class HanaDBDatabase extends AbstractDatabase {
         return false;
     }
 
-    @Override
     public boolean supportsTablespaces() {
         return true;
     }
