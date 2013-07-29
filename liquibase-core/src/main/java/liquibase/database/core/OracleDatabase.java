@@ -212,7 +212,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
                 return true;
             }
         }else if (isSystemObject(example.getSchema())) {
-            return true;
+            return !example.getName().startsWith("DATABASECHANGELOG");
         }
         if (example instanceof Catalog) {
             if (("SYSTEM".equals(example.getName()) || "SYS".equals(example.getName()) || "CTXSYS".equals(example.getName()) || "XDB".equals(example.getName()))) {
