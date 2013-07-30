@@ -59,4 +59,8 @@ public class ChangeLogIterator {
             }
         }
     }
+
+    public List<ChangeSetFilter> getChangeSetFilters() {
+        return Collections.unmodifiableList(changeSetFilters);
+    }
 }

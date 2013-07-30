@@ -3,6 +3,9 @@ package liquibase;
 import liquibase.changelog.ChangeLogIterator;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.DatabaseChangeLog;
+import liquibase.changelog.filter.ContextChangeSetFilter;
+import liquibase.changelog.filter.DbmsChangeSetFilter;
+import liquibase.changelog.filter.ShouldRunChangeSetFilter;
 import liquibase.changelog.visitor.UpdateVisitor;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
@@ -15,10 +18,13 @@ import liquibase.exception.LiquibaseException;
 import liquibase.exception.LockException;
 import liquibase.lockservice.LockService;
 import liquibase.lockservice.LockServiceFactory;
+import liquibase.logging.LogFactory;
 import liquibase.logging.LogLevel;
+import liquibase.logging.Logger;
 import liquibase.parser.ChangeLogParser;
 import liquibase.parser.ChangeLogParserFactory;
 import liquibase.resource.ResourceAccessor;
+import liquibase.test.Assert;
 import liquibase.test.MockResourceAccessor;
 import org.junit.After;
 import org.junit.Before;
@@ -27,6 +33,7 @@ import org.junit.Test;
 import java.util.HashMap;
 import java.util.Map;
 
+import static liquibase.test.Assert.assertListsEqual;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
@@ -40,6 +47,8 @@ public class LiquibaseTest {
     private ChangeLogParser mockChangeLogParser;
     private DatabaseChangeLog mockChangeLog;
     private ChangeLogIterator mockChangeLogIterator;
+
+    private Logger mockLogger;
 
 //    private TestLiquibase testLiquibase;
 //    private DatabaseConnection connectionForConstructor;
@@ -70,12 +79,21 @@ public class LiquibaseTest {
         mockChangeLog = mock(DatabaseChangeLog.class);
         mockChangeLogIterator = mock(ChangeLogIterator.class);
 
+        mockLogger = mock(Logger.class);
+
         LockServiceFactory.setInstance(mockLockServiceFactory);
         when(mockLockServiceFactory.getLockService(isA(Database.class))).thenReturn(mockLockService);
 
         ChangeLogParserFactory.setInstance(mockChangeLogParserFactory);
         when(mockChangeLogParserFactory.getParser(anyString(), isA(ResourceAccessor.class))).thenReturn(mockChangeLogParser);
         when(mockChangeLogParser.parse(anyString(), any(ChangeLogParameters.class), isA(ResourceAccessor.class))).thenReturn(mockChangeLog);
+
+        LogFactory.setInstance(new LogFactory() {
+            @Override
+            public Logger getLog(String name) {
+                return mockLogger;
+            }
+        });
     }
 
     @After
@@ -84,10 +102,12 @@ public class LiquibaseTest {
         reset(mockDatabase, mockLockServiceFactory, mockLockService, mockChangeLogParserFactory, mockChangeLogParser, mockChangeLog, mockChangeLogIterator);
         LockServiceFactory.reset();
         ChangeLogParserFactory.reset();
+        LogFactory.reset();
     }
 
     @Test
     public void constructor() throws Exception {
+        LogFactory.reset(); //going to test log setup
         MockResourceAccessor resourceAccessor = this.mockResourceAccessor;
         MockDatabase database = new MockDatabase();
 
@@ -265,6 +285,21 @@ public class LiquibaseTest {
         doThrow(LockException.class).when(mockLockService).releaseLock();
 
         update(); //works like normal, just logs error
+        verify(mockLogger).severe(eq("Could not release lock"), any(Exception.class));
+    }
+
+    @Test
+    public void getStandardChangelogIterator() throws LiquibaseException {
+        ChangeLogIterator iterator = new Liquibase("com/example/changelog.xml", mockResourceAccessor, mockDatabase).getStandardChangelogIterator(new Contexts("a", "b"), mockChangeLog);
+        assertListsEqual(new Class[] {ShouldRunChangeSetFilter.class,
+                ContextChangeSetFilter.class,
+                DbmsChangeSetFilter.class},
+                iterator.getChangeSetFilters(), new Assert.AssertFunction() {
+            @Override
+            public void check(String message, Object expected, Object actual) {
+                assertEquals(message, expected, actual.getClass());
+            }
+        });
     }
 
 

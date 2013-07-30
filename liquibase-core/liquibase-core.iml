@@ -50,6 +50,15 @@
     <orderEntry type="library" scope="TEST" name="Maven: org.jboss.weld.se:weld-se:1.1.8.Final" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: org.hsqldb:hsqldb:2.2.9" level="project" />
     <orderEntry type="library" name="Maven: org.yaml:snakeyaml:1.12" level="project" />
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/../liquibase-integration-tests/src/test/resources/jdbc-drivers/all/mysql-5.1/mysql-connector-java-5.1.25-bin.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
   </component>
 </module>
 
