@@ -81,7 +81,11 @@ public interface Database extends PrioritizedService {
 
     String getLiquibaseCatalogName();
 
+    void setLiquibaseCatalogName(String catalogName);
+
     String getLiquibaseSchemaName();
+
+    void setLiquibaseSchemaName(String schemaName);
 
     /**
      * Returns whether this database support initially deferrable columns.

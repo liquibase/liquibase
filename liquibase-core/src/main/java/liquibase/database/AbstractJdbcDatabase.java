@@ -760,8 +760,16 @@ public abstract class AbstractJdbcDatabase implements Database {
         return liquibaseCatalogName == null ? getDefaultCatalogName() : liquibaseCatalogName;
     }
 
+    public void setLiquibaseCatalogName(String catalogName) {
+        this.liquibaseCatalogName = catalogName;
+    }
+
     public String getLiquibaseSchemaName() {
         return liquibaseSchemaName == null ? getDefaultSchemaName() : liquibaseSchemaName;
+    }
+
+    public void setLiquibaseSchemaName(String schemaName) {
+        this.liquibaseSchemaName = schemaName;
     }
 
     /**
