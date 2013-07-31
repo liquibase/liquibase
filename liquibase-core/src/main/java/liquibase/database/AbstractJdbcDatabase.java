@@ -102,6 +102,8 @@ public abstract class AbstractJdbcDatabase implements Database {
     // whether object names should be quoted
     protected ObjectQuotingStrategy quotingStrategy = ObjectQuotingStrategy.LEGACY;
 
+    private Set<String> reservedWords = new HashSet<String>();
+
     public String getName() {
         return toString();
     }
@@ -139,6 +141,12 @@ public abstract class AbstractJdbcDatabase implements Database {
 
                 LogFactory.getLogger().debug("Setting auto commit to " + getAutoCommitMode() + " from " + autoCommit);
                 connection.setAutoCommit(getAutoCommitMode());
+
+                try {
+                    reservedWords.addAll(Arrays.asList(((JdbcConnection) conn).getWrappedConnection().getMetaData().getSQLKeywords().toUpperCase().split(",\\s*")));
+                } catch (SQLException e) {
+                    LogFactory.getLogger().info("Error fetching reserved words list from JDBC driver", e);
+                }
             }
         } catch (DatabaseException e) {
             LogFactory.getLogger().warning("Cannot set auto commit to " + getAutoCommitMode() + " on connection");
@@ -819,7 +827,7 @@ public abstract class AbstractJdbcDatabase implements Database {
     }
 
     public boolean isReservedWord(String string) {
-        return false;
+        return reservedWords.contains(string.toUpperCase());
     }
 
     /*
