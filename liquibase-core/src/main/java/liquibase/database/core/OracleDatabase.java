@@ -204,6 +204,10 @@ public class OracleDatabase extends AbstractJdbcDatabase {
             return false;
         }
 
+        if (this.isLiquibaseObject(example)) {
+            return false;
+        }
+
         if (example instanceof Schema) {
             if ("SYSTEM".equals(example.getName()) || "SYS".equals(example.getName()) || "CTXSYS".equals(example.getName())|| "XDB".equals(example.getName())) {
                 return true;
@@ -211,7 +215,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
             if ("SYSTEM".equals(example.getSchema().getCatalogName()) || "SYS".equals(example.getSchema().getCatalogName()) || "CTXSYS".equals(example.getSchema().getCatalogName()) || "XDB".equals(example.getSchema().getCatalogName())) {
                 return true;
             }
-        }else if (isSystemObject(example.getSchema())) {
+        } else if (isSystemObject(example.getSchema())) {
             return true;
         }
         if (example instanceof Catalog) {
