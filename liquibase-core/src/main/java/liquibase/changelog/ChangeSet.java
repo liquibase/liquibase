@@ -365,7 +365,14 @@ public class ChangeSet implements Conditional {
         try {
             Executor executor = ExecutorService.getInstance().getExecutor(database);
             executor.comment("Rolling Back ChangeSet: " + toString());
-            RanChangeSet ranChangeSet = database.getRanChangeSet(this);
+            List<SqlVisitor> rollbackVisitors = new ArrayList<SqlVisitor>();
+            if (sqlVisitors != null) {
+                for (SqlVisitor visitor : sqlVisitors) {
+                    if (visitor.isApplyToRollback()) {
+                        rollbackVisitors.add(visitor);
+                    }
+                }
+            }
             if (rollBackChanges != null && rollBackChanges.size() > 0) {
                 for (Change rollback : rollBackChanges) {
                     SqlStatement[] statements = rollback.generateStatements(database);
@@ -374,7 +381,7 @@ public class ChangeSet implements Conditional {
                     }
                     for (SqlStatement statement : statements) {
                         try {
-                            executor.execute(statement, sqlVisitors);
+                            executor.execute(statement, rollbackVisitors);
                         } catch (DatabaseException e) {
                             throw new RollbackFailedException("Error executing custom SQL [" + statement + "]", e);
                         }
@@ -385,7 +392,7 @@ public class ChangeSet implements Conditional {
                 List<Change> changes = getChanges();
                 for (int i = changes.size() - 1; i >= 0; i--) {
                     Change change = changes.get(i);
-                    database.executeRollbackStatements(change, sqlVisitors);
+                    database.executeRollbackStatements(change, rollbackVisitors);
                     log.debug(change.getConfirmationMessage());
                 }
             }
