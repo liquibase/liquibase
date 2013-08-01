@@ -1,23 +1,39 @@
 package org.liquibase.maven.plugins;
 
-import java.io.*;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.lang.reflect.Field;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
 
-import liquibase.*;
+import liquibase.Liquibase;
+import liquibase.database.Database;
+import liquibase.exception.DatabaseException;
+import liquibase.exception.LiquibaseException;
 import liquibase.integration.commandline.CommandLineUtils;
 import liquibase.logging.LogFactory;
 import liquibase.resource.CompositeResourceAccessor;
-import liquibase.resource.ResourceAccessor;
 import liquibase.resource.FileSystemResourceAccessor;
-import liquibase.database.Database;
-import liquibase.exception.*;
+import liquibase.resource.ResourceAccessor;
 import liquibase.util.ui.UIFactory;
 import org.apache.maven.artifact.manager.WagonManager;
-import org.apache.maven.plugin.*;
+import org.apache.maven.plugin.AbstractMojo;
+import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
 
@@ -25,6 +41,7 @@ import org.apache.maven.wagon.authentication.AuthenticationInfo;
  * A base class for providing Liquibase {@link liquibase.Liquibase} functionality.
  *
  * @author Peter Murray
+ * @author Florent Biville
  *
  * Test dependency is used because when you run a goal outside the build phases you want to have the same dependencies
  * that it would had if it was ran inside test phase 
@@ -220,13 +237,25 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
      */
     private Map expressionVariables;
 
-
     /**
      * Flag to set the character encoding of the output file produced by Liquibase during the updateSQL phase.
      *
      * @parameter expression="${liquibase.outputFileEncoding}"
      */
     protected String outputFileEncoding;
+    /**
+     * Schema against which Liquibase changelog tables will be created.
+     *
+     * @parameter expression="${liquibase.changelogCatalogName}"
+     */
+    protected String changelogCatalogName;
+    /**
+     * Schema against which Liquibase changelog tables will be created.
+     *
+     * @parameter expression="${liquibase.changelogSchemaName}"
+     */
+    protected String changelogSchemaName;
+
 
     protected Writer getOutputWriter(final File outputFile) throws IOException {
         if (outputFileEncoding==null) {
@@ -290,7 +319,9 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
                     defaultCatalogName,
                     defaultSchemaName,
                     databaseClass,
-                    null);
+                    null,
+                    changelogCatalogName,
+                    changelogSchemaName);
             liquibase = createLiquibase(getFileOpener(artifactClassLoader), database);
 
             getLog().debug("expressionVars = " + String.valueOf(expressionVars));
@@ -327,8 +358,9 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
 
             performLiquibaseTask(liquibase);
         }
-        catch (LiquibaseException e) {
+        catch (Exception e) {
             cleanup(database);
+            getLog().info(e.getMessage());
             throw new MojoExecutionException("Error setting up or running Liquibase: " + e.getMessage(), e);
         }
 
