@@ -27,10 +27,10 @@ public class UnknownType extends LiquibaseDataType {
         int dataTypeMaxParameters = database.getDataTypeMaxParameters(getName());
         Object[] parameters = getParameters();
         if (database instanceof MySQLDatabase && (
-                getName().equals("TINYBLOB")
-                        || getName().equals("MEDIUMBLOB")
-                        || getName().equals("TINYTEXT")
-                        || getName().equals("MEDIUMTEXT")
+                getName().equalsIgnoreCase("TINYBLOB")
+                        || getName().equalsIgnoreCase("MEDIUMBLOB")
+                        || getName().equalsIgnoreCase("TINYTEXT")
+                        || getName().equalsIgnoreCase("MEDIUMTEXT")
         )) {
             parameters = new Object[0];
         }
