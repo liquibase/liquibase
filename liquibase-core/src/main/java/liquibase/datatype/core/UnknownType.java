@@ -2,6 +2,7 @@ package liquibase.datatype.core;
 
 import liquibase.database.Database;
 import liquibase.database.core.MySQLDatabase;
+import liquibase.database.core.MSSQLDatabase;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
 
@@ -26,7 +27,17 @@ public class UnknownType extends LiquibaseDataType {
     public DatabaseDataType toDatabaseDataType(Database database) {
         int dataTypeMaxParameters = database.getDataTypeMaxParameters(getName());
         Object[] parameters = getParameters();
-        if (database instanceof MySQLDatabase && getName().equals("TINYBLOB") || getName().equals("MEDIUMBLOB")) {
+		
+		/*
+		* Address CORE-1356 & CORE-1358 by handling types returned with unnecesarry size specifiers
+		* as Unknown Types
+		*/
+        if (database instanceof MySQLDatabase && (
+                getName().equalsIgnoreCase("TINYBLOB")
+                        || getName().equalsIgnoreCase("MEDIUMBLOB")
+                        || getName().equalsIgnoreCase("TINYTEXT")
+                        || getName().equalsIgnoreCase("MEDIUMTEXT")
+        )|| (database instanceof MSSQLDatabase && getName().equalsIgnoreCase("REAL"))) {
             parameters = new Object[0];
         }
 
