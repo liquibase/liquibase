@@ -24,8 +24,20 @@ public class LockServiceImpl implements LockService {
 
     private boolean hasChangeLogLock = false;
 
+    public static final String LOCK_WAIT_TIME_SYSTEM_PROPERTY = "liquibase.changeLogLockWaitTimeInMinutes";
+    
     private long changeLogLockWaitTime = 1000 * 60 * 5;  //default to 5 mins
     private long changeLogLocRecheckTime = 1000 * 10;  //default to every 10 seconds
+
+
+    {
+        try {
+			changeLogLockWaitTime = 1000 * 60 * Long.parseLong(System.getProperty(LOCK_WAIT_TIME_SYSTEM_PROPERTY));
+			LogFactory.getLogger().info("lockWaitTime change to: " + changeLogLockWaitTime);
+		} catch (NumberFormatException e) {
+			// was non or not valid configuration, we will keep the standard value
+		}
+    }
 
     public LockServiceImpl() {
     }
