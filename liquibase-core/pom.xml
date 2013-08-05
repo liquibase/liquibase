@@ -10,7 +10,7 @@
     <parent>
       <groupId>com.datical</groupId>
       <artifactId>liquibase-parent</artifactId>
-      <version>3.0.1.2-SNAPSHOT</version>
+      <version>3.0.1.2</version>
       <relativePath>../pom.xml</relativePath>
     </parent>
     
