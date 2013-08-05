@@ -92,6 +92,11 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
                     "and uc.owner = '" + database.correctObjectName(schema.getCatalogName(), Catalog.class) + "' " +
                     "and ui.table_owner = '" + database.correctObjectName(schema.getCatalogName(), Catalog.class) + "' " +
                     "and ucc.owner = '" + database.correctObjectName(schema.getCatalogName(), Catalog.class) + "'";
+        } else if (database instanceof DB2iDatabase) {
+            sql = "select distinct CONSTRAINT_NAME from QSYS2.SYSCST " +
+                    "where TABLE_NAME = '" + database.correctObjectName(table.getName(), Table.class) + "' " +
+                    "and TABLE_SCHEMA = '" + database.correctObjectName(schema.getCatalogName(), Catalog.class) + "' " +
+                    "and CONSTRAINT_TYPE = 'UNIQUE'";
         } else if (database instanceof DB2Database) {
             sql = "select distinct k.constname as constraint_name from syscat.keycoluse k, syscat.tabconst t " +
                     "where k.constname = t.constname " +
@@ -152,6 +157,12 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
                     "order by TC.Constraint_Name";
         } else if (database instanceof OracleDatabase) {
             sql = "select ucc.column_name from all_cons_columns ucc where ucc.constraint_name='"+database.correctObjectName(name, UniqueConstraint.class)+"' and ucc.owner='"+database.correctObjectName(schema.getCatalogName(), Catalog.class)+"' order by ucc.position";
+        } else if (database instanceof DB2iDatabase) {
+            sql = "select k.colname as column_name from QSYS2.SYSKEYCST k, QSYS2.SYSCST t " +
+                    "where k.CONSTRAINT_NAME = t.CONSTRAINT_NAME " +
+                    "and t.CONSTRAINT_TYPE = 'UNIQUE'" +
+                    "and k.CONSTRAINT_NAME='"+database.correctObjectName(name, UniqueConstraint.class)+"' "+
+                    "order by k.ORDINAL_POSITION";
         } else if (database instanceof DB2Database) {
             sql = "select k.colname as column_name from syscat.keycoluse k, syscat.tabconst t " +
                     "where k.constname = t.constname " +
