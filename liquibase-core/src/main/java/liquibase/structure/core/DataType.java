@@ -1,7 +1,5 @@
 package liquibase.structure.core;
 
-import java.math.BigInteger;
-
 public class DataType {
 
     private String typeName;
@@ -69,6 +67,10 @@ public class DataType {
 
             if (decimalDigits != null) {
                 value+= ", "+decimalDigits ;
+            }
+
+            if (columnSizeUnit != null) {
+                value += " " + columnSizeUnit;
             }
 
             value +=")";
