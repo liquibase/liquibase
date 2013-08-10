@@ -36,16 +36,18 @@ public abstract class JdbcSnapshotGenerator implements SnapshotGenerator {
     }
 
     public int getPriority(Class<? extends DatabaseObject> objectType, Database database) {
-        if (defaultFor != null && defaultFor.isAssignableFrom(objectType)) {
-            return PRIORITY_DEFAULT;
-        }
-        if (addsTo() != null) {
-            for (Class<? extends DatabaseObject> type : addsTo()) {
-                if (type.isAssignableFrom(objectType)) {
-                    return PRIORITY_ADDITIONAL;
-                }
-            }
-        }
+	if(database instanceof AbstractJdbcDatabase) {
+	        if (defaultFor != null && defaultFor.isAssignableFrom(objectType)) {
+	            return PRIORITY_DEFAULT;
+	        }
+	        if (addsTo() != null) {
+	            for (Class<? extends DatabaseObject> type : addsTo()) {
+	                if (type.isAssignableFrom(objectType)) {
+	                    return PRIORITY_ADDITIONAL;
+	                }
+	            }
+	        }
+	}
         return PRIORITY_NONE;
 
     }
