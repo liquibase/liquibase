@@ -3,6 +3,7 @@ package liquibase.database.core;
 import liquibase.CatalogAndSchema;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
+import liquibase.database.ObjectQuotingStrategy;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.logging.LogFactory;
@@ -55,13 +56,26 @@ public class OracleDatabase extends AbstractJdbcDatabase {
             method.invoke(sqlConn, true);
 
             reservedWords.addAll(Arrays.asList(sqlConn.getMetaData().getSQLKeywords().toUpperCase().split(",\\s*")));
-            reservedWords.addAll(Arrays.asList("USER", "SESSION","RESOURCE", "START", "SIZE")); //more reserved words not returned by driver
+            reservedWords.addAll(Arrays.asList("USER", "SESSION","RESOURCE", "START", "SIZE", "PASSWORD")); //more reserved words not returned by driver
         } catch (Exception e) {
             LogFactory.getLogger().info("Could not set remarks reporting on OracleDatabase: " + e.getMessage());
             ; //cannot set it. That is OK
         }
         super.setConnection(conn);
     }
+
+	@Override
+	public String escapeObjectName(String objectName, Class<? extends DatabaseObject> objectType) {
+        if (objectName != null) {
+            if (objectName.contains("-") || startsWithNumeric(objectName) || isReservedWord(objectName)) {
+                return quotingStartCharacter + objectName + quotingEndCharacter;
+            } else if (quotingStrategy == ObjectQuotingStrategy.QUOTE_ALL_OBJECTS) {
+                return quotingStartCharacter + objectName + quotingEndCharacter;
+            }
+        }
+        return objectName;
+    }
+
 
     public String getShortName() {
         return "oracle";
