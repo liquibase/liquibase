@@ -172,9 +172,10 @@ public class Liquibase {
         try {
             ChangeLogParser parser = ChangeLogParserFactory.getInstance().getParser(changeLogFile, resourceAccessor);
             DatabaseChangeLog changeLog = parser.parse(changeLogFile, changeLogParameters, resourceAccessor);
-            changeLog.validate(database, contexts);
 
             checkLiquibaseTables(true, changeLog, contexts);
+
+            changeLog.validate(database, contexts);
 
             ChangeLogIterator changeLogIterator = getStandardChangelogIterator(contexts, changeLog);
 

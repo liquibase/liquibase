@@ -66,7 +66,14 @@ public class LogFactory {
         return getLog("liquibase");
     }
 
-    public void setLoggingLevel(String defaultLoggingLevel) {
+    public void setDefaultLoggingLevel(String defaultLoggingLevel) {
         this.defaultLoggingLevel = defaultLoggingLevel;
+    }
+
+    /**
+     * @deprecated Use non-static {@link #setDefaultLoggingLevel(String)} method
+     */
+    public static void setLoggingLevel(String defaultLoggingLevel) {
+        getInstance().defaultLoggingLevel = defaultLoggingLevel;
     }
 }
