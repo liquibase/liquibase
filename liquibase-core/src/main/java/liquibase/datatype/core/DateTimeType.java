@@ -31,6 +31,10 @@ public class DateTimeType extends LiquibaseDataType {
             return new DatabaseDataType("TEXT");
         }
 
+        if (database instanceof OracleDatabase) {
+            return new DatabaseDataType("DATE");
+        }
+
         return new DatabaseDataType(getName());
     }
 
