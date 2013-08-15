@@ -83,7 +83,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
 
     @Override
     public String getJdbcSchemaName(CatalogAndSchema schema) {
-        return schema.getCatalogName();
+        return schema.getCatalogName() == null ? schema.getSchemaName() : schema.getCatalogName();
     }
 
     @Override
