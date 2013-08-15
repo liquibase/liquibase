@@ -147,6 +147,11 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
     }
 
     @Override
+    public String escapeObjectName(String objectName, Class<? extends DatabaseObject> objectType) {
+        return quotingStartCharacter+objectName+quotingEndCharacter;
+    }
+
+    @Override
     public boolean supportsForeignKeyDisable() {
         return true;
     }
