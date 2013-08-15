@@ -1,0 +1,114 @@
+.\"Created with GNOME Manpages Editor Wizard
+.\"http://sourceforge.net/projects/gmanedit2
+.TH liquibase 1 "August 3, 2013" "" "Liquibase"
+
+.SH NAME
+liquibase \- Open source library for tracking, managing and applying database changes
+
+.SH SYNOPSIS
+.B liquibase
+.RI [ options ]  [command]
+
+.br
+
+.SH DESCRIPTION
+This manual page explains how to use liquibase command line tool.
+
+For maven integration, see <http://www.liquibase.org/documentation/maven/index.html>
+
+For ant integration, see <http://www.liquibase.org/documentation/ant/index.html>
+
+.B liquibase
+program.
+.PP
+\fBliquibase\fP is for...
+
+
+
+.SH STANDARD COMMANDS
+.B
+.IP update
+
+Updates database to current version
+
+
+.B
+.IP updateSQL
+
+Writes SQL to update database to current version to STDOUT
+
+.B
+.IP updateCount <num>
+
+Applies next NUM changes to the database
+
+.B
+.IP updateCountSQL <num>
+
+Writes SQL to apply next NUM changes to the database
+
+.B
+.IP rollback <tag>
+
+Rolls back the database to the the state is was when the tag was applied
+
+.B
+.IP rollbackSQL <tag>
+Writes SQL to roll back the database to that state it was in when the tag was applied to STDOUT
+
+.B rollbackToDate <date/time>
+
+.IP Rolls back the database to the the state is was at the given date/time. Date Format: yyyy-MM-dd'T'HH:mm:ss
+
+
+.B rollbackToDateSQL <date/time>
+
+.IP Writes SQL to roll back the database to that state it was in at the given date/time version to STDOUT
+
+.B rollbackCount <value>
+
+.IP Rolls back the last <value> change sets applied to the database
+
+.B rollbackCountSQL <value>
+
+.IP Writes SQL to roll back the last <value> change sets to STDOUT applied to the database
+
+.B futureRollbackSQL
+
+.IP Writes SQL to roll back the database to the current state after the changes in the changeslog have been applied
+
+.B  futureRollbackSQL <value>
+
+.IP Writes SQL to roll back the database to the current state after <value> changes in the changeslog have been applied
+
+.B updateTestingRollback
+
+.IP Updates database, then rolls back changes before updating again. Useful for testing rollback support
+
+.B generateChangeLog
+
+.IP Writes Change Log XML to copy the current state of the database to standard out
+
+
+.SH DIFF COMMANDS
+
+.B diff [diff parameters]
+
+.IP Writes description of differences to standard out
+
+
+
+
+
+
+
+
+
+
+
+
+
+.SH EXAMPLE
+
+.SH "SEE ALSO"
+
