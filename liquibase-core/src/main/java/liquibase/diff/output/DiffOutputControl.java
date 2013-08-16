@@ -3,7 +3,6 @@ package liquibase.diff.output;
 import liquibase.database.Database;
 import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.core.Column;
 
 import java.util.HashSet;
 import java.util.Set;
