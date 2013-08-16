@@ -6,7 +6,6 @@ import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
 
 import java.util.Arrays;
-import java.util.Collections;
 
 public class UnknownType extends LiquibaseDataType {
 
