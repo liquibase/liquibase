@@ -2,7 +2,6 @@ package liquibase.changelog.filter;
 
 import liquibase.Contexts;
 import liquibase.changelog.ChangeSet;
-import liquibase.util.StringUtils;
 import liquibase.sql.visitor.SqlVisitor;
 
 import java.util.*;

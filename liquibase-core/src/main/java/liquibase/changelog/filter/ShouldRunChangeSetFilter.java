@@ -4,11 +4,6 @@ import liquibase.changelog.ChangeSet;
 import liquibase.changelog.RanChangeSet;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
-import liquibase.executor.ExecutorService;
-import liquibase.sql.visitor.SqlVisitor;
-import liquibase.statement.core.UpdateStatement;
-
-import java.util.ArrayList;
 import java.util.List;
 
 public class ShouldRunChangeSetFilter implements ChangeSetFilter {
