@@ -1,11 +1,9 @@
 package liquibase.change;
 
-import liquibase.statement.DatabaseFunction;
 import liquibase.statement.SequenceCurrentValueFunction;
 import liquibase.statement.SequenceNextValueFunction;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Table;
-import liquibase.util.ISODateFormat;
 
 import java.math.BigInteger;
 import java.text.NumberFormat;
