@@ -1,7 +1,6 @@
 package liquibase.change;
 
 import liquibase.database.Database;
-import liquibase.database.core.H2Database;
 import liquibase.servicelocator.PrioritizedService;
 import liquibase.structure.DatabaseObject;
 
