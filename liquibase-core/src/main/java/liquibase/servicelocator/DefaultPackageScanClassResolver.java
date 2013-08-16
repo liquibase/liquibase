@@ -1,7 +1,5 @@
 package liquibase.servicelocator;
 
-import liquibase.logging.LogFactory;
-import liquibase.logging.LogLevel;
 import liquibase.logging.Logger;
 import liquibase.logging.core.DefaultLogger;
 
@@ -9,7 +7,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.annotation.Annotation;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
