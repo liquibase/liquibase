@@ -4,7 +4,6 @@ import liquibase.change.ChangeFactory;
 import liquibase.change.StandardChangeTest;
 import liquibase.database.Database;
 import liquibase.database.core.CacheDatabase;
-import liquibase.database.core.DB2Database;
 import liquibase.database.core.MockDatabase;
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.statement.SqlStatement;

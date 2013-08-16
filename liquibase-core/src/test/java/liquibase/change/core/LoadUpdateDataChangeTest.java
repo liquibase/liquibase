@@ -1,12 +1,10 @@
 package liquibase.change.core;
 
 import junit.framework.Assert;
-import static junit.framework.Assert.fail;
 
 import liquibase.change.ChangeFactory;
 import liquibase.change.StandardChangeTest;
 import liquibase.database.core.MockDatabase;
-import liquibase.exception.RollbackImpossibleException;
 import liquibase.exception.LiquibaseException;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.statement.SqlStatement;
