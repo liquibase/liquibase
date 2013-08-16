@@ -2,7 +2,6 @@ package liquibase.integration.ant;
 
 import liquibase.CatalogAndSchema;
 import liquibase.Liquibase;
-import liquibase.structure.core.Schema;
 import liquibase.util.StringUtils;
 import org.apache.tools.ant.BuildException;
 
