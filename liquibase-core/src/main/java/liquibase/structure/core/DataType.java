@@ -1,7 +1,5 @@
 package liquibase.structure.core;
 
-import java.math.BigInteger;
-
 public class DataType {
 
     private String typeName;
