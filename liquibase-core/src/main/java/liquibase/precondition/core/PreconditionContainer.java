@@ -7,8 +7,6 @@ import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.ChangeSet;
 import liquibase.exception.PreconditionFailedException;
 import liquibase.exception.PreconditionErrorException;
-import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.exception.ValidationFailedException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.logging.LogFactory;
