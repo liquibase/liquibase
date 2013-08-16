@@ -1,7 +1,6 @@
 package liquibase.serializer.core.yaml;
 
 import liquibase.changelog.ChangeSet;
-import liquibase.changelog.DatabaseChangeLog;
 import liquibase.serializer.ChangeLogSerializer;
 import liquibase.serializer.LiquibaseSerializable;
 import liquibase.statement.DatabaseFunction;
@@ -9,7 +8,6 @@ import liquibase.statement.SequenceCurrentValueFunction;
 import liquibase.statement.SequenceNextValueFunction;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
-import org.yaml.snakeyaml.introspector.FieldProperty;
 import org.yaml.snakeyaml.introspector.GenericProperty;
 import org.yaml.snakeyaml.introspector.Property;
 import org.yaml.snakeyaml.nodes.MappingNode;
@@ -24,7 +22,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.lang.reflect.Type;
-import java.sql.Timestamp;
 import java.util.*;
 
 public class YamlChangeLogSerializer implements ChangeLogSerializer {
