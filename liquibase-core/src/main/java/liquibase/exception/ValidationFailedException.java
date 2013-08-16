@@ -1,8 +1,6 @@
 package liquibase.exception;
 
-import liquibase.change.CheckSum;
 import liquibase.changelog.ChangeSet;
-import liquibase.changelog.RanChangeSet;
 import liquibase.changelog.visitor.ValidatingVisitor;
 import liquibase.database.Database;
 import liquibase.logging.LogFactory;
