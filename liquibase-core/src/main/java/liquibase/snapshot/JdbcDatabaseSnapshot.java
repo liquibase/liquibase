@@ -5,7 +5,6 @@ import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.jvm.ColumnMapRowMapper;
 import liquibase.executor.jvm.RowMapperResultSetExtractor;
-import liquibase.structure.core.Table;
 
 import java.sql.*;
 import java.util.*;

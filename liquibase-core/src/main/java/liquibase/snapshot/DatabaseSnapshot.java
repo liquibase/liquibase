@@ -4,12 +4,10 @@ import liquibase.CatalogAndSchema;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.servicelocator.ServiceLocator;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
 import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 
-import java.lang.reflect.Field;
 import java.util.*;
 
 public abstract class DatabaseSnapshot {
