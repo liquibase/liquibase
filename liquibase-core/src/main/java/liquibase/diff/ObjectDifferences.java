@@ -2,7 +2,6 @@ package liquibase.diff;
 
 import liquibase.database.Database;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.core.DataType;
 
 import java.util.*;
 
