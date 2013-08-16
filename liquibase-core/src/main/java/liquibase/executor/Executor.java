@@ -3,7 +3,6 @@ package liquibase.executor;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 import liquibase.sql.visitor.SqlVisitor;
-import liquibase.statement.CallableSqlStatement;
 import liquibase.statement.SqlStatement;
 
 import java.util.List;
