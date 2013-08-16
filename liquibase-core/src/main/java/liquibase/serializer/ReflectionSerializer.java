@@ -1,6 +1,5 @@
 package liquibase.serializer;
 
-import liquibase.change.DatabaseChangeProperty;
 import liquibase.exception.UnexpectedLiquibaseException;
 
 import java.lang.reflect.Field;
