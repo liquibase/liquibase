@@ -1,6 +1,5 @@
 package liquibase.database.core;
 
-import liquibase.CatalogAndSchema;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.ObjectQuotingStrategy;
@@ -13,7 +12,6 @@ import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.core.Table;
 
 import java.math.BigInteger;
-import java.sql.Types;
 import java.util.*;
 
 /**

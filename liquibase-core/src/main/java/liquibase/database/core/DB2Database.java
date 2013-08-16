@@ -7,7 +7,6 @@ import liquibase.database.jvm.JdbcConnection;
 import liquibase.structure.DatabaseObject;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.DateParseException;
-import liquibase.structure.core.Schema;
 import liquibase.util.JdbcUtils;
 
 import java.sql.ResultSet;
