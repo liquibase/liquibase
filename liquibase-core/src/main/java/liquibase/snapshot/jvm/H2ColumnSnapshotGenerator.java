@@ -9,7 +9,6 @@ import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Column;
 
 import java.sql.SQLException;
-import java.util.Map;
 
 public class H2ColumnSnapshotGenerator extends ColumnSnapshotGenerator {
     @Override

@@ -13,8 +13,6 @@ import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
 
 import java.sql.DatabaseMetaData;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.*;
 
 public class ForeignKeySnapshotGenerator extends JdbcSnapshotGenerator {

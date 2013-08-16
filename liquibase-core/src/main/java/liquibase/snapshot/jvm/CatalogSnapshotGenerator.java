@@ -1,6 +1,5 @@
 package liquibase.snapshot.jvm;
 
-import liquibase.CatalogAndSchema;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
 import liquibase.database.jvm.JdbcConnection;

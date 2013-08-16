@@ -10,7 +10,6 @@ import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.InvalidExampleException;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Catalog;
-import liquibase.structure.core.Column;
 import liquibase.structure.core.Schema;
 import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.util.JdbcUtils;
