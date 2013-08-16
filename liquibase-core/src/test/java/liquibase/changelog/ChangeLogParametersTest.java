@@ -1,12 +1,10 @@
 package liquibase.changelog;
 
 import liquibase.Contexts;
-import org.junit.Before;
 import org.junit.Test;
 import static org.junit.Assert.*;
 import liquibase.database.core.H2Database;
 
-import java.util.Arrays;
 
 
 public class ChangeLogParametersTest {
