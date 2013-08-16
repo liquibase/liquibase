@@ -7,7 +7,6 @@ import liquibase.exception.PreconditionErrorException;
 import liquibase.exception.PreconditionFailedException;
 import liquibase.exception.ValidationErrors;
 import liquibase.exception.Warnings;
-import liquibase.serializer.LiquibaseSerializable;
 
 /**
  * Marker interface for preconditions.  May become an annotation in the future.
