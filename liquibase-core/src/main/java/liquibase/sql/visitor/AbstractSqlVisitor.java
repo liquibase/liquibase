@@ -2,7 +2,6 @@ package liquibase.sql.visitor;
 
 import liquibase.Contexts;
 import liquibase.change.CheckSum;
-import liquibase.serializer.LiquibaseSerializable;
 import liquibase.serializer.ReflectionSerializer;
 import liquibase.serializer.core.string.StringChangeLogSerializer;
 
