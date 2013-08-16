@@ -1,6 +1,5 @@
 package liquibase.integration.ant;
 
-import liquibase.integration.ant.AntResourceAccessor;
 import liquibase.resource.AbstractFileOpenerTest;
 import liquibase.resource.ResourceAccessor;
 import org.apache.tools.ant.Project;

@@ -1,6 +1,5 @@
 package liquibase.integration.ant;
 
-import liquibase.integration.ant.DatabaseUpdateTask;
 import org.apache.tools.ant.Project;
 import static org.junit.Assert.*;
 import org.junit.Test;
