@@ -1,6 +1,5 @@
 package liquibase.integration.commandline;
 
-import liquibase.integration.commandline.CommandLineResourceAccessor;
 import liquibase.resource.AbstractFileOpenerTest;
 import liquibase.resource.ResourceAccessor;
 import static org.junit.Assert.*;
