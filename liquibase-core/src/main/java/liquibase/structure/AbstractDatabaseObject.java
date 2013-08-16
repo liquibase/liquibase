@@ -1,7 +1,5 @@
 package liquibase.structure;
 
-import liquibase.CatalogAndSchema;
-import liquibase.database.Database;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.util.StringUtils;
 
