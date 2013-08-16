@@ -1,9 +1,6 @@
 package liquibase.servicelocator;
 
-import java.io.File;
 import java.lang.reflect.Modifier;
-import java.net.MalformedURLException;
-import java.net.URL;
 
 import liquibase.database.Database;
 import liquibase.parser.ChangeLogParser;
