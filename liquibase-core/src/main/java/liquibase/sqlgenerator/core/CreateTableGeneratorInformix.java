@@ -6,12 +6,10 @@ import java.util.List;
 
 import liquibase.database.Database;
 import liquibase.database.core.InformixDatabase;
-import liquibase.exception.ValidationErrors;
 import liquibase.logging.LogFactory;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
-import liquibase.sqlgenerator.core.AbstractSqlGenerator;
 import liquibase.statement.AutoIncrementConstraint;
 import liquibase.statement.ForeignKeyConstraint;
 import liquibase.statement.UniqueConstraint;

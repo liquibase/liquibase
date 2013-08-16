@@ -13,7 +13,6 @@ import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
-import liquibase.sqlgenerator.core.AbstractSqlGenerator;
 import liquibase.statement.core.CreateViewStatement;
 import liquibase.structure.core.View;
 

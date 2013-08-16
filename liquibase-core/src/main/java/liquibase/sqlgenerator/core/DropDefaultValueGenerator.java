@@ -7,11 +7,9 @@ import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
-import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.DropDefaultValueStatement;
 import liquibase.structure.core.Column;
-import liquibase.structure.core.Relation;
 import liquibase.structure.core.Table;
 
 public class DropDefaultValueGenerator extends AbstractSqlGenerator<DropDefaultValueStatement> {

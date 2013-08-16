@@ -12,7 +12,6 @@ import liquibase.structure.core.Column;
 import liquibase.structure.core.Relation;
 import liquibase.structure.core.Table;
 
-import java.util.regex.Pattern;
 
 public class DeleteGenerator extends AbstractSqlGenerator<DeleteStatement> {
 
