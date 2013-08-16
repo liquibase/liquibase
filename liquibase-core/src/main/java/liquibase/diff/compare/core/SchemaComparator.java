@@ -4,9 +4,7 @@ import liquibase.database.Database;
 import liquibase.diff.ObjectDifferences;
 import liquibase.diff.compare.DatabaseObjectComparator;
 import liquibase.diff.compare.DatabaseObjectComparatorChain;
-import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.core.Column;
 import liquibase.structure.core.Schema;
 
 public class SchemaComparator implements DatabaseObjectComparator {

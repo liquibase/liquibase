@@ -2,7 +2,6 @@ package liquibase.diff.compare.core;
 
 import liquibase.database.Database;
 import liquibase.diff.ObjectDifferences;
-import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Index;

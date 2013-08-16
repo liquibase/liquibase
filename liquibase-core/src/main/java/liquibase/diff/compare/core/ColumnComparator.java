@@ -7,7 +7,6 @@ import liquibase.diff.compare.DatabaseObjectComparatorChain;
 import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Column;
-import liquibase.structure.core.Index;
 
 public class ColumnComparator implements DatabaseObjectComparator {
     public int getPriority(Class<? extends DatabaseObject> objectType, Database database) {
