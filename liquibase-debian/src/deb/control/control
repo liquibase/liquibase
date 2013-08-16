@@ -1,0 +1,9 @@
+Package: liquibase
+Version: [[version]]
+Section: misc
+Priority: optional
+Architecture: all
+Depends:
+Maintainer: Adrien Sales <Adrien.Sales@gmail.com>
+Description: Liquibase debian installer
+Distribution: development
