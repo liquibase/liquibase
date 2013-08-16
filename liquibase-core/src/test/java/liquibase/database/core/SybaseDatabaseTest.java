@@ -7,8 +7,6 @@ import static org.junit.Assert.*;
 import liquibase.CatalogAndSchema;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
-import liquibase.structure.core.Catalog;
-import liquibase.structure.core.Schema;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
