@@ -4,10 +4,11 @@ import java.io.*;
 import java.net.URL;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.Map;
-import java.util.Vector;
-
 import javax.sql.DataSource;
 
 import liquibase.Liquibase;
@@ -90,11 +91,9 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
         }
 
         public Enumeration<URL> getResources(String packageName) throws IOException {
-            Vector<URL> tmp = new Vector<URL>();
-
+            List<URL> tmp = new ArrayList<URL>();
             tmp.add(getResource(packageName).getURL());
-
-            return tmp.elements();
+            return Collections.enumeration(tmp);
         }
 
         public Resource getResource(String file) {
