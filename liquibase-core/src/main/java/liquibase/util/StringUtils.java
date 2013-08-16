@@ -1,6 +1,5 @@
 package liquibase.util;
 
-import liquibase.database.Database;
 
 import java.util.ArrayList;
 import java.util.Arrays;
