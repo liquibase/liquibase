@@ -4,15 +4,10 @@ import liquibase.integration.cdi.annotations.LiquibaseType;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 import org.hsqldb.jdbc.JDBCDataSource;
-import org.jboss.weld.resources.ClassLoaderResourceLoader;
 
 import javax.enterprise.inject.Produces;
 import javax.sql.DataSource;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
 import java.sql.SQLException;
-import java.util.Enumeration;
 
 /**
  * A Test CDI Producer used for testing CDILiquibase
