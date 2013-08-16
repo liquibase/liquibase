@@ -1,8 +1,6 @@
 package liquibase.lockservice;
 
 import liquibase.database.Database;
-import liquibase.database.core.MySQLDatabase;
-import liquibase.database.core.OracleDatabase;
 import liquibase.exception.LockException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
