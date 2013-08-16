@@ -5,7 +5,6 @@ import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.logging.LogFactory;
 import liquibase.servicelocator.ServiceLocator;
-import liquibase.util.StringUtils;
 
 import java.util.*;
 
