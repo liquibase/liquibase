@@ -4,6 +4,7 @@ import liquibase.CatalogAndSchema;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
 import liquibase.database.core.MSSQLDatabase;
+import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.exception.DatabaseException;
 import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.DatabaseSnapshot;
@@ -158,6 +159,10 @@ public class ForeignKeySnapshotGenerator extends JdbcSnapshotGenerator {
                     foreignKey.setInitiallyDeferred(false);
                 } else {
                     throw new RuntimeException("Unknown deferrability result: " + deferrability);
+                }
+
+                if (!DatabaseObjectComparatorFactory.getInstance().isSameObject(example, foreignKey, database)) {
+                    continue;
                 }
 
                 Index exampleIndex = new Index().setTable(foreignKey.getForeignKeyTable());

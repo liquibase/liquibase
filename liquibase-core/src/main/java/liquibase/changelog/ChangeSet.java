@@ -162,6 +162,8 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
 
     private ObjectQuotingStrategy objectQuotingStrategy;
 
+    private DatabaseChangeLog changeLog;
+
     public boolean shouldAlwaysRun() {
         return alwaysRun;
     }
@@ -170,20 +172,20 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
         return runOnChange;
     }
 
-    public ChangeSet(String id, String author, boolean alwaysRun, boolean runOnChange, String filePath, String contextList, String dbmsList) {
-        this(id, author, alwaysRun, runOnChange, filePath, contextList, dbmsList, true, ObjectQuotingStrategy.LEGACY);
+    public ChangeSet(String id, String author, boolean alwaysRun, boolean runOnChange, String filePath, String contextList, String dbmsList, DatabaseChangeLog databaseChangeLog) {
+        this(id, author, alwaysRun, runOnChange, filePath, contextList, dbmsList, true, ObjectQuotingStrategy.LEGACY, databaseChangeLog);
     }
 
-    public ChangeSet(String id, String author, boolean alwaysRun, boolean runOnChange, String filePath, String contextList, String dbmsList, boolean runInTransaction) {
-        this(id, author, alwaysRun, runOnChange, filePath, contextList, dbmsList, runInTransaction, ObjectQuotingStrategy.LEGACY);
+    public ChangeSet(String id, String author, boolean alwaysRun, boolean runOnChange, String filePath, String contextList, String dbmsList, boolean runInTransaction, DatabaseChangeLog databaseChangeLog) {
+        this(id, author, alwaysRun, runOnChange, filePath, contextList, dbmsList, runInTransaction, ObjectQuotingStrategy.LEGACY, databaseChangeLog);
     }
 
-    public ChangeSet(String id, String author, boolean alwaysRun, boolean runOnChange, String filePath, String contextList, String dbmsList, ObjectQuotingStrategy quotingStrategy) {
-        this(id, author, alwaysRun, runOnChange, filePath, contextList, dbmsList, true, quotingStrategy);
+    public ChangeSet(String id, String author, boolean alwaysRun, boolean runOnChange, String filePath, String contextList, String dbmsList, ObjectQuotingStrategy quotingStrategy, DatabaseChangeLog databaseChangeLog) {
+        this(id, author, alwaysRun, runOnChange, filePath, contextList, dbmsList, true, quotingStrategy, databaseChangeLog);
     }
 
     public ChangeSet(String id, String author, boolean alwaysRun, boolean runOnChange, String filePath, String contextList, String dbmsList,
-                     boolean runInTransaction, ObjectQuotingStrategy quotingStrategy) {
+                     boolean runInTransaction, ObjectQuotingStrategy quotingStrategy, DatabaseChangeLog databaseChangeLog) {
         this.changes = new ArrayList<Change>();
         log = LogFactory.getLogger();
         this.id = id;
@@ -207,6 +209,7 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
                 dbmsSet.add(string.trim().toLowerCase());
             }
         }
+        this.changeLog = databaseChangeLog;
     }
 
     public String getFilePath() {
@@ -455,6 +458,10 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
 
     public Set<String> getDbmsSet() {
         return dbmsSet;
+    }
+
+    public DatabaseChangeLog getChangeLog() {
+        return changeLog;
     }
 
     public String toString(boolean includeMD5Sum) {

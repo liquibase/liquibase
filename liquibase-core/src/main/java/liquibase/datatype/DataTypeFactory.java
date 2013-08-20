@@ -96,6 +96,17 @@ public class DataTypeFactory {
             primaryKey = true;
         }
 
+        String additionalInfo = null;
+        if (dataTypeName.toLowerCase().startsWith("bit varying")) {
+            //not going to do anything. Special case for postgres in our tests, need to better support handling these types of differences
+        } else {
+            String[] splitTypeName = dataTypeName.split("\\s+", 2);
+            dataTypeName = splitTypeName[0];
+            if (splitTypeName.length > 1) {
+                additionalInfo = splitTypeName[1];
+            }
+        }
+
         SortedSet<Class<? extends LiquibaseDataType>> classes = registry.get(dataTypeName.toLowerCase());
 
         LiquibaseDataType liquibaseDataType = null;
@@ -113,6 +124,7 @@ public class DataTypeFactory {
             liquibaseDataType = new UnknownType(dataTypeName);
 
         }
+        liquibaseDataType.setAdditionalInformation(additionalInfo);
 
         if (dataTypeDefinition.matches(".+\\s*\\(.*")) {
             String paramStrings = dataTypeDefinition.replaceFirst(".*?\\(", "").replaceFirst("\\).*", "");

@@ -257,4 +257,14 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
     public String getConfirmationMessage() {
         return "Foreign key contraint added to " + getBaseTableName() + " (" + getBaseColumnNames() + ")";
     }
+
+    /**
+     * @deprecated No longer supported in 3.0
+     */
+    public Boolean getReferencesUniqueColumn() {
+        return null;
+    }
+
+    public void setReferencesUniqueColumn(Boolean referencesUniqueColumn) {
+    }
 }

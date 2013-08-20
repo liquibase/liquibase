@@ -2,6 +2,7 @@ package liquibase.parser;
 
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.exception.UnknownChangelogFormatException;
 import liquibase.resource.ResourceAccessor;
 import liquibase.servicelocator.ServiceLocator;
 
@@ -58,7 +59,7 @@ public class ChangeLogParserFactory {
             }
         }
 
-        throw new LiquibaseException("Cannot find parser that supports "+fileNameOrExtension);
+        throw new UnknownChangelogFormatException("Cannot find parser that supports "+fileNameOrExtension);
     }
 
     public void register(ChangeLogParser changeLogParser) {

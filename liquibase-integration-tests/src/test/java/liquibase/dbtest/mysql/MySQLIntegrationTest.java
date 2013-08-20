@@ -18,7 +18,7 @@ public class MySQLIntegrationTest extends AbstractIntegrationTest {
 
 
         runCompleteChangeLog();
-        DatabaseSnapshot snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(getDatabase().getDefaultSchema(), getDatabase(), new SnapshotControl());
+        DatabaseSnapshot snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(getDatabase().getDefaultSchema(), getDatabase(), new SnapshotControl(getDatabase()));
         System.out.println(snapshot);
     }
 

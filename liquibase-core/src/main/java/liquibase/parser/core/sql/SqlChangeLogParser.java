@@ -25,6 +25,9 @@ public class SqlChangeLogParser implements ChangeLogParser {
     
     public DatabaseChangeLog parse(String physicalChangeLogLocation, ChangeLogParameters changeLogParameters, ResourceAccessor resourceAccessor) throws ChangeLogParseException {
 
+        DatabaseChangeLog changeLog = new DatabaseChangeLog();
+        changeLog.setPhysicalFilePath(physicalChangeLogLocation);
+
         RawSQLChange change = new RawSQLChange();
 
         try {
@@ -38,11 +41,9 @@ public class SqlChangeLogParser implements ChangeLogParser {
         change.setSplitStatements(false);
         change.setStripComments(false);
 
-        ChangeSet changeSet = new ChangeSet("raw", "includeAll", false, false, physicalChangeLogLocation, null, null, true, ObjectQuotingStrategy.LEGACY);
+        ChangeSet changeSet = new ChangeSet("raw", "includeAll", false, false, physicalChangeLogLocation, null, null, true, ObjectQuotingStrategy.LEGACY, changeLog);
         changeSet.addChange(change);
 
-        DatabaseChangeLog changeLog = new DatabaseChangeLog();
-        changeLog.setPhysicalFilePath(physicalChangeLogLocation);
         changeLog.addChangeSet(changeSet);
 
         return changeLog;

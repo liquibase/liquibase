@@ -223,7 +223,6 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
                             continue;
                         }
                         includedChangeLogs.add(path);
-                        includedChangeLogs.add(path);
                     }
                 }
                 if (resourceFilter != null) {
@@ -262,7 +261,7 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
 
 				changeSet = new ChangeSet(atts.getValue("id"), atts.getValue("author"), alwaysRun, runOnChange, filePath,
 						atts.getValue("context"), atts.getValue("dbms"),
-						Boolean.valueOf(atts.getValue("runInTransaction")), quotingStrategy);
+						Boolean.valueOf(atts.getValue("runInTransaction")), quotingStrategy, databaseChangeLog);
 				if (StringUtils.trimToNull(atts.getValue("failOnError")) != null) {
 					changeSet.setFailOnError(Boolean.parseBoolean(atts.getValue("failOnError")));
 				}
@@ -515,12 +514,13 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
             return false;
         }
 
-        ChangeLogParser changeLogParser = ChangeLogParserFactory.getInstance().getParser(fileName, resourceAccessor);
-		if (changeLogParser == null) {
-			log.warning("included file "+relativeBaseFileName + "/" + fileName + " is not a recognized file type");
-			return false;
-		}
-
+        ChangeLogParser changeLogParser = null;
+        try {
+            changeLogParser = ChangeLogParserFactory.getInstance().getParser(fileName, resourceAccessor);
+        } catch (LiquibaseException e) {
+            log.warning("included file "+relativeBaseFileName + "/" + fileName + " is not a recognized file type");
+            return false;
+        }
 
 		if (isRelativePath) {
 			// workaround for FilenameUtils.normalize() returning null for relative paths like ../conf/liquibase.xml

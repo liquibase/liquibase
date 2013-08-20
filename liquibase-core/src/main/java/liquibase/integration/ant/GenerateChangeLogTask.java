@@ -85,7 +85,7 @@ public class GenerateChangeLogTask extends BaseLiquibaseTask {
 			liquibase = createLiquibase();
 
             Database database = liquibase.getDatabase();
-            SnapshotControl snapshotControl = new SnapshotControl(getDiffTypes());
+            SnapshotControl snapshotControl = new SnapshotControl(database, getDiffTypes());
 
             DatabaseSnapshot referenceSnapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(new CatalogAndSchema(getDefaultCatalogName(), getDefaultSchemaName()), database, snapshotControl);
 

@@ -68,12 +68,12 @@ public class HsqlDatabase extends AbstractJdbcDatabase {
     }
 
     @Override
-    protected String doGetDefaultCatalogName() throws DatabaseException {
+    protected String getConnectionCatalogName() throws DatabaseException {
         return "PUBLIC";
     }
 
     @Override
-    protected String doGetDefaultSchemaName() {
+    protected String getConnectionSchemaName() {
         return "PUBLIC";
     }
 

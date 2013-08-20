@@ -39,7 +39,6 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
 
     public MSSQLDatabase() {
         super.setCurrentDateTimeFunction("GETDATE()");
-        setDefaultSchemaName("dbo");
 
         systemTablesAndViews.add("syscolumns");
         systemTablesAndViews.add("syscomments");
@@ -146,7 +145,7 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
     }
 
     @Override
-    protected String doGetDefaultSchemaName() {
+    protected String getConnectionSchemaName() {
         try {
             ResultSet resultSet = ((JdbcConnection) getConnection()).prepareStatement("select schema_name()").executeQuery();
             resultSet.next();
@@ -269,17 +268,6 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
     }
 
     @Override
-	public String getDefaultSchemaName() {
-        String defaultSchemaName = super.getDefaultSchemaName();
-        if (defaultSchemaName == null) {
-            return "dbo";
-        } else {
-            return defaultSchemaName;
-        }
-
-	}
-
-      @Override
     public String getViewDefinition(CatalogAndSchema schema, String viewName) throws DatabaseException {
           schema = correctSchema(schema);
         List<String> defLines = (List<String>) ExecutorService.getInstance().getExecutor(this).queryForList(new GetViewDefinitionStatement(schema.getCatalogName(), schema.getSchemaName(), viewName), String.class);

@@ -11,7 +11,7 @@
     <parent>
         <artifactId>liquibase-parent</artifactId>
         <groupId>com.datical</groupId>
-        <version>3.0.1.3-SNAPSHOT</version>
+        <version>3.0.3.1-SNAPSHOT</version>
     </parent>
 
     <dependencies>
@@ -104,4 +104,3 @@
     </profiles>
 
 </project>
-        

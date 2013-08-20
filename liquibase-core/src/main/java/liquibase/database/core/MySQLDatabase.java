@@ -132,11 +132,6 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
     }
 
     @Override
-    public String getDefaultSchemaName() {
-        return null;
-    }
-
-    @Override
     public boolean supportsSchemas() {
         return false;
     }

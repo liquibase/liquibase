@@ -135,7 +135,7 @@ public class YamlChangeLogSerializer implements ChangeLogSerializer {
             LiquibaseSerializable serialzableType = null;
             try {
                 if (type.equals(ChangeSet.class)) {
-                    serialzableType = new ChangeSet("x", "y", false, false, null, null, null);
+                    serialzableType = new ChangeSet("x", "y", false, false, null, null, null, null);
                 } else if (LiquibaseSerializable.class.isAssignableFrom(type)) {
                     serialzableType = (LiquibaseSerializable) type.newInstance();
                 } else {
