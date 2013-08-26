@@ -1,8 +1,9 @@
-/target
-/.project
-/.settings
+target
+.project
+.settings
+.classpath
+liquibase.iws
 *nb-configuration.xml
-/.classpath
 /.idea/workspace.xml
 /out
 /bin
