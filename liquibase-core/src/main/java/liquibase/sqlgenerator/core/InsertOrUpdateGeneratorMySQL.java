@@ -33,7 +33,8 @@ public class InsertOrUpdateGeneratorMySQL extends InsertOrUpdateGenerator {
             if (!hashPkFields.contains(columnKey)) {
             	hasFields = true;
             	updateClause.append(columnKey).append(" = ");
-            	updateClause.append(DataTypeFactory.getInstance().fromObject(insertOrUpdateStatement.getColumnValue(columnKey), database).objectToSql(columnKey, database));
+                Object columnValue = insertOrUpdateStatement.getColumnValue(columnKey);
+                updateClause.append(DataTypeFactory.getInstance().fromObject(columnValue, database).objectToSql(columnValue, database));
             	updateClause.append(",");
             }
         }
