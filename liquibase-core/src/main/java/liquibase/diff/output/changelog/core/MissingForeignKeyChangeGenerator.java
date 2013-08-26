@@ -21,12 +21,13 @@ public class MissingForeignKeyChangeGenerator implements MissingObjectChangeGene
         return new Class[] {
                 Table.class,
                 Column.class,
-                PrimaryKey.class
+                PrimaryKey.class,
+                Index.class
         };
     }
 
     public Class<? extends DatabaseObject>[] runBeforeTypes() {
-        return new Class[] { Index.class };
+        return null;
     }
 
     public Change[] fixMissing(DatabaseObject missingObject, DiffOutputControl control, Database referenceDatabase, Database comparisonDatabase, ChangeGeneratorChain chain) {

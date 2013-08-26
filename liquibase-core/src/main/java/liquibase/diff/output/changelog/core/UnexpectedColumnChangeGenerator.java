@@ -21,7 +21,7 @@ public class UnexpectedColumnChangeGenerator implements UnexpectedObjectChangeGe
         return new Class[] {
                 PrimaryKey.class,
                 ForeignKey.class,
-                Table.class,
+                Index.class,
         };
     }
 

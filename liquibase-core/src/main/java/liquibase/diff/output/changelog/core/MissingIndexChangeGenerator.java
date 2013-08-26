@@ -11,6 +11,7 @@ import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Index;
 import liquibase.structure.core.Table;
+import liquibase.structure.core.UniqueConstraint;
 
 public class MissingIndexChangeGenerator implements MissingObjectChangeGenerator {
     public int getPriority(Class<? extends DatabaseObject> objectType, Database database) {
@@ -28,7 +29,7 @@ public class MissingIndexChangeGenerator implements MissingObjectChangeGenerator
     }
 
     public Class<? extends DatabaseObject>[] runBeforeTypes() {
-        return null;
+        return new Class[]{UniqueConstraint.class};
     }
 
     public Change[] fixMissing(DatabaseObject missingObject, DiffOutputControl control, Database referenceDatabase, Database comparisonDatabase, ChangeGeneratorChain chain) {

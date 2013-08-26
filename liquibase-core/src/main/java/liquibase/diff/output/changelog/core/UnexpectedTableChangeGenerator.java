@@ -18,11 +18,16 @@ public class UnexpectedTableChangeGenerator implements UnexpectedObjectChangeGen
     }
 
     public Class<? extends DatabaseObject>[] runAfterTypes() {
-        return null;
+        return new Class[] {
+                PrimaryKey.class,
+                ForeignKey.class,
+                Index.class,
+                Column.class,
+        };
     }
 
     public Class<? extends DatabaseObject>[] runBeforeTypes() {
-        return new Class[] {Column.class, PrimaryKey.class};
+        return null;
     }
 
     public Change[] fixUnexpected(DatabaseObject unexpectedObject, DiffOutputControl control, Database referenceDatabase, Database comparisonDatabase, ChangeGeneratorChain chain) {

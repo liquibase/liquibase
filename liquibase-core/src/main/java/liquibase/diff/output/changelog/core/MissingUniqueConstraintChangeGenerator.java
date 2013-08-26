@@ -23,12 +23,13 @@ public class MissingUniqueConstraintChangeGenerator implements MissingObjectChan
     public Class<? extends DatabaseObject>[] runAfterTypes() {
         return new Class[]{
                 Table.class,
-                Column.class
+                Column.class,
+                Index.class
         };
     }
 
     public Class<? extends DatabaseObject>[] runBeforeTypes() {
-        return new Class[]{Index.class};
+        return null;
     }
 
     public Change[] fixMissing(DatabaseObject missingObject, DiffOutputControl control, Database referenceDatabase, Database comparisonDatabase, ChangeGeneratorChain chain) {
