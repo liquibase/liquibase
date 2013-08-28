@@ -93,6 +93,7 @@ public abstract class AbstractJdbcDatabase implements Database {
     private boolean canCacheLiquibaseTableInfo = false;
     private boolean hasDatabaseChangeLogTable = false;
     private boolean hasDatabaseChangeLogLockTable = false;
+    private boolean isDatabaseChangeLogLockTableInitialized = false;
 
     protected BigInteger defaultAutoIncrementStartWith = BigInteger.ONE;
     protected BigInteger defaultAutoIncrementBy = BigInteger.ONE;
@@ -756,6 +757,22 @@ public abstract class AbstractJdbcDatabase implements Database {
         return hasTable;
     }
 
+    public boolean isDatabaseChangeLogLockTableInitialized() throws DatabaseException {
+        if (canCacheLiquibaseTableInfo && isDatabaseChangeLogLockTableInitialized) {
+            return true;
+        }
+        boolean initialized;
+        try {
+            initialized = ExecutorService.getInstance().getExecutor(this).queryForInt(new RawSqlStatement("select count(*) from "+this.escapeTableName(this.getLiquibaseCatalogName(), this.getLiquibaseSchemaName(), this.getDatabaseChangeLogLockTableName()))) > 0;
+        } catch (LiquibaseException e) {
+            throw new UnexpectedLiquibaseException(e);
+        }
+        if (canCacheLiquibaseTableInfo) {
+            isDatabaseChangeLogLockTableInitialized = initialized;
+        }
+        return initialized;
+    }
+
     public String getLiquibaseCatalogName() {
         return liquibaseCatalogName == null ? getDefaultCatalogName() : liquibaseCatalogName;
     }
@@ -787,6 +804,12 @@ public abstract class AbstractJdbcDatabase implements Database {
             this.commit();
             LogFactory.getLogger().debug("Created database lock table with name: " + escapeTableName(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogLockTableName()));
             this.hasDatabaseChangeLogLockTable = true;
+        }
+
+        if (!isDatabaseChangeLogLockTableInitialized()) {
+            executor.comment("Initialize Database Lock Table");
+            executor.execute(new InitializeDatabaseChangeLogLockTableStatement());
+            this.commit();
         }
     }
     
