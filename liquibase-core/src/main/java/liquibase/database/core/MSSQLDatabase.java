@@ -59,6 +59,7 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
         systemTablesAndViews.add("sysreferences");
         systemTablesAndViews.add("systypes");
         systemTablesAndViews.add("sysusers");
+        systemTablesAndViews.add("sysdiagrams");
 
         systemTablesAndViews.add("syssegments");
         systemTablesAndViews.add("sysconstraints");
