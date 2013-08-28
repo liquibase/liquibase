@@ -261,7 +261,13 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
         } finally {
             if (c != null) {
                 try {
-                    c.rollback();
+                    if (!c.getAutoCommit()) {
+                        c.rollback();
+                    }
+                } catch (SQLException e) {
+                    //nothing to do
+                }
+                try {
                     c.close();
                 } catch (SQLException e) {
                     //nothing to do
