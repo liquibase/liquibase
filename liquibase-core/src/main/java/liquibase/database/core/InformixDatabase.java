@@ -34,7 +34,10 @@ import liquibase.statement.core.SelectFromDatabaseChangeLogStatement;
 import liquibase.statement.core.SetNullableStatement;
 import liquibase.statement.core.UpdateChangeSetChecksumStatement;
 import liquibase.statement.core.UpdateStatement;
+import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.Catalog;
 import liquibase.structure.core.Column;
+import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
 
 public class InformixDatabase extends AbstractJdbcDatabase {
@@ -403,4 +406,13 @@ public class InformixDatabase extends AbstractJdbcDatabase {
 	public boolean supportsSchemas() {
 		return false;
 	}
+
+    @Override
+    public String escapeObjectName(String catalogName, String schemaName, String objectName, Class<? extends DatabaseObject> objectType) {
+        if (Table.class.isAssignableFrom(objectType) && catalogName != null && schemaName != null) {
+            return escapeObjectName(catalogName, Catalog.class)+":"+escapeObjectName(schemaName, Schema.class)+"."+escapeObjectName(objectName, Table.class);
+        } else {
+            return super.escapeObjectName(catalogName, schemaName, objectName, objectType);
+        }
+    }
 }
