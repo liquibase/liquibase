@@ -28,7 +28,11 @@ import java.util.List;
 
 public class MockDatabase implements Database {
 
-    public int getPriority() {
+    private boolean outputDefaultSchema;
+    private boolean outputDefaultCatalog;
+
+
+	public int getPriority() {
         return PRIORITY_DEFAULT;
     }
 
@@ -580,6 +584,32 @@ public class MockDatabase implements Database {
     }
 
     public boolean createsIndexesForForeignKeys() {
+        return false;
+    }
+
+
+	public void setOutputDefaultSchema(boolean outputDefaultSchema) {
+		this.outputDefaultSchema = outputDefaultSchema;
+	}
+
+
+	public boolean getOutputDefaultSchema() {
+		return outputDefaultSchema;
+	}
+
+    public boolean getOutputDefaultCatalog() {
+        return outputDefaultCatalog;
+    }
+
+    public void setOutputDefaultCatalog(boolean outputDefaultCatalog) {
+        this.outputDefaultCatalog = outputDefaultCatalog;
+    }
+
+    public boolean isDefaultSchema(String catalog, String schema) {
+        return false;
+    }
+
+    public boolean isDefaultCatalog(String catalog) {
         return false;
     }
 }

@@ -175,7 +175,6 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
 
     @Override
     public String escapeTableName(String catalogName, String schemaName, String tableName) {
-        // MSSQL server does not support the schema name for the index -
         return escapeObjectName(null, schemaName, tableName, Table.class);
     }
 
@@ -290,7 +289,7 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
      */
     @Override
     public String escapeViewName(String catalogName, String schemaName, String viewName) {
-        if (StringUtils.trimToNull(schemaName) == null) {
+        if (!getOutputDefaultSchema() && !isDefaultSchema(catalogName, schemaName)) {
             return escapeObjectName(viewName, View.class);
         } else {
             return escapeObjectName(schemaName, Schema.class)+"."+ escapeObjectName(viewName, Schema.class);

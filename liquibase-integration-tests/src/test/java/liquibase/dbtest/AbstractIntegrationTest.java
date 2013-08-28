@@ -39,7 +39,7 @@ import liquibase.test.JUnitResourceAccessor;
 import liquibase.test.TestContext;
 import liquibase.util.FileUtil;
 import liquibase.util.RegexMatcher;
-import liquibase.util.StreamUtil;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -51,6 +51,7 @@ import java.sql.Statement;
 import java.util.*;
 
 import static junit.framework.Assert.*;
+import static org.junit.Assert.assertFalse;
 
 /**
  * Base class for all database integration tests.  There is an AbstractIntegrationTest subclass for each supported database.
@@ -889,6 +890,40 @@ public abstract class AbstractIntegrationTest {
         clearDatabase(liquibase);
     }
 
+    @Test
+    public void testOutputChangeLogIgnoringSchema() throws Exception {
+        if (getDatabase() == null) {
+            return;
+        }
+        String schemaName = getDatabase().getDefaultSchemaName();
+        assertNotNull(schemaName);
+        boolean outputDefaultSchema = getDatabase().getOutputDefaultSchema();
+        getDatabase().setOutputDefaultSchema(false);
+
+        StringWriter output = new StringWriter();
+        Liquibase liquibase = createLiquibase(completeChangeLog);
+        clearDatabase(liquibase);
+
+        liquibase = createLiquibase(completeChangeLog);
+        liquibase.update(contexts, output);
+
+        String outputResult = output.getBuffer().toString();
+        assertNotNull(outputResult);
+        assertTrue(outputResult.length() > 100); //should be pretty big
+        System.out.println(outputResult);
+        CharSequence expected = "CREATE TABLE "+getDatabase().escapeTableName(getDatabase().getLiquibaseCatalogName(), getDatabase().getLiquibaseSchemaName(), getDatabase().getDatabaseChangeLogTableName());
+        assertTrue("create databasechangelog command not found in: \n" + outputResult, outputResult.contains(expected));
+        assertTrue("create databasechangeloglock command not found in: \n" + outputResult, outputResult.contains(expected));
+        assertFalse("the schame name should be ignored", outputResult.contains(schemaName));
+//        System.out.println("expected    : " + expected);
+//        System.out.println("outputResult: " + outputResult);
+
+        assertTrue(outputResult.contains("€"));
+        assertTrue(outputResult.contains("€"));
+
+        getDatabase().setOutputDefaultSchema(outputDefaultSchema);
+
+    }
     @Test
     public void generateChangeLog_noChanges() throws Exception{
         if (database == null) {

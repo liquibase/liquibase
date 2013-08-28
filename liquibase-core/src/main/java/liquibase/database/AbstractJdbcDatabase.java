@@ -102,6 +102,10 @@ public abstract class AbstractJdbcDatabase implements Database {
     // whether object names should be quoted
     protected ObjectQuotingStrategy quotingStrategy = ObjectQuotingStrategy.LEGACY;
 
+    private Boolean caseSensitive;
+    private boolean outputDefaultSchema = false;
+    private boolean outputDefaultCatalog = false;
+
     public String getName() {
         return toString();
     }
@@ -821,8 +825,6 @@ public abstract class AbstractJdbcDatabase implements Database {
             this.commit();
         }
     }
-    
-    private Boolean caseSensitive;
 
     public boolean isCaseSensitive() {
     	if (caseSensitive == null) {
@@ -1034,26 +1036,48 @@ public abstract class AbstractJdbcDatabase implements Database {
             if (catalogName == null && schemaName == null) {
                 return escapeObjectName(objectName, objectType);
             } else if (catalogName == null || !this.supportsCatalogInObjectName(objectType)) {
-                return escapeObjectName(schemaName, Schema.class) + "." + escapeObjectName(objectName, objectType);
+                if (isDefaultSchema(catalogName, schemaName) && !getOutputDefaultSchema()) {
+                    return escapeObjectName(objectName, objectType);
+                } else {
+                    return escapeObjectName(schemaName, Schema.class) + "." + escapeObjectName(objectName, objectType);
+                }
             } else {
-                return escapeObjectName(catalogName, Catalog.class) + "." + escapeObjectName(schemaName, Schema.class) + "." + escapeObjectName(objectName, objectType);
+                if (isDefaultSchema(catalogName, schemaName) && !getOutputDefaultSchema() && !getOutputDefaultCatalog()) {
+                    return escapeObjectName(objectName, objectType);
+                } else if (isDefaultSchema(catalogName, schemaName) && !getOutputDefaultCatalog()) {
+                    return escapeObjectName(schemaName, Schema.class) + "." + escapeObjectName(objectName, objectType);
+                } else {
+                    return escapeObjectName(catalogName, Catalog.class) + "." + escapeObjectName(schemaName, Schema.class) + "." + escapeObjectName(objectName, objectType);
+                }
             }
         } else if (supportsCatalogs()) {
             catalogName = StringUtils.trimToNull(catalogName);
             schemaName = StringUtils.trimToNull(schemaName);
 
             if (catalogName != null) {
-                return escapeObjectName(catalogName, Catalog.class) + "." + escapeObjectName(objectName, objectType);
+                if (isDefaultCatalog(catalogName) && getOutputDefaultCatalog()) {
+                    return escapeObjectName(catalogName, Catalog.class) + "." + escapeObjectName(objectName, objectType);
+                } else {
+                    return escapeObjectName(objectName, objectType);
+                }
             } else {
                 if (schemaName != null) { //they actually mean catalog name
-                    return escapeObjectName(schemaName, Catalog.class) + "." + escapeObjectName(objectName, objectType);
+                    if (isDefaultCatalog(schemaName) && getOutputDefaultCatalog()) {
+                        return escapeObjectName(schemaName, Catalog.class) + "." + escapeObjectName(objectName, objectType);
+                    } else {
+                        return escapeObjectName(objectName, objectType);
+                    }
                 } else {
                     catalogName = this.getDefaultCatalogName();
 
                     if (catalogName == null) {
                         return escapeObjectName(objectName, objectType);
                     } else {
-                        return escapeObjectName(catalogName, Catalog.class) + "." + escapeObjectName(objectName, objectType);
+                        if (isDefaultCatalog(catalogName) && getOutputDefaultCatalog()) {
+                            return escapeObjectName(catalogName, Catalog.class) + "." + escapeObjectName(objectName, objectType);
+                        } else {
+                            return escapeObjectName(objectName, objectType);
+                        }
                     }
                 }
             }
@@ -1538,5 +1562,42 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     public String getCurrentDateTimeFunction() {
         return currentDateTimeFunction;
+    }
+    
+ 	public void setOutputDefaultSchema(boolean outputDefaultSchema) {
+		this.outputDefaultSchema = outputDefaultSchema;
+ 		
+ 	}
+
+    public boolean isDefaultSchema(String catalog, String schema) {
+        if (!supportsSchemas()) {
+            return true;
+        }
+
+        if (!isDefaultCatalog(catalog)) {
+            return false;
+        }
+        return schema == null || schema.equalsIgnoreCase(getDefaultSchemaName());
+    }
+
+    public boolean isDefaultCatalog(String catalog) {
+        if (!supportsCatalogs()) {
+            return true;
+        }
+
+        return catalog == null || catalog.equalsIgnoreCase(getDefaultCatalogName());
+
+    }
+
+ 	public boolean getOutputDefaultSchema() {
+ 		return outputDefaultSchema;
+ 	}
+
+    public boolean getOutputDefaultCatalog() {
+        return outputDefaultCatalog;
+    }
+
+    public void setOutputDefaultCatalog(boolean outputDefaultCatalog) {
+        this.outputDefaultCatalog = outputDefaultCatalog;
     }
 }

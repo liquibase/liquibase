@@ -409,10 +409,13 @@ public class InformixDatabase extends AbstractJdbcDatabase {
 
     @Override
     public String escapeObjectName(String catalogName, String schemaName, String objectName, Class<? extends DatabaseObject> objectType) {
-        if (Table.class.isAssignableFrom(objectType) && catalogName != null && schemaName != null) {
-            return escapeObjectName(catalogName, Catalog.class)+":"+escapeObjectName(schemaName, Schema.class)+"."+escapeObjectName(objectName, Table.class);
-        } else {
-            return super.escapeObjectName(catalogName, schemaName, objectName, objectType);
+        String name = super.escapeObjectName(catalogName, schemaName, objectName, objectType);
+        if (name == null) {
+            return null;
         }
+        if (name.matches(".*\\..*\\..*")) {
+            name = name.replaceFirst("\\.", ":"); //informix uses : to separate catalog and schema. Like "catalog:schema.table"
+        }
+        return name;
     }
 }

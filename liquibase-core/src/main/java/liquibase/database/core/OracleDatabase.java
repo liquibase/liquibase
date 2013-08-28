@@ -147,16 +147,6 @@ public class OracleDatabase extends AbstractJdbcDatabase {
         return super.getDefaultCatalogName() == null ? null : super.getDefaultCatalogName().toUpperCase();
     }
 
-    @Override
-    public String escapeIndexName(String catalogName, String schemaName, String indexName) {
-        String escapedIndexName = escapeObjectName(indexName, Index.class);
-        if (schemaName != null)
-        {
-            escapedIndexName = escapeObjectName(schemaName, Schema.class) + "." + escapedIndexName;
-        }
-        return escapedIndexName;
-    }
-
     /**
      * Return an Oracle date literal with the same value as a string formatted using ISO 8601.
      * <p/>

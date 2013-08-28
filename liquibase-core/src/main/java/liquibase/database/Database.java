@@ -322,5 +322,20 @@ public interface Database extends PrioritizedService {
     ObjectQuotingStrategy getObjectQuotingStrategy();
 
     boolean createsIndexesForForeignKeys();
+
+    /**
+	 * Whether the default schema should be included in generated SQL
+	 */
+	void setOutputDefaultSchema(boolean outputDefaultSchema);
+
+	boolean getOutputDefaultSchema();
+
+    boolean isDefaultSchema(String catalog, String schema);
+
+    boolean isDefaultCatalog(String catalog);
+
+    boolean getOutputDefaultCatalog();
+
+    void setOutputDefaultCatalog(boolean outputDefaultCatalog);
 }
 
