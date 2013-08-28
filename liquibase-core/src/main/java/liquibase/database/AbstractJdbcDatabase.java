@@ -1459,6 +1459,10 @@ public abstract class AbstractJdbcDatabase implements Database {
         throw new DatabaseException("ForeignKeyChecks Management not supported");
     }
 
+    public boolean createsIndexesForForeignKeys() {
+        return false;
+    }
+
     public int getDataTypeMaxParameters(String dataTypeName) {
         return 2;
     }

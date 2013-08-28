@@ -181,4 +181,9 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
         }
         return string.replace("\\", "\\\\");
     }
+
+    @Override
+    public boolean createsIndexesForForeignKeys() {
+        return true;
+    }
 }

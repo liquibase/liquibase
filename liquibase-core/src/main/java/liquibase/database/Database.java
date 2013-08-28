@@ -321,5 +321,6 @@ public interface Database extends PrioritizedService {
 
     ObjectQuotingStrategy getObjectQuotingStrategy();
 
+    boolean createsIndexesForForeignKeys();
 }
 
