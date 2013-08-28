@@ -26,7 +26,7 @@ public class IntType extends LiquibaseDataType {
             return new DatabaseDataType("SERIAL");
         }
         if (database instanceof OracleDatabase) {
-            return new DatabaseDataType("INTEGER", getParameters());
+            return new DatabaseDataType("INTEGER");
         }
         if (database instanceof DB2Database || database instanceof DerbyDatabase) {
             return new DatabaseDataType("INTEGER");

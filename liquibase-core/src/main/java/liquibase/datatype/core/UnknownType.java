@@ -1,6 +1,7 @@
 package liquibase.datatype.core;
 
 import liquibase.database.Database;
+import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.core.MySQLDatabase;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.datatype.DatabaseDataType;
@@ -32,7 +33,13 @@ public class UnknownType extends LiquibaseDataType {
                         || getName().equalsIgnoreCase("MEDIUMBLOB")
                         || getName().equalsIgnoreCase("TINYTEXT")
                         || getName().equalsIgnoreCase("MEDIUMTEXT")
-        )|| (database instanceof MSSQLDatabase && getName().equalsIgnoreCase("REAL"))) {
+                        || getName().equalsIgnoreCase("REAL")
+        )) {
+            parameters = new Object[0];
+        }
+
+        if (database instanceof MSSQLDatabase &&
+                getName().equalsIgnoreCase("REAL")) {
             parameters = new Object[0];
         }
 

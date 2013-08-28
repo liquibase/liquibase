@@ -272,20 +272,22 @@ public abstract class AbstractIntegrationTest {
         try {
             statement = ((JdbcConnection) database.getConnection()).getUnderlyingConnection().createStatement();
             try {
-                statement.execute("drop table " + database.escapeTableName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName()));
+                try {
+                    statement.execute("drop table " + database.escapeTableName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName()));
+                    database.commit();
+                } catch (Exception e) {
+                    System.out.println("Probably expected error dropping databasechangelog table");
+                    e.printStackTrace();
+                }
+                try {
+                    statement.execute("drop table " + database.escapeTableName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName()));
+                    database.commit();
+                } catch (Exception e) {
+                    System.out.println("Probably expected error dropping databasechangeloglock table");
+                    e.printStackTrace();
+                }
+            } finally {
                 statement.close();
-                database.commit();
-            } catch (Exception e) {
-                System.out.println("Probably expected error dropping databasechangelog table");
-                e.printStackTrace();
-            }
-            try {
-                statement.execute("drop table " + database.escapeTableName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName()));
-                statement.close();
-                database.commit();
-            } catch (Exception e) {
-                System.out.println("Probably expected error dropping databasechangeloglock table");
-                e.printStackTrace();
             }
         } catch (SQLException e) {
             throw new DatabaseException(e);

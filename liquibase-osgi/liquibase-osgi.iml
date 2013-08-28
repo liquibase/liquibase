@@ -15,7 +15,7 @@
           <property key="DynamicImport-Package" value="net.sf.cglib.*" />
           <property key="-include" value="src/main/resources/META-INF/MANIFEST.MF" />
           <property key="Bundle-ClassPath" value=".,liquibase-core-3.0.3-SNAPSHOT.jar,snakeyaml-1.12.jar" />
-          <property key="Include-Resource" value="liquibase-core-3.0.3-SNAPSHOT.jar=$MODULE_DIR$/../liquibase-core/pom.xml,snakeyaml-1.12.jar=$MAVEN_REPOSITORY$/org/yaml/snakeyaml/1.12/snakeyaml-1.12.jar" />
+          <property key="Include-Resource" value="liquibase-core-3.0.3-SNAPSHOT.jar=C:/src/liquibase/liquibase/liquibase-core/pom.xml,snakeyaml-1.12.jar=C:/Users/nvoxland/.m2/repository/org/yaml/snakeyaml/1.12/snakeyaml-1.12.jar" />
           <property key="Embedded-Artifacts" value="liquibase-core-3.0.3-SNAPSHOT.jar;g=&quot;org.liquibase&quot;;a=&quot;liquibase-core&quot;;v=&quot;3.0.3-SNAPSHOT&quot;,snakeyaml-1.12.jar;g=&quot;org.yaml&quot;;a=&quot;snakeyaml&quot;;v=&quot;1.12&quot;" />
         </additionalProperties>
         <additionalJARContents />

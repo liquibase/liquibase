@@ -8,15 +8,15 @@
     <packaging>jar</packaging>
 
     <parent>
-      <groupId>com.datical</groupId>
+      <groupId>org.liquibase</groupId>
       <artifactId>liquibase-parent</artifactId>
-      <version>3.0.3.1-SNAPSHOT</version>
+      <version>3.0.3-SNAPSHOT</version>
       <relativePath>../pom.xml</relativePath>
     </parent>
     
     <properties>
         <bundle.namespace>liquibase.*</bundle.namespace>
-        <project.version>3.0.0-SNAPSHOT</project.version>
+        <project.version>3.0.3</project.version>
     </properties>
 
     <dependencies>
@@ -250,3 +250,4 @@
     </profiles>
 
 </project>
+

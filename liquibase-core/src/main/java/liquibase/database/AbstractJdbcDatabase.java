@@ -93,6 +93,7 @@ public abstract class AbstractJdbcDatabase implements Database {
     private boolean canCacheLiquibaseTableInfo = false;
     private boolean hasDatabaseChangeLogTable = false;
     private boolean hasDatabaseChangeLogLockTable = false;
+    private boolean isDatabaseChangeLogLockTableInitialized = false;
 
     protected BigInteger defaultAutoIncrementStartWith = BigInteger.ONE;
     protected BigInteger defaultAutoIncrementBy = BigInteger.ONE;
@@ -756,12 +757,43 @@ public abstract class AbstractJdbcDatabase implements Database {
         return hasTable;
     }
 
+    public boolean isDatabaseChangeLogLockTableInitialized(boolean tableJustCreated) throws DatabaseException {
+        if (canCacheLiquibaseTableInfo && isDatabaseChangeLogLockTableInitialized) {
+            return true;
+        }
+        boolean initialized;
+        Executor executor = ExecutorService.getInstance().getExecutor(this);
+        try {
+            initialized = executor.queryForInt(new RawSqlStatement("select count(*) from " + this.escapeTableName(this.getLiquibaseCatalogName(), this.getLiquibaseSchemaName(), this.getDatabaseChangeLogLockTableName()))) > 0;
+        } catch (LiquibaseException e) {
+            if (executor.updatesDatabase()) {
+                throw new UnexpectedLiquibaseException(e);
+            } else {
+                //probably didn't actually create the table yet.
+
+                initialized = !tableJustCreated;
+            }
+        }
+        if (canCacheLiquibaseTableInfo) {
+            isDatabaseChangeLogLockTableInitialized = initialized;
+        }
+        return initialized;
+    }
+
     public String getLiquibaseCatalogName() {
         return liquibaseCatalogName == null ? getDefaultCatalogName() : liquibaseCatalogName;
     }
 
+    public void setLiquibaseCatalogName(String catalogName) {
+        this.liquibaseCatalogName = catalogName;
+    }
+
     public String getLiquibaseSchemaName() {
         return liquibaseSchemaName == null ? getDefaultSchemaName() : liquibaseSchemaName;
+    }
+
+    public void setLiquibaseSchemaName(String schemaName) {
+        this.liquibaseSchemaName = schemaName;
     }
 
     /**
@@ -771,6 +803,7 @@ public abstract class AbstractJdbcDatabase implements Database {
      */
     public void checkDatabaseChangeLogLockTable() throws DatabaseException {
 
+        boolean createdTable = false;
         Executor executor = ExecutorService.getInstance().getExecutor(this);
         if (!hasDatabaseChangeLogLockTable()) {
 
@@ -779,6 +812,13 @@ public abstract class AbstractJdbcDatabase implements Database {
             this.commit();
             LogFactory.getLogger().debug("Created database lock table with name: " + escapeTableName(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogLockTableName()));
             this.hasDatabaseChangeLogLockTable = true;
+            createdTable = true;
+        }
+
+        if (!isDatabaseChangeLogLockTableInitialized(createdTable)) {
+            executor.comment("Initialize Database Lock Table");
+            executor.execute(new InitializeDatabaseChangeLogLockTableStatement());
+            this.commit();
         }
     }
     

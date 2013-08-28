@@ -55,7 +55,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
             method.invoke(sqlConn, true);
 
             reservedWords.addAll(Arrays.asList(sqlConn.getMetaData().getSQLKeywords().toUpperCase().split(",\\s*")));
-            reservedWords.addAll(Arrays.asList("USER", "SESSION","RESOURCE", "START", "SIZE")); //more reserved words not returned by driver
+            reservedWords.addAll(Arrays.asList("GROUP", "USER", "SESSION","PASSWORD", "RESOURCE", "START", "SIZE")); //more reserved words not returned by driver
         } catch (Exception e) {
             LogFactory.getLogger().info("Could not set remarks reporting on OracleDatabase: " + e.getMessage());
             ; //cannot set it. That is OK
@@ -83,7 +83,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
 
     @Override
     public String getJdbcSchemaName(CatalogAndSchema schema) {
-        return schema.getCatalogName();
+        return schema.getCatalogName() == null ? schema.getSchemaName() : schema.getCatalogName();
     }
 
     @Override
@@ -204,6 +204,10 @@ public class OracleDatabase extends AbstractJdbcDatabase {
             return false;
         }
 
+        if (this.isLiquibaseObject(example)) {
+            return false;
+        }
+
         if (example instanceof Schema) {
             if ("SYSTEM".equals(example.getName()) || "SYS".equals(example.getName()) || "CTXSYS".equals(example.getName())|| "XDB".equals(example.getName())) {
                 return true;
@@ -211,7 +215,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
             if ("SYSTEM".equals(example.getSchema().getCatalogName()) || "SYS".equals(example.getSchema().getCatalogName()) || "CTXSYS".equals(example.getSchema().getCatalogName()) || "XDB".equals(example.getSchema().getCatalogName())) {
                 return true;
             }
-        }else if (isSystemObject(example.getSchema())) {
+        } else if (isSystemObject(example.getSchema())) {
             return true;
         }
         if (example instanceof Catalog) {

@@ -461,9 +461,17 @@ public class MockDatabase implements Database {
         return null;
     }
 
+    public void setLiquibaseCatalogName(String catalogName) {
+
+    }
+
     public String getLiquibaseSchemaName(){
 		return null;
 	}
+
+    public void setLiquibaseSchemaName(String schemaName) {
+
+    }
 
     public String getLiquibaseTablespaceName() {
         return null;

@@ -175,7 +175,8 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
                             } else if (columnConfig.getType().equalsIgnoreCase("STRING")) {
                                 valueConfig.setValue(value.toString());
                             } else if (columnConfig.getType().equalsIgnoreCase("COMPUTED")) {
-                                valueConfig.setValue(value.toString());
+                                liquibase.statement.DatabaseFunction function = new liquibase.statement.DatabaseFunction(value.toString());
+                                valueConfig.setValueComputed(function);
                             } else {
                                 throw new UnexpectedLiquibaseException("loadData type of "+columnConfig.getType()+" is not supported.  Please use BOOLEAN, NUMERIC, DATE, STRING, COMPUTED or SKIP");
                             }
