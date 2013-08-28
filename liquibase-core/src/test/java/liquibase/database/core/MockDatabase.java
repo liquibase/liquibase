@@ -578,4 +578,8 @@ public class MockDatabase implements Database {
     public boolean supportsCatalogInObjectName(Class<? extends DatabaseObject> type) {
         return true;
     }
+
+    public boolean createsIndexesForForeignKeys() {
+        return false;
+    }
 }
