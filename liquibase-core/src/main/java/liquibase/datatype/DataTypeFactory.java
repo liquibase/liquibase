@@ -88,7 +88,7 @@ public class DataTypeFactory {
             dataTypeName = dataTypeDefinition.replaceFirst("\\s*\\(.*\\)", "");
         }
         if (dataTypeName.matches(".+\\{.*")) {
-            dataTypeName = dataTypeDefinition.replaceFirst("\\s*\\{.*", "");
+            dataTypeName = dataTypeName.replaceFirst("\\s*\\{.*", "");
         }
         boolean primaryKey = false;
         if (dataTypeName.endsWith(" identity")) {
