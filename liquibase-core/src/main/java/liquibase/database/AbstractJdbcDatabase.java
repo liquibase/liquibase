@@ -1055,17 +1055,25 @@ public abstract class AbstractJdbcDatabase implements Database {
             schemaName = StringUtils.trimToNull(schemaName);
 
             if (catalogName != null) {
-                if (isDefaultCatalog(catalogName) && getOutputDefaultCatalog()) {
+                if (getOutputDefaultCatalog()) {
                     return escapeObjectName(catalogName, Catalog.class) + "." + escapeObjectName(objectName, objectType);
                 } else {
-                    return escapeObjectName(objectName, objectType);
+                    if (isDefaultCatalog(catalogName)) {
+                        return escapeObjectName(objectName, objectType);
+                    } else {
+                        return escapeObjectName(catalogName, Catalog.class) + "." + escapeObjectName(objectName, objectType);
+                    }
                 }
             } else {
                 if (schemaName != null) { //they actually mean catalog name
-                    if (isDefaultCatalog(schemaName) && getOutputDefaultCatalog()) {
+                    if (getOutputDefaultCatalog()) {
                         return escapeObjectName(schemaName, Catalog.class) + "." + escapeObjectName(objectName, objectType);
                     } else {
-                        return escapeObjectName(objectName, objectType);
+                        if (isDefaultCatalog(schemaName)) {
+                            return escapeObjectName(objectName, objectType);
+                        } else {
+                            return escapeObjectName(schemaName, Catalog.class) + "." + escapeObjectName(objectName, objectType);
+                        }
                     }
                 } else {
                     catalogName = this.getDefaultCatalogName();
@@ -1088,12 +1096,12 @@ public abstract class AbstractJdbcDatabase implements Database {
     }
 
     public String escapeObjectName(String objectName, Class<? extends DatabaseObject> objectType) {
-        if (objectName == null || quotingStrategy == ObjectQuotingStrategy.LEGACY) {
-            return objectName;
-        } else if (objectName.contains("-") || startsWithNumeric(objectName) || isReservedWord(objectName)) {
-            return quotingStartCharacter + objectName + quotingEndCharacter;
-        } else if (quotingStrategy == ObjectQuotingStrategy.QUOTE_ALL_OBJECTS) {
-            return quotingStartCharacter + objectName + quotingEndCharacter;
+        if (objectName != null) {
+            if (objectName.contains("-") || startsWithNumeric(objectName) || isReservedWord(objectName)) {
+                return quotingStartCharacter + objectName + quotingEndCharacter;
+            } else if (quotingStrategy == ObjectQuotingStrategy.QUOTE_ALL_OBJECTS) {
+                return quotingStartCharacter + objectName + quotingEndCharacter;
+            }
         }
         return objectName;
     }
