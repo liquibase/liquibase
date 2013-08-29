@@ -161,13 +161,10 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
 
     @Override
     public String escapeObjectName(String objectName, Class<? extends DatabaseObject> objectType) {
-        if (objectName == null || quotingStrategy != ObjectQuotingStrategy.LEGACY) {
-            return super.escapeObjectName(objectName, objectType);
-        }
-        if (objectName.contains("-") || hasMixedCase(objectName) || startsWithNumeric(objectName) || isReservedWord(objectName)) {
+        if (hasMixedCase(objectName)) {
             return "\"" + objectName + "\"";
         } else {
-            return objectName;
+            return super.escapeObjectName(objectName, objectType);
         }
     }
 
@@ -191,6 +188,9 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
     * Method is public so a subclass extension can override it to always return false.
     */
     protected boolean hasMixedCase(String tableName) {
+        if (tableName == null) {
+            return false;
+        }
         return tableName.matches(".*[A-Z].*") && tableName.matches(".*[a-z].*");
     }
 

@@ -104,6 +104,15 @@ public class AddColumnStatement extends AbstractSqlStatement {
         return false;
     }
 
+    public String getUniqueStatementName() {
+        for (ColumnConstraint constraint : getConstraints()) {
+            if (constraint instanceof UniqueConstraint) {
+                return ((UniqueConstraint) constraint).getConstraintName();
+            }
+        }
+        return null;
+    }
+
     public Object getDefaultValue() {
         return defaultValue;
     }

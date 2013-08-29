@@ -21,6 +21,9 @@ public class LiquibaseUpdateMojoTest extends AbstractLiquibaseMojoTest {
     DEFAULT_PROPERTIES.put("username", "root");
     DEFAULT_PROPERTIES.put("password", null);
     DEFAULT_PROPERTIES.put("verbose", true);
+    DEFAULT_PROPERTIES.put("outputDefaultSchema", false);
+    DEFAULT_PROPERTIES.put("outputDefaultCatalog", false);
+    DEFAULT_PROPERTIES.put("outputFileEncoding", "UTF-8");
   }
 
   public void testNoPropertiesFile() throws Exception {

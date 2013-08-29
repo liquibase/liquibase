@@ -55,7 +55,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
             method.invoke(sqlConn, true);
 
             reservedWords.addAll(Arrays.asList(sqlConn.getMetaData().getSQLKeywords().toUpperCase().split(",\\s*")));
-            reservedWords.addAll(Arrays.asList("GROUP", "USER", "SESSION","RESOURCE", "START", "SIZE")); //more reserved words not returned by driver
+            reservedWords.addAll(Arrays.asList("GROUP", "USER", "SESSION","PASSWORD", "RESOURCE", "START", "SIZE")); //more reserved words not returned by driver
         } catch (Exception e) {
             LogFactory.getLogger().info("Could not set remarks reporting on OracleDatabase: " + e.getMessage());
             ; //cannot set it. That is OK
@@ -147,16 +147,6 @@ public class OracleDatabase extends AbstractJdbcDatabase {
         return super.getDefaultCatalogName() == null ? null : super.getDefaultCatalogName().toUpperCase();
     }
 
-    @Override
-    public String escapeIndexName(String catalogName, String schemaName, String indexName) {
-        String escapedIndexName = escapeObjectName(indexName, Index.class);
-        if (schemaName != null)
-        {
-            escapedIndexName = escapeObjectName(schemaName, Schema.class) + "." + escapedIndexName;
-        }
-        return escapedIndexName;
-    }
-
     /**
      * Return an Oracle date literal with the same value as a string formatted using ISO 8601.
      * <p/>
@@ -204,6 +194,10 @@ public class OracleDatabase extends AbstractJdbcDatabase {
             return false;
         }
 
+        if (this.isLiquibaseObject(example)) {
+            return false;
+        }
+
         if (example instanceof Schema) {
             if ("SYSTEM".equals(example.getName()) || "SYS".equals(example.getName()) || "CTXSYS".equals(example.getName())|| "XDB".equals(example.getName())) {
                 return true;
@@ -211,7 +205,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
             if ("SYSTEM".equals(example.getSchema().getCatalogName()) || "SYS".equals(example.getSchema().getCatalogName()) || "CTXSYS".equals(example.getSchema().getCatalogName()) || "XDB".equals(example.getSchema().getCatalogName())) {
                 return true;
             }
-        }else if (isSystemObject(example.getSchema())) {
+        } else if (isSystemObject(example.getSchema())) {
             return true;
         }
         if (example instanceof Catalog) {

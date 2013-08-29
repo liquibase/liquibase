@@ -26,8 +26,7 @@ public class UnexpectedForeignKeyChangeGenerator implements UnexpectedObjectChan
 
     public Class<? extends DatabaseObject>[] runBeforeTypes() {
         return new Class[] {
-                Table.class,
-                Index.class
+                Table.class
         };
     }
 

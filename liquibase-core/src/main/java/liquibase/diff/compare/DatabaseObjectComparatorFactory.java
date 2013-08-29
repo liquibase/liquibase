@@ -83,6 +83,12 @@ public class DatabaseObjectComparatorFactory {
     }
 
     public boolean isSameObject(DatabaseObject object1, DatabaseObject object2, Database accordingTo) {
+        if (object1 == null && object2 == null) {
+            return true;
+        }
+        if (object1 == null || object2 == null) {
+            return false;
+        }
         return createComparatorChain(object1.getClass(), accordingTo).isSameObject(object1, object2, accordingTo);
     }
 

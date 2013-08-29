@@ -74,12 +74,19 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
 
     protected List<Map> listConstraints(Table table, Database database, Schema schema) throws DatabaseException {
         String sql = null;
-        if (database instanceof MySQLDatabase || database instanceof PostgresDatabase|| database instanceof HsqlDatabase) {
+        if (database instanceof MySQLDatabase || database instanceof HsqlDatabase) {
             sql = "select CONSTRAINT_NAME " +
                     "from information_schema.table_constraints " +
                     "where constraint_schema='" + database.correctObjectName(schema.getCatalogName(), Catalog.class) + "' " +
                     "and constraint_type='UNIQUE' " +
                     "and table_name='" + database.correctObjectName(table.getName(), Table.class) + "'";
+        } else if (database instanceof PostgresDatabase) {
+                sql = "select CONSTRAINT_NAME " +
+                        "from information_schema.table_constraints " +
+                        "where constraint_catalog='" + database.correctObjectName(schema.getCatalogName(), Catalog.class) + "' " +
+                        "and constraint_schema='"+database.correctObjectName(schema.getSchema().getName(), Schema.class)+"' " +
+                        "and constraint_type='UNIQUE' " +
+                        "and table_name='" + database.correctObjectName(table.getName(), Table.class) + "'";
         } else if (database instanceof MSSQLDatabase) {
             sql = "select Constraint_Name from information_schema.table_constraints " +
                     "where constraint_type = 'Unique' " +
@@ -143,7 +150,19 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
                     "and const.table_name='" + database.correctObjectName(example.getTable().getName(), Table.class) + "' " +
                     "and const.constraint_name='" + database.correctObjectName(name, UniqueConstraint.class) + "'" +
                     "order by ordinal_position";
-        } else if (database instanceof MSSQLDatabase) {
+        } else if (database instanceof PostgresDatabase) {
+                sql = "select const.CONSTRAINT_NAME, COLUMN_NAME " +
+                        "from information_schema.table_constraints const " +
+                        "join information_schema.key_column_usage col " +
+                        "on const.constraint_schema=col.constraint_schema " +
+                        "and const.table_name=col.table_name " +
+                        "and const.constraint_name=col.constraint_name " +
+                        "where const.constraint_catalog='" + database.correctObjectName(schema.getCatalogName(), Catalog.class) + "' " +
+                        "and const.constraint_schema='" + database.correctObjectName(schema.getSchema().getName(), Schema.class) + "' " +
+                        "and const.table_name='" + database.correctObjectName(example.getTable().getName(), Table.class) + "' " +
+                        "and const.constraint_name='" + database.correctObjectName(name, UniqueConstraint.class) + "'" +
+                        "order by ordinal_position";
+            } else if (database instanceof MSSQLDatabase) {
             sql = "select TC.Constraint_Name as CONSTRAINT_NAME, CC.Column_Name as COLUMN_NAME from information_schema.table_constraints TC " +
                     "inner join information_schema.constraint_column_usage CC on TC.Constraint_Name = CC.Constraint_Name " +
                     "where TC.constraint_schema='" + database.correctObjectName(schema.getCatalogName(), Catalog.class) + "' " +

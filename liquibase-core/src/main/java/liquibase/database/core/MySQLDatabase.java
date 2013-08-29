@@ -6,11 +6,13 @@ import liquibase.CatalogAndSchema;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
 import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.Catalog;
 import liquibase.structure.core.Index;
 import liquibase.structure.core.PrimaryKey;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.ExecutorService;
 import liquibase.statement.core.RawSqlStatement;
+import liquibase.structure.core.Schema;
 
 /**
  * Encapsulates MySQL database support.
@@ -21,8 +23,8 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
     public MySQLDatabase() {
         super.setCurrentDateTimeFunction("NOW()");
         // objects in mysql are always case sensitive
-        super.quotingStartCharacter ="";
-        super.quotingEndCharacter="";
+        super.quotingStartCharacter ="`";
+        super.quotingEndCharacter="`";
     }
 
     public String getShortName() {
@@ -180,5 +182,10 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
             return null;
         }
         return string.replace("\\", "\\\\");
+    }
+
+    @Override
+    public boolean createsIndexesForForeignKeys() {
+        return true;
     }
 }

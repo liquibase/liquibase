@@ -225,6 +225,19 @@ public class FormattedSqlChangeLogParserTest {
         assertEquals("drop table my_table;", ((RawSQLChange) cs.getRollBackChanges()[0]).getSql());
     }
 
+    @Test
+    public void parse_authorWithSpace() throws Exception {
+        String changeLogWithSpace = "--liquibase formatted sql\n\n"+
+                "--changeset John Doe:12345\n" +
+                "create table test (id int);\n";
+
+        DatabaseChangeLog changeLog = new MockFormattedSqlChangeLogParser(changeLogWithSpace).parse("asdf.sql", new ChangeLogParameters(), new JUnitResourceAccessor());
+        assertEquals(1, changeLog.getChangeSets().size());
+        assertEquals("John Doe", changeLog.getChangeSets().get(0).getAuthor());
+        assertEquals("12345", changeLog.getChangeSets().get(0).getId());
+
+    }
+
     private static class MockFormattedSqlChangeLogParser extends FormattedSqlChangeLogParser {
         private String changeLog;
 

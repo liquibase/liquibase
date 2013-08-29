@@ -22,4 +22,24 @@ public class CharType extends LiquibaseDataType {
         }
     }
 
+    /**
+     * Return the size of this data type definition. If unknown or unspecified, return -1
+     */
+    protected int getSize() {
+        if (getParameters().length == 0) {
+            return -1;
+        }
+
+        if (getParameters()[0] instanceof String) {
+            return Integer.valueOf((String) getParameters()[0]);
+        }
+
+        if (getParameters()[0] instanceof Number) {
+            return ((Number) getParameters()[0]).intValue();
+        }
+
+        return -1;
+    }
+
+
 }
