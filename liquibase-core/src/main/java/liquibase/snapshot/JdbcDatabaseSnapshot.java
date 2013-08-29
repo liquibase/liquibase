@@ -10,6 +10,8 @@ import liquibase.structure.core.Table;
 import java.sql.*;
 import java.util.*;
 
+import liquibase.logging.LogFactory;
+
 public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
     private CachingDatabaseMetaData cachingDatabaseMetaData;
     private int tablesOfColumnsFetched = 0;
@@ -153,12 +155,12 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                     }
                 }
                 if (filteredList.size() == 0) {
-                    System.out.println("zero size");
+                    LogFactory.getInstance().getLog().debug("zero size");
                 }
                 return filteredList;
             } else {
                 if (returnList.size() == 0) {
-                    System.out.println("zero size");
+                    LogFactory.getInstance().getLog().debug("zero size");
                 }
                 return returnList;
             }
