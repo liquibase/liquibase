@@ -1058,12 +1058,6 @@
         },
 
         {
-            "includeAll": {
-                "path": "changelogs/common/pathincluded/"
-            }
-        },
-
-        {
             "include": {
                 "file": "includerelative\\pathinclude1.changelog.xml",
                 "relativeToChangelogFile": true
@@ -1168,11 +1162,6 @@
                     }
                 ]
             }
-        },
-
-        {
-            "includeAll": {
-                "path": "com/example/packaged"
-            }
         }
+
     ]}

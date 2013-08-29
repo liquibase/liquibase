@@ -1,0 +1,26 @@
+{
+    "databaseChangeLog": [
+        {
+            "changeSet": {
+                "id": "included_json",
+                "author": "nvoxland",
+                "changes": [
+                    {
+                        "createTable": {
+                            "tableName": "included_json",
+                            "columns": [
+                                {
+                                    "column": {
+                                        "name": "id",
+                                        "type": "int"
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                ]
+            }
+
+        }
+    ]
+}

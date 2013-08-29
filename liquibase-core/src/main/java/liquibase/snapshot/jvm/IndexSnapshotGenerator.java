@@ -1,25 +1,32 @@
 package liquibase.snapshot.jvm;
 
+import java.sql.DatabaseMetaData;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
 import liquibase.database.core.DB2Database;
 import liquibase.database.core.DerbyDatabase;
 import liquibase.database.core.InformixDatabase;
 import liquibase.database.core.OracleDatabase;
-import liquibase.database.jvm.JdbcConnection;
-import liquibase.diff.compare.DatabaseObjectComparator;
 import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.exception.DatabaseException;
-import liquibase.snapshot.*;
+import liquibase.snapshot.DatabaseSnapshot;
+import liquibase.snapshot.InvalidExampleException;
+import liquibase.snapshot.JdbcDatabaseSnapshot;
+import liquibase.snapshot.SnapshotControl;
+import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.core.*;
-
-import java.io.FileOutputStream;
-import java.sql.DatabaseMetaData;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.*;
+import liquibase.structure.core.Catalog;
+import liquibase.structure.core.Column;
+import liquibase.structure.core.ForeignKey;
+import liquibase.structure.core.Index;
+import liquibase.structure.core.Schema;
+import liquibase.structure.core.Table;
+import liquibase.structure.core.UniqueConstraint;
 
 public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
     public IndexSnapshotGenerator() {
@@ -175,6 +182,7 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                         index = new Index();
                         index.setName(indexName);
                         index.setTable(table);
+                        foundIndexes.put(indexName, index);
                     }
                     index.getColumns().add(row.getString("COLUMN_NAME"));
                 }
@@ -214,10 +222,15 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
 
         List<Table> tables = new ArrayList<Table>();
         if (exampleTable.getName() == null) {
-            DatabaseSnapshot tableSnapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(schema.toCatalogAndSchema(), database, new SnapshotControl(Table.class, Schema.class, Catalog.class)); //todo: don't get from Factory
+            DatabaseSnapshot tableSnapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(schema.toCatalogAndSchema(), database, new SnapshotControl(snapshot.getDatabase(), Table.class, Schema.class, Catalog.class)); //todo: don't get from Factory
             tables.addAll(tableSnapshot.get(Table.class));
         } else {
-            tables.add(exampleTable);
+            Table snapshotTable = snapshot.get(exampleTable);
+            if (snapshotTable == null) {
+                tables.add(exampleTable);
+            } else {
+                tables.add(snapshotTable);
+            }
         }
         Map<String, Index> foundIndexes = new HashMap<String, Index>();
         for (Table table : tables) {
@@ -317,8 +330,14 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
         } else {
             for (Index index : foundIndexes.values()) {
                 if (DatabaseObjectComparatorFactory.getInstance().isSameObject(index.getTable(), exampleTable, database)) {
-                    if (index.getColumnNames().equals(((Index) example).getColumnNames())) {
-                        return index;
+                    if (database.isCaseSensitive()) {
+                        if (index.getColumnNames().equals(((Index) example).getColumnNames())) {
+                            return index;
+                        }
+                    } else {
+                        if (index.getColumnNames().equalsIgnoreCase(((Index) example).getColumnNames())) {
+                            return index;
+                        }
                     }
                 }
             }

@@ -28,7 +28,7 @@ release on sonatype
 - staging repositories->select "org.liquibase..."
 - run "close" in top toolbar
 - select "org.liquibase..."
-- run "release" on top toolbar (will 
+- run "release" on top toolbar
 
 Test:
 - download files from download/index.html

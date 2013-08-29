@@ -62,7 +62,7 @@ public class LiquibaseRollbackSQL extends LiquibaseRollback {
 									+ migrationSqlOutputFile.getAbsolutePath());
 				}
 			}
-			outputWriter = new FileWriter(migrationSqlOutputFile);
+			outputWriter = getOutputWriter(migrationSqlOutputFile);
 		} catch (IOException e) {
 			getLog().error(e);
 			throw new MojoExecutionException(

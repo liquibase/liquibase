@@ -1,8 +1,6 @@
 package org.liquibase.maven.plugins;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.lang.reflect.Field;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -223,11 +221,21 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     private Map expressionVariables;
 
 
-    /*
-    @parameter expression="$ {liquibase.outputFileEncoding}
-            "
-            */
+    /**
+     * Flag to set the character encoding of the output file produced by Liquibase during the updateSQL phase.
+     *
+     * @parameter expression="${liquibase.outputFileEncoding}"
+     */
     protected String outputFileEncoding;
+
+    protected Writer getOutputWriter(final File outputFile) throws IOException {
+        if (outputFileEncoding==null) {
+            getLog().info("Char encoding not set! The created file will be system dependent!");
+            return new FileWriter(outputFile);
+        }
+        getLog().debug("Writing output file with [" + outputFileEncoding + "] file encoding.");
+        return new BufferedWriter(new OutputStreamWriter( new FileOutputStream(outputFile), outputFileEncoding));
+    }
 
     public void execute() throws MojoExecutionException, MojoFailureException {
         getLog().info(MavenUtils.LOG_SEPARATOR);
@@ -452,7 +460,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
         getLog().info(indent + "driver: " + driver);
         getLog().info(indent + "url: " + url);
         getLog().info(indent + "username: " + username);
-        getLog().info(indent + "password: " + password);
+        getLog().info(indent + "password: " + "*****");
         getLog().info(indent + "use empty password: " + emptyPassword);
         getLog().info(indent + "properties file: " + propertyFile);
         getLog().info(indent + "properties file will override? " + propertyFileWillOverride);

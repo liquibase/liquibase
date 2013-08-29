@@ -1,0 +1,12 @@
+databaseChangeLog:
+  - changeSet:
+      id: included_yaml
+      author: nv
+      changes:
+        - createTable:
+            tableName: included_yaml
+            columns:
+            - column:
+                name: id
+                type: int
+

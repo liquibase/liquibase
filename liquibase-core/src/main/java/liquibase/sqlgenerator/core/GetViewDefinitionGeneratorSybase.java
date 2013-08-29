@@ -24,8 +24,16 @@ public class GetViewDefinitionGeneratorSybase extends GetViewDefinitionGenerator
     public Sql[] generateSql(GetViewDefinitionStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         CatalogAndSchema schema = database.correctSchema(new CatalogAndSchema(statement.getCatalogName(), statement.getSchemaName()));
 
+        String schemaName = schema.getSchemaName();
+        if (schemaName == null) {
+            schemaName = database.getDefaultSchemaName();
+        }
+        if (schemaName == null) {
+            schemaName = "dbo";
+        }
+
         String sql = "select text from syscomments where id = object_id('" +
-                schema.getSchemaName() + "." +
+                schemaName + "." +
                 statement.getViewName() + "') order by colid";
 
         return new Sql[]{

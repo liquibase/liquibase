@@ -179,7 +179,7 @@ public class DerbyDatabase extends AbstractJdbcDatabase {
     }
 
     @Override
-    protected String doGetDefaultCatalogName() throws DatabaseException {
+    protected String getConnectionCatalogName() throws DatabaseException {
         try {
             ResultSet resultSet = ((JdbcConnection) getConnection()).prepareStatement("select current schema from sysibm.sysdummy1").executeQuery();
             resultSet.next();

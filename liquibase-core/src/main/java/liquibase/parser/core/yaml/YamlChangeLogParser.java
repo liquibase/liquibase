@@ -1,15 +1,16 @@
 package liquibase.parser.core.yaml;
 
 import liquibase.change.*;
-import liquibase.change.core.LoadDataChange;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.exception.ChangeLogParseException;
+import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.logging.LogFactory;
 import liquibase.logging.Logger;
 import liquibase.parser.ChangeLogParser;
+import liquibase.parser.ChangeLogParserFactory;
 import liquibase.precondition.CustomPreconditionWrapper;
 import liquibase.precondition.Precondition;
 import liquibase.precondition.PreconditionFactory;
@@ -21,14 +22,13 @@ import liquibase.sql.visitor.SqlVisitorFactory;
 import liquibase.statement.DatabaseFunction;
 import liquibase.statement.SequenceCurrentValueFunction;
 import liquibase.statement.SequenceNextValueFunction;
-import liquibase.util.ISODateFormat;
 import liquibase.util.ObjectUtil;
+import liquibase.util.file.FilenameUtils;
 import org.yaml.snakeyaml.Yaml;
 
-import java.io.IOException;
+import java.io.File;
 import java.io.InputStream;
 import java.math.BigInteger;
-import java.text.ParseException;
 import java.util.*;
 
 public class YamlChangeLogParser implements ChangeLogParser {
@@ -36,7 +36,11 @@ public class YamlChangeLogParser implements ChangeLogParser {
     protected Logger log = LogFactory.getLogger();
 
     public boolean supports(String changeLogFile, ResourceAccessor resourceAccessor) {
-        return changeLogFile.endsWith(".yaml");
+        return changeLogFile.endsWith("."+ getSupportedFileExtension());
+    }
+
+    protected String getSupportedFileExtension() {
+        return "yaml";
     }
 
     public int getPriority() {
@@ -53,7 +57,7 @@ public class YamlChangeLogParser implements ChangeLogParser {
             try {
                 changeLogAsMap = yaml.loadAs(changeLogStream, Map.class);
             } catch (Exception e) {
-                throw new ChangeLogParseException("Syntax error in yaml: " + e.getMessage(), e);
+                throw new ChangeLogParseException("Syntax error in "+getSupportedFileExtension()+": " + e.getMessage(), e);
             }
 
             DatabaseChangeLog changeLog = new DatabaseChangeLog(physicalChangeLogLocation);
@@ -79,7 +83,8 @@ public class YamlChangeLogParser implements ChangeLogParser {
                             getValue(changeSetMap, "runOnChange", boolean.class, false, changeLogParameters),
                             physicalChangeLogLocation,
                             getValue(changeSetMap, "context", String.class, changeLogParameters),
-                            getValue(changeSetMap, "dbms", String.class, changeLogParameters)
+                            getValue(changeSetMap, "dbms", String.class, changeLogParameters),
+                            changeLog
                     );
 
                     try {
@@ -320,16 +325,17 @@ public class YamlChangeLogParser implements ChangeLogParser {
                     }
                     file = file.replace('\\', '/');
                     boolean isRelativeToChangelogFile = getValue(includeMap, "relativeToChangelogFile", Boolean.class, false, changeLogParameters);
-//                    handleIncludedChangeLog(fileName, isRelativeToChangelogFile, physicalChangeLogLocation);
+                    handleIncludedChangeLog(file, isRelativeToChangelogFile, physicalChangeLogLocation, changeLog, changeLogParameters, resourceAccessor);
 
                 } else if (objectType.equals("includeAll")) {
-                    Map<String, Object> includeAllMap = (Map) nestedMap.get("includeAll");
-                    String path = getValue(includeAllMap, "path", String.class, changeLogParameters);
-                    if (path == null) {
-                        throw new ChangeLogParseException("Missing includeAll 'file' attribute");
-                    }
-                    path = path.replace('\\', '/');
-                    boolean isRelativeToChangelogFile = getValue(includeAllMap, "relativeToChangelogFile", Boolean.class, false, changeLogParameters);
+                    throw new ChangeLogParseException("includeAll not yet supported in "+getSupportedFileExtension());
+//                    Map<String, Object> includeAllMap = (Map) nestedMap.get("includeAll");
+//                    String path = getValue(includeAllMap, "path", String.class, changeLogParameters);
+//                    if (path == null) {
+//                        throw new ChangeLogParseException("Missing includeAll 'file' attribute");
+//                    }
+//                    path = path.replace('\\', '/');
+//                    boolean isRelativeToChangelogFile = getValue(includeAllMap, "relativeToChangelogFile", Boolean.class, false, changeLogParameters);
 //                    handleIncludedChangeLog(fileName, isRelativeToChangelogFile, physicalChangeLogLocation);
                 } else {
                     throw new ChangeLogParseException("Unexpected databaseChangeLog node: " + objectType);
@@ -407,4 +413,44 @@ public class YamlChangeLogParser implements ChangeLogParser {
             throw new ChangeLogParseException(outerNode + " is missing required attribute " + key);
         }
     }
+
+    protected boolean handleIncludedChangeLog(String fileName, boolean isRelativePath, String relativeBaseFileName, DatabaseChangeLog databaseChangeLog, ChangeLogParameters changeLogParameters, ResourceAccessor resourceAccessor) throws LiquibaseException {
+
+        if (fileName.equalsIgnoreCase(".svn") || fileName.equalsIgnoreCase("cvs")) {
+            return false;
+        }
+
+        ChangeLogParser changeLogParser = ChangeLogParserFactory.getInstance().getParser(fileName, resourceAccessor);
+        if (changeLogParser == null) {
+            log.warning("included file "+relativeBaseFileName + "/" + fileName + " is not a recognized file type");
+            return false;
+        }
+
+
+        if (isRelativePath) {
+            // workaround for FilenameUtils.normalize() returning null for relative paths like ../conf/liquibase.xml
+            String tempFile = FilenameUtils.concat(FilenameUtils.getFullPath(relativeBaseFileName), fileName);
+            if(tempFile != null && new File(tempFile).exists() == true) {
+                fileName = tempFile;
+            } else {
+                fileName = FilenameUtils.getFullPath(relativeBaseFileName) + fileName;
+            }
+        }
+        DatabaseChangeLog changeLog = ChangeLogParserFactory.getInstance().getParser(fileName, resourceAccessor).parse(fileName, changeLogParameters,
+                resourceAccessor);
+        PreconditionContainer preconditions = changeLog.getPreconditions();
+        if (preconditions != null) {
+            if (null == databaseChangeLog.getPreconditions()) {
+                databaseChangeLog.setPreconditions(new PreconditionContainer());
+            }
+            databaseChangeLog.getPreconditions().addNestedPrecondition(
+                    preconditions);
+        }
+        for (ChangeSet changeSet : changeLog.getChangeSets()) {
+            databaseChangeLog.addChangeSet(changeSet);
+        }
+
+        return true;
+    }
+
 }

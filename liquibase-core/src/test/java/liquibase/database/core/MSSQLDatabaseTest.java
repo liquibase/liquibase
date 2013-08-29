@@ -60,7 +60,7 @@ public class MSSQLDatabaseTest extends AbstractJdbcDatabaseTest {
     @Test
     public void changeDefaultSchema() throws DatabaseException {
         Database database = new MSSQLDatabase();
-        assertEquals("dbo", database.getDefaultSchemaName());
+        assertNull(database.getDefaultSchemaName());
 
         database.setDefaultSchemaName("myschema");
         assertEquals("myschema", database.getDefaultSchemaName());

@@ -121,6 +121,10 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
         return columns;
     }
 
+    public void setColumns(List<LoadDataColumnConfig> columns) {
+        this.columns = columns;
+    }
+
     public SqlStatement[] generateStatements(Database database) {
         CSVReader reader = null;
         try {

@@ -262,7 +262,7 @@ public abstract class AbstractIntegrationTest {
         assertTrue(outputResult.contains("€"));
         assertTrue(outputResult.contains("€"));
 
-        DatabaseSnapshot snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(database.getDefaultSchema(), database, new SnapshotControl());
+        DatabaseSnapshot snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(database.getDefaultSchema(), database, new SnapshotControl(database));
         assertEquals(0, snapshot.get(Schema.class).iterator().next().getDatabaseObjects(Table.class).size());
     }
 
@@ -273,16 +273,20 @@ public abstract class AbstractIntegrationTest {
             statement = ((JdbcConnection) database.getConnection()).getUnderlyingConnection().createStatement();
             try {
                 statement.execute("drop table " + database.escapeTableName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName()));
+                statement.close();
+                database.commit();
             } catch (Exception e) {
-                //ok
+                System.out.println("Probably expected error dropping databasechangelog table");
+                e.printStackTrace();
             }
             try {
                 statement.execute("drop table " + database.escapeTableName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName()));
+                statement.close();
+                database.commit();
             } catch (Exception e) {
-                //ok
+                System.out.println("Probably expected error dropping databasechangeloglock table");
+                e.printStackTrace();
             }
-            statement.close();
-            database.commit();
         } catch (SQLException e) {
             throw new DatabaseException(e);
         }
@@ -424,7 +428,7 @@ public abstract class AbstractIntegrationTest {
             boolean outputCsv = run == 1;
             runCompleteChangeLog();
 
-            SnapshotControl snapshotControl = new SnapshotControl();
+            SnapshotControl snapshotControl = new SnapshotControl(database);
 //todo            compareControl.setDiffData(true);
 
             DatabaseSnapshot originalSnapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(database.getDefaultSchema(), database, snapshotControl);
@@ -451,7 +455,7 @@ public abstract class AbstractIntegrationTest {
             Liquibase liquibase = createLiquibase(tempFile.getName());
             clearDatabase(liquibase);
 
-            DatabaseSnapshot emptySnapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(database.getDefaultSchema(), database, new SnapshotControl());
+            DatabaseSnapshot emptySnapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(database.getDefaultSchema(), database, new SnapshotControl(database));
 
             //run again to test changelog testing logic
             liquibase = createLiquibase(tempFile.getName());
@@ -464,7 +468,7 @@ public abstract class AbstractIntegrationTest {
 
 //            tempFile.deleteOnExit();
 
-            DatabaseSnapshot migratedSnapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(database.getDefaultSchema(), database, new SnapshotControl());
+            DatabaseSnapshot migratedSnapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(database.getDefaultSchema(), database, new SnapshotControl(database));
 
             DiffResult finalDiffResult = DiffGeneratorFactory.getInstance().compare(originalSnapshot, migratedSnapshot, new CompareControl());
             try {
@@ -492,7 +496,7 @@ public abstract class AbstractIntegrationTest {
                 throw e;
             }
 
-            DatabaseSnapshot emptyAgainSnapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(database.getDefaultSchema(), database, new SnapshotControl());
+            DatabaseSnapshot emptyAgainSnapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(database.getDefaultSchema(), database, new SnapshotControl(database));
             assertEquals(2, emptyAgainSnapshot.get(Table.class).size());
             assertEquals(0, emptyAgainSnapshot.get(View.class).size());
         }
@@ -517,7 +521,7 @@ public abstract class AbstractIntegrationTest {
 
         liquibase.update(includedChangeLog);
 
-        DatabaseSnapshot originalSnapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(database.getDefaultSchema(), database, new SnapshotControl());
+        DatabaseSnapshot originalSnapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(database.getDefaultSchema(), database, new SnapshotControl(database));
 
         CompareControl compareControl = new CompareControl(new CompareControl.SchemaComparison[]{new CompareControl.SchemaComparison(CatalogAndSchema.DEFAULT, new CatalogAndSchema(null, "liquibaseb"))}, originalSnapshot.getSnapshotControl().getTypesToInclude());
         DiffResult diffResult = DiffGeneratorFactory.getInstance().compare(database, null, compareControl);
@@ -562,7 +566,7 @@ public abstract class AbstractIntegrationTest {
 
         tempFile.deleteOnExit();
 
-        DatabaseSnapshot finalSnapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(database.getDefaultSchema(), database, new SnapshotControl());
+        DatabaseSnapshot finalSnapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(database.getDefaultSchema(), database, new SnapshotControl(database));
 
         DiffResult finalDiffResult = DiffGeneratorFactory.getInstance().compare(originalSnapshot, finalSnapshot, new CompareControl());
         new DiffToReport(finalDiffResult, System.out).print();

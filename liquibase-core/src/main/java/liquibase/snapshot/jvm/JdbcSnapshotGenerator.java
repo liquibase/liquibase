@@ -39,8 +39,8 @@ public abstract class JdbcSnapshotGenerator implements SnapshotGenerator {
         if (defaultFor != null && defaultFor.isAssignableFrom(objectType)) {
             return PRIORITY_DEFAULT;
         }
-        if (addsTo != null) {
-            for (Class<? extends DatabaseObject> type : addsTo) {
+        if (addsTo() != null) {
+            for (Class<? extends DatabaseObject> type : addsTo()) {
                 if (type.isAssignableFrom(objectType)) {
                     return PRIORITY_ADDITIONAL;
                 }
@@ -50,6 +50,9 @@ public abstract class JdbcSnapshotGenerator implements SnapshotGenerator {
 
     }
 
+    public Class<? extends DatabaseObject>[] addsTo() {
+        return addsTo;
+    }
 
     public DatabaseObject snapshot(DatabaseObject example, DatabaseSnapshot snapshot, SnapshotGeneratorChain chain) throws DatabaseException, InvalidExampleException {
         if (defaultFor != null && defaultFor.isAssignableFrom(example.getClass())) {
@@ -60,8 +63,8 @@ public abstract class JdbcSnapshotGenerator implements SnapshotGenerator {
         if (chainResponse == null) {
             return null;
         }
-        if (addsTo != null) {
-            for (Class<? extends DatabaseObject> addType : addsTo) {
+        if (addsTo() != null) {
+            for (Class<? extends DatabaseObject> addType : addsTo()) {
                 if (addType.isAssignableFrom(example.getClass())) {
                     if (chainResponse != null) {
                         addTo(chainResponse, snapshot);

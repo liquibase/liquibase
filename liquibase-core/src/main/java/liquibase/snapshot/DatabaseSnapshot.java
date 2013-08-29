@@ -34,7 +34,7 @@ public abstract class DatabaseSnapshot {
 
     public DatabaseSnapshot(Database database) {
         this.database = database;
-        this.snapshotControl = new SnapshotControl();
+        this.snapshotControl = new SnapshotControl(database);
     }
 
     public Table getTable(String name) {

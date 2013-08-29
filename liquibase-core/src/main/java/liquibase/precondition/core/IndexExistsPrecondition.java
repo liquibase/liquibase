@@ -3,6 +3,7 @@ package liquibase.precondition.core;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
+import liquibase.logging.LogFactory;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.structure.core.Column;
@@ -104,7 +105,9 @@ public class IndexExistsPrecondition implements Precondition {
                 throw new PreconditionFailedException("Index "+ name +" does not exist", changeLog, this);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            if (e instanceof PreconditionFailedException) {
+                throw (((PreconditionFailedException) e));
+            }
             throw new PreconditionErrorException(e, changeLog, this);
         }
     }

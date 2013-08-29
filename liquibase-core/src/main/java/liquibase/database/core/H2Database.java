@@ -140,7 +140,7 @@ public class H2Database extends AbstractJdbcDatabase {
     }
 
     @Override
-    protected String doGetDefaultSchemaName() {
+    protected String getConnectionSchemaName() {
         return "PUBLIC";
     }
 

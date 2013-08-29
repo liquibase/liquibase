@@ -553,7 +553,8 @@
 		<xsd:attribute name="deleteCascade" type="booleanExp" />
 		<xsd:attribute name="onDelete" type="fkCascadeActionOptions" />
 		<xsd:attribute name="onUpdate" type="fkCascadeActionOptions" />
-	</xsd:attributeGroup>
+        <xsd:attribute name="referencesUniqueColumn" type="booleanExp" />
+    </xsd:attributeGroup>
 
 	<xsd:attributeGroup name="addNotNullConstraintAttrib">
         <xsd:attributeGroup ref="tableNameAttribute" />
@@ -1134,6 +1135,8 @@
 				<xsd:element ref="changeLogPropertyDefined" maxOccurs="unbounded" />
                 <xsd:element ref="expectedQuotingStrategy" maxOccurs="unbounded" />
 				<xsd:element ref="customPrecondition" maxOccurs="unbounded" />
+				<xsd:any namespace="##other" processContents="lax" minOccurs="0"
+					maxOccurs="unbounded" />
 			</xsd:choice>
 		</xsd:sequence>
 
