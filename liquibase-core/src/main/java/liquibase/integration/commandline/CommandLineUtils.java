@@ -41,8 +41,12 @@ public class CommandLineUtils {
                                                 String driver,
                                                 String defaultCatalogName,
                                                 String defaultSchemaName,
+                                                boolean outputDefaultCatalog,
+                                                boolean outputDefaultSchema,
                                                 String databaseClass,
-                                                String driverPropertiesFile) throws DatabaseException {
+                                                String driverPropertiesFile,
+                                                String liquibaseCatalogName,
+                                                String liquibaseSchemaName) throws DatabaseException {
         if (driver == null) {
             driver = DatabaseFactory.getInstance().findDefaultDriver(url);
         }
@@ -106,6 +110,10 @@ public class CommandLineUtils {
             Database database = databaseFactory.findCorrectDatabaseImplementation(new JdbcConnection(connection));
             database.setDefaultCatalogName(StringUtils.trimToNull(defaultCatalogName));
             database.setDefaultSchemaName(StringUtils.trimToNull(defaultSchemaName));
+            database.setOutputDefaultCatalog(outputDefaultCatalog);
+            database.setOutputDefaultSchema(outputDefaultSchema);
+            database.setLiquibaseCatalogName(StringUtils.trimToNull(liquibaseCatalogName));
+            database.setLiquibaseSchemaName(StringUtils.trimToNull(liquibaseSchemaName));
             return database;
         } catch (Exception e) {
             throw new DatabaseException(e);

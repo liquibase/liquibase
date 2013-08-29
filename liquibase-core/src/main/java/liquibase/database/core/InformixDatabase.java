@@ -36,7 +36,10 @@ import liquibase.statement.core.SelectFromDatabaseChangeLogStatement;
 import liquibase.statement.core.SetNullableStatement;
 import liquibase.statement.core.UpdateChangeSetChecksumStatement;
 import liquibase.statement.core.UpdateStatement;
+import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.Catalog;
 import liquibase.structure.core.Column;
+import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
 
 public class InformixDatabase extends AbstractJdbcDatabase {
@@ -409,4 +412,16 @@ public class InformixDatabase extends AbstractJdbcDatabase {
 	public boolean supportsSchemas() {
 		return false;
 	}
+
+    @Override
+    public String escapeObjectName(String catalogName, String schemaName, String objectName, Class<? extends DatabaseObject> objectType) {
+        String name = super.escapeObjectName(catalogName, schemaName, objectName, objectType);
+        if (name == null) {
+            return null;
+        }
+        if (name.matches(".*\\..*\\..*")) {
+            name = name.replaceFirst("\\.", ":"); //informix uses : to separate catalog and schema. Like "catalog:schema.table"
+        }
+        return name;
+    }
 }

@@ -52,6 +52,10 @@ public class SybaseDatabase extends AbstractJdbcDatabase {
         systemTablesAndViews.add("sysquerymetrics");
         systemTablesAndViews.add("syssegments");
         systemTablesAndViews.add("sysconstraints");
+
+        super.quotingStartCharacter ="[";
+        super.quotingEndCharacter="]";
+
     }
 
 /*    public void setConnection(Connection connection) {
@@ -193,11 +197,13 @@ public class SybaseDatabase extends AbstractJdbcDatabase {
 
     @Override
     public boolean isSystemObject(DatabaseObject example) {
-        if (example instanceof Table && (example.getSchema().getName().equals("sys") || example.getSchema().getName().equals("sybfi"))) {
-            return true;
-        }
-        if (example instanceof View && (example.getSchema().getName().equals("sys") || example.getSchema().getName().equals("sybfi"))) {
-            return true;
+        if (example.getSchema() != null && example.getSchema().getName() != null) {
+            if (example instanceof Table && (example.getSchema().getName().equals("sys") || example.getSchema().getName().equals("sybfi"))) {
+                return true;
+            }
+            if (example instanceof View && (example.getSchema().getName().equals("sys") || example.getSchema().getName().equals("sybfi"))) {
+                return true;
+            }
         }
         return super.isSystemObject(example);
     }
@@ -219,11 +225,6 @@ public class SybaseDatabase extends AbstractJdbcDatabase {
     @Override
     public boolean supportsRestrictForeignKeys() {
         return false;
-    }
-
-    @Override
-    public String escapeObjectName(String objectName, Class<? extends DatabaseObject> objectType) {
-        return "["+objectName+"]";
     }
 
 	@Override
@@ -275,4 +276,8 @@ public class SybaseDatabase extends AbstractJdbcDatabase {
         return super.escapeIndexName(null, null, indexName);
     }
 
+    @Override
+    public String escapeObjectName(String objectName, Class<? extends DatabaseObject> objectType) {
+        return this.quotingStartCharacter+objectName+this.quotingEndCharacter;
+    }
 }

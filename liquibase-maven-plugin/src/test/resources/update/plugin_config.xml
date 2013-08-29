@@ -14,6 +14,9 @@
           <driver>com.mysql.jdbc.Driver</driver>
           <url>jdbc:mysql://localhost/eformat</url>
           <username>root</username>
+          <outputDefaultCatalog>false</outputDefaultCatalog>
+          <outputDefaultSchema>false</outputDefaultSchema>
+		  <outputFileEncoding>UTF-8</outputFileEncoding>
         </configuration>
       </plugin>
     </plugins>

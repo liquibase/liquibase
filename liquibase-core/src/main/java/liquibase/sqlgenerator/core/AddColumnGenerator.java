@@ -1,6 +1,7 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
+import liquibase.statement.core.AddUniqueConstraintStatement;
 import liquibase.structure.core.Schema;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.database.core.*;
@@ -69,15 +70,12 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
             alterTable += " PRIMARY KEY";
         }
 
-        if (statement.isUnique()) {
-            alterTable += " UNIQUE ";
-        }
-
         alterTable += getDefaultClause(statement, database);
 
         List<Sql> returnSql = new ArrayList<Sql>();
         returnSql.add(new UnparsedSql(alterTable, getAffectedColumn(statement)));
 
+        addUniqueConstrantStatements(statement, database, returnSql);
         addForeignKeyStatements(statement, database, returnSql);
 
         return returnSql.toArray(new Sql[returnSql.size()]);
@@ -87,6 +85,13 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
         return new Column()
                 .setRelation(new Table().setName(statement.getTableName()).setSchema(new Schema(statement.getCatalogName(), statement.getSchemaName())))
                 .setName(statement.getColumnName());
+    }
+
+    protected void addUniqueConstrantStatements(AddColumnStatement statement, Database database, List<Sql> returnSql) {
+        if (statement.isUnique()) {
+            AddUniqueConstraintStatement addConstraintStmt = new AddUniqueConstraintStatement(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName(), statement.getUniqueStatementName());
+            returnSql.addAll(Arrays.asList(SqlGeneratorFactory.getInstance().generateSql(addConstraintStmt, database)));
+        }
     }
 
     protected void addForeignKeyStatements(AddColumnStatement statement, Database database, List<Sql> returnSql) {

@@ -1,6 +1,7 @@
 package liquibase.datatype.core;
 
 import liquibase.database.Database;
+import liquibase.database.core.InformixDatabase;
 import liquibase.database.core.OracleDatabase;
 import liquibase.datatype.DataTypeInfo;
 import liquibase.datatype.DatabaseDataType;
@@ -13,9 +14,13 @@ public class VarcharType extends CharType {
         if (database instanceof OracleDatabase) {
             return new DatabaseDataType("VARCHAR2", getParameters());
         }
+
+        if (database instanceof InformixDatabase && getSize() > 255) {
+            return new DatabaseDataType("LVARCHAR", getParameters());
+        }
+
         return super.toDatabaseDataType(database);
     }
-
 
     //oracle
     //			if (columnTypeString.toUpperCase().startsWith("VARCHAR2")) {

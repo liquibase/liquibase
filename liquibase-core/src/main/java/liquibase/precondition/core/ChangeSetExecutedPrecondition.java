@@ -4,6 +4,7 @@ import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.RanChangeSet;
 import liquibase.database.Database;
+import liquibase.database.ObjectQuotingStrategy;
 import liquibase.exception.PreconditionErrorException;
 import liquibase.exception.PreconditionFailedException;
 import liquibase.exception.ValidationErrors;
@@ -49,7 +50,13 @@ public class ChangeSetExecutedPrecondition implements Precondition {
     }
     
     public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet) throws PreconditionFailedException, PreconditionErrorException {
-        ChangeSet interestedChangeSet = new ChangeSet(getId(), getAuthor(), false, false, getChangeLogFile(), null, null, false, changeSet.getObjectQuotingStrategy(), changeLog);
+        ObjectQuotingStrategy objectQuotingStrategy = null;
+        if (changeSet == null) {
+            objectQuotingStrategy = ObjectQuotingStrategy.LEGACY;
+        } else {
+            objectQuotingStrategy = changeSet.getObjectQuotingStrategy();
+        }
+        ChangeSet interestedChangeSet = new ChangeSet(getId(), getAuthor(), false, false, getChangeLogFile(), null, null, false, objectQuotingStrategy, changeLog);
         RanChangeSet ranChangeSet;
         try {
             ranChangeSet = database.getRanChangeSet(interestedChangeSet);

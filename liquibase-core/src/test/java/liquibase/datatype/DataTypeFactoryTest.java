@@ -14,8 +14,9 @@ public class DataTypeFactoryTest {
         assertParseCorrect("varchar(255)", VarcharType.class);
         assertParseCorrect("int{autoIncrement:true}", "int", IntType.class);
         assertParseCorrect("int{}", "int", IntType.class);
+        assertParseCorrect("varchar COLLATE Latin1_General_BIN", VarcharType.class);
+        assertParseCorrect("varchar(255) COLLATE Latin1_General_BIN", VarcharType.class);
 
-        H2Database database = new H2Database();
         assertTrue(((IntType) DataTypeFactory.getInstance().fromDescription("int{autoIncrement:true}")).isAutoIncrement());
         assertFalse(((IntType) DataTypeFactory.getInstance().fromDescription("int{autoIncrement:false}")).isAutoIncrement());
         assertFalse(((IntType) DataTypeFactory.getInstance().fromDescription("int")).isAutoIncrement());

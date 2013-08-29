@@ -309,11 +309,10 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
 			} else if (currentPrecondition != null && currentPrecondition instanceof CustomPreconditionWrapper && qName.equals("param")) {
 				((CustomPreconditionWrapper) currentPrecondition).setParam(atts.getValue("name"), atts.getValue("value"));
 			} else if (rootPrecondition != null) {
-				currentPrecondition = PreconditionFactory.getInstance().create(
-						qName);
+				currentPrecondition = PreconditionFactory.getInstance().create(localName);
 
 				for (int i = 0; i < atts.getLength(); i++) {
-					String attributeName = atts.getQName(i);
+					String attributeName = atts.getLocalName(i);
 					String attributeValue = atts.getValue(i);
 					setProperty(currentPrecondition, attributeName,
 							attributeValue);
@@ -343,10 +342,9 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
 							.getValue("applyToRollback"));
 				}
 			} else if (inModifySql) {
-				SqlVisitor sqlVisitor = SqlVisitorFactory.getInstance().create(
-						qName);
+				SqlVisitor sqlVisitor = SqlVisitorFactory.getInstance().create(localName);
 				for (int i = 0; i < atts.getLength(); i++) {
-					String attributeName = atts.getQName(i);
+					String attributeName = atts.getLocalName(i);
 					String attributeValue = atts.getValue(i);
 					setProperty(sqlVisitor, attributeName, attributeValue);
 				}
@@ -407,7 +405,7 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
             else if (change != null && "constraints".equals(qName)) {
 				ConstraintsConfig constraints = new ConstraintsConfig();
 				for (int i = 0; i < atts.getLength(); i++) {
-					String attributeName = atts.getQName(i);
+					String attributeName = atts.getLocalName(i);
 					String attributeValue = atts.getValue(i);
 					setProperty(constraints, attributeName, attributeValue);
 				}
@@ -477,11 +475,11 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
 				} catch (NoSuchMethodException e) {
 					throw new MigrationFailedException(changeSet,
 							"Could not find creator method " + creatorMethod
-									+ " for tag: " + qName);
+									+ " for tag: " + localName);
 				}
 				Object subObject = method.invoke(objectToCreateFrom);
 				for (int i = 0; i < atts.getLength(); i++) {
-					String attributeName = atts.getQName(i);
+					String attributeName = atts.getLocalName(i);
 					String attributeValue = atts.getValue(i);
 					setProperty(subObject, attributeName, attributeValue);
 				}
@@ -489,7 +487,7 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
 
 			} else {
 				throw new MigrationFailedException(changeSet,
-						"Unexpected tag: " + qName);
+						"Unexpected tag: " + localName);
 			}
 		} catch (Exception e) {
 			log.severe("Error thrown as a SAXException: " + e.getMessage(), e);
@@ -500,7 +498,7 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
 
     private void populateColumnFromAttributes(Attributes atts, ColumnConfig column) throws IllegalAccessException, InvocationTargetException, CustomChangeException {
         for (int i = 0; i < atts.getLength(); i++) {
-            String attributeName = atts.getQName(i);
+            String attributeName = atts.getLocalName(i);
             String attributeValue = atts.getValue(i);
             setProperty(column, attributeName, attributeValue);
         }

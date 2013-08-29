@@ -117,6 +117,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
         if (table instanceof Table) {
             if (columnMetadataResultSet.containsColumn("IS_AUTOINCREMENT")) {
                 String isAutoincrement = (String) columnMetadataResultSet.get("IS_AUTOINCREMENT");
+                isAutoincrement = StringUtils.trimToNull(isAutoincrement);
                 if (isAutoincrement == null) {
                     column.setAutoIncrementInformation(null);
                 } else if (isAutoincrement.equals("YES")) {
@@ -127,7 +128,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                     LogFactory.getLogger().info("Unknown auto increment state for column " + column.toString() + ". Assuming not auto increment");
                     column.setAutoIncrementInformation(null);
                 } else {
-                    throw new UnexpectedLiquibaseException("Unknown is_autoincrement value: " + isAutoincrement);
+                    throw new UnexpectedLiquibaseException("Unknown is_autoincrement value: '" + isAutoincrement+"'");
                 }
             } else {
                 //probably older version of java, need to select from the column to find out if it is auto-increment
