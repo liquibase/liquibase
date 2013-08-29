@@ -147,6 +147,9 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
 
     @Override
     protected String getConnectionSchemaName() {
+        if (getConnection() == null) {
+            return null;
+        }
         try {
             ResultSet resultSet = ((JdbcConnection) getConnection()).prepareStatement("select schema_name()").executeQuery();
             resultSet.next();
