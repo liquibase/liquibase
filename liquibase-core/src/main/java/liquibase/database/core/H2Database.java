@@ -235,4 +235,9 @@ public class H2Database extends AbstractJdbcDatabase {
     protected String getAutoIncrementClause() {
         return "AUTO_INCREMENT";
     }
+
+    @Override
+    public boolean createsIndexesForForeignKeys() {
+        return true;
+    }
 }
