@@ -159,6 +159,8 @@ public abstract class AbstractIntegrationTest {
             }
             ExecutorService.getInstance().clearExecutor(database);
             database.setDefaultSchemaName(null);
+            database.setOutputDefaultCatalog(false);
+            database.setOutputDefaultSchema(false);
 //            database.close();
         }
 //        ServiceLocator.resetInternalState();
@@ -518,6 +520,7 @@ public abstract class AbstractIntegrationTest {
         clearDatabase(liquibase);
 
         database.setDefaultSchemaName("liquibaseb");
+        database.setOutputDefaultSchema(true);
 
         LockService lockService = LockServiceFactory.getInstance().getLockService(database);
         lockService.forceReleaseLock();
