@@ -63,6 +63,9 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
 
         systemTablesAndViews.add("syssegments");
         systemTablesAndViews.add("sysconstraints");
+
+        super.quotingStartCharacter ="[";
+        super.quotingEndCharacter="]";
     }
 
 
@@ -248,7 +251,7 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
 
     @Override
     public String escapeObjectName(String objectName, Class<? extends DatabaseObject> objectType) {
-        return "["+objectName+"]";
+        return this.quotingStartCharacter+objectName+this.quotingEndCharacter;
     }
 
     @Override
@@ -292,7 +295,7 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
      */
     @Override
     public String escapeViewName(String catalogName, String schemaName, String viewName) {
-        if (!getOutputDefaultSchema() && !isDefaultSchema(catalogName, schemaName)) {
+        if (schemaName== null || (isDefaultSchema(catalogName, schemaName) && !getOutputDefaultSchema())) {
             return escapeObjectName(viewName, View.class);
         } else {
             return escapeObjectName(schemaName, Schema.class)+"."+ escapeObjectName(viewName, Schema.class);

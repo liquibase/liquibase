@@ -65,10 +65,6 @@ public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTab
         for (Database database : TestContext.getInstance().getAllDatabases()) {
                 CreateTableStatement statement = new CreateTableStatement(CATALOG_NAME, SCHEMA_NAME, TABLE_NAME);
                 statement.addColumn(COLUMN_NAME1, DataTypeFactory.getInstance().fromDescription("int(11) unsigned"));
-
-            if (database instanceof MySQLDatabase) {
-                assertEquals("CREATE TABLE CATALOG_NAME.TABLE_NAME (COLUMN1_NAME INT(11) NULL)", this.generatorUnderTest.generateSql(statement, database, null)[0].toSql());
-            }
         }
     }
 
@@ -597,7 +593,7 @@ public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTab
 	    		
 	    		Sql[] generatedSql = this.generatorUnderTest.generateSql(statement, database, null);
     		
-    			assertEquals("CREATE TABLE [SCHEMA_NAME].[TABLE_NAME] ([COLUMN1_NAME] BIGINT IDENTITY (1, 1))", generatedSql[0].toSql());
+    			assertEquals("Error on "+database, "CREATE TABLE [SCHEMA_NAME].[TABLE_NAME] ([COLUMN1_NAME] BIGINT IDENTITY (1, 1))", generatedSql[0].toSql());
     		}
     	}
     }
@@ -874,7 +870,7 @@ public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTab
 	    		
 	    		Sql[] generatedSql = this.generatorUnderTest.generateSql(statement, database, null);
     		
-    			assertEquals("CREATE TABLE [SCHEMA_NAME].[TABLE_NAME] ([COLUMN1_NAME] BIGINT IDENTITY NULL)", generatedSql[0].toSql());
+    			assertEquals("Error with "+database, "CREATE TABLE [SCHEMA_NAME].[TABLE_NAME] ([COLUMN1_NAME] BIGINT IDENTITY NULL)", generatedSql[0].toSql());
     		}
     	}
     }
@@ -920,6 +916,7 @@ public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTab
     @Test
     public void createReferencesSchemaEscaped() throws Exception {
         Database database = new PostgresDatabase();
+        database.setOutputDefaultSchema(true);
         database.setDefaultSchemaName("my-schema");
         CreateTableStatement statement = new CreateTableStatement(CATALOG_NAME, SCHEMA_NAME, TABLE_NAME);
         statement.addColumnConstraint(new ForeignKeyConstraint("fk_test_parent", TABLE_NAME + "(id)").setColumn("id"));

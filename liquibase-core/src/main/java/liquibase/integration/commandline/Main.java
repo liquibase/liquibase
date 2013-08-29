@@ -61,8 +61,8 @@ public class Main {
     protected String url;
     protected String databaseClass;
     protected String defaultSchemaName;
-    protected String outputDefaultSchema = "false";
-    protected String outputDefaultCatalog = "false";
+    protected String outputDefaultSchema = "true";
+    protected String outputDefaultCatalog = "true";
     protected String defaultCatalogName;
     protected String changeLogFile;
     protected String classpath;
@@ -517,6 +517,14 @@ public class Main {
         stream.println(" --currentDateTimeFunction=<value>          Overrides current date time function");
         stream.println("                                            used in SQL.");
         stream.println("                                            Useful for unsupported databases");
+        stream.println(" --outputDefaultSchema=<true|false>         If true, SQL object references");
+        stream.println("                                            include the schema name, even if");
+        stream.println("                                            it is the default schema. ");
+        stream.println("                                            Defaults to true");
+        stream.println(" --outputDefaultCatalog=<true|false>        If true, SQL object references");
+        stream.println("                                            include the catalog name, even if");
+        stream.println("                                            it is the default catalog.");
+        stream.println("                                            Defaults to true");
         stream.println(" --help                                     Prints this message");
         stream.println(" --version                                  Prints this version information");
         stream.println("");

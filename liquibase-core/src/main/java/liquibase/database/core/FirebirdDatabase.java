@@ -100,4 +100,9 @@ public class FirebirdDatabase extends AbstractJdbcDatabase {
         }
         return objectName.toUpperCase().trim();
     }
+
+    @Override
+    public boolean createsIndexesForForeignKeys() {
+        return true;
+    }
 }

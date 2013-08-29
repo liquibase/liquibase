@@ -103,8 +103,8 @@ public abstract class AbstractJdbcDatabase implements Database {
     protected ObjectQuotingStrategy quotingStrategy = ObjectQuotingStrategy.LEGACY;
 
     private Boolean caseSensitive;
-    private boolean outputDefaultSchema = false;
-    private boolean outputDefaultCatalog = false;
+    private boolean outputDefaultSchema = true;
+    private boolean outputDefaultCatalog = true;
 
     public String getName() {
         return toString();

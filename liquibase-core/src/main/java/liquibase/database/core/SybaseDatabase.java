@@ -52,6 +52,10 @@ public class SybaseDatabase extends AbstractJdbcDatabase {
         systemTablesAndViews.add("sysquerymetrics");
         systemTablesAndViews.add("syssegments");
         systemTablesAndViews.add("sysconstraints");
+
+        super.quotingStartCharacter ="[";
+        super.quotingEndCharacter="]";
+
     }
 
 /*    public void setConnection(Connection connection) {
@@ -223,11 +227,6 @@ public class SybaseDatabase extends AbstractJdbcDatabase {
         return false;
     }
 
-    @Override
-    public String escapeObjectName(String objectName, Class<? extends DatabaseObject> objectType) {
-        return "["+objectName+"]";
-    }
-
 	@Override
 	public String getViewDefinition(CatalogAndSchema schema, String viewName) throws DatabaseException {
         schema = correctSchema(schema);
@@ -277,4 +276,8 @@ public class SybaseDatabase extends AbstractJdbcDatabase {
         return super.escapeIndexName(null, null, indexName);
     }
 
+    @Override
+    public String escapeObjectName(String objectName, Class<? extends DatabaseObject> objectType) {
+        return this.quotingStartCharacter+objectName+this.quotingEndCharacter;
+    }
 }
