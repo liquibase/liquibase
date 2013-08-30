@@ -229,7 +229,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     private Liquibase liquibase;
 
     /**
-     * Array to put a expression variable to maven plugin.
+     * Properties for substitution in the change log(s)
      *
      * @parameter
      */
@@ -244,7 +244,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     protected boolean skip;
 
     /**
-     * Array to put a expression variable to maven plugin.
+     * Properties for substitution in the change log(s)
      *
      * @parameter
      */
