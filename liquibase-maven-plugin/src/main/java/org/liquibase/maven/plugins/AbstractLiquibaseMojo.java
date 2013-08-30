@@ -69,7 +69,6 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     protected String url;
 
     /**
-
      The Maven Wagon manager to use when obtaining server authentication details.
      @component role="org.apache.maven.artifact.manager.WagonManager"
      @required
@@ -202,7 +201,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     protected boolean propertyFileWillOverride;
 
     /**
-     * Flag for forcing the checksums to be cleared from teh DatabaseChangeLog table.
+     * Flag for forcing the checksums to be cleared from the DatabaseChangeLog table.
      *
      * @parameter expression="${liquibase.clearCheckSums}" default-value="false"
      */
@@ -588,7 +587,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
      * the default value. This is not an ideal solution, but should cover most situations in
      * the use of the plugin.
      *
-     * @param f The Field to check if a user has specified a value for.
+     * @param f The field to check if a user has specified a value for.
      * @return <code>true</code> if the user has specified a value.
      */
     private boolean isCurrentFieldValueSpecified(Field f) throws IllegalAccessException {
