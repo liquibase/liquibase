@@ -2,13 +2,12 @@ package liquibase.diff.compare.core;
 
 import liquibase.database.Database;
 import liquibase.diff.ObjectDifferences;
-import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.structure.DatabaseObject;
-import liquibase.structure.core.Column;
-import liquibase.structure.core.Index;
 import liquibase.diff.compare.DatabaseObjectComparator;
 import liquibase.diff.compare.DatabaseObjectComparatorChain;
 import liquibase.diff.compare.DatabaseObjectComparatorFactory;
+import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.Column;
+import liquibase.structure.core.Index;
 
 public class IndexComparator implements DatabaseObjectComparator {
     public int getPriority(Class<? extends DatabaseObject> objectType, Database database) {
@@ -25,6 +24,10 @@ public class IndexComparator implements DatabaseObjectComparator {
 
         Index thisIndex = (Index) databaseObject1;
         Index otherIndex = (Index) databaseObject2;
+
+        if (!equals(thisIndex.isUnique(), otherIndex.isUnique())) {
+            return false;
+        }
 
         if (thisIndex.getColumns().size() == 0 || otherIndex.getColumns().size() == 0) {
             return chain.isSameObject(databaseObject1, databaseObject2, accordingTo);
@@ -46,6 +49,13 @@ public class IndexComparator implements DatabaseObjectComparator {
         }
 
         return true;
+    }
+
+    /**
+     * from Java 7
+     */
+    private boolean equals(Object a, Object b) {
+        return (a == b) || (a != null && a.equals(b));
     }
 
 
