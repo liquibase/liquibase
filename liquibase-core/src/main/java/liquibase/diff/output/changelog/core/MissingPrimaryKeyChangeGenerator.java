@@ -11,6 +11,7 @@ import liquibase.structure.core.Column;
 import liquibase.structure.core.Index;
 import liquibase.structure.core.PrimaryKey;
 import liquibase.structure.core.Table;
+import liquibase.structure.core.UniqueConstraint;
 
 public class MissingPrimaryKeyChangeGenerator implements MissingObjectChangeGenerator {
 
@@ -23,17 +24,17 @@ public class MissingPrimaryKeyChangeGenerator implements MissingObjectChangeGene
     }
 
     public Class<? extends DatabaseObject>[] runAfterTypes() {
-        return new Class[] {
-                Table.class,
-                Column.class
+        return new Class[]{
+            Table.class,
+            Column.class,
+            Index.class,
+            UniqueConstraint.class
         };
 
     }
 
     public Class<? extends DatabaseObject>[] runBeforeTypes() {
-        return new Class[] {
-                Index.class
-        };
+        return null;
     }
 
     public Change[] fixMissing(DatabaseObject missingObject, DiffOutputControl control, Database referenceDatabase, Database comparisonDatabase, ChangeGeneratorChain chain) {
@@ -55,7 +56,7 @@ public class MissingPrimaryKeyChangeGenerator implements MissingObjectChangeGene
 
         control.setAlreadyHandledMissing(pk.getBackingIndex());
 
-        return new Change[] { change };
+        return new Change[]{change};
 
     }
 }

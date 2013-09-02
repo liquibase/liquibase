@@ -7,9 +7,9 @@ import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.changelog.ChangeGeneratorChain;
 import liquibase.diff.output.changelog.UnexpectedObjectChangeGenerator;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.core.Column;
 import liquibase.structure.core.ForeignKey;
 import liquibase.structure.core.Index;
+import liquibase.structure.core.PrimaryKey;
 import liquibase.structure.core.Table;
 
 public class UnexpectedForeignKeyChangeGenerator implements UnexpectedObjectChangeGenerator {
@@ -25,9 +25,10 @@ public class UnexpectedForeignKeyChangeGenerator implements UnexpectedObjectChan
     }
 
     public Class<? extends DatabaseObject>[] runBeforeTypes() {
-        return new Class[] {
-                Table.class,
-                Index.class
+        return new Class[]{
+            Table.class,
+            Index.class,
+            PrimaryKey.class
         };
     }
 
@@ -52,10 +53,10 @@ public class UnexpectedForeignKeyChangeGenerator implements UnexpectedObjectChan
 //            }
 //            control.setAlreadyHandledUnexpected(exampleIndex);
 //        } else {
-            control.setAlreadyHandledUnexpected(backingIndex);
+        control.setAlreadyHandledUnexpected(backingIndex);
 //        }
 
-        return new Change[] { change };
+        return new Change[]{change};
 
     }
 }
