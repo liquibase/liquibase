@@ -198,7 +198,10 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
 //        if (foundObject instanceof PrimaryKey) {
 //            ((PrimaryKey) foundObject).setBackingIndex(new Index().setTable(((PrimaryKey) foundObject).getTable()).setName(foundObject.getName()));
 //        }
-        if (foundObject instanceof UniqueConstraint && !(snapshot.getDatabase() instanceof DB2Database)&& !(snapshot.getDatabase() instanceof DerbyDatabase)) {
+        if (foundObject instanceof UniqueConstraint
+            && !(snapshot.getDatabase() instanceof DB2Database)
+            && !(snapshot.getDatabase() instanceof OracleDatabase)
+            && !(snapshot.getDatabase() instanceof DerbyDatabase)) {
             Index exampleIndex = new Index().setTable(((UniqueConstraint) foundObject).getTable()).setName(foundObject.getName());
             exampleIndex.getColumns().addAll(((UniqueConstraint) foundObject).getColumns());
             ((UniqueConstraint) foundObject).setBackingIndex(exampleIndex);
@@ -241,11 +244,16 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
 
                 if (database instanceof OracleDatabase) {
                     //oracle getIndexInfo is buggy and slow.  See Issue 1824548 and http://forums.oracle.com/forums/thread.jspa?messageID=578383&#578383
-                    String sql = "SELECT INDEX_NAME, 3 AS TYPE, TABLE_NAME, COLUMN_NAME, COLUMN_POSITION AS ORDINAL_POSITION, null AS FILTER_CONDITION FROM ALL_IND_COLUMNS WHERE TABLE_OWNER='" + schema.getName() + "' AND TABLE_NAME='" + table.getName() + "'";
+                    String sql = "SELECT c.INDEX_NAME, 3 AS TYPE, c.TABLE_NAME, c.COLUMN_NAME, c.COLUMN_POSITION AS ORDINAL_POSITION, e.COLUMN_EXPRESSION AS FILTER_CONDITION, " +
+                        " case I.UNIQUENESS when 'UNIQUE' then 0 else 1 end as NON_UNIQUE" +
+                        " FROM ALL_IND_COLUMNS c" +
+                        " JOIN ALL_INDEXES i on i.index_name = c.index_name" +
+                        " LEFT JOIN all_ind_expressions e on (e.column_position = c.column_position AND e.index_name = c.index_name)" +
+                        " WHERE c.TABLE_OWNER='" + schema.getName() + "' AND c.TABLE_NAME='" + table.getName() + "'";
                     if (exampleName != null) {
-                        sql += " AND INDEX_NAME='" + exampleName + "'";
+                        sql += " AND c.INDEX_NAME='" + exampleName + "'";
                     }
-                    sql += " ORDER BY INDEX_NAME, ORDINAL_POSITION";
+                    sql += " ORDER BY c.INDEX_NAME, ORDINAL_POSITION";
                     rs = databaseMetaData.query(sql);
                 } else {
                     rs = databaseMetaData.getIndexInfo(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema),
@@ -293,6 +301,9 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                         System.out.println(this.getClass().getName() + ": corrected position to " + ++position);
                     }
                     String filterCondition = row.getString("FILTER_CONDITION");
+                    if (filterCondition != null) {
+                        columnName = filterCondition.replaceAll("\"", "");
+                    }
 
                     if (type == DatabaseMetaData.tableIndexStatistic) {
                         continue;
