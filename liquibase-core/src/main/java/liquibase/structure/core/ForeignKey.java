@@ -1,11 +1,11 @@
 package liquibase.structure.core;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import liquibase.structure.AbstractDatabaseObject;
 import liquibase.structure.DatabaseObject;
 import liquibase.util.StringUtils;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class ForeignKey extends AbstractDatabaseObject{
 
@@ -192,9 +192,6 @@ public class ForeignKey extends AbstractDatabaseObject{
         }
         if (returnValue == 0 && this.getForeignKeyColumns() != null && o.getForeignKeyColumns() != null) {
             returnValue = this.getForeignKeyColumns().compareToIgnoreCase(o.getForeignKeyColumns());
-        }
-        if (returnValue == 0 && this.getName() != null && o.getName() != null) {
-            returnValue = this.getName().compareToIgnoreCase(o.getName());
         }
         if (returnValue == 0 && this.getPrimaryKeyTable() != null && o.getPrimaryKeyTable() != null) {
             returnValue = this.getPrimaryKeyTable().compareTo(o.getPrimaryKeyTable());
