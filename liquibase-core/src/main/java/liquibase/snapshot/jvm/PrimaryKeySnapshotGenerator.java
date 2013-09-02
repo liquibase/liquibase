@@ -1,21 +1,23 @@
 package liquibase.snapshot.jvm;
 
+import java.sql.SQLException;
+import java.util.Arrays;
+import java.util.List;
+
 import liquibase.CatalogAndSchema;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
 import liquibase.database.core.MSSQLDatabase;
+import liquibase.database.core.OracleDatabase;
 import liquibase.exception.DatabaseException;
-import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.DatabaseSnapshot;
+import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.JdbcDatabaseSnapshot;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.core.*;
-
-import java.sql.DatabaseMetaData;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.Arrays;
-import java.util.List;
+import liquibase.structure.core.Index;
+import liquibase.structure.core.PrimaryKey;
+import liquibase.structure.core.Schema;
+import liquibase.structure.core.Table;
 
 public class PrimaryKeySnapshotGenerator extends JdbcSnapshotGenerator {
 
@@ -54,7 +56,7 @@ public class PrimaryKeySnapshotGenerator extends JdbcSnapshotGenerator {
                 returnKey.addColumnName(position - 1, columnName);
             }
 
-            if (returnKey != null) {
+            if (returnKey != null && !(snapshot.getDatabase() instanceof OracleDatabase)) {
                 Index exampleIndex = new Index().setTable(returnKey.getTable());
                 exampleIndex.getColumns().addAll(Arrays.asList(returnKey.getColumnNames().split("\\s*,\\s*")));
                 if (database instanceof MSSQLDatabase) { //index name matches PK name for better accuracy
