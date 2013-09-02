@@ -1,21 +1,29 @@
 package liquibase.snapshot.jvm;
 
+import java.sql.DatabaseMetaData;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import liquibase.CatalogAndSchema;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
 import liquibase.database.core.MSSQLDatabase;
+import liquibase.database.core.OracleDatabase;
 import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.exception.DatabaseException;
-import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.DatabaseSnapshot;
+import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.JdbcDatabaseSnapshot;
+import liquibase.snapshot.JdbcDatabaseSnapshot.CachedRow;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.core.*;
-
-import java.sql.DatabaseMetaData;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.*;
+import liquibase.structure.core.Catalog;
+import liquibase.structure.core.ForeignKey;
+import liquibase.structure.core.ForeignKeyConstraintType;
+import liquibase.structure.core.Index;
+import liquibase.structure.core.Schema;
+import liquibase.structure.core.Table;
 
 public class ForeignKeySnapshotGenerator extends JdbcSnapshotGenerator {
 
@@ -79,7 +87,7 @@ public class ForeignKeySnapshotGenerator extends JdbcSnapshotGenerator {
                         database.correctObjectName(table.getName(), Table.class));
 
                 for (JdbcDatabaseSnapshot.CachedRow row : importedKeyMetadataResultSet) {
-                    ForeignKey fk = new ForeignKey().setName(row.getString("FK_NAME")).setForeignKeyTable(table);
+                    ForeignKey fk = createForeignKey(database, row);
                     if (seenFks.add(fk.getName())) {
                         table.getOutgoingForeignKeys().add(fk);
                     }
@@ -95,8 +103,7 @@ public class ForeignKeySnapshotGenerator extends JdbcSnapshotGenerator {
                         ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), database.correctObjectName(table.getName(), Table.class));
 
                 for (JdbcDatabaseSnapshot.CachedRow row : exportedKeyMetadataResultSet) {
-                    Table fktable = (Table) new Table().setName(row.getString("FKTABLE_NAME")).setSchema(new Schema(row.getString("FKTABLE_CAT"), row.getString("FKTABLE_SCHEM")));
-                    ForeignKey fk = new ForeignKey().setName(row.getString("FK_NAME")).setForeignKeyTable(fktable);
+                    ForeignKey fk = createForeignKey(database, row);
                     if (seenFks.add(fk.getName())) {
                         table.getIncomingForeignKeys().add(fk);
                     }
@@ -122,52 +129,17 @@ public class ForeignKeySnapshotGenerator extends JdbcSnapshotGenerator {
 
             importedKeyMetadataResultSet = ((JdbcDatabaseSnapshot) snapshot).getMetaData().getImportedKeys(searchCatalog, searchSchema, searchTableName);
             for (JdbcDatabaseSnapshot.CachedRow row : importedKeyMetadataResultSet) {
-                String fk_name = cleanNameFromDatabase(row.getString("FK_NAME"), database);
-                ForeignKey foreignKey = new ForeignKey();
-                foreignKey.setName(fk_name);
-
-                String fkTableCatalog = cleanNameFromDatabase(row.getString("FKTABLE_CAT"), database);
-                String fkTableSchema = cleanNameFromDatabase(row.getString("FKTABLE_SCHEM"), database);
-                String fkTableName = cleanNameFromDatabase(row.getString("FKTABLE_NAME"), database);
-                Table foreignKeyTable = new Table().setName(fkTableName);
-                foreignKeyTable.setSchema(new Schema(new Catalog(fkTableCatalog), fkTableSchema));
-
-                foreignKey.setForeignKeyTable(foreignKeyTable);
-                foreignKey.setForeignKeyColumns(cleanNameFromDatabase(row.getString("FKCOLUMN_NAME"), database));
-
-                CatalogAndSchema pkTableSchema = ((AbstractJdbcDatabase) database).getSchemaFromJdbcInfo(row.getString("PKTABLE_CAT"), row.getString("PKTABLE_SCHEM"));
-                Table tempPkTable = (Table) new Table().setName(row.getString("PKTABLE_NAME")).setSchema(new Schema(pkTableSchema.getCatalogName(), pkTableSchema.getSchemaName()));
-                foreignKey.setPrimaryKeyTable(tempPkTable);
-                foreignKey.setPrimaryKeyColumns(cleanNameFromDatabase(row.getString("PKCOLUMN_NAME"), database));
-                //todo foreignKey.setKeySeq(importedKeyMetadataResultSet.getInt("KEY_SEQ"));
-
-                ForeignKeyConstraintType updateRule = convertToForeignKeyConstraintType(row.getInt("UPDATE_RULE"), database);
-                foreignKey.setUpdateRule(updateRule);
-                ForeignKeyConstraintType deleteRule = convertToForeignKeyConstraintType(row.getInt("DELETE_RULE"), database);
-                foreignKey.setDeleteRule(deleteRule);
-                short deferrability = row.getShort("DEFERRABILITY");
-                // Hsqldb doesn't handle setting this property correctly, it sets it to 0.
-                // it should be set to DatabaseMetaData.importedKeyNotDeferrable(7)
-                if (deferrability == 0 || deferrability == DatabaseMetaData.importedKeyNotDeferrable) {
-                    foreignKey.setDeferrable(false);
-                    foreignKey.setInitiallyDeferred(false);
-                } else if (deferrability == DatabaseMetaData.importedKeyInitiallyDeferred) {
-                    foreignKey.setDeferrable(true);
-                    foreignKey.setInitiallyDeferred(true);
-                } else if (deferrability == DatabaseMetaData.importedKeyInitiallyImmediate) {
-                    foreignKey.setDeferrable(true);
-                    foreignKey.setInitiallyDeferred(false);
-                } else {
-                    throw new RuntimeException("Unknown deferrability result: " + deferrability);
-                }
+                ForeignKey foreignKey = createForeignKey(database, row);
 
                 if (!DatabaseObjectComparatorFactory.getInstance().isSameObject(example, foreignKey, database)) {
                     continue;
                 }
 
-                Index exampleIndex = new Index().setTable(foreignKey.getForeignKeyTable());
-                exampleIndex.getColumns().addAll(Arrays.asList(foreignKey.getForeignKeyColumns().split("\\s*,\\s*")));
-                foreignKey.setBackingIndex(exampleIndex);
+                if (!(snapshot.getDatabase() instanceof OracleDatabase)) {
+                    Index exampleIndex = new Index().setTable(foreignKey.getForeignKeyTable());
+                    exampleIndex.getColumns().addAll(Arrays.asList(foreignKey.getForeignKeyColumns().split("\\s*,\\s*")));
+                    foreignKey.setBackingIndex(exampleIndex);
+                }
 
                 return foreignKey;
             }
@@ -175,6 +147,48 @@ public class ForeignKeySnapshotGenerator extends JdbcSnapshotGenerator {
         } catch (Exception e) {
             throw new DatabaseException(e);
         }
+    }
+
+    private ForeignKey createForeignKey(Database database, CachedRow row) throws DatabaseException {
+        String fk_name = cleanNameFromDatabase(row.getString("FK_NAME"), database);
+        ForeignKey foreignKey = new ForeignKey();
+        foreignKey.setName(fk_name);
+
+        String fkTableCatalog = cleanNameFromDatabase(row.getString("FKTABLE_CAT"), database);
+        String fkTableSchema = cleanNameFromDatabase(row.getString("FKTABLE_SCHEM"), database);
+        String fkTableName = cleanNameFromDatabase(row.getString("FKTABLE_NAME"), database);
+        Table foreignKeyTable = new Table().setName(fkTableName);
+        foreignKeyTable.setSchema(new Schema(new Catalog(fkTableCatalog), fkTableSchema));
+
+        foreignKey.setForeignKeyTable(foreignKeyTable);
+        foreignKey.setForeignKeyColumns(cleanNameFromDatabase(row.getString("FKCOLUMN_NAME"), database));
+
+        CatalogAndSchema pkTableSchema = ((AbstractJdbcDatabase) database).getSchemaFromJdbcInfo(row.getString("PKTABLE_CAT"), row.getString("PKTABLE_SCHEM"));
+        Table tempPkTable = (Table) new Table().setName(row.getString("PKTABLE_NAME")).setSchema(new Schema(pkTableSchema.getCatalogName(), pkTableSchema.getSchemaName()));
+        foreignKey.setPrimaryKeyTable(tempPkTable);
+        foreignKey.setPrimaryKeyColumns(cleanNameFromDatabase(row.getString("PKCOLUMN_NAME"), database));
+        //todo foreignKey.setKeySeq(importedKeyMetadataResultSet.getInt("KEY_SEQ"));
+
+        ForeignKeyConstraintType updateRule = convertToForeignKeyConstraintType(row.getInt("UPDATE_RULE"), database);
+        foreignKey.setUpdateRule(updateRule);
+        ForeignKeyConstraintType deleteRule = convertToForeignKeyConstraintType(row.getInt("DELETE_RULE"), database);
+        foreignKey.setDeleteRule(deleteRule);
+        short deferrability = row.getShort("DEFERRABILITY");
+        // Hsqldb doesn't handle setting this property correctly, it sets it to 0.
+        // it should be set to DatabaseMetaData.importedKeyNotDeferrable(7)
+        if (deferrability == 0 || deferrability == DatabaseMetaData.importedKeyNotDeferrable) {
+            foreignKey.setDeferrable(false);
+            foreignKey.setInitiallyDeferred(false);
+        } else if (deferrability == DatabaseMetaData.importedKeyInitiallyDeferred) {
+            foreignKey.setDeferrable(true);
+            foreignKey.setInitiallyDeferred(true);
+        } else if (deferrability == DatabaseMetaData.importedKeyInitiallyImmediate) {
+            foreignKey.setDeferrable(true);
+            foreignKey.setInitiallyDeferred(false);
+        } else {
+            throw new RuntimeException("Unknown deferrability result: " + deferrability);
+        }
+        return foreignKey;
     }
 
 
