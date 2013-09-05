@@ -38,6 +38,13 @@ public class ForeignKeyComparator implements DatabaseObjectComparator {
             columnsTheSame = StringUtils.trimToEmpty(((ForeignKey) databaseObject1).getForeignKeyColumns()).equals(StringUtils.trimToEmpty(((ForeignKey) databaseObject2).getForeignKeyColumns())) &&
                     StringUtils.trimToEmpty(((ForeignKey) databaseObject1).getPrimaryKeyColumns()).equals(StringUtils.trimToEmpty(((ForeignKey) databaseObject2).getPrimaryKeyColumns()));
         } else {
+            if (((ForeignKey) databaseObject1).getForeignKeyColumns()== null || ((ForeignKey) databaseObject2).getForeignKeyColumns() == null) {
+              if (((ForeignKey) databaseObject1).getForeignKeyColumns() == ((ForeignKey) databaseObject2).getForeignKeyColumns()) {
+                return true;
+              } else {
+                return false;
+              }
+            }
             columnsTheSame = ((ForeignKey) databaseObject1).getForeignKeyColumns().equalsIgnoreCase(((ForeignKey) databaseObject2).getForeignKeyColumns()) &&
                     ((ForeignKey) databaseObject1).getPrimaryKeyColumns().equalsIgnoreCase(((ForeignKey) databaseObject2).getPrimaryKeyColumns());
 
