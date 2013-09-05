@@ -577,12 +577,19 @@ public class Main {
                 } catch (Exception e) {
                     throw new CommandLineParsingException("Unknown parameter: '" + attributeName + "'");
                 }
-//            } else if(arg.equals("-p")) {
-//            	//Prompt for password
-//            	password = new String(System.console().readPassword("DB Password:"));
-//            } else if(arg.equals("-rp")) {
-//            	//Prompt for reference password
-//            	referencePassword = new String(System.console().readPassword("Reference DB Password:"));
+            } else if(arg.equals("-p")) {
+              Console c = System.console();
+              if (c == null) {
+                throw new CommandLineParsingException("Console unavailable");
+              }
+            	//Prompt for password
+            	password = new String(c.readPassword("DB Password: "));
+            } else if(arg.equals("-rp")) {
+              Console c = System.console();
+              if (c == null) {
+                throw new CommandLineParsingException("Console unavailable");
+              }
+            	referencePassword = new String(c.readPassword("Reference DB Password: "));
             } else {
                 throw new CommandLineParsingException("Unexpected value " + arg + ": parameters must start with a '--'");
             }
