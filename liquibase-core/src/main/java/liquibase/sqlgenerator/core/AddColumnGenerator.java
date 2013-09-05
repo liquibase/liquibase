@@ -72,6 +72,10 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
 
         alterTable += getDefaultClause(statement, database);
 
+        if( database instanceof MySQLDatabase && statement.getRemarks() != null ) {
+            alterTable += " COMMENT '" + statement.getRemarks() + "' ";
+        }
+
         List<Sql> returnSql = new ArrayList<Sql>();
         returnSql.add(new UnparsedSql(alterTable, getAffectedColumn(statement)));
 

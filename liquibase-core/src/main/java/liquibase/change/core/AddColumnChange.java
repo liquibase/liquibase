@@ -116,6 +116,7 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
                     column.getName(),
                     column.getType(),
                     column.getDefaultValueObject(),
+                    column.getRemarks(),
                     constraints.toArray(new ColumnConstraint[constraints.size()]));
 
             sql.add(addColumnStatement);

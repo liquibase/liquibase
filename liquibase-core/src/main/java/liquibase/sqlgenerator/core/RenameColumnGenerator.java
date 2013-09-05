@@ -58,6 +58,10 @@ public class RenameColumnGenerator extends AbstractSqlGenerator<RenameColumnStat
             sql = "ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " RENAME COLUMN " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getOldColumnName()) + " TO " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getNewColumnName());
         }
 
+        if( database instanceof MySQLDatabase && statement.getRemarks() != null ) {
+            sql += " COMMENT '" + statement.getRemarks() +"' ";
+        }
+
         return new Sql[] {
                 new UnparsedSql(sql, getAffectedOldColumn(statement), getAffectedNewColumn(statement))
         };
