@@ -1,8 +1,8 @@
-/target
-/.project
-/.settings
+target
+.project
+.settings
 *nb-configuration.xml
-/.classpath
+.classpath
 /.idea/workspace.xml
 /out
 /bin
