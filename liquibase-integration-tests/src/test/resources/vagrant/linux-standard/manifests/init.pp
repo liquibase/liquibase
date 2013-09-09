@@ -47,48 +47,48 @@ postgresql::db { 'liquibase':
 #    recurse => true
 #}
 
-oradb::installdb{ '12.1.0.1_Linux-x86-64':
-        version      => '12.1.0.1',
-        file         => 'linuxamd64_12c_database',
-        databaseType => 'SE',
-        oracleBase   => '/oracle',
-        oracleHome   => '/oracle/product/12.1/db',
-        user         => 'oracle',
-        group        => 'dba',
-        downloadDir  => '/oracle/install',
-        puppetDownloadMntPoint  => '/tmp/oracle/'
- }
+#oradb::installdb{ '12.1.0.1_Linux-x86-64':
+#        version      => '12.1.0.1',
+#        file         => 'linuxamd64_12c_database',
+#        databaseType => 'SE',
+#        oracleBase   => '/oracle',
+#        oracleHome   => '/oracle/product/12.1/db',
+#        user         => 'oracle',
+#        group        => 'dba',
+#        downloadDir  => '/oracle/install',
+#        puppetDownloadMntPoint  => '/tmp/oracle/'
+# }
 
 
-oradb::database{ 'liquibase':
-                  oracleBase              => '/oracle',
-                  oracleHome              => '/oracle/product/12.1/db',
-                  version                 => "12.1",
-                  user                    => 'oracle',
-                  group                   => 'dba',
-                  downloadDir             => '/install',
-                  action                  => 'create',
-                  dbName                  => 'oracle',
-                  dbDomain                => 'liquibase.org',
-                  sysPassword             => 'liquibase',
-                  systemPassword          => 'liquibase',
-                  dataFileDestination     => "/oracle/oradata",
-                  recoveryAreaDestination => "/oracle/flash_recovery_area",
-                  characterSet            => "AL32UTF8",
-                  nationalCharacterSet    => "UTF8",
-                  initParams              => "open_cursors=1000,processes=600,job_queue_processes=4",
-                  sampleSchema            => 'FALSE',
-                  memoryPercentage        => "40",
-                  memoryTotal             => "800",
-                  databaseType            => "MULTIPURPOSE",
-                  require                 => Oradb::Listener['start listener'],
-}
+#oradb::database{ 'liquibase':
+#                  oracleBase              => '/oracle',
+#                  oracleHome              => '/oracle/product/12.1/db',
+#                  version                 => "12.1",
+#                  user                    => 'oracle',
+#                  group                   => 'dba',
+#                  downloadDir             => '/install',
+#                  action                  => 'create',
+#                  dbName                  => 'oracle',
+#                  dbDomain                => 'liquibase.org',
+#                  sysPassword             => 'liquibase',
+#                  systemPassword          => 'liquibase',
+#                  dataFileDestination     => "/oracle/oradata",
+#                  recoveryAreaDestination => "/oracle/flash_recovery_area",
+#                  characterSet            => "AL32UTF8",
+#                  nationalCharacterSet    => "UTF8",
+#                  initParams              => "open_cursors=1000,processes=600,job_queue_processes=4",
+#                  sampleSchema            => 'FALSE',
+#                  memoryPercentage        => "40",
+#                  memoryTotal             => "800",
+#                  databaseType            => "MULTIPURPOSE",
+#                  require                 => Oradb::Listener['start listener'],
+#}
 
-oradb::listener{'start listener':
-        oracleBase   => '/oracle',
-        oracleHome   => '/oracle/product/12.1/db',
-        user         => 'oracle',
-        group        => 'dba',
-        action       => 'start',
-     }
+#oradb::listener{'start listener':
+#        oracleBase   => '/oracle',
+#        oracleHome   => '/oracle/product/12.1/db',
+#        user         => 'oracle',
+#        group        => 'dba',
+#        action       => 'start',
+#     }
 #
