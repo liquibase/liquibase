@@ -1,7 +1,11 @@
 Liquibase Core Changelog
 ===========================================
 
-Changes in version 3.0.2 (2013.08.29)
+Changes in version 3.0.4 (2013.09.06)
+- [CORE-548] - GenerateChangeLog generates invalid XML/SQL for mysql tables with autoincrement and compound PKs
+- [CORE-1423] - NPE in ForeignKeyComparator
+
+Changes in version 3.0.3 (2013.08.29)
 - [CORE-1241] - Remove schema name from SQL generated when running updateSQL
 - [CORE-1412] - UpdateSQL should write to stdout not stderr
 - [CORE-844] - Integer with range limitations handled incorrectly on Oracle

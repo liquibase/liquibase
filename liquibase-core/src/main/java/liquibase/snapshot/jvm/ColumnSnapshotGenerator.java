@@ -133,6 +133,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
             } else {
                 //probably older version of java, need to select from the column to find out if it is auto-increment
                 String selectStatement = "select " + database.escapeColumnName(rawCatalogName, rawSchemaName, rawTableName, rawColumnName) + " from " + database.escapeTableName(rawCatalogName, rawSchemaName, rawTableName) + " where 0=1";
+                LogFactory.getLogger().debug("Checking "+rawTableName+"."+rawCatalogName+" for auto-increment with SQL: '"+selectStatement+"'");
                 Connection underlyingConnection = ((JdbcConnection) database.getConnection()).getUnderlyingConnection();
                 Statement statement = underlyingConnection.createStatement();
                 ResultSet columnSelectRS = statement.executeQuery(selectStatement);
