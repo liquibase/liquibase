@@ -106,6 +106,20 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
      */
     protected boolean emptyPassword;
 
+	/**
+	 * Whether to ignore the schema name.
+	 *
+	 * @parameter expression="${liquibase.outputDefaultSchema}"
+	 */
+	protected boolean outputDefaultSchema;
+
+    /**
+     * Whether to ignore the schema name.
+     *
+     * @parameter expression="${liquibase.outputDefaultCatalog}"
+     */
+    protected boolean outputDefaultCatalog;
+
     /**
      * The default catalog name to use the for database connection.
      *
@@ -318,6 +332,8 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
                     driver,
                     defaultCatalogName,
                     defaultSchemaName,
+                    outputDefaultCatalog,
+                    outputDefaultSchema,
                     databaseClass,
                     null,
                     changelogCatalogName,

@@ -41,6 +41,8 @@ public class CommandLineUtils {
                                                 String driver,
                                                 String defaultCatalogName,
                                                 String defaultSchemaName,
+                                                boolean outputDefaultCatalog,
+                                                boolean outputDefaultSchema,
                                                 String databaseClass,
                                                 String driverPropertiesFile,
                                                 String liquibaseCatalogName,
@@ -108,6 +110,8 @@ public class CommandLineUtils {
             Database database = databaseFactory.findCorrectDatabaseImplementation(new JdbcConnection(connection));
             database.setDefaultCatalogName(StringUtils.trimToNull(defaultCatalogName));
             database.setDefaultSchemaName(StringUtils.trimToNull(defaultSchemaName));
+            database.setOutputDefaultCatalog(outputDefaultCatalog);
+            database.setOutputDefaultSchema(outputDefaultSchema);
             database.setLiquibaseCatalogName(StringUtils.trimToNull(liquibaseCatalogName));
             database.setLiquibaseSchemaName(StringUtils.trimToNull(liquibaseSchemaName));
             return database;

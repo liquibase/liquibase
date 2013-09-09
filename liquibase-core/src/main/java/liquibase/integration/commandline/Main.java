@@ -61,6 +61,8 @@ public class Main {
     protected String url;
     protected String databaseClass;
     protected String defaultSchemaName;
+    protected String outputDefaultSchema = "true";
+    protected String outputDefaultCatalog = "true";
     protected String defaultCatalogName;
     protected String changeLogFile;
     protected String classpath;
@@ -515,6 +517,14 @@ public class Main {
         stream.println(" --currentDateTimeFunction=<value>          Overrides current date time function");
         stream.println("                                            used in SQL.");
         stream.println("                                            Useful for unsupported databases");
+        stream.println(" --outputDefaultSchema=<true|false>         If true, SQL object references");
+        stream.println("                                            include the schema name, even if");
+        stream.println("                                            it is the default schema. ");
+        stream.println("                                            Defaults to true");
+        stream.println(" --outputDefaultCatalog=<true|false>        If true, SQL object references");
+        stream.println("                                            include the catalog name, even if");
+        stream.println("                                            it is the default catalog.");
+        stream.println("                                            Defaults to true");
         stream.println(" --help                                     Prints this message");
         stream.println(" --version                                  Prints this version information");
         stream.println("");
@@ -752,7 +762,7 @@ public class Main {
         FileSystemResourceAccessor fsOpener = new FileSystemResourceAccessor();
         CommandLineResourceAccessor clOpener = new CommandLineResourceAccessor(classLoader);
         Database database = CommandLineUtils.createDatabaseObject(classLoader, this.url, 
-            this.username, this.password, this.driver, this.defaultCatalogName,this.defaultSchemaName, this.databaseClass, this.driverPropertiesFile, null, null);
+            this.username, this.password, this.driver, this.defaultCatalogName,this.defaultSchemaName,  Boolean.parseBoolean(outputDefaultCatalog), Boolean.parseBoolean(outputDefaultSchema), this.databaseClass, this.driverPropertiesFile, null, null);
         try {
 
 
@@ -968,7 +978,7 @@ public class Main {
             throw new CommandLineParsingException("referenceUrl parameter missing");
         }
 
-        return CommandLineUtils.createDatabaseObject(classLoader, url, username, password, driver, defaultCatalogName, defaultSchemaName, null, null, null, null);
+        return CommandLineUtils.createDatabaseObject(classLoader, url, username, password, driver, defaultCatalogName, defaultSchemaName, Boolean.parseBoolean(outputDefaultCatalog), Boolean.parseBoolean(outputDefaultSchema), null, null, null, null);
 //        Driver driverObject;
 //        try {
 //            driverObject = (Driver) Class.forName(driver, true, classLoader).newInstance();

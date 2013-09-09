@@ -7,15 +7,13 @@ import liquibase.exception.Warnings;
 import liquibase.logging.LogFactory;
 import liquibase.logging.Logger;
 import liquibase.resource.ResourceAccessor;
+import liquibase.resource.UtfBomAwareReader;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.InsertStatement;
 import liquibase.util.StringUtils;
 import liquibase.util.csv.CSVReader;
 
-import java.io.BufferedInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -231,11 +229,11 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
             throw new UnexpectedLiquibaseException("Data file "+getFile()+" was not found");
         }
 
-        InputStreamReader streamReader;
+        Reader streamReader;
         if (getEncoding() == null) {
-            streamReader = new InputStreamReader(stream);
+            streamReader = new UtfBomAwareReader(stream);
         } else {
-            streamReader = new InputStreamReader(stream, getEncoding());
+            streamReader = new UtfBomAwareReader(stream, getEncoding());
         }
 
         char quotchar;

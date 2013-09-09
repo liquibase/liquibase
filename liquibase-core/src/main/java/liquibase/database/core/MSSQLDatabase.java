@@ -22,7 +22,6 @@ import java.util.Set;
 import java.util.regex.Pattern;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.logging.LogFactory;
-import liquibase.util.StringUtils;
 
 /**
  * Encapsulates MS-SQL database support.
@@ -31,7 +30,8 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
     public static final String PRODUCT_NAME = "Microsoft SQL Server";
     protected Set<String> systemTablesAndViews = new HashSet<String>();
 
-    private static Pattern CREATE_VIEW_AS_PATTERN = Pattern.compile("^CREATE\\s+.*?VIEW\\s+.*?AS\\s+", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+    private static Pattern INITIAL_COMMENT_PATTERN = Pattern.compile("^/\\*.*?\\*/");
+    private static Pattern CREATE_VIEW_AS_PATTERN = Pattern.compile("(?im)^\\s*(CREATE|ALTER)\\s+?VIEW\\s+?((\\S+?)|(\\[.*\\])|(\\\".*\\\"))\\s+?AS\\s*?", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
     public String getShortName() {
         return "mssql";
@@ -63,6 +63,9 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
 
         systemTablesAndViews.add("syssegments");
         systemTablesAndViews.add("sysconstraints");
+
+        super.quotingStartCharacter ="[";
+        super.quotingEndCharacter="]";
     }
 
 
@@ -147,6 +150,9 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
 
     @Override
     protected String getConnectionSchemaName() {
+        if (getConnection() == null) {
+            return null;
+        }
         try {
             ResultSet resultSet = ((JdbcConnection) getConnection()).prepareStatement("select schema_name()").executeQuery();
             resultSet.next();
@@ -175,7 +181,6 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
 
     @Override
     public String escapeTableName(String catalogName, String schemaName, String tableName) {
-        // MSSQL server does not support the schema name for the index -
         return escapeObjectName(null, schemaName, tableName, Table.class);
     }
 
@@ -246,7 +251,7 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
 
     @Override
     public String escapeObjectName(String objectName, Class<? extends DatabaseObject> objectType) {
-        return "["+objectName+"]";
+        return this.quotingStartCharacter+objectName+this.quotingEndCharacter;
     }
 
     @Override
@@ -278,10 +283,19 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
         }
         String definition = sb.toString();
 
-        if (definition == null) {
-            return null;
+        String finalDef =definition.replaceAll("\r\n", "\n");
+        finalDef = INITIAL_COMMENT_PATTERN.matcher(finalDef).replaceFirst("").trim(); //handle views that start with '/****** Script for XYZ command from SSMS  ******/'
+        finalDef = CREATE_VIEW_AS_PATTERN.matcher(finalDef).replaceFirst("").trim();
+
+        finalDef = finalDef.replaceAll("--.*", "").trim();
+
+        /**handle views that end up as '(select XYZ FROM ABC);' */
+        if (finalDef.startsWith("(") && (finalDef.endsWith(")") || finalDef.endsWith(");"))) {
+            finalDef = finalDef.replaceFirst("^\\(", "");
+            finalDef = finalDef.replaceFirst("\\);?$", "");
         }
-        return CREATE_VIEW_AS_PATTERN.matcher(definition).replaceFirst("");
+
+        return finalDef;
     }
 
     /**
@@ -290,7 +304,7 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
      */
     @Override
     public String escapeViewName(String catalogName, String schemaName, String viewName) {
-        if (StringUtils.trimToNull(schemaName) == null) {
+        if (schemaName== null || (isDefaultSchema(catalogName, schemaName) && !getOutputDefaultSchema())) {
             return escapeObjectName(viewName, View.class);
         } else {
             return escapeObjectName(schemaName, Schema.class)+"."+ escapeObjectName(viewName, Schema.class);
