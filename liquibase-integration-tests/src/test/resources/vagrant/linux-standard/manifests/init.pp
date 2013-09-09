@@ -1,5 +1,9 @@
 include apt
 
+package { "unzip":
+    ensure => "installed"
+}
+
 class { 'mysql::server':
   config_hash => {
 	'root_password' => 'root',
