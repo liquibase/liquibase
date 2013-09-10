@@ -207,8 +207,16 @@ public class YamlChangeLogParser implements ChangeLogParser {
                                     changeSet.getPreconditions().setOnFail(getValue(preconditionMap, "onFail", String.class, null, changeLogParameters));
                                     continue;
                                 }
+                                if(preconditionName.equals("onFailMessage")) {
+                                    changeSet.getPreconditions().setOnFailMessage(getValue(preconditionMap, "onFailMessage", String.class, null, changeLogParameters));
+                                    continue;
+                                }
                                 if (preconditionName.equals("onError")) {
                                     changeSet.getPreconditions().setOnError(getValue(preconditionMap, "onError", String.class, null, changeLogParameters));
+                                    continue;
+                                }
+                                if(preconditionName.equals("onErrorMessage")) {
+                                    changeSet.getPreconditions().setOnErrorMessage(getValue(preconditionMap, "onErrorMessage", String.class, null, changeLogParameters));
                                     continue;
                                 }
                                 Precondition precondition = parsePrecondition(preconditionMap);
@@ -302,6 +310,24 @@ public class YamlChangeLogParser implements ChangeLogParser {
 
                     for (Map<String, Object> preconditionContainerMap : (List<Map>) preconditions) {
                         String preconditionName = preconditionContainerMap.keySet().iterator().next();
+
+                        if(preconditionName.equals("onFail")){
+                            rootPrecondition.setOnFail(getValue(preconditionContainerMap, "onFail", String.class, null, changeLogParameters));
+                            continue;
+                        }
+                        if(preconditionName.equals("onError")){
+                            rootPrecondition.setOnError(getValue(preconditionContainerMap, "onError", String.class, null, changeLogParameters));
+                            continue;
+                        }
+                        if(preconditionName.equals("onFailMessage")){
+                            rootPrecondition.setOnFailMessage(getValue(preconditionContainerMap, "onFailMessage", String.class, null, changeLogParameters));
+                            continue;
+                        }
+                        if(preconditionName.equals("onErrorMessage")){
+                            rootPrecondition.setOnErrorMessage(getValue(preconditionContainerMap, "onErrorMessage", String.class, null, changeLogParameters));
+                            continue;
+                        }
+
                         Map<String, Object> preconditionMap = (Map) preconditionContainerMap.get(preconditionName);
                         Precondition precondition = PreconditionFactory.getInstance().create(preconditionName);
 
