@@ -67,6 +67,7 @@ public class Liquibase {
     private Logger log;
 
     private ChangeLogParameters changeLogParameters;
+    private ChangeExecListener changeExecListener;
 
     /**
      * Creates a Liquibase instance for a given DatabaseConnection. The Database instance used will be found with {@link DatabaseFactory#findCorrectDatabaseImplementation(liquibase.database.DatabaseConnection)}
@@ -191,7 +192,7 @@ public class Liquibase {
     }
 
     protected UpdateVisitor createUpdateVisitor() {
-        return new UpdateVisitor(database);
+        return new UpdateVisitor(database, changeExecListener);
     }
 
     protected ChangeLogIterator getStandardChangelogIterator(Contexts contexts, DatabaseChangeLog changeLog) throws DatabaseException {
@@ -948,5 +949,9 @@ public class Liquibase {
 
     public void setChangeLogParameter(String key, Object value) {
         this.changeLogParameters.set(key, value);
+    }
+    
+    public void setChangeExecListener(ChangeExecListener listener) {
+      this.changeExecListener = listener;
     }
 }

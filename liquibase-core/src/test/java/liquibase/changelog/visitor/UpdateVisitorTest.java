@@ -16,11 +16,14 @@ public class UpdateVisitorTest {
         database.setObjectQuotingStrategy(ObjectQuotingStrategy.LEGACY);
 
         ChangeSet changeSet = createMock(ChangeSet.class);
-        expect(changeSet.execute(new DatabaseChangeLog("test.xml"), database)).andReturn(ChangeSet.ExecType.EXECUTED);
-
+        DatabaseChangeLog databaseChangeLog = new DatabaseChangeLog("test.xml");
+        expect(changeSet.execute(databaseChangeLog, database)).andReturn(ChangeSet.ExecType.EXECUTED);
 
         expect(database.getRunStatus(changeSet)).andReturn(ChangeSet.RunStatus.NOT_RAN);
 
+        ChangeExecListener listener = createMock(ChangeExecListener.class);
+        listener.ran(changeSet, databaseChangeLog, database, ChangeSet.ExecType.EXECUTED);
+        expectLastCall();
 
         database.markChangeSetExecStatus(changeSet, ChangeSet.ExecType.EXECUTED);
         expectLastCall();
@@ -31,12 +34,14 @@ public class UpdateVisitorTest {
 
         replay(changeSet);
         replay(database);
+        replay(listener);
 
-        UpdateVisitor visitor = new UpdateVisitor(database);
-        visitor.visit(changeSet, new DatabaseChangeLog("test.xml"), database);
+        UpdateVisitor visitor = new UpdateVisitor(database, listener);
+        visitor.visit(changeSet, databaseChangeLog, database);
 
         verify(database);
         verify(changeSet);
+        verify(listener);
     }
 
 }
