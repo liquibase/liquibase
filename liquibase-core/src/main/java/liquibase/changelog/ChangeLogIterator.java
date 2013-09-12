@@ -4,6 +4,8 @@ import liquibase.changelog.filter.*;
 import liquibase.changelog.visitor.ChangeSetVisitor;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
+import liquibase.logging.LogFactory;
+import liquibase.logging.Logger;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -38,6 +40,8 @@ public class ChangeLogIterator {
     }
 
     public void run(ChangeSetVisitor visitor, Database database) throws LiquibaseException {
+      Logger log = LogFactory.getInstance().getLog();
+      log.setChangeLog(databaseChangeLog);
         List<ChangeSet> changeSetList = databaseChangeLog.getChangeSets();
         if (visitor.getDirection().equals(ChangeSetVisitor.Direction.REVERSE)) {
             Collections.reverse(changeSetList);
@@ -55,7 +59,9 @@ public class ChangeLogIterator {
             }
 
             if (shouldVisit) {
+                log.setChangeSet(changeSet);
                 visitor.visit(changeSet, databaseChangeLog, database);
+                log.setChangeSet(null);
             }
         }
     }
