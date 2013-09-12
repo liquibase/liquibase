@@ -27,28 +27,31 @@ public class ForeignKeyComparator implements DatabaseObjectComparator {
         ForeignKey thisForeignKey = (ForeignKey) databaseObject1;
         ForeignKey otherForeignKey = (ForeignKey) databaseObject2;
 
-        if (thisForeignKey.getName() != null && databaseObject2.getName() != null) {
-            if (chain.isSameObject(thisForeignKey, databaseObject2, accordingTo)) {
+        if (thisForeignKey.getName() != null && otherForeignKey.getName() != null) {
+            if (chain.isSameObject(thisForeignKey, otherForeignKey, accordingTo)) {
                 return true;
             }
         }
 
-        boolean columnsTheSame;
-        if (accordingTo.isCaseSensitive()) {
-            columnsTheSame = StringUtils.trimToEmpty(((ForeignKey) databaseObject1).getForeignKeyColumns()).equals(StringUtils.trimToEmpty(((ForeignKey) databaseObject2).getForeignKeyColumns())) &&
-                    StringUtils.trimToEmpty(((ForeignKey) databaseObject1).getPrimaryKeyColumns()).equals(StringUtils.trimToEmpty(((ForeignKey) databaseObject2).getPrimaryKeyColumns()));
-        } else {
-            columnsTheSame = ((ForeignKey) databaseObject1).getForeignKeyColumns().equalsIgnoreCase(((ForeignKey) databaseObject2).getForeignKeyColumns()) &&
-                    ((ForeignKey) databaseObject1).getPrimaryKeyColumns().equalsIgnoreCase(((ForeignKey) databaseObject2).getPrimaryKeyColumns());
+        if (thisForeignKey.getForeignKeyColumns() != null && thisForeignKey.getPrimaryKeyColumns() != null &&
+                otherForeignKey.getForeignKeyColumns() != null && otherForeignKey.getPrimaryKeyColumns() != null) {
+            boolean columnsTheSame;
+            if (accordingTo.isCaseSensitive()) {
+                columnsTheSame = StringUtils.trimToEmpty(thisForeignKey.getForeignKeyColumns()).equals(StringUtils.trimToEmpty(otherForeignKey.getForeignKeyColumns())) &&
+                        StringUtils.trimToEmpty(thisForeignKey.getPrimaryKeyColumns()).equals(StringUtils.trimToEmpty(otherForeignKey.getPrimaryKeyColumns()));
+            } else {
+                columnsTheSame = thisForeignKey.getForeignKeyColumns().equalsIgnoreCase(otherForeignKey.getForeignKeyColumns()) &&
+                        thisForeignKey.getPrimaryKeyColumns().equalsIgnoreCase(otherForeignKey.getPrimaryKeyColumns());
+            }
+
+            return columnsTheSame &&
+                    DatabaseObjectComparatorFactory.getInstance().isSameObject(thisForeignKey.getForeignKeyTable(), otherForeignKey.getForeignKeyTable(), accordingTo) &&
+                    DatabaseObjectComparatorFactory.getInstance().isSameObject(thisForeignKey.getPrimaryKeyTable(), otherForeignKey.getPrimaryKeyTable(), accordingTo);
 
         }
 
-        return columnsTheSame &&
-                DatabaseObjectComparatorFactory.getInstance().isSameObject(thisForeignKey.getForeignKeyTable(), otherForeignKey.getForeignKeyTable(), accordingTo) &&
-                DatabaseObjectComparatorFactory.getInstance().isSameObject(thisForeignKey.getPrimaryKeyTable(), otherForeignKey.getPrimaryKeyTable(), accordingTo);
-
+        return false;
     }
-
 
     public ObjectDifferences findDifferences(DatabaseObject databaseObject1, DatabaseObject databaseObject2, Database accordingTo, DatabaseObjectComparatorChain chain) {
         ObjectDifferences differences = chain.findDifferences(databaseObject1, databaseObject2, accordingTo);

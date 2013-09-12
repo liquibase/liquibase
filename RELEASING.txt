@@ -17,10 +17,10 @@ mvn -Darguments="-DskipTests=true" release:perform
 
 upload target/checkout/liquibase-core/target/liquibase-3.0.0-*.zip and *-.tar.gz to sourceforge
 
-upload target/checkout/liquibase-maven-plugin/target/site to phpinclude
-copy target/checkout/liquibase-core/target/site/apidocs to liquibase.github.io/javadoc
-update version info and links in liquibase.github.io/download/index.md
-commit and push liquibase.github.io
+upload target/checkout/liquibase-maven-plugin/target/site to liquibase.org/documentation\maven\generated
+copy target/checkout/liquibase-core/target/site/apidocs to liquibase.org/javadoc
+update version info and links in liquibase.org/download/index.md
+commit and push liquibase.org
 
 release version on jira
 
