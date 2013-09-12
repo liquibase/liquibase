@@ -56,13 +56,14 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # information on available options.
 
   ##### UNCOMMENT THIS WHEN RUNNING THE FIRST TIME ###
-  config.vm.provision :shell do |shell|
-    shell.inline = "sudo apt-get update;
-                    mkdir -p /etc/puppet/modules;
-  	                puppet module install puppetlabs/mysql;
-  	                puppet module install puppetlabs/postgresql;
-  	                "
-  end
+  #config.vm.provision :shell do |shell|
+  #  shell.inline = "sudo apt-get update;
+  #                  mkdir -p /etc/puppet/modules;
+ # 	                puppet module install puppetlabs/mysql;
+ # 	                puppet module install puppetlabs/postgresql;
+ # 	                puppet module install biemond/oradb;
+ # 	                "
+ # end
 
   config.vm.provision :puppet do |puppet|
     puppet.manifests_path = "manifests"

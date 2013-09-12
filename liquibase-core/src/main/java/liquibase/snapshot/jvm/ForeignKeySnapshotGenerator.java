@@ -165,9 +165,11 @@ public class ForeignKeySnapshotGenerator extends JdbcSnapshotGenerator {
                     continue;
                 }
 
-                Index exampleIndex = new Index().setTable(foreignKey.getForeignKeyTable());
-                exampleIndex.getColumns().addAll(Arrays.asList(foreignKey.getForeignKeyColumns().split("\\s*,\\s*")));
-                foreignKey.setBackingIndex(exampleIndex);
+                if (database.createsIndexesForForeignKeys()) {
+                    Index exampleIndex = new Index().setTable(foreignKey.getForeignKeyTable());
+                    exampleIndex.getColumns().addAll(Arrays.asList(foreignKey.getForeignKeyColumns().split("\\s*,\\s*")));
+                    foreignKey.setBackingIndex(exampleIndex);
+                }
 
                 return foreignKey;
             }

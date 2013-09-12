@@ -18,7 +18,9 @@ public class UnexpectedIndexChangeGenerator implements UnexpectedObjectChangeGen
     }
 
     public Class<? extends DatabaseObject>[] runAfterTypes() {
-        return null;
+        return new Class[] {
+                ForeignKey.class
+        };
     }
 
     public Class<? extends DatabaseObject>[] runBeforeTypes() {

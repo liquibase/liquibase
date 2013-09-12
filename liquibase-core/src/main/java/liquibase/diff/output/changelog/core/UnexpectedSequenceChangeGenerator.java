@@ -9,6 +9,7 @@ import liquibase.diff.output.changelog.UnexpectedObjectChangeGenerator;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.ForeignKey;
 import liquibase.structure.core.Sequence;
+import liquibase.structure.core.Table;
 
 public class UnexpectedSequenceChangeGenerator implements UnexpectedObjectChangeGenerator {
     public int getPriority(Class<? extends DatabaseObject> objectType, Database database) {
@@ -19,7 +20,7 @@ public class UnexpectedSequenceChangeGenerator implements UnexpectedObjectChange
     }
 
     public Class<? extends DatabaseObject>[] runAfterTypes() {
-        return null;
+        return new Class[] { Table.class};
     }
 
     public Class<? extends DatabaseObject>[] runBeforeTypes() {

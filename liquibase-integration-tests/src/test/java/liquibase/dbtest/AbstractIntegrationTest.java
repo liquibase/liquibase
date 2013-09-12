@@ -39,7 +39,7 @@ import liquibase.test.JUnitResourceAccessor;
 import liquibase.test.TestContext;
 import liquibase.util.FileUtil;
 import liquibase.util.RegexMatcher;
-import liquibase.util.StreamUtil;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -51,6 +51,7 @@ import java.sql.Statement;
 import java.util.*;
 
 import static junit.framework.Assert.*;
+import static org.junit.Assert.assertFalse;
 
 /**
  * Base class for all database integration tests.  There is an AbstractIntegrationTest subclass for each supported database.
@@ -158,6 +159,8 @@ public abstract class AbstractIntegrationTest {
             }
             ExecutorService.getInstance().clearExecutor(database);
             database.setDefaultSchemaName(null);
+            database.setOutputDefaultCatalog(true);
+            database.setOutputDefaultSchema(true);
 //            database.close();
         }
 //        ServiceLocator.resetInternalState();
@@ -268,26 +271,33 @@ public abstract class AbstractIntegrationTest {
 
     protected void clearDatabase(Liquibase liquibase) throws DatabaseException {
         liquibase.dropAll(getSchemasToDrop());
-        Statement statement = null;
         try {
-            statement = ((JdbcConnection) database.getConnection()).getUnderlyingConnection().createStatement();
+            Statement statement = null;
             try {
-                try {
-                    statement.execute("drop table " + database.escapeTableName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName()));
-                    database.commit();
-                } catch (Exception e) {
-                    System.out.println("Probably expected error dropping databasechangelog table");
-                    e.printStackTrace();
-                }
-                try {
-                    statement.execute("drop table " + database.escapeTableName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName()));
-                    database.commit();
-                } catch (Exception e) {
-                    System.out.println("Probably expected error dropping databasechangeloglock table");
-                    e.printStackTrace();
-                }
+                statement = ((JdbcConnection) database.getConnection()).getUnderlyingConnection().createStatement();
+                statement.execute("drop table " + database.escapeTableName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName()));
+                database.commit();
+            } catch (Exception e) {
+                System.out.println("Probably expected error dropping databasechangelog table");
+                e.printStackTrace();
+                database.rollback();
             } finally {
-                statement.close();
+                if (statement != null) {
+                    statement.close();
+                }
+            }
+            try {
+                statement = ((JdbcConnection) database.getConnection()).getUnderlyingConnection().createStatement();
+                statement.execute("drop table " + database.escapeTableName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName()));
+                database.commit();
+            } catch (Exception e) {
+                System.out.println("Probably expected error dropping databasechangeloglock table");
+                e.printStackTrace();
+                database.rollback();
+            } finally {
+                if (statement != null) {
+                    statement.close();
+                }
             }
         } catch (SQLException e) {
             throw new DatabaseException(e);
@@ -887,6 +897,39 @@ public abstract class AbstractIntegrationTest {
         clearDatabase(liquibase);
         liquibase.update(contexts);
         clearDatabase(liquibase);
+    }
+
+    @Test
+    public void testOutputChangeLogIgnoringSchema() throws Exception {
+        if (getDatabase() == null) {
+            return;
+        }
+
+        String schemaName = getDatabase().getDefaultSchemaName();
+        if (schemaName == null) {
+            return;
+        }
+
+        getDatabase().setOutputDefaultSchema(false);
+        getDatabase().setOutputDefaultCatalog(false);
+
+        StringWriter output = new StringWriter();
+        Liquibase liquibase = createLiquibase(includedChangeLog);
+        clearDatabase(liquibase);
+
+        liquibase = createLiquibase(includedChangeLog);
+        liquibase.update(contexts, output);
+
+        String outputResult = output.getBuffer().toString();
+        assertNotNull(outputResult);
+        assertTrue(outputResult.length() > 100); //should be pretty big
+//        System.out.println(outputResult);
+        CharSequence expected = "CREATE TABLE "+getDatabase().escapeTableName(getDatabase().getLiquibaseCatalogName(), getDatabase().getLiquibaseSchemaName(), getDatabase().getDatabaseChangeLogTableName());
+        assertTrue("create databasechangelog command not found in: \n" + outputResult, outputResult.contains(expected));
+        assertTrue("create databasechangeloglock command not found in: \n" + outputResult, outputResult.contains(expected));
+        assertFalse("the scheame name '"+schemaName+"' should be ignored\n\n"+outputResult, outputResult.contains(schemaName+"."));
+//        System.out.println("expected    : " + expected);
+//        System.out.println("outputResult: " + outputResult);
     }
 
     @Test
