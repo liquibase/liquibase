@@ -11,6 +11,7 @@ import liquibase.database.Database;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.exception.LiquibaseException;
 import liquibase.integration.commandline.CommandLineUtils;
+import liquibase.util.StringUtils;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -107,6 +108,14 @@ public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
      * @parameter expression="${liquibase.diffIncludeTablespace}"
      */
     protected boolean diffIncludeTablespace;
+    
+    /**
+     * List of diff types to include in Change Log expressed as a comma separated list from: tables, views, columns, indexes, foreignkeys, primarykeys, uniqueconstraints, data.
+     * If this is null then the default types will be: tables, views, columns, indexes, foreignkeys, primarykeys, uniqueconstraints
+     *
+     * @parameter expression="${liquibase.diffTypes}"
+     */
+    private String diffTypes;
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
@@ -138,7 +147,7 @@ public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
         getLog().info("Performing Diff on database " + db.toString());
         if (diffChangeLogFile != null) {
             try {
-                CommandLineUtils.doDiffToChangeLog(diffChangeLogFile, referenceDatabase, db, new DiffOutputControl(diffIncludeCatalog, diffIncludeSchema, diffIncludeTablespace));
+                CommandLineUtils.doDiffToChangeLog(diffChangeLogFile, referenceDatabase, db, new DiffOutputControl(diffIncludeCatalog, diffIncludeSchema, diffIncludeTablespace), StringUtils.trimToNull(diffTypes));
                 getLog().info("Differences written to Change Log File, " + diffChangeLogFile);
             }
             catch (IOException e) {
@@ -148,7 +157,7 @@ public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
                 throw new LiquibaseException(e);
             }
         } else {
-            CommandLineUtils.doDiff(referenceDatabase, db);
+            CommandLineUtils.doDiff(referenceDatabase, db, StringUtils.trimToNull(diffTypes));
         }
     }
 

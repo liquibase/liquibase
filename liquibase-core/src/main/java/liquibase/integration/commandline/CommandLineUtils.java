@@ -112,9 +112,9 @@ public class CommandLineUtils {
         }
     }
 
-    public static void doDiff(Database referenceDatabase, Database targetDatabase) throws LiquibaseException {
+    public static void doDiff(Database referenceDatabase, Database targetDatabase, String snapshotTypes) throws LiquibaseException {
 //        compareControl.addStatusListener(new OutDiffStatusListener());
-        DatabaseSnapshot referenceSnapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(referenceDatabase.getDefaultSchema(), referenceDatabase, new SnapshotControl(referenceDatabase));
+        DatabaseSnapshot referenceSnapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(referenceDatabase.getDefaultSchema(), referenceDatabase, new SnapshotControl(referenceDatabase, snapshotTypes));
         DatabaseSnapshot targetSnapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(targetDatabase.getDefaultSchema(), targetDatabase, new SnapshotControl(targetDatabase));
 
         CompareControl compareControl = new CompareControl(referenceSnapshot.getSnapshotControl().getTypesToInclude());
@@ -128,9 +128,10 @@ public class CommandLineUtils {
     public static void doDiffToChangeLog(String changeLogFile,
                                          Database referenceDatabase,
                                          Database targetDatabase,
-                                         DiffOutputControl diffOutputControl)
+                                         DiffOutputControl diffOutputControl,
+                                         String snapshotTypes)
             throws LiquibaseException, IOException, ParserConfigurationException {
-        DatabaseSnapshot referenceSnapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(referenceDatabase.getDefaultSchema(), referenceDatabase, new SnapshotControl(referenceDatabase));
+        DatabaseSnapshot referenceSnapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(referenceDatabase.getDefaultSchema(), referenceDatabase, new SnapshotControl(referenceDatabase, snapshotTypes));
         DatabaseSnapshot targetSnapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(targetDatabase.getDefaultSchema(), targetDatabase, new SnapshotControl(targetDatabase));
 
         CompareControl compareControl = new CompareControl(referenceSnapshot.getSnapshotControl().getTypesToInclude());
