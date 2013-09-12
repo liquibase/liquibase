@@ -14,6 +14,8 @@ import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Table;
 import liquibase.structure.core.View;
+
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -32,9 +34,23 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 
-@RunWith(PowerMockRunner.class)
+/*
+I moved this annotation from the class 
 @PrepareForTest({SqlGeneratorFactory.class, CheckSum.class})
+and used more specific annotations on individual test methods 
+because SqlGeneratorFactory was scanning classes and interacting
+with large numbers of mocked/generated classes with proxied
+methods.  The behavior seemed to differ between Linux and Windows.
+I don't really know why yet.
+ */
+
+
+@RunWith(PowerMockRunner.class)
 public class AbstractChangeTest {
+  
+  @BeforeClass
+  public static void unClench() {
+  }
 
     @Test
     public void finishInitialization() throws SetupException {
@@ -47,10 +63,12 @@ public class AbstractChangeTest {
     public void createChangeMetaData_noAnnotation() {
         try {
             new AbstractChange() {
+                @Override
                 public String getConfirmationMessage() {
                     return null;
                 }
 
+                @Override
                 public SqlStatement[] generateStatements(Database database) {
                     return null;
                 }
@@ -79,6 +97,7 @@ public class AbstractChangeTest {
         ChangeParameterMetaData paramNotIncludedMetaData = parameters.get("paramNotIncluded");
         ChangeParameterMetaData paramNoWriteMethodMetaData = parameters.get("paramNoWriteMethod");
 
+        assertNotNull(dbmsMetaData);
         assertNotNull(paramOneMetaData);
         assertEquals("paramOne", paramOneMetaData.getParameterName());
         assertEquals("Param One", paramOneMetaData.getDisplayName());
@@ -132,6 +151,7 @@ public class AbstractChangeTest {
     }
 
     @Test
+    @PrepareForTest({SqlGeneratorFactory.class})
     public void generateStatementsVolatile() throws Exception {
         Database database = mock(Database.class);
         final SqlStatement statement1No = mock(SqlStatement.class);
@@ -184,6 +204,7 @@ public class AbstractChangeTest {
     }
 
     @Test
+    @PrepareForTest({SqlGeneratorFactory.class})
     public void generateRollbackStatementsVolatile() throws Exception {
         Database database = mock(Database.class);
         final SqlStatement statement1No = mock(SqlStatement.class);
@@ -251,6 +272,7 @@ public class AbstractChangeTest {
     }
 
     @Test
+    @PrepareForTest({SqlGeneratorFactory.class})
     public void warn() throws Exception {
         Database database = mock(Database.class);
         final SqlStatement statementUnsupported = mock(SqlStatement.class);
@@ -289,6 +311,7 @@ public class AbstractChangeTest {
     }
 
     @Test
+    @PrepareForTest({SqlGeneratorFactory.class})
     public void warn_unsupportedButSkip() throws Exception {
         Database database = new MySQLDatabase();
         final SqlStatement statementSkip = mock(SqlStatement.class);
@@ -358,6 +381,7 @@ public class AbstractChangeTest {
     }
 
     @Test
+    @PrepareForTest({SqlGeneratorFactory.class})
     public void validate_notSupported() throws Exception {
         Database database = new MySQLDatabase();
         final SqlStatement statement1Unsupported = mock(SqlStatement.class);
@@ -386,6 +410,7 @@ public class AbstractChangeTest {
     }
 
     @Test
+    @PrepareForTest({SqlGeneratorFactory.class})
     public void validate_statementsHaveErrors() throws Exception {
         Database database = new MySQLDatabase();
         final SqlStatement statement1Fails = mock(SqlStatement.class);
@@ -432,6 +457,7 @@ public class AbstractChangeTest {
     }
 
     @Test
+    @PrepareForTest({SqlGeneratorFactory.class})
     public void validate_noErrorsForSkipOnUnsupported() throws Exception {
         Database database = new MySQLDatabase();
         final SqlStatement statementSkip = mock(SqlStatement.class);
@@ -538,6 +564,7 @@ public class AbstractChangeTest {
     }
 
     @Test
+    @PrepareForTest({SqlGeneratorFactory.class})
     public void getAffectedDatabaseObjects() throws Exception {
         Database database = mock(Database.class);
         final SqlStatement statement1 = mock(SqlStatement.class);
@@ -615,6 +642,7 @@ public class AbstractChangeTest {
 
 
     @Test
+    @PrepareForTest({CheckSum.class})
     public void generateCheckSum() {
         ExampleAbstractChange change = new ExampleAbstractChange();
         String serializedChange = new StringChangeLogSerializer().serialize(change, false);
@@ -713,10 +741,12 @@ public class AbstractChangeTest {
     @DatabaseChange(name = "exampleParamelessAbstractChange", description = "Used for the AbstractChangeTest unit test", priority = 1)
     private static class ExampleParamlessAbstractChange extends AbstractChange {
 
+        @Override
         public String getConfirmationMessage() {
             return "Test Confirmation Message";
         }
 
+        @Override
         public SqlStatement[] generateStatements(Database database) {
             return null;
         }
