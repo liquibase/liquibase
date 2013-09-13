@@ -36,12 +36,12 @@ public class UpdateVisitor implements ChangeSetVisitor {
     public void visit(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database) throws LiquibaseException {
         ChangeSet.RunStatus runStatus = this.database.getRunStatus(changeSet);
         log.debug("Running Changeset:" + changeSet);
-        sendWillRunEvent(changeSet, databaseChangeLog, database, runStatus);
+        fireWillRun(changeSet, databaseChangeLog, database, runStatus);
         ChangeSet.ExecType execType = changeSet.execute(databaseChangeLog, this.database);
         if (!runStatus.equals(ChangeSet.RunStatus.NOT_RAN)) {
             execType = ChangeSet.ExecType.RERAN;
         }
-        sendRanEvent(changeSet, databaseChangeLog, database, execType);
+        fireRan(changeSet, databaseChangeLog, database, execType);
         // reset object quoting strategy after running changeset
         this.database.setObjectQuotingStrategy(ObjectQuotingStrategy.LEGACY);
         this.database.markChangeSetExecStatus(changeSet, execType);
@@ -49,13 +49,13 @@ public class UpdateVisitor implements ChangeSetVisitor {
         this.database.commit();
     }
 
-    private void sendWillRunEvent(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database2, RunStatus runStatus) {
+    private void fireWillRun(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database2, RunStatus runStatus) {
       if (execListener != null) {
         execListener.willRun(changeSet, databaseChangeLog, database, runStatus);
       }      
     }
 
-    private void sendRanEvent(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database2, ExecType execType) {
+    private void fireRan(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database2, ExecType execType) {
       if (execListener != null) {
         execListener.ran(changeSet, databaseChangeLog, database, execType);
       }
