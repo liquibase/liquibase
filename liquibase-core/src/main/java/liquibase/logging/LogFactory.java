@@ -35,6 +35,7 @@ public class LogFactory {
     /**
      * @deprecated Use non-static {@link #getLog(String)} method
      */
+    @Deprecated
     public static Logger getLogger(String name) {
         return getInstance().getLog(name);
     }
@@ -58,6 +59,7 @@ public class LogFactory {
     /**
      * @deprecated Use non-static {@link #getLog()} method
      */
+    @Deprecated
     public static Logger getLogger() {
         return getInstance().getLog();
     }
@@ -73,6 +75,7 @@ public class LogFactory {
     /**
      * @deprecated Use non-static {@link #setDefaultLoggingLevel(String)} method
      */
+    @Deprecated
     public static void setLoggingLevel(String defaultLoggingLevel) {
         getInstance().defaultLoggingLevel = defaultLoggingLevel;
     }
