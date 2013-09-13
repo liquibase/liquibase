@@ -1,6 +1,7 @@
 package liquibase.changelog.visitor;
 
 import liquibase.changelog.ChangeSet;
+import liquibase.changelog.ChangeSet.RunStatus;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.database.Database;
 import static org.easymock.classextension.EasyMock.*;
@@ -22,6 +23,8 @@ public class UpdateVisitorTest {
         expect(database.getRunStatus(changeSet)).andReturn(ChangeSet.RunStatus.NOT_RAN);
 
         ChangeExecListener listener = createMock(ChangeExecListener.class);
+        listener.willRun(changeSet, databaseChangeLog, database, RunStatus.NOT_RAN);
+        expectLastCall();
         listener.ran(changeSet, databaseChangeLog, database, ChangeSet.ExecType.EXECUTED);
         expectLastCall();
 

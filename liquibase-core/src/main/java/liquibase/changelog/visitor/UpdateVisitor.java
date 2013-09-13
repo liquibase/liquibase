@@ -2,6 +2,7 @@ package liquibase.changelog.visitor;
 
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.ChangeSet.ExecType;
+import liquibase.changelog.ChangeSet.RunStatus;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.database.Database;
 import liquibase.database.ObjectQuotingStrategy;
@@ -35,6 +36,7 @@ public class UpdateVisitor implements ChangeSetVisitor {
     public void visit(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database) throws LiquibaseException {
         ChangeSet.RunStatus runStatus = this.database.getRunStatus(changeSet);
         log.debug("Running Changeset:" + changeSet);
+        sendWillRunEvent(changeSet, databaseChangeLog, database, runStatus);
         ChangeSet.ExecType execType = changeSet.execute(databaseChangeLog, this.database);
         if (!runStatus.equals(ChangeSet.RunStatus.NOT_RAN)) {
             execType = ChangeSet.ExecType.RERAN;
@@ -45,6 +47,12 @@ public class UpdateVisitor implements ChangeSetVisitor {
         this.database.markChangeSetExecStatus(changeSet, execType);
 
         this.database.commit();
+    }
+
+    private void sendWillRunEvent(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database2, RunStatus runStatus) {
+      if (execListener != null) {
+        execListener.willRun(changeSet, databaseChangeLog, database, runStatus);
+      }      
     }
 
     private void sendRanEvent(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database2, ExecType execType) {
