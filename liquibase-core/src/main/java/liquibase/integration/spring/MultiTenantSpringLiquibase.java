@@ -24,11 +24,32 @@ import org.springframework.context.ResourceLoaderAware;
 import org.springframework.core.io.ResourceLoader;
 
 /**
+ * A wrapper of Liquibase suitable in multi-tenant environments where multiple
+ * data sources represent tenants. It utilizes {@link SpringLiquibase} per each
+ * data source. All the parameters are the same as for {@link SpringLiquibase}
+ * except of the data source definition - in this case it is a list of data
+ * sources available under specified JNDI subtree. You have to define the
+ * subtree with {@link #jndiBase} property.<br/>
+ * <br/>
+ * The wrapper scans the subtree for all data sources and creates
+ * {@link SpringLiquibase} instances.<br/>
+ * <br/>
+ * Example:<br/>
+ * <br/><pre>
+ * &lt;bean id="liquibase" class="liquibase.integration.spring.MultiTenantSpringLiquibase"&gt;
+ *	&lt;property name="jndiBase" value="java:comp/env/jdbc/db" /&gt;
+ *	&lt;property name="changeLog" value="classpath:db/migration/db-changelog.xml" /&gt;	
+ * &lt;/bean&gt;
+ * </pre>
+ * 
+ * @see SpringLiquibase
+ * 
  * @author ladislav.gazo
  */
 public class MultiTenantSpringLiquibase implements InitializingBean, ResourceLoaderAware {
 	private Logger log = LogFactory.getLogger(MultiTenantSpringLiquibase.class.getName());
 
+	/** Defines the location of data sources suitable for multi-tenant environment. */
 	private String jndiBase;
 	private final List<DataSource> dataSources = new ArrayList<DataSource>();
 
