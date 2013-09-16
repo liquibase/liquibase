@@ -105,7 +105,7 @@ public class MultiTenantSpringLiquibase implements InitializingBean, ResourceLoa
 
 	private void runOnAllDataSources() throws LiquibaseException {
 		for(DataSource dataSource : dataSources) {
-			log.debug("Initializing Liquibase for data source " + dataSource);
+			log.info("Initializing Liquibase for data source " + dataSource);
 			SpringLiquibase liquibase = new SpringLiquibase();
 			liquibase.setChangeLog(changeLog);
 			liquibase.setChangeLogParameters(parameters);
