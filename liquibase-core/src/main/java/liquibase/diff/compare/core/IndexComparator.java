@@ -11,6 +11,7 @@ import liquibase.diff.compare.DatabaseObjectComparatorChain;
 import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 
 public class IndexComparator implements DatabaseObjectComparator {
+    @Override
     public int getPriority(Class<? extends DatabaseObject> objectType, Database database) {
         if (Index.class.isAssignableFrom(objectType)) {
             return PRIORITY_TYPE;
@@ -18,6 +19,13 @@ public class IndexComparator implements DatabaseObjectComparator {
         return PRIORITY_NONE;
     }
 
+    @Override
+    public String hash(DatabaseObject databaseObject, Database accordingTo, DatabaseObjectComparatorChain chain) {
+        return null;
+    }
+
+
+    @Override
     public boolean isSameObject(DatabaseObject databaseObject1, DatabaseObject databaseObject2, Database accordingTo, DatabaseObjectComparatorChain chain) {
         if (!(databaseObject1 instanceof Index && databaseObject2 instanceof Index)) {
             return false;
@@ -49,6 +57,7 @@ public class IndexComparator implements DatabaseObjectComparator {
     }
 
 
+    @Override
     public ObjectDifferences findDifferences(DatabaseObject databaseObject1, DatabaseObject databaseObject2, Database accordingTo, DatabaseObjectComparatorChain chain) {
         ObjectDifferences differences = chain.findDifferences(databaseObject1, databaseObject2, accordingTo);
         differences.removeDifference("name");

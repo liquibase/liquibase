@@ -5,6 +5,7 @@ import liquibase.diff.ObjectDifferences;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.servicelocator.ServiceLocator;
 import liquibase.structure.DatabaseObject;
+import liquibase.util.StringUtils;
 
 import java.util.*;
 
@@ -106,7 +107,23 @@ public class DatabaseObjectComparatorFactory {
             }
         }
 
+        if (!hash(object1, accordingTo).equals(hash(object2, accordingTo))) {
+            return false;
+        }
+
         return createComparatorChain(object1.getClass(), accordingTo).isSameObject(object1, object2, accordingTo);
+    }
+
+    public String hash(DatabaseObject databaseObject, Database accordingTo) {
+        String hash = null;
+        if (databaseObject != null) {
+            hash = createComparatorChain(databaseObject.getClass(), accordingTo).hash(databaseObject, accordingTo);
+        }
+
+        if (StringUtils.trimToNull(hash) == null) {
+            hash = "null";
+        }
+        return hash;
     }
 
     public ObjectDifferences findDifferences(DatabaseObject object1, DatabaseObject object2, Database accordingTo) {

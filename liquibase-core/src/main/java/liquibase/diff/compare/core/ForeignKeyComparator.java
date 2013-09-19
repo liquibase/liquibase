@@ -12,6 +12,7 @@ import liquibase.structure.core.Table;
 import liquibase.util.StringUtils;
 
 public class ForeignKeyComparator implements DatabaseObjectComparator {
+    @Override
     public int getPriority(Class<? extends DatabaseObject> objectType, Database database) {
         if (ForeignKey.class.isAssignableFrom(objectType)) {
             return PRIORITY_TYPE;
@@ -19,6 +20,14 @@ public class ForeignKeyComparator implements DatabaseObjectComparator {
         return PRIORITY_NONE;
     }
 
+
+    @Override
+    public String hash(DatabaseObject databaseObject, Database accordingTo, DatabaseObjectComparatorChain chain) {
+        return DatabaseObjectComparatorFactory.getInstance().hash(((ForeignKey) databaseObject).getForeignKeyTable(), accordingTo);
+    }
+
+
+    @Override
     public boolean isSameObject(DatabaseObject databaseObject1, DatabaseObject databaseObject2, Database accordingTo, DatabaseObjectComparatorChain chain) {
         if (!(databaseObject1 instanceof ForeignKey && databaseObject2 instanceof ForeignKey)) {
             return false;
@@ -53,6 +62,7 @@ public class ForeignKeyComparator implements DatabaseObjectComparator {
         return false;
     }
 
+    @Override
     public ObjectDifferences findDifferences(DatabaseObject databaseObject1, DatabaseObject databaseObject2, Database accordingTo, DatabaseObjectComparatorChain chain) {
         ObjectDifferences differences = chain.findDifferences(databaseObject1, databaseObject2, accordingTo);
         differences.removeDifference("name");

@@ -10,6 +10,7 @@ import liquibase.structure.core.Column;
 import liquibase.structure.core.Schema;
 
 public class SchemaComparator implements DatabaseObjectComparator {
+    @Override
     public int getPriority(Class<? extends DatabaseObject> objectType, Database database) {
         if (Schema.class.isAssignableFrom(objectType)) {
             return PRIORITY_TYPE;
@@ -17,6 +18,12 @@ public class SchemaComparator implements DatabaseObjectComparator {
         return PRIORITY_NONE;
     }
 
+    @Override
+    public String hash(DatabaseObject databaseObject, Database accordingTo, DatabaseObjectComparatorChain chain) {
+       return null;
+    }
+
+    @Override
     public boolean isSameObject(DatabaseObject databaseObject1, DatabaseObject databaseObject2, Database accordingTo, DatabaseObjectComparatorChain chain) {
         if (chain.isSameObject(databaseObject1, databaseObject2, accordingTo)) {
             return true;
@@ -44,6 +51,7 @@ public class SchemaComparator implements DatabaseObjectComparator {
     }
 
 
+    @Override
     public ObjectDifferences findDifferences(DatabaseObject databaseObject1, DatabaseObject databaseObject2, Database accordingTo, DatabaseObjectComparatorChain chain) {
         ObjectDifferences differences = new ObjectDifferences();
         differences.compare("name", databaseObject1, databaseObject2, new ObjectDifferences.DatabaseObjectNameCompareFunction(Schema.class, accordingTo));

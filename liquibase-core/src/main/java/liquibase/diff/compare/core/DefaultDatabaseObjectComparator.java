@@ -2,6 +2,7 @@ package liquibase.diff.compare.core;
 
 import liquibase.database.Database;
 import liquibase.diff.ObjectDifferences;
+import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.structure.DatabaseObject;
 import liquibase.diff.compare.DatabaseObjectComparator;
 import liquibase.diff.compare.DatabaseObjectComparatorChain;
@@ -15,6 +16,18 @@ public final class DefaultDatabaseObjectComparator implements DatabaseObjectComp
     @Override
     public int getPriority(Class<? extends DatabaseObject> objectType, Database database) {
         return PRIORITY_DEFAULT;
+    }
+
+    @Override
+    public String hash(DatabaseObject databaseObject, Database accordingTo, DatabaseObjectComparatorChain chain) {
+        String name = databaseObject.getName();
+        if (name != null) {
+            if (!accordingTo.isCaseSensitive()) {
+                name = name.toLowerCase();
+            }
+        }
+
+        return DatabaseObjectComparatorFactory.getInstance().hash(databaseObject.getSchema(), accordingTo)+":"+name;
     }
 
     @Override

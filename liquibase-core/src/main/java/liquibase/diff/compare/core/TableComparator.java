@@ -6,6 +6,7 @@ import liquibase.diff.compare.DatabaseObjectComparator;
 import liquibase.diff.compare.DatabaseObjectComparatorChain;
 import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
 
 public class TableComparator  implements DatabaseObjectComparator {
@@ -15,6 +16,11 @@ public class TableComparator  implements DatabaseObjectComparator {
             return PRIORITY_TYPE;
         }
         return PRIORITY_NONE;
+    }
+
+    @Override
+    public String hash(DatabaseObject databaseObject, Database accordingTo, DatabaseObjectComparatorChain chain) {
+        return chain.hash(databaseObject, accordingTo);
     }
 
     @Override

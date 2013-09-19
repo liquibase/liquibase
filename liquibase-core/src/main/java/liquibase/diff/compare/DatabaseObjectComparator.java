@@ -15,5 +15,7 @@ public interface DatabaseObjectComparator {
 
     boolean isSameObject(DatabaseObject databaseObject1, DatabaseObject databaseObject2, Database accordingTo, DatabaseObjectComparatorChain chain);
 
+    String hash(DatabaseObject databaseObject, Database accordingTo, DatabaseObjectComparatorChain chain);
+
     ObjectDifferences findDifferences(DatabaseObject databaseObject1, DatabaseObject databaseObject2, Database accordingTo, DatabaseObjectComparatorChain chain);
 }

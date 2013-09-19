@@ -17,7 +17,7 @@ public abstract class DatabaseSnapshot {
     private List<DatabaseObject> originalExamples;
     private SnapshotControl snapshotControl;
     private Database database;
-    private Map<Class<? extends DatabaseObject>, Set<DatabaseObject>> allFound = new HashMap<Class<? extends DatabaseObject>, Set<DatabaseObject>>();
+    private Map<Class<? extends DatabaseObject>, Map<String, Set<DatabaseObject>>> allFoundByHash = new HashMap<Class<? extends DatabaseObject>, Map<String, Set<DatabaseObject>>>();
     private Map<Class<? extends DatabaseObject>, Set<DatabaseObject>> knownNull = new HashMap<Class<? extends DatabaseObject>, Set<DatabaseObject>>();
 
     private Map<String, ResultSetCache> resultSetCaches = new HashMap<String, ResultSetCache>();
@@ -55,10 +55,6 @@ public abstract class DatabaseSnapshot {
      * Include the object described by the passed example object in this snapshot. Returns the object snapshot or null if the object does not exist in the database.
      * If the same object was returned by an earlier include() call, the same object instance will be returned.
      */
-//    public void include(DatabaseObject example) throws DatabaseException, InvalidExampleException {
-//        include(example, false);
-//    }
-
     protected  <T extends DatabaseObject> T include(T example) throws DatabaseException, InvalidExampleException {
         if (example == null) {
             return null;
@@ -97,10 +93,17 @@ public abstract class DatabaseSnapshot {
             collection.add(example);
 
         } else {
-            Set<DatabaseObject> collection = allFound.get(object.getClass());
+            Map<String, Set<DatabaseObject>> collectionMap = allFoundByHash.get(object.getClass());
+            if (collectionMap == null) {
+                collectionMap = new HashMap<String, Set<DatabaseObject>>();
+                allFoundByHash.put(object.getClass(), collectionMap);
+            }
+
+            String hash = DatabaseObjectComparatorFactory.getInstance().hash(object, database);
+            Set<DatabaseObject> collection = collectionMap.get(hash);
             if (collection == null) {
                 collection = new HashSet<DatabaseObject>();
-                allFound.put(object.getClass(), collection);
+                collectionMap.put(hash, collection);
             }
             collection.add(object);
 
@@ -186,7 +189,15 @@ public abstract class DatabaseSnapshot {
      * Returns the object described by the passed example if it is already included in this snapshot.
      */
     public <DatabaseObjectType extends DatabaseObject> DatabaseObjectType get(DatabaseObjectType example) {
-        Set<DatabaseObject> databaseObjects = allFound.get(example.getClass());
+        Map<String, Set<DatabaseObject>> databaseObjectsByHash = allFoundByHash.get(example.getClass());
+
+        if (databaseObjectsByHash == null) {
+            return null;
+        }
+
+        String hash = DatabaseObjectComparatorFactory.getInstance().hash(example, database);
+
+        Set<DatabaseObject> databaseObjects = databaseObjectsByHash.get(hash);
         if (databaseObjects == null) {
             return null;
         }
@@ -203,13 +214,17 @@ public abstract class DatabaseSnapshot {
      * Returns all objects of the given type that are already included in this snapshot.
      */
     public <DatabaseObjectType extends  DatabaseObject> Set<DatabaseObjectType> get(Class<DatabaseObjectType> type) {
-        //noinspection unchecked
-        Set<DatabaseObjectType> objects = (Set<DatabaseObjectType>) allFound.get(type);
-        if (objects == null) {
-            return Collections.unmodifiableSet(new HashSet<DatabaseObjectType>());
-        } else {
-            return Collections.unmodifiableSet(objects);
+
+        Set<DatabaseObject> returnSet = new HashSet<DatabaseObject>();
+
+        Map<String, Set<DatabaseObject>> allFound = allFoundByHash.get(type);
+        if (allFound != null) {
+            for (Set<DatabaseObject> objects : allFound.values()) {
+                returnSet.addAll(objects);
+            }
         }
+
+        return (Set<DatabaseObjectType>) Collections.unmodifiableSet(returnSet);
     }
 
 
