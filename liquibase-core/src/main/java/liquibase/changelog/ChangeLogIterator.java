@@ -40,7 +40,7 @@ public class ChangeLogIterator {
     }
 
     public void run(ChangeSetVisitor visitor, Database database) throws LiquibaseException {
-      Logger log = LogFactory.getInstance().getLog();
+      Logger log = LogFactory.getLogger();
       log.setChangeLog(databaseChangeLog);
         List<ChangeSet> changeSetList = databaseChangeLog.getChangeSets();
         if (visitor.getDirection().equals(ChangeSetVisitor.Direction.REVERSE)) {
