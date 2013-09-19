@@ -34,26 +34,36 @@ public class IndexComparator implements DatabaseObjectComparator {
         Index thisIndex = (Index) databaseObject1;
         Index otherIndex = (Index) databaseObject2;
 
-        if (thisIndex.getColumns().size() == 0 || otherIndex.getColumns().size() == 0) {
-            return chain.isSameObject(databaseObject1, databaseObject2, accordingTo);
-        }
+        int thisIndexSize = thisIndex.getColumns().size();
+        int otherIndexSize = otherIndex.getColumns().size();
 
-        if (!DatabaseObjectComparatorFactory.getInstance().isSameObject(thisIndex.getTable(), otherIndex.getTable(), accordingTo)) {
+        if (thisIndexSize > 0 && otherIndexSize > 0 && thisIndexSize != otherIndexSize) {
             return false;
         }
 
-
-        if (thisIndex.getColumns().size() !=  otherIndex.getColumns().size()) {
-            return false;
-        }
-
-        for (int i=0; i<otherIndex.getColumns().size(); i++) {
-            if (! DatabaseObjectComparatorFactory.getInstance().isSameObject(new Column().setName(thisIndex.getColumns().get(i)).setRelation(thisIndex.getTable()), new Column().setName(otherIndex.getColumns().get(i)).setRelation(otherIndex.getTable()), accordingTo)) {
+        if (thisIndex.getTable() != null && otherIndex.getTable() != null && thisIndexSize > 0 && otherIndexSize > 0) {
+            if (!DatabaseObjectComparatorFactory.getInstance().isSameObject(thisIndex.getTable(), otherIndex.getTable(), accordingTo)) {
                 return false;
+            }
+
+            for (int i=0; i< otherIndexSize; i++) {
+                if (! DatabaseObjectComparatorFactory.getInstance().isSameObject(new Column().setName(thisIndex.getColumns().get(i)).setRelation(thisIndex.getTable()), new Column().setName(otherIndex.getColumns().get(i)).setRelation(otherIndex.getTable()), accordingTo)) {
+                    return false;
+                }
+            }
+            return true;
+        } else {
+            if (!DefaultDatabaseObjectComparator.nameMatches(databaseObject1, databaseObject2, accordingTo)) {
+                return false;
+            }
+
+            if (databaseObject1.getSchema() != null && databaseObject2.getSchema() != null) {
+                return DatabaseObjectComparatorFactory.getInstance().isSameObject(databaseObject1.getSchema(), databaseObject2.getSchema(), accordingTo);
+            } else {
+                return true;
             }
         }
 
-        return true;
     }
 
 

@@ -4,6 +4,7 @@ import liquibase.database.Database;
 import liquibase.diff.ObjectDifferences;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.servicelocator.ServiceLocator;
+import liquibase.structure.AbstractDatabaseObject;
 import liquibase.structure.DatabaseObject;
 import liquibase.util.StringUtils;
 
@@ -101,8 +102,10 @@ public class DatabaseObjectComparatorFactory {
             return false;
         }
 
-        if (object1.getSnapshotId() != null && object2.getSnapshotId() != null) {
-            if (object1.getSnapshotId().equals(object2.getSnapshotId())) {
+        UUID snapshotId1 = object1.getSnapshotId();
+        UUID snapshotId2 = object2.getSnapshotId();
+        if (snapshotId1 != null && snapshotId2 != null) {
+            if (snapshotId1.equals(snapshotId2)) {
                 return true;
             }
         }
@@ -110,6 +113,7 @@ public class DatabaseObjectComparatorFactory {
         if (!hash(object1, accordingTo).equals(hash(object2, accordingTo))) {
             return false;
         }
+
 
         return createComparatorChain(object1.getClass(), accordingTo).isSameObject(object1, object2, accordingTo);
     }

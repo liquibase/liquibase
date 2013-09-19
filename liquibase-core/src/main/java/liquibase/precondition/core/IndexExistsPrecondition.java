@@ -61,10 +61,12 @@ public class IndexExistsPrecondition implements Precondition {
         this.columnNames = columnNames;
     }
 
+    @Override
     public Warnings warn(Database database) {
         return new Warnings();
     }
 
+    @Override
     public ValidationErrors validate(Database database) {
         ValidationErrors validationErrors = new ValidationErrors();
         if (getIndexName() == null && getTableName() == null && getColumnNames() == null) {
@@ -73,15 +75,17 @@ public class IndexExistsPrecondition implements Precondition {
         return validationErrors;
     }
 
+    @Override
     public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet) throws PreconditionFailedException, PreconditionErrorException {
     	try {
             Schema schema = new Schema(getCatalogName(), getSchemaName());
             Index example = new Index();
-            example.setTable(new Table());
-            if (StringUtils.trimToNull(getTableName()) != null) {
-                example.getTable().setName(database.correctObjectName(getTableName(), Table.class));
+            String tableName = StringUtils.trimToNull(getTableName());
+            if (tableName != null) {
+                example.setTable((Table) new Table()
+                        .setName(database.correctObjectName(getTableName(), Table.class))
+                        .setSchema(schema));
             }
-            example.getTable().setSchema(schema);
             example.setName(database.correctObjectName(getIndexName(), Index.class));
             if (StringUtils.trimToNull(getColumnNames()) != null) {
                 for (String column : getColumnNames().split("\\s*,\\s*")) {
@@ -95,7 +99,7 @@ public class IndexExistsPrecondition implements Precondition {
                     name += database.escapeStringForDatabase(getIndexName());
                 }
 
-                if (StringUtils.trimToNull(getTableName()) != null) {
+                if (tableName != null) {
                     name += " on "+database.escapeStringForDatabase(getTableName());
 
                     if (StringUtils.trimToNull(getColumnNames()) != null) {
@@ -112,6 +116,7 @@ public class IndexExistsPrecondition implements Precondition {
         }
     }
 
+    @Override
     public String getName() {
         return "indexExists";
     }
