@@ -4,6 +4,7 @@ import liquibase.CatalogAndSchema;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
+import liquibase.snapshot.CachedRow;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.JdbcDatabaseSnapshot;
@@ -11,8 +12,6 @@ import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
 import liquibase.util.StringUtils;
 
-import java.sql.DatabaseMetaData;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 
@@ -27,7 +26,7 @@ public class TableSnapshotGenerator extends JdbcSnapshotGenerator {
         String objectName = example.getName();
         Schema schema = example.getSchema();
 
-        List<JdbcDatabaseSnapshot.CachedRow> rs = null;
+        List<CachedRow> rs = null;
         try {
             JdbcDatabaseSnapshot.CachingDatabaseMetaData metaData = ((JdbcDatabaseSnapshot) snapshot).getMetaData();
             rs = metaData.getTables(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema),
@@ -57,10 +56,10 @@ public class TableSnapshotGenerator extends JdbcSnapshotGenerator {
             Database database = snapshot.getDatabase();
             Schema schema = (Schema) foundObject;
 
-            List<JdbcDatabaseSnapshot.CachedRow> tableMetaDataRs = null;
+            List<CachedRow> tableMetaDataRs = null;
             try {
                 tableMetaDataRs = ((JdbcDatabaseSnapshot) snapshot).getMetaData().getTables(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), null, new String[]{"TABLE"});
-                for (JdbcDatabaseSnapshot.CachedRow row : tableMetaDataRs) {
+                for (CachedRow row : tableMetaDataRs) {
                     String tableName = row.getString("TABLE_NAME");
                     Table tableExample = (Table) new Table().setName(cleanNameFromDatabase(tableName, database)).setSchema(schema);
 
@@ -74,7 +73,7 @@ public class TableSnapshotGenerator extends JdbcSnapshotGenerator {
 
     }
 
-    protected Table readTable(JdbcDatabaseSnapshot.CachedRow tableMetadataResultSet, Database database) throws SQLException, DatabaseException {
+    protected Table readTable(CachedRow tableMetadataResultSet, Database database) throws SQLException, DatabaseException {
         String rawTableName = tableMetadataResultSet.getString("TABLE_NAME");
         String rawSchemaName = StringUtils.trimToNull(tableMetadataResultSet.getString("TABLE_SCHEM"));
         String rawCatalogName = StringUtils.trimToNull(tableMetadataResultSet.getString("TABLE_CAT"));

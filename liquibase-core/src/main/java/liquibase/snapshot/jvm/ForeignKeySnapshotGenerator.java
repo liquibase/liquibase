@@ -4,8 +4,8 @@ import liquibase.CatalogAndSchema;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
 import liquibase.database.core.MSSQLDatabase;
-import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.exception.DatabaseException;
+import liquibase.snapshot.CachedRow;
 import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.JdbcDatabaseSnapshot;
@@ -13,8 +13,6 @@ import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
 
 import java.sql.DatabaseMetaData;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.*;
 
 public class ForeignKeySnapshotGenerator extends JdbcSnapshotGenerator {
@@ -72,13 +70,13 @@ public class ForeignKeySnapshotGenerator extends JdbcSnapshotGenerator {
 
 
             Set<String> seenFks = new HashSet<String>();
-            List<JdbcDatabaseSnapshot.CachedRow> importedKeyMetadataResultSet = null;
+            List<CachedRow> importedKeyMetadataResultSet = null;
             try {
                 importedKeyMetadataResultSet = ((JdbcDatabaseSnapshot) snapshot).getMetaData().getImportedKeys(((AbstractJdbcDatabase) database)
                         .getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema),
                         database.correctObjectName(table.getName(), Table.class));
 
-                for (JdbcDatabaseSnapshot.CachedRow row : importedKeyMetadataResultSet) {
+                for (CachedRow row : importedKeyMetadataResultSet) {
                     ForeignKey fk = new ForeignKey().setName(row.getString("FK_NAME")).setForeignKeyTable(table);
                     if (seenFks.add(fk.getName())) {
                         table.getOutgoingForeignKeys().add(fk);
@@ -87,24 +85,6 @@ public class ForeignKeySnapshotGenerator extends JdbcSnapshotGenerator {
             } catch (Exception e) {
                 throw new DatabaseException(e);
             }
-
-            seenFks = new HashSet<String>();
-            List<JdbcDatabaseSnapshot.CachedRow> exportedKeyMetadataResultSet = null;
-            try {
-                exportedKeyMetadataResultSet = ((JdbcDatabaseSnapshot) snapshot).getMetaData().getExportedKeys(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema),
-                        ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), database.correctObjectName(table.getName(), Table.class));
-
-                for (JdbcDatabaseSnapshot.CachedRow row : exportedKeyMetadataResultSet) {
-                    Table fktable = (Table) new Table().setName(row.getString("FKTABLE_NAME")).setSchema(new Schema(row.getString("FKTABLE_CAT"), row.getString("FKTABLE_SCHEM")));
-                    ForeignKey fk = new ForeignKey().setName(row.getString("FK_NAME")).setForeignKeyTable(fktable);
-                    if (seenFks.add(fk.getName())) {
-                        table.getIncomingForeignKeys().add(fk);
-                    }
-                }
-            } catch (Exception e) {
-                throw new DatabaseException(e);
-            }
-
         }
     }
 
@@ -113,7 +93,7 @@ public class ForeignKeySnapshotGenerator extends JdbcSnapshotGenerator {
 
         Database database = snapshot.getDatabase();
 
-        List<JdbcDatabaseSnapshot.CachedRow> importedKeyMetadataResultSet = null;
+        List<CachedRow> importedKeyMetadataResultSet = null;
         try {
             Table fkTable = ((ForeignKey) example).getForeignKeyTable();
             String searchCatalog = ((AbstractJdbcDatabase) database).getJdbcCatalogName(fkTable.getSchema());
@@ -122,7 +102,7 @@ public class ForeignKeySnapshotGenerator extends JdbcSnapshotGenerator {
 
             importedKeyMetadataResultSet = ((JdbcDatabaseSnapshot) snapshot).getMetaData().getImportedKeys(searchCatalog, searchSchema, searchTableName);
             ForeignKey foreignKey = null;
-            for (JdbcDatabaseSnapshot.CachedRow row : importedKeyMetadataResultSet) {
+            for (CachedRow row : importedKeyMetadataResultSet) {
                 String fk_name = cleanNameFromDatabase(row.getString("FK_NAME"), database);
                 if (!fk_name.equals(example.getName())) {
                     continue;

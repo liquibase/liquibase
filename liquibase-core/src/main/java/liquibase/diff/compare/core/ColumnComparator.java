@@ -10,6 +10,7 @@ import liquibase.structure.core.Column;
 import liquibase.structure.core.Index;
 
 public class ColumnComparator implements DatabaseObjectComparator {
+    @Override
     public int getPriority(Class<? extends DatabaseObject> objectType, Database database) {
         if (Column.class.isAssignableFrom(objectType)) {
             return PRIORITY_TYPE;
@@ -17,6 +18,7 @@ public class ColumnComparator implements DatabaseObjectComparator {
         return PRIORITY_NONE;
     }
 
+    @Override
     public boolean isSameObject(DatabaseObject databaseObject1, DatabaseObject databaseObject2, Database accordingTo, DatabaseObjectComparatorChain chain) {
         if (!(databaseObject1 instanceof Column && databaseObject2 instanceof Column)) {
             return false;
@@ -24,6 +26,11 @@ public class ColumnComparator implements DatabaseObjectComparator {
 
         Column thisColumn = (Column) databaseObject1;
         Column otherColumn = (Column) databaseObject2;
+
+        //short circut chain.isSameObject for performance reasons. There can be a lot of columns in a database
+        if (!DefaultDatabaseObjectComparator.nameMatches(thisColumn, otherColumn, accordingTo)) {
+            return false;
+        }
 
         if (!DatabaseObjectComparatorFactory.getInstance().isSameObject(thisColumn.getRelation(), otherColumn.getRelation(), accordingTo)) {
             return false;
@@ -33,6 +40,7 @@ public class ColumnComparator implements DatabaseObjectComparator {
     }
 
 
+    @Override
     public ObjectDifferences findDifferences(DatabaseObject databaseObject1, DatabaseObject databaseObject2, Database accordingTo, DatabaseObjectComparatorChain chain) {
         ObjectDifferences differences = chain.findDifferences(databaseObject1, databaseObject2, accordingTo);
         differences.removeDifference("autoIncrementInformation");

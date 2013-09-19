@@ -6,19 +6,13 @@ import liquibase.database.core.DB2Database;
 import liquibase.database.core.DerbyDatabase;
 import liquibase.database.core.InformixDatabase;
 import liquibase.database.core.OracleDatabase;
-import liquibase.database.jvm.JdbcConnection;
-import liquibase.diff.compare.DatabaseObjectComparator;
 import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.exception.DatabaseException;
 import liquibase.snapshot.*;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
 
-import java.io.FileOutputStream;
 import java.sql.DatabaseMetaData;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.*;
 
 public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
@@ -150,21 +144,15 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
             schema = table.getSchema();
 
 
-            List<JdbcDatabaseSnapshot.CachedRow> rs = null;
+            List<CachedRow> rs = null;
             JdbcDatabaseSnapshot.CachingDatabaseMetaData databaseMetaData = null;
             try {
                 databaseMetaData = ((JdbcDatabaseSnapshot) snapshot).getMetaData();
 
-                if (database instanceof OracleDatabase) {
-                    //oracle getIndexInfo is buggy and slow.  See Issue 1824548 and http://forums.oracle.com/forums/thread.jspa?messageID=578383&#578383
-                    String sql = "SELECT INDEX_NAME, COLUMN_NAME FROM ALL_IND_COLUMNS WHERE TABLE_OWNER='" + schema.getName() + "' AND TABLE_NAME='" + table.getName() + "'";
-                    rs = databaseMetaData.query(sql);
-                } else {
                     rs = databaseMetaData.getIndexInfo(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema),
-                            ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), table.getName(), false, true);
-                }
+                            ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), table.getName());
                 Map<String, Index> foundIndexes = new HashMap<String, Index>();
-                for (JdbcDatabaseSnapshot.CachedRow row : rs) {
+                for (CachedRow row : rs) {
                     String indexName = row.getString("INDEX_NAME");
                     if (indexName == null) {
                         continue;
@@ -228,24 +216,13 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
         Map<String, Index> foundIndexes = new HashMap<String, Index>();
         for (Table table : tables) {
             JdbcDatabaseSnapshot.CachingDatabaseMetaData databaseMetaData = null;
-            List<JdbcDatabaseSnapshot.CachedRow> rs = null;
+            List<CachedRow> rs = null;
             try {
                 databaseMetaData = ((JdbcDatabaseSnapshot) snapshot).getMetaData();
 
-                if (database instanceof OracleDatabase) {
-                    //oracle getIndexInfo is buggy and slow.  See Issue 1824548 and http://forums.oracle.com/forums/thread.jspa?messageID=578383&#578383
-                    String sql = "SELECT INDEX_NAME, 3 AS TYPE, TABLE_NAME, COLUMN_NAME, COLUMN_POSITION AS ORDINAL_POSITION, null AS FILTER_CONDITION FROM ALL_IND_COLUMNS WHERE TABLE_OWNER='" + schema.getName() + "' AND TABLE_NAME='" + table.getName() + "'";
-                    if (exampleName != null) {
-                        sql += " AND INDEX_NAME='" + exampleName + "'";
-                    }
-                    sql += " ORDER BY INDEX_NAME, ORDINAL_POSITION";
-                    rs = databaseMetaData.query(sql);
-                } else {
-                    rs = databaseMetaData.getIndexInfo(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema),
-                            ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), table.getName(), false, true);
-                }
+                    rs = databaseMetaData.getIndexInfo(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), table.getName());
 
-                for (JdbcDatabaseSnapshot.CachedRow row : rs) {
+                for (CachedRow row : rs) {
                     String indexName = database.correctObjectName(cleanNameFromDatabase(row.getString("INDEX_NAME"), database), Index.class);
                     if (indexName == null) {
                         continue;

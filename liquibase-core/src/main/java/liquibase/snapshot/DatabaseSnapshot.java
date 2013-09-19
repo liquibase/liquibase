@@ -14,19 +14,26 @@ import java.util.*;
 
 public abstract class DatabaseSnapshot {
 
+    private List<DatabaseObject> originalExamples;
     private SnapshotControl snapshotControl;
     private Database database;
     private Map<Class<? extends DatabaseObject>, Set<DatabaseObject>> allFound = new HashMap<Class<? extends DatabaseObject>, Set<DatabaseObject>>();
     private Map<Class<? extends DatabaseObject>, Set<DatabaseObject>> knownNull = new HashMap<Class<? extends DatabaseObject>, Set<DatabaseObject>>();
 
-    DatabaseSnapshot(SnapshotControl snapshotControl, Database database) {
+    private Map<String, ResultSetCache> resultSetCaches = new HashMap<String, ResultSetCache>();
+
+    DatabaseSnapshot(DatabaseObject[] examples, Database database, SnapshotControl snapshotControl) throws DatabaseException, InvalidExampleException {
+        this.originalExamples = Arrays.asList(examples);
         this.database = database;
         this.snapshotControl = snapshotControl;
+
+        for (DatabaseObject obj : examples) {
+            include(obj);
+        }
     }
 
-    public DatabaseSnapshot(Database database) {
-        this.database = database;
-        this.snapshotControl = new SnapshotControl(database);
+    public DatabaseSnapshot(DatabaseObject[] examples, Database database) throws DatabaseException, InvalidExampleException {
+        this(examples, database, new SnapshotControl(database));
     }
 
     public SnapshotControl getSnapshotControl() {
@@ -35,6 +42,13 @@ public abstract class DatabaseSnapshot {
 
     public Database getDatabase() {
         return database;
+    }
+
+    public ResultSetCache getResultSetCache(String key) {
+        if (!resultSetCaches.containsKey(key)) {
+            resultSetCaches.put(key, new ResultSetCache());
+        }
+        return resultSetCaches.get(key);
     }
 
     /**

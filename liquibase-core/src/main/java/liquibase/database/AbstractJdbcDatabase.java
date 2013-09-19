@@ -20,10 +20,7 @@ import liquibase.exception.*;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.logging.LogFactory;
-import liquibase.snapshot.DatabaseSnapshot;
-import liquibase.snapshot.JdbcDatabaseSnapshot;
-import liquibase.snapshot.SnapshotControl;
-import liquibase.snapshot.SnapshotGeneratorFactory;
+import liquibase.snapshot.*;
 import liquibase.sql.Sql;
 import liquibase.sql.visitor.SqlVisitor;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
@@ -871,7 +868,7 @@ public abstract class AbstractJdbcDatabase implements Database {
                 throw new UnexpectedLiquibaseException(e);
             }
 
-            DiffResult diffResult = DiffGeneratorFactory.getInstance().compare(new JdbcDatabaseSnapshot(this), snapshot, new CompareControl(snapshot.getSnapshotControl().getTypesToInclude()));
+            DiffResult diffResult = DiffGeneratorFactory.getInstance().compare(new EmptyDatabaseSnapshot(this), snapshot, new CompareControl(snapshot.getSnapshotControl().getTypesToInclude()));
             List<ChangeSet> changeSets = new DiffToChangeLog(diffResult, new DiffOutputControl(true, true, false)).generateChangeSets();
 
             final boolean reEnableFK = supportsForeignKeyDisable() && disableForeignKeyChecks();

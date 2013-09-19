@@ -5,15 +5,19 @@ import liquibase.diff.ObjectDifferences;
 import liquibase.structure.DatabaseObject;
 
 import java.util.Iterator;
+import java.util.List;
 import java.util.SortedSet;
 
-public class DatabaseObjectComparatorChain {
-    private Iterator<DatabaseObjectComparator> comparators;
+public class DatabaseObjectComparatorChain implements Cloneable {
+    private List<DatabaseObjectComparator> comparators;
+    private int nextIndex = 0; //this class is used often enough that the overhead of an iterator adds up to a significant percentage of the execution time
 
-    public DatabaseObjectComparatorChain(SortedSet<DatabaseObjectComparator> comparators) {
-        if (comparators != null) {
-            this.comparators = comparators.iterator();
-        }
+    public DatabaseObjectComparatorChain(List<DatabaseObjectComparator> comparators) {
+        this.comparators = comparators;
+    }
+
+    protected DatabaseObjectComparatorChain copy() {
+        return new DatabaseObjectComparatorChain(comparators);
     }
 
     public boolean isSameObject(DatabaseObject object1, DatabaseObject object2, Database accordingTo) {
@@ -32,11 +36,27 @@ public class DatabaseObjectComparatorChain {
             return true;
         }
 
-        if (!comparators.hasNext()) {
+        DatabaseObjectComparator next = getNextComparator();
+
+        if (next == null) {
             return true;
         }
 
-        return comparators.next().isSameObject(object1, object2, accordingTo, this);
+        return next.isSameObject(object1, object2, accordingTo, this);
+    }
+
+    private DatabaseObjectComparator getNextComparator() {
+        if (comparators == null) {
+            return null;
+        }
+
+        if (nextIndex >= comparators.size()) {
+            return null;
+        }
+
+        DatabaseObjectComparator next = comparators.get(nextIndex);
+        nextIndex++;
+        return next;
     }
 
     public ObjectDifferences findDifferences(DatabaseObject object1, DatabaseObject object2, Database accordingTo) {
@@ -51,14 +71,12 @@ public class DatabaseObjectComparatorChain {
             return new ObjectDifferences().addDifference("Compared value was null", "this", null, null);
         }
 
-        if (comparators == null) {
+        DatabaseObjectComparator next = getNextComparator();
+
+        if (next == null) {
             return new ObjectDifferences();
         }
 
-        if (!comparators.hasNext()) {
-            return new ObjectDifferences();
-        }
-
-        return comparators.next().findDifferences(object1, object2, accordingTo, this);
+        return next.findDifferences(object1, object2, accordingTo, this);
     }
 }

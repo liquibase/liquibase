@@ -7,6 +7,8 @@ import java.math.BigInteger;
 
 public class Column extends AbstractDatabaseObject {
 
+    private String name;
+
     public Column() {
     }
 
@@ -36,10 +38,11 @@ public class Column extends AbstractDatabaseObject {
     }
 
 	public String getName() {
-        return getAttribute("name", String.class);
+        return name;
     }
 
     public Column setName(String name) {
+        this.name = name;
         setAttribute("name", name);
 
         return this;
