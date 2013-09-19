@@ -36,7 +36,7 @@ public class ColumnComparator implements DatabaseObjectComparator {
             return false;
         }
 
-        return chain.isSameObject(databaseObject1, databaseObject2, accordingTo);
+        return true;
     }
 
 

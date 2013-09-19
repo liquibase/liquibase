@@ -4,6 +4,7 @@ import liquibase.database.Database;
 import liquibase.diff.ObjectDifferences;
 import liquibase.diff.compare.DatabaseObjectComparator;
 import liquibase.diff.compare.DatabaseObjectComparatorChain;
+import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Table;
 
@@ -27,7 +28,12 @@ public class TableComparator  implements DatabaseObjectComparator {
             return false;
         }
 
-        return chain.isSameObject(databaseObject1, databaseObject2, accordingTo);
+        if (!DatabaseObjectComparatorFactory.getInstance().isSameObject(databaseObject1.getSchema(), databaseObject2.getSchema(), accordingTo)) {
+            return false;
+        }
+
+
+        return true;
     }
 
 
