@@ -45,7 +45,7 @@ public class DatabaseObjectComparatorChain implements Cloneable {
         return next.isSameObject(object1, object2, accordingTo, this);
     }
 
-    public String hash(DatabaseObject object, Database accordingTo) {
+    public String[] hash(DatabaseObject object, Database accordingTo) {
         if (object == null) {
             return null;
         }

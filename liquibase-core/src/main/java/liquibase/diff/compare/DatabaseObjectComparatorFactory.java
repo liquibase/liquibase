@@ -110,7 +110,18 @@ public class DatabaseObjectComparatorFactory {
             }
         }
 
-        if (!hash(object1, accordingTo).equals(hash(object2, accordingTo))) {
+        boolean aHashMatches = false;
+
+        List<String> hash1 = Arrays.asList(hash(object1, accordingTo));
+        List<String> hash2 = Arrays.asList(hash(object2, accordingTo));
+        for (String hash : hash1) {
+            if (hash2.contains(hash)) {
+                aHashMatches = true;
+                break;
+            }
+        }
+
+        if (!aHashMatches) {
             return false;
         }
 
@@ -118,14 +129,22 @@ public class DatabaseObjectComparatorFactory {
         return createComparatorChain(object1.getClass(), accordingTo).isSameObject(object1, object2, accordingTo);
     }
 
-    public String hash(DatabaseObject databaseObject, Database accordingTo) {
-        String hash = null;
+    public String[] hash(DatabaseObject databaseObject, Database accordingTo) {
+        String[] hash = null;
         if (databaseObject != null) {
             hash = createComparatorChain(databaseObject.getClass(), accordingTo).hash(databaseObject, accordingTo);
         }
 
-        if (StringUtils.trimToNull(hash) == null) {
-            hash = "null";
+        if (hash == null) {
+            hash = new String[] {
+                    "null"
+            };
+        }
+
+        for (int i=0; i<hash.length; i++) {
+            if (StringUtils.trimToNull(hash[i]) == null) {
+                hash[i] = "null";
+            }
         }
         return hash;
     }

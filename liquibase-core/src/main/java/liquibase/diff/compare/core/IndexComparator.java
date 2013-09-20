@@ -9,6 +9,11 @@ import liquibase.structure.core.Index;
 import liquibase.diff.compare.DatabaseObjectComparator;
 import liquibase.diff.compare.DatabaseObjectComparatorChain;
 import liquibase.diff.compare.DatabaseObjectComparatorFactory;
+import liquibase.structure.core.Table;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class IndexComparator implements DatabaseObjectComparator {
     @Override
@@ -20,8 +25,18 @@ public class IndexComparator implements DatabaseObjectComparator {
     }
 
     @Override
-    public String hash(DatabaseObject databaseObject, Database accordingTo, DatabaseObjectComparatorChain chain) {
-        return null;
+    public String[] hash(DatabaseObject databaseObject, Database accordingTo, DatabaseObjectComparatorChain chain) {
+        List<String> hashes = new ArrayList<String>();
+        if (databaseObject.getName() != null) {
+            hashes.add(databaseObject.getName().toLowerCase());
+        }
+
+        Table table = ((Index) databaseObject).getTable();
+        if (table != null) {
+            hashes.addAll(Arrays.asList(DatabaseObjectComparatorFactory.getInstance().hash(table, accordingTo)));
+        }
+
+        return hashes.toArray(new String[hashes.size()]);
     }
 
 

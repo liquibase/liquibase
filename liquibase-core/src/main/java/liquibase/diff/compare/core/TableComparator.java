@@ -19,7 +19,7 @@ public class TableComparator  implements DatabaseObjectComparator {
     }
 
     @Override
-    public String hash(DatabaseObject databaseObject, Database accordingTo, DatabaseObjectComparatorChain chain) {
+    public String[] hash(DatabaseObject databaseObject, Database accordingTo, DatabaseObjectComparatorChain chain) {
         return chain.hash(databaseObject, accordingTo);
     }
 

@@ -19,15 +19,8 @@ public final class DefaultDatabaseObjectComparator implements DatabaseObjectComp
     }
 
     @Override
-    public String hash(DatabaseObject databaseObject, Database accordingTo, DatabaseObjectComparatorChain chain) {
-        String name = databaseObject.getName();
-        if (name != null) {
-            if (!accordingTo.isCaseSensitive()) {
-                name = name.toLowerCase();
-            }
-        }
-
-        return DatabaseObjectComparatorFactory.getInstance().hash(databaseObject.getSchema(), accordingTo)+":"+name;
+    public String[] hash(DatabaseObject databaseObject, Database accordingTo, DatabaseObjectComparatorChain chain) {
+        return new String[] {databaseObject.getName().toLowerCase()};
     }
 
     @Override

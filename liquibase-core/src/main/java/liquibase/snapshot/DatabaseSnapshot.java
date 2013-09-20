@@ -6,6 +6,7 @@ import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.servicelocator.ServiceLocator;
 import liquibase.structure.DatabaseObject;
+import liquibase.structure.DatabaseObjectCollection;
 import liquibase.structure.core.*;
 import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 
@@ -14,17 +15,16 @@ import java.util.*;
 
 public abstract class DatabaseSnapshot {
 
-    private List<DatabaseObject> originalExamples;
     private SnapshotControl snapshotControl;
     private Database database;
-    private Map<Class<? extends DatabaseObject>, Map<String, Set<DatabaseObject>>> allFoundByHash = new HashMap<Class<? extends DatabaseObject>, Map<String, Set<DatabaseObject>>>();
+    private DatabaseObjectCollection allFound;
     private Map<Class<? extends DatabaseObject>, Set<DatabaseObject>> knownNull = new HashMap<Class<? extends DatabaseObject>, Set<DatabaseObject>>();
 
     private Map<String, ResultSetCache> resultSetCaches = new HashMap<String, ResultSetCache>();
 
     DatabaseSnapshot(DatabaseObject[] examples, Database database, SnapshotControl snapshotControl) throws DatabaseException, InvalidExampleException {
-        this.originalExamples = Arrays.asList(examples);
         this.database = database;
+        allFound = new DatabaseObjectCollection(database);
         this.snapshotControl = snapshotControl;
 
         for (DatabaseObject obj : examples) {
@@ -93,19 +93,7 @@ public abstract class DatabaseSnapshot {
             collection.add(example);
 
         } else {
-            Map<String, Set<DatabaseObject>> collectionMap = allFoundByHash.get(object.getClass());
-            if (collectionMap == null) {
-                collectionMap = new HashMap<String, Set<DatabaseObject>>();
-                allFoundByHash.put(object.getClass(), collectionMap);
-            }
-
-            String hash = DatabaseObjectComparatorFactory.getInstance().hash(object, database);
-            Set<DatabaseObject> collection = collectionMap.get(hash);
-            if (collection == null) {
-                collection = new HashSet<DatabaseObject>();
-                collectionMap.put(hash, collection);
-            }
-            collection.add(object);
+            allFound.add(object);
 
             try {
                 includeNestedObjects(object);
@@ -134,6 +122,10 @@ public abstract class DatabaseSnapshot {
             return null;
         }
         if (fieldValue instanceof DatabaseObject) {
+            if (((DatabaseObject) fieldValue).getSnapshotId() != null) { //already been replaced
+                return fieldValue;
+            }
+
             if (!snapshotControl.shouldInclude(((DatabaseObject) fieldValue).getClass())) {
                 return fieldValue;
             }
@@ -189,42 +181,14 @@ public abstract class DatabaseSnapshot {
      * Returns the object described by the passed example if it is already included in this snapshot.
      */
     public <DatabaseObjectType extends DatabaseObject> DatabaseObjectType get(DatabaseObjectType example) {
-        Map<String, Set<DatabaseObject>> databaseObjectsByHash = allFoundByHash.get(example.getClass());
-
-        if (databaseObjectsByHash == null) {
-            return null;
-        }
-
-        String hash = DatabaseObjectComparatorFactory.getInstance().hash(example, database);
-
-        Set<DatabaseObject> databaseObjects = databaseObjectsByHash.get(hash);
-        if (databaseObjects == null) {
-            return null;
-        }
-        for (DatabaseObject obj : databaseObjects) {
-            if (DatabaseObjectComparatorFactory.getInstance().isSameObject(obj, example, database)) {
-                //noinspection unchecked
-                return (DatabaseObjectType) obj;
-            }
-        }
-        return null;
+        return allFound.get(example);
     }
 
     /**
      * Returns all objects of the given type that are already included in this snapshot.
      */
     public <DatabaseObjectType extends  DatabaseObject> Set<DatabaseObjectType> get(Class<DatabaseObjectType> type) {
-
-        Set<DatabaseObject> returnSet = new HashSet<DatabaseObject>();
-
-        Map<String, Set<DatabaseObject>> allFound = allFoundByHash.get(type);
-        if (allFound != null) {
-            for (Set<DatabaseObject> objects : allFound.values()) {
-                returnSet.addAll(objects);
-            }
-        }
-
-        return (Set<DatabaseObjectType>) Collections.unmodifiableSet(returnSet);
+        return allFound.get(type);
     }
 
 

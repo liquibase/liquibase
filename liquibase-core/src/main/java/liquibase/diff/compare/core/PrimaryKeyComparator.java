@@ -20,7 +20,7 @@ public class PrimaryKeyComparator implements DatabaseObjectComparator {
 
 
     @Override
-    public String hash(DatabaseObject databaseObject, Database accordingTo, DatabaseObjectComparatorChain chain) {
+    public String[] hash(DatabaseObject databaseObject, Database accordingTo, DatabaseObjectComparatorChain chain) {
         return DatabaseObjectComparatorFactory.getInstance().hash(((PrimaryKey) databaseObject).getTable(), accordingTo);
     }
 

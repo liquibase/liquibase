@@ -19,14 +19,10 @@ public class ColumnComparator implements DatabaseObjectComparator {
     }
 
     @Override
-    public String hash(DatabaseObject databaseObject, Database accordingTo, DatabaseObjectComparatorChain chain) {
+    public String[] hash(DatabaseObject databaseObject, Database accordingTo, DatabaseObjectComparatorChain chain) {
         Column column = (Column) databaseObject;
 
-        String name = column.getName();
-        if (!accordingTo.isCaseSensitive()) {
-            name = name.toLowerCase();
-        }
-        return DatabaseObjectComparatorFactory.getInstance().hash(column.getRelation(), accordingTo) + ":" + name;
+        return new String[] {column.getRelation().getName() + ":" + column.getName().toLowerCase()};
     }
 
     @Override
