@@ -38,14 +38,14 @@ public class SchemaComparator implements DatabaseObjectComparator {
 
         if (accordingTo.supportsCatalogs()) {
             if (thisSchema.getCatalogName() == null) {
-                return otherSchema.getCatalogName() == null || accordingTo.getDefaultCatalogName() == null || accordingTo.getDefaultCatalogName().equals(otherSchema.getCatalogName());
+                return otherSchema.getCatalogName() == null || accordingTo.getDefaultCatalogName() == null || accordingTo.getDefaultCatalogName().equalsIgnoreCase(otherSchema.getCatalogName());
             }
-            if (!thisSchema.getCatalogName().equals(otherSchema.getCatalogName())) {
+            if (!thisSchema.getCatalogName().equalsIgnoreCase(otherSchema.getCatalogName())) {
                 return false;
             }
         }
         if (accordingTo.supportsSchemas()) {
-            return thisSchema.getName().equals(otherSchema.getName());
+            return thisSchema.getName().equalsIgnoreCase(otherSchema.getName());
         }
         return true;
     }
