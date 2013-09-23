@@ -109,41 +109,43 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
             column.setNullable(true);
         }
 
-        if (table instanceof Table) {
-            if (columnMetadataResultSet.containsColumn("IS_AUTOINCREMENT")) {
-                String isAutoincrement = (String) columnMetadataResultSet.get("IS_AUTOINCREMENT");
-                isAutoincrement = StringUtils.trimToNull(isAutoincrement);
-                if (isAutoincrement == null) {
-                    column.setAutoIncrementInformation(null);
-                } else if (isAutoincrement.equals("YES")) {
-                    column.setAutoIncrementInformation(new Column.AutoIncrementInformation());
-                } else if (isAutoincrement.equals("NO")) {
-                    column.setAutoIncrementInformation(null);
-                } else if (isAutoincrement.equals("")) {
-                    LogFactory.getLogger().info("Unknown auto increment state for column " + column.toString() + ". Assuming not auto increment");
-                    column.setAutoIncrementInformation(null);
-                } else {
-                    throw new UnexpectedLiquibaseException("Unknown is_autoincrement value: '" + isAutoincrement+"'");
-                }
-            } else {
-                //probably older version of java, need to select from the column to find out if it is auto-increment
-                String selectStatement = "select " + database.escapeColumnName(rawCatalogName, rawSchemaName, rawTableName, rawColumnName) + " from " + database.escapeTableName(rawCatalogName, rawSchemaName, rawTableName) + " where 0=1";
-                LogFactory.getLogger().debug("Checking "+rawTableName+"."+rawCatalogName+" for auto-increment with SQL: '"+selectStatement+"'");
-                Connection underlyingConnection = ((JdbcConnection) database.getConnection()).getUnderlyingConnection();
-                Statement statement = underlyingConnection.createStatement();
-                ResultSet columnSelectRS = statement.executeQuery(selectStatement);
-                try {
-                    if (columnSelectRS.getMetaData().isAutoIncrement(1)) {
-                        column.setAutoIncrementInformation(new Column.AutoIncrementInformation());
-                    } else {
+        if (database.supportsAutoIncrement()) {
+            if (table instanceof Table) {
+                if (columnMetadataResultSet.containsColumn("IS_AUTOINCREMENT")) {
+                    String isAutoincrement = (String) columnMetadataResultSet.get("IS_AUTOINCREMENT");
+                    isAutoincrement = StringUtils.trimToNull(isAutoincrement);
+                    if (isAutoincrement == null) {
                         column.setAutoIncrementInformation(null);
+                    } else if (isAutoincrement.equals("YES")) {
+                        column.setAutoIncrementInformation(new Column.AutoIncrementInformation());
+                    } else if (isAutoincrement.equals("NO")) {
+                        column.setAutoIncrementInformation(null);
+                    } else if (isAutoincrement.equals("")) {
+                        LogFactory.getLogger().info("Unknown auto increment state for column " + column.toString() + ". Assuming not auto increment");
+                        column.setAutoIncrementInformation(null);
+                    } else {
+                        throw new UnexpectedLiquibaseException("Unknown is_autoincrement value: '" + isAutoincrement+"'");
                     }
-                } finally {
+                } else {
+                    //probably older version of java, need to select from the column to find out if it is auto-increment
+                    String selectStatement = "select " + database.escapeColumnName(rawCatalogName, rawSchemaName, rawTableName, rawColumnName) + " from " + database.escapeTableName(rawCatalogName, rawSchemaName, rawTableName) + " where 0=1";
+                    LogFactory.getLogger().debug("Checking "+rawTableName+"."+rawCatalogName+" for auto-increment with SQL: '"+selectStatement+"'");
+                    Connection underlyingConnection = ((JdbcConnection) database.getConnection()).getUnderlyingConnection();
+                    Statement statement = underlyingConnection.createStatement();
+                    ResultSet columnSelectRS = statement.executeQuery(selectStatement);
                     try {
-                        statement.close();
-                    } catch (SQLException ignore) {
+                        if (columnSelectRS.getMetaData().isAutoIncrement(1)) {
+                            column.setAutoIncrementInformation(new Column.AutoIncrementInformation());
+                        } else {
+                            column.setAutoIncrementInformation(null);
+                        }
+                    } finally {
+                        try {
+                            statement.close();
+                        } catch (SQLException ignore) {
+                        }
+                        columnSelectRS.close();
                     }
-                    columnSelectRS.close();
                 }
             }
         }
