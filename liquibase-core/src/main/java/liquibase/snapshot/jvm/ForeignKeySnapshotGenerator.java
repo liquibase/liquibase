@@ -70,7 +70,7 @@ public class ForeignKeySnapshotGenerator extends JdbcSnapshotGenerator {
 
 
             Set<String> seenFks = new HashSet<String>();
-            List<CachedRow> importedKeyMetadataResultSet = null;
+            List<CachedRow> importedKeyMetadataResultSet;
             try {
                 importedKeyMetadataResultSet = ((JdbcDatabaseSnapshot) snapshot).getMetaData().getForeignKeys(((AbstractJdbcDatabase) database)
                         .getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema),
@@ -93,7 +93,7 @@ public class ForeignKeySnapshotGenerator extends JdbcSnapshotGenerator {
 
         Database database = snapshot.getDatabase();
 
-        List<CachedRow> importedKeyMetadataResultSet = null;
+        List<CachedRow> importedKeyMetadataResultSet;
         try {
             Table fkTable = ((ForeignKey) example).getForeignKeyTable();
             String searchCatalog = ((AbstractJdbcDatabase) database).getJdbcCatalogName(fkTable.getSchema());
