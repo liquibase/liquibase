@@ -64,8 +64,8 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                 }
 
                 @Override
-                public ResultSet[] fastFetchQuery() throws SQLException, DatabaseException {
-                    List<ResultSet> results = new ArrayList<ResultSet>();
+                public List<CachedRow> fastFetch() throws SQLException, DatabaseException {
+                    List<CachedRow> returnList = new ArrayList<CachedRow>();
 
                     List<String> tables = new ArrayList<String>();
                     if (tableName == null) {
@@ -78,14 +78,14 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
 
                     for (String foundTable : tables) {
-                        results.add(databaseMetaData.getImportedKeys(catalogName, schemaName, foundTable));
+                        returnList.addAll(extract(databaseMetaData.getImportedKeys(catalogName, schemaName, foundTable)));
                     }
 
-                    return results.toArray(new ResultSet[results.size()]);
+                    return returnList;
                 }
 
                 @Override
-                public ResultSet[] bulkFetchQuery() throws SQLException {
+                public List<CachedRow> bulkFetch() throws SQLException, DatabaseException {
                     return null;
                 }
 
@@ -110,8 +110,8 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                 }
 
                 @Override
-                public ResultSet[] fastFetchQuery() throws SQLException, DatabaseException {
-                    List<ResultSet> results = new ArrayList<ResultSet>();
+                public List<CachedRow> fastFetch() throws SQLException, DatabaseException {
+                    List<CachedRow> returnList = new ArrayList<CachedRow>();
 
                     if (database instanceof OracleDatabase) {
                         //oracle getIndexInfo is buggy and slow.  See Issue 1824548 and http://forums.oracle.com/forums/thread.jspa?messageID=578383&#578383
@@ -127,7 +127,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
                         sql += " ORDER BY INDEX_NAME, ORDINAL_POSITION";
 
-                        results.add(executeQuery(sql, database));
+                        returnList.addAll(extract(executeQuery(sql, database)));
                     } else {
                         List<String> tables = new ArrayList<String>();
                         if (tableName == null) {
@@ -140,15 +140,15 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
 
                         for (String tableName : tables) {
-                            results.add(databaseMetaData.getIndexInfo(catalogName, schemaName, tableName, false, true));
+                            returnList.addAll(extract(databaseMetaData.getIndexInfo(catalogName, schemaName, tableName, false, true)));
                         }
                     }
 
-                    return results.toArray(new ResultSet[results.size()]);
+                    return returnList;
                 }
 
                 @Override
-                public ResultSet[] bulkFetchQuery() throws SQLException {
+                public List<CachedRow> bulkFetch() throws SQLException, DatabaseException {
                     return null;
                 }
 

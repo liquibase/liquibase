@@ -241,28 +241,5 @@ class ResultSetCache {
         protected UnionResultSetExtractor(Database database) {
             super(database);
         }
-
-        public abstract ResultSet[] fastFetchQuery() throws SQLException, DatabaseException;
-        public abstract ResultSet[] bulkFetchQuery() throws SQLException, DatabaseException;
-
-        @Override
-        public List<CachedRow> fastFetch() throws SQLException, DatabaseException {
-            return extract(fastFetchQuery());
-        }
-
-
-        @Override
-        public List<CachedRow> bulkFetch() throws SQLException, DatabaseException {
-            return extract(bulkFetchQuery());
-        }
-
-        private List<CachedRow> extract(ResultSet[] resultSets) throws SQLException {
-            List<CachedRow> returnList = new ArrayList<CachedRow>();
-            for (ResultSet rs : resultSets) {
-                returnList.addAll(extract(rs));
-            }
-
-            return returnList;
-        }
     }
 }
