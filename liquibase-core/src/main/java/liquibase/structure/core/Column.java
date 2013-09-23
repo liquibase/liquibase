@@ -217,6 +217,11 @@ public class Column extends AbstractDatabaseObject {
         public BigInteger getIncrementBy() {
             return incrementBy;
         }
+
+        @Override
+        public String toString() {
+            return "AUTO INCREMENT START WITH "+startWith+" INCREMENT BY "+incrementBy;
+        }
     }
 }
 

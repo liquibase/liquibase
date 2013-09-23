@@ -13,6 +13,14 @@ public class ObjectDifferences {
         return Collections.unmodifiableSet(new HashSet<Difference>(differences.values()));
     }
 
+    public Difference getDifference(String field) {
+        return differences.get(field);
+    }
+
+    public boolean isDifferent(String field) {
+        return differences.containsKey(field);
+    }
+
     public ObjectDifferences addDifference(String changedField, Object referenceValue, Object compareToValue) {
         this.differences.put(changedField, new Difference(changedField, referenceValue, compareToValue));
 
@@ -39,8 +47,8 @@ public class ObjectDifferences {
         boolean different;
         if (referenceValue == null && compareValue == null) {
             different = false;
-        } else if (referenceValue == null || compareValue == null) {
-            different = false;
+        } else if ((referenceValue == null && compareValue != null) || (referenceValue != null && compareValue == null)) {
+            different = true;
         } else {
             different = !compareFunction.areEqual(referenceValue, compareValue);
         }
