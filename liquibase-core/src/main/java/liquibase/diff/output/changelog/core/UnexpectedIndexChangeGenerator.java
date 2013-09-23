@@ -27,9 +27,7 @@ public class UnexpectedIndexChangeGenerator implements UnexpectedObjectChangeGen
 
     @Override
     public Class<? extends DatabaseObject>[] runBeforeTypes() {
-        return new Class[] {
-                UniqueConstraint.class
-        };
+        return null;
     }
 
     @Override
