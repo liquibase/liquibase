@@ -610,7 +610,7 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
 				text = new StringBuffer();
 			} else if (change != null && "where".equals(qName)) {
 				if (change instanceof AbstractModifyDataChange) {
-					((AbstractModifyDataChange) change).setWhereClause(textString);
+					((AbstractModifyDataChange) change).setWhere(textString);
 				} else {
 					throw new RuntimeException("Unexpected change type: "
 							+ change.getClass().getName());
