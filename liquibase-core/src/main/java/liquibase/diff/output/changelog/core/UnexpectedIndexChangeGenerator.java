@@ -10,6 +10,7 @@ import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
 
 public class UnexpectedIndexChangeGenerator implements UnexpectedObjectChangeGenerator {
+    @Override
     public int getPriority(Class<? extends DatabaseObject> objectType, Database database) {
         if (Index.class.isAssignableFrom(objectType)) {
             return PRIORITY_DEFAULT;
@@ -17,16 +18,21 @@ public class UnexpectedIndexChangeGenerator implements UnexpectedObjectChangeGen
         return PRIORITY_NONE;
     }
 
+    @Override
     public Class<? extends DatabaseObject>[] runAfterTypes() {
         return new Class[] {
                 ForeignKey.class
         };
     }
 
+    @Override
     public Class<? extends DatabaseObject>[] runBeforeTypes() {
-        return null;
+        return new Class[] {
+                UniqueConstraint.class
+        };
     }
 
+    @Override
     public Change[] fixUnexpected(DatabaseObject unexpectedObject, DiffOutputControl control, Database referenceDatabase, Database comparisonDatabase, ChangeGeneratorChain chain) {
         Index index = (Index) unexpectedObject;
 
