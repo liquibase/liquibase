@@ -158,8 +158,6 @@ public class ForeignKeySnapshotGenerator extends JdbcSnapshotGenerator {
                     exampleIndex.getColumns().addAll(Arrays.asList(foreignKey.getForeignKeyColumns().split("\\s*,\\s*")));
                     foreignKey.setBackingIndex(exampleIndex);
                 }
-
-                return foreignKey;
             }
             return foreignKey;
         } catch (Exception e) {
