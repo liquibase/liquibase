@@ -341,7 +341,7 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
                 for (Change change : getChanges()) {
                     if ((!(change instanceof DbmsTargetedChange)) || DatabaseList.definitionMatches(((DbmsTargetedChange) change).getDbms(), database, true)) {
                         database.executeStatements(change, databaseChangeLog, sqlVisitors);
-                        log.debug(change.getConfirmationMessage());
+                        log.info(change.getConfirmationMessage());
                     } else {
                         log.debug("Change " + change.getSerializedObjectName() + " not included for database " + database.getShortName());
                     }
@@ -415,7 +415,7 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
                 for (int i = changes.size() - 1; i >= 0; i--) {
                     Change change = changes.get(i);
                     database.executeRollbackStatements(change, sqlVisitors);
-                    log.debug(change.getConfirmationMessage());
+                    log.info(change.getConfirmationMessage());
                 }
             }
 
