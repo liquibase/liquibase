@@ -120,4 +120,23 @@ public class IndexExistsPrecondition implements Precondition {
     public String getName() {
         return "indexExists";
     }
+
+    @Override
+    public String toString() {
+        String string = "Index Exists Precondition: ";
+
+        if (getIndexName() != null) {
+            string += getIndexName();
+        }
+
+        if (tableName != null) {
+            string += " on "+getTableName();
+
+            if (StringUtils.trimToNull(getColumnNames()) != null) {
+                string += " columns "+getColumnNames();
+            }
+        }
+
+        return string;
+    }
 }
