@@ -415,7 +415,6 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
                 for (int i = changes.size() - 1; i >= 0; i--) {
                     Change change = changes.get(i);
                     database.executeRollbackStatements(change, sqlVisitors);
-                    log.info(change.getConfirmationMessage());
                 }
             }
 
