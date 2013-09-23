@@ -149,8 +149,7 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
             try {
                 databaseMetaData = ((JdbcDatabaseSnapshot) snapshot).getMetaData();
 
-                    rs = databaseMetaData.getIndexInfo(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema),
-                            ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), table.getName());
+                rs = databaseMetaData.getIndexInfo(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), table.getName(), null);
                 Map<String, Index> foundIndexes = new HashMap<String, Index>();
                 for (CachedRow row : rs) {
                     String indexName = row.getString("INDEX_NAME");
@@ -191,108 +190,105 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
         Database database = snapshot.getDatabase();
         Table exampleTable = ((Index) example).getTable();
 
+        String tableName = null;
+        Schema schema = null;
+        if (exampleTable != null) {
+            tableName = exampleTable.getName();
+            schema = exampleTable.getSchema();
+        }
+
+        if (schema == null) {
+            schema = new Schema(database.getDefaultCatalogName(), database.getDefaultSchemaName());
+        }
+
+
         for (int i=0; i<((Index) example).getColumns().size(); i++) {
             ((Index) example).getColumns().set(i, database.correctObjectName(((Index) example).getColumns().get(i), Column.class));
         }
 
-        Schema schema = new Schema(database.getDefaultCatalogName(), database.getDefaultSchemaName()); //todo exampleTable.getSchema();
         String exampleName = example.getName();
         if (exampleName != null) {
             exampleName = database.correctObjectName(exampleName, Index.class);
         }
 
-        List<Table> tables = new ArrayList<Table>();
-        if (exampleTable == null || exampleTable.getName() == null) {
-            DatabaseSnapshot tableSnapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(schema.toCatalogAndSchema(), database, new SnapshotControl(snapshot.getDatabase(), Table.class, Schema.class, Catalog.class)); //todo: don't get from Factory
-            tables.addAll(tableSnapshot.get(Table.class));
-        } else {
-            Table snapshotTable = snapshot.get(exampleTable);
-            if (snapshotTable == null) {
-                tables.add(exampleTable);
-            } else {
-                tables.add(snapshotTable);
-            }
-        }
         Map<String, Index> foundIndexes = new HashMap<String, Index>();
-        for (Table table : tables) {
-            JdbcDatabaseSnapshot.CachingDatabaseMetaData databaseMetaData = null;
-            List<CachedRow> rs = null;
-            try {
-                databaseMetaData = ((JdbcDatabaseSnapshot) snapshot).getMetaData();
+        JdbcDatabaseSnapshot.CachingDatabaseMetaData databaseMetaData = null;
+        List<CachedRow> rs = null;
+        try {
+            databaseMetaData = ((JdbcDatabaseSnapshot) snapshot).getMetaData();
 
-                    rs = databaseMetaData.getIndexInfo(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), table.getName());
+            rs = databaseMetaData.getIndexInfo(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), tableName, exampleName);
 
-                for (CachedRow row : rs) {
-                    String indexName = database.correctObjectName(cleanNameFromDatabase(row.getString("INDEX_NAME"), database), Index.class);
-                    if (indexName == null) {
-                        continue;
-                    }
-                    if (database.isCaseSensitive()) {
-                        if (exampleName != null && !exampleName.equals(indexName)) {
-                            continue;
-                        }
-                    } else {
-                        if (exampleName != null && !exampleName.equalsIgnoreCase(indexName)) {
-                            continue;
-                        }
-                    }
-                    /*
-                    * TODO Informix generates indexnames with a leading blank if no name given.
-                    * An identifier with a leading blank is not allowed.
-                    * So here is it replaced.
-                    */
-                    if (database instanceof InformixDatabase && indexName.startsWith(" ")) {
-                        indexName = "_generated_index_" + indexName.substring(1);
-                    }
-                    short type = row.getShort("TYPE");
-                    //                String tableName = rs.getString("TABLE_NAME");
-                    Boolean nonUnique = row.getBoolean("NON_UNIQUE");
-                    if (nonUnique == null) {
-                        nonUnique = true;
-                    }
-                    String columnName = cleanNameFromDatabase(row.getString("COLUMN_NAME"), database);
-                    short position = row.getShort("ORDINAL_POSITION");
-                    /*
-                    * TODO maybe bug in jdbc driver? Need to investigate.
-                    * If this "if" is commented out ArrayOutOfBoundsException is thrown
-                    * because it tries to access an element -1 of a List (position-1)
-                    */
-                    if (database instanceof InformixDatabase
-                            && type != DatabaseMetaData.tableIndexStatistic
-                            && position == 0) {
-                        System.out.println(this.getClass().getName() + ": corrected position to " + ++position);
-                    }
-                    String filterCondition = row.getString("FILTER_CONDITION");
-
-                    if (type == DatabaseMetaData.tableIndexStatistic) {
-                        continue;
-                    }
-                    //                if (type == DatabaseMetaData.tableIndexOther) {
-                    //                    continue;
-                    //                }
-
-                    if (columnName == null) {
-                        //nothing to index, not sure why these come through sometimes
-                        continue;
-                    }
-                    Index returnIndex = foundIndexes.get(indexName);
-                    if (returnIndex == null) {
-                        returnIndex = new Index();
-                        returnIndex.setTable(table);
-                        returnIndex.setName(indexName);
-                        returnIndex.setUnique(!nonUnique);
-                        returnIndex.setFilterCondition(filterCondition);
-                        foundIndexes.put(indexName, returnIndex);
-                    }
-
-                    for (int i = returnIndex.getColumns().size(); i < position; i++) {
-                        returnIndex.getColumns().add(null);
-                    }
-                    returnIndex.getColumns().set(position - 1, columnName);
+            for (CachedRow row : rs) {
+                String indexName = database.correctObjectName(cleanNameFromDatabase(row.getString("INDEX_NAME"), database), Index.class);
+                if (indexName == null) {
+                    continue;
                 }
-            } catch (Exception e) {
-                throw new DatabaseException(e);
+                if (database.isCaseSensitive()) {
+                    if (exampleName != null && !exampleName.equals(indexName)) {
+                        continue;
+                    }
+                } else {
+                    if (exampleName != null && !exampleName.equalsIgnoreCase(indexName)) {
+                        continue;
+                    }
+                }
+                /*
+                * TODO Informix generates indexnames with a leading blank if no name given.
+                * An identifier with a leading blank is not allowed.
+                * So here is it replaced.
+                */
+                if (database instanceof InformixDatabase && indexName.startsWith(" ")) {
+                    indexName = "_generated_index_" + indexName.substring(1);
+                }
+                short type = row.getShort("TYPE");
+                //                String tableName = rs.getString("TABLE_NAME");
+                Boolean nonUnique = row.getBoolean("NON_UNIQUE");
+                if (nonUnique == null) {
+                    nonUnique = true;
+                }
+                String columnName = cleanNameFromDatabase(row.getString("COLUMN_NAME"), database);
+                short position = row.getShort("ORDINAL_POSITION");
+                /*
+                * TODO maybe bug in jdbc driver? Need to investigate.
+                * If this "if" is commented out ArrayOutOfBoundsException is thrown
+                * because it tries to access an element -1 of a List (position-1)
+                */
+                if (database instanceof InformixDatabase
+                        && type != DatabaseMetaData.tableIndexStatistic
+                        && position == 0) {
+                    System.out.println(this.getClass().getName() + ": corrected position to " + ++position);
+                }
+                String filterCondition = row.getString("FILTER_CONDITION");
+
+                if (type == DatabaseMetaData.tableIndexStatistic) {
+                    continue;
+                }
+                //                if (type == DatabaseMetaData.tableIndexOther) {
+                //                    continue;
+                //                }
+
+                if (columnName == null) {
+                    //nothing to index, not sure why these come through sometimes
+                    continue;
+                }
+                Index returnIndex = foundIndexes.get(indexName);
+                if (returnIndex == null) {
+                    returnIndex = new Index();
+                    returnIndex.setTable((Table) new Table().setName(row.getString("TABLE_NAME")).setSchema(schema));
+                    returnIndex.setName(indexName);
+                    returnIndex.setUnique(!nonUnique);
+                    returnIndex.setFilterCondition(filterCondition);
+                    foundIndexes.put(indexName, returnIndex);
+                }
+
+                for (int i = returnIndex.getColumns().size(); i < position; i++) {
+                    returnIndex.getColumns().add(null);
+                }
+                returnIndex.getColumns().set(position - 1, columnName);
             }
+        } catch (Exception e) {
+            throw new DatabaseException(e);
         }
 
         if (exampleName != null) {

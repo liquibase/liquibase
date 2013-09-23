@@ -1,10 +1,7 @@
 package liquibase.snapshot.jvm;
 
-import liquibase.CatalogAndSchema;
-import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
 import liquibase.database.core.PostgresDatabase;
-import liquibase.database.jvm.JdbcConnection;
 import liquibase.diff.DiffStatusListener;
 import liquibase.exception.DatabaseException;
 import liquibase.logging.LogFactory;
@@ -14,9 +11,6 @@ import liquibase.snapshot.SnapshotGenerator;
 import liquibase.snapshot.SnapshotGeneratorChain;
 import liquibase.structure.DatabaseObject;
 
-import java.sql.DatabaseMetaData;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -35,6 +29,7 @@ public abstract class JdbcSnapshotGenerator implements SnapshotGenerator {
         this.addsTo = addsTo;
     }
 
+    @Override
     public int getPriority(Class<? extends DatabaseObject> objectType, Database database) {
         if (defaultFor != null && defaultFor.isAssignableFrom(objectType)) {
             return PRIORITY_DEFAULT;
@@ -50,10 +45,12 @@ public abstract class JdbcSnapshotGenerator implements SnapshotGenerator {
 
     }
 
+    @Override
     public Class<? extends DatabaseObject>[] addsTo() {
         return addsTo;
     }
 
+    @Override
     public DatabaseObject snapshot(DatabaseObject example, DatabaseSnapshot snapshot, SnapshotGeneratorChain chain) throws DatabaseException, InvalidExampleException {
         if (defaultFor != null && defaultFor.isAssignableFrom(example.getClass())) {
             return snapshotObject(example, snapshot);
@@ -63,17 +60,24 @@ public abstract class JdbcSnapshotGenerator implements SnapshotGenerator {
         if (chainResponse == null) {
             return null;
         }
-        if (addsTo() != null) {
-            for (Class<? extends DatabaseObject> addType : addsTo()) {
-                if (addType.isAssignableFrom(example.getClass())) {
-                    if (chainResponse != null) {
-                        addTo(chainResponse, snapshot);
+
+        if (shouldAddTo(example.getClass(), snapshot)) {
+            if (addsTo() != null) {
+                for (Class<? extends DatabaseObject> addType : addsTo()) {
+                    if (addType.isAssignableFrom(example.getClass())) {
+                        if (chainResponse != null) {
+                            addTo(chainResponse, snapshot);
+                        }
                     }
                 }
             }
         }
         return chainResponse;
 
+    }
+
+    protected boolean shouldAddTo(Class<? extends DatabaseObject> databaseObjectType, DatabaseSnapshot snapshot) {
+        return defaultFor != null && snapshot.getSnapshotControl().shouldInclude(defaultFor);
     }
 
     protected abstract DatabaseObject snapshotObject(DatabaseObject example, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException;

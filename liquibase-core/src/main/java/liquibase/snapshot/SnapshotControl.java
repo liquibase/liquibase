@@ -48,6 +48,6 @@ public class SnapshotControl {
     }
 
     public boolean shouldInclude(Class<? extends DatabaseObject> type) {
-        return type.equals(Catalog.class) || type.equals(Schema.class) || types.contains(type);
+        return types.contains(type);
     }
 }

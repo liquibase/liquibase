@@ -1,6 +1,5 @@
 package liquibase.snapshot;
 
-import liquibase.CatalogAndSchema;
 import liquibase.database.Database;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
@@ -44,11 +43,11 @@ class ResultSetCache {
             List<CachedRow> results;
             if (resultSetExtractor.shouldBulkSelect(this)) {
                 cache.clear(); //remove any existing single fetches that may be duplicated
-                results = extract(resultSetExtractor.bulkFetch());
+                results = resultSetExtractor.bulkFetch();
                 didBulkQuery = true;
             } else {
                 timesSingleQueried++;
-                results = extract(resultSetExtractor.fastFetch());
+                results = resultSetExtractor.fastFetch();
             }
 
             for (CachedRow row : results) {
@@ -72,21 +71,6 @@ class ResultSetCache {
         } catch (SQLException e) {
             throw new DatabaseException(e);
         }
-    }
-
-    private List<CachedRow> extract(ResultSet resultSet) throws SQLException {
-        List<Map> result;
-        List<CachedRow> returnList = new ArrayList<CachedRow>();
-        try {
-            result = (List<Map>) new RowMapperResultSetExtractor(new ColumnMapRowMapper()).extractData(resultSet);
-
-            for (Map row : result) {
-                returnList.add(new CachedRow(row));
-            }
-        } finally {
-            resultSet.close();
-        }
-        return returnList;
     }
 
     public <T> T getInfo(String key, Class<T> type) {
@@ -181,16 +165,13 @@ class ResultSetCache {
             this.database = database;
         }
 
-        public abstract ResultSet fastFetch() throws SQLException, DatabaseException;
-        public abstract ResultSet bulkFetch() throws SQLException, DatabaseException;
-
         boolean shouldBulkSelect(ResultSetCache resultSetCache) {
             return resultSetCache.timesSingleQueried >= 3;
         }
 
         ResultSet executeQuery(String sql, Database database) throws DatabaseException, SQLException {
             Statement statement = ((JdbcConnection) database.getConnection()).createStatement();
-                return statement.executeQuery(sql);
+            return statement.executeQuery(sql);
 
         }
 
@@ -213,6 +194,75 @@ class ResultSetCache {
         public abstract RowData rowKeyParameters(CachedRow row);
 
         public abstract RowData wantedKeyParameters();
+
+        public abstract List<CachedRow> fastFetch() throws SQLException, DatabaseException;
+        public abstract List<CachedRow> bulkFetch() throws SQLException, DatabaseException;
+
+        protected List<CachedRow> extract(ResultSet resultSet) throws SQLException {
+            List<Map> result;
+            List<CachedRow> returnList = new ArrayList<CachedRow>();
+            try {
+                result = (List<Map>) new RowMapperResultSetExtractor(new ColumnMapRowMapper()).extractData(resultSet);
+
+                for (Map row : result) {
+                    returnList.add(new CachedRow(row));
+                }
+            } finally {
+                resultSet.close();
+            }
+            return returnList;
+        }
+
+
     }
 
+    public abstract static class SingleResultSetExtractor extends ResultSetExtractor {
+
+        public SingleResultSetExtractor(Database database) {
+            super(database);
+        }
+
+        public abstract ResultSet fastFetchQuery() throws SQLException, DatabaseException;
+        public abstract ResultSet bulkFetchQuery() throws SQLException, DatabaseException;
+
+        @Override
+        public List<CachedRow> fastFetch() throws SQLException, DatabaseException {
+            return extract(fastFetchQuery());
+        }
+
+
+        @Override
+        public List<CachedRow> bulkFetch() throws SQLException, DatabaseException {
+            return extract(bulkFetchQuery());
+        }
+    }
+
+    public abstract static class UnionResultSetExtractor extends ResultSetExtractor {
+        protected UnionResultSetExtractor(Database database) {
+            super(database);
+        }
+
+        public abstract ResultSet[] fastFetchQuery() throws SQLException, DatabaseException;
+        public abstract ResultSet[] bulkFetchQuery() throws SQLException, DatabaseException;
+
+        @Override
+        public List<CachedRow> fastFetch() throws SQLException, DatabaseException {
+            return extract(fastFetchQuery());
+        }
+
+
+        @Override
+        public List<CachedRow> bulkFetch() throws SQLException, DatabaseException {
+            return extract(bulkFetchQuery());
+        }
+
+        private List<CachedRow> extract(ResultSet[] resultSets) throws SQLException {
+            List<CachedRow> returnList = new ArrayList<CachedRow>();
+            for (ResultSet rs : resultSets) {
+                returnList.addAll(extract(rs));
+            }
+
+            return returnList;
+        }
+    }
 }

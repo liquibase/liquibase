@@ -1,5 +1,6 @@
 package liquibase.diff.compare.core;
 
+import liquibase.CatalogAndSchema;
 import liquibase.database.Database;
 import liquibase.diff.ObjectDifferences;
 import liquibase.diff.compare.DatabaseObjectComparator;
@@ -33,8 +34,8 @@ public class SchemaComparator implements DatabaseObjectComparator {
             return false;
         }
 
-        Schema thisSchema = (Schema) databaseObject1;
-        Schema otherSchema = (Schema) databaseObject2;
+        CatalogAndSchema thisSchema = accordingTo.correctSchema(((Schema) databaseObject1).toCatalogAndSchema());
+        CatalogAndSchema otherSchema = accordingTo.correctSchema(((Schema) databaseObject2).toCatalogAndSchema());
 
         if (accordingTo.supportsCatalogs()) {
             if (thisSchema.getCatalogName() == null) {
@@ -45,7 +46,7 @@ public class SchemaComparator implements DatabaseObjectComparator {
             }
         }
         if (accordingTo.supportsSchemas()) {
-            return thisSchema.getName().equalsIgnoreCase(otherSchema.getName());
+            return thisSchema.getSchemaName().equalsIgnoreCase(otherSchema.getSchemaName());
         }
         return true;
     }
