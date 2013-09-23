@@ -4,9 +4,7 @@ import liquibase.database.Database;
 import liquibase.diff.ObjectDifferences;
 import liquibase.structure.DatabaseObject;
 
-import java.util.Iterator;
-import java.util.List;
-import java.util.SortedSet;
+import java.util.*;
 
 public class DatabaseObjectComparatorChain implements Cloneable {
     private List<DatabaseObjectComparator> comparators;
@@ -73,24 +71,24 @@ public class DatabaseObjectComparatorChain implements Cloneable {
         return next;
     }
 
-    public ObjectDifferences findDifferences(DatabaseObject object1, DatabaseObject object2, Database accordingTo) {
+    public ObjectDifferences findDifferences(DatabaseObject object1, DatabaseObject object2, Database accordingTo, CompareControl compareControl) {
         if (object1 == null && object2 == null) {
-            return new ObjectDifferences();
+            return new ObjectDifferences(compareControl);
         }
         if (object1 == null && object2 != null) {
-            return new ObjectDifferences().addDifference("Reference value was null", "this", null, null);
+            return new ObjectDifferences(compareControl).addDifference("Reference value was null", "this", null, null);
         }
 
         if (object1 != null && object2 == null) {
-            return new ObjectDifferences().addDifference("Compared value was null", "this", null, null);
+            return new ObjectDifferences(compareControl).addDifference("Compared value was null", "this", null, null);
         }
 
         DatabaseObjectComparator next = getNextComparator();
 
         if (next == null) {
-            return new ObjectDifferences();
+            return new ObjectDifferences(compareControl);
         }
 
-        return next.findDifferences(object1, object2, accordingTo, this);
+        return next.findDifferences(object1, object2, accordingTo, compareControl, this);
     }
 }

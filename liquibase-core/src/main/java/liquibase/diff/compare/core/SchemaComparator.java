@@ -3,11 +3,10 @@ package liquibase.diff.compare.core;
 import liquibase.CatalogAndSchema;
 import liquibase.database.Database;
 import liquibase.diff.ObjectDifferences;
+import liquibase.diff.compare.CompareControl;
 import liquibase.diff.compare.DatabaseObjectComparator;
 import liquibase.diff.compare.DatabaseObjectComparatorChain;
-import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.core.Column;
 import liquibase.structure.core.Schema;
 
 public class SchemaComparator implements DatabaseObjectComparator {
@@ -53,8 +52,8 @@ public class SchemaComparator implements DatabaseObjectComparator {
 
 
     @Override
-    public ObjectDifferences findDifferences(DatabaseObject databaseObject1, DatabaseObject databaseObject2, Database accordingTo, DatabaseObjectComparatorChain chain) {
-        ObjectDifferences differences = new ObjectDifferences();
+    public ObjectDifferences findDifferences(DatabaseObject databaseObject1, DatabaseObject databaseObject2, Database accordingTo, CompareControl compareControl, DatabaseObjectComparatorChain chain) {
+        ObjectDifferences differences = new ObjectDifferences(compareControl);
         differences.compare("name", databaseObject1, databaseObject2, new ObjectDifferences.DatabaseObjectNameCompareFunction(Schema.class, accordingTo));
 
         return differences;

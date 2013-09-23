@@ -2,7 +2,7 @@ package liquibase.diff.compare.core;
 
 import liquibase.database.Database;
 import liquibase.diff.ObjectDifferences;
-import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.diff.compare.CompareControl;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Index;
@@ -83,8 +83,8 @@ public class IndexComparator implements DatabaseObjectComparator {
 
 
     @Override
-    public ObjectDifferences findDifferences(DatabaseObject databaseObject1, DatabaseObject databaseObject2, Database accordingTo, DatabaseObjectComparatorChain chain) {
-        ObjectDifferences differences = chain.findDifferences(databaseObject1, databaseObject2, accordingTo);
+    public ObjectDifferences findDifferences(DatabaseObject databaseObject1, DatabaseObject databaseObject2, Database accordingTo, CompareControl compareControl, DatabaseObjectComparatorChain chain) {
+        ObjectDifferences differences = chain.findDifferences(databaseObject1, databaseObject2, accordingTo, compareControl);
         differences.removeDifference("name");
 
         differences.removeDifference("columns");

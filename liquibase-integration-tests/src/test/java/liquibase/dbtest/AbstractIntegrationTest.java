@@ -2,6 +2,7 @@ package liquibase.dbtest;
 
 import liquibase.CatalogAndSchema;
 import liquibase.Liquibase;
+import liquibase.structure.core.Column;
 import liquibase.test.DiffResultAssert;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
@@ -420,7 +421,10 @@ public abstract class AbstractIntegrationTest {
 
         runCompleteChangeLog();
 
-        DiffResult diffResult = DiffGeneratorFactory.getInstance().compare(database, database, new CompareControl());
+        CompareControl compareControl = new CompareControl();
+        compareControl.addSuppressedField(Column.class, "defaultValue");  //database returns different data even if the same
+        compareControl.addSuppressedField(Column.class, "autoIncrementInformation"); //database returns different data even if the same
+        DiffResult diffResult = DiffGeneratorFactory.getInstance().compare(database, database, compareControl);
 
         try {
             assertTrue(diffResult.areEqual());
@@ -446,6 +450,9 @@ public abstract class AbstractIntegrationTest {
             DatabaseSnapshot originalSnapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(database.getDefaultSchema(), database, snapshotControl);
 
             CompareControl compareControl = new CompareControl();
+            compareControl.addSuppressedField(Column.class, "defaultValue");  //database returns different data even if the same
+            compareControl.addSuppressedField(Column.class, "autoIncrementInformation"); //database returns different data even if the same
+
             DiffOutputControl diffOutputControl = new DiffOutputControl();
             File tempFile = File.createTempFile("liquibase-test", ".xml");
             FileUtil.forceDeleteOnExit(tempFile);
@@ -482,7 +489,7 @@ public abstract class AbstractIntegrationTest {
 
             DatabaseSnapshot migratedSnapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(database.getDefaultSchema(), database, new SnapshotControl(database));
 
-            DiffResult finalDiffResult = DiffGeneratorFactory.getInstance().compare(originalSnapshot, migratedSnapshot, new CompareControl());
+            DiffResult finalDiffResult = DiffGeneratorFactory.getInstance().compare(originalSnapshot, migratedSnapshot, compareControl);
             try {
                 assertTrue(finalDiffResult.areEqual());
             } catch (AssertionError e) {
@@ -491,7 +498,7 @@ public abstract class AbstractIntegrationTest {
             }
 
             //diff to empty and drop all
-            DiffResult emptyDiffResult = DiffGeneratorFactory.getInstance().compare(emptySnapshot, migratedSnapshot, new CompareControl());
+            DiffResult emptyDiffResult = DiffGeneratorFactory.getInstance().compare(emptySnapshot, migratedSnapshot, compareControl);
             output = new FileOutputStream(tempFile);
             try {
                 new DiffToChangeLog(emptyDiffResult, new DiffOutputControl(true, true, true)).print(new PrintStream(output));
@@ -580,7 +587,9 @@ public abstract class AbstractIntegrationTest {
 
         DatabaseSnapshot finalSnapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(database.getDefaultSchema(), database, new SnapshotControl(database));
 
-        DiffResult finalDiffResult = DiffGeneratorFactory.getInstance().compare(originalSnapshot, finalSnapshot, new CompareControl());
+        CompareControl finalCompareControl = new CompareControl();
+        finalCompareControl.addSuppressedField(Column.class, "autoIncrementInformation");
+        DiffResult finalDiffResult = DiffGeneratorFactory.getInstance().compare(originalSnapshot, finalSnapshot, finalCompareControl);
         new DiffToReport(finalDiffResult, System.out).print();
         assertTrue(finalDiffResult.areEqual());
     }
@@ -943,7 +952,8 @@ public abstract class AbstractIntegrationTest {
         DiffResult diffResult = DiffGeneratorFactory.getInstance().compare(database, database, new CompareControl());
 
         DiffToChangeLog changeLogWriter = new DiffToChangeLog(diffResult, new DiffOutputControl(false, false, false));
-        assertEquals(0, changeLogWriter.generateChangeSets().size());
+        List<ChangeSet> changeSets = changeLogWriter.generateChangeSets();
+        assertEquals(0, changeSets.size());
     }
 
 //   @Test

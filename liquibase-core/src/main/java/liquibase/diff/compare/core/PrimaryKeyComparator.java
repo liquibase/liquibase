@@ -2,6 +2,7 @@ package liquibase.diff.compare.core;
 
 import liquibase.database.Database;
 import liquibase.diff.ObjectDifferences;
+import liquibase.diff.compare.CompareControl;
 import liquibase.diff.compare.DatabaseObjectComparator;
 import liquibase.diff.compare.DatabaseObjectComparatorChain;
 import liquibase.diff.compare.DatabaseObjectComparatorFactory;
@@ -38,8 +39,8 @@ public class PrimaryKeyComparator implements DatabaseObjectComparator {
 
 
     @Override
-    public ObjectDifferences findDifferences(DatabaseObject databaseObject1, DatabaseObject databaseObject2, Database accordingTo, DatabaseObjectComparatorChain chain) {
-        ObjectDifferences differences = chain.findDifferences(databaseObject1, databaseObject2, accordingTo);
+    public ObjectDifferences findDifferences(DatabaseObject databaseObject1, DatabaseObject databaseObject2, Database accordingTo, CompareControl compareControl, DatabaseObjectComparatorChain chain) {
+        ObjectDifferences differences = chain.findDifferences(databaseObject1, databaseObject2, accordingTo, compareControl);
         differences.removeDifference("name");
         differences.removeDifference("backingIndex");
 

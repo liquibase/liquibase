@@ -2,12 +2,12 @@ package liquibase.diff.compare.core;
 
 import liquibase.database.Database;
 import liquibase.diff.ObjectDifferences;
+import liquibase.diff.compare.CompareControl;
 import liquibase.diff.compare.DatabaseObjectComparator;
 import liquibase.diff.compare.DatabaseObjectComparatorChain;
 import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Column;
-import liquibase.structure.core.Index;
 
 public class ColumnComparator implements DatabaseObjectComparator {
     @Override
@@ -48,7 +48,7 @@ public class ColumnComparator implements DatabaseObjectComparator {
 
 
     @Override
-    public ObjectDifferences findDifferences(DatabaseObject databaseObject1, DatabaseObject databaseObject2, Database accordingTo, DatabaseObjectComparatorChain chain) {
-        return chain.findDifferences(databaseObject1, databaseObject2, accordingTo);
+    public ObjectDifferences findDifferences(DatabaseObject databaseObject1, DatabaseObject databaseObject2, Database accordingTo, CompareControl compareControl, DatabaseObjectComparatorChain chain) {
+        return chain.findDifferences(databaseObject1, databaseObject2, accordingTo, compareControl);
     }
 }

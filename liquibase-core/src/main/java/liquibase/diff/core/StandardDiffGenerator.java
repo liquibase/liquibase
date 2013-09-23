@@ -84,7 +84,7 @@ public class StandardDiffGenerator implements DiffGenerator {
                 if (comparisonObject == null) {
                     diffResult.addMissingObject(referenceObject);
                 } else {
-                    ObjectDifferences differences = DatabaseObjectComparatorFactory.getInstance().findDifferences(referenceObject, comparisonObject, comparisonSnapshot.getDatabase());
+                    ObjectDifferences differences = DatabaseObjectComparatorFactory.getInstance().findDifferences(referenceObject, comparisonObject, comparisonSnapshot.getDatabase(), diffResult.getCompareControl());
                     if (differences.hasDifferences()) {
                         diffResult.addChangedObject(referenceObject, differences);
                     }

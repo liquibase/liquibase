@@ -2,10 +2,11 @@ package liquibase.diff.compare.core;
 
 import liquibase.database.Database;
 import liquibase.diff.ObjectDifferences;
-import liquibase.diff.compare.DatabaseObjectComparatorFactory;
+import liquibase.diff.compare.CompareControl;
 import liquibase.structure.DatabaseObject;
 import liquibase.diff.compare.DatabaseObjectComparator;
 import liquibase.diff.compare.DatabaseObjectComparatorChain;
+import liquibase.structure.core.Column;
 import liquibase.structure.core.DataType;
 
 import java.util.Collection;
@@ -33,13 +34,13 @@ public final class DefaultDatabaseObjectComparator implements DatabaseObjectComp
     }
 
     @Override
-    public ObjectDifferences findDifferences(DatabaseObject databaseObject1, DatabaseObject databaseObject2, Database accordingTo, DatabaseObjectComparatorChain chain) {
+    public ObjectDifferences findDifferences(DatabaseObject databaseObject1, DatabaseObject databaseObject2, Database accordingTo, CompareControl compareControl, DatabaseObjectComparatorChain chain) {
 
         Set<String> attributes = new HashSet<String>();
         attributes.addAll(databaseObject1.getAttributes());
         attributes.addAll(databaseObject2.getAttributes());
 
-        ObjectDifferences differences = new ObjectDifferences();
+        ObjectDifferences differences = new ObjectDifferences(compareControl);
 
         for (String attribute : attributes) {
             Object attribute1 = databaseObject1.getAttribute(attribute, Object.class);
@@ -55,6 +56,8 @@ public final class DefaultDatabaseObjectComparator implements DatabaseObjectComp
                 }
                 compareFunction = new ObjectDifferences.DatabaseObjectNameCompareFunction(type, accordingTo);
             } else if (attribute1 instanceof DataType || attribute2 instanceof DataType) {
+                compareFunction = new ObjectDifferences.ToStringCompareFunction();
+            } else if (attribute1 instanceof Column.AutoIncrementInformation || attribute2 instanceof Column.AutoIncrementInformation) {
                 compareFunction = new ObjectDifferences.ToStringCompareFunction();
             } else if (attribute1 instanceof Collection || attribute2 instanceof Collection) {
                 compareFunction = new ObjectDifferences.OrderedCollectionCompareFunction(new ObjectDifferences.StandardCompareFunction());

@@ -149,8 +149,8 @@ public class DatabaseObjectComparatorFactory {
         return hash;
     }
 
-    public ObjectDifferences findDifferences(DatabaseObject object1, DatabaseObject object2, Database accordingTo) {
-        return createComparatorChain(object1.getClass(), accordingTo).findDifferences(object1, object2, accordingTo);
+    public ObjectDifferences findDifferences(DatabaseObject object1, DatabaseObject object2, Database accordingTo, CompareControl compareControl) {
+        return createComparatorChain(object1.getClass(), accordingTo).findDifferences(object1, object2, accordingTo, compareControl);
 
     }
 
