@@ -154,11 +154,14 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
                 @Override
                 public List<CachedRow> bulkFetch() throws SQLException, DatabaseException {
-                    return null;
+                    return fastFetch();
                 }
 
                 @Override
                 boolean shouldBulkSelect(ResultSetCache resultSetCache) {
+                    if (database instanceof OracleDatabase) {
+                        return super.shouldBulkSelect(resultSetCache);
+                    }
                     return false;
                 }
             });
