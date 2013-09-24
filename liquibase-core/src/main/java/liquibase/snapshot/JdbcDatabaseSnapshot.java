@@ -298,11 +298,11 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                                 sql += " and table_name='" + database.correctObjectName(tableName, Table.class) + "'";
                         }
                     } else if (database instanceof MSSQLDatabase) {
-                        sql = "select Constraint_Name from information_schema.table_constraints " +
-                                "where constraint_type = 'Unique' " +
-                                "and constraint_schema='"+database.correctObjectName(schemaName, Schema.class)+"'";
+                        sql = "select CONSTRAINT_NAME from INFORMATION_SCHEMA.TABLE_CONSTRAINTS " +
+                                "where CONSTRAINT_TYPE = 'Unique' " +
+                                "and CONSTRAINT_SCHEMA='"+database.correctObjectName(schemaName, Schema.class)+"'";
                         if (tableName != null) {
-                                sql += " and table_name='"+database.correctObjectName(tableName, Table.class)+"'";
+                                sql += " and TABLE_NAME='"+database.correctObjectName(tableName, Table.class)+"'";
                         }
                     } else if (database instanceof OracleDatabase) {
                         sql = "select uc.constraint_name, uc.table_name,uc.status,uc.deferrable,uc.deferred,ui.tablespace_name from all_constraints uc, all_cons_columns ucc, all_indexes ui " +

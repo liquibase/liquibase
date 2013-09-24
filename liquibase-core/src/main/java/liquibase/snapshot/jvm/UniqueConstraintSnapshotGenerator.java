@@ -106,13 +106,13 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
                         "and const.table_name='" + database.correctObjectName(example.getTable().getName(), Table.class) + "' " +
                         "and const.constraint_name='" + database.correctObjectName(name, UniqueConstraint.class) + "'" +
                         "order by ordinal_position";
-            } else if (database instanceof MSSQLDatabase) {
-            sql = "select TC.Constraint_Name as CONSTRAINT_NAME, CC.Column_Name as COLUMN_NAME from information_schema.table_constraints TC " +
-                    "inner join information_schema.constraint_column_usage CC on TC.Constraint_Name = CC.Constraint_Name " +
-                    "where TC.constraint_schema='" + database.correctObjectName(schema.getCatalogName(), Catalog.class) + "' " +
-                    "and TC.table_name='" + database.correctObjectName(example.getTable().getName(), Table.class) + "' " +
-                    "and TC.Constraint_Name='" + database.correctObjectName(name, UniqueConstraint.class) + "'" +
-                    "order by TC.Constraint_Name";
+        } else if (database instanceof MSSQLDatabase) {
+            sql = "select TC.CONSTRAINT_NAME as CONSTRAINT_NAME, CC.COLUMN_NAME as COLUMN_NAME from INFORMATION_SCHEMA.TABLE_CONSTRAINTS TC " +
+                    "inner join INFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE CC on TC.CONSTRAINT_NAME = CC.CONSTRAINT_NAME " +
+                    "where TC.CONSTRAINT_SCHEMA='" + database.correctObjectName(schema.getCatalogName(), Catalog.class) + "' " +
+                    "and TC.TABLE_NAME='" + database.correctObjectName(example.getTable().getName(), Table.class) + "' " +
+                    "and TC.CONSTRAINT_NAME='" + database.correctObjectName(name, UniqueConstraint.class) + "'" +
+                    "order by TC.CONSTRAINT_NAME";
         } else if (database instanceof OracleDatabase) {
             sql = "select ucc.column_name from all_cons_columns ucc where ucc.constraint_name='"+database.correctObjectName(name, UniqueConstraint.class)+"' and ucc.owner='"+database.correctObjectName(schema.getCatalogName(), Catalog.class)+"' order by ucc.position";
         } else if (database instanceof DB2Database) {
