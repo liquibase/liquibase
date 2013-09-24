@@ -2,6 +2,7 @@ package liquibase.dbtest;
 
 import liquibase.CatalogAndSchema;
 import liquibase.Liquibase;
+import liquibase.database.core.OracleDatabase;
 import liquibase.structure.core.Column;
 import liquibase.test.DiffResultAssert;
 import liquibase.changelog.ChangeSet;
@@ -452,6 +453,9 @@ public abstract class AbstractIntegrationTest {
             CompareControl compareControl = new CompareControl();
             compareControl.addSuppressedField(Column.class, "defaultValue");  //database returns different data even if the same
             compareControl.addSuppressedField(Column.class, "autoIncrementInformation"); //database returns different data even if the same
+            if (database instanceof OracleDatabase) {
+                compareControl.addSuppressedField(Column.class, "type"); //database returns different nvarchar2 info even though they are the same
+            }
 
             DiffOutputControl diffOutputControl = new DiffOutputControl();
             File tempFile = File.createTempFile("liquibase-test", ".xml");

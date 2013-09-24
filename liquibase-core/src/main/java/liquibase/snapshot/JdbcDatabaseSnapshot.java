@@ -1,5 +1,7 @@
 package liquibase.snapshot;
 
+import liquibase.CatalogAndSchema;
+import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.database.jvm.JdbcConnection;
@@ -65,11 +67,13 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
                 @Override
                 public List<CachedRow> fastFetch() throws SQLException, DatabaseException {
+                    CatalogAndSchema catalogAndSchema = database.correctSchema(new CatalogAndSchema(catalogName, schemaName));
+
                     List<CachedRow> returnList = new ArrayList<CachedRow>();
 
                     List<String> tables = new ArrayList<String>();
                     if (tableName == null) {
-                        for (CachedRow row : getTables(catalogName, schemaName, null, new String[] {"TABLE"})) {
+                        for (CachedRow row : getTables(((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema), null, new String[] {"TABLE"})) {
                             tables.add(row.getString("TABLE_NAME"));
                         }
                     } else {
@@ -78,7 +82,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
 
                     for (String foundTable : tables) {
-                        returnList.addAll(extract(databaseMetaData.getImportedKeys(catalogName, schemaName, foundTable)));
+                        returnList.addAll(extract(databaseMetaData.getImportedKeys(((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema), foundTable)));
                     }
 
                     return returnList;
@@ -113,10 +117,11 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                 public List<CachedRow> fastFetch() throws SQLException, DatabaseException {
                     List<CachedRow> returnList = new ArrayList<CachedRow>();
 
+                    CatalogAndSchema catalogAndSchema = database.correctSchema(new CatalogAndSchema(catalogName, schemaName));
                     if (database instanceof OracleDatabase) {
                         //oracle getIndexInfo is buggy and slow.  See Issue 1824548 and http://forums.oracle.com/forums/thread.jspa?messageID=578383&#578383
                         String sql = "SELECT INDEX_NAME, 3 AS TYPE, TABLE_NAME, COLUMN_NAME, COLUMN_POSITION AS ORDINAL_POSITION, null AS FILTER_CONDITION FROM ALL_IND_COLUMNS " +
-                                "WHERE TABLE_OWNER='" + schemaName + "'";
+                                "WHERE TABLE_OWNER='" + database.correctObjectName(catalogAndSchema.getCatalogName(), Schema.class) + "'";
                         if (tableName != null) {
                             sql += " AND TABLE_NAME='" + database.correctObjectName(tableName, Table.class) + "'";
                         }
@@ -131,7 +136,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                     } else {
                         List<String> tables = new ArrayList<String>();
                         if (tableName == null) {
-                            for (CachedRow row : getTables(catalogName, schemaName, null, new String[] {"TABLE"})) {
+                            for (CachedRow row : getTables(((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema), null, new String[] {"TABLE"})) {
                                 tables.add(row.getString("TABLE_NAME"));
                             }
                         } else {
@@ -140,7 +145,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
 
                         for (String tableName : tables) {
-                            returnList.addAll(extract(databaseMetaData.getIndexInfo(catalogName, schemaName, tableName, false, true)));
+                            returnList.addAll(extract(databaseMetaData.getIndexInfo(((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema), tableName, false, true)));
                         }
                     }
 
@@ -189,12 +194,16 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
                 @Override
                 public ResultSet fastFetchQuery() throws SQLException {
-                    return databaseMetaData.getColumns(catalogName, schemaName, tableName, columnName);
+                    CatalogAndSchema catalogAndSchema = database.correctSchema(new CatalogAndSchema(catalogName, schemaName));
+
+                    return databaseMetaData.getColumns(((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema), tableName, columnName);
                 }
 
                 @Override
                 public ResultSet bulkFetchQuery() throws SQLException {
-                    return databaseMetaData.getColumns(catalogName, schemaName, null, null);
+                    CatalogAndSchema catalogAndSchema = database.correctSchema(new CatalogAndSchema(catalogName, schemaName));
+
+                    return databaseMetaData.getColumns(((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema), null, null);
                 }
             });
         }
@@ -214,12 +223,16 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
                 @Override
                 public ResultSet fastFetchQuery() throws SQLException {
-                    return databaseMetaData.getTables(catalogName, schemaName, database.correctObjectName(table, Table.class), types);
+                    CatalogAndSchema catalogAndSchema = database.correctSchema(new CatalogAndSchema(catalogName, schemaName));
+
+                    return databaseMetaData.getTables(((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema), database.correctObjectName(table, Table.class), types);
                 }
 
                 @Override
                 public ResultSet bulkFetchQuery() throws SQLException {
-                    return databaseMetaData.getTables(catalogName, schemaName, null, types);
+                    CatalogAndSchema catalogAndSchema = database.correctSchema(new CatalogAndSchema(catalogName, schemaName));
+
+                    return databaseMetaData.getTables(((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema), null, types);
                 }
             });
         }
@@ -239,7 +252,9 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
                 @Override
                 public ResultSet fastFetchQuery() throws SQLException {
-                    return databaseMetaData.getPrimaryKeys(catalogName, schemaName, table);
+                    CatalogAndSchema catalogAndSchema = database.correctSchema(new CatalogAndSchema(catalogName, schemaName));
+
+                    return databaseMetaData.getPrimaryKeys(((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema), table);
                 }
 
                 @Override
@@ -269,12 +284,16 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
                 @Override
                 public ResultSet fastFetchQuery() throws SQLException, DatabaseException {
-                    return executeQuery(createSql(catalogName, schemaName, tableName), JdbcDatabaseSnapshot.this.getDatabase());
+                    CatalogAndSchema catalogAndSchema = database.correctSchema(new CatalogAndSchema(catalogName, schemaName));
+
+                    return executeQuery(createSql(((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema), tableName), JdbcDatabaseSnapshot.this.getDatabase());
                 }
 
                 @Override
                 public ResultSet bulkFetchQuery() throws SQLException, DatabaseException {
-                    return executeQuery(createSql(catalogName, schemaName, null), JdbcDatabaseSnapshot.this.getDatabase());
+                    CatalogAndSchema catalogAndSchema = database.correctSchema(new CatalogAndSchema(catalogName, schemaName));
+
+                    return executeQuery(createSql(((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema), null), JdbcDatabaseSnapshot.this.getDatabase());
                 }
 
                 private String createSql(String catalogName, String schemaName, String tableName) throws SQLException {
