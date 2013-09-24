@@ -214,7 +214,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
                 @Override
                 public ResultSet fastFetchQuery() throws SQLException {
-                    return databaseMetaData.getTables(catalogName, schemaName, table, types);
+                    return databaseMetaData.getTables(catalogName, schemaName, database.correctObjectName(table, Table.class), types);
                 }
 
                 @Override
