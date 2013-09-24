@@ -1,6 +1,26 @@
 Liquibase Core Changelog
 ===========================================
 
+Changes in version 3.0.5 (2013.09.24)
+- Major Focus: Performance Improvements
+- [CORE-1453] - Multi-column foreign keys not snapshotted correctly
+- [CORE-845] - "DATE" data type is deployed as "SMALLDATETIME" in SQL 2008
+- [CORE-859] - Nullable TIMESTAMP columns in MySQL are not nullable.
+- [CORE-1257] - Oracle: generateChangeLog exports a column of type "NUMBER" as "NUMBER(0,-127)"
+- [CORE-1288] - H2 (and other) support for BLOB and CLOB is incorrect
+- [CORE-1338] - Using apostrophe in changeset's ID causes SQL error
+- [CORE-1360] - Confirmation message of a custom change change is only printed if loglevel is debug
+- [CORE-1364] - SQL Server incorrect INFORMATION_SCHEMA table case in native query
+- [CORE-1365] - SQL Server: "Database 'dbo' does not exist" error
+- [CORE-1401] - Unnecessary snapshot on liquibase update
+- [CORE-1415] - Liquibase tables are not detected in oracle running in the SYSTEM schema
+- [CORE-1426] - ORACLE: Check for existing tables is case sensitive
+- [CORE-1429] - Random order of UniqueConstraint and ForeignKey drop statements
+- [CORE-1459] - Maven updateSQL creates databasechangelog table, should only output SQL to do it
+- [CORE-1462] - renameColumn with 'text' data type improperly trying to use 'clob' against MySql
+- [CORE-1433] - Handle changes in column datatypes in diffChangeLog
+- [CORE-1434] - Formatted Changelog format not parsing UTF8 .sql files with BOM
+
 Changes in version 3.0.4 (2013.09.06)
 - [CORE-548] - GenerateChangeLog generates invalid XML/SQL for mysql tables with autoincrement and compound PKs
 - [CORE-1423] - NPE in ForeignKeyComparator
