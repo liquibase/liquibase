@@ -68,6 +68,7 @@ public class Liquibase {
     private Logger log;
 
     private ChangeLogParameters changeLogParameters;
+    private ChangeExecListener changeExecListener;
 
     public Liquibase(String changeLogFile, ResourceAccessor resourceAccessor, DatabaseConnection conn) throws LiquibaseException {
         this(changeLogFile, resourceAccessor, DatabaseFactory.getInstance().findCorrectDatabaseImplementation(conn));
@@ -143,7 +144,13 @@ public class Liquibase {
         }
     }
 
-    private ChangeLogIterator getStandardChangelogIterator(String contexts, DatabaseChangeLog changeLog) throws DatabaseException {
+
+    protected UpdateVisitor createUpdateVisitor() {
+        return new UpdateVisitor(database, changeExecListener);
+    }
+
+
+    protected ChangeLogIterator getStandardChangelogIterator(String contexts, DatabaseChangeLog changeLog) throws DatabaseException {
         return new ChangeLogIterator(changeLog,
                 new ShouldRunChangeSetFilter(database),
                 new ContextChangeSetFilter(contexts),
@@ -886,5 +893,8 @@ public class Liquibase {
 
     private LockService getLockService() {
         return LockServiceFactory.getInstance().getLockService(database);
+    }
+    public void setChangeExecListener(ChangeExecListener listener) {
+      this.changeExecListener = listener;
     }
 }
