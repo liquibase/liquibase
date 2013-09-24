@@ -135,6 +135,6 @@ public class DefaultLogger extends AbstractLogger {
 
     @Override
     public void setChangeSet(ChangeSet changeSet) {
-      changeSetName = (changeSet == null ? null : changeSet.toString());
+      changeSetName = (changeSet == null ? null : changeSet.toString(false));
     }
 }
