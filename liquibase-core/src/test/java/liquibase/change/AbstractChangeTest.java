@@ -97,7 +97,7 @@ public class AbstractChangeTest {
         ChangeParameterMetaData paramNotIncludedMetaData = parameters.get("paramNotIncluded");
         ChangeParameterMetaData paramNoWriteMethodMetaData = parameters.get("paramNoWriteMethod");
 
-        assertNotNull(dbmsMetaData);
+        assertNull(dbmsMetaData);
         assertNotNull(paramOneMetaData);
         assertEquals("paramOne", paramOneMetaData.getParameterName());
         assertEquals("Param One", paramOneMetaData.getDisplayName());
