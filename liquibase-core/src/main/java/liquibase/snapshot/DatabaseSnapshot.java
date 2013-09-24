@@ -28,6 +28,8 @@ public abstract class DatabaseSnapshot {
         this.snapshotControl = snapshotControl;
 
         for (DatabaseObject obj : examples) {
+            this.snapshotControl.addType(obj.getClass(), database);
+
             include(obj);
         }
     }
