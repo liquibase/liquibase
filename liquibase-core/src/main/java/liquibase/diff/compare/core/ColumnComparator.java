@@ -22,7 +22,7 @@ public class ColumnComparator implements DatabaseObjectComparator {
     public String[] hash(DatabaseObject databaseObject, Database accordingTo, DatabaseObjectComparatorChain chain) {
         Column column = (Column) databaseObject;
 
-        return new String[] {column.getRelation().getName() + ":" + column.getName().toLowerCase()};
+        return new String[] {(column.getRelation().getName() + ":" + column.getName()).toLowerCase()};
     }
 
     @Override
