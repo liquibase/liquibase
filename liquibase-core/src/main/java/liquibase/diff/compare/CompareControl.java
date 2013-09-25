@@ -2,6 +2,7 @@ package liquibase.diff.compare;
 
 import liquibase.CatalogAndSchema;
 import liquibase.database.Database;
+import liquibase.diff.ObjectDifferences;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.logging.LogFactory;
 import liquibase.servicelocator.ServiceLocator;
@@ -9,13 +10,19 @@ import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.DatabaseObjectFactory;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 public class CompareControl {
 
     private CompareControl.SchemaComparison[] schemaComparisons;
     private Set<Class<? extends DatabaseObject>> compareTypes = new HashSet<Class<? extends DatabaseObject>>();
+    private Map<Class<? extends DatabaseObject>, Set<String>> suppressedFields = new HashMap<Class<? extends DatabaseObject>, Set<String>>();
+
+    public static CompareControl STANDARD = new CompareControl();
+
 
     public CompareControl() {
         this(null);
@@ -75,6 +82,19 @@ public class CompareControl {
     }
 
 
+    public void addSuppressedField(Class<? extends DatabaseObject> type, String field) {
+        if (!suppressedFields.containsKey(type)) {
+            suppressedFields.put(type, new HashSet<String>());
+        }
+        suppressedFields.get(type).add(field);
+    }
+
+    public boolean isSuppressedField(Class<? extends DatabaseObject> type, String field) {
+        if (!suppressedFields.containsKey(type)) {
+            return false;
+        }
+        return suppressedFields.get(type).contains(field);
+    }
 
     public SchemaComparison[] getSchemaComparisons() {
         return schemaComparisons;

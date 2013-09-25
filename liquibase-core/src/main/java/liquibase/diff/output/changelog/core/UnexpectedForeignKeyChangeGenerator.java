@@ -7,12 +7,10 @@ import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.changelog.ChangeGeneratorChain;
 import liquibase.diff.output.changelog.UnexpectedObjectChangeGenerator;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.core.Column;
-import liquibase.structure.core.ForeignKey;
-import liquibase.structure.core.Index;
-import liquibase.structure.core.Table;
+import liquibase.structure.core.*;
 
 public class UnexpectedForeignKeyChangeGenerator implements UnexpectedObjectChangeGenerator {
+    @Override
     public int getPriority(Class<? extends DatabaseObject> objectType, Database database) {
         if (ForeignKey.class.isAssignableFrom(objectType)) {
             return PRIORITY_DEFAULT;
@@ -20,16 +18,21 @@ public class UnexpectedForeignKeyChangeGenerator implements UnexpectedObjectChan
         return PRIORITY_NONE;
     }
 
+    @Override
     public Class<? extends DatabaseObject>[] runAfterTypes() {
         return null;
     }
 
+    @Override
     public Class<? extends DatabaseObject>[] runBeforeTypes() {
         return new Class[] {
-                Table.class
+                Table.class,
+                Index.class,
+                UniqueConstraint.class
         };
     }
 
+    @Override
     public Change[] fixUnexpected(DatabaseObject unexpectedObject, DiffOutputControl control, Database referenceDatabase, Database comparisonDatabase, ChangeGeneratorChain chain) {
         ForeignKey fk = (ForeignKey) unexpectedObject;
 

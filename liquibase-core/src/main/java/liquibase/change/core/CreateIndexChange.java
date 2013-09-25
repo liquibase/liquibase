@@ -49,7 +49,7 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
         this.schemaName = schemaName;
     }
 
-    @DatabaseChangeProperty(mustEqualExisting = "index.table", description = "Name of the table to add the index to", exampleValue = "user")
+    @DatabaseChangeProperty(mustEqualExisting = "index.table", description = "Name of the table to add the index to", exampleValue = "person")
     public String getTableName() {
         return tableName;
     }

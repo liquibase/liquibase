@@ -791,13 +791,13 @@ public class XMLChangeLogSerializerTest {
         change.setCatalogName("a");
         change.setSchemaName("b");
         change.setTableName("c");
-        change.setWhereClause("Some Text");
+        change.setWhere("Some Text");
 
         String out = new XMLChangeLogSerializer().serialize(change, true);
         assertEquals("<update catalogName=\"a\"\n" +
                 "        schemaName=\"b\"\n" +
                 "        tableName=\"c\">\n" +
-                "    <whereClause>Some Text</whereClause>\n" +
+                "    <where>Some Text</where>\n" +
                 "</update>", out);
     }
 

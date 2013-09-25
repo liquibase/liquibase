@@ -1,11 +1,15 @@
 package liquibase.diff.output;
 
 import liquibase.database.Database;
+import liquibase.database.core.H2Database;
 import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.structure.DatabaseObject;
+import liquibase.structure.DatabaseObjectCollection;
 import liquibase.structure.core.Column;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 public class DiffOutputControl {
@@ -14,9 +18,9 @@ public class DiffOutputControl {
     private boolean includeTablespace;
 
     private String dataDir = null;
-    private Set<DatabaseObject> alreadyHandledMissing = new HashSet<DatabaseObject>();
-    private Set<DatabaseObject> alreadyHandledUnexpected = new HashSet<DatabaseObject>();
-    private Set<DatabaseObject> alreadyHandledChanged = new HashSet<DatabaseObject>();
+    private DatabaseObjectCollection alreadyHandledMissing= new DatabaseObjectCollection(new DatabaseForHash());
+    private DatabaseObjectCollection alreadyHandledUnexpected = new DatabaseObjectCollection(new DatabaseForHash());
+    private DatabaseObjectCollection alreadyHandledChanged = new DatabaseObjectCollection(new DatabaseForHash());
 
     public DiffOutputControl() {
         includeSchema = true;
@@ -67,51 +71,32 @@ public class DiffOutputControl {
     }
 
     public void setAlreadyHandledMissing(DatabaseObject missingObject) {
-        if (missingObject == null) {
-            return;
-        }
         this.alreadyHandledMissing.add(missingObject);
     }
 
     public boolean alreadyHandledMissing(DatabaseObject missingObject, Database accordingTo) {
-        for (DatabaseObject object : this.alreadyHandledMissing) {
-            if (DatabaseObjectComparatorFactory.getInstance().isSameObject(object, missingObject, accordingTo)) {
-                return true;
-            }
-        }
-        return false;
+        return alreadyHandledMissing.contains(missingObject);
     }
 
     public void setAlreadyHandledUnexpected(DatabaseObject unexpectedObject) {
-        if (unexpectedObject == null) {
-            return;
-        }
         this.alreadyHandledUnexpected.add(unexpectedObject);
     }
 
     public boolean alreadyHandledUnexpected(DatabaseObject unexpectedObject, Database accordingTo) {
-        for (DatabaseObject object : this.alreadyHandledUnexpected) {
-            if (DatabaseObjectComparatorFactory.getInstance().isSameObject(object, unexpectedObject, accordingTo)) {
-                return true;
-            }
-        }
-        return false;
-    }
+        return alreadyHandledUnexpected.contains(unexpectedObject);    }
 
     public void setAlreadyHandledChanged(DatabaseObject changedObject) {
-        if (changedObject == null) {
-            return;
-        }
-
         this.alreadyHandledChanged.add(changedObject);
     }
 
     public boolean alreadyHandledChanged(DatabaseObject changedObject, Database accordingTo) {
-        for (DatabaseObject object : this.alreadyHandledChanged) {
-            if (DatabaseObjectComparatorFactory.getInstance().isSameObject(object, changedObject, accordingTo)) {
-                return true;
-            }
+        return alreadyHandledChanged.contains(changedObject);    }
+
+    private static class DatabaseForHash extends H2Database {
+        @Override
+        public boolean isCaseSensitive() {
+            return true;
         }
-        return false;
     }
+
 }

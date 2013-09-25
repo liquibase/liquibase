@@ -1,16 +1,30 @@
 package liquibase.diff;
 
 import liquibase.database.Database;
+import liquibase.diff.compare.CompareControl;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.core.DataType;
 
 import java.util.*;
 
 public class ObjectDifferences {
+
+    private CompareControl compareControl;
     private HashMap<String, Difference> differences = new HashMap<String, Difference>();
+
+    public ObjectDifferences(CompareControl compareControl) {
+        this.compareControl = compareControl;
+    }
 
     public Set<Difference> getDifferences() {
         return Collections.unmodifiableSet(new HashSet<Difference>(differences.values()));
+    }
+
+    public Difference getDifference(String field) {
+        return differences.get(field);
+    }
+
+    public boolean isDifferent(String field) {
+        return differences.containsKey(field);
     }
 
     public ObjectDifferences addDifference(String changedField, Object referenceValue, Object compareToValue) {
@@ -33,14 +47,18 @@ public class ObjectDifferences {
         compare(null, attribute, referenceObject, compareToObject, compareFunction);
     }
     public void compare(String message, String attribute, DatabaseObject referenceObject, DatabaseObject compareToObject, CompareFunction compareFunction) {
+        if (compareControl.isSuppressedField(referenceObject.getClass(), attribute)) {
+            return;
+        }
+
         Object referenceValue = referenceObject.getAttribute(attribute, Object.class);
         Object compareValue = compareToObject.getAttribute(attribute, Object.class);
 
         boolean different;
         if (referenceValue == null && compareValue == null) {
             different = false;
-        } else if (referenceValue == null || compareValue == null) {
-            different = false;
+        } else if ((referenceValue == null && compareValue != null) || (referenceValue != null && compareValue == null)) {
+            different = true;
         } else {
             different = !compareFunction.areEqual(referenceValue, compareValue);
         }

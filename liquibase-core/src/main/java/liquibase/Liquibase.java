@@ -67,6 +67,7 @@ public class Liquibase {
     private Logger log;
 
     private ChangeLogParameters changeLogParameters;
+    private ChangeExecListener changeExecListener;
 
     /**
      * Creates a Liquibase instance for a given DatabaseConnection. The Database instance used will be found with {@link DatabaseFactory#findCorrectDatabaseImplementation(liquibase.database.DatabaseConnection)}
@@ -190,11 +191,13 @@ public class Liquibase {
         }
     }
 
+
     protected UpdateVisitor createUpdateVisitor() {
-        return new UpdateVisitor(database);
+        return new UpdateVisitor(database, changeExecListener);
     }
 
-    protected ChangeLogIterator getStandardChangelogIterator(Contexts contexts, DatabaseChangeLog changeLog) throws DatabaseException {
+
+    protected ChangeLogIterator getStandardChangelogIterator(String contexts, DatabaseChangeLog changeLog) throws DatabaseException {
         return new ChangeLogIterator(changeLog,
                 new ShouldRunChangeSetFilter(database),
                 new ContextChangeSetFilter(contexts),
@@ -948,5 +951,44 @@ public class Liquibase {
 
     public void setChangeLogParameter(String key, Object value) {
         this.changeLogParameters.set(key, value);
+    }
+
+    /**
+     * Add safe database properties as changelog parameters.<br/>
+     * Safe properties are the ones that doesn't have side effects in liquibase state and also don't change in during the liquibase execution
+     * @param database Database which propeties are put in the changelog
+     * @throws DatabaseException
+     */
+    private void setDatabasePropertiesAsChangelogParameters(Database database) throws DatabaseException {            
+            setChangeLogParameter("database.autoIncrementClause", database.getAutoIncrementClause(null, null));
+            setChangeLogParameter("database.currentDateTimeFunction", database.getCurrentDateTimeFunction());
+            setChangeLogParameter("database.databaseChangeLogLockTableName", database.getDatabaseChangeLogLockTableName());
+            setChangeLogParameter("database.databaseChangeLogTableName", database.getDatabaseChangeLogTableName());
+            setChangeLogParameter("database.databaseMajorVersion", database.getDatabaseMajorVersion());
+            setChangeLogParameter("database.databaseMinorVersion", database.getDatabaseMinorVersion());
+            setChangeLogParameter("database.databaseProductName", database.getDatabaseProductName());
+            setChangeLogParameter("database.databaseProductVersion", database.getDatabaseProductVersion());
+            setChangeLogParameter("database.defaultCatalogName", database.getDefaultCatalogName());
+            setChangeLogParameter("database.defaultSchemaName", database.getDefaultSchemaName());
+            setChangeLogParameter("database.defaultSchemaNamePrefix", StringUtils.trimToNull(database.getDefaultSchemaName())==null?"":"."+database.getDefaultSchemaName());
+            setChangeLogParameter("database.lineComment", database.getLineComment());
+            setChangeLogParameter("database.liquibaseSchemaName", database.getLiquibaseSchemaName());
+            setChangeLogParameter("database.typeName", database.getShortName());
+            setChangeLogParameter("database.isSafeToRunUpdate", database.isSafeToRunUpdate());
+            setChangeLogParameter("database.requiresPassword", database.requiresPassword());
+            setChangeLogParameter("database.requiresUsername", database.requiresUsername());
+            setChangeLogParameter("database.supportsForeignKeyDisable", database.supportsForeignKeyDisable());
+            setChangeLogParameter("database.supportsInitiallyDeferrableColumns", database.supportsInitiallyDeferrableColumns());
+            setChangeLogParameter("database.supportsRestrictForeignKeys", database.supportsRestrictForeignKeys());
+            setChangeLogParameter("database.supportsSchemas", database.supportsSchemas());
+            setChangeLogParameter("database.supportsSequences", database.supportsSequences());
+            setChangeLogParameter("database.supportsTablespaces", database.supportsTablespaces());
+    }
+
+    private LockService getLockService() {
+        return LockServiceFactory.getInstance().getLockService(database);
+    }
+    public void setChangeExecListener(ChangeExecListener listener) {
+      this.changeExecListener = listener;
     }
 }

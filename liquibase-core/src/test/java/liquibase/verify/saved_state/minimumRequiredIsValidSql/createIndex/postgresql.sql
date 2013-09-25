@@ -3,5 +3,5 @@
 --     name="id"
 --     type="int"
 -- ], ]
--- Change Parameter: tableName=user
-CREATE INDEX ON "user"(id);
+-- Change Parameter: tableName=person
+CREATE INDEX ON person(id);

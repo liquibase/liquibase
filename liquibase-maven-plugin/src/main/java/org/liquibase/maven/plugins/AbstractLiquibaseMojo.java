@@ -516,16 +516,6 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     }
 
     protected void cleanup(Database db) {
-        // Release any locks that we may have on the database.
-        if (getLiquibase() != null) {
-            try {
-                getLiquibase().forceReleaseLocks();
-            }
-            catch (LiquibaseException e) {
-                getLog().error(e.getMessage(), e);
-            }
-        }
-
         // Clean up the connection
         if (db != null) {
             try {

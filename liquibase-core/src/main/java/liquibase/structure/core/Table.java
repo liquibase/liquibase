@@ -60,9 +60,9 @@ public class Table extends Relation {
         return getName();
     }
 
+    @Override
     public Table setName(String name) {
-        setAttribute("name", name);
-        return this;
+        return (Table) super.setName(name);
     }
 
 }

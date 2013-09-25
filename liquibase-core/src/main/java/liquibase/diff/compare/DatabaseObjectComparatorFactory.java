@@ -4,18 +4,20 @@ import liquibase.database.Database;
 import liquibase.diff.ObjectDifferences;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.servicelocator.ServiceLocator;
+import liquibase.structure.AbstractDatabaseObject;
 import liquibase.structure.DatabaseObject;
+import liquibase.util.StringUtils;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import java.util.*;
 
 public class DatabaseObjectComparatorFactory {
 
     private static DatabaseObjectComparatorFactory instance;
 
     private List<DatabaseObjectComparator> comparators = new ArrayList<DatabaseObjectComparator>();
+
+    private Map<String, List<DatabaseObjectComparator>> validComparatorsByClassAndDatabase = new HashMap<String, List<DatabaseObjectComparator>>();
+    private Map<String, DatabaseObjectComparatorChain> comparatorChainsByClassAndDatabase = new HashMap<String, DatabaseObjectComparatorChain>();
 
     private DatabaseObjectComparatorFactory() {
         Class[] classes;
@@ -66,14 +68,24 @@ public class DatabaseObjectComparatorFactory {
         unregister(toRemove);
     }
 
-    protected SortedSet<DatabaseObjectComparator> getComparators(Class<? extends DatabaseObject> comparatorClass, Database database) {
-        SortedSet<DatabaseObjectComparator> validComparators = new TreeSet<DatabaseObjectComparator>(new DatabaseObjectComparatorComparator(comparatorClass, database));
+    protected List<DatabaseObjectComparator> getComparators(Class<? extends DatabaseObject> comparatorClass, Database database) {
+        String key = comparatorClass.getName()+":"+database.getShortName();
+        if (validComparatorsByClassAndDatabase.containsKey(key)) {
+            return validComparatorsByClassAndDatabase.get(key);
+        }
+
+        List<DatabaseObjectComparator> validComparators = new ArrayList<DatabaseObjectComparator>();
 
         for (DatabaseObjectComparator comparator : comparators) {
             if (comparator.getPriority(comparatorClass, database) > 0) {
                 validComparators.add(comparator);
             }
         }
+
+        Collections.sort(validComparators, new DatabaseObjectComparatorComparator(comparatorClass, database));
+
+        validComparatorsByClassAndDatabase.put(key, validComparators);
+
         return validComparators;
     }
 
@@ -89,21 +101,75 @@ public class DatabaseObjectComparatorFactory {
         if (object1 == null || object2 == null) {
             return false;
         }
+
+        UUID snapshotId1 = object1.getSnapshotId();
+        UUID snapshotId2 = object2.getSnapshotId();
+        if (snapshotId1 != null && snapshotId2 != null) {
+            if (snapshotId1.equals(snapshotId2)) {
+                return true;
+            }
+        }
+
+        boolean aHashMatches = false;
+
+        List<String> hash1 = Arrays.asList(hash(object1, accordingTo));
+        List<String> hash2 = Arrays.asList(hash(object2, accordingTo));
+        for (String hash : hash1) {
+            if (hash2.contains(hash)) {
+                aHashMatches = true;
+                break;
+            }
+        }
+
+        if (!aHashMatches) {
+            return false;
+        }
+
+
         return createComparatorChain(object1.getClass(), accordingTo).isSameObject(object1, object2, accordingTo);
     }
 
-    public ObjectDifferences findDifferences(DatabaseObject object1, DatabaseObject object2, Database accordingTo) {
-        return createComparatorChain(object1.getClass(), accordingTo).findDifferences(object1, object2, accordingTo);
+    public String[] hash(DatabaseObject databaseObject, Database accordingTo) {
+        String[] hash = null;
+        if (databaseObject != null) {
+            hash = createComparatorChain(databaseObject.getClass(), accordingTo).hash(databaseObject, accordingTo);
+        }
+
+        if (hash == null) {
+            hash = new String[] {
+                    "null"
+            };
+        }
+
+        for (int i=0; i<hash.length; i++) {
+            if (StringUtils.trimToNull(hash[i]) == null) {
+                hash[i] = "null";
+            }
+        }
+        return hash;
+    }
+
+    public ObjectDifferences findDifferences(DatabaseObject object1, DatabaseObject object2, Database accordingTo, CompareControl compareControl) {
+        return createComparatorChain(object1.getClass(), accordingTo).findDifferences(object1, object2, accordingTo, compareControl);
 
     }
 
     private DatabaseObjectComparatorChain createComparatorChain(Class<? extends DatabaseObject> databaseObjectType, Database database) {
-        SortedSet<DatabaseObjectComparator> comparators = DatabaseObjectComparatorFactory.getInstance().getComparators(databaseObjectType, database);
+        String key = databaseObjectType.getName()+":"+database.getShortName();
+
+        if (comparatorChainsByClassAndDatabase.containsKey(key)) {
+            return comparatorChainsByClassAndDatabase.get(key).copy();
+        }
+
+        List<DatabaseObjectComparator> comparators = DatabaseObjectComparatorFactory.getInstance().getComparators(databaseObjectType, database);
         if (comparators == null || comparators.size() == 0) {
             return null;
         }
+
+        DatabaseObjectComparatorChain chain = new DatabaseObjectComparatorChain(comparators);
+        comparatorChainsByClassAndDatabase.put(key, chain);
         //noinspection unchecked
-        return new DatabaseObjectComparatorChain(comparators);
+        return chain;
     }
 
 }

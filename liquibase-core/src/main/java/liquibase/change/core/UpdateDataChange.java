@@ -59,7 +59,7 @@ public class UpdateDataChange extends AbstractModifyDataChange implements Change
             statement.addNewColumnValue(column.getName(), column.getValueObject());
         }
 
-        statement.setWhereClause(whereClause);
+        statement.setWhereClause(where);
 
         for (ColumnConfig whereParam : whereParams) {
             if (whereParam.getName() != null) {

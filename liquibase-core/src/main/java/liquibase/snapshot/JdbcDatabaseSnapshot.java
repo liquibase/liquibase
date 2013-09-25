@@ -1,11 +1,17 @@
 package liquibase.snapshot;
 
+import liquibase.CatalogAndSchema;
+import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
+import liquibase.database.core.*;
 import liquibase.database.jvm.JdbcConnection;
-import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.executor.jvm.ColumnMapRowMapper;
-import liquibase.executor.jvm.RowMapperResultSetExtractor;
+import liquibase.exception.DatabaseException;
+import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.Catalog;
+import liquibase.structure.core.Index;
+import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
+import liquibase.util.StringUtils;
 
 import java.sql.*;
 import java.util.*;
@@ -14,14 +20,13 @@ import liquibase.logging.LogFactory;
 
 public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
     private CachingDatabaseMetaData cachingDatabaseMetaData;
-    private int tablesOfColumnsFetched = 0;
 
-    public JdbcDatabaseSnapshot(SnapshotControl snapshotControl, Database database) {
-        super(snapshotControl, database);
+    public JdbcDatabaseSnapshot(DatabaseObject[] examples, Database database, SnapshotControl snapshotControl) throws DatabaseException, InvalidExampleException {
+        super(examples, database, snapshotControl);
     }
 
-    public JdbcDatabaseSnapshot(Database database) {
-        super(database);
+    public JdbcDatabaseSnapshot(DatabaseObject[] examples, Database database) throws DatabaseException, InvalidExampleException {
+        super(examples, database);
     }
 
     public CachingDatabaseMetaData getMetaData() throws SQLException {
@@ -31,237 +36,351 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                 databaseMetaData = ((JdbcConnection) getDatabase().getConnection()).getUnderlyingConnection().getMetaData();
             }
 
-            cachingDatabaseMetaData = new CachingDatabaseMetaData(databaseMetaData);
+            cachingDatabaseMetaData = new CachingDatabaseMetaData(this.getDatabase(), databaseMetaData);
         }
         return cachingDatabaseMetaData;
     }
 
     public class CachingDatabaseMetaData {
         private DatabaseMetaData databaseMetaData;
+        private Database database;
 
-        private Map<String, List<CachedRow>> cachedResults = new HashMap<String, List<CachedRow>>();
-
-        public CachingDatabaseMetaData(DatabaseMetaData metaData) {
+        public CachingDatabaseMetaData(Database database, DatabaseMetaData metaData) {
             this.databaseMetaData = metaData;
+            this.database = database;
         }
 
         public DatabaseMetaData getDatabaseMetaData() {
             return databaseMetaData;
         }
 
-        public List<CachedRow> getExportedKeys(String catalogName, String schemaName, String table) throws SQLException {
-            String key = createKey("getExportedKeys", catalogName, schemaName, table);
-            if (hasCachedValue(key)) {
-                return getCachedValue(key);
-            }
-            return cacheResultSet(key, databaseMetaData.getExportedKeys(catalogName, schemaName, table));
-        }
+        public List<CachedRow> getForeignKeys(final String catalogName, final String schemaName, final String tableName, final String fkName) throws DatabaseException {
+            return getResultSetCache("getImportedKeys").get(new ResultSetCache.UnionResultSetExtractor(database) {
 
-        private List<CachedRow> getCachedValue(String key) {
-            return cachedResults.get(key);
-        }
-
-        private boolean hasCachedValue(String key) {
-            return cachedResults.containsKey(key);
-        }
-
-        private String createKey(String methodName, Object... params) {
-            String key = methodName;
-            if (params != null) {
-                for (Object param : params) {
-                    key += ":"+param;
+                @Override
+                public ResultSetCache.RowData rowKeyParameters(CachedRow row) {
+                    return new ResultSetCache.RowData(row.getString("FKTABLE_CAT"), row.getString("FKTABLE_SCHEM"), database, row.getString("FKTABLE_NAME"), row.getString("FK_NAME"));
                 }
-            }
-            return key;
-        }
 
-        private List<CachedRow> cacheResultSet(String key, ResultSet rs) throws SQLException {
-            List list;
-            try {
-                list = (List) new RowMapperResultSetExtractor(new ColumnMapRowMapper()).extractData(rs);
-                for (int i=0; i<list.size(); i++) {
-                    list.set(i, new CachedRow((Map) list.get(i)));
+                @Override
+                public ResultSetCache.RowData wantedKeyParameters() {
+                    return new ResultSetCache.RowData(catalogName, schemaName, database, tableName, fkName);
                 }
-            } finally {
-                rs.close();
-            }
 
-            cachedResults.put(key, list);
-            return list;
+                @Override
+                public List<CachedRow> fastFetch() throws SQLException, DatabaseException {
+                    CatalogAndSchema catalogAndSchema = database.correctSchema(new CatalogAndSchema(catalogName, schemaName));
 
+                    List<CachedRow> returnList = new ArrayList<CachedRow>();
+
+                    List<String> tables = new ArrayList<String>();
+                    if (tableName == null) {
+                        for (CachedRow row : getTables(((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema), null, new String[] {"TABLE"})) {
+                            tables.add(row.getString("TABLE_NAME"));
+                        }
+                    } else {
+                        tables.add(tableName);
+                    }
+
+
+                    for (String foundTable : tables) {
+                        returnList.addAll(extract(databaseMetaData.getImportedKeys(((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema), foundTable)));
+                    }
+
+                    return returnList;
+                }
+
+                @Override
+                public List<CachedRow> bulkFetch() throws SQLException, DatabaseException {
+                    return null;
+                }
+
+                @Override
+                boolean shouldBulkSelect(ResultSetCache resultSetCache) {
+                    return false;
+                }
+            });
         }
 
-        public List<CachedRow> getImportedKeys(String catalogName, String schemaName, String table) throws SQLException {
-            String key = createKey("getImportedKeys", catalogName, schemaName, table);
-            if (hasCachedValue(key)) {
-                return getCachedValue(key);
-            }
+        public List<CachedRow> getIndexInfo(final String catalogName, final String schemaName, final String tableName, final String indexName) throws DatabaseException {
+            return getResultSetCache("getIndexInfo").get(new ResultSetCache.UnionResultSetExtractor(database) {
 
-            return cacheResultSet(key, databaseMetaData.getImportedKeys(catalogName, schemaName, table));
-        }
+                @Override
+                public ResultSetCache.RowData rowKeyParameters(CachedRow row) {
+                    return new ResultSetCache.RowData(row.getString("TABLE_CAT"), row.getString("TABLE_SCHEM"), database, row.getString("TABLE_NAME"), row.getString("INDEX_NAME"));
+                }
 
-        public List<CachedRow> getIndexInfo(String catalogName, String schemaName, String table, boolean unique, boolean approximate) throws SQLException {
-            String key = createKey("getIndexInfo", catalogName, schemaName, table, unique, approximate);
-            if (hasCachedValue(key)) {
-                return getCachedValue(key);
-            }
+                @Override
+                public ResultSetCache.RowData wantedKeyParameters() {
+                    return new ResultSetCache.RowData(catalogName, schemaName, database, tableName, indexName);
+                }
 
-            return cacheResultSet(key, databaseMetaData.getIndexInfo(catalogName, schemaName, table, unique, approximate));
+                @Override
+                public List<CachedRow> fastFetch() throws SQLException, DatabaseException {
+                    List<CachedRow> returnList = new ArrayList<CachedRow>();
+
+                    CatalogAndSchema catalogAndSchema = database.correctSchema(new CatalogAndSchema(catalogName, schemaName));
+                    if (database instanceof OracleDatabase) {
+                        //oracle getIndexInfo is buggy and slow.  See Issue 1824548 and http://forums.oracle.com/forums/thread.jspa?messageID=578383&#578383
+                        String sql = "SELECT INDEX_NAME, 3 AS TYPE, TABLE_NAME, COLUMN_NAME, COLUMN_POSITION AS ORDINAL_POSITION, null AS FILTER_CONDITION FROM ALL_IND_COLUMNS " +
+                                "WHERE TABLE_OWNER='" + database.correctObjectName(catalogAndSchema.getCatalogName(), Schema.class) + "'";
+                        if (tableName != null) {
+                            sql += " AND TABLE_NAME='" + database.correctObjectName(tableName, Table.class) + "'";
+                        }
+
+                        if (indexName != null) {
+                            sql += " AND INDEX_NAME='" + database.correctObjectName(indexName, Index.class) + "'";
+                        }
+
+                        sql += " ORDER BY INDEX_NAME, ORDINAL_POSITION";
+
+                        returnList.addAll(extract(executeQuery(sql, database)));
+                    } else {
+                        List<String> tables = new ArrayList<String>();
+                        if (tableName == null) {
+                            for (CachedRow row : getTables(((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema), null, new String[] {"TABLE"})) {
+                                tables.add(row.getString("TABLE_NAME"));
+                            }
+                        } else {
+                            tables.add(tableName);
+                        }
+
+
+                        for (String tableName : tables) {
+                            returnList.addAll(extract(databaseMetaData.getIndexInfo(((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema), tableName, false, true)));
+                        }
+                    }
+
+                    return returnList;
+                }
+
+                @Override
+                public List<CachedRow> bulkFetch() throws SQLException, DatabaseException {
+                    return fastFetch();
+                }
+
+                @Override
+                boolean shouldBulkSelect(ResultSetCache resultSetCache) {
+                    if (database instanceof OracleDatabase) {
+                        return super.shouldBulkSelect(resultSetCache);
+                    }
+                    return false;
+                }
+            });
         }
 
         /**
          * Return the columns for the given catalog, schema, table, and column.
-         * Because this query can be expensive on some databases (I'm looking at you, Oracle), after a couple calls for different tables it will give up and get all columns for all tables.
-         * To override when this
          */
-        public List<CachedRow> getColumns(String catalogName, String schemaName, String tableNamePattern, String columnNamePattern) throws SQLException {
-            String byTableKey = createKey("getColumns", catalogName, schemaName, tableNamePattern);
-            String allTablesKey = createKey("getColumns", catalogName, schemaName);
-            List<CachedRow> returnList;
+        public List<CachedRow> getColumns(final String catalogName, final String schemaName, final String tableName, final String columnName) throws SQLException, DatabaseException {
+            return getResultSetCache("getColumns").get(new ResultSetCache.SingleResultSetExtractor(database) {
 
-            boolean needToFilter = false;
-            if (hasCachedValue(byTableKey)) {
-                returnList = getCachedValue(byTableKey);
-            } else if (hasCachedValue(allTablesKey)) {
-                returnList = getCachedValue(allTablesKey);
-                needToFilter = true;
-            } else {
-                tablesOfColumnsFetched++;
-
-                if (shouldCacheAllTableColumns()) {
-                    returnList = cacheResultSet(allTablesKey, databaseMetaData.getColumns(catalogName, schemaName, null, null));
-                    needToFilter = true;
-                } else {
-                    returnList = cacheResultSet(byTableKey, databaseMetaData.getColumns(catalogName, schemaName, tableNamePattern, null));
-                    if (returnList.size() == 0) {
-                        throw new UnexpectedLiquibaseException("No Columns found for table "+tableNamePattern);
-                    }
+                @Override
+                public ResultSetCache.RowData rowKeyParameters(CachedRow row) {
+                    return new ResultSetCache.RowData(row.getString("TABLE_CAT"), row.getString("TABLE_SCHEM"), database, row.getString("TABLE_NAME"), row.getString("COLUMN_NAME"));
                 }
-            }
 
-            if (columnNamePattern != null || needToFilter) {
-                List<CachedRow> filteredList = new ArrayList<CachedRow>();
-                for (CachedRow row : returnList) {
-                    if (getDatabase().isCaseSensitive()) {
-                        if (row.getString("TABLE_NAME").equals(tableNamePattern))
-                            if (columnNamePattern == null || row.getString("COLUMN_NAME").equals(columnNamePattern)) {
-                                filteredList.add(row);
-                            }
-                    } else {
-                        if (row.getString("TABLE_NAME").equalsIgnoreCase(tableNamePattern))
-                            if (columnNamePattern == null || row.getString("COLUMN_NAME").equalsIgnoreCase(columnNamePattern)) {
-                                filteredList.add(row);
-                            }
-                    }
+                @Override
+                public ResultSetCache.RowData wantedKeyParameters() {
+                    return new ResultSetCache.RowData(catalogName, schemaName, database, tableName, columnName);
                 }
+
+                @Override
+                boolean shouldBulkSelect(ResultSetCache resultSetCache) {
+                    Set<String> seenTables = resultSetCache.getInfo("seenTables", Set.class);
+                    if (seenTables == null) {
+                        seenTables = new HashSet<String>();
+                        resultSetCache.putInfo("seenTables", seenTables);
+                    }
+
+                    seenTables.add(catalogName+":"+schemaName+":"+tableName);
+                    return seenTables.size() > 2;
+                }
+
+                @Override
+                public ResultSet fastFetchQuery() throws SQLException {
+                    CatalogAndSchema catalogAndSchema = database.correctSchema(new CatalogAndSchema(catalogName, schemaName));
+
+                    return databaseMetaData.getColumns(((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema), tableName, columnName);
                 if (filteredList.size() == 0) {
                     LogFactory.getInstance().getLog().debug("zero size");
                 }
-                return filteredList;
-            } else {
-                if (returnList.size() == 0) {
-                    LogFactory.getInstance().getLog().debug("zero size");
+
+                @Override
+                public ResultSet bulkFetchQuery() throws SQLException {
+                    CatalogAndSchema catalogAndSchema = database.correctSchema(new CatalogAndSchema(catalogName, schemaName));
+
+                    return databaseMetaData.getColumns(((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema), null, null);
                 }
-                return returnList;
-            }
+            });
         }
 
-        public List<CachedRow> getTables(String catalogName, String schemaName, String tableNamePattern, String[] types) throws SQLException {
-            String key = createKey("getTables", catalogName, schemaName, tableNamePattern, types);
-            if (hasCachedValue(key)) {
-                return getCachedValue(key);
-            }
+        public List<CachedRow> getTables(final String catalogName, final String schemaName, final String table, final String[] types) throws SQLException, DatabaseException {
+            return getResultSetCache("getTables."+StringUtils.join(types, ":")).get(new ResultSetCache.SingleResultSetExtractor(database) {
 
-            return cacheResultSet(key, databaseMetaData.getTables(catalogName, schemaName, tableNamePattern, types));
+                @Override
+                public ResultSetCache.RowData rowKeyParameters(CachedRow row) {
+                    return new ResultSetCache.RowData(row.getString("TABLE_CAT"), row.getString("TABLE_SCHEM"), database, row.getString("TABLE_NAME"));
+                }
+
+                @Override
+                public ResultSetCache.RowData wantedKeyParameters() {
+                    return new ResultSetCache.RowData(catalogName, schemaName, database, table);
+                }
+
+                @Override
+                public ResultSet fastFetchQuery() throws SQLException {
+                    CatalogAndSchema catalogAndSchema = database.correctSchema(new CatalogAndSchema(catalogName, schemaName));
+
+                    return databaseMetaData.getTables(((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema), database.correctObjectName(table, Table.class), types);
+                }
+
+                @Override
+                public ResultSet bulkFetchQuery() throws SQLException {
+                    CatalogAndSchema catalogAndSchema = database.correctSchema(new CatalogAndSchema(catalogName, schemaName));
+
+                    return databaseMetaData.getTables(((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema), null, types);
+                }
+            });
         }
 
-        public List<CachedRow> getPrimaryKeys(String catalogName, String schemaName, String table) throws SQLException {
-            String key = createKey("getPrimaryKeys", catalogName, schemaName, table);
-            if (hasCachedValue(key)) {
-                return getCachedValue(key);
-            }
+        public List<CachedRow> getPrimaryKeys(final String catalogName, final String schemaName, final String table) throws SQLException, DatabaseException {
+            return getResultSetCache("getPrimaryKeys").get(new ResultSetCache.SingleResultSetExtractor(database) {
 
-            return cacheResultSet(key, databaseMetaData.getPrimaryKeys(catalogName, schemaName, table));
-        }
+                @Override
+                public ResultSetCache.RowData rowKeyParameters(CachedRow row) {
+                    return new ResultSetCache.RowData(row.getString("TABLE_CAT"), row.getString("TABLE_SCHEM"),  database, row.getString("TABLE_NAME"));
+                }
 
-        public List<CachedRow> query(String sql) throws SQLException {
-            String key = createKey("query", sql);
-            if (hasCachedValue(key)) {
-                return getCachedValue(key);
-            }
+                @Override
+                public ResultSetCache.RowData wantedKeyParameters() {
+                    return new ResultSetCache.RowData(catalogName, schemaName, database, table);
+                }
 
-            Statement statement = this.getDatabaseMetaData().getConnection().createStatement();
-            try {
-                return cacheResultSet(key, statement.executeQuery(sql));
-            } finally {
-                statement.close();
-            }
-        }
-    }
+                @Override
+                public ResultSet fastFetchQuery() throws SQLException {
+                    CatalogAndSchema catalogAndSchema = database.correctSchema(new CatalogAndSchema(catalogName, schemaName));
 
-    protected boolean shouldCacheAllTableColumns() {
-        return tablesOfColumnsFetched == 4;
-    }
+                    return databaseMetaData.getPrimaryKeys(((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema), table);
+                }
 
-    public class CachedRow {
-        private Map row;
+                @Override
+                public ResultSet bulkFetchQuery() throws SQLException {
+                    return null;
+                }
 
-        public CachedRow(Map row) {
-            this.row = row;
-        }
-
-
-
-        public Object get(String columnName) {
-            return row.get(columnName);
-        }
-
-        public void set(String columnName, Object value) {
-            row.put(columnName, value);
-        }
-
-
-        public boolean containsColumn(String columnName) {
-            return row.containsKey(columnName);
-        }
-
-        public String getString(String columnName) {
-            return (String) row.get(columnName);
-        }
-
-        public Integer getInt(String columnName) {
-            Object o = row.get(columnName);
-            if (o instanceof Number) {
-                return ((Number) o).intValue();
-            } else if (o instanceof String) {
-                return Integer.valueOf((String) o);
-            }
-            return (Integer) o;
-        }
-
-        public Short getShort(String columnName) {
-            Object o = row.get(columnName);
-            if (o instanceof Number) {
-                return ((Number) o).shortValue();
-            } else if (o instanceof String) {
-                return Short.valueOf((String) o);
-            }
-            return (Short) o;
-        }
-
-        public Boolean getBoolean(String columnName) {
-            Object o = row.get(columnName);
-            if (o instanceof Number) {
-                if (((Number) o).longValue() == 0) {
+                @Override
+                boolean shouldBulkSelect(ResultSetCache resultSetCache) {
                     return false;
-                } else {
-                    return true;
                 }
-            }
-            if (o instanceof String) {
-                return Boolean.valueOf((String) o);
-            }
-            return (Boolean) o;
+            });
+        }
+
+        public List<CachedRow> getUniqueConstraints(final String catalogName, final String schemaName, final String tableName) throws SQLException, DatabaseException {
+            return getResultSetCache("getUniqueConstraints").get(new ResultSetCache.SingleResultSetExtractor(database) {
+
+                @Override
+                public ResultSetCache.RowData rowKeyParameters(CachedRow row) {
+                    return new ResultSetCache.RowData(row.getString("TABLE_CAT"), row.getString("TABLE_SCHEM"), database, row.getString("TABLE_NAME"));
+                }
+
+                @Override
+                public ResultSetCache.RowData wantedKeyParameters() {
+                    return new ResultSetCache.RowData(catalogName, schemaName, database, tableName);
+                }
+
+                @Override
+                public ResultSet fastFetchQuery() throws SQLException, DatabaseException {
+                    CatalogAndSchema catalogAndSchema = database.correctSchema(new CatalogAndSchema(catalogName, schemaName));
+
+                    return executeQuery(createSql(((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema), tableName), JdbcDatabaseSnapshot.this.getDatabase());
+                }
+
+                @Override
+                public ResultSet bulkFetchQuery() throws SQLException, DatabaseException {
+                    CatalogAndSchema catalogAndSchema = database.correctSchema(new CatalogAndSchema(catalogName, schemaName));
+
+                    return executeQuery(createSql(((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema), null), JdbcDatabaseSnapshot.this.getDatabase());
+                }
+
+                private String createSql(String catalogName, String schemaName, String tableName) throws SQLException {
+                    Database database = JdbcDatabaseSnapshot.this.getDatabase();
+                    String sql;
+                    if (database instanceof MySQLDatabase || database instanceof HsqlDatabase) {
+                        sql = "select CONSTRAINT_NAME " +
+                                "from information_schema.table_constraints " +
+                                "where constraint_schema='" + database.correctObjectName(catalogName, Catalog.class) + "' " +
+                                "and constraint_type='UNIQUE'";
+                        if (tableName != null) {
+                            sql += " and table_name='" + database.correctObjectName(tableName, Table.class) + "'";
+                        }
+                    } else if (database instanceof PostgresDatabase) {
+                        sql = "select CONSTRAINT_NAME " +
+                                "from information_schema.table_constraints " +
+                                "where constraint_catalog='" + database.correctObjectName(catalogName, Catalog.class) + "' " +
+                                "and constraint_schema='"+database.correctObjectName(schemaName, Schema.class)+"' " +
+                                "and constraint_type='UNIQUE'";
+                        if (tableName != null) {
+                                sql += " and table_name='" + database.correctObjectName(tableName, Table.class) + "'";
+                        }
+                    } else if (database instanceof MSSQLDatabase) {
+                        sql = "select CONSTRAINT_NAME from INFORMATION_SCHEMA.TABLE_CONSTRAINTS " +
+                                "where CONSTRAINT_TYPE = 'Unique' " +
+                                "and CONSTRAINT_SCHEMA='"+database.correctObjectName(schemaName, Schema.class)+"'";
+                        if (tableName != null) {
+                                sql += " and TABLE_NAME='"+database.correctObjectName(tableName, Table.class)+"'";
+                        }
+                    } else if (database instanceof OracleDatabase) {
+                        sql = "select uc.constraint_name, uc.table_name,uc.status,uc.deferrable,uc.deferred,ui.tablespace_name from all_constraints uc, all_cons_columns ucc, all_indexes ui " +
+                                "where uc.constraint_type='U' and uc.index_name = ui.index_name and uc.constraint_name = ucc.constraint_name " +
+                                "and uc.owner = '" + database.correctObjectName(catalogName, Catalog.class) + "' " +
+                                "and ui.table_owner = '" + database.correctObjectName(catalogName, Catalog.class) + "' " +
+                                "and ucc.owner = '" + database.correctObjectName(catalogName, Catalog.class) + "'";
+                        if (tableName != null) {
+                            sql += " and uc.table_name = '" + database.correctObjectName(tableName, Table.class) + "'";
+                        }
+                    } else if (database instanceof DB2Database) {
+                        sql = "select distinct k.constname as constraint_name from syscat.keycoluse k, syscat.tabconst t " +
+                                "where k.constname = t.constname " +
+                                "and t.tabschema = '" + database.correctObjectName(catalogName, Catalog.class) + "' " +
+                                "and t.type='U'";
+                        if (tableName != null) {
+                            sql += " and t.tabname = '" + database.correctObjectName(tableName, Table.class) + "'";
+                        }
+                    } else if (database instanceof FirebirdDatabase) {
+                        sql = "SELECT RDB$INDICES.RDB$INDEX_NAME AS CONSTRAINT_NAME FROM RDB$INDICES " +
+                                "LEFT JOIN RDB$RELATION_CONSTRAINTS ON RDB$RELATION_CONSTRAINTS.RDB$INDEX_NAME = RDB$INDICES.RDB$INDEX_NAME " +
+                                "WHERE RDB$INDICES.RDB$UNIQUE_FLAG IS NOT NULL " +
+                                "AND RDB$RELATION_CONSTRAINTS.RDB$CONSTRAINT_TYPE != 'PRIMARY KEY' "+
+                                "AND NOT(RDB$INDICES.RDB$INDEX_NAME LIKE 'RDB$%')";
+                        if (tableName != null) {
+                            sql += " AND RDB$INDICES.RDB$RELATION_NAME='"+database.correctObjectName(tableName, Table.class)+"'";
+                        }
+                    } else if (database instanceof DerbyDatabase) {
+                        sql = "select c.constraintname as CONSTRAINT_NAME " +
+                                "from sys.systables t, sys.sysconstraints c, sys.sysschemas s " +
+                                "where s.schemaname='"+database.correctObjectName(catalogName, Catalog.class)+"' "+
+                                "and t.tableid = c.tableid " +
+                                "and t.schemaid=s.schemaid " +
+                                "and c.type = 'U'";
+                        if (tableName != null) {
+                            sql += " AND t.tablename = '"+database.correctObjectName(tableName, Table.class)+"'";
+                        }
+                    } else {
+                        sql = "select CONSTRAINT_NAME, CONSTRAINT_TYPE " +
+                                "from information_schema.constraints " +
+                                "where constraint_schema='" + database.correctObjectName(schemaName, Schema.class) + "' " +
+                                "and constraint_catalog='" + database.correctObjectName(catalogName, Catalog.class) + "' " +
+                                "and constraint_type='UNIQUE'";
+                        if (tableName != null) {
+                                sql += " and table_name='" + database.correctObjectName(tableName, Table.class) + "'";
+                        }
+
+                    }
+
+                    return sql;
+                }
+            });
         }
     }
 

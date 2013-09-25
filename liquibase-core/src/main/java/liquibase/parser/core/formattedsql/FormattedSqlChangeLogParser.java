@@ -11,6 +11,7 @@ import liquibase.parser.ChangeLogParser;
 import liquibase.precondition.core.PreconditionContainer;
 import liquibase.precondition.core.SqlPrecondition;
 import liquibase.resource.ResourceAccessor;
+import liquibase.resource.UtfBomAwareReader;
 import liquibase.util.StringUtils;
 
 import java.io.*;
@@ -23,7 +24,7 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
         BufferedReader reader = null;
         try {
             if (changeLogFile.endsWith(".sql")) {
-                reader = new BufferedReader(new InputStreamReader(openChangeLogFile(changeLogFile, resourceAccessor)));
+                reader = new BufferedReader(new UtfBomAwareReader(openChangeLogFile(changeLogFile, resourceAccessor)));
 
                 return reader.readLine().matches("\\-\\-\\s*liquibase formatted.*");
             } else {
@@ -56,7 +57,7 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
         BufferedReader reader = null;
 
         try {
-            reader = new BufferedReader(new InputStreamReader(openChangeLogFile(physicalChangeLogLocation, resourceAccessor)));
+            reader = new BufferedReader(new UtfBomAwareReader(openChangeLogFile(physicalChangeLogLocation, resourceAccessor)));
             StringBuffer currentSql = new StringBuffer();
             StringBuffer currentRollbackSql = new StringBuffer();
 
