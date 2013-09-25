@@ -49,6 +49,7 @@ public class BaseLiquibaseTask extends Task {
     private String databaseClass;
     private String databaseChangeLogTableName;
     private String databaseChangeLogLockTableName;
+    private String databaseChangeLogObjectsTablespace;
 
 
     private Map<String, Object> changeLogProperties = new HashMap<String, Object>();
@@ -261,6 +262,9 @@ public class BaseLiquibaseTask extends Task {
         if (getDatabaseChangeLogLockTableName() != null)
             database.setDatabaseChangeLogLockTableName(getDatabaseChangeLogLockTableName());
 
+        if (getDatabaseChangeLogObjectsTablespace() != null)
+            database.setChangeLogObjectsTablespace(getChangeLogObjectsTablespace());
+
         return database;
     }
 
@@ -376,6 +380,15 @@ public class BaseLiquibaseTask extends Task {
 
     public void setDatabaseChangeLogLockTableName(String tableName) {
         this.databaseChangeLogLockTableName = tableName;
+    }
+
+    public String getDatabaseChangeLogObjectsTablespace() {
+        return databaseChangeLogObjectsTablespace;
+    }
+
+
+    public void setDatabaseChangeLogObjectsTablespace(String tablespaceName) {
+        this.databaseChangeLogObjectsTablespace = tablespaceName;
     }
 
     public String getLogLevel() {
