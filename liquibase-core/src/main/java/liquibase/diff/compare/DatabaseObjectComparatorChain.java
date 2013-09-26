@@ -71,7 +71,7 @@ public class DatabaseObjectComparatorChain implements Cloneable {
         return next;
     }
 
-    public ObjectDifferences findDifferences(DatabaseObject object1, DatabaseObject object2, Database accordingTo, CompareControl compareControl) {
+    public ObjectDifferences findDifferences(DatabaseObject object1, DatabaseObject object2, Database accordingTo, CompareControl compareControl, Set<String> exclude) {
         if (object1 == null && object2 == null) {
             return new ObjectDifferences(compareControl);
         }
@@ -89,6 +89,6 @@ public class DatabaseObjectComparatorChain implements Cloneable {
             return new ObjectDifferences(compareControl);
         }
 
-        return next.findDifferences(object1, object2, accordingTo, compareControl, this);
+        return next.findDifferences(object1, object2, accordingTo, compareControl, this, exclude);
     }
 }

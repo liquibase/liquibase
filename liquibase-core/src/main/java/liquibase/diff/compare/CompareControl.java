@@ -82,11 +82,13 @@ public class CompareControl {
     }
 
 
-    public void addSuppressedField(Class<? extends DatabaseObject> type, String field) {
+    public CompareControl addSuppressedField(Class<? extends DatabaseObject> type, String field) {
         if (!suppressedFields.containsKey(type)) {
             suppressedFields.put(type, new HashSet<String>());
         }
         suppressedFields.get(type).add(field);
+
+        return this;
     }
 
     public boolean isSuppressedField(Class<? extends DatabaseObject> type, String field) {

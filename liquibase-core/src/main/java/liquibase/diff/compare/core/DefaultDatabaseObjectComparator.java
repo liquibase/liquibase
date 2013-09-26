@@ -21,7 +21,11 @@ public final class DefaultDatabaseObjectComparator implements DatabaseObjectComp
 
     @Override
     public String[] hash(DatabaseObject databaseObject, Database accordingTo, DatabaseObjectComparatorChain chain) {
-        return new String[] {databaseObject.getName().toLowerCase()};
+        String name = databaseObject.getName();
+        if (name == null) {
+            name = "null";
+        }
+        return new String[] {name.toLowerCase()};
     }
 
     @Override
@@ -34,7 +38,7 @@ public final class DefaultDatabaseObjectComparator implements DatabaseObjectComp
     }
 
     @Override
-    public ObjectDifferences findDifferences(DatabaseObject databaseObject1, DatabaseObject databaseObject2, Database accordingTo, CompareControl compareControl, DatabaseObjectComparatorChain chain) {
+    public ObjectDifferences findDifferences(DatabaseObject databaseObject1, DatabaseObject databaseObject2, Database accordingTo, CompareControl compareControl, DatabaseObjectComparatorChain chain, Set<String> exclude) {
 
         Set<String> attributes = new HashSet<String>();
         attributes.addAll(databaseObject1.getAttributes());
@@ -43,6 +47,9 @@ public final class DefaultDatabaseObjectComparator implements DatabaseObjectComp
         ObjectDifferences differences = new ObjectDifferences(compareControl);
 
         for (String attribute : attributes) {
+            if (exclude.contains(attribute)) {
+                continue;
+            }
             Object attribute1 = databaseObject1.getAttribute(attribute, Object.class);
             Object attribute2 = databaseObject2.getAttribute(attribute, Object.class);
 
@@ -60,9 +67,9 @@ public final class DefaultDatabaseObjectComparator implements DatabaseObjectComp
             } else if (attribute1 instanceof Column.AutoIncrementInformation || attribute2 instanceof Column.AutoIncrementInformation) {
                 compareFunction = new ObjectDifferences.ToStringCompareFunction();
             } else if (attribute1 instanceof Collection || attribute2 instanceof Collection) {
-                compareFunction = new ObjectDifferences.OrderedCollectionCompareFunction(new ObjectDifferences.StandardCompareFunction());
+                compareFunction = new ObjectDifferences.OrderedCollectionCompareFunction(new ObjectDifferences.StandardCompareFunction(accordingTo));
             } else {
-                compareFunction = new ObjectDifferences.StandardCompareFunction();
+                compareFunction = new ObjectDifferences.StandardCompareFunction(accordingTo);
             }
             differences.compare(attribute, databaseObject1, databaseObject2, compareFunction);
 

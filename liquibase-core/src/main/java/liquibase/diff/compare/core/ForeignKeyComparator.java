@@ -12,6 +12,8 @@ import liquibase.structure.core.ForeignKey;
 import liquibase.structure.core.Table;
 import liquibase.util.StringUtils;
 
+import java.util.Set;
+
 public class ForeignKeyComparator implements DatabaseObjectComparator {
     @Override
     public int getPriority(Class<? extends DatabaseObject> objectType, Database database) {
@@ -64,12 +66,15 @@ public class ForeignKeyComparator implements DatabaseObjectComparator {
     }
 
     @Override
-    public ObjectDifferences findDifferences(DatabaseObject databaseObject1, DatabaseObject databaseObject2, Database accordingTo, CompareControl compareControl, DatabaseObjectComparatorChain chain) {
-        ObjectDifferences differences = chain.findDifferences(databaseObject1, databaseObject2, accordingTo, compareControl);
-        differences.removeDifference("name");
-        differences.removeDifference("backingIndex");
+    public ObjectDifferences findDifferences(DatabaseObject databaseObject1, DatabaseObject databaseObject2, Database accordingTo, CompareControl compareControl, DatabaseObjectComparatorChain chain, Set<String> exclue) {
+        exclue.add("name");
+        exclue.add("backingIndex");
+        exclue.add("foreignKeyColumns");
+        exclue.add("primaryKeyColumns");
+        exclue.add("foreignKeyTable");
+        exclue.add("primaryKeyTable");
 
-        differences.removeDifference("columnNames");
+        ObjectDifferences differences = chain.findDifferences(databaseObject1, databaseObject2, accordingTo, compareControl, exclue);
         differences.compare("foreignKeyColumns", databaseObject1, databaseObject2, new ObjectDifferences.DatabaseObjectNameCompareFunction(Column.class, accordingTo));
         differences.compare("primaryKeyColumns", databaseObject1, databaseObject2, new ObjectDifferences.DatabaseObjectNameCompareFunction(Column.class, accordingTo));
         differences.compare("foreignKeyTable", databaseObject1, databaseObject2, new ObjectDifferences.DatabaseObjectNameCompareFunction(Table.class, accordingTo));
