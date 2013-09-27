@@ -962,6 +962,7 @@ public class Liquibase {
     private void setDatabasePropertiesAsChangelogParameters(Database database) throws DatabaseException {            
             setChangeLogParameter("database.autoIncrementClause", database.getAutoIncrementClause(null, null));
             setChangeLogParameter("database.currentDateTimeFunction", database.getCurrentDateTimeFunction());
+            setChangeLogParameter("database.databaseChangeLogObjectsTablespace", database.getChangeLogObjectsTablespace());
             setChangeLogParameter("database.databaseChangeLogLockTableName", database.getDatabaseChangeLogLockTableName());
             setChangeLogParameter("database.databaseChangeLogTableName", database.getDatabaseChangeLogTableName());
             setChangeLogParameter("database.databaseMajorVersion", database.getDatabaseMajorVersion());
