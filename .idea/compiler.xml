@@ -30,6 +30,7 @@
         <outputRelativeToContentRoot value="true" />
         <processorPath useClasspath="true" />
         <module name="liquibase-core" />
+        <module name="liquibase-debian" />
         <module name="liquibase-integration-tests" />
         <module name="liquibase-maven-plugin" />
         <module name="liquibase-osgi" />
