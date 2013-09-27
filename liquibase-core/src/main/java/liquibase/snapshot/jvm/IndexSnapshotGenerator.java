@@ -260,6 +260,9 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                     System.out.println(this.getClass().getName() + ": corrected position to " + ++position);
                 }
                 String filterCondition = row.getString("FILTER_CONDITION");
+                if (filterCondition != null) {
+                    filterCondition = filterCondition.replaceAll("\"", "");
+                }
 
                 if (type == DatabaseMetaData.tableIndexStatistic) {
                     continue;
