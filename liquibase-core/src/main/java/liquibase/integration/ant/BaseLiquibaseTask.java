@@ -220,6 +220,7 @@ public abstract class BaseLiquibaseTask extends Task {
         }
 
         URLClassLoader loader = AccessController.doPrivileged(new PrivilegedAction<URLClassLoader>() {
+            @Override
             public URLClassLoader run() {
                 return new URLClassLoader(taskClassPath.toArray(new URL[taskClassPath.size()]), Database.class.getClassLoader());
             }
@@ -270,7 +271,7 @@ public abstract class BaseLiquibaseTask extends Task {
             database.setDatabaseChangeLogLockTableName(getDatabaseChangeLogLockTableName());
 
         if (getDatabaseChangeLogObjectsTablespace() != null)
-            database.setChangeLogObjectsTablespace(getChangeLogObjectsTablespace());
+            database.setLiquibaseTablespaceName(getDatabaseChangeLogObjectsTablespace());
 
         return database;
     }

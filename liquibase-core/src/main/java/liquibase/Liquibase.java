@@ -962,7 +962,6 @@ public class Liquibase {
     private void setDatabasePropertiesAsChangelogParameters(Database database) throws DatabaseException {            
             setChangeLogParameter("database.autoIncrementClause", database.getAutoIncrementClause(null, null));
             setChangeLogParameter("database.currentDateTimeFunction", database.getCurrentDateTimeFunction());
-            setChangeLogParameter("database.databaseChangeLogObjectsTablespace", database.getChangeLogObjectsTablespace());
             setChangeLogParameter("database.databaseChangeLogLockTableName", database.getDatabaseChangeLogLockTableName());
             setChangeLogParameter("database.databaseChangeLogTableName", database.getDatabaseChangeLogTableName());
             setChangeLogParameter("database.databaseMajorVersion", database.getDatabaseMajorVersion());
@@ -974,6 +973,7 @@ public class Liquibase {
             setChangeLogParameter("database.defaultSchemaNamePrefix", StringUtils.trimToNull(database.getDefaultSchemaName())==null?"":"."+database.getDefaultSchemaName());
             setChangeLogParameter("database.lineComment", database.getLineComment());
             setChangeLogParameter("database.liquibaseSchemaName", database.getLiquibaseSchemaName());
+            setChangeLogParameter("database.liquibaseTablespaceName", database.getLiquibaseTablespaceName());
             setChangeLogParameter("database.typeName", database.getShortName());
             setChangeLogParameter("database.isSafeToRunUpdate", database.isSafeToRunUpdate());
             setChangeLogParameter("database.requiresPassword", database.requiresPassword());
