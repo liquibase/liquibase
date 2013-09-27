@@ -10,10 +10,12 @@ public class CreateTableStatement extends AbstractSqlStatement {
     private String schemaName;
     private String tableName;
     private String tablespace;
+    private String remarks;
     private List<String> columns = new ArrayList<String>();
     private Set<AutoIncrementConstraint> autoIncrementConstraints = new HashSet<AutoIncrementConstraint>();
     private Map<String, LiquibaseDataType> columnTypes = new HashMap<String, LiquibaseDataType>();
     private Map<String, Object> defaultValues = new HashMap<String, Object>();
+    private Map<String, String> columnRemarks = new HashMap<String, String>();
 
     private PrimaryKeyConstraint primaryKeyConstraint;
     private Set<String> notNullColumns = new HashSet<String>();
@@ -25,6 +27,11 @@ public class CreateTableStatement extends AbstractSqlStatement {
         this.catalogName = catalogName;
         this.schemaName = schemaName;
         this.tableName = tableName;
+    }
+
+    public CreateTableStatement(String catalogName, String schemaName, String tableName,String remarks) {
+        this(catalogName,schemaName,tableName);
+        this.remarks = remarks;
     }
 
     public String getCatalogName() {
@@ -50,6 +57,14 @@ public class CreateTableStatement extends AbstractSqlStatement {
     public CreateTableStatement setTablespace(String tablespace) {
         this.tablespace = tablespace;
         return this;
+    }
+
+    public String getRemarks() {
+        return remarks;
+    }
+
+    public void setRemarks(String remarks) {
+        this.remarks = remarks;
     }
 
     public PrimaryKeyConstraint getPrimaryKeyConstraint() {
@@ -95,20 +110,27 @@ public class CreateTableStatement extends AbstractSqlStatement {
 
     public CreateTableStatement addColumn(String columnName, LiquibaseDataType columnType, Object defaultValue) {
         if (defaultValue instanceof ColumnConstraint) {
-            return addColumn(columnName,  columnType, null, (ColumnConstraint) defaultValue);
+            return addColumn(columnName,  columnType, null, new ColumnConstraint[]{(ColumnConstraint) defaultValue});
         }
         return addColumn(columnName, columnType, defaultValue, new ColumnConstraint[0]);
     }
 
-    public CreateTableStatement addColumn(String columnName, LiquibaseDataType columnType, ColumnConstraint... constraints) {
+    public CreateTableStatement addColumn(String columnName, LiquibaseDataType columnType, ColumnConstraint[] constraints) {
         return addColumn(columnName, columnType, null, constraints);
     }
 
-    public CreateTableStatement addColumn(String columnName, LiquibaseDataType columnType, Object defaultValue, ColumnConstraint... constraints) {
+    public CreateTableStatement addColumn(String columnName, LiquibaseDataType columnType, Object defaultValue, ColumnConstraint[] constraints) {
+        return addColumn(columnName,columnType,defaultValue,null,constraints);
+
+    }
+    public CreateTableStatement addColumn(String columnName, LiquibaseDataType columnType, Object defaultValue, String remarks, ColumnConstraint... constraints) {
         this.getColumns().add(columnName);
         this.columnTypes.put(columnName, columnType);
         if (defaultValue != null) {
             defaultValues.put(columnName, defaultValue);
+        }
+        if(remarks != null) {
+            this.columnRemarks.put(columnName, remarks);
         }
         if (constraints != null) {
             for (ColumnConstraint constraint : constraints) {
@@ -146,6 +168,10 @@ public class CreateTableStatement extends AbstractSqlStatement {
 
     public Object getDefaultValue(String column) {
         return defaultValues.get(column);
+    }
+
+    public String getColumnRemarks(String column) {
+        return columnRemarks.get(column);
     }
 
     public CreateTableStatement addColumnConstraint(NotNullConstraint notNullConstraint) {

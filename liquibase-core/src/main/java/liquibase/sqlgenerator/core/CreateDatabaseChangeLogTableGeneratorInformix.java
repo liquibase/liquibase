@@ -7,6 +7,7 @@ import liquibase.sql.Sql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.sqlgenerator.core.CreateDatabaseChangeLogTableGenerator;
+import liquibase.statement.ColumnConstraint;
 import liquibase.statement.NotNullConstraint;
 import liquibase.statement.core.CreateDatabaseChangeLogTableStatement;
 import liquibase.statement.core.CreateTableStatement;
@@ -39,7 +40,7 @@ public class CreateDatabaseChangeLogTableGeneratorInformix extends CreateDatabas
                 .addPrimaryKeyColumn("ID", DataTypeFactory.getInstance().fromDescription("VARCHAR(" + getIdColumnSize() + ")"), null, null, null, new NotNullConstraint())
                 .addColumn("AUTHOR",DataTypeFactory.getInstance().fromDescription("VARCHAR(" + getAuthorColumnSize() + ")"), null, null, null, new NotNullConstraint())
                 .addColumn("FILENAME", DataTypeFactory.getInstance().fromDescription("VARCHAR(" + getFilenameColumnSize() + ")"), null, null, null, new NotNullConstraint())
-                .addColumn("DATEEXECUTED", DataTypeFactory.getInstance().fromDescription("datetime"), null, new NotNullConstraint())
+                .addColumn("DATEEXECUTED", DataTypeFactory.getInstance().fromDescription("datetime"), null, new ColumnConstraint[]{ new NotNullConstraint()})
                 .addColumn("ORDEREXECUTED", DataTypeFactory.getInstance().fromDescription("INT"), new NotNullConstraint())
                 .addColumn("EXECTYPE", DataTypeFactory.getInstance().fromDescription("VARCHAR(10)"), new NotNullConstraint())
                 .addColumn("MD5SUM", DataTypeFactory.getInstance().fromDescription("VARCHAR(35)"))
