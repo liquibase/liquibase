@@ -238,7 +238,10 @@ public class Liquibase {
         executor.comment("*********************************************************************");
         executor.comment("Change Log: " + changeLogFile);
         executor.comment("Ran at: " + DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(new Date()));
-        executor.comment("Against: " + getDatabase().getConnection().getConnectionUserName() + "@" + getDatabase().getConnection().getURL());
+        DatabaseConnection connection = getDatabase().getConnection();
+        if (connection != null) {
+            executor.comment("Against: " + connection.getConnectionUserName() + "@" + connection.getURL());
+        }
         executor.comment("Liquibase version: " + LiquibaseUtil.getBuildVersion());
         executor.comment("*********************************************************************" + StreamUtil.getLineSeparator());
         
