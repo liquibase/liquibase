@@ -343,7 +343,8 @@
 		<xsd:attribute name="newColumnName" type="xsd:string"
 			use="required" />
 		<xsd:attribute name="columnDataType" type="xsd:string" />
-	</xsd:attributeGroup>
+        <xsd:attribute name="remarks" type="xsd:string" />
+    </xsd:attributeGroup>
 
 	<xsd:attributeGroup name="dropColumnAttributes">
 		<xsd:attributeGroup ref="tableNameAttribute" />
@@ -997,13 +998,6 @@
 				use="required" />
 		</xsd:complexType>
 	</xsd:element>
-
-	<xsd:group name="whereClause">
-		<xsd:sequence>
-			<xsd:element name="whereClause" type="xsd:string"
-				minOccurs="0" maxOccurs="unbounded" />
-		</xsd:sequence>
-	</xsd:group>
 
 	<xsd:element name="createSequence">
 		<xsd:complexType>
