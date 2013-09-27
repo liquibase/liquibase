@@ -261,7 +261,7 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                 }
                 String filterCondition = row.getString("FILTER_CONDITION");
                 if (filterCondition != null) {
-                    columnName = filterCondition.replaceAll("\"", "");
+                    filterCondition = filterCondition.replaceAll("\"", "");
                 }
 
                 if (type == DatabaseMetaData.tableIndexStatistic) {

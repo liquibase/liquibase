@@ -124,9 +124,9 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                                 "FROM ALL_IND_COLUMNS c " +
                                 "JOIN ALL_INDEXES i on i.index_name = c.index_name " +
                                 "LEFT JOIN all_ind_expressions e on (e.column_position = c.column_position AND e.index_name = c.index_name) " +
-                                "WHERE TABLE_OWNER='" + database.correctObjectName(catalogAndSchema.getCatalogName(), Schema.class) + "'";
+                                "WHERE c.TABLE_OWNER='" + database.correctObjectName(catalogAndSchema.getCatalogName(), Schema.class) + "'";
                         if (tableName != null) {
-                            sql += " AND TABLE_NAME='" + database.correctObjectName(tableName, Table.class) + "'";
+                            sql += " AND c.TABLE_NAME='" + database.correctObjectName(tableName, Table.class) + "'";
                         }
 
                         if (indexName != null) {
