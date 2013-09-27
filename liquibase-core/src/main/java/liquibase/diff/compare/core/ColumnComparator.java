@@ -9,6 +9,8 @@ import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Column;
 
+import java.util.Set;
+
 public class ColumnComparator implements DatabaseObjectComparator {
     @Override
     public int getPriority(Class<? extends DatabaseObject> objectType, Database database) {
@@ -22,7 +24,7 @@ public class ColumnComparator implements DatabaseObjectComparator {
     public String[] hash(DatabaseObject databaseObject, Database accordingTo, DatabaseObjectComparatorChain chain) {
         Column column = (Column) databaseObject;
 
-        return new String[] {column.getRelation().getName() + ":" + column.getName().toLowerCase()};
+        return new String[] {(column.getRelation().getName() + ":" + column.getName()).toLowerCase()};
     }
 
     @Override
@@ -48,7 +50,14 @@ public class ColumnComparator implements DatabaseObjectComparator {
 
 
     @Override
-    public ObjectDifferences findDifferences(DatabaseObject databaseObject1, DatabaseObject databaseObject2, Database accordingTo, CompareControl compareControl, DatabaseObjectComparatorChain chain) {
-        return chain.findDifferences(databaseObject1, databaseObject2, accordingTo, compareControl);
+    public ObjectDifferences findDifferences(DatabaseObject databaseObject1, DatabaseObject databaseObject2, Database accordingTo, CompareControl compareControl, DatabaseObjectComparatorChain chain, Set<String> exclude) {
+        exclude.add("name");
+        exclude.add("type");
+        ObjectDifferences differences = chain.findDifferences(databaseObject1, databaseObject2, accordingTo, compareControl, exclude);
+
+        differences.compare("name", databaseObject1, databaseObject2, new ObjectDifferences.DatabaseObjectNameCompareFunction(Column.class, accordingTo));
+        differences.compare("type", databaseObject1, databaseObject2, new ObjectDifferences.DatabaseObjectNameCompareFunction(Column.class, accordingTo));
+
+        return differences;
     }
 }

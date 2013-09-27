@@ -4,6 +4,9 @@ import liquibase.database.Database;
 import liquibase.diff.ObjectDifferences;
 import liquibase.structure.DatabaseObject;
 
+import java.util.Collection;
+import java.util.Set;
+
 public interface DatabaseObjectComparator {
 
     final int PRIORITY_NONE = -1;
@@ -17,5 +20,5 @@ public interface DatabaseObjectComparator {
 
     String[] hash(DatabaseObject databaseObject, Database accordingTo, DatabaseObjectComparatorChain chain);
 
-    ObjectDifferences findDifferences(DatabaseObject databaseObject1, DatabaseObject databaseObject2, Database accordingTo, CompareControl compareControl, DatabaseObjectComparatorChain chain);
+    ObjectDifferences findDifferences(DatabaseObject databaseObject1, DatabaseObject databaseObject2, Database accordingTo, CompareControl compareControl, DatabaseObjectComparatorChain chain, Set<String> exclude);
 }

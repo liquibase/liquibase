@@ -3,20 +3,23 @@ package liquibase.diff.compare.core;
 import liquibase.database.Database;
 import liquibase.diff.ObjectDifferences;
 import liquibase.diff.compare.CompareControl;
-import liquibase.structure.DatabaseObject;
-import liquibase.structure.core.Column;
-import liquibase.structure.core.Index;
 import liquibase.diff.compare.DatabaseObjectComparator;
 import liquibase.diff.compare.DatabaseObjectComparatorChain;
 import liquibase.diff.compare.DatabaseObjectComparatorFactory;
+import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.Column;
 import liquibase.structure.core.Table;
+import liquibase.structure.core.UniqueConstraint;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Set;
 
-public class IndexComparator implements DatabaseObjectComparator {
+public class UniqueConstraintComparator implements DatabaseObjectComparator {
     @Override
     public int getPriority(Class<? extends DatabaseObject> objectType, Database database) {
-        if (Index.class.isAssignableFrom(objectType)) {
+        if (UniqueConstraint.class.isAssignableFrom(objectType)) {
             return PRIORITY_TYPE;
         }
         return PRIORITY_NONE;
@@ -29,7 +32,7 @@ public class IndexComparator implements DatabaseObjectComparator {
             hashes.add(databaseObject.getName().toLowerCase());
         }
 
-        Table table = ((Index) databaseObject).getTable();
+        Table table = ((UniqueConstraint) databaseObject).getTable();
         if (table != null) {
             hashes.addAll(Arrays.asList(DatabaseObjectComparatorFactory.getInstance().hash(table, accordingTo)));
         }
@@ -40,27 +43,27 @@ public class IndexComparator implements DatabaseObjectComparator {
 
     @Override
     public boolean isSameObject(DatabaseObject databaseObject1, DatabaseObject databaseObject2, Database accordingTo, DatabaseObjectComparatorChain chain) {
-        if (!(databaseObject1 instanceof Index && databaseObject2 instanceof Index)) {
+        if (!(databaseObject1 instanceof UniqueConstraint && databaseObject2 instanceof UniqueConstraint)) {
             return false;
         }
 
-        Index thisIndex = (Index) databaseObject1;
-        Index otherIndex = (Index) databaseObject2;
+        UniqueConstraint thisConstraint = (UniqueConstraint) databaseObject1;
+        UniqueConstraint otherConstraint = (UniqueConstraint) databaseObject2;
 
-        int thisIndexSize = thisIndex.getColumns().size();
-        int otherIndexSize = otherIndex.getColumns().size();
+        int thisConstraintSize = thisConstraint.getColumns().size();
+        int otherConstraintSize = otherConstraint.getColumns().size();
 
-        if (thisIndexSize > 0 && otherIndexSize > 0 && thisIndexSize != otherIndexSize) {
+        if (thisConstraintSize > 0 && otherConstraintSize > 0 && thisConstraintSize != otherConstraintSize) {
             return false;
         }
 
-        if (thisIndex.getTable() != null && otherIndex.getTable() != null && thisIndexSize > 0 && otherIndexSize > 0) {
-            if (!DatabaseObjectComparatorFactory.getInstance().isSameObject(thisIndex.getTable(), otherIndex.getTable(), accordingTo)) {
+        if (thisConstraint.getTable() != null && otherConstraint.getTable() != null && thisConstraintSize > 0 && otherConstraintSize > 0) {
+            if (!DatabaseObjectComparatorFactory.getInstance().isSameObject(thisConstraint.getTable(), otherConstraint.getTable(), accordingTo)) {
                 return false;
             }
 
-            for (int i=0; i< otherIndexSize; i++) {
-                if (! DatabaseObjectComparatorFactory.getInstance().isSameObject(new Column().setName(thisIndex.getColumns().get(i)).setRelation(thisIndex.getTable()), new Column().setName(otherIndex.getColumns().get(i)).setRelation(otherIndex.getTable()), accordingTo)) {
+            for (int i=0; i< otherConstraintSize; i++) {
+                if (! DatabaseObjectComparatorFactory.getInstance().isSameObject(new Column().setName(thisConstraint.getColumns().get(i)).setRelation(thisConstraint.getTable()), new Column().setName(otherConstraint.getColumns().get(i)).setRelation(otherConstraint.getTable()), accordingTo)) {
                     return false;
                 }
             }

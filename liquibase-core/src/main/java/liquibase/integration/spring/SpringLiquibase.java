@@ -7,9 +7,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Enumeration;
-import java.util.Map;
-import java.util.Vector;
+import java.util.*;
 
 import javax.sql.DataSource;
 
@@ -82,7 +80,7 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 		}
 
 		public Enumeration<URL> getResources(String packageName) throws IOException {
-			Vector<URL> tmp = new Vector<URL>();
+            List<URL> tmp = new ArrayList<URL>();
 
 			Resource[] resources = org.springframework.core.io.support.ResourcePatternUtils.getResourcePatternResolver(getResourceLoader())
 					.getResources(adjustClasspath(packageName));
@@ -91,7 +89,7 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 				tmp.add(res.getURL());
 			}
 
-			return tmp.elements();
+            return Collections.enumeration(tmp);
 		}
 
 		public InputStream getResourceAsStream(String file) throws IOException {

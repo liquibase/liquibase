@@ -1,0 +1,194 @@
+<project>
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>org.liquibase.package</groupId>
+    <artifactId>liquibase-debian</artifactId>
+    
+    <version>3.1.0-SNAPSHOT</version>
+    <name>Liquibase Debian Packager</name>
+    <description>Debian package builder for liquibase.</description>
+     <organization>
+        <name>Liquibase.org</name>
+        <url>http://www.liquibase.org</url>
+    </organization>
+     <licenses>
+        <license>
+            <url>http://www.apache.org/licenses/LICENSE-2.0</url>
+            <name>Apache License, Version 2.0</name>
+        </license>
+    </licenses>
+
+    <properties>
+        <snakeyaml.version>1.12</snakeyaml.version>
+
+        <!-- Jdeb version, used to build the debian package  : should it match liquibase target version one ? -->
+        <jdeb.version>1.0.1</jdeb.version>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.liquibase</groupId>
+            <artifactId>liquibase-core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.yaml</groupId>
+            <artifactId>snakeyaml</artifactId>
+            <version>${snakeyaml.version}</version>
+        </dependency>
+    </dependencies>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>2.8</version>
+                <executions>
+                    <execution>
+                        <id>unpack-sigar</id>
+                        <phase>package<!-- or any other valid maven phase --></phase>
+                        <goals>
+                            <goal>unpack-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <includeGroupIds>org.liquibase</includeGroupIds>
+                            <includeArtifactIds>liquibase-core</includeArtifactIds>
+                            <outputDirectory>
+                                ${project.build.directory}
+                                <!-- or: ${project.basedir}/wherever/you/want/it -->
+                            </outputDirectory>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>copy</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>copy</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>org.liquibase</groupId>
+                                    <artifactId>liquibase-core</artifactId>
+                                    <overWrite>true</overWrite>
+                                    <outputDirectory>${project.build.directory}/</outputDirectory>
+                                    <destFileName>liquibase.jar</destFileName>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.yaml</groupId>
+                                    <artifactId>snakeyaml</artifactId>
+                                    <version>${snakeyaml.version}</version>
+                                    <type>jar</type>
+                                    <overWrite>false</overWrite>
+                                    <outputDirectory>${project.build.directory}/lib/</outputDirectory>
+                                </artifactItem>
+                            </artifactItems>
+                            <outputDirectory>${project.build.directory}/lib</outputDirectory>
+                            <overWriteReleases>false</overWriteReleases>
+                            <overWriteSnapshots>true</overWriteSnapshots>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <artifactId>jdeb</artifactId>
+                <groupId>org.vafer</groupId>
+                <version>${jdeb.version}</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>jdeb</goal>
+                        </goals>
+                        <configuration>
+                            <dataSet>
+                                <data>
+                                    <src>${project.build.directory}/liquibase.jar</src>
+                                    <dst>liquibase.jar</dst>
+                                    <type>file</type>
+                                    <mapper>
+                                        <type>perm</type>
+                                        <filemode>555</filemode>
+                                        <prefix>/usr/lib/liquibase-${project.version}</prefix>
+                                    </mapper>
+                                </data>
+                                <data>
+                                    <!--<src>${project.build.directory}/dist/liquibase</src>-->
+                                    <src>src/main/resources/liquibase</src>
+                                    <type>file</type>
+                                    <mapper>
+                                        <type>perm</type>
+                                        <filemode>555</filemode>
+                                        <prefix>/usr/lib/liquibase-${project.version}</prefix>
+                                    </mapper>
+                                </data>
+                                <data>
+                                    <src>${project.build.directory}/dist/LICENSE.txt</src>
+                                    <type>file</type>
+                                    <mapper>
+                                        <type>perm</type>
+                                        <filemode>444</filemode>
+                                        <prefix>/usr/lib/liquibase-${project.version}</prefix>
+                                    </mapper>
+                                </data>
+                                <data>
+                                    <src>${project.build.directory}/dist/liquibase.spec</src>
+                                    <type>file</type>
+                                    <mapper>
+                                        <type>perm</type>
+                                        <filemode>444</filemode>
+                                        <prefix>/usr/lib/liquibase-${project.version}</prefix>
+                                    </mapper>
+                                </data>
+                                <data>
+                                    <src>${project.build.directory}/dist/lib/README.txt</src>
+                                    <type>file</type>
+                                    <mapper>
+                                        <type>perm</type>
+                                        <filemode>444</filemode>
+                                        <prefix>/usr/lib/liquibase-${project.version}/lib</prefix>
+                                    </mapper>
+                                </data>
+			    
+                                <data>
+                                    <type>link</type>
+                                    <linkName>/usr/bin/liquibase</linkName>
+                                    <linkTarget>/usr/lib/liquibase-${project.version}/liquibase</linkTarget>  
+                                    <symlink>true</symlink>
+                                </data>
+			    
+                                <!-- Copy additional jars-->
+                                <data>
+                                    <src>${project.build.directory}/lib</src>
+                                    <type>directory</type>
+                                    <!--<includes />-->
+                                    <!--<excludes>**/.svn</excludes>-->
+                                    <mapper>
+                                        <type>perm</type>
+                                        <filemode>444</filemode>
+                                        <prefix>/usr/lib/liquibase-${project.version}/lib</prefix>
+                                    </mapper>
+                                </data>
+                                <!-- Now, add bash auto-completion file to make life easier
+                                when usin liquibase in command line mode
+                                /etc/bash_completion.d/
+                                -->
+                                <data>
+                                    <!--<src>${project.build.directory}/dist/liquibase</src>-->
+                                    <src>src/main/resources/liquibase.sh</src>
+                                    <type>file</type>
+                                    <mapper>
+                                        <type>perm</type>
+                                        <filemode>644</filemode>
+                                        <prefix>/etc/bash_completion.d/</prefix>
+                                    </mapper>
+                                </data>
+                                
+                            </dataSet>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>

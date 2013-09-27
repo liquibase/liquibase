@@ -3,7 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/liquibase-core/liquibase-core.iml" filepath="$PROJECT_DIR$/liquibase-core/liquibase-core.iml" />
-      <module fileurl="file://$PROJECT_DIR$/liquibase-integration-tests/liquibase-integration-tests.iml" filepath="$PROJECT_DIR$/liquibase-integration-tests/liquibase-integration-tests.iml" />
+      <module fileurl="file://$PROJECT_DIR$/liquibase-debian/liquibase-debian.iml" filepath="$PROJECT_DIR$/liquibase-debian/liquibase-debian.iml" />
       <module fileurl="file://$PROJECT_DIR$/liquibase-maven-plugin/liquibase-maven-plugin.iml" filepath="$PROJECT_DIR$/liquibase-maven-plugin/liquibase-maven-plugin.iml" />
       <module fileurl="file://$PROJECT_DIR$/liquibase-osgi/liquibase-osgi.iml" filepath="$PROJECT_DIR$/liquibase-osgi/liquibase-osgi.iml" />
     </modules>
