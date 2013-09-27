@@ -71,6 +71,10 @@ public class DataType {
                 value+= ", "+decimalDigits ;
             }
 
+            if (columnSizeUnit != null) {
+                value += " " + columnSizeUnit;
+            }
+
             value +=")";
         }
 
