@@ -56,6 +56,6 @@ public class CreateDatabaseChangeLogTableGenerator extends AbstractSqlGenerator<
     }
 
     protected String getFilenameColumnSize() {
-        return "200";
+        return "400";
     }
 }
