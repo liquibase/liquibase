@@ -537,6 +537,13 @@ public class Main {
         stream.println(" --referenceDriver=<jdbc.driver.ClassName>  Reference Database driver class name");
         stream.println(" --dataOutputDirectory=DIR                  Output data as CSV in the given ");
         stream.println("                                            directory");
+        stream.println(" --diffTypes                                List of diff types to include in Change Log ");
+        stream.println("                                            expressed as a comma separated list from: ");
+        stream.println("                                            tables, views, columns, indexes, foreignkeys, ");
+        stream.println("                                            primarykeys, uniqueconstraints, data. ");
+        stream.println("                                            If this is null then the default types will be: ");
+        stream.println("                                            tables, views, columns, indexes, foreignkeys, ");
+        stream.println("                                            primarykeys, uniqueconstraints.");
         stream.println("");
         stream.println("Change Log Properties:");
         stream.println(" -D<property.name>=<property.value>         Pass a name/value pair for");
@@ -774,10 +781,10 @@ public class Main {
             DiffOutputControl diffOutputControl = new DiffOutputControl(includeCatalog, includeSchema, includeTablespace);
 
             if ("diff".equalsIgnoreCase(command)) {
-                CommandLineUtils.doDiff(createReferenceDatabaseFromCommandParams(commandParams), database);
+                CommandLineUtils.doDiff(createReferenceDatabaseFromCommandParams(commandParams), database, StringUtils.trimToNull(diffTypes));
                 return;
             } else if ("diffChangeLog".equalsIgnoreCase(command)) {
-                CommandLineUtils.doDiffToChangeLog(changeLogFile, createReferenceDatabaseFromCommandParams(commandParams), database, diffOutputControl);
+                CommandLineUtils.doDiffToChangeLog(changeLogFile, createReferenceDatabaseFromCommandParams(commandParams), database, diffOutputControl,  StringUtils.trimToNull(diffTypes));
                 return;
             } else if ("generateChangeLog".equalsIgnoreCase(command)) {
                 CommandLineUtils.doGenerateChangeLog(changeLogFile, database, defaultCatalogName, defaultSchemaName, StringUtils.trimToNull(diffTypes), StringUtils.trimToNull(changeSetAuthor), StringUtils.trimToNull(changeSetContext), StringUtils.trimToNull(dataOutputDirectory), diffOutputControl);
