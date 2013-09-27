@@ -120,17 +120,20 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                     CatalogAndSchema catalogAndSchema = database.correctSchema(new CatalogAndSchema(catalogName, schemaName));
                     if (database instanceof OracleDatabase) {
                         //oracle getIndexInfo is buggy and slow.  See Issue 1824548 and http://forums.oracle.com/forums/thread.jspa?messageID=578383&#578383
-                        String sql = "SELECT INDEX_NAME, 3 AS TYPE, TABLE_NAME, COLUMN_NAME, COLUMN_POSITION AS ORDINAL_POSITION, null AS FILTER_CONDITION FROM ALL_IND_COLUMNS " +
+                        String sql = "SELECT c.INDEX_NAME, 3 AS TYPE, c.TABLE_NAME, c.COLUMN_NAME, c.COLUMN_POSITION AS ORDINAL_POSITION, e.COLUMN_EXPRESSION AS FILTER_CONDITION, case I.UNIQUENESS when 'UNIQUE' then 0 else 1 end as NON_UNIQUE " +
+                                "FROM ALL_IND_COLUMNS c " +
+                                "JOIN ALL_INDEXES i on i.index_name = c.index_name " +
+                                "LEFT JOIN all_ind_expressions e on (e.column_position = c.column_position AND e.index_name = c.index_name) " +
                                 "WHERE TABLE_OWNER='" + database.correctObjectName(catalogAndSchema.getCatalogName(), Schema.class) + "'";
                         if (tableName != null) {
                             sql += " AND TABLE_NAME='" + database.correctObjectName(tableName, Table.class) + "'";
                         }
 
                         if (indexName != null) {
-                            sql += " AND INDEX_NAME='" + database.correctObjectName(indexName, Index.class) + "'";
+                            sql += " AND c.INDEX_NAME='" + database.correctObjectName(indexName, Index.class) + "'";
                         }
 
-                        sql += " ORDER BY INDEX_NAME, ORDINAL_POSITION";
+                        sql += " ORDER BY c.INDEX_NAME, ORDINAL_POSITION";
 
                         returnList.addAll(extract(executeQuery(sql, database)));
                     } else {
