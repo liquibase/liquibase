@@ -6,6 +6,7 @@ import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
+import liquibase.statement.ColumnConstraint;
 import liquibase.statement.NotNullConstraint;
 import liquibase.statement.core.CreateDatabaseChangeLogLockTableStatement;
 import liquibase.statement.core.CreateTableStatement;
@@ -25,7 +26,7 @@ public class CreateDatabaseChangeLogLockTableGenerator extends AbstractSqlGenera
         CreateTableStatement createTableStatement = new CreateTableStatement(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName())
                 .setTablespace(database.getLiquibaseTablespaceName())
                 .addPrimaryKeyColumn("ID", DataTypeFactory.getInstance().fromDescription("INT"), null, null, null, new NotNullConstraint())
-                .addColumn("LOCKED", DataTypeFactory.getInstance().fromDescription("BOOLEAN"), null, new NotNullConstraint())
+                .addColumn("LOCKED", DataTypeFactory.getInstance().fromDescription("BOOLEAN"), null, new ColumnConstraint[]{new NotNullConstraint()})
                 .addColumn("LOCKGRANTED", DataTypeFactory.getInstance().fromDescription("DATETIME"))
                 .addColumn("LOCKEDBY", DataTypeFactory.getInstance().fromDescription("VARCHAR(255)"));
         List<Sql> sql = new ArrayList<Sql>();
