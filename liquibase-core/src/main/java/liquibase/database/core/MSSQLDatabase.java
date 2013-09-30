@@ -303,7 +303,7 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
         if (schemaName== null || (isDefaultSchema(catalogName, schemaName) && !getOutputDefaultSchema())) {
             return escapeObjectName(viewName, View.class);
         } else {
-            return escapeObjectName(schemaName, Schema.class)+"."+ escapeObjectName(viewName, Schema.class);
+            return escapeObjectName(schemaName, Schema.class)+"."+ escapeObjectName(viewName, View.class);
         }
 
     }
