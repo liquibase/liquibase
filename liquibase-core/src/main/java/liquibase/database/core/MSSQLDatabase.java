@@ -300,11 +300,7 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
      */
     @Override
     public String escapeViewName(String catalogName, String schemaName, String viewName) {
-        if (schemaName== null || (isDefaultSchema(catalogName, schemaName) && !getOutputDefaultSchema())) {
-            return escapeObjectName(viewName, View.class);
-        } else {
-            return escapeObjectName(schemaName, Schema.class)+"."+ escapeObjectName(viewName, View.class);
-        }
+        return escapeObjectName(null, schemaName, viewName, View.class);
 
     }
 
