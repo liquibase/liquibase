@@ -125,6 +125,7 @@ public class SybaseASADatabase extends AbstractJdbcDatabase {
         super.setCurrentDateTimeFunction("now()");
 	}
 
+    @Override
     public int getPriority() {
         return PRIORITY_DEFAULT;
     }
@@ -132,7 +133,8 @@ public class SybaseASADatabase extends AbstractJdbcDatabase {
 	/* (non-Javadoc)
 	 * @see liquibase.database.Database#getDefaultDriver(java.lang.String)
 	 */
-	public String getDefaultDriver(String url) {
+	@Override
+    public String getDefaultDriver(String url) {
         if (url.startsWith("jdbc:sybase")) {
             return "com.sybase.jdbc3.jdbc.SybDriver";
         } else {
@@ -140,6 +142,7 @@ public class SybaseASADatabase extends AbstractJdbcDatabase {
         }
 	}
 
+    @Override
     public Integer getDefaultPort() {
         return 2638;
     }
@@ -152,7 +155,8 @@ public class SybaseASADatabase extends AbstractJdbcDatabase {
     /* (non-Javadoc)
     * @see liquibase.database.Database#getShortName()
     */
-	public String getShortName() {
+	@Override
+    public String getShortName() {
 		
 		return "asany";
 	}
@@ -160,9 +164,11 @@ public class SybaseASADatabase extends AbstractJdbcDatabase {
 	/* (non-Javadoc)
 	 * @see liquibase.database.Database#isCorrectDatabaseImplementation(java.sql.Connection)
 	 */
-	public boolean isCorrectDatabaseImplementation(DatabaseConnection conn) throws DatabaseException {
+	@Override
+    public boolean isCorrectDatabaseImplementation(DatabaseConnection conn) throws DatabaseException {
 		return "Adaptive Server Anywhere".equalsIgnoreCase(conn.getDatabaseProductName())
-                || "SQL Anywhere".equalsIgnoreCase(conn.getDatabaseProductName());
+                || "SQL Anywhere".equalsIgnoreCase(conn.getDatabaseProductName())
+        || "Adaptive Server IQ".equalsIgnoreCase(conn.getDatabaseProductName());
 	}
 
 	@Override
@@ -193,14 +199,16 @@ public class SybaseASADatabase extends AbstractJdbcDatabase {
 	/* (non-Javadoc)
 	 * @see liquibase.database.Database#supportsInitiallyDeferrableColumns()
 	 */
-	public boolean supportsInitiallyDeferrableColumns() {
+	@Override
+    public boolean supportsInitiallyDeferrableColumns() {
 		return false;
 	}
 
 	/* (non-Javadoc)
 	 * @see liquibase.database.Database#supportsTablespaces()
 	 */
-	public boolean supportsTablespaces() {
+	@Override
+    public boolean supportsTablespaces() {
 		return true;
 	}
 
