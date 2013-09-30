@@ -202,7 +202,16 @@ class ResultSetCache {
             List<Map> result;
             List<CachedRow> returnList = new ArrayList<CachedRow>();
             try {
-                result = (List<Map>) new RowMapperResultSetExtractor(new ColumnMapRowMapper()).extractData(resultSet);
+                result = (List<Map>) new RowMapperResultSetExtractor(new ColumnMapRowMapper() {
+                    @Override
+                    protected Object getColumnValue(ResultSet rs, int index) throws SQLException {
+                        Object value = super.getColumnValue(rs, index);
+                        if (value != null && value instanceof String) {
+                            value = ((String) value).trim();
+                        }
+                        return value;
+                    }
+                }).extractData(resultSet);
 
                 for (Map row : result) {
                     returnList.add(new CachedRow(row));
