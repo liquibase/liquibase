@@ -266,11 +266,7 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
 
     @Override
     public boolean supportsDropTableCascadeConstraints() {
-        try {
-            return this.getDatabaseMajorVersion() > 10;
-        } catch (DatabaseException e) {
-            return true;
-        }
+        return false;
     }
 
     @Override
