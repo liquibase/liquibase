@@ -176,7 +176,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
 
     /**
      * Controls the level of logging from Liquibase when executing. The value can be
-     * "all", "finest", "finer", "fine", "info", "warning", "severe" or "off". The value is
+     * "debug", "info", "warning", "severe", or "off". The value is
      * case insensitive.
      *
      * @parameter expression="${liquibase.logging}" default-value="INFO"
