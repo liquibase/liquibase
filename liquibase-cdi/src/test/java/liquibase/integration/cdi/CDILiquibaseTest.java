@@ -1,13 +1,9 @@
 package liquibase.integration.cdi;
 
 import liquibase.Liquibase;
-import liquibase.integration.cdi.annotations.LiquibaseType;
 import org.jboss.weld.environment.se.Weld;
 import org.jboss.weld.environment.se.WeldContainer;
 import org.junit.Test;
-
-
-import javax.enterprise.util.AnnotationLiteral;
 
 import static org.junit.Assert.*;
 
