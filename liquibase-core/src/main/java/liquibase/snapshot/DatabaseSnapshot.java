@@ -27,10 +27,12 @@ public abstract class DatabaseSnapshot {
         allFound = new DatabaseObjectCollection(database);
         this.snapshotControl = snapshotControl;
 
-        for (DatabaseObject obj : examples) {
-            this.snapshotControl.addType(obj.getClass(), database);
+        if (examples != null) {
+            for (DatabaseObject obj : examples) {
+                this.snapshotControl.addType(obj.getClass(), database);
 
-            include(obj);
+                include(obj);
+            }
         }
     }
 
