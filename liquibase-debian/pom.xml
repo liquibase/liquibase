@@ -3,7 +3,7 @@
     <groupId>org.liquibase.package</groupId>
     <artifactId>liquibase-debian</artifactId>
     
-    <version>3.0.6-SNAPSHOT</version>
+    <version>3.0.5.1-SNAPSHOT</version>
     <name>Liquibase Debian Packager</name>
     <description>Debian package builder for liquibase.</description>
      <organization>
