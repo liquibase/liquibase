@@ -1,15 +1,6 @@
 package liquibase.integration.commandline;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStreamWriter;
-import java.io.PrintStream;
-import java.io.Writer;
+import java.io.*;
 import java.lang.reflect.Field;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -490,7 +481,9 @@ public class Main {
         stream.println("Required Parameters:");
         stream.println(" --changeLogFile=<path and filename>        Migration file");
         stream.println(" --username=<value>                         Database username");
-        stream.println(" --password=<value>                         Database password");
+        stream.println(" --password=<value>                         Database password. If values");
+        stream.println("                                            is PROMPT, Liquibase will");
+        stream.println("                                            prompt for a password");
         stream.println(" --url=<value>                              Database URL");
         stream.println("");
         stream.println("Optional Parameters:");
@@ -530,7 +523,9 @@ public class Main {
         stream.println("");
         stream.println("Required Diff Parameters:");
         stream.println(" --referenceUsername=<value>                Reference Database username");
-        stream.println(" --referencePassword=<value>                Reference Database password");
+        stream.println(" --referencePassword=<value>                Reference Database password. If values");
+        stream.println("                                            is PROMPT, Liquibase will");
+        stream.println("                                            prompt for a password");
         stream.println(" --referenceUrl=<value>                     Reference Database URL");
         stream.println("");
         stream.println("Optional Diff Parameters:");
@@ -584,6 +579,19 @@ public class Main {
                 String attributeName = splitArg[0];
                 String value = splitArg[1];
 
+                if (StringUtils.trimToEmpty(value).equalsIgnoreCase("PROMPT")) {
+                    Console c = System.console();
+                    if (c == null) {
+                        throw new CommandLineParsingException("Console unavailable");
+                    }
+                    //Prompt for value
+                    if (attributeName.toLowerCase().contains("password")) {
+                        value = new String(c.readPassword(attributeName+": "));
+                    } else {
+                        value = new String(c.readLine(attributeName+": "));
+                    }
+                }
+
                 try {
                     Field field = getClass().getDeclaredField(attributeName);
                     if (field.getType().equals(Boolean.class)) {
@@ -594,12 +602,6 @@ public class Main {
                 } catch (Exception e) {
                     throw new CommandLineParsingException("Unknown parameter: '" + attributeName + "'");
                 }
-//            } else if(arg.equals("-p")) {
-//            	//Prompt for password
-//            	password = new String(System.console().readPassword("DB Password:"));
-//            } else if(arg.equals("-rp")) {
-//            	//Prompt for reference password
-//            	referencePassword = new String(System.console().readPassword("Reference DB Password:"));
             } else {
                 throw new CommandLineParsingException("Unexpected value " + arg + ": parameters must start with a '--'");
             }

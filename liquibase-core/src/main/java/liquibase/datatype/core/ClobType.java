@@ -6,11 +6,11 @@ import liquibase.datatype.DataTypeInfo;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
 
-@DataTypeInfo(name="clob", aliases = {"longvarchar", "text", "longtext", "java.sql.Types.LONGVARCHAR", "java.sql.Types.CLOB"}, minParameters = 0, maxParameters = 0, priority = LiquibaseDataType.PRIORITY_DEFAULT)
+@DataTypeInfo(name="clob", aliases = {"text", "longtext", "java.sql.Types.CLOB"}, minParameters = 0, maxParameters = 0, priority = LiquibaseDataType.PRIORITY_DEFAULT)
 public class ClobType extends LiquibaseDataType {
     @Override
     public DatabaseDataType toDatabaseDataType(Database database) {
-        if (database instanceof CacheDatabase || database instanceof H2Database || database instanceof HsqlDatabase) {
+        if (database instanceof CacheDatabase) {
             return new DatabaseDataType("LONGVARCHAR");
         }   else if (database instanceof FirebirdDatabase) {
             return new DatabaseDataType("BLOB SUB_TYPE TEXT");

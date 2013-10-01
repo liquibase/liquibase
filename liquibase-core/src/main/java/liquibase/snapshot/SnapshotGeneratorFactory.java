@@ -122,13 +122,7 @@ public class SnapshotGeneratorFactory {
     }
 
     public DatabaseSnapshot createSnapshot(DatabaseObject[] examples, Database database, SnapshotControl snapshotControl) throws DatabaseException, InvalidExampleException {
-        DatabaseSnapshot snapshot = new JdbcDatabaseSnapshot(snapshotControl, database);
-
-        for (DatabaseObject example : examples) {
-            snapshot.include(example);
-        }
-
-        return snapshot;
+        return new JdbcDatabaseSnapshot(examples, database, snapshotControl);
     }
 
     public <T extends DatabaseObject> T createSnapshot(T example, Database database) throws DatabaseException, InvalidExampleException {

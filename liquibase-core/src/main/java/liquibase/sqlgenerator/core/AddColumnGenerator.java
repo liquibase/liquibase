@@ -61,7 +61,7 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
         if (!statement.isNullable()) {
             alterTable += " NOT NULL";
         } else {
-            if (database instanceof SybaseDatabase || database instanceof SybaseASADatabase) {
+            if (database instanceof SybaseDatabase || database instanceof SybaseASADatabase || database instanceof MySQLDatabase) {
                 alterTable += " NULL";
             }
         }

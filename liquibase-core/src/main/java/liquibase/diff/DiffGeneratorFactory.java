@@ -6,10 +6,7 @@ import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.servicelocator.ServiceLocator;
-import liquibase.snapshot.DatabaseSnapshot;
-import liquibase.snapshot.JdbcDatabaseSnapshot;
-import liquibase.snapshot.SnapshotControl;
-import liquibase.snapshot.SnapshotGeneratorFactory;
+import liquibase.snapshot.*;
 
 import java.util.*;
 
@@ -46,6 +43,7 @@ public class DiffGeneratorFactory {
 
     public DiffGenerator getGenerator(Database referenceDatabase, Database comparisonDatabase) {
         SortedSet<DiffGenerator> foundGenerators = new TreeSet<DiffGenerator>(new Comparator<DiffGenerator>() {
+            @Override
             public int compare(DiffGenerator o1, DiffGenerator o2) {
                 return -1 * new Integer(o1.getPriority()).compareTo(o2.getPriority());
             }
@@ -73,7 +71,7 @@ public class DiffGeneratorFactory {
         DatabaseSnapshot referenceSnapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(referenceDatabase.getDefaultSchema(), referenceDatabase, new SnapshotControl(referenceDatabase));
         DatabaseSnapshot comparisonSnapshot = null;
         if (comparisonDatabase == null) {
-            comparisonSnapshot = new JdbcDatabaseSnapshot(referenceDatabase);
+            comparisonSnapshot = new EmptyDatabaseSnapshot(referenceDatabase);
         } else {
             comparisonSnapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(comparisonDatabase.getDefaultSchema(), comparisonDatabase, new SnapshotControl(comparisonDatabase));
         }
@@ -87,7 +85,11 @@ public class DiffGeneratorFactory {
         Database comparisonDatabase;
         if (comparisonSnapshot == null) {
             comparisonDatabase = referenceSnapshot.getDatabase();
-            comparisonSnapshot = new JdbcDatabaseSnapshot(referenceSnapshot.getSnapshotControl(), referenceDatabase);
+            try {
+                comparisonSnapshot = new EmptyDatabaseSnapshot(referenceDatabase, referenceSnapshot.getSnapshotControl());
+            } catch (InvalidExampleException e) {
+                throw new UnexpectedLiquibaseException(e);
+            }
         } else {
             comparisonDatabase = comparisonSnapshot.getDatabase();
         }

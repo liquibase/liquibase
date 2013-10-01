@@ -176,7 +176,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
 
     /**
      * Controls the level of logging from Liquibase when executing. The value can be
-     * "all", "finest", "finer", "fine", "info", "warning", "severe" or "off". The value is
+     * "debug", "info", "warning", "severe", or "off". The value is
      * case insensitive.
      *
      * @parameter expression="${liquibase.logging}" default-value="INFO"
@@ -516,16 +516,6 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
     }
 
     protected void cleanup(Database db) {
-        // Release any locks that we may have on the database.
-        if (getLiquibase() != null) {
-            try {
-                getLiquibase().forceReleaseLocks();
-            }
-            catch (LiquibaseException e) {
-                getLog().error(e.getMessage(), e);
-            }
-        }
-
         // Clean up the connection
         if (db != null) {
             try {

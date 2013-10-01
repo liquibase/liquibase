@@ -71,6 +71,11 @@ public class DataType {
                 value+= ", "+decimalDigits ;
             }
 
+            //Failing on data types such as nvarchar if included
+//            if (columnSizeUnit != null && columnSizeUnit.equals(ColumnSizeUnit.CHAR)) {
+//                value += " " + columnSizeUnit;
+//            }
+
             value +=")";
         }
 

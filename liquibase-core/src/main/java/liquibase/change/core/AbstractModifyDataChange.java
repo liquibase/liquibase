@@ -1,9 +1,6 @@
 package liquibase.change.core;
 
 import liquibase.change.*;
-import liquibase.database.Database;
-import liquibase.statement.SqlStatement;
-import liquibase.statement.core.DeleteStatement;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,7 +16,7 @@ public abstract class AbstractModifyDataChange extends AbstractChange {
 
     protected List<ColumnConfig> whereParams = new ArrayList<ColumnConfig>();
 
-    protected String whereClause;
+    protected String where;
 
     @DatabaseChangeProperty(mustEqualExisting ="table.catalog")
     public String getCatalogName() {
@@ -49,13 +46,29 @@ public abstract class AbstractModifyDataChange extends AbstractChange {
     }
 
     @DatabaseChangeProperty(serializationType = SerializationType.NESTED_OBJECT)
-    public String getWhereClause() {
-        return whereClause;
+    public String getWhere() {
+        return where;
     }
 
-    public void setWhereClause(String whereClause) {
-        this.whereClause = whereClause;
+    public void setWhere(String where) {
+        this.where = where;
     }
+
+    /**
+     * @deprecated use getWhere()
+     */
+    @DatabaseChangeProperty(isChangeProperty = false)
+    public String getWhereClause() {
+        return where;
+    }
+
+    /**
+     * @deprecated use setWhere()
+     */
+    public void setWhereClause(String where) {
+        this.where = where;
+    }
+
 
     public void addWhereParam(ColumnConfig param) {
         whereParams.add(param);

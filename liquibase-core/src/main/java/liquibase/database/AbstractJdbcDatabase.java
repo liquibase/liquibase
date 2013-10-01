@@ -20,10 +20,7 @@ import liquibase.exception.*;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.logging.LogFactory;
-import liquibase.snapshot.DatabaseSnapshot;
-import liquibase.snapshot.JdbcDatabaseSnapshot;
-import liquibase.snapshot.SnapshotControl;
-import liquibase.snapshot.SnapshotGeneratorFactory;
+import liquibase.snapshot.*;
 import liquibase.sql.Sql;
 import liquibase.sql.visitor.SqlVisitor;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
@@ -110,10 +107,12 @@ public abstract class AbstractJdbcDatabase implements Database {
         return toString();
     }
 
+    @Override
     public boolean requiresPassword() {
         return true;
     }
 
+    @Override
     public boolean requiresUsername() {
         return true;
     }
@@ -124,10 +123,12 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     // ------- DATABASE INFORMATION METHODS ---- //
 
+    @Override
     public DatabaseConnection getConnection() {
         return connection;
     }
 
+    @Override
     public void setConnection(DatabaseConnection conn) {
         LogFactory.getLogger().debug("Connected to " + conn.getConnectionUserName() + "@" + conn.getURL());
         this.connection = conn;
@@ -152,6 +153,7 @@ public abstract class AbstractJdbcDatabase implements Database {
     /**
      * Auto-commit mode to run in
      */
+    @Override
     public boolean getAutoCommitMode() {
         return !supportsDDLInTransaction();
     }
@@ -159,6 +161,7 @@ public abstract class AbstractJdbcDatabase implements Database {
     /**
      * By default databases should support DDL within a transaction.
      */
+    @Override
     public boolean supportsDDLInTransaction() {
         return true;
     }
@@ -166,6 +169,7 @@ public abstract class AbstractJdbcDatabase implements Database {
     /**
      * Returns the name of the database product according to the underlying database.
      */
+    @Override
     public String getDatabaseProductName() {
         if (connection == null) {
             return getDefaultDatabaseProductName();
@@ -181,6 +185,7 @@ public abstract class AbstractJdbcDatabase implements Database {
     protected abstract String getDefaultDatabaseProductName();
 
 
+    @Override
     public String getDatabaseProductVersion() throws DatabaseException {
         if (connection == null) {
             return null;
@@ -193,6 +198,7 @@ public abstract class AbstractJdbcDatabase implements Database {
         }
     }
 
+    @Override
     public int getDatabaseMajorVersion() throws DatabaseException {
         if (connection == null) {
             return -1;
@@ -204,6 +210,7 @@ public abstract class AbstractJdbcDatabase implements Database {
         }
     }
 
+    @Override
     public int getDatabaseMinorVersion() throws DatabaseException {
         if (connection == null) {
             return -1;
@@ -215,6 +222,7 @@ public abstract class AbstractJdbcDatabase implements Database {
         }
     }
 
+    @Override
     public String getDefaultCatalogName() {
         if (defaultCatalogName == null) {
             if (defaultSchemaName != null && !this.supportsSchemas()) {
@@ -240,6 +248,7 @@ public abstract class AbstractJdbcDatabase implements Database {
         return correctSchema(new CatalogAndSchema(catalog, schema));
     }
 
+    @Override
     public CatalogAndSchema correctSchema(CatalogAndSchema schema) {
         if (schema == null) {
             return new CatalogAndSchema(getDefaultCatalogName(), getDefaultSchemaName());
@@ -284,6 +293,7 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     }
 
+    @Override
     public String correctObjectName(String objectName, Class<? extends DatabaseObject> objectType) {
         if (quotingStrategy == ObjectQuotingStrategy.QUOTE_ALL_OBJECTS || unquotedObjectsAreUppercased == null
                 || objectName == null || (objectName.startsWith(quotingStartCharacter) && objectName.endsWith(
@@ -296,11 +306,13 @@ public abstract class AbstractJdbcDatabase implements Database {
         }
     }
 
+    @Override
     public CatalogAndSchema getDefaultSchema() {
         return new CatalogAndSchema(getDefaultCatalogName(), getDefaultSchemaName());
 
     }
 
+    @Override
     public String getDefaultSchemaName() {
 
         if (!supportsSchemas()) {
@@ -334,10 +346,12 @@ public abstract class AbstractJdbcDatabase implements Database {
         return null;
     }
 
+    @Override
     public void setDefaultCatalogName(String defaultCatalogName) {
         this.defaultCatalogName = correctObjectName(defaultCatalogName, Catalog.class);
     }
 
+    @Override
     public void setDefaultSchemaName(String schemaName) {
         this.defaultSchemaName = correctObjectName(schemaName, Schema.class);
     }
@@ -362,16 +376,19 @@ public abstract class AbstractJdbcDatabase implements Database {
     /**
      * Does the database type support sequence.
      */
+    @Override
     public boolean supportsSequences() {
         return true;
     }
 
+    @Override
     public boolean supportsAutoIncrement() {
         return true;
     }
 
     // ------- DATABASE-SPECIFIC SQL METHODS ---- //
 
+    @Override
     public void setCurrentDateTimeFunction(String function) {
         if (function != null) {
             this.currentDateTimeFunction = function;
@@ -392,6 +409,7 @@ public abstract class AbstractJdbcDatabase implements Database {
      * hh:mm:ss
      * yyyy-MM-ddThh:mm:ss
      */
+    @Override
     public String getDateLiteral(String isoDate) {
         if (isDateOnly(isoDate) || isTimeOnly(isoDate)) {
             return "'" + isoDate + "'";
@@ -411,18 +429,22 @@ public abstract class AbstractJdbcDatabase implements Database {
     }
 
 
+    @Override
     public String getDateTimeLiteral(java.sql.Timestamp date) {
         return getDateLiteral(new ISODateFormat().format(date).replaceFirst("^'", "").replaceFirst("'$", ""));
     }
 
+    @Override
     public String getDateLiteral(java.sql.Date date) {
         return getDateLiteral(new ISODateFormat().format(date).replaceFirst("^'", "").replaceFirst("'$", ""));
     }
 
+    @Override
     public String getTimeLiteral(java.sql.Time date) {
         return getDateLiteral(new ISODateFormat().format(date).replaceFirst("^'", "").replaceFirst("'$", ""));
     }
 
+    @Override
     public String getDateLiteral(Date date) {
         if (date instanceof java.sql.Date) {
             return getDateLiteral(((java.sql.Date) date));
@@ -435,6 +457,7 @@ public abstract class AbstractJdbcDatabase implements Database {
         }
     }
 
+    @Override
     public Date parseDate(String dateAsString) throws DateParseException {
         try {
             if (dateAsString.indexOf(" ") > 0) {
@@ -469,6 +492,7 @@ public abstract class AbstractJdbcDatabase implements Database {
     /**
      * Returns database-specific line comment string.
      */
+    @Override
     public String getLineComment() {
         return "--";
     }
@@ -476,6 +500,7 @@ public abstract class AbstractJdbcDatabase implements Database {
     /**
      * Returns database-specific auto-increment DDL clause.
      */
+    @Override
     public String getAutoIncrementClause(BigInteger startWith, BigInteger incrementBy) {
         if (!supportsAutoIncrement()) {
             return "";
@@ -539,6 +564,7 @@ public abstract class AbstractJdbcDatabase implements Database {
         return "INCREMENT BY %d";
     }
 
+    @Override
     public String getConcatSql(String... values) {
         StringBuffer returnString = new StringBuffer();
         for (String value : values) {
@@ -553,6 +579,7 @@ public abstract class AbstractJdbcDatabase implements Database {
     /**
      * @see liquibase.database.Database#getDatabaseChangeLogTableName()
      */
+    @Override
     public String getDatabaseChangeLogTableName() {
         return databaseChangeLogTableName;
     }
@@ -560,6 +587,7 @@ public abstract class AbstractJdbcDatabase implements Database {
     /**
      * @see liquibase.database.Database#getDatabaseChangeLogLockTableName()
      */
+    @Override
     public String getDatabaseChangeLogLockTableName() {
         return databaseChangeLogLockTableName;
     }
@@ -567,6 +595,7 @@ public abstract class AbstractJdbcDatabase implements Database {
     /**
      * @see liquibase.database.Database#getLiquibaseTablespaceName()
      */
+    @Override
     public String getLiquibaseTablespaceName() {
         return liquibaseTablespaceName;
     }
@@ -574,6 +603,7 @@ public abstract class AbstractJdbcDatabase implements Database {
     /**
      * @see liquibase.database.Database#setDatabaseChangeLogTableName(java.lang.String)
      */
+    @Override
     public void setDatabaseChangeLogTableName(String tableName) {
         this.databaseChangeLogTableName = tableName;
     }
@@ -581,6 +611,7 @@ public abstract class AbstractJdbcDatabase implements Database {
     /**
      * @see liquibase.database.Database#setDatabaseChangeLogLockTableName(java.lang.String)
      */
+    @Override
     public void setDatabaseChangeLogLockTableName(String tableName) {
         this.databaseChangeLogLockTableName = tableName;
     }
@@ -588,6 +619,7 @@ public abstract class AbstractJdbcDatabase implements Database {
     /**
      * @see liquibase.database.Database#setLiquibaseTablespaceName(java.lang.String)
      */
+    @Override
     public void setLiquibaseTablespaceName(String tablespace) {
         this.liquibaseTablespaceName = tablespace;
     }
@@ -600,6 +632,7 @@ public abstract class AbstractJdbcDatabase implements Database {
      * @param updateExistingNullChecksums
      * @param contexts
      */
+    @Override
     public void checkDatabaseChangeLogTable(boolean updateExistingNullChecksums, DatabaseChangeLog databaseChangeLog, String... contexts) throws DatabaseException {
         Executor executor = ExecutorService.getInstance().getExecutor(this);
 
@@ -723,12 +756,14 @@ public abstract class AbstractJdbcDatabase implements Database {
         return true;
     }
 
+    @Override
     public void setCanCacheLiquibaseTableInfo(boolean canCacheLiquibaseTableInfo) {
         this.canCacheLiquibaseTableInfo = canCacheLiquibaseTableInfo;
         hasDatabaseChangeLogTable = false;
         hasDatabaseChangeLogLockTable = false;
     }
 
+    @Override
     public boolean hasDatabaseChangeLogTable() throws DatabaseException {
         if (hasDatabaseChangeLogTable) {
             return true;
@@ -745,6 +780,7 @@ public abstract class AbstractJdbcDatabase implements Database {
         return hasTable;
     }
 
+    @Override
     public boolean hasDatabaseChangeLogLockTable() throws DatabaseException {
         if (canCacheLiquibaseTableInfo && hasDatabaseChangeLogLockTable) {
             return true;
@@ -784,18 +820,22 @@ public abstract class AbstractJdbcDatabase implements Database {
         return initialized;
     }
 
+    @Override
     public String getLiquibaseCatalogName() {
         return liquibaseCatalogName == null ? getDefaultCatalogName() : liquibaseCatalogName;
     }
 
+    @Override
     public void setLiquibaseCatalogName(String catalogName) {
         this.liquibaseCatalogName = catalogName;
     }
 
+    @Override
     public String getLiquibaseSchemaName() {
         return liquibaseSchemaName == null ? getDefaultSchemaName() : liquibaseSchemaName;
     }
 
+    @Override
     public void setLiquibaseSchemaName(String schemaName) {
         this.liquibaseSchemaName = schemaName;
     }
@@ -805,6 +845,7 @@ public abstract class AbstractJdbcDatabase implements Database {
      * if a machine is updating the database. If the table does not exist it will create one
      * otherwise it will not do anything besides outputting a log message.
      */
+    @Override
     public void checkDatabaseChangeLogLockTable() throws DatabaseException {
 
         boolean createdTable = false;
@@ -826,6 +867,7 @@ public abstract class AbstractJdbcDatabase implements Database {
         }
     }
 
+    @Override
     public boolean isCaseSensitive() {
     	if (caseSensitive == null) {
             if (connection != null) {
@@ -844,6 +886,7 @@ public abstract class AbstractJdbcDatabase implements Database {
     	}
     }
 
+    @Override
     public boolean isReservedWord(String string) {
         return false;
     }
@@ -860,6 +903,7 @@ public abstract class AbstractJdbcDatabase implements Database {
     /**
      * Drops all objects owned by the connected user.
      */
+    @Override
     public void dropDatabaseObjects(CatalogAndSchema schemaToDrop) throws LiquibaseException {
         ObjectQuotingStrategy currentStrategy = this.getObjectQuotingStrategy();
         this.setObjectQuotingStrategy(ObjectQuotingStrategy.QUOTE_ALL_OBJECTS);
@@ -871,7 +915,7 @@ public abstract class AbstractJdbcDatabase implements Database {
                 throw new UnexpectedLiquibaseException(e);
             }
 
-            DiffResult diffResult = DiffGeneratorFactory.getInstance().compare(new JdbcDatabaseSnapshot(this), snapshot, new CompareControl(snapshot.getSnapshotControl().getTypesToInclude()));
+            DiffResult diffResult = DiffGeneratorFactory.getInstance().compare(new EmptyDatabaseSnapshot(this), snapshot, new CompareControl(snapshot.getSnapshotControl().getTypesToInclude()));
             List<ChangeSet> changeSets = new DiffToChangeLog(diffResult, new DiffOutputControl(true, true, false)).generateChangeSets();
 
             final boolean reEnableFK = supportsForeignKeyDisable() && disableForeignKeyChecks();
@@ -904,6 +948,7 @@ public abstract class AbstractJdbcDatabase implements Database {
         }
     }
 
+    @Override
     public boolean supportsDropTableCascadeConstraints() {
         return (this instanceof SQLiteDatabase
                 || this instanceof SybaseDatabase
@@ -913,6 +958,7 @@ public abstract class AbstractJdbcDatabase implements Database {
         );
     }
 
+    @Override
     public boolean isSystemObject(DatabaseObject example) {
         if (example == null) {
             return false;
@@ -941,15 +987,15 @@ public abstract class AbstractJdbcDatabase implements Database {
         return false;
     }
 
+    @Override
     public boolean isLiquibaseObject(DatabaseObject object) {
         if (object instanceof Table) {
-            if (DatabaseObjectComparatorFactory.getInstance().isSameObject(object.getSchema(), new Schema(getLiquibaseCatalogName(), getLiquibaseSchemaName()), this)) {
-                if (DatabaseObjectComparatorFactory.getInstance().isSameObject(object, new Table().setName(getDatabaseChangeLogTableName()), this)) {
-                    return true;
-                }
-                if (DatabaseObjectComparatorFactory.getInstance().isSameObject(object, new Table().setName(getDatabaseChangeLogLockTableName()), this)) {
-                    return true;
-                }
+            Schema liquibaseSchema = new Schema(getLiquibaseCatalogName(), getLiquibaseSchemaName());
+            if (DatabaseObjectComparatorFactory.getInstance().isSameObject(object, new Table().setName(getDatabaseChangeLogTableName()).setSchema(liquibaseSchema), this)) {
+                return true;
+            }
+            if (DatabaseObjectComparatorFactory.getInstance().isSameObject(object, new Table().setName(getDatabaseChangeLogLockTableName()).setSchema(liquibaseSchema), this)) {
+                return true;
             }
             return false;
         } else if (object instanceof Column) {
@@ -967,6 +1013,7 @@ public abstract class AbstractJdbcDatabase implements Database {
     /**
      * Tags the database changelog with the given string.
      */
+    @Override
     public void tag(String tagString) throws DatabaseException {
         Executor executor = ExecutorService.getInstance().getExecutor(this);
         try {
@@ -986,6 +1033,7 @@ public abstract class AbstractJdbcDatabase implements Database {
         }
     }
 
+    @Override
     public boolean doesTagExist(String tag) throws DatabaseException {
         int count = ExecutorService.getInstance().getExecutor(this).queryForInt(new SelectFromDatabaseChangeLogStatement(new SelectFromDatabaseChangeLogStatement.ByTag(tag), "COUNT(*)"));
         return count > 0;
@@ -1001,6 +1049,7 @@ public abstract class AbstractJdbcDatabase implements Database {
     }
 
 
+    @Override
     public String getViewDefinition(CatalogAndSchema schema, String viewName) throws DatabaseException {
         schema = correctSchema(schema);
         String definition = (String) ExecutorService.getInstance().getExecutor(this).queryForObject(new GetViewDefinitionStatement(schema.getCatalogName(), schema.getSchemaName(), viewName), String.class);
@@ -1010,10 +1059,12 @@ public abstract class AbstractJdbcDatabase implements Database {
         return CREATE_VIEW_AS_PATTERN.matcher(definition).replaceFirst("");
     }
 
+    @Override
     public String escapeTableName(String catalogName, String schemaName, String tableName) {
         return escapeObjectName(catalogName, schemaName, tableName, Table.class);
     }
 
+    @Override
     public String escapeObjectName(String catalogName, String schemaName, String objectName, Class<? extends DatabaseObject> objectType) {
 //        CatalogAndSchema catalogAndSchema = this.correctSchema(catalogName, schemaName);
 //        catalogName = catalogAndSchema.getCatalogName();
@@ -1095,6 +1146,7 @@ public abstract class AbstractJdbcDatabase implements Database {
         }
     }
 
+    @Override
     public String escapeObjectName(String objectName, Class<? extends DatabaseObject> objectType) {
         if (objectName != null) {
             if (objectName.contains("-") || startsWithNumeric(objectName) || isReservedWord(objectName)) {
@@ -1106,18 +1158,22 @@ public abstract class AbstractJdbcDatabase implements Database {
         return objectName;
     }
 
+    @Override
     public String escapeIndexName(String catalogName, String schemaName, String indexName) {
         return escapeObjectName(catalogName, schemaName, indexName, Index.class);
     }
 
+    @Override
     public String escapeSequenceName(String catalogName, String schemaName, String sequenceName) {
         return escapeObjectName(catalogName, schemaName, sequenceName, Sequence.class);
     }
 
+    @Override
     public String escapeConstraintName(String constraintName) {
         return escapeObjectName(constraintName, Index.class);
     }
 
+    @Override
     public String escapeColumnName(String catalogName, String schemaName, String tableName, String columnName) {
         if (columnName.contains("(")) {
             return columnName;
@@ -1126,6 +1182,7 @@ public abstract class AbstractJdbcDatabase implements Database {
         return escapeObjectName(columnName, Column.class);
     }
 
+    @Override
     public String escapeColumnNameList(String columnNames) {
         StringBuffer sb = new StringBuffer();
         for (String columnName : columnNames.split(",")) {
@@ -1138,10 +1195,12 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     }
 
+    @Override
     public boolean supportsSchemas() {
         return true;
     }
 
+    @Override
     public boolean supportsCatalogs() {
         return true;
     }
@@ -1150,14 +1209,17 @@ public abstract class AbstractJdbcDatabase implements Database {
         return false;
     }
 
+    @Override
     public boolean supportsCatalogInObjectName(Class<? extends DatabaseObject> type) {
         return false;
     }
 
+    @Override
     public String generatePrimaryKeyName(String tableName) {
         return "PK_" + tableName.toUpperCase();
     }
 
+    @Override
     public String escapeViewName(String catalogName, String schemaName, String viewName) {
         return escapeObjectName(catalogName, schemaName, viewName, View.class);
     }
@@ -1165,6 +1227,7 @@ public abstract class AbstractJdbcDatabase implements Database {
     /**
      * Returns the run status for the given ChangeSet
      */
+    @Override
     public ChangeSet.RunStatus getRunStatus(ChangeSet changeSet) throws DatabaseException, DatabaseHistoryException {
         if (!hasDatabaseChangeLogTable()) {
             return ChangeSet.RunStatus.NOT_RAN;
@@ -1201,6 +1264,7 @@ public abstract class AbstractJdbcDatabase implements Database {
         }
     }
 
+    @Override
     public RanChangeSet getRanChangeSet(ChangeSet changeSet) throws DatabaseException, DatabaseHistoryException {
         if (!hasDatabaseChangeLogTable()) {
             return null;
@@ -1219,6 +1283,7 @@ public abstract class AbstractJdbcDatabase implements Database {
     /**
      * Returns the ChangeSets that have been run against the current database.
      */
+    @Override
     public List<RanChangeSet> getRanChangeSetList() throws DatabaseException {
         if (this.ranChangeSetList != null) {
             return this.ranChangeSetList;
@@ -1262,6 +1327,7 @@ public abstract class AbstractJdbcDatabase implements Database {
         return ranChangeSetList;
     }
 
+    @Override
     public Date getRanDate(ChangeSet changeSet) throws DatabaseException, DatabaseHistoryException {
         RanChangeSet ranChange = getRanChangeSet(changeSet);
         if (ranChange == null) {
@@ -1275,6 +1341,7 @@ public abstract class AbstractJdbcDatabase implements Database {
      * After the change set has been ran against the database this method will update the change log table
      * with the information.
      */
+    @Override
     public void markChangeSetExecStatus(ChangeSet changeSet, ChangeSet.ExecType execType) throws DatabaseException {
 
 
@@ -1283,6 +1350,7 @@ public abstract class AbstractJdbcDatabase implements Database {
         getRanChangeSetList().add(new RanChangeSet(changeSet, execType));
     }
 
+    @Override
     public void removeRanStatus(ChangeSet changeSet) throws DatabaseException {
 
         ExecutorService.getInstance().getExecutor(this).execute(new RemoveChangeSetRanStatusStatement(changeSet));
@@ -1291,6 +1359,7 @@ public abstract class AbstractJdbcDatabase implements Database {
         getRanChangeSetList().remove(new RanChangeSet(changeSet));
     }
 
+    @Override
     public String escapeStringForDatabase(String string) {
         if (string == null) {
             return null;
@@ -1298,6 +1367,7 @@ public abstract class AbstractJdbcDatabase implements Database {
         return string.replaceAll("'", "''");
     }
 
+    @Override
     public void commit() throws DatabaseException {
         try {
             getConnection().commit();
@@ -1306,6 +1376,7 @@ public abstract class AbstractJdbcDatabase implements Database {
         }
     }
 
+    @Override
     public void rollback() throws DatabaseException {
         try {
             getConnection().rollback();
@@ -1337,6 +1408,7 @@ public abstract class AbstractJdbcDatabase implements Database {
         return (connection != null ? connection.hashCode() : super.hashCode());
     }
 
+    @Override
     public void close() throws DatabaseException {
         DatabaseConnection connection = getConnection();
         if (connection != null) {
@@ -1353,10 +1425,12 @@ public abstract class AbstractJdbcDatabase implements Database {
         }
     }
 
+    @Override
     public boolean supportsRestrictForeignKeys() {
         return true;
     }
 
+    @Override
     public boolean isAutoCommit() throws DatabaseException {
         try {
             return getConnection().getAutoCommit();
@@ -1365,6 +1439,7 @@ public abstract class AbstractJdbcDatabase implements Database {
         }
     }
 
+    @Override
     public void setAutoCommit(boolean b) throws DatabaseException {
         try {
             getConnection().setAutoCommit(b);
@@ -1379,6 +1454,7 @@ public abstract class AbstractJdbcDatabase implements Database {
      * @throws liquibase.exception.DatabaseException
      *
      */
+    @Override
     public boolean isSafeToRunUpdate() throws DatabaseException {
         DatabaseConnection connection = getConnection();
         if (connection == null) {
@@ -1391,6 +1467,7 @@ public abstract class AbstractJdbcDatabase implements Database {
         return (url.contains("localhost")) || (url.contains("127.0.0.1"));
     }
 
+    @Override
     public void executeStatements(Change change, DatabaseChangeLog changeLog, List<SqlVisitor> sqlVisitors) throws LiquibaseException {
         SqlStatement[] statements = change.generateStatements(this);
 
@@ -1404,6 +1481,7 @@ public abstract class AbstractJdbcDatabase implements Database {
      * @param database the target {@link Database}
      * @throws DatabaseException if there were problems issuing the statements
      */
+    @Override
     public void execute(SqlStatement[] statements, List<SqlVisitor> sqlVisitors) throws LiquibaseException {
         for (SqlStatement statement : statements) {
             if (statement.skipOnUnsupported() && !SqlGeneratorFactory.getInstance().supports(statement, this)) {
@@ -1415,6 +1493,7 @@ public abstract class AbstractJdbcDatabase implements Database {
     }
 
 
+    @Override
     public void saveStatements(Change change, List<SqlVisitor> sqlVisitors, Writer writer) throws IOException, StatementNotSupportedOnDatabaseException, LiquibaseException {
         SqlStatement[] statements = change.generateStatements(this);
         for (SqlStatement statement : statements) {
@@ -1424,6 +1503,7 @@ public abstract class AbstractJdbcDatabase implements Database {
         }
     }
 
+    @Override
     public void executeRollbackStatements(Change change, List<SqlVisitor> sqlVisitors) throws LiquibaseException, RollbackImpossibleException {
         SqlStatement[] statements = change.generateRollbackStatements(this);
         List<SqlVisitor> rollbackVisitors = new ArrayList<SqlVisitor>();
@@ -1437,6 +1517,7 @@ public abstract class AbstractJdbcDatabase implements Database {
         execute(statements, rollbackVisitors);
     }
 
+    @Override
     public void saveRollbackStatement(Change change, List<SqlVisitor> sqlVisitors, Writer writer) throws IOException, RollbackImpossibleException, StatementNotSupportedOnDatabaseException, LiquibaseException {
         SqlStatement[] statements = change.generateRollbackStatements(this);
         for (SqlStatement statement : statements) {
@@ -1446,6 +1527,7 @@ public abstract class AbstractJdbcDatabase implements Database {
         }
     }
 
+    @Override
     public int getNextChangeSetSequenceValue() throws LiquibaseException {
         if (lastChangeSetSequenceValue == null) {
             if (getConnection() == null) {
@@ -1458,10 +1540,12 @@ public abstract class AbstractJdbcDatabase implements Database {
         return ++lastChangeSetSequenceValue;
     }
 
+    @Override
     public List<DatabaseFunction> getDateFunctions() {
         return dateFunctions;
     }
 
+    @Override
     public boolean isFunction(String string) {
         if (string.endsWith("()")) {
             return true;
@@ -1474,27 +1558,33 @@ public abstract class AbstractJdbcDatabase implements Database {
         return false;
     }
 
+    @Override
     public void resetInternalState() {
         this.ranChangeSetList = null;
         this.hasDatabaseChangeLogLockTable = false;
     }
 
+    @Override
     public boolean supportsForeignKeyDisable() {
         return false;
     }
 
+    @Override
     public boolean disableForeignKeyChecks() throws DatabaseException {
         throw new DatabaseException("ForeignKeyChecks Management not supported");
     }
 
+    @Override
     public void enableForeignKeyChecks() throws DatabaseException {
         throw new DatabaseException("ForeignKeyChecks Management not supported");
     }
 
+    @Override
     public boolean createsIndexesForForeignKeys() {
         return false;
     }
 
+    @Override
     public int getDataTypeMaxParameters(String dataTypeName) {
         return 2;
     }
@@ -1527,18 +1617,22 @@ public abstract class AbstractJdbcDatabase implements Database {
         }
     }
 
+    @Override
     public boolean dataTypeIsNotModifiable(final String typeName) {
         return unmodifiableDataTypes.contains(typeName.toLowerCase());
     }
 
+    @Override
     public void setObjectQuotingStrategy(ObjectQuotingStrategy quotingStrategy) {
         this.quotingStrategy = quotingStrategy;
     }
 
+    @Override
     public ObjectQuotingStrategy getObjectQuotingStrategy() {
         return this.quotingStrategy;
     }
 
+    @Override
     public String generateDatabaseFunctionValue(final DatabaseFunction databaseFunction) {
         if (databaseFunction.getValue() == null) {
             return null;
@@ -1568,15 +1662,18 @@ public abstract class AbstractJdbcDatabase implements Database {
                 || getCurrentDateTimeFunction().equalsIgnoreCase(functionValue);
     }
 
+    @Override
     public String getCurrentDateTimeFunction() {
         return currentDateTimeFunction;
     }
     
- 	public void setOutputDefaultSchema(boolean outputDefaultSchema) {
+ 	@Override
+    public void setOutputDefaultSchema(boolean outputDefaultSchema) {
 		this.outputDefaultSchema = outputDefaultSchema;
  		
  	}
 
+    @Override
     public boolean isDefaultSchema(String catalog, String schema) {
         if (!supportsSchemas()) {
             return true;
@@ -1588,6 +1685,7 @@ public abstract class AbstractJdbcDatabase implements Database {
         return schema == null || schema.equalsIgnoreCase(getDefaultSchemaName());
     }
 
+    @Override
     public boolean isDefaultCatalog(String catalog) {
         if (!supportsCatalogs()) {
             return true;
@@ -1597,14 +1695,17 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     }
 
- 	public boolean getOutputDefaultSchema() {
+ 	@Override
+    public boolean getOutputDefaultSchema() {
  		return outputDefaultSchema;
  	}
 
+    @Override
     public boolean getOutputDefaultCatalog() {
         return outputDefaultCatalog;
     }
 
+    @Override
     public void setOutputDefaultCatalog(boolean outputDefaultCatalog) {
         this.outputDefaultCatalog = outputDefaultCatalog;
     }

@@ -51,14 +51,14 @@ public class LoadUpdateDataChange extends LoadDataChange {
         for(SqlStatement thisForward: forward){
             InsertOrUpdateStatement thisInsert = (InsertOrUpdateStatement)thisForward;
             DeleteStatement delete = new DeleteStatement(getCatalogName(), getSchemaName(),getTableName());
-            delete.setWhereClause(getWhereClause(thisInsert,database));
+            delete.setWhere(getWhere(thisInsert,database));
             statements.add(delete);
         }
 
         return statements.toArray(new SqlStatement[statements.size()]);
     }
 
-    private String getWhereClause(InsertOrUpdateStatement insertOrUpdateStatement, Database database) {
+    private String getWhere(InsertOrUpdateStatement insertOrUpdateStatement, Database database) {
         StringBuilder where = new StringBuilder();
 
         String[] pkColumns = insertOrUpdateStatement.getPrimaryKey().split(",");

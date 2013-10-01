@@ -1,0 +1,9 @@
+Package: liquibase
+Version: [[version]]
+Section: misc
+Priority: optional
+Architecture: all
+Depends:
+Maintainer: Nathan Voxland <nathan.voxland@liquibase.org>
+Description: Liquibase Debian Installer
+Distribution: development

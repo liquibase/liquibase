@@ -4,16 +4,18 @@ import liquibase.database.Database;
 import liquibase.diff.ObjectDifferences;
 import liquibase.structure.DatabaseObject;
 
-import java.util.Iterator;
-import java.util.SortedSet;
+import java.util.*;
 
-public class DatabaseObjectComparatorChain {
-    private Iterator<DatabaseObjectComparator> comparators;
+public class DatabaseObjectComparatorChain implements Cloneable {
+    private List<DatabaseObjectComparator> comparators;
+    private int nextIndex = 0; //this class is used often enough that the overhead of an iterator adds up to a significant percentage of the execution time
 
-    public DatabaseObjectComparatorChain(SortedSet<DatabaseObjectComparator> comparators) {
-        if (comparators != null) {
-            this.comparators = comparators.iterator();
-        }
+    public DatabaseObjectComparatorChain(List<DatabaseObjectComparator> comparators) {
+        this.comparators = comparators;
+    }
+
+    protected DatabaseObjectComparatorChain copy() {
+        return new DatabaseObjectComparatorChain(comparators);
     }
 
     public boolean isSameObject(DatabaseObject object1, DatabaseObject object2, Database accordingTo) {
@@ -32,33 +34,61 @@ public class DatabaseObjectComparatorChain {
             return true;
         }
 
-        if (!comparators.hasNext()) {
+        DatabaseObjectComparator next = getNextComparator();
+
+        if (next == null) {
             return true;
         }
 
-        return comparators.next().isSameObject(object1, object2, accordingTo, this);
+        return next.isSameObject(object1, object2, accordingTo, this);
     }
 
-    public ObjectDifferences findDifferences(DatabaseObject object1, DatabaseObject object2, Database accordingTo) {
+    public String[] hash(DatabaseObject object, Database accordingTo) {
+        if (object == null) {
+            return null;
+        }
+
+        DatabaseObjectComparator next = getNextComparator();
+
+        if (next == null) {
+            return null;
+        }
+
+        return next.hash(object, accordingTo, this);
+    }
+
+    private DatabaseObjectComparator getNextComparator() {
+        if (comparators == null) {
+            return null;
+        }
+
+        if (nextIndex >= comparators.size()) {
+            return null;
+        }
+
+        DatabaseObjectComparator next = comparators.get(nextIndex);
+        nextIndex++;
+        return next;
+    }
+
+    public ObjectDifferences findDifferences(DatabaseObject object1, DatabaseObject object2, Database accordingTo, CompareControl compareControl, Set<String> exclude) {
         if (object1 == null && object2 == null) {
-            return new ObjectDifferences();
+            return new ObjectDifferences(compareControl);
         }
         if (object1 == null && object2 != null) {
-            return new ObjectDifferences().addDifference("Reference value was null", "this", null, null);
+            return new ObjectDifferences(compareControl).addDifference("Reference value was null", "this", null, null);
         }
 
         if (object1 != null && object2 == null) {
-            return new ObjectDifferences().addDifference("Compared value was null", "this", null, null);
+            return new ObjectDifferences(compareControl).addDifference("Compared value was null", "this", null, null);
         }
 
-        if (comparators == null) {
-            return new ObjectDifferences();
+        DatabaseObjectComparator next = getNextComparator();
+
+        if (next == null) {
+            return new ObjectDifferences(compareControl);
         }
 
-        if (!comparators.hasNext()) {
-            return new ObjectDifferences();
-        }
-
-        return comparators.next().findDifferences(object1, object2, accordingTo, this);
+        return next.findDifferences(object1, object2, accordingTo, compareControl, this, exclude);
     }
 }

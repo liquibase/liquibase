@@ -266,11 +266,7 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
 
     @Override
     public boolean supportsDropTableCascadeConstraints() {
-        try {
-            return this.getDatabaseMajorVersion() > 10;
-        } catch (DatabaseException e) {
-            return true;
-        }
+        return false;
     }
 
     @Override
@@ -304,11 +300,7 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
      */
     @Override
     public String escapeViewName(String catalogName, String schemaName, String viewName) {
-        if (schemaName== null || (isDefaultSchema(catalogName, schemaName) && !getOutputDefaultSchema())) {
-            return escapeObjectName(viewName, View.class);
-        } else {
-            return escapeObjectName(schemaName, Schema.class)+"."+ escapeObjectName(viewName, Schema.class);
-        }
+        return escapeObjectName(null, schemaName, viewName, View.class);
 
     }
 

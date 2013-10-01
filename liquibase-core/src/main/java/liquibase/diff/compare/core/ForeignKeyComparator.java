@@ -2,6 +2,7 @@ package liquibase.diff.compare.core;
 
 import liquibase.database.Database;
 import liquibase.diff.ObjectDifferences;
+import liquibase.diff.compare.CompareControl;
 import liquibase.diff.compare.DatabaseObjectComparator;
 import liquibase.diff.compare.DatabaseObjectComparatorChain;
 import liquibase.diff.compare.DatabaseObjectComparatorFactory;
@@ -11,7 +12,10 @@ import liquibase.structure.core.ForeignKey;
 import liquibase.structure.core.Table;
 import liquibase.util.StringUtils;
 
+import java.util.Set;
+
 public class ForeignKeyComparator implements DatabaseObjectComparator {
+    @Override
     public int getPriority(Class<? extends DatabaseObject> objectType, Database database) {
         if (ForeignKey.class.isAssignableFrom(objectType)) {
             return PRIORITY_TYPE;
@@ -19,6 +23,14 @@ public class ForeignKeyComparator implements DatabaseObjectComparator {
         return PRIORITY_NONE;
     }
 
+
+    @Override
+    public String[] hash(DatabaseObject databaseObject, Database accordingTo, DatabaseObjectComparatorChain chain) {
+        return DatabaseObjectComparatorFactory.getInstance().hash(((ForeignKey) databaseObject).getForeignKeyTable(), accordingTo);
+    }
+
+
+    @Override
     public boolean isSameObject(DatabaseObject databaseObject1, DatabaseObject databaseObject2, Database accordingTo, DatabaseObjectComparatorChain chain) {
         if (!(databaseObject1 instanceof ForeignKey && databaseObject2 instanceof ForeignKey)) {
             return false;
@@ -53,12 +65,16 @@ public class ForeignKeyComparator implements DatabaseObjectComparator {
         return false;
     }
 
-    public ObjectDifferences findDifferences(DatabaseObject databaseObject1, DatabaseObject databaseObject2, Database accordingTo, DatabaseObjectComparatorChain chain) {
-        ObjectDifferences differences = chain.findDifferences(databaseObject1, databaseObject2, accordingTo);
-        differences.removeDifference("name");
-        differences.removeDifference("backingIndex");
+    @Override
+    public ObjectDifferences findDifferences(DatabaseObject databaseObject1, DatabaseObject databaseObject2, Database accordingTo, CompareControl compareControl, DatabaseObjectComparatorChain chain, Set<String> exclue) {
+        exclue.add("name");
+        exclue.add("backingIndex");
+        exclue.add("foreignKeyColumns");
+        exclue.add("primaryKeyColumns");
+        exclue.add("foreignKeyTable");
+        exclue.add("primaryKeyTable");
 
-        differences.removeDifference("columnNames");
+        ObjectDifferences differences = chain.findDifferences(databaseObject1, databaseObject2, accordingTo, compareControl, exclue);
         differences.compare("foreignKeyColumns", databaseObject1, databaseObject2, new ObjectDifferences.DatabaseObjectNameCompareFunction(Column.class, accordingTo));
         differences.compare("primaryKeyColumns", databaseObject1, databaseObject2, new ObjectDifferences.DatabaseObjectNameCompareFunction(Column.class, accordingTo));
         differences.compare("foreignKeyTable", databaseObject1, databaseObject2, new ObjectDifferences.DatabaseObjectNameCompareFunction(Table.class, accordingTo));

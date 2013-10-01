@@ -219,8 +219,7 @@ public class XMLChangeLogSAXParserTest {
     	final String nestedFileName = "liquibase/parser/core/xml/nestedChangeLog.xml";
         DatabaseChangeLog changeLog = new XMLChangeLogSAXParser().parse(doubleNestedFileName, new ChangeLogParameters(), new JUnitResourceAccessor());
 
-        doubleNestedFileAssertions(doubleNestedFileName, nestedFileName,
-				changeLog);
+        doubleNestedFileAssertions(doubleNestedFileName, nestedFileName, changeLog);
     }
 
     @Test
@@ -233,8 +232,7 @@ public class XMLChangeLogSAXParserTest {
 				changeLog);
     }
 
-	private void doubleNestedFileAssertions(final String doubleNestedFileName,
-			final String nestedFileName, DatabaseChangeLog changeLog) {
+	private void doubleNestedFileAssertions(final String doubleNestedFileName, final String nestedFileName, DatabaseChangeLog changeLog) {
 		assertEquals(doubleNestedFileName, changeLog.getLogicalFilePath());
         assertEquals(doubleNestedFileName, changeLog.getPhysicalFilePath());
 

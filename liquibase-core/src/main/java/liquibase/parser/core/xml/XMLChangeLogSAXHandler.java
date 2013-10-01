@@ -36,9 +36,9 @@ import liquibase.database.ObjectQuotingStrategy;
 import liquibase.exception.CustomChangeException;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.MigrationFailedException;
+import liquibase.exception.UnknownChangelogFormatException;
 import liquibase.logging.LogFactory;
 import liquibase.logging.Logger;
-import liquibase.parser.ChangeLogParser;
 import liquibase.parser.ChangeLogParserFactory;
 import liquibase.precondition.CustomPreconditionWrapper;
 import liquibase.precondition.Precondition;
@@ -53,7 +53,6 @@ import liquibase.util.FileUtil;
 import liquibase.util.ObjectUtil;
 import liquibase.util.StringUtils;
 import liquibase.util.file.FilenameUtils;
-
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
@@ -504,19 +503,11 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
         }
     }
 
-    protected boolean handleIncludedChangeLog(String fileName,
-			boolean isRelativePath, String relativeBaseFileName)
-			throws LiquibaseException {
+  protected boolean handleIncludedChangeLog(String fileName,
+	  boolean isRelativePath, String relativeBaseFileName)
+	  throws LiquibaseException {
 
         if (fileName.equalsIgnoreCase(".svn") || fileName.equalsIgnoreCase("cvs")) {
-            return false;
-        }
-
-        ChangeLogParser changeLogParser = null;
-        try {
-            changeLogParser = ChangeLogParserFactory.getInstance().getParser(fileName, resourceAccessor);
-        } catch (LiquibaseException e) {
-            log.warning("included file "+relativeBaseFileName + "/" + fileName + " is not a recognized file type");
             return false;
         }
 
@@ -529,9 +520,15 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
 				fileName = FilenameUtils.getFullPath(relativeBaseFileName) + fileName;
 			}
 		}
-		DatabaseChangeLog changeLog = ChangeLogParserFactory.getInstance().getParser(fileName, resourceAccessor).parse(fileName, changeLogParameters,
-						resourceAccessor);
-		PreconditionContainer preconditions = changeLog.getPreconditions();
+      DatabaseChangeLog changeLog;
+      try {
+         changeLog= ChangeLogParserFactory.getInstance().getParser(fileName, resourceAccessor).parse(fileName, changeLogParameters,
+                resourceAccessor);
+      } catch (UnknownChangelogFormatException e) {
+        log.warning("included file "+relativeBaseFileName + "/" + fileName + " is not a recognized file type");
+                    return false;
+      }
+      PreconditionContainer preconditions = changeLog.getPreconditions();
 		if (preconditions != null) {
 			if (null == databaseChangeLog.getPreconditions()) {
 				databaseChangeLog.setPreconditions(new PreconditionContainer());
@@ -610,7 +607,7 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
 				text = new StringBuffer();
 			} else if (change != null && "where".equals(qName)) {
 				if (change instanceof AbstractModifyDataChange) {
-					((AbstractModifyDataChange) change).setWhereClause(textString);
+					((AbstractModifyDataChange) change).setWhere(textString);
 				} else {
 					throw new RuntimeException("Unexpected change type: "
 							+ change.getClass().getName());

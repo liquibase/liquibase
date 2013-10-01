@@ -6,6 +6,7 @@ import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.servicelocator.ServiceLocator;
 import liquibase.structure.DatabaseObject;
+import liquibase.structure.DatabaseObjectCollection;
 import liquibase.structure.core.*;
 import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 
@@ -16,17 +17,25 @@ public abstract class DatabaseSnapshot {
 
     private SnapshotControl snapshotControl;
     private Database database;
-    private Map<Class<? extends DatabaseObject>, Set<DatabaseObject>> allFound = new HashMap<Class<? extends DatabaseObject>, Set<DatabaseObject>>();
+    private DatabaseObjectCollection allFound;
     private Map<Class<? extends DatabaseObject>, Set<DatabaseObject>> knownNull = new HashMap<Class<? extends DatabaseObject>, Set<DatabaseObject>>();
 
-    DatabaseSnapshot(SnapshotControl snapshotControl, Database database) {
+    private Map<String, ResultSetCache> resultSetCaches = new HashMap<String, ResultSetCache>();
+
+    DatabaseSnapshot(DatabaseObject[] examples, Database database, SnapshotControl snapshotControl) throws DatabaseException, InvalidExampleException {
         this.database = database;
+        allFound = new DatabaseObjectCollection(database);
         this.snapshotControl = snapshotControl;
+
+        for (DatabaseObject obj : examples) {
+            this.snapshotControl.addType(obj.getClass(), database);
+
+            include(obj);
+        }
     }
 
-    public DatabaseSnapshot(Database database) {
-        this.database = database;
-        this.snapshotControl = new SnapshotControl(database);
+    public DatabaseSnapshot(DatabaseObject[] examples, Database database) throws DatabaseException, InvalidExampleException {
+        this(examples, database, new SnapshotControl(database));
     }
 
     public SnapshotControl getSnapshotControl() {
@@ -37,14 +46,17 @@ public abstract class DatabaseSnapshot {
         return database;
     }
 
+    public ResultSetCache getResultSetCache(String key) {
+        if (!resultSetCaches.containsKey(key)) {
+            resultSetCaches.put(key, new ResultSetCache());
+        }
+        return resultSetCaches.get(key);
+    }
+
     /**
      * Include the object described by the passed example object in this snapshot. Returns the object snapshot or null if the object does not exist in the database.
      * If the same object was returned by an earlier include() call, the same object instance will be returned.
      */
-//    public void include(DatabaseObject example) throws DatabaseException, InvalidExampleException {
-//        include(example, false);
-//    }
-
     protected  <T extends DatabaseObject> T include(T example) throws DatabaseException, InvalidExampleException {
         if (example == null) {
             return null;
@@ -83,12 +95,7 @@ public abstract class DatabaseSnapshot {
             collection.add(example);
 
         } else {
-            Set<DatabaseObject> collection = allFound.get(object.getClass());
-            if (collection == null) {
-                collection = new HashSet<DatabaseObject>();
-                allFound.put(object.getClass(), collection);
-            }
-            collection.add(object);
+            allFound.add(object);
 
             try {
                 includeNestedObjects(object);
@@ -117,6 +124,10 @@ public abstract class DatabaseSnapshot {
             return null;
         }
         if (fieldValue instanceof DatabaseObject) {
+            if (((DatabaseObject) fieldValue).getSnapshotId() != null) { //already been replaced
+                return fieldValue;
+            }
+
             if (!snapshotControl.shouldInclude(((DatabaseObject) fieldValue).getClass())) {
                 return fieldValue;
             }
@@ -172,30 +183,14 @@ public abstract class DatabaseSnapshot {
      * Returns the object described by the passed example if it is already included in this snapshot.
      */
     public <DatabaseObjectType extends DatabaseObject> DatabaseObjectType get(DatabaseObjectType example) {
-        Set<DatabaseObject> databaseObjects = allFound.get(example.getClass());
-        if (databaseObjects == null) {
-            return null;
-        }
-        for (DatabaseObject obj : databaseObjects) {
-            if (DatabaseObjectComparatorFactory.getInstance().isSameObject(obj, example, database)) {
-                //noinspection unchecked
-                return (DatabaseObjectType) obj;
-            }
-        }
-        return null;
+        return allFound.get(example);
     }
 
     /**
      * Returns all objects of the given type that are already included in this snapshot.
      */
     public <DatabaseObjectType extends  DatabaseObject> Set<DatabaseObjectType> get(Class<DatabaseObjectType> type) {
-        //noinspection unchecked
-        Set<DatabaseObjectType> objects = (Set<DatabaseObjectType>) allFound.get(type);
-        if (objects == null) {
-            return Collections.unmodifiableSet(new HashSet<DatabaseObjectType>());
-        } else {
-            return Collections.unmodifiableSet(objects);
-        }
+        return allFound.get(type);
     }
 
 

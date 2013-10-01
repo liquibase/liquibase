@@ -1,0 +1,7 @@
+forge "http://forge.puppetlabs.com"
+
+mod "puppetlabs/apt"
+mod "puppetlabs/mysql"
+mod "puppetlabs/postgresql"
+mod "puppetlabs/firewall"
+mod "biemond/oradb"

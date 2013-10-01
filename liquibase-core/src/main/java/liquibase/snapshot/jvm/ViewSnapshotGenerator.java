@@ -4,17 +4,16 @@ import liquibase.CatalogAndSchema;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
+import liquibase.snapshot.CachedRow;
 import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.JdbcDatabaseSnapshot;
 import liquibase.statement.core.GetViewDefinitionStatement;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.core.Column;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.View;
 import liquibase.util.StringUtils;
 
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 
@@ -52,11 +51,11 @@ public class ViewSnapshotGenerator extends JdbcSnapshotGenerator {
         Database database = snapshot.getDatabase();
         Schema schema = example.getSchema();
 
-        List<JdbcDatabaseSnapshot.CachedRow> viewsMetadataRs = null;
+        List<CachedRow> viewsMetadataRs = null;
         try {
             viewsMetadataRs = ((JdbcDatabaseSnapshot) snapshot).getMetaData().getTables(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), example.getName(), new String[]{"VIEW"});
             if (viewsMetadataRs.size() > 0) {
-                JdbcDatabaseSnapshot.CachedRow row = viewsMetadataRs.get(0);
+                CachedRow row = viewsMetadataRs.get(0);
                 String rawViewName = row.getString("TABLE_NAME");
                 String rawSchemaName = StringUtils.trimToNull(row.getString("TABLE_SCHEM"));
                 String rawCatalogName = StringUtils.trimToNull(row.getString("TABLE_CAT"));
@@ -96,10 +95,10 @@ public class ViewSnapshotGenerator extends JdbcSnapshotGenerator {
         if (foundObject instanceof Schema) {
             Schema schema = (Schema) foundObject;
             Database database = snapshot.getDatabase();
-            List<JdbcDatabaseSnapshot.CachedRow> viewsMetadataRs = null;
+            List<CachedRow> viewsMetadataRs = null;
             try {
                 viewsMetadataRs = ((JdbcDatabaseSnapshot) snapshot).getMetaData().getTables(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), null, new String[]{"VIEW"});
-                for (JdbcDatabaseSnapshot.CachedRow row : viewsMetadataRs) {
+                for (CachedRow row : viewsMetadataRs) {
                     schema.addDatabaseObject(new View().setName(row.getString("TABLE_NAME")).setSchema(schema));
                 }
             } catch (SQLException e) {
