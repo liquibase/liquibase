@@ -39,7 +39,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
 	private String quotchar = liquibase.util.csv.opencsv.CSVReader.DEFAULT_QUOTE_CHARACTER + "";
 
 
-    private List<LoadDataColumnConfig> columns = new ArrayList<LoadDataColumnConfig>();
+    private final List<LoadDataColumnConfig> columns = new ArrayList<LoadDataColumnConfig>();
 
     @Override
     public boolean supports(Database database) {

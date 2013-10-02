@@ -14,12 +14,14 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import liquibase.Contexts;
+import liquibase.change.AddColumnConfig;
 import liquibase.change.Change;
 import liquibase.change.ChangeFactory;
 import liquibase.change.ChangeWithColumns;
 import liquibase.change.ColumnConfig;
 import liquibase.change.ConstraintsConfig;
 import liquibase.change.core.AbstractModifyDataChange;
+import liquibase.change.core.AddColumnChange;
 import liquibase.change.core.CreateProcedureChange;
 import liquibase.change.core.CreateViewChange;
 import liquibase.change.core.ExecuteShellCommandChange;
@@ -310,12 +312,7 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
 			} else if (rootPrecondition != null) {
 				currentPrecondition = PreconditionFactory.getInstance().create(localName);
 
-				for (int i = 0; i < atts.getLength(); i++) {
-					String attributeName = atts.getLocalName(i);
-					String attributeValue = atts.getValue(i);
-					setProperty(currentPrecondition, attributeName,
-							attributeValue);
-				}
+				setAllProperties(currentPrecondition, atts);
 				preconditionLogicStack.peek().addNestedPrecondition(
 						currentPrecondition);
 
@@ -341,12 +338,9 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
 							.getValue("applyToRollback"));
 				}
 			} else if (inModifySql) {
-				SqlVisitor sqlVisitor = SqlVisitorFactory.getInstance().create(localName);
-				for (int i = 0; i < atts.getLength(); i++) {
-					String attributeName = atts.getLocalName(i);
-					String attributeValue = atts.getValue(i);
-					setProperty(sqlVisitor, attributeName, attributeValue);
-				}
+                SqlVisitor sqlVisitor = SqlVisitorFactory.getInstance().create(localName);
+				
+				setAllProperties(sqlVisitor, atts);
 				sqlVisitor.setApplicableDbms(modifySqlDbmsList);
 				sqlVisitor.setApplyToRollback(modifySqlAppliedOnRollback);
 				sqlVisitor.setContexts(modifySqlContexts);
@@ -370,12 +364,8 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
 					((CustomChangeWrapper) change)
 							.setClassLoader(resourceAccessor.toClassLoader());
 				}
-				for (int i = 0; i < atts.getLength(); i++) {
-					String attributeName = atts.getLocalName(i);
-					String attributeValue = atts.getValue(i);
-					setProperty(change, attributeName, attributeValue);
-				}
 
+				setAllProperties(change, atts);
 				change.finishInitialization();
 			} else if (change != null && "column".equals(qName)) {
 				ColumnConfig column;
@@ -384,40 +374,53 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
 				} else {
 					column = new ColumnConfig();
 				}
-                populateColumnFromAttributes(atts, column);
-                if (change instanceof ChangeWithColumns) {
-					((ChangeWithColumns) change).addColumn(column);
+				
+				if (change instanceof AddColumnChange) {
+					AddColumnConfig addColumn = new AddColumnConfig();
+					setAllProperties(addColumn, atts);
+					((AddColumnChange) change).addColumn(addColumn);
 				} else {
-					throw new RuntimeException("Unexpected column tag for "
-							+ change.getClass().getName());
+					setAllProperties(column, atts);
+
+					if (change instanceof ChangeWithColumns) {
+						((ChangeWithColumns) change).addColumn(column);
+					} else {
+						throw new RuntimeException("Unexpected column tag for "
+								+ change.getClass().getName());
+					}
 				}
-			} else if (change != null && "whereParams".equals(qName)) {
-                if (!(change instanceof AbstractModifyDataChange)) {
-                    throw new RuntimeException("Unexpected change: "
-                            + change.getClass().getName());
+			} else if (change instanceof AddColumnChange && "after".equals(qName)) {
+				AddColumnConfig.Position addAtPosition = new AddColumnConfig.Position();
+				addAtPosition.setAfterColumn(atts.getValue("column"));
+				
+				AddColumnConfig lastColumn = getLastColumnConfigFromChange();
+                if (lastColumn == null) {
+                    throw new RuntimeException("Could not determine column to add position info");
                 }
-            } else if (change != null && change instanceof AbstractModifyDataChange && "param".equals(qName)) {
-                ColumnConfig param = new ColumnConfig();
-                populateColumnFromAttributes(atts, param);
-                ((AbstractModifyDataChange) change).addWhereParam(param);
-            }
-            else if (change != null && "constraints".equals(qName)) {
+                lastColumn.setPosition(addAtPosition);
+			} else if (change instanceof AddColumnChange && "before".equals(qName)) {
+				AddColumnConfig.Position addAtPosition = new AddColumnConfig.Position();
+				addAtPosition.setBeforeColumn(atts.getValue("column"));
+				
+				AddColumnConfig lastColumn = getLastColumnConfigFromChange();
+                if (lastColumn == null) {
+                    throw new RuntimeException("Could not determine column to add position info");
+                }
+                lastColumn.setPosition(addAtPosition);
+			} else if (change instanceof AddColumnChange && "atPosition".equals(qName)) {
+				AddColumnConfig.Position addAtPosition = new AddColumnConfig.Position();
+				setAllProperties(addAtPosition, atts);
+
+				AddColumnConfig lastColumn = getLastColumnConfigFromChange();
+                if (lastColumn == null) {
+                    throw new RuntimeException("Could not determine column to add position info");
+                }
+                lastColumn.setPosition(addAtPosition);
+			} else if (change != null && "constraints".equals(qName)) {
 				ConstraintsConfig constraints = new ConstraintsConfig();
-				for (int i = 0; i < atts.getLength(); i++) {
-					String attributeName = atts.getLocalName(i);
-					String attributeValue = atts.getValue(i);
-					setProperty(constraints, attributeName, attributeValue);
-				}
-				ColumnConfig lastColumn = null;
-                if (change instanceof ChangeWithColumns) {
-                    List<ColumnConfig> columns = ((ChangeWithColumns) change).getColumns();
-                    if (columns != null && columns.size() > 0) {
-                        lastColumn = columns.get(columns.size() - 1);
-                    }
-                } else {
-					throw new RuntimeException("Unexpected change: "
-							+ change.getClass().getName());
-				}
+				setAllProperties(constraints, atts);
+
+				ColumnConfig lastColumn = getLastColumnConfigFromChange();
                 if (lastColumn == null) {
                     throw new RuntimeException("Could not determine column to add constraint to");
                 }
@@ -477,13 +480,9 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
 									+ " for tag: " + localName);
 				}
 				Object subObject = method.invoke(objectToCreateFrom);
-				for (int i = 0; i < atts.getLength(); i++) {
-					String attributeName = atts.getLocalName(i);
-					String attributeValue = atts.getValue(i);
-					setProperty(subObject, attributeName, attributeValue);
-				}
-				changeSubObjects.push(subObject);
+				setAllProperties(subObject, atts);
 
+				changeSubObjects.push(subObject);
 			} else {
 				throw new MigrationFailedException(changeSet,
 						"Unexpected tag: " + localName);
@@ -493,6 +492,28 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
 			e.printStackTrace();
 			throw new SAXException(e);
 		}
+	}
+
+	private void setAllProperties(Object object, Attributes atts) throws IllegalAccessException, InvocationTargetException, CustomChangeException {
+		for (int i = 0; i < atts.getLength(); i++) {
+			String attributeName = atts.getQName(i);
+			String attributeValue = atts.getValue(i);
+			setProperty(object, attributeName, attributeValue);
+		}
+	}
+
+	private <T extends ColumnConfig> T getLastColumnConfigFromChange() {
+		T result = null;
+		if (change instanceof ChangeWithColumns) {
+		    List<T> columns = ((ChangeWithColumns) change).getColumns();
+		    if (columns.size() > 0) {
+		        result = columns.get(columns.size() - 1);
+		    }
+		} else {
+			throw new RuntimeException("Unexpected change: "
+					+ change.getClass().getName());
+		}
+		return result;
 	}
 
     private void populateColumnFromAttributes(Attributes atts, ColumnConfig column) throws IllegalAccessException, InvocationTargetException, CustomChangeException {

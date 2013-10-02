@@ -15,6 +15,9 @@ public class AddColumnStatement extends AbstractSqlStatement {
     private String columnType;
     private Object defaultValue;
     private String remarks;
+    private String addAfterColumn;
+    private String addBeforeColumn;
+    private Integer addAtPosition;
     private Set<ColumnConstraint> constraints = new HashSet<ColumnConstraint>();
 
     public AddColumnStatement(String catalogName, String schemaName, String tableName, String columnName, String columnType, Object defaultValue, ColumnConstraint... constraints) {
@@ -126,4 +129,28 @@ public class AddColumnStatement extends AbstractSqlStatement {
     public Object getDefaultValue() {
         return defaultValue;
     }
+
+    public String getAddAfterColumn() {
+    	return addAfterColumn;
+    }
+
+    public void setAddAfterColumn(String addAfterColumn) {
+		this.addAfterColumn = addAfterColumn;
+	}
+
+    public String getAddBeforeColumn() {
+    	return addBeforeColumn;
+    }
+
+    public void setAddBeforeColumn(String addBeforeColumn) {
+		this.addBeforeColumn = addBeforeColumn;
+	}
+
+	public Integer getAddAtPosition() {
+		return addAtPosition;
+	}
+
+	public void setAddAtPosition(Integer addAtPosition) {
+		this.addAtPosition = addAtPosition;
+	}
 }

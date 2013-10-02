@@ -8,6 +8,7 @@ import java.util.Set;
 import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.database.core.DB2Database;
+import liquibase.exception.ValidationErrors;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.*;
 import liquibase.statement.core.AddColumnStatement;
@@ -20,18 +21,17 @@ import liquibase.util.StringUtils;
  * Adds a column to an existing table.
  */
 @DatabaseChange(name="addColumn", description = "Adds a new column to an existing table", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "table")
-public class AddColumnChange extends AbstractChange implements ChangeWithColumns<ColumnConfig> {
+public class AddColumnChange extends AbstractChange implements ChangeWithColumns<AddColumnConfig> {
 
     private String catalogName;
     private String schemaName;
     private String tableName;
-    private List<ColumnConfig> columns;
-
+    private List<AddColumnConfig> columns;
 
     public AddColumnChange() {
-        columns = new ArrayList<ColumnConfig>();
+        columns = new ArrayList<AddColumnConfig>();
     }
-
+    
     @DatabaseChangeProperty(mustEqualExisting ="relation.catalog", since = "3.0")
     public String getCatalogName() {
         return catalogName;
@@ -60,15 +60,15 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
     }
 
     @DatabaseChangeProperty(description = "Column constraint and foreign key information. Setting the \"defaultValue\" attribute will specify a default value for the column. Setting the \"value\" attribute will set all rows existing to the specified value without modifying the column default.", requiredForDatabase = "all")
-    public List<ColumnConfig> getColumns() {
+    public List<AddColumnConfig> getColumns() {
         return columns;
     }
 
-    public void setColumns(List<ColumnConfig> columns) {
+    public void setColumns(List<AddColumnConfig> columns) {
         this.columns = columns;
     }
 
-    public void addColumn(ColumnConfig column) {
+    public void addColumn(AddColumnConfig column) {
         this.columns.add(column);
     }
 
@@ -86,7 +86,7 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
             };
         }
 
-        for (ColumnConfig column : getColumns()) {
+        for (AddColumnConfig column : getColumns()) {
             Set<ColumnConstraint> constraints = new HashSet<ColumnConstraint>();
             ConstraintsConfig constraintsConfig =column.getConstraints();
             if (constraintsConfig != null) {
@@ -119,6 +119,18 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
                     column.getRemarks(),
                     constraints.toArray(new ColumnConstraint[constraints.size()]));
 
+        	AddColumnConfig.Position position = column.getPosition();
+        	if (position != null) {
+	            if ((database instanceof MySQLDatabase) && (position.getAfterColumn() != null)) {
+					addColumnStatement.setAddAfterColumn(position.getAfterColumn());
+	            } else if (((database instanceof HsqlDatabase) || (database instanceof H2Database))
+	            		   && (position.getBeforeColumn() != null)) {
+					addColumnStatement.setAddBeforeColumn(position.getBeforeColumn());
+	            } else if ((database instanceof FirebirdDatabase) && (position.getPosition() != null)) {
+					addColumnStatement.setAddAtPosition(position.getPosition());
+	            }
+        	}
+            
             sql.add(addColumnStatement);
 
             if (database instanceof DB2Database) {
