@@ -1709,4 +1709,9 @@ public abstract class AbstractJdbcDatabase implements Database {
     public void setOutputDefaultCatalog(boolean outputDefaultCatalog) {
         this.outputDefaultCatalog = outputDefaultCatalog;
     }
+
+    @Override
+    public boolean supportsPrimaryKeyNames() {
+        return true;
+    }
 }

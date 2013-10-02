@@ -140,7 +140,6 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
 
         buffer.append(",");
 
-        // TODO informixdb
         if (!( (database instanceof SQLiteDatabase) &&
                 isSinglePrimaryKeyColumn &&
                 isPrimaryKeyAutoIncrement) &&
@@ -153,7 +152,7 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
             // This constraint is added after the column type.
 
             if (statement.getPrimaryKeyConstraint() != null && statement.getPrimaryKeyConstraint().getColumns().size() > 0) {
-                if (!(database instanceof InformixDatabase)) {
+                if (database.supportsPrimaryKeyNames()) {
                     String pkName = StringUtils.trimToNull(statement.getPrimaryKeyConstraint().getConstraintName());
                     if (pkName == null) {
                         // TODO ORA-00972: identifier is too long

@@ -337,5 +337,7 @@ public interface Database extends PrioritizedService {
     boolean getOutputDefaultCatalog();
 
     void setOutputDefaultCatalog(boolean outputDefaultCatalog);
+
+    boolean supportsPrimaryKeyNames();
 }
 
