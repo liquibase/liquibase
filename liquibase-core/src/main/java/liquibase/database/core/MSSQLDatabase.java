@@ -22,7 +22,6 @@ import java.util.Set;
 import java.util.regex.Pattern;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.logging.LogFactory;
-import liquibase.util.StringUtils;
 
 /**
  * Encapsulates MS-SQL database support.
@@ -31,7 +30,8 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
     public static final String PRODUCT_NAME = "Microsoft SQL Server";
     protected Set<String> systemTablesAndViews = new HashSet<String>();
 
-    private static Pattern CREATE_VIEW_AS_PATTERN = Pattern.compile("(?im)^\\s*(CREATE|ALTER)\\s+?VIEW\\s+?((\\S+?)|(\\[.*\\])|(\\\".*\\\"))\\s+?AS\\s+?", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+    private static Pattern INITIAL_COMMENT_PATTERN = Pattern.compile("^/\\*.*?\\*/");
+    private static Pattern CREATE_VIEW_AS_PATTERN = Pattern.compile("(?im)^\\s*(CREATE|ALTER)\\s+?VIEW\\s+?((\\S+?)|(\\[.*\\])|(\\\".*\\\"))\\s+?AS\\s*?", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
     public String getShortName() {
         return "mssql";
@@ -283,10 +283,19 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
         }
         String definition = sb.toString();
 
-        if (definition == null) {
-            return null;
+        String finalDef =definition.replaceAll("\r\n", "\n");
+        finalDef = INITIAL_COMMENT_PATTERN.matcher(finalDef).replaceFirst("").trim(); //handle views that start with '/****** Script for XYZ command from SSMS  ******/'
+        finalDef = CREATE_VIEW_AS_PATTERN.matcher(finalDef).replaceFirst("").trim();
+
+        finalDef = finalDef.replaceAll("--.*", "").trim();
+
+        /**handle views that end up as '(select XYZ FROM ABC);' */
+        if (finalDef.startsWith("(") && (finalDef.endsWith(")") || finalDef.endsWith(");"))) {
+            finalDef = finalDef.replaceFirst("^\\(", "");
+            finalDef = finalDef.replaceFirst("\\);?$", "");
         }
-        return CREATE_VIEW_AS_PATTERN.matcher(definition).replaceFirst("");
+
+        return finalDef;
     }
 
     /**

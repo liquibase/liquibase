@@ -99,8 +99,8 @@
             <dependencies>
                 <dependency>
                     <groupId>oracle</groupId>
-                    <artifactId>oracle-ojdbc14</artifactId>
-                    <version>10.2.0.5</version>
+                    <artifactId>oracle-ojdbc6</artifactId>
+                    <version>12.1.0.1</version>
                     <scope>test</scope>
                 </dependency>
             </dependencies>

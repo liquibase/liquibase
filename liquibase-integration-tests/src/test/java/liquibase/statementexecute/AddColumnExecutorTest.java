@@ -29,12 +29,12 @@ public class AddColumnExecutorTest extends AbstractExecuteTest {
     protected List<? extends SqlStatement> setupStatements(Database database) {
         ArrayList<CreateTableStatement> statements = new ArrayList<CreateTableStatement>();
         CreateTableStatement table = new CreateTableStatement(null, null, TABLE_NAME);
-        table.addColumn("id", DataTypeFactory.getInstance().fromDescription("int"), null, new NotNullConstraint());
+        table.addColumn("id", DataTypeFactory.getInstance().fromDescription("int"), null, new ColumnConstraint[]{ new NotNullConstraint() });
         statements.add(table);
 
         if (database.supportsSchemas()) {
             table = new CreateTableStatement(DatabaseTestContext.ALT_CATALOG, DatabaseTestContext.ALT_SCHEMA, TABLE_NAME);
-            table.addColumn("id", DataTypeFactory.getInstance().fromDescription("int"), null, new NotNullConstraint());
+            table.addColumn("id", DataTypeFactory.getInstance().fromDescription("int"), null, new ColumnConstraint[]{  new NotNullConstraint()});
             statements.add(table);
         }
         return statements;
@@ -79,7 +79,7 @@ public class AddColumnExecutorTest extends AbstractExecuteTest {
         assertCorrect("not supported. fixme!!", SQLiteDatabase.class);
         assertCorrect("alter table table_name add column_name int default 42", PostgresDatabase.class, InformixDatabase.class, OracleDatabase.class, DerbyDatabase.class, HsqlDatabase.class, DB2Database.class, H2Database.class, CacheDatabase.class, FirebirdDatabase.class, MaxDBDatabase.class);
         assertCorrect("alter table [table_name] add [column_name] int default 42 null", SybaseASADatabase.class);
-        assertCorrect("alter table table_name add column_name int default 42", MySQLDatabase.class);
+        assertCorrect("alter table table_name add column_name int null default 42", MySQLDatabase.class);
         assertCorrectOnRest("ALTER TABLE [table_name] ADD [column_name] int DEFAULT 42");
     }
 

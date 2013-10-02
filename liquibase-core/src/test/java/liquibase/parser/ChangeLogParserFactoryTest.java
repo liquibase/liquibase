@@ -6,6 +6,7 @@ import liquibase.parser.core.xml.XMLChangeLogSAXParser;
 import static org.junit.Assert.*;
 
 import liquibase.test.JUnitResourceAccessor;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -16,7 +17,11 @@ public class ChangeLogParserFactoryTest {
     @Before
     public void setup() {
         ChangeLogParserFactory.reset();
+    }
 
+    @After
+    public void after() {
+        ChangeLogParserFactory.reset();
     }
 
     @Test

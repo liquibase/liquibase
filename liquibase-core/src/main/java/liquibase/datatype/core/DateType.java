@@ -14,10 +14,6 @@ import liquibase.database.Database;
 public class DateType extends LiquibaseDataType {
     @Override
     public DatabaseDataType toDatabaseDataType(Database database) {
-        if (database instanceof MSSQLDatabase || database instanceof SybaseDatabase) {
-            return new DatabaseDataType("SMALLDATETIME");
-        }
-
         return new DatabaseDataType(getName());
     }
 

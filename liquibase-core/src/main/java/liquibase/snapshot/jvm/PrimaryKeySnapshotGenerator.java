@@ -5,14 +5,13 @@ import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.exception.DatabaseException;
+import liquibase.snapshot.CachedRow;
 import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.JdbcDatabaseSnapshot;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
 
-import java.sql.DatabaseMetaData;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
@@ -33,12 +32,12 @@ public class PrimaryKeySnapshotGenerator extends JdbcSnapshotGenerator {
             searchTableName = database.correctObjectName(searchTableName, Table.class);
         }
 
-        List<JdbcDatabaseSnapshot.CachedRow> rs = null;
+        List<CachedRow> rs = null;
         try {
             JdbcDatabaseSnapshot.CachingDatabaseMetaData metaData = ((JdbcDatabaseSnapshot) snapshot).getMetaData();
             rs = metaData.getPrimaryKeys(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), searchTableName);
             PrimaryKey returnKey = null;
-            for (JdbcDatabaseSnapshot.CachedRow row : rs) {
+            for (CachedRow row : rs) {
                 if (example.getName() != null && !example.getName().equals(row.getString("PK_NAME"))) {
                     continue;
                 }
@@ -80,7 +79,7 @@ public class PrimaryKeySnapshotGenerator extends JdbcSnapshotGenerator {
             Database database = snapshot.getDatabase();
             Schema schema = table.getSchema();
 
-            List<JdbcDatabaseSnapshot.CachedRow> rs = null;
+            List<CachedRow> rs = null;
             try {
                 JdbcDatabaseSnapshot.CachingDatabaseMetaData metaData = ((JdbcDatabaseSnapshot) snapshot).getMetaData();
                 rs = metaData.getPrimaryKeys(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), table.getName());

@@ -49,6 +49,7 @@ public abstract class BaseLiquibaseTask extends Task {
     private String databaseClass;
     private String databaseChangeLogTableName;
     private String databaseChangeLogLockTableName;
+    private String databaseChangeLogObjectsTablespace;
 
 
     private Map<String, Object> changeLogProperties = new HashMap<String, Object>();
@@ -219,6 +220,7 @@ public abstract class BaseLiquibaseTask extends Task {
         }
 
         URLClassLoader loader = AccessController.doPrivileged(new PrivilegedAction<URLClassLoader>() {
+            @Override
             public URLClassLoader run() {
                 return new URLClassLoader(taskClassPath.toArray(new URL[taskClassPath.size()]), Database.class.getClassLoader());
             }
@@ -267,6 +269,9 @@ public abstract class BaseLiquibaseTask extends Task {
 
         if (getDatabaseChangeLogLockTableName() != null)
             database.setDatabaseChangeLogLockTableName(getDatabaseChangeLogLockTableName());
+
+        if (getDatabaseChangeLogObjectsTablespace() != null)
+            database.setLiquibaseTablespaceName(getDatabaseChangeLogObjectsTablespace());
 
         return database;
     }
@@ -383,6 +388,15 @@ public abstract class BaseLiquibaseTask extends Task {
 
     public void setDatabaseChangeLogLockTableName(String tableName) {
         this.databaseChangeLogLockTableName = tableName;
+    }
+
+    public String getDatabaseChangeLogObjectsTablespace() {
+        return databaseChangeLogObjectsTablespace;
+    }
+
+
+    public void setDatabaseChangeLogObjectsTablespace(String tablespaceName) {
+        this.databaseChangeLogObjectsTablespace = tablespaceName;
     }
 
     public String getLogLevel() {

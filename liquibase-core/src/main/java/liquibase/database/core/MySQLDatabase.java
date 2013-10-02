@@ -188,4 +188,12 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
     public boolean createsIndexesForForeignKeys() {
         return true;
     }
+
+    @Override
+    public boolean isReservedWord(String string) {
+        if (string.equalsIgnoreCase("condition")) {
+            return true;
+        }
+        return super.isReservedWord(string);
+    }
 }

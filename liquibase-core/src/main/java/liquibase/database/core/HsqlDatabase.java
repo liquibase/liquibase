@@ -428,9 +428,17 @@ public class HsqlDatabase extends AbstractJdbcDatabase {
             "INITIAL");
 
     @Override
-    public String getJdbcCatalogName(CatalogAndSchema schema) {
-        return null;
+    public boolean isCaseSensitive() {
+        return false;
     }
 
-
+    @Override
+    public String escapeObjectName(String objectName, Class<? extends DatabaseObject> objectType) {
+        if (objectName != null) {
+            if (isReservedWord(objectName.toUpperCase())) {
+                return "\""+objectName.toUpperCase()+"\"";
+            }
+        }
+        return objectName;
+    }
 }

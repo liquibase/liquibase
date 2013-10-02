@@ -6,16 +6,16 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 
-public abstract class CreateProcedureChangeTest extends StandardChangeTest {
+public class CreateProcedureChangeTest extends StandardChangeTest {
 
     @Override
     @Test
     public void getRefactoringName() throws Exception {
-        assertEquals("Create Procedure", ChangeFactory.getInstance().getChangeMetaData(new CreateProcedureChange()).getName());
+        assertEquals("createProcedure", ChangeFactory.getInstance().getChangeMetaData(new CreateProcedureChange()).getName());
     }
 
-//    @Test
-//    public void generateStatement() throws Exception {
+    @Test
+    public void generateStatement() throws Exception {
 //        new DatabaseTestTemplate().testOnAllDatabases(new DatabaseTest() {
 //            public void performTest(Database database) throws Exception {
 //                CreateProcedureChange change = new CreateProcedureChange();
@@ -35,7 +35,7 @@ public abstract class CreateProcedureChangeTest extends StandardChangeTest {
 //                }
 //            }
 //        });
-//    }
+    }
 
     @Override
     @Test

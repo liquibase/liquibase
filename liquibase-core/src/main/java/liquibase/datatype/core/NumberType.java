@@ -25,6 +25,14 @@ public class NumberType extends LiquibaseDataType {
                 || database instanceof HsqlDatabase || database instanceof DerbyDatabase || database instanceof PostgresDatabase || database instanceof FirebirdDatabase) {
             return new DatabaseDataType("numeric", getParameters());
         }
+
+        if (database instanceof OracleDatabase) {
+            if (getParameters().length > 0 && getParameters()[0].equals("0") && getParameters()[1].equals("-127")) {
+                return new DatabaseDataType("NUMBER");
+            } else {
+                return new DatabaseDataType("NUMBER", getParameters());
+            }
+        }
         return super.toDatabaseDataType(database);
     }
 }
