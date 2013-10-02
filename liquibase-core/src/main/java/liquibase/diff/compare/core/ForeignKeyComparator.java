@@ -47,20 +47,20 @@ public class ForeignKeyComparator implements DatabaseObjectComparator {
 
         if (thisForeignKey.getForeignKeyColumns() != null && thisForeignKey.getPrimaryKeyColumns() != null &&
                 otherForeignKey.getForeignKeyColumns() != null && otherForeignKey.getPrimaryKeyColumns() != null) {
-            boolean columnsTheSame;
-            if (accordingTo.isCaseSensitive()) {
+        boolean columnsTheSame;
+        if (accordingTo.isCaseSensitive()) {
                 columnsTheSame = StringUtils.trimToEmpty(thisForeignKey.getForeignKeyColumns()).equals(StringUtils.trimToEmpty(otherForeignKey.getForeignKeyColumns())) &&
                         StringUtils.trimToEmpty(thisForeignKey.getPrimaryKeyColumns()).equals(StringUtils.trimToEmpty(otherForeignKey.getPrimaryKeyColumns()));
-            } else {
+        } else {
                 columnsTheSame = thisForeignKey.getForeignKeyColumns().equalsIgnoreCase(otherForeignKey.getForeignKeyColumns()) &&
                         thisForeignKey.getPrimaryKeyColumns().equalsIgnoreCase(otherForeignKey.getPrimaryKeyColumns());
-            }
-
-            return columnsTheSame &&
-                    DatabaseObjectComparatorFactory.getInstance().isSameObject(thisForeignKey.getForeignKeyTable(), otherForeignKey.getForeignKeyTable(), accordingTo) &&
-                    DatabaseObjectComparatorFactory.getInstance().isSameObject(thisForeignKey.getPrimaryKeyTable(), otherForeignKey.getPrimaryKeyTable(), accordingTo);
-
         }
+
+        return columnsTheSame &&
+                DatabaseObjectComparatorFactory.getInstance().isSameObject(thisForeignKey.getForeignKeyTable(), otherForeignKey.getForeignKeyTable(), accordingTo) &&
+                DatabaseObjectComparatorFactory.getInstance().isSameObject(thisForeignKey.getPrimaryKeyTable(), otherForeignKey.getPrimaryKeyTable(), accordingTo);
+
+    }
 
         return false;
     }
