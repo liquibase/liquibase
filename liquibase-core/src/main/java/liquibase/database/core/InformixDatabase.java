@@ -424,4 +424,10 @@ public class InformixDatabase extends AbstractJdbcDatabase {
         }
         return name;
     }
+
+    @Override
+    public boolean supportsPrimaryKeyNames() {
+        return false;
+    }
+
 }

@@ -29,6 +29,7 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <processorPath useClasspath="true" />
+        <module name="liquibase-cdi" />
         <module name="liquibase-core" />
         <module name="liquibase-debian" />
         <module name="liquibase-integration-tests" />
@@ -38,6 +39,7 @@
     </annotationProcessing>
     <bytecodeTargetLevel>
       <module name="liquibase" target="1.5" />
+      <module name="liquibase-cdi" target="1.6" />
       <module name="liquibase-core" target="1.6" />
       <module name="liquibase-ext-change" target="1.5" />
       <module name="liquibase-ext-changewithnestedtags" target="1.5" />

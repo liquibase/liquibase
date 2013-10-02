@@ -63,9 +63,9 @@ public final class DefaultDatabaseObjectComparator implements DatabaseObjectComp
                 }
                 compareFunction = new ObjectDifferences.DatabaseObjectNameCompareFunction(type, accordingTo);
             } else if (attribute1 instanceof DataType || attribute2 instanceof DataType) {
-                compareFunction = new ObjectDifferences.ToStringCompareFunction();
+                compareFunction = new ObjectDifferences.ToStringCompareFunction(false);
             } else if (attribute1 instanceof Column.AutoIncrementInformation || attribute2 instanceof Column.AutoIncrementInformation) {
-                compareFunction = new ObjectDifferences.ToStringCompareFunction();
+                compareFunction = new ObjectDifferences.ToStringCompareFunction(false);
             } else if (attribute1 instanceof Collection || attribute2 instanceof Collection) {
                 compareFunction = new ObjectDifferences.OrderedCollectionCompareFunction(new ObjectDifferences.StandardCompareFunction(accordingTo));
             } else {

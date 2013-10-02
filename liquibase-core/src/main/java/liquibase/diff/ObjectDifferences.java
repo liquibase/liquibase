@@ -110,6 +110,12 @@ public class ObjectDifferences {
 
     public static class ToStringCompareFunction implements CompareFunction {
 
+        private boolean caseSensitive;
+
+        public ToStringCompareFunction(boolean caseSensitive) {
+            this.caseSensitive = caseSensitive;
+        }
+
         @Override
         public boolean areEqual(Object referenceValue, Object compareToValue) {
             if (referenceValue == null && compareToValue == null) {
@@ -119,7 +125,11 @@ public class ObjectDifferences {
                 return false;
             }
 
-            return referenceValue.toString().equals(compareToValue.toString());
+            if (caseSensitive) {
+                return referenceValue.toString().equals(compareToValue.toString());
+            } else {
+                return referenceValue.toString().equalsIgnoreCase(compareToValue.toString());
+            }
 
         }
     }

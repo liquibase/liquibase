@@ -21,8 +21,14 @@ public class NumberType extends LiquibaseDataType {
 
     @Override
     public DatabaseDataType toDatabaseDataType(Database database) {
-        if (database instanceof MySQLDatabase || database instanceof DB2Database|| database instanceof MSSQLDatabase
-                || database instanceof HsqlDatabase || database instanceof DerbyDatabase || database instanceof PostgresDatabase || database instanceof FirebirdDatabase) {
+        if (database instanceof MySQLDatabase
+                || database instanceof DB2Database
+                || database instanceof MSSQLDatabase
+                || database instanceof HsqlDatabase
+                || database instanceof DerbyDatabase
+                || database instanceof PostgresDatabase
+                || database instanceof FirebirdDatabase
+                || database instanceof SybaseDatabase) {
             return new DatabaseDataType("numeric", getParameters());
         }
 
