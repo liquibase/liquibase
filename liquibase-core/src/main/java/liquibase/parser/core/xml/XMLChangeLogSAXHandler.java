@@ -330,7 +330,7 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
 				}
 			} else if (inModifySql) {
                 SqlVisitor sqlVisitor = SqlVisitorFactory.getInstance().create(localName);
-				
+
 				setAllProperties(sqlVisitor, atts);
 				sqlVisitor.setApplicableDbms(modifySqlDbmsList);
 				sqlVisitor.setApplyToRollback(modifySqlAppliedOnRollback);
