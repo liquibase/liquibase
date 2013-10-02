@@ -2,6 +2,8 @@ package liquibase.parser.core.yaml;
 
 import liquibase.Contexts;
 import liquibase.change.*;
+import liquibase.change.core.AddColumnChange;
+import liquibase.change.core.CreateIndexChange;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
@@ -113,14 +115,20 @@ public class YamlChangeLogParser implements ChangeLogParser {
                                     }
                                     Object value = param.getValue();
                                     String dataType = changeParameterMetaData.getDataType();
-                                    if (dataType.equals("list of columnConfig")) {
+                                    if (dataType.equals("list of columnConfig") || dataType.equals("list of addColumnConfig")) {
                                         List<ColumnConfig> columnList = new ArrayList<ColumnConfig>();
                                         for (Map<String, Map<String, Object>> columnMap : (List<Map<String, Map<String, Object>>>) value ) {
                                             if (columnMap.size() != 1) {
                                                 throw new ChangeLogParseException("Invalid 'column' syntax");
                                             }
                                             Map<String, Object> column = columnMap.get("column");
-                                            ColumnConfig columnConfig = new ColumnConfig();
+                                            ColumnConfig columnConfig;
+                                            if (change instanceof CreateIndexChange || change instanceof AddColumnChange) {
+                                                columnConfig = new AddColumnConfig();
+                                            } else {
+                                                columnConfig = new ColumnConfig();
+                                            }
+
                                             columnConfig.setName(getValue(column, "name", String.class, changeLogParameters));
                                             columnConfig.setType(getValue(column, "type", String.class, changeLogParameters));
                                             columnConfig.setAutoIncrement(getValue(column, "autoIncrement", Boolean.class, changeLogParameters));

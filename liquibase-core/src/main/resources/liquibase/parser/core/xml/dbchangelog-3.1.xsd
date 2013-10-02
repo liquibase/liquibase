@@ -298,6 +298,13 @@
 		<xsd:attribute name="remarks" type="xsd:string" />
 	</xsd:attributeGroup>
 
+    <xsd:complexType name="columnType" mixed="true">
+        <xsd:sequence>
+            <xsd:element ref="constraints" minOccurs="0"/>
+        </xsd:sequence>
+        <xsd:attributeGroup ref="column"/>
+    </xsd:complexType>
+
     <xsd:attributeGroup name="param">
         <xsd:attribute name="name" type="xsd:string" />
         <xsd:attribute name="value" type="xsd:string" />
@@ -864,7 +871,17 @@
 	<xsd:element name="addColumn">
 		<xsd:complexType>
 			<xsd:sequence>
-				<xsd:element ref="column" minOccurs="1" maxOccurs="unbounded" />
+				<xsd:element name="column" minOccurs="1" maxOccurs="unbounded">
+					<xsd:complexType>
+						<xsd:complexContent mixed="true">
+							<xsd:extension base="columnType">
+                                <xsd:attribute name="beforeColumn" type="xsd:string" />
+                                <xsd:attribute name="afterColumn" type="xsd:string" />
+                                <xsd:attribute name="position" type="xsd:integer" />
+							</xsd:extension>
+						</xsd:complexContent>
+					</xsd:complexType>
+				</xsd:element>
 			</xsd:sequence>
 			<xsd:attributeGroup ref="tableNameAttribute" />
 		</xsd:complexType>

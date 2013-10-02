@@ -23,6 +23,10 @@ public class UpdateDataChange extends AbstractModifyDataChange implements Change
         return columns;
     }
 
+    public void setColumns(List<ColumnConfig> columns) {
+        this.columns = columns;
+    }
+
     public void addColumn(ColumnConfig column) {
         columns.add(column);
     }

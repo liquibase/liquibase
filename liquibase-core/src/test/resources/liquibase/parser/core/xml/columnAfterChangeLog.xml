@@ -3,7 +3,7 @@
 <databaseChangeLog
         xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog liquibase/parser/core/xml/dbchangelog-3.0.xsd">
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog liquibase/parser/core/xml/dbchangelog-3.1.xsd">
 
     <changeSet id="1" author="nvoxland">
         <comment>Some comments go here</comment>
@@ -21,9 +21,7 @@
     <changeSet id="2" author="cmouttet">
     	<comment>add column after</comment>
     	<addColumn tableName="person">
-    		<column name="middlename" type="varchar(50)">
-    			<after column="firstname" />
-    		</column>
+    		<column name="middlename" type="varchar(50)" afterColumn="firstname"/>
     	</addColumn>
     </changeSet>
 </databaseChangeLog>

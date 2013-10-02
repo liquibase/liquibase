@@ -393,11 +393,7 @@ public class XMLChangeLogSAXParserTest {
         AddColumnConfig columnConfig = columns.get(0);
         assertEquals("middlename", columnConfig.getName());
         
-        AddColumnConfig.Position addAtPosition = columnConfig.getPosition();
-        assertNotNull(addAtPosition);
-        assertEquals("firstname", addAtPosition.getAfterColumn());
-        assertNull(addAtPosition.getFirst());
-        assertNull(addAtPosition.getPosition());
+        assertEquals("firstname", columnConfig.getAfterColumn());
 	}
 
 	@Test
@@ -424,11 +420,7 @@ public class XMLChangeLogSAXParserTest {
         AddColumnConfig columnConfig = columns.get(0);
         assertEquals("middlename", columnConfig.getName());
         
-        AddColumnConfig.Position addAtPosition = columnConfig.getPosition();
-        assertNotNull(addAtPosition);
-        assertEquals("lastname", addAtPosition.getBeforeColumn());
-        assertNull(addAtPosition.getFirst());
-        assertNull(addAtPosition.getPosition());
+        assertEquals("lastname", columnConfig.getBeforeColumn());
 	}
 
 	@Test
@@ -443,9 +435,6 @@ public class XMLChangeLogSAXParserTest {
         AddColumnConfig columnConfig = columns.get(0);
         assertEquals("middlename", columnConfig.getName());
 
-        AddColumnConfig.Position addAtPosition = columnConfig.getPosition();
-        assertNotNull(addAtPosition);
-		assertTrue(addAtPosition.getFirst());
-		assertEquals(Integer.valueOf(1), addAtPosition.getPosition());
+		assertEquals(Integer.valueOf(1), columnConfig.getPosition());
 	}
 }

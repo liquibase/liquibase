@@ -264,11 +264,11 @@ public class XMLChangeLogSerializerTest {
         refactoring.setIndexName("IDX_TEST");
         refactoring.setTableName("TAB_NAME");
 
-        ColumnConfig column1 = new ColumnConfig();
+        AddColumnConfig column1 = new AddColumnConfig();
         column1.setName("COL1");
         refactoring.addColumn(column1);
 
-        ColumnConfig column2 = new ColumnConfig();
+        AddColumnConfig column2 = new AddColumnConfig();
         column2.setName("COL2");
         refactoring.addColumn(column2);
 

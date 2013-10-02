@@ -16,8 +16,6 @@
     </option>
     <option name="ignoredFiles">
       <set>
-        <option value="$PROJECT_DIR$/../cassandra-jdbc/pom.xml" />
-        <option value="$PROJECT_DIR$/liquibase-integration-tests/pom.xml" />
         <option value="$PROJECT_DIR$/pom.xml" />
       </set>
     </option>

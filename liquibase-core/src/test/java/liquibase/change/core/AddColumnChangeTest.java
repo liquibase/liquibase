@@ -401,7 +401,7 @@ public class AddColumnChangeTest extends StandardChangeTest {
         AddColumnChange refactoring = new AddColumnChange();
         refactoring.setSchemaName("SCHEMA");
         refactoring.setTableName("TAB");
-        ColumnConfig column = new ColumnConfig();
+        AddColumnConfig column = new AddColumnConfig();
         column.setName("NEWCOL");
         column.setType("TYP");
         column.setDefaultValue("DEFAULT");
