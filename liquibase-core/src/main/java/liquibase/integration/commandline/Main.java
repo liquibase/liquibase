@@ -523,8 +523,8 @@ public class Main {
         stream.println("");
         stream.println("Required Diff Parameters:");
         stream.println(" --referenceUsername=<value>                Reference Database username");
-        stream.println(" --referencePassword=<value>                Reference Database password. If values");
-        stream.println("                                            is PROMPT, Liquibase will");
+        stream.println(" --referencePassword=<value>                Reference Database password. If");
+        stream.println("                                            value is PROMPT, Liquibase will");
         stream.println("                                            prompt for a password");
         stream.println(" --referenceUrl=<value>                     Reference Database URL");
         stream.println("");
