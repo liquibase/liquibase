@@ -27,6 +27,12 @@
         </dependency>
 
         <dependency>
+            <groupId>org.hamcrest</groupId>
+            <artifactId>hamcrest-library</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
           <groupId>org.easymock</groupId>
           <artifactId>easymockclassextension</artifactId>
             <scope>test</scope>
@@ -65,16 +71,6 @@
         <dependency>
           <groupId>org.springframework</groupId>
           <artifactId>spring</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>javax.enterprise</groupId>
-            <artifactId>cdi-api</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.jboss.weld.se</groupId>
-            <artifactId>weld-se</artifactId>
         </dependency>
 
         <dependency>

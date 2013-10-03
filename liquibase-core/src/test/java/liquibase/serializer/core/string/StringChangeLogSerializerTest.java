@@ -84,7 +84,7 @@ public class StringChangeLogSerializerTest {
                 "    tableName=\"TABLE_NAME\"\n" +
                 "]", new StringChangeLogSerializer().serialize(change, false));
 
-        ColumnConfig column = new ColumnConfig();
+        AddColumnConfig column = new AddColumnConfig();
         change.addColumn(column);
         column.setName("COLUMN_NAME");
 
@@ -98,7 +98,7 @@ public class StringChangeLogSerializerTest {
                 "    tableName=\"TABLE_NAME\"\n" +
                 "]", new StringChangeLogSerializer().serialize(change, false));
 
-        ColumnConfig column2 = new ColumnConfig();
+        AddColumnConfig column2 = new AddColumnConfig();
         change.addColumn(column2);
         column2.setName("COLUMN2_NAME");
         column2.setAutoIncrement(true);

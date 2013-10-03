@@ -3,6 +3,7 @@ package liquibase.statementexecute;
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.datatype.DataTypeFactory;
+import liquibase.statement.ColumnConstraint;
 import liquibase.statement.NotNullConstraint;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.CreateTableStatement;
@@ -26,7 +27,7 @@ public class RenameColumnExecuteTest extends AbstractExecuteTest {
         if (database instanceof MySQLDatabase) {
             table.addPrimaryKeyColumn("id", DataTypeFactory.getInstance().fromDescription("int"), null, "pk_", null);
         } else {
-            table.addColumn("id", DataTypeFactory.getInstance().fromDescription("int"), null, new NotNullConstraint());
+            table.addColumn("id", DataTypeFactory.getInstance().fromDescription("int"), null, new ColumnConstraint[]{  new NotNullConstraint() });
         }
         table.addColumn(COLUMN_NAME, DataTypeFactory.getInstance().fromDescription("int"));
         statements.add(table);
@@ -34,7 +35,7 @@ public class RenameColumnExecuteTest extends AbstractExecuteTest {
         if (database.supportsSchemas()) {
             table = new CreateTableStatement(DatabaseTestContext.ALT_CATALOG, DatabaseTestContext.ALT_SCHEMA, TABLE_NAME);
             table
-                    .addColumn("id", DataTypeFactory.getInstance().fromDescription("int"), null, new NotNullConstraint());
+                    .addColumn("id", DataTypeFactory.getInstance().fromDescription("int"), null, new ColumnConstraint[]{  new NotNullConstraint() });
             statements.add(table);
         }
         return statements;

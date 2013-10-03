@@ -24,7 +24,6 @@ public class GetViewDefinitionGeneratorMSSQL extends GetViewDefinitionGenerator 
     public Sql[] generateSql(GetViewDefinitionStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         CatalogAndSchema schema = database.correctSchema(new CatalogAndSchema(statement.getCatalogName(), statement.getSchemaName()));
 
-        String sql = "exec sp_helptext '" + schema.getSchemaName() + "."
-                    + statement.getViewName().toUpperCase() + "'";
+        String sql = "exec sp_helptext '" + schema.getSchemaName() + "."+ statement.getViewName() + "'";
             return new Sql[]{new UnparsedSql(sql) };
     }}

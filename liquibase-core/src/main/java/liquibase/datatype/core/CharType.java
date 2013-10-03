@@ -18,7 +18,7 @@ public class CharType extends LiquibaseDataType {
         if (val.startsWith("'")) {
             return val;
         } else {
-            return "'"+val+"'";
+            return "'"+database.escapeStringForDatabase(val)+"'";
         }
     }
 

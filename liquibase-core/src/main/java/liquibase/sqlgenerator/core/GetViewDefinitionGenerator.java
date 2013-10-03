@@ -2,6 +2,7 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.CatalogAndSchema;
 import liquibase.database.Database;
+import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.core.MySQLDatabase;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.View;
@@ -22,7 +23,11 @@ public class GetViewDefinitionGenerator extends AbstractSqlGenerator<GetViewDefi
     public Sql[] generateSql(GetViewDefinitionStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         CatalogAndSchema schema = database.correctSchema(new CatalogAndSchema(statement.getCatalogName(), statement.getSchemaName()));
 
-        String sql = "select view_definition from information_schema.views where table_name='" + database.correctObjectName(statement.getViewName(), View.class) + "'";
+        String sql;
+        if (database instanceof MSSQLDatabase)
+        	sql = "select VIEW_DEFINITION from INFORMATION_SCHEMA.VIEWS where TABLE_NAME='" + database.correctObjectName(statement.getViewName(), View.class) + "'";
+        else
+        	sql = "select view_definition from information_schema.views where table_name='" + database.correctObjectName(statement.getViewName(), View.class) + "'";
 
         if (database instanceof MySQLDatabase) {
             sql += " and table_schema='" + schema.getCatalogName() + "'";
@@ -31,14 +36,20 @@ public class GetViewDefinitionGenerator extends AbstractSqlGenerator<GetViewDefi
             if (database.supportsSchemas()) {
                 String schemaName = schema.getSchemaName();
                 if (schemaName != null) {
-                    sql += " and table_schema='" + schemaName + "'";
+                	if (database instanceof MSSQLDatabase)
+                		sql += " and TABLE_SCHEMA='" + schemaName + "'";
+                	else
+                		sql += " and table_schema='" + schemaName + "'";
                 }
             }
 
             if (database.supportsCatalogs()) {
                 String catalogName = schema.getCatalogName();
                 if (catalogName != null) {
-                    sql += " and table_catalog='" + catalogName + "'";
+                	if (database instanceof MSSQLDatabase)
+                		sql += " and TABLE_CATALOG='" + catalogName + "'";
+                	else
+                		sql += " and table_catalog='" + catalogName + "'";
                 }
             }
         }

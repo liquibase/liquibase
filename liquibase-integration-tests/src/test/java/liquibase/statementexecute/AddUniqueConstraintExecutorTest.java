@@ -3,6 +3,7 @@ package liquibase.statementexecute;
 import liquibase.database.*;
 import liquibase.database.core.*;
 import liquibase.datatype.DataTypeFactory;
+import liquibase.statement.ColumnConstraint;
 import liquibase.test.DatabaseTestContext;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.CreateTableStatement;
@@ -26,15 +27,15 @@ public class AddUniqueConstraintExecutorTest extends AbstractExecuteTest {
         List<CreateTableStatement> statements = new ArrayList<CreateTableStatement>();
         CreateTableStatement table = new CreateTableStatement(null, null, TABLE_NAME);
         table
-                .addColumn("id", DataTypeFactory.getInstance().fromDescription("int"), null, new NotNullConstraint())
-                .addColumn(COLUMN_NAME, DataTypeFactory.getInstance().fromDescription("int"), null, new NotNullConstraint());
+                .addColumn("id", DataTypeFactory.getInstance().fromDescription("int"), null, new ColumnConstraint[]{ new NotNullConstraint()})
+                .addColumn(COLUMN_NAME, DataTypeFactory.getInstance().fromDescription("int"), null, new ColumnConstraint[]{ new NotNullConstraint()});
         statements.add(table);
 
         if (database.supportsSchemas()) {
             table = new CreateTableStatement(DatabaseTestContext.ALT_CATALOG, DatabaseTestContext.ALT_SCHEMA, TABLE_NAME);
             table
-                    .addColumn("id", DataTypeFactory.getInstance().fromDescription("int"), null, new NotNullConstraint())
-                    .addColumn(COLUMN_NAME, DataTypeFactory.getInstance().fromDescription("int"), null, new NotNullConstraint());
+                    .addColumn("id", DataTypeFactory.getInstance().fromDescription("int"), null, new ColumnConstraint[]{  new NotNullConstraint() })
+                    .addColumn(COLUMN_NAME, DataTypeFactory.getInstance().fromDescription("int"), null,  new ColumnConstraint[]{ new NotNullConstraint() });
             statements.add(table);
         }
         return statements;

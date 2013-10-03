@@ -26,7 +26,14 @@ public class CommandLineResourceAccessor implements ResourceAccessor {
     public InputStream getResourceAsStream(String file) throws IOException {
         URL resource = loader.getResource(file);
         if (resource == null) {
-            throw new IOException(file + " could not be found");
+            // One more try. People are often confused about leading
+            // slashes in resource paths...
+            if (file.startsWith("/")) {
+                resource = loader.getResource(file.substring(1));
+            }
+            if (resource == null) {
+                throw new IOException(file + " could not be found");
+            }
         }
         return resource.openStream();
     }

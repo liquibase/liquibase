@@ -10,7 +10,6 @@ public class Table extends Relation {
 
     public Table() {
         setAttribute("outgoingForeignKeys", new ArrayList<ForeignKey>());
-        setAttribute("incomingForeignKeys", new ArrayList<ForeignKey>());
         setAttribute("indexes", new ArrayList<Index>());
         setAttribute("uniqueConstraints", new ArrayList<UniqueConstraint>());
     }
@@ -25,10 +24,6 @@ public class Table extends Relation {
 
     public List<ForeignKey> getOutgoingForeignKeys() {
         return getAttribute("outgoingForeignKeys", List.class);
-    }
-
-    public List<ForeignKey> getIncomingForeignKeys() {
-        return getAttribute("incomingForeignKeys", List.class);
     }
 
     public List<Index> getIndexes() {
@@ -60,9 +55,9 @@ public class Table extends Relation {
         return getName();
     }
 
+    @Override
     public Table setName(String name) {
-        setAttribute("name", name);
-        return this;
+        return (Table) super.setName(name);
     }
 
 }

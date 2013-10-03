@@ -338,4 +338,71 @@
 
         </createTable>
     </changeSet>
+
+    <changeSet author="barry" id="CORE-1158-create_user_table">
+        <comment>create a table using a reserved keyword in the table name (with lowercase letters)</comment>
+        <createTable tableName="User">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="label" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="barry" id="CORE-1158-create_company_table">
+        <comment>create a table using a reserved keyword in the column name (with lowercase letters)</comment>
+        <createTable tableName="Org">
+            <column autoIncrement="true" name="id" type="BIGINT">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="month" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="barry" id="CORE-1158-insert_into_user_table">
+        <insert tableName="User">
+            <column name="id" value="1"/>
+            <column name="label" value="12"/>
+            <column name="name" value="Barry"/>
+        </insert>
+        <insert tableName="User">
+            <column name="id" value="2"/>
+            <column name="label" value="12"/>
+            <column name="name" value="Dev 1"/>
+        </insert>
+        <insert tableName="User">
+            <column name="id" value="3"/>
+            <column name="label" value="12"/>
+            <column name="name" value="Dev 2"/>
+        </insert>
+    </changeSet>
+
+    <changeSet author="barry" id="CORE-1158-insert_into_org_table">
+        <insert tableName="Org">
+            <column name="id" value="1"/>
+            <column name="month" value="12"/>
+            <column name="name" value="ACME Corp"/>
+        </insert>
+        <insert tableName="Org">
+            <column name="id" value="2"/>
+            <column name="month" value="12"/>
+            <column name="name" value="Google"/>
+        </insert>
+        <insert tableName="Org">
+            <column name="id" value="3"/>
+            <column name="month" value="12"/>
+            <column name="name" value="Facebook"/>
+        </insert>
+    </changeSet>
+
 </databaseChangeLog>

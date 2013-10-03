@@ -23,6 +23,7 @@ public class RenameColumnChange extends AbstractChange {
     private String oldColumnName;
     private String newColumnName;
     private String columnDataType;
+    private String remarks;
 
     @DatabaseChangeProperty(mustEqualExisting ="column.relation.catalog", since = "3.0")
     public String getCatalogName() {
@@ -78,6 +79,15 @@ public class RenameColumnChange extends AbstractChange {
         this.columnDataType = columnDataType;
     }
 
+    @DatabaseChangeProperty(description = "Remarks of the column")
+    public String getRemarks() {
+        return remarks;
+    }
+
+    public void setRemarks(String remarks) {
+        this.remarks = remarks;
+    }
+
     public SqlStatement[] generateStatements(Database database) {
 //todo    	if (database instanceof SQLiteDatabase) {
 //    		// return special statements for SQLite databases
@@ -88,7 +98,7 @@ public class RenameColumnChange extends AbstractChange {
                 getCatalogName(),
                 getSchemaName(),
     			getTableName(), getOldColumnName(), getNewColumnName(), 
-    			getColumnDataType())
+    			getColumnDataType(),getRemarks())
         };
     }
     

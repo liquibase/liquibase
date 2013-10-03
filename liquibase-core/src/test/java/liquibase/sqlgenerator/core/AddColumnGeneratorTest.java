@@ -1,5 +1,7 @@
 package liquibase.sqlgenerator.core;
 
+import org.junit.Test;
+
 import liquibase.database.core.*;
 import liquibase.sqlgenerator.AbstractSqlGeneratorTest;
 import liquibase.sqlgenerator.MockSqlGeneratorChain;
@@ -10,8 +12,11 @@ import liquibase.statement.core.AddColumnStatement;
 import static org.junit.Assert.*;
 
 public class AddColumnGeneratorTest extends AbstractSqlGeneratorTest<AddColumnStatement> {
+	private static final String TABLE_NAME = "table_name";
+	private static final String COLUMN_NAME = "column_name";
+    private static final String COLUMN_TYPE = "column_type";
 
-    public AddColumnGeneratorTest() throws Exception {
+	public AddColumnGeneratorTest() throws Exception {
         this(new AddColumnGenerator());
     } 
 
@@ -21,14 +26,14 @@ public class AddColumnGeneratorTest extends AbstractSqlGeneratorTest<AddColumnSt
 
 	@Override
 	protected AddColumnStatement createSampleSqlStatement() {
-		return new AddColumnStatement(null, null, "table_name", "column_name", "column_type", null);
+		return new AddColumnStatement(null, null, TABLE_NAME, COLUMN_NAME, COLUMN_TYPE, null);
 	}
 
 
 	@Override
     public void isValid() throws Exception {
         super.isValid();
-        AddColumnStatement addPKColumn = new AddColumnStatement(null, null, "table_name", "column_name", "column_type", null, new PrimaryKeyConstraint("pk_name"));
+        AddColumnStatement addPKColumn = new AddColumnStatement(null, null, TABLE_NAME, COLUMN_NAME, COLUMN_TYPE, null, new PrimaryKeyConstraint("pk_name"));
 
         assertFalse(generatorUnderTest.validate(addPKColumn, new OracleDatabase(), new MockSqlGeneratorChain()).hasErrors());
         assertTrue(generatorUnderTest.validate(addPKColumn, new CacheDatabase(), new MockSqlGeneratorChain()).getErrorMessages().contains("Cannot add a primary key column"));
@@ -41,4 +46,12 @@ public class AddColumnGeneratorTest extends AbstractSqlGeneratorTest<AddColumnSt
 
         assertTrue(generatorUnderTest.validate(new AddColumnStatement(null, null, null, null, null, null, new AutoIncrementConstraint()), new MySQLDatabase(), new MockSqlGeneratorChain()).getErrorMessages().contains("Cannot add a non-primary key identity column"));
     }
+	
+	@Test
+	public void testAddColumnAfter() {
+		AddColumnStatement statement = new AddColumnStatement(null, null, TABLE_NAME, COLUMN_NAME, COLUMN_TYPE, null);
+		statement.setAddAfterColumn("column_after");
+
+		assertFalse(generatorUnderTest.validate(statement, new MySQLDatabase(), new MockSqlGeneratorChain()).hasErrors());
+	}
 }

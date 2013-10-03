@@ -5,7 +5,10 @@ import liquibase.database.Database;
 import liquibase.diff.*;
 import liquibase.diff.compare.CompareControl;
 import liquibase.exception.DatabaseException;
+import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.snapshot.DatabaseSnapshot;
+import liquibase.snapshot.EmptyDatabaseSnapshot;
+import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.JdbcDatabaseSnapshot;
 import liquibase.structure.DatabaseObject;
 import liquibase.diff.compare.DatabaseObjectComparatorFactory;
@@ -14,18 +17,25 @@ import java.util.Set;
 
 public class StandardDiffGenerator implements DiffGenerator {
 
+    @Override
     public int getPriority() {
         return PRIORITY_DEFAULT;
     }
 
+    @Override
     public boolean supports(Database referenceDatabase, Database comparisonDatabase) {
         return true;
     }
 
+    @Override
     public DiffResult compare(DatabaseSnapshot referenceSnapshot, DatabaseSnapshot comparisonSnapshot, CompareControl compareControl) throws DatabaseException {
 
         if (comparisonSnapshot == null) {
-            comparisonSnapshot = new JdbcDatabaseSnapshot(referenceSnapshot.getDatabase()); //, compareControl.toSnapshotControl(CompareControl.DatabaseRole.REFERENCE));
+            try {
+                comparisonSnapshot = new EmptyDatabaseSnapshot(referenceSnapshot.getDatabase()); //, compareControl.toSnapshotControl(CompareControl.DatabaseRole.REFERENCE));
+            } catch (InvalidExampleException e) {
+                throw new UnexpectedLiquibaseException(e);
+            }
         }
 
         DiffResult diffResult = new DiffResult(referenceSnapshot, comparisonSnapshot, compareControl);
@@ -74,7 +84,7 @@ public class StandardDiffGenerator implements DiffGenerator {
                 if (comparisonObject == null) {
                     diffResult.addMissingObject(referenceObject);
                 } else {
-                    ObjectDifferences differences = DatabaseObjectComparatorFactory.getInstance().findDifferences(referenceObject, comparisonObject, comparisonSnapshot.getDatabase());
+                    ObjectDifferences differences = DatabaseObjectComparatorFactory.getInstance().findDifferences(referenceObject, comparisonObject, comparisonSnapshot.getDatabase(), diffResult.getCompareControl());
                     if (differences.hasDifferences()) {
                         diffResult.addChangedObject(referenceObject, differences);
                     }

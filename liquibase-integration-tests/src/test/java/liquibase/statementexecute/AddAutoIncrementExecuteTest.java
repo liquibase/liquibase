@@ -25,13 +25,13 @@ public class AddAutoIncrementExecuteTest extends AbstractExecuteTest {
         if (database instanceof MySQLDatabase) {
             table.addPrimaryKeyColumn("id", DataTypeFactory.getInstance().fromDescription("int"), null, "pk_", null);
         } else {
-            table.addColumn("id", DataTypeFactory.getInstance().fromDescription("int"), null, new NotNullConstraint());
+            table.addColumn("id", DataTypeFactory.getInstance().fromDescription("int"), null, new ColumnConstraint[]{new NotNullConstraint()});
         }
         statements.add(table);
 
         if (database.supportsSchemas()) {
             table = new CreateTableStatement(DatabaseTestContext.ALT_CATALOG, DatabaseTestContext.ALT_SCHEMA, TABLE_NAME);
-            table.addColumn("id", DataTypeFactory.getInstance().fromDescription("int"), null, new NotNullConstraint());
+            table.addColumn("id", DataTypeFactory.getInstance().fromDescription("int"), null, new ColumnConstraint[]{new NotNullConstraint()});
             statements.add(table);
         }
         return statements;

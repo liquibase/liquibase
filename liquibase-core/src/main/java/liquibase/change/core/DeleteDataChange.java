@@ -13,7 +13,7 @@ public class DeleteDataChange extends AbstractModifyDataChange {
 
         DeleteStatement statement = new DeleteStatement(getCatalogName(), getSchemaName(), getTableName());
 
-        statement.setWhereClause(whereClause);
+        statement.setWhereClause(where);
 
         for (ColumnConfig whereParam : whereParams) {
             if (whereParam.getName() != null) {

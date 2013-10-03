@@ -2,6 +2,7 @@ package liquibase.change.core;
 
 import liquibase.change.*;
 import liquibase.database.Database;
+import liquibase.database.core.MySQLDatabase;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.datatype.LiquibaseDataType;
 import liquibase.exception.UnexpectedLiquibaseException;
@@ -54,7 +55,7 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
 
     public SqlStatement[] generateStatements(Database database) {
 
-        CreateTableStatement statement = new CreateTableStatement(getCatalogName(), getSchemaName(), getTableName());
+        CreateTableStatement statement = new CreateTableStatement(getCatalogName(), getSchemaName(), getTableName(),getRemarks());
         for (ColumnConfig column : getColumns()) {
             ConstraintsConfig constraints = column.getConstraints();
             boolean isAutoIncrement = column.isAutoIncrement() != null && column.isAutoIncrement();
@@ -69,7 +70,8 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
             } else {
                 statement.addColumn(column.getName(),
                         columnType,
-                        defaultValue);
+                        defaultValue,
+                        column.getRemarks());
             }
 
 
@@ -118,7 +120,7 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
             String columnRemarks = StringUtils.trimToNull(column.getRemarks());
             if (columnRemarks != null) {
                 SetColumnRemarksStatement remarksStatement = new SetColumnRemarksStatement(catalogName, schemaName, tableName, column.getName(), columnRemarks);
-                if (SqlGeneratorFactory.getInstance().supports(remarksStatement, database)) {
+                if (!(database instanceof MySQLDatabase) && SqlGeneratorFactory.getInstance().supports(remarksStatement, database)) {
                     statements.add(remarksStatement);
                 }
             }

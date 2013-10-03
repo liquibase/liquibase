@@ -46,6 +46,18 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
         if (database instanceof MySQLDatabase && statement.isAutoIncrement() && !statement.isPrimaryKey()) {
             validationErrors.addError("Cannot add a non-primary key identity column");
         }
+        
+        // TODO is this feature valid for other databases?
+        if ((statement.getAddAfterColumn() != null) && !(database instanceof MySQLDatabase)) {
+        	validationErrors.addError("Cannot add column on specific position");
+        }
+        if ((statement.getAddBeforeColumn() != null) && !((database instanceof H2Database) || (database instanceof HsqlDatabase))) {
+        	validationErrors.addError("Cannot add column on specific position");
+        }
+        if ((statement.getAddAtPosition() != null) && !(database instanceof FirebirdDatabase)) {
+        	validationErrors.addError("Cannot add column on specific position");
+        }
+        
         return validationErrors;
     }
 
@@ -61,7 +73,7 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
         if (!statement.isNullable()) {
             alterTable += " NOT NULL";
         } else {
-            if (database instanceof SybaseDatabase || database instanceof SybaseASADatabase) {
+            if (database instanceof SybaseDatabase || database instanceof SybaseASADatabase || database instanceof MySQLDatabase) {
                 alterTable += " NULL";
             }
         }
@@ -71,6 +83,10 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
         }
 
         alterTable += getDefaultClause(statement, database);
+
+        if( database instanceof MySQLDatabase && statement.getRemarks() != null ) {
+            alterTable += " COMMENT '" + statement.getRemarks() + "' ";
+        }
 
         List<Sql> returnSql = new ArrayList<Sql>();
         returnSql.add(new UnparsedSql(alterTable, getAffectedColumn(statement)));

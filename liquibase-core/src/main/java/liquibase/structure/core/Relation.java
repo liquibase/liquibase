@@ -11,14 +11,26 @@ import java.util.List;
  */
 public abstract class Relation extends AbstractDatabaseObject {
 
+    private String name;
+
     protected Relation() {
         setAttribute("columns", new ArrayList());
     }
 
+    @Override
     public String getName() {
-        return getAttribute("name", String.class);
+        return name;
     }
 
+    @Override
+    public Relation setName(String name) {
+        setAttribute("name", name);
+        this.name = name;
+
+        return this;
+    }
+
+    @Override
     public DatabaseObject[] getContainingObjects() {
         return new DatabaseObject[]{
                 getSchema()
@@ -55,6 +67,7 @@ public abstract class Relation extends AbstractDatabaseObject {
     /**
      * @return Returns the schema.
      */
+    @Override
     public Schema getSchema() {
         return getAttribute("schema", Schema.class);
     }

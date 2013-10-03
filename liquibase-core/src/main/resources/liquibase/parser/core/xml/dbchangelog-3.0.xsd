@@ -997,13 +997,6 @@
 		</xsd:complexType>
 	</xsd:element>
 
-	<xsd:group name="whereClause">
-		<xsd:sequence>
-			<xsd:element name="whereClause" type="xsd:string"
-				minOccurs="0" maxOccurs="unbounded" />
-		</xsd:sequence>
-	</xsd:group>
-
 	<xsd:element name="createSequence">
 		<xsd:complexType>
 			<xsd:attributeGroup ref="sequenceAttributes" />

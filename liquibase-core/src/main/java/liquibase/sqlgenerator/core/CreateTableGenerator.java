@@ -117,7 +117,7 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
                         additionalSql.add(new UnparsedSql("alter sequence "+database.escapeSequenceName(statement.getCatalogName(), statement.getSchemaName(), sequenceName)+" start with "+autoIncrementConstraint.getStartWith(), new Sequence().setName(sequenceName).setSchema(statement.getCatalogName(), statement.getSchemaName())));
                     }
                 } else {
-                    LogFactory.getLogger().warning(database.getShortName()+" does not support autoincrement columns as request for "+(database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName())));
+                    LogFactory.getLogger().warning(database.getShortName()+" does not support autoincrement columns as requested for "+(database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName())));
                 }
             }
 
@@ -125,17 +125,17 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
                 buffer.append(" NOT NULL");
             } else {
                 if (database instanceof SybaseDatabase || database instanceof SybaseASADatabase || database instanceof MySQLDatabase) {
-                    if (database instanceof MySQLDatabase && statement.getColumnTypes().get(column).getName().equalsIgnoreCase("timestamp")) {
-                        //don't append null
-                    } else {
-                        buffer.append(" NULL");
-                    }
-
+                    buffer.append(" NULL");
                 }
             }
 
             if (database instanceof InformixDatabase && isSinglePrimaryKeyColumn && isPrimaryKeyColumn) {
                 //buffer.append(" PRIMARY KEY");
+            }
+
+            if(database instanceof MySQLDatabase && statement.getColumnRemarks(column) != null){
+                buffer.append(" COMMENT '" + statement.getColumnRemarks(column) + "'");
+
             }
 
             if (columnIterator.hasNext()) {
@@ -145,7 +145,6 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
 
         buffer.append(",");
 
-        // TODO informixdb
         if (!( (database instanceof SQLiteDatabase) &&
                 isSinglePrimaryKeyColumn &&
                 isPrimaryKeyAutoIncrement) &&
@@ -158,7 +157,7 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
             // This constraint is added after the column type.
 
             if (statement.getPrimaryKeyConstraint() != null && statement.getPrimaryKeyConstraint().getColumns().size() > 0) {
-                if (!(database instanceof InformixDatabase)) {
+                if (database.supportsPrimaryKeyNames()) {
                     String pkName = StringUtils.trimToNull(statement.getPrimaryKeyConstraint().getConstraintName());
                     if (pkName == null) {
                         // TODO ORA-00972: identifier is too long
@@ -248,6 +247,8 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
 
         String sql = buffer.toString().replaceFirst(",\\s*$", "") + ")";
 
+
+
 //        if (StringUtils.trimToNull(tablespace) != null && database.supportsTablespaces()) {
 //            if (database instanceof MSSQLDatabase) {
 //                buffer.append(" ON ").append(tablespace);
@@ -268,6 +269,9 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
             }
         }
 
+        if( database instanceof MySQLDatabase && statement.getRemarks() != null) {
+            sql += " COMMENT='"+statement.getRemarks()+"' ";
+        }
         additionalSql.add(0, new UnparsedSql(sql, getAffectedTable(statement)));
         return additionalSql.toArray(new Sql[additionalSql.size()]);
     }

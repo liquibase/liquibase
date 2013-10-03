@@ -1,5 +1,7 @@
 package liquibase.logging;
 
+import liquibase.changelog.ChangeSet;
+import liquibase.changelog.DatabaseChangeLog;
 import liquibase.servicelocator.PrioritizedService;
 
 public interface Logger extends PrioritizedService {
@@ -29,5 +31,9 @@ public interface Logger extends PrioritizedService {
     LogLevel getLogLevel();
 
     void debug(String message, Throwable e);
+
+    void setChangeLog(DatabaseChangeLog databaseChangeLog);
+
+    void setChangeSet(ChangeSet changeSet);
 
 }

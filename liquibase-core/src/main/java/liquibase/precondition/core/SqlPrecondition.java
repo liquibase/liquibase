@@ -31,14 +31,17 @@ public class SqlPrecondition implements Precondition {
         this.sql = sql;
     }
 
+    @Override
     public Warnings warn(Database database) {
         return new Warnings();
     }
 
+    @Override
     public ValidationErrors validate(Database database) {
         return new ValidationErrors();
     }
 
+    @Override
     public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet) throws PreconditionFailedException, PreconditionErrorException {
         DatabaseConnection connection = database.getConnection();
         try {
@@ -47,8 +50,9 @@ public class SqlPrecondition implements Precondition {
                 throw new PreconditionFailedException("No rows returned from SQL Precondition", changeLog, this);
             }
 
+            String expectedResult = getExpectedResult();
             if (!expectedResult.equals(result)) {
-                throw new PreconditionFailedException("SQL Precondition failed.  Expected '"+expectedResult+"' got '"+result+"'", changeLog, this);
+                throw new PreconditionFailedException("SQL Precondition failed.  Expected '"+ expectedResult +"' got '"+result+"'", changeLog, this);
             }
 
         } catch (DatabaseException e) {
@@ -56,6 +60,7 @@ public class SqlPrecondition implements Precondition {
         }
     }
 
+    @Override
     public String getName() {
         return "sqlCheck";
     }

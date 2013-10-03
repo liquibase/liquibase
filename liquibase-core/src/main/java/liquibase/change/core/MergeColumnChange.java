@@ -118,7 +118,7 @@ public class MergeColumnChange extends AbstractChange {
         AddColumnChange addNewColumnChange = new AddColumnChange();
         addNewColumnChange.setSchemaName(schemaName);
         addNewColumnChange.setTableName(getTableName());
-        ColumnConfig columnConfig = new ColumnConfig();
+        AddColumnConfig columnConfig = new AddColumnConfig();
         columnConfig.setName(getFinalColumnName());
         columnConfig.setType(getFinalColumnType());
         addNewColumnChange.addColumn(columnConfig);

@@ -29,7 +29,9 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <processorPath useClasspath="true" />
+        <module name="liquibase-cdi" />
         <module name="liquibase-core" />
+        <module name="liquibase-debian" />
         <module name="liquibase-integration-tests" />
         <module name="liquibase-maven-plugin" />
         <module name="liquibase-osgi" />
@@ -37,13 +39,15 @@
     </annotationProcessing>
     <bytecodeTargetLevel>
       <module name="liquibase" target="1.5" />
-      <module name="liquibase-core" target="1.5" />
+      <module name="liquibase-cdi" target="1.6" />
+      <module name="liquibase-core" target="1.6" />
       <module name="liquibase-ext-change" target="1.5" />
       <module name="liquibase-ext-changewithnestedtags" target="1.5" />
       <module name="liquibase-ext-sqlgenerator" target="1.5" />
-      <module name="liquibase-integration-tests" target="1.5" />
-      <module name="liquibase-maven-plugin" target="1.5" />
-      <module name="liquibase-osgi" target="1.5" />
+      <module name="liquibase-integration-tests" target="1.6" />
+      <module name="liquibase-maven-plugin" target="1.6" />
+      <module name="liquibase-osgi" target="1.6" />
+      <module name="liquibase-parent" target="1.6" />
     </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">

@@ -1,5 +1,14 @@
 package liquibase.parser.core.xml;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
+import java.util.List;
+
+import liquibase.change.AddColumnConfig;
 import liquibase.change.Change;
 import liquibase.change.ChangeFactory;
 import liquibase.change.core.AddColumnChange;
@@ -7,6 +16,7 @@ import liquibase.change.core.CreateTableChange;
 import liquibase.change.core.RawSQLChange;
 import liquibase.change.custom.CustomChangeWrapper;
 import liquibase.change.custom.ExampleCustomSqlChange;
+import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.ChangeLogParameters;
@@ -15,7 +25,6 @@ import liquibase.exception.ChangeLogParseException;
 import liquibase.precondition.core.OrPrecondition;
 import liquibase.precondition.core.PreconditionContainer;
 import liquibase.test.JUnitResourceAccessor;
-import static org.junit.Assert.*;
 
 import org.junit.Test;
 
@@ -219,8 +228,7 @@ public class XMLChangeLogSAXParserTest {
     	final String nestedFileName = "liquibase/parser/core/xml/nestedChangeLog.xml";
         DatabaseChangeLog changeLog = new XMLChangeLogSAXParser().parse(doubleNestedFileName, new ChangeLogParameters(), new JUnitResourceAccessor());
 
-        doubleNestedFileAssertions(doubleNestedFileName, nestedFileName,
-				changeLog);
+        doubleNestedFileAssertions(doubleNestedFileName, nestedFileName, changeLog);
     }
 
     @Test
@@ -233,8 +241,7 @@ public class XMLChangeLogSAXParserTest {
 				changeLog);
     }
 
-	private void doubleNestedFileAssertions(final String doubleNestedFileName,
-			final String nestedFileName, DatabaseChangeLog changeLog) {
+	private void doubleNestedFileAssertions(final String doubleNestedFileName, final String nestedFileName, DatabaseChangeLog changeLog) {
 		assertEquals(doubleNestedFileName, changeLog.getLogicalFilePath());
         assertEquals(doubleNestedFileName, changeLog.getPhysicalFilePath());
 
@@ -362,4 +369,72 @@ public class XMLChangeLogSAXParserTest {
 		assertEquals("drop table rawsql", ((RawSQLChange) changeSet.getRollBackChanges()[0]).getSql());
 	}
 
+	@Test
+	public void addColumnAfter() throws Exception {
+        DatabaseChangeLog changeLog = new XMLChangeLogSAXParser().parse("liquibase/parser/core/xml/columnAfterChangeLog.xml", new ChangeLogParameters(), new JUnitResourceAccessor());
+        
+        // change 0
+        ChangeSet changeSet = changeLog.getChangeSets().get(0);
+        assertEquals("1", changeSet.getId());
+        
+        // change 1
+        changeSet = changeLog.getChangeSets().get(1);
+        assertEquals("2", changeSet.getId());
+
+        List<Change> changes = changeSet.getChanges();
+        assertEquals(1, changes.size());
+
+        Change change = changes.get(0);
+        assertTrue(change instanceof AddColumnChange);
+
+        List<AddColumnConfig> columns = ((AddColumnChange) change).getColumns();
+        assertEquals(1, columns.size());
+        
+        AddColumnConfig columnConfig = columns.get(0);
+        assertEquals("middlename", columnConfig.getName());
+        
+        assertEquals("firstname", columnConfig.getAfterColumn());
+	}
+
+	@Test
+	public void addColumnBefore() throws Exception {
+        DatabaseChangeLog changeLog = new XMLChangeLogSAXParser().parse("liquibase/parser/core/xml/columnBeforeChangeLog.xml", new ChangeLogParameters(), new JUnitResourceAccessor());
+        
+        // change 0
+        ChangeSet changeSet = changeLog.getChangeSets().get(0);
+        assertEquals("1", changeSet.getId());
+        
+        // change 1
+        changeSet = changeLog.getChangeSets().get(1);
+        assertEquals("2", changeSet.getId());
+
+        List<Change> changes = changeSet.getChanges();
+        assertEquals(1, changes.size());
+
+        Change change = changes.get(0);
+        assertTrue(change instanceof AddColumnChange);
+
+        List<AddColumnConfig> columns = ((AddColumnChange) change).getColumns();
+        assertEquals(1, columns.size());
+        
+        AddColumnConfig columnConfig = columns.get(0);
+        assertEquals("middlename", columnConfig.getName());
+        
+        assertEquals("lastname", columnConfig.getBeforeColumn());
+	}
+
+	@Test
+	public void addColumnFirst() throws Exception {
+        DatabaseChangeLog changeLog = new XMLChangeLogSAXParser().parse("liquibase/parser/core/xml/columnFirstChangeLog.xml", new ChangeLogParameters(), new JUnitResourceAccessor());
+        
+        ChangeSet changeSet = changeLog.getChangeSets().get(1);
+        List<Change> changes = changeSet.getChanges();
+        Change change = changes.get(0);
+        List<AddColumnConfig> columns = ((AddColumnChange) change).getColumns();
+        
+        AddColumnConfig columnConfig = columns.get(0);
+        assertEquals("middlename", columnConfig.getName());
+
+		assertEquals(Integer.valueOf(1), columnConfig.getPosition());
+	}
 }

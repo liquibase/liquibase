@@ -1,5 +1,6 @@
 package liquibase.serializer.core.xml;
 
+import liquibase.change.AddColumnConfig;
 import liquibase.change.ColumnConfig;
 import liquibase.change.ConstraintsConfig;
 import liquibase.change.core.*;
@@ -53,7 +54,7 @@ public class XMLChangeLogSerializerTest {
     public void createNode_addColumnChange() throws Exception {
         AddColumnChange refactoring = new AddColumnChange();
         refactoring.setTableName("TAB");
-        ColumnConfig column = new ColumnConfig();
+        AddColumnConfig column = new AddColumnConfig();
         column.setName("NEWCOL");
         column.setType("TYP");
         refactoring.addColumn(column);
@@ -263,11 +264,11 @@ public class XMLChangeLogSerializerTest {
         refactoring.setIndexName("IDX_TEST");
         refactoring.setTableName("TAB_NAME");
 
-        ColumnConfig column1 = new ColumnConfig();
+        AddColumnConfig column1 = new AddColumnConfig();
         column1.setName("COL1");
         refactoring.addColumn(column1);
 
-        ColumnConfig column2 = new ColumnConfig();
+        AddColumnConfig column2 = new AddColumnConfig();
         column2.setName("COL2");
         refactoring.addColumn(column2);
 
@@ -791,13 +792,13 @@ public class XMLChangeLogSerializerTest {
         change.setCatalogName("a");
         change.setSchemaName("b");
         change.setTableName("c");
-        change.setWhereClause("Some Text");
+        change.setWhere("Some Text");
 
         String out = new XMLChangeLogSerializer().serialize(change, true);
         assertEquals("<update catalogName=\"a\"\n" +
                 "        schemaName=\"b\"\n" +
                 "        tableName=\"c\">\n" +
-                "    <whereClause>Some Text</whereClause>\n" +
+                "    <where>Some Text</where>\n" +
                 "</update>", out);
     }
 

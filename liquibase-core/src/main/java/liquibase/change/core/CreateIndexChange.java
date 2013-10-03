@@ -12,7 +12,7 @@ import java.util.List;
  * Creates an index on an existing column.
  */
 @DatabaseChange(name="createIndex", description = "Creates an index on an existing column or set of columns.", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "index")
-public class CreateIndexChange extends AbstractChange implements ChangeWithColumns<ColumnConfig> {
+public class CreateIndexChange extends AbstractChange implements ChangeWithColumns<AddColumnConfig> {
 
     private String catalogName;
     private String schemaName;
@@ -20,7 +20,7 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
     private String indexName;
     private Boolean unique;
     private String tablespace;
-    private List<ColumnConfig> columns;
+    private List<AddColumnConfig> columns;
 
 	// Contain associations of index
 	// for example: foreignKey, primaryKey or uniqueConstraint
@@ -28,7 +28,7 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
 
 
     public CreateIndexChange() {
-        columns = new ArrayList<ColumnConfig>();
+        columns = new ArrayList<AddColumnConfig>();
     }
 
     @DatabaseChangeProperty(mustEqualExisting = "index", description = "Name of the index to create")
@@ -49,7 +49,7 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
         this.schemaName = schemaName;
     }
 
-    @DatabaseChangeProperty(mustEqualExisting = "index.table", description = "Name of the table to add the index to", exampleValue = "user")
+    @DatabaseChangeProperty(mustEqualExisting = "index.table", description = "Name of the table to add the index to", exampleValue = "person")
     public String getTableName() {
         return tableName;
     }
@@ -58,19 +58,22 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
         this.tableName = tableName;
     }
 
+    @Override
     @DatabaseChangeProperty(mustEqualExisting = "index.column", description = "Column(s) to add to the index", requiredForDatabase = "all")
-    public List<ColumnConfig> getColumns() {
+    public List<AddColumnConfig> getColumns() {
         if (columns == null) {
-            return new ArrayList<ColumnConfig>();
+            return new ArrayList<AddColumnConfig>();
         }
         return columns;
     }
 
-    public void setColumns(List<ColumnConfig> columns) {
+    @Override
+    public void setColumns(List<AddColumnConfig> columns) {
         this.columns = columns;
     }
 
-    public void addColumn(ColumnConfig column) {
+    @Override
+    public void addColumn(AddColumnConfig column) {
         columns.add(column);
     }
 
@@ -84,6 +87,7 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
         this.tablespace = tablespace;
     }
 
+    @Override
     public SqlStatement[] generateStatements(Database database) {
         List<String> columns = new ArrayList<String>();
         for (ColumnConfig column : getColumns()) {
@@ -115,6 +119,7 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
         };
     }
 
+    @Override
     public String getConfirmationMessage() {
         return "Index " + getIndexName() + " created";
     }

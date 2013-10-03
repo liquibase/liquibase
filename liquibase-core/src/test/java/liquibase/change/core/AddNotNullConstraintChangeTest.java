@@ -39,7 +39,7 @@ public class AddNotNullConstraintChangeTest extends StandardChangeTest {
 //
 //                assertEquals("SCHEMA_NAME", ((UpdateStatement) sqlStatements[0]).getSchemaName());
 //                assertEquals("TABLE_NAME", ((UpdateStatement) sqlStatements[0]).getTableName());
-//                assertEquals("COL_HERE IS NULL", ((UpdateStatement) sqlStatements[0]).getWhereClause());
+//                assertEquals("COL_HERE IS NULL", ((UpdateStatement) sqlStatements[0]).getWhere());
 //                assertEquals("DEFAULT_VALUE", ((UpdateStatement) sqlStatements[0]).getNewColumnValues().get("COL_HERE"));
 //
 //                assertEquals("SCHEMA_NAME", ((SetNullableStatement) sqlStatements[1]).getSchemaName());

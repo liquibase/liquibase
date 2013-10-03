@@ -130,15 +130,15 @@ public class LoadUpdateDataChangeTest extends StandardChangeTest {
         change.setPrimaryKey("name");
         SqlStatement[] statements = change.generateStatements(database);
 
-//        private String getWhereClause(InsertOrUpdateStatement insertOrUpdateStatement, Database database)
+//        private String getWhere(InsertOrUpdateStatement insertOrUpdateStatement, Database database)
 
         Object[] args ;
         String result ;
         args = new Object[] { statements[0], database };
-        result = (String)invokePrivateMethod(change,"getWhereClause",args);
+        result = (String)invokePrivateMethod(change,"getWhere",args);
         assertEquals("name = 'Bob Johnson'",result.trim());
         args = new Object[] { statements[1], database };
-        result = (String)invokePrivateMethod(change,"getWhereClause",args);
+        result = (String)invokePrivateMethod(change,"getWhere",args);
         assertEquals("name = 'John Doe'",result.trim());
 
     }

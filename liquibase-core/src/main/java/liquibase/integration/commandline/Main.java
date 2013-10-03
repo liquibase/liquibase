@@ -1,15 +1,6 @@
 package liquibase.integration.commandline;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStreamWriter;
-import java.io.PrintStream;
-import java.io.Writer;
+import java.io.*;
 import java.lang.reflect.Field;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -490,7 +481,9 @@ public class Main {
         stream.println("Required Parameters:");
         stream.println(" --changeLogFile=<path and filename>        Migration file");
         stream.println(" --username=<value>                         Database username");
-        stream.println(" --password=<value>                         Database password");
+        stream.println(" --password=<value>                         Database password. If values");
+        stream.println("                                            is PROMPT, Liquibase will");
+        stream.println("                                            prompt for a password");
         stream.println(" --url=<value>                              Database URL");
         stream.println("");
         stream.println("Optional Parameters:");
@@ -530,13 +523,22 @@ public class Main {
         stream.println("");
         stream.println("Required Diff Parameters:");
         stream.println(" --referenceUsername=<value>                Reference Database username");
-        stream.println(" --referencePassword=<value>                Reference Database password");
+        stream.println(" --referencePassword=<value>                Reference Database password. If");
+        stream.println("                                            value is PROMPT, Liquibase will");
+        stream.println("                                            prompt for a password");
         stream.println(" --referenceUrl=<value>                     Reference Database URL");
         stream.println("");
         stream.println("Optional Diff Parameters:");
         stream.println(" --referenceDriver=<jdbc.driver.ClassName>  Reference Database driver class name");
         stream.println(" --dataOutputDirectory=DIR                  Output data as CSV in the given ");
         stream.println("                                            directory");
+        stream.println(" --diffTypes                                List of diff types to include in Change Log ");
+        stream.println("                                            expressed as a comma separated list from: ");
+        stream.println("                                            tables, views, columns, indexes, foreignkeys, ");
+        stream.println("                                            primarykeys, uniqueconstraints, data. ");
+        stream.println("                                            If this is null then the default types will be: ");
+        stream.println("                                            tables, views, columns, indexes, foreignkeys, ");
+        stream.println("                                            primarykeys, uniqueconstraints.");
         stream.println("");
         stream.println("Change Log Properties:");
         stream.println(" -D<property.name>=<property.value>         Pass a name/value pair for");
@@ -583,6 +585,19 @@ public class Main {
 
                 String attributeName = splitArg[0];
                 String value = splitArg[1];
+
+                if (StringUtils.trimToEmpty(value).equalsIgnoreCase("PROMPT")) {
+                    Console c = System.console();
+                    if (c == null) {
+                        throw new CommandLineParsingException("Console unavailable");
+                    }
+                    //Prompt for value
+                    if (attributeName.toLowerCase().contains("password")) {
+                        value = new String(c.readPassword(attributeName+": "));
+                    } else {
+                        value = new String(c.readLine(attributeName+": "));
+                    }
+                }
 
                 try {
                     Field field = getClass().getDeclaredField(attributeName);
@@ -774,10 +789,10 @@ public class Main {
             DiffOutputControl diffOutputControl = new DiffOutputControl(includeCatalog, includeSchema, includeTablespace);
 
             if ("diff".equalsIgnoreCase(command)) {
-                CommandLineUtils.doDiff(createReferenceDatabaseFromCommandParams(commandParams), database);
+                CommandLineUtils.doDiff(createReferenceDatabaseFromCommandParams(commandParams), database, StringUtils.trimToNull(diffTypes));
                 return;
             } else if ("diffChangeLog".equalsIgnoreCase(command)) {
-                CommandLineUtils.doDiffToChangeLog(changeLogFile, createReferenceDatabaseFromCommandParams(commandParams), database, diffOutputControl);
+                CommandLineUtils.doDiffToChangeLog(changeLogFile, createReferenceDatabaseFromCommandParams(commandParams), database, diffOutputControl,  StringUtils.trimToNull(diffTypes));
                 return;
             } else if ("generateChangeLog".equalsIgnoreCase(command)) {
                 CommandLineUtils.doGenerateChangeLog(changeLogFile, database, defaultCatalogName, defaultSchemaName, StringUtils.trimToNull(diffTypes), StringUtils.trimToNull(changeSetAuthor), StringUtils.trimToNull(changeSetContext), StringUtils.trimToNull(dataOutputDirectory), diffOutputControl);

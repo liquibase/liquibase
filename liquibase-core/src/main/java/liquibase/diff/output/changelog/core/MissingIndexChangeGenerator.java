@@ -1,5 +1,6 @@
 package liquibase.diff.output.changelog.core;
 
+import liquibase.change.AddColumnConfig;
 import liquibase.change.Change;
 import liquibase.change.ColumnConfig;
 import liquibase.change.core.CreateIndexChange;
@@ -54,7 +55,7 @@ public class MissingIndexChangeGenerator implements MissingObjectChangeGenerator
 //        }
 
         for (String columnName : index.getColumns()) {
-            ColumnConfig column = new ColumnConfig();
+            AddColumnConfig column = new AddColumnConfig();
             column.setName(columnName);
             change.addColumn(column);
         }

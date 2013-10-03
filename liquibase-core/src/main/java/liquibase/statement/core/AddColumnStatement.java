@@ -14,6 +14,10 @@ public class AddColumnStatement extends AbstractSqlStatement {
     private String columnName;
     private String columnType;
     private Object defaultValue;
+    private String remarks;
+    private String addAfterColumn;
+    private String addBeforeColumn;
+    private Integer addAtPosition;
     private Set<ColumnConstraint> constraints = new HashSet<ColumnConstraint>();
 
     public AddColumnStatement(String catalogName, String schemaName, String tableName, String columnName, String columnType, Object defaultValue, ColumnConstraint... constraints) {
@@ -26,6 +30,11 @@ public class AddColumnStatement extends AbstractSqlStatement {
         if (constraints != null) {
             this.constraints.addAll(Arrays.asList(constraints));
         }
+    }
+
+    public AddColumnStatement(String catalogName, String schemaName, String tableName, String columnName, String columnType, Object defaultValue, String remarks,ColumnConstraint... constraints) {
+        this(catalogName,schemaName,tableName,columnName,columnType,defaultValue,constraints);
+        this.remarks = remarks;
     }
 
     public String getCatalogName() {
@@ -46,6 +55,10 @@ public class AddColumnStatement extends AbstractSqlStatement {
 
     public String getColumnType() {
         return columnType;
+    }
+
+    public String getRemarks() {
+        return remarks;
     }
 
     public Set<ColumnConstraint> getConstraints() {
@@ -116,4 +129,28 @@ public class AddColumnStatement extends AbstractSqlStatement {
     public Object getDefaultValue() {
         return defaultValue;
     }
+
+    public String getAddAfterColumn() {
+    	return addAfterColumn;
+    }
+
+    public void setAddAfterColumn(String addAfterColumn) {
+		this.addAfterColumn = addAfterColumn;
+	}
+
+    public String getAddBeforeColumn() {
+    	return addBeforeColumn;
+    }
+
+    public void setAddBeforeColumn(String addBeforeColumn) {
+		this.addBeforeColumn = addBeforeColumn;
+	}
+
+	public Integer getAddAtPosition() {
+		return addAtPosition;
+	}
+
+	public void setAddAtPosition(Integer addAtPosition) {
+		this.addAtPosition = addAtPosition;
+	}
 }

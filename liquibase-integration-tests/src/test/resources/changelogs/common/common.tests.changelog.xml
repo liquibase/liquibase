@@ -1087,4 +1087,13 @@
         </preConditions>
     </changeSet>
 
+
+    <changeSet id="fk-bug-in-3.0.3" author="nvoxland">
+        <preConditions>
+            <not>
+                <foreignKeyConstraintExists foreignKeyTableName="some_table" foreignKeyName="fk_some_key"/>
+            </not>
+        </preConditions>
+    </changeSet>
+
 </databaseChangeLog>
