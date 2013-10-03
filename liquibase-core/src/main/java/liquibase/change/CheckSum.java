@@ -5,6 +5,7 @@ import liquibase.util.StringUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.Normalizer;
 
 /**
  * CheckSums are used by liquibase to determine if a Change has been modified since it was originally ran.
@@ -48,7 +49,12 @@ public class CheckSum {
      * Compute a checksum of the given string.
      */
     public static CheckSum compute(String valueToChecksum) {
-        return new CheckSum(MD5Util.computeMD5(StringUtils.standardizeLineEndings(valueToChecksum)), getCurrentVersion());
+        return new CheckSum(MD5Util.computeMD5(
+                Normalizer.normalize(
+                    StringUtils.standardizeLineEndings(valueToChecksum)
+                            .replaceAll("\\uFFFD", "") //remove "Unknown" unicode char 65533
+                        , Normalizer.Form.NFC)
+        ), getCurrentVersion());
     }
 
     /**
