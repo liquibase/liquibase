@@ -47,6 +47,7 @@
       <module name="liquibase-integration-tests" target="1.6" />
       <module name="liquibase-maven-plugin" target="1.6" />
       <module name="liquibase-osgi" target="1.6" />
+      <module name="liquibase-parent" target="1.6" />
     </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">

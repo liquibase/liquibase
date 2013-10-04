@@ -32,7 +32,7 @@
     <orderEntry type="library" name="Maven: org.apache.maven:maven-artifact:2.0" level="project" />
     <orderEntry type="library" name="Maven: org.apache.maven.wagon:wagon-provider-api:1.0-alpha-5" level="project" />
     <orderEntry type="module" module-name="liquibase-core" />
-    <orderEntry type="library" name="Maven: org.yaml:snakeyaml:1.12" level="project" />
+    <orderEntry type="library" name="Maven: org.yaml:snakeyaml:1.13" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: org.apache.maven.shared:maven-plugin-testing-harness:1.1" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: org.apache.maven:maven-core:2.0" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: org.apache.maven:maven-settings:2.0" level="project" />

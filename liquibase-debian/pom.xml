@@ -18,7 +18,7 @@
     </licenses>
 
     <properties>
-        <snakeyaml.version>1.12</snakeyaml.version>
+        <snakeyaml.version>1.13</snakeyaml.version>
 
         <!-- Jdeb version, used to build the debian package  : should it match liquibase target version one ? -->
         <jdeb.version>1.0.1</jdeb.version>
