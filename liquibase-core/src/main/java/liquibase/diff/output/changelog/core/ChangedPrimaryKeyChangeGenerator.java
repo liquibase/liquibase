@@ -43,6 +43,8 @@ public class ChangedPrimaryKeyChangeGenerator  implements ChangedObjectChangeGen
         AddPrimaryKeyChange addPkChange = new AddPrimaryKeyChange();
         addPkChange.setTableName(pk.getTable().getName());
         addPkChange.setColumnNames(pk.getColumnNames());
+        addPkChange.setConstraintName(pk.getName());
+
 
         if (control.isIncludeCatalog()) {
             dropPkChange.setCatalogName(pk.getSchema().getCatalogName());
