@@ -183,11 +183,11 @@ public class DerbyDatabase extends AbstractJdbcDatabase {
                     return;
                 }
             }
-            log.debug("Unable to load/access Apache Derby driver class " + "to check version");
+//            log.debug("Unable to load/access Apache Derby driver class " + "to check version");
             driverVersionMajor = -1;
             driverVersionMinor = -1;
         } catch (Exception e) {
-            log.debug("Unable to load/access Apache Derby driver class " + "org.apache.derby.tools.sysinfo to check version: " + e.getMessage());
+//            log.debug("Unable to load/access Apache Derby driver class " + "org.apache.derby.tools.sysinfo to check version: " + e.getMessage());
             driverVersionMajor = -1;
             driverVersionMinor = -1;
         }
