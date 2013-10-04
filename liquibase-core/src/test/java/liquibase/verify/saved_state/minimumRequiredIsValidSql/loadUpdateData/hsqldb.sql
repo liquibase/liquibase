@@ -1,4 +1,8 @@
 -- Database: hsqldb
+-- Change Parameter: columns=[column:[
+--     name="id"
+--     type="int"
+-- ], ]
 -- Change Parameter: file=com/example/users.csv
 -- Change Parameter: primaryKey=pk_id
 -- Change Parameter: tableName=person
