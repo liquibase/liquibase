@@ -148,10 +148,12 @@ public abstract class AbstractJdbcDatabase implements Database {
                 LogFactory.getLogger().debug("Setting auto commit to " + getAutoCommitMode() + " from " + autoCommit);
                 connection.setAutoCommit(getAutoCommitMode());
 
-                try {
-                    reservedWords.addAll(Arrays.asList(((JdbcConnection) conn).getWrappedConnection().getMetaData().getSQLKeywords().toUpperCase().split(",\\s*")));
-                } catch (SQLException e) {
-                    LogFactory.getLogger().info("Error fetching reserved words list from JDBC driver", e);
+                if (conn instanceof JdbcConnection) {
+                    try {
+                        reservedWords.addAll(Arrays.asList(((JdbcConnection) conn).getWrappedConnection().getMetaData().getSQLKeywords().toUpperCase().split(",\\s*")));
+                    } catch (SQLException e) {
+                        LogFactory.getLogger().info("Error fetching reserved words list from JDBC driver", e);
+                    }
                 }
             }
         } catch (DatabaseException e) {

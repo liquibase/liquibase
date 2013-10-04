@@ -323,6 +323,9 @@ public class StringChangeLogSerializerTest {
                         if (typeToCreate.equals(ColumnConfig.class)) {
                             collection.add(createColumnConfig());
                             collection.add(createColumnConfig());
+                        } else if (typeToCreate.equals(AddColumnConfig.class)) {
+                            collection.add(createAddColumnConfig());
+                            collection.add(createAddColumnConfig());
                         } else if (typeToCreate.equals(LoadDataColumnConfig.class)) {
                             collection.add(createLoadDataColumnConfig());
                             collection.add(createLoadDataColumnConfig());
@@ -387,6 +390,12 @@ public class StringChangeLogSerializerTest {
 
     private ColumnConfig createColumnConfig() throws Exception {
         ColumnConfig config = new ColumnConfig();
+        setFields(config);
+        return config;
+    }
+
+    private AddColumnConfig createAddColumnConfig() throws Exception {
+        AddColumnConfig config = new AddColumnConfig();
         setFields(config);
         return config;
     }

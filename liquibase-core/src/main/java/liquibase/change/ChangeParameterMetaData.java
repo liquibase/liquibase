@@ -355,6 +355,10 @@ public class ChangeParameterMetaData {
             ArrayList<ColumnConfig> list = new ArrayList<ColumnConfig>();
             list.add(new ColumnConfig().setName("id").setType("int"));
             return list;
+        } else if (dataType.equals("list of addColumnConfig")) {
+            ArrayList<ColumnConfig> list = new ArrayList<ColumnConfig>();
+            list.add(new AddColumnConfig().setName("id").setType("int"));
+            return list;
         } else if (dataType.equals("list of loadDataColumnConfig")) {
             ArrayList<ColumnConfig> list = new ArrayList<ColumnConfig>();
             list.add(new LoadDataColumnConfig().setName("id").setType("int"));
