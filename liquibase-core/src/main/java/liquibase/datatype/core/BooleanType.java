@@ -5,6 +5,7 @@ import liquibase.database.core.*;
 import liquibase.datatype.DataTypeInfo;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
+import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.statement.DatabaseFunction;
 
@@ -26,7 +27,11 @@ public class BooleanType extends LiquibaseDataType {
         } else if (database instanceof SybaseASADatabase || database instanceof SybaseDatabase) {
             return new DatabaseDataType("BIT");
         } else if (database instanceof DerbyDatabase) {
-            return new DatabaseDataType("SMALLINT");
+            if (((DerbyDatabase) database).supportsBooleanDataType()) {
+                return new DatabaseDataType("BOOLEAN");
+            } else {
+                return new DatabaseDataType("SMALLINT");
+            }
         } else if (database instanceof HsqlDatabase) {
             return new DatabaseDataType("BOOLEAN");
         }
@@ -67,6 +72,9 @@ public class BooleanType extends LiquibaseDataType {
     }
 
     protected boolean isNumericBoolean(Database database) {
+        if (database instanceof DerbyDatabase) {
+            return !((DerbyDatabase) database).supportsBooleanDataType();
+        }
         return database instanceof CacheDatabase
                 || database instanceof DB2Database
                 || database instanceof FirebirdDatabase
@@ -74,8 +82,7 @@ public class BooleanType extends LiquibaseDataType {
                 || database instanceof MySQLDatabase
                 || database instanceof OracleDatabase
                 || database instanceof SybaseASADatabase
-                || database instanceof SybaseDatabase
-                || database instanceof DerbyDatabase;
+                || database instanceof SybaseDatabase;
 
     }
 
