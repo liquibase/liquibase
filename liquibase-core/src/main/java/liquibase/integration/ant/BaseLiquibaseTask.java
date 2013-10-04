@@ -219,6 +219,7 @@ public abstract class BaseLiquibaseTask extends Task {
         }
 
         URLClassLoader loader = AccessController.doPrivileged(new PrivilegedAction<URLClassLoader>() {
+            @Override
             public URLClassLoader run() {
                 return new URLClassLoader(taskClassPath.toArray(new URL[taskClassPath.size()]), Database.class.getClassLoader());
             }

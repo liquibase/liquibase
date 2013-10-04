@@ -622,14 +622,17 @@ public class ColumnConfig implements LiquibaseSerializable {
         return this;
     }
 
+    @Override
     public String getSerializedObjectName() {
         return "column";
     }
 
+    @Override
     public Set<String> getSerializableFields() {
         return ReflectionSerializer.getInstance().getFields(this);
     }
 
+    @Override
     public Object getSerializableFieldValue(String field) {
         return ReflectionSerializer.getInstance().getValue(this, field);
     }
@@ -644,6 +647,7 @@ public class ColumnConfig implements LiquibaseSerializable {
         return this;
     }
     
+    @Override
     public SerializationType getSerializableFieldType(String field) {
         return SerializationType.NAMED_FIELD;
     }

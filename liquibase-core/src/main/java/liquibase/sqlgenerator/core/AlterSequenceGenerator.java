@@ -17,6 +17,7 @@ public class AlterSequenceGenerator extends AbstractSqlGenerator<AlterSequenceSt
         return database.supportsSequences();
     }
 
+    @Override
     public ValidationErrors validate(AlterSequenceStatement alterSequenceStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
 
@@ -30,6 +31,7 @@ public class AlterSequenceGenerator extends AbstractSqlGenerator<AlterSequenceSt
         return validationErrors;
     }
 
+    @Override
     public Sql[] generateSql(AlterSequenceStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         StringBuffer buffer = new StringBuffer();
         buffer.append("ALTER SEQUENCE ");

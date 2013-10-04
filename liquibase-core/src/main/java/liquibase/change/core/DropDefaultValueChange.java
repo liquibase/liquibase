@@ -62,6 +62,7 @@ public class DropDefaultValueChange extends AbstractChange {
 		this.columnDataType = columnDataType;
 	}
 
+    @Override
     public SqlStatement[] generateStatements(Database database) {
 
 //todo    	if (database instanceof SQLiteDatabase) {
@@ -116,6 +117,7 @@ public class DropDefaultValueChange extends AbstractChange {
 //    	return statements.toArray(new SqlStatement[statements.size()]);
 //    }
 
+    @Override
     public String getConfirmationMessage() {
         return "Default value dropped from "+getTableName()+"."+getColumnName();
     }

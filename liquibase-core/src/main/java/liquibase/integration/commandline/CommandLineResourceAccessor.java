@@ -23,6 +23,7 @@ public class CommandLineResourceAccessor implements ResourceAccessor {
         this.loader = loader;
     }
 
+    @Override
     public InputStream getResourceAsStream(String file) throws IOException {
         URL resource = loader.getResource(file);
         if (resource == null) {
@@ -31,10 +32,12 @@ public class CommandLineResourceAccessor implements ResourceAccessor {
         return resource.openStream();
     }
 
+    @Override
     public Enumeration<URL> getResources(String packageName) throws IOException {
         return loader.getResources(packageName);
     }
 
+    @Override
     public ClassLoader toClassLoader() {
         return loader;
     }

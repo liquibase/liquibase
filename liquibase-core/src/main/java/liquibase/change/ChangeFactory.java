@@ -63,6 +63,7 @@ public class ChangeFactory {
             String name = metaData.getName();
             if (registry.get(name) == null) {
                 registry.put(name, new TreeSet<Class<? extends Change>>(new Comparator<Class<? extends Change>>() {
+                    @Override
                     public int compare(Class<? extends Change> o1, Class<? extends Change> o2) {
                         try {
                             return -1 * new Integer(getChangeMetaData(o1.newInstance()).getPriority()).compareTo(getChangeMetaData(o2.newInstance()).getPriority());

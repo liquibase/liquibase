@@ -74,6 +74,7 @@ public class AddPrimaryKeyChange extends AbstractChange {
         this.tablespace = tablespace;
     }
 
+    @Override
     public SqlStatement[] generateStatements(Database database) {
 
 
@@ -151,6 +152,7 @@ public class AddPrimaryKeyChange extends AbstractChange {
         };
     }
 
+    @Override
     public String getConfirmationMessage() {
         return "Primary key added to " + getTableName() + " (" + getColumnNames() + ")";
     }

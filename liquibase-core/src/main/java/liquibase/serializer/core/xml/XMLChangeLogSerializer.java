@@ -41,6 +41,7 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
         this.currentChangeLogFileDOM = currentChangeLogFileDOM;
     }
 
+    @Override
     public String[] getValidFileExtensions() {
         return new String[]{"xml"};
     }
@@ -50,6 +51,7 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
         return null; //todo
     }
 
+    @Override
     public String serialize(LiquibaseSerializable object, boolean pretty) {
         StringBuffer buffer = new StringBuffer();
         int indent = -1;
@@ -60,6 +62,7 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
         return buffer.toString();
     }
 
+    @Override
     public void write(List<ChangeSet> changeSets, OutputStream out) throws IOException {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         DocumentBuilder documentBuilder;
@@ -87,6 +90,7 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
         new DefaultXmlWriter().write(doc, out);
     }
 
+    @Override
     public void append(ChangeSet changeSet, File changeLogFile) throws IOException {
         FileInputStream in = new FileInputStream(changeLogFile);
         String existingChangeLog = StreamUtil.getStreamContents(in);

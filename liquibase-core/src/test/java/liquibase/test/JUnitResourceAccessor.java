@@ -29,6 +29,7 @@ public class JUnitResourceAccessor implements ResourceAccessor {
 
     }
 
+    @Override
     public InputStream getResourceAsStream(String file) throws IOException {
         if (file == null) {
             return null;
@@ -36,10 +37,12 @@ public class JUnitResourceAccessor implements ResourceAccessor {
         return classLoader.getResourceAsStream(file);
     }
 
+    @Override
     public Enumeration<URL> getResources(String packageName) throws IOException {
         return classLoader.getResources(packageName);
     }
 
+    @Override
     public ClassLoader toClassLoader() {
         return classLoader;
     }

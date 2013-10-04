@@ -122,14 +122,17 @@ public class ChangeLogParserFactoryTest {
 
     private static class MockChangeLogParser implements ChangeLogParser {
 
+        @Override
         public DatabaseChangeLog parse(String physicalChangeLogLocation, ChangeLogParameters changeLogParameters, ResourceAccessor resourceAccessor) throws ChangeLogParseException {
             return null;
         }
 
+        @Override
         public boolean supports(String changeLogFile, ResourceAccessor resourceAccessor) {
             return changeLogFile.endsWith(".test");
         }
 
+        @Override
         public int getPriority() {
             return PRIORITY_DEFAULT;
         }        

@@ -24,6 +24,7 @@ public class AddUniqueConstraintGenerator extends AbstractSqlGenerator<AddUnique
         ;
     }
 
+    @Override
     public ValidationErrors validate(AddUniqueConstraintStatement addUniqueConstraintStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("columnNames", addUniqueConstraintStatement.getColumnNames());
@@ -31,6 +32,7 @@ public class AddUniqueConstraintGenerator extends AbstractSqlGenerator<AddUnique
         return validationErrors;
     }
 
+    @Override
     public Sql[] generateSql(AddUniqueConstraintStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
 
 		String sql = null;

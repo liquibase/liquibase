@@ -178,6 +178,7 @@ public class CommandLineUtils {
 
     private static class OutDiffStatusListener implements DiffStatusListener {
 
+        @Override
         public void statusUpdate(String message) {
             LogFactory.getLogger().info(message);
 

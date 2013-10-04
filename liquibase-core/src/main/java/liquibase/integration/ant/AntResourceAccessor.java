@@ -22,12 +22,14 @@ public class AntResourceAccessor extends CompositeResourceAccessor {
     public AntResourceAccessor(final Project project, final Path classpath) {
         super(new ClassLoaderResourceAccessor(
                 AccessController.doPrivileged(new PrivilegedAction<AntClassLoader>() {
+                    @Override
                     public AntClassLoader run() {
                         return new AntClassLoader(project, classpath);
                     }
                 })),
                 new ClassLoaderResourceAccessor(
                         AccessController.doPrivileged(new PrivilegedAction<AntClassLoader>() {
+                            @Override
                             public AntClassLoader run() {
                                 return new AntClassLoader(project, new Path(project, "."));
                             }

@@ -24,6 +24,7 @@ public class SybaseDatabase extends AbstractJdbcDatabase {
     public static final String PRODUCT_NAME = "Adaptive Server Enterprise";
     protected Set<String> systemTablesAndViews = new HashSet<String>();
 
+    @Override
     public String getShortName() {
         return "sybase";
     }
@@ -63,11 +64,13 @@ public class SybaseDatabase extends AbstractJdbcDatabase {
     }
     */
 
+    @Override
     public int getPriority() {
         return PRIORITY_DEFAULT;
     }
 
 
+    @Override
     public Integer getDefaultPort() {
         return 4100;
     }
@@ -91,6 +94,7 @@ public class SybaseDatabase extends AbstractJdbcDatabase {
         return systemTablesAndViews;
     }
 
+    @Override
     public boolean supportsInitiallyDeferrableColumns() {
         return false;
     }
@@ -100,6 +104,7 @@ public class SybaseDatabase extends AbstractJdbcDatabase {
         return false;
     }
 
+    @Override
     public boolean isCorrectDatabaseImplementation(DatabaseConnection conn) throws DatabaseException {
         String dbProductName = conn.getDatabaseProductName();
         return isSybaseProductName(dbProductName);
@@ -114,6 +119,7 @@ public class SybaseDatabase extends AbstractJdbcDatabase {
                 || "ASE".equals(dbProductName);
     }
 
+    @Override
     public String getDefaultDriver(String url) {
         if (url.startsWith("jdbc:sybase")) {
             return "com.sybase.jdbc3.jdbc.SybDriver";
@@ -191,6 +197,7 @@ public class SybaseDatabase extends AbstractJdbcDatabase {
 //
 //    }
 
+    @Override
     public boolean supportsTablespaces() {
         return true;
     }

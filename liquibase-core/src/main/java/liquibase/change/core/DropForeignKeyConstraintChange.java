@@ -55,6 +55,7 @@ public class DropForeignKeyConstraintChange extends AbstractChange {
         this.constraintName = constraintName;
     }
 
+    @Override
     public SqlStatement[] generateStatements(Database database) {
 
         if (database instanceof SQLiteDatabase) {
@@ -78,6 +79,7 @@ public class DropForeignKeyConstraintChange extends AbstractChange {
 		return new SqlStatement[]{};
     }
 
+    @Override
     public String getConfirmationMessage() {
         return "Foreign key " + getConstraintName() + " dropped";
     }

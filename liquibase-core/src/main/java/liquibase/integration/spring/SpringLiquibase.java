@@ -78,6 +78,7 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
             this.parentFile = parentFile;
         }
 
+        @Override
         public InputStream getResourceAsStream(String file) throws IOException {
             try {
                 Resource resource = getResource(file);
@@ -87,6 +88,7 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
             }
         }
 
+        @Override
         public Enumeration<URL> getResources(String packageName) throws IOException {
             List<URL> tmp = new ArrayList<URL>();
 
@@ -114,6 +116,7 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
             return false;
         }
 
+        @Override
         public ClassLoader toClassLoader() {
             return getResourceLoader().getClassLoader();
         }
@@ -235,6 +238,7 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
     /**
      * Executed automatically when the bean is initialized.
      */
+    @Override
     public void afterPropertiesSet() throws LiquibaseException {
         String shouldRunProperty = System.getProperty(Liquibase.SHOULD_RUN_SYSTEM_PROPERTY);
         if (shouldRunProperty != null && !Boolean.valueOf(shouldRunProperty)) {
@@ -334,6 +338,7 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
     /**
      * Spring sets this automatically to the instance's configured bean name.
      */
+    @Override
     public void setBeanName(String name) {
         this.beanName = name;
     }
@@ -347,6 +352,7 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
         return beanName;
     }
 
+    @Override
     public void setResourceLoader(ResourceLoader resourceLoader) {
         this.resourceLoader = resourceLoader;
     }

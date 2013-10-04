@@ -11,10 +11,12 @@ class ExampleAbstractChange extends AbstractChange {
     private String paramNoMetadata;
     private String paramNotIncluded;
 
+    @Override
     public String getConfirmationMessage() {
         return "Test Confirmation Message";
     }
 
+    @Override
     public SqlStatement[] generateStatements(Database database) {
         return null;
     }

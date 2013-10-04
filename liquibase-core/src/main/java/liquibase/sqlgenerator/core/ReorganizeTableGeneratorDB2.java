@@ -23,12 +23,14 @@ public class ReorganizeTableGeneratorDB2 extends AbstractSqlGenerator<Reorganize
         return database instanceof DB2Database;
     }
 
+    @Override
     public ValidationErrors validate(ReorganizeTableStatement reorganizeTableStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("tableName", reorganizeTableStatement.getTableName());
         return validationErrors;
     }
 
+    @Override
     public Sql[] generateSql(ReorganizeTableStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         try {
             if (database.getDatabaseMajorVersion() >= 9) {

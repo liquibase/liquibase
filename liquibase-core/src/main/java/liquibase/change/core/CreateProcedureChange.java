@@ -39,6 +39,7 @@ public class CreateProcedureChange extends AbstractChange {
         this.comments = comments;
     }
 
+    @Override
     public SqlStatement[] generateStatements(Database database) {
         String endDelimiter = ";";
         if (database instanceof OracleDatabase) {
@@ -52,6 +53,7 @@ public class CreateProcedureChange extends AbstractChange {
         };
     }
 
+    @Override
     public String getConfirmationMessage() {
         return "Stored procedure created";
     }

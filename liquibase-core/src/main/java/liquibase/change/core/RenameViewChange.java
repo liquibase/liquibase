@@ -51,6 +51,7 @@ public class RenameViewChange extends AbstractChange {
         this.newViewName = newViewName;
     }
 
+    @Override
     public SqlStatement[] generateStatements(Database database) {
         return new SqlStatement[]{new RenameViewStatement(getCatalogName(), getSchemaName(), getOldViewName(), getNewViewName())};
     }
@@ -66,6 +67,7 @@ public class RenameViewChange extends AbstractChange {
         };
     }
 
+    @Override
     public String getConfirmationMessage() {
         return "View " + oldViewName + " renamed to " + newViewName;
     }

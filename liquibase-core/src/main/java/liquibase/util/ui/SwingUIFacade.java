@@ -11,6 +11,7 @@ public class SwingUIFacade implements UIFacade {
      * Displays swing-based dialog about running against a non-localhost database.
      * Returns true if the user selected that they are OK with that.
      */
+    @Override
     public boolean promptForNonLocalDatabase(Database database) throws DatabaseException {
         return JOptionPane.showConfirmDialog(null, "You are running a database migration against a non-local database." + StreamUtil.getLineSeparator() +
                 "Database URL is: " + database.getConnection().getURL() + StreamUtil.getLineSeparator() +

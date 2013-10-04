@@ -112,6 +112,7 @@ public class MergeColumnChange extends AbstractChange {
         return false;
     }
 
+    @Override
     public SqlStatement[] generateStatements(Database database) {
         List<SqlStatement> statements = new ArrayList<SqlStatement>();
 
@@ -138,7 +139,8 @@ public class MergeColumnChange extends AbstractChange {
     		
 			// define alter table logic
     		AlterTableVisitor rename_alter_visitor = new AlterTableVisitor() {
-    			public ColumnConfig[] getColumnsToAdd() {
+    			@Override
+                public ColumnConfig[] getColumnsToAdd() {
     				ColumnConfig[] new_columns = new ColumnConfig[1];
     				ColumnConfig new_column = new ColumnConfig();
     		        new_column.setName(getFinalColumnName());
@@ -146,15 +148,18 @@ public class MergeColumnChange extends AbstractChange {
     				new_columns[0] = new_column;
     				return new_columns;
     			}
-    			public boolean copyThisColumn(ColumnConfig column) {
+    			@Override
+                public boolean copyThisColumn(ColumnConfig column) {
     				return !(column.getName().equals(getColumn1Name()) ||
     						column.getName().equals(getColumn2Name()));
     			}
-    			public boolean createThisColumn(ColumnConfig column) {
+    			@Override
+                public boolean createThisColumn(ColumnConfig column) {
     				return !(column.getName().equals(getColumn1Name()) ||
     						column.getName().equals(getColumn2Name()));
     			}
-    			public boolean createThisIndex(Index index) {
+    			@Override
+                public boolean createThisIndex(Index index) {
     				return !(index.getColumns().contains(getColumn1Name()) ||
     						index.getColumns().contains(getColumn2Name()));
     			}
@@ -189,6 +194,7 @@ public class MergeColumnChange extends AbstractChange {
 
     }
 
+    @Override
     public String getConfirmationMessage() {
         return "Columns "+getTableName()+"."+getColumn1Name()+" and "+getTableName()+"."+getColumn2Name()+" merged";
     }

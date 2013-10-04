@@ -103,6 +103,7 @@ public class CreateSequenceChange extends AbstractChange {
         this.cycle = cycle;
     }
 
+    @Override
     public SqlStatement[] generateStatements(Database database) {
         return new SqlStatement[] {
                 new CreateSequenceStatement(getCatalogName(), getSchemaName(), getSequenceName())
@@ -126,6 +127,7 @@ public class CreateSequenceChange extends AbstractChange {
         };
     }
 
+    @Override
     public String getConfirmationMessage() {
         return "Sequence " + getSequenceName() + " created";
     }

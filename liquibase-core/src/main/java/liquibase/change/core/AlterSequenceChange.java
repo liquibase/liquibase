@@ -88,6 +88,7 @@ public class AlterSequenceChange extends AbstractChange {
         this.ordered = ordered;
     }
 
+    @Override
     public SqlStatement[] generateStatements(Database database) {
         return new SqlStatement[] {
                 new AlterSequenceStatement(getCatalogName(), getSchemaName(), getSequenceName())
@@ -98,6 +99,7 @@ public class AlterSequenceChange extends AbstractChange {
         };
     }
 
+    @Override
     public String getConfirmationMessage() {
         return "Sequence " + getSequenceName() + " altered";
     }

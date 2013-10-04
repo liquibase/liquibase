@@ -33,6 +33,7 @@ public class SQLiteDatabase extends AbstractJdbcDatabase {
 
     public static final String PRODUCT_NAME = "SQLite";
 
+    @Override
     public String getDefaultDriver(String url) {
         if (url.startsWith("jdbc:sqlite:")) {
             return "SQLite.JDBCDriver";
@@ -40,11 +41,13 @@ public class SQLiteDatabase extends AbstractJdbcDatabase {
         return null;
     }
 
+    @Override
     public int getPriority() {
         return PRIORITY_DEFAULT;
     }
     
 
+    @Override
     public String getShortName() {
         return "sqlite";
     }
@@ -55,19 +58,23 @@ public class SQLiteDatabase extends AbstractJdbcDatabase {
         return PRODUCT_NAME;
     }
 
+    @Override
     public Integer getDefaultPort() {
         return null;
     }
 
+    @Override
     public boolean isCorrectDatabaseImplementation(DatabaseConnection conn)
             throws DatabaseException {
         return PRODUCT_NAME.equalsIgnoreCase(conn.getDatabaseProductName());
     }
 
+    @Override
     public boolean supportsInitiallyDeferrableColumns() {
         return false;
     }
 
+    @Override
     public boolean supportsTablespaces() {
         return false;
     }

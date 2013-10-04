@@ -38,6 +38,7 @@ public class LiquibaseEntityResolver implements EntityResolver2 {
         this.basePath=basePath;
     }
 
+   @Override
    public InputSource resolveEntity(String name, String publicId, String baseURI, String systemId) throws SAXException, IOException {
        InputSource resolved=null;
        if(systemId!=null && systemId.toLowerCase().endsWith(".xsd")) {
@@ -86,10 +87,12 @@ public class LiquibaseEntityResolver implements EntityResolver2 {
         }
     }
 
+    @Override
     public InputSource getExternalSubset(String name, String baseURI) throws SAXException, IOException {
         return null;
     }
 
+    @Override
     public InputSource resolveEntity(String publicId, String systemId) throws SAXException, IOException {
         log.warning("Current XML parsers seems to not support EntityResolver2. External entities won't be correctly loaded");
         return tryResolveLiquibaseSchema(systemId, publicId);

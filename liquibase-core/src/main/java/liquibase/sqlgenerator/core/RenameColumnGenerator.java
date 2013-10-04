@@ -19,6 +19,7 @@ public class RenameColumnGenerator extends AbstractSqlGenerator<RenameColumnStat
                 || database instanceof SQLiteDatabase);
     }
 
+    @Override
     public ValidationErrors validate(RenameColumnStatement renameColumnStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("tableName", renameColumnStatement.getTableName());
@@ -32,6 +33,7 @@ public class RenameColumnGenerator extends AbstractSqlGenerator<RenameColumnStat
         return validationErrors;
     }
 
+    @Override
     public Sql[] generateSql(RenameColumnStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         String sql;
         if (database instanceof MSSQLDatabase) {

@@ -19,12 +19,14 @@ public class TagDatabaseChange extends AbstractChange {
         this.tag = tag;
     }
 
+    @Override
     public SqlStatement[] generateStatements(Database database) {
         return new SqlStatement[] {
                 new TagDatabaseStatement(tag)
         };
     }
 
+    @Override
     public String getConfirmationMessage() {
         return "Tag '"+tag+"' applied to database";
     }

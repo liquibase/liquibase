@@ -45,10 +45,12 @@ public class DropSequenceChange extends AbstractChange {
         this.sequenceName = sequenceName;
     }
 
+    @Override
     public SqlStatement[] generateStatements(Database database) {
         return new SqlStatement[]{new DropSequenceStatement(getCatalogName(), getSchemaName(), getSequenceName())};
     }
 
+    @Override
     public String getConfirmationMessage() {
         return "Sequence " + getSequenceName() + " dropped";
     }

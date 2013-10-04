@@ -36,10 +36,12 @@ public class DerbyDatabase extends AbstractJdbcDatabase {
         determineDriverVersion();
     }
 
+    @Override
     public boolean isCorrectDatabaseImplementation(DatabaseConnection conn) throws DatabaseException {
         return "Apache Derby".equalsIgnoreCase(conn.getDatabaseProductName());
     }
 
+    @Override
     public String getDefaultDriver(String url) {
         // CORE-1230 - don't shutdown derby network server
         if (url.startsWith("jdbc:derby://")) {
@@ -50,6 +52,7 @@ public class DerbyDatabase extends AbstractJdbcDatabase {
         return null;
     }
 
+    @Override
     public int getPriority() {
         return PRIORITY_DEFAULT;
     }
@@ -64,6 +67,7 @@ public class DerbyDatabase extends AbstractJdbcDatabase {
         return true;
     }
 
+    @Override
     public Integer getDefaultPort() {
         return 1527;
     }
@@ -81,6 +85,7 @@ public class DerbyDatabase extends AbstractJdbcDatabase {
         return objectName.toUpperCase();
     }
 
+    @Override
     public String getShortName() {
         return "derby";
     }
@@ -96,6 +101,7 @@ public class DerbyDatabase extends AbstractJdbcDatabase {
         }
     }
 
+    @Override
     public boolean supportsInitiallyDeferrableColumns() {
         return false;
     }
@@ -117,6 +123,7 @@ public class DerbyDatabase extends AbstractJdbcDatabase {
         }
     }
 
+    @Override
     public boolean supportsTablespaces() {
         return false;
     }

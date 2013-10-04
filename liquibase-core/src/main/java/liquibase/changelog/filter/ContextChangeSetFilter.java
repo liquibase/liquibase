@@ -32,6 +32,7 @@ public class ContextChangeSetFilter implements ChangeSetFilter {
         }
     }
 
+    @Override
     public boolean accepts(ChangeSet changeSet) {
         List<SqlVisitor> visitorsToRemove = new ArrayList<SqlVisitor>();
         for (SqlVisitor visitor : changeSet.getSqlVisitors()) {

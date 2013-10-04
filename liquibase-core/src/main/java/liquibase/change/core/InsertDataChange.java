@@ -52,15 +52,18 @@ public class InsertDataChange extends AbstractChange implements ChangeWithColumn
         this.tableName = tableName;
     }
 
+    @Override
     @DatabaseChangeProperty(mustEqualExisting = "table.column", description = "Data to insert into columns", requiredForDatabase = "all")
     public List<ColumnConfig> getColumns() {
         return columns;
     }
 
+    @Override
     public void setColumns(List<ColumnConfig> columns) {
         this.columns = columns;
     }
 
+    @Override
     public void addColumn(ColumnConfig column) {
         columns.add(column);
     }
@@ -69,6 +72,7 @@ public class InsertDataChange extends AbstractChange implements ChangeWithColumn
         columns.remove(column);
     }
 
+    @Override
     public SqlStatement[] generateStatements(Database database) {
 
         boolean needsPreparedStatement = false;
@@ -111,15 +115,18 @@ public class InsertDataChange extends AbstractChange implements ChangeWithColumn
     /**
      * @see liquibase.change.Change#getConfirmationMessage()
      */
+    @Override
     public String getConfirmationMessage() {
         return "New row inserted into " + getTableName();
     }
 
+    @Override
     @DatabaseChangeProperty(since = "3.0", exampleValue = "h2, oracle")
     public String getDbms() {
         return dbms;
     }
 
+    @Override
     public void setDbms(final String dbms) {
         this.dbms = dbms;
     }

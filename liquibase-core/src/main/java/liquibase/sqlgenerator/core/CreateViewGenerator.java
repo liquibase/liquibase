@@ -16,6 +16,7 @@ import java.util.List;
 
 public class CreateViewGenerator extends AbstractSqlGenerator<CreateViewStatement> {
 
+    @Override
     public ValidationErrors validate(CreateViewStatement createViewStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
     	
     	if (database instanceof InformixDatabase) {
@@ -34,6 +35,7 @@ public class CreateViewGenerator extends AbstractSqlGenerator<CreateViewStatemen
         return validationErrors;
     }
 
+    @Override
     public Sql[] generateSql(CreateViewStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
     	
     	if (database instanceof InformixDatabase) {

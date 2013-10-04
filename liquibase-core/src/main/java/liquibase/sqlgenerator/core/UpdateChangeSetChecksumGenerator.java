@@ -13,6 +13,7 @@ import liquibase.statement.core.UpdateChangeSetChecksumStatement;
 import liquibase.statement.core.UpdateStatement;
 
 public class UpdateChangeSetChecksumGenerator extends AbstractSqlGenerator<UpdateChangeSetChecksumStatement> {
+    @Override
     public ValidationErrors validate(UpdateChangeSetChecksumStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("changeSet", statement.getChangeSet());
@@ -20,6 +21,7 @@ public class UpdateChangeSetChecksumGenerator extends AbstractSqlGenerator<Updat
         return validationErrors;
     }
 
+    @Override
     public Sql[] generateSql(UpdateChangeSetChecksumStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         ChangeSet changeSet = statement.getChangeSet();
 

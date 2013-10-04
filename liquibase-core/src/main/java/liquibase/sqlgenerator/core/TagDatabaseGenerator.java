@@ -15,12 +15,14 @@ import liquibase.statement.core.UpdateStatement;
 
 public class TagDatabaseGenerator extends AbstractSqlGenerator<TagDatabaseStatement> {
 
+    @Override
     public ValidationErrors validate(TagDatabaseStatement tagDatabaseStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("tag", tagDatabaseStatement.getTag());
         return validationErrors;
     }
 
+    @Override
     public Sql[] generateSql(TagDatabaseStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
     	String liquibaseSchema = null;
    		liquibaseSchema = database.getLiquibaseSchemaName();

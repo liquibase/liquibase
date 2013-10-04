@@ -33,6 +33,7 @@ public class AfterTagChangeSetFilter implements ChangeSetFilter {
         return id+":"+author+":"+changeLog;
     }
 
+    @Override
     public boolean accepts(ChangeSet changeSet) {
         return changeLogsAfterTag.contains(changeLogToString(changeSet.getId(), changeSet.getAuthor(), changeSet.getFilePath()));
     }

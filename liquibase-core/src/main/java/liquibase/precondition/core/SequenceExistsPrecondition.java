@@ -40,14 +40,17 @@ public class SequenceExistsPrecondition implements Precondition {
         this.sequenceName = sequenceName;
     }
 
+        @Override
         public Warnings warn(Database database) {
         return new Warnings();
     }
 
+    @Override
     public ValidationErrors validate(Database database) {
         return new ValidationErrors();
     }
 
+    @Override
     public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet) throws PreconditionFailedException, PreconditionErrorException {
         DatabaseSnapshot snapshot;
         Schema schema = new Schema(getCatalogName(), getSchemaName());
@@ -60,6 +63,7 @@ public class SequenceExistsPrecondition implements Precondition {
         }
     }
 
+    @Override
     public String getName() {
         return "sequenceExists";
     }

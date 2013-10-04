@@ -22,21 +22,25 @@ public class Index extends AbstractDatabaseObject {
         setAttribute("associatedWith", new HashSet<String>());
     }
 
+    @Override
     public DatabaseObject[] getContainingObjects() {
         return new DatabaseObject[] {
                 getTable()
         };
     }
 
+    @Override
     public String getName() {
         return getAttribute("name", String.class);
     }
 
+    @Override
     public Index setName(String name) {
         this.setAttribute("name", name);
         return this;
     }
 
+    @Override
     public Schema getSchema() {
         if (getTable() == null) {
             return null;

@@ -17,6 +17,7 @@ import java.util.List;
 
 public class CreateIndexGenerator extends AbstractSqlGenerator<CreateIndexStatement> {
 
+    @Override
     public ValidationErrors validate(CreateIndexStatement createIndexStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("tableName", createIndexStatement.getTableName());
@@ -24,6 +25,7 @@ public class CreateIndexGenerator extends AbstractSqlGenerator<CreateIndexStatem
         return validationErrors;
     }
 
+    @Override
     public Sql[] generateSql(CreateIndexStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
 
 	    if (database instanceof OracleDatabase) {

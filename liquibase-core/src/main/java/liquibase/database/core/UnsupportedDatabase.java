@@ -6,6 +6,7 @@ import liquibase.exception.DatabaseException;
 
 public class UnsupportedDatabase extends AbstractJdbcDatabase {
 
+    @Override
     public int getPriority() {
         return -1;
     }
@@ -26,18 +27,22 @@ public class UnsupportedDatabase extends AbstractJdbcDatabase {
         return null;
     }
 
+    @Override
     public boolean isCorrectDatabaseImplementation(DatabaseConnection conn) throws DatabaseException {
         return false;
     }
 
+    @Override
     public String getDefaultDriver(String url) {
         return null;
     }    
 
+    @Override
     public String getShortName() {
         return "unsupported";
     }
 
+    @Override
     public Integer getDefaultPort() {
         return null;
     }
@@ -47,10 +52,12 @@ public class UnsupportedDatabase extends AbstractJdbcDatabase {
         return "Unsupported";
     }
 
+    @Override
     public boolean supportsInitiallyDeferrableColumns() {
         return false;
     }
 
+    @Override
     public String getCurrentDateTimeFunction() {
         return currentDateTimeFunction;
     }
@@ -113,6 +120,7 @@ public class UnsupportedDatabase extends AbstractJdbcDatabase {
 //        }
 //    }
 
+    @Override
     public boolean supportsTablespaces() {
         return false;
     }

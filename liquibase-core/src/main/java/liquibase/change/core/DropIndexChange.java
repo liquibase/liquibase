@@ -48,12 +48,14 @@ public class DropIndexChange extends AbstractChange {
         this.tableName = tableName;
     }
 
+    @Override
     public SqlStatement[] generateStatements(Database database) {
         return new SqlStatement[] {
             new DropIndexStatement(getIndexName(), getCatalogName(), getSchemaName(), getTableName(), getAssociatedWith())
         };
     }
 
+    @Override
     public String getConfirmationMessage() {
         return "Index " + getIndexName() + " dropped from table " + getTableName();
     }

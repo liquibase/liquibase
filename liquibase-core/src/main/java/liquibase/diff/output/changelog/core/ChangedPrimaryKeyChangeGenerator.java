@@ -15,6 +15,7 @@ import liquibase.structure.core.Table;
 import liquibase.structure.core.UniqueConstraint;
 
 public class ChangedPrimaryKeyChangeGenerator  implements ChangedObjectChangeGenerator {
+    @Override
     public int getPriority(Class<? extends DatabaseObject> objectType, Database database) {
         if (PrimaryKey.class.isAssignableFrom(objectType)) {
             return PRIORITY_DEFAULT;
@@ -22,14 +23,17 @@ public class ChangedPrimaryKeyChangeGenerator  implements ChangedObjectChangeGen
         return PRIORITY_NONE;
     }
 
+    @Override
     public Class<? extends DatabaseObject>[] runBeforeTypes() {
         return new Class[] {Index.class, UniqueConstraint.class };
     }
 
+    @Override
     public Class<? extends DatabaseObject>[] runAfterTypes() {
         return null;
     }
 
+    @Override
     public Change[] fixChanged(DatabaseObject changedObject, ObjectDifferences differences, DiffOutputControl control, Database referenceDatabase, Database comparisonDatabase, ChangeGeneratorChain chain) {
         PrimaryKey pk = (PrimaryKey) changedObject;
 

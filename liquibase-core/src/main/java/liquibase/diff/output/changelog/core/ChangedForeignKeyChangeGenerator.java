@@ -14,6 +14,7 @@ import liquibase.structure.core.ForeignKey;
 import liquibase.structure.core.UniqueConstraint;
 
 public class ChangedForeignKeyChangeGenerator implements ChangedObjectChangeGenerator {
+    @Override
     public int getPriority(Class<? extends DatabaseObject> objectType, Database database) {
         if (ForeignKey.class.isAssignableFrom(objectType)) {
             return PRIORITY_DEFAULT;
@@ -21,14 +22,17 @@ public class ChangedForeignKeyChangeGenerator implements ChangedObjectChangeGene
         return PRIORITY_NONE;
     }
 
+    @Override
     public Class<? extends DatabaseObject>[] runBeforeTypes() {
         return new Class[] {Index.class, UniqueConstraint.class };
     }
 
+    @Override
     public Class<? extends DatabaseObject>[] runAfterTypes() {
         return null;
     }
 
+    @Override
     public Change[] fixChanged(DatabaseObject changedObject, ObjectDifferences differences, DiffOutputControl control, Database referenceDatabase, Database comparisonDatabase, ChangeGeneratorChain chain) {
         ForeignKey fk = (ForeignKey) changedObject;
 

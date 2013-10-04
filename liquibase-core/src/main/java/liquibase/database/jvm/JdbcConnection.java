@@ -20,6 +20,7 @@ public class JdbcConnection implements DatabaseConnection {
         this.con = connection;
     }
 
+    @Override
     public String getDatabaseProductName() throws DatabaseException {
         try {
             return con.getMetaData().getDatabaseProductName();
@@ -28,6 +29,7 @@ public class JdbcConnection implements DatabaseConnection {
         }
     }
 
+    @Override
     public String getDatabaseProductVersion() throws DatabaseException {
         try {
             return con.getMetaData().getDatabaseProductVersion();
@@ -36,6 +38,7 @@ public class JdbcConnection implements DatabaseConnection {
         }
     }
 
+    @Override
     public int getDatabaseMajorVersion() throws DatabaseException {
         try {
             return con.getMetaData().getDatabaseMajorVersion();
@@ -44,6 +47,7 @@ public class JdbcConnection implements DatabaseConnection {
         }
     }
 
+    @Override
     public int getDatabaseMinorVersion() throws DatabaseException {
         try {
             return con.getMetaData().getDatabaseMinorVersion();
@@ -52,6 +56,7 @@ public class JdbcConnection implements DatabaseConnection {
         }
     }
 
+    @Override
     public String getURL(){
         try {
             return con.getMetaData().getURL();
@@ -60,6 +65,7 @@ public class JdbcConnection implements DatabaseConnection {
         }
     }
 
+    @Override
     public String getConnectionUserName() {
         try {
             return con.getMetaData().getUserName();
@@ -85,6 +91,7 @@ public class JdbcConnection implements DatabaseConnection {
         }
     }
 
+    @Override
     public void close() throws DatabaseException {
         rollback();
         try {
@@ -94,6 +101,7 @@ public class JdbcConnection implements DatabaseConnection {
         }
     }
 
+    @Override
     public void commit() throws DatabaseException {
         try {
             if (!con.getAutoCommit()) {
@@ -132,6 +140,7 @@ public class JdbcConnection implements DatabaseConnection {
         }
     }
 
+    @Override
     public boolean getAutoCommit() throws DatabaseException {
         try {
             return con.getAutoCommit();
@@ -140,6 +149,7 @@ public class JdbcConnection implements DatabaseConnection {
         }
     }
 
+    @Override
     public String getCatalog() throws DatabaseException {
         try {
             return con.getCatalog();
@@ -188,6 +198,7 @@ public class JdbcConnection implements DatabaseConnection {
         }
     }
 
+    @Override
     public boolean isClosed() throws DatabaseException {
         try {
             return con.isClosed();
@@ -204,6 +215,7 @@ public class JdbcConnection implements DatabaseConnection {
         }
     }
 
+    @Override
     public String nativeSQL(String sql) throws DatabaseException {
         try {
             return con.nativeSQL(sql);
@@ -303,6 +315,7 @@ public class JdbcConnection implements DatabaseConnection {
         }
     }
 
+    @Override
     public void rollback() throws DatabaseException {
         try {
             if (!con.getAutoCommit() && !con.isClosed()) {
@@ -323,6 +336,7 @@ public class JdbcConnection implements DatabaseConnection {
         }
     }
 
+    @Override
     public void setAutoCommit(boolean autoCommit) throws DatabaseException {
         // Fix for Sybase jConnect JDBC driver bug.
         // Which throws DatabaseException(JZ016: The AutoCommit option is already set to false)

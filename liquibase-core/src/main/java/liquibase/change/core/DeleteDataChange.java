@@ -9,6 +9,7 @@ import liquibase.statement.core.DeleteStatement;
 public class DeleteDataChange extends AbstractModifyDataChange {
 
 
+    @Override
     public SqlStatement[] generateStatements(Database database) {
 
         DeleteStatement statement = new DeleteStatement(getCatalogName(), getSchemaName(), getTableName());
@@ -27,6 +28,7 @@ public class DeleteDataChange extends AbstractModifyDataChange {
         };
     }
 
+    @Override
     public String getConfirmationMessage() {
         return "Data deleted from " + getTableName();
     }

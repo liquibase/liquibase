@@ -36,6 +36,7 @@ public abstract class AbstractChange implements Change {
     /**
      * Default implementation is a no-op
      */
+    @Override
     public void finishInitialization() throws SetupException {
 
     }
@@ -45,6 +46,7 @@ public abstract class AbstractChange implements Change {
      * and calls out to {@link #createChangeParameterMetadata(String)} for each property.
      * @throws UnexpectedLiquibaseException if no @DatabaseChange annotation on this Change class
      */
+    @Override
     public ChangeMetaData createChangeMetaData() {
         try {
             DatabaseChange databaseChange = this.getClass().getAnnotation(DatabaseChange.class);
@@ -220,6 +222,7 @@ public abstract class AbstractChange implements Change {
     /**
      * {@inheritDoc}
      */
+    @Override
     @DatabaseChangeProperty(isChangeProperty = false)
     public ChangeSet getChangeSet() {
         return changeSet;
@@ -228,6 +231,7 @@ public abstract class AbstractChange implements Change {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void setChangeSet(ChangeSet changeSet) {
         this.changeSet = changeSet;
     }
@@ -236,6 +240,7 @@ public abstract class AbstractChange implements Change {
      * Implementation delegates logic to the {@link liquibase.sqlgenerator.SqlGenerator#generateStatementsIsVolatile(Database) } method on the {@link SqlStatement} objects returned by {@link #generateStatements }.
      * If zero or null SqlStatements are returned by generateStatements then this method returns false.
      */
+    @Override
     public boolean generateStatementsVolatile(Database database) {
         SqlStatement[] statements = generateStatements(database);
         if (statements == null) {
@@ -253,6 +258,7 @@ public abstract class AbstractChange implements Change {
      * Implementation delegates logic to the {@link liquibase.sqlgenerator.SqlGenerator#generateRollbackStatementsIsVolatile(Database) } method on the {@link SqlStatement} objects returned by {@link #generateStatements }
      * If no or null SqlStatements are returned by generateRollbackStatements then this method returns false.
      */
+    @Override
     public boolean generateRollbackStatementsVolatile(Database database) {
         SqlStatement[] statements = generateStatements(database);
         if (statements == null) {
@@ -271,6 +277,7 @@ public abstract class AbstractChange implements Change {
      * If no or null SqlStatements are returned by generateStatements then this method returns true.
      * If {@link #generateStatementsVolatile(liquibase.database.Database)} returns true, we cannot call generateStatements and so assume true.
      */
+    @Override
     public boolean supports(Database database) {
         if (generateStatementsVolatile(database)) {
             return true;
@@ -292,6 +299,7 @@ public abstract class AbstractChange implements Change {
      * If a generated statement is not supported for the given database, no warning will be added since that is a validation error.
      * If no or null SqlStatements are returned by generateStatements then this method returns no warnings.
      */
+    @Override
     public Warnings warn(Database database) {
         Warnings warnings = new Warnings();
         if (generateStatementsVolatile(database)) {
@@ -319,6 +327,7 @@ public abstract class AbstractChange implements Change {
      * If no or null SqlStatements are returned by generateStatements then this method returns no errors.
      * If there are no parameters than this method returns no errors
      */
+    @Override
     public ValidationErrors validate(Database database) {
         ValidationErrors changeValidationErrors = new ValidationErrors();
 
@@ -359,6 +368,7 @@ public abstract class AbstractChange implements Change {
     /**
      * Implementation relies on value returned from {@link #createInverses()}.
      */
+    @Override
     public SqlStatement[] generateRollbackStatements(Database database) throws RollbackImpossibleException {
         return generateRollbackStatementsFromInverse(database);
     }
@@ -366,6 +376,7 @@ public abstract class AbstractChange implements Change {
     /**
      * Implementation returns true if {@link #createInverses()} returns a non-null value.
      */
+    @Override
     public boolean supportsRollback(Database database) {
         return createInverses() != null;
     }
@@ -373,6 +384,7 @@ public abstract class AbstractChange implements Change {
     /**
      * Implementation generates checksum by serializing the change with {@link StringChangeLogSerializer}
      */
+    @Override
     public CheckSum generateCheckSum() {
         return CheckSum.compute(new StringChangeLogSerializer().serialize(this, false));
     }
@@ -420,6 +432,7 @@ public abstract class AbstractChange implements Change {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void setResourceAccessor(ResourceAccessor resourceAccessor) {
         this.resourceAccessor = resourceAccessor;
     }
@@ -436,6 +449,7 @@ public abstract class AbstractChange implements Change {
      * Implementation delegates logic to the {@link liquibase.sqlgenerator.SqlGeneratorFactory#getAffectedDatabaseObjects(liquibase.statement.SqlStatement, liquibase.database.Database)}  method on the {@link SqlStatement} objects returned by {@link #generateStatements }
      * Returns empty set if change is not supported for the passed database
      */
+    @Override
     public Set<DatabaseObject> getAffectedDatabaseObjects(Database database) {
         if (this.generateStatementsVolatile(database)) {
             return new HashSet<DatabaseObject>();
@@ -455,18 +469,22 @@ public abstract class AbstractChange implements Change {
     /**
      * Returns the fields on this change that are serializable.
      */
+    @Override
     public Set<String> getSerializableFields() {
         return ChangeFactory.getInstance().getChangeMetaData(this).getParameters().keySet();
     }
 
+    @Override
     public Object getSerializableFieldValue(String field) {
         return ChangeFactory.getInstance().getChangeMetaData(this).getParameters().get(field).getCurrentValue(this);
     }
 
+    @Override
     public String getSerializedObjectName() {
         return ChangeFactory.getInstance().getChangeMetaData(this).getName();
     }
 
+    @Override
     public SerializationType getSerializableFieldType(String field) {
         return ChangeFactory.getInstance().getChangeMetaData(this).getParameters().get(field).getSerializationType();
     }

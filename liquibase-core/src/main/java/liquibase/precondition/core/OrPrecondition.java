@@ -18,14 +18,17 @@ import java.util.List;
  */
 public class OrPrecondition extends PreconditionLogic {
 
+    @Override
     public Warnings warn(Database database) {
         return new Warnings();
     }
 
+    @Override
     public ValidationErrors validate(Database database) {
         return new ValidationErrors();
     }
 
+    @Override
     public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet) throws PreconditionFailedException, PreconditionErrorException {
         boolean onePassed = false;
         List<FailedPrecondition> failures = new ArrayList<FailedPrecondition>();
@@ -43,6 +46,7 @@ public class OrPrecondition extends PreconditionLogic {
         }
     }
 
+    @Override
     public String getName() {
         return "or";
     }

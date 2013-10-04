@@ -21,6 +21,7 @@ public class DropDefaultValueGenerator extends AbstractSqlGenerator<DropDefaultV
         return !(database instanceof SQLiteDatabase);
     }
 
+    @Override
     public ValidationErrors validate(DropDefaultValueStatement dropDefaultValueStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("tableName", dropDefaultValueStatement.getTableName());
@@ -34,6 +35,7 @@ public class DropDefaultValueGenerator extends AbstractSqlGenerator<DropDefaultV
         return validationErrors;
     }
 
+    @Override
     public Sql[] generateSql(DropDefaultValueStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         String sql;
          if (database instanceof MSSQLDatabase) {

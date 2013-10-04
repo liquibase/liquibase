@@ -126,6 +126,7 @@ public class InformixDatabase extends AbstractJdbcDatabase {
 		return systemTablesAndViews;
 	}
 
+    @Override
     public int getPriority() {
         return PRIORITY_DEFAULT;
     }
@@ -135,6 +136,7 @@ public class InformixDatabase extends AbstractJdbcDatabase {
         return "Informix";
     }
 
+    @Override
     public Integer getDefaultPort() {
         return 1526;
     }
@@ -160,30 +162,35 @@ public class InformixDatabase extends AbstractJdbcDatabase {
 		}
     }
 	
-	public String getDefaultDriver(String url) {
+	@Override
+    public String getDefaultDriver(String url) {
 		if (url.startsWith("jdbc:informix-sqli")) {
 			return "com.informix.jdbc.IfxDriver";
 		}
 		return null;
 	}
 
-	public String getShortName() {
+	@Override
+    public String getShortName() {
 		return "informix";
 	}
 
-	public boolean isCorrectDatabaseImplementation(DatabaseConnection conn)
+	@Override
+    public boolean isCorrectDatabaseImplementation(DatabaseConnection conn)
 			throws DatabaseException {
 		return PRODUCT_NAME.equals(conn.getDatabaseProductName());
 	}
 
-	public boolean supportsInitiallyDeferrableColumns() {
+	@Override
+    public boolean supportsInitiallyDeferrableColumns() {
 		return false;
 	}
 
 	/*
 	 * Informix calls them Dbspaces
 	 */
-	public boolean supportsTablespaces() {
+	@Override
+    public boolean supportsTablespaces() {
 		return true;
 	}
 	

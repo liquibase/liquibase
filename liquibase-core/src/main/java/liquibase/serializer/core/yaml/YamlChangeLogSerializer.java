@@ -41,12 +41,14 @@ public class YamlChangeLogSerializer implements ChangeLogSerializer {
         return new Yaml(new LiquibaseRepresenter(), dumperOptions);
     }
 
+    @Override
     public String[] getValidFileExtensions() {
         return new String[]{
                 "yaml"
         };
     }
 
+    @Override
     public String serialize(LiquibaseSerializable object, boolean pretty) {
         return yaml.dumpAsMap(toMap(object));
     }
@@ -57,6 +59,7 @@ public class YamlChangeLogSerializer implements ChangeLogSerializer {
             comparator = new ChangeSetComparator();
         } else {
             comparator = new Comparator<String>() {
+                @Override
                 public int compare(String o1, String o2) {
                     return o1.compareTo(o2);
                 }
@@ -92,10 +95,12 @@ public class YamlChangeLogSerializer implements ChangeLogSerializer {
         return containerMap;
     }
 
+    @Override
     public void write(List<ChangeSet> changeSets, OutputStream out) throws IOException {
         //To change body of implemented methods use File | Settings | File Templates.
     }
 
+    @Override
     public void append(ChangeSet changeSet, File changeLogFile) throws IOException {
         //To change body of implemented methods use File | Settings | File Templates.
     }
@@ -171,6 +176,7 @@ public class YamlChangeLogSerializer implements ChangeLogSerializer {
         }
 
         private class AsStringRepresenter implements Represent {
+            @Override
             public Node representData(Object data) {
                 return representScalar(Tag.STR, data.toString());
             }
@@ -186,6 +192,7 @@ public class YamlChangeLogSerializer implements ChangeLogSerializer {
             order.put("changes", Integer.MAX_VALUE);
         }
 
+        @Override
         public int compare(String o1, String o2) {
             Integer o1Order = order.get(o1);
             if (o1Order == null) {

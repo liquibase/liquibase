@@ -12,6 +12,7 @@ import liquibase.util.StringUtils;
 
 public class SelectFromDatabaseChangeLogLockGenerator extends AbstractSqlGenerator<SelectFromDatabaseChangeLogLockStatement> {
 
+    @Override
     public ValidationErrors validate(SelectFromDatabaseChangeLogLockStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors errors = new ValidationErrors();
         errors.checkRequiredField("columnToSelect", statement.getColumnsToSelect());
@@ -19,6 +20,7 @@ public class SelectFromDatabaseChangeLogLockGenerator extends AbstractSqlGenerat
         return errors;
     }
 
+    @Override
     public Sql[] generateSql(SelectFromDatabaseChangeLogLockStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
     	String liquibaseSchema;
    		liquibaseSchema = database.getLiquibaseSchemaName();

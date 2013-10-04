@@ -29,6 +29,7 @@ public class CreateViewGeneratorInformix extends AbstractSqlGenerator<CreateView
         return PRIORITY_DATABASE;
     }
 
+    @Override
     public ValidationErrors validate(CreateViewStatement createViewStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
 
@@ -42,6 +43,7 @@ public class CreateViewGeneratorInformix extends AbstractSqlGenerator<CreateView
         return validationErrors;
     }
 
+    @Override
     public Sql[] generateSql(CreateViewStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
     	String viewName = database.escapeViewName(statement.getCatalogName(), statement.getSchemaName(), statement.getViewName());
     	        

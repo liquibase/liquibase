@@ -19,10 +19,12 @@ public class CreateDatabaseChangeLogTableGenerator extends AbstractSqlGenerator<
         return (!(database instanceof SybaseDatabase));
     }
 
+    @Override
     public ValidationErrors validate(CreateDatabaseChangeLogTableStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         return new ValidationErrors();
     }
 
+    @Override
     public Sql[] generateSql(CreateDatabaseChangeLogTableStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
     	
     	if (database instanceof InformixDatabase) {

@@ -152,14 +152,17 @@ public class LiquibaseTest {
         @Override
         public ResourceAccessor getFileOpener() {
             return new ResourceAccessor() {
+                @Override
                 public InputStream getResourceAsStream(String file) {
                     return inputStream;
                 }
 
+                @Override
                 public Enumeration<URL> getResources(String packageName) {
                     return null;
                 }
 
+                @Override
                 public ClassLoader toClassLoader() {
                     return null;
                 }

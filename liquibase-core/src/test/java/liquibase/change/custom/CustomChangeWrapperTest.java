@@ -284,24 +284,30 @@ public class CustomChangeWrapperTest {
             this.address = address;
         }
 
+        @Override
         public String getConfirmationMessage() {
             return null;
         }
 
+        @Override
         public void setUp() throws SetupException {
         }
 
+        @Override
         public void setFileOpener(ResourceAccessor resourceAccessor) {
         }
 
+        @Override
         public ValidationErrors validate(Database database) {
             return null;
         }
 
+        @Override
         public SqlStatement[] generateStatements(Database database) throws CustomChangeException {
             return new SqlStatement[0];
         }
 
+        @Override
         public SqlStatement[] generateRollbackStatements(Database database) throws CustomChangeException, RollbackImpossibleException {
             return new SqlStatement[0];
         }

@@ -30,6 +30,7 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
         super.quotingEndCharacter="`";
     }
 
+    @Override
     public String getShortName() {
         return "mysql";
     }
@@ -61,18 +62,22 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
         return "MySQL";
     }
 
+    @Override
     public Integer getDefaultPort() {
         return 3306;
     }
 
+    @Override
     public int getPriority() {
         return PRIORITY_DEFAULT;
     }
 
+    @Override
     public boolean isCorrectDatabaseImplementation(DatabaseConnection conn) throws DatabaseException {
         return PRODUCT_NAME.equalsIgnoreCase(conn.getDatabaseProductName());
     }
 
+    @Override
     public String getDefaultDriver(String url) {
         if (url.startsWith("jdbc:mysql")) {
             return "com.mysql.jdbc.Driver";
@@ -86,6 +91,7 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
         return false;
     }
 
+    @Override
     public boolean supportsInitiallyDeferrableColumns() {
         return false;
     }
@@ -132,6 +138,7 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
         return returnString.toString().replaceFirst(", $", ")");
     }
 
+    @Override
     public boolean supportsTablespaces() {
         return false;
     }

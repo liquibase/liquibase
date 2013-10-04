@@ -213,6 +213,7 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
         }
     }
 
+    @Override
     public SqlStatement[] generateStatements(Database database) {
 
         boolean deferrable = false;
@@ -254,6 +255,7 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
         };
     }
 
+    @Override
     public String getConfirmationMessage() {
         return "Foreign key contraint added to " + getBaseTableName() + " (" + getBaseColumnNames() + ")";
     }

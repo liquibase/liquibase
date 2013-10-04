@@ -31,6 +31,7 @@ public class AddAutoIncrementGenerator extends AbstractSqlGenerator<AddAutoIncre
                 && !(database instanceof H2Database));
     }
 
+    @Override
     public ValidationErrors validate(
     		AddAutoIncrementStatement statement,
     		Database database,
@@ -45,6 +46,7 @@ public class AddAutoIncrementGenerator extends AbstractSqlGenerator<AddAutoIncre
         return validationErrors;
     }
 
+    @Override
     public Sql[] generateSql(
     		AddAutoIncrementStatement statement,
     		Database database,

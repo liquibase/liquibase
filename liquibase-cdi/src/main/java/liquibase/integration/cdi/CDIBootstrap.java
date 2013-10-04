@@ -37,6 +37,7 @@ public class CDIBootstrap implements Extension {
         final InjectionTarget<CDILiquibase> it = bm.createInjectionTarget(at);
         instance = new Bean<CDILiquibase>() {
 
+            @Override
             public Set<Type> getTypes() {
                 Set<Type> types = new HashSet<Type>();
                 types.add(CDILiquibase.class);
@@ -44,6 +45,7 @@ public class CDIBootstrap implements Extension {
                 return types;
             }
 
+            @Override
             public Set<Annotation> getQualifiers() {
                 Set<Annotation> qualifiers = new HashSet<Annotation>();
                 qualifiers.add( new AnnotationLiteral<Default>() {} );
@@ -51,34 +53,42 @@ public class CDIBootstrap implements Extension {
                 return qualifiers;
             }
 
+            @Override
             public Class<? extends Annotation> getScope() {
                 return ApplicationScoped.class;
             }
 
+            @Override
             public String getName() {
                 return "cdiLiquibase";
             }
 
+            @Override
             public Set<Class<? extends Annotation>> getStereotypes() {
                 return Collections.emptySet();
             }
 
+            @Override
             public Class<?> getBeanClass() {
                 return CDILiquibase.class;
             }
 
+            @Override
             public boolean isAlternative() {
                 return false;
             }
 
+            @Override
             public boolean isNullable() {
                 return false;
             }
 
+            @Override
             public Set<InjectionPoint> getInjectionPoints() {
                 return it.getInjectionPoints();
             }
 
+            @Override
             public CDILiquibase create(CreationalContext<CDILiquibase> ctx) {
                 CDILiquibase instance = it.produce(ctx);
                 it.inject(instance, ctx);
@@ -86,6 +96,7 @@ public class CDIBootstrap implements Extension {
                 return instance;
             }
 
+            @Override
             public void destroy(CDILiquibase instance, CreationalContext<CDILiquibase> ctx) {
                 it.preDestroy(instance);
                 it.dispose(instance);

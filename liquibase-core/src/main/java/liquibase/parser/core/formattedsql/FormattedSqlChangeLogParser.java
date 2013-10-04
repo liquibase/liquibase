@@ -20,6 +20,7 @@ import java.util.regex.Pattern;
 
 public class FormattedSqlChangeLogParser implements ChangeLogParser {
 
+    @Override
     public boolean supports(String changeLogFile, ResourceAccessor resourceAccessor) {
         BufferedReader reader = null;
         try {
@@ -44,10 +45,12 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
         }
     }
 
+    @Override
     public int getPriority() {
         return PRIORITY_DEFAULT + 5;
     }
 
+    @Override
     public DatabaseChangeLog parse(String physicalChangeLogLocation, ChangeLogParameters changeLogParameters, ResourceAccessor resourceAccessor) throws ChangeLogParseException {
 
         DatabaseChangeLog changeLog = new DatabaseChangeLog();

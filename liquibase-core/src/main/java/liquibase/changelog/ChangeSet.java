@@ -606,10 +606,12 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
         return false;
     }
 
+    @Override
     public PreconditionContainer getPreconditions() {
         return preconditions;
     }
 
+    @Override
     public void setPreconditions(PreconditionContainer preconditionContainer) {
         this.preconditions = preconditionContainer;
     }
@@ -637,10 +639,12 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
         return objectQuotingStrategy;
     }
  
+    @Override
     public String getSerializedObjectName() {
         return "changeSet";
     }
 
+    @Override
     public Set<String> getSerializableFields() {
         return new HashSet<String>(Arrays.asList(
                 "id",
@@ -656,6 +660,7 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
 
     }
 
+    @Override
     public Object getSerializableFieldValue(String field) {
         if (field.equals("id")) {
             return this.getId();
@@ -727,6 +732,7 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
         throw new UnexpectedLiquibaseException("Unexpected field request on changeSet: "+field);
     }
 
+    @Override
     public SerializationType getSerializableFieldType(String field) {
         if (field.equals("comment") || field.equals("changes") || field.equals("rollback")) {
             return SerializationType.NESTED_OBJECT;

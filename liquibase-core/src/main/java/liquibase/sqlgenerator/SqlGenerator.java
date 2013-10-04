@@ -43,6 +43,7 @@ public interface SqlGenerator<StatementType extends SqlStatement> extends Priori
      * Of all the SqlGenerators that "support" a given SqlStatement/Database, SqlGeneratorFactory will return the one with the highest priority. 
      * @return
      */
+    @Override
     public int getPriority();
 
     /**

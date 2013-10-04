@@ -9,6 +9,7 @@ import java.util.List;
 
 public class ForeignKey extends AbstractDatabaseObject{
 
+    @Override
     public DatabaseObject[] getContainingObjects() {
 
         List<Column> objects = new ArrayList<Column>();
@@ -27,6 +28,7 @@ public class ForeignKey extends AbstractDatabaseObject{
         return objects.toArray(new DatabaseObject[objects.size()]);
     }
 
+    @Override
     public Schema getSchema() {
         if (getForeignKeyTable() == null) {
             return null;
@@ -91,10 +93,12 @@ public class ForeignKey extends AbstractDatabaseObject{
         return this;
     }
 
+    @Override
     public String getName() {
         return getAttribute("name", String.class);
     }
 
+    @Override
     public ForeignKey setName(String name) {
         this.setAttribute("name", name);
         return this;

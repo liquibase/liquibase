@@ -30,10 +30,12 @@ public class H2Database extends AbstractJdbcDatabase {
         super.sequenceCurrentValueFunction = "CURRVAL('%s')";
     }
 
+    @Override
     public String getShortName() {
         return "h2";
     }
 
+    @Override
     public Integer getDefaultPort() {
         return 8082;
     }
@@ -43,6 +45,7 @@ public class H2Database extends AbstractJdbcDatabase {
         return "H2";
     }
 
+    @Override
     public String getDefaultDriver(String url) {
         if (url.startsWith("jdbc:h2")) {
             return "org.h2.Driver";
@@ -50,10 +53,12 @@ public class H2Database extends AbstractJdbcDatabase {
         return null;
     }
 
+    @Override
     public int getPriority() {
         return PRIORITY_DATABASE;
     }
 
+    @Override
     public boolean isCorrectDatabaseImplementation(DatabaseConnection conn) throws DatabaseException {
         return "H2".equals(conn.getDatabaseProductName());
     }
@@ -83,6 +88,7 @@ public class H2Database extends AbstractJdbcDatabase {
 //
 //    }
 
+    @Override
     public boolean supportsTablespaces() {
         return false;
     }
@@ -227,6 +233,7 @@ public class H2Database extends AbstractJdbcDatabase {
             "UNIQUE",
             "WHERE");
 
+    @Override
     public boolean supportsInitiallyDeferrableColumns() {
         return false;
     }

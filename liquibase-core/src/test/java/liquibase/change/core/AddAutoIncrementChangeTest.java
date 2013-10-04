@@ -31,6 +31,7 @@ public class AddAutoIncrementChangeTest extends StandardChangeTest {
         change.setColumnDataType("DATATYPE(255)");
 
         testChangeOnAllExcept(change, new GenerateAllValidator() {
+            @Override
             public void validate(SqlStatement[] sqlStatements, Database database) {
 
                 assertEquals(1, sqlStatements.length);
@@ -42,6 +43,7 @@ public class AddAutoIncrementChangeTest extends StandardChangeTest {
             }
         }, PostgresDatabase.class);
         testChange(change, new GenerateAllValidator() {
+            @Override
             public void validate(SqlStatement[] sqlStatements, Database database) {
 
                 assertEquals(3, sqlStatements.length);

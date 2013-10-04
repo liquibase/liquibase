@@ -12,6 +12,7 @@ public class CacheDatabase extends AbstractJdbcDatabase {
         super.setCurrentDateTimeFunction("SYSDATE");
     }
 
+    @Override
     public String getDefaultDriver(String url) {
         if (url.startsWith("jdbc:Cache")) {
             return "com.intersys.jdbc.CacheDriver";
@@ -24,24 +25,29 @@ public class CacheDatabase extends AbstractJdbcDatabase {
         return "Cache";
     }
 
+    @Override
     public Integer getDefaultPort() {
         return 1972;
     }
 
+    @Override
     public int getPriority() {
         return PRIORITY_DEFAULT;
     }
     
 
+    @Override
     public String getShortName() {
         return "cache";
     }
 
+    @Override
     public boolean isCorrectDatabaseImplementation(DatabaseConnection conn)
             throws DatabaseException {
         return PRODUCT_NAME.equalsIgnoreCase(conn.getDatabaseProductName());
     }
 
+    @Override
     public boolean supportsInitiallyDeferrableColumns() {
         return false;
     }
@@ -57,6 +63,7 @@ public class CacheDatabase extends AbstractJdbcDatabase {
         return false;
     }
 
+    @Override
     public boolean supportsTablespaces() {
         return false;
     }

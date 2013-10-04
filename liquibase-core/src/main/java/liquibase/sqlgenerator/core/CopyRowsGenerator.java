@@ -19,6 +19,7 @@ public class CopyRowsGenerator extends AbstractSqlGenerator<CopyRowsStatement> {
         return (database instanceof SQLiteDatabase);
     }
 
+    @Override
     public ValidationErrors validate(CopyRowsStatement copyRowsStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("targetTable", copyRowsStatement.getTargetTable());
@@ -27,6 +28,7 @@ public class CopyRowsGenerator extends AbstractSqlGenerator<CopyRowsStatement> {
         return validationErrors;
     }
 
+    @Override
     public Sql[] generateSql(CopyRowsStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         StringBuffer sql = new StringBuffer();
         if (database instanceof SQLiteDatabase) {

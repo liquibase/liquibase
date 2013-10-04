@@ -15,6 +15,7 @@ import java.util.List;
 
 public class DropIndexGenerator extends AbstractSqlGenerator<DropIndexStatement> {
 
+    @Override
     public ValidationErrors validate(DropIndexStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("indexName", statement.getIndexName());
@@ -26,6 +27,7 @@ public class DropIndexGenerator extends AbstractSqlGenerator<DropIndexStatement>
         return validationErrors;
     }
 
+    @Override
     public Sql[] generateSql(DropIndexStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         List<String> associatedWith = StringUtils.splitAndTrim(statement.getAssociatedWith(), ",");
         if (associatedWith != null) {

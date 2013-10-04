@@ -15,6 +15,7 @@ class SnapshotGeneratorComparator implements Comparator<SnapshotGenerator> {
         this.database = database;
     }
 
+    @Override
     public int compare(SnapshotGenerator o1, SnapshotGenerator o2) {
         int result = -1 * new Integer(o1.getPriority(objectType, database)).compareTo(o2.getPriority(objectType, database));
         if (result == 0) {

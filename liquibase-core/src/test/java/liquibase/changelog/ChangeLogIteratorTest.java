@@ -74,10 +74,12 @@ public class ChangeLogIteratorTest {
         public List<ChangeSet> visitedChangeSets = new ArrayList<ChangeSet>();
 
 
+        @Override
         public Direction getDirection() {
             return ChangeSetVisitor.Direction.FORWARD;
         }
 
+        @Override
         public void visit(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database) {
             visitedChangeSets.add(changeSet);
         }

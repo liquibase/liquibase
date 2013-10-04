@@ -20,10 +20,12 @@ public class ContextChangeSetFilterTest {
             setContexts(new HashSet<String>(Arrays.asList(contexts)));
         }
 
+        @Override
         public String modifySql(String sql, Database database) {
             throw new UnsupportedOperationException("modifySql has not been implemented");
         }
 
+        @Override
         public String getName() {
             throw new UnsupportedOperationException("getName has not been implemented");
         }

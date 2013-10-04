@@ -6,6 +6,7 @@ public class PrependSqlVisitor extends AbstractSqlVisitor {
     private String value;
 
 
+    @Override
     public String getName() {
         return "prepend";
     }
@@ -18,6 +19,7 @@ public class PrependSqlVisitor extends AbstractSqlVisitor {
         this.value = value;
     }
 
+    @Override
     public String modifySql(String sql, Database database) {
         return value + sql;
     }

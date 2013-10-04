@@ -20,6 +20,7 @@ public class DropUniqueConstraintGenerator extends AbstractSqlGenerator<DropUniq
         return !(database instanceof SQLiteDatabase);
     }
 
+    @Override
     public ValidationErrors validate(DropUniqueConstraintStatement dropUniqueConstraintStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("tableName", dropUniqueConstraintStatement.getTableName());
@@ -27,6 +28,7 @@ public class DropUniqueConstraintGenerator extends AbstractSqlGenerator<DropUniq
         return validationErrors;
     }
 
+    @Override
     public Sql[] generateSql(DropUniqueConstraintStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         String sql;
         if (database instanceof MySQLDatabase) {

@@ -13,6 +13,7 @@ public class NotRanChangeSetFilter implements ChangeSetFilter {
         this.ranChangeSets = ranChangeSets;
     }
 
+    @Override
     @SuppressWarnings({"RedundantIfStatement"})
     public boolean accepts(ChangeSet changeSet) {
         for (RanChangeSet ranChangeSet : ranChangeSets) {

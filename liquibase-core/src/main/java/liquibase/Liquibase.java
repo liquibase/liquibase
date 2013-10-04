@@ -520,6 +520,7 @@ public class Liquibase {
                         new ContextChangeSetFilter(contexts),
                         new DbmsChangeSetFilter(database),
                         new ChangeSetFilter() {
+                            @Override
                             public boolean accepts(ChangeSet changeSet) {
                                 return listVisitor.getSeenChangeSets().contains(changeSet);
                             }

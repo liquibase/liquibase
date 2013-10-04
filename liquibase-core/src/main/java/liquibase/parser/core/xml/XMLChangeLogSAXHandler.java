@@ -173,6 +173,7 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
 
 				Enumeration<URL> resourcesEnum = resourceAccessor.getResources(pathName);
                 SortedSet<URL> resources = new TreeSet<URL>(new Comparator<URL>() {
+                    @Override
                     public int compare(URL o1, URL o2) {
                         return o1.toString().compareTo(o2.toString());
                     }
@@ -725,52 +726,64 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
 			this.attributes = attributes;
 		}
 
-		public int getLength() {
+		@Override
+        public int getLength() {
 			return attributes.getLength();
 		}
 
-		public String getURI(int index) {
+		@Override
+        public String getURI(int index) {
 			return attributes.getURI(index);
 		}
 
-		public String getLocalName(int index) {
+		@Override
+        public String getLocalName(int index) {
 			return attributes.getLocalName(index);
 		}
 
-		public String getQName(int index) {
+		@Override
+        public String getQName(int index) {
 			return attributes.getQName(index);
 		}
 
-		public String getType(int index) {
+		@Override
+        public String getType(int index) {
 			return attributes.getType(index);
 		}
 
-		public String getValue(int index) {
+		@Override
+        public String getValue(int index) {
 			return attributes.getValue(index);
 		}
 
-		public int getIndex(String uri, String localName) {
+		@Override
+        public int getIndex(String uri, String localName) {
 			return attributes.getIndex(uri, localName);
 		}
 
-		public int getIndex(String qName) {
+		@Override
+        public int getIndex(String qName) {
 			return attributes.getIndex(qName);
 		}
 
-		public String getType(String uri, String localName) {
+		@Override
+        public String getType(String uri, String localName) {
 			return attributes.getType(uri, localName);
 		}
 
-		public String getType(String qName) {
+		@Override
+        public String getType(String qName) {
 			return attributes.getType(qName);
 		}
 
-		public String getValue(String uri, String localName) {
+		@Override
+        public String getValue(String uri, String localName) {
 			return changeLogParameters.expandExpressions(attributes.getValue(
 					uri, localName));
 		}
 
-		public String getValue(String qName) {
+		@Override
+        public String getValue(String qName) {
 			return changeLogParameters.expandExpressions(attributes
 					.getValue(qName));
 		}

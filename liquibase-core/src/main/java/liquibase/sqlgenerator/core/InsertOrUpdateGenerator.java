@@ -30,6 +30,7 @@ public abstract class InsertOrUpdateGenerator extends AbstractSqlGenerator<Inser
         return PRIORITY_DATABASE;
     }
 
+    @Override
     public ValidationErrors validate(InsertOrUpdateStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("tableName", statement.getTableName());
@@ -124,6 +125,7 @@ public abstract class InsertOrUpdateGenerator extends AbstractSqlGenerator<Inser
 
     }
 
+    @Override
     public Sql[] generateSql(InsertOrUpdateStatement insertOrUpdateStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         StringBuffer completeSql = new StringBuffer();
         String whereClause = getWhereClause(insertOrUpdateStatement, database);

@@ -51,7 +51,8 @@ public class LockServiceFactory {
 	public LockService getLockService(Database database) {
 		if (!openLockServices.containsKey(database)) {
 			SortedSet<LockService> foundServices = new TreeSet<LockService>(new Comparator<LockService>() {
-				public int compare(LockService o1, LockService o2) {
+				@Override
+                public int compare(LockService o1, LockService o2) {
 					return -1 * new Integer(o1.getPriority()).compareTo(o2.getPriority());
 				}
 			});

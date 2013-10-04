@@ -40,6 +40,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
         super.sequenceCurrentValueFunction = "%s.currval";
     }
 
+    @Override
     public int getPriority() {
         return PRIORITY_DEFAULT;
     }
@@ -63,6 +64,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
         super.setConnection(conn);
     }
 
+    @Override
     public String getShortName() {
         return "oracle";
     }
@@ -72,6 +74,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
         return "Oracle";
     }
 
+    @Override
     public Integer getDefaultPort() {
         return 1521;
     }
@@ -95,6 +98,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
         }
     }
 
+    @Override
     public boolean supportsInitiallyDeferrableColumns() {
         return true;
     }
@@ -131,10 +135,12 @@ public class OracleDatabase extends AbstractJdbcDatabase {
         return null;
     }
 
+    @Override
     public boolean isCorrectDatabaseImplementation(DatabaseConnection conn) throws DatabaseException {
         return PRODUCT_NAME.equalsIgnoreCase(conn.getDatabaseProductName());
     }
 
+    @Override
     public String getDefaultDriver(String url) {
         if (url.startsWith("jdbc:oracle")) {
             return "oracle.jdbc.OracleDriver";
@@ -227,6 +233,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
         return super.isSystemObject(example);
     }
 
+    @Override
     public boolean supportsTablespaces() {
         return true;
     }

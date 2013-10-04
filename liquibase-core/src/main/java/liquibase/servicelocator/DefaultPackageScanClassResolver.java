@@ -30,6 +30,7 @@ public class DefaultPackageScanClassResolver implements PackageScanClassResolver
     private Set<ClassLoader> classLoaders;
     private Set<PackageScanFilter> scanFilters;
 
+    @Override
     public void addClassLoader(ClassLoader classLoader) {
         try {
             getClassLoaders().add(classLoader);
@@ -39,6 +40,7 @@ public class DefaultPackageScanClassResolver implements PackageScanClassResolver
         }
     }
 
+    @Override
     public void addFilter(PackageScanFilter filter) {
         if (scanFilters == null) {
             scanFilters = new LinkedHashSet<PackageScanFilter>();
@@ -46,12 +48,14 @@ public class DefaultPackageScanClassResolver implements PackageScanClassResolver
         scanFilters.add(filter);
     }
 
+    @Override
     public void removeFilter(PackageScanFilter filter) {
         if (scanFilters != null) {
             scanFilters.remove(filter);
         }
     }
 
+    @Override
     public Set<ClassLoader> getClassLoaders() {
         if (classLoaders == null) {
             classLoaders = new HashSet<ClassLoader>();
@@ -65,10 +69,12 @@ public class DefaultPackageScanClassResolver implements PackageScanClassResolver
         return classLoaders;
     }
 
+    @Override
     public void setClassLoaders(Set<ClassLoader> classLoaders) {
         this.classLoaders = classLoaders;
     }
 
+    @Override
     @SuppressWarnings("unchecked")
     public Set<Class<?>> findImplementations(Class parent, String... packageNames) {
         if (packageNames == null) {
@@ -88,6 +94,7 @@ public class DefaultPackageScanClassResolver implements PackageScanClassResolver
         return classes;
     }
 
+    @Override
     @SuppressWarnings("unchecked")
     public Set<Class<?>> findByFilter(PackageScanFilter filter, String... packageNames) {
         if (packageNames == null) {

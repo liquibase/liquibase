@@ -13,6 +13,7 @@ import liquibase.statement.core.AddDefaultValueStatement;
 
 public class AddDefaultValueGenerator extends AbstractSqlGenerator<AddDefaultValueStatement> {
 
+    @Override
     public ValidationErrors validate(AddDefaultValueStatement addDefaultValueStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("defaultValue", addDefaultValueStatement.getDefaultValue());
@@ -21,6 +22,7 @@ public class AddDefaultValueGenerator extends AbstractSqlGenerator<AddDefaultVal
         return validationErrors;
     }
 
+    @Override
     public Sql[] generateSql(AddDefaultValueStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         Object defaultValue = statement.getDefaultValue();
         return new Sql[]{

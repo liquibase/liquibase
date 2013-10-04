@@ -15,6 +15,7 @@ public class ChangeLogPropertyDefinedPrecondition implements Precondition {
     private String property;
     private String value;
 
+    @Override
     public String getName() {
         return "changeLogPropertyDefined";
     }
@@ -35,14 +36,17 @@ public class ChangeLogPropertyDefinedPrecondition implements Precondition {
         this.value = value;
     }
     
+    @Override
     public Warnings warn(Database database) {
         return new Warnings();
     }
 
+    @Override
     public ValidationErrors validate(Database database) {
         return new ValidationErrors();
     }
 
+    @Override
     public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet) throws PreconditionFailedException, PreconditionErrorException {
         ChangeLogParameters changeLogParameters = changeLog.getChangeLogParameters();
         if (changeLogParameters == null) {

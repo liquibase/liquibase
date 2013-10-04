@@ -14,6 +14,7 @@ import liquibase.structure.core.Table;
 
 public class MissingPrimaryKeyChangeGenerator implements MissingObjectChangeGenerator {
 
+    @Override
     public int getPriority(Class<? extends DatabaseObject> objectType, Database database) {
         if (PrimaryKey.class.isAssignableFrom(objectType)) {
             return PRIORITY_DEFAULT;
@@ -22,6 +23,7 @@ public class MissingPrimaryKeyChangeGenerator implements MissingObjectChangeGene
 
     }
 
+    @Override
     public Class<? extends DatabaseObject>[] runAfterTypes() {
         return new Class[] {
                 Table.class,
@@ -30,12 +32,14 @@ public class MissingPrimaryKeyChangeGenerator implements MissingObjectChangeGene
 
     }
 
+    @Override
     public Class<? extends DatabaseObject>[] runBeforeTypes() {
         return new Class[] {
                 Index.class
         };
     }
 
+    @Override
     public Change[] fixMissing(DatabaseObject missingObject, DiffOutputControl control, Database referenceDatabase, Database comparisonDatabase, ChangeGeneratorChain chain) {
         PrimaryKey pk = (PrimaryKey) missingObject;
 

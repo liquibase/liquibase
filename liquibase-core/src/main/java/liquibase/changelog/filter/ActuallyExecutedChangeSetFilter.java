@@ -11,6 +11,7 @@ public class ActuallyExecutedChangeSetFilter extends RanChangeSetFilter {
         super(ranChangeSets);
     }
 
+    @Override
     public boolean accepts(ChangeSet changeSet) {
         RanChangeSet ranChangeSet = getRanChangeSet(changeSet);
         return ranChangeSet != null && (ranChangeSet.getExecType() == null || ranChangeSet.getExecType().equals(ChangeSet.ExecType.EXECUTED) || ranChangeSet.getExecType().equals(ChangeSet.ExecType.RERAN));

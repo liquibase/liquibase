@@ -49,14 +49,17 @@ public class PrimaryKeyExistsPrecondition implements Precondition {
         this.tableName = tableName;
     }
 
+    @Override
     public Warnings warn(Database database) {
         return new Warnings();
     }
 
+    @Override
     public ValidationErrors validate(Database database) {
         return new ValidationErrors();
     }
 
+    @Override
     public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet) throws PreconditionFailedException, PreconditionErrorException {
         try {
             PrimaryKey example = new PrimaryKey();
@@ -82,6 +85,7 @@ public class PrimaryKeyExistsPrecondition implements Precondition {
         }
     }
 
+    @Override
     public String getName() {
         return "primaryKeyExists";
     }

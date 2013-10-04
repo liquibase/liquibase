@@ -58,6 +58,7 @@ public class JUnitJDBCDriverClassLoader extends URLClassLoader {
                 throw new RuntimeException("JDBC driver directory "+jdbcLib.getAbsolutePath()+" does not exist");
             }
             File[] files = jdbcLib.listFiles(new FileFilter() {
+                @Override
                 public boolean accept(File pathname) {
                     return pathname.isDirectory();
                 }
@@ -67,6 +68,7 @@ public class JUnitJDBCDriverClassLoader extends URLClassLoader {
             }
             for (File driverDir : files) {
                 File[] driverJars = driverDir.listFiles(new FilenameFilter() {
+                    @Override
                     public boolean accept(File dir, String name) {
                         return name.endsWith("jar");
                     }

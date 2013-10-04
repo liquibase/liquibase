@@ -8,10 +8,12 @@ import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.InsertOrUpdateStatement;
 
 public class InsertOrUpdateGeneratorMSSQL extends InsertOrUpdateGenerator {
+    @Override
     public boolean supports(InsertOrUpdateStatement statement, Database database) {
          return database instanceof MSSQLDatabase;
     }
 
+    @Override
     protected String getRecordCheck(InsertOrUpdateStatement insertOrUpdateStatement, Database database, String whereClause) {
         StringBuffer recordCheck = new StringBuffer();
         recordCheck.append("DECLARE @reccount integer\n");

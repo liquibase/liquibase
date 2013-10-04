@@ -29,10 +29,12 @@ public class HeaderColumnNameMappingStrategy implements MappingStrategy {
     protected PropertyDescriptor[] descriptors;
     protected Class type;
 
+    @Override
     public void captureHeader(CSVReader reader) throws IOException {
         header = reader.readNext();
     }
 
+    @Override
     public PropertyDescriptor findDescriptor(int col) throws IntrospectionException {
         String columnName = getColumnName(col);
         return (null != columnName && columnName.trim().length()>0) ? findDescriptor(columnName) : null;
@@ -56,6 +58,7 @@ public class HeaderColumnNameMappingStrategy implements MappingStrategy {
         BeanInfo beanInfo = Introspector.getBeanInfo(cls);
         return beanInfo.getPropertyDescriptors();
     }
+    @Override
     public Object createBean() throws InstantiationException, IllegalAccessException {
         return type.newInstance();
     }

@@ -7,6 +7,7 @@ public class RegExpReplaceSqlVisitor extends AbstractSqlVisitor {
     private String replace;
     private String with;
 
+    @Override
     public String getName() {
         return "regExpReplace";
     }
@@ -27,6 +28,7 @@ public class RegExpReplaceSqlVisitor extends AbstractSqlVisitor {
         this.with = with;
     }
 
+    @Override
     public String modifySql(String sql, Database database) {
         return sql.replaceAll(getReplace(), getWith());
     }

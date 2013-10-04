@@ -29,10 +29,12 @@ public class HsqlDatabase extends AbstractJdbcDatabase {
         super.sequenceCurrentValueFunction = "CURRVAL('%s')";
     }
     
+    @Override
     public boolean isCorrectDatabaseImplementation(DatabaseConnection conn) throws DatabaseException {
         return "HSQL Database Engine".equalsIgnoreCase(conn.getDatabaseProductName());
     }
 
+    @Override
     public String getDefaultDriver(String url) {
         if (url.startsWith("jdbc:hsqldb:")) {
             return "org.hsqldb.jdbcDriver";
@@ -41,6 +43,7 @@ public class HsqlDatabase extends AbstractJdbcDatabase {
     }
 
 
+    @Override
     public Integer getDefaultPort() {
         return 9001;
     }
@@ -50,10 +53,12 @@ public class HsqlDatabase extends AbstractJdbcDatabase {
         return "HyperSQL";
     }
 
+    @Override
     public int getPriority() {
         return PRIORITY_DEFAULT;
     }
 
+    @Override
     public String getShortName() {
         return "hsqldb";
     }
@@ -63,6 +68,7 @@ public class HsqlDatabase extends AbstractJdbcDatabase {
         return true;
     }
 
+    @Override
     public boolean supportsInitiallyDeferrableColumns() {
         return false;
     }
@@ -132,6 +138,7 @@ public class HsqlDatabase extends AbstractJdbcDatabase {
         }
     }
 
+    @Override
     public boolean supportsTablespaces() {
         return false;
     }

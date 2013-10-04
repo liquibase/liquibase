@@ -20,12 +20,14 @@ public class FindForeignKeyConstraintsGeneratorPostgres extends AbstractSqlGener
         return database instanceof PostgresDatabase;
     }
 
+    @Override
     public ValidationErrors validate(FindForeignKeyConstraintsStatement findForeignKeyConstraintsStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("baseTableName", findForeignKeyConstraintsStatement.getBaseTableName());
         return validationErrors;
     }
 
+    @Override
     public Sql[] generateSql(FindForeignKeyConstraintsStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
          StringBuilder sb = new StringBuilder();
 

@@ -13,6 +13,7 @@ import liquibase.structure.core.Table;
 import liquibase.structure.core.View;
 
 public class UnexpectedViewChangeGenerator implements UnexpectedObjectChangeGenerator {
+    @Override
     public int getPriority(Class<? extends DatabaseObject> objectType, Database database) {
         if (View.class.isAssignableFrom(objectType)) {
             return PRIORITY_DEFAULT;
@@ -20,10 +21,12 @@ public class UnexpectedViewChangeGenerator implements UnexpectedObjectChangeGene
         return PRIORITY_NONE;
     }
 
+    @Override
     public Class<? extends DatabaseObject>[] runAfterTypes() {
         return null;
     }
 
+    @Override
     public Class<? extends DatabaseObject>[] runBeforeTypes() {
         return new Class[] {
                 Table.class,
@@ -31,6 +34,7 @@ public class UnexpectedViewChangeGenerator implements UnexpectedObjectChangeGene
         };
     }
 
+    @Override
     public Change[] fixUnexpected(DatabaseObject unexpectedObject, DiffOutputControl control, Database referenceDatabase, Database comparisonDatabase, ChangeGeneratorChain chain) {
         View view = (View) unexpectedObject;
 

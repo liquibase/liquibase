@@ -56,6 +56,7 @@ public abstract class LiquibaseDataType implements PrioritizedService {
         return aliases;
     }
 
+    @Override
     public int getPriority() {
         return priority;
     }

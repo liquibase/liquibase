@@ -21,6 +21,7 @@ public class ShouldRunChangeSetFilter implements ChangeSetFilter {
         this.ranChangeSets = database.getRanChangeSetList();
     }
 
+    @Override
     @SuppressWarnings({"RedundantIfStatement"})
     public boolean accepts(ChangeSet changeSet) {
         for (RanChangeSet ranChangeSet : ranChangeSets) {

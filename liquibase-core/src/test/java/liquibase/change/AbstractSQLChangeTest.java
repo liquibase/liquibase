@@ -246,6 +246,7 @@ public class AbstractSQLChangeTest {
         }
 
 
+        @Override
         public String getConfirmationMessage() {
             return "Example SQL Change Message";
         }

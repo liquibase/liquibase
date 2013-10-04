@@ -6,6 +6,7 @@ public class AppendSqlVisitor extends AbstractSqlVisitor{
     private String value;
 
 
+    @Override
     public String getName() {
         return "append";
     }
@@ -18,6 +19,7 @@ public class AppendSqlVisitor extends AbstractSqlVisitor{
         this.value = value;
     }
 
+    @Override
     public String modifySql(String sql, Database database) {
         return sql + value;
     }

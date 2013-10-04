@@ -24,6 +24,7 @@ public class ExampleCustomProcCallChange implements CustomSqlChange {
         this.procedureName = procedureName;
     }
 
+    @Override
     public SqlStatement[] generateStatements(Database database) throws CustomChangeException {
         StoredProcedureStatement procedureStatement = new StoredProcedureStatement("testHello");
         return new SqlStatement[]{
@@ -31,17 +32,21 @@ public class ExampleCustomProcCallChange implements CustomSqlChange {
         };
     }
 
+    @Override
     public String getConfirmationMessage() {
         return "Executed " + getProcedureName();
     }
 
+    @Override
     public void setUp() throws SetupException {
     }
 
+    @Override
     public void setFileOpener(ResourceAccessor resourceAccessor) {
         this.resourceAccessor = resourceAccessor;
     }
 
+    @Override
     public ValidationErrors validate(Database database) {
         return new ValidationErrors();
     }

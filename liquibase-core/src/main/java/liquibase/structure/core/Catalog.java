@@ -17,18 +17,22 @@ public class Catalog extends AbstractDatabaseObject {
         return getName();
     }
 
+    @Override
     public DatabaseObject[] getContainingObjects() {
         return null;
     }
 
+    @Override
     public Schema getSchema() {
         return null;
     }
 
+    @Override
     public String getName() {
         return getAttribute("name", String.class);
     }
 
+    @Override
     public Catalog setName(String name) {
         setAttribute("name", name);
         return this;

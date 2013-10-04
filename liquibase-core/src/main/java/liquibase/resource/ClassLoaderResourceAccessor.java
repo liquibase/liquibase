@@ -26,14 +26,17 @@ public class ClassLoaderResourceAccessor implements ResourceAccessor {
         this.classLoader = classLoader;
     }
 
+    @Override
     public InputStream getResourceAsStream(String file) throws IOException {
         return classLoader.getResourceAsStream(file);
     }
 
+    @Override
     public Enumeration<URL> getResources(String packageName) throws IOException {
         return classLoader.getResources(packageName);
     }
 
+    @Override
     public ClassLoader toClassLoader() {
         return classLoader;
     }

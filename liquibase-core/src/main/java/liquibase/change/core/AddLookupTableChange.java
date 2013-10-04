@@ -151,6 +151,7 @@ public class AddLookupTableChange extends AbstractChange {
         };
     }
 
+    @Override
     public SqlStatement[] generateStatements(Database database) {
         List<SqlStatement> statements = new ArrayList<SqlStatement>();
 
@@ -216,6 +217,7 @@ public class AddLookupTableChange extends AbstractChange {
         return statements.toArray(new SqlStatement[statements.size()]);
     }
 
+    @Override
     public String getConfirmationMessage() {
         return "Lookup table added for "+getExistingTableName()+"."+getExistingColumnName();
     }

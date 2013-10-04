@@ -15,15 +15,18 @@ public class SingleLineComment implements Sql {
 		this.lineCommentToken = lineCommentToken;
 	}
 	
-	public Collection<? extends DatabaseObject> getAffectedDatabaseObjects() {
+	@Override
+    public Collection<? extends DatabaseObject> getAffectedDatabaseObjects() {
 		return new HashSet<DatabaseObject>();
 	}
 
-	public String getEndDelimiter() {
+	@Override
+    public String getEndDelimiter() {
 		return "\n";
 	}
 
-	public String toSql() {
+	@Override
+    public String toSql() {
 		return lineCommentToken + ' ' + sql;
 	}
 

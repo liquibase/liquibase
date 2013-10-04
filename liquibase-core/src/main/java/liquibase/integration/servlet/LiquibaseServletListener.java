@@ -82,6 +82,7 @@ public class LiquibaseServletListener implements ServletContextListener {
         this.dataSourceName = dataSource;
     }
 
+    @Override
     public void contextInitialized(ServletContextEvent servletContextEvent) {
         ServletContext servletContext = servletContextEvent.getServletContext();
         try {
@@ -254,6 +255,7 @@ public class LiquibaseServletListener implements ServletContextListener {
         return System.getProperty(key);
     }
 
+    @Override
     public void contextDestroyed(ServletContextEvent servletContextEvent) {
     }
 

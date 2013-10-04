@@ -64,6 +64,7 @@ public class DropUniqueConstraintChange extends AbstractChange {
 		this.uniqueColumns = uniqueColumns;
 	}
 
+    @Override
     public SqlStatement[] generateStatements(Database database) {
         
 //todo    	if (database instanceof SQLiteDatabase) {
@@ -121,6 +122,7 @@ public class DropUniqueConstraintChange extends AbstractChange {
 //    	return statements.toArray(new SqlStatement[statements.size()]);
 //    }
 
+    @Override
     public String getConfirmationMessage() {
         return "Unique constraint "+getConstraintName()+" dropped from "+getTableName();
     }

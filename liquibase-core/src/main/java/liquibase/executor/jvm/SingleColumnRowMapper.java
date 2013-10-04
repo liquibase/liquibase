@@ -63,6 +63,7 @@ class SingleColumnRowMapper implements RowMapper {
      * @see #getColumnValue(java.sql.ResultSet,int,Class)
      * @see #convertValueToRequiredType(Object,Class)
      */
+    @Override
     public Object mapRow(ResultSet rs, int rowNum) throws SQLException {
         // Validate column count.
         ResultSetMetaData rsmd = rs.getMetaData();

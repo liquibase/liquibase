@@ -23,6 +23,7 @@ import java.util.Map;
 @SuppressWarnings({"unchecked"})
 public class ColumnMapRowMapper implements RowMapper {
 
+    @Override
     public Object mapRow(ResultSet rs, int rowNum) throws SQLException {
         ResultSetMetaData rsmd = rs.getMetaData();
         int columnCount = rsmd.getColumnCount();
