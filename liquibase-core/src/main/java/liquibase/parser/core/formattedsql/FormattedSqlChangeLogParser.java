@@ -25,7 +25,11 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
         BufferedReader reader = null;
         try {
             if (changeLogFile.endsWith(".sql")) {
-                reader = new BufferedReader(new UtfBomAwareReader(openChangeLogFile(changeLogFile, resourceAccessor)));
+                InputStream fileStream = openChangeLogFile(changeLogFile, resourceAccessor);
+                if (fileStream == null) {
+                    return false;
+                }
+                reader = new BufferedReader(new UtfBomAwareReader(fileStream));
 
                 return reader.readLine().matches("\\-\\-\\s*liquibase formatted.*");
             } else {
