@@ -68,6 +68,7 @@ public class Liquibase {
 
     private ChangeLogParameters changeLogParameters;
     private ChangeExecListener changeExecListener;
+    private boolean ignoringClasspathPrefix;
 
     /**
      * Creates a Liquibase instance for a given DatabaseConnection. The Database instance used will be found with {@link DatabaseFactory#findCorrectDatabaseImplementation(liquibase.database.DatabaseConnection)}
@@ -199,7 +200,7 @@ public class Liquibase {
 
     protected ChangeLogIterator getStandardChangelogIterator(Contexts contexts, DatabaseChangeLog changeLog) throws DatabaseException {
         return new ChangeLogIterator(changeLog,
-                new ShouldRunChangeSetFilter(database),
+                new ShouldRunChangeSetFilter(database, ignoringClasspathPrefix),
                 new ContextChangeSetFilter(contexts),
                 new DbmsChangeSetFilter(database));
     }
@@ -252,7 +253,7 @@ public class Liquibase {
             changeLog.validate(database, contexts);
 
             ChangeLogIterator logIterator = new ChangeLogIterator(changeLog,
-                    new ShouldRunChangeSetFilter(database),
+                    new ShouldRunChangeSetFilter(database, ignoringClasspathPrefix),
                     new ContextChangeSetFilter(contexts),
                     new DbmsChangeSetFilter(database),
                     new CountChangeSetFilter(changesToApply));
@@ -994,5 +995,13 @@ public class Liquibase {
     }
     public void setChangeExecListener(ChangeExecListener listener) {
       this.changeExecListener = listener;
+    }
+
+    public void setIgnoringClasspathPrefix(boolean ignoringClasspathPrefix) {
+        this.ignoringClasspathPrefix = ignoringClasspathPrefix;
+    }
+
+    public boolean isIgnoringClasspathPrefix() {
+        return ignoringClasspathPrefix;
     }
 }
