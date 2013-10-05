@@ -71,12 +71,12 @@ import org.springframework.core.io.ResourceLoader;
 public class SpringLiquibase implements InitializingBean, BeanNameAware, ResourceLoaderAware {
 
     public class SpringResourceOpener implements ResourceAccessor {
+
         private String parentFile;
-
-
         public SpringResourceOpener(String parentFile) {
             this.parentFile = parentFile;
         }
+
 
         @Override
         public InputStream getResourceAsStream(String file) throws IOException {
@@ -120,8 +120,8 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
         public ClassLoader toClassLoader() {
             return getResourceLoader().getClassLoader();
         }
-    }
 
+    }
     private String beanName;
 
     private ResourceLoader resourceLoader;
@@ -144,9 +144,40 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 
     private File rollbackFile;
 
-    public SpringLiquibase() {
-        super();
-    }
+    /**
+     * Ignores classpath prefix during changeset comparison.
+     * This is particularly useful if Liquibase is run in different ways.
+     *
+     * For instance, if Maven plugin is used to run changesets, as in:
+     * <code>
+     *      &lt;configuration&gt;
+     *          ...
+     *          &lt;changeLogFile&gt;path/to/changelog&lt;/changeLogFile&gt;
+     *      &lt;/configuration&gt;
+     * </code>
+     *
+     * And {@link SpringLiquibase} is configured like:
+     * <code>
+     *     SpringLiquibase springLiquibase = new SpringLiquibase();
+     *     springLiquibase.setChangeLog("classpath:path/to/changelog");
+     * </code>
+     *
+     * or, in equivalent XML configuration:
+     * <code>
+     *     &lt;bean id="springLiquibase" class="liquibase.integration.spring.SpringLiquibase"&gt;
+     *         &lt;property name="changeLog" value="path/to/changelog" /&gt;
+     *      &lt;/bean&gt;
+     * </code>
+     *
+     * {@link Liquibase#listUnrunChangeSets(String)} will
+     * always, by default, return changesets, regardless of their
+     * execution by Maven.
+     * Maven-executed changeset path name are not be prepended by
+     * "classpath:" whereas the ones parsed via SpringLiquibase are.
+     *
+     * To avoid this issue, just set ignoringClasspathPrefix to true.
+     */
+    private boolean ignoringClasspathPrefix;
 
     public boolean isDropFirst() {
         return dropFirst;
@@ -295,6 +326,7 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 
     protected Liquibase createLiquibase(Connection c) throws LiquibaseException {
         Liquibase liquibase = new Liquibase(getChangeLog(), createResourceOpener(), createDatabase(c));
+        liquibase.setIgnoringClasspathPrefix(isIgnoringClasspathPrefix());
         if (parameters != null) {
             for (Map.Entry<String, String> entry : parameters.entrySet()) {
                 liquibase.setChangeLogParameter(entry.getKey(), entry.getValue());
@@ -363,6 +395,14 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 
     public void setRollbackFile(File rollbackFile) {
         this.rollbackFile = rollbackFile;
+    }
+
+    public boolean isIgnoringClasspathPrefix() {
+        return ignoringClasspathPrefix;
+    }
+
+    public void setIgnoringClasspathPrefix(boolean ignoringClasspathPrefix) {
+        this.ignoringClasspathPrefix = ignoringClasspathPrefix;
     }
 
     @Override
