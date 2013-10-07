@@ -69,7 +69,7 @@ public class Liquibase {
 
     private ChangeLogParameters changeLogParameters;
     private ChangeExecListener changeExecListener;
-    private boolean ignoringClasspathPrefix;
+    private boolean ignoreClasspathPrefix = true;
 
     public Liquibase(String changeLogFile, ResourceAccessor resourceAccessor, DatabaseConnection conn) throws LiquibaseException {
         this(changeLogFile, resourceAccessor, DatabaseFactory.getInstance().findCorrectDatabaseImplementation(conn));
@@ -153,7 +153,7 @@ public class Liquibase {
 
     protected ChangeLogIterator getStandardChangelogIterator(String contexts, DatabaseChangeLog changeLog) throws DatabaseException {
         return new ChangeLogIterator(changeLog,
-                new ShouldRunChangeSetFilter(database, ignoringClasspathPrefix),
+                new ShouldRunChangeSetFilter(database, ignoreClasspathPrefix),
                 new ContextChangeSetFilter(contexts),
                 new DbmsChangeSetFilter(database));
     }
@@ -200,7 +200,7 @@ public class Liquibase {
             changeLog.validate(database, contexts);
 
             ChangeLogIterator logIterator = new ChangeLogIterator(changeLog,
-                    new ShouldRunChangeSetFilter(database, ignoringClasspathPrefix),
+                    new ShouldRunChangeSetFilter(database, ignoreClasspathPrefix),
                     new ContextChangeSetFilter(contexts),
                     new DbmsChangeSetFilter(database),
                     new CountChangeSetFilter(changesToApply));
@@ -903,11 +903,11 @@ public class Liquibase {
       this.changeExecListener = listener;
     }
 
-    public void setIgnoringClasspathPrefix(boolean ignoringClasspathPrefix) {
-        this.ignoringClasspathPrefix = ignoringClasspathPrefix;
+    public void setIgnoreClasspathPrefix(boolean ignoreClasspathPrefix) {
+        this.ignoreClasspathPrefix = ignoreClasspathPrefix;
     }
 
-    public boolean isIgnoringClasspathPrefix() {
-        return ignoringClasspathPrefix;
+    public boolean isIgnoreClasspathPrefix() {
+        return ignoreClasspathPrefix;
     }
 }

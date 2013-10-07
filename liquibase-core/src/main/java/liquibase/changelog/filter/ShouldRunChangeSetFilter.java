@@ -13,27 +13,25 @@ public class ShouldRunChangeSetFilter implements ChangeSetFilter {
     private final Database database;
     private final boolean ignoringClasspathPrefix;
 
-    public ShouldRunChangeSetFilter(Database database,
-                                    boolean ignoringClasspathPrefix) throws DatabaseException {
+    public ShouldRunChangeSetFilter(Database database, boolean ignoringClasspathPrefix) throws DatabaseException {
         this.database = database;
         this.ignoringClasspathPrefix = ignoringClasspathPrefix;
         this.ranChangeSets = database.getRanChangeSetList();
     }
 
     public ShouldRunChangeSetFilter(Database database) throws DatabaseException {
-        this(database, false);
+        this(database, true);
     }
     
     @Override
     @SuppressWarnings({"RedundantIfStatement"})
     public boolean accepts(ChangeSet changeSet) {
         for (RanChangeSet ranChangeSet : ranChangeSets) {
-            if (currentAndRanChangesetsMatch(changeSet, ranChangeSet)) {
+            if (changeSetsMatch(changeSet, ranChangeSet)) {
                 if (changeSet.shouldAlwaysRun()) {
                     return true;
                 }
-                if (changeSet.shouldRunOnChange() &&
-                    currentChecksumHasChanged(changeSet, ranChangeSet)) {
+                if (changeSet.shouldRunOnChange() && checksumChanged(changeSet, ranChangeSet)) {
                     return true;
                 }
                 return false;
@@ -42,31 +40,40 @@ public class ShouldRunChangeSetFilter implements ChangeSetFilter {
         return true;
     }
 
-    private boolean currentAndRanChangesetsMatch(ChangeSet changeSet, RanChangeSet ranChangeSet) {
-        return ranChangeSet.getId().equals(changeSet.getId())
-            && ranChangeSet.getAuthor().equals(changeSet.getAuthor())
-            && isPathEquals(changeSet, ranChangeSet);
+    protected boolean changeSetsMatch(ChangeSet changeSet, RanChangeSet ranChangeSet) {
+        return idsAreEqual(changeSet, ranChangeSet)
+            && authorsAreEqual(changeSet, ranChangeSet)
+            && pathsAreEqual(changeSet, ranChangeSet);
     }
 
-    private boolean currentChecksumHasChanged(ChangeSet changeSet, RanChangeSet ranChangeSet) {
+    protected boolean idsAreEqual(ChangeSet changeSet, RanChangeSet ranChangeSet) {
+        return ranChangeSet.getId().equals(changeSet.getId());
+    }
+
+    protected boolean authorsAreEqual(ChangeSet changeSet, RanChangeSet ranChangeSet) {
+        return ranChangeSet.getAuthor().equals(changeSet.getAuthor());
+    }
+
+    private boolean pathsAreEqual(ChangeSet changeSet, RanChangeSet ranChangeSet) {
+        return getPath(ranChangeSet).equalsIgnoreCase(getPath(changeSet));
+    }
+
+    protected boolean checksumChanged(ChangeSet changeSet, RanChangeSet ranChangeSet) {
         return !changeSet.generateCheckSum().equals(ranChangeSet.getLastCheckSum());
     }
 
-    private boolean isPathEquals(ChangeSet changeSet, RanChangeSet ranChangeSet) {
-        return getChangeLog(ranChangeSet).equalsIgnoreCase(getFilePath(changeSet));
-    }
 
-    private String getChangeLog(RanChangeSet ranChangeSet) {
+    private String getPath(RanChangeSet ranChangeSet) {
         return stripClasspathPrefix(ranChangeSet.getChangeLog());
     }
 
-    private String getFilePath(ChangeSet changeSet) {
+    private String getPath(ChangeSet changeSet) {
         return stripClasspathPrefix(changeSet.getFilePath());
     }
 
     private String stripClasspathPrefix(String filePath) {
         if (ignoringClasspathPrefix) {
-            return filePath.replace("classpath:", "");
+            return filePath.replaceFirst("^classpath:", "");
         }
         return filePath;
     }
