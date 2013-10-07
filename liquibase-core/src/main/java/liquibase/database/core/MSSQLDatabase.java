@@ -91,6 +91,11 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
     }
 
     @Override
+    protected Set<String> getSystemTables() {
+        return systemTablesAndViews;
+    }
+
+    @Override
     public boolean supportsInitiallyDeferrableColumns() {
         return false;
     }
