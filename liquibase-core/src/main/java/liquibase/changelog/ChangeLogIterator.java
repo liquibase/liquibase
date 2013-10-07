@@ -42,27 +42,31 @@ public class ChangeLogIterator {
     public void run(ChangeSetVisitor visitor, Database database) throws LiquibaseException {
       Logger log = LogFactory.getLogger();
       log.setChangeLog(databaseChangeLog);
-        List<ChangeSet> changeSetList = databaseChangeLog.getChangeSets();
-        if (visitor.getDirection().equals(ChangeSetVisitor.Direction.REVERSE)) {
-            Collections.reverse(changeSetList);
-        }
+        try {
+            List<ChangeSet> changeSetList = databaseChangeLog.getChangeSets();
+            if (visitor.getDirection().equals(ChangeSetVisitor.Direction.REVERSE)) {
+                Collections.reverse(changeSetList);
+            }
 
-        for (ChangeSet changeSet : changeSetList) {
-            boolean shouldVisit = true;
-            if (changeSetFilters != null) {
-                for (ChangeSetFilter filter : changeSetFilters) {
-                    if (!filter.accepts(changeSet)) {
-                        shouldVisit = false;
-                        break;
+            for (ChangeSet changeSet : changeSetList) {
+                boolean shouldVisit = true;
+                if (changeSetFilters != null) {
+                    for (ChangeSetFilter filter : changeSetFilters) {
+                        if (!filter.accepts(changeSet)) {
+                            shouldVisit = false;
+                            break;
+                        }
                     }
                 }
-            }
 
-            if (shouldVisit) {
-                log.setChangeSet(changeSet);
-                visitor.visit(changeSet, databaseChangeLog, database);
-                log.setChangeSet(null);
+                if (shouldVisit) {
+                    log.setChangeSet(changeSet);
+                    visitor.visit(changeSet, databaseChangeLog, database);
+                    log.setChangeSet(null);
+                }
             }
+        } finally {
+            log.setChangeLog(null);
         }
     }
 }
