@@ -1,6 +1,5 @@
 package liquibase.changelog.filter;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.easymock.classextension.EasyMock.*;
 
 import java.util.ArrayList;
@@ -16,6 +15,7 @@ import liquibase.executor.ExecutorService;
 import liquibase.statement.core.UpdateStatement;
 
 import org.junit.Test;
+import static org.junit.Assert.*;
 
 public class ShouldRunChangeSetFilterTest  {
 
@@ -28,7 +28,7 @@ public class ShouldRunChangeSetFilterTest  {
 
         ShouldRunChangeSetFilter filter = new ShouldRunChangeSetFilter(database);
 
-        assertThat(filter.accepts(new ChangeSet("1", "testAuthor", false, false, "path/changelog", null, null, null))).isTrue();
+        assertTrue(filter.accepts(new ChangeSet("1", "testAuthor", false, false, "path/changelog", null, null, null)));
     }
 
     @Test
@@ -37,29 +37,17 @@ public class ShouldRunChangeSetFilterTest  {
 
         ShouldRunChangeSetFilter filter = new ShouldRunChangeSetFilter(database);
 
-        assertThat(filter.accepts(new ChangeSet("1", "testAuthor", false, false, "path/changelog", null, null, null)))
-            .describedAs("everything same")
-            .isFalse();
+        assertFalse("Already ran changeset should not be accepted", filter.accepts(new ChangeSet("1", "testAuthor", false, false, "path/changelog", null, null, null)));
 
-        assertThat(filter.accepts(new ChangeSet("1", "testAuthor", true, false, "path/changelog", null, null, null)))
-            .describedAs("alwaysRun")
-            .isTrue();
+        assertTrue("AlwaysRun changesets should always be accepted", filter.accepts(new ChangeSet("1", "testAuthor", true, false, "path/changelog", null, null, null)));
 
-        assertThat(filter.accepts(new ChangeSet("1", "testAuthor", false, true, "path/changelog", null, null, null)))
-            .describedAs("run on change")
-            .isTrue();
+        assertTrue("RunOnChange changed changeset should be accepted", filter.accepts(new ChangeSet("1", "testAuthor", false, true, "path/changelog", null, null, null)));
 
-        assertThat(filter.accepts(new ChangeSet("3", "testAuthor", false, false, "path/changelog", null, null, null)))
-            .describedAs("different id")
-            .isTrue();
+        assertTrue("ChangeSet with different id should be accepted", filter.accepts(new ChangeSet("3", "testAuthor", false, false, "path/changelog", null, null, null)));
 
-        assertThat(filter.accepts(new ChangeSet("1", "otherAuthor", false, false, "path/changelog", null, null, null)))
-            .describedAs("different author")
-            .isTrue();
+        assertTrue("ChangeSet with different author should be accepted", filter.accepts(new ChangeSet("1", "otherAuthor", false, false, "path/changelog", null, null, null)));
 
-        assertThat(filter.accepts(new ChangeSet("1", "testAuthor", false, false, "other/changelog", null, null, null)))
-            .describedAs("different path")
-            .isTrue();
+        assertTrue("ChangSet with different path should be accepted", filter.accepts(new ChangeSet("1", "testAuthor", false, false, "other/changelog", null, null, null)));
     }
 
     @Test
@@ -69,8 +57,7 @@ public class ShouldRunChangeSetFilterTest  {
 
         ShouldRunChangeSetFilter filter = new ShouldRunChangeSetFilter(database, true);
 
-        assertThat(filter.accepts(changeSetWithClasspathPrefix))
-            .isFalse();
+        assertFalse(filter.accepts(changeSetWithClasspathPrefix));
     }
 
     @Test
@@ -80,8 +67,7 @@ public class ShouldRunChangeSetFilterTest  {
 
         ShouldRunChangeSetFilter filter = new ShouldRunChangeSetFilter(database, true);
 
-        assertThat(filter.accepts(changeSet))
-            .isFalse();
+        assertFalse(filter.accepts(changeSet));
     }
 
     @Test
@@ -91,8 +77,7 @@ public class ShouldRunChangeSetFilterTest  {
 
         ShouldRunChangeSetFilter filter = new ShouldRunChangeSetFilter(database, true);
 
-        assertThat(filter.accepts(changeSet))
-            .isFalse();
+        assertFalse(filter.accepts(changeSet));
     }
 
     private Database given_a_database_with_two_executed_changesets() throws DatabaseException {
