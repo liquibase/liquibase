@@ -64,14 +64,14 @@ public class ShouldRunChangeSetFilter implements ChangeSetFilter {
 
 
     private String getPath(RanChangeSet ranChangeSet) {
-        return stripClasspathPrefix(ranChangeSet.getChangeLog());
+        return normalizePath(ranChangeSet.getChangeLog());
     }
 
     private String getPath(ChangeSet changeSet) {
-        return stripClasspathPrefix(changeSet.getFilePath());
+        return normalizePath(changeSet.getFilePath());
     }
 
-    private String stripClasspathPrefix(String filePath) {
+    protected String normalizePath(String filePath) {
         if (ignoreClasspathPrefix) {
             return filePath.replaceFirst("^classpath:", "");
         }
