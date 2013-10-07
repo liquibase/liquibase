@@ -9,7 +9,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.text.DateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 public class DefaultLogger extends AbstractLogger {
 
@@ -66,8 +68,17 @@ public class DefaultLogger extends AbstractLogger {
         if (StringUtils.trimToNull(message) == null) {
             return;
         }
-        
-        err.println(logLevel+" "+DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(new Date())+ ":"+name + ": " + changeLogName + ": " + changeSetName + ": " + message);
+
+        List<String> description = new ArrayList<String>();
+        description.add(name);
+        if (changeLogName != null) {
+            description.add(changeLogName);
+        }
+        if (changeSetName != null) {
+            description.add(changeSetName.replace(changeLogName+"::", ""));
+        }
+
+        err.println(logLevel + " " + DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(new Date()) + ":" + StringUtils.join(description, ": ") + ": " + message);
     }
 
     @Override
