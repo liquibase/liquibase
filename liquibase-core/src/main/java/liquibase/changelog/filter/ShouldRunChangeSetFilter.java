@@ -11,11 +11,11 @@ public class ShouldRunChangeSetFilter implements ChangeSetFilter {
 
     private final List<RanChangeSet> ranChangeSets;
     private final Database database;
-    private final boolean ignoringClasspathPrefix;
+    private final boolean ignoreClasspathPrefix;
 
-    public ShouldRunChangeSetFilter(Database database, boolean ignoringClasspathPrefix) throws DatabaseException {
+    public ShouldRunChangeSetFilter(Database database, boolean ignoreClasspathPrefix) throws DatabaseException {
         this.database = database;
-        this.ignoringClasspathPrefix = ignoringClasspathPrefix;
+        this.ignoreClasspathPrefix = ignoreClasspathPrefix;
         this.ranChangeSets = database.getRanChangeSetList();
     }
 
@@ -72,7 +72,7 @@ public class ShouldRunChangeSetFilter implements ChangeSetFilter {
     }
 
     private String stripClasspathPrefix(String filePath) {
-        if (ignoringClasspathPrefix) {
+        if (ignoreClasspathPrefix) {
             return filePath.replaceFirst("^classpath:", "");
         }
         return filePath;

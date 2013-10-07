@@ -175,9 +175,9 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
      * Maven-executed changeset path name are not be prepended by
      * "classpath:" whereas the ones parsed via SpringLiquibase are.
      *
-     * To avoid this issue, just set ignoringClasspathPrefix to true.
+     * To avoid this issue, just set ignoreClasspathPrefix to true.
      */
-    private boolean ignoringClasspathPrefix;
+    private boolean ignoreClasspathPrefix;
 
     public boolean isDropFirst() {
         return dropFirst;
@@ -326,7 +326,7 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 
     protected Liquibase createLiquibase(Connection c) throws LiquibaseException {
         Liquibase liquibase = new Liquibase(getChangeLog(), createResourceOpener(), createDatabase(c));
-        liquibase.setIgnoreClasspathPrefix(isIgnoringClasspathPrefix());
+        liquibase.setIgnoreClasspathPrefix(isIgnoreClasspathPrefix());
         if (parameters != null) {
             for (Map.Entry<String, String> entry : parameters.entrySet()) {
                 liquibase.setChangeLogParameter(entry.getKey(), entry.getValue());
@@ -397,12 +397,12 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
         this.rollbackFile = rollbackFile;
     }
 
-    public boolean isIgnoringClasspathPrefix() {
-        return ignoringClasspathPrefix;
+    public boolean isIgnoreClasspathPrefix() {
+        return ignoreClasspathPrefix;
     }
 
-    public void setIgnoringClasspathPrefix(boolean ignoringClasspathPrefix) {
-        this.ignoringClasspathPrefix = ignoringClasspathPrefix;
+    public void setIgnoreClasspathPrefix(boolean ignoreClasspathPrefix) {
+        this.ignoreClasspathPrefix = ignoreClasspathPrefix;
     }
 
     @Override
