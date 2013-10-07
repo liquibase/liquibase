@@ -72,6 +72,12 @@ public class DiffResult {
         return returnSet;
     }
 
+    public <T extends DatabaseObject> SortedSet<T> getMissingObjects(Class<T> type, Comparator<DatabaseObject> comparator) {
+        TreeSet<T> set = new TreeSet<T>(comparator);
+        set.addAll(getMissingObjects(type));
+        return set;
+    }
+
     public void addMissingObject(DatabaseObject obj) {
         missingObjects.add(obj);
     }
@@ -90,6 +96,13 @@ public class DiffResult {
         return returnSet;
     }
 
+    public <T extends DatabaseObject> SortedSet<T> getUnexpectedObjects(Class<T> type, Comparator<DatabaseObject> comparator) {
+        TreeSet<T> set = new TreeSet<T>(comparator);
+        set.addAll(getUnexpectedObjects(type));
+        return set;
+    }
+
+
     public void addUnexpectedObject(DatabaseObject obj) {
         unexpectedObjects.add(obj);
     }
@@ -98,7 +111,7 @@ public class DiffResult {
         return changedObjects;
     }
 
-    public Map<DatabaseObject, ObjectDifferences> getChangedObjects(Class<? extends DatabaseObject> type) {
+    public  <T extends DatabaseObject> Map<T, ObjectDifferences> getChangedObjects(Class<T> type) {
         Map returnSet = new HashMap();
         for (Map.Entry<DatabaseObject, ObjectDifferences> obj : changedObjects.entrySet()) {
             if (type.isAssignableFrom(obj.getKey().getClass())) {
@@ -107,6 +120,13 @@ public class DiffResult {
         }
         return returnSet;
     }
+
+    public <T extends DatabaseObject> SortedMap<T, ObjectDifferences> getChangedObjects(Class<T> type, Comparator<DatabaseObject> comparator) {
+        SortedMap<T, ObjectDifferences> map = new TreeMap<T, ObjectDifferences>(comparator);
+        map.putAll(getChangedObjects(type));
+        return map;
+    }
+
 
     public void addChangedObject(DatabaseObject obj, ObjectDifferences differences) {
         changedObjects.put(obj, differences);
