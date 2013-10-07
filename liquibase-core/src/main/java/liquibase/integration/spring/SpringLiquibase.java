@@ -177,7 +177,7 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
      *
      * To avoid this issue, just set ignoreClasspathPrefix to true.
      */
-    private boolean ignoreClasspathPrefix;
+    private boolean ignoreClasspathPrefix = true;
 
     public boolean isDropFirst() {
         return dropFirst;
