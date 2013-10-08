@@ -13,6 +13,9 @@ import liquibase.structure.core.Index;
 import liquibase.structure.core.PrimaryKey;
 import liquibase.structure.core.Table;
 import liquibase.structure.core.UniqueConstraint;
+import liquibase.util.StringUtils;
+
+import java.util.Collection;
 
 public class ChangedPrimaryKeyChangeGenerator  implements ChangedObjectChangeGenerator {
     @Override
@@ -55,8 +58,18 @@ public class ChangedPrimaryKeyChangeGenerator  implements ChangedObjectChangeGen
             addPkChange.setSchemaName(pk.getSchema().getName());
         }
 
-        control.setAlreadyHandledChanged(new Index().setTable(pk.getTable()).setColumns(pk.getColumnNames()));
-        control.setAlreadyHandledChanged(new UniqueConstraint().setTable(pk.getTable()).setColumns(pk.getColumnNames()));
+        String referenceColumns = StringUtils.join((Collection<String>) differences.getDifference("columnNames").getReferenceValue(), ",");
+        String comparedColumns = StringUtils.join((Collection<String>) differences.getDifference("columnNames").getComparedValue(), ",");
+
+        control.setAlreadyHandledChanged(new Index().setTable(pk.getTable()).setColumns(referenceColumns));
+        if (!referenceColumns.equalsIgnoreCase(comparedColumns)) {
+            control.setAlreadyHandledChanged(new Index().setTable(pk.getTable()).setColumns(comparedColumns));
+        }
+
+        control.setAlreadyHandledChanged(new UniqueConstraint().setTable(pk.getTable()).setColumns(referenceColumns));
+        if (!referenceColumns.equalsIgnoreCase(comparedColumns)) {
+            control.setAlreadyHandledChanged(new UniqueConstraint().setTable(pk.getTable()).setColumns(comparedColumns));
+        }
 
         return new Change[] { dropPkChange, addPkChange };
     }
