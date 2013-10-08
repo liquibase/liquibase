@@ -99,14 +99,23 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
         column.setRelation(table);
         column.setRemarks(remarks);
 
-        int nullable = columnMetadataResultSet.getInt("NULLABLE");
-        if (nullable == DatabaseMetaData.columnNoNulls) {
-            column.setNullable(false);
-        } else if (nullable == DatabaseMetaData.columnNullable) {
-            column.setNullable(true);
-        } else if (nullable == DatabaseMetaData.columnNullableUnknown) {
-            LogFactory.getLogger().info("Unknown nullable state for column " + column.toString() + ". Assuming nullable");
-            column.setNullable(true);
+        if (database instanceof OracleDatabase) {
+            String nullable = columnMetadataResultSet.getString("NULLABLE");
+            if (nullable.equals("Y")) {
+                column.setNullable(true);
+            } else {
+                column.setNullable(false);
+            }
+        } else {
+            int nullable = columnMetadataResultSet.getInt("NULLABLE");
+            if (nullable == DatabaseMetaData.columnNoNulls) {
+                column.setNullable(false);
+            } else if (nullable == DatabaseMetaData.columnNullable) {
+                column.setNullable(true);
+            } else if (nullable == DatabaseMetaData.columnNullableUnknown) {
+                LogFactory.getLogger().info("Unknown nullable state for column " + column.toString() + ". Assuming nullable");
+                column.setNullable(true);
+            }
         }
 
         if (database.supportsAutoIncrement()) {
@@ -159,6 +168,42 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
     }
 
     protected DataType readDataType(CachedRow columnMetadataResultSet, Column column, Database database) throws SQLException {
+
+        if (database instanceof OracleDatabase) {
+            String dataType = columnMetadataResultSet.getString("DATA_TYPE");
+            dataType = dataType.replace("VARCHAR2", "VARCHAR");
+            dataType = dataType.replace("NVARCHAR2", "NVARCHAR");
+
+            DataType type = new DataType(dataType);
+//            type.setDataTypeId(dataType);
+            if (dataType.equalsIgnoreCase("NUMBER")) {
+                type.setColumnSize(columnMetadataResultSet.getInt("DATA_PRECISION"));
+                if (type.getColumnSize() == null) {
+                    type.setColumnSize(38);
+                }
+                type.setDecimalDigits(columnMetadataResultSet.getInt("DATA_SCALE"));
+//            type.setRadix(10);
+            } else {
+                type.setColumnSize(columnMetadataResultSet.getInt("DATA_LENGTH"));
+
+                if (dataType.equalsIgnoreCase("NVARCHAR")) {
+                    //data length is in bytes but specified in chars
+                    type.setColumnSize(type.getColumnSize() / 2);
+                    type.setColumnSizeUnit(DataType.ColumnSizeUnit.CHAR);
+                } else {
+                    String charUsed = columnMetadataResultSet.getString("CHAR_USED");
+                    DataType.ColumnSizeUnit unit = null;
+                    if ("C".equals(charUsed)) {
+                        unit = DataType.ColumnSizeUnit.CHAR;
+                    }
+                    type.setColumnSizeUnit(unit);
+                }
+            }
+
+
+            return type;
+        }
+
         String columnTypeName = (String) columnMetadataResultSet.get("TYPE_NAME");
 
         if (database instanceof FirebirdDatabase) {
@@ -177,9 +222,6 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
         // don't set size for types like int4, int8 etc
         if (database.dataTypeIsNotModifiable(columnTypeName)) {
             columnSize = null;
-        }  else if (database instanceof OracleDatabase && columnTypeName.equals("NVARCHAR2")) {
-            columnSize = columnSize / 2; //oracle returns value in bytes, not chars
-            columnSizeUnit = DataType.ColumnSizeUnit.CHAR;
         }
 
         Integer decimalDigits = columnMetadataResultSet.getInt("DECIMAL_DIGITS");
