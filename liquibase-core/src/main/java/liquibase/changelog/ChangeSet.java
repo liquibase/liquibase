@@ -540,10 +540,10 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
             } else if (changeCount > 1) {
                 returnString.append(" (x").append(changeCount).append(")");
                 returnString.append(", ");
-                returnString.append(ChangeFactory.getInstance().getChangeMetaData(change).getDescription());
+                returnString.append(ChangeFactory.getInstance().getChangeMetaData(change).getName());
                 changeCount = 1;
             } else {
-                returnString.append(", ").append(ChangeFactory.getInstance().getChangeMetaData(change).getDescription());
+                returnString.append(", ").append(ChangeFactory.getInstance().getChangeMetaData(change).getName());
                 changeCount = 1;
             }
             lastChangeClass = change.getClass();
