@@ -21,7 +21,7 @@ public abstract class InsertOrUpdateGenerator extends AbstractSqlGenerator<Inser
 
     protected abstract String getElse(Database database);
 
-    protected String getPostUpdateStatements(){
+    protected String getPostUpdateStatements(Database database){
         return "";
     }
 
@@ -144,7 +144,7 @@ public abstract class InsertOrUpdateGenerator extends AbstractSqlGenerator<Inser
             
         } catch (LiquibaseException e) {}
 
-        completeSql.append(getPostUpdateStatements());
+        completeSql.append(getPostUpdateStatements(database));
 
         return new Sql[]{
                 new UnparsedSql(completeSql.toString(), getAffectedTable(insertOrUpdateStatement))
