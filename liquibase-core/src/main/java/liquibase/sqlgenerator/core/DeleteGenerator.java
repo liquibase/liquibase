@@ -2,7 +2,6 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
 import liquibase.datatype.DataTypeFactory;
-import liquibase.database.core.SQLiteDatabase;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
@@ -12,13 +11,11 @@ import liquibase.structure.core.Column;
 import liquibase.structure.core.Relation;
 import liquibase.structure.core.Table;
 
-import java.util.regex.Pattern;
-
 public class DeleteGenerator extends AbstractSqlGenerator<DeleteStatement> {
 
     @Override
     public boolean supports(DeleteStatement statement, Database database) {
-        return !(database instanceof SQLiteDatabase);
+        return true;
     }
 
     public ValidationErrors validate(DeleteStatement deleteStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
