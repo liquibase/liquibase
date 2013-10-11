@@ -9,3 +9,5 @@ target
 liquibase.integrationtest.local.properties
 /liquibase
 /derby.log
+/.idea
+*.iml
