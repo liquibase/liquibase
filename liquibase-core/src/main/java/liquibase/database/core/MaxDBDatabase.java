@@ -87,6 +87,7 @@ public class MaxDBDatabase extends AbstractJdbcDatabase {
         super.sequenceCurrentValueFunction = "%s.CURRVAL";
     }
 
+    @Override
     public int getPriority() {
         return PRIORITY_DEFAULT;
     }
@@ -96,10 +97,12 @@ public class MaxDBDatabase extends AbstractJdbcDatabase {
         return systemTablesAndViews;
     }
 
+    @Override
     public String getShortName() {
         return "maxdb";
     }
 
+    @Override
     public Integer getDefaultPort() {
         return 7210;
     }
@@ -109,6 +112,7 @@ public class MaxDBDatabase extends AbstractJdbcDatabase {
         return PRODUCT_NAME;
     }
 
+    @Override
     public boolean supportsInitiallyDeferrableColumns() {
         return false;
     }
@@ -118,10 +122,12 @@ public class MaxDBDatabase extends AbstractJdbcDatabase {
         return true;
     }
 
+    @Override
     public boolean isCorrectDatabaseImplementation(DatabaseConnection conn) throws DatabaseException {
         return PRODUCT_NAME.equalsIgnoreCase(conn.getDatabaseProductName());
     }
 
+    @Override
     public String getDefaultDriver(String url) {
         if (url.startsWith("jdbc:sapdb")) {
             return "com.sap.dbtech.jdbc.DriverSapDB";
@@ -151,6 +157,7 @@ public class MaxDBDatabase extends AbstractJdbcDatabase {
         return false;
     }
 
+    @Override
     public boolean supportsTablespaces() {
         return false;
     }

@@ -39,14 +39,17 @@ public class ViewExistsPrecondition implements Precondition {
         this.viewName = viewName;
     }
 
+    @Override
     public Warnings warn(Database database) {
         return new Warnings();
     }
 
+    @Override
     public ValidationErrors validate(Database database) {
         return new ValidationErrors();
     }
 
+    @Override
     public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet) throws PreconditionFailedException, PreconditionErrorException {
     	String currentSchemaName;
         String currentCatalogName;
@@ -63,6 +66,7 @@ public class ViewExistsPrecondition implements Precondition {
         }
     }
 
+    @Override
     public String getName() {
         return "viewExists";
     }

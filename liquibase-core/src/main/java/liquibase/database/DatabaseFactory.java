@@ -111,6 +111,7 @@ public class DatabaseFactory {
     }
 
     private static class DatabaseComparator implements Comparator<Database> {
+        @Override
         public int compare(Database o1, Database o2) {
             return -1 * new Integer(o1.getPriority()).compareTo(o2.getPriority());
         }

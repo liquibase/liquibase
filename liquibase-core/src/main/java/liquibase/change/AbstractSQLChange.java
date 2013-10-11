@@ -28,11 +28,13 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
         setSplitStatements(null);
     }
 
+    @Override
     @DatabaseChangeProperty(since = "3.0", exampleValue = "h2, oracle")
     public String getDbms() {
         return dbms;
     }
 
+    @Override
     public void setDbms(final String dbms) {
         this.dbms = dbms;
     }
@@ -151,6 +153,7 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
      * If stripping comments is true then any comments are removed before the splitting is executed.
      * The set SQL is passed through the {@link java.sql.Connection#nativeSQL} method if a connection is available.
      */
+    @Override
     public SqlStatement[] generateStatements(Database database) {
 
         List<SqlStatement> returnStatements = new ArrayList<SqlStatement>();

@@ -26,6 +26,7 @@ public class SetNullableGenerator extends AbstractSqlGenerator<SetNullableStatem
                 database instanceof SQLiteDatabase);
     }
 
+    @Override
     public ValidationErrors validate(SetNullableStatement setNullableStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
 
@@ -46,6 +47,7 @@ public class SetNullableGenerator extends AbstractSqlGenerator<SetNullableStatem
         return validationErrors;
     }
 
+    @Override
     public Sql[] generateSql(SetNullableStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         String sql;
 

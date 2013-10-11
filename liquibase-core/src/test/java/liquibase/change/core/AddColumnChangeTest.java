@@ -98,6 +98,7 @@ public class AddColumnChangeTest extends StandardChangeTest {
         refactoring.addColumn(column);
 
         testChangeOnAll(refactoring, new GenerateAllValidator() {
+            @Override
             public void validate(SqlStatement[] sqlStatements, Database database) {
 
                 if (database instanceof DB2Database) {
@@ -153,6 +154,7 @@ public class AddColumnChangeTest extends StandardChangeTest {
         refactoring.addColumn(column);
 
         testChangeOnAll(refactoring, new GenerateAllValidator() {
+            @Override
             public void validate(SqlStatement[] sqlStatements, Database database) {
 
                 if (database instanceof DB2Database) {
@@ -191,6 +193,7 @@ public class AddColumnChangeTest extends StandardChangeTest {
         refactoring.addColumn(column);
 
         testChangeOnAll(refactoring, new GenerateAllValidator() {
+            @Override
             public void validate(SqlStatement[] sqlStatements, Database database) {
                 if (database instanceof DB2Database) {
                     assertEquals(2, sqlStatements.length);
@@ -229,6 +232,7 @@ public class AddColumnChangeTest extends StandardChangeTest {
         refactoring.addColumn(column);
 
         testChangeOnAll(refactoring, new GenerateAllValidator() {
+            @Override
             public void validate(SqlStatement[] sqlStatements, Database database) {
                 if (database instanceof DB2Database) {
                     assertEquals(2, sqlStatements.length);
@@ -264,6 +268,7 @@ public class AddColumnChangeTest extends StandardChangeTest {
         refactoring.addColumn(column);
 
         testChangeOnAll(refactoring, new GenerateAllValidator() {
+            @Override
             public void validate(SqlStatement[] sqlStatements, Database database) {
                 if (database instanceof DB2Database) {
                     assertEquals(2, sqlStatements.length);
@@ -306,6 +311,7 @@ public class AddColumnChangeTest extends StandardChangeTest {
         refactoring.addColumn(column);
 
         testChangeOnAll(refactoring, new GenerateAllValidator() {
+            @Override
             public void validate(SqlStatement[] sqlStatements, Database database) {
                 if (database instanceof DB2Database) {
                     assertEquals(3, sqlStatements.length);
@@ -348,6 +354,7 @@ public class AddColumnChangeTest extends StandardChangeTest {
         refactoring.addColumn(column);
 
         testChangeOnAll(refactoring, new GenerateAllValidator() {
+            @Override
             public void validate(SqlStatement[] sqlStatements, Database database) {
                 if (database instanceof DB2Database) {
                     assertEquals(2, sqlStatements.length);
@@ -386,6 +393,7 @@ public class AddColumnChangeTest extends StandardChangeTest {
         refactoring.addColumn(column);
 
         testInverseOnAll(refactoring, new InverseValidator() {
+            @Override
             public void validate(Change[] changes) {
                 assertEquals(1, changes.length);
                 assertTrue(changes[0] instanceof DropColumnChange);
@@ -416,6 +424,7 @@ public class AddColumnChangeTest extends StandardChangeTest {
         refactoring.addColumn(column);
 
         testInverseOnAll(refactoring, new InverseValidator() {
+            @Override
             public void validate(Change[] changes) {
                 assertEquals(2, changes.length);
                 assertTrue(changes[0] instanceof DropDefaultValueChange);
@@ -455,6 +464,7 @@ public class AddColumnChangeTest extends StandardChangeTest {
         refactoring.addColumn(column);
 
         testInverseOnAll(refactoring, new InverseValidator() {
+            @Override
             public void validate(Change[] changes) {
                 assertEquals(2, changes.length);
                 assertTrue(changes[0] instanceof DropColumnChange);

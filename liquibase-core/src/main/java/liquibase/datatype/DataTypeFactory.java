@@ -58,6 +58,7 @@ public class DataTypeFactory {
                 name = name.toLowerCase();
                 if (registry.get(name) == null) {
                     registry.put(name, new TreeSet<Class<? extends LiquibaseDataType>>(new Comparator<Class<? extends LiquibaseDataType>>() {
+                        @Override
                         public int compare(Class<? extends LiquibaseDataType> o1, Class<? extends LiquibaseDataType> o2) {
                             try {
                                 return -1 * new Integer(o1.newInstance().getPriority()).compareTo(o2.newInstance().getPriority());

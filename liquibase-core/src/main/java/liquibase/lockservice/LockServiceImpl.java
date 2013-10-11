@@ -41,30 +41,37 @@ public class LockServiceImpl implements LockService {
     public LockServiceImpl() {
     }
 
+    @Override
     public int getPriority() {
         return PRIORITY_DEFAULT;
     }
 
+    @Override
     public boolean supports(Database database) {
         return true;
     }
 
+    @Override
     public void setDatabase(Database database) {
         this.database = database;
     }
 
+    @Override
     public void setChangeLogLockWaitTime(long changeLogLockWaitTime) {
         this.changeLogLockWaitTime = changeLogLockWaitTime;
     }
 
+    @Override
     public void setChangeLogLockRecheckTime(long changeLogLocRecheckTime) {
         this.changeLogLocRecheckTime = changeLogLocRecheckTime;
     }
 
+    @Override
     public boolean hasChangeLogLock() {
         return hasChangeLogLock;
     }
 
+    @Override
     public void waitForLock() throws LockException {
 
         boolean locked = false;
@@ -94,6 +101,7 @@ public class LockServiceImpl implements LockService {
         }
     }
 
+    @Override
     public boolean acquireLock() throws LockException {
         if (hasChangeLogLock) {
             return true;
@@ -141,6 +149,7 @@ public class LockServiceImpl implements LockService {
 
     }
 
+    @Override
     public void releaseLock() throws LockException {
         Executor executor = ExecutorService.getInstance().getExecutor(database);
         try {
@@ -169,6 +178,7 @@ public class LockServiceImpl implements LockService {
         }
     }
 
+    @Override
     public DatabaseChangeLogLock[] listLocks() throws LockException {
         try {
             if (!database.hasDatabaseChangeLogLockTable()) {
@@ -196,6 +206,7 @@ public class LockServiceImpl implements LockService {
         }
     }
 
+    @Override
     public void forceReleaseLock() throws LockException, DatabaseException {
         database.checkDatabaseChangeLogLockTable();
         releaseLock();
@@ -207,6 +218,7 @@ public class LockServiceImpl implements LockService {
         }*/
     }
 
+    @Override
     public void reset() {
         hasChangeLogLock = false;
     }

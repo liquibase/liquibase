@@ -33,14 +33,17 @@ public class YamlChangeLogParserTest {
     @Test
     public void parse() throws ChangeLogParseException {
         DatabaseChangeLog changeLog = new YamlChangeLogParser().parse("test.yaml", new ChangeLogParameters(), new ResourceAccessor() {
+            @Override
             public InputStream getResourceAsStream(String file) throws IOException {
                 return new ByteArrayInputStream(changeLogText.getBytes());
             }
 
+            @Override
             public Enumeration<URL> getResources(String packageName) throws IOException {
                 return null;  //To change body of implemented methods use File | Settings | File Templates.
             }
 
+            @Override
             public ClassLoader toClassLoader() {
                 return null;  //To change body of implemented methods use File | Settings | File Templates.
             }

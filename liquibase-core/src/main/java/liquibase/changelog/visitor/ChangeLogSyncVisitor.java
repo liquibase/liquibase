@@ -13,10 +13,12 @@ public class ChangeLogSyncVisitor implements ChangeSetVisitor {
         this.database = database;
     }
 
+    @Override
     public Direction getDirection() {
         return ChangeSetVisitor.Direction.FORWARD;
     }
 
+    @Override
     public void visit(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database) throws LiquibaseException {
         this.database.markChangeSetExecStatus(changeSet, ChangeSet.ExecType.EXECUTED);
     }

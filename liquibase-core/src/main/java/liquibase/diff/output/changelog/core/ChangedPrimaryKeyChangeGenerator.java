@@ -13,8 +13,12 @@ import liquibase.structure.core.Index;
 import liquibase.structure.core.PrimaryKey;
 import liquibase.structure.core.Table;
 import liquibase.structure.core.UniqueConstraint;
+import liquibase.util.StringUtils;
+
+import java.util.Collection;
 
 public class ChangedPrimaryKeyChangeGenerator  implements ChangedObjectChangeGenerator {
+    @Override
     public int getPriority(Class<? extends DatabaseObject> objectType, Database database) {
         if (PrimaryKey.class.isAssignableFrom(objectType)) {
             return PRIORITY_DEFAULT;
@@ -22,14 +26,17 @@ public class ChangedPrimaryKeyChangeGenerator  implements ChangedObjectChangeGen
         return PRIORITY_NONE;
     }
 
+    @Override
     public Class<? extends DatabaseObject>[] runBeforeTypes() {
         return new Class[] {Index.class, UniqueConstraint.class };
     }
 
+    @Override
     public Class<? extends DatabaseObject>[] runAfterTypes() {
         return null;
     }
 
+    @Override
     public Change[] fixChanged(DatabaseObject changedObject, ObjectDifferences differences, DiffOutputControl control, Database referenceDatabase, Database comparisonDatabase, ChangeGeneratorChain chain) {
         PrimaryKey pk = (PrimaryKey) changedObject;
 
@@ -39,6 +46,8 @@ public class ChangedPrimaryKeyChangeGenerator  implements ChangedObjectChangeGen
         AddPrimaryKeyChange addPkChange = new AddPrimaryKeyChange();
         addPkChange.setTableName(pk.getTable().getName());
         addPkChange.setColumnNames(pk.getColumnNames());
+        addPkChange.setConstraintName(pk.getName());
+
 
         if (control.isIncludeCatalog()) {
             dropPkChange.setCatalogName(pk.getSchema().getCatalogName());
@@ -49,8 +58,18 @@ public class ChangedPrimaryKeyChangeGenerator  implements ChangedObjectChangeGen
             addPkChange.setSchemaName(pk.getSchema().getName());
         }
 
-        control.setAlreadyHandledChanged(new Index().setTable(pk.getTable()).setColumns(pk.getColumnNames()));
-        control.setAlreadyHandledChanged(new UniqueConstraint().setTable(pk.getTable()).setColumns(pk.getColumnNames()));
+        String referenceColumns = StringUtils.join((Collection<String>) differences.getDifference("columnNames").getReferenceValue(), ",");
+        String comparedColumns = StringUtils.join((Collection<String>) differences.getDifference("columnNames").getComparedValue(), ",");
+
+        control.setAlreadyHandledChanged(new Index().setTable(pk.getTable()).setColumns(referenceColumns));
+        if (!referenceColumns.equalsIgnoreCase(comparedColumns)) {
+            control.setAlreadyHandledChanged(new Index().setTable(pk.getTable()).setColumns(comparedColumns));
+        }
+
+        control.setAlreadyHandledChanged(new UniqueConstraint().setTable(pk.getTable()).setColumns(referenceColumns));
+        if (!referenceColumns.equalsIgnoreCase(comparedColumns)) {
+            control.setAlreadyHandledChanged(new UniqueConstraint().setTable(pk.getTable()).setColumns(comparedColumns));
+        }
 
         return new Change[] { dropPkChange, addPkChange };
     }

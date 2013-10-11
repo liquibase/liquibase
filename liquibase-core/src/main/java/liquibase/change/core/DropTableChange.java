@@ -54,6 +54,7 @@ public class DropTableChange extends AbstractChange {
         this.cascadeConstraints = cascadeConstraints;
     }
 
+    @Override
     public SqlStatement[] generateStatements(Database database) {
         boolean constraints = false;
         if (isCascadeConstraints() != null) {
@@ -65,6 +66,7 @@ public class DropTableChange extends AbstractChange {
         };
     }
 
+    @Override
     public String getConfirmationMessage() {
         return "Table " + getTableName() + " dropped";
     }

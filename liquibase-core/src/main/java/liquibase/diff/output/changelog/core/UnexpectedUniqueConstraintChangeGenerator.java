@@ -10,6 +10,7 @@ import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
 
 public class UnexpectedUniqueConstraintChangeGenerator implements UnexpectedObjectChangeGenerator {
+    @Override
     public int getPriority(Class<? extends DatabaseObject> objectType, Database database) {
         if (UniqueConstraint.class.isAssignableFrom(objectType)) {
             return PRIORITY_DEFAULT;
@@ -17,10 +18,12 @@ public class UnexpectedUniqueConstraintChangeGenerator implements UnexpectedObje
         return PRIORITY_NONE;
     }
 
+    @Override
     public Class<? extends DatabaseObject>[] runAfterTypes() {
         return null;
     }
 
+    @Override
     public Class<? extends DatabaseObject>[] runBeforeTypes() {
         return new Class[] {
                 Table.class,
@@ -28,6 +31,7 @@ public class UnexpectedUniqueConstraintChangeGenerator implements UnexpectedObje
         };
     }
 
+    @Override
     public Change[] fixUnexpected(DatabaseObject unexpectedObject, DiffOutputControl control, Database referenceDatabase, Database comparisonDatabase, ChangeGeneratorChain chain) {
         UniqueConstraint uc = (UniqueConstraint) unexpectedObject;
         if (uc.getTable() == null) {

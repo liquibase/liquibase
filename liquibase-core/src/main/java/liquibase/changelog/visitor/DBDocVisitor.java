@@ -57,10 +57,12 @@ public class DBDocVisitor implements ChangeSetVisitor {
         recentChanges = new ArrayList<Change>();
     }
 
+    @Override
     public ChangeSetVisitor.Direction getDirection() {
         return ChangeSetVisitor.Direction.FORWARD;
     }
 
+    @Override
     public void visit(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database) throws LiquibaseException {
         ChangeSet.RunStatus runStatus = this.database.getRunStatus(changeSet);
         if (rootChangeLogName == null) {
@@ -203,6 +205,7 @@ public class DBDocVisitor implements ChangeSetVisitor {
             return logicalPath.hashCode();
         }
 
+        @Override
         public int compareTo(ChangeLogInfo o) {
             return this.logicalPath.compareTo(o.logicalPath);
         }

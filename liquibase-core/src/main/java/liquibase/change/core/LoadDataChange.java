@@ -110,19 +110,23 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
 		this.quotchar = quotchar;
 	}
 
-	public void addColumn(LoadDataColumnConfig column) {
+	@Override
+    public void addColumn(LoadDataColumnConfig column) {
       	columns.add(column);
     }
 
+    @Override
     @DatabaseChangeProperty(description = "Defines how the data should be loaded.", requiredForDatabase = "all")
     public List<LoadDataColumnConfig> getColumns() {
         return columns;
     }
 
+    @Override
     public void setColumns(List<LoadDataColumnConfig> columns) {
         this.columns = columns;
     }
 
+    @Override
     public SqlStatement[] generateStatements(Database database) {
         CSVReader reader = null;
         try {
@@ -267,6 +271,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
         return null;
     }
 
+    @Override
     public String getConfirmationMessage() {
         return "Data loaded from "+getFile()+" into "+getTableName();
     }

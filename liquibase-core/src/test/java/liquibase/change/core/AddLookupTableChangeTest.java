@@ -28,6 +28,7 @@ public class AddLookupTableChangeTest extends StandardChangeTest {
         change.setNewTableSchemaName("NEW_SCHEM");
 
         testChangeOnAll(change, new GenerateAllValidator() {
+            @Override
             public void validate(SqlStatement[] statements, Database database) {
                 
                 // TODO this test should reorganized 

@@ -22,6 +22,7 @@ public class AddForeignKeyConstraintGenerator extends AbstractSqlGenerator<AddFo
         return (!(database instanceof SQLiteDatabase));
     }
 
+    @Override
     public ValidationErrors validate(AddForeignKeyConstraintStatement addForeignKeyConstraintStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
 
@@ -39,6 +40,7 @@ public class AddForeignKeyConstraintGenerator extends AbstractSqlGenerator<AddFo
         return validationErrors;
     }
 
+    @Override
     public Sql[] generateSql(AddForeignKeyConstraintStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
 	    StringBuilder sb = new StringBuilder();
 	    sb.append("ALTER TABLE ")

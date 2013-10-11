@@ -18,15 +18,18 @@ public class UpdateDataChange extends AbstractModifyDataChange implements Change
         columns = new ArrayList<ColumnConfig>();
     }
 
+    @Override
     @DatabaseChangeProperty(description = "Data to update", requiredForDatabase = "all")
     public List<ColumnConfig> getColumns() {
         return columns;
     }
 
+    @Override
     public void setColumns(List<ColumnConfig> columns) {
         this.columns = columns;
     }
 
+    @Override
     public void addColumn(ColumnConfig column) {
         columns.add(column);
     }
@@ -35,6 +38,7 @@ public class UpdateDataChange extends AbstractModifyDataChange implements Change
         columns.remove(column);
     }
 
+    @Override
     public SqlStatement[] generateStatements(Database database) {
 
     	boolean needsPreparedStatement = false;
@@ -73,6 +77,7 @@ public class UpdateDataChange extends AbstractModifyDataChange implements Change
         };
     }
 
+    @Override
     public String getConfirmationMessage() {
         return "Data updated in " + getTableName();
     }

@@ -24,7 +24,8 @@ public class SetColumnRemarksGenerator extends AbstractSqlGenerator<SetColumnRem
 		return database instanceof OracleDatabase || database instanceof PostgresDatabase || database instanceof DB2Database;
 	}
 
-	public ValidationErrors validate(SetColumnRemarksStatement setColumnRemarksStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+	@Override
+    public ValidationErrors validate(SetColumnRemarksStatement setColumnRemarksStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
 		ValidationErrors validationErrors = new ValidationErrors();
 		validationErrors.checkRequiredField("tableName", setColumnRemarksStatement.getTableName());
 		validationErrors.checkRequiredField("columnName", setColumnRemarksStatement.getColumnName());
@@ -32,7 +33,8 @@ public class SetColumnRemarksGenerator extends AbstractSqlGenerator<SetColumnRem
 		return validationErrors;
 	}
 
-	public Sql[] generateSql(SetColumnRemarksStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+	@Override
+    public Sql[] generateSql(SetColumnRemarksStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
 		if (database instanceof DB2iDatabase) {
 			return new Sql[] {
 					new UnparsedSql("LABEL ON " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " ("

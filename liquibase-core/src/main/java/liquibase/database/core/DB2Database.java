@@ -23,10 +23,12 @@ public class DB2Database extends AbstractJdbcDatabase {
         super.sequenceCurrentValueFunction = "PREVIOUS VALUE FOR %s";
     }
     
+    @Override
     public boolean isCorrectDatabaseImplementation(DatabaseConnection conn) throws DatabaseException {
         return conn.getDatabaseProductName().startsWith("DB2");
     }
 
+    @Override
     public String getDefaultDriver(String url) {
         if (url.startsWith("jdbc:db2")) {
             return "com.ibm.db2.jcc.DB2Driver";
@@ -34,10 +36,12 @@ public class DB2Database extends AbstractJdbcDatabase {
         return null;
     }
 
+    @Override
     public int getPriority() {
         return PRIORITY_DEFAULT;
     }
 
+    @Override
     public Integer getDefaultPort() {
         return 446;
     }
@@ -57,6 +61,7 @@ public class DB2Database extends AbstractJdbcDatabase {
         return "DB2";
     }
 
+    @Override
     public String getShortName() {
         return "db2";
     }
@@ -107,6 +112,7 @@ public class DB2Database extends AbstractJdbcDatabase {
         return objectName.toUpperCase();
     }
 
+    @Override
     public boolean supportsInitiallyDeferrableColumns() {
         return false;
     }
@@ -153,6 +159,7 @@ public class DB2Database extends AbstractJdbcDatabase {
 
 
 
+    @Override
     public boolean supportsTablespaces() {
         return true;
     }

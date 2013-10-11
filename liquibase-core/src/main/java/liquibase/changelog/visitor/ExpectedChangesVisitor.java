@@ -18,10 +18,12 @@ public class ExpectedChangesVisitor implements ChangeSetVisitor {
         this.unexpectedChangeSets = new LinkedHashSet<RanChangeSet>(ranChangeSetList);
     }
 
+    @Override
     public Direction getDirection() {
         return ChangeSetVisitor.Direction.FORWARD;
     }
 
+    @Override
     public void visit(ChangeSet changeSet,
             DatabaseChangeLog databaseChangeLog,
             Database database) throws LiquibaseException {

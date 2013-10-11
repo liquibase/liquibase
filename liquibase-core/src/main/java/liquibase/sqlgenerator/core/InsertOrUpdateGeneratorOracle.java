@@ -2,6 +2,8 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
 import liquibase.database.core.OracleDatabase;
+import liquibase.executor.ExecutorService;
+import liquibase.executor.LoggingExecutor;
 import liquibase.statement.core.InsertOrUpdateStatement;
 
 public class InsertOrUpdateGeneratorOracle extends InsertOrUpdateGenerator {
@@ -36,10 +38,15 @@ public class InsertOrUpdateGeneratorOracle extends InsertOrUpdateGenerator {
     }
 
     @Override
-    protected String getPostUpdateStatements(){
+    protected String getPostUpdateStatements(Database database){
         StringBuffer endStatements = new StringBuffer();
         endStatements.append("END IF;\n");
         endStatements.append("END;\n");
+
+        if (ExecutorService.getInstance().getExecutor(database) instanceof LoggingExecutor) {
+            endStatements.append("/\n");
+        }
+
         return endStatements.toString();
 
     }

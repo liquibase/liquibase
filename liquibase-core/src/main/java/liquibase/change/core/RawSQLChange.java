@@ -49,6 +49,7 @@ public class RawSQLChange extends AbstractSQLChange {
         this.comment = comment;
     }
 
+    @Override
     public String getConfirmationMessage() {
         return "Custom SQL executed";
     }

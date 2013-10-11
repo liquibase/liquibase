@@ -153,6 +153,7 @@ public class VerifyChangeClassesTest extends AbstractVerifyTest {
 
                 List<List<String>> paramLists = powerSet(optionalParameters);
                 Collections.sort(paramLists, new Comparator<List<String>>() {
+                    @Override
                     public int compare(List<String> o1, List<String> o2) {
                         int comp = Integer.valueOf(o1.size()).compareTo(o2.size());
                         if (comp == 0) {

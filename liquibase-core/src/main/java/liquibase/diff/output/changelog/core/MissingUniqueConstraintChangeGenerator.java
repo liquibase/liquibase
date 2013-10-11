@@ -13,6 +13,7 @@ import liquibase.structure.core.Table;
 import liquibase.structure.core.UniqueConstraint;
 
 public class MissingUniqueConstraintChangeGenerator implements MissingObjectChangeGenerator {
+    @Override
     public int getPriority(Class<? extends DatabaseObject> objectType, Database database) {
         if (UniqueConstraint.class.isAssignableFrom(objectType)) {
             return PRIORITY_DEFAULT;
@@ -20,6 +21,7 @@ public class MissingUniqueConstraintChangeGenerator implements MissingObjectChan
         return PRIORITY_NONE;
     }
 
+    @Override
     public Class<? extends DatabaseObject>[] runAfterTypes() {
         return new Class[]{
                 Table.class,
@@ -27,10 +29,12 @@ public class MissingUniqueConstraintChangeGenerator implements MissingObjectChan
         };
     }
 
+    @Override
     public Class<? extends DatabaseObject>[] runBeforeTypes() {
         return new Class[]{Index.class};
     }
 
+    @Override
     public Change[] fixMissing(DatabaseObject missingObject, DiffOutputControl control, Database referenceDatabase, Database comparisonDatabase, ChangeGeneratorChain chain) {
         UniqueConstraint uc = (UniqueConstraint) missingObject;
 

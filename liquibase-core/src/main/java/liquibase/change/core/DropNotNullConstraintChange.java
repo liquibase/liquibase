@@ -62,6 +62,7 @@ public class DropNotNullConstraintChange extends AbstractChange {
         this.columnDataType = columnDataType;
     }
 
+    @Override
     public SqlStatement[] generateStatements(Database database) {
 
 //todo    	if (database instanceof SQLiteDatabase) {
@@ -126,6 +127,7 @@ public class DropNotNullConstraintChange extends AbstractChange {
         };
     }
 
+    @Override
     public String getConfirmationMessage() {
         return "Null constraint dropped from " + getTableName() + "." + getColumnName();
     }

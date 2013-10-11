@@ -13,6 +13,7 @@ import liquibase.structure.core.Table;
 
 public class DropColumnGenerator extends AbstractSqlGenerator<DropColumnStatement> {
 
+    @Override
     public ValidationErrors validate(DropColumnStatement dropColumnStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("tableName", dropColumnStatement.getTableName());
@@ -20,6 +21,7 @@ public class DropColumnGenerator extends AbstractSqlGenerator<DropColumnStatemen
         return validationErrors;
     }
 
+    @Override
     public Sql[] generateSql(DropColumnStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         if (database instanceof DB2Database) {
             return new Sql[] { new UnparsedSql("ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " DROP COLUMN " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()), getAffectedColumn(statement)) };

@@ -84,6 +84,7 @@ public class AddNotNullConstraintChange extends AbstractChange {
         this.columnDataType = columnDataType;
     }
 
+    @Override
     public SqlStatement[] generateStatements(Database database) {
 
 ////        if (database instanceof SQLiteDatabase) {
@@ -144,19 +145,23 @@ public class AddNotNullConstraintChange extends AbstractChange {
 		
 		// define alter table logic
 		AlterTableVisitor rename_alter_visitor = new AlterTableVisitor() {
-			public ColumnConfig[] getColumnsToAdd() {
+			@Override
+            public ColumnConfig[] getColumnsToAdd() {
 				return new ColumnConfig[0];
 			}
-			public boolean copyThisColumn(ColumnConfig column) {
+			@Override
+            public boolean copyThisColumn(ColumnConfig column) {
 				return true;
 			}
-			public boolean createThisColumn(ColumnConfig column) {
+			@Override
+            public boolean createThisColumn(ColumnConfig column) {
 				if (column.getName().equals(getColumnName())) {
 					column.getConstraints().setNullable(false);
 				}
 				return true;
 			}
-			public boolean createThisIndex(Index index) {
+			@Override
+            public boolean createThisIndex(Index index) {
 				return true;
 			}
 		};
@@ -184,6 +189,7 @@ public class AddNotNullConstraintChange extends AbstractChange {
         };
     }
 
+    @Override
     public String getConfirmationMessage() {
         return "Null constraint has been added to " + getTableName() + "." + getColumnName();
     }

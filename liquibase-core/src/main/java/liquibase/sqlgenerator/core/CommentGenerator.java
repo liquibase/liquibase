@@ -10,13 +10,15 @@ import liquibase.statement.core.CommentStatement;
 
 public class CommentGenerator extends AbstractSqlGenerator<CommentStatement> {
 
-	public Sql[] generateSql(CommentStatement comment, Database database, SqlGeneratorChain sqlGeneratorChain) {
+	@Override
+    public Sql[] generateSql(CommentStatement comment, Database database, SqlGeneratorChain sqlGeneratorChain) {
         return new Sql[] {
                 new SingleLineComment(comment.getText(), database.getLineComment())     
 		};
 	}
 
-	public ValidationErrors validate(CommentStatement comment,
+	@Override
+    public ValidationErrors validate(CommentStatement comment,
                                      Database database, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("text", comment.getText());

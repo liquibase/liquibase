@@ -28,14 +28,17 @@ public class RunningAsPrecondition implements Precondition {
         return username;
     }
 
+    @Override
     public Warnings warn(Database database) {
         return new Warnings();
     }
 
+    @Override
     public ValidationErrors validate(Database database) {
         return new ValidationErrors();
     }
 
+    @Override
     public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet) throws PreconditionFailedException, PreconditionErrorException {
         String loggedusername = database.getConnection().getConnectionUserName();
         if (loggedusername.indexOf('@') >= 0) {
@@ -46,6 +49,7 @@ public class RunningAsPrecondition implements Precondition {
         }
     }
 
+    @Override
     public String getName() {
         return "runningAs";
     }

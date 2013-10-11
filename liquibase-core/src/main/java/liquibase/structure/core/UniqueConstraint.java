@@ -16,7 +16,8 @@ public class UniqueConstraint extends AbstractDatabaseObject {
         setAttribute("disabled", false);
     }
 
-	public DatabaseObject[] getContainingObjects() {
+	@Override
+    public DatabaseObject[] getContainingObjects() {
 		List<DatabaseObject> columns = new ArrayList<DatabaseObject>();
 		for (String column : this.getColumns()) {
 			columns.add(new Column().setName(column).setRelation(getTable()));
@@ -25,16 +26,19 @@ public class UniqueConstraint extends AbstractDatabaseObject {
 		return columns.toArray(new DatabaseObject[columns.size()]);
 	}
 
-	public String getName() {
+	@Override
+    public String getName() {
 		return getAttribute("name", String.class);
 	}
 
-	public UniqueConstraint setName(String constraintName) {
+	@Override
+    public UniqueConstraint setName(String constraintName) {
         this.setAttribute("name", constraintName);
         return this;
 
     }
 
+    @Override
     public Schema getSchema() {
         if (getTable() == null) {
             return null;

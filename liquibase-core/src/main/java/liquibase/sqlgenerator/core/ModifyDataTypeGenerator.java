@@ -25,6 +25,7 @@ public class ModifyDataTypeGenerator extends AbstractSqlGenerator<ModifyDataType
         return warnings;
     }
 
+    @Override
     public ValidationErrors validate(ModifyDataTypeStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("tableName", statement.getTableName());
@@ -34,6 +35,7 @@ public class ModifyDataTypeGenerator extends AbstractSqlGenerator<ModifyDataType
         return validationErrors;
     }
 
+    @Override
     public Sql[] generateSql(ModifyDataTypeStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         String alterTable = "ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName());
 

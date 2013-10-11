@@ -70,6 +70,7 @@ public class ChangeMetaData implements PrioritizedService {
     /**
      * The priority of a Change implementation controls which implementation is used if several exist for the same "name".
      */
+    @Override
     public int getPriority() {
         return priority;
     }

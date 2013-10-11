@@ -55,6 +55,7 @@ public class DropAllForeignKeyConstraintsChange extends AbstractChange {
         this.baseTableName = baseTableName;
     }
 
+    @Override
     public SqlStatement[] generateStatements(Database database) {
         List<SqlStatement> sqlStatements = new ArrayList<SqlStatement>();
 
@@ -69,6 +70,7 @@ public class DropAllForeignKeyConstraintsChange extends AbstractChange {
         return sqlStatements.toArray(new SqlStatement[sqlStatements.size()]);
     }
 
+    @Override
     public String getConfirmationMessage() {
         return "Foreign keys on base table " + getBaseTableName() + " dropped";
     }

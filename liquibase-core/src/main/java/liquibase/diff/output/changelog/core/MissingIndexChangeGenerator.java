@@ -14,6 +14,7 @@ import liquibase.structure.core.Index;
 import liquibase.structure.core.Table;
 
 public class MissingIndexChangeGenerator implements MissingObjectChangeGenerator {
+    @Override
     public int getPriority(Class<? extends DatabaseObject> objectType, Database database) {
         if (Index.class.isAssignableFrom(objectType)) {
             return PRIORITY_DEFAULT;
@@ -21,6 +22,7 @@ public class MissingIndexChangeGenerator implements MissingObjectChangeGenerator
         return PRIORITY_NONE;
     }
 
+    @Override
     public Class<? extends DatabaseObject>[] runAfterTypes() {
         return new Class[] {
                 Table.class,
@@ -28,10 +30,12 @@ public class MissingIndexChangeGenerator implements MissingObjectChangeGenerator
         };
     }
 
+    @Override
     public Class<? extends DatabaseObject>[] runBeforeTypes() {
         return null;
     }
 
+    @Override
     public Change[] fixMissing(DatabaseObject missingObject, DiffOutputControl control, Database referenceDatabase, Database comparisonDatabase, ChangeGeneratorChain chain) {
         Index index = (Index) missingObject;
 

@@ -17,6 +17,7 @@ public class RenameTableGenerator extends AbstractSqlGenerator<RenameTableStatem
         return !(database instanceof CacheDatabase || database instanceof FirebirdDatabase);
     }
 
+    @Override
     public ValidationErrors validate(RenameTableStatement renameTableStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("newTableName", renameTableStatement.getNewTableName());
@@ -24,6 +25,7 @@ public class RenameTableGenerator extends AbstractSqlGenerator<RenameTableStatem
         return validationErrors;
     }
 
+    @Override
     public Sql[] generateSql(RenameTableStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         String sql;
         if (database instanceof MSSQLDatabase) {

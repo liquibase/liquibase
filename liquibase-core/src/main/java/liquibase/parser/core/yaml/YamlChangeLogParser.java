@@ -38,6 +38,7 @@ public class YamlChangeLogParser implements ChangeLogParser {
 
     protected Logger log = LogFactory.getLogger();
 
+    @Override
     public boolean supports(String changeLogFile, ResourceAccessor resourceAccessor) {
         return changeLogFile.endsWith("."+ getSupportedFileExtension());
     }
@@ -46,10 +47,12 @@ public class YamlChangeLogParser implements ChangeLogParser {
         return "yaml";
     }
 
+    @Override
     public int getPriority() {
         return PRIORITY_DEFAULT;
     }
 
+    @Override
     public DatabaseChangeLog parse(String physicalChangeLogLocation, ChangeLogParameters changeLogParameters, ResourceAccessor resourceAccessor) throws ChangeLogParseException {
         Yaml yaml = new Yaml();
 

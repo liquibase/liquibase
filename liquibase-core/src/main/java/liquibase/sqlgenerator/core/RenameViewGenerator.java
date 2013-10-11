@@ -24,6 +24,7 @@ public class RenameViewGenerator extends AbstractSqlGenerator<RenameViewStatemen
                 || database instanceof SybaseASADatabase);
     }
 
+    @Override
     public ValidationErrors validate(RenameViewStatement renameViewStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("oldViewName", renameViewStatement.getOldViewName());
@@ -34,6 +35,7 @@ public class RenameViewGenerator extends AbstractSqlGenerator<RenameViewStatemen
         return validationErrors;
     }
 
+    @Override
     public Sql[] generateSql(RenameViewStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         String sql;
 

@@ -29,18 +29,22 @@ public class MockSqlGenerator implements SqlGenerator {
         this.returnSql = returnSql;
     }
 
+    @Override
     public int getPriority() {
         return priority;
     }
 
+    @Override
     public boolean supports(SqlStatement statement, Database database) {
         return supports;
     }
 
+    @Override
     public boolean generateStatementsIsVolatile(Database database) {
         return false;
     }
 
+    @Override
     public boolean generateRollbackStatementsIsVolatile(Database database) {
         return false;
     }
@@ -51,16 +55,19 @@ public class MockSqlGenerator implements SqlGenerator {
         return this;
     }
 
+    @Override
     public Warnings warn(SqlStatement sqlStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         return new Warnings();
     }
     
+    @Override
     public ValidationErrors validate(SqlStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = sqlGeneratorChain.validate(statement, database);
         validationErrors.addAll(errors);
         return validationErrors;
     }
 
+    @Override
     public Sql[] generateSql(SqlStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         List<Sql> sql = new ArrayList<Sql>();
         for (String returnSql  : this.returnSql) {

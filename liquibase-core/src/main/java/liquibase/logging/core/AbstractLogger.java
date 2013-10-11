@@ -7,10 +7,12 @@ import liquibase.logging.Logger;
 public abstract class AbstractLogger  implements Logger {
     private LogLevel logLevel;
 
+    @Override
     public LogLevel getLogLevel() {
         return logLevel;
     }
 
+    @Override
     public void setLogLevel(String logLevel) {
         if ("debug".equalsIgnoreCase(logLevel)) {
             setLogLevel(LogLevel.DEBUG);
@@ -27,6 +29,7 @@ public abstract class AbstractLogger  implements Logger {
         }
     }
 
+    @Override
     public void setLogLevel(LogLevel level) {
         this.logLevel = level;
     }

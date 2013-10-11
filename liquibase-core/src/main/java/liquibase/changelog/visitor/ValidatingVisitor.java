@@ -67,10 +67,12 @@ public class ValidatingVisitor implements ChangeSetVisitor {
         }
     }
 
+    @Override
     public Direction getDirection() {
         return ChangeSetVisitor.Direction.FORWARD;
     }
 
+    @Override
     public void visit(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database) throws LiquibaseException {
         RanChangeSet ranChangeSet = ranIndex.get(changeSet.toString(false));
         boolean ran = ranChangeSet != null;

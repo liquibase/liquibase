@@ -43,14 +43,17 @@ public class UnparsedSql implements Sql {
         this.affectedDatabaseObjects.addAll(moreAffectedDatabaseObjects);
     }
 
+    @Override
     public String toSql() {
         return sql;
     }
 
+    @Override
     public String getEndDelimiter() {
         return endDelimiter;
     }
 
+    @Override
     public Set<? extends DatabaseObject> getAffectedDatabaseObjects() {
         return affectedDatabaseObjects;
     }

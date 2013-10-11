@@ -21,19 +21,23 @@ public class MockChangeLogSerializer implements ChangeLogSerializer {
         this.validExtensions = validExtensions;
     }
 
+    @Override
     public String[] getValidFileExtensions() {
         return validExtensions;
     }
 
-	public void write(List<ChangeSet> changeSets, OutputStream out)
+	@Override
+    public void write(List<ChangeSet> changeSets, OutputStream out)
 			throws IOException {
 		;
 	}
 
+    @Override
     public void append(ChangeSet changeSet, File changeLogFile) throws IOException {
 
     }
 
+    @Override
     public String serialize(LiquibaseSerializable object, boolean pretty) {
         return null;
     }

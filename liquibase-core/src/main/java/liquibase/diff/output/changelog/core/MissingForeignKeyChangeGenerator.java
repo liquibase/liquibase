@@ -10,6 +10,7 @@ import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
 
 public class MissingForeignKeyChangeGenerator implements MissingObjectChangeGenerator {
+    @Override
     public int getPriority(Class<? extends DatabaseObject> objectType, Database database) {
         if (ForeignKey.class.isAssignableFrom(objectType)) {
             return PRIORITY_DEFAULT;
@@ -17,6 +18,7 @@ public class MissingForeignKeyChangeGenerator implements MissingObjectChangeGene
         return PRIORITY_NONE;
     }
 
+    @Override
     public Class<? extends DatabaseObject>[] runAfterTypes() {
         return new Class[] {
                 Table.class,
@@ -25,10 +27,12 @@ public class MissingForeignKeyChangeGenerator implements MissingObjectChangeGene
         };
     }
 
+    @Override
     public Class<? extends DatabaseObject>[] runBeforeTypes() {
         return new Class[] { Index.class };
     }
 
+    @Override
     public Change[] fixMissing(DatabaseObject missingObject, DiffOutputControl control, Database referenceDatabase, Database comparisonDatabase, ChangeGeneratorChain chain) {
         ForeignKey fk = (ForeignKey) missingObject;
 

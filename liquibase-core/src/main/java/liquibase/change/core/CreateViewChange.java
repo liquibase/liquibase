@@ -67,7 +67,8 @@ public class CreateViewChange extends AbstractChange {
 		this.replaceIfExists = replaceIfExists;
 	}
 
-	public SqlStatement[] generateStatements(Database database) {
+	@Override
+    public SqlStatement[] generateStatements(Database database) {
         List<SqlStatement> statements = new ArrayList<SqlStatement>();
 
 		boolean replaceIfExists = false;
@@ -87,7 +88,8 @@ public class CreateViewChange extends AbstractChange {
 		return statements.toArray(new SqlStatement[statements.size()]);
 	}
 
-	public String getConfirmationMessage() {
+	@Override
+    public String getConfirmationMessage() {
 		return "View " + getViewName() + " created";
 	}
 

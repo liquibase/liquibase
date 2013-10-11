@@ -91,6 +91,10 @@ public class Main {
                 return;
             }
 
+//            if (!System.getProperties().contains("file.encoding")) {
+//                System.setProperty("file.encoding", "UTF-8");
+//            }
+
             Main main = new Main();
             if (args.length == 1 && "--help".equals(args[0])) {
                 main.printHelp(System.err);
@@ -692,6 +696,7 @@ public class Main {
         }
         if (includeSystemClasspath) {
             classLoader = AccessController.doPrivileged(new PrivilegedAction<URLClassLoader>() {
+                @Override
                 public URLClassLoader run() {
                     return new URLClassLoader(urls.toArray(new URL[urls.size()]), Thread.currentThread().getContextClassLoader());
                 }
@@ -699,6 +704,7 @@ public class Main {
 
         } else {
             classLoader = AccessController.doPrivileged(new PrivilegedAction<URLClassLoader>() {
+                @Override
                 public URLClassLoader run() {
                     return new URLClassLoader(urls.toArray(new URL[urls.size()]));
                 }
@@ -1024,8 +1030,15 @@ public class Main {
 //        return database;
     }
 
-    private Writer getOutputWriter() {
-        return new OutputStreamWriter(System.out);
+    private Writer getOutputWriter() throws UnsupportedEncodingException {
+        String charsetName = StringUtils.trimToNull(System.getProperty("liquibase.file.encoding"));
+        if (charsetName == null) {
+            charsetName = StringUtils.trimToNull(System.getProperty("file.encoding"));
+        }
+        if (charsetName == null) {
+            charsetName = "UTF-8";
+        }
+        return new OutputStreamWriter(System.out, charsetName);
     }
 
     public boolean isWindows() {

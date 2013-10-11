@@ -21,12 +21,14 @@ public class Data extends AbstractDatabaseObject {
     }
 
 
+    @Override
     public DatabaseObject[] getContainingObjects() {
         return new DatabaseObject[] {
                 getTable()
         };
     }
 
+    @Override
     public String getName() {
         Table table = getTable();
         if (table == null) {
@@ -35,6 +37,7 @@ public class Data extends AbstractDatabaseObject {
         return table.getName();
     }
 
+    @Override
     public Data setName(String name) {
         Table table = getTable();
         if (table == null) {
@@ -46,6 +49,7 @@ public class Data extends AbstractDatabaseObject {
         return this;
     }
 
+    @Override
     public Schema getSchema() {
         Table table = getTable();
         if (table == null) {

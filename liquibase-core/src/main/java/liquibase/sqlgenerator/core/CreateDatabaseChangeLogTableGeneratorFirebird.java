@@ -14,19 +14,4 @@ public class CreateDatabaseChangeLogTableGeneratorFirebird extends CreateDatabas
     public boolean supports(CreateDatabaseChangeLogTableStatement statement, Database database) {
         return database instanceof FirebirdDatabase;
     }
-
-    @Override
-    protected String getFilenameColumnSize() {
-        return "150";
-    }
-
-    @Override
-    protected String getIdColumnSize() {
-        return "60";
-    }
-
-    @Override
-    protected String getAuthorColumnSize() {
-        return "60";
-    }
 }

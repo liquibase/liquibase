@@ -44,6 +44,7 @@ public class ExampleCustomSqlChange implements CustomSqlChange, CustomSqlRollbac
         this.newValue = newValue;
     }
 
+    @Override
     public SqlStatement[] generateStatements(Database database) {
         return new SqlStatement[]{
                 new RawSqlStatement("update "+database.escapeObjectName(tableName, Table.class)
@@ -51,6 +52,7 @@ public class ExampleCustomSqlChange implements CustomSqlChange, CustomSqlRollbac
         };
     }
 
+    @Override
     public SqlStatement[] generateRollbackStatements(Database database) throws RollbackImpossibleException {
         return new SqlStatement[]{
                 new RawSqlStatement("update "+database.correctObjectName(tableName, Table.class)
@@ -58,17 +60,21 @@ public class ExampleCustomSqlChange implements CustomSqlChange, CustomSqlRollbac
         };
     }
 
+    @Override
     public String getConfirmationMessage() {
         return "Custom class updated "+tableName+"."+columnName;
     }
 
+    @Override
     public void setUp() throws SetupException {
     }
 
+    @Override
     public void setFileOpener(ResourceAccessor resourceAccessor) {
         this.resourceAccessor = resourceAccessor;
     }
 
+    @Override
     public ValidationErrors validate(Database database) {
         return new ValidationErrors();
     }

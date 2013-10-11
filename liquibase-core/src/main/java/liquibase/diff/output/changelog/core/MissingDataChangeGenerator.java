@@ -34,6 +34,7 @@ import java.util.Map;
 
 public class MissingDataChangeGenerator implements MissingObjectChangeGenerator {
 
+    @Override
     public int getPriority(Class<? extends DatabaseObject> objectType, Database database) {
         if (Data.class.isAssignableFrom(objectType)) {
             return PRIORITY_DEFAULT;
@@ -41,18 +42,21 @@ public class MissingDataChangeGenerator implements MissingObjectChangeGenerator 
         return PRIORITY_NONE;
     }
 
+    @Override
     public Class<? extends DatabaseObject>[] runAfterTypes() {
         return new Class[]{
                 Table.class
         };
     }
 
+    @Override
     public Class<? extends DatabaseObject>[] runBeforeTypes() {
         return new Class[]{
                 PrimaryKey.class, ForeignKey.class, Index.class
         };
     }
 
+    @Override
     public Change[] fixMissing(DatabaseObject missingObject, DiffOutputControl outputControl, Database referenceDatabase, Database comparisionDatabase, ChangeGeneratorChain chain) {
         Statement stmt = null;
         ResultSet rs = null;

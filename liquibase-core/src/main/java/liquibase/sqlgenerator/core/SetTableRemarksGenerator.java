@@ -22,14 +22,16 @@ public class SetTableRemarksGenerator extends AbstractSqlGenerator<SetTableRemar
 				|| database instanceof DB2Database;
 	}
 
-	public ValidationErrors validate(SetTableRemarksStatement setTableRemarksStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+	@Override
+    public ValidationErrors validate(SetTableRemarksStatement setTableRemarksStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
 		ValidationErrors validationErrors = new ValidationErrors();
 		validationErrors.checkRequiredField("tableName", setTableRemarksStatement.getTableName());
 		validationErrors.checkRequiredField("remarks", setTableRemarksStatement.getRemarks());
 		return validationErrors;
 	}
 
-	public Sql[] generateSql(SetTableRemarksStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+	@Override
+    public Sql[] generateSql(SetTableRemarksStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
 		String sql;
 		String remarks = database.escapeStringForDatabase(statement.getRemarks());
 		if (database instanceof MySQLDatabase) {

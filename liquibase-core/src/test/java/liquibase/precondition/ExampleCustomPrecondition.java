@@ -25,6 +25,7 @@ public class ExampleCustomPrecondition implements CustomPrecondition {
         this.count = count;
     }
 
+    @Override
     public void check(Database database) throws CustomPreconditionFailedException {
         System.out.println("Custom precondition ran. Name: "+name+", count: "+count  );
 

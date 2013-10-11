@@ -33,10 +33,12 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         this.physicalFilePath = physicalFilePath;
     }
 
+    @Override
     public PreconditionContainer getPreconditions() {
         return preconditionContainer;
     }
 
+    @Override
     public void setPreconditions(PreconditionContainer precond) {
         preconditionContainer = precond;
     }
@@ -91,6 +93,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         return getFilePath();
     }
 
+    @Override
     public int compareTo(DatabaseChangeLog o) {
         return getFilePath().compareTo(o.getFilePath());
     }

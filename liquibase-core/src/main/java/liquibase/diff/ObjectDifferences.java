@@ -182,7 +182,7 @@ public class ObjectDifferences {
             if (compareToValue instanceof DatabaseObject) {
                 object2Name = accordingTo.correctObjectName(((DatabaseObject) compareToValue).getAttribute("name", String.class), type);
             } else {
-                object2Name = referenceValue.toString();
+                object2Name = compareToValue.toString();
             }
 
             if (object1Name == null && object2Name == null) {

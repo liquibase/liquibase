@@ -18,7 +18,7 @@ public class ChangeSetTest {
 
         assertEquals("Empty", changeSet.getDescription());
 
-        String insertDescription = "Inserts data into an existing table";
+        String insertDescription = "insert";
 
         changeSet.addChange(new InsertDataChange());
         assertEquals(insertDescription, changeSet.getDescription());
@@ -27,7 +27,7 @@ public class ChangeSetTest {
         assertEquals(insertDescription + " (x2)", changeSet.getDescription());
 
         changeSet.addChange(new CreateTableChange());
-        assertEquals(insertDescription + " (x2), Create Table", changeSet.getDescription());
+        assertEquals(insertDescription + " (x2), createTable", changeSet.getDescription());
     }
     
     @Test

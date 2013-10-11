@@ -7,6 +7,7 @@ public class ReplaceSqlVisitor extends AbstractSqlVisitor {
     private String replace;
     private String with;
 
+    @Override
     public String getName() {
         return "replace";
     }
@@ -27,6 +28,7 @@ public class ReplaceSqlVisitor extends AbstractSqlVisitor {
         this.with = with;
     }
 
+    @Override
     public String modifySql(String sql, Database database) {
         return sql.replace(getReplace(), getWith());
     }

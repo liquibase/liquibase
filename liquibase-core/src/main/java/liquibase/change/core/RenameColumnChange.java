@@ -88,6 +88,7 @@ public class RenameColumnChange extends AbstractChange {
         this.remarks = remarks;
     }
 
+    @Override
     public SqlStatement[] generateStatements(Database database) {
 //todo    	if (database instanceof SQLiteDatabase) {
 //    		// return special statements for SQLite databases
@@ -113,19 +114,23 @@ public class RenameColumnChange extends AbstractChange {
     	// define alter table logic
 		AlterTableVisitor rename_alter_visitor = 
 		new AlterTableVisitor() {
-			public ColumnConfig[] getColumnsToAdd() {
+			@Override
+            public ColumnConfig[] getColumnsToAdd() {
 				return new ColumnConfig[0];
 			}
-			public boolean copyThisColumn(ColumnConfig column) {
+			@Override
+            public boolean copyThisColumn(ColumnConfig column) {
 				return true;
 			}
-			public boolean createThisColumn(ColumnConfig column) {
+			@Override
+            public boolean createThisColumn(ColumnConfig column) {
 				if (column.getName().equals(getOldColumnName())) {
 					column.setName(getNewColumnName());
 				}
 				return true;
 			}
-			public boolean createThisIndex(Index index) {
+			@Override
+            public boolean createThisIndex(Index index) {
 				if (index.getColumns().contains(getOldColumnName())) {
 					index.getColumns().remove(getOldColumnName());
 					index.getColumns().add(getNewColumnName());
@@ -161,6 +166,7 @@ public class RenameColumnChange extends AbstractChange {
         };
     }
 
+    @Override
     public String getConfirmationMessage() {
         return "Column "+tableName+"."+ oldColumnName + " renamed to " + newColumnName;
     }

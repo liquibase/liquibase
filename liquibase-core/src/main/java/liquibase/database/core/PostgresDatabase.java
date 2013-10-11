@@ -41,7 +41,9 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
     @Override
     public void setConnection(DatabaseConnection conn) {
         try {
-            reservedWords.addAll(Arrays.asList(((JdbcConnection) conn).getMetaData().getSQLKeywords().toUpperCase().split(",\\s*")));
+            if (conn instanceof JdbcConnection) {
+                reservedWords.addAll(Arrays.asList(((JdbcConnection) conn).getMetaData().getSQLKeywords().toUpperCase().split(",\\s*")));
+            }
         } catch (Exception e) {
             LogFactory.getLogger().warning("Cannot retrieve reserved words", e);
         }
@@ -49,6 +51,7 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
         super.setConnection(conn);
     }
 
+    @Override
     public String getShortName() {
         return "postgresql";
     }
@@ -58,6 +61,7 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
         return "PostgreSQL";
     }
 
+    @Override
     public Integer getDefaultPort() {
         return 5432;
     }
@@ -67,18 +71,22 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
         return systemTablesAndViews;
     }
 
+    @Override
     public int getPriority() {
         return PRIORITY_DEFAULT;
     }
 
+    @Override
     public boolean supportsInitiallyDeferrableColumns() {
         return true;
     }
 
+    @Override
     public boolean isCorrectDatabaseImplementation(DatabaseConnection conn) throws DatabaseException {
         return PRODUCT_NAME.equalsIgnoreCase(conn.getDatabaseProductName());
     }
 
+    @Override
     public String getDefaultDriver(String url) {
         if (url.startsWith("jdbc:postgresql:")) {
             return "org.postgresql.Driver";
@@ -140,6 +148,7 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
         return super.isSystemObject(example);
     }
 
+    @Override
     public boolean supportsTablespaces() {
         return true;
     }

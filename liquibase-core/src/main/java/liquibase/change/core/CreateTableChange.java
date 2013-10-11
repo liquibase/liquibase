@@ -53,6 +53,7 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
         return validationErrors;
     }
 
+    @Override
     public SqlStatement[] generateStatements(Database database) {
 
         CreateTableStatement statement = new CreateTableStatement(getCatalogName(), getSchemaName(), getTableName(),getRemarks());
@@ -141,6 +142,7 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
         };
     }
 
+    @Override
     @DatabaseChangeProperty(requiredForDatabase = "all")
     public List<ColumnConfig> getColumns() {
         if (columns == null) {
@@ -149,6 +151,7 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
         return columns;
     }
 
+    @Override
     public void setColumns(List<ColumnConfig> columns) {
         this.columns = columns;
     }
@@ -188,6 +191,7 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
         this.tablespace = tablespace;
     }
 
+    @Override
     public void addColumn(ColumnConfig column) {
         columns.add(column);
     }
@@ -200,6 +204,7 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
         this.remarks = remarks;
     }
 
+    @Override
     public String getConfirmationMessage() {
         return "Table " + tableName + " created";
     }

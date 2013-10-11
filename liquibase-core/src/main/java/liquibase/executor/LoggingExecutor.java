@@ -30,10 +30,12 @@ public class LoggingExecutor extends AbstractExecutor implements Executor {
         setDatabase(database);
     }
 
+    @Override
     public void execute(SqlStatement sql) throws DatabaseException {
         outputStatement(sql);
     }
 
+    @Override
     public int update(SqlStatement sql) throws DatabaseException {
         if (sql instanceof LockDatabaseChangeLogStatement) {
             return 1;
@@ -46,15 +48,18 @@ public class LoggingExecutor extends AbstractExecutor implements Executor {
         return 0;
     }
 
+    @Override
     public void execute(SqlStatement sql, List<SqlVisitor> sqlVisitors) throws DatabaseException {
         outputStatement(sql, sqlVisitors);
     }
 
+    @Override
     public int update(SqlStatement sql, List<SqlVisitor> sqlVisitors) throws DatabaseException {
         outputStatement(sql, sqlVisitors);
         return 0;
     }
 
+    @Override
     public void comment(String message) throws DatabaseException {
         try {
             output.write(database.getLineComment());
@@ -105,6 +110,7 @@ public class LoggingExecutor extends AbstractExecutor implements Executor {
         }
     }
 
+    @Override
     public Object queryForObject(SqlStatement sql, Class requiredType) throws DatabaseException {
         if (sql instanceof SelectFromDatabaseChangeLogLockStatement) {
             return false;
@@ -112,18 +118,22 @@ public class LoggingExecutor extends AbstractExecutor implements Executor {
         return delegatedReadExecutor.queryForObject(sql, requiredType);
     }
 
+    @Override
     public Object queryForObject(SqlStatement sql, Class requiredType, List<SqlVisitor> sqlVisitors) throws DatabaseException {
         return delegatedReadExecutor.queryForObject(sql, requiredType, sqlVisitors);
     }
 
+    @Override
     public long queryForLong(SqlStatement sql) throws DatabaseException {
         return delegatedReadExecutor.queryForLong(sql);
     }
 
+    @Override
     public long queryForLong(SqlStatement sql, List<SqlVisitor> sqlVisitors) throws DatabaseException {
         return delegatedReadExecutor.queryForLong(sql, sqlVisitors);
     }
 
+    @Override
     public int queryForInt(SqlStatement sql) throws DatabaseException {
         try {
             return delegatedReadExecutor.queryForInt(sql);
@@ -135,26 +145,32 @@ public class LoggingExecutor extends AbstractExecutor implements Executor {
         }
     }
 
+    @Override
     public int queryForInt(SqlStatement sql, List<SqlVisitor> sqlVisitors) throws DatabaseException {
         return delegatedReadExecutor.queryForInt(sql, sqlVisitors);
     }
 
+    @Override
     public List queryForList(SqlStatement sql, Class elementType) throws DatabaseException {
         return delegatedReadExecutor.queryForList(sql, elementType);
     }
 
+    @Override
     public List queryForList(SqlStatement sql, Class elementType, List<SqlVisitor> sqlVisitors) throws DatabaseException {
         return delegatedReadExecutor.queryForList(sql, elementType, sqlVisitors);
     }
 
+    @Override
     public List<Map> queryForList(SqlStatement sql) throws DatabaseException {
         return delegatedReadExecutor.queryForList(sql);
     }
 
+    @Override
     public List<Map> queryForList(SqlStatement sql, List<SqlVisitor> sqlVisitors) throws DatabaseException {
         return delegatedReadExecutor.queryForList(sql, sqlVisitors);
     }
 
+    @Override
     public boolean updatesDatabase() {
         return false;
     }

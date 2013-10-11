@@ -39,6 +39,7 @@ public class XMLChangeLogSAXParser implements ChangeLogParser {
         }
     }
 
+    @Override
     public int getPriority() {
         return PRIORITY_DEFAULT;
     }
@@ -51,10 +52,12 @@ public class XMLChangeLogSAXParser implements ChangeLogParser {
         return "http://www.liquibase.org/xml/ns/dbchangelog";
     }
 
+    @Override
     public boolean supports(String changeLogFile, ResourceAccessor resourceAccessor) {
         return changeLogFile.endsWith("xml");
     }
 
+    @Override
     public DatabaseChangeLog parse(String physicalChangeLogLocation, ChangeLogParameters changeLogParameters, ResourceAccessor resourceAccessor) throws ChangeLogParseException {
 
         InputStream inputStream = null;
@@ -73,16 +76,19 @@ public class XMLChangeLogSAXParser implements ChangeLogParser {
             resolver.useResoureAccessor(resourceAccessor,FilenameUtils.getFullPath(physicalChangeLogLocation));
             xmlReader.setEntityResolver(resolver);
             xmlReader.setErrorHandler(new ErrorHandler() {
+                @Override
                 public void warning(SAXParseException exception) throws SAXException {
                     LogFactory.getLogger().warning(exception.getMessage());
                     throw exception;
                 }
 
+                @Override
                 public void error(SAXParseException exception) throws SAXException {
                     LogFactory.getLogger().severe(exception.getMessage());
                     throw exception;
                 }
 
+                @Override
                 public void fatalError(SAXParseException exception) throws SAXException {
                     LogFactory.getLogger().severe(exception.getMessage());
                     throw exception;

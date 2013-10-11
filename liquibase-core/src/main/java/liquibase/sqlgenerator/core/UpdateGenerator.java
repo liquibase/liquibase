@@ -16,6 +16,7 @@ import java.util.Date;
 
 public class UpdateGenerator extends AbstractSqlGenerator<UpdateStatement> {
 
+    @Override
     public ValidationErrors validate(UpdateStatement updateStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("tableName", updateStatement.getTableName());
@@ -23,6 +24,7 @@ public class UpdateGenerator extends AbstractSqlGenerator<UpdateStatement> {
         return validationErrors;
     }
 
+    @Override
     public Sql[] generateSql(UpdateStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         StringBuffer sql = new StringBuffer("UPDATE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " SET");
         for (String column : statement.getNewColumnValues().keySet()) {

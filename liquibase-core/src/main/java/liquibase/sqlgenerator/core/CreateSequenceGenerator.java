@@ -17,6 +17,7 @@ public class CreateSequenceGenerator extends AbstractSqlGenerator<CreateSequence
         return database.supportsSequences();
     }
 
+    @Override
     public ValidationErrors validate(CreateSequenceStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
 
@@ -34,6 +35,7 @@ public class CreateSequenceGenerator extends AbstractSqlGenerator<CreateSequence
         return validationErrors;
     }
 
+    @Override
     public Sql[] generateSql(CreateSequenceStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         StringBuffer buffer = new StringBuffer();
         buffer.append("CREATE SEQUENCE ");

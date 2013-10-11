@@ -16,6 +16,7 @@ public class DbmsChangeSetFilter implements ChangeSetFilter {
         this.database = database;
     }
 
+    @Override
     public boolean accepts(ChangeSet changeSet) {
         if (database == null) {
             return true;

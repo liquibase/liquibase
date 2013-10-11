@@ -49,14 +49,17 @@ public class ColumnExistsPrecondition implements Precondition {
         this.columnName = columnName;
     }
 
+    @Override
     public Warnings warn(Database database) {
         return new Warnings();
     }
 
+    @Override
     public ValidationErrors validate(Database database) {
         return new ValidationErrors();
     }
 
+    @Override
     public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet) throws PreconditionFailedException, PreconditionErrorException {
         Column example = new Column();
         if (StringUtils.trimToNull(getTableName()) != null) {
@@ -73,6 +76,7 @@ public class ColumnExistsPrecondition implements Precondition {
         }
     }
 
+    @Override
     public String getName() {
         return "columnExists";
     }

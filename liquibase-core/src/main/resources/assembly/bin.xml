@@ -18,6 +18,14 @@
         <fileSet>
             <directory>src/main/resources/dist</directory>
             <outputDirectory>/</outputDirectory>
+            <includes>
+                <include>liquibase</include>
+            </includes>
+            <fileMode>0755</fileMode>
+        </fileSet>
+        <fileSet>
+            <directory>src/main/resources/dist</directory>
+            <outputDirectory>/</outputDirectory>
             <lineEnding>dos</lineEnding>
             <includes>
                 <include>*.bat</include>

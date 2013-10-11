@@ -33,6 +33,7 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
     private static Pattern INITIAL_COMMENT_PATTERN = Pattern.compile("^/\\*.*?\\*/");
     private static Pattern CREATE_VIEW_AS_PATTERN = Pattern.compile("(?im)^\\s*(CREATE|ALTER)\\s+?VIEW\\s+?((\\S+?)|(\\[.*\\])|(\\\".*\\\"))\\s+?AS\\s*?", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
+    @Override
     public String getShortName() {
         return "mssql";
     }
@@ -69,6 +70,7 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
     }
 
 
+    @Override
     public int getPriority() {
         return PRIORITY_DEFAULT;
     }
@@ -78,6 +80,7 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
         return "SQL Server";
     }
 
+    @Override
     public Integer getDefaultPort() {
         return 1433;
     }
@@ -87,6 +90,12 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
         return systemTablesAndViews;
     }
 
+    @Override
+    protected Set<String> getSystemTables() {
+        return systemTablesAndViews;
+    }
+
+    @Override
     public boolean supportsInitiallyDeferrableColumns() {
         return false;
     }
@@ -96,12 +105,14 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
         return false;
     }
 
+    @Override
     public boolean isCorrectDatabaseImplementation(DatabaseConnection conn) throws DatabaseException {
         String databaseProductName = conn.getDatabaseProductName();
         return PRODUCT_NAME.equalsIgnoreCase(databaseProductName)
                 || "SQLOLEDB".equalsIgnoreCase(databaseProductName);
     }
 
+    @Override
     public String getDefaultDriver(String url) {
         if (url.startsWith("jdbc:sqlserver")) {
             return "com.microsoft.sqlserver.jdbc.SQLServerDriver";
@@ -225,6 +236,7 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
 //
 //    }
 
+    @Override
     public boolean supportsTablespaces() {
         return true;
     }

@@ -12,12 +12,14 @@ import liquibase.structure.core.View;
 
 public class DropViewGenerator extends AbstractSqlGenerator<DropViewStatement> {
 
+    @Override
     public ValidationErrors validate(DropViewStatement dropViewStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("viewName", dropViewStatement.getViewName());
         return validationErrors;
     }
 
+    @Override
     public Sql[] generateSql(DropViewStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         return new Sql[] {
                 new UnparsedSql("DROP VIEW " + database.escapeViewName(statement.getCatalogName(), statement.getSchemaName(), statement.getViewName()), getAffectedView(statement))

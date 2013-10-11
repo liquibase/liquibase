@@ -9,10 +9,12 @@ import liquibase.statement.SqlStatement;
 @DatabaseChange(name="empty", description = "empty", priority = ChangeMetaData.PRIORITY_DEFAULT)
 public class EmptyChange extends AbstractChange {
 
+    @Override
     public SqlStatement[] generateStatements(Database database) {
         return new SqlStatement[0];
     }
 
+    @Override
     public String getConfirmationMessage() {
         return "Empty change did nothing";
     }

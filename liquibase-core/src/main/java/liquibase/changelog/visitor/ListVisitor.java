@@ -16,10 +16,12 @@ public class ListVisitor implements ChangeSetVisitor {
         return seenChangeSets;
     }
 
+    @Override
     public Direction getDirection() {
         return ChangeSetVisitor.Direction.FORWARD;
     }
 
+    @Override
     public void visit(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database) throws LiquibaseException {
         seenChangeSets.add(changeSet);
     }

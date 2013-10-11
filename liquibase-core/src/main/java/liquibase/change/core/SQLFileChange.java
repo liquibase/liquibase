@@ -209,6 +209,7 @@ public class SQLFileChange extends AbstractSQLChange {
         }
     }
 
+    @Override
     public String getConfirmationMessage() {
         return "SQL in file " + path + " executed";
     }

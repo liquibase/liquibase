@@ -1,6 +1,57 @@
 Liquibase Core Changelog
 ===========================================
 
+Changes in version 3.0.6 (2013.10.08)
+
+- Major Changes:
+     Split out CDI code to a separate jar
+	 Remove primary key on DATABASECHANGELOG and increased column sizes
+	 Case sensitivity fixes
+	 General bug fixes
+
+- [CORE-1485] - Extract CDI support into a separate module
+- [CORE-602] - Increase the default size of the FILENAME column
+- [CORE-1471] - Add support for Sybase IQ
+- [CORE-1475] - Support entering password(s) interactively on the command line
+- [CORE-1477] - Support overriding LockService changeLogWaitTime
+- [CORE-1492] - DatabaseChangelog Description useless
+- [CORE-1502] - CLONE - UpdateSQL needs to append a "/" to the end of createProcedure for Oracle
+- [CORE-1088] - Derby fails to create databasechangelog tables
+- [CORE-1093] - generateChangeLog fails on MSSQL with coalation CS on views named in lowerCase
+- [CORE-1158] - Escaping of reserved keywords in HSQLDB
+- [CORE-1170] - loadUpdateData sometimes needs / and sometimes not
+- [CORE-1177] - Failure to write a change set to the DATABASECHANGELOG table still applies the change set
+- [CORE-1325] - CDI injection does not work with openwebbeans
+- [CORE-1343] - Include SQL file with relativeToChangelogFile doesn't work
+- [CORE-1378] - Deploy fails on Glassfish
+- [CORE-1409] - Package CDI support as a separate module
+- [CORE-1436] - loadUpdateData does not escape apostrophes
+- [CORE-1437] - Diff is case-sensitive on column names
+- [CORE-1440] - Reorg Table gets called before table is created on DB2
+- [CORE-1441] - Drop table with cascade does not work on MS SQL Server
+- [CORE-1443] - Documentation for liquibase maven logging configuration needs update
+- [CORE-1445] - Mysql Reserved Words Not quoted
+- [CORE-1449] - Liquibase throws null pointer if included file does not exist
+- [CORE-1464] - SQL changelog are not correctly handled (NPE)
+- [CORE-1465] - GetViewDefinitionGeneratorMSSQL generates UPPER case view name
+- [CORE-1469] - GenerateChangelog not working on Firebird
+- [CORE-1470] - Use NUMERIC instead of NUMBER for Sybase ASE
+- [CORE-1478] - MySQL keywords `key' not quoted as a column name
+- [CORE-1479] - MySQL 5.5.27 fails to create DATABASECHANGELOG table (Liquibase support fully broken)
+- [CORE-1480] - ChangedPrimaryKeyChangeGenerator missing name
+- [CORE-1481] - Schema.toString NPE
+- [CORE-1482] - Update fails with "Table DATABASECHANGELOGLOCK already exists"
+- [CORE-1483] - Boolean values of "false" being incorrectly handled
+- [CORE-1488] - Encoding issue with UpdateSQL
+- [CORE-1490] - Oracle 10g: Changelog generation changes type NUMBER(*,0) to NUMBER(22)
+- [CORE-1491] - Oracle 10g: changelog generation converts VARCHAR2(n CHAR) to VARCHAR2(n BYTE)
+- [CORE-1497] - SQL SERVER: sysdiagram table is captured during generateChangeLog if system diagrams are enabled.
+- [CORE-1499] - null appearing in liquibase maven output
+- [CORE-1500] - Snapshots do not order objects alphabetically
+- [CORE-1501] - Incorrect SQL generated for default column value in PostgreSQL for text columns
+- [CORE-1448] - Throw a more helpful error message and continue on if snakeyaml isn't in the classpath
+- [CORE-1472] - Support multi-tenant spring applications
+
 Changes in version 3.0.5 (2013.09.24)
 - Major Focus: Performance Improvements
 - [CORE-1453] - Multi-column foreign keys not snapshotted correctly

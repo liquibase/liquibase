@@ -18,6 +18,7 @@ import liquibase.statement.core.InsertStatement;
  */
 public class CustomChange implements CustomSqlChange,CustomSqlRollback{
 
+    @Override
     public SqlStatement[] generateStatements(Database database) throws CustomChangeException {
         SqlStatement st[]=new SqlStatement[1];
         InsertStatement is=new InsertStatement(null, null,"persons");
@@ -28,22 +29,27 @@ public class CustomChange implements CustomSqlChange,CustomSqlRollback{
         return st;
     }
 
+    @Override
     public String getConfirmationMessage() {
        return "executed";
     }
 
+    @Override
     public void setUp() throws SetupException {
 
     }
 
+    @Override
     public void setFileOpener(ResourceAccessor resourceAccessor) {
 
     }
 
+    @Override
     public ValidationErrors validate(Database database) {
         return new ValidationErrors();
     }
 
+    @Override
     public SqlStatement[] generateRollbackStatements(Database database) throws CustomChangeException, RollbackImpossibleException {
         SqlStatement st[]=new SqlStatement[1];
         DeleteStatement ds=new DeleteStatement(null, null,"persons");

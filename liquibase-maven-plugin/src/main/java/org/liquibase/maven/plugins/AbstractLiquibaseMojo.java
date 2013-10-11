@@ -280,6 +280,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
         return new BufferedWriter(new OutputStreamWriter( new FileOutputStream(outputFile), outputFileEncoding));
     }
 
+    @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
         getLog().info(MavenUtils.LOG_SEPARATOR);
 

@@ -94,6 +94,7 @@ public class AddAutoIncrementChange extends AbstractChange {
     	this.incrementBy = incrementBy;
     }
     
+    @Override
     public SqlStatement[] generateStatements(Database database) {
         if (database instanceof PostgresDatabase) {
             String sequenceName = (getTableName() + "_" + getColumnName() + "_seq").toLowerCase();
@@ -107,6 +108,7 @@ public class AddAutoIncrementChange extends AbstractChange {
         return new SqlStatement[]{new AddAutoIncrementStatement(getCatalogName(), getSchemaName(), getTableName(), getColumnName(), getColumnDataType(), getStartWith(), getIncrementBy())};
     }
 
+    @Override
     public String getConfirmationMessage() {
         return "Auto-increment added to " + getTableName() + "." + getColumnName();
     }

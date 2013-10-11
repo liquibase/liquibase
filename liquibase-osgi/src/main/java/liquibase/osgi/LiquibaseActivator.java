@@ -18,6 +18,7 @@ import org.osgi.framework.BundleContext;
  * use the package scanning technique to pull classes out of other libraries.
  */
 public class LiquibaseActivator implements BundleActivator {
+    @Override
     public void start(BundleContext bundleContext) throws Exception {
 
         PackageScanClassResolver resolver = new OSGIPackageScanClassResolver(bundleContext.getBundle());
@@ -25,6 +26,7 @@ public class LiquibaseActivator implements BundleActivator {
         ServiceLocator.setInstance(new CustomResolverServiceLocator(resolver));
     }
 
+    @Override
     public void stop(BundleContext bundleContext) throws Exception {
         ServiceLocator.reset();
     }

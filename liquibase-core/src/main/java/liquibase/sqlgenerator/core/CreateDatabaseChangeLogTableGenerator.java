@@ -20,22 +20,20 @@ public class CreateDatabaseChangeLogTableGenerator extends AbstractSqlGenerator<
         return (!(database instanceof SybaseDatabase));
     }
 
+    @Override
     public ValidationErrors validate(CreateDatabaseChangeLogTableStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         return new ValidationErrors();
     }
 
+    @Override
     public Sql[] generateSql(CreateDatabaseChangeLogTableStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-    	
-    	if (database instanceof InformixDatabase) {
-    		return new CreateDatabaseChangeLogTableGeneratorInformix().generateSql(statement, database, sqlGeneratorChain);
-    	}
     	
         CreateTableStatement createTableStatement = new CreateTableStatement(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName())
                 .setTablespace(database.getLiquibaseTablespaceName())
-                .addPrimaryKeyColumn("ID", DataTypeFactory.getInstance().fromDescription("VARCHAR(" + getIdColumnSize() + ")"), null, null, null, new NotNullConstraint())
-                .addPrimaryKeyColumn("AUTHOR", DataTypeFactory.getInstance().fromDescription("VARCHAR(" + getAuthorColumnSize() + ")"), null, null, null, new NotNullConstraint())
-                .addPrimaryKeyColumn("FILENAME", DataTypeFactory.getInstance().fromDescription("VARCHAR(" + getFilenameColumnSize() + ")"), null, null, null, new NotNullConstraint())
-                .addColumn("DATEEXECUTED", DataTypeFactory.getInstance().fromDescription("datetime"), null, new ColumnConstraint[]{ new NotNullConstraint()})
+                .addColumn("ID", DataTypeFactory.getInstance().fromDescription("VARCHAR(" + getIdColumnSize() + ")"), null, null, null, new NotNullConstraint())
+                .addColumn("AUTHOR", DataTypeFactory.getInstance().fromDescription("VARCHAR(" + getAuthorColumnSize() + ")"), null, null, null, new NotNullConstraint())
+                .addColumn("FILENAME", DataTypeFactory.getInstance().fromDescription("VARCHAR(" + getFilenameColumnSize() + ")"), null, null, null, new NotNullConstraint())
+                .addColumn("DATEEXECUTED", DataTypeFactory.getInstance().fromDescription("datetime"), null, null, new NotNullConstraint())
                 .addColumn("ORDEREXECUTED", DataTypeFactory.getInstance().fromDescription("INT"), new NotNullConstraint())
                 .addColumn("EXECTYPE", DataTypeFactory.getInstance().fromDescription("VARCHAR(10)"), new NotNullConstraint())
                 .addColumn("MD5SUM", DataTypeFactory.getInstance().fromDescription("VARCHAR(35)"))
@@ -48,14 +46,14 @@ public class CreateDatabaseChangeLogTableGenerator extends AbstractSqlGenerator<
     }
 
     protected String getIdColumnSize() {
-        return "63";
+        return "255";
     }
 
     protected String getAuthorColumnSize() {
-        return "63";
+        return "255";
     }
 
     protected String getFilenameColumnSize() {
-        return "200";
+        return "255";
     }
 }

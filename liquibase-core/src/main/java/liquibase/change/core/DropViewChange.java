@@ -45,12 +45,14 @@ public class DropViewChange extends AbstractChange {
         this.viewName = viewName;
     }
 
+    @Override
     public SqlStatement[] generateStatements(Database database) {
         return new SqlStatement[]{
                 new DropViewStatement(getCatalogName(), getSchemaName(), getViewName()),
         };
     }
 
+    @Override
     public String getConfirmationMessage() {
         return "View "+getViewName()+" dropped";
     }

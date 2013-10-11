@@ -29,6 +29,7 @@ public class StopChange extends AbstractChange {
         this.message = StringUtils.trimToNull(message);
     }
 
+    @Override
     public SqlStatement[] generateStatements(Database database) {
         return new SqlStatement[] { new RuntimeStatement() {
             @Override
@@ -39,6 +40,7 @@ public class StopChange extends AbstractChange {
 
     }
 
+    @Override
     public String getConfirmationMessage() {
         return "Changelog Execution Stopped";
     }

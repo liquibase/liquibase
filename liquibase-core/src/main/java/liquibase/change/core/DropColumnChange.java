@@ -58,6 +58,7 @@ public class DropColumnChange extends AbstractChange {
         this.tableName = tableName;
     }
 
+    @Override
     public SqlStatement[] generateStatements(Database database) {
      
 //todo        if (database instanceof SQLiteDatabase) {		
@@ -112,6 +113,7 @@ public class DropColumnChange extends AbstractChange {
 //		return statements.toArray(new SqlStatement[statements.size()]);
 //    }
 
+    @Override
     public String getConfirmationMessage() {
         return "Column " + getTableName() + "." + getColumnName() + " dropped";
     }

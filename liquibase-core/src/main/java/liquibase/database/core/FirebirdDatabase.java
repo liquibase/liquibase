@@ -18,10 +18,12 @@ public class FirebirdDatabase extends AbstractJdbcDatabase {
         super.sequenceNextValueFunction="NEXT VALUE FOR %s";
     }
 
+    @Override
     public boolean isCorrectDatabaseImplementation(DatabaseConnection conn) throws DatabaseException {
         return conn.getDatabaseProductName().startsWith("Firebird");
     }
 
+    @Override
     public String getDefaultDriver(String url) {
         if (url.startsWith("jdbc:firebirdsql")) {
             return "org.firebirdsql.jdbc.FBDriver";
@@ -29,14 +31,17 @@ public class FirebirdDatabase extends AbstractJdbcDatabase {
         return null;
     }
 
+    @Override
     public int getPriority() {
         return PRIORITY_DEFAULT;
     }
     
+    @Override
     public String getShortName() {
         return "firebird";
     }
 
+    @Override
     public Integer getDefaultPort() {
         return 3050;
     }
@@ -51,10 +56,12 @@ public class FirebirdDatabase extends AbstractJdbcDatabase {
         return true;
     }
 
+    @Override
     public boolean supportsInitiallyDeferrableColumns() {
         return false;
     }
 
+    @Override
     public boolean supportsTablespaces() {
         return false;
     }

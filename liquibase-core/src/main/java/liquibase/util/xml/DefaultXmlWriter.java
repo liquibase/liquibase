@@ -14,6 +14,7 @@ import java.io.OutputStreamWriter;
 
 public class DefaultXmlWriter implements XmlWriter {
 
+    @Override
     public void write(Document doc, OutputStream outputStream) throws IOException {
         try {
             TransformerFactory factory = TransformerFactory.newInstance();

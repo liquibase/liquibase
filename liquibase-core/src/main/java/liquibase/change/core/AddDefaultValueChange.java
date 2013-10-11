@@ -134,6 +134,7 @@ public class AddDefaultValueChange extends AbstractChange {
         this.defaultValueSequenceNext = defaultValueSequenceNext;
     }
 
+    @Override
     public SqlStatement[] generateStatements(Database database) {
         Object defaultValue = null;
 
@@ -177,6 +178,7 @@ public class AddDefaultValueChange extends AbstractChange {
         };
     }
 
+    @Override
     public String getConfirmationMessage() {
         return "Default value added to " + getTableName() + "." + getColumnName();
     }

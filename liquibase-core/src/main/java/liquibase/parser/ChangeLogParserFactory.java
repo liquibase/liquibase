@@ -37,6 +37,7 @@ public class ChangeLogParserFactory {
     private ChangeLogParserFactory() {
         Class<? extends ChangeLogParser>[] classes;
         changelogParserComparator = new Comparator<ChangeLogParser>() {
+            @Override
             public int compare(ChangeLogParser o1, ChangeLogParser o2) {
                 return Integer.valueOf(o2.getPriority()).compareTo(o1.getPriority());
             }

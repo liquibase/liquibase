@@ -18,6 +18,7 @@ import liquibase.structure.core.View;
 
 public class MissingColumnChangeGenerator implements MissingObjectChangeGenerator {
 
+    @Override
     public int getPriority(Class<? extends DatabaseObject> objectType, Database database) {
         if (Column.class.isAssignableFrom(objectType)) {
             return PRIORITY_DEFAULT;
@@ -26,16 +27,19 @@ public class MissingColumnChangeGenerator implements MissingObjectChangeGenerato
 
     }
 
+    @Override
     public Class<? extends DatabaseObject>[] runAfterTypes() {
         return new Class[] {
                 Table.class
         };
     }
 
+    @Override
     public Class<? extends DatabaseObject>[] runBeforeTypes() {
         return new Class[] { PrimaryKey.class };
     }
 
+    @Override
     public Change[] fixMissing(DatabaseObject missingObject, DiffOutputControl control, Database referenceDatabase, Database comparisonDatabase, ChangeGeneratorChain chain) {
         Column column = (Column) missingObject;
 //        if (!shouldModifyColumn(column)) {

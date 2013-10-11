@@ -21,7 +21,7 @@ public abstract class InsertOrUpdateGenerator extends AbstractSqlGenerator<Inser
 
     protected abstract String getElse(Database database);
 
-    protected String getPostUpdateStatements(){
+    protected String getPostUpdateStatements(Database database){
         return "";
     }
 
@@ -30,6 +30,7 @@ public abstract class InsertOrUpdateGenerator extends AbstractSqlGenerator<Inser
         return PRIORITY_DATABASE;
     }
 
+    @Override
     public ValidationErrors validate(InsertOrUpdateStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("tableName", statement.getTableName());
@@ -124,6 +125,7 @@ public abstract class InsertOrUpdateGenerator extends AbstractSqlGenerator<Inser
 
     }
 
+    @Override
     public Sql[] generateSql(InsertOrUpdateStatement insertOrUpdateStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         StringBuffer completeSql = new StringBuffer();
         String whereClause = getWhereClause(insertOrUpdateStatement, database);
@@ -142,7 +144,7 @@ public abstract class InsertOrUpdateGenerator extends AbstractSqlGenerator<Inser
             
         } catch (LiquibaseException e) {}
 
-        completeSql.append(getPostUpdateStatements());
+        completeSql.append(getPostUpdateStatements(database));
 
         return new Sql[]{
                 new UnparsedSql(completeSql.toString(), getAffectedTable(insertOrUpdateStatement))

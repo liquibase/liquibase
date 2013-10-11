@@ -19,10 +19,12 @@ public class StringChangeLogSerializer implements ChangeLogSerializer {
 
     private static final int INDENT_LENGTH = 4;
 
+    @Override
     public String[] getValidFileExtensions() {
         return new String[]{"txt"};
     }
 
+    @Override
     public String serialize(LiquibaseSerializable object, boolean pretty) {
         return object.getSerializedObjectName() + ":" + serializeObject(object, 1);
     }
@@ -133,10 +135,12 @@ public class StringChangeLogSerializer implements ChangeLogSerializer {
 
     }
 
+    @Override
     public void write(List<ChangeSet> changeSets, OutputStream out) throws IOException {
 
     }
 
+    @Override
     public void append(ChangeSet changeSet, File changeLogFile) throws IOException {
 
     }

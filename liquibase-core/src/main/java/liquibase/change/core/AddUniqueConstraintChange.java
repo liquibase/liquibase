@@ -102,6 +102,7 @@ public class AddUniqueConstraintChange extends AbstractChange {
         this.disabled = disabled;
     }
 
+    @Override
     public SqlStatement[] generateStatements(Database database) {
 
 //todo    	if (database instanceof SQLiteDatabase) {
@@ -174,6 +175,7 @@ public class AddUniqueConstraintChange extends AbstractChange {
 //    	return statements.toArray(new SqlStatement[statements.size()]);
 //    }
 
+    @Override
     public String getConfirmationMessage() {
         return "Unique constraint added to "+getTableName()+"("+getColumnNames()+")";
     }

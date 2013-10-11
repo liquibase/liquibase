@@ -31,6 +31,7 @@ public class JdbcExecutor extends AbstractExecutor implements Executor {
 
     private Logger log = LogFactory.getLogger();
 
+    @Override
     public boolean updatesDatabase() {
         return true;
     }
@@ -60,10 +61,12 @@ public class JdbcExecutor extends AbstractExecutor implements Executor {
         }
     }
 
+    @Override
     public void execute(final SqlStatement sql) throws DatabaseException {
         execute(sql, new ArrayList<SqlVisitor>());
     }
 
+    @Override
     public void execute(final SqlStatement sql, final List<SqlVisitor> sqlVisitors) throws DatabaseException {
         if(sql instanceof ExecutablePreparedStatement) {
             ((ExecutablePreparedStatement) sql).execute(new PreparedStatementFactory((JdbcConnection)database.getConnection()));
@@ -72,6 +75,7 @@ public class JdbcExecutor extends AbstractExecutor implements Executor {
 
 
         class ExecuteStatementCallback implements StatementCallback {
+            @Override
             public Object doInStatement(Statement stmt) throws SQLException, DatabaseException {
                 for (String statement : applyVisitors(sql, sqlVisitors)) {
                     if (database instanceof OracleDatabase) {
@@ -91,6 +95,7 @@ public class JdbcExecutor extends AbstractExecutor implements Executor {
                 return null;
             }
 
+            @Override
             public SqlStatement getStatement() {
                 return sql;
             }
@@ -109,6 +114,7 @@ public class JdbcExecutor extends AbstractExecutor implements Executor {
         }
 
         class QueryStatementCallback implements StatementCallback {
+            @Override
             public Object doInStatement(Statement stmt) throws SQLException, DatabaseException {
                 ResultSet rs = null;
                 try {
@@ -129,6 +135,7 @@ public class JdbcExecutor extends AbstractExecutor implements Executor {
             }
 
 
+            @Override
             public SqlStatement getStatement() {
                 return sql;
             }
@@ -153,59 +160,72 @@ public class JdbcExecutor extends AbstractExecutor implements Executor {
         return JdbcUtils.requiredSingleResult(results);
     }
 
+    @Override
     public Object queryForObject(SqlStatement sql, Class requiredType) throws DatabaseException {
         return queryForObject(sql, requiredType, new ArrayList());
     }
 
+    @Override
     public Object queryForObject(SqlStatement sql, Class requiredType, List<SqlVisitor> sqlVisitors) throws DatabaseException {
         return queryForObject(sql, getSingleColumnRowMapper(requiredType), sqlVisitors);
     }
 
+    @Override
     public long queryForLong(SqlStatement sql) throws DatabaseException {
         return queryForLong(sql, new ArrayList());
     }
 
+    @Override
     public long queryForLong(SqlStatement sql, List<SqlVisitor> sqlVisitors) throws DatabaseException {
         Number number = (Number) queryForObject(sql, Long.class, sqlVisitors);
         return (number != null ? number.longValue() : 0);
     }
 
+    @Override
     public int queryForInt(SqlStatement sql) throws DatabaseException {
         return queryForInt(sql, new ArrayList());
     }
 
+    @Override
     public int queryForInt(SqlStatement sql, List<SqlVisitor> sqlVisitors) throws DatabaseException {
         Number number = (Number) queryForObject(sql, Integer.class, sqlVisitors);
         return (number != null ? number.intValue() : 0);
     }
 
+    @Override
     public List queryForList(SqlStatement sql, Class elementType) throws DatabaseException {
         return queryForList(sql, elementType, new ArrayList());
     }
 
+    @Override
     public List queryForList(SqlStatement sql, Class elementType, List<SqlVisitor> sqlVisitors) throws DatabaseException {
         return query(sql, getSingleColumnRowMapper(elementType), sqlVisitors);
     }
 
+    @Override
     public List<Map> queryForList(SqlStatement sql) throws DatabaseException {
         return queryForList(sql, new ArrayList());
     }
 
+    @Override
     public List<Map> queryForList(SqlStatement sql, List<SqlVisitor> sqlVisitors) throws DatabaseException {
         //noinspection unchecked
         return (List<Map>) query(sql, getColumnMapRowMapper(), sqlVisitors);
     }
 
+    @Override
     public int update(final SqlStatement sql) throws DatabaseException {
         return update(sql, new ArrayList());
     }
 
+    @Override
     public int update(final SqlStatement sql, final List<SqlVisitor> sqlVisitors) throws DatabaseException {
         if (sql instanceof CallableSqlStatement) {
             throw new DatabaseException("Direct update using CallableSqlStatement not currently implemented");
         }
 
         class UpdateStatementCallback implements StatementCallback {
+            @Override
             public Object doInStatement(Statement stmt) throws SQLException, DatabaseException {
                 String[] sqlToExecute = applyVisitors(sql, sqlVisitors);
                 if (sqlToExecute.length != 1) {
@@ -216,6 +236,7 @@ public class JdbcExecutor extends AbstractExecutor implements Executor {
             }
 
 
+            @Override
             public SqlStatement getStatement() {
                 return sql;
             }
@@ -244,6 +265,7 @@ public class JdbcExecutor extends AbstractExecutor implements Executor {
         return new SingleColumnRowMapper(requiredType);
     }
 
+    @Override
     public void comment(String message) throws DatabaseException {
         LogFactory.getLogger().debug(message);
     }
@@ -261,6 +283,7 @@ public class JdbcExecutor extends AbstractExecutor implements Executor {
             this.rch = rch;
         }
 
+        @Override
         public Object extractData(ResultSet rs) throws SQLException {
             while (rs.next()) {
                 this.rch.processRow(rs);

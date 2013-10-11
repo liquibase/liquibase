@@ -15,6 +15,7 @@ public class ChangeGeneratorComparator implements Comparator<ChangeGenerator> {
         this.database = database;
     }
 
+    @Override
     public int compare(ChangeGenerator o1, ChangeGenerator o2) {
         int result = -1 * new Integer(o1.getPriority(objectType, database)).compareTo(o2.getPriority(objectType, database));
         if (result == 0) {

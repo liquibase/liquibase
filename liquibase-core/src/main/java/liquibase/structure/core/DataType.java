@@ -72,9 +72,9 @@ public class DataType {
             }
 
             //Failing on data types such as nvarchar if included
-//            if (columnSizeUnit != null && columnSizeUnit.equals(ColumnSizeUnit.CHAR)) {
-//                value += " " + columnSizeUnit;
-//            }
+            if (columnSizeUnit != null && columnSizeUnit.equals(ColumnSizeUnit.CHAR) && (typeName.equalsIgnoreCase("VARCHAR") || typeName.equalsIgnoreCase("VARCHAR2"))) {
+                value += " " + columnSizeUnit;
+            }
 
             value +=")";
         }

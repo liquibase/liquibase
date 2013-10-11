@@ -61,6 +61,7 @@ public class RenameTableChange extends AbstractChange {
         this.newTableName = newTableName;
     }
 
+    @Override
     public SqlStatement[] generateStatements(Database database) {
         List<SqlStatement> statements = new ArrayList<SqlStatement>();
         statements.add(new RenameTableStatement(getCatalogName(), getSchemaName(), getOldTableName(), getNewTableName()));
@@ -83,6 +84,7 @@ public class RenameTableChange extends AbstractChange {
         };
     }
 
+    @Override
     public String getConfirmationMessage() {
         return "Table " + oldTableName + " renamed to " + newTableName;
     }

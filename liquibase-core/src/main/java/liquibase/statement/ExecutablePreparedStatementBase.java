@@ -35,7 +35,8 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
 		this.columns = columns;
 	}
 
-	public void execute(PreparedStatementFactory factory) throws DatabaseException {
+	@Override
+    public void execute(PreparedStatementFactory factory) throws DatabaseException {
 		
 	    // build the sql statement
 		List<ColumnConfig> cols = new ArrayList<ColumnConfig>(getColumns().size());
@@ -113,7 +114,8 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
 		}
 	}
 
-	public boolean skipOnUnsupported() {
+	@Override
+    public boolean skipOnUnsupported() {
 	    return false;
 	}
 

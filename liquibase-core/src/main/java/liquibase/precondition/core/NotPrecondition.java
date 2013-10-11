@@ -15,14 +15,17 @@ import liquibase.precondition.PreconditionLogic;
  */
 public class NotPrecondition extends PreconditionLogic {
 
+    @Override
     public Warnings warn(Database database) {
         return new Warnings();
     }
 
+    @Override
     public ValidationErrors validate(Database database) {
         return new ValidationErrors();
     }
     
+    @Override
     public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet) throws PreconditionFailedException, PreconditionErrorException {
         for (Precondition precondition : getNestedPreconditions()) {
             boolean threwException = false;
@@ -39,6 +42,7 @@ public class NotPrecondition extends PreconditionLogic {
         }
     }
 
+    @Override
     public String getName() {
         return "not";
     }

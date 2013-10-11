@@ -154,6 +154,7 @@ public class CustomChangeWrapper extends AbstractChange {
      * <p></p>
      * If the CustomChange returns a null SqlStatement array, this method returns an empty array. If a CustomTaskChange is being used, this method will return an empty array.
      */
+    @Override
     public SqlStatement[] generateStatements(Database database) {
         SqlStatement[] statements = null;
         try {
@@ -219,6 +220,7 @@ public class CustomChangeWrapper extends AbstractChange {
     /**
      * Return the customChange's {@link CustomChange#getConfirmationMessage} message as the Change's message.
      */
+    @Override
     public String getConfirmationMessage() {
         return customChange.getConfirmationMessage();
     }

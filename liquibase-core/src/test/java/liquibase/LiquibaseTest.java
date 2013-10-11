@@ -12,6 +12,7 @@ import liquibase.database.DatabaseConnection;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.ObjectQuotingStrategy;
 import liquibase.database.core.MockDatabase;
+import liquibase.database.core.OracleDatabase;
 import liquibase.exception.ChangeLogParseException;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
@@ -30,10 +31,17 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.InputStream;
+import java.net.URL;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 
 import static liquibase.test.Assert.assertListsEqual;
+import static org.easymock.EasyMock.createMock;
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.expectLastCall;
+import static org.easymock.EasyMock.replay;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 

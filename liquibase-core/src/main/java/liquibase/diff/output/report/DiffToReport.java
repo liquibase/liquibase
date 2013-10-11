@@ -6,6 +6,7 @@ import liquibase.structure.DatabaseObject;
 import liquibase.diff.DiffResult;
 import liquibase.diff.StringDiff;
 import liquibase.exception.DatabaseException;
+import liquibase.structure.DatabaseObjectComparator;
 
 import java.io.PrintStream;
 import java.util.*;
@@ -21,6 +22,7 @@ public class DiffToReport {
     }
 
     public void print() throws DatabaseException {
+        DatabaseObjectComparator comparator = new DatabaseObjectComparator();
         out.println("Reference Database: " + diffResult.getReferenceSnapshot().getDatabase());
         out.println("Comparison Database: " + diffResult.getComparisonSnapshot().getDatabase());
 
@@ -28,16 +30,17 @@ public class DiffToReport {
         printComparison("Product Version", diffResult.getProductVersionDiff(), out);
 
         TreeSet<Class<? extends DatabaseObject>> types = new TreeSet<Class<? extends DatabaseObject>>(new Comparator<Class<? extends DatabaseObject>>() {
+            @Override
             public int compare(Class<? extends DatabaseObject> o1, Class<? extends DatabaseObject> o2) {
                 return o1.getSimpleName().compareTo(o2.getSimpleName());
             }
         });
         types.addAll(diffResult.getCompareControl().getComparedTypes());
         for (Class<? extends DatabaseObject> type : types) {
-            printSetComparison("Missing " + getTypeName(type), diffResult.getMissingObjects(type), out);
-            printSetComparison("Unexpected "+getTypeName(type), diffResult.getUnexpectedObjects(type), out);
+            printSetComparison("Missing " + getTypeName(type), diffResult.getMissingObjects(type, comparator), out);
+            printSetComparison("Unexpected "+getTypeName(type), diffResult.getUnexpectedObjects(type, comparator), out);
 
-            printChangedComparison("Changed " + getTypeName(type), diffResult.getChangedObjects(type), out);
+            printChangedComparison("Changed " + getTypeName(type), diffResult.getChangedObjects(type, comparator), out);
 
         }
         

@@ -9,6 +9,7 @@ import java.util.*;
 
 public class Schema extends AbstractDatabaseObject {
 
+    @Override
     public DatabaseObject[] getContainingObjects() {
         return null;
     }
@@ -30,16 +31,19 @@ public class Schema extends AbstractDatabaseObject {
         this(catalog.getName(), name);
     }
 
+    @Override
     public String getName() {
         return getAttribute("name", String.class);
     }
 
 
+    @Override
     public Schema setName(String name) {
         setAttribute("name", name);
         return this;
     }
 
+    @Override
     public Schema getSchema() {
         return this;
     }
@@ -77,7 +81,12 @@ public class Schema extends AbstractDatabaseObject {
     
     @Override
     public String toString() {
-        return getCatalog().getName()+"."+getName();
+        String catalogName = getCatalogName();
+        if (catalogName == null) {
+            return getName();
+        } else {
+            return catalogName +"."+getName();
+        }
     }
 
     public CatalogAndSchema toCatalogAndSchema() {

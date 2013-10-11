@@ -288,18 +288,22 @@ public class ConstraintsConfig implements LiquibaseSerializable {
         }
     }
 
+    @Override
     public String getSerializedObjectName() {
         return "constraints";
     }
 
+    @Override
     public Set<String> getSerializableFields() {
         return ReflectionSerializer.getInstance().getFields(this);
     }
 
+    @Override
     public Object getSerializableFieldValue(String field) {
         return ReflectionSerializer.getInstance().getValue(this, field);
     }
 
+    @Override
     public SerializationType getSerializableFieldType(String field) {
         return SerializationType.NAMED_FIELD;
     }

@@ -49,14 +49,17 @@ public class ForeignKeyExistsPrecondition implements Precondition {
         this.foreignKeyName = foreignKeyName;
     }
 
+    @Override
     public Warnings warn(Database database) {
         return new Warnings();
     }
 
+    @Override
     public ValidationErrors validate(Database database) {
         return new ValidationErrors();
     }
 
+    @Override
     public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet) throws PreconditionFailedException, PreconditionErrorException {
         try {
             ForeignKey example = new ForeignKey();
@@ -77,6 +80,7 @@ public class ForeignKeyExistsPrecondition implements Precondition {
         }
     }
 
+    @Override
     public String getName() {
         return "foreignKeyConstraintExists";
     }

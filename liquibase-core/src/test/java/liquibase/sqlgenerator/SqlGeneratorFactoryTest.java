@@ -128,31 +128,38 @@ public class SqlGeneratorFactoryTest {
     private SqlGenerator addGenerator(final Class<? extends SqlStatement> sqlStatementClass, final Class<? extends Database> sqlDatabaseClass, final int level) {
     	
         SqlGenerator generator = new SqlGenerator() {
+            @Override
             public int getPriority() {
                 return level;
             }
 
+            @Override
             public boolean generateStatementsIsVolatile(Database database) {
                 return false;
             }
 
+            @Override
             public boolean generateRollbackStatementsIsVolatile(Database database) {
                 return false;
             }
 
+            @Override
             public Warnings warn(SqlStatement sqlStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
                 return new Warnings();
             }
 
+            @Override
             public ValidationErrors validate(SqlStatement sqlStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
                 return new ValidationErrors();
             }
 
+            @Override
             public boolean supports(SqlStatement statement, Database database) {
             	boolean ret = sqlStatementClass.isAssignableFrom(statement.getClass()) && sqlDatabaseClass.isAssignableFrom(database.getClass()); 
                 return ret;
             }
 
+            @Override
             public Sql[] generateSql(SqlStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
                 return new Sql[0];
             }

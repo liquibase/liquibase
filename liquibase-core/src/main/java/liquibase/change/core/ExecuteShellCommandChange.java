@@ -80,6 +80,7 @@ public class ExecuteShellCommandChange extends AbstractChange {
         return new Warnings();
     }
 
+    @Override
     public SqlStatement[] generateStatements(final Database database) {
         boolean shouldRun = true;
         if (os != null && os.size() > 0) {
@@ -148,6 +149,7 @@ public class ExecuteShellCommandChange extends AbstractChange {
         return new SqlStatement[0];
     }
 
+    @Override
     public String getConfirmationMessage() {
         return "Shell command '" + getCommandString() + "' executed";
     }

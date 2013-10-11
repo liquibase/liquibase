@@ -12,6 +12,7 @@ import liquibase.structure.core.Sequence;
 
 public class MissingSequenceChangeGenerator implements MissingObjectChangeGenerator {
 
+    @Override
     public int getPriority(Class<? extends DatabaseObject> objectType, Database database) {
         if (Sequence.class.isAssignableFrom(objectType)) {
             return PRIORITY_DEFAULT;
@@ -19,14 +20,17 @@ public class MissingSequenceChangeGenerator implements MissingObjectChangeGenera
         return PRIORITY_NONE;
     }
 
+    @Override
     public Class<? extends DatabaseObject>[] runAfterTypes() {
         return null;
     }
 
+    @Override
     public Class<? extends DatabaseObject>[] runBeforeTypes() {
         return null;
     }
 
+    @Override
     public Change[] fixMissing(DatabaseObject missingObject, DiffOutputControl control, Database referenceDatabase, Database comparisonDatabase, ChangeGeneratorChain chain) {
         Sequence sequence = (Sequence) missingObject;
 

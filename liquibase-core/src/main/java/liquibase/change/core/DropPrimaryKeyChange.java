@@ -65,6 +65,7 @@ public class DropPrimaryKeyChange extends AbstractChange {
         this.constraintName = constraintName;
     }
 
+    @Override
     public SqlStatement[] generateStatements(Database database) {
 
         if (database instanceof SQLiteDatabase) {
@@ -90,19 +91,23 @@ public class DropPrimaryKeyChange extends AbstractChange {
     	
 		// define alter table logic
 		AlterTableVisitor rename_alter_visitor = new AlterTableVisitor() {
-			public ColumnConfig[] getColumnsToAdd() {
+			@Override
+            public ColumnConfig[] getColumnsToAdd() {
 				return new ColumnConfig[0];
 			}
-			public boolean copyThisColumn(ColumnConfig column) {
+			@Override
+            public boolean copyThisColumn(ColumnConfig column) {
 				return true;
 			}
-			public boolean createThisColumn(ColumnConfig column) {
+			@Override
+            public boolean createThisColumn(ColumnConfig column) {
 				if (column.getName().equals(getConstraintName())) {
 					column.getConstraints().setPrimaryKey(false);
 				}
 				return true;
 			}
-			public boolean createThisIndex(Index index) {
+			@Override
+            public boolean createThisIndex(Index index) {
 				return true;
 			}
 		};
@@ -119,6 +124,7 @@ public class DropPrimaryKeyChange extends AbstractChange {
 		return statements.toArray(new SqlStatement[statements.size()]);
     }
 
+    @Override
     public String getConfirmationMessage() {
         return "Primary key dropped from "+getTableName();
     }

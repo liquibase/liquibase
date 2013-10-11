@@ -102,14 +102,16 @@ public class UtfBomAwareReader extends Reader {
 		}
 	}
 
-	public void close() throws IOException {
+	@Override
+    public void close() throws IOException {
 		if (is == null) {
 			init();
 		}
 		is.close();
 	}
 
-	public int read(char[] cbuf, int off, int len) throws IOException {
+	@Override
+    public int read(char[] cbuf, int off, int len) throws IOException {
 		if (is == null) {
 			init();
 		}

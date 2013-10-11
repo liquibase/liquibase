@@ -8,6 +8,22 @@ import liquibase.datatype.LiquibaseDataType;
 
 @DataTypeInfo(name="clob", aliases = {"text", "longtext", "java.sql.Types.CLOB"}, minParameters = 0, maxParameters = 0, priority = LiquibaseDataType.PRIORITY_DEFAULT)
 public class ClobType extends LiquibaseDataType {
+
+    @Override
+    public String objectToSql(Object value, Database database) {
+        if (value == null || value.toString().equalsIgnoreCase("null")) {
+            return null;
+        }
+        String val = String.valueOf(value);
+        // postgres type character varying gets identified as a char type
+        // simple sanity check to avoid double quoting a value
+        if (val.startsWith("'")) {
+            return val;
+        } else {
+            return "'"+database.escapeStringForDatabase(val)+"'";
+        }
+    }
+
     @Override
     public DatabaseDataType toDatabaseDataType(Database database) {
         if (database instanceof CacheDatabase) {

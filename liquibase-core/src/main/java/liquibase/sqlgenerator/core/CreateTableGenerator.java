@@ -25,6 +25,7 @@ import java.util.List;
 
 public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatement> {
 
+    @Override
     public ValidationErrors validate(CreateTableStatement createTableStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("tableName", createTableStatement.getTableName());
@@ -32,6 +33,7 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
         return validationErrors;
     }
 
+    @Override
     public Sql[] generateSql(CreateTableStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
     	
     	if (database instanceof InformixDatabase) {
