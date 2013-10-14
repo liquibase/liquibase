@@ -910,15 +910,24 @@ public abstract class AbstractJdbcDatabase implements Database {
         ObjectQuotingStrategy currentStrategy = this.getObjectQuotingStrategy();
         this.setObjectQuotingStrategy(ObjectQuotingStrategy.QUOTE_ALL_OBJECTS);
         try {
-            DatabaseSnapshot snapshot = null;
+            DatabaseSnapshot snapshot;
             try {
-                snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(schemaToDrop, this, new SnapshotControl(this));
+	            final SnapshotControl snapshotControl = new SnapshotControl(this);
+	            if (supportsForeignKeyDisable()) {
+		            LogFactory.getLogger().debug(String.format("Database %s supports Foreign Key Disable. Skip snapshots generation for Foreign Keys.", getDatabaseProductName()));
+		            snapshotControl.getTypesToInclude().remove(ForeignKey.class);
+	            }
+	            final long createSnapshotStarted = System.currentTimeMillis();
+	            snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(schemaToDrop, this, snapshotControl);
+	            LogFactory.getLogger().debug(String.format("Database snapshot generated in %d ms. Snapshot includes: %s", System.currentTimeMillis() - createSnapshotStarted, snapshotControl.getTypesToInclude()));
             } catch (LiquibaseException e) {
                 throw new UnexpectedLiquibaseException(e);
             }
 
-            DiffResult diffResult = DiffGeneratorFactory.getInstance().compare(new EmptyDatabaseSnapshot(this), snapshot, new CompareControl(snapshot.getSnapshotControl().getTypesToInclude()));
+	        final long changeSetStarted = System.currentTimeMillis();
+	        DiffResult diffResult = DiffGeneratorFactory.getInstance().compare(new EmptyDatabaseSnapshot(this), snapshot, new CompareControl(snapshot.getSnapshotControl().getTypesToInclude()));
             List<ChangeSet> changeSets = new DiffToChangeLog(diffResult, new DiffOutputControl(true, true, false)).generateChangeSets();
+	        LogFactory.getLogger().debug(String.format("ChangeSet to Remove Database Objects generated in %d ms.", System.currentTimeMillis() - changeSetStarted));
 
             final boolean reEnableFK = supportsForeignKeyDisable() && disableForeignKeyChecks();
             try {
