@@ -649,7 +649,24 @@
 		</xsd:complexType>
 	</xsd:element>
 
-	<xsd:element name="changeLogPropertyDefined">
+    <xsd:element name="rowCount">
+        <xsd:complexType>
+            <xsd:attribute name="catalogName" type="xsd:string" />
+            <xsd:attribute name="schemaName" type="xsd:string" />
+            <xsd:attribute name="tableName" type="xsd:string" />
+            <xsd:attribute name="expectedRows" type="xsd:int" />
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="tableIsEmpty">
+        <xsd:complexType>
+            <xsd:attribute name="catalogName" type="xsd:string" />
+            <xsd:attribute name="schemaName" type="xsd:string" />
+            <xsd:attribute name="tableName" type="xsd:string" />
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="changeLogPropertyDefined">
 		<xsd:complexType>
 			<xsd:attribute name="property" type="xsd:string" use="required" />
 			<xsd:attribute name="value" type="xsd:string" />
@@ -1143,6 +1160,8 @@
 				<xsd:element ref="indexExists" maxOccurs="unbounded" />
 				<xsd:element ref="primaryKeyExists" maxOccurs="unbounded" />
 				<xsd:element ref="viewExists" maxOccurs="unbounded" />
+                <xsd:element ref="tableIsEmpty" maxOccurs="unbounded" />
+                <xsd:element ref="rowCount" maxOccurs="unbounded" />
 				<xsd:element ref="sqlCheck" maxOccurs="unbounded" />
 				<xsd:element ref="changeLogPropertyDefined" maxOccurs="unbounded" />
                 <xsd:element ref="expectedQuotingStrategy" maxOccurs="unbounded" />
