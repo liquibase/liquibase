@@ -28,6 +28,7 @@ import liquibase.statement.*;
 import liquibase.statement.core.*;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
+import liquibase.structure.core.UniqueConstraint;
 import liquibase.util.ISODateFormat;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
@@ -911,13 +912,22 @@ public abstract class AbstractJdbcDatabase implements Database {
             DatabaseSnapshot snapshot;
             try {
 	            final SnapshotControl snapshotControl = new SnapshotControl(this);
+	            final Set<Class<? extends DatabaseObject>> typesToInclude = snapshotControl.getTypesToInclude();
+
+	            //We do not need to remove indexes and primary/unique keys explicitly. They should be removed
+	            //as part of tables.
+	            typesToInclude.remove(Index.class);
+	            typesToInclude.remove(PrimaryKey.class);
+	            typesToInclude.remove(UniqueConstraint.class);
+
 	            if (supportsForeignKeyDisable()) {
-		            LogFactory.getLogger().debug(String.format("Database %s supports Foreign Key Disable. Skip snapshots generation for Foreign Keys.", getDatabaseProductName()));
-		            snapshotControl.getTypesToInclude().remove(ForeignKey.class);
+		            //We do not remove ForeignKey because they will be disabled and removed as parts of tables.
+		            typesToInclude.remove(ForeignKey.class);
 	            }
+
 	            final long createSnapshotStarted = System.currentTimeMillis();
 	            snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(schemaToDrop, this, snapshotControl);
-	            LogFactory.getLogger().debug(String.format("Database snapshot generated in %d ms. Snapshot includes: %s", System.currentTimeMillis() - createSnapshotStarted, snapshotControl.getTypesToInclude()));
+	            LogFactory.getLogger().debug(String.format("Database snapshot generated in %d ms. Snapshot includes: %s", System.currentTimeMillis() - createSnapshotStarted, typesToInclude));
             } catch (LiquibaseException e) {
                 throw new UnexpectedLiquibaseException(e);
             }
