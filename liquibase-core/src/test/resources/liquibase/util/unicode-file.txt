@@ -1,0 +1,2 @@
+File with Unicode chars.
+Файл с Юникод.

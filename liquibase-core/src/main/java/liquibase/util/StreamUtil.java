@@ -95,4 +95,28 @@ public class StreamUtil {
             r = inputStream.read(bytes);
         }
     }
+
+    public static long getContentLength(InputStream in) throws IOException
+    {
+        long length = 0;
+        byte[] buf = new byte[4096];
+        int bytesRead = in.read(buf);
+        while (bytesRead > 0) {
+            length += bytesRead;
+            bytesRead = in.read(buf);
+        }
+        return length;
+    }
+
+    public static long getContentLength(Reader reader) throws IOException
+    {
+        long length = 0;
+        char[] buf = new char[2048];
+        int charsRead = reader.read(buf);
+        while (charsRead > 0) {
+            length += charsRead;
+            charsRead = reader.read(buf);
+        }
+        return length;
+    }
 }

@@ -296,6 +296,15 @@
 		<xsd:attribute name="startWith" type="xsd:long" />
 		<xsd:attribute name="incrementBy" type="xsd:long" />
 		<xsd:attribute name="remarks" type="xsd:string" />
+        <xsd:attribute name="encoding" type="xsd:string">
+            <xsd:annotation>
+                <xsd:appinfo>
+                    <xsd:documentation>
+                        Used with valueClobFile to specify file encoding explicitly.
+                    </xsd:documentation>
+                </xsd:appinfo>
+            </xsd:annotation>
+        </xsd:attribute>
 	</xsd:attributeGroup>
 
     <xsd:complexType name="columnType" mixed="true">
