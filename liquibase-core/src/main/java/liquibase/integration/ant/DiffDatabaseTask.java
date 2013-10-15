@@ -5,6 +5,7 @@ import liquibase.Liquibase;
 import liquibase.database.Database;
 import liquibase.diff.compare.CompareControl;
 import liquibase.diff.output.DiffOutputControl;
+import liquibase.diff.output.report.DiffToReport;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.SnapshotControl;
 import liquibase.snapshot.SnapshotGeneratorFactory;
@@ -180,6 +181,6 @@ public class DiffDatabaseTask extends BaseLiquibaseTask {
     }
 
     protected void outputDiff(PrintStream writer, DiffResult diffResult, Database targetDatabase) throws Exception {
-        new DiffToChangeLog(diffResult, new DiffOutputControl(getIncludeCatalog(), getIncludeSchema(), getIncludeTablespace())).print(writer);
+        new DiffToReport(diffResult, writer).print();
     }
 }
