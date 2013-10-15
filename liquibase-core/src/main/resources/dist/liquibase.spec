@@ -45,8 +45,6 @@ Source9: %{gpl2license}
 Source10: %{sqlitejar}
 Source11: %{apache2license}
 
-Patch0: liquibase-bin.patch
-
 BuildRoot: %{_tmppath}/build-root-%{name}
 BuildArch: noarch
 Packager: %{packagedby}
