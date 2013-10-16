@@ -73,9 +73,9 @@ public class PrimaryKeyExistsPrecondition implements Precondition {
 
             if (!SnapshotGeneratorFactory.getInstance().has(example, database)) {
                 if (tableName != null) {
-                    throw new PreconditionFailedException("Primary Key does not exist on " + database.escapeStringForDatabase(getTableName()), changeLog, this);
+                    throw new PreconditionFailedException("Primary Key does not exist on " + database.escapeObjectName(getTableName(), Table.class), changeLog, this);
                 } else {
-                    throw new PreconditionFailedException("Primary Key " + database.escapeStringForDatabase(getPrimaryKeyName()) + " does not exist", changeLog, this);
+                    throw new PreconditionFailedException("Primary Key " + database.escapeObjectName(getPrimaryKeyName(), PrimaryKey.class) + " does not exist", changeLog, this);
                 }
             }
         } catch (PreconditionFailedException e) {
