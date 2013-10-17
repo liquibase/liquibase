@@ -184,4 +184,20 @@ public class StringUtils {
         }
         return string.replace("\r\n", "\n").replace("\r","\n");
     }
+
+    public static boolean isAscii(String string) {
+        if (string == null) {
+            return true;
+        }
+        for (char c : string.toCharArray()) {
+            if (!isAscii(c)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public static boolean isAscii(char ch) {
+        return ch < 128;
+    }
 }
