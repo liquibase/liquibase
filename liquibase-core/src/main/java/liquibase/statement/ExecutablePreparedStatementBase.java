@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.InputStream;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.PreparedStatement;
@@ -83,23 +84,33 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
 		    }
 		} else if(col.getValueDate() != null) {
 		    stmt.setDate(i, new java.sql.Date(col.getValueDate().getTime()));
-		} else if(col.getValueBlobFile() != null) {
-		    try {
-		        File file = new File(col.getValueBlobFile());
-		        stmt.setBinaryStream(i, new BufferedInputStream(new FileInputStream(file)), (int) file.length());
-		    } catch (FileNotFoundException e) {
-		        throw new DatabaseException(e.getMessage(), e); // wrap
-		    }
-		} else if(col.getValueClobFile() != null) {
-		    try {
-		        File file = new File(col.getValueClobFile());
-		        stmt.setCharacterStream(i, new BufferedReader(new FileReader(file)), (int) file.length());
-		    } catch(FileNotFoundException e) {
-		        throw new DatabaseException(e.getMessage(), e); // wrap
-		    }
 		} else {
-			// NULL values might intentionally be set into a change, we must also add them to the prepared statement  
-			stmt.setNull(i, java.sql.Types.NULL);
+	    String valueBlobFileName = col.getValueBlobFile();
+	    if (valueBlobFileName != null) {
+		        try {
+		    File file = new File(valueBlobFileName);
+		    InputStream in;
+		    if (file.exists()) {
+		        in = new FileInputStream(file);
+		    } else {
+			in = getClass().getResourceAsStream(valueBlobFileName);
+		    }
+		    stmt.setBinaryStream(i, new BufferedInputStream(in),
+		    	(int) file.length());
+		        } catch (FileNotFoundException e) {
+		            throw new DatabaseException(e.getMessage(), e); // wrap
+		        }
+		    } else if(col.getValueClobFile() != null) {
+		        try {
+		            File file = new File(col.getValueClobFile());
+		            stmt.setCharacterStream(i, new BufferedReader(new FileReader(file)), (int) file.length());
+		        } catch(FileNotFoundException e) {
+		            throw new DatabaseException(e.getMessage(), e); // wrap
+		        }
+		    } else {
+		    	// NULL values might intentionally be set into a change, we must also add them to the prepared statement  
+		    	stmt.setNull(i, java.sql.Types.NULL);
+		    }
 		}
 	}
 
