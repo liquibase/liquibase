@@ -6,9 +6,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.io.InputStream;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -84,37 +85,54 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
 		    }
 		} else if(col.getValueDate() != null) {
 		    stmt.setDate(i, new java.sql.Date(col.getValueDate().getTime()));
-		} else {
-	    String valueBlobFileName = col.getValueBlobFile();
-	    if (valueBlobFileName != null) {
-		        try {
-		    File file = new File(valueBlobFileName);
-		    InputStream in;
-		    if (file.exists()) {
-		        in = new FileInputStream(file);
-		    } else {
-			in = getClass().getResourceAsStream(valueBlobFileName);
-		    }
-		    stmt.setBinaryStream(i, new BufferedInputStream(in),
-		    	(int) file.length());
-		        } catch (FileNotFoundException e) {
-		            throw new DatabaseException(e.getMessage(), e); // wrap
-		        }
-		    } else if(col.getValueClobFile() != null) {
-		        try {
-		            File file = new File(col.getValueClobFile());
-		            stmt.setCharacterStream(i, new BufferedReader(new FileReader(file)), (int) file.length());
-		        } catch(FileNotFoundException e) {
-		            throw new DatabaseException(e.getMessage(), e); // wrap
-		        }
-		    } else {
-		    	// NULL values might intentionally be set into a change, we must also add them to the prepared statement  
-		    	stmt.setNull(i, java.sql.Types.NULL);
-		    }
-		}
-	}
+        } else {
+            String valueBlobFileName = col.getValueBlobFile();
+            if (valueBlobFileName != null) {
+                try {
+                    File blobFile = getFile(valueBlobFileName);
+                    //file size has to be determined, calling method setBinaryStream without file size throws AbstractMethodError
+                    stmt.setBinaryStream(i, new BufferedInputStream(new FileInputStream(blobFile)), (int) blobFile.length());
+                } catch (FileNotFoundException e) {
+                    throw new DatabaseException(e.getMessage(), e); // wrap
+                }
+            } else if (col.getValueClobFile() != null) {
+                try {
+                    File clobFile = getFile(col.getValueClobFile());
+                    stmt.setCharacterStream(i, new BufferedReader(new FileReader(clobFile)), (int) clobFile.length());
+                } catch (FileNotFoundException e) {
+                    throw new DatabaseException(e.getMessage(), e); // wrap
+                }
+            } else {
+                // NULL values might intentionally be set into a change, we must also add them to the prepared statement
+                stmt.setNull(i, java.sql.Types.NULL);
+            }
+        }
+    }
 
-	@Override
+    private File getFile(final String valueBlobFileName) throws FileNotFoundException {
+        File file = new File(valueBlobFileName);
+        if (file.isFile() && file.exists()) {
+            return file;
+        } else {
+            URL resource = getClass().getResource(valueBlobFileName);
+            if (resource != null) {
+                try {
+                    file = new File(resource.toURI());
+                } catch (URISyntaxException e) {
+                    //https://weblogs.java.net/blog/kohsuke/archive/2007/04/how_to_convert.html
+                    file = new File(resource.getPath());
+                }
+                if (file.isFile() && file.exists()) {
+                    return file;
+                }
+            }
+        }
+        throw new FileNotFoundException("File " + valueBlobFileName + " was not found!");
+    }
+
+
+
+    @Override
     public boolean skipOnUnsupported() {
 	    return false;
 	}
