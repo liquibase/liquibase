@@ -45,8 +45,9 @@ public class MD5Util {
             digest = MessageDigest.getInstance("MD5");
 
             DigestInputStream digestStream = new DigestInputStream(stream, digest);
-            while (digestStream.read() != -1) {
-                ; //digest is updating
+            byte[] buf = new byte[20480];
+            while (digestStream.read(buf) != -1) {
+                ; // digest is updating
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
