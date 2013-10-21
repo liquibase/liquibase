@@ -3,11 +3,14 @@ package liquibase.change;
 import liquibase.database.Database;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.exception.DatabaseException;
+import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.util.StringUtils;
 
+import java.io.*;
 import java.util.*;
+import java.util.regex.Pattern;
 
 /**
  * A common parent for all raw SQL related changes regardless of where the sql was sourced from.
@@ -22,6 +25,11 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
     private String endDelimiter;
     private String sql;
     private String dbms;
+
+    protected InputStream sqlStream;
+
+    protected String encoding = null;
+
 
     protected AbstractSQLChange() {
         setStripComments(null);
@@ -135,14 +143,15 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
      */
     @Override
     public CheckSum generateCheckSum() {
-        String sql = getSql();
-        if (sql == null) {
-            sql = "";
+        InputStream stream = this.sqlStream;
+        if (stream == null && sql != null) {
+            stream = new ByteArrayInputStream(sql.getBytes());
         }
+
         return CheckSum.compute(this.getEndDelimiter()+":"+
                 this.isSplitStatements()+":"+
                 this.isStripComments()+":"+
-                prepareSqlForChecksum(sql)); //normalize line endings
+                prepareSqlForChecksum(stream)); //normalize line endings
     }
 
 
@@ -187,13 +196,52 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
         return string.replaceAll("\r\n", "\n").replaceAll("\r", "\n");
     }
 
-    protected String prepareSqlForChecksum(String string) {
+    protected String prepareSqlForChecksumOld(String string) {
         string = string.trim(); //remove begininng and trailig space
         string = string.replace("\r\n", "\n").replace("\r", "\n"); //ensure line endings are consistent (for next replacements) across OS types
         string = string.replaceAll("\\s*\\n\\s*", " "); //remove line endings, preserving them as a space. Collapse any whitespace around them into the same space
         string = string.replaceAll("\\s+", " "); //collapse duplicate spaces
 
         return string;
+    }
+
+    protected String prepareSqlForChecksum(String sql) {
+        if (sql == null) {
+            return "";
+        }
+        return prepareSqlForChecksum(new ByteArrayInputStream(sql.getBytes()));
+    }
+
+    protected String prepareSqlForChecksum(InputStream stream) {
+        if (stream == null) {
+            return "";
+        }
+        StringBuilder returnString = new StringBuilder();
+        String encoding = this. encoding;
+        if (encoding == null) {
+            encoding = "UTF-8";
+        }
+
+        Pattern multipleSpaces = Pattern.compile("\\s+");
+        try {
+            BufferedReader reader = new BufferedReader(new InputStreamReader(stream, encoding));
+
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String fixedLine = multipleSpaces.matcher(line.trim()).replaceAll(" ");
+                if (!fixedLine.equals("")) { //something on this line
+                    returnString.append(fixedLine).append(" ");
+                }
+            }
+        } catch (IOException e) {
+            throw new UnexpectedLiquibaseException(e);
+        }
+
+        if (returnString.length() > 0) {
+            returnString.deleteCharAt(returnString.length()-1); //remove trailing space added
+        }
+
+        return returnString.toString();
     }
 
 //    @Override

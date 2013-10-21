@@ -8,6 +8,8 @@ import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RawSqlStatement;
 import org.junit.Test;
 
+import java.io.InputStream;
+
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -194,7 +196,12 @@ public class AbstractSQLChangeTest {
         assertEquals("single line string with whitespace", new ExampleAbstractSQLChange().prepareSqlForChecksum("single line string with      whitespace"));
         assertEquals("multiple line string", new ExampleAbstractSQLChange().prepareSqlForChecksum("\r\nmultiple\r\nline\r\nstring\r\n"));
         assertEquals("multiple line string", new ExampleAbstractSQLChange().prepareSqlForChecksum("\rmultiple\rline\rstring\r"));
-
+        assertEquals("multiple line string", new ExampleAbstractSQLChange().prepareSqlForChecksum("\nmultiple\nline\nstring\n"));
+        assertEquals("a line with double newlines", new ExampleAbstractSQLChange().prepareSqlForChecksum("\n\na\nline \n with \r\n \r\n double \n \n \n \n newlines"));
+        assertEquals("", new ExampleAbstractSQLChange().prepareSqlForChecksum((InputStream) null));
+        assertEquals("", new ExampleAbstractSQLChange().prepareSqlForChecksum((String) null));
+        assertEquals("", new ExampleAbstractSQLChange().prepareSqlForChecksum("    "));
+        assertEquals("", new ExampleAbstractSQLChange().prepareSqlForChecksum(" \n \n \n   \n  "));
 
         String version1 = new ExampleAbstractSQLChange().prepareSqlForChecksum("INSERT INTO recommendation_list(instanceId, name, publicId)\n" +
                 "SELECT DISTINCT instanceId, \"default\" as name, \"default\" as publicId\n" +

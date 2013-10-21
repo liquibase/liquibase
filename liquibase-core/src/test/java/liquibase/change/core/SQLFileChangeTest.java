@@ -7,10 +7,7 @@ import static org.junit.Assert.fail;
 import java.lang.reflect.Field;
 import java.util.Map;
 
-import liquibase.change.ChangeFactory;
-import liquibase.change.StandardChangeTest;
-import liquibase.change.AbstractSQLChange;
-import liquibase.change.Change;
+import liquibase.change.*;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
@@ -18,6 +15,7 @@ import liquibase.database.core.MockDatabase;
 import liquibase.database.core.OracleDatabase;
 import liquibase.exception.SetupException;
 import liquibase.resource.ClassLoaderResourceAccessor;
+import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.statement.SqlStatement;
 
 import org.junit.Before;
@@ -216,4 +214,18 @@ public class SQLFileChangeTest extends StandardChangeTest {
       String expected = "create prfx_customer (nofx INTEGER NOT NULL, PRIMARY KEY (nofx));";
       assertEquals(expected, change.getSql());
    }
+
+    @Test
+    public void memoryTest() throws SetupException {
+        long startMem = Runtime.getRuntime().totalMemory();
+        SQLFileChange change = new SQLFileChange();
+        change.setResourceAccessor(new FileSystemResourceAccessor());
+        change.setPath("/temp/out.sql");
+        change.finishInitialization();
+        CheckSum checkSum = change.generateCheckSum();
+        System.out.println("Final checksum: "+checkSum.toString());
+        long endMem = Runtime.getRuntime().totalMemory();
+
+        System.out.println(endMem +"-"+startMem+"="+(endMem-startMem));
+    }
 }

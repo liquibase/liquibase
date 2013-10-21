@@ -1,9 +1,6 @@
 package liquibase.resource;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -50,9 +47,9 @@ public class FileSystemResourceAccessor implements ResourceAccessor {
         File relativeFile = (baseDirectory == null) ? new File(file) : new File(baseDirectory, file);
 
         if (absoluteFile.exists() && absoluteFile.isFile() && absoluteFile.isAbsolute()) {
-            return new FileInputStream(absoluteFile);
+            return new BufferedInputStream(new FileInputStream(absoluteFile));
         } else if (relativeFile.exists() && relativeFile.isFile()) {
-            return new FileInputStream(relativeFile);
+            return new BufferedInputStream(new FileInputStream(relativeFile));
         } else {
             return null;
 
