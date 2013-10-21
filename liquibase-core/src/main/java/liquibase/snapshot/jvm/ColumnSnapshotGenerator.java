@@ -249,11 +249,9 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
             Object defaultValue = columnMetadataResultSet.get("COLUMN_DEF");
 
             if (defaultValue != null && defaultValue instanceof String) {
-                String newValue = null;
                 if (defaultValue.equals("(NULL)")) {
-                    newValue = null;
+                    columnMetadataResultSet.set("COLUMN_DEF", null);
                 }
-                columnMetadataResultSet.set("COLUMN_DEF", newValue);
             }
         }
 
@@ -269,6 +267,10 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
 
         if (stringVal.startsWith("'") && stringVal.endsWith("'")) {
             stringVal = stringVal.substring(1, stringVal.length() - 1);
+        } else if (stringVal.startsWith("((") && stringVal.endsWith("))")) {
+            stringVal = stringVal.substring(2, stringVal.length() - 2);
+        } else if (stringVal.startsWith("('") && stringVal.endsWith("')")) {
+            stringVal = stringVal.substring(2, stringVal.length() - 2);
         } else if (stringVal.startsWith("(") && stringVal.endsWith(")")) {
             return new DatabaseFunction(stringVal.substring(1, stringVal.length() - 1));
         }
