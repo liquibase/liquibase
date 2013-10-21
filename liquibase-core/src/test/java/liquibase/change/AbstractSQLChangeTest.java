@@ -6,9 +6,11 @@ import liquibase.database.core.MSSQLDatabase;
 import liquibase.exception.DatabaseException;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RawSqlStatement;
+import liquibase.util.StreamUtil;
 import org.junit.Test;
 
-import java.io.InputStream;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
@@ -191,25 +193,26 @@ public class AbstractSQLChangeTest {
     }
 
     @Test
-    public void normalizeSql() {
-        assertEquals("single line String", new ExampleAbstractSQLChange().prepareSqlForChecksum("single line String"));
-        assertEquals("single line string with whitespace", new ExampleAbstractSQLChange().prepareSqlForChecksum("single line string with      whitespace"));
-        assertEquals("multiple line string", new ExampleAbstractSQLChange().prepareSqlForChecksum("\r\nmultiple\r\nline\r\nstring\r\n"));
-        assertEquals("multiple line string", new ExampleAbstractSQLChange().prepareSqlForChecksum("\rmultiple\rline\rstring\r"));
-        assertEquals("multiple line string", new ExampleAbstractSQLChange().prepareSqlForChecksum("\nmultiple\nline\nstring\n"));
-        assertEquals("a line with double newlines", new ExampleAbstractSQLChange().prepareSqlForChecksum("\n\na\nline \n with \r\n \r\n double \n \n \n \n newlines"));
-        assertEquals("", new ExampleAbstractSQLChange().prepareSqlForChecksum((InputStream) null));
-        assertEquals("", new ExampleAbstractSQLChange().prepareSqlForChecksum((String) null));
-        assertEquals("", new ExampleAbstractSQLChange().prepareSqlForChecksum("    "));
-        assertEquals("", new ExampleAbstractSQLChange().prepareSqlForChecksum(" \n \n \n   \n  "));
+    public void normalizeSql() throws IOException {
+        assertNormalizingStreamCorrect("single line String", "single line String");
+        assertNormalizingStreamCorrect("single line string with whitespace", "single line string with      whitespace");
+        assertNormalizingStreamCorrect("multiple line string", "\r\nmultiple\r\nline\r\nstring\r\n");
+        assertNormalizingStreamCorrect("multiple line string", "\rmultiple\rline\rstring\r");
+        assertNormalizingStreamCorrect("multiple line string", "\nmultiple\nline\nstring\n");
+        assertNormalizingStreamCorrect("a line with double newlines", "\n\na\nline \n with \r\n \r\n double \n \n \n \n newlines");
+//        assertNormalizingStreamCorrect("", null);
+        assertNormalizingStreamCorrect("", "    ");
+        assertNormalizingStreamCorrect("", " \n \n \n   \n  ");
 
-        String version1 = new ExampleAbstractSQLChange().prepareSqlForChecksum("INSERT INTO recommendation_list(instanceId, name, publicId)\n" +
+
+        String versionNormalized = "INSERT INTO recommendation_list(instanceId, name, publicId) SELECT DISTINCT instanceId, \"default\" as name, \"default\" as publicId FROM recommendation;";
+
+        String version1 = "INSERT INTO recommendation_list(instanceId, name, publicId)\n" +
                 "SELECT DISTINCT instanceId, \"default\" as name, \"default\" as publicId\n" +
-                "FROM recommendation;");
+                "FROM recommendation;";
+        assertNormalizingStreamCorrect(versionNormalized, version1);
 
-        assertEquals("INSERT INTO recommendation_list(instanceId, name, publicId) SELECT DISTINCT instanceId, \"default\" as name, \"default\" as publicId FROM recommendation;", version1);
-
-        String version2 = new ExampleAbstractSQLChange().prepareSqlForChecksum("INSERT INTO \n" +
+        String version2 = "INSERT INTO \n" +
                 "    recommendation_list(instanceId, name, publicId)\n" +
                 "SELECT \n" +
                 "    DISTINCT \n" +
@@ -217,9 +220,13 @@ public class AbstractSQLChangeTest {
                 "          \"default\" as name, \n" +
                 "          \"default\" as publicId\n" +
                 "   FROM \n" +
-                "       recommendation;");
+                "       recommendation;";
+        assertNormalizingStreamCorrect(versionNormalized, version2);
+    }
 
-        assertEquals(version1, version2);
+    private void assertNormalizingStreamCorrect(String expected, String toCorrect) throws IOException {
+        AbstractSQLChange.NormalizingStream normalizingStream = new AbstractSQLChange.NormalizingStream("x", true, false, new ByteArrayInputStream(toCorrect.getBytes()));
+        assertEquals("x:true:false:"+expected, StreamUtil.getStreamContents(normalizingStream));
     }
 
     @Test

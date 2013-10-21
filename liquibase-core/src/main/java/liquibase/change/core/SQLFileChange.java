@@ -89,14 +89,19 @@ public class SQLFileChange extends AbstractSQLChange {
             throw new SetupException("<sqlfile> - No path specified");
         }
         LogFactory.getLogger().debug("SQLFile file:" + path);
-        boolean loaded = loadFromClasspath(path);
-        if (!loaded) {
-            loaded = loadFromFileSystem(path);
-        }
+        boolean loaded = initializeSql();
 
         if (!loaded) {
             throw new SetupException("<sqlfile path=" + path + "> - Could not find file");
         }
+    }
+
+    public boolean initializeSql() throws SetupException {
+        boolean loaded = loadFromClasspath(path);
+        if (!loaded) {
+            loaded = loadFromFileSystem(path);
+        }
+        return loaded;
     }
 
     @Override

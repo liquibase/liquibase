@@ -1,8 +1,11 @@
 package liquibase.change;
 
+import liquibase.change.core.RawSQLChange;
+import liquibase.change.core.SQLFileChange;
 import liquibase.database.Database;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.exception.DatabaseException;
+import liquibase.exception.SetupException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RawSqlStatement;
@@ -34,6 +37,10 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
     protected AbstractSQLChange() {
         setStripComments(null);
         setSplitStatements(null);
+    }
+
+    public boolean initializeSql() throws SetupException {
+        return true;
     }
 
     @Override
@@ -144,14 +151,20 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
     @Override
     public CheckSum generateCheckSum() {
         InputStream stream = this.sqlStream;
-        if (stream == null && sql != null) {
+
+        if (sql != null) {
             stream = new ByteArrayInputStream(sql.getBytes());
         }
 
-        return CheckSum.compute(this.getEndDelimiter()+":"+
-                this.isSplitStatements()+":"+
-                this.isStripComments()+":"+
-                prepareSqlForChecksum(stream)); //normalize line endings
+        CheckSum checkSum = CheckSum.compute(new NormalizingStream(this.getEndDelimiter(), this.isSplitStatements(), this.isStripComments(), stream), false);
+
+        try {
+            initializeSql();
+        } catch (SetupException e) {
+            throw new UnexpectedLiquibaseException("Exception re-initializing sql", e);
+        }
+
+        return checkSum;
     }
 
 
@@ -196,45 +209,6 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
         return string.replaceAll("\r\n", "\n").replaceAll("\r", "\n");
     }
 
-    protected String prepareSqlForChecksum(String sql) {
-        if (sql == null) {
-            return "";
-        }
-        return prepareSqlForChecksum(new ByteArrayInputStream(sql.getBytes()));
-    }
-
-    protected String prepareSqlForChecksum(InputStream stream) {
-        if (stream == null) {
-            return "";
-        }
-        StringBuilder returnString = new StringBuilder();
-        String encoding = this. encoding;
-        if (encoding == null) {
-            encoding = "UTF-8";
-        }
-
-        Pattern multipleSpaces = Pattern.compile("\\s+");
-        try {
-            BufferedReader reader = new BufferedReader(new InputStreamReader(stream, encoding));
-
-            String line;
-            while ((line = reader.readLine()) != null) {
-                String fixedLine = multipleSpaces.matcher(line.trim()).replaceAll(" ");
-                if (!fixedLine.equals("")) { //something on this line
-                    returnString.append(fixedLine).append(" ");
-                }
-            }
-        } catch (IOException e) {
-            throw new UnexpectedLiquibaseException(e);
-        }
-
-        if (returnString.length() > 0) {
-            returnString.deleteCharAt(returnString.length()-1); //remove trailing space added
-        }
-
-        return returnString.toString();
-    }
-
 //    @Override
 //    public Set<String> getSerializableFields() {
 //        Set<String> fieldsToSerialize = new HashSet<String>(super.getSerializableFields());
@@ -249,4 +223,102 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
 //            return isSplitStatements();
 //        }
 //    }
+
+    public static class NormalizingStream extends InputStream {
+        private ByteArrayInputStream headerStream;
+        private PushbackInputStream stream;
+
+        private int lastChar = 'X';
+        private boolean seenNonSpace = false;
+
+        public NormalizingStream(String endDelimiter, Boolean splitStatements, Boolean stripComments, InputStream stream) {
+            this.stream = new PushbackInputStream(stream, 2048);
+            this.headerStream = new ByteArrayInputStream((endDelimiter+":"+splitStatements+":"+stripComments+":").getBytes());
+        }
+
+        @Override
+        public int read() throws IOException {
+            if (headerStream != null) {
+                int returnChar = headerStream.read();
+                if (returnChar != -1) {
+                    return returnChar;
+                }
+                headerStream = null;
+            }
+
+            int returnChar = stream.read();
+            if (isWhiteSpace(returnChar)) {
+                returnChar = ' ';
+            }
+
+            while (returnChar == ' ' && (!seenNonSpace || lastChar == ' ')) {
+                returnChar = stream.read();
+
+                if (isWhiteSpace(returnChar)) {
+                    returnChar = ' ';
+                }
+            }
+
+            seenNonSpace = true;
+
+            lastChar = returnChar;
+
+            if (lastChar == ' ' && isOnlyWhitespaceRemaining()) {
+                return -1;
+            }
+
+            return returnChar;
+        }
+
+        @Override
+        public int available() throws IOException {
+            return stream.available();
+        }
+
+        @Override
+        public boolean markSupported() {
+            return stream.markSupported();
+        }
+
+        @Override
+        public void mark(int readlimit) {
+            stream.mark(readlimit);
+        }
+
+        @Override
+        public void reset() throws IOException {
+            stream.reset();
+        }
+
+        private boolean isOnlyWhitespaceRemaining() throws IOException {
+            List<Byte> readChars = new ArrayList<Byte>();
+            while (true) {
+                byte read = (byte) stream.read();
+                readChars.add(read);
+
+                if (read == -1) {
+                    return true;
+                }
+                if (!isWhiteSpace(read)) {
+                    byte[] buf = new byte[readChars.size()];
+                    for (int i=0; i<readChars.size(); i++) {
+                        buf[i] = readChars.get(i);
+                    }
+
+                    stream.unread(buf);
+
+                    return false;
+                }
+            }
+        }
+
+        private boolean isWhiteSpace(int read) {
+            return read == ' ' || read == '\n' || read == '\r' || read == '\t';
+        }
+
+        @Override
+        public void close() throws IOException {
+            stream.close();
+        }
+    }
 }
