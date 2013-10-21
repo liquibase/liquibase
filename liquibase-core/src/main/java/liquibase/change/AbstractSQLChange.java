@@ -196,15 +196,6 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
         return string.replaceAll("\r\n", "\n").replaceAll("\r", "\n");
     }
 
-    protected String prepareSqlForChecksumOld(String string) {
-        string = string.trim(); //remove begininng and trailig space
-        string = string.replace("\r\n", "\n").replace("\r", "\n"); //ensure line endings are consistent (for next replacements) across OS types
-        string = string.replaceAll("\\s*\\n\\s*", " "); //remove line endings, preserving them as a space. Collapse any whitespace around them into the same space
-        string = string.replaceAll("\\s+", " "); //collapse duplicate spaces
-
-        return string;
-    }
-
     protected String prepareSqlForChecksum(String sql) {
         if (sql == null) {
             return "";
