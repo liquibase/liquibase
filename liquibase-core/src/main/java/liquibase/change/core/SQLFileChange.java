@@ -97,6 +97,10 @@ public class SQLFileChange extends AbstractSQLChange {
     }
 
     public boolean initializeSql() throws SetupException {
+        if (path == null) {
+            return true;
+        }
+
         boolean loaded = loadFromClasspath(path);
         if (!loaded) {
             loaded = loadFromFileSystem(path);
@@ -202,16 +206,13 @@ public class SQLFileChange extends AbstractSQLChange {
     public String getSql() {
         String sql = super.getSql();
         if (sql == null) {
+            if (sqlStream == null) {
+                return null;
+            }
             try {
                 setSql(StreamUtil.getStreamContents(sqlStream, encoding));
             } catch (IOException e) {
                 throw new UnexpectedLiquibaseException(e);
-            } finally {
-                try {
-                    sqlStream.close();
-                } catch (IOException e) {
-                    LogFactory.getLogger().info("Error closing "+path);
-                }
             }
             sql = super.getSql();
         }

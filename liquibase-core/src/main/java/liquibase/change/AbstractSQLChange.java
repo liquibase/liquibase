@@ -152,6 +152,11 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
     public CheckSum generateCheckSum() {
         InputStream stream = this.sqlStream;
 
+        String sql = this.sql;
+        if (sqlStream == null && sql == null) {
+            sql = "";
+        }
+
         if (sql != null) {
             stream = new ByteArrayInputStream(sql.getBytes());
         }
@@ -204,6 +209,18 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
 
         return returnStatements.toArray(new SqlStatement[returnStatements.size()]);
     }
+
+    @Override
+    public boolean generateStatementsVolatile(Database database) {
+        return false;
+    }
+
+    @Override
+    public boolean generateRollbackStatementsVolatile(Database database) {
+        return false;
+    }
+
+
 
     protected String normalizeLineEndings(String string) {
         return string.replaceAll("\r\n", "\n").replaceAll("\r", "\n");
