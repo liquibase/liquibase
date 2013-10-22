@@ -47,6 +47,7 @@ public class CommandLineUtils {
                                                 String driverPropertiesFile,
                                                 String liquibaseCatalogName,
                                                 String liquibaseSchemaName) throws DatabaseException {
+        driver = StringUtils.trimToNull(driver);
         if (driver == null) {
             driver = DatabaseFactory.getInstance().findDefaultDriver(url);
         }
