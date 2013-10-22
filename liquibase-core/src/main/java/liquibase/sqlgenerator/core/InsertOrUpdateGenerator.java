@@ -22,7 +22,7 @@ public abstract class InsertOrUpdateGenerator extends AbstractSqlGenerator<Inser
     protected abstract String getElse(Database database);
 
     protected String getPostUpdateStatements(Database database){
-        return "";
+        return ";";
     }
 
     @Override
@@ -147,7 +147,7 @@ public abstract class InsertOrUpdateGenerator extends AbstractSqlGenerator<Inser
         completeSql.append(getPostUpdateStatements(database));
 
         return new Sql[]{
-                new UnparsedSql(completeSql.toString(), getAffectedTable(insertOrUpdateStatement))
+                new UnparsedSql(completeSql.toString(), "", getAffectedTable(insertOrUpdateStatement))
         };
     }
 
