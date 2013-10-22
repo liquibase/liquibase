@@ -25,7 +25,12 @@ public class UnknownType extends LiquibaseDataType {
 
     @Override
     public DatabaseDataType toDatabaseDataType(Database database) {
-        int dataTypeMaxParameters = database.getDataTypeMaxParameters(getName());
+        int dataTypeMaxParameters;
+        if (getName().equalsIgnoreCase("enum")) {
+            dataTypeMaxParameters = Integer.MAX_VALUE;
+        } else {
+            dataTypeMaxParameters = database.getDataTypeMaxParameters(getName());
+        }
         Object[] parameters = getParameters();
         if (database instanceof MySQLDatabase && (
                 getName().equalsIgnoreCase("TINYBLOB")
