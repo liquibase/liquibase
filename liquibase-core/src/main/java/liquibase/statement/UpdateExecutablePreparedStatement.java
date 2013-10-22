@@ -3,12 +3,13 @@ package liquibase.statement;
 import java.util.List;
 
 import liquibase.change.ColumnConfig;
+import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 
 public class UpdateExecutablePreparedStatement extends ExecutablePreparedStatementBase {
 
-	public UpdateExecutablePreparedStatement(Database database, String catalogName, String schemaName, String tableName, List<ColumnConfig> columns) {
-		super(database, catalogName, schemaName, tableName, columns);
+	public UpdateExecutablePreparedStatement(Database database, String catalogName, String schemaName, String tableName, List<ColumnConfig> columns, ChangeSet changeSet) {
+		super(database, catalogName, schemaName, tableName, columns, changeSet);
 	}
 
 	@Override

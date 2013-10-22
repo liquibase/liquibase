@@ -53,7 +53,7 @@ public class UpdateDataChange extends AbstractModifyDataChange implements Change
 
         if (needsPreparedStatement) {
             return new SqlStatement[] {
-                    new UpdateExecutablePreparedStatement(database, catalogName, schemaName, tableName, columns)
+                    new UpdateExecutablePreparedStatement(database, catalogName, schemaName, tableName, columns, getChangeSet())
             };
         }
     	
