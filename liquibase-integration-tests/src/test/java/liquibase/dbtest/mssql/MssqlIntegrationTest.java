@@ -2,11 +2,19 @@ package liquibase.dbtest.mssql;
 
 import liquibase.CatalogAndSchema;
 import liquibase.Liquibase;
+import liquibase.datatype.DataTypeFactory;
+import liquibase.datatype.DatabaseDataType;
+import liquibase.diff.DiffResult;
+import liquibase.diff.compare.CompareControl;
+import liquibase.diff.output.DiffOutputControl;
+import liquibase.diff.output.changelog.DiffToChangeLog;
 import liquibase.snapshot.DatabaseSnapshot;
+import liquibase.snapshot.EmptyDatabaseSnapshot;
 import liquibase.snapshot.SnapshotControl;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.DatabaseFunction;
 import liquibase.structure.core.Column;
+import liquibase.structure.core.DataType;
 import liquibase.structure.core.Table;
 import org.junit.Test;
 
@@ -30,7 +38,7 @@ public class MssqlIntegrationTest extends AbstractMssqlIntegrationTest {
     }
 
     @Test
-    public void dataTypeTests() throws Exception {
+    public void defaultValuesTests() throws Exception {
         if (this.getDatabase() == null) {
             return;
         }
@@ -65,6 +73,34 @@ public class MssqlIntegrationTest extends AbstractMssqlIntegrationTest {
                         assertEquals(1, ((Number) defaultValue).intValue());
                     }
                 }
+            }
+        }
+    }
+
+    @Test
+    public void dataTypesTest() throws Exception {
+        if (this.getDatabase() == null) {
+            return;
+        }
+
+        Liquibase liquibase = createLiquibase("changelogs/mssql/issues/data.types.xml");
+        liquibase.update(null);
+
+        DatabaseSnapshot snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(CatalogAndSchema.DEFAULT, this.getDatabase(), new SnapshotControl(getDatabase()));
+
+        for (Table table : snapshot.get(Table.class)) {
+            if (getDatabase().isLiquibaseObject(table)) {
+                continue;
+            }
+            for (Column column : table.getColumns()) {
+                String expectedType = column.getName().split("_")[0];
+
+                if (expectedType.equalsIgnoreCase("text")) {
+                    expectedType = "nvarchar";
+                }
+
+                String foundType = DataTypeFactory.getInstance().from(column.getType()).toDatabaseDataType(getDatabase()).toString().replaceFirst("\\(.*", "");
+                assertEquals("Wrong data type for " + table.getName() + "." + column.getName(), expectedType.toLowerCase(), foundType.toLowerCase());
             }
         }
     }
