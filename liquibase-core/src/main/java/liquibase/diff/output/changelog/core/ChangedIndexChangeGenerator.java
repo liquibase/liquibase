@@ -63,18 +63,24 @@ public class ChangedIndexChangeGenerator implements ChangedObjectChangeGenerator
             addIndexChange.setSchemaName(index.getSchema().getName());
         }
 
-        String referenceColumns = StringUtils.join((Collection<String>) differences.getDifference("columnNames").getReferenceValue(), ",");
-        String comparedColumns = StringUtils.join((Collection<String>) differences.getDifference("columnNames").getComparedValue(), ",");
-
-        control.setAlreadyHandledChanged(new Index().setTable(index.getTable()).setColumns(referenceColumns));
-        if (!referenceColumns.equalsIgnoreCase(comparedColumns)) {
-            control.setAlreadyHandledChanged(new Index().setTable(index.getTable()).setColumns(comparedColumns));
-        }
-
-        if (index.isUnique() != null && index.isUnique()) {
-            control.setAlreadyHandledChanged(new UniqueConstraint().setTable(index.getTable()).setColumns(referenceColumns));
+        Difference columnNames = differences.getDifference("columnNames");
+        
+        if (columnNames != null) {
+            String referenceColumns = StringUtils.join(
+                (Collection<String>) columnNames.getReferenceValue(), ",");
+            String comparedColumns = StringUtils.join(
+                (Collection<String>) columnNames.getComparedValue(), ",");
+    
+            control.setAlreadyHandledChanged(new Index().setTable(index.getTable()).setColumns(referenceColumns));
             if (!referenceColumns.equalsIgnoreCase(comparedColumns)) {
-                control.setAlreadyHandledChanged(new UniqueConstraint().setTable(index.getTable()).setColumns(comparedColumns));
+                control.setAlreadyHandledChanged(new Index().setTable(index.getTable()).setColumns(comparedColumns));
+            }
+    
+            if (index.isUnique() != null && index.isUnique()) {
+                control.setAlreadyHandledChanged(new UniqueConstraint().setTable(index.getTable()).setColumns(referenceColumns));
+                if (!referenceColumns.equalsIgnoreCase(comparedColumns)) {
+                    control.setAlreadyHandledChanged(new UniqueConstraint().setTable(index.getTable()).setColumns(comparedColumns));
+                }
             }
         }
 
