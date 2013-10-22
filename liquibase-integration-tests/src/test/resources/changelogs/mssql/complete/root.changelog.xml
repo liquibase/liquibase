@@ -324,4 +324,22 @@
         </createTable>
     </changeSet>
 
+    <changeSet author="authorized user" id="decimal">
+        <createTable tableName="dataTypeTestDECIMAL">
+            <column name="DECIMAL_NULL" type="DECIMAL(18)"/>
+            <column name="DECIMAL_NOTNULL" type="DECIMAL(18)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="DECIMAL_DEFAULT" type="DECIMAL(18)"/>
+            <column name="DECIMAL_PK" type="DECIMAL(18)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="DECIMAL_UNIQUE" type="DECIMAL(18)"/>
+            <column autoIncrement="true" name="DECIMAL_AUTOINCREMENT" type="DECIMAL">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+
 </databaseChangeLog>
