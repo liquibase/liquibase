@@ -99,8 +99,17 @@ public class MssqlIntegrationTest extends AbstractMssqlIntegrationTest {
                     expectedType = "nvarchar";
                 }
 
-                String foundType = DataTypeFactory.getInstance().from(column.getType()).toDatabaseDataType(getDatabase()).toString().replaceFirst("\\(.*", "");
+                String foundTypeDefinition = DataTypeFactory.getInstance().from(column.getType()).toDatabaseDataType(getDatabase()).toString();
+                String foundType = foundTypeDefinition.replaceFirst("\\(.*", "");
                 assertEquals("Wrong data type for " + table.getName() + "." + column.getName(), expectedType.toLowerCase(), foundType.toLowerCase());
+
+                if (expectedType.equalsIgnoreCase("varbinary")) {
+                    if (column.getName().endsWith("_MAX")) {
+                        assertEquals("VARBINARY(MAX)", foundTypeDefinition);
+                    } else {
+                        assertEquals("VARBINARY(1)", foundTypeDefinition);
+                    }
+                }
             }
         }
     }
