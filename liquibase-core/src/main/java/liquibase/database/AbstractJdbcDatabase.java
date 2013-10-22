@@ -1156,6 +1156,7 @@ public abstract class AbstractJdbcDatabase implements Database {
             } else if (quotingStrategy == ObjectQuotingStrategy.QUOTE_ALL_OBJECTS) {
                 return quotingStartCharacter + objectName + quotingEndCharacter;
             }
+            objectName = objectName.trim();
         }
         return objectName;
     }
