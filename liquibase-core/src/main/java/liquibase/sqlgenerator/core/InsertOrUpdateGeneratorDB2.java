@@ -38,7 +38,7 @@ public class InsertOrUpdateGeneratorDB2 extends InsertOrUpdateGenerator {
 	protected String getPostUpdateStatements(Database database) {
         StringBuffer endStatements = new StringBuffer();
         endStatements.append("END IF;\n");
-        endStatements.append("END;\n");
+        endStatements.append("END\n");
         return endStatements.toString();
 	}
 
