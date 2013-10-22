@@ -1151,7 +1151,7 @@ public abstract class AbstractJdbcDatabase implements Database {
     @Override
     public String escapeObjectName(String objectName, Class<? extends DatabaseObject> objectType) {
         if (objectName != null) {
-            if (objectName.contains("-") || startsWithNumeric(objectName) || isReservedWord(objectName)) {
+            if (objectName.contains("-") || startsWithNumeric(objectName) || isReservedWord(objectName) || objectName.contains("(") || objectName.contains(")")) {
                 return quotingStartCharacter + objectName + quotingEndCharacter;
             } else if (quotingStrategy == ObjectQuotingStrategy.QUOTE_ALL_OBJECTS) {
                 return quotingStartCharacter + objectName + quotingEndCharacter;
@@ -1178,10 +1178,6 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     @Override
     public String escapeColumnName(String catalogName, String schemaName, String tableName, String columnName) {
-        if (columnName.contains("(")) {
-            return columnName;
-        }
-
         return escapeObjectName(columnName, Column.class);
     }
 
