@@ -389,7 +389,10 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
 
     protected DateFormat getDateTimeFormat(Database database) {
         if (database instanceof MySQLDatabase) {
-            return new SimpleDateFormat("yyyy-MM-dd HH:mm:SS"); //no ms in mysql
+            return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"); //no ms in mysql
+        }
+        if (database instanceof MSSQLDatabase) {
+            return new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS"); //no ms in mysql
         }
         return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
     }
