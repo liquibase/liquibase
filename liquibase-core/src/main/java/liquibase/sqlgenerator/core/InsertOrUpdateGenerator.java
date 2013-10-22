@@ -22,7 +22,7 @@ public abstract class InsertOrUpdateGenerator extends AbstractSqlGenerator<Inser
     protected abstract String getElse(Database database);
 
     protected String getPostUpdateStatements(Database database){
-        return ";";
+        return "";
     }
 
     @Override
