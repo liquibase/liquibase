@@ -11,6 +11,7 @@ import liquibase.executor.ExecutorService;
 import liquibase.logging.LogFactory;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.core.Table;
+import liquibase.util.StringUtils;
 
 import java.math.BigInteger;
 import java.sql.Types;
@@ -200,7 +201,7 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
         if (tableName == null) {
             return false;
         }
-        return tableName.matches(".*[A-Z].*") && tableName.matches(".*[a-z].*");
+        return StringUtils.hasUpperCase(tableName) && StringUtils.hasLowerCase(tableName);
     }
 
     @Override

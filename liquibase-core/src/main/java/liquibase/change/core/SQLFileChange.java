@@ -2,7 +2,6 @@ package liquibase.change.core;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 
 import liquibase.change.*;
 import liquibase.database.Database;
@@ -89,14 +88,19 @@ public class SQLFileChange extends AbstractSQLChange {
             throw new SetupException("<sqlfile> - No path specified");
         }
         LogFactory.getLogger().debug("SQLFile file:" + path);
-        boolean loaded = initializeSql();
+        boolean loaded = false;
+        try {
+            loaded = initializeSqlStream();
+        } catch (IOException e) {
+            throw new SetupException(e);
+        }
 
         if (!loaded) {
             throw new SetupException("<sqlfile path=" + path + "> - Could not find file");
         }
     }
 
-    public boolean initializeSql() throws SetupException {
+    public boolean initializeSqlStream() throws IOException {
         if (path == null) {
             return true;
         }
@@ -128,7 +132,7 @@ public class SQLFileChange extends AbstractSQLChange {
      * @param file The name of the file to search for
      * @return True if the file was found, false otherwise.
      */
-    private boolean loadFromFileSystem(String file) throws SetupException {
+    private boolean loadFromFileSystem(String file) throws IOException {
         if (relativeToChangelogFile != null && relativeToChangelogFile) {
             String base;
             if (getChangeSet().getChangeLog() == null) {
@@ -145,13 +149,13 @@ public class SQLFileChange extends AbstractSQLChange {
         try {
             sqlStream = getResourceAccessor().getResourceAsStream(file);
             if (sqlStream == null) {
-                throw new SetupException("<sqlfile path=" + file + "> -Unable to read file");
+                throw new IOException("<sqlfile path=" + file + "> -Unable to read file");
             }
             return true;
         } catch (FileNotFoundException fnfe) {
             return false;
         } catch (IOException e) {
-            throw new SetupException("<sqlfile path=" + file + "> -Unable to read file", e);
+            throw new IOException("<sqlfile path=" + file + "> -Unable to read file", e);
         }
 
     }
@@ -210,14 +214,19 @@ public class SQLFileChange extends AbstractSQLChange {
                 return null;
             }
             try {
-                setSql(StreamUtil.getStreamContents(sqlStream, encoding));
+                return StreamUtil.getStreamContents(sqlStream, encoding);
             } catch (IOException e) {
                 throw new UnexpectedLiquibaseException(e);
+            } finally {
+                try {
+                    initializeSqlStream();
+                } catch (IOException e) {
+                    LogFactory.getLogger().severe("Error re-initializing sqlStream", e);
+                }
             }
-            sql = super.getSql();
+        } else {
+            return sql;
         }
-
-        return sql;
     }
 
     @Override

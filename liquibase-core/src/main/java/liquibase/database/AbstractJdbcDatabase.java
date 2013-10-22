@@ -51,6 +51,8 @@ import java.util.regex.Pattern;
  */
 public abstract class AbstractJdbcDatabase implements Database {
 
+    private static final Pattern startsWithNumberPattern = Pattern.compile("^[0-9].*");
+
     private DatabaseConnection connection;
     protected String defaultCatalogName;
     protected String defaultSchemaName;
@@ -895,7 +897,7 @@ public abstract class AbstractJdbcDatabase implements Database {
     * Check if given string starts with numeric values that may cause problems and should be escaped.
     */
     protected boolean startsWithNumeric(String objectName) {
-        return objectName.matches("^[0-9].*");
+        return startsWithNumberPattern.matcher(objectName).matches();
     }
 
 // ------- DATABASE OBJECT DROPPING METHODS ---- //

@@ -13,6 +13,9 @@ import java.util.regex.Pattern;
  */
 public class StringUtils {
     private static final Pattern commentPattern = Pattern.compile("/\\*.*?\\*/", Pattern.DOTALL);
+    private static final Pattern upperCasePattern = Pattern.compile(".*[A-Z].*");
+    private static final Pattern lowerCasePattern = Pattern.compile(".*[a-z].*");
+
 
     /**
      * This pattern is used to recognize end-of-line ANSI style comments at the end of lines of SQL. -- like this
@@ -176,6 +179,14 @@ public class StringUtils {
 
     public static String upperCaseFirst(String string) {
         return string.substring(0, 1).toUpperCase()+string.substring(1);
+    }
+
+    public static boolean hasUpperCase(String string) {
+        return upperCasePattern.matcher(string).matches();
+    }
+
+    public static boolean hasLowerCase(String string) {
+        return lowerCasePattern.matcher(string).matches();
     }
 
     public static String standardizeLineEndings(String string) {

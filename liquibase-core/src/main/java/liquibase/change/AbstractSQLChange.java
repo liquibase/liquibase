@@ -1,19 +1,17 @@
 package liquibase.change;
 
-import liquibase.change.core.RawSQLChange;
-import liquibase.change.core.SQLFileChange;
 import liquibase.database.Database;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.SetupException;
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.logging.LogFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.util.StringUtils;
 
 import java.io.*;
 import java.util.*;
-import java.util.regex.Pattern;
 
 /**
  * A common parent for all raw SQL related changes regardless of where the sql was sourced from.
@@ -39,7 +37,7 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
         setSplitStatements(null);
     }
 
-    public boolean initializeSql() throws SetupException {
+    public boolean initializeSqlStream() throws IOException {
         return true;
     }
 
@@ -161,15 +159,17 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
             stream = new ByteArrayInputStream(sql.getBytes());
         }
 
-        CheckSum checkSum = CheckSum.compute(new NormalizingStream(this.getEndDelimiter(), this.isSplitStatements(), this.isStripComments(), stream), false);
-
         try {
-            initializeSql();
-        } catch (SetupException e) {
-            throw new UnexpectedLiquibaseException("Exception re-initializing sql", e);
-        }
+            CheckSum checkSum = CheckSum.compute(new NormalizingStream(this.getEndDelimiter(), this.isSplitStatements(), this.isStripComments(), stream), false);
 
-        return checkSum;
+            return checkSum;
+        } finally {
+            try {
+                initializeSqlStream();
+            } catch (IOException e) {
+                LogFactory.getLogger().severe("Exception re-initializing sql", e);
+            }
+        }
     }
 
 
@@ -185,7 +185,8 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
 
         List<SqlStatement> returnStatements = new ArrayList<SqlStatement>();
 
-        if (StringUtils.trimToNull(getSql()) == null) {
+        String sql = StringUtils.trimToNull(getSql());
+        if (sql == null) {
             return new SqlStatement[0];
         }
 
@@ -223,7 +224,7 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
 
 
     protected String normalizeLineEndings(String string) {
-        return string.replaceAll("\r\n", "\n").replaceAll("\r", "\n");
+        return string.replace("\r", "");
     }
 
 //    @Override
@@ -244,6 +245,10 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
     public static class NormalizingStream extends InputStream {
         private ByteArrayInputStream headerStream;
         private PushbackInputStream stream;
+
+        private byte[] quickBuffer = new byte[100];
+        private List<Byte> resizingBuffer = new ArrayList<Byte>();
+
 
         private int lastChar = 'X';
         private boolean seenNonSpace = false;
@@ -308,24 +313,36 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
         }
 
         private boolean isOnlyWhitespaceRemaining() throws IOException {
-            List<Byte> readChars = new ArrayList<Byte>();
-            while (true) {
-                byte read = (byte) stream.read();
-                readChars.add(read);
-
-                if (read == -1) {
-                    return true;
-                }
-                if (!isWhiteSpace(read)) {
-                    byte[] buf = new byte[readChars.size()];
-                    for (int i=0; i<readChars.size(); i++) {
-                        buf[i] = readChars.get(i);
+            try {
+                int quickBufferUsed = 0;
+                while (true) {
+                    byte read = (byte) stream.read();
+                    if (quickBufferUsed >= quickBuffer.length) {
+                        resizingBuffer.add(read);
+                    } else {
+                        quickBuffer[quickBufferUsed++] = read;
                     }
 
-                    stream.unread(buf);
+                    if (read == -1) {
+                        return true;
+                    }
+                    if (!isWhiteSpace(read)) {
+                        if (resizingBuffer.size() > 0) {
 
-                    return false;
+                            byte[] buf = new byte[resizingBuffer.size()];
+                            for (int i=0; i< resizingBuffer.size(); i++) {
+                                buf[i] = resizingBuffer.get(i);
+                            }
+
+                            stream.unread(buf);
+                        }
+
+                        stream.unread(quickBuffer, 0, quickBufferUsed);
+                        return false;
+                    }
                 }
+            } finally {
+                resizingBuffer.clear();
             }
         }
 

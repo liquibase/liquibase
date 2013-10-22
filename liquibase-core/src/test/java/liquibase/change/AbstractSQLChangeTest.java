@@ -204,6 +204,9 @@ public class AbstractSQLChangeTest {
         assertNormalizingStreamCorrect("", "    ");
         assertNormalizingStreamCorrect("", " \n \n \n   \n  ");
 
+        //test quickBuffer -> resizingBuffer handoff
+        String longSpaceString = "a line with a lot of: wait for it....                                                                                                                                                                                                                                                                                         spaces";
+        assertNormalizingStreamCorrect("a line with a lot of: wait for it.... spaces", longSpaceString);
 
         String versionNormalized = "INSERT INTO recommendation_list(instanceId, name, publicId) SELECT DISTINCT instanceId, \"default\" as name, \"default\" as publicId FROM recommendation;";
 
