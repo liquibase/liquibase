@@ -25,6 +25,7 @@ import java.util.Set;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
 
 public class MssqlIntegrationTest extends AbstractMssqlIntegrationTest {
 
@@ -110,6 +111,32 @@ public class MssqlIntegrationTest extends AbstractMssqlIntegrationTest {
                         assertEquals("VARBINARY(1)", foundTypeDefinition);
                     }
                 }
+            }
+        }
+    }
+
+
+    @Test
+    public void dataTypeParamsTest() throws Exception {
+        if (this.getDatabase() == null) {
+            return;
+        }
+
+        Liquibase liquibase = createLiquibase("changelogs/mssql/issues/data.type.params.xml");
+        liquibase.update(null);
+
+        DatabaseSnapshot snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(CatalogAndSchema.DEFAULT, this.getDatabase(), new SnapshotControl(getDatabase()));
+
+        for (Table table : snapshot.get(Table.class)) {
+            if (getDatabase().isLiquibaseObject(table)) {
+                continue;
+            }
+            for (Column column : table.getColumns()) {
+                String expectedType = column.getName().split("_")[0];
+
+                String foundTypeDefinition = DataTypeFactory.getInstance().from(column.getType()).toDatabaseDataType(getDatabase()).toString();
+
+                assertFalse("Parameter found in " + table.getName() + "." + column.getName(), foundTypeDefinition.contains("("));
             }
         }
     }

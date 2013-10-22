@@ -37,8 +37,14 @@ public class UnknownType extends LiquibaseDataType {
             parameters = new Object[0];
         }
 
-        if (database instanceof MSSQLDatabase &&
-                getName().equalsIgnoreCase("REAL")) {
+        if (database instanceof MSSQLDatabase && (
+                getName().equalsIgnoreCase("REAL")
+                || getName().equalsIgnoreCase("XML")
+                || getName().equalsIgnoreCase("HIERARCHYID")
+                || getName().equalsIgnoreCase("DATETIMEOFFSET")
+                || getName().equalsIgnoreCase("IMAGE")
+                    || getName().equalsIgnoreCase("SMALLMONEY")
+        )) {
             parameters = new Object[0];
         }
 
