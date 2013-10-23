@@ -40,19 +40,6 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
     }
 
     @Override
-    public void setConnection(DatabaseConnection conn) {
-        try {
-            if (conn instanceof JdbcConnection) {
-                reservedWords.addAll(Arrays.asList(((JdbcConnection) conn).getMetaData().getSQLKeywords().toUpperCase().split(",\\s*")));
-            }
-        } catch (Exception e) {
-            LogFactory.getLogger().warning("Cannot retrieve reserved words", e);
-        }
-
-        super.setConnection(conn);
-    }
-
-    @Override
     public String getShortName() {
         return "postgresql";
     }
