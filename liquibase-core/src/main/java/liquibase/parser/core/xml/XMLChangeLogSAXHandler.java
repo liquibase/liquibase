@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.util.*;
@@ -168,14 +169,30 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
                     resourceFilter = (IncludeAllFilter) Class.forName(resourceFilterDef).newInstance();
                 }
                 if (isRelativeToChangelogFile) {
-					File changeLogFile = new File(databaseChangeLog
-							.getPhysicalFilePath());
-					File resourceBase = new File(changeLogFile.getParent(),
-							pathName);
-					if (!resourceBase.exists()) {
-						throw new SAXException(
-								"Resource directory for includeAll does not exist ["
-										+ resourceBase.getPath() + "]");
+					File changeLogFile = null;
+
+                    Enumeration<URL> resources = resourceAccessor.getResources(databaseChangeLog.getPhysicalFilePath());
+                    while (resources.hasMoreElements()) {
+                        try {
+                            changeLogFile = new File(resources.nextElement().toURI());
+                        } catch (URISyntaxException e) {
+                            continue; //ignore error, probably a URL or something like that
+                        }
+                        if (changeLogFile.exists()) {
+                            break;
+                        } else {
+                            changeLogFile = null;
+                        }
+                    }
+
+                    if (changeLogFile == null) {
+                        throw new SAXException("Cannot determine physical location of "+databaseChangeLog.getPhysicalFilePath());
+                    }
+
+                    File resourceBase = new File(changeLogFile.getParentFile(), pathName);
+
+                    if (!resourceBase.exists()) {
+						throw new SAXException("Resource directory for includeAll does not exist [" + resourceBase.getAbsolutePath() + "]");
 					}
 					pathName = resourceBase.getPath() + '/';
 					pathName = pathName.replace('\\', '/');
