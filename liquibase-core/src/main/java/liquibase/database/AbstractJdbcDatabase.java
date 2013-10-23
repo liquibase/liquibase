@@ -29,6 +29,7 @@ import liquibase.statement.*;
 import liquibase.statement.core.*;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
+import liquibase.structure.core.UniqueConstraint;
 import liquibase.util.ISODateFormat;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
@@ -934,15 +935,33 @@ public abstract class AbstractJdbcDatabase implements Database {
         ObjectQuotingStrategy currentStrategy = this.getObjectQuotingStrategy();
         this.setObjectQuotingStrategy(ObjectQuotingStrategy.QUOTE_ALL_OBJECTS);
         try {
-            DatabaseSnapshot snapshot = null;
+            DatabaseSnapshot snapshot;
             try {
-                snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(schemaToDrop, this, new SnapshotControl(this));
+	            final SnapshotControl snapshotControl = new SnapshotControl(this);
+	            final Set<Class<? extends DatabaseObject>> typesToInclude = snapshotControl.getTypesToInclude();
+
+	            //We do not need to remove indexes and primary/unique keys explicitly. They should be removed
+	            //as part of tables.
+	            typesToInclude.remove(Index.class);
+	            typesToInclude.remove(PrimaryKey.class);
+	            typesToInclude.remove(UniqueConstraint.class);
+
+	            if (supportsForeignKeyDisable()) {
+		            //We do not remove ForeignKey because they will be disabled and removed as parts of tables.
+		            typesToInclude.remove(ForeignKey.class);
+	            }
+
+	            final long createSnapshotStarted = System.currentTimeMillis();
+	            snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(schemaToDrop, this, snapshotControl);
+	            LogFactory.getLogger().debug(String.format("Database snapshot generated in %d ms. Snapshot includes: %s", System.currentTimeMillis() - createSnapshotStarted, typesToInclude));
             } catch (LiquibaseException e) {
                 throw new UnexpectedLiquibaseException(e);
             }
 
-            DiffResult diffResult = DiffGeneratorFactory.getInstance().compare(new EmptyDatabaseSnapshot(this), snapshot, new CompareControl(snapshot.getSnapshotControl().getTypesToInclude()));
+	        final long changeSetStarted = System.currentTimeMillis();
+	        DiffResult diffResult = DiffGeneratorFactory.getInstance().compare(new EmptyDatabaseSnapshot(this), snapshot, new CompareControl(snapshot.getSnapshotControl().getTypesToInclude()));
             List<ChangeSet> changeSets = new DiffToChangeLog(diffResult, new DiffOutputControl(true, true, false)).generateChangeSets();
+	        LogFactory.getLogger().debug(String.format("ChangeSet to Remove Database Objects generated in %d ms.", System.currentTimeMillis() - changeSetStarted));
 
             final boolean reEnableFK = supportsForeignKeyDisable() && disableForeignKeyChecks();
             try {
