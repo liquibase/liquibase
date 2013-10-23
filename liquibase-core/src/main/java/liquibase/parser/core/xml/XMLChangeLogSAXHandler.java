@@ -61,7 +61,12 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
 
 	private static final char LIQUIBASE_FILE_SEPARATOR = '/';
 
-	protected Logger log;
+    private final ChangeFactory changeFactory;
+    private final PreconditionFactory preconditionFactory;
+    private final SqlVisitorFactory sqlVisitorFactory;
+    private final ChangeLogParserFactory changeLogParserFactory;
+
+    protected Logger log;
 
 	private DatabaseChangeLog databaseChangeLog;
 	private Change change;
@@ -82,7 +87,7 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
 	private Set<String> modifySqlContexts;
 	private boolean modifySqlAppliedOnRollback = false;
 
-	protected XMLChangeLogSAXHandler(String physicalChangeLogLocation,
+    protected XMLChangeLogSAXHandler(String physicalChangeLogLocation,
 			ResourceAccessor resourceAccessor,
 			ChangeLogParameters changeLogParameters) {
 		log = LogFactory.getLogger();
@@ -93,7 +98,12 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
 		databaseChangeLog.setChangeLogParameters(changeLogParameters);
 
 		this.changeLogParameters = changeLogParameters;
-	}
+
+        changeFactory = ChangeFactory.getInstance();
+        preconditionFactory = PreconditionFactory.getInstance();
+        sqlVisitorFactory = SqlVisitorFactory.getInstance();
+        changeLogParserFactory = ChangeLogParserFactory.getInstance();
+    }
 
 	public DatabaseChangeLog getDatabaseChangeLog() {
 		return databaseChangeLog;
@@ -308,7 +318,7 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
 			} else if (currentPrecondition != null && currentPrecondition instanceof CustomPreconditionWrapper && qName.equals("param")) {
 				((CustomPreconditionWrapper) currentPrecondition).setParam(atts.getValue("name"), atts.getValue("value"));
 			} else if (rootPrecondition != null) {
-				currentPrecondition = PreconditionFactory.getInstance().create(localName);
+				currentPrecondition = preconditionFactory.create(localName);
 
 				for (int i = 0; i < atts.getLength(); i++) {
 					String attributeName = atts.getLocalName(i);
@@ -342,7 +352,7 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
 							.getValue("applyToRollback"));
 				}
 			} else if (inModifySql) {
-				SqlVisitor sqlVisitor = SqlVisitorFactory.getInstance().create(localName);
+				SqlVisitor sqlVisitor = sqlVisitorFactory.create(localName);
 				for (int i = 0; i < atts.getLength(); i++) {
 					String attributeName = atts.getLocalName(i);
 					String attributeValue = atts.getValue(i);
@@ -354,7 +364,7 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
 
 				changeSet.addSqlVisitor(sqlVisitor);
 			} else if (changeSet != null && change == null) {
-				change = ChangeFactory.getInstance().create(localName);
+				change = changeFactory.create(localName);
 				if (change == null) {
 					throw new SAXException("Unknown Liquibase extension: "
 							+ localName
@@ -523,7 +533,7 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
 		}
       DatabaseChangeLog changeLog;
       try {
-         changeLog= ChangeLogParserFactory.getInstance().getParser(fileName, resourceAccessor).parse(fileName, changeLogParameters,
+         changeLog= changeLogParserFactory.getParser(fileName, resourceAccessor).parse(fileName, changeLogParameters,
                 resourceAccessor);
       } catch (UnknownChangelogFormatException e) {
         log.warning("included file "+relativeBaseFileName + "/" + fileName + " is not a recognized file type");
@@ -649,7 +659,7 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
                     columns.get(columns.size() - 1).setValue(textString);
                     this.text = new StringBuffer();
 			} else if (change != null
-					&& localName.equals(ChangeFactory.getInstance().getChangeMetaData(change).getName())) {
+					&& localName.equals(changeFactory.getChangeMetaData(change).getName())) {
 				if (textString != null) {
 					if (change instanceof RawSQLChange) {
 						// We've already expanded expressions when we defined 'textString' above. If we enabled
@@ -673,7 +683,7 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
 						((StopChange) change).setMessage(textString);
 					} else {
 						throw new RuntimeException("Unexpected text in "
-                                + ChangeFactory.getInstance().getChangeMetaData(change).getName());
+                                + changeFactory.getChangeMetaData(change).getName());
 					}
 				}
 				text = null;
