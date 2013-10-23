@@ -28,6 +28,7 @@ public class SqlGeneratorFactory {
     //caches for expensive reflection based calls that slow down Liquibase initialization: CORE-1207
     private final Map<Class<?>, Type[]> genericInterfacesCache = new HashMap<Class<?>, Type[]>();
     private final Map<Class<?>, Type> genericSuperClassCache = new HashMap<Class<?>, Type>();
+    private Map<String, SortedSet<SqlGenerator>> generatorsByKey = new HashMap<String, SortedSet<SqlGenerator>>();
 
     private SqlGeneratorFactory() {
         Class[] classes;
@@ -84,6 +85,12 @@ public class SqlGeneratorFactory {
     }
 
     protected SortedSet<SqlGenerator> getGenerators(SqlStatement statement, Database database) {
+        String key = statement.getClass().getName()+":"+database.getShortName();
+
+        if (generatorsByKey.containsKey(key)) {
+            return generatorsByKey.get(key);
+        }
+
         SortedSet<SqlGenerator> validGenerators = new TreeSet<SqlGenerator>(new SqlGeneratorComparator());
 
         for (SqlGenerator generator : getGenerators()) {
@@ -108,6 +115,8 @@ public class SqlGeneratorFactory {
                 clazz = clazz.getSuperclass();
             }
         }
+
+        generatorsByKey.put(key, validGenerators);
         return validGenerators;
     }
 
