@@ -255,7 +255,9 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                 public ResultSet fastFetchQuery() throws SQLException {
                     CatalogAndSchema catalogAndSchema = database.correctSchema(new CatalogAndSchema(catalogName, schemaName));
 
-                    return databaseMetaData.getTables(((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema), database.correctObjectName(table, Table.class), types);
+                    String catalog = ((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema);
+                    String schema = ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema);
+                    return databaseMetaData.getTables(catalog, schema, database.correctObjectName(table, Table.class), types);
                 }
 
                 @Override
