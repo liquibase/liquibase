@@ -3,10 +3,7 @@ package liquibase.dbdoc;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.StreamUtil;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 
 public class ChangeLogWriter {
     protected File outputDir;
@@ -34,12 +31,14 @@ public class ChangeLogWriter {
 //        }
 
 
-        File xmlFile = new File(outputDir, changeLog + ".xml");
+        File xmlFile = new File(outputDir, changeLog + ".html");
         xmlFile.getParentFile().mkdirs();
 
-        FileOutputStream changeLogStream = new FileOutputStream(xmlFile, false);
+        BufferedWriter changeLogStream = new BufferedWriter(new FileWriter(xmlFile, false));
         try {
-            StreamUtil.copy(stylesheet, changeLogStream);
+            changeLogStream.write("<html><body><pre>\n");
+            changeLogStream.write(StreamUtil.getStreamContents(stylesheet).replace("<", "&lt;").replace(">", "&gt;"));
+            changeLogStream.write("\n</pre></body></html>");
         } finally {
             changeLogStream.close();
         }

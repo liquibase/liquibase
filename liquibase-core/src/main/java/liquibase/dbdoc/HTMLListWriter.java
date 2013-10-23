@@ -36,10 +36,10 @@ public class HTMLListWriter {
                 fileWriter.append("<A HREF=\"");
                 fileWriter.append(directory);
                 fileWriter.append("/");
-                fileWriter.append(object.toString().toLowerCase());
+                fileWriter.append(DBDocUtil.toFileName(object.toString().toLowerCase()));
                 fileWriter.append(getTargetExtension());
                 fileWriter.append("\" target=\"objectFrame\">");
-                fileWriter.append(object.toString());
+                fileWriter.append(DBDocUtil.htmlEncode(object.toString()));
                 fileWriter.append("</A><BR>\n");
             }
 
