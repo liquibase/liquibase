@@ -2,9 +2,7 @@ package liquibase.change;
 
 import liquibase.database.Database;
 import liquibase.database.core.MSSQLDatabase;
-import liquibase.exception.DatabaseException;
-import liquibase.exception.SetupException;
-import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.exception.*;
 import liquibase.logging.LogFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RawSqlStatement;
@@ -60,6 +58,21 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
     @Override
     public boolean supports(Database database) {
         return true;
+    }
+
+    @Override
+    public Warnings warn(Database database) {
+        return new Warnings();
+    }
+
+    @Override
+    public ValidationErrors validate(Database database) {
+        ValidationErrors validationErrors = new ValidationErrors();
+        if (StringUtils.trimToNull(sql) == null) {
+            validationErrors.addError("'sql' is required");
+        }
+        return validationErrors;
+
     }
 
     /**

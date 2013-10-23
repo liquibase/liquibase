@@ -121,11 +121,6 @@ public class SQLFileChange extends AbstractSQLChange {
         return validationErrors;
     }
 
-    @Override
-    public Warnings warn(Database database) {
-        return new Warnings();
-    }
-
     /**
      * Tries to load the file from the file system.
      *
