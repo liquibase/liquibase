@@ -85,7 +85,13 @@ public class SqlGeneratorFactory {
     }
 
     protected SortedSet<SqlGenerator> getGenerators(SqlStatement statement, Database database) {
-        String key = statement.getClass().getName()+":"+database.getShortName();
+        String databaseName = null;
+        if (database == null) {
+            databaseName = "NULL";
+        } else {
+            databaseName = database.getShortName();
+        }
+        String key = statement.getClass().getName()+":"+ databaseName;
 
         if (generatorsByKey.containsKey(key)) {
             return generatorsByKey.get(key);

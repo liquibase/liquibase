@@ -156,6 +156,7 @@ public class ChangeLogParameters {
     protected static class ExpressionExpander {
     	private boolean enableEscaping;
         private ChangeLogParameters changeLogParameters;
+        private static final Pattern EXPRESSION_PATTERN = Pattern.compile("(\\$\\{[^\\}]+\\})");
 
         public ExpressionExpander(ChangeLogParameters changeLogParameters) {
             this(changeLogParameters, false);
@@ -170,8 +171,7 @@ public class ChangeLogParameters {
             if (text == null) {
                 return null;
             }
-            Pattern expressionPattern = Pattern.compile("(\\$\\{[^\\}]+\\})");
-            Matcher matcher = expressionPattern.matcher(text);
+            Matcher matcher = EXPRESSION_PATTERN.matcher(text);
             String originalText = text;
             while (matcher.find()) {
                 String expressionString = originalText.substring(matcher.start(), matcher.end());
