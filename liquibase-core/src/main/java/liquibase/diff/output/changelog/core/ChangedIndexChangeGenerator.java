@@ -5,6 +5,7 @@ import liquibase.change.ColumnConfig;
 import liquibase.change.core.CreateIndexChange;
 import liquibase.change.core.DropIndexChange;
 import liquibase.database.Database;
+import liquibase.diff.Difference;
 import liquibase.diff.ObjectDifferences;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.changelog.ChangeGeneratorChain;
