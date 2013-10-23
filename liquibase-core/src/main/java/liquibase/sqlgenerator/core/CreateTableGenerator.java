@@ -92,7 +92,7 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
                     buffer.append(" CONSTRAINT ");
                     buffer.append(database.escapeConstraintName(pkName));
                 }
-                buffer.append(" PRIMARY KEY AUTOINCREMENT");
+                buffer.append(" PRIMARY KEY");
             }
 
             // for the serial data type in postgres, there should be no default value
