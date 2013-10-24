@@ -263,6 +263,9 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
 
     @Override
     public String escapeObjectName(String objectName, Class<? extends DatabaseObject> objectType) {
+        if (objectName.contains("(")) { //probably a function
+            return objectName;
+        }
         return this.quotingStartCharacter+objectName+this.quotingEndCharacter;
     }
 

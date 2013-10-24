@@ -1170,7 +1170,7 @@ public abstract class AbstractJdbcDatabase implements Database {
     @Override
     public String escapeObjectName(String objectName, Class<? extends DatabaseObject> objectType) {
         if (objectName != null) {
-            if (objectName.contains("-") || startsWithNumeric(objectName) || isReservedWord(objectName) || objectName.contains("(") || objectName.contains(")")) {
+            if (objectName.contains("-") || startsWithNumeric(objectName) || isReservedWord(objectName)) {
                 return quoteObject(objectName, objectType);
             } else if (quotingStrategy == ObjectQuotingStrategy.QUOTE_ALL_OBJECTS) {
                 return quoteObject(objectName, objectType);
