@@ -1171,13 +1171,17 @@ public abstract class AbstractJdbcDatabase implements Database {
     public String escapeObjectName(String objectName, Class<? extends DatabaseObject> objectType) {
         if (objectName != null) {
             if (objectName.contains("-") || startsWithNumeric(objectName) || isReservedWord(objectName) || objectName.contains("(") || objectName.contains(")")) {
-                return quotingStartCharacter + objectName + quotingEndCharacter;
+                return quoteObject(objectName, objectType);
             } else if (quotingStrategy == ObjectQuotingStrategy.QUOTE_ALL_OBJECTS) {
-                return quotingStartCharacter + objectName + quotingEndCharacter;
+                return quoteObject(objectName, objectType);
             }
             objectName = objectName.trim();
         }
         return objectName;
+    }
+
+    public String quoteObject(String objectName, Class<? extends DatabaseObject> objectType) {
+        return quotingStartCharacter + objectName + quotingEndCharacter;
     }
 
     @Override
