@@ -36,8 +36,8 @@ public class MD5Util {
         String returnString = new String(encodeHex(digestBytes));
 
         String inputToLog = input;
-        if (inputToLog.length() > 50) {
-            inputToLog = inputToLog.substring(0, 50);
+        if (inputToLog.length() > 500) {
+            inputToLog = inputToLog.substring(0, 500)+"... [truncated in log]";
         }
         LogFactory.getLogger().debug("Computed checksum for "+inputToLog+" as "+returnString);
         return returnString;
