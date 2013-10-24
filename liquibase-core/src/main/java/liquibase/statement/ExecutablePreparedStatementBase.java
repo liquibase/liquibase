@@ -2,6 +2,7 @@ package liquibase.statement;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -13,7 +14,9 @@ import java.math.BigInteger;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import liquibase.change.ColumnConfig;
 import liquibase.changelog.ChangeSet;
@@ -37,6 +40,8 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
 	private String schemaName;
 	private String tableName;
 	private List<ColumnConfig> columns;
+	
+	private Set<Closeable> closeables;
 
 	protected ExecutablePreparedStatementBase(Database database, ChangeSet changeSet, String catalogName, String schemaName, String tableName, List<ColumnConfig> columns) {
 		this.database = database;
@@ -45,6 +50,7 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
 		this.schemaName = schemaName;
 		this.tableName = tableName;
 		this.columns = columns;
+		this.closeables = new HashSet<Closeable>();
 	}
 
 	@Override
@@ -69,6 +75,10 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
 	        stmt.execute();
 	    } catch(SQLException e) {
 	        throw new DatabaseException(e);
+	    } finally {
+	        for (Closeable closeable : closeables) {
+                StreamUtil.closeQuietly(closeable);
+            }
 	    }
 	}
 
@@ -104,6 +114,7 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
 				} else {
 					stmt.setBinaryStream(i, lob.content, lob.length);
 				}
+				closeables.add(lob.content);
 			} catch (IOException e) {
 				throw new DatabaseException(e.getMessage(), e); // wrap
 			}
@@ -115,6 +126,7 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
 				} else {
 					stmt.setCharacterStream(i, lob.content, lob.length);
 				}
+				closeables.add(lob.content);
 			}
 			catch (IOException e) {
 				throw new DatabaseException(e.getMessage(), e); // wrap
@@ -160,6 +172,7 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
 		if (in.markSupported() && length <= IN_MEMORY_THRESHOLD) {
 			in.reset();
 		} else {
+			StreamUtil.closeQuietly(in);
 			in = createStream(getResourceAsStream(valueLobFile));
 		}
 		
@@ -191,6 +204,7 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
 		if (reader.markSupported() && length <= IN_MEMORY_THRESHOLD) {
 			reader.reset();
 		} else {
+			StreamUtil.closeQuietly(reader);
 			reader = createReader(getResourceAsStream(valueLobFile), encoding);
 		}
 		
