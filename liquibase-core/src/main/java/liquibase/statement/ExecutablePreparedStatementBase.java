@@ -99,14 +99,22 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
 		} else if (col.getValueBlobFile() != null) {
 			try {
 				LOBContent<InputStream> lob = toBinaryStream(col.getValueBlobFile());
-				stmt.setBinaryStream(i, lob.content, lob.length);
+				if (lob.length <= Integer.MAX_VALUE) {
+					stmt.setBinaryStream(i, lob.content, (int) lob.length);
+				} else {
+					stmt.setBinaryStream(i, lob.content, lob.length);
+				}
 			} catch (IOException e) {
 				throw new DatabaseException(e.getMessage(), e); // wrap
 			}
 		} else if(col.getValueClobFile() != null) {
 			try {
 				LOBContent<Reader> lob = toCharacterStream(col.getValueClobFile(), col.getEncoding());
-				stmt.setCharacterStream(i, lob.content, lob.length);
+				if (lob.length <= Integer.MAX_VALUE) {
+					stmt.setCharacterStream(i, lob.content, (int) lob.length);
+				} else {
+					stmt.setCharacterStream(i, lob.content, lob.length);
+				}
 			}
 			catch (IOException e) {
 				throw new DatabaseException(e.getMessage(), e); // wrap
