@@ -89,26 +89,23 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
 		    stmt.setDate(i, new java.sql.Date(col.getValueDate().getTime()));
 		} else if(col.getValueBlobFile() != null) {
 		    try {
-                // Add change log base path if file path is relative.
-		    	String filePath = getAbsolutePath(col.getValueBlobFile());
-		        File file = new File(filePath);
-		        stmt.setBinaryStream(i, new BufferedInputStream(new FileInputStream(file)), (int) file.length());
-		    } catch (FileNotFoundException e) {
+                LOBContent<InputStream> lob = toBinaryStream(col.getValueBlobFile());
+                stmt.setBinaryStream(i, lob.content, lob.length);
+            } catch (IOException e) {
 		        throw new DatabaseException(e.getMessage(), e); // wrap
 		    }
 		} else if(col.getValueClobFile() != null) {
 		    try {
-                // Add change log base path if file path is relative.
-		    	String filePath = getAbsolutePath(col.getValueClobFile());
-		        File file = new File(filePath);
-		        Reader bufReader = new BufferedReader(new FileReader(file));
+                LOBContent<Reader> lob = toCharacterStream(col.getValueClobFile(), col.getEncoding());
+                stmt.setCharacterStream(i, lob.content, lob.length);
+
 		        // PostgreSql does not support PreparedStatement.setCharacterStream() nor
 		        // PreparedStatement.setClob().
 		        if (database instanceof PostgresDatabase) {
-		            String text = StreamUtil.getReaderContents(bufReader);
+		            String text = StreamUtil.getReaderContents(lob.content);
 		            stmt.setString(i, text);
 		        } else {
-		            stmt.setCharacterStream(i, bufReader);
+		            stmt.setCharacterStream(i, lob.content, lob.length);
 		        }
 		    } catch(FileNotFoundException e) {
 		        throw new DatabaseException(e.getMessage(), e); // wrap
