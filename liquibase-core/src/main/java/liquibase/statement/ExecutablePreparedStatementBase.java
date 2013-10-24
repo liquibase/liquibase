@@ -4,10 +4,8 @@ import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.Reader;
-import java.io.UnsupportedEncodingException;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.PreparedStatement;
@@ -19,15 +17,10 @@ import liquibase.change.ColumnConfig;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.database.PreparedStatementFactory;
+import liquibase.database.core.PostgresDatabase;
 import liquibase.exception.DatabaseException;
-import liquibase.resource.ClassLoaderResourceAccessor;
-import liquibase.resource.CompositeResourceAccessor;
-import liquibase.resource.FileSystemResourceAccessor;
-import liquibase.resource.ResourceAccessor;
-import liquibase.resource.UtfBomAwareReader;
-import liquibase.util.StreamUtil;
-import liquibase.util.StringUtils;
 import liquibase.util.file.FilenameUtils;
+import liquibase.util.StreamUtil;
 
 public abstract class ExecutablePreparedStatementBase implements ExecutablePreparedStatement {
 
@@ -37,14 +30,16 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
 	private String schemaName;
 	private String tableName;
 	private List<ColumnConfig> columns;
+	private ChangeSet changeSet;
 
-	protected ExecutablePreparedStatementBase(Database database, ChangeSet changeSet, String catalogName, String schemaName, String tableName, List<ColumnConfig> columns) {
+	protected ExecutablePreparedStatementBase(Database database, String catalogName, String schemaName, String tableName, List<ColumnConfig> columns, ChangeSet changeSet) {
 		this.database = database;
 		this.changeSet = changeSet;
 		this.catalogName = catalogName;
 		this.schemaName = schemaName;
 		this.tableName = tableName;
 		this.columns = columns;
+		this.changeSet = changeSet;
 	}
 
 	@Override
@@ -96,21 +91,34 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
 		    }
 		} else if(col.getValueDate() != null) {
 		    stmt.setDate(i, new java.sql.Date(col.getValueDate().getTime()));
-		} else if (col.getValueBlobFile() != null) {
-			try {
-				LOBContent<InputStream> lob = toBinaryStream(col.getValueBlobFile());
-				stmt.setBinaryStream(i, lob.content, lob.length);
-			} catch (IOException e) {
-				throw new DatabaseException(e.getMessage(), e); // wrap
-			}
+		} else if(col.getValueBlobFile() != null) {
+		    try {
+                // Add change log base path if file path is relative.
+		    	String filePath = getAbsolutePath(col.getValueBlobFile());
+		        File file = new File(filePath);
+		        stmt.setBinaryStream(i, new BufferedInputStream(new FileInputStream(file)), (int) file.length());
+		    } catch (FileNotFoundException e) {
+		        throw new DatabaseException(e.getMessage(), e); // wrap
+		    }
 		} else if(col.getValueClobFile() != null) {
-			try {
-				LOBContent<Reader> lob = toCharacterStream(col.getValueClobFile(), col.getEncoding());
-				stmt.setCharacterStream(i, lob.content, lob.length);
-			}
-			catch (IOException e) {
-				throw new DatabaseException(e.getMessage(), e); // wrap
-			}
+		    try {
+                // Add change log base path if file path is relative.
+		    	String filePath = getAbsolutePath(col.getValueClobFile());
+		        File file = new File(filePath);
+		        Reader bufReader = new BufferedReader(new FileReader(file));
+		        // PostgreSql does not support PreparedStatement.setCharacterStream() nor
+		        // PreparedStatement.setClob().
+		        if (database instanceof PostgresDatabase) {
+		            String text = StreamUtil.getReaderContents(bufReader);
+		            stmt.setString(i, text);
+		        } else {
+		            stmt.setCharacterStream(i, bufReader);
+		        }
+		    } catch(FileNotFoundException e) {
+		        throw new DatabaseException(e.getMessage(), e); // wrap
+		    } catch(IOException e) {
+		        throw new DatabaseException(e.getMessage(), e); // wrap
+		    }
 		} else {
 			// NULL values might intentionally be set into a change, we must also add them to the prepared statement  
 			stmt.setNull(i, java.sql.Types.NULL);
@@ -230,6 +238,24 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
 		
 		return fileName;
 	}
+
+    /**
+     * Gets absolute and normalized path for path.
+     * If path is relative, absolute path is calculated relative to change log file.
+     *
+     * @param path Absolute or relative path.
+     * @return Absolute and normalized path.
+     */
+    public String getAbsolutePath(String path) {
+    	String p = path;
+        File f = new File(p);
+        if (!f.isAbsolute()) {
+            String basePath = FilenameUtils.getFullPath(changeSet.getChangeLog().getPhysicalFilePath());
+            p = FilenameUtils.normalize(basePath + p);
+        }
+        return p;
+    }
+
 
 	@Override
     public boolean skipOnUnsupported() {

@@ -11,6 +11,7 @@ import liquibase.util.StringUtils;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.net.URLEncoder;
 import java.text.DateFormat;
 import java.util.Date;
 import java.util.List;
@@ -30,7 +31,7 @@ public abstract class HTMLWriter {
     protected abstract void writeCustomHTML(FileWriter fileWriter, Object object, List<Change> changes, Database database) throws IOException;
 
     private FileWriter createFileWriter(Object object) throws IOException {
-        return new FileWriter(new File(outputDir, object.toString().toLowerCase() + ".html"));
+        return new FileWriter(new File(outputDir, DBDocUtil.toFileName(object.toString().toLowerCase()) + ".html"));
     }
 
     public void writeHTML(Object object, List<Change> ranChanges, List<Change> changesToRun, String changeLog) throws IOException, DatabaseHistoryException, DatabaseException {
@@ -133,9 +134,9 @@ public abstract class HTMLWriter {
                 if (!change.getChangeSet().equals(lastChangeSet)) {
                     lastChangeSet = change.getChangeSet();
                     fileWriter.append("<TR BGCOLOR=\"#EEEEFF\" CLASS=\"TableSubHeadingColor\">\n");
-                    writeTD(fileWriter, "<a href='../changelogs/"+change.getChangeSet().getFilePath()+".xml'>"+change.getChangeSet().getFilePath()+"</a>");
+                    writeTD(fileWriter, "<a href='../changelogs/"+DBDocUtil.toFileName(change.getChangeSet().getFilePath())+".html'>"+change.getChangeSet().getFilePath()+"</a>");
                     writeTD(fileWriter, change.getChangeSet().getId());
-                    writeTD(fileWriter, "<a href='../authors/"+change.getChangeSet().getAuthor().toLowerCase()+".html'>"+change.getChangeSet().getAuthor().toLowerCase()+"</a>");
+                    writeTD(fileWriter, "<a href='../authors/"+DBDocUtil.toFileName(change.getChangeSet().getAuthor().toLowerCase())+".html'>"+DBDocUtil.htmlEncode(change.getChangeSet().getAuthor().toLowerCase())+"</a>");
 
                     ChangeSet.RunStatus runStatus = database.getRunStatus(change.getChangeSet());
                     if (runStatus.equals(ChangeSet.RunStatus.NOT_RAN)) {

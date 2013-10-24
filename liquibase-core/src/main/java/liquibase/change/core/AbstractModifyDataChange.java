@@ -55,7 +55,7 @@ public abstract class AbstractModifyDataChange extends AbstractChange {
     }
 
     /**
-     * @deprecated use getWhere()
+     * @deprecated use getWhere().
      */
     @DatabaseChangeProperty(isChangeProperty = false)
     public String getWhereClause() {

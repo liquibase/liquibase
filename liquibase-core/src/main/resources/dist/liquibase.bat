@@ -23,4 +23,4 @@ goto setup
 
 IF NOT DEFINED JAVA_OPTS set JAVA_OPTS=
 
-'java -cp "%CP%" %JAVA_OPTS% liquibase.integration.commandline.Main %CMD_LINE_ARGS%'
+java -cp "%CP%" %JAVA_OPTS% liquibase.integration.commandline.Main %CMD_LINE_ARGS%

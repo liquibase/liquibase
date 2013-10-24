@@ -438,4 +438,17 @@
             <!--double_column DOUBLE NOT NULL DEFAULT 100 ,-->
             <!--PRIMARY KEY (double_column) );</sql>-->
     <!--</changeSet>-->
+
+    <!--<changeSet id="CORE-1511-setup" author="nvoxland">-->
+        <!--<createTable tableName="core1511">-->
+            <!--<column name="id" type="int"/>-->
+            <!--<column name="ApproveSecurity" type="int"/>-->
+        <!--</createTable>-->
+    <!--</changeSet>-->
+    <!--<changeSet id="CORE-1511" author="nvoxland">-->
+        <!--<modifyDataType tableName="core1511"-->
+                        <!--columnName="ApproveSecurity"-->
+                        <!--newDataType="ENUM('Approving_Boss','Approving_NetworkOwner','Approving_other','Approving_Owner','Approving_RVS','Inv_AccessApproving_NetworkOwner','Approving_Request_Handler') NOT NULL"/>-->
+    <!--</changeSet>-->
+
 </databaseChangeLog>

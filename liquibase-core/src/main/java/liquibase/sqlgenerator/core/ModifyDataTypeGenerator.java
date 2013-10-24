@@ -15,6 +15,14 @@ import liquibase.structure.core.Table;
 public class ModifyDataTypeGenerator extends AbstractSqlGenerator<ModifyDataTypeStatement> {
 
     @Override
+    public boolean supports(ModifyDataTypeStatement statement, Database database) {
+        if (database instanceof SQLiteDatabase) {
+            return false;
+        }
+        return super.supports(statement, database);
+    }
+
+    @Override
     public Warnings warn(ModifyDataTypeStatement modifyDataTypeStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         Warnings warnings = super.warn(modifyDataTypeStatement, database, sqlGeneratorChain);
 

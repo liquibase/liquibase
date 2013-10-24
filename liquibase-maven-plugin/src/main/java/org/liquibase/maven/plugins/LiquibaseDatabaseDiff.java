@@ -34,10 +34,7 @@ public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
     protected String referenceDriver;
 
     /**
-     * The reference database URL to connect to for executing Liquibase. If performing a diff
-     * against a Hibernate config xml file, then use <b>"hibernate:PATH_TO_CONFIG_XML"</b>
-     * as the URL. The path to the hibernate configuration file can be relative to the test
-     * classpath for the Maven project.
+     * The reference database URL to connect to for executing Liquibase.
      *
      * @parameter expression="${liquibase.referenceUrl}"
      */
@@ -177,8 +174,7 @@ public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
         super.checkRequiredParametersAreSpecified();
 
         if (referenceUrl == null) {
-            throw new MojoFailureException("A reference database or hibernate configuration file "
-                    + "must be provided to perform a diff.");
+            throw new MojoFailureException("A reference database must be provided to perform a diff.");
         }
 
         if (referencePassword == null) {

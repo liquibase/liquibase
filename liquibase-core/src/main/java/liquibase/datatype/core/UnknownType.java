@@ -25,7 +25,12 @@ public class UnknownType extends LiquibaseDataType {
 
     @Override
     public DatabaseDataType toDatabaseDataType(Database database) {
-        int dataTypeMaxParameters = database.getDataTypeMaxParameters(getName());
+        int dataTypeMaxParameters;
+        if (getName().equalsIgnoreCase("enum")) {
+            dataTypeMaxParameters = Integer.MAX_VALUE;
+        } else {
+            dataTypeMaxParameters = database.getDataTypeMaxParameters(getName());
+        }
         Object[] parameters = getParameters();
         if (database instanceof MySQLDatabase && (
                 getName().equalsIgnoreCase("TINYBLOB")
@@ -37,8 +42,14 @@ public class UnknownType extends LiquibaseDataType {
             parameters = new Object[0];
         }
 
-        if (database instanceof MSSQLDatabase &&
-                getName().equalsIgnoreCase("REAL")) {
+        if (database instanceof MSSQLDatabase && (
+                getName().equalsIgnoreCase("REAL")
+                || getName().equalsIgnoreCase("XML")
+                || getName().equalsIgnoreCase("HIERARCHYID")
+                || getName().equalsIgnoreCase("DATETIMEOFFSET")
+                || getName().equalsIgnoreCase("IMAGE")
+                    || getName().equalsIgnoreCase("SMALLMONEY")
+        )) {
             parameters = new Object[0];
         }
 
