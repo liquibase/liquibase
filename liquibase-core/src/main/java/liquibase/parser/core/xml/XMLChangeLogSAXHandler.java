@@ -550,15 +550,6 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
                     return false;
       }
       PreconditionContainer preconditions = changeLog.getPreconditions();
-		DatabaseChangeLog changeLog;
-		try {
-			changeLog = ChangeLogParserFactory.getInstance().getParser(fileName, resourceAccessor)
-					.parse(fileName, changeLogParameters, resourceAccessor);
-		} catch (UnknownChangelogFormatException e) {
-			log.warning("included file " + relativeBaseFileName + "/" + fileName + " is not a recognized file type");
-			return false;
-		}
-		PreconditionContainer preconditions = changeLog.getPreconditions();
 		if (preconditions != null) {
 			if (null == databaseChangeLog.getPreconditions()) {
 				databaseChangeLog.setPreconditions(new PreconditionContainer());

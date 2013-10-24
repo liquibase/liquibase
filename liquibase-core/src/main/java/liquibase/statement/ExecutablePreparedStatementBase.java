@@ -1,11 +1,6 @@
 package liquibase.statement;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
+import java.io.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.PreparedStatement;
@@ -19,12 +14,13 @@ import liquibase.database.Database;
 import liquibase.database.PreparedStatementFactory;
 import liquibase.database.core.PostgresDatabase;
 import liquibase.exception.DatabaseException;
+import liquibase.resource.*;
+import liquibase.util.StringUtils;
 import liquibase.util.file.FilenameUtils;
 import liquibase.util.StreamUtil;
 
 public abstract class ExecutablePreparedStatementBase implements ExecutablePreparedStatement {
 
-	private ChangeSet changeSet;
 	protected Database database;
 	private String catalogName;
 	private String schemaName;

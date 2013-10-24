@@ -45,7 +45,7 @@ public class MssqlIntegrationTest extends AbstractMssqlIntegrationTest {
         }
 
         Liquibase liquibase = createLiquibase("changelogs/mssql/issues/default.values.xml");
-        liquibase.update(null);
+        liquibase.update((String) null);
 
         DatabaseSnapshot snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(CatalogAndSchema.DEFAULT, this.getDatabase(), new SnapshotControl(getDatabase()));
 
@@ -85,7 +85,7 @@ public class MssqlIntegrationTest extends AbstractMssqlIntegrationTest {
         }
 
         Liquibase liquibase = createLiquibase("changelogs/mssql/issues/data.types.xml");
-        liquibase.update(null);
+        liquibase.update((String) null);
 
         DatabaseSnapshot snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(CatalogAndSchema.DEFAULT, this.getDatabase(), new SnapshotControl(getDatabase()));
 
@@ -123,7 +123,7 @@ public class MssqlIntegrationTest extends AbstractMssqlIntegrationTest {
         }
 
         Liquibase liquibase = createLiquibase("changelogs/mssql/issues/data.type.params.xml");
-        liquibase.update(null);
+        liquibase.update((String) null);
 
         DatabaseSnapshot snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(CatalogAndSchema.DEFAULT, this.getDatabase(), new SnapshotControl(getDatabase()));
 
