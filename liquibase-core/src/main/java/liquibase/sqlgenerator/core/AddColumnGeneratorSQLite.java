@@ -28,6 +28,11 @@ public class AddColumnGeneratorSQLite extends AddColumnGenerator {
     }
 
     @Override
+    public boolean generateStatementsIsVolatile(Database database) {
+        return true;
+    }
+
+    @Override
     public Sql[] generateSql(final AddColumnStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         // SQLite does not support this ALTER TABLE operation until now.
         // For more information see: http://www.sqlite.org/omitted.html.
