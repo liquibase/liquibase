@@ -79,11 +79,7 @@ public class StreamUtil {
             }
             return result.toString();
         } finally {
-            try {
-                reader.close();
-            } catch (IOException ioe) {//NOPMD
-                // can safely ignore
-            }
+            closeQuietly(reader);
         }
     }
 

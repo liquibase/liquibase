@@ -112,28 +112,26 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
 				} else {
 					stmt.setBinaryStream(i, lob.content, lob.length);
 				}
-				closeables.add(lob.content);
 			} catch (IOException e) {
 				throw new DatabaseException(e.getMessage(), e); // wrap
 			}
 		} else if(col.getValueClobFile() != null) {
 			try {
 				LOBContent<Reader> lob = toCharacterStream(col.getValueClobFile(), col.getEncoding());
-                // PostgreSql does not support PreparedStatement.setCharacterStream() nor
-                // PreparedStatement.setClob().
-                if (database instanceof PostgresDatabase) {
-                    String text = StreamUtil.getReaderContents(lob.content);
-                    stmt.setString(i, text);
-                } else {
-                    if (lob.length <= Integer.MAX_VALUE) {
-                        stmt.setCharacterStream(i, lob.content, (int) lob.length);
-                    } else {
-                        stmt.setCharacterStream(i, lob.content, lob.length);
-                    }
-                }
-				closeables.add(lob.content);
-			}
-			catch (IOException e) {
+				
+				// PostgreSql does not support PreparedStatement.setCharacterStream() nor
+				// PreparedStatement.setClob().
+				if (database instanceof PostgresDatabase) {
+					String text = StreamUtil.getReaderContents(lob.content);
+					stmt.setString(i, text);
+				} else {
+					if (lob.length <= Integer.MAX_VALUE) {
+						stmt.setCharacterStream(i, lob.content, (int) lob.length);
+					} else {
+						stmt.setCharacterStream(i, lob.content, lob.length);
+					}
+				}
+			} catch (IOException e) {
 				throw new DatabaseException(e.getMessage(), e); // wrap
 			}
 		} else {
@@ -152,7 +150,8 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
 		}
 	}
 
-	private LOBContent<InputStream> toBinaryStream(String valueLobFile) throws DatabaseException, IOException
+	@SuppressWarnings("resource")
+    private LOBContent<InputStream> toBinaryStream(String valueLobFile) throws DatabaseException, IOException
 	{
 		InputStream in = getResourceAsStream(valueLobFile);
 		
@@ -160,28 +159,36 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
 			throw new DatabaseException("BLOB resource not found: " + valueLobFile);
 		}
 		
-		if (in instanceof FileInputStream) {
-			return new LOBContent<InputStream>(createStream(in), ((FileInputStream) in).getChannel().size());
+		try {
+			if (in instanceof FileInputStream) {
+				in = createStream(in);
+				return new LOBContent<InputStream>(in, ((FileInputStream) in).getChannel().size());
+			}
+			
+			in = createStream(in);
+			
+			final int IN_MEMORY_THRESHOLD = 100000;
+			
+			if (in.markSupported()) {
+				in.mark(IN_MEMORY_THRESHOLD);
+			}
+			
+			long length = StreamUtil.getContentLength(in);
+			
+			if (in.markSupported() && length <= IN_MEMORY_THRESHOLD) {
+				in.reset();
+			} else {
+				StreamUtil.closeQuietly(in);
+				in = getResourceAsStream(valueLobFile);
+				in = createStream(in);
+			}
+			
+			return new LOBContent<InputStream>(in, length);
+		} finally {
+			if (in != null) {
+				closeables.add(in);
+			}
 		}
-		
-		in = createStream(in);
-		
-		final int IN_MEMORY_THRESHOLD = 100000;
-		
-		if (in.markSupported()) {
-			in.mark(IN_MEMORY_THRESHOLD);
-		}
-		
-		long length = StreamUtil.getContentLength(in);
-		
-		if (in.markSupported() && length <= IN_MEMORY_THRESHOLD) {
-			in.reset();
-		} else {
-			StreamUtil.closeQuietly(in);
-			in = createStream(getResourceAsStream(valueLobFile));
-		}
-		
-		return new LOBContent<InputStream>(in, length);
 	}
 
 	private InputStream createStream(InputStream in) {
@@ -198,22 +205,35 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
 		
 		final int IN_MEMORY_THRESHOLD = 100000;
 		
-		Reader reader = createReader(in, encoding);
+		Reader reader = null;
 		
-		if (reader.markSupported()) {
-			reader.mark(IN_MEMORY_THRESHOLD);
+		try {
+			reader = createReader(in, encoding);
+			
+			if (reader.markSupported()) {
+				reader.mark(IN_MEMORY_THRESHOLD);
+			}
+			
+			long length = StreamUtil.getContentLength(reader);
+			
+			if (reader.markSupported() && length <= IN_MEMORY_THRESHOLD) {
+				reader.reset();
+			} else {
+				StreamUtil.closeQuietly(reader);
+				in = getResourceAsStream(valueLobFile);
+				reader = createReader(in, encoding);
+			}
+			
+			return new LOBContent<Reader>(reader, length);
 		}
-		
-		long length = StreamUtil.getContentLength(reader);
-		
-		if (reader.markSupported() && length <= IN_MEMORY_THRESHOLD) {
-			reader.reset();
-		} else {
-			StreamUtil.closeQuietly(reader);
-			reader = createReader(getResourceAsStream(valueLobFile), encoding);
+		finally {
+			if (reader != null) {
+				closeables.add(reader);
+			}
+			if (in != null) {
+				closeables.add(in);
+			}
 		}
-		
-		return new LOBContent<Reader>(reader, length);
 	}
 
 	@SuppressWarnings("resource")
@@ -224,7 +244,7 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
 					: new UtfBomAwareReader(in, encoding));
 	}
 	
-	protected InputStream getResourceAsStream(String valueLobFile) throws IOException {
+	private InputStream getResourceAsStream(String valueLobFile) throws IOException {
 		//  The same lookup logic that is in LiquibaseServletListener#executeUpdate()
 		
 		Thread currentThread = Thread.currentThread();
@@ -242,7 +262,7 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
 		return in;
 	}
 
-	protected String getFileName(String fileName) {
+	private String getFileName(String fileName) {
 		//  Most of this method were copy-pasted from XMLChangeLogSAXHandler#handleIncludedChangeLog()
 		
 		String relativeBaseFileName = changeSet.getFilePath();
