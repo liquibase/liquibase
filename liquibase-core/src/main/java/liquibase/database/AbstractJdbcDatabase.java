@@ -53,6 +53,8 @@ import java.util.regex.Pattern;
  */
 public abstract class AbstractJdbcDatabase implements Database {
 
+    private static final Pattern startsWithNumberPattern = Pattern.compile("^[0-9].*");
+
     private DatabaseConnection connection;
     protected String defaultCatalogName;
     protected String defaultSchemaName;
@@ -922,7 +924,7 @@ public abstract class AbstractJdbcDatabase implements Database {
     * Check if given string starts with numeric values that may cause problems and should be escaped.
     */
     protected boolean startsWithNumeric(String objectName) {
-        return objectName.matches("^[0-9].*");
+        return startsWithNumberPattern.matcher(objectName).matches();
     }
 
 // ------- DATABASE OBJECT DROPPING METHODS ---- //
@@ -1195,12 +1197,17 @@ public abstract class AbstractJdbcDatabase implements Database {
     public String escapeObjectName(String objectName, Class<? extends DatabaseObject> objectType) {
         if (objectName != null) {
             if (objectName.contains("-") || startsWithNumeric(objectName) || isReservedWord(objectName)) {
-                return quotingStartCharacter + objectName + quotingEndCharacter;
+                return quoteObject(objectName, objectType);
             } else if (quotingStrategy == ObjectQuotingStrategy.QUOTE_ALL_OBJECTS) {
-                return quotingStartCharacter + objectName + quotingEndCharacter;
+                return quoteObject(objectName, objectType);
             }
+            objectName = objectName.trim();
         }
         return objectName;
+    }
+
+    public String quoteObject(String objectName, Class<? extends DatabaseObject> objectType) {
+        return quotingStartCharacter + objectName + quotingEndCharacter;
     }
 
     @Override
@@ -1220,10 +1227,6 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     @Override
     public String escapeColumnName(String catalogName, String schemaName, String tableName, String columnName) {
-        if (columnName.contains("(")) {
-            return columnName;
-        }
-
         return escapeObjectName(columnName, Column.class);
     }
 

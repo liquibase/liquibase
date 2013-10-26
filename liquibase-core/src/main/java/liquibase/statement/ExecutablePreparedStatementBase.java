@@ -22,34 +22,32 @@ import liquibase.change.ColumnConfig;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.database.PreparedStatementFactory;
+import liquibase.database.core.PostgresDatabase;
 import liquibase.exception.DatabaseException;
-import liquibase.resource.ClassLoaderResourceAccessor;
-import liquibase.resource.CompositeResourceAccessor;
-import liquibase.resource.FileSystemResourceAccessor;
-import liquibase.resource.ResourceAccessor;
-import liquibase.resource.UtfBomAwareReader;
-import liquibase.util.StreamUtil;
+import liquibase.resource.*;
 import liquibase.util.StringUtils;
 import liquibase.util.file.FilenameUtils;
+import liquibase.util.StreamUtil;
 
 public abstract class ExecutablePreparedStatementBase implements ExecutablePreparedStatement {
 
-	private ChangeSet changeSet;
 	protected Database database;
 	private String catalogName;
 	private String schemaName;
 	private String tableName;
 	private List<ColumnConfig> columns;
-	
+	private ChangeSet changeSet;
+
 	private Set<Closeable> closeables;
 
-	protected ExecutablePreparedStatementBase(Database database, ChangeSet changeSet, String catalogName, String schemaName, String tableName, List<ColumnConfig> columns) {
+	protected ExecutablePreparedStatementBase(Database database, String catalogName, String schemaName, String tableName, List<ColumnConfig> columns, ChangeSet changeSet) {
 		this.database = database;
 		this.changeSet = changeSet;
 		this.catalogName = catalogName;
 		this.schemaName = schemaName;
 		this.tableName = tableName;
 		this.columns = columns;
+		this.changeSet = changeSet;
 		this.closeables = new HashSet<Closeable>();
 	}
 
@@ -121,11 +119,18 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
 		} else if(col.getValueClobFile() != null) {
 			try {
 				LOBContent<Reader> lob = toCharacterStream(col.getValueClobFile(), col.getEncoding());
-				if (lob.length <= Integer.MAX_VALUE) {
-					stmt.setCharacterStream(i, lob.content, (int) lob.length);
-				} else {
-					stmt.setCharacterStream(i, lob.content, lob.length);
-				}
+                // PostgreSql does not support PreparedStatement.setCharacterStream() nor
+                // PreparedStatement.setClob().
+                if (database instanceof PostgresDatabase) {
+                    String text = StreamUtil.getReaderContents(lob.content);
+                    stmt.setString(i, text);
+                } else {
+                    if (lob.length <= Integer.MAX_VALUE) {
+                        stmt.setCharacterStream(i, lob.content, (int) lob.length);
+                    } else {
+                        stmt.setCharacterStream(i, lob.content, lob.length);
+                    }
+                }
 				closeables.add(lob.content);
 			}
 			catch (IOException e) {
@@ -252,6 +257,24 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
 		
 		return fileName;
 	}
+
+    /**
+     * Gets absolute and normalized path for path.
+     * If path is relative, absolute path is calculated relative to change log file.
+     *
+     * @param path Absolute or relative path.
+     * @return Absolute and normalized path.
+     */
+    public String getAbsolutePath(String path) {
+    	String p = path;
+        File f = new File(p);
+        if (!f.isAbsolute()) {
+            String basePath = FilenameUtils.getFullPath(changeSet.getChangeLog().getPhysicalFilePath());
+            p = FilenameUtils.normalize(basePath + p);
+        }
+        return p;
+    }
+
 
 	@Override
     public boolean skipOnUnsupported() {

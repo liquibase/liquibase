@@ -43,11 +43,15 @@ public class MavenResourceAccessor implements ResourceAccessor {
 
     @Override
     public InputStream getResourceAsStream(String file) throws IOException {
+        file = file.replaceFirst("^target/classes/","");
+
         return _loader.getResourceAsStream(file);
     }
 
     @Override
     public Enumeration<URL> getResources(String packageName) throws IOException {
+        packageName = packageName.replaceFirst("^target/classes/","");
+
         return _loader.getResources(packageName);
     }
 

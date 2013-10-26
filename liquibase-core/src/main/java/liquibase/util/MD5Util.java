@@ -34,7 +34,12 @@ public class MD5Util {
         byte[] digestBytes = digest.digest();
 
         String returnString = new String(encodeHex(digestBytes));
-        LogFactory.getLogger().debug("Computed checksum for "+input+" as "+returnString);
+
+        String inputToLog = input;
+        if (inputToLog.length() > 500) {
+            inputToLog = inputToLog.substring(0, 500)+"... [truncated in log]";
+        }
+        LogFactory.getLogger().debug("Computed checksum for "+inputToLog+" as "+returnString);
         return returnString;
 
     }
@@ -45,7 +50,8 @@ public class MD5Util {
             digest = MessageDigest.getInstance("MD5");
 
             DigestInputStream digestStream = new DigestInputStream(stream, digest);
-            while (digestStream.read() != -1) {
+            byte[] buf = new byte[20480];
+            while (digestStream.read(buf) != -1) {
                 ; //digest is updating
             }
         } catch (Exception e) {
@@ -55,7 +61,7 @@ public class MD5Util {
 
         String returnString = new String(encodeHex(digestBytes));
 
-        LogFactory.getLogger().debug("Computed checksum for "+returnString+" as "+returnString);
+        LogFactory.getLogger().debug("Computed checksum for inputStream as "+returnString);
         return returnString;
     }
 

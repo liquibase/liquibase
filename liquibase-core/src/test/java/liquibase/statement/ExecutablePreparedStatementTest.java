@@ -66,9 +66,7 @@ public class ExecutablePreparedStatementTest {
 		
 		InsertExecutablePreparedStatement statement =
 				new InsertExecutablePreparedStatement(
-						new MockDatabase(),
-						changeSet,
-						"catalog", "schema", "table", columns);
+						new MockDatabase(), "catalog", "schema", "table", columns, changeSet);
 		
 		PreparedStatement stmt = createMock(PreparedStatement.class);
 
@@ -136,8 +134,7 @@ public class ExecutablePreparedStatementTest {
 		InsertExecutablePreparedStatement statement =
 				new InsertExecutablePreparedStatement(
 						new MockDatabase(),
-						changeSet,
-						"catalog", "schema", "table", columns);
+						"catalog", "schema", "table", columns, changeSet);
 		
 		PreparedStatement stmt = createMock(PreparedStatement.class);
 

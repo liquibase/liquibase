@@ -12,8 +12,8 @@ import liquibase.database.Database;
  */
 public class InsertExecutablePreparedStatement extends ExecutablePreparedStatementBase {
 	
-	public InsertExecutablePreparedStatement(Database database, ChangeSet changeSet, String catalogName, String schemaName, String tableName, List<ColumnConfig> columns) {
-		super(database, changeSet, catalogName, schemaName, tableName, columns);
+	public InsertExecutablePreparedStatement(Database database, String catalogName, String schemaName, String tableName, List<ColumnConfig> columns, ChangeSet changeSet) {
+		super(database, catalogName, schemaName, tableName, columns, changeSet);
 	}
 
 	@Override

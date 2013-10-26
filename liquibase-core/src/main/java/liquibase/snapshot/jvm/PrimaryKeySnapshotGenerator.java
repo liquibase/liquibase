@@ -4,6 +4,7 @@ import liquibase.CatalogAndSchema;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
 import liquibase.database.core.MSSQLDatabase;
+import liquibase.database.core.SQLiteDatabase;
 import liquibase.exception.DatabaseException;
 import liquibase.snapshot.CachedRow;
 import liquibase.snapshot.InvalidExampleException;
@@ -50,6 +51,11 @@ public class PrimaryKeySnapshotGenerator extends JdbcSnapshotGenerator {
                     returnKey.setTable((Table) new Table().setName(row.getString("TABLE_NAME")).setSchema(new Schema(tableSchema.getCatalogName(), tableSchema.getSchemaName())));
                     returnKey.setName(row.getString("PK_NAME"));
                 }
+
+                if (database instanceof SQLiteDatabase) { //SQLite is zero based position?
+                    position = (short) (position + 1);
+                }
+
                 returnKey.addColumnName(position - 1, columnName);
             }
 

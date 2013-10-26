@@ -96,11 +96,11 @@ public class IndexExistsPrecondition implements Precondition {
                 String name = "";
 
                 if (getIndexName() != null) {
-                    name += database.escapeStringForDatabase(getIndexName());
+                    name += database.escapeObjectName(getIndexName(), Index.class);
                 }
 
                 if (tableName != null) {
-                    name += " on "+database.escapeStringForDatabase(getTableName());
+                    name += " on "+database.escapeObjectName(getTableName(), Table.class);
 
                     if (StringUtils.trimToNull(getColumnNames()) != null) {
                         name += " columns "+getColumnNames();

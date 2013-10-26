@@ -168,7 +168,7 @@ public class DiffToChangeLog {
         return changeSets;
     }
 
-    private List<Class<? extends DatabaseObject>> getOrderedOutputTypes(Class<? extends ChangeGenerator> generatorType) {
+    protected List<Class<? extends DatabaseObject>> getOrderedOutputTypes(Class<? extends ChangeGenerator> generatorType) {
 
         Database comparisonDatabase = diffResult.getComparisonSnapshot().getDatabase();
         DependencyGraph graph = new DependencyGraph();
@@ -250,37 +250,36 @@ public class DiffToChangeLog {
             }
 
 
-            //L <- Empty list that will contain the sorted elements
-            ArrayList<Node> L = new ArrayList<Node>();
+            ArrayList<Node> returnNodes = new ArrayList<Node>();
 
-            //S <- Set of all nodes with no incoming edges
-            HashSet<Node> S = new HashSet<Node>();
+            SortedSet<Node> nodesWithNoIncomingEdges = new TreeSet<Node>(new Comparator<Node>() {
+                @Override
+                public int compare(Node o1, Node o2) {
+                    return o1.type.getName().compareTo(o2.type.getName());
+                }
+            });
             for (Node n : allNodes.values()) {
                 if (n.inEdges.size() == 0) {
-                    S.add(n);
+                    nodesWithNoIncomingEdges.add(n);
                 }
             }
 
-            //while S is non-empty do
-            while (!S.isEmpty()) {
-                //remove a node n from S
-                Node n = S.iterator().next();
-                S.remove(n);
+            while (!nodesWithNoIncomingEdges.isEmpty()) {
+                Node node = nodesWithNoIncomingEdges.iterator().next();
+                nodesWithNoIncomingEdges.remove(node);
 
-                //insert n into L
-                L.add(n);
+                returnNodes.add(node);
 
-                //for each node m with an edge e from n to m do
-                for (Iterator<Edge> it = n.outEdges.iterator(); it.hasNext(); ) {
+                for (Iterator<Edge> it = node.outEdges.iterator(); it.hasNext(); ) {
                     //remove edge e from the graph
-                    Edge e = it.next();
-                    Node m = e.to;
-                    it.remove();//Remove edge from n
-                    m.inEdges.remove(e);//Remove edge from m
+                    Edge edge = it.next();
+                    Node nodePointedTo = edge.to;
+                    it.remove();//Remove edge from node
+                    nodePointedTo.inEdges.remove(edge);//Remove edge from nodePointedTo
 
-                    //if m has no other incoming edges then insert m into S
-                    if (m.inEdges.isEmpty()) {
-                        S.add(m);
+                    //if nodePointedTo has no other incoming edges then insert nodePointedTo into nodesWithNoIncomingEdges
+                    if (nodePointedTo.inEdges.isEmpty()) {
+                        nodesWithNoIncomingEdges.add(nodePointedTo);
                     }
                 }
             }
@@ -306,7 +305,7 @@ public class DiffToChangeLog {
                 }
             }
             List<Class<? extends DatabaseObject>> returnList = new ArrayList<Class<? extends DatabaseObject>>();
-            for (Node node : L) {
+            for (Node node : returnNodes) {
                 returnList.add(node.type);
             }
             return returnList;

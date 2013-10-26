@@ -21,6 +21,14 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
     }
 
     @Override
+    public int getPriority(Class<? extends DatabaseObject> objectType, Database database) {
+        if (database instanceof SQLiteDatabase) {
+            return PRIORITY_NONE;
+        }
+        return super.getPriority(objectType, database);
+    }
+
+    @Override
     protected DatabaseObject snapshotObject(DatabaseObject example, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException {
         Database database = snapshot.getDatabase();
         UniqueConstraint exampleConstraint = (UniqueConstraint) example;

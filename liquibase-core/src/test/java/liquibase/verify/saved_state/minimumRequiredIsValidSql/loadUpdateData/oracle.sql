@@ -11,9 +11,9 @@ DECLARE
 BEGIN
 	SELECT COUNT(*) INTO v_reccount FROM person WHERE pk_id = NULL;
 	IF v_reccount = 0 THEN
-INSERT INTO person (username,  fullname) VALUES ('nvoxland', ' Nathan Voxland');
+INSERT INTO person (username, fullname) VALUES ('nvoxland', ' Nathan Voxland');
 	ELSIF v_reccount = 1 THEN
-UPDATE person SET  fullname = ' Nathan Voxland', username = 'nvoxland' WHERE pk_id = NULL;
+UPDATE person SET fullname = ' Nathan Voxland', username = 'nvoxland' WHERE pk_id = NULL;
 END IF;
 END;;
 DECLARE
@@ -21,8 +21,8 @@ DECLARE
 BEGIN
 	SELECT COUNT(*) INTO v_reccount FROM person WHERE pk_id = NULL;
 	IF v_reccount = 0 THEN
-INSERT INTO person (username,  fullname) VALUES ('bob', ' Bob Bobson');
+INSERT INTO person (username, fullname) VALUES ('bob', ' Bob Bobson');
 	ELSIF v_reccount = 1 THEN
-UPDATE person SET  fullname = ' Bob Bobson', username = 'bob' WHERE pk_id = NULL;
+UPDATE person SET fullname = ' Bob Bobson', username = 'bob' WHERE pk_id = NULL;
 END IF;
 END;;

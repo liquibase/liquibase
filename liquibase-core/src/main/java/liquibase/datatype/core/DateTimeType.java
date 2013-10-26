@@ -7,7 +7,7 @@ import liquibase.datatype.LiquibaseDataType;
 import liquibase.statement.DatabaseFunction;
 import liquibase.database.Database;
 
-@DataTypeInfo(name = "datetime", aliases = {"java.sql.Types.DATETIME", "java.util.Date"}, minParameters = 0, maxParameters = 1, priority = LiquibaseDataType.PRIORITY_DEFAULT)
+@DataTypeInfo(name = "datetime", aliases = {"java.sql.Types.DATETIME", "java.util.Date", "smalldatetime", "datetime2"}, minParameters = 0, maxParameters = 1, priority = LiquibaseDataType.PRIORITY_DEFAULT)
 public class DateTimeType extends LiquibaseDataType {
 
     @Override
@@ -20,6 +20,10 @@ public class DateTimeType extends LiquibaseDataType {
                 || database instanceof MaxDBDatabase
                 || database instanceof OracleDatabase) {
             return new DatabaseDataType("TIMESTAMP");
+        }
+
+        if (database instanceof MSSQLDatabase && getParameters().length > 0 && "16".equals(getParameters()[0])) {
+            return new DatabaseDataType("SMALLDATETIME");
         }
         if (database instanceof InformixDatabase) {
             return new DatabaseDataType("DATETIME YEAR TO FRACTION", 5);
