@@ -22,12 +22,15 @@ import liquibase.change.ColumnConfig;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.database.PreparedStatementFactory;
-import liquibase.database.core.PostgresDatabase;
 import liquibase.exception.DatabaseException;
-import liquibase.resource.*;
+import liquibase.resource.ClassLoaderResourceAccessor;
+import liquibase.resource.CompositeResourceAccessor;
+import liquibase.resource.FileSystemResourceAccessor;
+import liquibase.resource.ResourceAccessor;
+import liquibase.resource.UtfBomAwareReader;
+import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
 import liquibase.util.file.FilenameUtils;
-import liquibase.util.StreamUtil;
 
 public abstract class ExecutablePreparedStatementBase implements ExecutablePreparedStatement {
 
@@ -118,18 +121,10 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
 		} else if(col.getValueClobFile() != null) {
 			try {
 				LOBContent<Reader> lob = toCharacterStream(col.getValueClobFile(), col.getEncoding());
-				
-				// PostgreSql does not support PreparedStatement.setCharacterStream() nor
-				// PreparedStatement.setClob().
-				if (database instanceof PostgresDatabase) {
-					String text = StreamUtil.getReaderContents(lob.content);
-					stmt.setString(i, text);
+				if (lob.length <= Integer.MAX_VALUE) {
+					stmt.setCharacterStream(i, lob.content, (int) lob.length);
 				} else {
-					if (lob.length <= Integer.MAX_VALUE) {
-						stmt.setCharacterStream(i, lob.content, (int) lob.length);
-					} else {
-						stmt.setCharacterStream(i, lob.content, lob.length);
-					}
+					stmt.setCharacterStream(i, lob.content, lob.length);
 				}
 			} catch (IOException e) {
 				throw new DatabaseException(e.getMessage(), e); // wrap
