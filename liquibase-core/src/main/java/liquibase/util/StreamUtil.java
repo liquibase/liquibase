@@ -79,11 +79,7 @@ public class StreamUtil {
             }
             return result.toString();
         } finally {
-            try {
-                reader.close();
-            } catch (IOException ioe) {//NOPMD
-                // can safely ignore
-            }
+            closeQuietly(reader);
         }
     }
 
@@ -119,4 +115,23 @@ public class StreamUtil {
         }
         return length;
     }
+    
+    public static void closeQuietly(Reader input) {
+        closeQuietly((Closeable) input);
+    }
+    
+    public static void closeQuietly(InputStream input) {
+        closeQuietly((Closeable) input);
+    }
+    
+    public static void closeQuietly(Closeable input) {
+        try {
+            if (input != null) {
+                input.close();
+            }
+        } catch (IOException ioe) {
+            // ignore
+        }
+    }
+
 }

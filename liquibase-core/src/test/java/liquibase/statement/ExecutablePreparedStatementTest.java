@@ -72,7 +72,7 @@ public class ExecutablePreparedStatementTest {
 
 		final Capture<Integer> index = new Capture<Integer>();
 		final Capture<InputStream> in = new Capture<InputStream>();
-		final Capture<Long> length = new Capture<Long>();
+		final Capture<Integer> length = new Capture<Integer>();
 		stmt.setBinaryStream(capture(index), capture(in), capture(length));
 		expectLastCall().andAnswer(new IAnswer<Object>() {
 			@Override
@@ -80,7 +80,7 @@ public class ExecutablePreparedStatementTest {
 				Assert.assertEquals(new Integer(1), index.getValue());
 				Assert.assertNotNull(in.getValue());
 				Assert.assertTrue(in.getValue() instanceof BufferedInputStream);
-				Assert.assertEquals(new Long(50), length.getValue());
+				Assert.assertEquals(new Integer(50), length.getValue());
 				return null;
 			}
 		});
@@ -140,7 +140,7 @@ public class ExecutablePreparedStatementTest {
 
 		final Capture<Integer> index = new Capture<Integer>();
 		final Capture<Reader> reader = new Capture<Reader>();
-		final Capture<Long> length = new Capture<Long>();
+		final Capture<Integer> length = new Capture<Integer>();
 		stmt.setCharacterStream(capture(index), capture(reader), capture(length));
 		expectLastCall().andAnswer(new IAnswer<Object>() {
 			@Override
@@ -148,7 +148,7 @@ public class ExecutablePreparedStatementTest {
 				Assert.assertEquals(new Integer(1), index.getValue());
 				Assert.assertNotNull(reader.getValue());
 				Assert.assertTrue(reader.getValue() instanceof BufferedReader);
-				Assert.assertEquals(new Long(39), length.getValue());
+				Assert.assertEquals(new Integer(39), length.getValue());
 				return null;
 			}
 		});
