@@ -342,5 +342,7 @@ public interface Database extends PrioritizedService {
     void setOutputDefaultCatalog(boolean outputDefaultCatalog);
 
     boolean supportsPrimaryKeyNames();
+
+    public String getSystemSchema();
 }
 

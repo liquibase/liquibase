@@ -54,18 +54,21 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
         public List<CachedRow> getForeignKeys(final String catalogName, final String schemaName, final String tableName, final String fkName) throws DatabaseException {
             return getResultSetCache("getImportedKeys").get(new ResultSetCache.UnionResultSetExtractor(database) {
 
+
                 @Override
                 public ResultSetCache.RowData rowKeyParameters(CachedRow row) {
                     return new ResultSetCache.RowData(row.getString("FKTABLE_CAT"), row.getString("FKTABLE_SCHEM"), database, row.getString("FKTABLE_NAME"), row.getString("FK_NAME"));
                 }
 
+
                 @Override
-                public ResultSetCache.RowData wantedKeyParameters() {
+				public ResultSetCache.RowData wantedKeyParameters() {
                     return new ResultSetCache.RowData(catalogName, schemaName, database, tableName, fkName);
                 }
 
+
                 @Override
-                public List<CachedRow> fastFetch() throws SQLException, DatabaseException {
+				public List<CachedRow> fastFetch() throws SQLException, DatabaseException {
                     CatalogAndSchema catalogAndSchema = database.correctSchema(new CatalogAndSchema(catalogName, schemaName));
 
                     List<CachedRow> returnList = new ArrayList<CachedRow>();
@@ -87,10 +90,12 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                     return returnList;
                 }
 
+
                 @Override
-                public List<CachedRow> bulkFetch() throws SQLException, DatabaseException {
+				public List<CachedRow> bulkFetch() throws SQLException, DatabaseException {
                     return null;
                 }
+
 
                 @Override
                 boolean shouldBulkSelect(ResultSetCache resultSetCache) {
@@ -102,18 +107,21 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
         public List<CachedRow> getIndexInfo(final String catalogName, final String schemaName, final String tableName, final String indexName) throws DatabaseException {
             return getResultSetCache("getIndexInfo").get(new ResultSetCache.UnionResultSetExtractor(database) {
 
+
                 @Override
                 public ResultSetCache.RowData rowKeyParameters(CachedRow row) {
                     return new ResultSetCache.RowData(row.getString("TABLE_CAT"), row.getString("TABLE_SCHEM"), database, row.getString("TABLE_NAME"), row.getString("INDEX_NAME"));
                 }
 
+
                 @Override
-                public ResultSetCache.RowData wantedKeyParameters() {
+				public ResultSetCache.RowData wantedKeyParameters() {
                     return new ResultSetCache.RowData(catalogName, schemaName, database, tableName, indexName);
                 }
 
+
                 @Override
-                public List<CachedRow> fastFetch() throws SQLException, DatabaseException {
+				public List<CachedRow> fastFetch() throws SQLException, DatabaseException {
                     List<CachedRow> returnList = new ArrayList<CachedRow>();
 
                     CatalogAndSchema catalogAndSchema = database.correctSchema(new CatalogAndSchema(catalogName, schemaName));
@@ -154,10 +162,12 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                     return returnList;
                 }
 
+
                 @Override
-                public List<CachedRow> bulkFetch() throws SQLException, DatabaseException {
+				public List<CachedRow> bulkFetch() throws SQLException, DatabaseException {
                     return fastFetch();
                 }
+
 
                 @Override
                 boolean shouldBulkSelect(ResultSetCache resultSetCache) {
@@ -175,15 +185,18 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
         public List<CachedRow> getColumns(final String catalogName, final String schemaName, final String tableName, final String columnName) throws SQLException, DatabaseException {
             return getResultSetCache("getColumns").get(new ResultSetCache.SingleResultSetExtractor(database) {
 
+
                 @Override
                 public ResultSetCache.RowData rowKeyParameters(CachedRow row) {
                     return new ResultSetCache.RowData(row.getString("TABLE_CAT"), row.getString("TABLE_SCHEM"), database, row.getString("TABLE_NAME"), row.getString("COLUMN_NAME"));
                 }
 
+
                 @Override
-                public ResultSetCache.RowData wantedKeyParameters() {
+				public ResultSetCache.RowData wantedKeyParameters() {
                     return new ResultSetCache.RowData(catalogName, schemaName, database, tableName, columnName);
                 }
+
 
                 @Override
                 boolean shouldBulkSelect(ResultSetCache resultSetCache) {
@@ -197,8 +210,9 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                     return seenTables.size() > 2;
                 }
 
+
                 @Override
-                public ResultSet fastFetchQuery() throws SQLException, DatabaseException {
+				public ResultSet fastFetchQuery() throws SQLException, DatabaseException {
                     if (database instanceof OracleDatabase) {
                         return oracleQuery(false);
                     }
@@ -207,8 +221,9 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                     return databaseMetaData.getColumns(((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema), tableName, columnName);
                 }
 
+
                 @Override
-                public ResultSet bulkFetchQuery() throws SQLException, DatabaseException {
+				public ResultSet bulkFetchQuery() throws SQLException, DatabaseException {
                     if (database instanceof OracleDatabase) {
                         return oracleQuery(true);
                     }
@@ -243,18 +258,21 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
         public List<CachedRow> getTables(final String catalogName, final String schemaName, final String table, final String[] types) throws SQLException, DatabaseException {
             return getResultSetCache("getTables."+StringUtils.join(types, ":")).get(new ResultSetCache.SingleResultSetExtractor(database) {
 
+
                 @Override
                 public ResultSetCache.RowData rowKeyParameters(CachedRow row) {
                     return new ResultSetCache.RowData(row.getString("TABLE_CAT"), row.getString("TABLE_SCHEM"), database, row.getString("TABLE_NAME"));
                 }
 
+
                 @Override
-                public ResultSetCache.RowData wantedKeyParameters() {
+				public ResultSetCache.RowData wantedKeyParameters() {
                     return new ResultSetCache.RowData(catalogName, schemaName, database, table);
                 }
 
+
                 @Override
-                public ResultSet fastFetchQuery() throws SQLException {
+				public ResultSet fastFetchQuery() throws SQLException {
                     CatalogAndSchema catalogAndSchema = database.correctSchema(new CatalogAndSchema(catalogName, schemaName));
 
                     String catalog = ((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema);
@@ -262,8 +280,9 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                     return databaseMetaData.getTables(catalog, schema, database.correctObjectName(table, Table.class), types);
                 }
 
+
                 @Override
-                public ResultSet bulkFetchQuery() throws SQLException {
+				public ResultSet bulkFetchQuery() throws SQLException {
                     CatalogAndSchema catalogAndSchema = database.correctSchema(new CatalogAndSchema(catalogName, schemaName));
 
                     return databaseMetaData.getTables(((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema), null, types);
@@ -274,27 +293,32 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
         public List<CachedRow> getPrimaryKeys(final String catalogName, final String schemaName, final String table) throws SQLException, DatabaseException {
             return getResultSetCache("getPrimaryKeys").get(new ResultSetCache.SingleResultSetExtractor(database) {
 
+
                 @Override
                 public ResultSetCache.RowData rowKeyParameters(CachedRow row) {
                     return new ResultSetCache.RowData(row.getString("TABLE_CAT"), row.getString("TABLE_SCHEM"),  database, row.getString("TABLE_NAME"));
                 }
 
+
                 @Override
-                public ResultSetCache.RowData wantedKeyParameters() {
+				public ResultSetCache.RowData wantedKeyParameters() {
                     return new ResultSetCache.RowData(catalogName, schemaName, database, table);
                 }
 
+
                 @Override
-                public ResultSet fastFetchQuery() throws SQLException {
+				public ResultSet fastFetchQuery() throws SQLException {
                     CatalogAndSchema catalogAndSchema = database.correctSchema(new CatalogAndSchema(catalogName, schemaName));
 
                     return databaseMetaData.getPrimaryKeys(((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema), table);
                 }
 
+
                 @Override
-                public ResultSet bulkFetchQuery() throws SQLException {
+				public ResultSet bulkFetchQuery() throws SQLException {
                     return null;
                 }
+
 
                 @Override
                 boolean shouldBulkSelect(ResultSetCache resultSetCache) {
@@ -306,25 +330,29 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
         public List<CachedRow> getUniqueConstraints(final String catalogName, final String schemaName, final String tableName) throws SQLException, DatabaseException {
             return getResultSetCache("getUniqueConstraints").get(new ResultSetCache.SingleResultSetExtractor(database) {
 
+
                 @Override
                 public ResultSetCache.RowData rowKeyParameters(CachedRow row) {
                     return new ResultSetCache.RowData(row.getString("TABLE_CAT"), row.getString("TABLE_SCHEM"), database, row.getString("TABLE_NAME"));
                 }
 
+
                 @Override
-                public ResultSetCache.RowData wantedKeyParameters() {
+				public ResultSetCache.RowData wantedKeyParameters() {
                     return new ResultSetCache.RowData(catalogName, schemaName, database, tableName);
                 }
 
+
                 @Override
-                public ResultSet fastFetchQuery() throws SQLException, DatabaseException {
+				public ResultSet fastFetchQuery() throws SQLException, DatabaseException {
                     CatalogAndSchema catalogAndSchema = database.correctSchema(new CatalogAndSchema(catalogName, schemaName));
 
                     return executeQuery(createSql(((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema), tableName), JdbcDatabaseSnapshot.this.getDatabase());
                 }
 
+
                 @Override
-                public ResultSet bulkFetchQuery() throws SQLException, DatabaseException {
+				public ResultSet bulkFetchQuery() throws SQLException, DatabaseException {
                     CatalogAndSchema catalogAndSchema = database.correctSchema(new CatalogAndSchema(catalogName, schemaName));
 
                     return executeQuery(createSql(((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema), null), JdbcDatabaseSnapshot.this.getDatabase());
@@ -335,7 +363,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                     String sql;
                     if (database instanceof MySQLDatabase || database instanceof HsqlDatabase) {
                         sql = "select CONSTRAINT_NAME, TABLE_NAME " +
-                                "from information_schema.table_constraints " +
+                                "from "+database.getSystemSchema()+".table_constraints " +
                                 "where constraint_schema='" + database.correctObjectName(catalogName, Catalog.class) + "' " +
                                 "and constraint_type='UNIQUE'";
                         if (tableName != null) {
@@ -343,7 +371,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                         }
                     } else if (database instanceof PostgresDatabase) {
                         sql = "select CONSTRAINT_NAME, TABLE_NAME " +
-                                "from information_schema.table_constraints " +
+                                "from "+database.getSystemSchema()+".table_constraints " +
                                 "where constraint_catalog='" + database.correctObjectName(catalogName, Catalog.class) + "' " +
                                 "and constraint_schema='"+database.correctObjectName(schemaName, Schema.class)+"' " +
                                 "and constraint_type='UNIQUE'";
@@ -400,9 +428,17 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                         if (tableName != null) {
                             sql += " AND t.tablename = '"+database.correctObjectName(tableName, Table.class)+"'";
                         }
+                    } else if (database instanceof InformixDatabase) {
+                        sql = "select sysindexes.idxname, sysindexes.idxtype, systables.tabname "+
+                        		"from sysindexes, systables "+
+                        		"where sysindexes.tabid = systables.tabid "+
+                        		"and sysindexes.idxtype ='U'";
+                        if (tableName != null) {
+                            sql += " AND systables.tabname = '"+database.correctObjectName(tableName, Table.class)+"'";
+                        }
                     } else {
                         sql = "select CONSTRAINT_NAME, CONSTRAINT_TYPE, TABLE_NAME " +
-                                "from information_schema.constraints " +
+                                "from "+database.getSystemSchema()+".constraints " +
                                 "where constraint_schema='" + database.correctObjectName(schemaName, Schema.class) + "' " +
                                 "and constraint_catalog='" + database.correctObjectName(catalogName, Catalog.class) + "' " +
                                 "and constraint_type='UNIQUE'";

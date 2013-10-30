@@ -20,6 +20,7 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
         super(UniqueConstraint.class, new Class[]{Table.class});
     }
 
+
     @Override
     public int getPriority(Class<? extends DatabaseObject> objectType, Database database) {
         if (database instanceof SQLiteDatabase) {
@@ -27,6 +28,7 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
         }
         return super.getPriority(objectType, database);
     }
+
 
     @Override
     protected DatabaseObject snapshotObject(DatabaseObject example, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException {
@@ -48,6 +50,7 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
 
         return constraint;
     }
+
 
     @Override
     protected void addTo(DatabaseObject foundObject, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException {
@@ -93,8 +96,8 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
         String sql = null;
         if (database instanceof MySQLDatabase || database instanceof HsqlDatabase) {
             sql = "select const.CONSTRAINT_NAME, COLUMN_NAME " +
-                    "from information_schema.table_constraints const " +
-                    "join information_schema.key_column_usage col " +
+                    "from "+database.getSystemSchema()+".table_constraints const " +
+                    "join "+database.getSystemSchema()+".key_column_usage col " +
                     "on const.constraint_schema=col.constraint_schema " +
                     "and const.table_name=col.table_name " +
                     "and const.constraint_name=col.constraint_name " +
@@ -104,8 +107,8 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
                     "order by ordinal_position";
         } else if (database instanceof PostgresDatabase) {
                 sql = "select const.CONSTRAINT_NAME, COLUMN_NAME " +
-                        "from information_schema.table_constraints const " +
-                        "join information_schema.key_column_usage col " +
+                        "from "+database.getSystemSchema()+".table_constraints const " +
+                        "join "+database.getSystemSchema()+".key_column_usage col " +
                         "on const.constraint_schema=col.constraint_schema " +
                         "and const.table_name=col.table_name " +
                         "and const.constraint_name=col.constraint_name " +
@@ -180,7 +183,7 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
             String constraintName = database.correctObjectName(name, UniqueConstraint.class);
             String tableName = database.correctObjectName(table.getName(), Table.class);
             sql = "select CONSTRAINT_NAME, COLUMN_LIST as COLUMN_NAME " +
-                    "from information_schema.constraints " +
+                    "from "+database.getSystemSchema()+".constraints " +
                     "where constraint_type='UNIQUE' ";
             if (catalogName != null) {
                 sql += "and constraint_catalog='" + catalogName + "' ";
