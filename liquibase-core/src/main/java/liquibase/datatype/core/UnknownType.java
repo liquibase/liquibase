@@ -48,7 +48,8 @@ public class UnknownType extends LiquibaseDataType {
                 || getName().equalsIgnoreCase("HIERARCHYID")
                 || getName().equalsIgnoreCase("DATETIMEOFFSET")
                 || getName().equalsIgnoreCase("IMAGE")
-                    || getName().equalsIgnoreCase("SMALLMONEY")
+                || getName().equalsIgnoreCase("NTEXT")
+                || getName().equalsIgnoreCase("SMALLMONEY")
         )) {
             parameters = new Object[0];
         }
