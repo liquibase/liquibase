@@ -130,6 +130,7 @@ public class YamlChangeLogParser implements ChangeLogParser {
                                             columnConfig.setRemarks(getValue(column, "remarks", String.class, changeLogParameters));
                                             columnConfig.setStartWith(getValue(column, "startWith", BigInteger.class, changeLogParameters));
 
+                                            columnConfig.setValue(getValue(column, "value", String.class, changeLogParameters));
                                             columnConfig.setValueNumeric(getValue(column, "valueNumeric", String.class, changeLogParameters));
                                             columnConfig.setValueBlobFile(getValue(column, "valueBlobFile", String.class, changeLogParameters));
                                             columnConfig.setValueBoolean(getValue(column, "valueBoolean", String.class, changeLogParameters));
