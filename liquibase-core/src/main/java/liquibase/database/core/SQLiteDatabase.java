@@ -9,8 +9,11 @@ import liquibase.database.DatabaseConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.snapshot.DatabaseSnapshot;
+import liquibase.snapshot.SnapshotControl;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.snapshot.InvalidExampleException;
+import liquibase.sql.Sql;
+import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.*;
 import liquibase.structure.core.*;
@@ -36,7 +39,7 @@ public class SQLiteDatabase extends AbstractJdbcDatabase {
     @Override
     public String getDefaultDriver(String url) {
         if (url.startsWith("jdbc:sqlite:")) {
-            return "SQLite.JDBCDriver";
+            return "org.sqlite.JDBC";
         }
         return null;
     }
@@ -45,7 +48,7 @@ public class SQLiteDatabase extends AbstractJdbcDatabase {
     public int getPriority() {
         return PRIORITY_DEFAULT;
     }
-    
+
 
     @Override
     public String getShortName() {
@@ -107,96 +110,103 @@ public class SQLiteDatabase extends AbstractJdbcDatabase {
 
     @Override
     protected boolean generateAutoIncrementStartWith(BigInteger startWith) {
-    	// not supported
-    	return false;
+        // not supported
+        return false;
     }
 
     @Override
     protected boolean generateAutoIncrementBy(BigInteger incrementBy) {
-    	// not supported
-    	return false;
+        // not supported
+        return false;
     }
-    
+
     public static List<SqlStatement> getAlterTableStatements(
             AlterTableVisitor alterTableVisitor,
             Database database, String catalogName, String schemaName, String tableName)
             throws DatabaseException {
 
-        DatabaseSnapshot snapshot = null; //todo
         List<SqlStatement> statements = new ArrayList<SqlStatement>();
 
         Table table = null;
         try {
             table = SnapshotGeneratorFactory.getInstance().createSnapshot((Table) new Table().setName(tableName).setSchema(new Schema(new Catalog(null), null)), database);
+
+            List<ColumnConfig> createColumns = new ArrayList<ColumnConfig>();
+            List<ColumnConfig> copyColumns = new ArrayList<ColumnConfig>();
+            if (table != null) {
+                for (Column column : table.getColumns()) {
+                    ColumnConfig new_column = new ColumnConfig(column);
+                    if (alterTableVisitor.createThisColumn(new_column)) {
+                        createColumns.add(new_column);
+                    }
+                    ColumnConfig copy_column = new ColumnConfig(column);
+                    if (alterTableVisitor.copyThisColumn(copy_column)) {
+                        copyColumns.add(copy_column);
+                    }
+
+                }
+            }
+            for (ColumnConfig column : alterTableVisitor.getColumnsToAdd()) {
+                if (alterTableVisitor.createThisColumn(column)) {
+                    createColumns.add(column);
+                }
+                if (alterTableVisitor.copyThisColumn(column)) {
+                    copyColumns.add(column);
+                }
+            }
+
+            List<Index> newIndices = new ArrayList<Index>();
+            for (Index index : SnapshotGeneratorFactory.getInstance().createSnapshot(new CatalogAndSchema(catalogName, schemaName), database, new SnapshotControl(database, Index.class)).get(Index.class)) {
+                if (index.getTable().getName().equalsIgnoreCase(tableName)) {
+                    if (alterTableVisitor.createThisIndex(index)) {
+                        newIndices.add(index);
+                    }
+                }
+            }
+
+            // rename table
+            String temp_table_name = tableName + "_temporary";
+
+            statements.addAll(Arrays.asList(new RenameTableStatement(catalogName, schemaName, tableName, temp_table_name)));
+            // create temporary table
+            CreateTableChange ct_change_tmp = new CreateTableChange();
+            ct_change_tmp.setSchemaName(schemaName);
+            ct_change_tmp.setTableName(tableName);
+            for (ColumnConfig column : createColumns) {
+                ct_change_tmp.addColumn(column);
+            }
+            statements.addAll(Arrays.asList(ct_change_tmp.generateStatements(database)));
+            // copy rows to temporary table
+            statements.addAll(Arrays.asList(new CopyRowsStatement(temp_table_name, tableName, copyColumns)));
+            // delete original table
+            statements.addAll(Arrays.asList(new DropTableStatement(catalogName, schemaName, temp_table_name, false)));
+            // validate indices
+            statements.addAll(Arrays.asList(new ReindexStatement(catalogName, schemaName, tableName)));
+            // add remaining indices
+            for (Index index_config : newIndices) {
+                statements.addAll(Arrays.asList(new CreateIndexStatement(
+                        index_config.getName(),
+                        catalogName, schemaName, tableName,
+                        index_config.isUnique(),
+                        index_config.getAssociatedWithAsString(),
+                        index_config.getColumns().
+                                toArray(new String[index_config.getColumns().size()]))));
+            }
+
+            return statements;
         } catch (InvalidExampleException e) {
             throw new UnexpectedLiquibaseException(e);
         }
 
-        List<ColumnConfig> createColumns = new Vector<ColumnConfig>();
-        List<ColumnConfig> copyColumns = new Vector<ColumnConfig>();
-        if (table != null) {
-            for (Column column : table.getColumns()) {
-                ColumnConfig new_column = new ColumnConfig(column);
-                if (alterTableVisitor.createThisColumn(new_column)) {
-                    createColumns.add(new_column);
-                }
-                ColumnConfig copy_column = new ColumnConfig(column);
-                if (alterTableVisitor.copyThisColumn(copy_column)) {
-                    copyColumns.add(copy_column);
-                }
-            }
-        }
-        for (ColumnConfig column : alterTableVisitor.getColumnsToAdd()) {
-            if (alterTableVisitor.createThisColumn(column)) {
-                createColumns.add(column);
-            }
-            if (alterTableVisitor.copyThisColumn(column)) {
-                copyColumns.add(column);
-            }
-        }
-
-        List<Index> newIndices = new Vector<Index>();
-        for (Index index : new ArrayList<Index>()) { //todo SnapshotGeneratorFactory.getInstance().getGenerator(Index.class, database).get(new Schema(new Catalog(null), schemaName), database)) {
-            if (index.getTable().getName().equalsIgnoreCase(tableName)) {
-                if (alterTableVisitor.createThisIndex(index)) {
-                    newIndices.add(index);
-                }
-            }
-        }
-
-        // rename table
-        String temp_table_name = tableName + "_temporary";
-        statements.add(new RenameTableStatement(catalogName, schemaName, tableName, temp_table_name));
-        // create temporary table
-        CreateTableChange ct_change_tmp = new CreateTableChange();
-        ct_change_tmp.setSchemaName(schemaName);
-        ct_change_tmp.setTableName(tableName);
-        for (ColumnConfig column : createColumns) {
-            ct_change_tmp.addColumn(column);
-        }
-        statements.addAll(Arrays.asList(ct_change_tmp.generateStatements(database)));
-        // copy rows to temporary table
-        statements.add(new CopyRowsStatement(temp_table_name, tableName, copyColumns));
-        // delete original table
-        statements.add(new DropTableStatement(catalogName, schemaName, temp_table_name, false));
-        // validate indices
-        statements.add(new ReindexStatement(catalogName, schemaName, tableName));
-        // add remaining indices
-        for (Index index_config : newIndices) {
-            statements.add(new CreateIndexStatement(
-                    index_config.getName(),
-                    catalogName, schemaName, tableName,
-                    index_config.isUnique(),
-		            index_config.getAssociatedWithAsString(),
-                    index_config.getColumns().
-                            toArray(new String[index_config.getColumns().size()])));
-        }
-
-        return statements;
     }
-    
+
     @Override
     protected Set<String> getSystemViews() {
+        return systemTables;
+    }
+
+    @Override
+    protected Set<String> getSystemTables() {
         return systemTables;
     }
 

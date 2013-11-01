@@ -10,7 +10,7 @@ public class ChangeLogListWriter extends HTMLListWriter {
 
     @Override
     public String getTargetExtension() {
-        return ".xml";
+        return ".html";
     }
 
 }

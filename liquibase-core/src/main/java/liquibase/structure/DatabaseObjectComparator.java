@@ -13,7 +13,7 @@ public class DatabaseObjectComparator implements Comparator<DatabaseObject> {
 
         int i = name1.compareTo(name2);
         if (i == 0) {
-            return o1.toString().compareTo(o2.toString());
+            return StringUtils.trimToEmpty(o1.toString()).compareTo(StringUtils.trimToEmpty(o2.toString()));
         }
 
         return i;

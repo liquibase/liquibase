@@ -1,13 +1,16 @@
 package liquibase.util;
 
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertTrue;
-import static junit.framework.Assert.fail;
-import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.StringReader;
+
+import org.junit.Test;
 
 public class StreamUtilTest {
 
@@ -75,5 +78,13 @@ public class StreamUtilTest {
 			assertTrue(e.getMessage().contains("UTF-16BE"));
 		}
 	}
-
+	
+	@Test
+	public void testContentLength() throws IOException {
+		InputStream in = getClass().getResourceAsStream("/liquibase/util/unicode-file.txt");
+		assertEquals(50, StreamUtil.getContentLength(in));
+		
+		in = getClass().getResourceAsStream("/liquibase/util/unicode-file.txt");
+		assertEquals(39, StreamUtil.getContentLength(new InputStreamReader(in, "UTF-8")));
+	}
 }

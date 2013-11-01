@@ -28,6 +28,7 @@ public class SqlGeneratorFactory {
     //caches for expensive reflection based calls that slow down Liquibase initialization: CORE-1207
     private final Map<Class<?>, Type[]> genericInterfacesCache = new HashMap<Class<?>, Type[]>();
     private final Map<Class<?>, Type> genericSuperClassCache = new HashMap<Class<?>, Type>();
+    private Map<String, SortedSet<SqlGenerator>> generatorsByKey = new HashMap<String, SortedSet<SqlGenerator>>();
 
     private SqlGeneratorFactory() {
         Class[] classes;
@@ -84,6 +85,18 @@ public class SqlGeneratorFactory {
     }
 
     protected SortedSet<SqlGenerator> getGenerators(SqlStatement statement, Database database) {
+        String databaseName = null;
+        if (database == null) {
+            databaseName = "NULL";
+        } else {
+            databaseName = database.getShortName();
+        }
+        String key = statement.getClass().getName()+":"+ databaseName;
+
+        if (generatorsByKey.containsKey(key)) {
+            return generatorsByKey.get(key);
+        }
+
         SortedSet<SqlGenerator> validGenerators = new TreeSet<SqlGenerator>(new SqlGeneratorComparator());
 
         for (SqlGenerator generator : getGenerators()) {
@@ -108,6 +121,8 @@ public class SqlGeneratorFactory {
                 clazz = clazz.getSuperclass();
             }
         }
+
+        generatorsByKey.put(key, validGenerators);
         return validGenerators;
     }
 
@@ -164,6 +179,15 @@ public class SqlGeneratorFactory {
         }
         //noinspection unchecked
         return new SqlGeneratorChain(sqlGenerators);
+    }
+
+    public Sql[] generateSql(SqlStatement[] statements, Database database) {
+        List<Sql> returnList = new ArrayList<Sql>();
+        for (SqlStatement statement : statements) {
+            returnList.addAll(Arrays.asList(SqlGeneratorFactory.getInstance().generateSql(statement, database)));
+        }
+
+        return returnList.toArray(new Sql[returnList.size()]);
     }
 
     public Sql[] generateSql(SqlStatement statement, Database database) {

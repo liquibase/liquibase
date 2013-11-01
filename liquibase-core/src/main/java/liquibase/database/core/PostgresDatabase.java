@@ -11,6 +11,7 @@ import liquibase.executor.ExecutorService;
 import liquibase.logging.LogFactory;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.core.Table;
+import liquibase.util.StringUtils;
 
 import java.math.BigInteger;
 import java.sql.Types;
@@ -36,19 +37,6 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
         super.sequenceCurrentValueFunction = "currval('%s')";
         super.unmodifiableDataTypes.addAll(Arrays.asList("bool", "int4", "int8", "float4", "float8", "numeric", "bigserial", "serial", "bytea", "timestamptz"));
         super.unquotedObjectsAreUppercased=false;
-    }
-
-    @Override
-    public void setConnection(DatabaseConnection conn) {
-        try {
-            if (conn instanceof JdbcConnection) {
-                reservedWords.addAll(Arrays.asList(((JdbcConnection) conn).getMetaData().getSQLKeywords().toUpperCase().split(",\\s*")));
-            }
-        } catch (Exception e) {
-            LogFactory.getLogger().warning("Cannot retrieve reserved words", e);
-        }
-
-        super.setConnection(conn);
     }
 
     @Override
@@ -200,7 +188,7 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
         if (tableName == null) {
             return false;
         }
-        return tableName.matches(".*[A-Z].*") && tableName.matches(".*[a-z].*");
+        return StringUtils.hasUpperCase(tableName) && StringUtils.hasLowerCase(tableName);
     }
 
     @Override

@@ -17,7 +17,14 @@ public class BlobType extends LiquibaseDataType {
             return new DatabaseDataType("LONG BYTE");
         }
         if (database instanceof MSSQLDatabase) {
-            return new DatabaseDataType("VARBINARY", "MAX");
+            String param = "MAX";
+            if (this.getParameters().length > 0) {
+                param = this.getParameters()[0].toString();
+            }
+            if (param.equals("2147483647")) {
+                param = "MAX";
+            }
+            return new DatabaseDataType("VARBINARY", param);
         }
         if (database instanceof MySQLDatabase) {
             return new DatabaseDataType("LONGBLOB");

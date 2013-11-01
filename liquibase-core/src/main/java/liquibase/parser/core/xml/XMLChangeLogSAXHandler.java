@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.util.Arrays;
@@ -77,7 +78,12 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
 
 	private static final char LIQUIBASE_FILE_SEPARATOR = '/';
 
-	protected Logger log;
+    private final ChangeFactory changeFactory;
+    private final PreconditionFactory preconditionFactory;
+    private final SqlVisitorFactory sqlVisitorFactory;
+    private final ChangeLogParserFactory changeLogParserFactory;
+
+    protected Logger log;
 
 	private final DatabaseChangeLog databaseChangeLog;
 	private Change change;
@@ -98,7 +104,8 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
 	private Contexts modifySqlContexts;
 	private boolean modifySqlAppliedOnRollback = false;
 
-	protected XMLChangeLogSAXHandler(String physicalChangeLogLocation, ResourceAccessor resourceAccessor,
+    protected XMLChangeLogSAXHandler(String physicalChangeLogLocation,
+			ResourceAccessor resourceAccessor,
 			ChangeLogParameters changeLogParameters) {
 		log = LogFactory.getLogger();
 		this.resourceAccessor = resourceAccessor;
@@ -108,7 +115,12 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
 		databaseChangeLog.setChangeLogParameters(changeLogParameters);
 
 		this.changeLogParameters = changeLogParameters;
-	}
+
+        changeFactory = ChangeFactory.getInstance();
+        preconditionFactory = PreconditionFactory.getInstance();
+        sqlVisitorFactory = SqlVisitorFactory.getInstance();
+        changeLogParserFactory = ChangeLogParserFactory.getInstance();
+    }
 
 	public DatabaseChangeLog getDatabaseChangeLog() {
 		return databaseChangeLog;
@@ -157,16 +169,36 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
 				log.debug("Using file opener for includeAll: " + resourceAccessor.toString());
 				boolean isRelativeToChangelogFile = Boolean.parseBoolean(atts.getValue("relativeToChangelogFile"));
 
-				String resourceFilterDef = atts.getValue("resourceFilter");
-				IncludeAllFilter resourceFilter = null;
-				if (resourceFilterDef != null) {
-					resourceFilter = (IncludeAllFilter) Class.forName(resourceFilterDef).newInstance();
-				}
-				if (isRelativeToChangelogFile) {
-					File changeLogFile = new File(databaseChangeLog.getPhysicalFilePath());
-					File resourceBase = new File(changeLogFile.getParent(), pathName);
-					if (!resourceBase.exists()) {
-						throw new SAXException("Resource directory for includeAll does not exist [" + resourceBase.getPath() + "]");
+                String resourceFilterDef = atts.getValue("resourceFilter");
+                IncludeAllFilter resourceFilter = null;
+                if (resourceFilterDef != null) {
+                    resourceFilter = (IncludeAllFilter) Class.forName(resourceFilterDef).newInstance();
+                }
+                if (isRelativeToChangelogFile) {
+					File changeLogFile = null;
+
+                    Enumeration<URL> resources = resourceAccessor.getResources(databaseChangeLog.getPhysicalFilePath());
+                    while (resources.hasMoreElements()) {
+                        try {
+                            changeLogFile = new File(resources.nextElement().toURI());
+                        } catch (URISyntaxException e) {
+                            continue; //ignore error, probably a URL or something like that
+                        }
+                        if (changeLogFile.exists()) {
+                            break;
+                        } else {
+                            changeLogFile = null;
+                        }
+                    }
+
+                    if (changeLogFile == null) {
+                        throw new SAXException("Cannot determine physical location of "+databaseChangeLog.getPhysicalFilePath());
+                    }
+
+                    File resourceBase = new File(changeLogFile.getParentFile(), pathName);
+
+                    if (!resourceBase.exists()) {
+						throw new SAXException("Resource directory for includeAll does not exist [" + resourceBase.getAbsolutePath() + "]");
 					}
 					pathName = resourceBase.getPath() + '/';
 					pathName = pathName.replace('\\', '/');
@@ -305,7 +337,7 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
 			} else if (currentPrecondition != null && currentPrecondition instanceof CustomPreconditionWrapper && qName.equals("param")) {
 				((CustomPreconditionWrapper) currentPrecondition).setParam(atts.getValue("name"), atts.getValue("value"));
 			} else if (rootPrecondition != null) {
-				currentPrecondition = PreconditionFactory.getInstance().create(localName);
+				currentPrecondition = preconditionFactory.create(localName);
 
 				setAllProperties(currentPrecondition, atts);
 				preconditionLogicStack.peek().addNestedPrecondition(currentPrecondition);
@@ -329,16 +361,19 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
 					modifySqlAppliedOnRollback = Boolean.valueOf(atts.getValue("applyToRollback"));
 				}
 			} else if (inModifySql) {
-				SqlVisitor sqlVisitor = SqlVisitorFactory.getInstance().create(localName);
-
-				setAllProperties(sqlVisitor, atts);
+				SqlVisitor sqlVisitor = sqlVisitorFactory.create(localName);
+				for (int i = 0; i < atts.getLength(); i++) {
+					String attributeName = atts.getLocalName(i);
+					String attributeValue = atts.getValue(i);
+					setProperty(sqlVisitor, attributeName, attributeValue);
+				}
 				sqlVisitor.setApplicableDbms(modifySqlDbmsList);
 				sqlVisitor.setApplyToRollback(modifySqlAppliedOnRollback);
 				sqlVisitor.setContexts(modifySqlContexts);
 
 				changeSet.addSqlVisitor(sqlVisitor);
 			} else if (changeSet != null && change == null) {
-				change = ChangeFactory.getInstance().create(localName);
+				change = changeFactory.create(localName);
 				if (change == null) {
 					throw new SAXException("Unknown Liquibase extension: " + localName + ".  Are you missing a jar from your classpath?");
 				}
@@ -506,15 +541,15 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
 				fileName = FilenameUtils.getFullPath(relativeBaseFileName) + fileName;
 			}
 		}
-		DatabaseChangeLog changeLog;
-		try {
-			changeLog = ChangeLogParserFactory.getInstance().getParser(fileName, resourceAccessor)
-					.parse(fileName, changeLogParameters, resourceAccessor);
-		} catch (UnknownChangelogFormatException e) {
-			log.warning("included file " + relativeBaseFileName + "/" + fileName + " is not a recognized file type");
-			return false;
-		}
-		PreconditionContainer preconditions = changeLog.getPreconditions();
+      DatabaseChangeLog changeLog;
+      try {
+         changeLog= changeLogParserFactory.getParser(fileName, resourceAccessor).parse(fileName, changeLogParameters,
+                resourceAccessor);
+      } catch (UnknownChangelogFormatException e) {
+        log.warning("included file "+relativeBaseFileName + "/" + fileName + " is not a recognized file type");
+                    return false;
+      }
+      PreconditionContainer preconditions = changeLog.getPreconditions();
 		if (preconditions != null) {
 			if (null == databaseChangeLog.getPreconditions()) {
 				databaseChangeLog.setPreconditions(new PreconditionContainer());
@@ -614,11 +649,14 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
 					throw new RuntimeException("Unexpected column with text: " + textString);
 				}
 				this.text = new StringBuffer();
-			} else if (change != null && change instanceof AbstractModifyDataChange && qName.equals("param") && textString != null) {
-				List<ColumnConfig> columns = ((AbstractModifyDataChange) change).getWhereParams();
-				columns.get(columns.size() - 1).setValue(textString);
-				this.text = new StringBuffer();
-			} else if (change != null && localName.equals(ChangeFactory.getInstance().getChangeMetaData(change).getName())) {
+            } else if (change != null && change instanceof AbstractModifyDataChange && qName.equals("param")
+                        && textString != null) {
+                    List<ColumnConfig> columns = ((AbstractModifyDataChange) change)
+                            .getWhereParams();
+                    columns.get(columns.size() - 1).setValue(textString);
+                    this.text = new StringBuffer();
+			} else if (change != null
+					&& localName.equals(changeFactory.getChangeMetaData(change).getName())) {
 				if (textString != null) {
 					if (change instanceof RawSQLChange) {
 						// We've already expanded expressions when we defined 'textString' above. If we enabled
@@ -640,7 +678,8 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
 					} else if (change instanceof StopChange) {
 						((StopChange) change).setMessage(textString);
 					} else {
-						throw new RuntimeException("Unexpected text in " + ChangeFactory.getInstance().getChangeMetaData(change).getName());
+						throw new RuntimeException("Unexpected text in "
+                                + changeFactory.getChangeMetaData(change).getName());
 					}
 				}
 				text = null;

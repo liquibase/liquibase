@@ -11,3 +11,4 @@ liquibase.integrationtest.local.properties
 /derby.log
 /.idea
 *.iml
+.DS_Store

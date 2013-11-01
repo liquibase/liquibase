@@ -1,6 +1,7 @@
 package liquibase.change.core;
 
 import liquibase.change.*;
+import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.Warnings;
@@ -10,6 +11,7 @@ import liquibase.resource.ResourceAccessor;
 import liquibase.resource.UtfBomAwareReader;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.InsertStatement;
+import liquibase.structure.core.Column;
 import liquibase.util.StringUtils;
 import liquibase.util.csv.CSVReader;
 
@@ -188,6 +190,10 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
 
                     if (columnName == null) {
                         columnName = headers[i];
+                    }
+
+                    if (columnName.contains("(") || columnName.contains(")") && database instanceof AbstractJdbcDatabase) {
+                        columnName = ((AbstractJdbcDatabase) database).quoteObject(columnName, Column.class);
                     }
 
 

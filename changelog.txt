@@ -1,6 +1,43 @@
 Liquibase Core Changelog
 ===========================================
 
+Changes in version 3.0.7 (2013.10.24)
+
+- Major Changes:
+    Decreased memory usage, especially with large sql files
+    Fixed SQLite support
+    Improvements to data type handling, especially in MS SqlServer
+
+[CORE-1509] - Memory improvements for large sqlFile files
+[CORE-1533] - Performance improvements in dropAll
+[CORE-1247] - [Sqlite] bad syntax in create table statements with single autoincrement primary key
+[CORE-1519] - Allow relative file paths for valueClobFile and valueBlobFile inserts/updates.
+[CORE-1275] - LoadData insert statements do not escape column names containing an open paren
+[CORE-1312] - Error when creating changelog tables
+[CORE-1399] - IncludeAll Failing when running in WAR files
+[CORE-1440] - Invalid Reorg table statement gets generated on DB2
+[CORE-1504] - dbDoc should html-encode author names
+[CORE-1506] - updateSQL generates invalid SQL for oracle
+[CORE-1507] - dropAll fails with NullPointerException
+[CORE-1510] - Maven plugin fails to configure parameters within property file with trailing spaces, error message misleading
+[CORE-1511] - modifyDataType truncates enum values
+[CORE-1512] - Insert with valueClobFile fails with unicode encoding.
+[CORE-1515] - Liquibase MSSQL: Snapshot incorrectly injecting size for some datatypes
+[CORE-1516] - Liquibase MSSQL: Snapshot recording incorrect size for VARBINARY
+[CORE-1517] - Liquibase MSSQL: Autoincrement property of decimal datatype not supported
+[CORE-1518] - Liquibase MSSQL: Incorrect datatypes captured in the snapshot
+[CORE-1520] - Liquibase Snapshot: Default datetime is wrong
+[CORE-1521] - When generateChangeLog is run, objects do not always come back in a consistent order
+[CORE-1522] - PreparedStatement.setCharacterStream() not supported by Postgres JDBC driver.
+[CORE-1524] - Ant diff command running diffChangeLog
+[CORE-1525] - Liquibase MSSQL: Snapshot not capturing alter statements that add default values
+[CORE-1526] - Unicode string escaping in MSSQL
+[CORE-1530] - Column called VERSION is quoted in PostgreSQL
+[CORE-1531] - includeAll with relativeToChangeLogFile fails under certain conditions
+[CORE-1532] - NPE in ChangedIndexChangeGenerator
+[CORE-1534] - Single quotes in liquibase.bat causing issues
+
+
 Changes in version 3.0.6 (2013.10.08)
 
 - Major Changes:

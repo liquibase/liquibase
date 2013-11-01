@@ -29,6 +29,7 @@ import liquibase.statement.*;
 import liquibase.statement.core.*;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
+import liquibase.structure.core.UniqueConstraint;
 import liquibase.util.ISODateFormat;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
@@ -51,6 +52,8 @@ import java.util.regex.Pattern;
  * database-specific characteristics such as the datatype for "boolean" fields.
  */
 public abstract class AbstractJdbcDatabase implements Database {
+
+    private static final Pattern startsWithNumberPattern = Pattern.compile("^[0-9].*");
 
     private DatabaseConnection connection;
     protected String defaultCatalogName;
@@ -921,7 +924,7 @@ public abstract class AbstractJdbcDatabase implements Database {
     * Check if given string starts with numeric values that may cause problems and should be escaped.
     */
     protected boolean startsWithNumeric(String objectName) {
-        return objectName.matches("^[0-9].*");
+        return startsWithNumberPattern.matcher(objectName).matches();
     }
 
 // ------- DATABASE OBJECT DROPPING METHODS ---- //
@@ -934,15 +937,33 @@ public abstract class AbstractJdbcDatabase implements Database {
         ObjectQuotingStrategy currentStrategy = this.getObjectQuotingStrategy();
         this.setObjectQuotingStrategy(ObjectQuotingStrategy.QUOTE_ALL_OBJECTS);
         try {
-            DatabaseSnapshot snapshot = null;
+            DatabaseSnapshot snapshot;
             try {
-                snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(schemaToDrop, this, new SnapshotControl(this));
+	            final SnapshotControl snapshotControl = new SnapshotControl(this);
+	            final Set<Class<? extends DatabaseObject>> typesToInclude = snapshotControl.getTypesToInclude();
+
+	            //We do not need to remove indexes and primary/unique keys explicitly. They should be removed
+	            //as part of tables.
+	            typesToInclude.remove(Index.class);
+	            typesToInclude.remove(PrimaryKey.class);
+	            typesToInclude.remove(UniqueConstraint.class);
+
+	            if (supportsForeignKeyDisable()) {
+		            //We do not remove ForeignKey because they will be disabled and removed as parts of tables.
+		            typesToInclude.remove(ForeignKey.class);
+	            }
+
+	            final long createSnapshotStarted = System.currentTimeMillis();
+	            snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(schemaToDrop, this, snapshotControl);
+	            LogFactory.getLogger().debug(String.format("Database snapshot generated in %d ms. Snapshot includes: %s", System.currentTimeMillis() - createSnapshotStarted, typesToInclude));
             } catch (LiquibaseException e) {
                 throw new UnexpectedLiquibaseException(e);
             }
 
-            DiffResult diffResult = DiffGeneratorFactory.getInstance().compare(new EmptyDatabaseSnapshot(this), snapshot, new CompareControl(snapshot.getSnapshotControl().getTypesToInclude()));
+	        final long changeSetStarted = System.currentTimeMillis();
+	        DiffResult diffResult = DiffGeneratorFactory.getInstance().compare(new EmptyDatabaseSnapshot(this), snapshot, new CompareControl(snapshot.getSnapshotControl().getTypesToInclude()));
             List<ChangeSet> changeSets = new DiffToChangeLog(diffResult, new DiffOutputControl(true, true, false)).generateChangeSets();
+	        LogFactory.getLogger().debug(String.format("ChangeSet to Remove Database Objects generated in %d ms.", System.currentTimeMillis() - changeSetStarted));
 
             final boolean reEnableFK = supportsForeignKeyDisable() && disableForeignKeyChecks();
             try {
@@ -1176,12 +1197,17 @@ public abstract class AbstractJdbcDatabase implements Database {
     public String escapeObjectName(String objectName, Class<? extends DatabaseObject> objectType) {
         if (objectName != null) {
             if (objectName.contains("-") || startsWithNumeric(objectName) || isReservedWord(objectName)) {
-                return quotingStartCharacter + objectName + quotingEndCharacter;
+                return quoteObject(objectName, objectType);
             } else if (quotingStrategy == ObjectQuotingStrategy.QUOTE_ALL_OBJECTS) {
-                return quotingStartCharacter + objectName + quotingEndCharacter;
+                return quoteObject(objectName, objectType);
             }
+            objectName = objectName.trim();
         }
         return objectName;
+    }
+
+    public String quoteObject(String objectName, Class<? extends DatabaseObject> objectType) {
+        return quotingStartCharacter + objectName + quotingEndCharacter;
     }
 
     @Override
@@ -1201,10 +1227,6 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     @Override
     public String escapeColumnName(String catalogName, String schemaName, String tableName, String columnName) {
-        if (columnName.contains("(")) {
-            return columnName;
-        }
-
         return escapeObjectName(columnName, Column.class);
     }
 

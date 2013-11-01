@@ -252,7 +252,7 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
                 database.setAutoCommit(!runInTransaction);
             }
 
-            executor.comment("Changeset " + toString());
+            executor.comment("Changeset " + toString(false));
             if (StringUtils.trimToNull(getComments()) != null) {
                 String comments = getComments();
                 String[] lines = comments.split("\n");
@@ -464,7 +464,7 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
 
     @Override
     public String toString() {
-        return toString(true);
+        return toString(false);
     }
 
     public String getComments() {

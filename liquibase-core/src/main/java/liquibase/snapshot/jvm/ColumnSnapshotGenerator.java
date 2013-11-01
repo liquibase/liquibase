@@ -249,11 +249,9 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
             Object defaultValue = columnMetadataResultSet.get("COLUMN_DEF");
 
             if (defaultValue != null && defaultValue instanceof String) {
-                String newValue = null;
                 if (defaultValue.equals("(NULL)")) {
-                    newValue = null;
+                    columnMetadataResultSet.set("COLUMN_DEF", null);
                 }
-                columnMetadataResultSet.set("COLUMN_DEF", newValue);
             }
         }
 
@@ -269,6 +267,10 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
 
         if (stringVal.startsWith("'") && stringVal.endsWith("'")) {
             stringVal = stringVal.substring(1, stringVal.length() - 1);
+        } else if (stringVal.startsWith("((") && stringVal.endsWith("))")) {
+            stringVal = stringVal.substring(2, stringVal.length() - 2);
+        } else if (stringVal.startsWith("('") && stringVal.endsWith("')")) {
+            stringVal = stringVal.substring(2, stringVal.length() - 2);
         } else if (stringVal.startsWith("(") && stringVal.endsWith(")")) {
             return new DatabaseFunction(stringVal.substring(1, stringVal.length() - 1));
         }
@@ -302,6 +304,9 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
             } else if (type == Types.DATALINK) {
                 return new DatabaseFunction(stringVal);
             } else if (type == Types.DATE) {
+                if (zeroTime(stringVal)) {
+                    return new DatabaseFunction(stringVal);
+                }
                 return new java.sql.Date(getDateFormat(database).parse(stringVal.trim()).getTime());
             } else if (type == Types.DECIMAL && scanner.hasNextBigDecimal()) {
                 return scanner.nextBigDecimal();
@@ -346,8 +351,14 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
             } else if (type == Types.STRUCT) {
                 return new DatabaseFunction(stringVal);
             } else if (type == Types.TIME) {
+                if (zeroTime(stringVal)) {
+                    return new DatabaseFunction(stringVal);
+                }
                 return new java.sql.Time(getTimeFormat(database).parse(stringVal).getTime());
             } else if (type == Types.TIMESTAMP) {
+                if (zeroTime(stringVal)) {
+                    return new DatabaseFunction(stringVal);
+                }
                 return new Timestamp(getDateTimeFormat(database).parse(stringVal).getTime());
             } else if (type == Types.TINYINT && scanner.hasNextInt()) {
                 return scanner.nextInt();
@@ -364,6 +375,10 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
         }
     }
 
+    private boolean zeroTime(String stringVal) {
+        return stringVal.replace("-","").replace(":", "").replace(" ","").replace("0","").equals("");
+    }
+
     protected DateFormat getDateFormat(Database database) {
         return new SimpleDateFormat("yyyy-MM-dd");
     }
@@ -374,7 +389,10 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
 
     protected DateFormat getDateTimeFormat(Database database) {
         if (database instanceof MySQLDatabase) {
-            return new SimpleDateFormat("yyyy-MM-dd HH:mm:SS"); //no ms in mysql
+            return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"); //no ms in mysql
+        }
+        if (database instanceof MSSQLDatabase) {
+            return new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS"); //no ms in mysql
         }
         return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
     }
