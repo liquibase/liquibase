@@ -417,4 +417,9 @@ public class InformixDatabase extends AbstractJdbcDatabase {
         }
         return name;
     }
+
+    @Override
+	public String getSystemSchema(){
+    	return "informix";
+    }
 }
