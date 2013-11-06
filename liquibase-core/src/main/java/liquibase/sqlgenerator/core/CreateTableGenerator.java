@@ -22,7 +22,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import liquibase.statement.DatabaseFunction;
 
 public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatement> {
 
