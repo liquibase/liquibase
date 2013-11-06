@@ -39,6 +39,28 @@ public class DatabaseDataType {
     public boolean isAutoIncrement() {
         return type.equalsIgnoreCase("serial") || type.equalsIgnoreCase("bigserial");
     }
+    
+    /**
+     * Mainly for MySQL. Temporal defaults need to be quoted Strings 
+     * on table creation if they are of a literal date
+     * @return true if timestamp, date, datetime, year datatype
+     */
+    public boolean isTemporal() {
+        return type.equalsIgnoreCase("timestamp") 
+            || type.equalsIgnoreCase("datetime")
+            || type.equalsIgnoreCase("date")
+            || type.equalsIgnoreCase("time")
+            || type.equalsIgnoreCase("year");
+    }
+    
+    
+    /**
+     * Mainly for MySQL. default Enumerations should be quoted
+     * @return true if enumeration
+     */
+    public boolean isEnumeration(){
+        return type.toLowerCase().startsWith("enum");
+    }
 
     public String toSql() {
         return toString();

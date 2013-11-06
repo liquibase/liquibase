@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import liquibase.statement.DatabaseFunction;
 
 public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatement> {
 
@@ -101,6 +102,24 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
                 if (database instanceof MSSQLDatabase) {
                     buffer.append(" CONSTRAINT ").append(((MSSQLDatabase) database).generateDefaultConstraintName(statement.getTableName(), column));
                 }
+                
+                //MySQL default dates such as 0000-00-00 must be entered as Strings
+                if (database instanceof MySQLDatabase && columnType.isTemporal()
+                        && defaultValue.toString().matches("^\\d.*")) {
+                    defaultValue = defaultValue.toString();
+                }
+                
+                //MySQL ENUM default values must be passed as a string value
+                //this is a hack, but will get the job done
+                if(database instanceof MySQLDatabase && columnType.isEnumeration() 
+                        && !defaultValue.toString().matches("^['|\"].*")){
+                    
+                    StringBuilder newDefaultValue = new StringBuilder("'")
+                        .append(defaultValue).append("'");
+                    
+                    defaultValue = newDefaultValue.toString();
+                }
+                
                 buffer.append(" DEFAULT ");
                 buffer.append(statement.getColumnTypes().get(column).objectToSql(defaultValue, database));
             }
