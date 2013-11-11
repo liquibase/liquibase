@@ -394,6 +394,12 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
         try {
             Executor executor = ExecutorService.getInstance().getExecutor(database);
             executor.comment("Rolling Back ChangeSet: " + toString());
+            
+            // set auto-commit based on runInTransaction if database supports DDL in transactions
+            if (database.supportsDDLInTransaction()) {
+                database.setAutoCommit(!runInTransaction);
+            }
+            
             RanChangeSet ranChangeSet = database.getRanChangeSet(this);
             if (rollBackChanges != null && rollBackChanges.size() > 0) {
                 for (Change rollback : rollBackChanges) {
@@ -418,7 +424,9 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
                 }
             }
 
-            database.commit();
+            if (runInTransaction) {
+                database.commit();
+            }
             log.debug("ChangeSet " + toString() + " has been successfully rolled back.");
         } catch (Exception e) {
             try {
@@ -427,6 +435,16 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
                 //ok
             }
             throw new RollbackFailedException(e);
+        } finally {
+            // restore auto-commit to false if this ChangeSet was not run in a transaction,
+            // but only if the database supports DDL in transactions
+            if (!runInTransaction && database.supportsDDLInTransaction()) {
+                try {
+                    database.setAutoCommit(false);
+                } catch (DatabaseException e) {
+                    throw new RollbackFailedException("Could not resetInternalState autocommit", e);
+                }
+            }
         }
 
     }
