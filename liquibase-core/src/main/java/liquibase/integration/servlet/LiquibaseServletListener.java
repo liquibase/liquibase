@@ -86,7 +86,7 @@ public class LiquibaseServletListener implements ServletContextListener {
     public void contextInitialized(ServletContextEvent servletContextEvent) {
         ServletContext servletContext = servletContextEvent.getServletContext();
         try {
-            this.hostName = NetUtil.getLocalHost().getHostName();
+            this.hostName = NetUtil.getLocalHostName();
         }
         catch (Exception e) {
             servletContext.log("Cannot find hostname: " + e.getMessage());
