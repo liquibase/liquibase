@@ -11,7 +11,6 @@ import liquibase.statement.core.LockDatabaseChangeLogStatement;
 import liquibase.statement.core.UpdateStatement;
 import liquibase.util.NetUtil;
 
-import java.net.InetAddress;
 import java.sql.Timestamp;
 
 public class LockDatabaseChangeLogGenerator extends AbstractSqlGenerator<LockDatabaseChangeLogStatement> {
@@ -25,11 +24,9 @@ public class LockDatabaseChangeLogGenerator extends AbstractSqlGenerator<LockDat
     protected static String hostaddress;
 
     static {
-        InetAddress localHost;
         try {
-            localHost = NetUtil.getLocalHost();
-            hostname = localHost.getHostName();
-            hostaddress = localHost.getHostAddress();
+            hostname = NetUtil.getLocalHostName();
+            hostaddress = NetUtil.getLocalHostAddress();
         } catch (Exception e) {
             throw new UnexpectedLiquibaseException(e);
         }

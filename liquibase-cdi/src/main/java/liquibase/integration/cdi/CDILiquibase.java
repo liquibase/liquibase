@@ -95,7 +95,7 @@ public class CDILiquibase implements Extension {
         log.info("Booting Liquibase " + LiquibaseUtil.getBuildVersion());
         String hostName;
         try {
-            hostName = NetUtil.getLocalHost().getHostName();
+            hostName = NetUtil.getLocalHostName();
         } catch (Exception e) {
             log.warning("Cannot find hostname: " + e.getMessage());
             log.debug("", e);
