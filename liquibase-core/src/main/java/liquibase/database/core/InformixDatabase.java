@@ -19,7 +19,6 @@ import liquibase.changelog.filter.DbmsChangeSetFilter;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
 import liquibase.exception.DatabaseException;
-import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
@@ -37,18 +36,16 @@ import liquibase.statement.core.SetNullableStatement;
 import liquibase.statement.core.UpdateChangeSetChecksumStatement;
 import liquibase.statement.core.UpdateStatement;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.core.Catalog;
 import liquibase.structure.core.Column;
-import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
 
 public class InformixDatabase extends AbstractJdbcDatabase {
-	
+
 	private static final String PRODUCT_NAME = "Informix Dynamic Server";
     private static final String INTERVAL_FIELD_QUALIFIER = "HOUR TO FRACTION(5)";
     private static final String DATETIME_FIELD_QUALIFIER = "YEAR TO FRACTION(5)";
 
-	private Set<String> systemTablesAndViews = new HashSet<String>();
+	private final Set<String> systemTablesAndViews = new HashSet<String>();
 
     private static final Pattern CREATE_VIEW_AS_PATTERN = Pattern.compile("^CREATE\\s+.*?VIEW\\s+.*?AS\\s+",
     		Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
@@ -144,16 +141,10 @@ public class InformixDatabase extends AbstractJdbcDatabase {
     }
 
     @Override
-    public String getDefaultSchemaName() {
-        // Standard default schema resolution always fails, this would boost performance for informix dbs
-        return null;
-    }
-
-    @Override
-    public void setConnection(DatabaseConnection connection) {
+    public void setConnection(final DatabaseConnection connection) {
         super.setConnection(connection);
         try {
-        	/* 
+        	/*
         	 * TODO Maybe there is a better place for this.
         	 * For each session this statement has to be executed,
         	 * to allow newlines in quoted strings
@@ -163,9 +154,9 @@ public class InformixDatabase extends AbstractJdbcDatabase {
 			throw new UnexpectedLiquibaseException("Could not allow newline characters in quoted strings with IFX_ALLOW_NEWLINE", e);
 		}
     }
-	
+
 	@Override
-    public String getDefaultDriver(String url) {
+    public String getDefaultDriver(final String url) {
 		if (url.startsWith("jdbc:informix-sqli")) {
 			return "com.informix.jdbc.IfxDriver";
 		}
@@ -178,7 +169,7 @@ public class InformixDatabase extends AbstractJdbcDatabase {
 	}
 
 	@Override
-    public boolean isCorrectDatabaseImplementation(DatabaseConnection conn)
+    public boolean isCorrectDatabaseImplementation(final DatabaseConnection conn)
 			throws DatabaseException {
 		return PRODUCT_NAME.equals(conn.getDatabaseProductName());
 	}
@@ -195,9 +186,9 @@ public class InformixDatabase extends AbstractJdbcDatabase {
     public boolean supportsTablespaces() {
 		return true;
 	}
-	
+
 	@Override
-	public void checkDatabaseChangeLogTable(boolean updateExistingNullChecksums, DatabaseChangeLog databaseChangeLog, Contexts contexts) throws DatabaseException {
+	public void checkDatabaseChangeLogTable(final boolean updateExistingNullChecksums, final DatabaseChangeLog databaseChangeLog, final Contexts contexts) throws DatabaseException {
         if (updateExistingNullChecksums && databaseChangeLog == null) {
             throw new DatabaseException("changeLog parameter is required if updating existing checksums");
         }
@@ -226,68 +217,68 @@ public class InformixDatabase extends AbstractJdbcDatabase {
                 executor.comment("Adding missing databasechangelog.description column");
                 statementsToExecute.add(
                 		new AddColumnStatement(
-                				getLiquibaseCatalogName(), 
-                				getLiquibaseSchemaName(), 
-                				getDatabaseChangeLogTableName(), 
-                				"DESCRIPTION", 
-                				"VARCHAR(255)", 
+                				getLiquibaseCatalogName(),
+                				getLiquibaseSchemaName(),
+                				getDatabaseChangeLogTableName(),
+                				"DESCRIPTION",
+                				"VARCHAR(255)",
                 				null));
             }
             if (!hasTag) {
                 executor.comment("Adding missing databasechangelog.tag column");
                 statementsToExecute.add(
                 		new AddColumnStatement(
-                				getLiquibaseCatalogName(), 
-                				getLiquibaseSchemaName(), 
-                				getDatabaseChangeLogTableName(), 
-                				"TAG", 
+                				getLiquibaseCatalogName(),
+                				getLiquibaseSchemaName(),
+                				getDatabaseChangeLogTableName(),
+                				"TAG",
                 				"VARCHAR(255)", null));
             }
             if (!hasComments) {
                 executor.comment("Adding missing databasechangelog.comments column");
                 statementsToExecute.add(
                 		new AddColumnStatement(
-                				getLiquibaseCatalogName(), 
-                				getLiquibaseSchemaName(), 
-                				getDatabaseChangeLogTableName(), 
-                				"COMMENTS", 
-                				"VARCHAR(255)", 
+                				getLiquibaseCatalogName(),
+                				getLiquibaseSchemaName(),
+                				getDatabaseChangeLogTableName(),
+                				"COMMENTS",
+                				"VARCHAR(255)",
                 				null));
             }
             if (!hasLiquibase) {
                 executor.comment("Adding missing databasechangelog.liquibase column");
                 statementsToExecute.add(
                 		new AddColumnStatement(
-                				getLiquibaseCatalogName(), 
-                				getLiquibaseSchemaName(), 
-                				getDatabaseChangeLogTableName(), 
-                				"LIQUIBASE", 
-                				"VARCHAR(255)", 
+                				getLiquibaseCatalogName(),
+                				getLiquibaseSchemaName(),
+                				getDatabaseChangeLogTableName(),
+                				"LIQUIBASE",
+                				"VARCHAR(255)",
                 				null));
             }
             if (!hasOrderExecuted) {
                 executor.comment("Adding missing databasechangelog.orderexecuted column");
                 statementsToExecute.add(
                 		new AddColumnStatement(
-                				getLiquibaseCatalogName(), 
-                				getLiquibaseSchemaName(), 
-                				getDatabaseChangeLogTableName(), 
-                				"ORDEREXECUTED", 
-                				"INT", 
+                				getLiquibaseCatalogName(),
+                				getLiquibaseSchemaName(),
+                				getDatabaseChangeLogTableName(),
+                				"ORDEREXECUTED",
+                				"INT",
                 				null));
                 statementsToExecute.add(
                 		new UpdateStatement(
-                				getLiquibaseCatalogName(), 
-                				getLiquibaseSchemaName(), 
+                				getLiquibaseCatalogName(),
+                				getLiquibaseSchemaName(),
                 				getDatabaseChangeLogTableName())
                 			.addNewColumnValue("ORDEREXECUTED", -1));
                 statementsToExecute.add(
                 		new SetNullableStatement(
-                				getLiquibaseCatalogName(), 
-                				getLiquibaseSchemaName(), 
-                				getDatabaseChangeLogTableName(), 
-                				"ORDEREXECUTED", 
-                				"INT", 
+                				getLiquibaseCatalogName(),
+                				getLiquibaseSchemaName(),
+                				getDatabaseChangeLogTableName(),
+                				"ORDEREXECUTED",
+                				"INT",
                 				false));
             }
             if (checksumNotRightSize) {
@@ -295,10 +286,10 @@ public class InformixDatabase extends AbstractJdbcDatabase {
 
                 statementsToExecute.add(
                 		new ModifyDataTypeStatement(
-                				getLiquibaseCatalogName(), 
-                				getLiquibaseSchemaName(), 
-                				getDatabaseChangeLogTableName(), 
-                				"MD5SUM", 
+                				getLiquibaseCatalogName(),
+                				getLiquibaseSchemaName(),
+                				getDatabaseChangeLogTableName(),
+                				"MD5SUM",
                 				"VARCHAR(35)"));
             }
             if (liquibaseColumnNotRightSize) {
@@ -310,25 +301,25 @@ public class InformixDatabase extends AbstractJdbcDatabase {
                 executor.comment("Adding missing databasechangelog.exectype column");
                 statementsToExecute.add(
                 		new AddColumnStatement(
-                				getLiquibaseCatalogName(), 
-                				getLiquibaseSchemaName(), 
-                				getDatabaseChangeLogTableName(), 
-                				"EXECTYPE", 
-                				"VARCHAR(10)", 
+                				getLiquibaseCatalogName(),
+                				getLiquibaseSchemaName(),
+                				getDatabaseChangeLogTableName(),
+                				"EXECTYPE",
+                				"VARCHAR(10)",
                 				null));
                 statementsToExecute.add(
                 		new UpdateStatement(
-                				getLiquibaseCatalogName(), 
-                				getLiquibaseSchemaName(), 
+                				getLiquibaseCatalogName(),
+                				getLiquibaseSchemaName(),
                 				getDatabaseChangeLogTableName())
                 			.addNewColumnValue("EXECTYPE", "EXECUTED"));
                 statementsToExecute.add(
                 		new SetNullableStatement(
-                				getLiquibaseCatalogName(), 
-                				getLiquibaseSchemaName(), 
-                				getDatabaseChangeLogTableName(), 
-                				"EXECTYPE", 
-                				"VARCHAR(10)", 
+                				getLiquibaseCatalogName(),
+                				getLiquibaseSchemaName(),
+                				getDatabaseChangeLogTableName(),
+                				"EXECTYPE",
+                				"VARCHAR(10)",
                 				false));
             }
 
@@ -376,10 +367,10 @@ public class InformixDatabase extends AbstractJdbcDatabase {
             resetRanChangeSetList();
         }
     }
-	
+
 
 	@Override
-	public String getViewDefinition(CatalogAndSchema schema, String viewName) throws DatabaseException {
+	public String getViewDefinition(CatalogAndSchema schema, final String viewName) throws DatabaseException {
         schema = correctSchema(schema);
 		List<Map> retList = ExecutorService.getInstance().getExecutor(this).queryForList(new GetViewDefinitionStatement(schema.getCatalogName(), schema.getSchemaName(), viewName));
 		// building the view definition from the multiple rows
@@ -392,13 +383,13 @@ public class InformixDatabase extends AbstractJdbcDatabase {
 	}
 
 	@Override
-	public String getAutoIncrementClause(BigInteger startWith, BigInteger incrementBy) {
+	public String getAutoIncrementClause(final BigInteger startWith, final BigInteger incrementBy) {
 		return "";
 	}
 
-	
+
 	@Override
-    public String getDateLiteral(String isoDate) {
+    public String getDateLiteral(final String isoDate) {
         if (isTimeOnly(isoDate)) {
             return "INTERVAL (" + super.getDateLiteral(isoDate).replaceAll("'", "") + ") " + INTERVAL_FIELD_QUALIFIER;
         } else if (isDateOnly(isoDate)){
@@ -407,21 +398,16 @@ public class InformixDatabase extends AbstractJdbcDatabase {
             return "DATETIME (" + super.getDateLiteral(isoDate).replaceAll("'", "") + ") " + DATETIME_FIELD_QUALIFIER;
         }
     }
-	
+
 	@Override
 	public boolean supportsRestrictForeignKeys() {
 		// TODO dont know if this correct
 		return false;
 	}
-	
-	
-	@Override
-	public boolean supportsSchemas() {
-		return false;
-	}
+
 
     @Override
-    public String escapeObjectName(String catalogName, String schemaName, String objectName, Class<? extends DatabaseObject> objectType) {
+    public String escapeObjectName(final String catalogName, final String schemaName, final String objectName, final Class<? extends DatabaseObject> objectType) {
         String name = super.escapeObjectName(catalogName, schemaName, objectName, objectType);
         if (name == null) {
             return null;
@@ -433,8 +419,7 @@ public class InformixDatabase extends AbstractJdbcDatabase {
     }
 
     @Override
-    public boolean supportsPrimaryKeyNames() {
-        return false;
+	public String getSystemSchema(){
+    	return "informix";
     }
-
 }
