@@ -682,19 +682,7 @@ public abstract class AbstractJdbcDatabase implements Database {
      * @param updateExistingNullChecksums
      * @param contexts
      */
-    @Override
     public void checkDatabaseChangeLogTable(boolean updateExistingNullChecksums, DatabaseChangeLog databaseChangeLog, String... contexts) throws DatabaseException {
-        checkDatabaseChangeLogTable(updateExistingNullChecksums, databaseChangeLog, new Contexts(contexts));
-    }
-        /**
-         * This method will check the database ChangeLog table used to keep track of
-         * the changes in the file. If the table does not exist it will create one
-         * otherwise it will not do anything besides outputting a log message.
-         *
-         * @param updateExistingNullChecksums
-         * @param contexts
-         */
-    public void checkDatabaseChangeLogTable(boolean updateExistingNullChecksums, DatabaseChangeLog databaseChangeLog, Contexts contexts) throws DatabaseException {
         if (updateExistingNullChecksums && databaseChangeLog == null) {
             throw new DatabaseException("changeLog parameter is required if updating existing checksums");
         }
