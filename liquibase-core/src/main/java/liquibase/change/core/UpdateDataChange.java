@@ -52,8 +52,19 @@ public class UpdateDataChange extends AbstractModifyDataChange implements Change
         }
 
         if (needsPreparedStatement) {
+            UpdateExecutablePreparedStatement statement = new UpdateExecutablePreparedStatement(database, catalogName, schemaName, tableName, columns, getChangeSet());
+            
+            statement.setWhereClause(where);
+            
+            for (ColumnConfig whereParam : whereParams) {
+                if (whereParam.getName() != null) {
+                    statement.addWhereColumnName(whereParam.getName());
+                }
+                statement.addWhereParameter(whereParam.getValueObject());
+            }
+            
             return new SqlStatement[] {
-                    new UpdateExecutablePreparedStatement(database, catalogName, schemaName, tableName, columns, getChangeSet())
+                    statement
             };
         }
     	
