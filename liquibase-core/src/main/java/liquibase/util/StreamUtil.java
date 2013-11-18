@@ -3,6 +3,8 @@ package liquibase.util;
 import java.io.*;
 import java.nio.charset.Charset;
 
+import liquibase.changelog.ChangeSet;
+import liquibase.resource.ResourceAccessor;
 import liquibase.resource.UtfBomAwareReader;
 
 /**
@@ -134,4 +136,71 @@ public class StreamUtil {
         }
     }
 
+    public static InputStream openStream(String path, Boolean relativeToChangelogFile, ChangeSet changeSet, ResourceAccessor resourceAccessor) throws IOException {
+        InputStream stream = loadFromClasspath(path, relativeToChangelogFile, changeSet, resourceAccessor);
+        if (stream == null) {
+            stream = loadFromFileSystem(path, relativeToChangelogFile, changeSet, resourceAccessor);
+        }
+
+        return stream;
+    }
+
+    /**
+     * Tries to load the file from the file system.
+     *
+     * @param file The name of the file to search for
+     * @return True if the file was found, false otherwise.
+     */
+    private static InputStream loadFromFileSystem(String file, Boolean relativeToChangelogFile, ChangeSet changeSet, ResourceAccessor resourceAccessor) throws IOException {
+        if (relativeToChangelogFile != null && relativeToChangelogFile) {
+            String base;
+            if (changeSet.getChangeLog() == null) {
+                base = changeSet.getFilePath();
+            } else {
+                base = changeSet.getChangeLog().getPhysicalFilePath().replaceAll("\\\\","/");
+            }
+            if (!base.contains("/")) {
+                base = ".";
+            }
+            file = base.replaceFirst("/[^/]*$", "") + "/" + file;
+        }
+
+        try {
+            return resourceAccessor.getResourceAsStream(file);
+        } catch (FileNotFoundException fnfe) {
+            return null;
+        }
+
+    }
+
+    /**
+     * Tries to load a file using the FileOpener.
+     * <p/>
+     * If the fileOpener can not be found then the attempt to load from the
+     * classpath the return is false.
+     *
+     * @param file The file name to try and find.
+     * @return True if the file was found and loaded, false otherwise.
+     */
+    private static InputStream loadFromClasspath(String file, Boolean relativeToChangelogFile, ChangeSet changeSet, ResourceAccessor resourceAccessor) throws IOException {
+        if (resourceAccessor == null) {
+            return null;
+        }
+
+        if (relativeToChangelogFile != null && relativeToChangelogFile) {
+            String base;
+            if (changeSet.getChangeLog() == null) {
+                base = changeSet.getFilePath();
+            } else {
+                base = changeSet.getChangeLog().getPhysicalFilePath().replaceAll("\\\\","/");
+            }
+            if (!base.contains("/")) {
+                base = ".";
+            }
+
+            file = base.replaceFirst("/[^/]*$", "") + "/" + file;
+        }
+
+        return resourceAccessor.getResourceAsStream(file);
+    }
 }

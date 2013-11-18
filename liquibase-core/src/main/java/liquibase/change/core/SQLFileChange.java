@@ -104,11 +104,13 @@ public class SQLFileChange extends AbstractSQLChange {
             return true;
         }
 
-        boolean loaded = loadFromClasspath(path);
-        if (!loaded) {
-            loaded = loadFromFileSystem(path);
+        try {
+            sqlStream = StreamUtil.openStream(path, isRelativeToChangelogFile(), getChangeSet(), getResourceAccessor());
+        } catch (IOException e) {
+            throw new IOException("<sqlfile path=" + path + "> -Unable to read file", e);
         }
-        return loaded;
+        return sqlStream != null;
+
     }
 
     @Override
@@ -118,80 +120,6 @@ public class SQLFileChange extends AbstractSQLChange {
             validationErrors.addError("'path' is required");
         }
         return validationErrors;
-    }
-
-    /**
-     * Tries to load the file from the file system.
-     *
-     * @param file The name of the file to search for
-     * @return True if the file was found, false otherwise.
-     */
-    private boolean loadFromFileSystem(String file) throws IOException {
-        if (relativeToChangelogFile != null && relativeToChangelogFile) {
-            String base;
-            if (getChangeSet().getChangeLog() == null) {
-                base = getChangeSet().getFilePath();
-            } else {
-                base = getChangeSet().getChangeLog().getPhysicalFilePath().replaceAll("\\\\","/");
-            }
-            if (!base.contains("/")) {
-                base = ".";
-            }
-            file = base.replaceFirst("/[^/]*$", "") + "/" + file;
-        }
-
-        try {
-            sqlStream = getResourceAccessor().getResourceAsStream(file);
-            if (sqlStream == null) {
-                throw new IOException("<sqlfile path=" + file + "> -Unable to read file");
-            }
-            return true;
-        } catch (FileNotFoundException fnfe) {
-            return false;
-        } catch (IOException e) {
-            throw new IOException("<sqlfile path=" + file + "> -Unable to read file", e);
-        }
-
-    }
-
-    /**
-     * Tries to load a file using the FileOpener.
-     * <p/>
-     * If the fileOpener can not be found then the attempt to load from the
-     * classpath the return is false.
-     *
-     * @param file The file name to try and find.
-     * @return True if the file was found and loaded, false otherwise.
-     */
-    private boolean loadFromClasspath(String file) {
-        if (relativeToChangelogFile != null && relativeToChangelogFile) {
-            String base;
-            if (getChangeSet().getChangeLog() == null) {
-                base = getChangeSet().getFilePath();
-            } else {
-                base = getChangeSet().getChangeLog().getPhysicalFilePath().replaceAll("\\\\","/");
-            }
-            if (!base.contains("/")) {
-                base = ".";
-            }
-
-            file = base.replaceFirst("/[^/]*$", "") + "/" + file;
-        }
-
-        try {
-            ResourceAccessor fo = getResourceAccessor();
-            if (fo == null) {
-                return false;
-            }
-
-            sqlStream = fo.getResourceAsStream(file);
-            if (sqlStream == null) {
-                return false;
-            }
-            return true;
-        } catch (IOException ioe) {
-            return false;
-        }
     }
 
     @Override
