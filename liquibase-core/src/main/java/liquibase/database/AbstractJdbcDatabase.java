@@ -148,7 +148,7 @@ public abstract class AbstractJdbcDatabase implements Database {
     // whether object names should be quoted
     protected ObjectQuotingStrategy quotingStrategy = ObjectQuotingStrategy.LEGACY;
 
-    private Set<String> reservedWords = new HashSet<String>();
+    private final Set<String> reservedWords = new HashSet<String>();
 
     private Boolean caseSensitive;
     private boolean outputDefaultSchema = true;
@@ -691,7 +691,8 @@ public abstract class AbstractJdbcDatabase implements Database {
      * @param updateExistingNullChecksums
      * @param contexts
      */
-    public void checkDatabaseChangeLogTable(boolean updateExistingNullChecksums, DatabaseChangeLog databaseChangeLog, String... contexts) throws DatabaseException {
+    @Override
+    public void checkDatabaseChangeLogTable(final boolean updateExistingNullChecksums, final DatabaseChangeLog databaseChangeLog, final String... contexts) throws DatabaseException {
         checkDatabaseChangeLogTable(updateExistingNullChecksums, databaseChangeLog, new Contexts(contexts));
     }
         /**
@@ -702,11 +703,8 @@ public abstract class AbstractJdbcDatabase implements Database {
          * @param updateExistingNullChecksums
          * @param contexts
          */
-    public void checkDatabaseChangeLogTable(boolean updateExistingNullChecksums, DatabaseChangeLog databaseChangeLog, Contexts contexts) throws DatabaseException {
-        if (updateExistingNullChecksums && databaseChangeLog == null) {
-            throw new DatabaseException("changeLog parameter is required if updating existing checksums");
-        }
-
+    @Override
+	public void checkDatabaseChangeLogTable(final boolean updateExistingNullChecksums, final DatabaseChangeLog databaseChangeLog, final Contexts contexts) throws DatabaseException {
         if (updateExistingNullChecksums && databaseChangeLog == null) {
             throw new DatabaseException("changeLog parameter is required if updating existing checksums");
         }
@@ -964,7 +962,7 @@ public abstract class AbstractJdbcDatabase implements Database {
     }
 
     @Override
-    public boolean isReservedWord(String string) {
+    public boolean isReservedWord(final String string) {
         return reservedWords.contains(string.toUpperCase());
     }
 
