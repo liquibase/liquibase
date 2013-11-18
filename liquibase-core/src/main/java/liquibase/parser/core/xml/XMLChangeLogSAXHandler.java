@@ -669,7 +669,7 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
 						}
 						((RawSQLChange) change).setSql(expandedExpression);
 					} else if (change instanceof CreateProcedureChange) {
-						((CreateProcedureChange) change).setProcedureBody(textString);
+						((CreateProcedureChange) change).setProcedureText(textString);
 						// } else if (change instanceof AlterViewChange) {
 						// ((AlterViewChange)
 						// change).setSelectQuery(textString);
