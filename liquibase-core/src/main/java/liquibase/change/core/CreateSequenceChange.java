@@ -131,4 +131,9 @@ public class CreateSequenceChange extends AbstractChange {
     public String getConfirmationMessage() {
         return "Sequence " + getSequenceName() + " created";
     }
+
+    @Override
+    public String getSerializedObjectNamespace() {
+        return STANDARD_OBJECTS_NAMESPACE;
+    }
 }

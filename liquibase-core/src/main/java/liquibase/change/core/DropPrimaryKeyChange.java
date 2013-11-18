@@ -128,4 +128,9 @@ public class DropPrimaryKeyChange extends AbstractChange {
     public String getConfirmationMessage() {
         return "Primary key dropped from "+getTableName();
     }
+
+    @Override
+    public String getSerializedObjectNamespace() {
+        return STANDARD_OBJECTS_NAMESPACE;
+    }
 }

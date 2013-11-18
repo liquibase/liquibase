@@ -32,4 +32,9 @@ public class ReplaceSqlVisitor extends AbstractSqlVisitor {
     public String modifySql(String sql, Database database) {
         return sql.replace(getReplace(), getWith());
     }
+
+    @Override
+    public String getSerializedObjectNamespace() {
+        return STANDARD_OBJECTS_NAMESPACE;
+    }
 }

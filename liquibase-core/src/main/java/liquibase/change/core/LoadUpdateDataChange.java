@@ -76,4 +76,8 @@ public class LoadUpdateDataChange extends LoadDataChange {
         return where.toString();
     }
 
+    @Override
+    public String getSerializedObjectNamespace() {
+        return STANDARD_OBJECTS_NAMESPACE;
+    }
 }

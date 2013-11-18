@@ -161,4 +161,9 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
     public void setCatalogName(String catalogName) {
         this.catalogName = catalogName;
     }
+
+    @Override
+    public String getSerializedObjectNamespace() {
+        return STANDARD_OBJECTS_NAMESPACE;
+    }
 }

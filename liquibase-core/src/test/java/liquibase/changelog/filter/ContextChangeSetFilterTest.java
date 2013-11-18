@@ -9,9 +9,6 @@ import liquibase.database.Database;
 import liquibase.sql.visitor.AbstractSqlVisitor;
 import org.junit.Test;
 
-import java.util.Arrays;
-import java.util.HashSet;
-
 public class ContextChangeSetFilterTest {
 
 
@@ -30,6 +27,12 @@ public class ContextChangeSetFilterTest {
         public String getName() {
             throw new UnsupportedOperationException("getName has not been implemented");
         }
+
+        @Override
+        public String getSerializedObjectNamespace() {
+            return STANDARD_OBJECTS_NAMESPACE;
+        }
+
 
     }
 

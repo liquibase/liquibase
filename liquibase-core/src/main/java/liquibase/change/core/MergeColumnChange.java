@@ -198,4 +198,9 @@ public class MergeColumnChange extends AbstractChange {
     public String getConfirmationMessage() {
         return "Columns "+getTableName()+"."+getColumn1Name()+" and "+getTableName()+"."+getColumn2Name()+" merged";
     }
+
+    @Override
+    public String getSerializedObjectNamespace() {
+        return STANDARD_OBJECTS_NAMESPACE;
+    }
 }

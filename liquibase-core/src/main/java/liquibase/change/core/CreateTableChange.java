@@ -209,5 +209,9 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
         return "Table " + tableName + " created";
     }
 
+    @Override
+    public String getSerializedObjectNamespace() {
+        return STANDARD_OBJECTS_NAMESPACE;
+    }
 
 }

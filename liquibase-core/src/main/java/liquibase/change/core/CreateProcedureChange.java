@@ -68,4 +68,9 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
     public String getConfirmationMessage() {
         return "Stored procedure created";
     }
+
+    @Override
+    public String getSerializedObjectNamespace() {
+        return STANDARD_OBJECTS_NAMESPACE;
+    }
 }

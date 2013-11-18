@@ -72,4 +72,8 @@ public class RenameViewChange extends AbstractChange {
         return "View " + oldViewName + " renamed to " + newViewName;
     }
 
+    @Override
+    public String getSerializedObjectNamespace() {
+        return STANDARD_OBJECTS_NAMESPACE;
+    }
 }

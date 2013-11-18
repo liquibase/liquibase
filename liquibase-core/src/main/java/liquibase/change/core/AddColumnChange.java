@@ -8,7 +8,6 @@ import java.util.Set;
 import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.database.core.*;
-import liquibase.exception.ValidationErrors;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.*;
 import liquibase.statement.core.AddColumnStatement;
@@ -193,5 +192,9 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
         return "Columns " + StringUtils.join(names, ",") + " added to " + tableName;
     }
 
+    @Override
+    public String getSerializedObjectNamespace() {
+        return STANDARD_OBJECTS_NAMESPACE;
+    }
 
 }

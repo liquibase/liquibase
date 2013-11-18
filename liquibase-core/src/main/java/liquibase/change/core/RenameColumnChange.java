@@ -171,4 +171,8 @@ public class RenameColumnChange extends AbstractChange {
         return "Column "+tableName+"."+ oldColumnName + " renamed to " + newColumnName;
     }
 
+    @Override
+    public String getSerializedObjectNamespace() {
+        return STANDARD_OBJECTS_NAMESPACE;
+    }
 }

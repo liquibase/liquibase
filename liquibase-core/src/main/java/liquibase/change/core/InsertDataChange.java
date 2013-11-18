@@ -131,4 +131,8 @@ public class InsertDataChange extends AbstractChange implements ChangeWithColumn
         this.dbms = dbms;
     }
 
+    @Override
+    public String getSerializedObjectNamespace() {
+        return STANDARD_OBJECTS_NAMESPACE;
+    }
 }

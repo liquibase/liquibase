@@ -263,4 +263,10 @@ public class CustomChangeWrapper extends AbstractChange {
     public Set<String> getSerializableFields() {
         return new HashSet<String>(Arrays.asList("class", "param"));
     }
+
+    @Override
+    public String getSerializedObjectNamespace() {
+        return STANDARD_OBJECTS_NAMESPACE;
+    }
+
 }

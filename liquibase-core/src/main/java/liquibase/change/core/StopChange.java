@@ -50,4 +50,9 @@ public class StopChange extends AbstractChange {
             super(message);
         }
     }
+
+    @Override
+    public String getSerializedObjectNamespace() {
+        return STANDARD_OBJECTS_NAMESPACE;
+    }
 }

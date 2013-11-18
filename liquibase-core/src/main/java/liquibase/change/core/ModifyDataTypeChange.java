@@ -71,4 +71,9 @@ public class ModifyDataTypeChange extends AbstractChange {
     public void setNewDataType(String newDataType) {
         this.newDataType = newDataType;
     }
+
+    @Override
+    public String getSerializedObjectNamespace() {
+        return STANDARD_OBJECTS_NAMESPACE;
+    }
 }

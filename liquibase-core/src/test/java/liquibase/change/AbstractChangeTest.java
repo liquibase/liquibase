@@ -72,6 +72,12 @@ public class AbstractChangeTest {
                 public SqlStatement[] generateStatements(Database database) {
                     return null;
                 }
+
+                @Override
+                public String getSerializedObjectNamespace() {
+                    return STANDARD_OBJECTS_NAMESPACE;
+                }
+
             }.createChangeMetaData();
             fail("Did not throw exception");
         } catch (UnexpectedLiquibaseException e) {
@@ -750,5 +756,11 @@ public class AbstractChangeTest {
         public SqlStatement[] generateStatements(Database database) {
             return null;
         }
+
+        @Override
+        public String getSerializedObjectNamespace() {
+            return STANDARD_OBJECTS_NAMESPACE;
+        }
+
     }
 }

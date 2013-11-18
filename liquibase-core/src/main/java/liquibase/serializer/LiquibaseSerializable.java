@@ -4,6 +4,11 @@ import java.util.Set;
 
 public interface LiquibaseSerializable {
 
+    String STANDARD_OBJECTS_NAMESPACE = "http://www.liquibase.org/xml/ns/dbchangelog";
+    String GENERIC_EXTENSION_NAMESPACE = "http://www.liquibase.org/xml/ns/dbchangelog-ext";
+
+    String getSerializedObjectNamespace();
+
     public enum SerializationType {
         NAMED_FIELD,
         NESTED_OBJECT,

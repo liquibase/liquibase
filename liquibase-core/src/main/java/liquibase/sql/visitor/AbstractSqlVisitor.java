@@ -67,4 +67,9 @@ public abstract class AbstractSqlVisitor implements SqlVisitor {
     public SerializationType getSerializableFieldType(String field) {
         return SerializationType.NAMED_FIELD;
     }
+
+    @Override
+    public String getSerializedObjectNamespace() {
+        return GENERIC_EXTENSION_NAMESPACE;
+    }
 }

@@ -103,4 +103,9 @@ public class AlterSequenceChange extends AbstractChange {
     public String getConfirmationMessage() {
         return "Sequence " + getSequenceName() + " altered";
     }
+
+    @Override
+    public String getSerializedObjectNamespace() {
+        return STANDARD_OBJECTS_NAMESPACE;
+    }
 }

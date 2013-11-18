@@ -191,4 +191,9 @@ public class AddUniqueConstraintChange extends AbstractChange {
                 inverse,
         };
     }
+
+    @Override
+    public String getSerializedObjectNamespace() {
+        return STANDARD_OBJECTS_NAMESPACE;
+    }
 }

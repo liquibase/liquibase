@@ -7,7 +7,6 @@ import liquibase.database.core.SQLiteDatabase;
 import liquibase.database.core.SQLiteDatabase.AlterTableVisitor;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Index;
-import liquibase.datatype.DataTypeFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.ReorganizeTableStatement;
 import liquibase.statement.core.SetNullableStatement;
@@ -192,5 +191,10 @@ public class AddNotNullConstraintChange extends AbstractChange {
     @Override
     public String getConfirmationMessage() {
         return "Null constraint has been added to " + getTableName() + "." + getColumnName();
+    }
+
+    @Override
+    public String getSerializedObjectNamespace() {
+        return STANDARD_OBJECTS_NAMESPACE;
     }
 }

@@ -123,4 +123,9 @@ public class DropAllForeignKeyConstraintsChange extends AbstractChange {
     public boolean generateStatementsVolatile(Database database) {
         return true;
     }
+
+    @Override
+    public String getSerializedObjectNamespace() {
+        return STANDARD_OBJECTS_NAMESPACE;
+    }
 }

@@ -65,6 +65,7 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
     @Override
     public void write(List<ChangeSet> changeSets, OutputStream out) throws IOException {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        factory.setNamespaceAware(true);
         DocumentBuilder documentBuilder;
         try {
             documentBuilder = factory.newDocumentBuilder();
@@ -74,11 +75,14 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
         documentBuilder.setEntityResolver(new LiquibaseEntityResolver());
 
         Document doc = documentBuilder.newDocument();
-        Element changeLogElement = doc.createElementNS(XMLChangeLogSAXParser.getDatabaseChangeLogNameSpace(), "databaseChangeLog");
+        Element changeLogElement = doc.createElementNS(LiquibaseSerializable.STANDARD_OBJECTS_NAMESPACE, "databaseChangeLog");
 
-        changeLogElement.setAttribute("xmlns", XMLChangeLogSAXParser.getDatabaseChangeLogNameSpace());
+        changeLogElement.setAttribute("xmlns", LiquibaseSerializable.STANDARD_OBJECTS_NAMESPACE);
         changeLogElement.setAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
-        changeLogElement.setAttribute("xsi:schemaLocation", "http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-" + XMLChangeLogSAXParser.getSchemaVersion() + ".xsd");
+        changeLogElement.setAttribute("xmlns:ext", LiquibaseSerializable.GENERIC_EXTENSION_NAMESPACE);
+        changeLogElement.setAttribute("xsi:schemaLocation",
+                LiquibaseSerializable.STANDARD_OBJECTS_NAMESPACE +" http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-" + XMLChangeLogSAXParser.getSchemaVersion() + ".xsd\n"+
+        LiquibaseSerializable.GENERIC_EXTENSION_NAMESPACE+" http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd");
 
         doc.appendChild(changeLogElement);
         setCurrentChangeLogFileDOM(doc);
@@ -110,7 +114,8 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
     }
 
     public Element createNode(LiquibaseSerializable object) {
-        Element node = currentChangeLogFileDOM.createElementNS(XMLChangeLogSAXParser.getDatabaseChangeLogNameSpace(), object.getSerializedObjectName());
+        String namespace = object.getSerializedObjectNamespace();
+        Element node = currentChangeLogFileDOM.createElementNS(namespace, object.getSerializedObjectName());
 
         for (String field : object.getSerializableFields()) {
             setValueOnNode(node, field, object.getSerializableFieldValue(field), object.getSerializableFieldType(field));
@@ -130,14 +135,18 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
             }
         } else if (value instanceof Map) {
             for (Map.Entry entry : (Set<Map.Entry>) ((Map) value).entrySet()) {
-                Element mapNode = currentChangeLogFileDOM.createElementNS(XMLChangeLogSAXParser.getDatabaseChangeLogNameSpace(), objectName);
+                Element mapNode = currentChangeLogFileDOM.createElementNS(LiquibaseSerializable.STANDARD_OBJECTS_NAMESPACE, objectName);
                 setValueOnNode(mapNode, (String) entry.getKey(), entry.getValue(), serializationType);
             }
         } else if (value instanceof LiquibaseSerializable) {
             node.appendChild(createNode((LiquibaseSerializable) value));
         } else {
             if (serializationType.equals(LiquibaseSerializable.SerializationType.NESTED_OBJECT)) {
-                node.appendChild(createNode(objectName, value.toString()));
+                String namespace = LiquibaseSerializable.STANDARD_OBJECTS_NAMESPACE;
+                if (value instanceof LiquibaseSerializable) {
+                    namespace = ((LiquibaseSerializable) value).getSerializedObjectNamespace();
+                }
+                node.appendChild(createNode(namespace, objectName, value.toString()));
             } else if (serializationType.equals(LiquibaseSerializable.SerializationType.DIRECT_VALUE)) {
                 node.setTextContent(value.toString());
             } else {
@@ -148,14 +157,14 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
 
 
     // create a XML node with nodeName and simple text content
-    public Element createNode(String nodeName, String nodeContent) {
-        Element element = currentChangeLogFileDOM.createElementNS(XMLChangeLogSAXParser.getDatabaseChangeLogNameSpace(), nodeName);
+    public Element createNode(String nodeNamespace, String nodeName, String nodeContent) {
+        Element element = currentChangeLogFileDOM.createElementNS(nodeNamespace, nodeName);
         element.setTextContent(nodeContent);
         return element;
     }
 
     public Element createNode(ColumnConfig columnConfig) {
-        Element element = currentChangeLogFileDOM.createElementNS(XMLChangeLogSAXParser.getDatabaseChangeLogNameSpace(), "column");
+        Element element = currentChangeLogFileDOM.createElementNS(columnConfig.getSerializedObjectNamespace(), "column");
         if (columnConfig.getName() != null) {
             element.setAttribute("name", columnConfig.getName());
         }
@@ -212,7 +221,7 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
 
         ConstraintsConfig constraints = columnConfig.getConstraints();
         if (constraints != null) {
-            Element constraintsElement = currentChangeLogFileDOM.createElementNS(XMLChangeLogSAXParser.getDatabaseChangeLogNameSpace(), "constraints");
+            Element constraintsElement = currentChangeLogFileDOM.createElementNS(columnConfig.getSerializedObjectNamespace(), "constraints");
             if (constraints.getCheckConstraint() != null) {
                 constraintsElement.setAttribute("checkConstraint", constraints.getCheckConstraint());
             }

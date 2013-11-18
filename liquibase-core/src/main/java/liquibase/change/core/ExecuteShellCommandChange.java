@@ -157,4 +157,9 @@ public class ExecuteShellCommandChange extends AbstractChange {
     private String getCommandString() {
         return executable + " " + StringUtils.join(args, " ");
     }
+
+    @Override
+    public String getSerializedObjectNamespace() {
+        return STANDARD_OBJECTS_NAMESPACE;
+    }
 }

@@ -33,4 +33,8 @@ public class DeleteDataChange extends AbstractModifyDataChange {
         return "Data deleted from " + getTableName();
     }
 
+    @Override
+    public String getSerializedObjectNamespace() {
+        return STANDARD_OBJECTS_NAMESPACE;
+    }
 }

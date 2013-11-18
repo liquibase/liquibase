@@ -59,4 +59,10 @@ class ExampleAbstractChange extends AbstractChange {
     public String getNotWriteMethod() {
         return null;
     }
+
+    @Override
+    public String getSerializedObjectNamespace() {
+        return STANDARD_OBJECTS_NAMESPACE;
+    }
+
 }

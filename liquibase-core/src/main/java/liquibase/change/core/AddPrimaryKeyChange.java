@@ -156,4 +156,9 @@ public class AddPrimaryKeyChange extends AbstractChange {
     public String getConfirmationMessage() {
         return "Primary key added to " + getTableName() + " (" + getColumnNames() + ")";
     }
+
+    @Override
+    public String getSerializedObjectNamespace() {
+        return STANDARD_OBJECTS_NAMESPACE;
+    }
 }

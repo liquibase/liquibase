@@ -106,4 +106,8 @@ public class CreateViewChange extends AbstractChange {
 		return !(database instanceof SQLiteDatabase);
 	}
 
+    @Override
+    public String getSerializedObjectNamespace() {
+        return STANDARD_OBJECTS_NAMESPACE;
+    }
 }

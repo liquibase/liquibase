@@ -88,4 +88,9 @@ public class RenameTableChange extends AbstractChange {
     public String getConfirmationMessage() {
         return "Table " + oldTableName + " renamed to " + newTableName;
     }
+
+    @Override
+    public String getSerializedObjectNamespace() {
+        return STANDARD_OBJECTS_NAMESPACE;
+    }
 }

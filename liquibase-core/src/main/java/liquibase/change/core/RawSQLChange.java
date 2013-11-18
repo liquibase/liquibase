@@ -54,4 +54,9 @@ public class RawSQLChange extends AbstractSQLChange {
         return "Custom SQL executed";
     }
 
+    @Override
+    public String getSerializedObjectNamespace() {
+        return STANDARD_OBJECTS_NAMESPACE;
+    }
+
 }

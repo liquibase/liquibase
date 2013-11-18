@@ -71,4 +71,8 @@ public class DropTableChange extends AbstractChange {
         return "Table " + getTableName() + " dropped";
     }
 
+    @Override
+    public String getSerializedObjectNamespace() {
+        return STANDARD_OBJECTS_NAMESPACE;
+    }
 }

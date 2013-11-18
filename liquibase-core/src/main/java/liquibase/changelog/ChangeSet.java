@@ -755,4 +755,10 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
             return SerializationType.NAMED_FIELD;
         }
     }
+
+    @Override
+    public String getSerializedObjectNamespace() {
+        return STANDARD_OBJECTS_NAMESPACE;
+    }
+
 }

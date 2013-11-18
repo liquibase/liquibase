@@ -121,4 +121,9 @@ public class DropDefaultValueChange extends AbstractChange {
     public String getConfirmationMessage() {
         return "Default value dropped from "+getTableName()+"."+getColumnName();
     }
+
+    @Override
+    public String getSerializedObjectNamespace() {
+        return STANDARD_OBJECTS_NAMESPACE;
+    }
 }

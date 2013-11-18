@@ -662,4 +662,10 @@ public class ColumnConfig implements LiquibaseSerializable {
     public SerializationType getSerializableFieldType(String field) {
         return SerializationType.NAMED_FIELD;
     }
+
+    @Override
+    public String getSerializedObjectNamespace() {
+        return STANDARD_OBJECTS_NAMESPACE;
+    }
+
 }

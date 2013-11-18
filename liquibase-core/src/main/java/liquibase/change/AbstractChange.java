@@ -488,4 +488,9 @@ public abstract class AbstractChange implements Change {
     public SerializationType getSerializableFieldType(String field) {
         return ChangeFactory.getInstance().getChangeMetaData(this).getParameters().get(field).getSerializationType();
     }
+
+    @Override
+    public String getSerializedObjectNamespace() {
+        return GENERIC_EXTENSION_NAMESPACE;
+    }
 }

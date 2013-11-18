@@ -131,4 +131,9 @@ public class DropNotNullConstraintChange extends AbstractChange {
     public String getConfirmationMessage() {
         return "Null constraint dropped from " + getTableName() + "." + getColumnName();
     }
+
+    @Override
+    public String getSerializedObjectNamespace() {
+        return STANDARD_OBJECTS_NAMESPACE;
+    }
 }

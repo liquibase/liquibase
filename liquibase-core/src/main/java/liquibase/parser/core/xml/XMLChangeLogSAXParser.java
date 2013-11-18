@@ -48,10 +48,6 @@ public class XMLChangeLogSAXParser implements ChangeLogParser {
         return "3.0";
     }
 
-    public static String getDatabaseChangeLogNameSpace() {
-        return "http://www.liquibase.org/xml/ns/dbchangelog";
-    }
-
     @Override
     public boolean supports(String changeLogFile, ResourceAccessor resourceAccessor) {
         return changeLogFile.endsWith("xml");

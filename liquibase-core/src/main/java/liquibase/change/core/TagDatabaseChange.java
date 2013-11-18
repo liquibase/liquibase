@@ -35,4 +35,9 @@ public class TagDatabaseChange extends AbstractChange {
     protected Change[] createInverses() {
         return new Change[0];
     }
+
+    @Override
+    public String getSerializedObjectNamespace() {
+        return STANDARD_OBJECTS_NAMESPACE;
+    }
 }

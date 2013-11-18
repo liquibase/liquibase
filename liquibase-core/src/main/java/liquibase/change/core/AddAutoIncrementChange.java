@@ -112,4 +112,9 @@ public class AddAutoIncrementChange extends AbstractChange {
     public String getConfirmationMessage() {
         return "Auto-increment added to " + getTableName() + "." + getColumnName();
     }
+
+    @Override
+    public String getSerializedObjectNamespace() {
+        return STANDARD_OBJECTS_NAMESPACE;
+    }
 }

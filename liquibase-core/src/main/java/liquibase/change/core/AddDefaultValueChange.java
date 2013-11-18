@@ -182,4 +182,9 @@ public class AddDefaultValueChange extends AbstractChange {
     public String getConfirmationMessage() {
         return "Default value added to " + getTableName() + "." + getColumnName();
     }
+
+    @Override
+    public String getSerializedObjectNamespace() {
+        return STANDARD_OBJECTS_NAMESPACE;
+    }
 }

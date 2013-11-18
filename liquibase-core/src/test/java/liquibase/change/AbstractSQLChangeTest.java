@@ -267,5 +267,11 @@ public class AbstractSQLChangeTest {
         public String getConfirmationMessage() {
             return "Example SQL Change Message";
         }
+
+        @Override
+        public String getSerializedObjectNamespace() {
+            return STANDARD_OBJECTS_NAMESPACE;
+        }
+
     }
 }

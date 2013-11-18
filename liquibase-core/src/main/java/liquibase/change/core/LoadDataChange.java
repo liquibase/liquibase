@@ -309,4 +309,9 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
     public Warnings warn(Database database) {
         return null;
     }
+
+    @Override
+    public String getSerializedObjectNamespace() {
+        return STANDARD_OBJECTS_NAMESPACE;
+    }
 }

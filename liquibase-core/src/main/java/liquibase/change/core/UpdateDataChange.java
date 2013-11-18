@@ -93,4 +93,8 @@ public class UpdateDataChange extends AbstractModifyDataChange implements Change
         return "Data updated in " + getTableName();
     }
 
+    @Override
+    public String getSerializedObjectNamespace() {
+        return STANDARD_OBJECTS_NAMESPACE;
+    }
 }

@@ -18,4 +18,9 @@ public class EmptyChange extends AbstractChange {
     public String getConfirmationMessage() {
         return "Empty change did nothing";
     }
+
+    @Override
+    public String getSerializedObjectNamespace() {
+        return STANDARD_OBJECTS_NAMESPACE;
+    }
 }

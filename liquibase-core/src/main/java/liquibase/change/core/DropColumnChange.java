@@ -147,4 +147,9 @@ public class DropColumnChange extends AbstractChange {
     public String getConfirmationMessage() {
         return "Column " + getTableName() + "." + getColumnName() + " dropped";
     }
+
+    @Override
+    public String getSerializedObjectNamespace() {
+        return STANDARD_OBJECTS_NAMESPACE;
+    }
 }

@@ -126,4 +126,9 @@ public class DropUniqueConstraintChange extends AbstractChange {
     public String getConfirmationMessage() {
         return "Unique constraint "+getConstraintName()+" dropped from "+getTableName();
     }
+
+    @Override
+    public String getSerializedObjectNamespace() {
+        return STANDARD_OBJECTS_NAMESPACE;
+    }
 }
