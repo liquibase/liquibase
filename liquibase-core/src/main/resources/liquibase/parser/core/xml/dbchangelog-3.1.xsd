@@ -946,7 +946,10 @@
 			<xsd:sequence>
 				<xsd:element ref="comment" minOccurs="0" maxOccurs="1" />
 			</xsd:sequence>
-			<xsd:attribute name="dbms" type="xsd:string" />
+			<xsd:attribute name="catalogName" type="xsd:string" />
+            <xsd:attribute name="schemaName" type="xsd:string" />
+            <xsd:attribute name="procedureName" type="xsd:string" />
+            <xsd:attribute name="dbms" type="xsd:string" />
 		</xsd:complexType>
 	</xsd:element>
 
@@ -1014,7 +1017,15 @@
 		</xsd:complexType>
 	</xsd:element>
 
-	<!-- renameColumn -->
+    <xsd:element name="dropProcedure">
+        <xsd:complexType>
+            <xsd:attribute name="procedureName" type="xsd:string" use="required" />
+            <xsd:attribute name="catalogName" type="xsd:string" />
+            <xsd:attribute name="schemaName" type="xsd:string" />
+        </xsd:complexType>
+    </xsd:element>
+
+    <!-- renameColumn -->
 	<xsd:element name="renameColumn">
 		<xsd:complexType>
 			<xsd:attributeGroup ref="renameColumnAttributes" />
