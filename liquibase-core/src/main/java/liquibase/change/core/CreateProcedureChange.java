@@ -27,11 +27,11 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
     private String procedureName;
     private String procedureText;
 	private String dbms;
-    private String path;
 
-    protected InputStream procedureTextStream;
+    private String path;
+    private InputStream procedureTextStream;
     private Boolean relativeToChangelogFile;
-    protected String encoding = null;
+    private String encoding = null;
 
 
     public String getCatalogName() {
@@ -67,7 +67,7 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
         this.encoding = encoding;
     }
 
-    @DatabaseChangeProperty(description = "File containing the procedure text. Either this attribute or a nested procedure text is required.", exampleValue = "com/example/my-procedure.sql")
+    @DatabaseChangeProperty(description = "File containing the procedure text. Either this attribute or a nested procedure text is required.", exampleValue = "com/example/my-logic.sql")
     public String getPath() {
         return path;
     }
@@ -120,11 +120,11 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
     public ValidationErrors validate(Database database) {
         ValidationErrors validate = new ValidationErrors(); //not falling back to default because of path/procedureText option group. Need to specify everything
         if (StringUtils.trimToNull(getProcedureText()) != null && StringUtils.trimToNull(getPath()) != null) {
-            validate.addError("Cannot specify both 'path' and a nested procedure text in createProcedure");
+            validate.addError("Cannot specify both 'path' and a nested procedure text in "+ChangeFactory.getInstance().getChangeMetaData(this).getName());
         }
 
         if (StringUtils.trimToNull(getProcedureText()) == null && StringUtils.trimToNull(getPath()) == null) {
-            validate.addError("Cannot specify either 'path' or a nested procedure text in createProcedure");
+            validate.addError("Cannot specify either 'path' or a nested procedure text in "+ChangeFactory.getInstance().getChangeMetaData(this).getName());
         }
 
         return validate;
@@ -145,7 +145,7 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
             return;
         }
 
-        boolean loaded = false;
+        boolean loaded;
         try {
             loaded = initializeSqlStream();
         } catch (IOException e) {
@@ -153,7 +153,7 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
         }
 
         if (!loaded) {
-            throw new SetupException("<createProcedure path=" + path + "> - Could not find file");
+            throw new SetupException("<"+ChangeFactory.getInstance().getChangeMetaData(this).getName()+" path=" + path + "> - Could not find file");
         }
     }
 
@@ -178,7 +178,7 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
         try {
             CheckSum checkSum = CheckSum.compute(new AbstractSQLChange.NormalizingStream(";", false, false, stream), false);
 
-            return checkSum;
+            return CheckSum.compute(super.generateCheckSum().toString()+":"+checkSum.toString());
         } finally {
             try {
                 initializeSqlStream();
@@ -214,8 +214,12 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
                 }
             }
         }
+        return generateStatements(procedureText, endDelimiter, database);
+    }
+
+    protected SqlStatement[] generateStatements(String logicText, String endDelimiter, Database database) {
         return new SqlStatement[]{
-                new CreateProcedureStatement(getCatalogName(), getSchemaName(), getProcedureName(), procedureText, endDelimiter),
+                new CreateProcedureStatement(getCatalogName(), getSchemaName(), getProcedureName(), logicText, endDelimiter),
         };
     }
 

@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
@@ -275,6 +276,8 @@ public class StringChangeLogSerializerTest {
             } else if (field.getType().equals(ResourceAccessor.class)) {
                 //nothing
             } else if (field.getType().equals(ClassLoader.class)) {
+                //nothing
+            } else if (field.getType().equals(InputStream.class)) {
                 //nothing
             } else if (field.getType().equals(long.class)) {
                 field.set(object, createInteger().longValue());

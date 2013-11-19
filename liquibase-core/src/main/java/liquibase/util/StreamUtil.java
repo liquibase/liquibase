@@ -152,6 +152,9 @@ public class StreamUtil {
      * @return True if the file was found, false otherwise.
      */
     private static InputStream loadFromFileSystem(String file, Boolean relativeToChangelogFile, ChangeSet changeSet, ResourceAccessor resourceAccessor) throws IOException {
+        if (resourceAccessor == null) {
+            return null;
+        }
         if (relativeToChangelogFile != null && relativeToChangelogFile) {
             String base;
             if (changeSet.getChangeLog() == null) {

@@ -9,6 +9,7 @@ import liquibase.statement.SqlStatement;
 import liquibase.test.TestContext;
 import org.junit.Test;
 
+import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.math.BigInteger;
@@ -60,7 +61,7 @@ public abstract class StandardChangeTest {
                 //currently not used
             } else  if (String.class.isAssignableFrom(field.getType())) {
                 // comment field should be ignored as it should not impact checksum
-                if (field.getName().equals("comment")) {
+                if (field.getName().equals("comment") || field.getName().equals("comments")) {
                     continue;
                 }
                 field.set(change, "asdghasdgasdg");
@@ -107,10 +108,10 @@ public abstract class StandardChangeTest {
 
                 column2.setName("87682346asgasdg");
                 checkThatChecksumIsNew(change, seenCheckSums, field);
-            } else if (field.getName().equalsIgnoreCase("changeLogParameters"))
-            {
+            } else if (field.getName().equalsIgnoreCase("changeLogParameters")) {
                // ignore, doesn't have something to do with generateCheckSum
-
+            } else if (InputStream.class.isAssignableFrom(field.getType())) {
+                // ignore, doesn't have something to do with generateCheckSum
             } else {
                 throw new RuntimeException("Unknown field type: "+field.getType()+" for "+field.getName());
             }
