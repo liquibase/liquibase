@@ -2,22 +2,16 @@ package liquibase.diff.output;
 
 import liquibase.database.Database;
 import liquibase.database.core.H2Database;
-import liquibase.diff.compare.DatabaseObjectComparatorFactory;
+import liquibase.diff.output.changelog.ChangeGeneratorFactory;
+import liquibase.diff.output.changelog.core.MissingDataExternalFileChangeGenerator;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.DatabaseObjectCollection;
-import liquibase.structure.core.Column;
-
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
 
 public class DiffOutputControl {
     private boolean includeSchema;
     private boolean includeCatalog;
     private boolean includeTablespace;
 
-    private String dataDir = null;
     private DatabaseObjectCollection alreadyHandledMissing= new DatabaseObjectCollection(new DatabaseForHash());
     private DatabaseObjectCollection alreadyHandledUnexpected = new DatabaseObjectCollection(new DatabaseForHash());
     private DatabaseObjectCollection alreadyHandledChanged = new DatabaseObjectCollection(new DatabaseForHash());
@@ -61,12 +55,11 @@ public class DiffOutputControl {
         return this;
     }
 
-    public String getDataDir() {
-        return dataDir;
-    }
-
     public DiffOutputControl setDataDir(String dataDir) {
-        this.dataDir = dataDir;
+
+        if (dataDir != null) {
+            ChangeGeneratorFactory.getInstance().register(new MissingDataExternalFileChangeGenerator(dataDir));
+        }
         return this;
     }
 

@@ -79,66 +79,9 @@ public class MissingDataChangeGenerator implements MissingObjectChangeGenerator 
                 columnNames.add(rs.getMetaData().getColumnName(i+1));
             }
 
-            // if dataDir is not null, print out a csv file and use loadData
-            // tag
-            String dataDir = outputControl.getDataDir();
-            if (dataDir != null) {
-                String fileName = table.getName().toLowerCase() + ".csv";
-                if (dataDir != null) {
-                    fileName = dataDir + "/" + fileName;
-                }
-
-                File parentDir = new File(dataDir);
-                if (!parentDir.exists()) {
-                    parentDir.mkdirs();
-                }
-                if (!parentDir.isDirectory()) {
-                    throw new RuntimeException(parentDir
-                            + " is not a directory");
-                }
-
-                CSVWriter outputFile = new CSVWriter(new BufferedWriter(new FileWriter(fileName)));
-                String[] dataTypes = new String[columnNames.size()];
-                String[] line = new String[columnNames.size()];
-                for (int i = 0; i < columnNames.size(); i++) {
-                    line[i] = columnNames.get(i);
-                }
-                outputFile.writeNext(line);
-
-                while (rs.next()) {
-                    line = new String[columnNames.size()];
-
-                    for (int i = 0; i < columnNames.size(); i++) {
-                        Object value = JdbcUtils.getResultSetValue(rs, i + 1);
-                        if (dataTypes[i] == null && value != null) {
-                            if (value instanceof Number) {
-                                dataTypes[i] = "NUMERIC";
-                            } else if (value instanceof Boolean) {
-                                dataTypes[i] = "BOOLEAN";
-                            } else if (value instanceof Date) {
-                                dataTypes[i] = "DATE";
-                            } else {
-                                dataTypes[i] = "STRING";
-                            }
-                        }
-                        if (value == null) {
-                            line[i] = "NULL";
-                        } else {
-                            if (value instanceof Date) {
-                                line[i] = new ISODateFormat().format(((Date) value));
-                            } else {
-                                line[i] = value.toString();
-                            }
-                        }
-                    }
-                    outputFile.writeNext(line);
-                }
-                outputFile.flush();
-                outputFile.close();
-
-                LoadDataChange change = new LoadDataChange();
-                change.setFile(fileName);
-                change.setEncoding("UTF-8");
+            List<Change> changes = new ArrayList<Change>();
+            while (rs.next()) {
+                InsertDataChange change = new InsertDataChange();
                 if (outputControl.isIncludeCatalog()) {
                     change.setCatalogName(table.getSchema().getCatalogName());
                 }
@@ -147,61 +90,34 @@ public class MissingDataChangeGenerator implements MissingObjectChangeGenerator 
                 }
                 change.setTableName(table.getName());
 
+                // loop over all columns for this row
                 for (int i = 0; i < columnNames.size(); i++) {
-                    String colName = columnNames.get(i);
-                    LoadDataColumnConfig columnConfig = new LoadDataColumnConfig();
-                    columnConfig.setHeader(colName);
-                    columnConfig.setName(colName);
-                    columnConfig.setType(dataTypes[i]);
+                    ColumnConfig column = new ColumnConfig();
+                    column.setName(columnNames.get(i));
 
-                    change.addColumn(columnConfig);
+                    Object value = JdbcUtils.getResultSetValue(rs, i + 1);
+                    if (value == null) {
+                        column.setValue(null);
+                    } else if (value instanceof Number) {
+                        column.setValueNumeric((Number) value);
+                    } else if (value instanceof Boolean) {
+                        column.setValueBoolean((Boolean) value);
+                    } else if (value instanceof Date) {
+                        column.setValueDate((Date) value);
+                    } else { // string
+                        column.setValue(value.toString().replace("\\", "\\\\"));
+                    }
+
+                    change.addColumn(column);
+
                 }
 
-                return new Change[]{
-                        change
-                };
-            } else { // if dataDir is null, build and use insert tags
-                List<Change> changes = new ArrayList<Change>();
-                while (rs.next()) {
-                    InsertDataChange change = new InsertDataChange();
-                    if (outputControl.isIncludeCatalog()) {
-                        change.setCatalogName(table.getSchema().getCatalogName());
-                    }
-                    if (outputControl.isIncludeSchema()) {
-                        change.setSchemaName(table.getSchema().getName());
-                    }
-                    change.setTableName(table.getName());
-
-                    // loop over all columns for this row
-                    for (int i = 0; i < columnNames.size(); i++) {
-                        ColumnConfig column = new ColumnConfig();
-                        column.setName(columnNames.get(i));
-
-                        Object value = JdbcUtils.getResultSetValue(rs, i + 1);
-                        if (value == null) {
-                            column.setValue(null);
-                        } else if (value instanceof Number) {
-                            column.setValueNumeric((Number) value);
-                        } else if (value instanceof Boolean) {
-                            column.setValueBoolean((Boolean) value);
-                        } else if (value instanceof Date) {
-                            column.setValueDate((Date) value);
-                        } else { // string
-                            column.setValue(value.toString().replace("\\", "\\\\"));
-                        }
-
-                        change.addColumn(column);
-
-                    }
-
-                    // for each row, add a new change
-                    // (there will be one group per table)
-                    changes.add(change);
-                }
-
-                return changes.toArray(new Change[changes.size()]);
-
+                // for each row, add a new change
+                // (there will be one group per table)
+                changes.add(change);
             }
+
+            return changes.toArray(new Change[changes.size()]);
         } catch (Exception e) {
             throw new UnexpectedLiquibaseException(e);
         } finally {
