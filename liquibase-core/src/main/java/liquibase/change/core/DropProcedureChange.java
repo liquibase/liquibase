@@ -33,7 +33,7 @@ public class DropProcedureChange extends AbstractChange {
         this.schemaName = schemaName;
     }
 
-    @DatabaseChangeProperty(mustEqualExisting = "storedProcedure", description = "Name of the stored procedure to drop")
+    @DatabaseChangeProperty(mustEqualExisting = "storedProcedure", description = "Name of the stored procedure to drop", exampleValue = "full_name")
     public String getProcedureName() {
         return procedureName;
     }
