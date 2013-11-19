@@ -3,7 +3,10 @@ package liquibase.change.core;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
-import liquibase.change.*;
+import liquibase.change.AbstractSQLChange;
+import liquibase.change.ChangeMetaData;
+import liquibase.change.DatabaseChange;
+import liquibase.change.DatabaseChangeProperty;
 import liquibase.database.Database;
 import liquibase.exception.SetupException;
 import liquibase.exception.UnexpectedLiquibaseException;
@@ -99,7 +102,8 @@ public class SQLFileChange extends AbstractSQLChange {
         }
     }
 
-    public boolean initializeSqlStream() throws IOException {
+    @Override
+	public boolean initializeSqlStream() throws IOException {
         if (path == null) {
             return true;
         }
@@ -136,7 +140,7 @@ public class SQLFileChange extends AbstractSQLChange {
                 return null;
             }
             try {
-                return StreamUtil.getStreamContents(sqlStream, encoding);
+                return getChangeSet().getChangeLogParameters().expandExpressions(StreamUtil.getStreamContents(sqlStream, encoding));
             } catch (IOException e) {
                 throw new UnexpectedLiquibaseException(e);
             } finally {
