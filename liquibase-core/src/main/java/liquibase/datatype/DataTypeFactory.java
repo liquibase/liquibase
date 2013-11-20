@@ -180,6 +180,8 @@ public class DataTypeFactory {
             ((BigIntType) liquibaseDataType).setAutoIncrement(true);
         }
 
+        liquibaseDataType.finishInitialization(dataTypeDefinition);
+
         return liquibaseDataType;
 
     }

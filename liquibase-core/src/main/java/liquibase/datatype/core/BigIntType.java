@@ -42,4 +42,13 @@ public class BigIntType extends LiquibaseDataType {
         }
         return super.toDatabaseDataType(database);
     }
+
+    @Override
+    public void finishInitialization(String originalDefinition) {
+        super.finishInitialization(originalDefinition);
+
+        if (originalDefinition.toLowerCase().startsWith("bigserial")) {
+            autoIncrement = true;
+        }
+    }
 }

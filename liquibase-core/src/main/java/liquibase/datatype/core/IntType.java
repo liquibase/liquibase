@@ -50,4 +50,14 @@ public class IntType extends LiquibaseDataType {
 //                columnTypeString.toLowerCase(Locale.ENGLISH).contains("bit")) {
 //            type = new IntType("INTEGER");
     }
+
+    @Override
+    public void finishInitialization(String originalDefinition) {
+        super.finishInitialization(originalDefinition);
+
+        if (originalDefinition.toLowerCase().startsWith("serial")) {
+            autoIncrement = true;
+        }
+    }
+
 }
