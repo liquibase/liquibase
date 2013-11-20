@@ -98,15 +98,18 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
 
         FileOutputStream out = new FileOutputStream(changeLogFile);
 
-        if (!existingChangeLog.contains("</databaseChangeLog>")) {
-            write(Arrays.asList(changeSet), out);
-        } else {
-            existingChangeLog = existingChangeLog.replaceFirst("</databaseChangeLog>", serialize(changeSet, true) + "\n</databaseChangeLog>");
+        try {
+            if (!existingChangeLog.contains("</databaseChangeLog>")) {
+                write(Arrays.asList(changeSet), out);
+            } else {
+                existingChangeLog = existingChangeLog.replaceFirst("</databaseChangeLog>", serialize(changeSet, true) + "\n</databaseChangeLog>");
 
-            StreamUtil.copy(new ByteArrayInputStream(existingChangeLog.getBytes()), out);
+                StreamUtil.copy(new ByteArrayInputStream(existingChangeLog.getBytes()), out);
+            }
+            out.flush();
+        } finally {
+            out.close();
         }
-        out.flush();
-        out.close();
     }
 
     public Element createNode(LiquibaseSerializable object) {

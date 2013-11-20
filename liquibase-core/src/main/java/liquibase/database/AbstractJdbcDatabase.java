@@ -54,26 +54,8 @@ import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.sql.Sql;
 import liquibase.sql.visitor.SqlVisitor;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
-import liquibase.statement.DatabaseFunction;
-import liquibase.statement.SequenceCurrentValueFunction;
-import liquibase.statement.SequenceNextValueFunction;
-import liquibase.statement.SqlStatement;
-import liquibase.statement.core.AddColumnStatement;
-import liquibase.statement.core.CreateDatabaseChangeLogLockTableStatement;
-import liquibase.statement.core.CreateDatabaseChangeLogTableStatement;
-import liquibase.statement.core.DropTableStatement;
-import liquibase.statement.core.GetNextChangeSetSequenceValueStatement;
-import liquibase.statement.core.GetViewDefinitionStatement;
-import liquibase.statement.core.InitializeDatabaseChangeLogLockTableStatement;
-import liquibase.statement.core.MarkChangeSetRanStatement;
-import liquibase.statement.core.ModifyDataTypeStatement;
-import liquibase.statement.core.RawSqlStatement;
-import liquibase.statement.core.RemoveChangeSetRanStatusStatement;
-import liquibase.statement.core.SelectFromDatabaseChangeLogStatement;
-import liquibase.statement.core.SetNullableStatement;
-import liquibase.statement.core.TagDatabaseStatement;
-import liquibase.statement.core.UpdateChangeSetChecksumStatement;
-import liquibase.statement.core.UpdateStatement;
+import liquibase.statement.*;
+import liquibase.statement.core.*;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Catalog;
 import liquibase.structure.core.Column;
@@ -387,9 +369,8 @@ public abstract class AbstractJdbcDatabase implements Database {
             return null;
         }
         try {
-            ResultSet resultSet = ((JdbcConnection) connection).prepareCall("call current_schema").executeQuery();
-            resultSet.next();
-            return resultSet.getString(1);
+            return ExecutorService.getInstance().getExecutor(this).queryForObject(new RawCallStatement("call current_schema"), String.class);
+
         } catch (Exception e) {
             LogFactory.getLogger().info("Error getting default schema", e);
         }

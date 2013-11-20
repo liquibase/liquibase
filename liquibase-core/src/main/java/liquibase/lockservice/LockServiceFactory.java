@@ -23,7 +23,7 @@ public class LockServiceFactory {
 
 	private Map<Database, LockService> openLockServices = new ConcurrentHashMap<Database, LockService>();
 
-	public static LockServiceFactory getInstance() {
+	public static synchronized LockServiceFactory getInstance() {
 		if (instance == null) {
 			instance = new LockServiceFactory();
 		}

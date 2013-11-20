@@ -1,5 +1,6 @@
 package liquibase.executor.jvm;
 
+import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.PreparedStatementFactory;
 import liquibase.database.core.OracleDatabase;
@@ -9,11 +10,14 @@ import liquibase.executor.AbstractExecutor;
 import liquibase.executor.Executor;
 import liquibase.logging.LogFactory;
 import liquibase.logging.Logger;
+import liquibase.sql.UnparsedSql;
 import liquibase.sql.visitor.SqlVisitor;
 import liquibase.statement.*;
+import liquibase.statement.core.RawSqlStatement;
 import liquibase.util.JdbcUtils;
 import liquibase.util.StringUtils;
 
+import java.sql.CallableStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -36,10 +40,6 @@ public class JdbcExecutor extends AbstractExecutor implements Executor {
         return true;
     }
 
-    //-------------------------------------------------------------------------
-    // Methods dealing with static SQL (java.sql.Statement)
-    //-------------------------------------------------------------------------
-
     public Object execute(StatementCallback action, List<SqlVisitor> sqlVisitors) throws DatabaseException {
         DatabaseConnection con = database.getConnection();
         Statement stmt = null;
@@ -48,6 +48,27 @@ public class JdbcExecutor extends AbstractExecutor implements Executor {
             Statement stmtToUse = stmt;
 
             return action.doInStatement(stmtToUse);
+        }
+        catch (SQLException ex) {
+            // Release Connection early, to avoid potential connection pool deadlock
+            // in the case when the exception translator hasn't been initialized yet.
+            JdbcUtils.closeStatement(stmt);
+            stmt = null;
+            throw new DatabaseException("Error executing SQL " + StringUtils.join(applyVisitors(action.getStatement(), sqlVisitors), "; on "+ con.getURL())+": "+ex.getMessage(), ex);
+        }
+        finally {
+            JdbcUtils.closeStatement(stmt);
+        }
+    }
+
+    public Object execute(CallableStatementCallback action, List<SqlVisitor> sqlVisitors) throws DatabaseException {
+        DatabaseConnection con = database.getConnection();
+        CallableStatement stmt = null;
+        try {
+            String sql = applyVisitors(action.getStatement(), sqlVisitors)[0];
+
+            stmt = ((JdbcConnection) con).getUnderlyingConnection().prepareCall(sql);
+            return action.doInCallableStatement(stmt);
         }
         catch (SQLException ex) {
             // Release Connection early, to avoid potential connection pool deadlock
@@ -73,34 +94,7 @@ public class JdbcExecutor extends AbstractExecutor implements Executor {
             return;
         }
 
-
-        class ExecuteStatementCallback implements StatementCallback {
-            @Override
-            public Object doInStatement(Statement stmt) throws SQLException, DatabaseException {
-                for (String statement : applyVisitors(sql, sqlVisitors)) {
-                    if (database instanceof OracleDatabase) {
-                        statement = statement.replaceFirst("/\\s*/\\s*$", ""); //remove duplicated /'s
-                    }
-
-                    log.debug("Executing EXECUTE database command: "+statement);
-                    if (statement.contains("?")) {
-                        stmt.setEscapeProcessing(false);
-                    }
-                    try {
-                        stmt.execute(statement);
-                    } catch (SQLException e) {
-                        throw e;
-                    }
-                }
-                return null;
-            }
-
-            @Override
-            public SqlStatement getStatement() {
-                return sql;
-            }
-        }
-        execute(new ExecuteStatementCallback(), sqlVisitors);
+        execute(new ExecuteStatementCallback(sql, sqlVisitors), sqlVisitors);
     }
 
 
@@ -110,37 +104,10 @@ public class JdbcExecutor extends AbstractExecutor implements Executor {
 
     public Object query(final SqlStatement sql, final ResultSetExtractor rse, final List<SqlVisitor> sqlVisitors) throws DatabaseException {
         if (sql instanceof CallableSqlStatement) {
-            throw new DatabaseException("Direct query using CallableSqlStatement not currently implemented");
+            return execute(new QueryCallableStatementCallback(sql, rse), sqlVisitors);
         }
 
-        class QueryStatementCallback implements StatementCallback {
-            @Override
-            public Object doInStatement(Statement stmt) throws SQLException, DatabaseException {
-                ResultSet rs = null;
-                try {
-                    String[] sqlToExecute = applyVisitors(sql, sqlVisitors);
-
-                    if (sqlToExecute.length != 1) {
-                        throw new DatabaseException("Can only query with statements that return one sql statement");
-                    }
-                    log.debug("Executing QUERY database command: "+sqlToExecute[0]);
-
-                    rs = stmt.executeQuery(sqlToExecute[0]);
-                    ResultSet rsToUse = rs;
-                    return rse.extractData(rsToUse);
-                }
-                finally {
-                    JdbcUtils.closeResultSet(rs);
-                }
-            }
-
-
-            @Override
-            public SqlStatement getStatement() {
-                return sql;
-            }
-        }
-        return execute(new QueryStatementCallback(), sqlVisitors);
+        return execute(new QueryStatementCallback(sql, rse, sqlVisitors), sqlVisitors);
     }
 
     public List query(SqlStatement sql, RowMapper rowMapper) throws DatabaseException {
@@ -161,13 +128,13 @@ public class JdbcExecutor extends AbstractExecutor implements Executor {
     }
 
     @Override
-    public Object queryForObject(SqlStatement sql, Class requiredType) throws DatabaseException {
-        return queryForObject(sql, requiredType, new ArrayList());
+    public <T> T queryForObject(SqlStatement sql, Class<T> requiredType) throws DatabaseException {
+        return (T) queryForObject(sql, requiredType, new ArrayList());
     }
 
     @Override
-    public Object queryForObject(SqlStatement sql, Class requiredType, List<SqlVisitor> sqlVisitors) throws DatabaseException {
-        return queryForObject(sql, getSingleColumnRowMapper(requiredType), sqlVisitors);
+    public <T> T queryForObject(SqlStatement sql, Class<T> requiredType, List<SqlVisitor> sqlVisitors) throws DatabaseException {
+        return (T) queryForObject(sql, getSingleColumnRowMapper(requiredType), sqlVisitors);
     }
 
     @Override
@@ -291,4 +258,111 @@ public class JdbcExecutor extends AbstractExecutor implements Executor {
             return null;
         }
     }
+
+
+    private class ExecuteStatementCallback implements StatementCallback {
+
+        private final SqlStatement sql;
+        private final List<SqlVisitor> sqlVisitors;
+
+        private ExecuteStatementCallback(SqlStatement sql, List<SqlVisitor> sqlVisitors) {
+            this.sql = sql;
+            this.sqlVisitors = sqlVisitors;
+        }
+
+        @Override
+        public Object doInStatement(Statement stmt) throws SQLException, DatabaseException {
+            for (String statement : applyVisitors(sql, sqlVisitors)) {
+                if (database instanceof OracleDatabase) {
+                    statement = statement.replaceFirst("/\\s*/\\s*$", ""); //remove duplicated /'s
+                }
+
+                log.debug("Executing EXECUTE database command: "+statement);
+                if (statement.contains("?")) {
+                    stmt.setEscapeProcessing(false);
+                }
+                try {
+                    stmt.execute(statement);
+                } catch (SQLException e) {
+                    throw e;
+                }
+            }
+            return null;
+        }
+
+        @Override
+        public SqlStatement getStatement() {
+            return sql;
+        }
+    }
+
+    private class QueryStatementCallback implements StatementCallback {
+
+        private final SqlStatement sql;
+        private final List<SqlVisitor> sqlVisitors;
+        private final ResultSetExtractor rse;
+
+        private QueryStatementCallback(SqlStatement sql, ResultSetExtractor rse, List<SqlVisitor> sqlVisitors) {
+            this.sql = sql;
+            this.rse = rse;
+            this.sqlVisitors = sqlVisitors;
+        }
+
+
+        @Override
+        public Object doInStatement(Statement stmt) throws SQLException, DatabaseException {
+            ResultSet rs = null;
+            try {
+                String[] sqlToExecute = applyVisitors(sql, sqlVisitors);
+
+                if (sqlToExecute.length != 1) {
+                    throw new DatabaseException("Can only query with statements that return one sql statement");
+                }
+                log.debug("Executing QUERY database command: "+sqlToExecute[0]);
+
+                rs = stmt.executeQuery(sqlToExecute[0]);
+                ResultSet rsToUse = rs;
+                return rse.extractData(rsToUse);
+            }
+            finally {
+                JdbcUtils.closeResultSet(rs);
+            }
+        }
+
+
+        @Override
+        public SqlStatement getStatement() {
+            return sql;
+        }
+    }
+
+    private class QueryCallableStatementCallback implements CallableStatementCallback {
+
+        private final SqlStatement sql;
+        private final ResultSetExtractor rse;
+
+        private QueryCallableStatementCallback(SqlStatement sql, ResultSetExtractor rse) {
+            this.sql = sql;
+            this.rse = rse;
+        }
+
+
+        @Override
+        public Object doInCallableStatement(CallableStatement cs) throws SQLException, DatabaseException {
+            ResultSet rs = null;
+            try {
+                rs = cs.executeQuery();
+                return rse.extractData(rs);
+            }
+            finally {
+                JdbcUtils.closeResultSet(rs);
+            }
+        }
+
+        @Override
+        public SqlStatement getStatement() {
+            return sql;
+        }
+    }
+
 }
