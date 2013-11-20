@@ -9,6 +9,8 @@ import liquibase.datatype.LiquibaseDataType;
 @DataTypeInfo(name="clob", aliases = {"text", "longtext", "java.sql.Types.CLOB"}, minParameters = 0, maxParameters = 0, priority = LiquibaseDataType.PRIORITY_DEFAULT)
 public class ClobType extends LiquibaseDataType {
 
+    private String originalDefinition;
+
     @Override
     public String objectToSql(Object value, Database database) {
         if (value == null || value.toString().equalsIgnoreCase("null")) {
@@ -35,7 +37,11 @@ public class ClobType extends LiquibaseDataType {
         } else if (database instanceof MSSQLDatabase) {
             return new DatabaseDataType("NVARCHAR", "MAX");
         } else if (database instanceof MySQLDatabase) {
-            return new DatabaseDataType("LONGTEXT");
+            if (originalDefinition.toLowerCase().startsWith("text")) {
+                return new DatabaseDataType("TEXT");
+            } else {
+                return new DatabaseDataType("LONGTEXT");
+            }
         } else if (database instanceof PostgresDatabase || database instanceof SQLiteDatabase || database instanceof SybaseDatabase) {
             return new DatabaseDataType("TEXT");
         } else if (database instanceof OracleDatabase) {
@@ -44,6 +50,11 @@ public class ClobType extends LiquibaseDataType {
         return super.toDatabaseDataType(database);
     }
 
+    @Override
+    public void finishInitialization(String originalDefinition) {
+        super.finishInitialization(originalDefinition);
+        this.originalDefinition = originalDefinition;
+    }
 
     //sqlite
     //        } else if (columnTypeString.equals("TEXT") ||
