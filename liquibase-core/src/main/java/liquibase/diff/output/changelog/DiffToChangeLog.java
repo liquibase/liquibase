@@ -359,6 +359,11 @@ public class DiffToChangeLog {
                 Edge e = (Edge) obj;
                 return e.from == from && e.to == to;
             }
+
+            @Override
+            public int hashCode() {
+                return (this.from.toString()+"."+this.to.toString()).hashCode();
+            }
         }
     }
 }
