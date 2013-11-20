@@ -391,7 +391,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
     }
 
     protected DateFormat getTimeFormat(Database database) {
-        return new SimpleDateFormat("HH:mm:SS");
+        return new SimpleDateFormat("HH:mm:ss");
     }
 
     protected DateFormat getDateTimeFormat(Database database) {
