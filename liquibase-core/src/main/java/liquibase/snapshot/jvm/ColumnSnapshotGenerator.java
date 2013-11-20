@@ -312,7 +312,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                 return new DatabaseFunction(stringVal);
             } else if (type == Types.DATE) {
                 if (zeroTime(stringVal)) {
-                    return new DatabaseFunction(stringVal);
+                    return stringVal;
                 }
                 return new java.sql.Date(getDateFormat(database).parse(stringVal.trim()).getTime());
             } else if (type == Types.DECIMAL && scanner.hasNextBigDecimal()) {
@@ -359,12 +359,12 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                 return new DatabaseFunction(stringVal);
             } else if (type == Types.TIME) {
                 if (zeroTime(stringVal)) {
-                    return new DatabaseFunction(stringVal);
+                    return stringVal;
                 }
                 return new java.sql.Time(getTimeFormat(database).parse(stringVal).getTime());
             } else if (type == Types.TIMESTAMP) {
                 if (zeroTime(stringVal)) {
-                    return new DatabaseFunction(stringVal);
+                    return stringVal;
                 }
                 return new Timestamp(getDateTimeFormat(database).parse(stringVal).getTime());
             } else if (type == Types.TINYINT && scanner.hasNextInt()) {
