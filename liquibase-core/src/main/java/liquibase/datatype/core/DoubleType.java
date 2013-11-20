@@ -13,7 +13,7 @@ public class DoubleType  extends LiquibaseDataType {
         if (database instanceof MSSQLDatabase) {
             return new DatabaseDataType("FLOAT");
         }
-        if (database instanceof DB2Database || database instanceof DerbyDatabase || database instanceof HsqlDatabase || database instanceof MySQLDatabase) {
+        if (database instanceof DB2Database || database instanceof DerbyDatabase || database instanceof HsqlDatabase) {
             return new DatabaseDataType("DOUBLE");
         }
         if (database instanceof OracleDatabase) {
