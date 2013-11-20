@@ -31,6 +31,8 @@ public class BlobType extends LiquibaseDataType {
         if (database instanceof MySQLDatabase) {
             if (originalDefinition.toLowerCase().startsWith("blob") || originalDefinition.equals("java.sql.Types.BLOB")) {
                 return new DatabaseDataType("BLOB");
+            } else if (originalDefinition.toLowerCase().startsWith("varbinary") || originalDefinition.equals("java.sql.Types.VARBINARY")) {
+                return new DatabaseDataType("VARBINARY", getParameters());
             } else {
                 return new DatabaseDataType("LONGBLOB");
             }
