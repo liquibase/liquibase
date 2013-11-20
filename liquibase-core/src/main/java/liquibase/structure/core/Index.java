@@ -158,6 +158,23 @@ public class Index extends AbstractDatabaseObject {
     }
 
     @Override
+    public int hashCode() {
+        return toString().hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if ((obj instanceof Index)) {
+            return false;
+        }
+        if (obj == null) {
+            return false;
+        }
+
+        return this.compareTo(obj) == 0;
+    }
+
+    @Override
     public String toString() {
         StringBuffer stringBuffer = new StringBuffer();
         stringBuffer.append(getName());

@@ -2,6 +2,7 @@ package liquibase.serializer.core.yaml;
 
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
+import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.serializer.ChangeLogSerializer;
 import liquibase.serializer.LiquibaseSerializable;
 import liquibase.statement.DatabaseFunction;
@@ -147,9 +148,9 @@ public class YamlChangeLogSerializer implements ChangeLogSerializer {
                     return super.getProperties(type);
                 }
             } catch (InstantiationException e) {
-                throw new RuntimeException(e);
+                throw new UnexpectedLiquibaseException(e);
             } catch (IllegalAccessException e) {
-                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+                throw new UnexpectedLiquibaseException(e);
             }
             for (String property : serialzableType.getSerializableFields()) {
                 LiquibaseSerializable.SerializationType fieldType = serialzableType.getSerializableFieldType(property);

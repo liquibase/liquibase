@@ -87,7 +87,12 @@ public class CommandLineUtils {
                 File propertiesFile = new File(driverPropertiesFile);
                 if (propertiesFile.exists()) {
 //                    System.out.println("Loading properties from the file:'" + driverPropertiesFile + "'");
-                    driverProperties.load(new FileInputStream(propertiesFile));
+                    FileInputStream inputStream = new FileInputStream(propertiesFile);
+                    try {
+                        driverProperties.load(inputStream);
+                    } finally {
+                        inputStream.close();
+                    }
                 } else {
                   throw new RuntimeException("Can't open JDBC Driver specific properties from the file: '"
                       + driverPropertiesFile + "'");

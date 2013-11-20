@@ -349,7 +349,7 @@ public abstract class AbstractJdbcDatabase implements Database {
                 || objectName == null || (objectName.startsWith(quotingStartCharacter) && objectName.endsWith(
                 quotingEndCharacter))) {
             return objectName;
-        } else if (unquotedObjectsAreUppercased == Boolean.TRUE) {
+        } else if (Boolean.TRUE.equals(unquotedObjectsAreUppercased)) {
             return objectName.toUpperCase();
         } else {
             return objectName.toLowerCase();
