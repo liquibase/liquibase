@@ -34,7 +34,7 @@ public class ModifyDataTypeChange extends AbstractChange {
             };
         } else {
             return new SqlStatement[] {
-                    new ReorganizeTableStatement(getCatalogName(), getSchemaName(), getTableName())
+                    modifyDataTypeStatement
             };
         }
     }
