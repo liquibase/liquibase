@@ -137,9 +137,9 @@ public class StreamUtil {
     }
 
     public static InputStream openStream(String path, Boolean relativeToChangelogFile, ChangeSet changeSet, ResourceAccessor resourceAccessor) throws IOException {
-        InputStream stream = loadFromClasspath(path, relativeToChangelogFile, changeSet, resourceAccessor);
+        InputStream stream = openFromClasspath(path, relativeToChangelogFile, changeSet, resourceAccessor);
         if (stream == null) {
-            stream = loadFromFileSystem(path, relativeToChangelogFile, changeSet, resourceAccessor);
+            stream = openFromFileSystem(path, relativeToChangelogFile, changeSet, resourceAccessor);
         }
 
         return stream;
@@ -151,7 +151,7 @@ public class StreamUtil {
      * @param file The name of the file to search for
      * @return True if the file was found, false otherwise.
      */
-    private static InputStream loadFromFileSystem(String file, Boolean relativeToChangelogFile, ChangeSet changeSet, ResourceAccessor resourceAccessor) throws IOException {
+    private static InputStream openFromFileSystem(String file, Boolean relativeToChangelogFile, ChangeSet changeSet, ResourceAccessor resourceAccessor) throws IOException {
         if (resourceAccessor == null) {
             return null;
         }
@@ -185,7 +185,7 @@ public class StreamUtil {
      * @param file The file name to try and find.
      * @return True if the file was found and loaded, false otherwise.
      */
-    private static InputStream loadFromClasspath(String file, Boolean relativeToChangelogFile, ChangeSet changeSet, ResourceAccessor resourceAccessor) throws IOException {
+    private static InputStream openFromClasspath(String file, Boolean relativeToChangelogFile, ChangeSet changeSet, ResourceAccessor resourceAccessor) throws IOException {
         if (resourceAccessor == null) {
             return null;
         }
