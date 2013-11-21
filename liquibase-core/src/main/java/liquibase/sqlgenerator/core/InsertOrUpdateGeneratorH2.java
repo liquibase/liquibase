@@ -6,6 +6,8 @@ import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.sqlgenerator.core.InsertOrUpdateGenerator;
 import liquibase.statement.core.InsertOrUpdateStatement;
 
+import java.util.regex.Matcher;
+
 public class InsertOrUpdateGeneratorH2 extends InsertOrUpdateGenerator {
     @Override
     public boolean supports(InsertOrUpdateStatement statement, Database database) {
@@ -15,7 +17,7 @@ public class InsertOrUpdateGeneratorH2 extends InsertOrUpdateGenerator {
     @Override
     protected String getInsertStatement(InsertOrUpdateStatement insertOrUpdateStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         String insertStatement = super.getInsertStatement(insertOrUpdateStatement, database, sqlGeneratorChain);
-        return insertStatement.replaceAll("(?i)insert into (.+) (values .+)", "MERGE INTO $1 KEY(" + insertOrUpdateStatement.getPrimaryKey() + ") $2");
+        return insertStatement.replaceAll("(?i)insert into (.+) (values .+)", "MERGE INTO $1 KEY(" + Matcher.quoteReplacement(insertOrUpdateStatement.getPrimaryKey()) + ") $2");
     }
 
     @Override
