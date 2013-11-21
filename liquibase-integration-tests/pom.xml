@@ -9,6 +9,7 @@
         <artifactId>liquibase-parent</artifactId>
         <groupId>org.liquibase</groupId>
         <version>3.0.8-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
     </parent>
 
     <dependencies>
