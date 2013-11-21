@@ -4,9 +4,11 @@ import liquibase.change.AbstractChange;
 import liquibase.change.DatabaseChange;
 import liquibase.change.ChangeMetaData;
 import liquibase.change.DatabaseChangeProperty;
+import liquibase.database.core.DB2Database;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.ModifyDataTypeStatement;
 import liquibase.database.Database;
+import liquibase.statement.core.ReorganizeTableStatement;
 
 @DatabaseChange(name="modifyDataType", description = "Modify data type", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "column")
 public class ModifyDataTypeChange extends AbstractChange {
@@ -24,7 +26,17 @@ public class ModifyDataTypeChange extends AbstractChange {
 
     @Override
     public SqlStatement[] generateStatements(Database database) {
-        return new SqlStatement[] {new ModifyDataTypeStatement(getCatalogName(), getSchemaName(), getTableName(), getColumnName(), getNewDataType())};
+        ModifyDataTypeStatement modifyDataTypeStatement = new ModifyDataTypeStatement(getCatalogName(), getSchemaName(), getTableName(), getColumnName(), getNewDataType());
+        if (database instanceof DB2Database) {
+            return new SqlStatement[] {
+                    modifyDataTypeStatement,
+                    new ReorganizeTableStatement(getCatalogName(), getSchemaName(), getTableName())
+            };
+        } else {
+            return new SqlStatement[] {
+                    modifyDataTypeStatement
+            };
+        }
     }
 
     @DatabaseChangeProperty(mustEqualExisting ="column.relation.catalog", since = "3.0")

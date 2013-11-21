@@ -168,4 +168,8 @@ public abstract class LiquibaseDataType implements PrioritizedService {
                 || string.toLowerCase().startsWith(DatabaseFunction.CURRENT_DATE_TIME_PLACE_HOLDER)
                 || database.getCurrentDateTimeFunction().equalsIgnoreCase(string);
     }
+
+    public void finishInitialization(String originalDefinition) {
+
+    }
 }

@@ -6,6 +6,8 @@ import java.sql.ResultSet;
 import liquibase.CatalogAndSchema;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
+import liquibase.sql.UnparsedSql;
+import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Index;
 import liquibase.structure.core.Schema;
@@ -165,9 +167,7 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
             return null;
         }
         try {
-            ResultSet resultSet = ((JdbcConnection) getConnection()).prepareStatement("select schema_name()").executeQuery();
-            resultSet.next();
-            return resultSet.getString(1);
+            return ExecutorService.getInstance().getExecutor(this).queryForObject(new RawSqlStatement("select schema_name()"), String.class);
         } catch (Exception e) {
             LogFactory.getLogger().info("Error getting default schema", e);
         }

@@ -805,15 +805,19 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
 		tempDir.delete();
 		tempDir.mkdir();
 
-		JarFile jarFile = new JarFile(zipfile);
-		Enumeration<JarEntry> entries = jarFile.entries();
-		while (entries.hasMoreElements()) {
-			JarEntry entry = entries.nextElement();
-			File entryFile = new File(tempDir, entry.getName());
-			entryFile.mkdirs();
-		}
+        JarFile jarFile = new JarFile(zipfile);
+        try {
+            Enumeration<JarEntry> entries = jarFile.entries();
+            while (entries.hasMoreElements()) {
+                JarEntry entry = entries.nextElement();
+                File entryFile = new File(tempDir, entry.getName());
+                entryFile.mkdirs();
+            }
 
-		FileUtil.forceDeleteOnExit(tempDir);
+            FileUtil.forceDeleteOnExit(tempDir);
+        } finally {
+            jarFile.close();
+        }
 
 		return tempDir;
 	}

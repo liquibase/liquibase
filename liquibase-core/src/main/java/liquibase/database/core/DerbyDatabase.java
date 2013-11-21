@@ -196,9 +196,7 @@ public class DerbyDatabase extends AbstractJdbcDatabase {
     @Override
     protected String getConnectionCatalogName() throws DatabaseException {
         try {
-            ResultSet resultSet = ((JdbcConnection) getConnection()).prepareStatement("select current schema from sysibm.sysdummy1").executeQuery();
-            resultSet.next();
-            return resultSet.getString(1);
+            return ExecutorService.getInstance().getExecutor(this).queryForObject(new RawSqlStatement("select current schema from sysibm.sysdummy1"), String.class);
         } catch (Exception e) {
             LogFactory.getLogger().info("Error getting default schema", e);
         }

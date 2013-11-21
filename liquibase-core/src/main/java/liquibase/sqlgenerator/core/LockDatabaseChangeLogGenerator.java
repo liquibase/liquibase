@@ -20,8 +20,8 @@ public class LockDatabaseChangeLogGenerator extends AbstractSqlGenerator<LockDat
         return new ValidationErrors();
     }
 
-    protected static String hostname;
-    protected static String hostaddress;
+    protected static final String hostname;
+    protected static final String hostaddress;
 
     static {
         try {

@@ -25,8 +25,6 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
     private String sql;
     private String dbms;
 
-    protected InputStream sqlStream;
-
     protected String encoding = null;
 
 
@@ -35,8 +33,8 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
         setSplitStatements(null);
     }
 
-    public boolean initializeSqlStream() throws IOException {
-        return true;
+    public InputStream openSqlStream() throws IOException {
+        return null;
     }
 
     @Override
@@ -161,26 +159,29 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
      */
     @Override
     public CheckSum generateCheckSum() {
-        InputStream stream = this.sqlStream;
-
-        String sql = this.sql;
-        if (sqlStream == null && sql == null) {
-            sql = "";
-        }
-
-        if (sql != null) {
-            stream = new ByteArrayInputStream(sql.getBytes());
-        }
-
+        InputStream stream = null;
         try {
-            CheckSum checkSum = CheckSum.compute(new NormalizingStream(this.getEndDelimiter(), this.isSplitStatements(), this.isStripComments(), stream), false);
+            stream = openSqlStream();
 
-            return checkSum;
+            String sql = this.sql;
+            if (stream == null && sql == null) {
+                sql = "";
+            }
+
+            if (sql != null) {
+                stream = new ByteArrayInputStream(sql.getBytes());
+            }
+
+            return CheckSum.compute(new NormalizingStream(this.getEndDelimiter(), this.isSplitStatements(), this.isStripComments(), stream), false);
+        } catch (IOException e) {
+            throw new UnexpectedLiquibaseException(e);
         } finally {
-            try {
-                initializeSqlStream();
-            } catch (IOException e) {
-                LogFactory.getLogger().severe("Exception re-initializing sql", e);
+            if (stream != null) {
+                try {
+                    stream.close();
+                } catch (IOException e) {
+                    LogFactory.getLogger().debug("Error closing stream", e);
+                }
             }
         }
     }

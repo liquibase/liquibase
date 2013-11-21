@@ -14,9 +14,9 @@ public interface Executor {
     void setDatabase(Database database);
 
     /** Read methods */
-    Object queryForObject(SqlStatement sql, Class requiredType) throws DatabaseException;
+    <T>  T queryForObject(SqlStatement sql, Class<T> requiredType) throws DatabaseException;
 
-    Object queryForObject(SqlStatement sql, Class requiredType, List<SqlVisitor> sqlVisitors) throws DatabaseException;
+    <T> T queryForObject(SqlStatement sql, Class<T> requiredType, List<SqlVisitor> sqlVisitors) throws DatabaseException;
 
     long queryForLong(SqlStatement sql) throws DatabaseException;
 

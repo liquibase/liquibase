@@ -111,15 +111,15 @@ public class LoggingExecutor extends AbstractExecutor implements Executor {
     }
 
     @Override
-    public Object queryForObject(SqlStatement sql, Class requiredType) throws DatabaseException {
+    public <T> T queryForObject(SqlStatement sql, Class<T> requiredType) throws DatabaseException {
         if (sql instanceof SelectFromDatabaseChangeLogLockStatement) {
-            return false;
+            return (T) Boolean.FALSE;
         }
         return delegatedReadExecutor.queryForObject(sql, requiredType);
     }
 
     @Override
-    public Object queryForObject(SqlStatement sql, Class requiredType, List<SqlVisitor> sqlVisitors) throws DatabaseException {
+    public <T> T queryForObject(SqlStatement sql, Class<T> requiredType, List<SqlVisitor> sqlVisitors) throws DatabaseException {
         return delegatedReadExecutor.queryForObject(sql, requiredType, sqlVisitors);
     }
 

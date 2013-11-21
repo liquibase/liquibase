@@ -90,11 +90,6 @@ public class DiffToChangeLog {
             }
             fileReader.close();
 
-            fileReader = new BufferedReader(new FileReader(file));
-            fileReader.skip(offset);
-
-            fileReader.close();
-
             // System.out.println("resulting XML: " + xml.trim());
 
             RandomAccessFile randomAccessFile = new RandomAccessFile(file, "rw");
@@ -356,8 +351,19 @@ public class DiffToChangeLog {
 
             @Override
             public boolean equals(Object obj) {
+                if (!(obj instanceof Edge)) {
+                    return false;
+                }
+                if (obj == null) {
+                    return false;
+                }
                 Edge e = (Edge) obj;
                 return e.from == from && e.to == to;
+            }
+
+            @Override
+            public int hashCode() {
+                return (this.from.toString()+"."+this.to.toString()).hashCode();
             }
         }
     }

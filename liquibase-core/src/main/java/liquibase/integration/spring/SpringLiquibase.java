@@ -318,15 +318,25 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 
 	}
 
-	private void generateRollbackFile(Liquibase liquibase) throws LiquibaseException {
-		if (rollbackFile != null) {
-			try {
-				liquibase.futureRollbackSQL(getContexts(), new FileWriter(rollbackFile));
-			} catch (IOException e) {
-				throw new LiquibaseException("Unable to generate rollback file.", e);
-			}
-		}
-	}
+    private void generateRollbackFile(Liquibase liquibase) throws LiquibaseException {
+        if (rollbackFile != null) {
+            FileWriter output = null;
+            try {
+                output = new FileWriter(rollbackFile);
+                liquibase.futureRollbackSQL(getContexts(), output);
+            } catch (IOException e) {
+                throw new LiquibaseException("Unable to generate rollback file.", e);
+            } finally {
+                try {
+                    if (output != null) {
+                        output.close();
+                    }
+                } catch (IOException e) {
+                    log.severe("Error closing output", e);
+                }
+            }
+        }
+    }
 
 	protected void performUpdate(Liquibase liquibase) throws LiquibaseException {
 		liquibase.update(getContexts());

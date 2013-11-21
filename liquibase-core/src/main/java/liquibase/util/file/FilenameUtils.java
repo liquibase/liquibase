@@ -984,9 +984,12 @@ public class FilenameUtils {
             String filename1, String filename2,
             boolean normalized, IOCase caseSensitivity) {
 
-        if (filename1 == null || filename2 == null) {
-            return filename1 == filename2;
+        if (filename1 == null && filename2 == null) {
+            return true;
+        } else if (filename1 == null || filename2 == null) {
+            return false;
         }
+
         if (normalized) {
             filename1 = normalize(filename1);
             filename2 = normalize(filename2);
