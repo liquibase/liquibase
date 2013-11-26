@@ -29,7 +29,7 @@ public class MissingForeignKeyChangeGenerator implements MissingObjectChangeGene
 
     @Override
     public Class<? extends DatabaseObject>[] runBeforeTypes() {
-        return new Class[] { Index.class };
+        return new Class[] { Index.class, UniqueConstraint.class };
     }
 
     @Override
