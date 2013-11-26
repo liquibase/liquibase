@@ -41,6 +41,14 @@ public class DiffToChangeLog {
         this.diffOutputControl = diffOutputControl;
     }
 
+    public DiffToChangeLog(DiffOutputControl diffOutputControl) {
+        this.diffOutputControl = diffOutputControl;
+    }
+
+    public void setDiffResult(DiffResult diffResult) {
+        this.diffResult = diffResult;
+    }
+
     public void setChangeSetContext(String changeSetContext) {
         this.changeSetContext = changeSetContext;
     }

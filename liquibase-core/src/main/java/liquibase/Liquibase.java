@@ -31,9 +31,11 @@ import liquibase.database.core.OracleDatabase;
 import liquibase.diff.DiffGeneratorFactory;
 import liquibase.diff.DiffResult;
 import liquibase.diff.compare.CompareControl;
+import liquibase.diff.output.changelog.DiffToChangeLog;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.LockException;
+import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.executor.LoggingExecutor;
@@ -45,11 +47,18 @@ import liquibase.logging.Logger;
 import liquibase.parser.ChangeLogParser;
 import liquibase.parser.ChangeLogParserFactory;
 import liquibase.resource.ResourceAccessor;
+import liquibase.snapshot.DatabaseSnapshot;
+import liquibase.snapshot.InvalidExampleException;
+import liquibase.snapshot.SnapshotControl;
+import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.statement.core.UpdateStatement;
+import liquibase.structure.DatabaseObject;
 import liquibase.util.LiquibaseUtil;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
+
+import javax.xml.parsers.ParserConfigurationException;
 
 /**
  * Primary facade class for interacting with Liquibase.
@@ -1005,4 +1014,30 @@ public class Liquibase {
     public boolean isIgnoreClasspathPrefix() {
         return ignoreClasspathPrefix;
     }
+
+
+    public void generateChangeLog(CatalogAndSchema catalogAndSchema, DiffToChangeLog changeLogWriter, PrintStream outputStream, Class<? extends DatabaseObject>... snapshotTypes) throws DatabaseException, IOException, ParserConfigurationException {
+        Set<Class<? extends DatabaseObject>> finalCompareTypes = null;
+        if (snapshotTypes != null || snapshotTypes.length > 0) {
+            finalCompareTypes = new HashSet<Class<? extends DatabaseObject>>(Arrays.asList(snapshotTypes));
+        }
+
+        SnapshotControl snapshotControl = new SnapshotControl(this.getDatabase(), snapshotTypes);
+        CompareControl compareControl = new CompareControl(new CompareControl.SchemaComparison[]{new CompareControl.SchemaComparison(catalogAndSchema, catalogAndSchema)}, finalCompareTypes);
+        //        compareControl.addStatusListener(new OutDiffStatusListener());
+
+        DatabaseSnapshot originalDatabaseSnapshot = null;
+        try {
+            originalDatabaseSnapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(compareControl.getSchemas(CompareControl.DatabaseRole.REFERENCE), getDatabase(), snapshotControl);
+            DiffResult diffResult = DiffGeneratorFactory.getInstance().compare(originalDatabaseSnapshot, SnapshotGeneratorFactory.getInstance().createSnapshot(compareControl.getSchemas(CompareControl.DatabaseRole.REFERENCE), null, snapshotControl), compareControl);
+
+            changeLogWriter.setDiffResult(diffResult);
+
+            changeLogWriter.print(outputStream);
+        } catch (InvalidExampleException e) {
+            throw new UnexpectedLiquibaseException(e);
+        }
+    }
+
 }
+
