@@ -12,6 +12,9 @@ import liquibase.structure.core.ForeignKey;
 import liquibase.structure.core.Table;
 import liquibase.util.StringUtils;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 public class ForeignKeyComparator implements DatabaseObjectComparator {
@@ -26,7 +29,11 @@ public class ForeignKeyComparator implements DatabaseObjectComparator {
 
     @Override
     public String[] hash(DatabaseObject databaseObject, Database accordingTo, DatabaseObjectComparatorChain chain) {
-        return DatabaseObjectComparatorFactory.getInstance().hash(((ForeignKey) databaseObject).getForeignKeyTable(), accordingTo);
+        Set<String> hashes = new HashSet<String>();
+        hashes.addAll(Arrays.asList(DatabaseObjectComparatorFactory.getInstance().hash(((ForeignKey) databaseObject).getForeignKeyTable(), accordingTo)));
+        hashes.addAll(Arrays.asList(chain.hash(databaseObject, accordingTo)));
+
+        return hashes.toArray(new String[hashes.size()]);
     }
 
 
