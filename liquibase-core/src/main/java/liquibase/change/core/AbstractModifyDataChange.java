@@ -45,7 +45,7 @@ public abstract class AbstractModifyDataChange extends AbstractChange {
         this.tableName = tableName;
     }
 
-    @DatabaseChangeProperty(isChangeProperty = false)
+    @DatabaseChangeProperty(serializationType = SerializationType.NESTED_OBJECT)
     public String getWhere() {
         return where;
     }
@@ -55,9 +55,9 @@ public abstract class AbstractModifyDataChange extends AbstractChange {
     }
 
     /**
-     * @deprecated use getWhere(). This field is marked as the one to serialize to not change checksum calculation for now
+     * @deprecated use getWhere().
      */
-    @DatabaseChangeProperty(serializationType = SerializationType.NESTED_OBJECT)
+    @DatabaseChangeProperty(isChangeProperty = false)
     public String getWhereClause() {
         return where;
     }
