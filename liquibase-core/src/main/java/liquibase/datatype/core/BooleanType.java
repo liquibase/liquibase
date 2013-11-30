@@ -75,6 +75,12 @@ public class BooleanType extends LiquibaseDataType {
             } else {
                 returnValue = this.getFalseBooleanValue(database);
             }
+        } else if (value instanceof Integer) {
+            if (1 == value) {
+                returnValue = this.getTrueBooleanValue(database);
+            } else {
+                returnValue = this.getFalseBooleanValue(database);
+            }
         } else if (value instanceof DatabaseFunction) {
             return ((DatabaseFunction) value).toString();
         } else if (((Boolean) value)) {
