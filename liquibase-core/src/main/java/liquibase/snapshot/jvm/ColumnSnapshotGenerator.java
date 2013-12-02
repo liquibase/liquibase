@@ -311,6 +311,9 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
             } else if (type == Types.DATALINK) {
                 return new DatabaseFunction(stringVal);
             } else if (type == Types.DATE) {
+                if (typeName.equalsIgnoreCase("year")) {
+                    return stringVal.trim();
+                }
                 if (zeroTime(stringVal)) {
                     return stringVal;
                 }
