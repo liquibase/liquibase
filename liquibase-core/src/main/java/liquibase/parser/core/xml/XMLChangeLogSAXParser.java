@@ -45,7 +45,7 @@ public class XMLChangeLogSAXParser implements ChangeLogParser {
     }
 
     public static String getSchemaVersion() {
-        return "3.0";
+        return "3.1";
     }
 
     @Override
