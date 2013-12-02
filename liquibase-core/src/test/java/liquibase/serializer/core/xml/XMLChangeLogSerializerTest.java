@@ -797,7 +797,7 @@ public class XMLChangeLogSerializerTest {
         assertEquals("<update catalogName=\"a\"\n" +
                 "        schemaName=\"b\"\n" +
                 "        tableName=\"c\">\n" +
-                "    <where>Some Text</where>\n" +
+                "    <whereClause>Some Text</whereClause>\n" +
                 "</update>", out);
     }
 
