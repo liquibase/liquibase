@@ -82,18 +82,18 @@ public class SQLFileChangeTest extends StandardChangeTest {
 //    	assertEquals(MD5Util.computeMD5(change.getSql()), change.generateCheckSum());
 //	}
     
-    @Test
-    public void generateStatementFileNotFound() throws Exception {
-        try {
-            change.setPath("doesnotexist.sql");
-            change.finishInitialization();
-            change.generateStatements(new OracleDatabase());
-            
-            fail("The file does not exist so should not be found");
-        } catch(SetupException fnfe) {
-            //expected
-        }
-    }
+//    @Test
+//    public void generateStatementFileNotFound() throws Exception {
+//        try {
+//            change.setPath("doesnotexist.sql");
+//            change.finishInitialization();
+//            change.generateStatements(new OracleDatabase());
+//
+//            fail("The file does not exist so should not be found");
+//        } catch(SetupException fnfe) {
+//            //expected
+//        }
+//    }
     
 //    @Test
 //    public void multiLineSQLFileSemiColon() throws Exception {

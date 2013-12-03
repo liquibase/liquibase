@@ -98,7 +98,7 @@ public class SQLFileChange extends AbstractSQLChange {
             try {
                 innputStream = openFromFileSystem(path);
                 if (innputStream == null) {
-                    throw new IOException("No file found");
+                    return null;
                 }
             } catch (IOException e) {
                 throw new IOException("<sqlfile path=" + path + "> -Unable to read file", e);
