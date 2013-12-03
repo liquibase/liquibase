@@ -1,9 +1,9 @@
 package liquibase.parser.core.xml;
 
 import liquibase.parser.LiquibaseParser;
+import liquibase.parser.NamespaceDetails;
+import liquibase.parser.NamespaceDetailsFactory;
 import liquibase.serializer.LiquibaseSerializer;
-import liquibase.serializer.SerializerNamespaceDetails;
-import liquibase.serializer.SerializerNamespaceDetailsFactory;
 import org.xml.sax.InputSource;
 
 import java.io.IOException;
@@ -60,11 +60,11 @@ public class LiquibaseEntityResolver implements EntityResolver2 {
 
     private InputSource tryResolveLiquibaseSchema(String systemId, String publicId) {
         if (systemId != null) {
-            SerializerNamespaceDetails namespaceDetails;
+            NamespaceDetails namespaceDetails;
             if (serializer != null) {
-                namespaceDetails = SerializerNamespaceDetailsFactory.getInstance().getNamespaceDetails(serializer, systemId);
+                namespaceDetails = NamespaceDetailsFactory.getInstance().getNamespaceDetails(serializer, systemId);
             } else {
-                namespaceDetails = SerializerNamespaceDetailsFactory.getInstance().getNamespaceDetails(parser, systemId);
+                namespaceDetails = NamespaceDetailsFactory.getInstance().getNamespaceDetails(parser, systemId);
             }
             if (namespaceDetails == null) {
                 return null;

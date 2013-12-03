@@ -1,21 +1,21 @@
-package liquibase.serializer.core.xml;
+package liquibase.parser.core.xml;
 
 import liquibase.parser.LiquibaseParser;
-import liquibase.parser.core.xml.XMLChangeLogSAXParser;
+import liquibase.parser.NamespaceDetails;
 import liquibase.serializer.LiquibaseSerializable;
 import liquibase.serializer.LiquibaseSerializer;
-import liquibase.serializer.SerializerNamespaceDetails;
+import liquibase.serializer.core.xml.XMLChangeLogSerializer;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class StandardSerializerNamespaceDetails implements SerializerNamespaceDetails {
+public class StandardNamespaceDetails implements NamespaceDetails {
 
     public static final String GENERIC_EXTENSION_XSD = "http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd";
     private final Pattern standardUrlPattern;
     private final Pattern oldStandardUrlPattern;
 
-    public StandardSerializerNamespaceDetails() {
+    public StandardNamespaceDetails() {
         standardUrlPattern = Pattern.compile("http://www.liquibase.org/xml/ns/dbchangelog/(dbchangelog-[\\d\\.]+.xsd)");
         oldStandardUrlPattern = Pattern.compile("http://www.liquibase.org/xml/ns/migrator/(dbchangelog-[\\d\\.]+.xsd)");
     }
@@ -26,43 +26,43 @@ public class StandardSerializerNamespaceDetails implements SerializerNamespaceDe
     }
 
     @Override
-    public boolean supports(LiquibaseSerializer serializer, String namespace) {
+    public boolean supports(LiquibaseSerializer serializer, String namespaceOrUrl) {
         return serializer instanceof XMLChangeLogSerializer;
     }
 
     @Override
-    public boolean supports(LiquibaseParser parser, String namespace) {
+    public boolean supports(LiquibaseParser parser, String namespaceOrUrl) {
         return parser instanceof XMLChangeLogSAXParser;
     }
 
     @Override
-    public String getShortName(String namespace) {
-        if (namespace.equals(LiquibaseSerializable.STANDARD_OBJECTS_NAMESPACE)) {
+    public String getShortName(String namespaceOrUrl) {
+        if (namespaceOrUrl.equals(LiquibaseSerializable.STANDARD_OBJECTS_NAMESPACE)) {
             return "";
         }
         return "ext";
     }
 
     @Override
-    public String getSchemaUrl(String namespace) {
-        if (namespace.equals(LiquibaseSerializable.STANDARD_OBJECTS_NAMESPACE)) {
+    public String getSchemaUrl(String namespaceOrUrl) {
+        if (namespaceOrUrl.equals(LiquibaseSerializable.STANDARD_OBJECTS_NAMESPACE)) {
             return "http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-" + XMLChangeLogSAXParser.getSchemaVersion() + ".xsd";
         }
         return GENERIC_EXTENSION_XSD;
     }
 
     @Override
-    public String getLocalPath(String url) {
+    public String getLocalPath(String namespaceOrUrl) {
 
-        if (url.equals(GENERIC_EXTENSION_XSD)) {
+        if (namespaceOrUrl.equals(GENERIC_EXTENSION_XSD)) {
             return "liquibase/parser/core/xml/dbchangelog-ext.xsd";
         }
-        Matcher matcher = standardUrlPattern.matcher(url);
+        Matcher matcher = standardUrlPattern.matcher(namespaceOrUrl);
         if (matcher.matches()) {
             return "liquibase/parser/core/xml/"+matcher.group(1);
         }
 
-        matcher = oldStandardUrlPattern.matcher(url);
+        matcher = oldStandardUrlPattern.matcher(namespaceOrUrl);
         if (matcher.matches()) {
             return "liquibase/parser/core/xml/"+matcher.group(1);
         }

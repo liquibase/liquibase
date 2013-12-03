@@ -4,11 +4,11 @@ import liquibase.change.*;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.parser.NamespaceDetails;
+import liquibase.parser.NamespaceDetailsFactory;
 import liquibase.parser.core.xml.LiquibaseEntityResolver;
 import liquibase.serializer.ChangeLogSerializer;
 import liquibase.serializer.LiquibaseSerializable;
-import liquibase.serializer.SerializerNamespaceDetails;
-import liquibase.serializer.SerializerNamespaceDetailsFactory;
 import liquibase.util.ISODateFormat;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
@@ -84,7 +84,7 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
         Map<String, String> shortNameByNamespace = new HashMap<String, String>();
         Map<String, String> urlByNamespace = new HashMap<String, String>();
         for (String namespace : ChangeFactory.getInstance().getAllChangeNamespaces()) {
-            SerializerNamespaceDetails details = SerializerNamespaceDetailsFactory.getInstance().getNamespaceDetails(this, namespace);
+            NamespaceDetails details = NamespaceDetailsFactory.getInstance().getNamespaceDetails(this, namespace);
             if (details != null) {
                 shortNameByNamespace.put(namespace, details.getShortName(namespace));
                 urlByNamespace.put(namespace, details.getSchemaUrl(namespace));
@@ -144,7 +144,7 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
 
         String nodeName = object.getSerializedObjectName();
 
-        SerializerNamespaceDetails details = SerializerNamespaceDetailsFactory.getInstance().getNamespaceDetails(this, namespace);
+        NamespaceDetails details = NamespaceDetailsFactory.getInstance().getNamespaceDetails(this, namespace);
         if (details != null && !details.getShortName(namespace).equals("")) {
             nodeName = details.getShortName(namespace)+":"+nodeName;
         }
