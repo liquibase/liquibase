@@ -135,4 +135,13 @@ public class ChangeFactory {
         }
     }
 
+    public String[] getAllChangeNamespaces() {
+        Set<String> namespaces = new HashSet<String>();
+        for (String changeName : getDefinedChanges()) {
+            Change change = create(changeName);
+            namespaces.add(change.getSerializedObjectNamespace());
+        }
+
+        return namespaces.toArray(new String[namespaces.size()]);
+    }
 }

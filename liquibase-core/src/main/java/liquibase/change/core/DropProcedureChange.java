@@ -5,6 +5,7 @@ import liquibase.change.ChangeMetaData;
 import liquibase.change.DatabaseChange;
 import liquibase.change.DatabaseChangeProperty;
 import liquibase.database.Database;
+import liquibase.serializer.LiquibaseSerializable;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.DropProcedureStatement;
 
@@ -52,5 +53,10 @@ public class DropProcedureChange extends AbstractChange {
         return new SqlStatement[]{
                 new DropProcedureStatement(getCatalogName(), getSchemaName(), getProcedureName())
         };
+    }
+
+    @Override
+    public String getSerializedObjectNamespace() {
+        return LiquibaseSerializable.STANDARD_OBJECTS_NAMESPACE;
     }
 }

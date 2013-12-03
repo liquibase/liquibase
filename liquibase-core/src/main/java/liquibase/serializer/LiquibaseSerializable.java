@@ -7,8 +7,6 @@ public interface LiquibaseSerializable {
     String STANDARD_OBJECTS_NAMESPACE = "http://www.liquibase.org/xml/ns/dbchangelog";
     String GENERIC_EXTENSION_NAMESPACE = "http://www.liquibase.org/xml/ns/dbchangelog-ext";
 
-    String getSerializedObjectNamespace();
-
     public enum SerializationType {
         NAMED_FIELD,
         NESTED_OBJECT,
@@ -22,5 +20,7 @@ public interface LiquibaseSerializable {
     Object getSerializableFieldValue(String field);
 
     public SerializationType getSerializableFieldType(String field);
+
+    String getSerializedObjectNamespace();
 
 }
