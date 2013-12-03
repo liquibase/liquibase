@@ -1,5 +1,9 @@
 package liquibase.parser.core.xml;
 
+import liquibase.parser.LiquibaseParser;
+import liquibase.serializer.LiquibaseSerializer;
+import liquibase.serializer.SerializerNamespaceDetails;
+import liquibase.serializer.SerializerNamespaceDetailsFactory;
 import org.xml.sax.InputSource;
 
 import java.io.IOException;
@@ -17,15 +21,19 @@ import org.xml.sax.ext.EntityResolver2;
  */
 public class LiquibaseEntityResolver implements EntityResolver2 {
 
-    private static final String SEARCH_PACKAGE = "liquibase/parser/core/xml/";
-
+    private LiquibaseParser parser;
+    private LiquibaseSerializer serializer;
     private ResourceAccessor resourceAccessor;
     private String basePath;
 
     private Logger log=LogFactory.getLogger();
 
-    public LiquibaseEntityResolver() {
+    public LiquibaseEntityResolver(LiquibaseSerializer serializer) {
+        this.serializer = serializer;
+    }
 
+    public LiquibaseEntityResolver(LiquibaseParser parser) {
+        this.parser = parser;
     }
 
     /**
@@ -52,27 +60,33 @@ public class LiquibaseEntityResolver implements EntityResolver2 {
 
     private InputSource tryResolveLiquibaseSchema(String systemId, String publicId) {
         if (systemId != null) {
-            int iSlash = systemId.lastIndexOf('/');
-            if (iSlash >= 0) {
-                String xsdFile = systemId.substring(iSlash + 1);
-                try {
-                    InputStream resourceAsStream = null;
-                    if (Thread.currentThread().getContextClassLoader() != null) {
-                        resourceAsStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(SEARCH_PACKAGE + xsdFile);
-                    }
-                    if (resourceAsStream == null) {
-                        resourceAsStream = this.getClass().getClassLoader().getResourceAsStream(SEARCH_PACKAGE + xsdFile);
-                    }
-                    if (resourceAsStream == null) {
-                        return null;
-                    }
-                    InputSource source = new InputSource(resourceAsStream);
-                    source.setPublicId(publicId);
-                    source.setSystemId(systemId);
-                    return source;
-                } catch (Exception ex) {
-                    return null; // We don't have the schema, try the network
+            SerializerNamespaceDetails namespaceDetails;
+            if (serializer != null) {
+                namespaceDetails = SerializerNamespaceDetailsFactory.getInstance().getNamespaceDetails(serializer, systemId);
+            } else {
+                namespaceDetails = SerializerNamespaceDetailsFactory.getInstance().getNamespaceDetails(parser, systemId);
+            }
+            if (namespaceDetails == null) {
+                return null;
+            }
+            String xsdFile = namespaceDetails.getLocalPath(systemId);
+            try {
+                InputStream resourceAsStream = null;
+                if (Thread.currentThread().getContextClassLoader() != null) {
+                    resourceAsStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(xsdFile);
                 }
+                if (resourceAsStream == null) {
+                    resourceAsStream = this.getClass().getClassLoader().getResourceAsStream(xsdFile);
+                }
+                if (resourceAsStream == null) {
+                    return null;
+                }
+                InputSource source = new InputSource(resourceAsStream);
+                source.setPublicId(publicId);
+                source.setSystemId(systemId);
+                return source;
+            } catch (Exception ex) {
+                return null; // We don't have the schema, try the network
             }
         }
         return null;

@@ -5,7 +5,6 @@ import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.parser.core.xml.LiquibaseEntityResolver;
-import liquibase.parser.core.xml.XMLChangeLogSAXParser;
 import liquibase.serializer.ChangeLogSerializer;
 import liquibase.serializer.LiquibaseSerializable;
 import liquibase.serializer.SerializerNamespaceDetails;
@@ -74,7 +73,7 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
         } catch (ParserConfigurationException e) {
             throw new RuntimeException(e);
         }
-        documentBuilder.setEntityResolver(new LiquibaseEntityResolver());
+        documentBuilder.setEntityResolver(new LiquibaseEntityResolver(this));
 
         Document doc = documentBuilder.newDocument();
         Element changeLogElement = doc.createElementNS(LiquibaseSerializable.STANDARD_OBJECTS_NAMESPACE, "databaseChangeLog");

@@ -6,7 +6,7 @@ import liquibase.exception.ChangeLogParseException;
 import liquibase.resource.ResourceAccessor;
 import liquibase.servicelocator.PrioritizedService;
 
-public interface ChangeLogParser extends PrioritizedService {
+public interface ChangeLogParser extends PrioritizedService, LiquibaseParser {
 
     public DatabaseChangeLog parse(String physicalChangeLogLocation, ChangeLogParameters changeLogParameters, ResourceAccessor resourceAccessor) throws ChangeLogParseException;
 

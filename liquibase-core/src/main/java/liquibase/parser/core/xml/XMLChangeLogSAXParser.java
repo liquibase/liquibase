@@ -68,7 +68,7 @@ public class XMLChangeLogSAXParser implements ChangeLogParser {
             }
 
             XMLReader xmlReader = parser.getXMLReader();
-            LiquibaseEntityResolver resolver=new LiquibaseEntityResolver();
+            LiquibaseEntityResolver resolver=new LiquibaseEntityResolver(this);
             resolver.useResoureAccessor(resourceAccessor,FilenameUtils.getFullPath(physicalChangeLogLocation));
             xmlReader.setEntityResolver(resolver);
             xmlReader.setErrorHandler(new ErrorHandler() {

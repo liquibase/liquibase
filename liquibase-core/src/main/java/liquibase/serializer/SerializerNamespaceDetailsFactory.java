@@ -2,6 +2,7 @@ package liquibase.serializer;
 
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.logging.LogFactory;
+import liquibase.parser.LiquibaseParser;
 import liquibase.servicelocator.ServiceLocator;
 
 import java.util.*;
@@ -36,6 +37,22 @@ public class SerializerNamespaceDetailsFactory {
             throw new UnexpectedLiquibaseException(e);
         }
 
+    }
+
+    public SerializerNamespaceDetails getNamespaceDetails(LiquibaseParser parser, String namespace) {
+        SortedSet<SerializerNamespaceDetails> validNamespaceDetails = new TreeSet<SerializerNamespaceDetails>(new SerializerNamespaceDetailsComparator());
+
+        for (SerializerNamespaceDetails details : namespaceDetails) {
+            if (details.supports(parser, namespace)) {
+                validNamespaceDetails.add(details);
+            }
+        }
+
+        if (validNamespaceDetails.isEmpty()) {
+            LogFactory.getInstance().getLog().debug("No parser namespace details associated with namespace '" + namespace + "' and parser " + parser.getClass().getName());
+        }
+
+        return validNamespaceDetails.iterator().next();
     }
 
     public SerializerNamespaceDetails getNamespaceDetails(LiquibaseSerializer serializer, String namespace) {
