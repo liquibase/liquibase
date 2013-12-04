@@ -36,7 +36,7 @@ public class DateTimeType extends LiquibaseDataType {
         }
 
         if (database instanceof MySQLDatabase) {
-            return new DatabaseDataType(getName());
+            return new DatabaseDataType(getName(), getParameters());
         }
 
         return new DatabaseDataType(getName());

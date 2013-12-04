@@ -28,6 +28,9 @@ public class TimeType  extends LiquibaseDataType {
         if (database instanceof OracleDatabase) {
             return new DatabaseDataType("DATE");
         }
+        if (database instanceof MySQLDatabase) {
+            return new DatabaseDataType(getName(), getParameters());
+        }
         return new DatabaseDataType(getName());
     }
 
