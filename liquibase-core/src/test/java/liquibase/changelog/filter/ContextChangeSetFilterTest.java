@@ -30,7 +30,7 @@ public class ContextChangeSetFilterTest {
 
         @Override
         public String getSerializedObjectNamespace() {
-            return STANDARD_OBJECTS_NAMESPACE;
+            return STANDARD_CHANGELOG_NAMESPACE;
         }
 
 

@@ -76,9 +76,9 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
         documentBuilder.setEntityResolver(new LiquibaseEntityResolver(this));
 
         Document doc = documentBuilder.newDocument();
-        Element changeLogElement = doc.createElementNS(LiquibaseSerializable.STANDARD_OBJECTS_NAMESPACE, "databaseChangeLog");
+        Element changeLogElement = doc.createElementNS(LiquibaseSerializable.STANDARD_CHANGELOG_NAMESPACE, "databaseChangeLog");
 
-        changeLogElement.setAttribute("xmlns", LiquibaseSerializable.STANDARD_OBJECTS_NAMESPACE);
+        changeLogElement.setAttribute("xmlns", LiquibaseSerializable.STANDARD_CHANGELOG_NAMESPACE);
         changeLogElement.setAttribute("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance");
 
         Map<String, String> shortNameByNamespace = new HashMap<String, String>();
@@ -168,14 +168,14 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
             }
         } else if (value instanceof Map) {
             for (Map.Entry entry : (Set<Map.Entry>) ((Map) value).entrySet()) {
-                Element mapNode = currentChangeLogFileDOM.createElementNS(LiquibaseSerializable.STANDARD_OBJECTS_NAMESPACE, objectName);
+                Element mapNode = currentChangeLogFileDOM.createElementNS(LiquibaseSerializable.STANDARD_CHANGELOG_NAMESPACE, objectName);
                 setValueOnNode(mapNode, (String) entry.getKey(), entry.getValue(), serializationType);
             }
         } else if (value instanceof LiquibaseSerializable) {
             node.appendChild(createNode((LiquibaseSerializable) value));
         } else {
             if (serializationType.equals(LiquibaseSerializable.SerializationType.NESTED_OBJECT)) {
-                String namespace = LiquibaseSerializable.STANDARD_OBJECTS_NAMESPACE;
+                String namespace = LiquibaseSerializable.STANDARD_CHANGELOG_NAMESPACE;
                 node.appendChild(createNode(namespace, objectName, value.toString()));
             } else if (serializationType.equals(LiquibaseSerializable.SerializationType.DIRECT_VALUE)) {
                 node.setTextContent(value.toString());

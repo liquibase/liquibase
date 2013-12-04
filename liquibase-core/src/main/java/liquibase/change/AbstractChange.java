@@ -491,6 +491,6 @@ public abstract class AbstractChange implements Change {
 
     @Override
     public String getSerializedObjectNamespace() {
-        return GENERIC_EXTENSION_NAMESPACE;
+        return GENERIC_CHANGELOG_EXTENSION_NAMESPACE;
     }
 }

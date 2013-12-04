@@ -164,6 +164,6 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
 
     @Override
     public String getSerializedObjectNamespace() {
-        return STANDARD_OBJECTS_NAMESPACE;
+        return STANDARD_CHANGELOG_NAMESPACE;
     }
 }

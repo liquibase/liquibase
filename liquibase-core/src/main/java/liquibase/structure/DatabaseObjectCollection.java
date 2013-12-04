@@ -2,16 +2,60 @@ package liquibase.structure;
 
 import liquibase.database.Database;
 import liquibase.diff.compare.DatabaseObjectComparatorFactory;
+import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.serializer.LiquibaseSerializable;
 
 import java.util.*;
 
-public class DatabaseObjectCollection {
+public class DatabaseObjectCollection implements LiquibaseSerializable {
 
     private Map<Class<? extends DatabaseObject>, Map<String, Set<DatabaseObject>>> cache = new HashMap<Class<? extends DatabaseObject>, Map<String, Set<DatabaseObject>>>();
     private Database database;
 
     public DatabaseObjectCollection(Database database) {
         this.database = database;
+    }
+
+    @Override
+    public String getSerializedObjectName() {
+        return "objects";
+    }
+
+    @Override
+    public String getSerializedObjectNamespace() {
+        return STANDARD_SNAPSHOT_NAMESPACE;
+    }
+
+    @Override
+    public Set<String> getSerializableFields() {
+        SortedSet<String> types = new TreeSet<String>();
+        for (Class type : cache.keySet()) {
+            types.add(type.getName());
+        }
+        return types;
+
+    }
+
+    @Override
+    public Object getSerializableFieldValue(String field) {
+        SortedSet<DatabaseObject> objects = new TreeSet<DatabaseObject>(new DatabaseObjectComparator());
+        try {
+            Map<String, Set<DatabaseObject>> map = cache.get(Class.forName(field));
+            if (map == null) {
+                return null;
+            }
+            for (Set<DatabaseObject> set : map.values()) {
+                objects.addAll(set);
+            }
+            return objects;
+        } catch (ClassNotFoundException e) {
+            throw new UnexpectedLiquibaseException(e);
+        }
+    }
+
+    @Override
+    public SerializationType getSerializableFieldType(String field) {
+        return SerializationType.NAMED_FIELD;
     }
 
     public void add(DatabaseObject databaseObject) {

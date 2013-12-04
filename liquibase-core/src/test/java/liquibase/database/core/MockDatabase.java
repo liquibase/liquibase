@@ -18,6 +18,7 @@ import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.RanChangeSet;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
+import liquibase.database.InternalDatabase;
 import liquibase.database.ObjectQuotingStrategy;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.DatabaseHistoryException;
@@ -33,7 +34,7 @@ import liquibase.statement.SqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Schema;
 
-public class MockDatabase implements Database {
+public class MockDatabase implements Database, InternalDatabase {
 
     private boolean outputDefaultSchema;
     private boolean outputDefaultCatalog;

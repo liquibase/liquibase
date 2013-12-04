@@ -131,6 +131,6 @@ public class DropPrimaryKeyChange extends AbstractChange {
 
     @Override
     public String getSerializedObjectNamespace() {
-        return STANDARD_OBJECTS_NAMESPACE;
+        return STANDARD_CHANGELOG_NAMESPACE;
     }
 }

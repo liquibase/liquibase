@@ -1,6 +1,7 @@
 package liquibase.diff.output;
 
 import liquibase.database.Database;
+import liquibase.database.InternalDatabase;
 import liquibase.database.core.H2Database;
 import liquibase.diff.output.changelog.ChangeGeneratorFactory;
 import liquibase.diff.output.changelog.core.MissingDataExternalFileChangeGenerator;
@@ -85,7 +86,7 @@ public class DiffOutputControl {
     public boolean alreadyHandledChanged(DatabaseObject changedObject, Database accordingTo) {
         return alreadyHandledChanged.contains(changedObject);    }
 
-    private static class DatabaseForHash extends H2Database {
+    private static class DatabaseForHash extends H2Database implements InternalDatabase {
         @Override
         public boolean isCaseSensitive() {
             return true;

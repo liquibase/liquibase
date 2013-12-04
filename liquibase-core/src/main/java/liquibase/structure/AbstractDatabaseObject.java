@@ -3,12 +3,10 @@ package liquibase.structure;
 import liquibase.CatalogAndSchema;
 import liquibase.database.Database;
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.serializer.LiquibaseSerializable;
 import liquibase.util.StringUtils;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 public abstract class AbstractDatabaseObject implements DatabaseObject {
 
@@ -65,5 +63,53 @@ public abstract class AbstractDatabaseObject implements DatabaseObject {
             attributes.put(attribute, value);
         }
         return this;
+    }
+
+    @Override
+    public String getSerializedObjectName() {
+        return getObjectTypeName();
+    }
+
+    @Override
+    public String getSerializedObjectNamespace() {
+        return STANDARD_SNAPSHOT_NAMESPACE;
+    }
+
+    @Override
+    public Set<String> getSerializableFields() {
+        TreeSet<String> fields = new TreeSet<String>(attributes.keySet());
+        fields.add("snapshotId");
+        return fields;
+    }
+
+    @Override
+    public Object getSerializableFieldValue(String field) {
+        if (field.equals("snapshotId")) {
+            return snapshotId;
+        }
+        if (!attributes.containsKey(field)) {
+            throw new UnexpectedLiquibaseException("Unknown field "+field);
+        }
+        Object value = attributes.get(field);
+        if (value instanceof DatabaseObject) {
+            try {
+                DatabaseObject clone = (DatabaseObject) value.getClass().newInstance();
+                clone.setName(((DatabaseObject) value).getName());
+                clone.setSnapshotId(((DatabaseObject) value).getSnapshotId());
+                return clone;
+            } catch (Exception e) {
+                throw new UnexpectedLiquibaseException(e);
+            }
+        }
+        return value;
+    }
+
+    @Override
+    public LiquibaseSerializable.SerializationType getSerializableFieldType(String field) {
+        if (getSerializableFieldValue(field) instanceof DatabaseObject) {
+            return LiquibaseSerializable.SerializationType.NAMED_FIELD;
+        } else {
+            return LiquibaseSerializable.SerializationType.NAMED_FIELD;
+        }
     }
 }

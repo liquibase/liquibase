@@ -2,7 +2,6 @@ package liquibase.sql.visitor;
 
 import liquibase.Contexts;
 import liquibase.change.CheckSum;
-import liquibase.serializer.LiquibaseSerializable;
 import liquibase.serializer.ReflectionSerializer;
 import liquibase.serializer.core.string.StringChangeLogSerializer;
 
@@ -70,6 +69,6 @@ public abstract class AbstractSqlVisitor implements SqlVisitor {
 
     @Override
     public String getSerializedObjectNamespace() {
-        return GENERIC_EXTENSION_NAMESPACE;
+        return GENERIC_CHANGELOG_EXTENSION_NAMESPACE;
     }
 }

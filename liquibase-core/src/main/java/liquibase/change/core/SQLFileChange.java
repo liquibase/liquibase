@@ -8,9 +8,6 @@ import liquibase.database.Database;
 import liquibase.exception.SetupException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
-import liquibase.exception.Warnings;
-import liquibase.logging.LogFactory;
-import liquibase.resource.ResourceAccessor;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
 
@@ -145,6 +142,6 @@ public class SQLFileChange extends AbstractSQLChange {
 
     @Override
     public String getSerializedObjectNamespace() {
-        return STANDARD_OBJECTS_NAMESPACE;
+        return STANDARD_CHANGELOG_NAMESPACE;
     }
 }

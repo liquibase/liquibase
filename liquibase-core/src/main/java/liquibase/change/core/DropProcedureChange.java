@@ -57,6 +57,6 @@ public class DropProcedureChange extends AbstractChange {
 
     @Override
     public String getSerializedObjectNamespace() {
-        return LiquibaseSerializable.STANDARD_OBJECTS_NAMESPACE;
+        return LiquibaseSerializable.STANDARD_CHANGELOG_NAMESPACE;
     }
 }

@@ -37,7 +37,7 @@ public class StandardNamespaceDetails implements NamespaceDetails {
 
     @Override
     public String getShortName(String namespaceOrUrl) {
-        if (namespaceOrUrl.equals(LiquibaseSerializable.STANDARD_OBJECTS_NAMESPACE)) {
+        if (namespaceOrUrl.equals(LiquibaseSerializable.STANDARD_CHANGELOG_NAMESPACE)) {
             return "";
         }
         return "ext";
@@ -45,7 +45,7 @@ public class StandardNamespaceDetails implements NamespaceDetails {
 
     @Override
     public String getSchemaUrl(String namespaceOrUrl) {
-        if (namespaceOrUrl.equals(LiquibaseSerializable.STANDARD_OBJECTS_NAMESPACE)) {
+        if (namespaceOrUrl.equals(LiquibaseSerializable.STANDARD_CHANGELOG_NAMESPACE)) {
             return "http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-" + XMLChangeLogSAXParser.getSchemaVersion() + ".xsd";
         }
         return GENERIC_EXTENSION_XSD;
