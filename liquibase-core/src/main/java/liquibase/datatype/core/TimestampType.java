@@ -12,7 +12,7 @@ public class TimestampType extends DateTimeType {
     @Override
     public DatabaseDataType toDatabaseDataType(Database database) {
         if (database instanceof MySQLDatabase) {
-            return new DatabaseDataType("TIMESTAMP");
+            return new DatabaseDataType("TIMESTAMP", getParameters());
         }
         if (database instanceof MSSQLDatabase) {
             return new DatabaseDataType("DATETIME");
