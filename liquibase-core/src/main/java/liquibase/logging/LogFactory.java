@@ -8,7 +8,7 @@ import java.util.Map;
 
 public class LogFactory {
     private static Map<String, Logger> loggers = new HashMap<String, Logger>();
-    private static String defaultLoggingLevel = "info";
+    private static String defaultLoggingLevel = null;
 
     public static Logger getLogger(String name) {
         if (!loggers.containsKey(name)) {
@@ -19,7 +19,9 @@ public class LogFactory {
                 throw new ServiceNotFoundException(e);
             }
             value.setName(name);
-            value.setLogLevel(defaultLoggingLevel);
+            if (defaultLoggingLevel != null) {
+                value.setLogLevel(defaultLoggingLevel);
+            }
             loggers.put(name, value);
         }
 
