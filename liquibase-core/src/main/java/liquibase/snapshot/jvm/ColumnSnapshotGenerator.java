@@ -2,10 +2,7 @@ package liquibase.snapshot.jvm;
 
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
-import liquibase.database.core.FirebirdDatabase;
-import liquibase.database.core.MSSQLDatabase;
-import liquibase.database.core.MySQLDatabase;
-import liquibase.database.core.OracleDatabase;
+import liquibase.database.core.*;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
@@ -308,6 +305,8 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                 return scanner.nextBoolean();
             } else if (type == Types.CHAR) {
                 return stringVal;
+            } else if (type == Types.CLOB) {
+                return stringVal;
             } else if (type == Types.DATALINK) {
                 return new DatabaseFunction(stringVal);
             } else if (type == Types.DATE) {
@@ -347,6 +346,9 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
             } else if (type == Types.NVARCHAR) {
                 return stringVal;
             } else if (type == Types.OTHER) {
+                if (database instanceof DB2Database && typeName.equalsIgnoreCase("DECFLOAT")) {
+                    return new BigDecimal(stringVal);
+                }
                 return new DatabaseFunction(stringVal);
             } else if (type == Types.REAL) {
                 return new BigDecimal(stringVal.trim());
@@ -394,6 +396,9 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
     }
 
     protected DateFormat getTimeFormat(Database database) {
+        if (database instanceof DB2Database) {
+            return new SimpleDateFormat("HH.mm.ss");
+        }
         return new SimpleDateFormat("HH:mm:ss");
     }
 
@@ -403,6 +408,10 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
         }
         if (database instanceof MSSQLDatabase) {
             return new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS"); //no ms in mysql
+        }
+
+        if (database instanceof DB2Database) {
+            return new SimpleDateFormat("yyyy-MM-dd-HH.mm.ss.SSS");
         }
         return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
     }
