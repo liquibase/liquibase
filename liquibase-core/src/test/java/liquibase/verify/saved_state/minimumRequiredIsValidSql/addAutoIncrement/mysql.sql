@@ -1,5 +1,4 @@
 -- Database: mysql
--- Change Parameter: columnDataType=int
--- Change Parameter: columnName=id
+-- Change Parameter: startWith=100
 -- Change Parameter: tableName=person
-ALTER TABLE person MODIFY id INT AUTO_INCREMENT;
+ALTER TABLE person AUTO_INCREMENT=100;
