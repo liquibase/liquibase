@@ -36,10 +36,14 @@ public class DatabaseObjectFactory {
 
             Class<? extends DatabaseObject>[] classes = ServiceLocator.getInstance().findClasses(DatabaseObject.class);
             for (Class<? extends DatabaseObject> clazz : classes) {
-                if (typesToInclude.contains(clazz.getSimpleName().toLowerCase()) || typesToInclude.contains(clazz.getSimpleName().toLowerCase()+"s")) {
+                if (typesToInclude.contains(clazz.getSimpleName().toLowerCase())
+                        || typesToInclude.contains(clazz.getSimpleName().toLowerCase()+"s")
+                        || typesToInclude.contains(clazz.getSimpleName().toLowerCase()+"es") //like indexes
+                        ) {
                     returnSet.add(clazz);
                     typesNotFound.remove(clazz.getSimpleName().toLowerCase());
                     typesNotFound.remove(clazz.getSimpleName().toLowerCase()+"s");
+                    typesNotFound.remove(clazz.getSimpleName().toLowerCase()+"es");
                 }
             }
             if (typesNotFound.size() > 0) {
