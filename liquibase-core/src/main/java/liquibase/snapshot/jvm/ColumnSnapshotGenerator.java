@@ -237,6 +237,16 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
 
         Integer characterOctetLength = columnMetadataResultSet.getInt("CHAR_OCTET_LENGTH");
 
+        if (database instanceof DB2Database) {
+            String typeName = columnMetadataResultSet.getString("TYPE_NAME");
+            if (typeName.equalsIgnoreCase("DBCLOB") || typeName.equalsIgnoreCase("GRAPHIC") || typeName.equalsIgnoreCase("VARGRAPHIC")) {
+                if (columnSize != null) {
+                    columnSize = columnSize / 2; //Stored as double length chars
+                }
+            }
+        }
+
+
         DataType type = new DataType(columnTypeName);
         type.setDataTypeId(dataType);
         type.setColumnSize(columnSize);
