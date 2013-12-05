@@ -1,6 +1,7 @@
 package liquibase.datatype.core;
 
 import liquibase.database.Database;
+import liquibase.database.core.DB2Database;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.core.MySQLDatabase;
 import liquibase.datatype.DatabaseDataType;
@@ -40,6 +41,10 @@ public class UnknownType extends LiquibaseDataType {
                         || getName().equalsIgnoreCase("MEDIUMTEXT")
                         || getName().equalsIgnoreCase("REAL")
         )) {
+            parameters = new Object[0];
+        }
+
+        if (database instanceof DB2Database && (getName().equalsIgnoreCase("REAL") || getName().equalsIgnoreCase("XML"))) {
             parameters = new Object[0];
         }
 
