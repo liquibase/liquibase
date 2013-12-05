@@ -5,6 +5,7 @@ import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.core.MySQLDatabase;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
+import liquibase.statement.DatabaseFunction;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -61,5 +62,14 @@ public class UnknownType extends LiquibaseDataType {
         type.addAdditionalInformation(getAdditionalInformation());
 
         return type;
+    }
+
+    @Override
+    public String objectToSql(Object value, Database database) {
+        if (value instanceof DatabaseFunction) {
+            return super.objectToSql(value, database);
+        } else {
+            return "'"+super.objectToSql(value, database)+"'";
+        }
     }
 }
