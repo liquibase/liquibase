@@ -86,7 +86,7 @@ public class LockServiceFactoryTest {
 
     private MockDatabase getMockDatabase() {
         DatabaseFactory factory = DatabaseFactory.getInstance();
-        for (Database db : factory.getImplementedDatabases()) {
+        for (Database db : factory.getInternalDatabases()) {
             if (db instanceof MockDatabase) {
                 return (MockDatabase) db;
             }

@@ -58,6 +58,17 @@ public class DatabaseFactory {
         return returnList;
     }
 
+    /**
+     * Returns instances of all "internal" database types.
+     */
+    public List<Database> getInternalDatabases() {
+        List<Database> returnList = new ArrayList<Database>();
+        for (SortedSet<Database> set : internalDatabases.values()) {
+            returnList.add(set.iterator().next());
+        }
+        return returnList;
+    }
+
     public void register(Database database) {
         Map<String, SortedSet<Database>> map = null;
         if (database instanceof InternalDatabase) {
