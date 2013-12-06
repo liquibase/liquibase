@@ -4,4 +4,4 @@
 --     type="int"
 -- ], ]
 -- Change Parameter: tableName=person
-CREATE TABLE person (id INTEGER);
+CREATE TABLE person (id NUMBER(10));
