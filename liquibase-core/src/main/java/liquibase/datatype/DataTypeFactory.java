@@ -112,7 +112,7 @@ public class DataTypeFactory {
 
         LiquibaseDataType liquibaseDataType = null;
         if (classes == null) {
-            liquibaseDataType = new UnknownType(dataTypeName);
+            liquibaseDataType = new UnknownType(dataTypeDefinition);
         } else {
 
             try {

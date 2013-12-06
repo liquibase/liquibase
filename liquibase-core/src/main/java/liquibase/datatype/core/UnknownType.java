@@ -61,8 +61,12 @@ public class UnknownType extends LiquibaseDataType {
             parameters = new Object[0];
         }
 
-        if (database instanceof OracleDatabase && (getName().equalsIgnoreCase("LONG"))) {
-            parameters = new Object[0];
+        if (database instanceof OracleDatabase) {
+            if (getName().equalsIgnoreCase("LONG")) {
+                parameters = new Object[0];
+            } else if (getName().toUpperCase().startsWith("INTERVAL ")) {
+                return new DatabaseDataType(getName().replaceAll("\\(\\d+\\)", ""));
+            }
         }
 
         if (dataTypeMaxParameters < parameters.length) {
