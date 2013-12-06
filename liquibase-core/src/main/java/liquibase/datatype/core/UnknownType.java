@@ -4,6 +4,7 @@ import liquibase.database.Database;
 import liquibase.database.core.DB2Database;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.core.MySQLDatabase;
+import liquibase.database.core.OracleDatabase;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
 import liquibase.statement.DatabaseFunction;
@@ -57,6 +58,10 @@ public class UnknownType extends LiquibaseDataType {
                 || getName().equalsIgnoreCase("NTEXT")
                 || getName().equalsIgnoreCase("SMALLMONEY")
         )) {
+            parameters = new Object[0];
+        }
+
+        if (database instanceof OracleDatabase && (getName().equalsIgnoreCase("LONG"))) {
             parameters = new Object[0];
         }
 
