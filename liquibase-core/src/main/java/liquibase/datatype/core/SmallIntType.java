@@ -24,6 +24,11 @@ public class SmallIntType extends LiquibaseDataType {
         if (database instanceof DB2Database || database instanceof DerbyDatabase || database instanceof FirebirdDatabase || database instanceof MSSQLDatabase || database instanceof PostgresDatabase) {
             return new DatabaseDataType("SMALLINT"); //always smallint regardless of parameters passed
         }
+
+        if (database instanceof OracleDatabase) {
+            return new DatabaseDataType("NUMBER", 5);
+        }
+
         return super.toDatabaseDataType(database);
     }
 
