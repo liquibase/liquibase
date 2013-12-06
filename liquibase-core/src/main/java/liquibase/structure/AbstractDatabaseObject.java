@@ -112,4 +112,9 @@ public abstract class AbstractDatabaseObject implements DatabaseObject {
             return LiquibaseSerializable.SerializationType.NAMED_FIELD;
         }
     }
+
+    @Override
+    public String toString() {
+        return getName();
+    }
 }
