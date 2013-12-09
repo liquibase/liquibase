@@ -328,7 +328,11 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
 
     @Override
     public String getJdbcSchemaName(CatalogAndSchema schema) {
-        return super.getJdbcSchemaName(schema).toLowerCase();
+        String schemaName = super.getJdbcSchemaName(schema);
+        if (schemaName != null) {
+            schemaName = schemaName.toLowerCase();
+        }
+        return schemaName;
     }
 
     @Override
@@ -336,17 +340,13 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
 
         if (caseSensitive == null) {
             try {
-            if (getConnection() != null) {
-//                Connection conn = ((JdbcConnection) getConnection()).getUnderlyingConnection();
-//                Statement statement = conn.createStatement();
-//                ResultSet rs = statement.executeQuery("SELECT CONVERT(varchar(100), DATABASEPROPERTYEX('liquibase', 'Collation')) SQLCollation");
-//                String collation = rs.getString(1);
-                String collation = ExecutorService.getInstance().getExecutor(this).queryForObject(new RawSqlStatement("SELECT CONVERT(varchar(100), SERVERPROPERTY('COLLATION'))"), String.class);
+                if (getConnection() != null) {
+                    String collation = ExecutorService.getInstance().getExecutor(this).queryForObject(new RawSqlStatement("SELECT CONVERT(varchar(100), SERVERPROPERTY('COLLATION'))"), String.class);
                     caseSensitive = collation.contains("_CI_");
-            }
-                } catch (Exception e) {
-                    LogFactory.getLogger().warning("Cannot determine case sensitivity from MSSQL", e);
                 }
+            } catch (Exception e) {
+                LogFactory.getLogger().warning("Cannot determine case sensitivity from MSSQL", e);
+            }
         }
 
         if (caseSensitive == null) {
