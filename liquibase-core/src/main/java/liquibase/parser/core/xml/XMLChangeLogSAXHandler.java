@@ -129,7 +129,7 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
 						String version = matcher.group(1);
 						if (!version.equals(XMLChangeLogSAXParser
 								.getSchemaVersion())) {
-							log.info(databaseChangeLog.getPhysicalFilePath()
+							log.warning(databaseChangeLog.getPhysicalFilePath()
 									+ " is using schema version " + version
 									+ " rather than version "
 									+ XMLChangeLogSAXParser.getSchemaVersion());
