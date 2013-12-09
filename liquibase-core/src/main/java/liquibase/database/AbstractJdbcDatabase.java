@@ -131,7 +131,7 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     private Set<String> reservedWords = new HashSet<String>();
 
-    private Boolean caseSensitive;
+    protected Boolean caseSensitive;
     private boolean outputDefaultSchema = true;
     private boolean outputDefaultCatalog = true;
 
@@ -1652,11 +1652,11 @@ public abstract class AbstractJdbcDatabase implements Database {
     }
 
     public String getJdbcCatalogName(final CatalogAndSchema schema) {
-        return schema.getCatalogName();
+        return correctObjectName(schema.getCatalogName(), Catalog.class);
     }
 
     public String getJdbcSchemaName(final CatalogAndSchema schema) {
-        return schema.getSchemaName();
+        return correctObjectName(schema.getSchemaName(), Schema.class);
     }
 
     public final String getJdbcCatalogName(final Schema schema) {
