@@ -64,6 +64,11 @@ public class FileSystemResourceAccessor implements ResourceAccessor {
         if (!directoryFile.exists()) {
             return new Vector<URL>().elements();
         }
+
+        if (!directoryFile.isDirectory()) {
+            return new Vector<URL>(Arrays.asList(directoryFile.toURL())).elements();
+        }
+
         File[] files = directoryFile.listFiles();
         
         List<URL> results = new ArrayList<URL>();
