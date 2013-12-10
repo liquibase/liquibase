@@ -43,12 +43,10 @@ public class UpdateDataChangeTest {
         ChangeSet changeSet = changelog.getChangeSet("a", "a", "1");
 
         CheckSum checksum = changeSet.generateCheckSum();
-        Assert.assertEquals("7:0942bdbc964a85c23c6536ac31947073", checksum.toString()); // version 3.0.4
-//        Assert.assertEquals("7:f5d90faf3e96175decc8395de001a5bb", checksum.toString()); // version 3.1.x
+        Assert.assertEquals("7:f5d90faf3e96175decc8395de001a5bb", checksum.toString());
 
         String changelogString = new StringChangeLogSerializer().serialize(changeSet.getChanges().get(0), false);
-        Assert.assertTrue(changelogString.contains("whereClause=")); // version 3.0.4
-//        Assert.assertTrue(changelogString.contains("where=")); // version 3.1.x
+        Assert.assertTrue(changelogString.contains("where=")); // version 3.1.x
     }
 
     private ResourceAccessor getResource(final String xml) {
