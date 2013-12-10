@@ -58,6 +58,11 @@ public abstract class JdbcUtils {
         }
     }
 
+    public static void close(ResultSet rs, Statement stmt) {
+        closeResultSet(rs);
+        closeStatement(stmt);
+    }
+
     /**
      * Retrieve a JDBC column value from a ResultSet, using the most appropriate
      * value type. The returned value should be a detached value object, not having
