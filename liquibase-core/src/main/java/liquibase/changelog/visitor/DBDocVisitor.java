@@ -92,7 +92,7 @@ public class DBDocVisitor implements ChangeSetVisitor {
         }
 
 
-        ChangeLogInfo changeLogInfo = new ChangeLogInfo(changeSet.getFilePath(), databaseChangeLog.getPhysicalFilePath());
+        ChangeLogInfo changeLogInfo = new ChangeLogInfo(changeSet.getFilePath(), changeSet.getChangeLog().getLogicalFilePath());
         if (!changeLogs.contains(changeLogInfo)) {
             changeLogs.add(changeLogInfo);
         }
