@@ -9,9 +9,11 @@ import liquibase.datatype.LiquibaseDataType;
 import liquibase.datatype.core.*;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.executor.ExecutorService;
 import liquibase.logging.LogFactory;
 import liquibase.snapshot.*;
 import liquibase.statement.DatabaseFunction;
+import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
 import liquibase.util.StringUtils;
@@ -224,6 +226,24 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
             }
         }
 
+        if (database instanceof MySQLDatabase && columnTypeName.equalsIgnoreCase("ENUM")) {
+            try {
+                List<String> enumValues = ExecutorService.getInstance().getExecutor(database).queryForList(new RawSqlStatement("SELECT DISTINCT SUBSTRING_INDEX(SUBSTRING_INDEX(SUBSTRING(COLUMN_TYPE, 7, LENGTH(COLUMN_TYPE) - 8), \"','\", 1 + units.i + tens.i * 10) , \"','\", -1)\n" +
+                        "FROM INFORMATION_SCHEMA.COLUMNS\n" +
+                        "CROSS JOIN (SELECT 0 AS i UNION SELECT 1 UNION SELECT 2 UNION SELECT 3 UNION SELECT 4 UNION SELECT 5 UNION SELECT 6 UNION SELECT 7 UNION SELECT 8 UNION SELECT 9) units\n" +
+                        "CROSS JOIN (SELECT 0 AS i UNION SELECT 1 UNION SELECT 2 UNION SELECT 3 UNION SELECT 4 UNION SELECT 5 UNION SELECT 6 UNION SELECT 7 UNION SELECT 8 UNION SELECT 9) tens\n" +
+                        "WHERE TABLE_NAME = '"+column.getRelation().getName()+"' \n" +
+                        "AND COLUMN_NAME = '"+column.getName()+"'"), String.class);
+                String enumClause = "";
+                for (String enumValue : enumValues) {
+                    enumClause += "'"+enumValue+"', ";
+                }
+                enumClause = enumClause.replaceFirst(", $", "");
+                return new DataType("ENUM("+enumClause+")");
+            } catch (DatabaseException e) {
+                LogFactory.getLogger().warning("Error fetching enum values", e);
+            }
+        }
         DataType.ColumnSizeUnit columnSizeUnit = DataType.ColumnSizeUnit.BYTE;
 
         int dataType = columnMetadataResultSet.getInt("DATA_TYPE");
@@ -439,6 +459,8 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
             } else if (type == Types.VARBINARY) {
                 return new DatabaseFunction(stringVal);
             } else if (liquibaseDataType instanceof VarcharType || type == Types.VARCHAR) {
+                return stringVal;
+            } else if (database instanceof MySQLDatabase && typeName.toLowerCase().startsWith("enum")) {
                 return stringVal;
             } else {
                 LogFactory.getLogger().info("Unknown default value: value '" + stringVal + "' type " + typeName + " (" + type + "), assuming it is a function");
