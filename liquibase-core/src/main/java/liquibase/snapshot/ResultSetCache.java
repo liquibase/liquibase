@@ -171,6 +171,9 @@ class ResultSetCache {
         }
 
         List<CachedRow> executeAndExtract(String sql, Database database) throws DatabaseException, SQLException {
+            if (sql == null) {
+                return new ArrayList<CachedRow>();
+            }
             Statement statement = null;
             ResultSet resultSet = null;
             try {

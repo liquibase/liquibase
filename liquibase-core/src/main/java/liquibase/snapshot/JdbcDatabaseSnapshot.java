@@ -6,6 +6,7 @@ import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
+import liquibase.logging.LogFactory;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
 import liquibase.util.StringUtils;
@@ -426,6 +427,9 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                         if (tableName != null) {
                             sql += " AND systables.tabname = '"+database.correctObjectName(tableName, Table.class)+"'";
                         }
+                    } else if (database instanceof SybaseDatabase) {
+                        LogFactory.getLogger().warning("Finding unique constraints not currently supported for Sybase");
+                        return null; //TODO: find sybase sql
                     } else {
                         sql = "select CONSTRAINT_NAME, CONSTRAINT_TYPE, TABLE_NAME " +
                                 "from "+database.getSystemSchema()+".constraints " +
