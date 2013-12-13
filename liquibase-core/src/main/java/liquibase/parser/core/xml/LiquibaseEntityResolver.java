@@ -71,14 +71,17 @@ public class LiquibaseEntityResolver implements EntityResolver2 {
             }
             String xsdFile = namespaceDetails.getLocalPath(systemId);
             try {
+              System.err.println("Looking for " + xsdFile + " for " + systemId);
                 InputStream resourceAsStream = resourceAccessor.getResourceAsStream(xsdFile);
-
-                if (resourceAccessor == null) {
+                System.err.println("Tried " + resourceAccessor + " and got " + resourceAsStream);
+                if (resourceAsStream == null) {
                     if (Thread.currentThread().getContextClassLoader() != null) {
                         resourceAsStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(xsdFile);
+                        System.err.println("Tried thread context classloader and got " + resourceAsStream);
                     }
                     if (resourceAsStream == null) {
                         resourceAsStream = this.getClass().getClassLoader().getResourceAsStream(xsdFile);
+                        System.err.println("Tried lb classloader and got " + resourceAsStream);
                     }
                 }
                 if (resourceAsStream == null) {
@@ -89,6 +92,7 @@ public class LiquibaseEntityResolver implements EntityResolver2 {
                 source.setSystemId(systemId);
                 return source;
             } catch (Exception ex) {
+                ex.printStackTrace();
                 return null; // We don't have the schema, try the network
             }
         }
