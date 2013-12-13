@@ -73,7 +73,7 @@ public class LiquibaseEntityResolver implements EntityResolver2 {
             try {
                 InputStream resourceAsStream = resourceAccessor.getResourceAsStream(xsdFile);
 
-                if (resourceAccessor == null) {
+                if (resourceAsStream == null) {
                     if (Thread.currentThread().getContextClassLoader() != null) {
                         resourceAsStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(xsdFile);
                     }
