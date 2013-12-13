@@ -158,7 +158,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
 
                     Object value = line[i];
 
-                    ColumnConfig columnConfig = getColumnConfig(i, headers[i]);
+                    ColumnConfig columnConfig = getColumnConfig(i, headers[i].trim());
                     if (columnConfig != null) {
                         columnName = columnConfig.getName();
 

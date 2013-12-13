@@ -112,7 +112,11 @@ public class DataTypeFactory {
 
         LiquibaseDataType liquibaseDataType = null;
         if (classes == null) {
-            liquibaseDataType = new UnknownType(dataTypeName);
+            if (dataTypeName.toUpperCase().startsWith("INTERVAL")) {
+                liquibaseDataType = new UnknownType(dataTypeDefinition);
+            } else {
+                liquibaseDataType = new UnknownType(dataTypeName);
+            }
         } else {
 
             try {

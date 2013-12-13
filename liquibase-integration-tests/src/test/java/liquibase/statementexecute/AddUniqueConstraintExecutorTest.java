@@ -128,7 +128,7 @@ public class AddUniqueConstraintExecutorTest extends AbstractExecuteTest {
 
         // FIXME Syntax for mysql is correct, but exception "Table 'liquibaseb.adduqtest' doesn't exist" is thrown
 // 		assertCorrect("alter table `liquibaseb`.`adduqtest` add constraint `uq_test` unique (`coltomakeuq`)", MySQLDatabase.class);
-        assertCorrect("alter table liquibasec.adduqtest add constraint unique (coltomakeuq) constraint uq_test", InformixDatabase.class);
+        assertCorrect("alter table liquibaseb.adduqtest add constraint unique (coltomakeuq) constraint uq_test", InformixDatabase.class);
         assertCorrect("alter table liquibasec.adduqtest add constraint uq_test unique (coltomakeuq)", OracleDatabase.class);
         assertCorrect("alter table liquibaseb.\"adduqtest\" add constraint uq_test unique (\"coltomakeuq\")", PostgresDatabase.class);
         assertCorrect("alter table liquibasec.adduqtest add constraint uq_test unique (coltomakeuq)", DerbyDatabase.class);

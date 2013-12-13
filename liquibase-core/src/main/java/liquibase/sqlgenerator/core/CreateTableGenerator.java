@@ -36,23 +36,23 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
 
     @Override
     public Sql[] generateSql(CreateTableStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-
+    	
     	if (database instanceof InformixDatabase) {
     		AbstractSqlGenerator<CreateTableStatement> gen = new CreateTableGeneratorInformix();
     		return gen.generateSql(statement, database, sqlGeneratorChain);
     	}
 
         List<Sql> additionalSql = new ArrayList<Sql>();
-
+    	
         StringBuffer buffer = new StringBuffer();
         buffer.append("CREATE TABLE ").append(database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName())).append(" ");
         buffer.append("(");
-
+        
         boolean isSinglePrimaryKeyColumn = statement.getPrimaryKeyConstraint() != null
             && statement.getPrimaryKeyConstraint().getColumns().size() == 1;
-
+        
         boolean isPrimaryKeyAutoIncrement = false;
-
+        
         Iterator<String> columnIterator = statement.getColumns().iterator();
         List<String> primaryKeyColumns = new LinkedList<String>();
 
@@ -66,7 +66,7 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
             buffer.append(" ").append(columnType);
 
             AutoIncrementConstraint autoIncrementConstraint = null;
-
+            
             for (AutoIncrementConstraint currentAutoIncrementConstraint : statement.getAutoIncrementConstraints()) {
                 if (column.equals(currentAutoIncrementConstraint.getColumnName())) {
                     autoIncrementConstraint = currentAutoIncrementConstraint;
@@ -79,11 +79,11 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
                     && statement.getPrimaryKeyConstraint().getColumns().contains(column);
             isPrimaryKeyAutoIncrement = isPrimaryKeyAutoIncrement
                     || isPrimaryKeyColumn && isAutoIncrementColumn;
-
+            
             if (isPrimaryKeyColumn) {
             	primaryKeyColumns.add(column);
             }
-
+            
             if ((database instanceof SQLiteDatabase) &&
                     isSinglePrimaryKeyColumn &&
                     isPrimaryKeyColumn &&
@@ -113,7 +113,7 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
                 // TODO: check if database supports auto increment on non primary key column
                 if (database.supportsAutoIncrement()) {
                     String autoIncrementClause = database.getAutoIncrementClause(autoIncrementConstraint.getStartWith(), autoIncrementConstraint.getIncrementBy());
-
+                
                     if (!"".equals(autoIncrementClause)) {
                         buffer.append(" ").append(autoIncrementClause);
                     }
@@ -257,6 +257,12 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
 
 
         String sql = buffer.toString().replaceFirst(",\\s*$", "")+")";
+
+        if (database instanceof MySQLDatabase && mysqlTableOptionStartWith != null){
+        	LogFactory.getLogger().info("[MySQL] Using last startWith statement ("+mysqlTableOptionStartWith.toString()+") as table option.");
+        	sql += " "+((MySQLDatabase)database).getTableOptionAutoIncrementStartWithClause(mysqlTableOptionStartWith);
+        }
+
 
         if (database instanceof MySQLDatabase && mysqlTableOptionStartWith != null){
         	LogFactory.getInstance().getLog().info("[MySQL] Using last startWith statement ("+mysqlTableOptionStartWith.toString()+") as table option.");

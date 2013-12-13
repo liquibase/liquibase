@@ -42,6 +42,8 @@ public class CustomChangeWrapper extends AbstractChange {
 
     private ClassLoader classLoader;
 
+    private boolean configured = false;
+
     @Override
     public boolean generateStatementsVolatile(Database database) {
         return true;
@@ -132,6 +134,14 @@ public class CustomChangeWrapper extends AbstractChange {
      */
     @Override
     public ValidationErrors validate(Database database) {
+        if (!configured) {
+            try {
+                configureCustomChange();
+            } catch (CustomChangeException e) {
+                throw new UnexpectedLiquibaseException(e);
+            }
+        }
+
         try {
             return customChange.validate(database);
         } catch (Throwable e) {
@@ -158,7 +168,9 @@ public class CustomChangeWrapper extends AbstractChange {
     public SqlStatement[] generateStatements(Database database) {
         SqlStatement[] statements = null;
         try {
-            configureCustomChange();
+            if (!configured) {
+                configureCustomChange();
+            }
             if (customChange instanceof CustomSqlChange) {
                 statements = ((CustomSqlChange) customChange).generateStatements(database);
             } else if (customChange instanceof CustomTaskChange) {
@@ -187,7 +199,9 @@ public class CustomChangeWrapper extends AbstractChange {
     public SqlStatement[] generateRollbackStatements(Database database) throws RollbackImpossibleException {
         SqlStatement[] statements = null;
         try {
-            configureCustomChange();
+            if (!configured) {
+                configureCustomChange();
+            }
             if (customChange instanceof CustomSqlRollback) {
                 statements = ((CustomSqlRollback) customChange).generateRollbackStatements(database);
             } else if (customChange instanceof CustomTaskRollback) {

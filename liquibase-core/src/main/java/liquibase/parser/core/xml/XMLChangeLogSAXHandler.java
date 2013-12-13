@@ -140,9 +140,12 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
 					Matcher matcher = Pattern.compile(".*dbchangelog-(\\d+\\.\\d+).xsd").matcher(schemaLocation);
 					if (matcher.matches()) {
 						String version = matcher.group(1);
-						if (!version.equals(XMLChangeLogSAXParser.getSchemaVersion())) {
-							log.info(databaseChangeLog.getPhysicalFilePath() + " is using schema version " + version
-									+ " rather than version " + XMLChangeLogSAXParser.getSchemaVersion());
+						if (!version.equals(XMLChangeLogSAXParser
+								.getSchemaVersion())) {
+							log.warning(databaseChangeLog.getPhysicalFilePath()
+									+ " is using schema version " + version
+									+ " rather than version "
+									+ XMLChangeLogSAXParser.getSchemaVersion());
 						}
 					}
 				}

@@ -6,11 +6,10 @@ import liquibase.util.StringUtils;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.List;
+import java.util.*;
 
 public class JUnitResourceAccessor implements ResourceAccessor {
     private URLClassLoader classLoader;
@@ -39,6 +38,18 @@ public class JUnitResourceAccessor implements ResourceAccessor {
 
     @Override
     public Enumeration<URL> getResources(String packageName) throws IOException {
+        try {
+            URL fileUrl = classLoader.getResource(packageName);
+            if (fileUrl != null) {
+                File file = new File(fileUrl.toURI());
+                if (file.exists() && ! file.isDirectory()) {
+                    return new Vector<URL>(Arrays.asList(fileUrl)).elements();
+                }
+            }
+        } catch (Throwable e) {
+            //not local file, continue on
+        }
+
         return classLoader.getResources(packageName);
     }
 

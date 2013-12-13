@@ -7,12 +7,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class LogFactory {
+    private static Map<String, Logger> loggers = new HashMap<String, Logger>();
+    private static String defaultLoggingLevel = null;
 
     private static LogFactory instance;
-
-    private Map<String, Logger> loggers = new HashMap<String, Logger>();
-    private String defaultLoggingLevel = "info";
-
 
     public static void reset() {
         instance = new LogFactory();
@@ -48,7 +46,9 @@ public class LogFactory {
                 throw new ServiceNotFoundException(e);
             }
             value.setName(name);
-            value.setLogLevel(defaultLoggingLevel);
+            if (defaultLoggingLevel != null) {
+                value.setLogLevel(defaultLoggingLevel);
+            }
             loggers.put(name, value);
         }
 

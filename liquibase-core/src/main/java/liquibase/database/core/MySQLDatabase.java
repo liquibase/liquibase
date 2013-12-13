@@ -97,6 +97,11 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
     }
 
     @Override
+    protected boolean mustQuoteObjectName(String objectName, Class<? extends DatabaseObject> objectType) {
+        return super.mustQuoteObjectName(objectName, objectType) || (!objectName.contains("(") && !objectName.matches("\\w+"));
+    }
+
+    @Override
     public String getLineComment() {
         return "-- ";
     }

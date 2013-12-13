@@ -5,6 +5,7 @@ import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.jvm.ColumnMapRowMapper;
 import liquibase.executor.jvm.RowMapperResultSetExtractor;
+import liquibase.util.JdbcUtils;
 import liquibase.util.StringUtils;
 
 import java.sql.ResultSet;
@@ -169,9 +170,19 @@ class ResultSetCache {
             return resultSetCache.timesSingleQueried >= 3;
         }
 
-        ResultSet executeQuery(String sql, Database database) throws DatabaseException, SQLException {
-            Statement statement = ((JdbcConnection) database.getConnection()).createStatement();
-            return statement.executeQuery(sql);
+        List<CachedRow> executeAndExtract(String sql, Database database) throws DatabaseException, SQLException {
+            if (sql == null) {
+                return new ArrayList<CachedRow>();
+            }
+            Statement statement = null;
+            ResultSet resultSet = null;
+            try {
+                statement = ((JdbcConnection) database.getConnection()).createStatement();
+                resultSet = statement.executeQuery(sql);
+                return extract(resultSet);
+            } finally {
+                JdbcUtils.close(resultSet, statement);
+            }
 
         }
 
@@ -217,7 +228,7 @@ class ResultSetCache {
                     returnList.add(new CachedRow(row));
                 }
             } finally {
-                resultSet.close();
+                JdbcUtils.closeResultSet(resultSet);
             }
             return returnList;
         }
@@ -231,18 +242,18 @@ class ResultSetCache {
             super(database);
         }
 
-        public abstract ResultSet fastFetchQuery() throws SQLException, DatabaseException;
-        public abstract ResultSet bulkFetchQuery() throws SQLException, DatabaseException;
+        public abstract List<CachedRow> fastFetchQuery() throws SQLException, DatabaseException;
+        public abstract List<CachedRow> bulkFetchQuery() throws SQLException, DatabaseException;
 
         @Override
         public List<CachedRow> fastFetch() throws SQLException, DatabaseException {
-            return extract(fastFetchQuery());
+            return fastFetchQuery();
         }
 
 
         @Override
         public List<CachedRow> bulkFetch() throws SQLException, DatabaseException {
-            return extract(bulkFetchQuery());
+            return bulkFetchQuery();
         }
     }
 

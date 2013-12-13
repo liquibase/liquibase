@@ -7,6 +7,7 @@ import liquibase.database.jvm.JdbcConnection;
 import liquibase.structure.DatabaseObject;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.DateParseException;
+import liquibase.structure.core.Catalog;
 import liquibase.structure.core.Schema;
 import liquibase.util.JdbcUtils;
 
@@ -226,7 +227,7 @@ public class DB2Database extends AbstractJdbcDatabase {
 
     @Override
     public String getJdbcSchemaName(CatalogAndSchema schema) {
-        return schema.getCatalogName();
+        return correctObjectName(schema.getCatalogName(), Catalog.class);
     }
 
     @Override

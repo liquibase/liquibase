@@ -1,6 +1,98 @@
 Liquibase Core Changelog
 ===========================================
 
+Changes in version 3.0.8 (2013.12.12)
+
+- Major Changes:
+    Improvements to data type handling
+    Bug fixes
+    Performance improvements
+
+- [CORE-1224] - Enum column types are not appropriately represented in the change log created by generateChangeLog
+- [CORE-1299] - modifyDataType does not auto reorg on DB2
+- [CORE-1302] - MySQL syntax for autoincrement column with start value
+- [CORE-1357] - Postgresql sequences create error in log files
+- [CORE-1368] - Unable to recreate DB from generated change logs
+- [CORE-1427] - Not generateChangeLog properly for INT2 type for Postgres
+- [CORE-1430] - When I was in sybase database using liquibase create the index, reported "information_schema.constraints" not found error
+- [CORE-1432] - Liquibase H2 InsertOrUpdateGeneratorH2 fails if primary key column name contains $ character
+- [CORE-1446] - Liquibase changelog generation can add linefeed to defaultValueComputed if last column
+- [CORE-1454] - Precondition negation does not seem to work
+- [CORE-1455] - Value not taken into account when inserting data with YAML
+- [CORE-1484] - very poor performance of dropAll on Oracle
+- [CORE-1496] - Custom Change validation happening before being fully initialized
+- [CORE-1531] - includeAll with relativeToChangeLogFile fails under certain conditions
+- [CORE-1537] - Liquibase: diffChangeLog on DB2 performing out of order steps
+- [CORE-1538] - diffChangeLog for DB2 injects invalid characters in xml
+- [CORE-1540] - Call 'Reorg table' after modifyDataType on DB2
+- [CORE-1541] - Column type="LONGVARCHAR" fails
+- [CORE-1545] - Oracle wrong LONG datatype declaration
+- [CORE-1547] - CLONE - H2 (and other) support for BLOB and CLOB is incorrect
+- [CORE-1548] - Oracle Data Type: DATE - defaultValueComputed should be defaultValue
+- [CORE-1549] - Oracle Data Type: INTERVAL YEAR TO MONTH - returned at "INTERNAL(2) YEAR"
+- [CORE-1550] - Oracle Data Type: NCLOB - Receive SQL error when specifying NCLOB size
+- [CORE-1551] - Oracle Data Type: NCHAR
+- [CORE-1552] - Oracle Data Type: NVARCHAR2 - Column sizing is wrong
+- [CORE-1553] - dropDefaultValue does not work on SQL Server
+- [CORE-1554] - dbDoc for Informix IDS
+- [CORE-1555] - Oracle UID reserved word not detected
+- [CORE-1557] - Mysql: BLOB type changes to LONGBLOB
+- [CORE-1559] - Columns defined as "serial" are created as "int" without autoincrement in Postgres
+- [CORE-1562] - update throws Recoverable Exception
+- [CORE-1564] - Broken links in dbDoc
+- [CORE-1566] - DB2 Datatype - DBCLOB, GRAPHIC, VARGRAPHIC doubling datatype size
+- [CORE-1567] - DB2 Datatype - defaultValueComputed being used instead of defaultValue for DBCLOB, TIME, TIMESTAMP, DATE
+- [CORE-1568] - DB2 Datatype - REAL and XML should not have datatype sizes
+- [CORE-1571] - updateDatabase can't find a changelog
+- [CORE-1572] - Regression: diff generates full schema instead of changes when using liquibase-hibernate4
+- [CORE-1580] - Mysql SET type not handled correctly
+- [CORE-1581] - modifyDataType ignores additional info of newDataType
+- [CORE-1582] - SQLServer datatype for TIMESTAMP
+- [CORE-1583] - Wrong datatype with renameColumn
+- [CORE-1584] - Unable do rollback not in transaction block
+- [CORE-1586] - MySQL DataType - defaultValueComputed being injected into TIMESTAMP, VARBINARY, BINARY, YEAR
+- [CORE-1587] - MySQL Datatype - VARBINARY vs LONGBLOB confusion
+- [CORE-1588] - MySQL DataType - BIT size and default not captured on Snapshot
+- [CORE-1589] - MySQL DataType - BLOB becomes LONGBLOB
+- [CORE-1590] - MySQL DataType - DOUBLE sizing not persisted on snapshot
+- [CORE-1591] - MySQL DataType - TIME not persisting seconds (getting hours and minutes..so I've got that going for me.)
+- [CORE-1592] - MySQL DataType - TEXT converted to LONGTEXT
+- [CORE-1594] - PostgreSQL 'bigserial' type is automatically converted to 'bigint'
+- [CORE-1595] - Schema version incompatibility is logged as INFO instead of WARN
+- [CORE-1596] - Liquibase 3.0.5 will not create tables in dbo schema in SQL Server
+- [CORE-1597] - ORA-01000: maximum open cursors exceeded
+- [CORE-1600] - "Collation" and "Lateral" are not escaped in Postgres (new reserved words in v9.3)
+- [CORE-1602] - DatabaseException in changesets that include date fields with default values
+- [CORE-1603] - MySQL Datatype - BIGINT, INT, MEDIUMINT, SMALLINT, TINYINT all "shaving" off sizes
+- [CORE-1606] - MySQL - TEXT vs. LONGTEXT for diffChangeLog presents CLOB
+- [CORE-1607] - MSSQL java.sql.Types.TIMESTAMP should map to DateTime
+- [CORE-1610] - MSSQL - NTEXT type being snapshot with MSSQL driver default size parameter.
+- [CORE-1611] - Avoid reverse DNS lookup with getLocalHost().getHostName();
+- [CORE-1612] - YAML/JSON changelogs not picking up "value" attribute on column configs
+- [CORE-1614] - mysql case insensitive affects databasechangelog creation
+- [CORE-1615] - Failed to drop default value in MSSQL
+- [CORE-1616] - SQLFileChange uses too many file descriptors
+- [CORE-1619] - MSSQL: preconditions treat object names in a case-sensitive way
+- [CORE-1622] - Ant not respecting diffTypes=data
+- [CORE-1623] - MSSQL: precondition primaryKeyExists doesn't work
+- [CORE-1625] - H2 Blob Type support is incorrect
+- [CORE-1626] - createIndex does not work for function based indexes anymore
+- [CORE-1627] - Option 'diffTypes' does not accept type 'indexes'
+- [CORE-1632] - It's impossible to setup Logger's log level with system property 'liquibase.defaultlogger.level'
+- [CORE-1636] - Case sensitivity issue with tableExists precondition
+- [CORE-1640] - foreignKeyExists precondition always failing
+- [CORE-1641] - Add column with foreign key throws NPE
+- [CORE-1644] - ValidationFailedException after update to 3.0.7
+- [CORE-1646] - Exception when comparing two schemas
+- [CORE-1647] - Mysql enum default values not quoted
+- [CORE-1648] - Mysql columns with colons and other special chars are not quoted
+- [CORE-1664] - MSSQL. "DATE" type doesn't exist for MSSQL 2005 and 2000.
+- [CORE-1382] - Allow to create DATABASECHANGELOG* tables in another schema
+- [CORE-1546] - Schema-Support on Informix
+- [CORE-1577] - Oracle tinyint, smallint, int being created as number(38,0)
+- [CORE-1604] - Minor maven pom cleanups
+- [CORE-1635] - Generated changelog missing unique constraints should be output before foreign keys
+
 Changes in version 3.0.7 (2013.10.24)
 
 - Major Changes:
@@ -8,35 +100,34 @@ Changes in version 3.0.7 (2013.10.24)
     Fixed SQLite support
     Improvements to data type handling, especially in MS SqlServer
 
-[CORE-1509] - Memory improvements for large sqlFile files
-[CORE-1533] - Performance improvements in dropAll
-[CORE-1247] - [Sqlite] bad syntax in create table statements with single autoincrement primary key
-[CORE-1519] - Allow relative file paths for valueClobFile and valueBlobFile inserts/updates.
-[CORE-1275] - LoadData insert statements do not escape column names containing an open paren
-[CORE-1312] - Error when creating changelog tables
-[CORE-1399] - IncludeAll Failing when running in WAR files
-[CORE-1440] - Invalid Reorg table statement gets generated on DB2
-[CORE-1504] - dbDoc should html-encode author names
-[CORE-1506] - updateSQL generates invalid SQL for oracle
-[CORE-1507] - dropAll fails with NullPointerException
-[CORE-1510] - Maven plugin fails to configure parameters within property file with trailing spaces, error message misleading
-[CORE-1511] - modifyDataType truncates enum values
-[CORE-1512] - Insert with valueClobFile fails with unicode encoding.
-[CORE-1515] - Liquibase MSSQL: Snapshot incorrectly injecting size for some datatypes
-[CORE-1516] - Liquibase MSSQL: Snapshot recording incorrect size for VARBINARY
-[CORE-1517] - Liquibase MSSQL: Autoincrement property of decimal datatype not supported
-[CORE-1518] - Liquibase MSSQL: Incorrect datatypes captured in the snapshot
-[CORE-1520] - Liquibase Snapshot: Default datetime is wrong
-[CORE-1521] - When generateChangeLog is run, objects do not always come back in a consistent order
-[CORE-1522] - PreparedStatement.setCharacterStream() not supported by Postgres JDBC driver.
-[CORE-1524] - Ant diff command running diffChangeLog
-[CORE-1525] - Liquibase MSSQL: Snapshot not capturing alter statements that add default values
-[CORE-1526] - Unicode string escaping in MSSQL
-[CORE-1530] - Column called VERSION is quoted in PostgreSQL
-[CORE-1531] - includeAll with relativeToChangeLogFile fails under certain conditions
-[CORE-1532] - NPE in ChangedIndexChangeGenerator
-[CORE-1534] - Single quotes in liquibase.bat causing issues
-
+- [CORE-1509] - Memory improvements for large sqlFile files
+- [CORE-1533] - Performance improvements in dropAll
+- [CORE-1247] - [Sqlite] bad syntax in create table statements with single autoincrement primary key
+- [CORE-1519] - Allow relative file paths for valueClobFile and valueBlobFile inserts/updates.
+- [CORE-1275] - LoadData insert statements do not escape column names containing an open paren
+- [CORE-1312] - Error when creating changelog tables
+- [CORE-1399] - IncludeAll Failing when running in WAR files
+- [CORE-1440] - Invalid Reorg table statement gets generated on DB2
+- [CORE-1504] - dbDoc should html-encode author names
+- [CORE-1506] - updateSQL generates invalid SQL for oracle
+- [CORE-1507] - dropAll fails with NullPointerException
+- [CORE-1510] - Maven plugin fails to configure parameters within property file with trailing spaces, error message misleading
+- [CORE-1511] - modifyDataType truncates enum values
+- [CORE-1512] - Insert with valueClobFile fails with unicode encoding.
+- [CORE-1515] - Liquibase MSSQL: Snapshot incorrectly injecting size for some datatypes
+- [CORE-1516] - Liquibase MSSQL: Snapshot recording incorrect size for VARBINARY
+- [CORE-1517] - Liquibase MSSQL: Autoincrement property of decimal datatype not supported
+- [CORE-1518] - Liquibase MSSQL: Incorrect datatypes captured in the snapshot
+- [CORE-1520] - Liquibase Snapshot: Default datetime is wrong
+- [CORE-1521] - When generateChangeLog is run, objects do not always come back in a consistent order
+- [CORE-1522] - PreparedStatement.setCharacterStream() not supported by Postgres JDBC driver.
+- [CORE-1524] - Ant diff command running diffChangeLog
+- [CORE-1525] - Liquibase MSSQL: Snapshot not capturing alter statements that add default values
+- [CORE-1526] - Unicode string escaping in MSSQL
+- [CORE-1530] - Column called VERSION is quoted in PostgreSQL
+- [CORE-1531] - includeAll with relativeToChangeLogFile fails under certain conditions
+- [CORE-1532] - NPE in ChangedIndexChangeGenerator
+- [CORE-1534] - Single quotes in liquibase.bat causing issues
 
 Changes in version 3.0.6 (2013.10.08)
 

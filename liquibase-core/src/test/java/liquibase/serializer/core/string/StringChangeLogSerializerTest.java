@@ -293,6 +293,8 @@ public class StringChangeLogSerializerTest {
                 field.set(object, createDate());
             } else if (field.getType().equals(Boolean.class)) {
                 field.set(object, createBoolean());
+            } else if (field.getType().equals(boolean.class)) {
+                field.set(object, createBoolean());
             } else if (field.getType().equals(ColumnConfig.class)) {
                 field.set(object, createColumnConfig());
             } else if (field.getType().equals(SequenceNextValueFunction.class)) {

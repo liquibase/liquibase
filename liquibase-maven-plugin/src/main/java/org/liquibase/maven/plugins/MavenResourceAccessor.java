@@ -1,12 +1,12 @@
 package org.liquibase.maven.plugins;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.List;
+import java.util.*;
 
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.StringUtils;
@@ -50,6 +50,18 @@ public class MavenResourceAccessor implements ResourceAccessor {
 
     @Override
     public Enumeration<URL> getResources(String packageName) throws IOException {
+        try {
+            URL fileUrl = _loader.getResource(packageName);
+            if (fileUrl != null) {
+                File file = new File(fileUrl.toURI());
+                if (file.exists() && ! file.isDirectory()) {
+                    return new Vector<URL>(Arrays.asList(fileUrl)).elements();
+                }
+            }
+        } catch (Throwable e) {
+            //not local file, continue on
+        }
+
         packageName = packageName.replaceFirst("^target/classes/","");
 
         return _loader.getResources(packageName);

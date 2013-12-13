@@ -116,20 +116,28 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
         for (ColumnConstraint constraint : statement.getConstraints()) {
             if (constraint instanceof ForeignKeyConstraint) {
                 ForeignKeyConstraint fkConstraint = (ForeignKeyConstraint) constraint;
-                Matcher referencesMatcher = Pattern.compile("([\\w\\._]+)\\(([\\w_]+)\\)").matcher(fkConstraint.getReferences());
-                if (!referencesMatcher.matches()) {
-                    throw new UnexpectedLiquibaseException("Don't know how to find table and column names from " + fkConstraint.getReferences());
-                }
                 String refSchemaName = null;
-                String refTableName = referencesMatcher.group(1);
+                String refTableName;
+                String refColName;
+                if (fkConstraint.getReferences() != null) {
+                    Matcher referencesMatcher = Pattern.compile("([\\w\\._]+)\\(([\\w_]+)\\)").matcher(fkConstraint.getReferences());
+                    if (!referencesMatcher.matches()) {
+                        throw new UnexpectedLiquibaseException("Don't know how to find table and column names from " + fkConstraint.getReferences());
+                    }
+                    refTableName = referencesMatcher.group(1);
+                    refColName = referencesMatcher.group(2);
+                } else {
+                    refTableName = ((ForeignKeyConstraint) constraint).getReferencedTableName();
+                    refColName = ((ForeignKeyConstraint) constraint).getReferencedColumnNames();
+                }
+
                 if (refTableName.indexOf(".") > 0) {
                     refSchemaName = refTableName.split("\\.")[0];
                     refTableName = refTableName.split("\\.")[1];
                 }
-                String refColName = referencesMatcher.group(2);
-                String refCatalogName = null;
 
-                AddForeignKeyConstraintStatement addForeignKeyConstraintStatement = new AddForeignKeyConstraintStatement(fkConstraint.getForeignKeyName(), statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName(), refCatalogName, refSchemaName, refTableName, refColName);
+
+                AddForeignKeyConstraintStatement addForeignKeyConstraintStatement = new AddForeignKeyConstraintStatement(fkConstraint.getForeignKeyName(), statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName(), null, refSchemaName, refTableName, refColName);
                 returnSql.addAll(Arrays.asList(SqlGeneratorFactory.getInstance().generateSql(addForeignKeyConstraintStatement, database)));
             }
         }

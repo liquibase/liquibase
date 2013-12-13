@@ -1,10 +1,13 @@
 package liquibase.datatype.core;
 
 import liquibase.database.Database;
+import liquibase.database.core.DB2Database;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.core.MySQLDatabase;
+import liquibase.database.core.OracleDatabase;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
+import liquibase.statement.DatabaseFunction;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -42,6 +45,10 @@ public class UnknownType extends LiquibaseDataType {
             parameters = new Object[0];
         }
 
+        if (database instanceof DB2Database && (getName().equalsIgnoreCase("REAL") || getName().equalsIgnoreCase("XML"))) {
+            parameters = new Object[0];
+        }
+
         if (database instanceof MSSQLDatabase && (
                 getName().equalsIgnoreCase("REAL")
                 || getName().equalsIgnoreCase("XML")
@@ -54,6 +61,14 @@ public class UnknownType extends LiquibaseDataType {
             parameters = new Object[0];
         }
 
+        if (database instanceof OracleDatabase) {
+            if (getName().equalsIgnoreCase("LONG") || getName().equalsIgnoreCase("NCLOB")) {
+                parameters = new Object[0];
+            } else if (getName().toUpperCase().startsWith("INTERVAL ")) {
+                return new DatabaseDataType(getName().replaceAll("\\(\\d+\\)", ""));
+            }
+        }
+
         if (dataTypeMaxParameters < parameters.length) {
             parameters = Arrays.copyOfRange(parameters, 0, dataTypeMaxParameters);
         }
@@ -61,5 +76,14 @@ public class UnknownType extends LiquibaseDataType {
         type.addAdditionalInformation(getAdditionalInformation());
 
         return type;
+    }
+
+    @Override
+    public String objectToSql(Object value, Database database) {
+        if (value instanceof DatabaseFunction) {
+            return super.objectToSql(value, database);
+        } else {
+            return "'"+super.objectToSql(value, database)+"'";
+        }
     }
 }

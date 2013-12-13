@@ -7,6 +7,7 @@ import liquibase.database.core.SybaseDatabase;
 import liquibase.datatype.DataTypeInfo;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
+import liquibase.exception.DatabaseException;
 import liquibase.statement.DatabaseFunction;
 import liquibase.database.Database;
 
@@ -14,6 +15,14 @@ import liquibase.database.Database;
 public class DateType extends LiquibaseDataType {
     @Override
     public DatabaseDataType toDatabaseDataType(Database database) {
+        if (database instanceof MSSQLDatabase) {
+            try {
+                if (database.getDatabaseMajorVersion() <= 9) { //2005 or earlier
+                    return new DatabaseDataType("SMALLDATETIME");
+                }
+            } catch (DatabaseException ignore) { } //assuming it is a newer version
+
+        }
         return new DatabaseDataType(getName());
     }
 

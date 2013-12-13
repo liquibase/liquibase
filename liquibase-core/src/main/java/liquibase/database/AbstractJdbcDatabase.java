@@ -132,7 +132,7 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     private final Set<String> reservedWords = new HashSet<String>();
 
-    private Boolean caseSensitive;
+    protected Boolean caseSensitive;
     private boolean outputDefaultSchema = true;
     private boolean outputDefaultCatalog = true;
 
@@ -1223,7 +1223,8 @@ public abstract class AbstractJdbcDatabase implements Database {
     @Override
     public String escapeObjectName(String objectName, final Class<? extends DatabaseObject> objectType) {
         if (objectName != null) {
-            if (objectName.contains("-") || startsWithNumeric(objectName) || isReservedWord(objectName)) {
+            objectName = objectName.trim();
+            if (mustQuoteObjectName(objectName, objectType)) {
                 return quoteObject(objectName, objectType);
             } else if (quotingStrategy == ObjectQuotingStrategy.QUOTE_ALL_OBJECTS) {
                 return quoteObject(objectName, objectType);
@@ -1231,6 +1232,10 @@ public abstract class AbstractJdbcDatabase implements Database {
             objectName = objectName.trim();
         }
         return objectName;
+    }
+
+    protected boolean mustQuoteObjectName(String objectName, Class<? extends DatabaseObject> objectType) {
+        return objectName.contains("-") || startsWithNumeric(objectName) || isReservedWord(objectName);
     }
 
     public String quoteObject(final String objectName, final Class<? extends DatabaseObject> objectType) {
@@ -1669,11 +1674,11 @@ public abstract class AbstractJdbcDatabase implements Database {
     }
 
     public String getJdbcCatalogName(final CatalogAndSchema schema) {
-        return schema.getCatalogName();
+        return correctObjectName(schema.getCatalogName(), Catalog.class);
     }
 
     public String getJdbcSchemaName(final CatalogAndSchema schema) {
-        return schema.getSchemaName();
+        return correctObjectName(schema.getSchemaName(), Schema.class);
     }
 
     public final String getJdbcCatalogName(final Schema schema) {

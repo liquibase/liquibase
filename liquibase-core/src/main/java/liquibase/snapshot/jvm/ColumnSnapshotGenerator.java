@@ -2,16 +2,18 @@ package liquibase.snapshot.jvm;
 
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
-import liquibase.database.core.FirebirdDatabase;
-import liquibase.database.core.MSSQLDatabase;
-import liquibase.database.core.MySQLDatabase;
-import liquibase.database.core.OracleDatabase;
+import liquibase.database.core.*;
 import liquibase.database.jvm.JdbcConnection;
+import liquibase.datatype.DataTypeFactory;
+import liquibase.datatype.LiquibaseDataType;
+import liquibase.datatype.core.*;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.executor.ExecutorService;
 import liquibase.logging.LogFactory;
 import liquibase.snapshot.*;
 import liquibase.statement.DatabaseFunction;
+import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
 import liquibase.util.StringUtils;
@@ -193,7 +195,9 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
             } else {
                 type.setColumnSize(columnMetadataResultSet.getInt("DATA_LENGTH"));
 
-                if (dataType.equalsIgnoreCase("NVARCHAR")) {
+                if (dataType.equalsIgnoreCase("NCLOB")) {
+                    //no attributes
+                } else if (dataType.equalsIgnoreCase("NVARCHAR")) {
                     //data length is in bytes but specified in chars
                     type.setColumnSize(type.getColumnSize() / 2);
                     type.setColumnSizeUnit(DataType.ColumnSizeUnit.CHAR);
@@ -222,6 +226,24 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
             }
         }
 
+        if (database instanceof MySQLDatabase && columnTypeName.equalsIgnoreCase("ENUM")) {
+            try {
+                List<String> enumValues = ExecutorService.getInstance().getExecutor(database).queryForList(new RawSqlStatement("SELECT DISTINCT SUBSTRING_INDEX(SUBSTRING_INDEX(SUBSTRING(COLUMN_TYPE, 7, LENGTH(COLUMN_TYPE) - 8), \"','\", 1 + units.i + tens.i * 10) , \"','\", -1)\n" +
+                        "FROM INFORMATION_SCHEMA.COLUMNS\n" +
+                        "CROSS JOIN (SELECT 0 AS i UNION SELECT 1 UNION SELECT 2 UNION SELECT 3 UNION SELECT 4 UNION SELECT 5 UNION SELECT 6 UNION SELECT 7 UNION SELECT 8 UNION SELECT 9) units\n" +
+                        "CROSS JOIN (SELECT 0 AS i UNION SELECT 1 UNION SELECT 2 UNION SELECT 3 UNION SELECT 4 UNION SELECT 5 UNION SELECT 6 UNION SELECT 7 UNION SELECT 8 UNION SELECT 9) tens\n" +
+                        "WHERE TABLE_NAME = '"+column.getRelation().getName()+"' \n" +
+                        "AND COLUMN_NAME = '"+column.getName()+"'"), String.class);
+                String enumClause = "";
+                for (String enumValue : enumValues) {
+                    enumClause += "'"+enumValue+"', ";
+                }
+                enumClause = enumClause.replaceFirst(", $", "");
+                return new DataType("ENUM("+enumClause+")");
+            } catch (DatabaseException e) {
+                LogFactory.getLogger().warning("Error fetching enum values", e);
+            }
+        }
         DataType.ColumnSizeUnit columnSizeUnit = DataType.ColumnSizeUnit.BYTE;
 
         int dataType = columnMetadataResultSet.getInt("DATA_TYPE");
@@ -239,6 +261,16 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
         Integer radix = columnMetadataResultSet.getInt("NUM_PREC_RADIX");
 
         Integer characterOctetLength = columnMetadataResultSet.getInt("CHAR_OCTET_LENGTH");
+
+        if (database instanceof DB2Database) {
+            String typeName = columnMetadataResultSet.getString("TYPE_NAME");
+            if (typeName.equalsIgnoreCase("DBCLOB") || typeName.equalsIgnoreCase("GRAPHIC") || typeName.equalsIgnoreCase("VARGRAPHIC")) {
+                if (columnSize != null) {
+                    columnSize = columnSize / 2; //Stored as double length chars
+                }
+            }
+        }
+
 
         DataType type = new DataType(columnTypeName);
         type.setDataTypeId(dataType);
@@ -262,6 +294,13 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
             }
         }
 
+        if (database instanceof OracleDatabase) {
+            if (columnMetadataResultSet.get("COLUMN_DEF") == null) {
+                columnMetadataResultSet.set("COLUMN_DEF", columnMetadataResultSet.get("DATA_DEFAULT"));
+            }
+
+        }
+
         Object val = columnMetadataResultSet.get("COLUMN_DEF");
         if (!(val instanceof String)) {
             return val;
@@ -282,14 +321,22 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
             return new DatabaseFunction(stringVal.substring(1, stringVal.length() - 1));
         }
 
-        int type = columnInfo.getType().getDataTypeId();
+        int type = Integer.MIN_VALUE;
+        if (columnInfo.getType().getDataTypeId() != null) {
+            type = columnInfo.getType().getDataTypeId();
+        }
         String typeName = columnInfo.getType().getTypeName();
         Scanner scanner = new Scanner(stringVal.trim());
         try {
+            LiquibaseDataType liquibaseDataType = DataTypeFactory.getInstance().from(columnInfo.getType());
             if (type == Types.ARRAY) {
                 return new DatabaseFunction(stringVal);
-            } else if (type == Types.BIGINT && scanner.hasNextBigInteger()) {
-                return scanner.nextBigInteger();
+            } else if ((liquibaseDataType instanceof BigIntType || type == Types.BIGINT)) {
+                if (scanner.hasNextBigInteger()) {
+                    return scanner.nextBigInteger();
+                } else {
+                    return new DatabaseFunction(stringVal);
+                }
             } else if (type == Types.BINARY) {
                 return new DatabaseFunction(stringVal.trim());
             } else if (type == Types.BIT) {
@@ -302,15 +349,21 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                 } else {
                     return new Integer(stringVal);
                 }
-            } else if (type == Types.BLOB) {
+            } else if (liquibaseDataType instanceof BlobType|| type == Types.BLOB) {
                 return new DatabaseFunction(stringVal);
-            } else if (type == Types.BOOLEAN && scanner.hasNextBoolean()) {
-                return scanner.nextBoolean();
-            } else if (type == Types.CHAR) {
+            } else if ((liquibaseDataType instanceof BooleanType || type == Types.BOOLEAN )) {
+                if (scanner.hasNextBoolean()) {
+                    return scanner.nextBoolean();
+                } else {
+                    return new DatabaseFunction(stringVal);
+                }
+            } else if (liquibaseDataType instanceof CharType || type == Types.CHAR) {
+                return stringVal;
+            } else if (liquibaseDataType instanceof ClobType || type == Types.CLOB) {
                 return stringVal;
             } else if (type == Types.DATALINK) {
                 return new DatabaseFunction(stringVal);
-            } else if (type == Types.DATE) {
+            } else if (liquibaseDataType instanceof DateType || type == Types.DATE) {
                 if (typeName.equalsIgnoreCase("year")) {
                     return stringVal.trim();
                 }
@@ -318,16 +371,32 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                     return stringVal;
                 }
                 return new java.sql.Date(getDateFormat(database).parse(stringVal.trim()).getTime());
-            } else if (type == Types.DECIMAL && scanner.hasNextBigDecimal()) {
-                return scanner.nextBigDecimal();
+            } else if ((liquibaseDataType instanceof DecimalType || type == Types.DECIMAL)) {
+                if (scanner.hasNextBigDecimal()) {
+                    return scanner.nextBigDecimal();
+                } else {
+                    return new DatabaseFunction(stringVal);
+                }
             } else if (type == Types.DISTINCT) {
                 return new DatabaseFunction(stringVal);
-            } else if (type == Types.DOUBLE && scanner.hasNextDouble()) {
-                return scanner.nextDouble();
-            } else if (type == Types.FLOAT && scanner.hasNextFloat()) {
-                return scanner.nextFloat();
-            } else if (type == Types.INTEGER && scanner.hasNextInt()) {
-                return scanner.nextInt();
+            } else if ((liquibaseDataType instanceof DoubleType || type == Types.DOUBLE)) {
+                if (scanner.hasNextDouble()) {
+                    return scanner.nextDouble();
+                } else {
+                    return new DatabaseFunction(stringVal);
+                }
+            } else if ((liquibaseDataType instanceof FloatType || type == Types.FLOAT)) {
+                if (scanner.hasNextFloat()) {
+                    return scanner.nextFloat();
+                } else {
+                    return new DatabaseFunction(stringVal);
+                }
+            } else if ((liquibaseDataType instanceof IntType || type == Types.INTEGER)) {
+                if (scanner.hasNextInt()) {
+                    return scanner.nextInt();
+                } else {
+                    return new DatabaseFunction(stringVal);
+                }
             } else if (type == Types.JAVA_OBJECT) {
                 return new DatabaseFunction(stringVal);
             } else if (type == Types.LONGNVARCHAR) {
@@ -336,17 +405,24 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                 return new DatabaseFunction(stringVal);
             } else if (type == Types.LONGVARCHAR) {
                 return stringVal;
-            } else if (type == Types.NCHAR) {
+            } else if (liquibaseDataType instanceof NCharType || type == Types.NCHAR) {
                 return stringVal;
             } else if (type == Types.NCLOB) {
                 return stringVal;
             } else if (type == Types.NULL) {
                 return null;
-            } else if (type == Types.NUMERIC && scanner.hasNextBigDecimal()) {
-                return scanner.nextBigDecimal();
-            } else if (type == Types.NVARCHAR) {
+            } else if ((liquibaseDataType instanceof NumberType || type == Types.NUMERIC)) {
+                if (scanner.hasNextBigDecimal()) {
+                    return scanner.nextBigDecimal();
+                } else {
+                    return new DatabaseFunction(stringVal);
+                }
+            } else if (liquibaseDataType instanceof NVarcharType || type == Types.NVARCHAR) {
                 return stringVal;
             } else if (type == Types.OTHER) {
+                if (database instanceof DB2Database && typeName.equalsIgnoreCase("DECFLOAT")) {
+                    return new BigDecimal(stringVal);
+                }
                 return new DatabaseFunction(stringVal);
             } else if (type == Types.REAL) {
                 return new BigDecimal(stringVal.trim());
@@ -354,27 +430,37 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                 return new DatabaseFunction(stringVal);
             } else if (type == Types.ROWID) {
                 return new DatabaseFunction(stringVal);
-            } else if (type == Types.SMALLINT && scanner.hasNextInt()) {
-                return scanner.nextInt();
+            } else if ((liquibaseDataType instanceof SmallIntType || type == Types.SMALLINT)) {
+                if (scanner.hasNextInt()) {
+                    return scanner.nextInt();
+                } else {
+                    return new DatabaseFunction(stringVal);
+                }
             } else if (type == Types.SQLXML) {
                 return new DatabaseFunction(stringVal);
             } else if (type == Types.STRUCT) {
                 return new DatabaseFunction(stringVal);
-            } else if (type == Types.TIME) {
+            } else if (liquibaseDataType instanceof TimeType || type == Types.TIME) {
                 if (zeroTime(stringVal)) {
                     return stringVal;
                 }
                 return new java.sql.Time(getTimeFormat(database).parse(stringVal).getTime());
-            } else if (type == Types.TIMESTAMP) {
+            } else if (liquibaseDataType instanceof DateTimeType || liquibaseDataType instanceof TimestampType || type == Types.TIMESTAMP) {
                 if (zeroTime(stringVal)) {
                     return stringVal;
                 }
                 return new Timestamp(getDateTimeFormat(database).parse(stringVal).getTime());
-            } else if (type == Types.TINYINT && scanner.hasNextInt()) {
-                return scanner.nextInt();
+            } else if ((liquibaseDataType instanceof TinyIntType || type == Types.TINYINT)) {
+                if (scanner.hasNextInt()) {
+                    return scanner.nextInt();
+                } else {
+                    return new DatabaseFunction(stringVal);
+                }
             } else if (type == Types.VARBINARY) {
                 return new DatabaseFunction(stringVal);
-            } else if (type == Types.VARCHAR) {
+            } else if (liquibaseDataType instanceof VarcharType || type == Types.VARCHAR) {
+                return stringVal;
+            } else if (database instanceof MySQLDatabase && typeName.toLowerCase().startsWith("enum")) {
                 return stringVal;
             } else {
                 LogFactory.getLogger().info("Unknown default value: value '" + stringVal + "' type " + typeName + " (" + type + "), assuming it is a function");
@@ -390,10 +476,17 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
     }
 
     protected DateFormat getDateFormat(Database database) {
-        return new SimpleDateFormat("yyyy-MM-dd");
+        if (database instanceof OracleDatabase) {
+            return new SimpleDateFormat("dd-MMM-yy");
+        } else {
+            return new SimpleDateFormat("yyyy-MM-dd");
+        }
     }
 
     protected DateFormat getTimeFormat(Database database) {
+        if (database instanceof DB2Database) {
+            return new SimpleDateFormat("HH.mm.ss");
+        }
         return new SimpleDateFormat("HH:mm:ss");
     }
 
@@ -403,6 +496,10 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
         }
         if (database instanceof MSSQLDatabase) {
             return new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS"); //no ms in mysql
+        }
+
+        if (database instanceof DB2Database) {
+            return new SimpleDateFormat("yyyy-MM-dd-HH.mm.ss.SSS");
         }
         return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
     }
