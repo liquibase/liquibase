@@ -71,7 +71,7 @@ public class DB2Database extends AbstractJdbcDatabase {
     public String getDefaultCatalogName() {
 
         if (defaultCatalogName != null) {
-            return defaultSchemaName;
+            return defaultCatalogName;
         }
 
         if (defaultSchemaName != null) {
