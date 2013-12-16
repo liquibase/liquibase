@@ -84,7 +84,7 @@ public class DropAllForeignKeyConstraintsChange extends AbstractChange {
         FindForeignKeyConstraintsStatement sql = new FindForeignKeyConstraintsStatement(getBaseTableCatalogName(), getBaseTableSchemaName(), getBaseTableName());
 
         try {
-            List<Map> results = executor.queryForList(sql);
+            List<Map<String, ?>> results = executor.queryForList(sql);
             Set<String> handledConstraints = new HashSet<String>();
 
             if (results != null && results.size() > 0) {

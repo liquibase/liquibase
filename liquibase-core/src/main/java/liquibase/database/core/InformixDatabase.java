@@ -323,7 +323,7 @@ public class InformixDatabase extends AbstractJdbcDatabase {
                 				false));
             }
 
-            List<Map> md5sumRS = ExecutorService.getInstance().getExecutor(this).queryForList(
+            List<Map<String, ?>> md5sumRS = ExecutorService.getInstance().getExecutor(this).queryForList(
             		new SelectFromDatabaseChangeLogStatement(
             				new SelectFromDatabaseChangeLogStatement.ByNotNullCheckSum(), "MD5SUM"));
             if (md5sumRS.size() > 0) {
@@ -372,7 +372,7 @@ public class InformixDatabase extends AbstractJdbcDatabase {
 	@Override
 	public String getViewDefinition(CatalogAndSchema schema, final String viewName) throws DatabaseException {
         schema = correctSchema(schema);
-		List<Map> retList = ExecutorService.getInstance().getExecutor(this).queryForList(new GetViewDefinitionStatement(schema.getCatalogName(), schema.getSchemaName(), viewName));
+		List<Map<String, ?>> retList = ExecutorService.getInstance().getExecutor(this).queryForList(new GetViewDefinitionStatement(schema.getCatalogName(), schema.getSchemaName(), viewName));
 		// building the view definition from the multiple rows
 		StringBuilder sb = new StringBuilder();
 		for (Map rowMap : retList) {

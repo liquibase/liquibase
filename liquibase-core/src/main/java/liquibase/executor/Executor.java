@@ -30,9 +30,9 @@ public interface Executor {
 
     List queryForList(SqlStatement sql, Class elementType, List<SqlVisitor> sqlVisitors) throws DatabaseException;
 
-    List<Map> queryForList(SqlStatement sql) throws DatabaseException;
+    List<Map<String, ?>> queryForList(SqlStatement sql) throws DatabaseException;
 
-    List<Map> queryForList(SqlStatement sql, List<SqlVisitor> sqlVisitors) throws DatabaseException;
+    List<Map<String, ?>> queryForList(SqlStatement sql, List<SqlVisitor> sqlVisitors) throws DatabaseException;
 
 
     /** Write methods */

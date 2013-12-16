@@ -201,7 +201,7 @@ public class LockServiceImplTest {
         expect(executor.queryForObject(isA(SelectFromDatabaseChangeLogLockStatement.class), eq(Boolean.class))).andReturn(true).anyTimes();
         expect(database.hasDatabaseChangeLogLockTable()).andReturn(true);
 
-        List<Map> resultList = new ArrayList<Map>();
+        List<Map<String, ?>> resultList = new ArrayList<Map<String, ?>>();
         Map<String, Object> result = new HashMap<String, Object>();
         result.put("ID", 1);
         result.put("LOCKED", true);
@@ -275,7 +275,7 @@ public class LockServiceImplTest {
         expect(executor.queryForObject(isA(SelectFromDatabaseChangeLogLockStatement.class), eq(Boolean.class))).andReturn(true).anyTimes();
         expect(database.hasDatabaseChangeLogLockTable()).andReturn(true);
 
-        List<Map> resultList = new ArrayList<Map>();
+        List<Map<String, ?>> resultList = new ArrayList<Map<String, ?>>();
         Map<String, Object> result = new HashMap<String, Object>();
         result.put("ID", 1);
         result.put("LOCKED", true);
@@ -312,7 +312,7 @@ public class LockServiceImplTest {
         expect(executor.queryForObject(isA(SelectFromDatabaseChangeLogLockStatement.class), eq(Boolean.class))).andReturn(true).anyTimes();
         expect(database.hasDatabaseChangeLogLockTable()).andReturn(true);
 
-        List<Map> resultList = new ArrayList<Map>();
+        List<Map<String, ?>> resultList = new ArrayList<Map<String, ?>>();
 
         expect(executor.queryForList(isA(SelectFromDatabaseChangeLogLockStatement.class))).andReturn(resultList);
 

@@ -161,12 +161,12 @@ public class LoggingExecutor extends AbstractExecutor implements Executor {
     }
 
     @Override
-    public List<Map> queryForList(SqlStatement sql) throws DatabaseException {
+    public List<Map<String, ?>> queryForList(SqlStatement sql) throws DatabaseException {
         return delegatedReadExecutor.queryForList(sql);
     }
 
     @Override
-    public List<Map> queryForList(SqlStatement sql, List<SqlVisitor> sqlVisitors) throws DatabaseException {
+    public List<Map<String, ?>> queryForList(SqlStatement sql, List<SqlVisitor> sqlVisitors) throws DatabaseException {
         return delegatedReadExecutor.queryForList(sql, sqlVisitors);
     }
 

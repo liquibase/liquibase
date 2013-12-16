@@ -36,7 +36,7 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
         UniqueConstraint exampleConstraint = (UniqueConstraint) example;
         Table table = exampleConstraint.getTable();
 
-        List<Map> metadata = listColumns(exampleConstraint, database);
+        List<Map<String, ?>> metadata = listColumns(exampleConstraint, database);
 
         if (metadata.size() == 0) {
             return null;
@@ -44,7 +44,7 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
         UniqueConstraint constraint = new UniqueConstraint();
         constraint.setTable(table);
         constraint.setName(example.getName());
-        for (Map<String, Object> col : metadata) {
+        for (Map<String, ?> col : metadata) {
             constraint.getColumns().add((String) col.get("COLUMN_NAME"));
         }
 
@@ -88,7 +88,7 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
         return ((JdbcDatabaseSnapshot) snapshot).getMetaData().getUniqueConstraints(schema.getCatalogName(), schema.getName(), table.getName());
     }
 
-    protected List<Map> listColumns(UniqueConstraint example, Database database) throws DatabaseException {
+    protected List<Map<String, ?>> listColumns(UniqueConstraint example, Database database) throws DatabaseException {
         Table table = example.getTable();
         Schema schema = table.getSchema();
         String name = example.getName();
@@ -145,9 +145,9 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
                     "JOIN sys.sysconstraints c ON c.constraintid = k.constraintid " +
                     "JOIN sys.systables t ON c.tableid = t.tableid "+
                     "WHERE c.constraintname='"+database.correctObjectName(name, UniqueConstraint.class)+"'";
-            List<Map> rows = ExecutorService.getInstance().getExecutor(database).queryForList(new RawSqlStatement(sql));
+            List<Map<String, ?>> rows = ExecutorService.getInstance().getExecutor(database).queryForList(new RawSqlStatement(sql));
 
-            List<Map> returnList = new ArrayList<Map>();
+            List<Map<String, ?>> returnList = new ArrayList<Map<String, ?>>();
             if (rows.size() == 0) {
                 return returnList;
             } else if (rows.size() > 1) {

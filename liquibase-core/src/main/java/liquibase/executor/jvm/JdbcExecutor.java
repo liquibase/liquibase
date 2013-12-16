@@ -170,14 +170,14 @@ public class JdbcExecutor extends AbstractExecutor implements Executor {
     }
 
     @Override
-    public List<Map> queryForList(SqlStatement sql) throws DatabaseException {
+    public List<Map<String, ?>> queryForList(SqlStatement sql) throws DatabaseException {
         return queryForList(sql, new ArrayList());
     }
 
     @Override
-    public List<Map> queryForList(SqlStatement sql, List<SqlVisitor> sqlVisitors) throws DatabaseException {
+    public List<Map<String, ?>> queryForList(SqlStatement sql, List<SqlVisitor> sqlVisitors) throws DatabaseException {
         //noinspection unchecked
-        return (List<Map>) query(sql, getColumnMapRowMapper(), sqlVisitors);
+        return (List<Map<String, ?>>) query(sql, getColumnMapRowMapper(), sqlVisitors);
     }
 
     @Override
