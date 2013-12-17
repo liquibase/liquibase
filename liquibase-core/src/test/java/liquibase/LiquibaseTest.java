@@ -122,7 +122,6 @@ public class LiquibaseTest {
         Liquibase liquibase = new Liquibase("com/example/test.xml", resourceAccessor, database);
 
         assertNotNull(liquibase.getLog());
-        assertEquals("Log level should default to INFO", LogLevel.INFO, liquibase.getLog().getLogLevel());
 
         assertEquals("com/example/test.xml", liquibase.getChangeLogFile());
 
