@@ -12,9 +12,11 @@ import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.parser.ChangeLogParser;
 import liquibase.parser.ChangeLogParserFactory;
+import liquibase.resource.CompositeResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 import liquibase.serializer.core.string.StringChangeLogSerializer;
 
+import liquibase.test.JUnitResourceAccessor;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -37,7 +39,7 @@ public class UpdateDataChangeTest {
                 "    </changeSet>\n" +
                 "</databaseChangeLog>\n";
 
-        ResourceAccessor resourceAccessor = getResource(xml);
+        ResourceAccessor resourceAccessor = new CompositeResourceAccessor(getResource(xml), new JUnitResourceAccessor());
         ChangeLogParser parser = ChangeLogParserFactory.getInstance().getParser("xml", resourceAccessor);
         DatabaseChangeLog changelog = parser.parse(null, new ChangeLogParameters(), resourceAccessor);
         ChangeSet changeSet = changelog.getChangeSet("a", "a", "1");
@@ -61,8 +63,12 @@ public class UpdateDataChangeTest {
             }
             @Override
             public InputStream getResourceAsStream(String file) throws IOException {
-                byte[] buf = xml.getBytes("UTF-8");
-                return new ByteArrayInputStream(buf);
+                if (file == null) {
+                    byte[] buf = xml.getBytes("UTF-8");
+                    return new ByteArrayInputStream(buf);
+                } else {
+                    return null;
+                }
             }
         };
     }
