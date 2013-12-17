@@ -1128,6 +1128,7 @@
 			<xsd:element ref="addColumn" maxOccurs="unbounded" />
 			<xsd:element ref="sql" maxOccurs="unbounded" />
 			<xsd:element ref="createProcedure" maxOccurs="unbounded" />
+            <xsd:element ref="dropProcedure" maxOccurs="unbounded" />
 			<xsd:element ref="sqlFile" maxOccurs="unbounded" />
 			<xsd:element ref="renameTable" maxOccurs="unbounded" />
 			<xsd:element ref="renameColumn" maxOccurs="unbounded" />
