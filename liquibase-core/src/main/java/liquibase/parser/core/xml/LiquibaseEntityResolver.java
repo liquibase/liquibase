@@ -50,6 +50,9 @@ public class LiquibaseEntityResolver implements EntityResolver2 {
    public InputSource resolveEntity(String name, String publicId, String baseURI, String systemId) throws SAXException, IOException {
        InputSource resolved=null;
        if(systemId!=null && systemId.toLowerCase().endsWith(".xsd")) {
+           if (systemId.startsWith("http://www.liquibase.org/xml/ns/migrator/")) {
+               systemId = systemId.replace("http://www.liquibase.org/xml/ns/migrator/", "http://www.liquibase.org/xml/ns/dbchangelog/");
+           }
             resolved=tryResolveLiquibaseSchema(systemId, publicId);
        }
        if(resolved==null && resourceAccessor!=null && basePath!=null && systemId!=null) {
@@ -70,6 +73,9 @@ public class LiquibaseEntityResolver implements EntityResolver2 {
                 return null;
             }
             String xsdFile = namespaceDetails.getLocalPath(systemId);
+            if (xsdFile == null) {
+                return null;
+            }
             try {
                 InputStream resourceAsStream = resourceAccessor.getResourceAsStream(xsdFile);
 
@@ -98,7 +104,11 @@ public class LiquibaseEntityResolver implements EntityResolver2 {
     private InputSource tryResolveFromResourceAccessor(String systemId) {
         String path=FilenameUtils.concat(basePath, systemId);
         try {
-            return new InputSource(resourceAccessor.getResourceAsStream(path));
+            InputStream resourceAsStream = resourceAccessor.getResourceAsStream(path);
+            if (resourceAsStream == null) {
+                return null;
+            }
+            return new InputSource(resourceAsStream);
         }catch(Exception ex) {
             return null;
         }

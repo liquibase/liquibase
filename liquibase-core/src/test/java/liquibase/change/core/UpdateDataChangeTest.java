@@ -27,7 +27,7 @@ public class UpdateDataChangeTest {
                 "<databaseChangeLog\n" + 
                 "        xmlns=\"http://www.liquibase.org/xml/ns/dbchangelog\"\n" + 
                 "        xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n" + 
-                "        xsi:schemaLocation=\"http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.0.xsd\">\n" + 
+                "        xsi:schemaLocation=\"http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd\">\n" +
                 "\n" + 
                 "    <changeSet id=\"1\" author=\"a\" logicalFilePath=\"a\">\n" + 
                 "        <update tableName=\"test\">\n" + 

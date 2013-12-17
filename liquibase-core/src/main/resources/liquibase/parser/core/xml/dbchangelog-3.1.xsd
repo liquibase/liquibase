@@ -868,7 +868,7 @@
 		<xsd:complexType mixed="true">
 			<xsd:sequence>
 				<xsd:element ref="column" minOccurs="1" maxOccurs="unbounded" />
-                <xsd:element name="where" minOccurs="0" maxOccurs="1" />
+                <xsd:element name="where" minOccurs="0" maxOccurs="1"/>
                 <xsd:element ref="whereParams" minOccurs="0" maxOccurs="1" />
 			</xsd:sequence>
 			<xsd:attributeGroup ref="tableNameAttribute" />
