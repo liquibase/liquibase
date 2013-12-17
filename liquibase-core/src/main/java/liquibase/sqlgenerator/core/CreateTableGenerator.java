@@ -264,12 +264,6 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
         }
 
 
-        if (database instanceof MySQLDatabase && mysqlTableOptionStartWith != null){
-        	LogFactory.getInstance().getLog().info("[MySQL] Using last startWith statement ("+mysqlTableOptionStartWith.toString()+") as table option.");
-        	sql += " "+((MySQLDatabase)database).getTableOptionAutoIncrementStartWithClause(mysqlTableOptionStartWith);
-        }
-
-
 //        if (StringUtils.trimToNull(tablespace) != null && database.supportsTablespaces()) {
 //            if (database instanceof MSSQLDatabase) {
 //                buffer.append(" ON ").append(tablespace);
