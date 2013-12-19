@@ -7,6 +7,7 @@ import liquibase.change.CheckSum;
 import liquibase.change.DbmsTargetedChange;
 import liquibase.change.core.EmptyChange;
 import liquibase.change.core.RawSQLChange;
+import liquibase.changelog.visitor.ChangeExecListener;
 import liquibase.database.Database;
 import liquibase.database.DatabaseList;
 import liquibase.database.ObjectQuotingStrategy;
@@ -225,13 +226,16 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
         return CheckSum.compute(stringToMD5.toString());
     }
 
+    public ExecType execute(DatabaseChangeLog databaseChangeLog, Database database) throws MigrationFailedException {
+        return execute(databaseChangeLog, null, database);
+    }
     /**
      * This method will actually execute each of the changes in the list against the
      * specified database.
      *
      * @return should change set be marked as ran
      */
-    public ExecType execute(DatabaseChangeLog databaseChangeLog, Database database) throws MigrationFailedException {
+    public ExecType execute(DatabaseChangeLog databaseChangeLog, ChangeExecListener listener, Database database) throws MigrationFailedException {
         if (validationFailed) {
             return ExecType.MARK_RAN;
         }
@@ -269,6 +273,9 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
                     preconditions.check(database, databaseChangeLog, this);
                 }
             } catch (PreconditionFailedException e) {
+                if (listener != null) {
+                    listener.preconditionFailed(e, preconditions.getOnFail());
+                }
                 StringBuffer message = new StringBuffer();
                 message.append(StreamUtil.getLineSeparator());
                 for (FailedPrecondition invalid : e.getFailedPreconditions()) {
@@ -294,6 +301,10 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
                     throw new UnexpectedLiquibaseException("Unexpected precondition onFail attribute: " + preconditions.getOnFail(), e);
                 }
             } catch (PreconditionErrorException e) {
+                if (listener != null) {
+                    listener.preconditionErrored(e, preconditions.getOnError());
+                }
+
                 StringBuffer message = new StringBuffer();
                 message.append(StreamUtil.getLineSeparator());
                 for (ErrorPrecondition invalid : e.getErrorPreconditions()) {
@@ -335,8 +346,14 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
                 log.debug("Reading ChangeSet: " + toString());
                 for (Change change : getChanges()) {
                     if ((!(change instanceof DbmsTargetedChange)) || DatabaseList.definitionMatches(((DbmsTargetedChange) change).getDbms(), database, true)) {
+                        if (listener != null) {
+                            listener.willRun(change, this, changeLog, database);
+                        }
                         database.executeStatements(change, databaseChangeLog, sqlVisitors);
                         log.info(change.getConfirmationMessage());
+                        if (listener != null) {
+                            listener.ran(change, this, changeLog, database);
+                        }
                     } else {
                         log.debug("Change " + change.getSerializedObjectName() + " not included for database " + database.getShortName());
                     }

@@ -57,7 +57,7 @@ public class PendingSQLWriter extends HTMLWriter {
                 String anchor = thisChangeSet.toString(false).replaceAll("\\W","_");
                 fileWriter.append("<a name='").append(anchor).append("'/>");
                 try {
-                    thisChangeSet.execute(databaseChangeLog, this.database);
+                    thisChangeSet.execute(databaseChangeLog, null, this.database);
                 } catch (MigrationFailedException e) {
                     fileWriter.append("EXECUTION ERROR: ").append(ChangeFactory.getInstance().getChangeMetaData(change).getDescription()).append(": ").append(e.getMessage()).append("\n\n");
                 }

@@ -1,10 +1,14 @@
 package liquibase.changelog.visitor;
 
+import liquibase.change.Change;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.ChangeSet.ExecType;
 import liquibase.changelog.ChangeSet.RunStatus;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.database.Database;
+import liquibase.exception.PreconditionErrorException;
+import liquibase.exception.PreconditionFailedException;
+import liquibase.precondition.core.PreconditionContainer;
 
 /**
  * An implementation of ChangeExecListener can be called by UpdateVisitor or
@@ -55,4 +59,11 @@ public interface ChangeExecListener {
    */
   void rolledBack(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database);
 
+    void preconditionFailed(PreconditionFailedException error, PreconditionContainer.FailOption onFail);
+
+    void preconditionErrored(PreconditionErrorException error, PreconditionContainer.ErrorOption onError);
+
+    void willRun(Change change, ChangeSet changeSet, DatabaseChangeLog changeLog, Database database);
+
+    void ran(Change change, ChangeSet changeSet, DatabaseChangeLog changeLog, Database database);
 }

@@ -37,7 +37,7 @@ public class UpdateVisitor implements ChangeSetVisitor {
         ChangeSet.RunStatus runStatus = this.database.getRunStatus(changeSet);
         log.debug("Running Changeset:" + changeSet);
         fireWillRun(changeSet, databaseChangeLog, database, runStatus);
-        ChangeSet.ExecType execType = changeSet.execute(databaseChangeLog, this.database);
+        ChangeSet.ExecType execType = changeSet.execute(databaseChangeLog, execListener, this.database);
         if (!runStatus.equals(ChangeSet.RunStatus.NOT_RAN)) {
             execType = ChangeSet.ExecType.RERAN;
         }
