@@ -16,13 +16,14 @@ public class UpdateVisitorTest {
         Database database = createMock(Database.class);
         database.setObjectQuotingStrategy(ObjectQuotingStrategy.LEGACY);
 
+        ChangeExecListener listener = createMock(ChangeExecListener.class);
+
         ChangeSet changeSet = createMock(ChangeSet.class);
         DatabaseChangeLog databaseChangeLog = new DatabaseChangeLog("test.xml");
-        expect(changeSet.execute(databaseChangeLog, database)).andReturn(ChangeSet.ExecType.EXECUTED);
+        expect(changeSet.execute(databaseChangeLog, listener, database)).andReturn(ChangeSet.ExecType.EXECUTED);
 
         expect(database.getRunStatus(changeSet)).andReturn(ChangeSet.RunStatus.NOT_RAN);
 
-        ChangeExecListener listener = createMock(ChangeExecListener.class);
         listener.willRun(changeSet, databaseChangeLog, database, RunStatus.NOT_RAN);
         expectLastCall();
         listener.ran(changeSet, databaseChangeLog, database, ChangeSet.ExecType.EXECUTED);
