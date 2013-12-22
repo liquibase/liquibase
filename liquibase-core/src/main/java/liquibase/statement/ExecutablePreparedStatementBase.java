@@ -18,6 +18,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.springframework.jdbc.support.JdbcUtils;
+
 import liquibase.change.ColumnConfig;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
@@ -80,6 +82,7 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
 	        for (Closeable closeable : closeables) {
                 StreamUtil.closeQuietly(closeable);
             }
+	        JdbcUtils.closeStatement(stmt);
 	    }
 	}
 
