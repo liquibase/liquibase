@@ -260,7 +260,8 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
 	private String getFileName(String fileName) {
 		//  Most of this method were copy-pasted from XMLChangeLogSAXHandler#handleIncludedChangeLog()
 		
-		String relativeBaseFileName = changeSet.getFilePath();
+		String relativeBaseFileName = changeSet.getChangeLog().getPhysicalFilePath();
+//		System.out.println("relativeBaseFileName: " + relativeBaseFileName);
 		
 		// workaround for FilenameUtils.normalize() returning null for relative paths like ../conf/liquibase.xml
 		String tempFile = FilenameUtils.concat(FilenameUtils.getFullPath(relativeBaseFileName), fileName);

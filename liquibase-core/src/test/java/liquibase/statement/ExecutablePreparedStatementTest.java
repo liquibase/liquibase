@@ -17,6 +17,7 @@ import java.util.List;
 
 import liquibase.change.ColumnConfig;
 import liquibase.changelog.ChangeSet;
+import liquibase.changelog.DatabaseChangeLog;
 import liquibase.database.PreparedStatementFactory;
 import liquibase.database.core.MockDatabase;
 import liquibase.database.jvm.JdbcConnection;
@@ -39,7 +40,10 @@ public class ExecutablePreparedStatementTest {
 		List<ColumnConfig> columns = Arrays.asList(columnConfig);
 		
 		ChangeSet changeSet = createMock(ChangeSet.class);
-		expect(changeSet.getFilePath()).andReturn("liquibase/util/foo/");
+		DatabaseChangeLog changeLog = createMock(DatabaseChangeLog.class);
+		expect(changeLog.getPhysicalFilePath()).andReturn("liquibase/util/foo/");
+		replay(changeLog);
+		expect(changeSet.getChangeLog()).andReturn(changeLog);
 		replay(changeSet);
 		
 		assertSetBinaryStream(columns, changeSet);
@@ -55,7 +59,10 @@ public class ExecutablePreparedStatementTest {
 		List<ColumnConfig> columns = Arrays.asList(columnConfig);
 		
 		ChangeSet changeSet = createMock(ChangeSet.class);
-		expect(changeSet.getFilePath()).andReturn("src/test/resources/liquibase/util/");
+		DatabaseChangeLog changeLog = createMock(DatabaseChangeLog.class);
+		expect(changeLog.getPhysicalFilePath()).andReturn("src/test/resources/liquibase/util/");
+		replay(changeLog);
+		expect(changeSet.getChangeLog()).andReturn(changeLog);
 		replay(changeSet);
 		
 		assertSetBinaryStream(columns, changeSet);
@@ -105,7 +112,10 @@ public class ExecutablePreparedStatementTest {
 		List<ColumnConfig> columns = Arrays.asList(columnConfig);
 		
 		ChangeSet changeSet = createMock(ChangeSet.class);
-		expect(changeSet.getFilePath()).andReturn("liquibase/util/");
+		DatabaseChangeLog changeLog = createMock(DatabaseChangeLog.class);
+		expect(changeLog.getPhysicalFilePath()).andReturn("liquibase/util/");
+		replay(changeLog);
+		expect(changeSet.getChangeLog()).andReturn(changeLog);
 		replay(changeSet);
 		
 		assertSetCharacterStream(columns, changeSet);
@@ -122,7 +132,10 @@ public class ExecutablePreparedStatementTest {
 		List<ColumnConfig> columns = Arrays.asList(columnConfig);
 		
 		ChangeSet changeSet = createMock(ChangeSet.class);
-		expect(changeSet.getFilePath()).andReturn("src/test/resources/liquibase/util/");
+		DatabaseChangeLog changeLog = createMock(DatabaseChangeLog.class);
+		expect(changeLog.getPhysicalFilePath()).andReturn("src/test/resources/liquibase/util/");
+		replay(changeLog);
+		expect(changeSet.getChangeLog()).andReturn(changeLog);
 		replay(changeSet);
 		
 		assertSetCharacterStream(columns, changeSet);
