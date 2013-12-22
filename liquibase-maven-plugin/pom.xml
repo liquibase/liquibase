@@ -35,6 +35,13 @@
             <groupId>org.apache.maven.shared</groupId>
             <artifactId>maven-plugin-testing-harness</artifactId>
         </dependency>
+        
+        <dependency>
+        	<groupId>org.apache.derby</groupId>
+        	<artifactId>derby</artifactId>
+        	<version>10.10.1.1</version>
+        	<scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
