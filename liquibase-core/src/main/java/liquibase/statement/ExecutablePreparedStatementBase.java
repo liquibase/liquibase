@@ -18,8 +18,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.springframework.jdbc.support.JdbcUtils;
-
 import liquibase.change.ColumnConfig;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
@@ -30,6 +28,7 @@ import liquibase.resource.CompositeResourceAccessor;
 import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 import liquibase.resource.UtfBomAwareReader;
+import liquibase.util.JdbcUtils;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
 import liquibase.util.file.FilenameUtils;
