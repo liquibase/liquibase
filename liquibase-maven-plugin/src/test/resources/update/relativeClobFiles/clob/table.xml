@@ -8,13 +8,11 @@
 		xmlns:xs="http://www.w3.org/2001/XMLSchema"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd"
-		logicalFilePath="logicalFilePath">
-
-	<include relativeToChangelogFile="true" file="clob/table.xml"/>
+		logicalFilePath="table">
 
 	<changeSet author="tgdmemae" id="table">
-		<insert tableName="T1">
-			<column name="TXT" valueClobFile="clob/val.txt"/>
-		</insert>
+		<createTable tableName="T1">
+			<column name="TXT" type="VARCHAR2(255)"></column>
+		</createTable>
 	</changeSet>
 </databaseChangeLog>
