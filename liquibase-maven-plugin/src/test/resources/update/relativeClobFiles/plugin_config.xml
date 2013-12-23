@@ -12,7 +12,6 @@
   <build>
     <plugins>
       <plugin>
-<!--         <groupId>org.liquibase</groupId> -->
         <artifactId>liquibase-maven-plugin</artifactId>
         <configuration>
           <verbose>true</verbose>
@@ -20,13 +19,6 @@
           <changeLogFile>src/test/resources/update/relativeClobFiles/relativeClobFileChangeLog.xml</changeLogFile>
           <driver>org.apache.derby.jdbc.EmbeddedDriver</driver>
           <url>jdbc:derby:memory:relativeClobFiles;create=true</url>
-<!--           <username>app</username> -->
-<!--           <password>sa</password> -->
-<!--           <url>jdbc:mysql://localhost/eformat</url> -->
-<!--           <username>root</username> -->
-          <outputDefaultCatalog>false</outputDefaultCatalog>
-          <outputDefaultSchema>false</outputDefaultSchema>
-		  <outputFileEncoding>UTF-8</outputFileEncoding>
 		  
 		  <!-- Test Stubs -->
 		  <project implementation="org.liquibase.maven.plugins.LiquibaseUpdateMojoExecutionTest_MavenProject"/>
