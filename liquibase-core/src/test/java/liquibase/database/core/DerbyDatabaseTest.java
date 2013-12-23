@@ -7,6 +7,7 @@ public class DerbyDatabaseTest extends TestCase {
     public void testGetDefaultDriver() {
         Database database = new DerbyDatabase();
 
+        assertEquals("com.vmware.sqlfire.jdbc.ClientDriver", database.getDefaultDriver("jdbc:sqlfire://localhost:1527/"));
         assertEquals("org.apache.derby.jdbc.EmbeddedDriver", database.getDefaultDriver("java:derby:liquibase;create=true"));
 
         assertNull(database.getDefaultDriver("jdbc:oracle://localhost;databaseName=liquibase"));
