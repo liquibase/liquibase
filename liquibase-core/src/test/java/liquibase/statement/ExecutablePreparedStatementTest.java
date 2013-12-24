@@ -22,6 +22,10 @@ import liquibase.database.PreparedStatementFactory;
 import liquibase.database.core.MockDatabase;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
+import liquibase.resource.ClassLoaderResourceAccessor;
+import liquibase.resource.CompositeResourceAccessor;
+import liquibase.resource.FileSystemResourceAccessor;
+import liquibase.resource.ResourceAccessor;
 
 import org.easymock.Capture;
 import org.easymock.IAnswer;
@@ -73,7 +77,7 @@ public class ExecutablePreparedStatementTest {
 		
 		InsertExecutablePreparedStatement statement =
 				new InsertExecutablePreparedStatement(
-						new MockDatabase(), "catalog", "schema", "table", columns, changeSet);
+						new MockDatabase(), "catalog", "schema", "table", columns, changeSet, createResourceAccessor());
 		
 		PreparedStatement stmt = createMock(PreparedStatement.class);
 
@@ -147,7 +151,7 @@ public class ExecutablePreparedStatementTest {
 		InsertExecutablePreparedStatement statement =
 				new InsertExecutablePreparedStatement(
 						new MockDatabase(),
-						"catalog", "schema", "table", columns, changeSet);
+						"catalog", "schema", "table", columns, changeSet, createResourceAccessor());
 		
 		PreparedStatement stmt = createMock(PreparedStatement.class);
 
@@ -173,5 +177,18 @@ public class ExecutablePreparedStatementTest {
 		replay(connection);
 		
 		statement.execute(new PreparedStatementFactory(connection));
+	}
+	
+	/**
+	 * Create a test context resource accessor.
+	 * @return
+	 */
+	private ResourceAccessor createResourceAccessor() {
+		ResourceAccessor resourceAccessor = new CompositeResourceAccessor(
+				new ClassLoaderResourceAccessor(),
+				new FileSystemResourceAccessor(),
+				new ClassLoaderResourceAccessor(Thread.currentThread().getContextClassLoader()));
+		
+		return resourceAccessor;
 	}
 }

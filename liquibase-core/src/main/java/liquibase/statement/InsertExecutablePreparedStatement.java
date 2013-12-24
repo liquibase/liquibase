@@ -6,14 +6,15 @@ import java.util.List;
 import liquibase.change.ColumnConfig;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
+import liquibase.resource.ResourceAccessor;
 
 /**
  * Handles INSERT Execution
  */
 public class InsertExecutablePreparedStatement extends ExecutablePreparedStatementBase {
 	
-	public InsertExecutablePreparedStatement(Database database, String catalogName, String schemaName, String tableName, List<ColumnConfig> columns, ChangeSet changeSet) {
-		super(database, catalogName, schemaName, tableName, columns, changeSet);
+	public InsertExecutablePreparedStatement(Database database, String catalogName, String schemaName, String tableName, List<ColumnConfig> columns, ChangeSet changeSet, ResourceAccessor resourceAccessor) {
+		super(database, catalogName, schemaName, tableName, columns, changeSet, resourceAccessor);
 	}
 
 	@Override
