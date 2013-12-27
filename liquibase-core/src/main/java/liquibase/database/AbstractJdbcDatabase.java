@@ -1,36 +1,10 @@
 package liquibase.database;
 
-import java.io.IOException;
-import java.io.Writer;
-import java.math.BigInteger;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.regex.Pattern;
-
 import liquibase.CatalogAndSchema;
 import liquibase.Contexts;
 import liquibase.change.Change;
-import liquibase.change.CheckSum;
-import liquibase.changelog.ChangeSet;
-import liquibase.changelog.DatabaseChangeLog;
-import liquibase.changelog.RanChangeSet;
-import liquibase.changelog.filter.ContextChangeSetFilter;
-import liquibase.changelog.filter.DbmsChangeSetFilter;
-import liquibase.database.core.OracleDatabase;
-import liquibase.database.core.PostgresDatabase;
-import liquibase.database.core.SQLiteDatabase;
-import liquibase.database.core.SybaseASADatabase;
-import liquibase.database.core.SybaseDatabase;
+import liquibase.changelog.*;
+import liquibase.database.core.*;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.diff.DiffGeneratorFactory;
 import liquibase.diff.DiffResult;
@@ -38,13 +12,7 @@ import liquibase.diff.compare.CompareControl;
 import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.changelog.DiffToChangeLog;
-import liquibase.exception.DatabaseException;
-import liquibase.exception.DatabaseHistoryException;
-import liquibase.exception.DateParseException;
-import liquibase.exception.LiquibaseException;
-import liquibase.exception.RollbackImpossibleException;
-import liquibase.exception.StatementNotSupportedOnDatabaseException;
-import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.exception.*;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.logging.LogFactory;
@@ -55,22 +23,25 @@ import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.sql.Sql;
 import liquibase.sql.visitor.SqlVisitor;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
-import liquibase.statement.*;
+import liquibase.statement.DatabaseFunction;
+import liquibase.statement.SequenceCurrentValueFunction;
+import liquibase.statement.SequenceNextValueFunction;
+import liquibase.statement.SqlStatement;
 import liquibase.statement.core.*;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.core.Catalog;
-import liquibase.structure.core.Column;
-import liquibase.structure.core.ForeignKey;
-import liquibase.structure.core.Index;
-import liquibase.structure.core.PrimaryKey;
-import liquibase.structure.core.Schema;
-import liquibase.structure.core.Sequence;
-import liquibase.structure.core.Table;
-import liquibase.structure.core.UniqueConstraint;
-import liquibase.structure.core.View;
+import liquibase.structure.core.*;
 import liquibase.util.ISODateFormat;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
+
+import java.io.IOException;
+import java.io.Writer;
+import java.math.BigInteger;
+import java.sql.SQLException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.regex.Pattern;
 
 
 /**
@@ -101,12 +72,6 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     protected List<String> unmodifiableDataTypes = new ArrayList<String>();
 
-    private List<RanChangeSet> ranChangeSetList;
-
-    protected void resetRanChangeSetList() {
-        ranChangeSetList = null;
-    }
-
     private static Pattern CREATE_VIEW_AS_PATTERN = Pattern.compile("^CREATE\\s+.*?VIEW\\s+.*?AS\\s+", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
     private String databaseChangeLogTableName = System.getProperty("liquibase.databaseChangeLogTableName") == null ? "DatabaseChangeLog".toUpperCase() : System.getProperty("liquibase.databaseChangeLogTableName");
@@ -115,7 +80,6 @@ public abstract class AbstractJdbcDatabase implements Database {
     private String liquibaseSchemaName = System.getProperty("liquibase.schemaName");
     private String liquibaseCatalogName = System.getProperty("liquibase.catalogName");
 
-    private Integer lastChangeSetSequenceValue;
     private Boolean previousAutoCommit;
 
     private boolean canCacheLiquibaseTableInfo = false;
@@ -614,8 +578,6 @@ public abstract class AbstractJdbcDatabase implements Database {
         return returnString.toString().replaceFirst(" \\|\\| $", "");
     }
 
-// ------- DATABASECHANGELOG / DATABASECHANGELOGLOCK METHODS ---- //
-
     /**
      * @see liquibase.database.Database#getDatabaseChangeLogTableName()
      */
@@ -671,6 +633,7 @@ public abstract class AbstractJdbcDatabase implements Database {
      *
      * @param updateExistingNullChecksums
      * @param contexts
+     * @deprecated Use methods on {@link liquibase.changelog.ChangeLogService}
      */
     @Override
     public void checkDatabaseChangeLogTable(final boolean updateExistingNullChecksums, final DatabaseChangeLog databaseChangeLog, final String... contexts) throws DatabaseException {
@@ -683,133 +646,16 @@ public abstract class AbstractJdbcDatabase implements Database {
          *
          * @param updateExistingNullChecksums
          * @param contexts
+         * @deprecated Use methods on {@link liquibase.changelog.ChangeLogService}
          */
     @Override
 	public void checkDatabaseChangeLogTable(final boolean updateExistingNullChecksums, final DatabaseChangeLog databaseChangeLog, final Contexts contexts) throws DatabaseException {
-        if (updateExistingNullChecksums && databaseChangeLog == null) {
-            throw new DatabaseException("changeLog parameter is required if updating existing checksums");
-        }
-
-        Executor executor = ExecutorService.getInstance().getExecutor(this);
-
-        Table changeLogTable = null;
-        try {
-            changeLogTable = SnapshotGeneratorFactory.getInstance().getDatabaseChangeLogTable(new SnapshotControl(this, Table.class, Column.class), this);
-        } catch (LiquibaseException e) {
-            throw new UnexpectedLiquibaseException(e);
-        }
-
-        List<SqlStatement> statementsToExecute = new ArrayList<SqlStatement>();
-
-        boolean changeLogCreateAttempted = false;
-        if (changeLogTable != null) {
-            boolean hasDescription = changeLogTable.getColumn("DESCRIPTION") != null;
-            boolean hasComments = changeLogTable.getColumn("COMMENTS") != null;
-            boolean hasTag = changeLogTable.getColumn("TAG") != null;
-            boolean hasLiquibase = changeLogTable.getColumn("LIQUIBASE") != null;
-            boolean liquibaseColumnNotRightSize = false;
-            if (!connection.getDatabaseProductName().equals("SQLite")) {
-                Integer columnSize = changeLogTable.getColumn("LIQUIBASE").getType().getColumnSize();
-                liquibaseColumnNotRightSize = columnSize != null && columnSize != 20;
-            }
-            boolean hasOrderExecuted = changeLogTable.getColumn("ORDEREXECUTED") != null;
-            boolean checksumNotRightSize = false;
-            if (!connection.getDatabaseProductName().equals("SQLite")) {
-                Integer columnSize = changeLogTable.getColumn("MD5SUM").getType().getColumnSize();
-                checksumNotRightSize = columnSize != null && columnSize != 35;
-            }
-            boolean hasExecTypeColumn = changeLogTable.getColumn("EXECTYPE") != null;
-
-            if (!hasDescription) {
-                executor.comment("Adding missing databasechangelog.description column");
-                statementsToExecute.add(new AddColumnStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "DESCRIPTION", "VARCHAR(255)", null));
-            }
-            if (!hasTag) {
-                executor.comment("Adding missing databasechangelog.tag column");
-                statementsToExecute.add(new AddColumnStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "TAG", "VARCHAR(255)", null));
-            }
-            if (!hasComments) {
-                executor.comment("Adding missing databasechangelog.comments column");
-                statementsToExecute.add(new AddColumnStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "COMMENTS", "VARCHAR(255)", null));
-            }
-            if (!hasLiquibase) {
-                executor.comment("Adding missing databasechangelog.liquibase column");
-                statementsToExecute.add(new AddColumnStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "LIQUIBASE", "VARCHAR(255)", null));
-            }
-            if (!hasOrderExecuted) {
-                executor.comment("Adding missing databasechangelog.orderexecuted column");
-                statementsToExecute.add(new AddColumnStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "ORDEREXECUTED", "INT", null));
-                statementsToExecute.add(new UpdateStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName()).addNewColumnValue("ORDEREXECUTED", -1));
-                statementsToExecute.add(new SetNullableStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "ORDEREXECUTED", "INT", false));
-            }
-            if (checksumNotRightSize) {
-                executor.comment("Modifying size of databasechangelog.md5sum column");
-
-                statementsToExecute.add(new ModifyDataTypeStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "MD5SUM", "VARCHAR(35)"));
-            }
-            if (liquibaseColumnNotRightSize) {
-                executor.comment("Modifying size of databasechangelog.liquibase column");
-
-                statementsToExecute.add(new ModifyDataTypeStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "LIQUIBASE", "VARCHAR(20)"));
-            }
-            if (!hasExecTypeColumn) {
-                executor.comment("Adding missing databasechangelog.exectype column");
-                statementsToExecute.add(new AddColumnStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "EXECTYPE", "VARCHAR(10)", null));
-                statementsToExecute.add(new UpdateStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName()).addNewColumnValue("EXECTYPE", "EXECUTED"));
-                statementsToExecute.add(new SetNullableStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "EXECTYPE", "VARCHAR(10)", false));
-            }
-
-            List<Map<String, ?>> md5sumRS = ExecutorService.getInstance().getExecutor(this).queryForList(new SelectFromDatabaseChangeLogStatement(new SelectFromDatabaseChangeLogStatement.ByNotNullCheckSum(), "MD5SUM"));
-            if (md5sumRS.size() > 0) {
-                String md5sum = md5sumRS.get(0).get("MD5SUM").toString();
-                if (!md5sum.startsWith(CheckSum.getCurrentVersion() + ":")) {
-                    executor.comment("DatabaseChangeLog checksums are an incompatible version.  Setting them to null so they will be updated on next database update");
-                    statementsToExecute.add(new RawSqlStatement("UPDATE " + escapeTableName(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName()) + " SET MD5SUM=null"));
-                }
-            }
-
-
-        } else if (!changeLogCreateAttempted) {
-            executor.comment("Create Database Change Log Table");
-            SqlStatement createTableStatement = new CreateDatabaseChangeLogTableStatement();
-            if (!canCreateChangeLogTable()) {
-                throw new DatabaseException("Cannot create " + escapeTableName(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName()) + " table for your database.\n\n" +
-                        "Please construct it manually using the following SQL as a base and re-run Liquibase:\n\n" +
-                        createTableStatement);
-            }
-            // If there is no table in the database for recording change history create one.
-            statementsToExecute.add(createTableStatement);
-            LogFactory.getLogger().info("Creating database history table with name: " + escapeTableName(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName()));
-//                }
-        }
-
-        for (SqlStatement sql : statementsToExecute) {
-            if (SqlGeneratorFactory.getInstance().supports(sql, this)) {
-                executor.execute(sql);
-                this.commit();
-            } else {
-                LogFactory.getLogger().info("Cannot run "+sql.getClass().getSimpleName()+" on "+this.getShortName()+" when checking databasechangelog table");
-            }
-        }
-
-        if (updateExistingNullChecksums) {
-            for (RanChangeSet ranChangeSet : this.getRanChangeSetList()) {
-                if (ranChangeSet.getLastCheckSum() == null) {
-                    ChangeSet changeSet = databaseChangeLog.getChangeSet(ranChangeSet);
-                    if (changeSet != null && new ContextChangeSetFilter(contexts).accepts(changeSet) && new DbmsChangeSetFilter(this).accepts(changeSet)) {
-                        LogFactory.getLogger().debug("Updating null or out of date checksum on changeSet " + changeSet + " to correct value");
-                        executor.execute(new UpdateChangeSetChecksumStatement(changeSet));
-                    }
-                }
-            }
-            commit();
-            this.ranChangeSetList = null;
-        }
+        ChangeLogServiceFactory.getInstance().getChangeLogService(this).checkDatabaseChangeLogTable(updateExistingNullChecksums, databaseChangeLog, contexts);
     }
 
 
     protected boolean canCreateChangeLogTable() throws DatabaseException {
-        return true;
+        return ((TableBasedChangeLogService) ChangeLogServiceFactory.getInstance().getChangeLogService(this)).canCreateChangeLogTable();
     }
 
     @Override
@@ -821,12 +667,13 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     @Override
     public boolean hasDatabaseChangeLogTable() throws DatabaseException {
+
         if (hasDatabaseChangeLogTable) {
             return true;
         }
         boolean hasTable = false;
         try {
-            hasTable = SnapshotGeneratorFactory.getInstance().hasDatabaseChangeLogTable(this);
+            hasTable = ChangeLogServiceFactory.getInstance().getChangeLogService(this).hasDatabaseChangeLogTable();
         } catch (LiquibaseException e) {
             throw new UnexpectedLiquibaseException(e);
         }
@@ -1082,35 +929,17 @@ public abstract class AbstractJdbcDatabase implements Database {
         return false;
     }
 
-    // ------- DATABASE TAGGING METHODS ---- //
-
     /**
      * Tags the database changelog with the given string.
      */
     @Override
     public void tag(final String tagString) throws DatabaseException {
-        Executor executor = ExecutorService.getInstance().getExecutor(this);
-        try {
-            int totalRows = ExecutorService.getInstance().getExecutor(this).queryForInt(new SelectFromDatabaseChangeLogStatement("COUNT(*)"));
-            if (totalRows == 0) {
-                ChangeSet emptyChangeSet = new ChangeSet(String.valueOf(new Date().getTime()), "liquibase", false, false, "liquibase-internal", null, null, quotingStrategy, null);
-                this.markChangeSetExecStatus(emptyChangeSet, ChangeSet.ExecType.EXECUTED);
-            }
-
-//            Timestamp lastExecutedDate = (Timestamp) this.getExecutor().queryForObject(createChangeToTagSQL(), Timestamp.class);
-            executor.execute(new TagDatabaseStatement(tagString));
-            this.commit();
-
-            getRanChangeSetList().get(getRanChangeSetList().size() - 1).setTag(tagString);
-        } catch (Exception e) {
-            throw new DatabaseException(e);
-        }
+        ChangeLogServiceFactory.getInstance().getChangeLogService(this).tag(tagString);
     }
 
     @Override
     public boolean doesTagExist(final String tag) throws DatabaseException {
-        int count = ExecutorService.getInstance().getExecutor(this).queryForInt(new SelectFromDatabaseChangeLogStatement(new SelectFromDatabaseChangeLogStatement.ByTag(tag), "COUNT(*)"));
-        return count > 0;
+        return ChangeLogServiceFactory.getInstance().getChangeLogService(this).doesTagExist(tag);
     }
 
     @Override
@@ -1309,55 +1138,12 @@ public abstract class AbstractJdbcDatabase implements Database {
      */
     @Override
     public ChangeSet.RunStatus getRunStatus(final ChangeSet changeSet) throws DatabaseException, DatabaseHistoryException {
-        if (!hasDatabaseChangeLogTable()) {
-            return ChangeSet.RunStatus.NOT_RAN;
-        }
-
-        RanChangeSet foundRan = getRanChangeSet(changeSet);
-
-        if (foundRan == null) {
-            return ChangeSet.RunStatus.NOT_RAN;
-        } else {
-            if (foundRan.getLastCheckSum() == null) {
-                try {
-                    LogFactory.getLogger().info("Updating NULL md5sum for " + changeSet.toString());
-                    ExecutorService.getInstance().getExecutor(this).execute(new RawSqlStatement("UPDATE " + escapeTableName(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName()) + " SET MD5SUM='" + changeSet.generateCheckSum().toString() + "' WHERE ID='" + changeSet.getId() + "' AND AUTHOR='" + changeSet.getAuthor() + "' AND FILENAME='" + changeSet.getFilePath() + "'"));
-
-                    this.commit();
-                } catch (DatabaseException e) {
-                    throw new DatabaseException(e);
-                }
-
-                return ChangeSet.RunStatus.ALREADY_RAN;
-            } else {
-                if (foundRan.getLastCheckSum().equals(changeSet.generateCheckSum())) {
-                    return ChangeSet.RunStatus.ALREADY_RAN;
-                } else {
-                    if (changeSet.shouldRunOnChange()) {
-                        return ChangeSet.RunStatus.RUN_AGAIN;
-                    } else {
-                        return ChangeSet.RunStatus.INVALID_MD5SUM;
-//                        throw new DatabaseHistoryException("MD5 Check for " + changeSet.toString() + " failed");
-                    }
-                }
-            }
-        }
+        return ChangeLogServiceFactory.getInstance().getChangeLogService(this).getRunStatus(changeSet);
     }
 
     @Override
     public RanChangeSet getRanChangeSet(final ChangeSet changeSet) throws DatabaseException, DatabaseHistoryException {
-        if (!hasDatabaseChangeLogTable()) {
-            return null;
-        }
-
-        RanChangeSet foundRan = null;
-        for (RanChangeSet ranChange : getRanChangeSetList()) {
-            if (ranChange.isSameAs(changeSet)) {
-                foundRan = ranChange;
-                break;
-            }
-        }
-        return foundRan;
+        return ChangeLogServiceFactory.getInstance().getChangeLogService(this).getRanChangeSet(changeSet);
     }
 
     /**
@@ -1365,56 +1151,12 @@ public abstract class AbstractJdbcDatabase implements Database {
      */
     @Override
     public List<RanChangeSet> getRanChangeSetList() throws DatabaseException {
-        if (this.ranChangeSetList != null) {
-            return this.ranChangeSetList;
-        }
-
-        String databaseChangeLogTableName = escapeTableName(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName());
-        ranChangeSetList = new ArrayList<RanChangeSet>();
-        if (hasDatabaseChangeLogTable()) {
-            LogFactory.getLogger().info("Reading from " + databaseChangeLogTableName);
-            SqlStatement select = new SelectFromDatabaseChangeLogStatement("FILENAME", "AUTHOR", "ID", "MD5SUM", "DATEEXECUTED", "ORDEREXECUTED", "TAG", "EXECTYPE", "DESCRIPTION", "COMMENTS").setOrderBy("DATEEXECUTED ASC", "ORDEREXECUTED ASC");
-            List<Map<String, ?>> results = ExecutorService.getInstance().getExecutor(this).queryForList(select);
-            for (Map rs : results) {
-                String fileName = rs.get("FILENAME").toString();
-                String author = rs.get("AUTHOR").toString();
-                String id = rs.get("ID").toString();
-                String md5sum = rs.get("MD5SUM") == null ? null : rs.get("MD5SUM").toString();
-                String description = rs.get("DESCRIPTION") == null ? null : rs.get("DESCRIPTION").toString();
-                String comments = rs.get("COMMENTS") == null ? null : rs.get("COMMENTS").toString();
-                Object tmpDateExecuted = rs.get("DATEEXECUTED");
-                Date dateExecuted = null;
-                if (tmpDateExecuted instanceof Date) {
-                    dateExecuted = (Date) tmpDateExecuted;
-                } else {
-                    DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                    try {
-                        dateExecuted = df.parse((String) tmpDateExecuted);
-                    } catch (ParseException e) {
-                    }
-                }
-                String tag = rs.get("TAG") == null ? null : rs.get("TAG").toString();
-                String execType = rs.get("EXECTYPE") == null ? null : rs.get("EXECTYPE").toString();
-                try {
-                    RanChangeSet ranChangeSet = new RanChangeSet(fileName, id, author, CheckSum.parse(md5sum), dateExecuted, tag, ChangeSet.ExecType.valueOf(execType), description, comments);
-                    ranChangeSetList.add(ranChangeSet);
-                } catch (IllegalArgumentException e) {
-                    LogFactory.getLogger().severe("Unknown EXECTYPE from database: " + execType);
-                    throw e;
-                }
-            }
-        }
-        return ranChangeSetList;
+        return ChangeLogServiceFactory.getInstance().getChangeLogService(this).getRanChangeSetList();
     }
 
     @Override
     public Date getRanDate(final ChangeSet changeSet) throws DatabaseException, DatabaseHistoryException {
-        RanChangeSet ranChange = getRanChangeSet(changeSet);
-        if (ranChange == null) {
-            return null;
-        } else {
-            return ranChange.getDateExecuted();
-        }
+        return ChangeLogServiceFactory.getInstance().getChangeLogService(this).getRanDate(changeSet);
     }
 
     /**
@@ -1423,20 +1165,12 @@ public abstract class AbstractJdbcDatabase implements Database {
      */
     @Override
     public void markChangeSetExecStatus(final ChangeSet changeSet, final ChangeSet.ExecType execType) throws DatabaseException {
-
-
-        ExecutorService.getInstance().getExecutor(this).execute(new MarkChangeSetRanStatement(changeSet, execType));
-        commit();
-        getRanChangeSetList().add(new RanChangeSet(changeSet, execType));
+        ChangeLogServiceFactory.getInstance().getChangeLogService(this).markChangeSetExecStatus(changeSet, execType);
     }
 
     @Override
     public void removeRanStatus(final ChangeSet changeSet) throws DatabaseException {
-
-        ExecutorService.getInstance().getExecutor(this).execute(new RemoveChangeSetRanStatusStatement(changeSet));
-        commit();
-
-        getRanChangeSetList().remove(new RanChangeSet(changeSet));
+        ChangeLogServiceFactory.getInstance().getChangeLogService(this).removeRanStatus(changeSet);
     }
 
     @Override
@@ -1609,15 +1343,7 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     @Override
     public int getNextChangeSetSequenceValue() throws LiquibaseException {
-        if (lastChangeSetSequenceValue == null) {
-            if (getConnection() == null) {
-                lastChangeSetSequenceValue = 0;
-            } else {
-                lastChangeSetSequenceValue = ExecutorService.getInstance().getExecutor(this).queryForInt(new GetNextChangeSetSequenceValueStatement());
-            }
-        }
-
-        return ++lastChangeSetSequenceValue;
+        return ChangeLogServiceFactory.getInstance().getChangeLogService(this).getNextChangeSetSequenceValue();
     }
 
     @Override
@@ -1640,7 +1366,7 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     @Override
     public void resetInternalState() {
-        this.ranChangeSetList = null;
+        ChangeLogServiceFactory.getInstance().getChangeLogService(this).reset();
         this.hasDatabaseChangeLogLockTable = false;
     }
 
