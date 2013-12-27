@@ -62,7 +62,11 @@ public class UnknownType extends LiquibaseDataType {
         }
 
         if (database instanceof OracleDatabase) {
-            if (getName().equalsIgnoreCase("LONG") || getName().equalsIgnoreCase("NCLOB")) {
+            if (getName().equalsIgnoreCase("LONG")
+                    || getName().equalsIgnoreCase("NCLOB")
+                    || getName().equalsIgnoreCase("BFILE")
+                    || getName().equalsIgnoreCase("ROWID")
+                    ) {
                 parameters = new Object[0];
             } else if (getName().toUpperCase().startsWith("INTERVAL ")) {
                 return new DatabaseDataType(getName().replaceAll("\\(\\d+\\)", ""));
