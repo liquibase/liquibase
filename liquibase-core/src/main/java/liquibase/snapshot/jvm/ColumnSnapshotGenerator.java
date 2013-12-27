@@ -197,7 +197,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
 
                 if (dataType.equalsIgnoreCase("NCLOB")) {
                     //no attributes
-                } else if (dataType.equalsIgnoreCase("NVARCHAR")) {
+                } else if (dataType.equalsIgnoreCase("NVARCHAR") || dataType.equalsIgnoreCase("NCHAR")) {
                     //data length is in bytes but specified in chars
                     type.setColumnSize(type.getColumnSize() / 2);
                     type.setColumnSizeUnit(DataType.ColumnSizeUnit.CHAR);
