@@ -8,6 +8,11 @@ import liquibase.exception.DatabaseException;
 import liquibase.statement.DatabaseFunction;
 import liquibase.database.Database;
 
+import java.sql.Timestamp;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+
 @DataTypeInfo(name="time", aliases = {"java.sql.Types.TIME", "java.sql.Time"}, minParameters = 0, maxParameters = 0, priority = LiquibaseDataType.PRIORITY_DEFAULT)
 public class TimeType  extends LiquibaseDataType {
 
@@ -46,6 +51,10 @@ public class TimeType  extends LiquibaseDataType {
 
     @Override
     public Object sqlToObject(String value, Database database) {
+        if (zeroTime(value)) {
+            return value;
+        }
+
         if (database instanceof DB2Database) {
             return value.replaceFirst("^\"SYSIBM\".\"TIME\"\\('", "").replaceFirst("'\\)", "");
         }
@@ -53,7 +62,30 @@ public class TimeType  extends LiquibaseDataType {
             return value.replaceFirst("^TIME\\('", "").replaceFirst("'\\)", "");
         }
 
-        return super.sqlToObject(value, database);
+        try {
+            DateFormat timeFormat = getTimeFormat(database);
+
+            if (database instanceof OracleDatabase && value.matches("to_date\\('\\d+:\\d+:\\d+', 'HH24:MI:SS'\\)")) {
+                timeFormat = new SimpleDateFormat("HH:mm:s");
+                value = value.replaceFirst(".*?'", "").replaceFirst("',.*","");
+            }
+
+            return new java.sql.Time(timeFormat.parse(value).getTime());
+        } catch (ParseException e) {
+            return new DatabaseFunction(value);
+        }
     }
+
+    private boolean zeroTime(String stringVal) {
+        return stringVal.replace("-","").replace(":", "").replace(" ","").replace("0","").equals("");
+    }
+
+    protected DateFormat getTimeFormat(Database database) {
+        if (database instanceof DB2Database) {
+            return new SimpleDateFormat("HH.mm.ss");
+        }
+        return new SimpleDateFormat("HH:mm:ss");
+    }
+
 
 }
