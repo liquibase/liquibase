@@ -18,8 +18,6 @@ public interface ChangeLogService extends PrioritizedService {
 
     void reset();
 
-    public boolean hasDatabaseChangeLogTable() throws DatabaseException;
-
     public void checkDatabaseChangeLogTable(final boolean updateExistingNullChecksums, final DatabaseChangeLog databaseChangeLog, final Contexts contexts) throws DatabaseException;
 
     public List<RanChangeSet> getRanChangeSetList() throws DatabaseException;

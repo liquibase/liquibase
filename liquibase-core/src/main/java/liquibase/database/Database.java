@@ -139,8 +139,6 @@ public interface Database extends PrioritizedService {
      */
     String getConcatSql(String... values);
 
-    boolean hasDatabaseChangeLogTable() throws DatabaseException;
-
     public void setCanCacheLiquibaseTableInfo(boolean canCacheLiquibaseTableInfo);
 
     boolean hasDatabaseChangeLogLockTable() throws DatabaseException;

@@ -83,7 +83,6 @@ public abstract class AbstractJdbcDatabase implements Database {
     private Boolean previousAutoCommit;
 
     private boolean canCacheLiquibaseTableInfo = false;
-    private boolean hasDatabaseChangeLogTable = false;
     private boolean hasDatabaseChangeLogLockTable = false;
     private boolean isDatabaseChangeLogLockTableInitialized = false;
 
@@ -661,26 +660,7 @@ public abstract class AbstractJdbcDatabase implements Database {
     @Override
     public void setCanCacheLiquibaseTableInfo(final boolean canCacheLiquibaseTableInfo) {
         this.canCacheLiquibaseTableInfo = canCacheLiquibaseTableInfo;
-        hasDatabaseChangeLogTable = false;
         hasDatabaseChangeLogLockTable = false;
-    }
-
-    @Override
-    public boolean hasDatabaseChangeLogTable() throws DatabaseException {
-
-        if (hasDatabaseChangeLogTable) {
-            return true;
-        }
-        boolean hasTable = false;
-        try {
-            hasTable = ChangeLogServiceFactory.getInstance().getChangeLogService(this).hasDatabaseChangeLogTable();
-        } catch (LiquibaseException e) {
-            throw new UnexpectedLiquibaseException(e);
-        }
-        if (canCacheLiquibaseTableInfo) {
-            hasDatabaseChangeLogTable = hasTable;
-        }
-        return hasTable;
     }
 
     @Override

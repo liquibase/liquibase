@@ -310,11 +310,6 @@ public class MockDatabase implements Database, InternalDatabase {
     }
 
     @Override
-    public boolean hasDatabaseChangeLogTable() {
-        return false;
-    }
-
-    @Override
     public boolean hasDatabaseChangeLogLockTable() {
         return false;
     }

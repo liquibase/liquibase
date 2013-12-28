@@ -80,7 +80,6 @@ public class TableBasedChangeLogService implements ChangeLogService {
         ranChangeSetList = null;
     }
 
-    @Override
     public boolean hasDatabaseChangeLogTable() throws DatabaseException {
         try {
             return SnapshotGeneratorFactory.getInstance().hasDatabaseChangeLogTable(database);
