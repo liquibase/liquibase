@@ -625,34 +625,6 @@ public abstract class AbstractJdbcDatabase implements Database {
         this.liquibaseTablespaceName = tablespace;
     }
 
-    /**
-     * This method will check the database ChangeLog table used to keep track of
-     * the changes in the file. If the table does not exist it will create one
-     * otherwise it will not do anything besides outputting a log message.
-     *
-     * @param updateExistingNullChecksums
-     * @param contexts
-     * @deprecated Use methods on {@link liquibase.changelog.ChangeLogService}
-     */
-    @Override
-    public void checkDatabaseChangeLogTable(final boolean updateExistingNullChecksums, final DatabaseChangeLog databaseChangeLog, final String... contexts) throws DatabaseException {
-        checkDatabaseChangeLogTable(updateExistingNullChecksums, databaseChangeLog, new Contexts(contexts));
-    }
-        /**
-         * This method will check the database ChangeLog table used to keep track of
-         * the changes in the file. If the table does not exist it will create one
-         * otherwise it will not do anything besides outputting a log message.
-         *
-         * @param updateExistingNullChecksums
-         * @param contexts
-         * @deprecated Use methods on {@link liquibase.changelog.ChangeLogService}
-         */
-    @Override
-	public void checkDatabaseChangeLogTable(final boolean updateExistingNullChecksums, final DatabaseChangeLog databaseChangeLog, final Contexts contexts) throws DatabaseException {
-        ChangeLogServiceFactory.getInstance().getChangeLogService(this).checkDatabaseChangeLogTable(updateExistingNullChecksums, databaseChangeLog, contexts);
-    }
-
-
     protected boolean canCreateChangeLogTable() throws DatabaseException {
         return ((TableBasedChangeLogService) ChangeLogServiceFactory.getInstance().getChangeLogService(this)).canCreateChangeLogTable();
     }

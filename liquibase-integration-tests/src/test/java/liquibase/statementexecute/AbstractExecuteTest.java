@@ -12,10 +12,10 @@ import java.util.Set;
 
 import liquibase.CatalogAndSchema;
 import liquibase.Contexts;
+import liquibase.changelog.ChangeLogServiceFactory;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.jvm.JdbcConnection;
-import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.structure.core.Table;
@@ -91,7 +91,7 @@ public abstract class AbstractExecuteTest {
                     testedDatabases.add(database.getClass());
 
                     if (database.getConnection() != null) {
-                        database.checkDatabaseChangeLogTable(false, null, new Contexts());
+                        ChangeLogServiceFactory.getInstance().getChangeLogService(database).init();
                         database.checkDatabaseChangeLogLockTable();
                     }
 

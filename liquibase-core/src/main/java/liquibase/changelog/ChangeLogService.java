@@ -18,7 +18,15 @@ public interface ChangeLogService extends PrioritizedService {
 
     void reset();
 
-    public void checkDatabaseChangeLogTable(final boolean updateExistingNullChecksums, final DatabaseChangeLog databaseChangeLog, final Contexts contexts) throws DatabaseException;
+    /**
+     * Ensures the change log history container is correctly initialized for use. This method may be called multiple times so it should check state as needed.
+     */
+    public void init() throws DatabaseException;
+
+    /**
+     * Upgrades any existing checksums with an out of date version
+     */
+    void upgradeChecksums(final DatabaseChangeLog databaseChangeLog, final Contexts contexts) throws DatabaseException;
 
     public List<RanChangeSet> getRanChangeSetList() throws DatabaseException;
 

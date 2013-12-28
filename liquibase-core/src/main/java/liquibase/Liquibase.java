@@ -8,11 +8,7 @@ import java.text.DateFormat;
 import java.util.*;
 
 import liquibase.change.CheckSum;
-import liquibase.changelog.ChangeLogIterator;
-import liquibase.changelog.ChangeLogParameters;
-import liquibase.changelog.ChangeSet;
-import liquibase.changelog.DatabaseChangeLog;
-import liquibase.changelog.RanChangeSet;
+import liquibase.changelog.*;
 import liquibase.changelog.filter.AfterTagChangeSetFilter;
 import liquibase.changelog.filter.AlreadyRanChangeSetFilter;
 import liquibase.changelog.filter.ChangeSetFilter;
@@ -703,7 +699,11 @@ public class Liquibase {
     }
 
     public void checkLiquibaseTables(boolean updateExistingNullChecksums, DatabaseChangeLog databaseChangeLog, Contexts contexts) throws LiquibaseException {
-        getDatabase().checkDatabaseChangeLogTable(updateExistingNullChecksums, databaseChangeLog, contexts);
+        ChangeLogService changeLogService = ChangeLogServiceFactory.getInstance().getChangeLogService(getDatabase());
+        changeLogService.init();
+        if (updateExistingNullChecksums) {
+            changeLogService.upgradeChecksums(databaseChangeLog, contexts);
+        }
         getDatabase().checkDatabaseChangeLogLockTable();
     }
 

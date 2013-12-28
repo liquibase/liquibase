@@ -433,16 +433,6 @@ public class MockDatabase implements Database, InternalDatabase {
     }
 
     @Override
-    public void checkDatabaseChangeLogTable(final boolean updateExistingNullChecksums, final DatabaseChangeLog databaseChangeLog, final String[] contexts) throws DatabaseException {
-        ;
-    }
-
-    @Override
-	public void checkDatabaseChangeLogTable(final boolean updateExistingNullChecksums, final DatabaseChangeLog databaseChangeLog, final Contexts contexts) throws DatabaseException {
-        ;
-    }
-
-    @Override
     public void checkDatabaseChangeLogLockTable() throws DatabaseException {
         ;
     }

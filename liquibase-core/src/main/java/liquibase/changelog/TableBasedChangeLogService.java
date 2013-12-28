@@ -88,11 +88,7 @@ public class TableBasedChangeLogService implements ChangeLogService {
         }
     }
 
-    public void checkDatabaseChangeLogTable(final boolean updateExistingNullChecksums, final DatabaseChangeLog databaseChangeLog, final Contexts contexts) throws DatabaseException {
-        if (updateExistingNullChecksums && databaseChangeLog == null) {
-            throw new DatabaseException("changeLog parameter is required if updating existing checksums");
-        }
-
+    public void init() throws DatabaseException {
         Database database = getDatabase();
         Executor executor = ExecutorService.getInstance().getExecutor(database);
 
@@ -196,19 +192,21 @@ public class TableBasedChangeLogService implements ChangeLogService {
             }
         }
 
-        if (updateExistingNullChecksums) {
-            for (RanChangeSet ranChangeSet : database.getRanChangeSetList()) {
-                if (ranChangeSet.getLastCheckSum() == null) {
-                    ChangeSet changeSet = databaseChangeLog.getChangeSet(ranChangeSet);
-                    if (changeSet != null && new ContextChangeSetFilter(contexts).accepts(changeSet) && new DbmsChangeSetFilter(database).accepts(changeSet)) {
-                        LogFactory.getLogger().debug("Updating null or out of date checksum on changeSet " + changeSet + " to correct value");
-                        executor.execute(new UpdateChangeSetChecksumStatement(changeSet));
-                    }
+    }
+
+    public void upgradeChecksums(final DatabaseChangeLog databaseChangeLog, final Contexts contexts) throws DatabaseException {
+        Executor executor = ExecutorService.getInstance().getExecutor(database);
+        for (RanChangeSet ranChangeSet : database.getRanChangeSetList()) {
+            if (ranChangeSet.getLastCheckSum() == null) {
+                ChangeSet changeSet = databaseChangeLog.getChangeSet(ranChangeSet);
+                if (changeSet != null && new ContextChangeSetFilter(contexts).accepts(changeSet) && new DbmsChangeSetFilter(database).accepts(changeSet)) {
+                    LogFactory.getLogger().debug("Updating null or out of date checksum on changeSet " + changeSet + " to correct value");
+                    executor.execute(new UpdateChangeSetChecksumStatement(changeSet));
                 }
             }
-            database.commit();
-            ranChangeSetList = null;
         }
+        database.commit();
+        ranChangeSetList = null;
     }
 
     /**
