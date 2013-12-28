@@ -28,7 +28,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-public class TableBasedChangeLogService implements ChangeLogService {
+public class TableBasedChangeLogHistoryService implements ChangeLogHistoryService {
 
     private Database database;
 

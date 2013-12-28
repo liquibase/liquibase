@@ -10,7 +10,7 @@ import liquibase.servicelocator.PrioritizedService;
 import java.util.Date;
 import java.util.List;
 
-public interface ChangeLogService extends PrioritizedService {
+public interface ChangeLogHistoryService extends PrioritizedService {
 
     boolean supports(Database database);
 

@@ -625,7 +625,7 @@ public abstract class AbstractJdbcDatabase implements Database {
     }
 
     protected boolean canCreateChangeLogTable() throws DatabaseException {
-        return ((TableBasedChangeLogService) ChangeLogServiceFactory.getInstance().getChangeLogService(this)).canCreateChangeLogTable();
+        return ((TableBasedChangeLogHistoryService) ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(this)).canCreateChangeLogTable();
     }
 
     @Override
@@ -885,12 +885,12 @@ public abstract class AbstractJdbcDatabase implements Database {
      */
     @Override
     public void tag(final String tagString) throws DatabaseException {
-        ChangeLogServiceFactory.getInstance().getChangeLogService(this).tag(tagString);
+        ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(this).tag(tagString);
     }
 
     @Override
     public boolean doesTagExist(final String tag) throws DatabaseException {
-        return ChangeLogServiceFactory.getInstance().getChangeLogService(this).tagExists(tag);
+        return ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(this).tagExists(tag);
     }
 
     @Override
@@ -1089,12 +1089,12 @@ public abstract class AbstractJdbcDatabase implements Database {
      */
     @Override
     public ChangeSet.RunStatus getRunStatus(final ChangeSet changeSet) throws DatabaseException, DatabaseHistoryException {
-        return ChangeLogServiceFactory.getInstance().getChangeLogService(this).getRunStatus(changeSet);
+        return ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(this).getRunStatus(changeSet);
     }
 
     @Override
     public RanChangeSet getRanChangeSet(final ChangeSet changeSet) throws DatabaseException, DatabaseHistoryException {
-        return ChangeLogServiceFactory.getInstance().getChangeLogService(this).getRanChangeSet(changeSet);
+        return ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(this).getRanChangeSet(changeSet);
     }
 
     /**
@@ -1102,12 +1102,12 @@ public abstract class AbstractJdbcDatabase implements Database {
      */
     @Override
     public List<RanChangeSet> getRanChangeSetList() throws DatabaseException {
-        return ChangeLogServiceFactory.getInstance().getChangeLogService(this).getRanChangeSets();
+        return ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(this).getRanChangeSets();
     }
 
     @Override
     public Date getRanDate(final ChangeSet changeSet) throws DatabaseException, DatabaseHistoryException {
-        return ChangeLogServiceFactory.getInstance().getChangeLogService(this).getRanDate(changeSet);
+        return ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(this).getRanDate(changeSet);
     }
 
     /**
@@ -1116,12 +1116,12 @@ public abstract class AbstractJdbcDatabase implements Database {
      */
     @Override
     public void markChangeSetExecStatus(final ChangeSet changeSet, final ChangeSet.ExecType execType) throws DatabaseException {
-        ChangeLogServiceFactory.getInstance().getChangeLogService(this).markExecType(changeSet, execType);
+        ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(this).markExecType(changeSet, execType);
     }
 
     @Override
     public void removeRanStatus(final ChangeSet changeSet) throws DatabaseException {
-        ChangeLogServiceFactory.getInstance().getChangeLogService(this).removeFromHistory(changeSet);
+        ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(this).removeFromHistory(changeSet);
     }
 
     @Override
@@ -1294,7 +1294,7 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     @Override
     public int getNextChangeSetSequenceValue() throws LiquibaseException {
-        return ChangeLogServiceFactory.getInstance().getChangeLogService(this).getNextChangeSetSequenceValue();
+        return ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(this).getNextChangeSetSequenceValue();
     }
 
     @Override
@@ -1317,7 +1317,7 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     @Override
     public void resetInternalState() {
-        ChangeLogServiceFactory.getInstance().getChangeLogService(this).reset();
+        ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(this).reset();
         this.hasDatabaseChangeLogLockTable = false;
     }
 

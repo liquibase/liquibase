@@ -699,10 +699,10 @@ public class Liquibase {
     }
 
     public void checkLiquibaseTables(boolean updateExistingNullChecksums, DatabaseChangeLog databaseChangeLog, Contexts contexts) throws LiquibaseException {
-        ChangeLogService changeLogService = ChangeLogServiceFactory.getInstance().getChangeLogService(getDatabase());
-        changeLogService.init();
+        ChangeLogHistoryService changeLogHistoryService = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(getDatabase());
+        changeLogHistoryService.init();
         if (updateExistingNullChecksums) {
-            changeLogService.upgradeChecksums(databaseChangeLog, contexts);
+            changeLogHistoryService.upgradeChecksums(databaseChangeLog, contexts);
         }
         getDatabase().checkDatabaseChangeLogLockTable();
     }

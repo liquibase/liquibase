@@ -11,8 +11,7 @@ import java.util.List;
 import java.util.Set;
 
 import liquibase.CatalogAndSchema;
-import liquibase.Contexts;
-import liquibase.changelog.ChangeLogServiceFactory;
+import liquibase.changelog.ChangeLogHistoryServiceFactory;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.jvm.JdbcConnection;
@@ -91,7 +90,7 @@ public abstract class AbstractExecuteTest {
                     testedDatabases.add(database.getClass());
 
                     if (database.getConnection() != null) {
-                        ChangeLogServiceFactory.getInstance().getChangeLogService(database).init();
+                        ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database).init();
                         database.checkDatabaseChangeLogLockTable();
                     }
 
