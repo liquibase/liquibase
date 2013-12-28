@@ -319,7 +319,7 @@ public class TableBasedChangeLogHistoryService implements ChangeLogHistoryServic
     }
 
     @Override
-    public void markExecType(ChangeSet changeSet, ChangeSet.ExecType execType) throws DatabaseException {
+    public void setExecType(ChangeSet changeSet, ChangeSet.ExecType execType) throws DatabaseException {
         Database database = getDatabase();
 
         ExecutorService.getInstance().getExecutor(database).execute(new MarkChangeSetRanStatement(changeSet, execType));
@@ -338,7 +338,7 @@ public class TableBasedChangeLogHistoryService implements ChangeLogHistoryServic
     }
 
     @Override
-    public int getNextChangeSetSequenceValue() throws LiquibaseException {
+    public int getNextSequenceValue() throws LiquibaseException {
         if (lastChangeSetSequenceValue == null) {
             if (getDatabase().getConnection() == null) {
                 lastChangeSetSequenceValue = 0;
@@ -361,7 +361,7 @@ public class TableBasedChangeLogHistoryService implements ChangeLogHistoryServic
             int totalRows = ExecutorService.getInstance().getExecutor(database).queryForInt(new SelectFromDatabaseChangeLogStatement("COUNT(*)"));
             if (totalRows == 0) {
                 ChangeSet emptyChangeSet = new ChangeSet(String.valueOf(new Date().getTime()), "liquibase", false, false, "liquibase-internal", null, null, database.getObjectQuotingStrategy(), null);
-                this.markExecType(emptyChangeSet, ChangeSet.ExecType.EXECUTED);
+                this.setExecType(emptyChangeSet, ChangeSet.ExecType.EXECUTED);
             }
 
 //            Timestamp lastExecutedDate = (Timestamp) this.getExecutor().queryForObject(createChangeToTagSQL(), Timestamp.class);

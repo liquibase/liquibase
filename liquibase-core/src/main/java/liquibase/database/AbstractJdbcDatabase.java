@@ -1116,7 +1116,7 @@ public abstract class AbstractJdbcDatabase implements Database {
      */
     @Override
     public void markChangeSetExecStatus(final ChangeSet changeSet, final ChangeSet.ExecType execType) throws DatabaseException {
-        ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(this).markExecType(changeSet, execType);
+        ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(this).setExecType(changeSet, execType);
     }
 
     @Override
@@ -1290,11 +1290,6 @@ public abstract class AbstractJdbcDatabase implements Database {
                 writer.append(sql.toSql()).append(sql.getEndDelimiter()).append("\n\n");
             }
         }
-    }
-
-    @Override
-    public int getNextChangeSetSequenceValue() throws LiquibaseException {
-        return ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(this).getNextChangeSetSequenceValue();
     }
 
     @Override

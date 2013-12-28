@@ -39,11 +39,11 @@ public interface ChangeLogHistoryService extends PrioritizedService {
      */
     Date getRanDate(ChangeSet changeSet) throws DatabaseException, DatabaseHistoryException;
 
-    void markExecType(ChangeSet changeSet, ChangeSet.ExecType execType) throws DatabaseException;
+    void setExecType(ChangeSet changeSet, ChangeSet.ExecType execType) throws DatabaseException;
 
     void removeFromHistory(ChangeSet changeSet) throws DatabaseException;
 
-    int getNextChangeSetSequenceValue() throws LiquibaseException;
+    int getNextSequenceValue() throws LiquibaseException;
 
     void tag(String tagString) throws DatabaseException;
 

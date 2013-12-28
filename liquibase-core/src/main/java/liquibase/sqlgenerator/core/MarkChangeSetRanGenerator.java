@@ -4,6 +4,7 @@ import java.util.List;
 
 import liquibase.change.Change;
 import liquibase.change.core.TagDatabaseChange;
+import liquibase.changelog.ChangeLogHistoryServiceFactory;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
@@ -53,7 +54,7 @@ public class MarkChangeSetRanGenerator extends AbstractSqlGenerator<MarkChangeSe
                         .addColumnValue("AUTHOR", changeSet.getAuthor())
                         .addColumnValue("FILENAME", changeSet.getFilePath())
                         .addColumnValue("DATEEXECUTED", new DatabaseFunction(dateValue))
-                        .addColumnValue("ORDEREXECUTED", database.getNextChangeSetSequenceValue())
+                        .addColumnValue("ORDEREXECUTED", ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database).getNextSequenceValue())
                         .addColumnValue("MD5SUM", changeSet.generateCheckSum().toString())
                         .addColumnValue("DESCRIPTION", limitSize(changeSet.getDescription()))
                         .addColumnValue("COMMENTS", limitSize(StringUtils.trimToEmpty(changeSet.getComments())))

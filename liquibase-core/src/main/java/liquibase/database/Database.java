@@ -255,8 +255,6 @@ public interface Database extends PrioritizedService {
 
     void saveRollbackStatement(Change change, List<SqlVisitor> sqlVisitors, Writer writer) throws IOException, RollbackImpossibleException, StatementNotSupportedOnDatabaseException, LiquibaseException;
 
-    int getNextChangeSetSequenceValue() throws LiquibaseException;
-
     public Date parseDate(String dateAsString) throws DateParseException;
 
     /**
