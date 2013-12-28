@@ -212,7 +212,7 @@ public class TableBasedChangeLogService implements ChangeLogService {
     /**
      * Returns the ChangeSets that have been run against the current database.
      */
-    public List<RanChangeSet> getRanChangeSetList() throws DatabaseException {
+    public List<RanChangeSet> getRanChangeSets() throws DatabaseException {
         if (this.ranChangeSetList != null) {
             return this.ranChangeSetList;
         }
@@ -299,7 +299,7 @@ public class TableBasedChangeLogService implements ChangeLogService {
         }
 
         RanChangeSet foundRan = null;
-        for (RanChangeSet ranChange : getRanChangeSetList()) {
+        for (RanChangeSet ranChange : getRanChangeSets()) {
             if (ranChange.isSameAs(changeSet)) {
                 foundRan = ranChange;
                 break;
@@ -319,22 +319,22 @@ public class TableBasedChangeLogService implements ChangeLogService {
     }
 
     @Override
-    public void markChangeSetExecStatus(ChangeSet changeSet, ChangeSet.ExecType execType) throws DatabaseException {
+    public void markExecType(ChangeSet changeSet, ChangeSet.ExecType execType) throws DatabaseException {
         Database database = getDatabase();
 
         ExecutorService.getInstance().getExecutor(database).execute(new MarkChangeSetRanStatement(changeSet, execType));
         database.commit();
-        getRanChangeSetList().add(new RanChangeSet(changeSet, execType));
+        getRanChangeSets().add(new RanChangeSet(changeSet, execType));
 
     }
 
     @Override
-    public void removeRanStatus(final ChangeSet changeSet) throws DatabaseException {
+    public void removeFromHistory(final ChangeSet changeSet) throws DatabaseException {
         Database database = getDatabase();
         ExecutorService.getInstance().getExecutor(database).execute(new RemoveChangeSetRanStatusStatement(changeSet));
         database.commit();
 
-        getRanChangeSetList().remove(new RanChangeSet(changeSet));
+        getRanChangeSets().remove(new RanChangeSet(changeSet));
     }
 
     @Override
@@ -361,21 +361,21 @@ public class TableBasedChangeLogService implements ChangeLogService {
             int totalRows = ExecutorService.getInstance().getExecutor(database).queryForInt(new SelectFromDatabaseChangeLogStatement("COUNT(*)"));
             if (totalRows == 0) {
                 ChangeSet emptyChangeSet = new ChangeSet(String.valueOf(new Date().getTime()), "liquibase", false, false, "liquibase-internal", null, null, database.getObjectQuotingStrategy(), null);
-                this.markChangeSetExecStatus(emptyChangeSet, ChangeSet.ExecType.EXECUTED);
+                this.markExecType(emptyChangeSet, ChangeSet.ExecType.EXECUTED);
             }
 
 //            Timestamp lastExecutedDate = (Timestamp) this.getExecutor().queryForObject(createChangeToTagSQL(), Timestamp.class);
             executor.execute(new TagDatabaseStatement(tagString));
             database.commit();
 
-            getRanChangeSetList().get(getRanChangeSetList().size() - 1).setTag(tagString);
+            getRanChangeSets().get(getRanChangeSets().size() - 1).setTag(tagString);
         } catch (Exception e) {
             throw new DatabaseException(e);
         }
     }
 
     @Override
-    public boolean doesTagExist(final String tag) throws DatabaseException {
+    public boolean tagExists(final String tag) throws DatabaseException {
         int count = ExecutorService.getInstance().getExecutor(getDatabase()).queryForInt(new SelectFromDatabaseChangeLogStatement(new SelectFromDatabaseChangeLogStatement.ByTag(tag), "COUNT(*)"));
         return count > 0;
     }

@@ -1,7 +1,6 @@
 package liquibase.database;
 
 import liquibase.CatalogAndSchema;
-import liquibase.Contexts;
 import liquibase.change.Change;
 import liquibase.changelog.*;
 import liquibase.database.core.*;
@@ -891,7 +890,7 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     @Override
     public boolean doesTagExist(final String tag) throws DatabaseException {
-        return ChangeLogServiceFactory.getInstance().getChangeLogService(this).doesTagExist(tag);
+        return ChangeLogServiceFactory.getInstance().getChangeLogService(this).tagExists(tag);
     }
 
     @Override
@@ -1103,7 +1102,7 @@ public abstract class AbstractJdbcDatabase implements Database {
      */
     @Override
     public List<RanChangeSet> getRanChangeSetList() throws DatabaseException {
-        return ChangeLogServiceFactory.getInstance().getChangeLogService(this).getRanChangeSetList();
+        return ChangeLogServiceFactory.getInstance().getChangeLogService(this).getRanChangeSets();
     }
 
     @Override
@@ -1117,12 +1116,12 @@ public abstract class AbstractJdbcDatabase implements Database {
      */
     @Override
     public void markChangeSetExecStatus(final ChangeSet changeSet, final ChangeSet.ExecType execType) throws DatabaseException {
-        ChangeLogServiceFactory.getInstance().getChangeLogService(this).markChangeSetExecStatus(changeSet, execType);
+        ChangeLogServiceFactory.getInstance().getChangeLogService(this).markExecType(changeSet, execType);
     }
 
     @Override
     public void removeRanStatus(final ChangeSet changeSet) throws DatabaseException {
-        ChangeLogServiceFactory.getInstance().getChangeLogService(this).removeRanStatus(changeSet);
+        ChangeLogServiceFactory.getInstance().getChangeLogService(this).removeFromHistory(changeSet);
     }
 
     @Override

@@ -28,21 +28,24 @@ public interface ChangeLogService extends PrioritizedService {
      */
     void upgradeChecksums(final DatabaseChangeLog databaseChangeLog, final Contexts contexts) throws DatabaseException;
 
-    public List<RanChangeSet> getRanChangeSetList() throws DatabaseException;
-
-    ChangeSet.RunStatus getRunStatus(ChangeSet changeSet) throws DatabaseException, DatabaseHistoryException;
+    public List<RanChangeSet> getRanChangeSets() throws DatabaseException;
 
     RanChangeSet getRanChangeSet(ChangeSet changeSet) throws DatabaseException, DatabaseHistoryException;
 
+    ChangeSet.RunStatus getRunStatus(ChangeSet changeSet) throws DatabaseException, DatabaseHistoryException;
+
+    /**
+     * Returns the date the given changeSet was ran. Returns null if changeSet was not null.
+     */
     Date getRanDate(ChangeSet changeSet) throws DatabaseException, DatabaseHistoryException;
 
-    void markChangeSetExecStatus(ChangeSet changeSet, ChangeSet.ExecType execType) throws DatabaseException;
+    void markExecType(ChangeSet changeSet, ChangeSet.ExecType execType) throws DatabaseException;
 
-    void removeRanStatus(ChangeSet changeSet) throws DatabaseException;
+    void removeFromHistory(ChangeSet changeSet) throws DatabaseException;
 
     int getNextChangeSetSequenceValue() throws LiquibaseException;
 
     void tag(String tagString) throws DatabaseException;
 
-    boolean doesTagExist(String tag) throws DatabaseException;
+    boolean tagExists(String tag) throws DatabaseException;
 }
