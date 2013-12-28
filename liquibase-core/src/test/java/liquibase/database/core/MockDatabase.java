@@ -572,11 +572,6 @@ public class MockDatabase implements Database, InternalDatabase {
     }
 
     @Override
-    public int getNextChangeSetSequenceValue() throws LiquibaseException {
-        return 1;
-    }
-
-    @Override
     public Date parseDate(final String dateAsString) throws DateParseException {
         return new Date();
     }
