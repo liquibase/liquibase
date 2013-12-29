@@ -139,15 +139,9 @@ public interface Database extends PrioritizedService {
      */
     String getConcatSql(String... values);
 
-    boolean hasDatabaseChangeLogTable() throws DatabaseException;
-
     public void setCanCacheLiquibaseTableInfo(boolean canCacheLiquibaseTableInfo);
 
     boolean hasDatabaseChangeLogLockTable() throws DatabaseException;
-
-    void checkDatabaseChangeLogTable(boolean updateExistingNullChecksums, DatabaseChangeLog databaseChangeLog, Contexts contexts) throws DatabaseException;
-
-    void checkDatabaseChangeLogTable(boolean updateExistingNullChecksums, DatabaseChangeLog databaseChangeLog, String... contexts) throws DatabaseException;
 
     void checkDatabaseChangeLogLockTable() throws DatabaseException;
 
@@ -260,8 +254,6 @@ public interface Database extends PrioritizedService {
     void executeRollbackStatements(Change change, List<SqlVisitor> sqlVisitors) throws LiquibaseException, RollbackImpossibleException;
 
     void saveRollbackStatement(Change change, List<SqlVisitor> sqlVisitors, Writer writer) throws IOException, RollbackImpossibleException, StatementNotSupportedOnDatabaseException, LiquibaseException;
-
-    int getNextChangeSetSequenceValue() throws LiquibaseException;
 
     public Date parseDate(String dateAsString) throws DateParseException;
 

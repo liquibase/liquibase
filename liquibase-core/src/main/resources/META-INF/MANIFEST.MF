@@ -2,6 +2,7 @@ Manifest-Version: 1.0
 Main-Class: liquibase.integration.commandline.Main
 Class-Path: lib/snakeyaml-1.13.jar
 Liquibase-Package: liquibase.change,
+ liquibase.changelog,
  liquibase.database,
  liquibase.parser,
  liquibase.precondition,

@@ -310,11 +310,6 @@ public class MockDatabase implements Database, InternalDatabase {
     }
 
     @Override
-    public boolean hasDatabaseChangeLogTable() {
-        return false;
-    }
-
-    @Override
     public boolean hasDatabaseChangeLogLockTable() {
         return false;
     }
@@ -435,16 +430,6 @@ public class MockDatabase implements Database, InternalDatabase {
 
     public boolean acquireLock() throws LockException {
         return false;
-    }
-
-    @Override
-    public void checkDatabaseChangeLogTable(final boolean updateExistingNullChecksums, final DatabaseChangeLog databaseChangeLog, final String[] contexts) throws DatabaseException {
-        ;
-    }
-
-    @Override
-	public void checkDatabaseChangeLogTable(final boolean updateExistingNullChecksums, final DatabaseChangeLog databaseChangeLog, final Contexts contexts) throws DatabaseException {
-        ;
     }
 
     @Override
@@ -584,11 +569,6 @@ public class MockDatabase implements Database, InternalDatabase {
     @Override
     public void setLiquibaseTablespaceName(final String tablespaceName) {
 
-    }
-
-    @Override
-    public int getNextChangeSetSequenceValue() throws LiquibaseException {
-        return 1;
     }
 
     @Override
