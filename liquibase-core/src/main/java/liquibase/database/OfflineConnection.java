@@ -1,11 +1,14 @@
 package liquibase.database;
 
+import liquibase.changelog.ChangeLogHistoryServiceFactory;
+import liquibase.changelog.OfflineChangeLogHistoryService;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.logging.LogFactory;
 import liquibase.util.ObjectUtil;
 import liquibase.util.StringUtils;
 
+import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
@@ -16,6 +19,9 @@ public class OfflineConnection implements DatabaseConnection {
     private final String url;
     private final String databaseShortName;
     private final Map<String, String> params = new HashMap<String, String>();
+    private Boolean changeLogSql = false;
+    private String changeLogFile = "databasechangelog.csv";
+    private Boolean caseSensitive = false;
     private String productName;
     private String productVersion;
     private int databaseMajorVersion = 999;
@@ -59,6 +65,12 @@ public class OfflineConnection implements DatabaseConnection {
                 this.productName = paramEntry.getValue();
             } else if (paramEntry.getKey().equals("catalog")) {
                 this.catalog = this.params.get("catalog");
+            } else if (paramEntry.getKey().equals("caseSensitive")) {
+                 this.caseSensitive = Boolean.valueOf(paramEntry.getValue());
+            } else if (paramEntry.getKey().equals("changeLogFile")) {
+                this.changeLogFile = paramEntry.getValue();
+            } else if (paramEntry.getKey().equals("changeLogSql")) {
+                this.changeLogSql = Boolean.valueOf(paramEntry.getValue());
             } else {
                 this.databaseParams.put(paramEntry.getKey(), paramEntry.getValue());
             }
@@ -80,11 +92,11 @@ public class OfflineConnection implements DatabaseConnection {
                 LogFactory.getInstance().getLog().warning("Error setting database parameter " + param.getKey() + ": " + e.getMessage(), e);
             }
         }
-        if (params.containsKey("caseSensitive")) {
-            if (database instanceof AbstractJdbcDatabase) {
-                ((AbstractJdbcDatabase) database).setCaseSensitive(Boolean.valueOf(params.get("caseSensitive")));
-            }
+        if (database instanceof AbstractJdbcDatabase) {
+            ((AbstractJdbcDatabase) database).setCaseSensitive(this.caseSensitive);
         }
+
+        ChangeLogHistoryServiceFactory.getInstance().register(new OfflineChangeLogHistoryService(database, new File(changeLogFile), changeLogSql));
     }
 
     @Override

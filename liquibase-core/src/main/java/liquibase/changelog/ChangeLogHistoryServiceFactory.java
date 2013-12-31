@@ -74,8 +74,17 @@ public class ChangeLogHistoryServiceFactory {
             }
 
             try {
-                ChangeLogHistoryService service = foundServices.iterator().next().getClass().newInstance();
-                service.setDatabase(database);
+                ChangeLogHistoryService exampleService = foundServices.iterator().next();
+                Class<? extends ChangeLogHistoryService> aClass = exampleService.getClass();
+                ChangeLogHistoryService service;
+                try {
+                    aClass.getConstructor();
+                    service = aClass.newInstance();
+                    service.setDatabase(database);
+                } catch (NoSuchMethodException e) {
+                    // must have been manually added to the registry and so already configured.
+                    service = exampleService;
+                }
 
                 services.put(database, service);
                 return service;
