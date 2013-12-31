@@ -2,6 +2,7 @@ package liquibase.executor.jvm;
 
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
+import liquibase.database.OfflineConnection;
 import liquibase.database.PreparedStatementFactory;
 import liquibase.database.core.OracleDatabase;
 import liquibase.database.jvm.JdbcConnection;
@@ -44,6 +45,9 @@ public class JdbcExecutor extends AbstractExecutor implements Executor {
         DatabaseConnection con = database.getConnection();
         Statement stmt = null;
         try {
+            if (con instanceof OfflineConnection) {
+                throw new DatabaseException("Cannot execute commands against an offline database");
+            }
             stmt = ((JdbcConnection) con).getUnderlyingConnection().createStatement();
             Statement stmtToUse = stmt;
 

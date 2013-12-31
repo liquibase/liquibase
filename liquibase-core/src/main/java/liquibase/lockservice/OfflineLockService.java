@@ -1,19 +1,23 @@
-package liquibase.lockservice.ext;
+package liquibase.lockservice;
 
 import liquibase.database.Database;
-import liquibase.database.core.MockDatabase;
+import liquibase.database.OfflineConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LockException;
-import liquibase.lockservice.DatabaseChangeLogLock;
-import liquibase.lockservice.LockService;
 
-/**
- * @author John Sanda
- */
-public class MockLockService implements LockService {
+public class OfflineLockService implements LockService {
+
+    private Database database;
+    private boolean hasChangeLogLock = false;
+
+    @Override
+    public int getPriority() {
+        return 5000;
+    }
+
     @Override
     public boolean supports(Database database) {
-        return database instanceof MockDatabase;
+        return database.getConnection() != null && database.getConnection() instanceof OfflineConnection;
     }
 
     @Override
@@ -23,32 +27,38 @@ public class MockLockService implements LockService {
 
     @Override
     public void setDatabase(Database database) {
+        this.database = database;
     }
 
     @Override
     public void setChangeLogLockWaitTime(long changeLogLockWaitTime) {
+
     }
 
     @Override
     public void setChangeLogLockRecheckTime(long changeLogLocRecheckTime) {
+
     }
 
     @Override
     public boolean hasChangeLogLock() {
-        return false;
+        return this.hasChangeLogLock;
     }
 
     @Override
     public void waitForLock() throws LockException {
+
     }
 
     @Override
     public boolean acquireLock() throws LockException {
-        return false;
+        this.hasChangeLogLock = true;
+        return true;
     }
 
     @Override
     public void releaseLock() throws LockException {
+        this.hasChangeLogLock = false;
     }
 
     @Override
@@ -58,14 +68,11 @@ public class MockLockService implements LockService {
 
     @Override
     public void forceReleaseLock() throws LockException, DatabaseException {
+        this.hasChangeLogLock = false;
     }
 
     @Override
     public void reset() {
-    }
-
-    @Override
-    public int getPriority() {
-        return PRIORITY_DATABASE;
+        this.hasChangeLogLock = false;
     }
 }

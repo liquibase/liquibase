@@ -1,16 +1,17 @@
 package liquibase.lockservice;
 
 import liquibase.database.Database;
+import liquibase.database.core.DerbyDatabase;
 import liquibase.exception.DatabaseException;
+import liquibase.exception.LiquibaseException;
 import liquibase.exception.LockException;
+import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.logging.LogFactory;
+import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.SqlStatement;
-import liquibase.statement.core.LockDatabaseChangeLogStatement;
-import liquibase.statement.core.SelectFromDatabaseChangeLogLockStatement;
-import liquibase.statement.core.UnlockDatabaseChangeLogStatement;
-import liquibase.statement.core.RawSqlStatement;
+import liquibase.statement.core.*;
 
 import java.text.DateFormat;
 import java.util.ArrayList;
@@ -28,6 +29,9 @@ public class LockServiceImpl implements LockService {
     private long changeLogLocRecheckTime = 1000 * 10;  //default to every 10 seconds
 
     public static final String LOCK_WAIT_TIME_SYSTEM_PROPERTY = "liquibase.changeLogLockWaitTimeInMinutes";
+
+    private boolean hasDatabaseChangeLogLockTable = false;
+    private boolean isDatabaseChangeLogLockTableInitialized = false;
 
     {
         try {
@@ -67,9 +71,71 @@ public class LockServiceImpl implements LockService {
     }
 
     @Override
+    public void init() throws DatabaseException {
+
+        boolean createdTable = false;
+        Executor executor = ExecutorService.getInstance().getExecutor(database);
+        if (!hasDatabaseChangeLogLockTable()) {
+
+            executor.comment("Create Database Lock Table");
+            executor.execute(new CreateDatabaseChangeLogLockTableStatement());
+            database.commit();
+            LogFactory.getLogger().debug("Created database lock table with name: " + database.escapeTableName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName()));
+            this.hasDatabaseChangeLogLockTable = true;
+            createdTable = true;
+        }
+
+        if (!isDatabaseChangeLogLockTableInitialized(createdTable)) {
+            executor.comment("Initialize Database Lock Table");
+            executor.execute(new InitializeDatabaseChangeLogLockTableStatement());
+            database.commit();
+        }
+
+        if (database instanceof DerbyDatabase && ((DerbyDatabase) database).supportsBooleanDataType()) { //check if the changelog table is of an old smallint vs. boolean format
+            String lockTable = database.escapeTableName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName());
+            Object obj = executor.queryForObject(new RawSqlStatement("select min(locked) as test from " + lockTable + " fetch first row only"), Object.class);
+            if (!(obj instanceof Boolean)) { //wrong type, need to recreate table
+                executor.execute(new DropTableStatement(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName(), false));
+                executor.execute(new CreateDatabaseChangeLogLockTableStatement());
+                executor.execute(new InitializeDatabaseChangeLogLockTableStatement());
+            }
+        }
+
+    }
+
+
+    public boolean isDatabaseChangeLogLockTableInitialized(final boolean tableJustCreated) throws DatabaseException {
+        boolean initialized;
+        Executor executor = ExecutorService.getInstance().getExecutor(database);
+        try {
+            initialized = executor.queryForInt(new RawSqlStatement("select count(*) from " + database.escapeTableName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName()))) > 0;
+        } catch (LiquibaseException e) {
+            if (executor.updatesDatabase()) {
+                throw new UnexpectedLiquibaseException(e);
+            } else {
+                //probably didn't actually create the table yet.
+
+                initialized = !tableJustCreated;
+            }
+        }
+        return initialized;
+    }
+
+    @Override
     public boolean hasChangeLogLock() {
         return hasChangeLogLock;
     }
+
+    public boolean hasDatabaseChangeLogLockTable() throws DatabaseException {
+        boolean hasTable = false;
+        try {
+            hasTable = SnapshotGeneratorFactory.getInstance().hasDatabaseChangeLogLockTable(database);
+        } catch (LiquibaseException e) {
+            throw new UnexpectedLiquibaseException(e);
+        }
+        return hasTable;
+    }
+
 
     @Override
     public void waitForLock() throws LockException {
@@ -111,7 +177,7 @@ public class LockServiceImpl implements LockService {
 
         try {
             database.rollback();
-            database.checkDatabaseChangeLogLockTable();
+            this.init();
 
             Boolean locked = (Boolean) ExecutorService.getInstance().getExecutor(database).queryForObject(new SelectFromDatabaseChangeLogLockStatement("LOCKED"), Boolean.class);
 
@@ -153,7 +219,7 @@ public class LockServiceImpl implements LockService {
     public void releaseLock() throws LockException {
         Executor executor = ExecutorService.getInstance().getExecutor(database);
         try {
-            if (database.hasDatabaseChangeLogLockTable()) {
+            if (this.hasDatabaseChangeLogLockTable()) {
                 executor.comment("Release Database Lock");
                 database.rollback();
                 int updatedRows = executor.update(new UnlockDatabaseChangeLogStatement());
@@ -181,7 +247,7 @@ public class LockServiceImpl implements LockService {
     @Override
     public DatabaseChangeLogLock[] listLocks() throws LockException {
         try {
-            if (!database.hasDatabaseChangeLogLockTable()) {
+            if (!this.hasDatabaseChangeLogLockTable()) {
                 return new DatabaseChangeLogLock[0];
             }
 
@@ -208,7 +274,7 @@ public class LockServiceImpl implements LockService {
 
     @Override
     public void forceReleaseLock() throws LockException, DatabaseException {
-        database.checkDatabaseChangeLogLockTable();
+        this.init();
         releaseLock();
         /*try {
             releaseLock();

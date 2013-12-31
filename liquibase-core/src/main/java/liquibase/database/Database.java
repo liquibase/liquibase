@@ -18,8 +18,10 @@ import liquibase.statement.DatabaseFunction;
 import java.io.IOException;
 import java.io.Writer;
 import java.math.BigInteger;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 public interface Database extends PrioritizedService {
 
@@ -140,10 +142,6 @@ public interface Database extends PrioritizedService {
     String getConcatSql(String... values);
 
     public void setCanCacheLiquibaseTableInfo(boolean canCacheLiquibaseTableInfo);
-
-    boolean hasDatabaseChangeLogLockTable() throws DatabaseException;
-
-    void checkDatabaseChangeLogLockTable() throws DatabaseException;
 
     void dropDatabaseObjects(CatalogAndSchema schema) throws LiquibaseException;
 
@@ -336,5 +334,7 @@ public interface Database extends PrioritizedService {
     boolean supportsPrimaryKeyNames();
 
     public String getSystemSchema();
+
+    public void addReservedWords(Collection<String> words);
 }
 

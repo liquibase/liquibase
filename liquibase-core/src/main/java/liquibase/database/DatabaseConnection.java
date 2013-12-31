@@ -37,4 +37,6 @@ public interface DatabaseConnection {
     String getConnectionUserName();
 
     boolean isClosed() throws DatabaseException;
+
+    void attached(Database database);
 }

@@ -6,6 +6,7 @@ import java.math.BigInteger;
 import java.sql.Connection;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
@@ -310,17 +311,6 @@ public class MockDatabase implements Database, InternalDatabase {
     }
 
     @Override
-    public boolean hasDatabaseChangeLogLockTable() {
-        return false;
-    }
-
-    public void checkDatabaseChangeLogTable(final Liquibase liquibase) throws DatabaseException, IOException {
-    }
-
-    public void checkDatabaseChangeLogLockTable(final Liquibase liquibase) throws DatabaseException, IOException {
-    }
-
-    @Override
     public void dropDatabaseObjects(final CatalogAndSchema schema) throws DatabaseException {
     }
 
@@ -430,11 +420,6 @@ public class MockDatabase implements Database, InternalDatabase {
 
     public boolean acquireLock() throws LockException {
         return false;
-    }
-
-    @Override
-    public void checkDatabaseChangeLogLockTable() throws DatabaseException {
-        ;
     }
 
     @Override
@@ -728,4 +713,9 @@ public class MockDatabase implements Database, InternalDatabase {
 	public String getSystemSchema() {
 		return "information_schema";
 	}
+
+    @Override
+    public void addReservedWords(Collection<String> words) {
+
+    }
 }

@@ -704,7 +704,7 @@ public class Liquibase {
         if (updateExistingNullChecksums) {
             changeLogHistoryService.upgradeChecksums(databaseChangeLog, contexts);
         }
-        getDatabase().checkDatabaseChangeLogLockTable();
+        LockServiceFactory.getInstance().getLockService(getDatabase()).init();
     }
 
     /**

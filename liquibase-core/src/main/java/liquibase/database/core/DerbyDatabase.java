@@ -209,22 +209,6 @@ public class DerbyDatabase extends AbstractJdbcDatabase {
         return true;
     }
 
-    @Override
-    public void checkDatabaseChangeLogLockTable() throws DatabaseException {
-        super.checkDatabaseChangeLogLockTable();
-
-        if (this.supportsBooleanDataType()) { //check if the changelog table is of an old smallint vs. boolean format
-            Executor executor = ExecutorService.getInstance().getExecutor(this);
-            String lockTable = this.escapeTableName(this.getLiquibaseCatalogName(), this.getLiquibaseSchemaName(), this.getDatabaseChangeLogLockTableName());
-            Object obj = executor.queryForObject(new RawSqlStatement("select min(locked) as test from " + lockTable + " fetch first row only"), Object.class);
-            if (!(obj instanceof Boolean)) { //wrong type, need to recreate table
-                executor.execute(new DropTableStatement(this.getLiquibaseCatalogName(), this.getLiquibaseSchemaName(), this.getDatabaseChangeLogLockTableName(), false));
-                executor.execute(new CreateDatabaseChangeLogLockTableStatement());
-                executor.execute(new InitializeDatabaseChangeLogLockTableStatement());
-            }
-        }
-    }
-
     public boolean supportsBooleanDataType() {
         if (getConnection() == null) {
             return false; ///assume not;

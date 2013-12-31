@@ -219,7 +219,7 @@ public class LiquibaseTest {
 
         verify(mockLockService).waitForLock();
 //        verify(mockDatabase).checkDatabaseChangeLogTable(true, mockChangeLog, contexts);
-        verify(mockDatabase).checkDatabaseChangeLogLockTable();
+//        verify(mockDatabase).checkDatabaseChangeLogLockTable();
         verify(mockChangeLog).validate(mockDatabase, contexts);
         verify(mockChangeLogParser).parse("com/example/test.xml", liquibase.getChangeLogParameters(), mockResourceAccessor);
         verify(mockChangeLogIterator).run(any(UpdateVisitor.class), eq(mockDatabase));
@@ -243,7 +243,7 @@ public class LiquibaseTest {
 
         verify(mockLockService).waitForLock();
 //        verify(mockDatabase).checkDatabaseChangeLogTable(true, mockChangeLog, (Contexts) null);
-        verify(mockDatabase).checkDatabaseChangeLogLockTable();
+//        verify(mockDatabase).checkDatabaseChangeLogLockTable();
         verify(mockChangeLog).validate(mockDatabase, (Contexts) null);
         verify(mockChangeLogParser).parse("com/example/test.xml", liquibase.getChangeLogParameters(), mockResourceAccessor);
         verify(mockChangeLogIterator).run(any(UpdateVisitor.class), eq(mockDatabase));

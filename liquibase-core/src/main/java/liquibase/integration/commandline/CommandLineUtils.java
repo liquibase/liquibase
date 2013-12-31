@@ -13,6 +13,7 @@ import liquibase.diff.output.changelog.DiffToChangeLog;
 import liquibase.diff.output.report.DiffToReport;
 import liquibase.exception.*;
 import liquibase.logging.LogFactory;
+import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.SnapshotControl;
@@ -47,73 +48,8 @@ public class CommandLineUtils {
                                                 String driverPropertiesFile,
                                                 String liquibaseCatalogName,
                                                 String liquibaseSchemaName) throws DatabaseException {
-        driver = StringUtils.trimToNull(driver);
-        if (driver == null) {
-            driver = DatabaseFactory.getInstance().findDefaultDriver(url);
-        }
-
         try {
-            Driver driverObject;
-            DatabaseFactory databaseFactory = DatabaseFactory.getInstance();
-            if (databaseClass != null) {
-                databaseFactory.clearRegistry();
-                databaseFactory.register((Database) Class.forName(databaseClass, true, classLoader).newInstance());
-            }
-
-            try {
-                if (driver == null) {
-                    driver = databaseFactory.findDefaultDriver(url);
-                }
-
-                if (driver == null) {
-                    throw new RuntimeException("Driver class was not specified and could not be determined from the url (" + url + ")");
-                }
-
-                driverObject = (Driver) Class.forName(driver, true, classLoader).newInstance();
-            } catch (Exception e) {
-                throw new RuntimeException("Cannot find database driver: " + e.getMessage());
-            }
-
-
-            Properties driverProperties = new Properties();
-
-            if (username != null) {
-                driverProperties.put("user", username);
-            }
-            if (password != null) {
-                driverProperties.put("password", password);
-            }
-            if (null != driverPropertiesFile) {
-                File propertiesFile = new File(driverPropertiesFile);
-                if (propertiesFile.exists()) {
-//                    System.out.println("Loading properties from the file:'" + driverPropertiesFile + "'");
-                    FileInputStream inputStream = new FileInputStream(propertiesFile);
-                    try {
-                        driverProperties.load(inputStream);
-                    } finally {
-                        inputStream.close();
-                    }
-                } else {
-                  throw new RuntimeException("Can't open JDBC Driver specific properties from the file: '"
-                      + driverPropertiesFile + "'");
-                }
-            }
-
-
-//            System.out.println("Properties:");
-//            for (Map.Entry entry : driverProperties.entrySet()) {
-//                System.out.println("Key:'"+entry.getKey().toString()+"' Value:'"+entry.getValue().toString()+"'");
-//            }
-            
-
-//            System.out.println("Connecting to the URL:'"+url+"' using driver:'"+driverObject.getClass().getName()+"'");
-            Connection connection = driverObject.connect(url, driverProperties);
-//            System.out.println("Connection has been created");
-            if (connection == null) {
-                throw new DatabaseException("Connection could not be created to " + url + " with driver " + driverObject.getClass().getName() + ".  Possibly the wrong driver for the given database URL");
-            }
-
-            Database database = databaseFactory.findCorrectDatabaseImplementation(new JdbcConnection(connection));
+            Database database = DatabaseFactory.getInstance().openDatabase(url, username, password, driver, databaseClass, driverPropertiesFile, new ClassLoaderResourceAccessor(classLoader));
             database.setDefaultCatalogName(StringUtils.trimToNull(defaultCatalogName));
             database.setDefaultSchemaName(StringUtils.trimToNull(defaultSchemaName));
             database.setOutputDefaultCatalog(outputDefaultCatalog);

@@ -1,10 +1,13 @@
 package liquibase.database.jvm;
 
+import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.logging.LogFactory;
 
 import java.sql.*;
+import java.util.Arrays;
 import java.util.Map;
 
 /**
@@ -18,6 +21,18 @@ public class JdbcConnection implements DatabaseConnection {
 
     public JdbcConnection(java.sql.Connection connection) {
         this.con = connection;
+    }
+
+
+    @Override
+    public void attached(Database database) {
+        try {
+            database.addReservedWords(Arrays.asList(this.getWrappedConnection().getMetaData().getSQLKeywords().toUpperCase().split(",\\s*")));
+        } catch (SQLException e) {
+            LogFactory.getLogger().info("Error fetching reserved words list from JDBC driver", e);
+        }
+
+
     }
 
     @Override
@@ -57,7 +72,7 @@ public class JdbcConnection implements DatabaseConnection {
     }
 
     @Override
-    public String getURL(){
+    public String getURL() {
         try {
             return con.getMetaData().getURL();
         } catch (SQLException e) {

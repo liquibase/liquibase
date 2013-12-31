@@ -14,6 +14,7 @@ import liquibase.diff.output.changelog.DiffToChangeLog;
 import liquibase.exception.*;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
+import liquibase.lockservice.LockServiceFactory;
 import liquibase.logging.LogFactory;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.EmptyDatabaseSnapshot;
@@ -82,8 +83,6 @@ public abstract class AbstractJdbcDatabase implements Database {
     private Boolean previousAutoCommit;
 
     private boolean canCacheLiquibaseTableInfo = false;
-    private boolean hasDatabaseChangeLogLockTable = false;
-    private boolean isDatabaseChangeLogLockTableInitialized = false;
 
     protected BigInteger defaultAutoIncrementStartWith = BigInteger.ONE;
     protected BigInteger defaultAutoIncrementBy = BigInteger.ONE;
@@ -140,17 +139,12 @@ public abstract class AbstractJdbcDatabase implements Database {
                 LogFactory.getLogger().debug("Setting auto commit to " + getAutoCommitMode() + " from " + autoCommit);
                 connection.setAutoCommit(getAutoCommitMode());
 
-                if (conn instanceof JdbcConnection) {
-                    try {
-                        reservedWords.addAll(Arrays.asList(((JdbcConnection) conn).getWrappedConnection().getMetaData().getSQLKeywords().toUpperCase().split(",\\s*")));
-                    } catch (SQLException e) {
-                        LogFactory.getLogger().info("Error fetching reserved words list from JDBC driver", e);
-                    }
-                }
             }
         } catch (DatabaseException e) {
             LogFactory.getLogger().warning("Cannot set auto commit to " + getAutoCommitMode() + " on connection");
         }
+
+        this.connection.attached(this);
     }
 
     /**
@@ -159,6 +153,11 @@ public abstract class AbstractJdbcDatabase implements Database {
     @Override
     public boolean getAutoCommitMode() {
         return !supportsDDLInTransaction();
+    }
+
+    @Override
+    public void addReservedWords(Collection<String> words) {
+        reservedWords.addAll(words);
     }
 
     /**
@@ -631,47 +630,6 @@ public abstract class AbstractJdbcDatabase implements Database {
     @Override
     public void setCanCacheLiquibaseTableInfo(final boolean canCacheLiquibaseTableInfo) {
         this.canCacheLiquibaseTableInfo = canCacheLiquibaseTableInfo;
-        hasDatabaseChangeLogLockTable = false;
-    }
-
-    @Override
-    public boolean hasDatabaseChangeLogLockTable() throws DatabaseException {
-        if (canCacheLiquibaseTableInfo && hasDatabaseChangeLogLockTable) {
-            return true;
-        }
-        boolean hasTable = false;
-        try {
-            hasTable = SnapshotGeneratorFactory.getInstance().hasDatabaseChangeLogLockTable(this);
-        } catch (LiquibaseException e) {
-            throw new UnexpectedLiquibaseException(e);
-        }
-        if (canCacheLiquibaseTableInfo) {
-            hasDatabaseChangeLogLockTable = hasTable;
-        }
-        return hasTable;
-    }
-
-    public boolean isDatabaseChangeLogLockTableInitialized(final boolean tableJustCreated) throws DatabaseException {
-        if (canCacheLiquibaseTableInfo && isDatabaseChangeLogLockTableInitialized) {
-            return true;
-        }
-        boolean initialized;
-        Executor executor = ExecutorService.getInstance().getExecutor(this);
-        try {
-            initialized = executor.queryForInt(new RawSqlStatement("select count(*) from " + this.escapeTableName(this.getLiquibaseCatalogName(), this.getLiquibaseSchemaName(), this.getDatabaseChangeLogLockTableName()))) > 0;
-        } catch (LiquibaseException e) {
-            if (executor.updatesDatabase()) {
-                throw new UnexpectedLiquibaseException(e);
-            } else {
-                //probably didn't actually create the table yet.
-
-                initialized = !tableJustCreated;
-            }
-        }
-        if (canCacheLiquibaseTableInfo) {
-            isDatabaseChangeLogLockTableInitialized = initialized;
-        }
-        return initialized;
     }
 
     @Override
@@ -694,39 +652,12 @@ public abstract class AbstractJdbcDatabase implements Database {
         this.liquibaseSchemaName = schemaName;
     }
 
-    /**
-     * This method will check the database ChangeLogLock table used to keep track of
-     * if a machine is updating the database. If the table does not exist it will create one
-     * otherwise it will not do anything besides outputting a log message.
-     */
-    @Override
-    public void checkDatabaseChangeLogLockTable() throws DatabaseException {
-
-        boolean createdTable = false;
-        Executor executor = ExecutorService.getInstance().getExecutor(this);
-        if (!hasDatabaseChangeLogLockTable()) {
-
-            executor.comment("Create Database Lock Table");
-            executor.execute(new CreateDatabaseChangeLogLockTableStatement());
-            this.commit();
-            LogFactory.getLogger().debug("Created database lock table with name: " + escapeTableName(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogLockTableName()));
-            this.hasDatabaseChangeLogLockTable = true;
-            createdTable = true;
-        }
-
-        if (!isDatabaseChangeLogLockTableInitialized(createdTable)) {
-            executor.comment("Initialize Database Lock Table");
-            executor.execute(new InitializeDatabaseChangeLogLockTableStatement());
-            this.commit();
-        }
-    }
-
     @Override
     public boolean isCaseSensitive() {
     	if (caseSensitive == null) {
-            if (connection != null) {
+            if (connection != null && connection instanceof JdbcConnection) {
                 try {
-                	caseSensitive = Boolean.valueOf(((JdbcConnection) connection).getUnderlyingConnection().getMetaData().supportsMixedCaseIdentifiers());
+                	caseSensitive = ((JdbcConnection) connection).getUnderlyingConnection().getMetaData().supportsMixedCaseIdentifiers();
                 } catch (SQLException e) {
                     LogFactory.getLogger().warning("Cannot determine case sensitivity from JDBC driver", e);
                 }
@@ -738,6 +669,10 @@ public abstract class AbstractJdbcDatabase implements Database {
     	} else {
     		return caseSensitive.booleanValue();
     	}
+    }
+
+    public void setCaseSensitive(Boolean caseSensitive) {
+        this.caseSensitive = caseSensitive;
     }
 
     @Override
@@ -1313,7 +1248,7 @@ public abstract class AbstractJdbcDatabase implements Database {
     @Override
     public void resetInternalState() {
         ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(this).reset();
-        this.hasDatabaseChangeLogLockTable = false;
+        LockServiceFactory.getInstance().getLockService(this).reset();
     }
 
     @Override

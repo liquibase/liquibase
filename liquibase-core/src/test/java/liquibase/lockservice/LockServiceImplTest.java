@@ -58,8 +58,8 @@ public class LockServiceImplTest {
         Database database = createMock(Database.class);
         Executor executor = createMock(Executor.class);
 
-        database.checkDatabaseChangeLogLockTable();
-        expectLastCall();
+//        database.checkDatabaseChangeLogLockTable();
+//        expectLastCall();
 
         database.rollback();
         expectLastCall().anyTimes();
@@ -94,8 +94,8 @@ public class LockServiceImplTest {
         Database database = createMock(Database.class);
         Executor executor = createMock(Executor.class);
 
-        database.checkDatabaseChangeLogLockTable();
-        expectLastCall();
+//        database.checkDatabaseChangeLogLockTable();
+//        expectLastCall();
 
         database.rollback();
         expectLastCall().anyTimes();
@@ -119,8 +119,8 @@ public class LockServiceImplTest {
         Executor executor = createMock(Executor.class);
 
 
-        database.checkDatabaseChangeLogLockTable();
-        expectLastCall();
+//        database.checkDatabaseChangeLogLockTable();
+//        expectLastCall();
 
         database.setCanCacheLiquibaseTableInfo(true);
         expectLastCall();
@@ -155,8 +155,8 @@ public class LockServiceImplTest {
         Database database = createMock(Database.class);
         Executor executor = createMock(Executor.class);
 
-        database.checkDatabaseChangeLogLockTable();
-        expectLastCall().anyTimes();
+//        database.checkDatabaseChangeLogLockTable();
+//        expectLastCall().anyTimes();
 
         database.setCanCacheLiquibaseTableInfo(true);
         expectLastCall();
@@ -195,11 +195,11 @@ public class LockServiceImplTest {
         Database database = createMock(Database.class);
         Executor executor = createMock(Executor.class);
 
-        database.checkDatabaseChangeLogLockTable();
-        expectLastCall().anyTimes();
+//        database.checkDatabaseChangeLogLockTable();
+//        expectLastCall().anyTimes();
 
-        expect(executor.queryForObject(isA(SelectFromDatabaseChangeLogLockStatement.class), eq(Boolean.class))).andReturn(true).anyTimes();
-        expect(database.hasDatabaseChangeLogLockTable()).andReturn(true);
+//        expect(executor.queryForObject(isA(SelectFromDatabaseChangeLogLockStatement.class), eq(Boolean.class))).andReturn(true).anyTimes();
+//        expect(database.hasDatabaseChangeLogLockTable()).andReturn(true);
 
         List<Map<String, ?>> resultList = new ArrayList<Map<String, ?>>();
         Map<String, Object> result = new HashMap<String, Object>();
@@ -240,7 +240,7 @@ public class LockServiceImplTest {
         Executor executor = createMock(Executor.class);
 
         expect(executor.update(isA(UnlockDatabaseChangeLogStatement.class))).andReturn(1);
-        expect(database.hasDatabaseChangeLogLockTable()).andReturn(true);
+//        expect(database.hasDatabaseChangeLogLockTable()).andReturn(true);
         database.commit();
         expectLastCall().atLeastOnce();
 
@@ -269,11 +269,11 @@ public class LockServiceImplTest {
         Database database = createMock(Database.class);
         Executor executor = createMock(Executor.class);
 
-        database.checkDatabaseChangeLogLockTable();
-        expectLastCall().anyTimes();
+//        database.checkDatabaseChangeLogLockTable();
+//        expectLastCall().anyTimes();
 
-        expect(executor.queryForObject(isA(SelectFromDatabaseChangeLogLockStatement.class), eq(Boolean.class))).andReturn(true).anyTimes();
-        expect(database.hasDatabaseChangeLogLockTable()).andReturn(true);
+//        expect(executor.queryForObject(isA(SelectFromDatabaseChangeLogLockStatement.class), eq(Boolean.class))).andReturn(true).anyTimes();
+//        expect(database.hasDatabaseChangeLogLockTable()).andReturn(true);
 
         List<Map<String, ?>> resultList = new ArrayList<Map<String, ?>>();
         Map<String, Object> result = new HashMap<String, Object>();
@@ -306,11 +306,11 @@ public class LockServiceImplTest {
         Database database = createMock(Database.class);
         Executor executor = createMock(Executor.class);
 
-        database.checkDatabaseChangeLogLockTable();
-        expectLastCall().anyTimes();
+//        database.checkDatabaseChangeLogLockTable();
+//        expectLastCall().anyTimes();
 
-        expect(executor.queryForObject(isA(SelectFromDatabaseChangeLogLockStatement.class), eq(Boolean.class))).andReturn(true).anyTimes();
-        expect(database.hasDatabaseChangeLogLockTable()).andReturn(true);
+//        expect(executor.queryForObject(isA(SelectFromDatabaseChangeLogLockStatement.class), eq(Boolean.class))).andReturn(true).anyTimes();
+//        expect(database.hasDatabaseChangeLogLockTable()).andReturn(true);
 
         List<Map<String, ?>> resultList = new ArrayList<Map<String, ?>>();
 
@@ -332,7 +332,7 @@ public class LockServiceImplTest {
     public void listLocks_tableDoesNotExists() throws Exception {
         Database database = createMock(Database.class);
 
-        expect(database.hasDatabaseChangeLogLockTable()).andReturn(false);
+//        expect(database.hasDatabaseChangeLogLockTable()).andReturn(false);
 
         replay(database);
 
