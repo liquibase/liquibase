@@ -67,6 +67,11 @@ public class JdbcExecutor extends AbstractExecutor implements Executor {
 
     public Object execute(CallableStatementCallback action, List<SqlVisitor> sqlVisitors) throws DatabaseException {
         DatabaseConnection con = database.getConnection();
+
+        if (con instanceof OfflineConnection) {
+            throw new DatabaseException("Cannot execute commands against an offline database");
+        }
+
         CallableStatement stmt = null;
         try {
             String sql = applyVisitors(action.getStatement(), sqlVisitors)[0];

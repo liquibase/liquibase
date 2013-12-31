@@ -2,8 +2,11 @@ package liquibase.database;
 
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.logging.LogFactory;
+import liquibase.util.ObjectUtil;
 import liquibase.util.StringUtils;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -13,6 +16,13 @@ public class OfflineConnection implements DatabaseConnection {
     private final String url;
     private final String databaseShortName;
     private final Map<String, String> params = new HashMap<String, String>();
+    private String productName;
+    private String productVersion;
+    private int databaseMajorVersion = 999;
+    private int databaseMinorVersion = 999;
+    private String catalog;
+
+    private final Map<String, String> databaseParams = new HashMap<String, String>();
 
     public OfflineConnection(String url) {
         this.url = url;
@@ -30,6 +40,31 @@ public class OfflineConnection implements DatabaseConnection {
             }
         }
 
+
+        this.productName = "Offline "+databaseShortName;
+        for (Map.Entry<String, String> paramEntry : this.params.entrySet()) {
+
+            if (paramEntry.getKey().equals("version")) {
+                this.productVersion = paramEntry.getValue();
+                String[] versionParts = productVersion.split("\\.");
+                try {
+                    this.databaseMajorVersion = Integer.valueOf(versionParts[0]);
+                    if (versionParts.length > 1) {
+                        this.databaseMinorVersion = Integer.valueOf(versionParts[1]);
+                    }
+                } catch (NumberFormatException e) {
+                    LogFactory.getInstance().getLog().warning("Cannot parse database version "+productVersion);
+                }
+            } else if (paramEntry.getKey().equals("productName")) {
+                this.productName = paramEntry.getValue();
+            } else if (paramEntry.getKey().equals("catalog")) {
+                this.catalog = this.params.get("catalog");
+            } else {
+                this.databaseParams.put(paramEntry.getKey(), paramEntry.getValue());
+            }
+
+
+        }
     }
 
     public boolean isCorrectDatabaseImplementation(Database database) {
@@ -38,6 +73,13 @@ public class OfflineConnection implements DatabaseConnection {
 
     @Override
     public void attached(Database database) {
+        for (Map.Entry<String, String> param : this.databaseParams.entrySet()) {
+            try {
+                ObjectUtil.setProperty(database, param.getKey(), param.getValue());
+            } catch (Throwable e) {
+                LogFactory.getInstance().getLog().warning("Error setting database parameter " + param.getKey() + ": " + e.getMessage(), e);
+            }
+        }
         if (params.containsKey("caseSensitive")) {
             if (database instanceof AbstractJdbcDatabase) {
                 ((AbstractJdbcDatabase) database).setCaseSensitive(Boolean.valueOf(params.get("caseSensitive")));
@@ -62,12 +104,12 @@ public class OfflineConnection implements DatabaseConnection {
 
     @Override
     public String getCatalog() throws DatabaseException {
-        return null;
+        return catalog;
     }
 
     @Override
     public String nativeSQL(String sql) throws DatabaseException {
-        return null;
+        return sql;
     }
 
     @Override
@@ -82,22 +124,22 @@ public class OfflineConnection implements DatabaseConnection {
 
     @Override
     public String getDatabaseProductName() throws DatabaseException {
-        return null;
+        return productName;
     }
 
     @Override
     public String getDatabaseProductVersion() throws DatabaseException {
-        return null;
+        return productVersion;
     }
 
     @Override
     public int getDatabaseMajorVersion() throws DatabaseException {
-        return 0;
+        return databaseMajorVersion;
     }
 
     @Override
     public int getDatabaseMinorVersion() throws DatabaseException {
-        return 0;
+        return databaseMinorVersion;
     }
 
     @Override

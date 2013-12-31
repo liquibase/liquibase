@@ -16,6 +16,7 @@ import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.lockservice.LockServiceFactory;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.structure.core.Table;
 import liquibase.datatype.DataTypeFactory;
@@ -91,7 +92,7 @@ public abstract class AbstractExecuteTest {
 
                     if (database.getConnection() != null) {
                         ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database).init();
-                        database.checkDatabaseChangeLogLockTable();
+                        LockServiceFactory.getInstance().getLockService(database).init();
                     }
 
                     Sql[] sql = SqlGeneratorFactory.getInstance().generateSql(statementUnderTest, database);

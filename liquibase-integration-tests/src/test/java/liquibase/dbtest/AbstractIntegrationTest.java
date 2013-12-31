@@ -118,7 +118,7 @@ public abstract class AbstractIntegrationTest {
             ExecutorService.getInstance().reset();
             LockServiceFactory.getInstance().resetAll();
 
-            database.checkDatabaseChangeLogLockTable();
+            LockServiceFactory.getInstance().getLockService(database).init();
 
             if (database.getConnection() != null) {
                 ((JdbcConnection) database.getConnection()).getUnderlyingConnection().createStatement().executeUpdate("drop table "+database.getDatabaseChangeLogLockTableName());

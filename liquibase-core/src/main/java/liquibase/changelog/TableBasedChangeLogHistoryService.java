@@ -5,6 +5,7 @@ import liquibase.change.CheckSum;
 import liquibase.changelog.filter.ContextChangeSetFilter;
 import liquibase.changelog.filter.DbmsChangeSetFilter;
 import liquibase.database.Database;
+import liquibase.database.core.SQLiteDatabase;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.DatabaseHistoryException;
 import liquibase.exception.LiquibaseException;
@@ -92,7 +93,7 @@ public class TableBasedChangeLogHistoryService extends AbstractChangeLogHistoryS
             boolean hasTag = changeLogTable.getColumn("TAG") != null;
             boolean hasLiquibase = changeLogTable.getColumn("LIQUIBASE") != null;
             boolean liquibaseColumnNotRightSize = false;
-            if (!this.getDatabase().getConnection().getDatabaseProductName().equals("SQLite")) {
+            if (!(this.getDatabase() instanceof SQLiteDatabase)) {
                 Integer columnSize = changeLogTable.getColumn("LIQUIBASE").getType().getColumnSize();
                 liquibaseColumnNotRightSize = columnSize != null && columnSize != 20;
             }

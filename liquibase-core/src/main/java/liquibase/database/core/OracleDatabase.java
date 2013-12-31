@@ -3,22 +3,19 @@ package liquibase.database.core;
 import liquibase.CatalogAndSchema;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
-import liquibase.database.jvm.JdbcConnection;
+import liquibase.database.OfflineConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.ExecutorService;
 import liquibase.logging.LogFactory;
 import liquibase.statement.DatabaseFunction;
-import liquibase.statement.StoredProcedureStatement;
 import liquibase.statement.core.RawCallStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Catalog;
-import liquibase.structure.core.Index;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
 
 import java.lang.reflect.Method;
 import java.sql.Connection;
-import java.sql.ResultSet;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -128,6 +125,9 @@ public class OracleDatabase extends AbstractJdbcDatabase {
 
     @Override
     protected String getConnectionCatalogName() throws DatabaseException {
+        if (getConnection() instanceof OfflineConnection) {
+            return getConnection().getCatalog();
+        }
         try {
             return ExecutorService.getInstance().getExecutor(this).queryForObject(new RawCallStatement("select sys_context( 'userenv', 'current_schema' ) from dual"), String.class);
         } catch (Exception e) {

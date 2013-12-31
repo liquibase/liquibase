@@ -2,6 +2,7 @@ package liquibase.snapshot;
 
 import liquibase.CatalogAndSchema;
 import liquibase.database.Database;
+import liquibase.database.OfflineConnection;
 import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
@@ -122,6 +123,9 @@ public class SnapshotGeneratorFactory {
     }
 
     public DatabaseSnapshot createSnapshot(DatabaseObject[] examples, Database database, SnapshotControl snapshotControl) throws DatabaseException, InvalidExampleException {
+        if (database.getConnection() instanceof OfflineConnection) {
+            throw new DatabaseException("Cannot snapshot offline database");
+        }
         return new JdbcDatabaseSnapshot(examples, database, snapshotControl);
     }
 
