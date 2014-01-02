@@ -3,15 +3,18 @@ package liquibase.changelog;
 import liquibase.Contexts;
 import liquibase.changelog.filter.ContextChangeSetFilter;
 import liquibase.changelog.filter.DbmsChangeSetFilter;
+import liquibase.changelog.filter.ShouldRunChangeSetFilter;
+import liquibase.changelog.visitor.ExpectedChangesVisitor;
+import liquibase.changelog.visitor.ListVisitor;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.DatabaseHistoryException;
-import liquibase.executor.Executor;
-import liquibase.executor.ExecutorService;
+import liquibase.exception.LiquibaseException;
 import liquibase.logging.LogFactory;
-import liquibase.statement.core.UpdateChangeSetChecksumStatement;
 
+import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 
 public abstract class AbstractChangeLogHistoryService implements ChangeLogHistoryService {
 

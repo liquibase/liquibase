@@ -13,6 +13,7 @@ import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.logging.LogFactory;
+import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.SnapshotControl;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
@@ -310,5 +311,24 @@ public class TableBasedChangeLogHistoryService extends AbstractChangeLogHistoryS
         return count > 0;
     }
 
+    @Override
+    public void clearAllCheckSums() throws LiquibaseException {
+        Database database = getDatabase();
+        UpdateStatement updateStatement = new UpdateStatement(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName());
+        updateStatement.addNewColumnValue("MD5SUM", null);
+        ExecutorService.getInstance().getExecutor(database).execute(updateStatement);
+        database.commit();
+    }
 
+    @Override
+    public void destroy() throws DatabaseException {
+        Database database = getDatabase();
+        try {
+            if (SnapshotGeneratorFactory.getInstance().has(new Table().setName(database.getDatabaseChangeLogTableName()).setSchema(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName()), database)) {
+                ExecutorService.getInstance().getExecutor(database).execute(new DropTableStatement(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName(), false));
+            }
+        } catch (InvalidExampleException e) {
+            throw new UnexpectedLiquibaseException(e);
+        }
+    }
 }

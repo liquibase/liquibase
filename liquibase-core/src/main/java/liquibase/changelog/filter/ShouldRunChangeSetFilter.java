@@ -10,11 +10,9 @@ import liquibase.exception.DatabaseException;
 public class ShouldRunChangeSetFilter implements ChangeSetFilter {
 
     private final List<RanChangeSet> ranChangeSets;
-    private final Database database;
     private final boolean ignoreClasspathPrefix;
 
     public ShouldRunChangeSetFilter(Database database, boolean ignoreClasspathPrefix) throws DatabaseException {
-        this.database = database;
         this.ignoreClasspathPrefix = ignoreClasspathPrefix;
         this.ranChangeSets = database.getRanChangeSetList();
     }

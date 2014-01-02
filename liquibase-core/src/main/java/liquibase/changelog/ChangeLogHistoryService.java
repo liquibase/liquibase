@@ -1,12 +1,15 @@
 package liquibase.changelog;
 
 import liquibase.Contexts;
+import liquibase.changelog.visitor.ListVisitor;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.DatabaseHistoryException;
 import liquibase.exception.LiquibaseException;
 import liquibase.servicelocator.PrioritizedService;
+import liquibase.snapshot.InvalidExampleException;
 
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
@@ -48,4 +51,8 @@ public interface ChangeLogHistoryService extends PrioritizedService {
     void tag(String tagString) throws DatabaseException;
 
     boolean tagExists(String tag) throws DatabaseException;
+
+    void clearAllCheckSums() throws LiquibaseException;
+
+    void destroy() throws DatabaseException;
 }

@@ -9,9 +9,11 @@ import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.logging.LogFactory;
+import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.*;
+import liquibase.structure.core.Table;
 
 import java.text.DateFormat;
 import java.util.ArrayList;
@@ -289,4 +291,15 @@ public class LockServiceImpl implements LockService {
         hasChangeLogLock = false;
     }
 
+    @Override
+    public void destroy() throws DatabaseException {
+        try {
+            if (SnapshotGeneratorFactory.getInstance().has(new Table().setName(database.getDatabaseChangeLogLockTableName()).setSchema(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName()), database)) {
+                ExecutorService.getInstance().getExecutor(database).execute(new DropTableStatement(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName(), false));
+            }
+        } catch (InvalidExampleException e) {
+            throw new UnexpectedLiquibaseException(e);
+        }
+
+    }
 }

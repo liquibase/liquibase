@@ -742,12 +742,8 @@ public abstract class AbstractJdbcDatabase implements Database {
                 }
             }
 
-            if (SnapshotGeneratorFactory.getInstance().has(new Table().setName(this.getDatabaseChangeLogTableName()).setSchema(this.getLiquibaseCatalogName(), this.getLiquibaseSchemaName()), this)) {
-                ExecutorService.getInstance().getExecutor(this).execute(new DropTableStatement(this.getLiquibaseCatalogName(), this.getLiquibaseSchemaName(), this.getDatabaseChangeLogTableName(), false));
-            }
-            if (SnapshotGeneratorFactory.getInstance().has(new Table().setName(this.getDatabaseChangeLogLockTableName()).setSchema(this.getLiquibaseCatalogName(), this.getLiquibaseSchemaName()), this)) {
-                ExecutorService.getInstance().getExecutor(this).execute(new DropTableStatement(this.getLiquibaseCatalogName(), this.getLiquibaseSchemaName(), this.getDatabaseChangeLogLockTableName(), false));
-            }
+            ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(this).destroy();
+            LockServiceFactory.getInstance().getLockService(this).destroy();
 
         } finally {
             this.setObjectQuotingStrategy(currentStrategy);

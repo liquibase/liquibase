@@ -187,7 +187,7 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
             CSVWriter csvWriter = new CSVWriter(writer);
             String[] line;
             while ((line = csvReader.readNext()) != null) {
-                if (line[COLUMN_ID].equals(changeSet.getId()) && line[COLUMN_AUTHOR].equals(changeSet.getAuthor()) && line[COLUMN_FILENAME].equals(changeSet.getFilePath())) {
+                if (changeSet == null || (line[COLUMN_ID].equals(changeSet.getId()) && line[COLUMN_AUTHOR].equals(changeSet.getAuthor()) && line[COLUMN_FILENAME].equals(changeSet.getFilePath()))) {
                     line = replaceLogic.execute(line);
                 }
                 if (line != null) {
@@ -362,5 +362,24 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
 
     private interface ReplaceChangeSetLogic {
         public String[] execute(String[] line);
+    }
+
+    @Override
+    public void clearAllCheckSums() throws LiquibaseException {
+        replaceChangeSet(null, new ReplaceChangeSetLogic() {
+            @Override
+            public String[] execute(String[] line) {
+                line[COLUMN_MD5SUM] = null;
+                return line;
+            }
+        });
+
+    }
+
+    @Override
+    public void destroy() throws DatabaseException {
+        if (changeLogFile.exists() && !changeLogFile.delete()) {
+            throw new DatabaseException("Could not delete changelog history file "+changeLogFile.getAbsolutePath());
+        }
     }
 }

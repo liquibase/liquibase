@@ -68,4 +68,9 @@ public class MockLockService implements LockService {
     public int getPriority() {
         return PRIORITY_DATABASE;
     }
+
+    @Override
+    public void destroy() throws DatabaseException {
+
+    }
 }

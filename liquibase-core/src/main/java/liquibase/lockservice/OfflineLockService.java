@@ -75,4 +75,9 @@ public class OfflineLockService implements LockService {
     public void reset() {
         this.hasChangeLogLock = false;
     }
+
+    @Override
+    public void destroy() throws DatabaseException {
+        //nothign to do
+    }
 }

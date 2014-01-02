@@ -39,4 +39,6 @@ public interface LockService extends PrioritizedService {
     void reset();
 
     void init() throws DatabaseException;
+
+    void destroy() throws DatabaseException;
 }
