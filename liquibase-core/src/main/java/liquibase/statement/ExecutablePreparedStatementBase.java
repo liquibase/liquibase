@@ -25,6 +25,7 @@ import liquibase.database.PreparedStatementFactory;
 import liquibase.exception.DatabaseException;
 import liquibase.resource.ResourceAccessor;
 import liquibase.resource.UtfBomAwareReader;
+import liquibase.util.JdbcUtils;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
 import liquibase.util.file.FilenameUtils;
@@ -80,6 +81,7 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
 	        for (Closeable closeable : closeables) {
                 StreamUtil.closeQuietly(closeable);
             }
+	        JdbcUtils.closeStatement(stmt);
 	    }
 	}
 
