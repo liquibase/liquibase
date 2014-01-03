@@ -123,7 +123,7 @@ public class SQLFileChange extends AbstractSQLChange {
                 if (sqlStream == null) {
                     return null;
                 }
-                return StreamUtil.getStreamContents(sqlStream, encoding);
+                return getChangeSet().getChangeLogParameters().expandExpressions(StreamUtil.getStreamContents(sqlStream, encoding));
             } catch (IOException e) {
                 throw new UnexpectedLiquibaseException(e);
             }
