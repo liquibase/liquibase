@@ -17,7 +17,19 @@ public class TimestampType extends DateTimeType {
             if (originalDefinition.contains(" ")) {
                 return new DatabaseDataType(originalDefinition);
             }
-            return new DatabaseDataType("TIMESTAMP");
+            boolean supportsParameters = true;
+            try {
+                supportsParameters = database.getDatabaseMajorVersion() >= 5
+                        && database.getDatabaseMinorVersion() >= 6
+                        && ((MySQLDatabase) database).getDatabasePatchVersion() >= 4;
+            } catch (Exception ignore) {
+                //assume supports parameters
+            }
+            if (supportsParameters) {
+                return new DatabaseDataType("TIMESTAMP", getParameters());
+            } else {
+                return new DatabaseDataType("TIMESTAMP");
+            }
         }
         if (database instanceof MSSQLDatabase) {
             return new DatabaseDataType("DATETIME");

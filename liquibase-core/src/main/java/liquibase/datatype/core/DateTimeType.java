@@ -4,6 +4,7 @@ import liquibase.database.core.*;
 import liquibase.datatype.DataTypeInfo;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
+import liquibase.exception.DatabaseException;
 import liquibase.statement.DatabaseFunction;
 import liquibase.database.Database;
 
@@ -41,7 +42,19 @@ public class DateTimeType extends LiquibaseDataType {
         }
 
         if (database instanceof MySQLDatabase) {
-            return new DatabaseDataType(getName());
+            boolean supportsParameters = true;
+            try {
+                supportsParameters = database.getDatabaseMajorVersion() >= 5
+                        && database.getDatabaseMinorVersion() >= 6
+                        && ((MySQLDatabase) database).getDatabasePatchVersion() >= 4;
+            } catch (Exception ignore) {
+                //assume supports parameters
+            }
+            if (supportsParameters) {
+                return new DatabaseDataType(getName(), getParameters());
+            } else {
+                return new DatabaseDataType(getName());
+            }
         }
 
         return new DatabaseDataType(getName());

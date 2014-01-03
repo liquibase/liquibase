@@ -218,6 +218,16 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
         return super.isReservedWord(string);
     }
 
+    public int getDatabasePatchVersion() throws DatabaseException {
+        String versionStrings[] = this.getDatabaseProductVersion().split("\\.");
+        try {
+            return Integer.parseInt(versionStrings[2].replaceFirst("\\D.*", ""));
+        } catch (NumberFormatException e) {
+            return 0;
+        }
+
+    }
+
     {
         //list from http://dev.mysql.com/doc/refman/5.6/en/reserved-words.html
         reservedWords.addAll(Arrays.asList("ACCESSIBLE",
