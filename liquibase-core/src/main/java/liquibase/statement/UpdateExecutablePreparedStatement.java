@@ -8,6 +8,7 @@ import liquibase.change.ColumnConfig;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.datatype.DataTypeFactory;
+import liquibase.resource.ResourceAccessor;
 import liquibase.structure.core.Column;
 
 public class UpdateExecutablePreparedStatement extends ExecutablePreparedStatementBase {
@@ -17,8 +18,8 @@ public class UpdateExecutablePreparedStatement extends ExecutablePreparedStateme
     private List<String> whereColumnNames = new ArrayList<String>();
     private List<Object> whereParameters = new ArrayList<Object>();
 
-	public UpdateExecutablePreparedStatement(Database database, String catalogName, String schemaName, String tableName, List<ColumnConfig> columns, ChangeSet changeSet) {
-		super(database, catalogName, schemaName, tableName, columns, changeSet);
+	public UpdateExecutablePreparedStatement(Database database, String catalogName, String schemaName, String tableName, List<ColumnConfig> columns, ChangeSet changeSet, ResourceAccessor resourceAccessor) {
+		super(database, catalogName, schemaName, tableName, columns, changeSet, resourceAccessor);
 	}
 
 	@Override
