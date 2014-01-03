@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- Liquibase data ChangeLog. Clears the whole table and loads all data. -->
+
+<databaseChangeLog 
+		xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+		xmlns:fn="http://www.w3.org/2005/xpath-functions"
+		xmlns:xs="http://www.w3.org/2001/XMLSchema"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd"
+		logicalFilePath="table">
+
+	<changeSet author="tgdmemae" id="table">
+		<createTable tableName="T1">
+			<column name="TXT" type="VARCHAR2(255)"></column>
+		</createTable>
+	</changeSet>
+</databaseChangeLog>
