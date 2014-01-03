@@ -226,9 +226,14 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
             }
         }
 
-        if (database instanceof MySQLDatabase && columnTypeName.equalsIgnoreCase("ENUM")) {
+        if (database instanceof MySQLDatabase && (columnTypeName.equalsIgnoreCase("ENUM") || columnTypeName.equalsIgnoreCase("SET"))) {
             try {
-                List<String> enumValues = ExecutorService.getInstance().getExecutor(database).queryForList(new RawSqlStatement("SELECT DISTINCT SUBSTRING_INDEX(SUBSTRING_INDEX(SUBSTRING(COLUMN_TYPE, 7, LENGTH(COLUMN_TYPE) - 8), \"','\", 1 + units.i + tens.i * 10) , \"','\", -1)\n" +
+                String boilerLength;
+                if (columnTypeName.equalsIgnoreCase("ENUM"))
+                    boilerLength = "7";
+                else // SET
+                    boilerLength = "6";
+                List<String> enumValues = ExecutorService.getInstance().getExecutor(database).queryForList(new RawSqlStatement("SELECT DISTINCT SUBSTRING_INDEX(SUBSTRING_INDEX(SUBSTRING(COLUMN_TYPE, " + boilerLength + ", LENGTH(COLUMN_TYPE) - " + boilerLength + " - 1 ), \"','\", 1 + units.i + tens.i * 10) , \"','\", -1)\n" +
                         "FROM INFORMATION_SCHEMA.COLUMNS\n" +
                         "CROSS JOIN (SELECT 0 AS i UNION SELECT 1 UNION SELECT 2 UNION SELECT 3 UNION SELECT 4 UNION SELECT 5 UNION SELECT 6 UNION SELECT 7 UNION SELECT 8 UNION SELECT 9) units\n" +
                         "CROSS JOIN (SELECT 0 AS i UNION SELECT 1 UNION SELECT 2 UNION SELECT 3 UNION SELECT 4 UNION SELECT 5 UNION SELECT 6 UNION SELECT 7 UNION SELECT 8 UNION SELECT 9) tens\n" +
@@ -239,7 +244,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                     enumClause += "'"+enumValue+"', ";
                 }
                 enumClause = enumClause.replaceFirst(", $", "");
-                return new DataType("ENUM("+enumClause+")");
+                return new DataType(columnTypeName + "("+enumClause+")");
             } catch (DatabaseException e) {
                 LogFactory.getLogger().warning("Error fetching enum values", e);
             }
