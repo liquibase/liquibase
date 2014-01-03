@@ -3,6 +3,7 @@ package liquibase.database.core;
 import liquibase.CatalogAndSchema;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
+import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.Executor;
@@ -221,11 +222,16 @@ public class SybaseDatabase extends AbstractJdbcDatabase {
     }
 
     @Override
-    public String getDefaultSchemaName() {
-        if (defaultSchemaName == null) {
-            defaultSchemaName = getConnectionSchemaName();
+    protected String getConnectionSchemaName() {
+        if (getConnection() == null) {
+            return null;
         }
-        return defaultSchemaName;
+        try {
+            return ExecutorService.getInstance().getExecutor(this).queryForObject(new RawSqlStatement("select user_name()"), String.class);
+        } catch (Exception e) {
+            LogFactory.getLogger().info("Error getting default schema", e);
+        }
+        return null;
     }
 
 
