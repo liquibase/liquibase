@@ -47,7 +47,12 @@ public class SchemaComparator implements DatabaseObjectComparator {
             }
         }
         if (accordingTo.supportsSchemas()) {
-            return thisSchema.getSchemaName().equalsIgnoreCase(otherSchema.getSchemaName());
+            String thisSchemaName = thisSchema.getSchemaName();
+            String otherSchemaName = otherSchema.getSchemaName();
+            if (thisSchemaName == null) {
+                return otherSchemaName == null;
+            }
+            return thisSchemaName.equalsIgnoreCase(otherSchemaName);
         }
         return true;
     }
