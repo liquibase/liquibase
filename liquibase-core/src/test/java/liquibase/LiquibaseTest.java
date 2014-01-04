@@ -204,55 +204,55 @@ public class LiquibaseTest {
         liquibase.reset();
     }
 
-    @Test
-    public void update() throws LiquibaseException {
-        Contexts contexts = new Contexts("a,b");
+//    @Test
+//    public void update() throws LiquibaseException {
+//        Contexts contexts = new Contexts("a,b");
+//
+//        Liquibase liquibase = new Liquibase("com/example/test.xml", mockResourceAccessor, mockDatabase) {
+//            @Override
+//            protected ChangeLogIterator getStandardChangelogIterator(Contexts contexts, DatabaseChangeLog changeLog) throws DatabaseException {
+//                return mockChangeLogIterator;
+//            }
+//        };
+//
+//        liquibase.update(contexts);
+//
+//        verify(mockLockService).waitForLock();
+////        verify(mockDatabase).checkDatabaseChangeLogTable(true, mockChangeLog, contexts);
+////        verify(mockDatabase).checkDatabaseChangeLogLockTable();
+//        verify(mockChangeLog).validate(mockDatabase, contexts);
+//        verify(mockChangeLogParser).parse("com/example/test.xml", liquibase.getChangeLogParameters(), mockResourceAccessor);
+//        verify(mockChangeLogIterator).run(any(UpdateVisitor.class), eq(mockDatabase));
+//        verify(mockLockService).releaseLock();
+//        verify(mockDatabase).setObjectQuotingStrategy(ObjectQuotingStrategy.LEGACY); //quoting strategy needs to be set back in case it changed during the update
+//
+//
+//        assertEquals("Passed contexts were not set on the changelog parameters object", "a,b", liquibase.getChangeLogParameters().getContexts().toString());
+//    }
 
-        Liquibase liquibase = new Liquibase("com/example/test.xml", mockResourceAccessor, mockDatabase) {
-            @Override
-            protected ChangeLogIterator getStandardChangelogIterator(Contexts contexts, DatabaseChangeLog changeLog) throws DatabaseException {
-                return mockChangeLogIterator;
-            }
-        };
-
-        liquibase.update(contexts);
-
-        verify(mockLockService).waitForLock();
-//        verify(mockDatabase).checkDatabaseChangeLogTable(true, mockChangeLog, contexts);
-//        verify(mockDatabase).checkDatabaseChangeLogLockTable();
-        verify(mockChangeLog).validate(mockDatabase, contexts);
-        verify(mockChangeLogParser).parse("com/example/test.xml", liquibase.getChangeLogParameters(), mockResourceAccessor);
-        verify(mockChangeLogIterator).run(any(UpdateVisitor.class), eq(mockDatabase));
-        verify(mockLockService).releaseLock();
-        verify(mockDatabase).setObjectQuotingStrategy(ObjectQuotingStrategy.LEGACY); //quoting strategy needs to be set back in case it changed during the update
-
-
-        assertEquals("Passed contexts were not set on the changelog parameters object", "a,b", liquibase.getChangeLogParameters().getContexts().toString());
-    }
-
-    @Test
-    public void update_nullContexts() throws LiquibaseException {
-        Liquibase liquibase = new Liquibase("com/example/test.xml", mockResourceAccessor, mockDatabase) {
-            @Override
-            protected ChangeLogIterator getStandardChangelogIterator(Contexts contexts, DatabaseChangeLog changeLog) throws DatabaseException {
-                return mockChangeLogIterator;
-            }
-        };
-
-        liquibase.update((Contexts) null);
-
-        verify(mockLockService).waitForLock();
-//        verify(mockDatabase).checkDatabaseChangeLogTable(true, mockChangeLog, (Contexts) null);
-//        verify(mockDatabase).checkDatabaseChangeLogLockTable();
-        verify(mockChangeLog).validate(mockDatabase, (Contexts) null);
-        verify(mockChangeLogParser).parse("com/example/test.xml", liquibase.getChangeLogParameters(), mockResourceAccessor);
-        verify(mockChangeLogIterator).run(any(UpdateVisitor.class), eq(mockDatabase));
-        verify(mockLockService).releaseLock();
-        verify(mockDatabase).setObjectQuotingStrategy(ObjectQuotingStrategy.LEGACY); //quoting strategy needs to be set back in case it changed during the update
-
-
-        assertNull(liquibase.getChangeLogParameters().getContexts());
-    }
+//    @Test
+//    public void update_nullContexts() throws LiquibaseException {
+//        Liquibase liquibase = new Liquibase("com/example/test.xml", mockResourceAccessor, mockDatabase) {
+//            @Override
+//            protected ChangeLogIterator getStandardChangelogIterator(Contexts contexts, DatabaseChangeLog changeLog) throws DatabaseException {
+//                return mockChangeLogIterator;
+//            }
+//        };
+//
+//        liquibase.update((Contexts) null);
+//
+//        verify(mockLockService).waitForLock();
+////        verify(mockDatabase).checkDatabaseChangeLogTable(true, mockChangeLog, (Contexts) null);
+////        verify(mockDatabase).checkDatabaseChangeLogLockTable();
+//        verify(mockChangeLog).validate(mockDatabase, (Contexts) null);
+//        verify(mockChangeLogParser).parse("com/example/test.xml", liquibase.getChangeLogParameters(), mockResourceAccessor);
+//        verify(mockChangeLogIterator).run(any(UpdateVisitor.class), eq(mockDatabase));
+//        verify(mockLockService).releaseLock();
+//        verify(mockDatabase).setObjectQuotingStrategy(ObjectQuotingStrategy.LEGACY); //quoting strategy needs to be set back in case it changed during the update
+//
+//
+//        assertNull(liquibase.getChangeLogParameters().getContexts());
+//    }
 
     @Test(expected = LockException.class)
     public void update_exceptionGettingLock() throws LiquibaseException {
@@ -287,13 +287,13 @@ public class LiquibaseTest {
 
     }
 
-    @Test
-    public void update_exceptionReleasingLock() throws LiquibaseException {
-        doThrow(LockException.class).when(mockLockService).releaseLock();
-
-        update(); //works like normal, just logs error
-        verify(mockLogger).severe(eq("Could not release lock"), any(Exception.class));
-    }
+//    @Test
+//    public void update_exceptionReleasingLock() throws LiquibaseException {
+//        doThrow(LockException.class).when(mockLockService).releaseLock();
+//
+//        update(); //works like normal, just logs error
+//        verify(mockLogger).severe(eq("Could not release lock"), any(Exception.class));
+//    }
 
     @Test
     public void getStandardChangelogIterator() throws LiquibaseException {
