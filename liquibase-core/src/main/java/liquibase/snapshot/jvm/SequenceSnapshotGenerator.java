@@ -104,6 +104,8 @@ public class SequenceSnapshotGenerator extends JdbcSnapshotGenerator {
                     "AND 'nextval(''" + schema.getName() + "." + "\"'||relname||'\"''::regclass)' not in (select adsrc from pg_attrdef where adsrc is not null) " +
                     "AND 'nextval('''||relname||'''::regclass)' not in (select adsrc from pg_attrdef where adsrc is not null)" +
                     "AND 'nextval(''\"'||relname||'\"''::regclass)' not in (select adsrc from pg_attrdef where adsrc is not null)";
+        } else if (database instanceof MSSQLDatabase) {
+                return "SELECT SEQUENCE_NAME FROM INFORMATION_SCHEMA.SEQUENCES WHERE SEQUENCE_SCHEMA = '" + schema.getName() +"'";
         } else {
             throw new UnexpectedLiquibaseException("Don't know how to query for sequences on " + database);
         }

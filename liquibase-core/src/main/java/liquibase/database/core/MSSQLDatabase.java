@@ -107,6 +107,13 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
 
     @Override
     public boolean supportsSequences() {
+        try {
+            if (this.getDatabaseMajorVersion() >= 11) {
+                return true;
+            }
+        } catch (DatabaseException e) {
+            return false;
+        }
         return false;
     }
 
