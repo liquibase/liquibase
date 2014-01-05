@@ -264,6 +264,10 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
     }
 
     protected InputStream openChangeLogFile(String physicalChangeLogLocation, ResourceAccessor resourceAccessor) throws IOException {
-        return resourceAccessor.getResourceAsStream(physicalChangeLogLocation);
+        InputStream resourceAsStream = resourceAccessor.getResourceAsStream(physicalChangeLogLocation);
+        if (resourceAsStream == null) {
+            throw new IOException("File does not exist: "+physicalChangeLogLocation);
+        }
+        return resourceAsStream;
     }
 }

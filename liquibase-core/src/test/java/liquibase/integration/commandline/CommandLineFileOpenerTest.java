@@ -1,12 +1,10 @@
 package liquibase.integration.commandline;
 
-import liquibase.integration.commandline.CommandLineResourceAccessor;
 import liquibase.resource.AbstractFileOpenerTest;
 import liquibase.resource.ResourceAccessor;
 import static org.junit.Assert.*;
 import org.junit.Test;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.Enumeration;
@@ -30,9 +28,9 @@ public class CommandLineFileOpenerTest extends AbstractFileOpenerTest {
       assertNotNull(inputStream);
     }
 
-    @Test(expected = IOException.class)
+    @Test
     public void getResourceAsStreamNonExistantFile() throws Exception {
-      resourceAccessor.getResourceAsStream("non/existant/file.txt");
+      assertNull(resourceAccessor.getResourceAsStream("non/existant/file.txt"));
     }
 
     @Test

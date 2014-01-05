@@ -24,6 +24,7 @@ import liquibase.Liquibase;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
+import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.integration.commandline.CommandLineUtils;
 import liquibase.logging.LogFactory;
 import liquibase.resource.CompositeResourceAccessor;
@@ -419,17 +420,17 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
         if (propertyFile != null) {
             getLog().info("Parsing Liquibase Properties File");
             getLog().info("  File: " + propertyFile);
+            InputStream is;
             try {
-                InputStream is = fo.getResourceAsStream(propertyFile);
-                if (is == null) {
-                    throw new MojoFailureException("Failed to resolve the properties file.");
-                }
-                parsePropertiesFile(is);
-                getLog().info(MavenUtils.LOG_SEPARATOR);
+                is = fo.getResourceAsStream(propertyFile);
+            } catch (IOException e) {
+                throw new UnexpectedLiquibaseException(e);
             }
-            catch (IOException e) {
-                throw new MojoExecutionException("Failed to resolve properties file", e);
+            if (is == null) {
+                throw new MojoFailureException("Failed to resolve the properties file.");
             }
+            parsePropertiesFile(is);
+            getLog().info(MavenUtils.LOG_SEPARATOR);
         }
     }
 

@@ -168,11 +168,7 @@ public class StreamUtil {
             file = base.replaceFirst("/[^/]*$", "") + "/" + file;
         }
 
-        try {
-            return resourceAccessor.getResourceAsStream(file);
-        } catch (FileNotFoundException fnfe) {
-            return null;
-        }
+        return resourceAccessor.getResourceAsStream(file);
 
     }
 

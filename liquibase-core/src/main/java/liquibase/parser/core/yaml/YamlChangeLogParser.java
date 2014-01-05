@@ -58,6 +58,9 @@ public class YamlChangeLogParser implements ChangeLogParser {
 
         try {
             InputStream changeLogStream = resourceAccessor.getResourceAsStream(physicalChangeLogLocation);
+            if (changeLogStream == null) {
+                throw new ChangeLogParseException("Change log file "+physicalChangeLogLocation+" does not exist");
+            }
 
             Map changeLogAsMap = null;
             try {

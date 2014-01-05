@@ -33,7 +33,7 @@ public class CommandLineResourceAccessor implements ResourceAccessor {
                 resource = loader.getResource(file.substring(1));
             }
             if (resource == null) {
-                throw new IOException(file + " could not be found");
+                return null;
             }
         }
         return resource.openStream();

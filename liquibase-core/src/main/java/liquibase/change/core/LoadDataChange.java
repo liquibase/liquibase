@@ -288,12 +288,12 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
         try {
             stream = getResourceAccessor().getResourceAsStream(getFile());
             if (stream == null) {
-                throw new RuntimeException(getFile() + " could not be found");
+                throw new UnexpectedLiquibaseException(getFile() + " could not be found");
             }
             stream = new BufferedInputStream(stream);
             return CheckSum.compute(stream, true);
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new UnexpectedLiquibaseException(e);
         } finally {
             if (stream != null) {
                 try {

@@ -95,8 +95,8 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 
 		@Override
         public InputStream getResourceAsStream(String file) throws IOException {
-			Enumeration<URL> resources = getResources(file);
-			// take first found resource from classpath
+            Enumeration<URL> resources = getResources(file);
+            // take first found resource from classpath
 			if (resources.hasMoreElements()) {
 				return resources.nextElement().openStream();
 			} else {
