@@ -415,6 +415,9 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
             RanChangeSet ranChangeSet = database.getRanChangeSet(this);
             if (rollBackChanges != null && rollBackChanges.size() > 0) {
                 for (Change rollback : rollBackChanges) {
+                    if (((rollback instanceof DbmsTargetedChange)) && !DatabaseList.definitionMatches(((DbmsTargetedChange) rollback).getDbms(), database, true)) {
+                        continue;
+                    }
                     SqlStatement[] statements = rollback.generateStatements(database);
                     if (statements == null) {
                         continue;
