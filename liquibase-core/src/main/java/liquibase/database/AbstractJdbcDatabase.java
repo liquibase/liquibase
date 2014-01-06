@@ -946,7 +946,10 @@ public abstract class AbstractJdbcDatabase implements Database {
     }
 
     protected boolean mustQuoteObjectName(String objectName, Class<? extends DatabaseObject> objectType) {
-        return (objectName.contains("-") && !objectName.contains("(")) || startsWithNumeric(objectName) || isReservedWord(objectName);
+        if (objectName.contains("(")) {
+            return false;
+        }
+        return objectName.contains("-") || startsWithNumeric(objectName) || isReservedWord(objectName);
     }
 
     public String quoteObject(final String objectName, final Class<? extends DatabaseObject> objectType) {
