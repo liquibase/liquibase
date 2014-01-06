@@ -23,9 +23,6 @@ public class BlobType extends LiquibaseDataType {
             }
         }
 
-        if (database instanceof MaxDBDatabase) {
-            return new DatabaseDataType("LONG BYTE");
-        }
         if (database instanceof MSSQLDatabase) {
             String param = "MAX";
             if (this.getParameters().length > 0) {

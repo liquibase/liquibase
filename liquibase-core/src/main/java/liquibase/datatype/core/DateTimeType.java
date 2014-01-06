@@ -23,7 +23,6 @@ public class DateTimeType extends LiquibaseDataType {
                 || database instanceof FirebirdDatabase
                 || database instanceof H2Database
                 || database instanceof HsqlDatabase
-                || database instanceof MaxDBDatabase
                 || database instanceof OracleDatabase) {
             return new DatabaseDataType("TIMESTAMP");
         }

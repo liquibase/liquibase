@@ -24,7 +24,7 @@ public class AlterSequenceGenerator extends AbstractSqlGenerator<AlterSequenceSt
         validationErrors.checkDisallowedField("incrementBy", alterSequenceStatement.getIncrementBy(), database, HsqlDatabase.class, H2Database.class);
         validationErrors.checkDisallowedField("maxValue", alterSequenceStatement.getMaxValue(), database, HsqlDatabase.class, H2Database.class);
         validationErrors.checkDisallowedField("minValue", alterSequenceStatement.getMinValue(), database, H2Database.class);
-        validationErrors.checkDisallowedField("ordered", alterSequenceStatement.getOrdered(), database, MaxDBDatabase.class, DB2Database.class);
+        validationErrors.checkDisallowedField("ordered", alterSequenceStatement.getOrdered(), database, DB2Database.class);
 
         validationErrors.checkRequiredField("sequenceName", alterSequenceStatement.getSequenceName());
 

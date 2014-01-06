@@ -29,7 +29,7 @@ public class CreateSequenceGenerator extends AbstractSqlGenerator<CreateSequence
         validationErrors.checkDisallowedField("minValue", statement.getMinValue(), database, FirebirdDatabase.class, H2Database.class, HsqlDatabase.class);
         validationErrors.checkDisallowedField("maxValue", statement.getMaxValue(), database, FirebirdDatabase.class, H2Database.class, HsqlDatabase.class);
 
-        validationErrors.checkDisallowedField("ordered", statement.getOrdered(), database, DB2Database.class, MaxDBDatabase.class);
+        validationErrors.checkDisallowedField("ordered", statement.getOrdered(), database, DB2Database.class);
 
 
         return validationErrors;
