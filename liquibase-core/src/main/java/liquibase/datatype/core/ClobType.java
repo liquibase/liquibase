@@ -31,9 +31,7 @@ public class ClobType extends LiquibaseDataType {
     public DatabaseDataType toDatabaseDataType(Database database) {
         String originalDefinition = StringUtils.trimToEmpty(this.originalDefinition);
 
-        if (database instanceof CacheDatabase) {
-            return new DatabaseDataType("LONGVARCHAR");
-        } else if (database instanceof FirebirdDatabase) {
+        if (database instanceof FirebirdDatabase) {
             return new DatabaseDataType("BLOB SUB_TYPE TEXT");
         } else if (database instanceof MaxDBDatabase || database instanceof SybaseASADatabase) {
             return new DatabaseDataType("LONG VARCHAR");

@@ -14,7 +14,7 @@ public class RenameTableGenerator extends AbstractSqlGenerator<RenameTableStatem
 
     @Override
     public boolean supports(RenameTableStatement statement, Database database) {
-        return !(database instanceof CacheDatabase || database instanceof FirebirdDatabase);
+        return !(database instanceof FirebirdDatabase);
     }
 
     @Override

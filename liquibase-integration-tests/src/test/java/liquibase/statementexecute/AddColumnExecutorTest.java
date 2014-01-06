@@ -8,7 +8,6 @@ import liquibase.database.core.PostgresDatabase;
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.database.core.SybaseASADatabase;
 import liquibase.database.core.SybaseDatabase;
-import liquibase.database.core.CacheDatabase;
 import liquibase.database.core.*;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.test.DatabaseTestContext;
@@ -58,7 +57,7 @@ public class AddColumnExecutorTest extends AbstractExecuteTest {
 	@Test
     public void generateSql_notNull() throws Exception {
         this.statementUnderTest = new AddColumnStatement(null, null, "table_name", "column_name", "int", 42, new NotNullConstraint());
-        assertCorrect("alter table [table_name] add [column_name] int not null default 42", CacheDatabase.class, MaxDBDatabase.class);
+        assertCorrect("alter table [table_name] add [column_name] int not null default 42", MaxDBDatabase.class);
         assertCorrect("alter table [table_name] add [column_name] int default 42 not null", SybaseASADatabase.class, SybaseDatabase.class);
         assertCorrect("alter table table_name add column_name int not null default 42", PostgresDatabase.class);
         assertCorrect("alter table [table_name] add [column_name] int not null constraint df_table_name_column_name default 42", MSSQLDatabase.class);
@@ -77,7 +76,7 @@ public class AddColumnExecutorTest extends AbstractExecuteTest {
         assertCorrect("alter table [table_name] add [column_name] int constraint df_table_name_column_name default 42", MSSQLDatabase.class);
 //        assertCorrect("alter table [table_name] add [column_name] integer default 42", SQLiteDatabase.class);
         assertCorrect("not supported. fixme!!", SQLiteDatabase.class);
-        assertCorrect("alter table table_name add column_name int default 42", PostgresDatabase.class, InformixDatabase.class, OracleDatabase.class, DerbyDatabase.class, HsqlDatabase.class, DB2Database.class, H2Database.class, CacheDatabase.class, FirebirdDatabase.class, MaxDBDatabase.class);
+        assertCorrect("alter table table_name add column_name int default 42", PostgresDatabase.class, InformixDatabase.class, OracleDatabase.class, DerbyDatabase.class, HsqlDatabase.class, DB2Database.class, H2Database.class, FirebirdDatabase.class, MaxDBDatabase.class);
         assertCorrect("alter table [table_name] add [column_name] int default 42 null", SybaseASADatabase.class);
         assertCorrect("alter table table_name add column_name int null default 42", MySQLDatabase.class);
         assertCorrectOnRest("ALTER TABLE [table_name] ADD [column_name] int DEFAULT 42");

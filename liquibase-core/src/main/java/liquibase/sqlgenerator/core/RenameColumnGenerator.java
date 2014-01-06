@@ -15,8 +15,7 @@ public class RenameColumnGenerator extends AbstractSqlGenerator<RenameColumnStat
 
     @Override
     public boolean supports(RenameColumnStatement statement, Database database) {
-        return !(database instanceof CacheDatabase
-                || database instanceof SQLiteDatabase);
+        return !(database instanceof SQLiteDatabase);
     }
 
     @Override

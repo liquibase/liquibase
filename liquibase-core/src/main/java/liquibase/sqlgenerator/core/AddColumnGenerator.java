@@ -35,8 +35,7 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
         validationErrors.checkRequiredField("columnType", statement.getColumnType());
         validationErrors.checkRequiredField("tableName", statement.getTableName());
 
-        if (statement.isPrimaryKey() && (database instanceof CacheDatabase
-                || database instanceof H2Database
+        if (statement.isPrimaryKey() && (database instanceof H2Database
                 || database instanceof DB2Database
                 || database instanceof DerbyDatabase
                 || database instanceof SQLiteDatabase)) {

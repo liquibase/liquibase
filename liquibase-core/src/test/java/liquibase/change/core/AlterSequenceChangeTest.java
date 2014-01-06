@@ -62,7 +62,6 @@ public class AlterSequenceChangeTest extends StandardChangeTest {
                 || database instanceof MSSQLDatabase
                 || database instanceof MySQLDatabase
                 || database instanceof DerbyDatabase
-                || database instanceof SybaseDatabase
-                || database instanceof CacheDatabase;
+                || database instanceof SybaseDatabase;
     }
 }
