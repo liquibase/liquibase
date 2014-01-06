@@ -393,6 +393,9 @@ public class DefaultPackageScanClassResolver implements PackageScanClassResolver
                 } catch (NoClassDefFoundError e) {
                     log.debug("Cannot find the class definition '" + fqn + "' in classloader: " + classLoader
                             + ". Reason: " + e, e);
+                } catch (LinkageError e) {
+                    log.debug("Cannot find the class definition '" + fqn + "' in classloader: " + classLoader
+                            + ". Reason: " + e, e);
                 } catch (Throwable e) {
                     log.severe("Cannot load class '"+fqn+"' in classloader: "+classLoader+".  Reason: "+e, e);
                 }
