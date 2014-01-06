@@ -19,6 +19,7 @@ import org.apache.maven.wagon.authentication.AuthenticationInfo;
 
 /**
  * Generates a diff between the specified database and the reference database.
+ * The output is either a report or a changelog depending on the value of the diffChangeLogFile parameter.
  *
  * @author Peter Murray
  * @goal diff
@@ -78,8 +79,8 @@ public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
 
 
     /**
-     * The diff change log file to output the differences to. If this is null then the
-     * differences will be output to the screen.
+     * If this parameter is set, the changelog needed to "fix" differences between the two databases is output. If the file exists, it is appended to.
+     * If this is null, a comparison report is output to stdout.
      *
      * @parameter expression="${liquibase.diffChangeLogFile}"
      */
