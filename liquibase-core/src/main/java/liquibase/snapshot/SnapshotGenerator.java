@@ -17,4 +17,9 @@ public interface SnapshotGenerator {
     <T extends DatabaseObject> T snapshot(T example, DatabaseSnapshot snapshot, SnapshotGeneratorChain chain) throws DatabaseException, InvalidExampleException;
 
     Class<? extends DatabaseObject>[] addsTo();
+
+    /**
+     * Returns classes (and superclasses) that this SnapshotGenerator replaces. Return null or empty array to not affect the SnapshotGeneratorChain.
+     */
+    Class<? extends SnapshotGenerator>[] replaces();
 }

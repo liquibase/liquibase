@@ -83,6 +83,11 @@ public abstract class JdbcSnapshotGenerator implements SnapshotGenerator {
         return defaultFor != null && snapshot.getSnapshotControl().shouldInclude(defaultFor);
     }
 
+    @Override
+    public Class<? extends SnapshotGenerator>[] replaces() {
+        return null;
+    }
+
     protected abstract DatabaseObject snapshotObject(DatabaseObject example, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException;
 
     protected abstract void addTo(DatabaseObject foundObject, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException;
