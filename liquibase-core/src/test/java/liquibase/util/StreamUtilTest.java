@@ -82,9 +82,9 @@ public class StreamUtilTest {
 	@Test
 	public void testContentLength() throws IOException {
 		InputStream in = getClass().getResourceAsStream("/liquibase/util/unicode-file.txt");
-		assertEquals(51, StreamUtil.getContentLength(in));
+		assertEquals(50, StreamUtil.getContentLength(in));
 		
 		in = getClass().getResourceAsStream("/liquibase/util/unicode-file.txt");
-		assertEquals(40, StreamUtil.getContentLength(new InputStreamReader(in, "UTF-8")));
+		assertEquals(39, StreamUtil.getContentLength(new InputStreamReader(in, "UTF-8")));
 	}
 }

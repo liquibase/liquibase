@@ -27,7 +27,6 @@ import liquibase.resource.CompositeResourceAccessor;
 import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 
-import liquibase.test.JUnitResourceAccessor;
 import org.easymock.Capture;
 import org.easymock.IAnswer;
 import org.junit.Assert;
@@ -36,7 +35,7 @@ import org.junit.Test;
 public class ExecutablePreparedStatementTest {
 
 	@Test
-	public void testValueBlobFileFromClassLoader() throws Exception {
+	public void testValueBlobFileFromClassLoader() throws DatabaseException, SQLException {
 		ColumnConfig columnConfig = new ColumnConfig();
 		
 		String valueBlobFile = "../unicode-file.txt";
@@ -55,7 +54,7 @@ public class ExecutablePreparedStatementTest {
 	}
 
 	@Test
-	public void testValueBlobFileFromFile() throws Exception {
+	public void testValueBlobFileFromFile() throws DatabaseException, SQLException {
 		ColumnConfig columnConfig = new ColumnConfig();
 		
 		String valueBlobFile = "unicode-file.txt";
@@ -65,7 +64,7 @@ public class ExecutablePreparedStatementTest {
 		
 		ChangeSet changeSet = createMock(ChangeSet.class);
 		DatabaseChangeLog changeLog = createMock(DatabaseChangeLog.class);
-		expect(changeLog.getPhysicalFilePath()).andReturn("liquibase/util/");
+		expect(changeLog.getPhysicalFilePath()).andReturn("src/test/resources/liquibase/util/");
 		replay(changeLog);
 		expect(changeSet.getChangeLog()).andReturn(changeLog);
 		replay(changeSet);
@@ -74,7 +73,7 @@ public class ExecutablePreparedStatementTest {
 	}
 
 	protected void assertSetBinaryStream(List<ColumnConfig> columns, ChangeSet changeSet)
-			throws Exception {
+			throws SQLException, DatabaseException {
 		
 		InsertExecutablePreparedStatement statement =
 				new InsertExecutablePreparedStatement(
@@ -92,7 +91,7 @@ public class ExecutablePreparedStatementTest {
 				Assert.assertEquals(new Integer(1), index.getValue());
 				Assert.assertNotNull(in.getValue());
 				Assert.assertTrue(in.getValue() instanceof BufferedInputStream);
-				Assert.assertEquals(new Integer(51), length.getValue());
+				Assert.assertEquals(new Integer(50), length.getValue());
 				return null;
 			}
 		});
@@ -107,7 +106,7 @@ public class ExecutablePreparedStatementTest {
 	}
 
 	@Test
-	public void testValueClobFileFromClassLoader() throws Exception {
+	public void testValueClobFileFromClassLoader() throws DatabaseException, SQLException {
 		ColumnConfig columnConfig = new ColumnConfig();
 		
 		String valueClobFile = "unicode-file.txt";
@@ -127,7 +126,7 @@ public class ExecutablePreparedStatementTest {
 	}
 
 	@Test
-	public void testValueClobFileFromFile() throws Exception {
+	public void testValueClobFileFromFile() throws DatabaseException, SQLException {
 		ColumnConfig columnConfig = new ColumnConfig();
 		
 		String valueClobFile = "unicode-file.txt";
@@ -138,7 +137,7 @@ public class ExecutablePreparedStatementTest {
 		
 		ChangeSet changeSet = createMock(ChangeSet.class);
 		DatabaseChangeLog changeLog = createMock(DatabaseChangeLog.class);
-		expect(changeLog.getPhysicalFilePath()).andReturn("liquibase/util/");
+		expect(changeLog.getPhysicalFilePath()).andReturn("src/test/resources/liquibase/util/");
 		replay(changeLog);
 		expect(changeSet.getChangeLog()).andReturn(changeLog);
 		replay(changeSet);
@@ -147,7 +146,7 @@ public class ExecutablePreparedStatementTest {
 	}
 
 	protected void assertSetCharacterStream(List<ColumnConfig> columns, ChangeSet changeSet)
-			throws Exception {
+			throws SQLException, DatabaseException {
 		
 		InsertExecutablePreparedStatement statement =
 				new InsertExecutablePreparedStatement(
@@ -166,7 +165,7 @@ public class ExecutablePreparedStatementTest {
 				Assert.assertEquals(new Integer(1), index.getValue());
 				Assert.assertNotNull(reader.getValue());
 				Assert.assertTrue(reader.getValue() instanceof BufferedReader);
-				Assert.assertEquals(new Integer(40), length.getValue());
+				Assert.assertEquals(new Integer(39), length.getValue());
 				return null;
 			}
 		});
@@ -184,8 +183,11 @@ public class ExecutablePreparedStatementTest {
 	 * Create a test context resource accessor.
 	 * @return
 	 */
-	private ResourceAccessor createResourceAccessor() throws Exception {
-		ResourceAccessor resourceAccessor = new JUnitResourceAccessor();
+	private ResourceAccessor createResourceAccessor() {
+		ResourceAccessor resourceAccessor = new CompositeResourceAccessor(
+				new ClassLoaderResourceAccessor(),
+				new FileSystemResourceAccessor(),
+				new ClassLoaderResourceAccessor(Thread.currentThread().getContextClassLoader()));
 		
 		return resourceAccessor;
 	}
