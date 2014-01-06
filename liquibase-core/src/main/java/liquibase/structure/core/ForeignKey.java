@@ -159,10 +159,10 @@ public class ForeignKey extends AbstractDatabaseObject{
             return this.getName().equalsIgnoreCase(that.getName());
         }
 
-        return getForeignKeyColumns().equalsIgnoreCase(that.getForeignKeyColumns())
-                && getForeignKeyTable().equals(that.getForeignKeyTable())
-                && getPrimaryKeyColumns().equalsIgnoreCase(that.getPrimaryKeyColumns())
-                && getPrimaryKeyTable().equals(that.getPrimaryKeyTable());
+        return (getForeignKeyColumns() != null && that.getForeignKeyColumns() != null && getForeignKeyColumns().equalsIgnoreCase(that.getForeignKeyColumns()))
+                && (getForeignKeyTable() != null && that.getForeignKeyTable() != null && getForeignKeyTable().equals(that.getForeignKeyTable()))
+                && (getPrimaryKeyColumns() != null && that.getPrimaryKeyColumns() != null && getPrimaryKeyColumns().equalsIgnoreCase(that.getPrimaryKeyColumns()))
+                && (getPrimaryKeyTable() != null && that.getPrimaryKeyTable() != null && getPrimaryKeyTable().equals(that.getPrimaryKeyTable()));
     }
 
     @Override
