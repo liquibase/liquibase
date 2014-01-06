@@ -2,7 +2,6 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
 import liquibase.database.core.DB2Database;
-import liquibase.database.core.DB2iDatabase;
 import liquibase.database.core.OracleDatabase;
 import liquibase.database.core.PostgresDatabase;
 import liquibase.exception.ValidationErrors;
@@ -35,16 +34,6 @@ public class SetColumnRemarksGenerator extends AbstractSqlGenerator<SetColumnRem
 
 	@Override
     public Sql[] generateSql(SetColumnRemarksStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-		if (database instanceof DB2iDatabase) {
-			return new Sql[] {
-					new UnparsedSql("LABEL ON " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " ("
-							+ database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName())
-							+ " TEXT IS '" + database.escapeStringForDatabase(statement.getRemarks()) + "')", getAffectedColumn(statement)),
-					new UnparsedSql("LABEL ON COLUMN " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + "."
-							+ database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName())
-							+ " IS '" + database.escapeStringForDatabase(statement.getRemarks()) + "'", getAffectedColumn(statement)) };
-		}
-
 		return new Sql[] { new UnparsedSql("COMMENT ON COLUMN " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName())
 				+ "." + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " IS '"
 				+ database.escapeStringForDatabase(statement.getRemarks()) + "'", getAffectedColumn(statement)) };

@@ -101,7 +101,7 @@ public class AddColumnExecutorTest extends AbstractExecuteTest {
         assertCorrect("ALTER TABLE [table_name] ADD [column_name] int DEFAULT 42 NOT NULL", SybaseASADatabase.class, SybaseDatabase.class);
         assertCorrect("alter table table_name add column_name int default 42 not null", InformixDatabase.class);
         assertCorrect("alter table [table_name] add [column_name] int not null constraint df_table_name_column_name default 42", MSSQLDatabase.class);
-        assertCorrect("alter table table_name add column_name int default 42 not null", OracleDatabase.class, DerbyDatabase.class, HsqlDatabase.class, DB2Database.class, H2Database.class, FirebirdDatabase.class, DB2iDatabase.class);
+        assertCorrect("alter table table_name add column_name int default 42 not null", OracleDatabase.class, DerbyDatabase.class, HsqlDatabase.class, DB2Database.class, H2Database.class, FirebirdDatabase.class);
         assertCorrect("not supported. fixme!!", SQLiteDatabase.class);
         assertCorrectOnRest("ALTER TABLE [table_name] ADD [column_name] int NOT NULL DEFAULT 42");
     }

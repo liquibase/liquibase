@@ -80,13 +80,6 @@ public class CreateDatabaseChangeLogLockTableExecuteTest extends AbstractExecute
                 "[locked] boolean not null, " +
                 "[lockgranted] datetime, " +
                 "[lockedby] varchar(255), " +
-                "constraint [pk_dbchgloglock] primary key ([id]))"}, DB2iDatabase.class);
-
-        assertCorrect(new String[]{"create table [databasechangeloglock] (" +
-                "[id] int not null, " +
-                "[locked] boolean not null, " +
-                "[lockgranted] datetime, " +
-                "[lockedby] varchar(255), " +
                 "constraint [pk_databasechangeloglock] primary key ([id]))"});
 
     }

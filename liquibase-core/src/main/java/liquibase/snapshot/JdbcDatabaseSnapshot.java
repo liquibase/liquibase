@@ -394,13 +394,6 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                         if (tableName != null) {
                             sql += " and uc.table_name = '" + database.correctObjectName(tableName, Table.class) + "'";
                         }
-                    } else if (database instanceof DB2iDatabase) {
-                        sql = "select distinct CONSTRAINT_NAME from QSYS2.SYSCST " +
-                                "where TABLE_SCHEMA = '" + database.correctObjectName(catalogName, Catalog.class) + "' " +
-                                "and CONSTRAINT_TYPE = 'UNIQUE'";
-                        if (tableName != null) {
-                            sql += " and TABLE_NAME = '" + database.correctObjectName(tableName, Table.class) + "')";
-                        }
                     } else if (database instanceof DB2Database) {
                         sql = "select distinct k.constname as constraint_name, t.tabname as TABLE_NAME from syscat.keycoluse k, syscat.tabconst t " +
                                 "where k.constname = t.constname " +
