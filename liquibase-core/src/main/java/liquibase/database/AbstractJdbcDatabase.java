@@ -12,7 +12,6 @@ import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.changelog.DiffToChangeLog;
 import liquibase.exception.*;
-import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.lockservice.LockServiceFactory;
 import liquibase.logging.LogFactory;
@@ -624,7 +623,7 @@ public abstract class AbstractJdbcDatabase implements Database {
     }
 
     protected boolean canCreateChangeLogTable() throws DatabaseException {
-        return ((TableBasedChangeLogHistoryService) ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(this)).canCreateChangeLogTable();
+        return ((StandardChangeLogHistoryService) ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(this)).canCreateChangeLogTable();
     }
 
     @Override
