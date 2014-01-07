@@ -1,14 +1,7 @@
 package liquibase.lockservice;
 
 import liquibase.database.Database;
-import liquibase.database.core.MySQLDatabase;
-import liquibase.database.core.OracleDatabase;
-import liquibase.exception.LockException;
-import liquibase.executor.Executor;
-import liquibase.executor.ExecutorService;
-import liquibase.statement.core.LockDatabaseChangeLogStatement;
-import liquibase.statement.core.SelectFromDatabaseChangeLogLockStatement;
-import liquibase.statement.core.UnlockDatabaseChangeLogStatement;
+
 import static org.easymock.classextension.EasyMock.*;
 import org.junit.After;
 import static org.junit.Assert.*;
@@ -16,17 +9,15 @@ import org.junit.Test;
 import org.junit.Before;
 
 import java.lang.reflect.Field;
-import java.text.DateFormat;
-import java.util.*;
 
 @SuppressWarnings({"EqualsWhichDoesntCheckParameterClass"})
-public class LockServiceImplTest {
+public class StandardLockServiceTest {
 
-    private LockServiceImpl lockService;
+    private StandardLockService lockService;
 
     @Before
     public void before() {
-        lockService = new LockServiceImpl();
+        lockService = new StandardLockService();
         lockService.reset();
     }
 

@@ -21,7 +21,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-public class LockServiceImpl implements LockService {
+public class StandardLockService implements LockService {
 
     private Database database;
 
@@ -44,7 +44,7 @@ public class LockServiceImpl implements LockService {
         }
     }
 
-    public LockServiceImpl() {
+    public StandardLockService() {
     }
 
     @Override
