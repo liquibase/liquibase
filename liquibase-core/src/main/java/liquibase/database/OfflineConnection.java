@@ -19,7 +19,6 @@ public class OfflineConnection implements DatabaseConnection {
     private final String url;
     private final String databaseShortName;
     private final Map<String, String> params = new HashMap<String, String>();
-    private Boolean changeLogSql = false;
     private String changeLogFile = "databasechangelog.csv";
     private Boolean caseSensitive = false;
     private String productName;
@@ -69,8 +68,6 @@ public class OfflineConnection implements DatabaseConnection {
                  this.caseSensitive = Boolean.valueOf(paramEntry.getValue());
             } else if (paramEntry.getKey().equals("changeLogFile")) {
                 this.changeLogFile = paramEntry.getValue();
-            } else if (paramEntry.getKey().equals("changeLogSql")) {
-                this.changeLogSql = Boolean.valueOf(paramEntry.getValue());
             } else {
                 this.databaseParams.put(paramEntry.getKey(), paramEntry.getValue());
             }
@@ -96,7 +93,7 @@ public class OfflineConnection implements DatabaseConnection {
             ((AbstractJdbcDatabase) database).setCaseSensitive(this.caseSensitive);
         }
 
-        ChangeLogHistoryServiceFactory.getInstance().register(new OfflineChangeLogHistoryService(database, new File(changeLogFile), changeLogSql));
+        ChangeLogHistoryServiceFactory.getInstance().register(new OfflineChangeLogHistoryService(database, new File(changeLogFile), false));
     }
 
     @Override
