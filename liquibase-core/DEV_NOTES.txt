@@ -14,3 +14,7 @@ Kept existing interfaces for the most part for backwards compatibility, but need
 
  - liquibase.DbmsSet
  TODO: Need to do somethign like liquibase.Context but for dbms usage
+ 
+Features:
+- liquibase.parser.core.formattedsql.FormattedSqlChangeLogParser
+Added support for multiple DBMS values in formatted SQL changelogs. Use comma separated values without spaces, e.g. "dbms:oracle,h2".
