@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
@@ -54,6 +55,7 @@ import liquibase.util.FileUtil;
 import liquibase.util.ObjectUtil;
 import liquibase.util.StringUtils;
 import liquibase.util.file.FilenameUtils;
+
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
@@ -217,7 +219,8 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
 					if (!fileUrl.toExternalForm().startsWith("file:")) {
                         if (fileUrl.toExternalForm().startsWith("jar:file:") || fileUrl.toExternalForm().startsWith("wsjar:file:") || fileUrl.toExternalForm().startsWith("zip:")) {
                             File zipFileDir = extractZipFile(fileUrl);
-                            fileUrl = new File(zipFileDir, pathName).toURL();
+                            URI fileUri = new File(zipFileDir, pathName).toURI();
+							fileUrl = fileUri.toURL();
                         } else {
                             log.debug(fileUrl.toExternalForm()
                                     + " is not a file path");
@@ -824,7 +827,7 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
         }else {
             path = path.replaceFirst("file:", "");
         }
-        path = URLDecoder.decode(path);
+        path = URLDecoder.decode(path, "UTF-8");
         File zipfile = new File(path);
 
         File tempDir = File.createTempFile("liquibase-sax", ".dir");
