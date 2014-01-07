@@ -238,6 +238,45 @@ public class FormattedSqlChangeLogParserTest {
 
     }
 
+    @Test
+    public void parse_multipleDbms() throws Exception {
+        // Happy day scenarios
+    	String changeLogWithMultipleDbms = "--liquibase formatted sql\n\n"+
+                "--changeset John Doe:12345 dbms:db2,db2i\n" +
+                "create table test (id int);\n";
+
+        DatabaseChangeLog changeLog = new MockFormattedSqlChangeLogParser(changeLogWithMultipleDbms).parse("asdf.sql", new ChangeLogParameters(), new JUnitResourceAccessor());
+        assertEquals(2, changeLog.getChangeSets().get(0).getDbmsSet().size());
+        assertTrue(changeLog.getChangeSets().get(0).getDbmsSet().contains("db2"));
+        assertTrue(changeLog.getChangeSets().get(0).getDbmsSet().contains("db2i"));
+        
+        // Sad night scenarios
+        String changeLogWithInvalidMultipleDbms = "--liquibase formatted sql\n\n"+
+                "--changeset John Doe:12345 dbms:db2, db2i\n" +
+                "create table test (id int);\n";
+
+        DatabaseChangeLog invalidChangeLog = new MockFormattedSqlChangeLogParser(changeLogWithInvalidMultipleDbms).parse("asdf.sql", new ChangeLogParameters(), new JUnitResourceAccessor());
+        assertEquals(1, invalidChangeLog.getChangeSets().get(0).getDbmsSet().size());
+        assertTrue(invalidChangeLog.getChangeSets().get(0).getDbmsSet().contains("db2"));
+        assertFalse(invalidChangeLog.getChangeSets().get(0).getDbmsSet().contains("db2i"));
+
+        changeLogWithInvalidMultipleDbms = "--liquibase formatted sql\n\n"+
+                "--changeset John Doe:12345 dbms:db2,\n" +
+                "create table test (id int);\n";
+
+        invalidChangeLog = new MockFormattedSqlChangeLogParser(changeLogWithInvalidMultipleDbms).parse("asdf.sql", new ChangeLogParameters(), new JUnitResourceAccessor());
+        assertEquals(1, invalidChangeLog.getChangeSets().get(0).getDbmsSet().size());
+        assertTrue(invalidChangeLog.getChangeSets().get(0).getDbmsSet().contains("db2"));
+        assertFalse(invalidChangeLog.getChangeSets().get(0).getDbmsSet().contains("db2i"));
+        
+        changeLogWithInvalidMultipleDbms = "--liquibase formatted sql\n\n"+
+                "--changeset John Doe:12345 dbms:,db2,\n" +
+                "create table test (id int);\n";
+
+        invalidChangeLog = new MockFormattedSqlChangeLogParser(changeLogWithInvalidMultipleDbms).parse("asdf.sql", new ChangeLogParameters(), new JUnitResourceAccessor());
+        assertEquals(null, invalidChangeLog.getChangeSets().get(0).getDbmsSet());
+    }
+    
     private static class MockFormattedSqlChangeLogParser extends FormattedSqlChangeLogParser {
         private String changeLog;
 
