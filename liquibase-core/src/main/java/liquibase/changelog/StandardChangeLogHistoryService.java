@@ -32,7 +32,7 @@ import java.util.Map;
 
 public class StandardChangeLogHistoryService extends AbstractChangeLogHistoryService {
 
-    private List<RanChangeSet> ranChangeSetList;
+//    private List<RanChangeSet> ranChangeSetList;
 
     private Integer lastChangeSetSequenceValue;
 
@@ -60,10 +60,6 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
 
     public boolean canCreateChangeLogTable() throws DatabaseException {
         return true;
-    }
-
-    public void resetRanChangeSetList() {
-        ranChangeSetList = null;
     }
 
     public boolean hasDatabaseChangeLogTable() throws DatabaseException {
@@ -183,20 +179,20 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
     public void upgradeChecksums(final DatabaseChangeLog databaseChangeLog, final Contexts contexts) throws DatabaseException {
         super.upgradeChecksums(databaseChangeLog, contexts);
         getDatabase().commit();
-        ranChangeSetList = null;
+//        ranChangeSetList = null;
     }
 
     /**
      * Returns the ChangeSets that have been run against the current getDatabase().
      */
     public List<RanChangeSet> getRanChangeSets() throws DatabaseException {
-        if (this.ranChangeSetList != null) {
-            return this.ranChangeSetList;
-        }
+//        if (this.ranChangeSetList != null) {
+//            return this.ranChangeSetList;
+//        }
 
         Database database = getDatabase();
         String databaseChangeLogTableName = getDatabase().escapeTableName(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName());
-        ranChangeSetList = new ArrayList<RanChangeSet>();
+        List<RanChangeSet> ranChangeSetList = new ArrayList<RanChangeSet>();
         if (hasDatabaseChangeLogTable()) {
             LogFactory.getLogger().info("Reading from " + databaseChangeLogTableName);
             SqlStatement select = new SelectFromDatabaseChangeLogStatement("FILENAME", "AUTHOR", "ID", "MD5SUM", "DATEEXECUTED", "ORDEREXECUTED", "TAG", "EXECTYPE", "DESCRIPTION", "COMMENTS").setOrderBy("DATEEXECUTED ASC", "ORDEREXECUTED ASC");
