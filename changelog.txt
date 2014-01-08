@@ -1,6 +1,58 @@
 Liquibase Core Changelog
 ===========================================
 
+Changes in version 3.1.0 (2014.01.09)
+- Major Changes:
+     Offline Datatabase Support
+     CreateProcedures supports external files and dbms attribute
+     New dropProcedure change
+     New tableIsEmpty precondition
+     New rowCount precondition
+     Mysql enum & set support
+     Mysql date/time/timestamp size parameter support
+     MSSQL 2012 sequence support
+     General Sybase & DB2 improvements
+     Change- and precondition- level callbacks in ChangeExecListener
+     Extensions can define custom XSDs and namespaces
+     Maven support for futureRollbackSql command
+
+- [CORE-1424] - SQL Generation ignores DATETIME parameters
+- [CORE-1579] - DefaultPackageScanClassResolver should suppress LinkageErrors
+- [CORE-1626] - createIndex does not work for function based indexes anymore
+- [CORE-1659] - "dbms" attribute is ignored for "sql" tag inside "rollback"
+- [CORE-1666] - CommandLineResourceAccessor throwing exception from getResourceAsStream()
+- [CORE-1669] - DB2Database the method getDefaultCatalogName returns the defaultSchemaName.
+- [CORE-1677] - Default Sybase schema name
+- [CORE-1680] - DbDoc fails with NullPointerException
+- [CORE-1685] - NPE at SchemaComparator
+- [CORE-1692] - generateChangeLog does not handle sets correct
+- [CORE-1693] - SqlCheck precondition's 'expectedResult' accounts for the amount of columns instead of the amount of rows
+- [CORE-1696] - Syntax error in command line UNIX shell script
+- [CORE-1698] - Add FormattedSQL support for comma separated list dbms attribute
+- [CORE-1428] - Support Springs classpath*: prefix for includeAll
+- [CORE-1458] - Maven support for futureRollbackSql
+- [CORE-1473] - JSON/YAML support for onFail/onError and onFailMessage/onErrorMessage on preconditions
+- [CORE-1474] - Support 'dbms' attribute on <createProcedure>
+- [CORE-1476] - Support reading unique constraints and sequences in DB2 for iSeries
+- [CORE-1544] - liquibase-maven-plugin: diffChangeLog goal is missing
+- [CORE-1638] - SnapshotGenerator extension system does not allow replacement of generators
+- [CORE-1639] - Support foreignKeyConstraintExists precondition specifying table and columns instead of name
+- [CORE-1656] - Extension to allow updateSql without a live database connection
+- [CORE-1657] - Extension support for external DatabaseChangeLog tables
+- [CORE-1663] - Support replaceIfExists for createView on H2
+- [CORE-1671] - Add millisecond precision Time, Timestamp, and DateTime for MySQL
+- [CORE-1681] - Log change and precondition execution into the ChangeExecListener
+- [CORE-641] - Support ${} params in included sql files
+- [CORE-883] - updateSQL without database access
+- [CORE-929] - Support for ordering of columns in addColumn
+- [CORE-1310] - Support column remarks for mysql
+- [CORE-1513] - tableIsEmpty precondition
+- [CORE-1514] - rowCount precondition
+- [CORE-1558] - Modify Liquibase to allow extensions to specify prefix for xml tags
+- [CORE-1617] - dropProcedure change
+- [CORE-1618] - Support defining createProcedure body in an external file
+- [CORE-1661] - Add support for MSSQL sequences
+
 Changes in version 3.0.8 (2013.12.12)
 
 - Major Changes:
@@ -231,7 +283,7 @@ Changes in version 3.0.3 (2013.08.29)
 - [CORE-1375] - "group" is not included as a reserved word
 - [CORE-1377] - liquibase version says 3.0.0-SNP
 - [CORE-1380] - ^M present in liquibase unix running file (from jar on maven repo)
-- [CORE-1381] - DropAll: Not working with MsSql
+- - [CORE-1381] - DropAll: Not working with MsSql
 - [CORE-1383] - Error attempting to re-create databasechangeloglock on second liquibase run if running in Oracle under SYSTEM user
 - [CORE-1387] - dropAll fails with oracle since version 3.0.2
 - [CORE-1388] - MSSQLServer: 'REAL' dataype is returned with unnecessary size modifier during generateChangeLog
