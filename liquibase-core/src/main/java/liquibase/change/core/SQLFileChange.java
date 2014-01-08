@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import liquibase.change.*;
+import liquibase.changelog.ChangeLogParameters;
 import liquibase.database.Database;
 import liquibase.exception.SetupException;
 import liquibase.exception.UnexpectedLiquibaseException;
@@ -123,7 +124,14 @@ public class SQLFileChange extends AbstractSQLChange {
                 if (sqlStream == null) {
                     return null;
                 }
-                return getChangeSet().getChangeLogParameters().expandExpressions(StreamUtil.getStreamContents(sqlStream, encoding));
+                String content = StreamUtil.getStreamContents(sqlStream, encoding);
+                if (getChangeSet() != null) {
+                    ChangeLogParameters parameters = getChangeSet().getChangeLogParameters();
+                    if (parameters != null) {
+                        content = parameters.expandExpressions(content);
+                    }
+                }
+                return content;
             } catch (IOException e) {
                 throw new UnexpectedLiquibaseException(e);
             }
