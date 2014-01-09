@@ -204,9 +204,19 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
                     if (!resourceBase.exists()) {
 						throw new SAXException("Resource directory for includeAll does not exist [" + resourceBase.getAbsolutePath() + "]");
 					}
-					pathName = resourceBase.getPath() + '/';
+
+                    pathName = resourceBase.getPath();
+                    pathName = pathName.replaceFirst("^\\Q"+changeLogFile.getParentFile().getAbsolutePath()+"\\E", "");
+                    pathName = databaseChangeLog.getFilePath().replaceFirst("/[^/]*$", "") + pathName;
 					pathName = pathName.replace('\\', '/');
-				}
+                    if (!pathName.endsWith("/")) {
+                        pathName = pathName + "/";
+                    }
+
+                    while (pathName.matches(".*/\\.\\./.*")) {
+                        pathName = pathName.replaceFirst("/[^/]+/\\.\\./", "/");
+                    }
+                }
 
 				Enumeration<URL> resourcesEnum = resourceAccessor.getResources(pathName);
 				SortedSet<URL> resources = new TreeSet<URL>(new Comparator<URL>() {
