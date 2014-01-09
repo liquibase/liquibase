@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
@@ -235,7 +236,8 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
 								log.debug("replace classpath*");
 								pathName = pathName.replaceFirst("classpath\\*:", "");
 							}
-							fileUrl = new File(zipFileDir, pathName).toURL();
+                            URI fileUri = new File(zipFileDir, pathName).toURI();
+							fileUrl = fileUri.toURL();
 						} else {
 							log.debug(fileUrl.toExternalForm() + " is not a file path");
 							continue;
@@ -801,7 +803,7 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
 		} else {
 			path = path.replaceFirst("file:", "");
 		}
-		path = URLDecoder.decode(path);
+		path = URLDecoder.decode(path, "UTF-8");
 		File zipfile = new File(path);
 
 		File tempDir = File.createTempFile("liquibase-sax", ".dir");
