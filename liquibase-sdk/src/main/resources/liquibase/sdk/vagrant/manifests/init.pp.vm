@@ -1,0 +1,26 @@
+service { "iptables":
+  ensure => "stopped",
+}
+
+exec { "Update package cache":
+    command =>  $operatingsystem ? {
+        ubuntu => "/usr/bin/apt-get update",
+        default => "/bin/echo 'No apt-get update style command for #{$operatingsystem}'"
+    }
+}
+
+user { 'liquibase':
+    password => 'liquibase'
+}
+
+Exec["Update package cache"] -> Package <| |>
+
+#foreach ( $package in $requiredPackages )
+package { "${package}":
+    ensure => "installed"
+}
+#end
+
+#foreach ( $block in $puppetBlocks )
+${block}
+#end

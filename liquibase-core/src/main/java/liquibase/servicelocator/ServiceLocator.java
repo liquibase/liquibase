@@ -133,6 +133,10 @@ public class ServiceLocator {
         packagesToScan.add(packageName);
     }
 
+    public List<String> getPackages() {
+        return packagesToScan;
+    }
+
     public Class findClass(Class requiredInterface) throws ServiceNotFoundException {
         Class[] classes = findClasses(requiredInterface);
         if (PrioritizedService.class.isAssignableFrom(requiredInterface)) {

@@ -1,0 +1,10 @@
+#foreach ($forge in $puppetForges)
+forge "${forge}"
+#end
+
+mod "puppetlabs/apt"
+mod "puppetlabs/firewall"
+
+#foreach ($module in $puppetModules)
+mod "${module}"
+#end

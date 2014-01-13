@@ -173,6 +173,15 @@ public class StringUtils {
         return returnString.substring(0, returnString.length()-delimiter.length());
     }
 
+    public static String indent(String string) {
+        return indent(string, 4);
+    }
+
+    public static String indent(String string, int padding) {
+        String pad = StringUtils.repeat(" ", padding);
+        return pad+(string.replaceAll("\n", "\n" + pad));
+    }
+
     public static String lowerCaseFirst(String string) {
         return string.substring(0, 1).toLowerCase()+string.substring(1);
     }
