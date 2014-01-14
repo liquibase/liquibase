@@ -60,6 +60,18 @@
                             com.sun.*;resolution:=optional,
                             sun.misc.*;resolution:=optional,
                             org.apache.commons.lang.text;resolution:=optional,
+                            com.werken.xpath.*;resolution:=optional,
+                            junit.framework.*;resolution:=optional,
+                            org.apache.commons.logging.*;resolution:=optional,
+                            org.apache.log.*;resolution:=optional,
+                            org.apache.log.format.*;resolution:=optional,
+                            org.apache.log.output.io.*;resolution:=optional,
+                            org.apache.log4j.*;resolution:=optional,
+                            org.apache.oro.text.perl.*;resolution:=optional,
+                            org.jdom.*;resolution:=optional,
+                            org.jdom.input.*;resolution:=optional,
+                            org.jdom.output.*;resolution:=optional,
+                            org.junit.experimental.theories.*;resolution:=optional
                         </Import-Package>
                         <Embed-Dependency>
                             *;scope=compile|runtime;type=!pom;inline=false;artifactId=!slf4j-api
