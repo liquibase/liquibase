@@ -20,6 +20,7 @@
             <outputDirectory>/</outputDirectory>
             <includes>
                 <include>liquibase</include>
+                <include>liquibase-sdk</include>
             </includes>
             <fileMode>0755</fileMode>
         </fileSet>
@@ -32,6 +33,7 @@
             </includes>
             <excludes>
                 <exclude>liquibase</exclude>
+                <exclude>liquibase-sdk</exclude>
             </excludes>
         </fileSet>
         <fileSet>

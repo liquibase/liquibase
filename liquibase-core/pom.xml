@@ -197,7 +197,6 @@
                             <descriptors>
                                 <!-- create the distribution archives -->
                                 <descriptor>src/main/resources/assembly/bin.xml</descriptor>
-                                <descriptor>src/main/resources/assembly/sdk-bin.xml</descriptor>
                             </descriptors>
                             <!--<archive>
                               <manifestFile>../liquibase-core/src/main/resources/META-INF/MANIFEST.MF</manifestFile>
