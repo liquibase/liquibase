@@ -88,6 +88,21 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
             "    BEGIN\n" +
             "      DBMS_OUTPUT.PUT_LINE('Hello From The Database!');\n" +
             "    END;")
+    /**
+     * @deprecated Use getProcedureText() instead
+     */
+    public String getProcedureBody() {
+        return procedureText;
+    }
+
+    /**
+     * @deprecated Use setProcedureText() instead
+     */
+    public void setProcedureBody(String procedureText) {
+        this.procedureText = procedureText;
+    }
+
+    @DatabaseChangeProperty(isChangeProperty = false)
     public String getProcedureText() {
         return procedureText;
     }
@@ -96,7 +111,7 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
         this.procedureText = procedureText;
     }
 
-	@DatabaseChangeProperty(since = "3.1", exampleValue = "h2, oracle")
+    @DatabaseChangeProperty(since = "3.1", exampleValue = "h2, oracle")
 	public String getDbms() {
 		return dbms;
 	}
@@ -146,6 +161,10 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
      */
     @Override
     public CheckSum generateCheckSum() {
+        if (this.path == null) {
+            return super.generateCheckSum();
+        }
+
         InputStream stream = null;
         try {
             stream = openSqlStream();
@@ -183,7 +202,11 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
             procedureText = StringUtils.trimToNull(getProcedureText());
         } else {
             try {
-                procedureText = StreamUtil.getStreamContents(openSqlStream(), encoding);
+                InputStream stream = openSqlStream();
+                if (stream == null) {
+                    throw new IOException("File does not exist: "+path);
+                }
+                procedureText = StreamUtil.getStreamContents(stream, encoding);
             } catch (IOException e) {
                 throw new UnexpectedLiquibaseException(e);
             }
