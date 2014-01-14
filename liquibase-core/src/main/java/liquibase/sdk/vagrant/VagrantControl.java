@@ -48,9 +48,9 @@ public class VagrantControl {
 
         String command = commandArgs.get(0);
 
-        vagrantInfo.boxName = commandArgs.get(1);
+        vagrantInfo.configName = commandArgs.get(1);
         vagrantInfo.vagrantRoot = new File(mainApp.getSdkRoot(), "vagrant");
-        vagrantInfo.boxDir = new File(vagrantInfo.vagrantRoot, vagrantInfo.boxName).getCanonicalFile();
+        vagrantInfo.boxDir = new File(vagrantInfo.vagrantRoot, vagrantInfo.configName).getCanonicalFile();
 
         if (command.equals("init")) {
             this.init(vagrantInfo, commandCommandLine);
@@ -82,7 +82,7 @@ public class VagrantControl {
         mainApp.out("Vagrant Machine Setup:");
         mainApp.divider();
         mainApp.out(StringUtils.indent("Local Path: " + vagrantInfo.boxDir.getAbsolutePath()));
-        mainApp.out(StringUtils.indent("Box name: " + vagrantInfo.boxName));
+        mainApp.out(StringUtils.indent("Config Name: " + vagrantInfo.configName));
         mainApp.out(StringUtils.indent("Database Config(s): " + StringUtils.join(configs, ", ")));
 
         Collection<ConnectionConfiguration> databases = null;
@@ -117,6 +117,9 @@ public class VagrantControl {
             throw new UnexpectedLiquibaseException("Null boxInfo");
         }
 
+        vagrantInfo.boxName = boxInfo[0];
+        vagrantInfo.boxUrl = boxInfo[1];
+
         mainApp.out(StringUtils.indent("Base Box Url: " + vagrantInfo.boxUrl));
         mainApp.out(StringUtils.indent("Hostname: " + vagrantInfo.hostName));
 
@@ -132,7 +135,7 @@ public class VagrantControl {
         writeVagrantFile(vagrantInfo);
         writePuppetFiles(vagrantInfo, databases);
 
-
+        mainApp.out("Vagrant Box "+vagrantInfo.configName+" created. To start the box, run 'liquibase-sdk vagrant up "+vagrantInfo.configName+"'");
     }
 
     public void provision(VagrantInfo vagrantInfo, CommandLine commandLine) {
@@ -165,7 +168,7 @@ public class VagrantControl {
 
     public void up(VagrantInfo vagrantInfo, CommandLine commandLine) {
         mainApp.out("Starting vagrant in " + vagrantInfo.boxDir.getAbsolutePath());
-        mainApp.out("Vagrant box name: " + vagrantInfo.boxName);
+        mainApp.out("Config Name: " + vagrantInfo.configName);
         mainApp.divider();
 
         runVagrant(vagrantInfo, "up");
@@ -227,7 +230,7 @@ public class VagrantControl {
         Set<String> modules = new HashSet<String>();
 
         for (ConnectionConfiguration config : databases) {
-            forges.addAll(config.getPuppetForges(vagrantInfo.boxName));
+            forges.addAll(config.getPuppetForges(vagrantInfo.configName));
             modules.addAll(config.getPuppetModules());
         }
 
@@ -248,8 +251,8 @@ public class VagrantControl {
         Set<String> puppetBlocks = new HashSet<String>();
 
         for (ConnectionConfiguration config : databases) {
-            requiredPackages.addAll(config.getRequiredPackages(vagrantInfo.boxName));
-            String thisInit = config.getPuppetInit(vagrantInfo.boxName);
+            requiredPackages.addAll(config.getRequiredPackages(vagrantInfo.configName));
+            String thisInit = config.getPuppetInit(vagrantInfo.configName);
             if (thisInit != null) {
                 puppetBlocks.add(thisInit);
             }
@@ -266,6 +269,9 @@ public class VagrantControl {
         outputDir.mkdirs();
 
         InputStream input = this.getClass().getClassLoader().getResourceAsStream(sourcePath);
+        if (input == null) {
+            throw new UnexpectedLiquibaseSdkException("Missing source file: "+sourcePath);
+        }
         BufferedReader reader = new BufferedReader(new InputStreamReader(input));
 
         String fileName = sourcePath.replaceFirst(".*/", "");
@@ -356,6 +362,7 @@ public class VagrantControl {
     }
 
     private static final class VagrantInfo {
+        public String configName;
         private File vagrantRoot;
         private String boxName;
         private File boxDir;
