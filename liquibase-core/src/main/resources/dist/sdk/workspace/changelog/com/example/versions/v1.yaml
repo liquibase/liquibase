@@ -1,0 +1,50 @@
+databaseChangeLog:
+
+    - changeSet:
+        id: 1
+        author: alice
+        changes:
+            - createTable:
+                tableName: article
+                columns:
+                    - column:
+                        name: id
+                        type: int
+                        autoIncrement: true
+                        constraints:
+                            primaryKey: true
+                    - column:
+                        name:  title
+                        type: varchar(255)
+                        constraints:
+                            nullable: false
+                    - column:
+                        name: author
+                        type: varchar(255)
+                    - column:
+                        name: summary
+                        type: clob
+
+    - changeSet:
+        id: 2
+        author: bob
+        changes:
+            - createTable:
+                tableName: page
+                columns:
+                    - column:
+                        name: id
+                        type: int
+                        autoIncrement: true
+                        constraints:
+                            primaryKey: true
+                    - column:
+                        name: content
+                        type: clob
+                    - column:
+                        name: employee_id
+                        type: int
+                        constraints:
+                            nullable: false
+                            foreignKeyName: fk_page_article
+                            references: article(id)

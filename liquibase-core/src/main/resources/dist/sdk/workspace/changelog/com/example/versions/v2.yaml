@@ -1,0 +1,59 @@
+databaseChangeLog:
+
+    - changeSet:
+        id: 1
+        author: alice
+        changes:
+            - addColumn:
+                tableName: article
+                columns:
+                    - column:
+                        name: rating
+                        type: int
+                        valueNumeric: 5
+
+    - changeSet:
+        id: 2
+        author: alice
+        changes:
+            - addNotNullConstraint:
+                tableName: article
+                columnName: rating
+                columnDataType: int
+
+    - changeSet:
+        id: 2
+        author: bob
+        changes:
+            - addColumn:
+                tableName: article
+                columns:
+                    - column:
+                        name: views
+                        type: int
+
+    - changeSet:
+        id: 3
+        author: bob
+        changes:
+            - addColumn:
+                tableName: article
+                columns:
+                    - column:
+                        name: permlink
+                        type: varchar(255)
+
+    - changeSet:
+        id: 4
+        author: bob
+        changes:
+            - dropColumn:
+                tableName: article
+                columnName: permlink
+        rollback:
+            - addColumn:
+                tableName: article
+                columns:
+                    - column:
+                        name: permlink
+                        type: varchar(255)

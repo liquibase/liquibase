@@ -1,0 +1,55 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd
+        http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+
+    <changeSet id="SAMPLE_1" author="alice">
+        <createTable tableName="employee">
+            <column name="id" type="int" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="first_name" type="varchar(255)"/>
+            <column name="last_name" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="create address table" author="bob">
+        <createTable tableName="address">
+            <column name="id" type="int" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="line1" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="line2" type="varchar(255)"/>
+            <column name="city" type="varchar(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="employee_id" type="int">
+                <constraints nullable="false" foreignKeyName="fk_address_employee" references="employee(id)"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="FEATURE-112" author="alice">
+        <addColumn tableName="employee">
+            <column name="title" type="varchar(50)"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="FEATURE-113" author="alice">
+        <addColumn tableName="employee">
+            <column name="favorite_color" type="varchar(10)"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="FEATURE-113-not-allowed" author="alice">
+        <dropColumn tableName="employee" columnName="favorite_color"/>
+        <rollback changeSetAuthor="alice" changeSetId="FEATURE-113"/>
+    </changeSet>
+
+</databaseChangeLog>
