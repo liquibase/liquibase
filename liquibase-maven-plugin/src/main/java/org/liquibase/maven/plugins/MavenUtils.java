@@ -40,12 +40,12 @@ public class MavenUtils {
     if (verbose) {
       log.info("Loading artfacts into URLClassLoader");
     }
-    Set<URL> urls = new HashSet<URL>();
+    Set<URI> uris = new HashSet<URI>();
     // Find project dependencies, including the transitive ones.
     Set dependencies = project.getArtifacts();
 	if (dependencies != null && !dependencies.isEmpty()) {
 		for (Iterator it = dependencies.iterator(); it.hasNext();) {
-			addArtifact(urls, (Artifact) it.next(), log, verbose);
+			addArtifact(uris, (Artifact) it.next(), log, verbose);
 		}
     } else {
       log.info("there are no resolved artifacts for the Maven project.");
@@ -60,19 +60,23 @@ public class MavenUtils {
       // to replace any placeholders in the resource files.
       Artifact a = project.getArtifact();
       if (a.getFile() != null) {
-        addArtifact(urls, a, log, verbose);
+        addArtifact(uris, a, log, verbose);
       } else {
-        addFile(urls, new File(project.getBuild().getOutputDirectory()), log, verbose);
+        addFile(uris, new File(project.getBuild().getOutputDirectory()), log, verbose);
       }
     }
      if (includeTestOutputDirectory) {
-        addFile(urls, new File(project.getBuild().getTestOutputDirectory()), log, verbose);
+        addFile(uris, new File(project.getBuild().getTestOutputDirectory()), log, verbose);
     }
     if (verbose) {
       log.info(LOG_SEPARATOR);
     }
 
-    URL[] urlArray = urls.toArray(new URL[urls.size()]);
+    List<URI> uriList = new ArrayList<URI>(uris);
+    URL[] urlArray = new URL[uris.size()];
+    for (int i=0; i<uris.size(); i++ ) {
+        urlArray[i] = uriList.get(i).toURL();
+    }
     return new URLClassLoader(urlArray, clazz.getClassLoader());
   }
 
@@ -82,7 +86,7 @@ public class MavenUtils {
    * @param artifact The Artifiact to resolve the file for.
    * @throws MalformedURLException If there is a problem creating the URL for the file.
    */
-  private static void addArtifact(Set<URL> urls,
+  private static void addArtifact(Set<URI> urls,
                                   Artifact artifact,
                                   Log log,
                                   boolean verbose)
@@ -106,14 +110,14 @@ public class MavenUtils {
 //    }
   }
 
-  private static void addFile(Set<URL> urls, File f, Log log, boolean verbose)
+  private static void addFile(Set<URI> urls, File f, Log log, boolean verbose)
           throws MalformedURLException {
     if (f != null) {
-      URL fileURL = f.toURI().toURL();
+      URI fileUri = f.toURI();
       if (verbose) {
-        log.info("  artifact: " + fileURL);
+        log.info("  artifact: " + fileUri);
       }
-      urls.add(fileURL);
+      urls.add(fileUri);
     }
   }
 
