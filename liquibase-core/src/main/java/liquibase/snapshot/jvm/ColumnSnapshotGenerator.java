@@ -191,6 +191,9 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                     type.setColumnSize(38);
                 }
                 type.setDecimalDigits(columnMetadataResultSet.getInt("DATA_SCALE"));
+                if (type.getDecimalDigits() == null) {
+                    type.setDecimalDigits(0);
+                }
 //            type.setRadix(10);
             } else {
                 type.setColumnSize(columnMetadataResultSet.getInt("DATA_LENGTH"));

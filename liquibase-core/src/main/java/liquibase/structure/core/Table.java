@@ -1,5 +1,7 @@
 package liquibase.structure.core;
 
+import liquibase.util.StringUtils;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -47,7 +49,7 @@ public class Table extends Relation {
 
     @Override
     public int hashCode() {
-        return getName().toUpperCase().hashCode();
+        return StringUtils.trimToEmpty(getName()).toUpperCase().hashCode();
     }
 
     @Override

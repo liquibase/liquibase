@@ -1,6 +1,17 @@
 Liquibase Core Changelog
 ===========================================
 
+Changes in version 3.1.1 (2014.01.16)
+Bug Fix release. Most critical bug is CORE-1704
+
+- [CORE-1704] - Checksum errors for changeSets with createProcedure in 3.1.0 vs 3.0.x
+- [CORE-1707] - TableRowCountGenerator shouldn't pass tableName as catalogName
+- [CORE-1710] - Oracle: NUMBER data type size specification is deployed with a precision specifier even though precision isn't specified in the change log
+- [CORE-1711] - rowCount doesn't work if only the tableName is given
+- [CORE-1713] - liquibase.precondition.core.ForeignKeyExistsPrecondition exception
+- [CORE-1715] - Errors if there are single quotes in comments
+- [CORE-1709] - generateChangeLog returns tables created by Materialized Views as standard tables
+
 Changes in version 3.1.0 (2014.01.09)
 - Major Changes:
      Offline Datatabase Support

@@ -27,7 +27,7 @@ public class TableRowCountGenerator extends AbstractSqlGenerator<TableRowCountSt
     }
 
     protected String generateCountSql(TableRowCountStatement statement, Database database) {
-        return "SELECT COUNT(*) FROM "+database.escapeTableName(statement.getTableName(), statement.getSchemaName(), statement.getTableName());
+        return "SELECT COUNT(*) FROM "+database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName());
     }
 
     @Override

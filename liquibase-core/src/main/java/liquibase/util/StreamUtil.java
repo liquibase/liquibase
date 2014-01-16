@@ -43,6 +43,10 @@ public class StreamUtil {
 			throws IOException {
 		UtfBomAwareReader reader;
 
+        if (ins  == null) {
+            throw new IOException("No stream to open");
+        }
+
 		if (charsetName == null) {
 			reader = new UtfBomAwareReader(ins);
 		} else {
