@@ -37,12 +37,19 @@ if [ -f /usr/bin/cygpath ]; then
     i=`cygpath --windows "$i"`
     CP="$CP;$i"
   done
+  for i in "$LIQUIBASE_HOME"/sdk/lib-sdk/*.jar; do
+    i=`cygpath --windows "$i"`
+    CP="$CP;$i"
+  done
 else
   CP=.
   for i in "$LIQUIBASE_HOME"/liquibase*.jar; do
     CP="$CP":"$i"
   done
   for i in "$LIQUIBASE_HOME"/lib/*.jar; do
+    CP="$CP":"$i"
+  done
+  for i in "$LIQUIBASE_HOME"/sdk/lib-sdk/*.jar; do
     CP="$CP":"$i"
   done
 fi

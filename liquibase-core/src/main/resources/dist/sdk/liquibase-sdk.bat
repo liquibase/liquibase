@@ -9,6 +9,7 @@ set LIQUIBASE_HOME="%~dp0\.."
 set CP=.
 for /R %LIQUIBASE_HOME% %%f in (liquibase*.jar) do set CP=!CP!;%%f
 for /R %LIQUIBASE_HOME%\lib %%f in (*.jar) do set CP=!CP!;%%f
+for /R %LIQUIBASE_HOME%\sdk\lib-sdk %%f in (*.jar) do set CP=!CP!;%%f
 
 rem get command line args into a variable
 set CMD_LINE_ARGS=%1

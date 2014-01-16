@@ -11,8 +11,7 @@ create table item (
 --changeset bob:2
 create table account (
   id int not null primary key,
-  username varchar(20) not null,
-  created datetime not null
+  username varchar(20) not null
 );
 --rollback drop table account
 

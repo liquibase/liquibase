@@ -38,7 +38,7 @@
         </fileSet>
         <fileSet>
             <directory>${project.build.directory}/site/apidocs</directory>
-            <outputDirectory>javadoc</outputDirectory>
+            <outputDirectory>sdk/javadoc</outputDirectory>
             <includes>
                 <include>**/*</include>
             </includes>
@@ -60,8 +60,16 @@
     <dependencySets>
         <dependencySet>
             <outputDirectory>lib</outputDirectory>
+            <includes>
+                <include>org.yaml:snakeyaml</include>
+            </includes>
+        </dependencySet>
+
+        <dependencySet>
+            <outputDirectory>sdk/lib-sdk</outputDirectory>
             <excludes>
                 <exclude>org.liquibase:liquibase-core</exclude>
+                <exclude>org.yaml:snakeyaml</exclude>
             </excludes>
         </dependencySet>
     </dependencySets>
