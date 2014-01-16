@@ -6,6 +6,7 @@ import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
+import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.logging.LogFactory;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
@@ -273,8 +274,12 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
 
                 @Override
-				public List<CachedRow> fastFetchQuery() throws SQLException {
+				public List<CachedRow> fastFetchQuery() throws SQLException, DatabaseException {
                     CatalogAndSchema catalogAndSchema = database.correctSchema(new CatalogAndSchema(catalogName, schemaName));
+
+                    if (database instanceof OracleDatabase) {
+                        return queryOracle(catalogAndSchema, null);
+                    }
 
                     String catalog = ((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema);
                     String schema = ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema);
@@ -283,10 +288,43 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
 
                 @Override
-				public List<CachedRow> bulkFetchQuery() throws SQLException {
+				public List<CachedRow> bulkFetchQuery() throws SQLException, DatabaseException {
                     CatalogAndSchema catalogAndSchema = database.correctSchema(new CatalogAndSchema(catalogName, schemaName));
 
+                    if (database instanceof OracleDatabase) {
+                        return queryOracle(catalogAndSchema, null);
+                    }
+
                     return extract(databaseMetaData.getTables(((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema), null, types));
+                }
+
+                private List<CachedRow> queryOracle(CatalogAndSchema catalogAndSchema, String tableName) throws DatabaseException, SQLException {
+                    List<CachedRow> results = new ArrayList<CachedRow>();
+                    for (String type : types) {
+                        String allTable;
+                        String nameColumn;
+                        if (type.equalsIgnoreCase("table")) {
+                            allTable = "ALL_TABLES";
+                            nameColumn = "TABLE_NAME";
+                        } else if (type.equalsIgnoreCase("view")) {
+                            allTable = "ALL_VIEWS";
+                            nameColumn = "VIEW_NAME";
+                        } else {
+                            throw new UnexpectedLiquibaseException("Unknown table type: "+type);
+                        }
+
+                        String ownerName = database.correctObjectName(catalogAndSchema.getCatalogName(), Schema.class);
+                        String sql = "SELECT null as TABLE_CAT, a.OWNER as TABLE_SCHEM, a."+nameColumn+" as TABLE_NAME, 'TABLE' as TABLE_TYPE,  c.COMMENTS as REMARKS " +
+                            "from "+allTable+" a " +
+                            "join ALL_TAB_COMMENTS c on a."+nameColumn+"=c.table_name and a.owner=c.owner " +
+                            "WHERE a.OWNER='" + ownerName + "'";
+                        if (tableName != null) {
+                            sql += " AND "+nameColumn+"='" + database.correctObjectName(tableName, Table.class) + "'";
+                        }
+                        sql += " AND a."+nameColumn+" not in (select mv.name from all_registered_mviews mv where mv.owner='"+ownerName+"')";
+                        results.addAll(executeAndExtract(sql, database));
+                    }
+                    return results;
                 }
             });
         }
