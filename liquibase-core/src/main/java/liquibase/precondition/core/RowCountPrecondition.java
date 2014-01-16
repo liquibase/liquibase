@@ -71,7 +71,7 @@ public class RowCountPrecondition implements Precondition {
             TableRowCountStatement statement = new TableRowCountStatement(catalogName, schemaName, tableName);
 
             int result = ExecutorService.getInstance().getExecutor(database).queryForInt(statement);
-            if (result == expectedRows) {
+            if (result != expectedRows) {
                 throw new PreconditionFailedException(getFailureMessage(result), changeLog, this);
             }
 
