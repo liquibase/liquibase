@@ -147,16 +147,6 @@
                                     </mapper>
                                 </data>
                                 <data>
-                                    <src>${project.build.directory}/dist/lib/README.txt</src>
-                                    <type>file</type>
-                                    <mapper>
-                                        <type>perm</type>
-                                        <filemode>444</filemode>
-                                        <prefix>/usr/lib/liquibase-${project.version}/lib</prefix>
-                                    </mapper>
-                                </data>
-			    
-                                <data>
                                     <type>link</type>
                                     <linkName>/usr/bin/liquibase</linkName>
                                     <linkTarget>/usr/lib/liquibase-${project.version}/liquibase</linkTarget>  
