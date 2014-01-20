@@ -252,6 +252,7 @@ public class Main {
                     if (!cmdParm.startsWith("--referenceUsername")
                         && !cmdParm.startsWith("--referencePassword")
                         && !cmdParm.startsWith("--referenceDriver")
+                        && !cmdParm.startsWith("--referenceDefaultCatalogName")
                             && !cmdParm.startsWith("--includeSchema")
                             && !cmdParm.startsWith("--includeCatalog")
                             && !cmdParm.startsWith("--includeTablespace")
