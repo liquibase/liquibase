@@ -10,8 +10,10 @@ import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.logging.LogFactory;
 import liquibase.statement.core.GetViewDefinitionStatement;
+import liquibase.structure.core.Catalog;
 import liquibase.structure.core.Table;
 import liquibase.structure.core.View;
+import liquibase.util.StringUtils;
 
 import java.math.BigInteger;
 import java.util.HashSet;
@@ -204,6 +206,16 @@ public class SybaseDatabase extends AbstractJdbcDatabase {
     }
 
     @Override
+    public boolean supportsSchemas() {
+      return false;
+    }
+
+    @Override
+    public CatalogAndSchema correctSchema(final CatalogAndSchema schema) {
+      return schema;
+    }
+
+    @Override
     public boolean isSystemObject(DatabaseObject example) {
         if (example.getSchema() != null && example.getSchema().getName() != null) {
             if (example instanceof Table && (example.getSchema().getName().equals("sys") || example.getSchema().getName().equals("sybfi"))) {
@@ -287,6 +299,34 @@ public class SybaseDatabase extends AbstractJdbcDatabase {
     @Override
     public String escapeIndexName(String catalogName,String schemaName, String indexName) {
         return super.escapeIndexName(null, null, indexName);
+    }
+
+    @Override
+    public String escapeObjectName(String catalogName, String schemaName, final String objectName, final Class<? extends DatabaseObject> objectType) {
+      catalogName = StringUtils.trimToNull(catalogName);
+
+      if (catalogName != null) {
+        if (getOutputDefaultCatalog()) {
+          return escapeObjectName(catalogName, Catalog.class) + ".." + escapeObjectName(objectName, objectType);
+        } else {
+          if (isDefaultCatalog(catalogName)) {
+            return escapeObjectName(objectName, objectType);
+          } else {
+            return escapeObjectName(catalogName, Catalog.class) + ".." + escapeObjectName(objectName, objectType);
+          }
+        }
+      } else {
+        catalogName = this.getDefaultCatalogName();
+        if (catalogName == null) {
+          return escapeObjectName(objectName, objectType);
+        } else {
+          if (isDefaultCatalog(catalogName) && getOutputDefaultCatalog()) {
+            return escapeObjectName(catalogName, Catalog.class) + ".." + escapeObjectName(objectName, objectType);
+          } else {
+            return escapeObjectName(objectName, objectType);
+          }
+        }
+      }
     }
 
     @Override
