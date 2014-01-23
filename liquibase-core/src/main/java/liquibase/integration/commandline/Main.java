@@ -61,6 +61,7 @@ public class Main {
     protected String driverPropertiesFile;
     protected Boolean promptForNonLocalDatabase = null;
     protected Boolean includeSystemClasspath;
+    protected Boolean disablePreconditions = Boolean.FALSE;
     protected String defaultsFile = "liquibase.properties";
 
     protected String diffTypes;
@@ -810,6 +811,9 @@ public class Main {
 
 
             Liquibase liquibase = new Liquibase(changeLogFile, fileOpener, database);
+            if (disablePreconditions) {
+                liquibase.disablePreconditions();
+            }
             liquibase.setCurrentDateTimeFunction(currentDateTimeFunction);
             for (Map.Entry<String, Object> entry : changeLogParameters.entrySet()) {
                 liquibase.setChangeLogParameter(entry.getKey(), entry.getValue());
