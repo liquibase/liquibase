@@ -1,0 +1,14 @@
+<Project projectName="liquibase">
+  <Jar>.\liquibase-core\target\classes</Jar>
+  <Jar>.\liquibase-cdi\target\classes</Jar>
+  <Jar>.\liquibase-maven-plugin\target\classes</Jar>
+  <Jar>.\liquibase-osgi\target\classes</Jar>
+  <AuxClasspathEntry>.\liquibase-debian\target\lib</AuxClasspathEntry>
+  <SrcDir>.\liquibase-cdi\src\main\java</SrcDir>
+  <SrcDir>.\liquibase-core\src\main\java</SrcDir>
+  <SrcDir>.\liquibase-maven-plugin\src\main\java</SrcDir>
+  <SrcDir>.\liquibase-osgi\src\main\java</SrcDir>
+  <SuppressionFilter>
+    <LastVersion value="-1" relOp="NEQ"/>
+  </SuppressionFilter>
+</Project>
