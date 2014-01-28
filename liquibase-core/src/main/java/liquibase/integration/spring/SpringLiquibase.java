@@ -12,6 +12,10 @@ import java.util.*;
 import javax.sql.DataSource;
 
 import liquibase.Liquibase;
+import liquibase.context.Context;
+import liquibase.context.ExecutionContext;
+import liquibase.context.GlobalContext;
+import liquibase.context.SystemPropertyValueContainer;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.jvm.JdbcConnection;
@@ -277,16 +281,15 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 	 */
 	@Override
     public void afterPropertiesSet() throws LiquibaseException {
-		String shouldRunProperty = System.getProperty(Liquibase.SHOULD_RUN_SYSTEM_PROPERTY);
-		if (shouldRunProperty != null && !Boolean.valueOf(shouldRunProperty)) {
-			LogFactory.getLogger().info(
-					"Liquibase did not run because '" + Liquibase.SHOULD_RUN_SYSTEM_PROPERTY + "' system property was set to false");
+        ExecutionContext executionContext = new ExecutionContext(new SystemPropertyValueContainer());
+        Context.ContextProperty shouldRunProperty = executionContext.getContext(GlobalContext.class).getProperty(GlobalContext.SHOULD_RUN);
+
+		if (!shouldRunProperty.getValue(Boolean.class)) {
+			LogFactory.getLogger().info("Liquibase did not run because "+executionContext.describeDefaultLookup(shouldRunProperty)+" was set to false");
 			return;
 		}
 		if (!shouldRun) {
-			LogFactory.getLogger().info(
-					"Liquibase did not run because 'shouldRun' " + "property was set to false on " + getBeanName()
-							+ " Liquibase Spring bean.");
+			LogFactory.getLogger().info("Liquibase did not run because 'shouldRun' " + "property was set to false on " + getBeanName() + " Liquibase Spring bean.");
 			return;
 		}
 

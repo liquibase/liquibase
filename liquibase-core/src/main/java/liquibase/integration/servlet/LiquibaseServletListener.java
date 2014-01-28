@@ -129,7 +129,7 @@ public class LiquibaseServletListener implements ServletContextListener {
     /**
      * Checks if the update is supposed to be executed. That depends on several conditions:
      * <ol>
-     * <li>if {@value Liquibase#SHOULD_RUN_SYSTEM_PROPERTY} is <code>false</code> the update will not be executed.</li>
+     * <li>if liquibase.shouldRun is <code>false</code> the update will not be executed.</li>
      * <li>if {@value LiquibaseServletListener#LIQUIBASE_HOST_INCLUDES} contains the current hostname, the the update will be executed.</li>
      * <li>if {@value LiquibaseServletListener#LIQUIBASE_HOST_EXCLUDES} contains the current hostname, the the update will not be executed.</li>
      * </ol>

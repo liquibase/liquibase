@@ -155,6 +155,14 @@ public abstract class Context {
             return value;
         }
 
+        public <T> T getValue(Class<T> type) {
+            if (!this.type.isAssignableFrom(type)) {
+                throw new UnexpectedLiquibaseException("Property "+name+" on is of type "+this.type.getSimpleName()+", not "+type.getSimpleName());
+            }
+
+            return (T) value;
+        }
+
         public void setValue(Object value) {
             if (value != null && !type.isAssignableFrom(value.getClass())) {
                 throw new UnexpectedLiquibaseException("Property "+name+" on is of type "+type.getSimpleName()+", not "+value.getClass().getSimpleName());

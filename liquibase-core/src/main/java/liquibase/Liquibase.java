@@ -62,7 +62,6 @@ import javax.xml.parsers.ParserConfigurationException;
  */
 public class Liquibase {
 
-    public static final String SHOULD_RUN_SYSTEM_PROPERTY = "liquibase.should.run";
     public static final String ENABLE_CHANGELOG_PROP_ESCAPING = "liquibase.enableEscaping";
 
     private DatabaseChangeLog databaseChangeLog;
