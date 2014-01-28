@@ -8,6 +8,7 @@ import javax.xml.parsers.SAXParserFactory;
 
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.DatabaseChangeLog;
+import liquibase.context.ExecutionContext;
 import liquibase.exception.ChangeLogParseException;
 import liquibase.logging.LogFactory;
 import liquibase.parser.ChangeLogParser;
@@ -54,7 +55,7 @@ public class XMLChangeLogSAXParser implements ChangeLogParser {
     }
 
     @Override
-    public DatabaseChangeLog parse(String physicalChangeLogLocation, ChangeLogParameters changeLogParameters, ResourceAccessor resourceAccessor) throws ChangeLogParseException {
+    public DatabaseChangeLog parse(String physicalChangeLogLocation, ChangeLogParameters changeLogParameters, ResourceAccessor resourceAccessor, ExecutionContext context) throws ChangeLogParseException {
 
         InputStream inputStream = null;
         try {
@@ -96,7 +97,7 @@ public class XMLChangeLogSAXParser implements ChangeLogParser {
                 throw new ChangeLogParseException(physicalChangeLogLocation + " does not exist");
             }
 
-            XMLChangeLogSAXHandler contentHandler = new XMLChangeLogSAXHandler(physicalChangeLogLocation, resourceAccessor, changeLogParameters);
+            XMLChangeLogSAXHandler contentHandler = new XMLChangeLogSAXHandler(physicalChangeLogLocation, resourceAccessor, changeLogParameters, context);
             xmlReader.setContentHandler(contentHandler);
             xmlReader.parse(new InputSource(new UtfBomStripperInputStream(inputStream)));
 

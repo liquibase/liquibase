@@ -1,5 +1,6 @@
 package liquibase.changelog;
 
+import liquibase.context.ExecutionContext;
 import liquibase.exception.ChangeLogParseException;
 import liquibase.parser.ChangeLogParser;
 import liquibase.parser.ChangeLogParserFactory;
@@ -123,7 +124,7 @@ public class ChangeLogParserFactoryTest {
     private static class MockChangeLogParser implements ChangeLogParser {
 
         @Override
-        public DatabaseChangeLog parse(String physicalChangeLogLocation, ChangeLogParameters changeLogParameters, ResourceAccessor resourceAccessor) throws ChangeLogParseException {
+        public DatabaseChangeLog parse(String physicalChangeLogLocation, ChangeLogParameters changeLogParameters, ResourceAccessor resourceAccessor, ExecutionContext context) throws ChangeLogParseException {
             return null;
         }
 

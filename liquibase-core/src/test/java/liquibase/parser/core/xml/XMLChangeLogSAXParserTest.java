@@ -20,19 +20,28 @@ import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.ChangeLogParameters;
+import liquibase.context.ExecutionContext;
 import liquibase.database.core.MockDatabase;
 import liquibase.exception.ChangeLogParseException;
 import liquibase.precondition.core.OrPrecondition;
 import liquibase.precondition.core.PreconditionContainer;
 import liquibase.test.JUnitResourceAccessor;
 
+import org.junit.Before;
 import org.junit.Test;
 
 public class XMLChangeLogSAXParserTest {
 
+    private ExecutionContext executionContext;
+
+    @Before
+    public void before() {
+        executionContext = new ExecutionContext();
+    }
+
     @Test
     public void simpleChangeLog() throws Exception {
-        DatabaseChangeLog changeLog = new XMLChangeLogSAXParser().parse("liquibase/parser/core/xml/simpleChangeLog.xml", new ChangeLogParameters(), new JUnitResourceAccessor());
+        DatabaseChangeLog changeLog = new XMLChangeLogSAXParser().parse("liquibase/parser/core/xml/simpleChangeLog.xml", new ChangeLogParameters(executionContext), new JUnitResourceAccessor(), executionContext);
 
         assertEquals("liquibase/parser/core/xml/simpleChangeLog.xml", changeLog.getLogicalFilePath());
         assertEquals("liquibase/parser/core/xml/simpleChangeLog.xml", changeLog.getPhysicalFilePath());
@@ -54,7 +63,7 @@ public class XMLChangeLogSAXParserTest {
 
     @Test
     public void multiChangeSetChangeLog() throws Exception {
-        DatabaseChangeLog changeLog = new XMLChangeLogSAXParser().parse("liquibase/parser/core/xml/multiChangeSetChangeLog.xml", new ChangeLogParameters(), new JUnitResourceAccessor());
+        DatabaseChangeLog changeLog = new XMLChangeLogSAXParser().parse("liquibase/parser/core/xml/multiChangeSetChangeLog.xml", new ChangeLogParameters(executionContext), new JUnitResourceAccessor(), executionContext);
 
         assertEquals("liquibase/parser/core/xml/multiChangeSetChangeLog.xml", changeLog.getLogicalFilePath());
         assertEquals("liquibase/parser/core/xml/multiChangeSetChangeLog.xml", changeLog.getPhysicalFilePath());
@@ -129,7 +138,7 @@ public class XMLChangeLogSAXParserTest {
 
     @Test
     public void logicalPathChangeLog() throws Exception {
-        DatabaseChangeLog changeLog = new XMLChangeLogSAXParser().parse("liquibase/parser/core/xml/logicalPathChangeLog.xml", new ChangeLogParameters(), new JUnitResourceAccessor());
+        DatabaseChangeLog changeLog = new XMLChangeLogSAXParser().parse("liquibase/parser/core/xml/logicalPathChangeLog.xml", new ChangeLogParameters(executionContext), new JUnitResourceAccessor(), executionContext);
 
         assertEquals("liquibase/parser-logical/xml/logicalPathChangeLog.xml", changeLog.getLogicalFilePath());
         assertEquals("liquibase/parser/core/xml/logicalPathChangeLog.xml", changeLog.getPhysicalFilePath());
@@ -142,7 +151,7 @@ public class XMLChangeLogSAXParserTest {
 
     @Test
     public void preconditionsChangeLog() throws Exception {
-        DatabaseChangeLog changeLog = new XMLChangeLogSAXParser().parse("liquibase/parser/core/xml/preconditionsChangeLog.xml", new ChangeLogParameters(), new JUnitResourceAccessor());
+        DatabaseChangeLog changeLog = new XMLChangeLogSAXParser().parse("liquibase/parser/core/xml/preconditionsChangeLog.xml", new ChangeLogParameters(executionContext), new JUnitResourceAccessor(), executionContext);
 
         assertEquals("liquibase/parser/core/xml/preconditionsChangeLog.xml", changeLog.getLogicalFilePath());
         assertEquals("liquibase/parser/core/xml/preconditionsChangeLog.xml", changeLog.getPhysicalFilePath());
@@ -162,7 +171,7 @@ public class XMLChangeLogSAXParserTest {
     @Test
     public void testNestedChangeLog() throws Exception {
     	final String nestedFileName = "liquibase/parser/core/xml/nestedChangeLog.xml";
-        DatabaseChangeLog changeLog = new XMLChangeLogSAXParser().parse("liquibase/parser/core/xml/nestedChangeLog.xml", new ChangeLogParameters(), new JUnitResourceAccessor());
+        DatabaseChangeLog changeLog = new XMLChangeLogSAXParser().parse("liquibase/parser/core/xml/nestedChangeLog.xml", new ChangeLogParameters(executionContext), new JUnitResourceAccessor(), executionContext);
         nestedFileAssertions(changeLog, nestedFileName);
 
     }
@@ -170,7 +179,7 @@ public class XMLChangeLogSAXParserTest {
     @Test
     public void nestedRelativeChangeLog() throws Exception {
     	final String nestedFileName = "liquibase/parser/core/xml/nestedRelativeChangeLog.xml";
-        DatabaseChangeLog changeLog = new XMLChangeLogSAXParser().parse(nestedFileName, new ChangeLogParameters(), new JUnitResourceAccessor());
+        DatabaseChangeLog changeLog = new XMLChangeLogSAXParser().parse(nestedFileName, new ChangeLogParameters(executionContext), new JUnitResourceAccessor(), executionContext);
         nestedFileAssertions(changeLog, nestedFileName);
 
     }
@@ -226,7 +235,7 @@ public class XMLChangeLogSAXParserTest {
     public void doubleNestedChangeLog() throws Exception {
     	final String doubleNestedFileName = "liquibase/parser/core/xml/doubleNestedChangeLog.xml";
     	final String nestedFileName = "liquibase/parser/core/xml/nestedChangeLog.xml";
-        DatabaseChangeLog changeLog = new XMLChangeLogSAXParser().parse(doubleNestedFileName, new ChangeLogParameters(), new JUnitResourceAccessor());
+        DatabaseChangeLog changeLog = new XMLChangeLogSAXParser().parse(doubleNestedFileName, new ChangeLogParameters(executionContext), new JUnitResourceAccessor(), executionContext);
 
         doubleNestedFileAssertions(doubleNestedFileName, nestedFileName, changeLog);
     }
@@ -235,7 +244,7 @@ public class XMLChangeLogSAXParserTest {
     public void doubleNestedRelativeChangeLog() throws Exception {
     	final String doubleNestedFileName = "liquibase/parser/core/xml/doubleNestedRelativeChangeLog.xml";
     	final String nestedFileName = "liquibase/parser/core/xml/nestedRelativeChangeLog.xml";
-        DatabaseChangeLog changeLog = new XMLChangeLogSAXParser().parse(doubleNestedFileName, new ChangeLogParameters(), new JUnitResourceAccessor());
+        DatabaseChangeLog changeLog = new XMLChangeLogSAXParser().parse(doubleNestedFileName, new ChangeLogParameters(executionContext), new JUnitResourceAccessor(), executionContext);
 
         doubleNestedFileAssertions(doubleNestedFileName, nestedFileName,
 				changeLog);
@@ -304,7 +313,7 @@ public class XMLChangeLogSAXParserTest {
     public void missingChangeLog() throws Exception {
         try {
             @SuppressWarnings("unused")
-			DatabaseChangeLog changeLog = new XMLChangeLogSAXParser().parse("liquibase/changelog/parser/xml/missingChangeLog.xml", new ChangeLogParameters(), new JUnitResourceAccessor());
+			DatabaseChangeLog changeLog = new XMLChangeLogSAXParser().parse("liquibase/changelog/parser/xml/missingChangeLog.xml", new ChangeLogParameters(executionContext), new JUnitResourceAccessor(), executionContext);
         } catch (Exception e) {
             assertTrue(e instanceof ChangeLogParseException);
             assertEquals("liquibase/changelog/parser/xml/missingChangeLog.xml does not exist", e.getMessage());
@@ -315,7 +324,7 @@ public class XMLChangeLogSAXParserTest {
     @Test
     public void malformedChangeLog() throws Exception {
         try {
-            DatabaseChangeLog changeLog = new XMLChangeLogSAXParser().parse("liquibase/parser/core/xml/malformedChangeLog.xml", new ChangeLogParameters(), new JUnitResourceAccessor());
+            DatabaseChangeLog changeLog = new XMLChangeLogSAXParser().parse("liquibase/parser/core/xml/malformedChangeLog.xml", new ChangeLogParameters(executionContext), new JUnitResourceAccessor(), executionContext);
         } catch (Exception e) {
             assertTrue(e instanceof ChangeLogParseException);
             assertTrue(e.getMessage().startsWith("Error parsing line"));
@@ -325,7 +334,7 @@ public class XMLChangeLogSAXParserTest {
 
     @Test
     public void otherNamespaceAttributesChangeLog() throws Exception {
-        DatabaseChangeLog changeLog = new XMLChangeLogSAXParser().parse("liquibase/parser/core/xml/simpleChangeLog.xml", new ChangeLogParameters(), new JUnitResourceAccessor());
+        DatabaseChangeLog changeLog = new XMLChangeLogSAXParser().parse("liquibase/parser/core/xml/simpleChangeLog.xml", new ChangeLogParameters(executionContext), new JUnitResourceAccessor(), executionContext);
 
         assertEquals("liquibase/parser/core/xml/simpleChangeLog.xml", changeLog.getLogicalFilePath());
         assertEquals("liquibase/parser/core/xml/simpleChangeLog.xml", changeLog.getPhysicalFilePath());
@@ -347,9 +356,9 @@ public class XMLChangeLogSAXParserTest {
 
 	@Test
 	public void rawSqlParameter() throws Exception {
-		ChangeLogParameters params = new ChangeLogParameters();
+		ChangeLogParameters params = new ChangeLogParameters(executionContext);
 		params.set("tablename", "rawsql");
-		DatabaseChangeLog changeLog = new XMLChangeLogSAXParser().parse("liquibase/parser/core/xml/rawSqlParameters.xml", params, new JUnitResourceAccessor());
+		DatabaseChangeLog changeLog = new XMLChangeLogSAXParser().parse("liquibase/parser/core/xml/rawSqlParameters.xml", params, new JUnitResourceAccessor(), executionContext);
 
 		assertEquals("liquibase/parser/core/xml/rawSqlParameters.xml", changeLog.getLogicalFilePath());
 		assertEquals("liquibase/parser/core/xml/rawSqlParameters.xml", changeLog.getPhysicalFilePath());
@@ -371,7 +380,7 @@ public class XMLChangeLogSAXParserTest {
 
 	@Test
 	public void addColumnAfter() throws Exception {
-        DatabaseChangeLog changeLog = new XMLChangeLogSAXParser().parse("liquibase/parser/core/xml/columnAfterChangeLog.xml", new ChangeLogParameters(), new JUnitResourceAccessor());
+        DatabaseChangeLog changeLog = new XMLChangeLogSAXParser().parse("liquibase/parser/core/xml/columnAfterChangeLog.xml", new ChangeLogParameters(executionContext), new JUnitResourceAccessor(), executionContext);
         
         // change 0
         ChangeSet changeSet = changeLog.getChangeSets().get(0);
@@ -398,7 +407,7 @@ public class XMLChangeLogSAXParserTest {
 
 	@Test
 	public void addColumnBefore() throws Exception {
-        DatabaseChangeLog changeLog = new XMLChangeLogSAXParser().parse("liquibase/parser/core/xml/columnBeforeChangeLog.xml", new ChangeLogParameters(), new JUnitResourceAccessor());
+        DatabaseChangeLog changeLog = new XMLChangeLogSAXParser().parse("liquibase/parser/core/xml/columnBeforeChangeLog.xml", new ChangeLogParameters(executionContext), new JUnitResourceAccessor(), executionContext);
         
         // change 0
         ChangeSet changeSet = changeLog.getChangeSets().get(0);
@@ -425,7 +434,7 @@ public class XMLChangeLogSAXParserTest {
 
 	@Test
 	public void addColumnFirst() throws Exception {
-        DatabaseChangeLog changeLog = new XMLChangeLogSAXParser().parse("liquibase/parser/core/xml/columnFirstChangeLog.xml", new ChangeLogParameters(), new JUnitResourceAccessor());
+        DatabaseChangeLog changeLog = new XMLChangeLogSAXParser().parse("liquibase/parser/core/xml/columnFirstChangeLog.xml", new ChangeLogParameters(executionContext), new JUnitResourceAccessor(), executionContext);
         
         ChangeSet changeSet = changeLog.getChangeSets().get(1);
         List<Change> changes = changeSet.getChanges();

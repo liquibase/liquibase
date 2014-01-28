@@ -1,7 +1,5 @@
 package liquibase.changelog;
 
-import static liquibase.Liquibase.ENABLE_CHANGELOG_PROP_ESCAPING;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -10,6 +8,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import liquibase.Contexts;
+import liquibase.context.ChangeLogParserContext;
+import liquibase.context.ExecutionContext;
 import liquibase.database.Database;
 import liquibase.database.DatabaseList;
 import liquibase.exception.DatabaseException;
@@ -17,23 +17,16 @@ import liquibase.util.StringUtils;
 
 public class ChangeLogParameters {
 	
-	public static final boolean EnableEscaping;
-	
-	static {
-		String enableEscaping = System.getProperty(ENABLE_CHANGELOG_PROP_ESCAPING, "false");
-		EnableEscaping = Boolean.valueOf(enableEscaping);
-	}
-
     private List<ChangeLogParameter> changeLogParameters = new ArrayList<ChangeLogParameter>();
     private ExpressionExpander expressionExpander;
     private Database currentDatabase;
     private Contexts currentContexts;
 
-    public ChangeLogParameters() {
-        this(null);
+    public ChangeLogParameters(ExecutionContext context) {
+        this(null, context);
     }
 
-    public ChangeLogParameters(Database database) {
+    public ChangeLogParameters(Database database, ExecutionContext context) {
         for (Map.Entry entry : System.getProperties().entrySet()) {
             changeLogParameters.add(new ChangeLogParameter(entry.getKey().toString(), entry.getValue()));
         }
@@ -77,7 +70,7 @@ public class ChangeLogParameters {
         }
 
 
-        this.expressionExpander = new ExpressionExpander(this, EnableEscaping);
+        this.expressionExpander = new ExpressionExpander(this, context);
         this.currentDatabase = database;
         this.currentContexts = new Contexts();
     }
@@ -203,13 +196,9 @@ public class ChangeLogParameters {
         private ChangeLogParameters changeLogParameters;
         private static final Pattern EXPRESSION_PATTERN = Pattern.compile("(\\$\\{[^\\}]+\\})");
 
-        public ExpressionExpander(ChangeLogParameters changeLogParameters) {
-            this(changeLogParameters, false);
-        }
-        
-        public ExpressionExpander(ChangeLogParameters changeLogParameters, boolean enableEscaping) {
+        public ExpressionExpander(ChangeLogParameters changeLogParameters, ExecutionContext context) {
             this.changeLogParameters = changeLogParameters;
-            this.enableEscaping = enableEscaping;
+            this.enableEscaping = context.getContext(ChangeLogParserContext.class).getSupportPropertyEscaping();
         }
 
         public String expandExpressions(String text) {

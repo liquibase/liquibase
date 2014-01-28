@@ -49,6 +49,8 @@ import liquibase.change.custom.CustomChangeWrapper;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
+import liquibase.context.ChangeLogParserContext;
+import liquibase.context.ExecutionContext;
 import liquibase.database.ObjectQuotingStrategy;
 import liquibase.exception.CustomChangeException;
 import liquibase.exception.LiquibaseException;
@@ -83,6 +85,7 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
     private final PreconditionFactory preconditionFactory;
     private final SqlVisitorFactory sqlVisitorFactory;
     private final ChangeLogParserFactory changeLogParserFactory;
+    private final ExecutionContext context;
 
     protected Logger log;
 
@@ -107,7 +110,9 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
 
     protected XMLChangeLogSAXHandler(String physicalChangeLogLocation,
 			ResourceAccessor resourceAccessor,
-			ChangeLogParameters changeLogParameters) {
+			ChangeLogParameters changeLogParameters,
+            ExecutionContext context) {
+        this.context = context;
 		log = LogFactory.getLogger();
 		this.resourceAccessor = resourceAccessor;
 
@@ -558,8 +563,7 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
 		}
       DatabaseChangeLog changeLog;
       try {
-         changeLog= changeLogParserFactory.getParser(fileName, resourceAccessor).parse(fileName, changeLogParameters,
-                resourceAccessor);
+         changeLog= changeLogParserFactory.getParser(fileName, resourceAccessor).parse(fileName, changeLogParameters, resourceAccessor, context);
       } catch (UnknownChangelogFormatException e) {
         log.warning("included file "+relativeBaseFileName + "/" + fileName + " is not a recognized file type");
                     return false;
@@ -679,7 +683,7 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
 						// incorrectly expanded. If we haven't enabled escaping, then retain the current behavior.
 						String expandedExpression = textString;
 
-						if (false == ChangeLogParameters.EnableEscaping) {
+						if (!context.getContext(ChangeLogParserContext.class).getSupportPropertyEscaping()) {
 							expandedExpression = changeLogParameters.expandExpressions(textString);
 						}
 						((RawSQLChange) change).setSql(expandedExpression);
