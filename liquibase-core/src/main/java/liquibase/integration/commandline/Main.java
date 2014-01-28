@@ -21,6 +21,9 @@ import java.util.jar.JarFile;
 
 import liquibase.Liquibase;
 import liquibase.change.CheckSum;
+import liquibase.context.ExecutionContext;
+import liquibase.context.GlobalContext;
+import liquibase.context.SystemPropertyValueContainer;
 import liquibase.database.Database;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.exception.CommandLineParsingException;
@@ -85,9 +88,11 @@ public class Main {
 
     public static void main(String args[]) throws CommandLineParsingException, IOException {
         try {
-            String shouldRunProperty = System.getProperty(Liquibase.SHOULD_RUN_SYSTEM_PROPERTY);
-            if (shouldRunProperty != null && !Boolean.valueOf(shouldRunProperty)) {
-                System.err.println("Liquibase did not run because '" + Liquibase.SHOULD_RUN_SYSTEM_PROPERTY + "' system property was set to false");
+            ExecutionContext executionContext = new ExecutionContext(new SystemPropertyValueContainer());
+            GlobalContext globalContext = executionContext.getContext(GlobalContext.class);
+
+            if (!globalContext.getShouldRun()) {
+                System.err.println("Liquibase did not run because '" + executionContext.describeDefaultLookup(globalContext.getProperty(GlobalContext.SHOULD_RUN)) + " was set to false");
                 return;
             }
 

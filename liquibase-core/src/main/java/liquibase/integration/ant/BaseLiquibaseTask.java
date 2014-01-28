@@ -1,6 +1,9 @@
 package liquibase.integration.ant;
 
 import liquibase.Liquibase;
+import liquibase.context.ExecutionContext;
+import liquibase.context.GlobalContext;
+import liquibase.context.SystemPropertyValueContainer;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.jvm.JdbcConnection;
@@ -53,6 +56,8 @@ public abstract class BaseLiquibaseTask extends Task {
 
 
     private Map<String, Object> changeLogProperties = new HashMap<String, Object>();
+
+    private ExecutionContext executionContext = new ExecutionContext(new SystemPropertyValueContainer());
 
     public BaseLiquibaseTask() {
         super();
@@ -345,9 +350,9 @@ public abstract class BaseLiquibaseTask extends Task {
     }
 
     protected boolean shouldRun() {
-        String shouldRunProperty = System.getProperty(Liquibase.SHOULD_RUN_SYSTEM_PROPERTY);
-        if (shouldRunProperty != null && !Boolean.valueOf(shouldRunProperty)) {
-            log("Liquibase did not run because '" + Liquibase.SHOULD_RUN_SYSTEM_PROPERTY + "' system property was set to false");
+        GlobalContext globalContext = executionContext.getContext(GlobalContext.class);
+        if (!globalContext.getShouldRun()) {
+            log("Liquibase did not run because " + executionContext.describeDefaultLookup(globalContext.getProperty(GlobalContext.SHOULD_RUN)) + " was set to false");
             return false;
         }
         return true;
