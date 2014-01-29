@@ -10,6 +10,7 @@ public class GlobalConfiguration extends AbstractConfiguration {
     public static final String LIQUIBASE_SCHEMA_NAME = "schemaName";
     public static final String OUTPUT_LINE_SEPARATOR = "outputLineSeparator";
     public static final String OUTPUT_ENCODING = "outputFileEncoding";
+    public static final String CHANGELOG_WAIT_TIME = "changeLogLockWaitTimeInMinutes";
 
     public GlobalConfiguration() {
         super("liquibase");
@@ -26,6 +27,10 @@ public class GlobalConfiguration extends AbstractConfiguration {
         getContainer().addProperty(DATABASECHANGELOGLOCK_TABLE_NAME, String.class)
                 .setDescription("Name of table to use for tracking concurrent liquibase usage")
                 .setDefaultValue("DATABASECHANGELOGLOCK");
+
+        getContainer().addProperty(CHANGELOG_WAIT_TIME, Long.class)
+                .setDescription("Number of minutes to wait for the changelog lock to be available before giving up")
+                .setDefaultValue(5);
 
         getContainer().addProperty(LIQUIBASE_TABLESPACE_NAME, String.class)
                 .setDescription("Tablespace to use for liquibase objects");
@@ -70,6 +75,15 @@ public class GlobalConfiguration extends AbstractConfiguration {
 
     public GlobalConfiguration setDatabaseChangeLogLockTableName(String name) {
         getContainer().setValue(DATABASECHANGELOGLOCK_TABLE_NAME, name);
+        return this;
+    }
+
+    public Long getDatabaseChangeLogWaitTime() {
+        return getContainer().getValue(CHANGELOG_WAIT_TIME, Long.class);
+    }
+
+    public GlobalConfiguration setDatabaseChangeLogWaitTime(Long minutes) {
+        getContainer().setValue(CHANGELOG_WAIT_TIME, minutes);
         return this;
     }
 
