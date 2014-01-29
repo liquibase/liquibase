@@ -1026,13 +1026,8 @@ public class Main {
     }
 
     private Writer getOutputWriter() throws UnsupportedEncodingException {
-        String charsetName = StringUtils.trimToNull(System.getProperty("liquibase.file.encoding"));
-        if (charsetName == null) {
-            charsetName = StringUtils.trimToNull(System.getProperty("file.encoding"));
-        }
-        if (charsetName == null) {
-            charsetName = "UTF-8";
-        }
+        String charsetName = LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding();
+
         return new OutputStreamWriter(System.out, charsetName);
     }
 

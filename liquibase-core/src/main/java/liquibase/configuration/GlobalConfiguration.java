@@ -8,6 +8,8 @@ public class GlobalConfiguration extends AbstractConfiguration {
     public static final String LIQUIBASE_TABLESPACE_NAME = "tablespaceName";
     public static final String LIQUIBASE_CATALOG_NAME = "catalogName";
     public static final String LIQUIBASE_SCHEMA_NAME = "schemaName";
+    public static final String OUTPUT_LINE_SEPARATOR = "outputLineSeparator";
+    public static final String OUTPUT_ENCODING = "outputFileEncoding";
 
     public GlobalConfiguration() {
         super("liquibase");
@@ -33,6 +35,15 @@ public class GlobalConfiguration extends AbstractConfiguration {
 
         getContainer().addProperty(LIQUIBASE_SCHEMA_NAME, String.class)
                 .setDescription("Schema to use for liquibase objects");
+
+        getContainer().addProperty(OUTPUT_LINE_SEPARATOR, String.class)
+                .setDescription("Line separator for output. Defaults to OS default")
+                .setDefaultValue(System.getProperty("line.separator"));
+
+        getContainer().addProperty(OUTPUT_ENCODING, String.class)
+                .setDescription("Encoding to output text in. Defaults to file.encoding system property or UTF-8")
+                .setDefaultValue(System.getProperty("file.encoding") == null ? "UTF-8" : System.getProperty("file.encoding"))
+                .addAlias("file.encoding");
     }
 
     public boolean getShouldRun() {
@@ -89,4 +100,21 @@ public class GlobalConfiguration extends AbstractConfiguration {
         return this;
     }
 
+    public String getOutputLineSeparator() {
+        return getContainer().getValue(OUTPUT_LINE_SEPARATOR, String.class);
+    }
+
+    public GlobalConfiguration setOutputLineSeparator(String name) {
+        getContainer().setValue(OUTPUT_LINE_SEPARATOR, name);
+        return this;
+    }
+
+    public String getOutputEncoding() {
+        return getContainer().getValue(OUTPUT_ENCODING, String.class);
+    }
+
+    public GlobalConfiguration setOutputEncoding(String name) {
+        getContainer().setValue(OUTPUT_ENCODING, name);
+        return this;
+    }
 }
