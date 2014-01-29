@@ -1,4 +1,4 @@
-package liquibase.configuration.core;
+package liquibase.parser;
 
 import liquibase.configuration.AbstractConfiguration;
 

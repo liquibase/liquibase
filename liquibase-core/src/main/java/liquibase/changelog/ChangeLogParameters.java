@@ -2,7 +2,7 @@ package liquibase.changelog;
 
 import liquibase.Contexts;
 import liquibase.configuration.LiquibaseConfiguration;
-import liquibase.configuration.core.ChangeLogParserCofiguration;
+import liquibase.parser.ChangeLogParserCofiguration;
 import liquibase.database.Database;
 import liquibase.database.DatabaseList;
 import liquibase.exception.DatabaseException;

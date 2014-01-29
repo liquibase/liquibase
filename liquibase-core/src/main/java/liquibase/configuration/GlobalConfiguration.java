@@ -1,6 +1,4 @@
-package liquibase.configuration.core;
-
-import liquibase.configuration.AbstractConfiguration;
+package liquibase.configuration;
 
 public class GlobalConfiguration extends AbstractConfiguration {
 

@@ -3,7 +3,7 @@ package liquibase.integration.commandline;
 import liquibase.Liquibase;
 import liquibase.change.CheckSum;
 import liquibase.configuration.LiquibaseConfiguration;
-import liquibase.configuration.core.GlobalConfiguration;
+import liquibase.configuration.GlobalConfiguration;
 import liquibase.database.Database;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.exception.CommandLineParsingException;

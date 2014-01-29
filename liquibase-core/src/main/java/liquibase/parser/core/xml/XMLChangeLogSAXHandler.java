@@ -8,7 +8,7 @@ import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.configuration.LiquibaseConfiguration;
-import liquibase.configuration.core.ChangeLogParserCofiguration;
+import liquibase.parser.ChangeLogParserCofiguration;
 import liquibase.database.ObjectQuotingStrategy;
 import liquibase.exception.CustomChangeException;
 import liquibase.exception.LiquibaseException;

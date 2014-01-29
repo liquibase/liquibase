@@ -1,8 +1,7 @@
 package liquibase.integration.cdi;
 
 import liquibase.Liquibase;
-import liquibase.configuration.SystemPropertyProvider;
-import liquibase.configuration.core.GlobalConfiguration;
+import liquibase.configuration.GlobalConfiguration;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;

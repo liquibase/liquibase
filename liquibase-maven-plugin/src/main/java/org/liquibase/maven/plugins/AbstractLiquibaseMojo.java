@@ -2,7 +2,7 @@ package org.liquibase.maven.plugins;
 
 import liquibase.Liquibase;
 import liquibase.configuration.LiquibaseConfiguration;
-import liquibase.configuration.core.GlobalConfiguration;
+import liquibase.configuration.GlobalConfiguration;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;

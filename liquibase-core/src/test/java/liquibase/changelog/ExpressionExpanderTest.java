@@ -1,7 +1,7 @@
 package liquibase.changelog;
 
 import liquibase.configuration.LiquibaseConfiguration;
-import liquibase.configuration.core.ChangeLogParserCofiguration;
+import liquibase.parser.ChangeLogParserCofiguration;
 import org.junit.Before;
 import org.junit.Test;
 

@@ -4,7 +4,7 @@ import liquibase.Liquibase;
 import liquibase.configuration.AbstractConfiguration;
 import liquibase.configuration.ConfigurationProvider;
 import liquibase.configuration.LiquibaseConfiguration;
-import liquibase.configuration.core.GlobalConfiguration;
+import liquibase.configuration.GlobalConfiguration;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.jvm.JdbcConnection;

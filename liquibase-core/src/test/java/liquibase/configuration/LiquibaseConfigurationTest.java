@@ -1,6 +1,5 @@
 package liquibase.configuration;
 
-import liquibase.configuration.core.GlobalConfiguration;
 import org.junit.Test;
 
 import static junit.framework.Assert.assertNotNull;
