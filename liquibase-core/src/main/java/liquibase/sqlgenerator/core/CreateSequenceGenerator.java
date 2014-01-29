@@ -56,9 +56,17 @@ public class CreateSequenceGenerator extends AbstractSqlGenerator<CreateSequence
             buffer.append(" MAXVALUE ").append(statement.getMaxValue());
         }
 
+        if (statement.getCacheSize() != null && database instanceof OracleDatabase) {
+            buffer.append(" CACHE ").append(statement.getCacheSize());
+        }
+
         if (statement.getOrdered() != null) {
             if (statement.getOrdered()) {
                 buffer.append(" ORDER");
+            } else {
+               if (database instanceof OracleDatabase) {
+                   buffer.append(" NOORDER");
+               }
             }
         }
         if (statement.getCycle() != null) {

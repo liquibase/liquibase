@@ -2,6 +2,7 @@ package liquibase.structure.core;
 
 import liquibase.structure.AbstractDatabaseObject;
 import liquibase.structure.DatabaseObject;
+import sun.security.util.BigInt;
 
 import java.math.BigInteger;
 
@@ -82,5 +83,63 @@ public class Sequence extends AbstractDatabaseObject {
 
     public Sequence setSchema(String catalog, String schema) {
         return setSchema(new Schema(catalog, schema));
+    }
+
+    public BigInteger getMinValue() {
+        return getAttribute("minValue", BigInteger.class);
+    }
+
+    public Sequence setMinValue(BigInteger minValue) {
+        this.setAttribute("minValue", minValue);
+        return this;
+    }
+
+    public BigInteger getMaxValue() {
+        return getAttribute("maxValue", BigInteger.class);
+    }
+
+    public Sequence setMaxValue(BigInteger maxValue) {
+        this.setAttribute("maxValue", maxValue);
+
+        return this;
+    }
+
+    public Boolean getWillCycle() {
+        return getAttribute("willCycle", Boolean.class);
+    }
+
+    public Sequence setWillCycle(Boolean willCycle) {
+        this.setAttribute("willCycle", willCycle);
+        return this;
+    }
+
+    public Boolean getOrdered() {
+        return getAttribute("ordered", Boolean.class);
+    }
+
+    public Sequence setOrdered(Boolean isOrdered) {
+        this.setAttribute("ordered", isOrdered);
+
+        return this;
+    }
+
+    public BigInteger getLastReturnedValue() {
+        return getAttribute("lastReturnedValue", BigInteger.class);
+    }
+
+    public Sequence setLastReturnedValue(BigInteger lastReturnedValue) {
+        this.setAttribute("lastReturnedValue", lastReturnedValue);
+
+        return this;
+    }
+
+    public BigInteger getCacheSize() {
+        return getAttribute("cacheSize", BigInteger.class);
+    }
+
+    public Sequence setCacheSize(BigInteger cacheSize) {
+        this.setAttribute("cacheSize", cacheSize);
+
+        return this;
     }
 }

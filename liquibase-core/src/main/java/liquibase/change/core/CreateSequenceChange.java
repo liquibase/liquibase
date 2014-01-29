@@ -22,6 +22,7 @@ public class CreateSequenceChange extends AbstractChange {
     private BigInteger minValue;
     private Boolean ordered;
     private Boolean cycle;
+    private BigInteger cacheSize;
 
     @DatabaseChangeProperty(since = "3.0")
     public String getCatalogName() {
@@ -103,6 +104,15 @@ public class CreateSequenceChange extends AbstractChange {
         this.cycle = cycle;
     }
 
+    @DatabaseChangeProperty(description = "Number of values to fetch per query")
+    public BigInteger getCacheSize() {
+        return cacheSize;
+    }
+
+    public void setCacheSize(BigInteger cacheSize) {
+        this.cacheSize = cacheSize;
+    }
+
     @Override
     public SqlStatement[] generateStatements(Database database) {
         return new SqlStatement[] {
@@ -113,6 +123,7 @@ public class CreateSequenceChange extends AbstractChange {
                 .setOrdered(isOrdered())
                 .setStartValue(getStartValue())
                 .setCycle(getCycle())
+                .setCacheSize(getCacheSize())
         };
     }
 
