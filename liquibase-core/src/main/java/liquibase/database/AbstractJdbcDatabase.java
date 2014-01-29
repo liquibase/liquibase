@@ -3,6 +3,9 @@ package liquibase.database;
 import liquibase.CatalogAndSchema;
 import liquibase.change.Change;
 import liquibase.changelog.*;
+import liquibase.configuration.AbstractConfiguration;
+import liquibase.configuration.GlobalConfiguration;
+import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.core.*;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.diff.DiffGeneratorFactory;
@@ -73,11 +76,11 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     private static Pattern CREATE_VIEW_AS_PATTERN = Pattern.compile("^CREATE\\s+.*?VIEW\\s+.*?AS\\s+", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
-    private String databaseChangeLogTableName = System.getProperty("liquibase.databaseChangeLogTableName") == null ? "DatabaseChangeLog".toUpperCase() : System.getProperty("liquibase.databaseChangeLogTableName");
-    private String databaseChangeLogLockTableName = System.getProperty("liquibase.databaseChangeLogLockTableName") == null ? "DatabaseChangeLogLock".toUpperCase() : System.getProperty("liquibase.databaseChangeLogLockTableName");
-    private String liquibaseTablespaceName = System.getProperty("liquibase.tablespaceName");
-    private String liquibaseSchemaName = System.getProperty("liquibase.schemaName");
-    private String liquibaseCatalogName = System.getProperty("liquibase.catalogName");
+    private String databaseChangeLogTableName;
+    private String databaseChangeLogLockTableName;
+    private String liquibaseTablespaceName;
+    private String liquibaseSchemaName;
+    private String liquibaseCatalogName;
 
     private Boolean previousAutoCommit;
 
@@ -579,6 +582,11 @@ public abstract class AbstractJdbcDatabase implements Database {
      */
     @Override
     public String getDatabaseChangeLogTableName() {
+        AbstractConfiguration.ConfigurationProperty configuration = LiquibaseConfiguration.getInstance().getProperty(GlobalConfiguration.class, GlobalConfiguration.DATABASECHANGELOG_TABLE_NAME);
+        if (configuration.wasSet()) {
+            return configuration.getValue(String.class);
+        }
+
         return databaseChangeLogTableName;
     }
 
@@ -587,6 +595,11 @@ public abstract class AbstractJdbcDatabase implements Database {
      */
     @Override
     public String getDatabaseChangeLogLockTableName() {
+        AbstractConfiguration.ConfigurationProperty configuration = LiquibaseConfiguration.getInstance().getProperty(GlobalConfiguration.class, GlobalConfiguration.DATABASECHANGELOGLOCK_TABLE_NAME);
+        if (configuration.wasSet()) {
+            return configuration.getValue(String.class);
+        }
+
         return databaseChangeLogLockTableName;
     }
 
@@ -595,6 +608,11 @@ public abstract class AbstractJdbcDatabase implements Database {
      */
     @Override
     public String getLiquibaseTablespaceName() {
+        AbstractConfiguration.ConfigurationProperty configuration = LiquibaseConfiguration.getInstance().getProperty(GlobalConfiguration.class, GlobalConfiguration.LIQUIBASE_TABLESPACE_NAME);
+        if (configuration.wasSet()) {
+            return configuration.getValue(String.class);
+        }
+
         return liquibaseTablespaceName;
     }
 
@@ -633,6 +651,11 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     @Override
     public String getLiquibaseCatalogName() {
+        AbstractConfiguration.ConfigurationProperty configuration = LiquibaseConfiguration.getInstance().getProperty(GlobalConfiguration.class, GlobalConfiguration.LIQUIBASE_CATALOG_NAME);
+        if (configuration.wasSet()) {
+            return configuration.getValue(String.class);
+        }
+
         return liquibaseCatalogName == null ? getDefaultCatalogName() : liquibaseCatalogName;
     }
 
@@ -643,6 +666,11 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     @Override
     public String getLiquibaseSchemaName() {
+        AbstractConfiguration.ConfigurationProperty configuration = LiquibaseConfiguration.getInstance().getProperty(GlobalConfiguration.class, GlobalConfiguration.LIQUIBASE_SCHEMA_NAME);
+        if (configuration.wasSet()) {
+            return configuration.getValue(String.class);
+        }
+
         return liquibaseSchemaName == null ? getDefaultSchemaName() : liquibaseSchemaName;
     }
 

@@ -285,7 +285,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
         LiquibaseConfiguration liquibaseConfiguration = LiquibaseConfiguration.getInstance();
 
         if (!liquibaseConfiguration.getConfiguration(GlobalConfiguration.class).getShouldRun()) {
-            getLog().info("Liquibase did not run because " + liquibaseConfiguration.describeDefaultLookup(liquibaseConfiguration.getConfiguration(GlobalConfiguration.class).getProperty(GlobalConfiguration.SHOULD_RUN)) + " was set to false");
+            getLog().info("Liquibase did not run because " + liquibaseConfiguration.describeDefaultLookup(GlobalConfiguration.class, GlobalConfiguration.SHOULD_RUN) + " was set to false");
             return;
         }
 

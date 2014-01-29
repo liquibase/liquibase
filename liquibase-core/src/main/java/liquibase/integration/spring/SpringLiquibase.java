@@ -278,7 +278,7 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 	 */
 	@Override
     public void afterPropertiesSet() throws LiquibaseException {
-        AbstractConfiguration.ConfigurationProperty shouldRunProperty = LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getProperty(GlobalConfiguration.SHOULD_RUN);
+        AbstractConfiguration.ConfigurationProperty shouldRunProperty = LiquibaseConfiguration.getInstance().getProperty(GlobalConfiguration.class, GlobalConfiguration.SHOULD_RUN);
 
 		if (!shouldRunProperty.getValue(Boolean.class)) {
 			LogFactory.getLogger().info("Liquibase did not run because "+ LiquibaseConfiguration.getInstance().describeDefaultLookup(shouldRunProperty)+" was set to false");

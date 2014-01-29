@@ -3,6 +3,7 @@ package liquibase.configuration;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.util.StringUtils;
 
+import javax.security.auth.login.Configuration;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -49,6 +50,11 @@ public class LiquibaseConfiguration {
         return (T) configurations.get(type);
     }
 
+    public AbstractConfiguration.ConfigurationProperty getProperty(Class<? extends AbstractConfiguration> config, String property) {
+        AbstractConfiguration configuration = getConfiguration(config);
+        return configuration.getProperty(property);
+    }
+
     protected  <T extends AbstractConfiguration> T createConfiguration(Class<T> type) {
         try {
             T configuration = type.newInstance();
@@ -57,6 +63,10 @@ public class LiquibaseConfiguration {
         } catch (Exception e) {
             throw new UnexpectedLiquibaseException("Cannot create default configuration "+type.getName());
         }
+    }
+
+    public String describeDefaultLookup(Class<? extends AbstractConfiguration> config, String property) {
+        return describeDefaultLookup(getProperty(config, property));
     }
 
     public String describeDefaultLookup(AbstractConfiguration.ConfigurationProperty property) {
