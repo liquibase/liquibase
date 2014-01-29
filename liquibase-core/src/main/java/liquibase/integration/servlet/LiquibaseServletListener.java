@@ -1,22 +1,10 @@
 package liquibase.integration.servlet;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.Enumeration;
-
-import javax.naming.Context;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletContextEvent;
-import javax.servlet.ServletContextListener;
-import javax.sql.DataSource;
-
 import liquibase.Liquibase;
 import liquibase.configuration.AbstractConfiguration;
 import liquibase.configuration.ConfigurationProvider;
-import liquibase.configuration.core.GlobalConfiguration;
 import liquibase.configuration.LiquibaseConfiguration;
+import liquibase.configuration.core.GlobalConfiguration;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.jvm.JdbcConnection;
@@ -28,6 +16,17 @@ import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.NetUtil;
 import liquibase.util.StringUtils;
+
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletContextEvent;
+import javax.servlet.ServletContextListener;
+import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.Enumeration;
 
 /**
  * Servlet listener than can be added to web.xml to allow Liquibase to run on every application server startup.
@@ -53,7 +52,6 @@ public class LiquibaseServletListener implements ServletContextListener {
     private String contexts;
     private String defaultSchema;
     private String hostName;
-    private LiquibaseConfiguration liquibaseConfiguration;
     private ServletValueContainer servletValueContainer; //temporarily saved separately until all lookup moves to liquibaseConfiguration
 
     public String getChangeLogFile() {
@@ -104,10 +102,10 @@ public class LiquibaseServletListener implements ServletContextListener {
             ic = new InitialContext();
 
             servletValueContainer = new ServletValueContainer(servletContext, ic);
-            liquibaseConfiguration = new LiquibaseConfiguration(servletValueContainer);
+            LiquibaseConfiguration.getInstance().init(servletValueContainer);
 
             failOnError = (String) servletValueContainer.getValue(LIQUIBASE_ONERROR_FAIL);
-            if (checkPreconditions(liquibaseConfiguration, servletContext, ic)) {
+            if (checkPreconditions(servletContext, ic)) {
                 executeUpdate(servletContext, ic);
             }
 
@@ -135,11 +133,11 @@ public class LiquibaseServletListener implements ServletContextListener {
      * <li>if {@value LiquibaseServletListener#LIQUIBASE_HOST_EXCLUDES} contains the current hostname, the the update will not be executed.</li>
      * </ol>
      */
-    private boolean checkPreconditions(LiquibaseConfiguration liquibaseConfiguration, ServletContext servletContext, InitialContext ic) {
-        GlobalConfiguration globalConfiguration = liquibaseConfiguration.getConfiguration(GlobalConfiguration.class);
+    private boolean checkPreconditions(ServletContext servletContext, InitialContext ic) {
+        GlobalConfiguration globalConfiguration = LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class);
         if (!globalConfiguration.getShouldRun()) {
             LogFactory.getLogger().info( "Liquibase did not run on " + hostName
-                    + " because "+ liquibaseConfiguration.describeDefaultLookup(globalConfiguration.getProperty(GlobalConfiguration.SHOULD_RUN))
+                    + " because "+ LiquibaseConfiguration.getInstance().describeDefaultLookup(globalConfiguration.getProperty(GlobalConfiguration.SHOULD_RUN))
                             + " was set to false");
             return false;
         }
@@ -170,7 +168,7 @@ public class LiquibaseServletListener implements ServletContextListener {
         if (globalConfiguration.getShouldRun() && globalConfiguration.getProperty(GlobalConfiguration.SHOULD_RUN).wasSet()) {
             shouldRun = true;
             servletContext.log("ignoring " + LIQUIBASE_HOST_INCLUDES + " and "
-                    + LIQUIBASE_HOST_EXCLUDES + ", since " + liquibaseConfiguration.describeDefaultLookup(globalConfiguration.getProperty(GlobalConfiguration.SHOULD_RUN))
+                    + LIQUIBASE_HOST_EXCLUDES + ", since " + LiquibaseConfiguration.getInstance().describeDefaultLookup(globalConfiguration.getProperty(GlobalConfiguration.SHOULD_RUN))
                     + "=true");
         }
         if (!shouldRun) {

@@ -1,9 +1,8 @@
 package liquibase.integration.ant;
 
 import liquibase.Liquibase;
-import liquibase.configuration.SystemPropertyProvider;
-import liquibase.configuration.core.GlobalConfiguration;
 import liquibase.configuration.LiquibaseConfiguration;
+import liquibase.configuration.core.GlobalConfiguration;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.jvm.JdbcConnection;
@@ -56,8 +55,6 @@ public abstract class BaseLiquibaseTask extends Task {
 
 
     private Map<String, Object> changeLogProperties = new HashMap<String, Object>();
-
-    private LiquibaseConfiguration liquibaseConfiguration = new LiquibaseConfiguration(new SystemPropertyProvider());
 
     public BaseLiquibaseTask() {
         super();
@@ -350,9 +347,9 @@ public abstract class BaseLiquibaseTask extends Task {
     }
 
     protected boolean shouldRun() {
-        GlobalConfiguration globalConfiguration = liquibaseConfiguration.getConfiguration(GlobalConfiguration.class);
+        GlobalConfiguration globalConfiguration = LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class);
         if (!globalConfiguration.getShouldRun()) {
-            log("Liquibase did not run because " + liquibaseConfiguration.describeDefaultLookup(globalConfiguration.getProperty(GlobalConfiguration.SHOULD_RUN)) + " was set to false");
+            log("Liquibase did not run because " + LiquibaseConfiguration.getInstance().describeDefaultLookup(globalConfiguration.getProperty(GlobalConfiguration.SHOULD_RUN)) + " was set to false");
             return false;
         }
         return true;

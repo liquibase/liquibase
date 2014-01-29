@@ -10,7 +10,7 @@ public class LiquibaseConfigurationTest {
 
     @Test
     public void getContext_defaultSetup() {
-        LiquibaseConfiguration liquibaseConfiguration = new LiquibaseConfiguration(new SystemPropertyProvider());
+        LiquibaseConfiguration liquibaseConfiguration = LiquibaseConfiguration.getInstance();
         GlobalConfiguration globalConfiguration = liquibaseConfiguration.getConfiguration(GlobalConfiguration.class);
 
         assertNotNull(globalConfiguration);

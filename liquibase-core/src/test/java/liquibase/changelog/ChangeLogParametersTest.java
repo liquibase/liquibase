@@ -2,24 +2,24 @@ package liquibase.changelog;
 
 import liquibase.Contexts;
 import liquibase.configuration.LiquibaseConfiguration;
+import liquibase.database.core.H2Database;
 import org.junit.Before;
 import org.junit.Test;
-import static org.junit.Assert.*;
-import liquibase.database.core.H2Database;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 
 public class ChangeLogParametersTest {
 
-    private LiquibaseConfiguration liquibaseConfiguration;
-
     @Before
     public void before() {
-        liquibaseConfiguration = new LiquibaseConfiguration();
+        LiquibaseConfiguration.getInstance().reset();
     }
 
     @Test
     public void setParameterValue_doubleSet() {
-        ChangeLogParameters changeLogParameters = new ChangeLogParameters(liquibaseConfiguration);
+        ChangeLogParameters changeLogParameters = new ChangeLogParameters();
 
         changeLogParameters.set("doubleSet", "originalValue");
         changeLogParameters.set("doubleSet", "newValue");
@@ -29,14 +29,14 @@ public class ChangeLogParametersTest {
 
     @Test
     public void getParameterValue_systemProperty() {
-        ChangeLogParameters changeLogParameters = new ChangeLogParameters(liquibaseConfiguration);
+        ChangeLogParameters changeLogParameters = new ChangeLogParameters();
 
         assertEquals(System.getProperty("user.name"), changeLogParameters.getValue("user.name"));
     }
 
     @Test
     public void setParameterValue_doubleSetButSecondWrongDatabase() {
-        ChangeLogParameters changeLogParameters = new ChangeLogParameters(new H2Database(), liquibaseConfiguration);
+        ChangeLogParameters changeLogParameters = new ChangeLogParameters(new H2Database());
 
         changeLogParameters.set("doubleSet", "originalValue", new Contexts(), "baddb");
         changeLogParameters.set("doubleSet", "newValue");
@@ -46,7 +46,7 @@ public class ChangeLogParametersTest {
 
     @Test
     public void setParameterValue_multiDatabase() {
-        ChangeLogParameters changeLogParameters = new ChangeLogParameters(new H2Database(), liquibaseConfiguration);
+        ChangeLogParameters changeLogParameters = new ChangeLogParameters(new H2Database());
 
         changeLogParameters.set("doubleSet", "originalValue", new Contexts(), "baddb, h2");
 
@@ -55,7 +55,7 @@ public class ChangeLogParametersTest {
 
     @Test
     public void setParameterValue_rightDBWrongContext() {
-        ChangeLogParameters changeLogParameters = new ChangeLogParameters(new H2Database(), liquibaseConfiguration);
+        ChangeLogParameters changeLogParameters = new ChangeLogParameters(new H2Database());
         changeLogParameters.setContexts(new Contexts("junit"));
 
         changeLogParameters.set("doubleSet", "originalValue", "anotherContext", "baddb, h2");
@@ -64,7 +64,7 @@ public class ChangeLogParametersTest {
     }
    @Test
     public void setParameterValue_rightDBRightContext() {
-        ChangeLogParameters changeLogParameters = new ChangeLogParameters(new H2Database(), liquibaseConfiguration);
+        ChangeLogParameters changeLogParameters = new ChangeLogParameters(new H2Database());
         changeLogParameters.setContexts(new Contexts("junit"));
 
         changeLogParameters.set("doubleSet", "originalValue", "junit", "baddb, h2");

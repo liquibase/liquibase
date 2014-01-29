@@ -1,18 +1,18 @@
 package liquibase.changelog;
 
+import liquibase.Contexts;
+import liquibase.configuration.LiquibaseConfiguration;
+import liquibase.configuration.core.ChangeLogParserCofiguration;
+import liquibase.database.Database;
+import liquibase.database.DatabaseList;
+import liquibase.exception.DatabaseException;
+import liquibase.util.StringUtils;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import liquibase.Contexts;
-import liquibase.configuration.core.ChangeLogParserCofiguration;
-import liquibase.configuration.LiquibaseConfiguration;
-import liquibase.database.Database;
-import liquibase.database.DatabaseList;
-import liquibase.exception.DatabaseException;
-import liquibase.util.StringUtils;
 
 public class ChangeLogParameters {
 	
@@ -21,11 +21,11 @@ public class ChangeLogParameters {
     private Database currentDatabase;
     private Contexts currentContexts;
 
-    public ChangeLogParameters(LiquibaseConfiguration context) {
-        this(null, context);
+    public ChangeLogParameters() {
+        this(null);
     }
 
-    public ChangeLogParameters(Database database, LiquibaseConfiguration context) {
+    public ChangeLogParameters(Database database) {
         for (Map.Entry entry : System.getProperties().entrySet()) {
             changeLogParameters.add(new ChangeLogParameter(entry.getKey().toString(), entry.getValue()));
         }
@@ -69,7 +69,7 @@ public class ChangeLogParameters {
         }
 
 
-        this.expressionExpander = new ExpressionExpander(this, context);
+        this.expressionExpander = new ExpressionExpander(this);
         this.currentDatabase = database;
         this.currentContexts = new Contexts();
     }
@@ -195,9 +195,9 @@ public class ChangeLogParameters {
         private ChangeLogParameters changeLogParameters;
         private static final Pattern EXPRESSION_PATTERN = Pattern.compile("(\\$\\{[^\\}]+\\})");
 
-        public ExpressionExpander(ChangeLogParameters changeLogParameters, LiquibaseConfiguration context) {
+        public ExpressionExpander(ChangeLogParameters changeLogParameters) {
             this.changeLogParameters = changeLogParameters;
-            this.enableEscaping = context.getConfiguration(ChangeLogParserCofiguration.class).getSupportPropertyEscaping();
+            this.enableEscaping = LiquibaseConfiguration.getInstance().getConfiguration(ChangeLogParserCofiguration.class).getSupportPropertyEscaping();
         }
 
         public String expandExpressions(String text) {

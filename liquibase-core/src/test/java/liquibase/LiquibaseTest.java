@@ -6,7 +6,6 @@ import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.filter.ContextChangeSetFilter;
 import liquibase.changelog.filter.DbmsChangeSetFilter;
 import liquibase.changelog.filter.ShouldRunChangeSetFilter;
-import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.DatabaseFactory;
@@ -85,7 +84,7 @@ public class LiquibaseTest {
 
         ChangeLogParserFactory.setInstance(mockChangeLogParserFactory);
         when(mockChangeLogParserFactory.getParser(anyString(), Mockito.isA(ResourceAccessor.class))).thenReturn(mockChangeLogParser);
-        when(mockChangeLogParser.parse(anyString(), any(ChangeLogParameters.class), Mockito.isA(ResourceAccessor.class), Mockito.isA(LiquibaseConfiguration.class))).thenReturn(mockChangeLog);
+        when(mockChangeLogParser.parse(anyString(), any(ChangeLogParameters.class), Mockito.isA(ResourceAccessor.class))).thenReturn(mockChangeLog);
 
         LogFactory.setInstance(new LogFactory() {
             @Override
@@ -261,12 +260,11 @@ public class LiquibaseTest {
 
     @Test(expected = ChangeLogParseException.class)
     public void update_exceptionDoingUpdate() throws LiquibaseException {
-        LiquibaseConfiguration context = new LiquibaseConfiguration();
         Contexts contexts = new Contexts("a,b");
 
         Liquibase liquibase = new Liquibase("com/example/test.xml", mockResourceAccessor, mockDatabase);
 
-        doThrow(ChangeLogParseException.class).when(mockChangeLogParser).parse("com/example/test.xml", liquibase.getChangeLogParameters(), mockResourceAccessor, context);
+        doThrow(ChangeLogParseException.class).when(mockChangeLogParser).parse("com/example/test.xml", liquibase.getChangeLogParameters(), mockResourceAccessor);
 
         try {
             liquibase.update(contexts);
@@ -274,7 +272,7 @@ public class LiquibaseTest {
             verify(mockLockService).waitForLock();
             verify(mockLockService).releaseLock(); //should still call
             verify(mockDatabase).setObjectQuotingStrategy(ObjectQuotingStrategy.LEGACY); //should still call
-            verify(mockChangeLogParser).parse("com/example/test.xml", liquibase.getChangeLogParameters(), mockResourceAccessor, context);
+            verify(mockChangeLogParser).parse("com/example/test.xml", liquibase.getChangeLogParameters(), mockResourceAccessor);
         }
 
     }

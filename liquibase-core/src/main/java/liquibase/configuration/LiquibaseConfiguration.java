@@ -10,15 +10,35 @@ import java.util.Map;
 
 public class LiquibaseConfiguration {
 
-    private Map<Class, AbstractConfiguration> configurations = new HashMap<Class, AbstractConfiguration>();
+    private Map<Class, AbstractConfiguration> configurations;
 
-    private ConfigurationProvider[] valueContainers;
+    private ConfigurationProvider[] configurationProviders;
 
-    public LiquibaseConfiguration(ConfigurationProvider... valueContainers) {
-        if (valueContainers == null) {
-            valueContainers = new ConfigurationProvider[0];
+    private static LiquibaseConfiguration instance;
+
+    public static LiquibaseConfiguration getInstance() {
+        if (instance == null) {
+            instance = new LiquibaseConfiguration();
+            instance.init();
         }
-        this.valueContainers = valueContainers;
+
+        return instance;
+    }
+
+    public void init(ConfigurationProvider... configurationProviders) {
+        if (configurationProviders == null) {
+            configurationProviders = new ConfigurationProvider[0];
+        }
+        this.configurationProviders = configurationProviders;
+
+        this.reset();
+    }
+
+    public static void setInstance(LiquibaseConfiguration instance) {
+        LiquibaseConfiguration.instance = instance;
+    }
+
+    private LiquibaseConfiguration() {
     }
 
     public <T extends AbstractConfiguration> T getConfiguration(Class<T> type) {
@@ -41,10 +61,14 @@ public class LiquibaseConfiguration {
 
     public String describeDefaultLookup(AbstractConfiguration.ConfigurationProperty property) {
         List<String> reasons = new ArrayList<String>();
-        for (ConfigurationProvider container : valueContainers) {
+        for (ConfigurationProvider container : configurationProviders) {
             reasons.add(container.describeDefaultLookup(property));
         }
 
         return StringUtils.join(reasons, " AND ");
+    }
+
+    public void reset() {
+        this.configurations = new HashMap<Class, AbstractConfiguration>();
     }
 }

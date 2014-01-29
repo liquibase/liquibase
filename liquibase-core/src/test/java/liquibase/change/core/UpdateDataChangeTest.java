@@ -1,25 +1,23 @@
 package liquibase.change.core;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.util.Enumeration;
-
 import liquibase.change.CheckSum;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
-import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.parser.ChangeLogParser;
 import liquibase.parser.ChangeLogParserFactory;
 import liquibase.resource.CompositeResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 import liquibase.serializer.core.string.StringChangeLogSerializer;
-
 import liquibase.test.JUnitResourceAccessor;
 import org.junit.Assert;
 import org.junit.Test;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.util.Enumeration;
 
 public class UpdateDataChangeTest {
 
@@ -42,8 +40,7 @@ public class UpdateDataChangeTest {
 
         ResourceAccessor resourceAccessor = new CompositeResourceAccessor(getResource(xml), new JUnitResourceAccessor());
         ChangeLogParser parser = ChangeLogParserFactory.getInstance().getParser("xml", resourceAccessor);
-        LiquibaseConfiguration context = new LiquibaseConfiguration();
-        DatabaseChangeLog changelog = parser.parse(null, new ChangeLogParameters(context), resourceAccessor, context);
+        DatabaseChangeLog changelog = parser.parse(null, new ChangeLogParameters(), resourceAccessor);
         ChangeSet changeSet = changelog.getChangeSet("a", "a", "1");
 
         CheckSum checksum = changeSet.generateCheckSum();
