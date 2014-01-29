@@ -582,12 +582,11 @@ public abstract class AbstractJdbcDatabase implements Database {
      */
     @Override
     public String getDatabaseChangeLogTableName() {
-        AbstractConfiguration.ConfigurationProperty configuration = LiquibaseConfiguration.getInstance().getProperty(GlobalConfiguration.class, GlobalConfiguration.DATABASECHANGELOG_TABLE_NAME);
-        if (configuration.wasSet()) {
-            return configuration.getValue(String.class);
+        if (databaseChangeLogTableName != null) {
+            return databaseChangeLogTableName;
         }
 
-        return databaseChangeLogTableName;
+        return LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getDatabaseChangeLogTableName();
     }
 
     /**
@@ -595,12 +594,11 @@ public abstract class AbstractJdbcDatabase implements Database {
      */
     @Override
     public String getDatabaseChangeLogLockTableName() {
-        AbstractConfiguration.ConfigurationProperty configuration = LiquibaseConfiguration.getInstance().getProperty(GlobalConfiguration.class, GlobalConfiguration.DATABASECHANGELOGLOCK_TABLE_NAME);
-        if (configuration.wasSet()) {
-            return configuration.getValue(String.class);
+        if (databaseChangeLogLockTableName != null) {
+            return databaseChangeLogLockTableName;
         }
 
-        return databaseChangeLogLockTableName;
+        return LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getDatabaseChangeLogLockTableName();
     }
 
     /**
@@ -608,12 +606,11 @@ public abstract class AbstractJdbcDatabase implements Database {
      */
     @Override
     public String getLiquibaseTablespaceName() {
-        AbstractConfiguration.ConfigurationProperty configuration = LiquibaseConfiguration.getInstance().getProperty(GlobalConfiguration.class, GlobalConfiguration.LIQUIBASE_TABLESPACE_NAME);
-        if (configuration.wasSet()) {
-            return configuration.getValue(String.class);
+        if (liquibaseTablespaceName != null) {
+            return liquibaseTablespaceName;
         }
 
-        return liquibaseTablespaceName;
+        return LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getLiquibaseTablespaceName();
     }
 
     /**
@@ -651,12 +648,16 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     @Override
     public String getLiquibaseCatalogName() {
+        if (liquibaseCatalogName != null) {
+            return liquibaseCatalogName;
+        }
+
         AbstractConfiguration.ConfigurationProperty configuration = LiquibaseConfiguration.getInstance().getProperty(GlobalConfiguration.class, GlobalConfiguration.LIQUIBASE_CATALOG_NAME);
         if (configuration.wasSet()) {
             return configuration.getValue(String.class);
         }
 
-        return liquibaseCatalogName == null ? getDefaultCatalogName() : liquibaseCatalogName;
+        return getDefaultCatalogName();
     }
 
     @Override
@@ -666,12 +667,16 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     @Override
     public String getLiquibaseSchemaName() {
+        if (liquibaseSchemaName != null) {
+            return liquibaseSchemaName;
+        }
+
         AbstractConfiguration.ConfigurationProperty configuration = LiquibaseConfiguration.getInstance().getProperty(GlobalConfiguration.class, GlobalConfiguration.LIQUIBASE_SCHEMA_NAME);
         if (configuration.wasSet()) {
             return configuration.getValue(String.class);
         }
 
-        return liquibaseSchemaName == null ? getDefaultSchemaName() : liquibaseSchemaName;
+        return getDefaultSchemaName();
     }
 
     @Override
