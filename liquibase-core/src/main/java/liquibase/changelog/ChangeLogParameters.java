@@ -1,15 +1,14 @@
 package liquibase.changelog;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import liquibase.Contexts;
-import liquibase.context.ChangeLogParserContext;
-import liquibase.context.ExecutionContext;
+import liquibase.configuration.core.ChangeLogParserCofiguration;
+import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
 import liquibase.database.DatabaseList;
 import liquibase.exception.DatabaseException;
@@ -22,11 +21,11 @@ public class ChangeLogParameters {
     private Database currentDatabase;
     private Contexts currentContexts;
 
-    public ChangeLogParameters(ExecutionContext context) {
+    public ChangeLogParameters(LiquibaseConfiguration context) {
         this(null, context);
     }
 
-    public ChangeLogParameters(Database database, ExecutionContext context) {
+    public ChangeLogParameters(Database database, LiquibaseConfiguration context) {
         for (Map.Entry entry : System.getProperties().entrySet()) {
             changeLogParameters.add(new ChangeLogParameter(entry.getKey().toString(), entry.getValue()));
         }
@@ -196,9 +195,9 @@ public class ChangeLogParameters {
         private ChangeLogParameters changeLogParameters;
         private static final Pattern EXPRESSION_PATTERN = Pattern.compile("(\\$\\{[^\\}]+\\})");
 
-        public ExpressionExpander(ChangeLogParameters changeLogParameters, ExecutionContext context) {
+        public ExpressionExpander(ChangeLogParameters changeLogParameters, LiquibaseConfiguration context) {
             this.changeLogParameters = changeLogParameters;
-            this.enableEscaping = context.getContext(ChangeLogParserContext.class).getSupportPropertyEscaping();
+            this.enableEscaping = context.getConfiguration(ChangeLogParserCofiguration.class).getSupportPropertyEscaping();
         }
 
         public String expandExpressions(String text) {

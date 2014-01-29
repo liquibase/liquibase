@@ -1,6 +1,6 @@
 package liquibase.dbtest;
 
-import liquibase.context.ExecutionContext;
+import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.parser.core.xml.XMLChangeLogSAXParser;
 import liquibase.test.JUnitResourceAccessor;
 import liquibase.changelog.ChangeLogParameters;
@@ -10,7 +10,7 @@ import org.junit.Test;
 public class IntXMLChangeLogSAXParserTest {
     @Test
     public void sampleChangeLogs() throws Exception {
-        ExecutionContext context = new ExecutionContext();
+        LiquibaseConfiguration context = new LiquibaseConfiguration();
         new XMLChangeLogSAXParser().parse("changelogs/cache/complete/root.changelog.xml", new ChangeLogParameters(context), new JUnitResourceAccessor(), context);
         new XMLChangeLogSAXParser().parse("changelogs/db2/complete/root.changelog.xml", new ChangeLogParameters(context), new JUnitResourceAccessor(), context);
         new XMLChangeLogSAXParser().parse("changelogs/derby/complete/root.changelog.xml", new ChangeLogParameters(context), new JUnitResourceAccessor(), context);

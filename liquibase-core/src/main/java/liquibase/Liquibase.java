@@ -19,8 +19,8 @@ import liquibase.changelog.filter.ExecutedAfterChangeSetFilter;
 import liquibase.changelog.filter.NotRanChangeSetFilter;
 import liquibase.changelog.filter.ShouldRunChangeSetFilter;
 import liquibase.changelog.visitor.*;
-import liquibase.context.ExecutionContext;
-import liquibase.context.SystemPropertyValueContainer;
+import liquibase.configuration.LiquibaseConfiguration;
+import liquibase.configuration.SystemPropertyProvider;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.DatabaseFactory;
@@ -74,7 +74,7 @@ public class Liquibase {
     private ChangeLogParameters changeLogParameters;
     private ChangeExecListener changeExecListener;
     private boolean ignoreClasspathPrefix = true;
-    private ExecutionContext executionContext;
+    private LiquibaseConfiguration liquibaseConfiguration;
 
     /**
      * Creates a Liquibase instance for a given DatabaseConnection. The Database instance used will be found with {@link DatabaseFactory#findCorrectDatabaseImplementation(liquibase.database.DatabaseConnection)}
@@ -97,7 +97,7 @@ public class Liquibase {
      * @see ResourceAccessor
      */
     public Liquibase(String changeLogFile, ResourceAccessor resourceAccessor, Database database) throws LiquibaseException {
-        executionContext = new ExecutionContext(new SystemPropertyValueContainer());
+        liquibaseConfiguration = new LiquibaseConfiguration(new SystemPropertyProvider());
 
         log = LogFactory.getLogger();
 
@@ -106,12 +106,12 @@ public class Liquibase {
         }
 
         this.resourceAccessor = resourceAccessor;
-        this.changeLogParameters = new ChangeLogParameters(database, executionContext);
+        this.changeLogParameters = new ChangeLogParameters(database, liquibaseConfiguration);
         this.database = database;
     }
 
     public Liquibase(DatabaseChangeLog changeLog, ResourceAccessor resourceAccessor, Database database) {
-        executionContext = new ExecutionContext(new SystemPropertyValueContainer());
+        liquibaseConfiguration = new LiquibaseConfiguration(new SystemPropertyProvider());
 
         log = LogFactory.getLogger();
         this.databaseChangeLog = changeLog;
@@ -122,7 +122,7 @@ public class Liquibase {
         }
         this.resourceAccessor = resourceAccessor;
         this.database = database;
-        this.changeLogParameters = new ChangeLogParameters(database, executionContext);
+        this.changeLogParameters = new ChangeLogParameters(database, liquibaseConfiguration);
     }
 
     /**
@@ -218,7 +218,7 @@ public class Liquibase {
     public DatabaseChangeLog getDatabaseChangeLog() throws LiquibaseException {
         if (databaseChangeLog == null) {
             ChangeLogParser parser = ChangeLogParserFactory.getInstance().getParser(changeLogFile, resourceAccessor);
-            databaseChangeLog = parser.parse(changeLogFile, changeLogParameters, resourceAccessor, executionContext);
+            databaseChangeLog = parser.parse(changeLogFile, changeLogParameters, resourceAccessor, liquibaseConfiguration);
         }
 
         return databaseChangeLog;
@@ -917,7 +917,7 @@ public class Liquibase {
         log.info(String.format("Calculating checksum for changeset %s::%s::%s", filename, id, author));
         final ChangeLogParameters changeLogParameters = this.getChangeLogParameters();
         final ResourceAccessor resourceAccessor = this.getResourceAccessor();
-        final DatabaseChangeLog changeLog = ChangeLogParserFactory.getInstance().getParser(this.changeLogFile, resourceAccessor).parse(this.changeLogFile, changeLogParameters, resourceAccessor, executionContext);
+        final DatabaseChangeLog changeLog = ChangeLogParserFactory.getInstance().getParser(this.changeLogFile, resourceAccessor).parse(this.changeLogFile, changeLogParameters, resourceAccessor, liquibaseConfiguration);
 
         // TODO: validate?
 

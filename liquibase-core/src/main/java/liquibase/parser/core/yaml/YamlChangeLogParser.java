@@ -7,7 +7,7 @@ import liquibase.change.core.CreateIndexChange;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
-import liquibase.context.ExecutionContext;
+import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.exception.ChangeLogParseException;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
@@ -54,7 +54,7 @@ public class YamlChangeLogParser implements ChangeLogParser {
     }
 
     @Override
-    public DatabaseChangeLog parse(String physicalChangeLogLocation, ChangeLogParameters changeLogParameters, ResourceAccessor resourceAccessor, ExecutionContext executionContext) throws ChangeLogParseException {
+    public DatabaseChangeLog parse(String physicalChangeLogLocation, ChangeLogParameters changeLogParameters, ResourceAccessor resourceAccessor, LiquibaseConfiguration liquibaseConfiguration) throws ChangeLogParseException {
         Yaml yaml = new Yaml();
 
         try {
@@ -288,7 +288,7 @@ public class YamlChangeLogParser implements ChangeLogParser {
                     }
                     file = file.replace('\\', '/');
                     boolean isRelativeToChangelogFile = getValue(includeMap, "relativeToChangelogFile", Boolean.class, false, changeLogParameters);
-                    handleIncludedChangeLog(file, isRelativeToChangelogFile, physicalChangeLogLocation, changeLog, changeLogParameters, resourceAccessor, executionContext);
+                    handleIncludedChangeLog(file, isRelativeToChangelogFile, physicalChangeLogLocation, changeLog, changeLogParameters, resourceAccessor, liquibaseConfiguration);
 
                 } else if (objectType.equals("includeAll")) {
                     throw new ChangeLogParseException("includeAll not yet supported in "+getSupportedFileExtension());
@@ -478,7 +478,7 @@ public class YamlChangeLogParser implements ChangeLogParser {
         }
     }
 
-    protected boolean handleIncludedChangeLog(String fileName, boolean isRelativePath, String relativeBaseFileName, DatabaseChangeLog databaseChangeLog, ChangeLogParameters changeLogParameters, ResourceAccessor resourceAccessor, ExecutionContext executionContext) throws LiquibaseException {
+    protected boolean handleIncludedChangeLog(String fileName, boolean isRelativePath, String relativeBaseFileName, DatabaseChangeLog databaseChangeLog, ChangeLogParameters changeLogParameters, ResourceAccessor resourceAccessor, LiquibaseConfiguration liquibaseConfiguration) throws LiquibaseException {
 
         if (fileName.equalsIgnoreCase(".svn") || fileName.equalsIgnoreCase("cvs")) {
             return false;
@@ -500,7 +500,7 @@ public class YamlChangeLogParser implements ChangeLogParser {
                 fileName = FilenameUtils.getFullPath(relativeBaseFileName) + fileName;
             }
         }
-        DatabaseChangeLog changeLog = ChangeLogParserFactory.getInstance().getParser(fileName, resourceAccessor).parse(fileName, changeLogParameters, resourceAccessor, executionContext);
+        DatabaseChangeLog changeLog = ChangeLogParserFactory.getInstance().getParser(fileName, resourceAccessor).parse(fileName, changeLogParameters, resourceAccessor, liquibaseConfiguration);
         PreconditionContainer preconditions = changeLog.getPreconditions();
         if (preconditions != null) {
             if (null == databaseChangeLog.getPreconditions()) {

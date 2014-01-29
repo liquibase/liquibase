@@ -8,7 +8,7 @@ import javax.xml.parsers.SAXParserFactory;
 
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.DatabaseChangeLog;
-import liquibase.context.ExecutionContext;
+import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.exception.ChangeLogParseException;
 import liquibase.logging.LogFactory;
 import liquibase.parser.ChangeLogParser;
@@ -55,7 +55,7 @@ public class XMLChangeLogSAXParser implements ChangeLogParser {
     }
 
     @Override
-    public DatabaseChangeLog parse(String physicalChangeLogLocation, ChangeLogParameters changeLogParameters, ResourceAccessor resourceAccessor, ExecutionContext context) throws ChangeLogParseException {
+    public DatabaseChangeLog parse(String physicalChangeLogLocation, ChangeLogParameters changeLogParameters, ResourceAccessor resourceAccessor, LiquibaseConfiguration context) throws ChangeLogParseException {
 
         InputStream inputStream = null;
         try {

@@ -21,9 +21,9 @@ import java.util.Properties;
 import java.util.Set;
 
 import liquibase.Liquibase;
-import liquibase.context.ExecutionContext;
-import liquibase.context.GlobalContext;
-import liquibase.context.SystemPropertyValueContainer;
+import liquibase.configuration.SystemPropertyProvider;
+import liquibase.configuration.core.GlobalConfiguration;
+import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
@@ -296,10 +296,10 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
             }
         }
 
-        ExecutionContext executionContext = new ExecutionContext(new SystemPropertyValueContainer());
+        LiquibaseConfiguration liquibaseConfiguration = new LiquibaseConfiguration(new SystemPropertyProvider());
 
-        if (!executionContext.getContext(GlobalContext.class).getShouldRun()) {
-            getLog().info("Liquibase did not run because " + executionContext.describeDefaultLookup(executionContext.getContext(GlobalContext.class).getProperty(GlobalContext.SHOULD_RUN)) + " was set to false");
+        if (!liquibaseConfiguration.getConfiguration(GlobalConfiguration.class).getShouldRun()) {
+            getLog().info("Liquibase did not run because " + liquibaseConfiguration.describeDefaultLookup(liquibaseConfiguration.getConfiguration(GlobalConfiguration.class).getProperty(GlobalConfiguration.SHOULD_RUN)) + " was set to false");
             return;
         }
 

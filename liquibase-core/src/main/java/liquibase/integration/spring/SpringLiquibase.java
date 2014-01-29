@@ -12,10 +12,10 @@ import java.util.*;
 import javax.sql.DataSource;
 
 import liquibase.Liquibase;
-import liquibase.context.Context;
-import liquibase.context.ExecutionContext;
-import liquibase.context.GlobalContext;
-import liquibase.context.SystemPropertyValueContainer;
+import liquibase.configuration.AbstractConfiguration;
+import liquibase.configuration.SystemPropertyProvider;
+import liquibase.configuration.core.GlobalConfiguration;
+import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.jvm.JdbcConnection;
@@ -281,11 +281,11 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 	 */
 	@Override
     public void afterPropertiesSet() throws LiquibaseException {
-        ExecutionContext executionContext = new ExecutionContext(new SystemPropertyValueContainer());
-        Context.ContextProperty shouldRunProperty = executionContext.getContext(GlobalContext.class).getProperty(GlobalContext.SHOULD_RUN);
+        LiquibaseConfiguration liquibaseConfiguration = new LiquibaseConfiguration(new SystemPropertyProvider());
+        AbstractConfiguration.ConfigurationProperty shouldRunProperty = liquibaseConfiguration.getConfiguration(GlobalConfiguration.class).getProperty(GlobalConfiguration.SHOULD_RUN);
 
 		if (!shouldRunProperty.getValue(Boolean.class)) {
-			LogFactory.getLogger().info("Liquibase did not run because "+executionContext.describeDefaultLookup(shouldRunProperty)+" was set to false");
+			LogFactory.getLogger().info("Liquibase did not run because "+ liquibaseConfiguration.describeDefaultLookup(shouldRunProperty)+" was set to false");
 			return;
 		}
 		if (!shouldRun) {

@@ -5,7 +5,7 @@ import liquibase.change.core.RawSQLChange;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
-import liquibase.context.ExecutionContext;
+import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.exception.ChangeLogParseException;
 import liquibase.precondition.core.PreconditionContainer;
 import liquibase.precondition.core.SqlPrecondition;
@@ -80,11 +80,11 @@ public class FormattedSqlChangeLogParserTest {
         "select 1;"
         ;
 
-    private ExecutionContext executionContext;
+    private LiquibaseConfiguration liquibaseConfiguration;
 
     @Before
     public void before() {
-        executionContext = new ExecutionContext();
+        liquibaseConfiguration = new LiquibaseConfiguration();
     }
 
     @Test
@@ -95,14 +95,14 @@ public class FormattedSqlChangeLogParserTest {
 
     @Test(expected = ChangeLogParseException.class)
     public void invalidPrecondition() throws Exception{
-        new MockFormattedSqlChangeLogParser(INVALID_CHANGELOG_INVALID_PRECONDITION).parse("asdf.sql", new ChangeLogParameters(executionContext), new JUnitResourceAccessor(), executionContext);
+        new MockFormattedSqlChangeLogParser(INVALID_CHANGELOG_INVALID_PRECONDITION).parse("asdf.sql", new ChangeLogParameters(liquibaseConfiguration), new JUnitResourceAccessor(), liquibaseConfiguration);
     }
 
     @Test
     public void parse() throws Exception {
-        ChangeLogParameters params = new ChangeLogParameters(executionContext);
+        ChangeLogParameters params = new ChangeLogParameters(liquibaseConfiguration);
         params.set("tablename", "table4");
-        DatabaseChangeLog changeLog = new MockFormattedSqlChangeLogParser(VALID_CHANGELOG).parse("asdf.sql", params, new JUnitResourceAccessor(), executionContext);
+        DatabaseChangeLog changeLog = new MockFormattedSqlChangeLogParser(VALID_CHANGELOG).parse("asdf.sql", params, new JUnitResourceAccessor(), liquibaseConfiguration);
 
         assertEquals("asdf.sql", changeLog.getLogicalFilePath());
 
@@ -240,7 +240,7 @@ public class FormattedSqlChangeLogParserTest {
                 "--changeset John Doe:12345\n" +
                 "create table test (id int);\n";
 
-        DatabaseChangeLog changeLog = new MockFormattedSqlChangeLogParser(changeLogWithSpace).parse("asdf.sql", new ChangeLogParameters(executionContext), new JUnitResourceAccessor(), executionContext);
+        DatabaseChangeLog changeLog = new MockFormattedSqlChangeLogParser(changeLogWithSpace).parse("asdf.sql", new ChangeLogParameters(liquibaseConfiguration), new JUnitResourceAccessor(), liquibaseConfiguration);
         assertEquals(1, changeLog.getChangeSets().size());
         assertEquals("John Doe", changeLog.getChangeSets().get(0).getAuthor());
         assertEquals("12345", changeLog.getChangeSets().get(0).getId());
@@ -254,7 +254,7 @@ public class FormattedSqlChangeLogParserTest {
                 "--changeset John Doe:12345 dbms:db2,db2i\n" +
                 "create table test (id int);\n";
 
-        DatabaseChangeLog changeLog = new MockFormattedSqlChangeLogParser(changeLogWithMultipleDbms).parse("asdf.sql", new ChangeLogParameters(executionContext), new JUnitResourceAccessor(), executionContext);
+        DatabaseChangeLog changeLog = new MockFormattedSqlChangeLogParser(changeLogWithMultipleDbms).parse("asdf.sql", new ChangeLogParameters(liquibaseConfiguration), new JUnitResourceAccessor(), liquibaseConfiguration);
         assertEquals(2, changeLog.getChangeSets().get(0).getDbmsSet().size());
         assertTrue(changeLog.getChangeSets().get(0).getDbmsSet().contains("db2"));
         assertTrue(changeLog.getChangeSets().get(0).getDbmsSet().contains("db2i"));
@@ -264,7 +264,7 @@ public class FormattedSqlChangeLogParserTest {
                 "--changeset John Doe:12345 dbms:db2, db2i\n" +
                 "create table test (id int);\n";
 
-        DatabaseChangeLog invalidChangeLog = new MockFormattedSqlChangeLogParser(changeLogWithInvalidMultipleDbms).parse("asdf.sql", new ChangeLogParameters(executionContext), new JUnitResourceAccessor(), executionContext);
+        DatabaseChangeLog invalidChangeLog = new MockFormattedSqlChangeLogParser(changeLogWithInvalidMultipleDbms).parse("asdf.sql", new ChangeLogParameters(liquibaseConfiguration), new JUnitResourceAccessor(), liquibaseConfiguration);
         assertEquals(1, invalidChangeLog.getChangeSets().get(0).getDbmsSet().size());
         assertTrue(invalidChangeLog.getChangeSets().get(0).getDbmsSet().contains("db2"));
         assertFalse(invalidChangeLog.getChangeSets().get(0).getDbmsSet().contains("db2i"));
@@ -273,7 +273,7 @@ public class FormattedSqlChangeLogParserTest {
                 "--changeset John Doe:12345 dbms:db2,\n" +
                 "create table test (id int);\n";
 
-        invalidChangeLog = new MockFormattedSqlChangeLogParser(changeLogWithInvalidMultipleDbms).parse("asdf.sql", new ChangeLogParameters(executionContext), new JUnitResourceAccessor(), executionContext);
+        invalidChangeLog = new MockFormattedSqlChangeLogParser(changeLogWithInvalidMultipleDbms).parse("asdf.sql", new ChangeLogParameters(liquibaseConfiguration), new JUnitResourceAccessor(), liquibaseConfiguration);
         assertEquals(1, invalidChangeLog.getChangeSets().get(0).getDbmsSet().size());
         assertTrue(invalidChangeLog.getChangeSets().get(0).getDbmsSet().contains("db2"));
         assertFalse(invalidChangeLog.getChangeSets().get(0).getDbmsSet().contains("db2i"));
@@ -282,7 +282,7 @@ public class FormattedSqlChangeLogParserTest {
                 "--changeset John Doe:12345 dbms:,db2,\n" +
                 "create table test (id int);\n";
 
-        invalidChangeLog = new MockFormattedSqlChangeLogParser(changeLogWithInvalidMultipleDbms).parse("asdf.sql", new ChangeLogParameters(executionContext), new JUnitResourceAccessor(), executionContext);
+        invalidChangeLog = new MockFormattedSqlChangeLogParser(changeLogWithInvalidMultipleDbms).parse("asdf.sql", new ChangeLogParameters(liquibaseConfiguration), new JUnitResourceAccessor(), liquibaseConfiguration);
         assertEquals(null, invalidChangeLog.getChangeSets().get(0).getDbmsSet());
     }
     

@@ -10,13 +10,10 @@ import java.util.Map;
 import liquibase.change.*;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.ChangeSet;
-import liquibase.context.ExecutionContext;
+import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
 import liquibase.database.core.MockDatabase;
-import liquibase.database.core.OracleDatabase;
-import liquibase.exception.SetupException;
 import liquibase.resource.ClassLoaderResourceAccessor;
-import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.statement.SqlStatement;
 
 import org.junit.Before;
@@ -201,7 +198,7 @@ public class SQLFileChangeTest extends StandardChangeTest {
    public void replacementOfProperties() throws Exception
    {
       SQLFileChange change = new SQLFileChange();
-      ChangeLogParameters changeLogParameters = new ChangeLogParameters(new ExecutionContext());
+      ChangeLogParameters changeLogParameters = new ChangeLogParameters(new LiquibaseConfiguration());
       changeLogParameters.set("table.prefix", "prfx");
       changeLogParameters.set("some.other.prop", "nofx");
        ChangeSet changeSet = new ChangeSet("x", "y", true, true, null, null, null, null);

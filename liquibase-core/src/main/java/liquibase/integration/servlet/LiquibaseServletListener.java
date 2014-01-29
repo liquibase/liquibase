@@ -13,9 +13,10 @@ import javax.servlet.ServletContextListener;
 import javax.sql.DataSource;
 
 import liquibase.Liquibase;
-import liquibase.context.ContextValueContainer;
-import liquibase.context.ExecutionContext;
-import liquibase.context.GlobalContext;
+import liquibase.configuration.AbstractConfiguration;
+import liquibase.configuration.ConfigurationProvider;
+import liquibase.configuration.core.GlobalConfiguration;
+import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.jvm.JdbcConnection;
@@ -52,8 +53,8 @@ public class LiquibaseServletListener implements ServletContextListener {
     private String contexts;
     private String defaultSchema;
     private String hostName;
-    private ExecutionContext executionContext;
-    private ServletValueContainer servletValueContainer; //temporarily saved separately until all lookup moves to executionContext
+    private LiquibaseConfiguration liquibaseConfiguration;
+    private ServletValueContainer servletValueContainer; //temporarily saved separately until all lookup moves to liquibaseConfiguration
 
     public String getChangeLogFile() {
         return changeLogFile;
@@ -103,10 +104,10 @@ public class LiquibaseServletListener implements ServletContextListener {
             ic = new InitialContext();
 
             servletValueContainer = new ServletValueContainer(servletContext, ic);
-            executionContext = new ExecutionContext(servletValueContainer);
+            liquibaseConfiguration = new LiquibaseConfiguration(servletValueContainer);
 
             failOnError = (String) servletValueContainer.getValue(LIQUIBASE_ONERROR_FAIL);
-            if (checkPreconditions(executionContext, servletContext, ic)) {
+            if (checkPreconditions(liquibaseConfiguration, servletContext, ic)) {
                 executeUpdate(servletContext, ic);
             }
 
@@ -134,11 +135,11 @@ public class LiquibaseServletListener implements ServletContextListener {
      * <li>if {@value LiquibaseServletListener#LIQUIBASE_HOST_EXCLUDES} contains the current hostname, the the update will not be executed.</li>
      * </ol>
      */
-    private boolean checkPreconditions(ExecutionContext executionContext, ServletContext servletContext, InitialContext ic) {
-        GlobalContext globalContext = executionContext.getContext(GlobalContext.class);
-        if (!globalContext.getShouldRun()) {
+    private boolean checkPreconditions(LiquibaseConfiguration liquibaseConfiguration, ServletContext servletContext, InitialContext ic) {
+        GlobalConfiguration globalConfiguration = liquibaseConfiguration.getConfiguration(GlobalConfiguration.class);
+        if (!globalConfiguration.getShouldRun()) {
             LogFactory.getLogger().info( "Liquibase did not run on " + hostName
-                    + " because "+executionContext.describeDefaultLookup(globalContext.getProperty(GlobalContext.SHOULD_RUN))
+                    + " because "+ liquibaseConfiguration.describeDefaultLookup(globalConfiguration.getProperty(GlobalConfiguration.SHOULD_RUN))
                             + " was set to false");
             return false;
         }
@@ -166,10 +167,10 @@ public class LiquibaseServletListener implements ServletContextListener {
             }
         }
 
-        if (globalContext.getShouldRun() && globalContext.getProperty(GlobalContext.SHOULD_RUN).wasSet()) {
+        if (globalConfiguration.getShouldRun() && globalConfiguration.getProperty(GlobalConfiguration.SHOULD_RUN).wasSet()) {
             shouldRun = true;
             servletContext.log("ignoring " + LIQUIBASE_HOST_INCLUDES + " and "
-                    + LIQUIBASE_HOST_EXCLUDES + ", since " + executionContext.describeDefaultLookup(globalContext.getProperty(GlobalContext.SHOULD_RUN))
+                    + LIQUIBASE_HOST_EXCLUDES + ", since " + liquibaseConfiguration.describeDefaultLookup(globalConfiguration.getProperty(GlobalConfiguration.SHOULD_RUN))
                     + "=true");
         }
         if (!shouldRun) {
@@ -237,7 +238,7 @@ public class LiquibaseServletListener implements ServletContextListener {
     public void contextDestroyed(ServletContextEvent servletContextEvent) {
     }
 
-    protected class ServletValueContainer implements ContextValueContainer {
+    protected class ServletValueContainer implements ConfigurationProvider {
 
         private ServletContext servletContext;
         private InitialContext initialContext;
@@ -248,13 +249,13 @@ public class LiquibaseServletListener implements ServletContextListener {
         }
 
         @Override
-        public String describeDefaultLookup(liquibase.context.Context.ContextProperty property) {
-            return "JNDI, servlet container init parameter, and system property '"+property.getContextPrefix()+"."+property.getName()+"'";
+        public String describeDefaultLookup(AbstractConfiguration.ConfigurationProperty property) {
+            return "JNDI, servlet container init parameter, and system property '"+property.getNamespace()+"."+property.getName()+"'";
         }
 
         @Override
-        public Object getValue(String contextPrefix, String property) {
-            return getValue(contextPrefix+"."+property);
+        public Object getValue(String namespace, String property) {
+            return getValue(namespace +"."+property);
         }
 
         /**

@@ -49,8 +49,8 @@ import liquibase.change.custom.CustomChangeWrapper;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
-import liquibase.context.ChangeLogParserContext;
-import liquibase.context.ExecutionContext;
+import liquibase.configuration.core.ChangeLogParserCofiguration;
+import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.ObjectQuotingStrategy;
 import liquibase.exception.CustomChangeException;
 import liquibase.exception.LiquibaseException;
@@ -85,7 +85,7 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
     private final PreconditionFactory preconditionFactory;
     private final SqlVisitorFactory sqlVisitorFactory;
     private final ChangeLogParserFactory changeLogParserFactory;
-    private final ExecutionContext context;
+    private final LiquibaseConfiguration context;
 
     protected Logger log;
 
@@ -111,7 +111,7 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
     protected XMLChangeLogSAXHandler(String physicalChangeLogLocation,
 			ResourceAccessor resourceAccessor,
 			ChangeLogParameters changeLogParameters,
-            ExecutionContext context) {
+            LiquibaseConfiguration context) {
         this.context = context;
 		log = LogFactory.getLogger();
 		this.resourceAccessor = resourceAccessor;
@@ -683,7 +683,7 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
 						// incorrectly expanded. If we haven't enabled escaping, then retain the current behavior.
 						String expandedExpression = textString;
 
-						if (!context.getContext(ChangeLogParserContext.class).getSupportPropertyEscaping()) {
+						if (!context.getConfiguration(ChangeLogParserCofiguration.class).getSupportPropertyEscaping()) {
 							expandedExpression = changeLogParameters.expandExpressions(textString);
 						}
 						((RawSQLChange) change).setSql(expandedExpression);

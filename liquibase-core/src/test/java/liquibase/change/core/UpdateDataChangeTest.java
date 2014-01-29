@@ -10,7 +10,7 @@ import liquibase.change.CheckSum;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
-import liquibase.context.ExecutionContext;
+import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.parser.ChangeLogParser;
 import liquibase.parser.ChangeLogParserFactory;
 import liquibase.resource.CompositeResourceAccessor;
@@ -42,7 +42,7 @@ public class UpdateDataChangeTest {
 
         ResourceAccessor resourceAccessor = new CompositeResourceAccessor(getResource(xml), new JUnitResourceAccessor());
         ChangeLogParser parser = ChangeLogParserFactory.getInstance().getParser("xml", resourceAccessor);
-        ExecutionContext context = new ExecutionContext();
+        LiquibaseConfiguration context = new LiquibaseConfiguration();
         DatabaseChangeLog changelog = parser.parse(null, new ChangeLogParameters(context), resourceAccessor, context);
         ChangeSet changeSet = changelog.getChangeSet("a", "a", "1");
 

@@ -21,9 +21,9 @@ import java.util.jar.JarFile;
 
 import liquibase.Liquibase;
 import liquibase.change.CheckSum;
-import liquibase.context.ExecutionContext;
-import liquibase.context.GlobalContext;
-import liquibase.context.SystemPropertyValueContainer;
+import liquibase.configuration.SystemPropertyProvider;
+import liquibase.configuration.core.GlobalConfiguration;
+import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.exception.CommandLineParsingException;
@@ -88,11 +88,11 @@ public class Main {
 
     public static void main(String args[]) throws CommandLineParsingException, IOException {
         try {
-            ExecutionContext executionContext = new ExecutionContext(new SystemPropertyValueContainer());
-            GlobalContext globalContext = executionContext.getContext(GlobalContext.class);
+            LiquibaseConfiguration liquibaseConfiguration = new LiquibaseConfiguration(new SystemPropertyProvider());
+            GlobalConfiguration globalConfiguration = liquibaseConfiguration.getConfiguration(GlobalConfiguration.class);
 
-            if (!globalContext.getShouldRun()) {
-                System.err.println("Liquibase did not run because '" + executionContext.describeDefaultLookup(globalContext.getProperty(GlobalContext.SHOULD_RUN)) + " was set to false");
+            if (!globalConfiguration.getShouldRun()) {
+                System.err.println("Liquibase did not run because '" + liquibaseConfiguration.describeDefaultLookup(globalConfiguration.getProperty(GlobalConfiguration.SHOULD_RUN)) + " was set to false");
                 return;
             }
 

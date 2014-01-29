@@ -6,22 +6,18 @@ import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.filter.ContextChangeSetFilter;
 import liquibase.changelog.filter.DbmsChangeSetFilter;
 import liquibase.changelog.filter.ShouldRunChangeSetFilter;
-import liquibase.changelog.visitor.UpdateVisitor;
-import liquibase.context.ExecutionContext;
+import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.ObjectQuotingStrategy;
 import liquibase.database.core.MockDatabase;
-import liquibase.database.core.OracleDatabase;
 import liquibase.exception.ChangeLogParseException;
-import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.LockException;
 import liquibase.lockservice.LockService;
 import liquibase.lockservice.LockServiceFactory;
 import liquibase.logging.LogFactory;
-import liquibase.logging.LogLevel;
 import liquibase.logging.Logger;
 import liquibase.parser.ChangeLogParser;
 import liquibase.parser.ChangeLogParserFactory;
@@ -33,14 +29,10 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import java.io.InputStream;
-import java.net.URL;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 
 import static liquibase.test.Assert.assertListsEqual;
-import static org.easymock.EasyMock.*;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
@@ -93,7 +85,7 @@ public class LiquibaseTest {
 
         ChangeLogParserFactory.setInstance(mockChangeLogParserFactory);
         when(mockChangeLogParserFactory.getParser(anyString(), Mockito.isA(ResourceAccessor.class))).thenReturn(mockChangeLogParser);
-        when(mockChangeLogParser.parse(anyString(), any(ChangeLogParameters.class), Mockito.isA(ResourceAccessor.class), Mockito.isA(ExecutionContext.class))).thenReturn(mockChangeLog);
+        when(mockChangeLogParser.parse(anyString(), any(ChangeLogParameters.class), Mockito.isA(ResourceAccessor.class), Mockito.isA(LiquibaseConfiguration.class))).thenReturn(mockChangeLog);
 
         LogFactory.setInstance(new LogFactory() {
             @Override
@@ -269,7 +261,7 @@ public class LiquibaseTest {
 
     @Test(expected = ChangeLogParseException.class)
     public void update_exceptionDoingUpdate() throws LiquibaseException {
-        ExecutionContext context = new ExecutionContext();
+        LiquibaseConfiguration context = new LiquibaseConfiguration();
         Contexts contexts = new Contexts("a,b");
 
         Liquibase liquibase = new Liquibase("com/example/test.xml", mockResourceAccessor, mockDatabase);

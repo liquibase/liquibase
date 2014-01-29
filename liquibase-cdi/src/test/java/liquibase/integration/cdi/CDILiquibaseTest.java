@@ -1,6 +1,5 @@
 package liquibase.integration.cdi;
 
-import liquibase.context.GlobalContext;
 import org.jboss.weld.environment.se.Weld;
 import org.jboss.weld.environment.se.WeldContainer;
 import org.junit.Test;

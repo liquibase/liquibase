@@ -2,7 +2,7 @@ package liquibase.parser.core.yaml;
 
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.DatabaseChangeLog;
-import liquibase.context.ExecutionContext;
+import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.exception.ChangeLogParseException;
 import liquibase.resource.ResourceAccessor;
 import org.junit.Test;
@@ -33,7 +33,7 @@ public class YamlChangeLogParserTest {
 
     @Test
     public void parse() throws ChangeLogParseException {
-        ExecutionContext context = new ExecutionContext();
+        LiquibaseConfiguration context = new LiquibaseConfiguration();
         DatabaseChangeLog changeLog = new YamlChangeLogParser().parse("test.yaml", new ChangeLogParameters(context), new ResourceAccessor() {
             @Override
             public InputStream getResourceAsStream(String file) throws IOException {
