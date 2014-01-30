@@ -37,6 +37,7 @@ public class MainTest {
                 "--classpath=CLASSPATH;CLASSPATH2",
                 "--contexts=CONTEXT1,CONTEXT2",
                 "--promptForNonLocalDatabase=true",
+                "--disablePreconditions=true",
                 "update",
         };
 
@@ -51,6 +52,7 @@ public class MainTest {
         assertEquals("CLASSPATH;CLASSPATH2", cli.classpath);
         assertEquals("CONTEXT1,CONTEXT2", cli.contexts);
         assertEquals(Boolean.TRUE, cli.promptForNonLocalDatabase);
+        assertEquals(Boolean.TRUE, cli.disablePreconditions);
         assertEquals("update", cli.command);
     }
 
@@ -58,6 +60,7 @@ public class MainTest {
     public void falseBooleanParameters() throws Exception {
         String[] args = new String[]{
                 "--promptForNonLocalDatabase=false",
+                "--disablePreconditions=false",
                 "update",
         };
 
@@ -65,6 +68,21 @@ public class MainTest {
         cli.parseOptions(args);
 
         assertEquals(Boolean.FALSE, cli.promptForNonLocalDatabase);
+        assertEquals(Boolean.FALSE, cli.disablePreconditions);
+        assertEquals("update", cli.command);
+
+    }
+
+    @Test
+    public void disablePreconditionsShouldBeSetToFalseByDefault() throws Exception {
+        String[] args = new String[]{
+                "update",
+        };
+
+        Main cli = new Main();
+        cli.parseOptions(args);
+
+        assertEquals(Boolean.FALSE, cli.disablePreconditions);
         assertEquals("update", cli.command);
 
     }
@@ -87,12 +105,14 @@ public class MainTest {
     public void trueBooleanParameters() throws Exception {
         String[] args = new String[]{
                 "--promptForNonLocalDatabase=true",
+                "--disablePreconditions=true",
                 "update",
         };
 
         Main cli = new Main();
         cli.parseOptions(args);
 
+        assertEquals(Boolean.TRUE, cli.disablePreconditions);
         assertEquals(Boolean.TRUE, cli.promptForNonLocalDatabase);
         assertEquals("update", cli.command);
 

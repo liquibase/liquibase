@@ -84,6 +84,8 @@ public class Liquibase {
      * @see #Liquibase(String, liquibase.resource.ResourceAccessor, liquibase.database.Database)
      * @see ResourceAccessor
      */
+    private boolean preConditionsDisabled = false;
+
     public Liquibase(String changeLogFile, ResourceAccessor resourceAccessor, DatabaseConnection conn) throws LiquibaseException {
         this(changeLogFile, resourceAccessor, DatabaseFactory.getInstance().findCorrectDatabaseImplementation(conn));
     }
@@ -197,6 +199,8 @@ public class Liquibase {
 
             changeLog.validate(database, contexts);
 
+            disablePreconditionsIfRequired(changeLog);
+
             ChangeLogIterator changeLogIterator = getStandardChangelogIterator(contexts, changeLog);
 
             changeLogIterator.run(createUpdateVisitor(), database);
@@ -278,6 +282,7 @@ public class Liquibase {
 
             checkLiquibaseTables(true, changeLog, contexts);
             changeLog.validate(database, contexts);
+            disablePreconditionsIfRequired(changeLog);
 
             ChangeLogIterator logIterator = new ChangeLogIterator(changeLog,
                     new ShouldRunChangeSetFilter(database, ignoreClasspathPrefix),
@@ -1020,6 +1025,22 @@ public class Liquibase {
             setChangeLogParameter("database.supportsSchemas", database.supportsSchemas());
             setChangeLogParameter("database.supportsSequences", database.supportsSequences());
             setChangeLogParameter("database.supportsTablespaces", database.supportsTablespaces());
+    }
+
+
+    private void disablePreconditionsIfRequired(DatabaseChangeLog changeLog) {
+        if (preConditionsDisabled) {
+            for (ChangeSet changeSet : changeLog.getChangeSets()) {
+                changeSet.setPreconditions(null);
+            }
+        }
+    }
+
+    /**
+     * Disable preconditions from running. Preconditions are run by default.
+     */
+    public void disablePreconditions() {
+        this.preConditionsDisabled = true;
     }
 
     private LockService getLockService() {
