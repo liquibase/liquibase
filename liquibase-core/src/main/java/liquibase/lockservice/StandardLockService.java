@@ -29,8 +29,8 @@ public class StandardLockService implements LockService {
 
     private boolean hasChangeLogLock = false;
 
-    private Long changeLogLockWaitTime;
-    private long changeLogLocRecheckTime = 1000 * 10;  //default to every 10 seconds
+    private Long changeLogLockPollRate;
+    private long changeLogLocRecheckTime;
 
     private boolean hasDatabaseChangeLogLockTable = false;
     private boolean isDatabaseChangeLogLockTableInitialized = false;
@@ -54,20 +54,27 @@ public class StandardLockService implements LockService {
     }
 
     public Long getChangeLogLockWaitTime() {
-        if (changeLogLockWaitTime != null) {
-            return changeLogLockWaitTime;
+        if (changeLogLockPollRate != null) {
+            return changeLogLockPollRate;
         }
-        return LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getDatabaseChangeLogWaitTime();
+        return LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getDatabaseChangeLogLockWaitTime();
     }
 
     @Override
     public void setChangeLogLockWaitTime(long changeLogLockWaitTime) {
-        this.changeLogLockWaitTime = changeLogLockWaitTime;
+        this.changeLogLockPollRate = changeLogLockWaitTime;
     }
 
     @Override
     public void setChangeLogLockRecheckTime(long changeLogLocRecheckTime) {
         this.changeLogLocRecheckTime = changeLogLocRecheckTime;
+    }
+
+    public Long getChangeLogLockRecheckTime() {
+        if (changeLogLockPollRate != null) {
+            return changeLogLockPollRate;
+        }
+        return LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getDatabaseChangeLogLockPollRate();
     }
 
     @Override
@@ -147,7 +154,7 @@ public class StandardLockService implements LockService {
             if (!locked) {
                 LogFactory.getLogger().info("Waiting for changelog lock....");
                 try {
-                    Thread.sleep(changeLogLocRecheckTime);
+                    Thread.sleep(getChangeLogLockRecheckTime() * 1000);
                 } catch (InterruptedException e) {
                     ;
                 }

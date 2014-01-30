@@ -61,7 +61,7 @@ public class LiquibaseConfiguration {
             configuration.init(new SystemPropertyProvider());
             return configuration;
         } catch (Exception e) {
-            throw new UnexpectedLiquibaseException("Cannot create default configuration "+type.getName());
+            throw new UnexpectedLiquibaseException("Cannot create default configuration "+type.getName(), e);
         }
     }
 

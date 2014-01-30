@@ -10,7 +10,8 @@ public class GlobalConfiguration extends AbstractConfiguration {
     public static final String LIQUIBASE_SCHEMA_NAME = "schemaName";
     public static final String OUTPUT_LINE_SEPARATOR = "outputLineSeparator";
     public static final String OUTPUT_ENCODING = "outputFileEncoding";
-    public static final String CHANGELOG_WAIT_TIME = "changeLogLockWaitTimeInMinutes";
+    public static final String CHANGELOGLOCK_WAIT_TIME = "changeLogLockWaitTimeInMinutes";
+    public static final String CHANGELOGLOCK_POLL_RATE = "changeLogLockPollRate";
 
     public GlobalConfiguration() {
         super("liquibase");
@@ -28,9 +29,13 @@ public class GlobalConfiguration extends AbstractConfiguration {
                 .setDescription("Name of table to use for tracking concurrent liquibase usage")
                 .setDefaultValue("DATABASECHANGELOGLOCK");
 
-        getContainer().addProperty(CHANGELOG_WAIT_TIME, Long.class)
+        getContainer().addProperty(CHANGELOGLOCK_WAIT_TIME, Long.class)
                 .setDescription("Number of minutes to wait for the changelog lock to be available before giving up")
                 .setDefaultValue(5);
+
+        getContainer().addProperty(CHANGELOGLOCK_POLL_RATE, Long.class)
+                .setDescription("Number of seconds wait between checks to the changelog lock when it is locked")
+                .setDefaultValue(10);
 
         getContainer().addProperty(LIQUIBASE_TABLESPACE_NAME, String.class)
                 .setDescription("Tablespace to use for liquibase objects");
@@ -78,12 +83,21 @@ public class GlobalConfiguration extends AbstractConfiguration {
         return this;
     }
 
-    public Long getDatabaseChangeLogWaitTime() {
-        return getContainer().getValue(CHANGELOG_WAIT_TIME, Long.class);
+    public Long getDatabaseChangeLogLockWaitTime() {
+        return getContainer().getValue(CHANGELOGLOCK_WAIT_TIME, Long.class);
     }
 
-    public GlobalConfiguration setDatabaseChangeLogWaitTime(Long minutes) {
-        getContainer().setValue(CHANGELOG_WAIT_TIME, minutes);
+    public GlobalConfiguration setDatabaseChangeLogLockWaitTime(Long minutes) {
+        getContainer().setValue(CHANGELOGLOCK_WAIT_TIME, minutes);
+        return this;
+    }
+
+    public Long getDatabaseChangeLogLockPollRate() {
+        return getContainer().getValue(CHANGELOGLOCK_POLL_RATE, Long.class);
+    }
+
+    public GlobalConfiguration setDatabaseChangeLogLockPollRate(Long seconds) {
+        getContainer().setValue(CHANGELOGLOCK_POLL_RATE, seconds);
         return this;
     }
 

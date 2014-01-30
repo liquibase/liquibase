@@ -195,6 +195,9 @@ public abstract class AbstractConfiguration {
 
         public ConfigurationProperty setDefaultValue(Object defaultValue) {
             if (defaultValue != null && !type.isAssignableFrom(defaultValue.getClass())) {
+                if (type == Long.class && defaultValue instanceof Integer) {
+                    return setDefaultValue(((Integer) defaultValue).longValue());
+                }
                 throw new UnexpectedLiquibaseException("Property "+name+" on is of type "+type.getSimpleName()+", not "+defaultValue.getClass().getSimpleName());
             }
 
