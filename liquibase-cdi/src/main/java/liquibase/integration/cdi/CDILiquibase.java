@@ -106,7 +106,7 @@ public class CDILiquibase implements Extension {
 
         LiquibaseConfiguration liquibaseConfiguration = LiquibaseConfiguration.getInstance();
         if (!liquibaseConfiguration.getConfiguration(GlobalConfiguration.class).getShouldRun()) {
-            log.info("Liquibase did not run on " + hostName + " because " + liquibaseConfiguration.describeDefaultLookup(GlobalConfiguration.class, GlobalConfiguration.SHOULD_RUN) + " was set to false");
+            log.info("Liquibase did not run on " + hostName + " because " + liquibaseConfiguration.describeValueLookup(GlobalConfiguration.class, GlobalConfiguration.SHOULD_RUN) + " was set to false");
             return;
         }
         initialized = true;

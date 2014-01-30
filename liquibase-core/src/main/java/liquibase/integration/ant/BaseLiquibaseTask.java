@@ -349,7 +349,7 @@ public abstract class BaseLiquibaseTask extends Task {
     protected boolean shouldRun() {
         GlobalConfiguration globalConfiguration = LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class);
         if (!globalConfiguration.getShouldRun()) {
-            log("Liquibase did not run because " + LiquibaseConfiguration.getInstance().describeDefaultLookup(globalConfiguration.getProperty(GlobalConfiguration.SHOULD_RUN)) + " was set to false");
+            log("Liquibase did not run because " + LiquibaseConfiguration.getInstance().describeValueLookup(globalConfiguration.getProperty(GlobalConfiguration.SHOULD_RUN)) + " was set to false");
             return false;
         }
         return true;
