@@ -82,7 +82,7 @@ public class Main {
             GlobalConfiguration globalConfiguration = LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class);
 
             if (!globalConfiguration.getShouldRun()) {
-                System.err.println("Liquibase did not run because '" + LiquibaseConfiguration.getInstance().describeValueLookup(globalConfiguration.getProperty(GlobalConfiguration.SHOULD_RUN)) + " was set to false");
+                System.err.println("Liquibase did not run because '" + LiquibaseConfiguration.getInstance().describeValueLookupLogic(globalConfiguration.getProperty(GlobalConfiguration.SHOULD_RUN)) + " was set to false");
                 return;
             }
 

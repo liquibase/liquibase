@@ -653,7 +653,7 @@ public abstract class AbstractJdbcDatabase implements Database {
         }
 
         ConfigurationProperty configuration = LiquibaseConfiguration.getInstance().getProperty(GlobalConfiguration.class, GlobalConfiguration.LIQUIBASE_CATALOG_NAME);
-        if (configuration.wasSet()) {
+        if (configuration.getWasOverridden()) {
             return configuration.getValue(String.class);
         }
 
@@ -672,7 +672,7 @@ public abstract class AbstractJdbcDatabase implements Database {
         }
 
         ConfigurationProperty configuration = LiquibaseConfiguration.getInstance().getProperty(GlobalConfiguration.class, GlobalConfiguration.LIQUIBASE_SCHEMA_NAME);
-        if (configuration.wasSet()) {
+        if (configuration.getWasOverridden()) {
             return configuration.getValue(String.class);
         }
 

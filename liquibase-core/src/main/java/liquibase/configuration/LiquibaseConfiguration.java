@@ -11,7 +11,7 @@ import java.util.Map;
 /**
  * Provides unified management of configuration properties within Liquibase core and in extensions.
  * <p>
- * This class is the top level container used to access {@link liquibase.configuration.AbstractConfiguration} implementations which contain the actual configuration properties.
+ * This class is the top level container used to access {@link ConfigurationContainer} implementations which contain the actual configuration properties.
  * Normal use is to call LiquibaseConfiguration.getInstance().getConfiguration(NEEDED_CONFIGURATION.class).getYOUR_PROPERTY()
  * <p>
  * This class is implemented as a singleton with a single global set of configuration objects, but the {@link #setInstance(LiquibaseConfiguration)} method can be used to replace
@@ -19,19 +19,19 @@ import java.util.Map;
  */
 public class LiquibaseConfiguration {
 
-    private Map<Class, AbstractConfiguration> configurations;
+    private Map<Class, ConfigurationContainer> configurations;
 
-    private ConfigurationProvider[] configurationProviders;
+    private ConfigurationValueProvider[] configurationValueProviders;
 
     private static LiquibaseConfiguration instance;
 
     /**
-     * Returns the singleton instance.
+     * Returns the singleton instance, creating it if necessary. On creation, the configuration is initialized with {@link liquibase.configuration.SystemPropertyProvider}
      */
     public static LiquibaseConfiguration getInstance() {
         if (instance == null) {
             instance = new LiquibaseConfiguration();
-            instance.init();
+            instance.init(new SystemPropertyProvider());
         }
 
         return instance;
@@ -39,7 +39,7 @@ public class LiquibaseConfiguration {
 
     /**
      * Overrides the standard singleton instance created by getInstance().
-     * Useful for alternate implementations with more complex AbstractConfiguration lookup logic such as different configurations per thread.
+     * Useful for alternate implementations with more complex AbstractConfigurationContainer lookup logic such as different configurations per thread.
      */
     public static void setInstance(LiquibaseConfiguration instance) {
         LiquibaseConfiguration.instance = instance;
@@ -54,31 +54,31 @@ public class LiquibaseConfiguration {
 
 
     /**
-     * Re-initialize the configuration with the given ConfigurationProviders. Any existing AbstractConfiguration instances are reset to
+     * Re-initialize the configuration with the given ConfigurationProviders. Any existing AbstractConfigurationContainer instances are reset to
      * defaults.
      */
-    public void init(ConfigurationProvider... configurationProviders) {
-        if (configurationProviders == null) {
-            configurationProviders = new ConfigurationProvider[0];
+    public void init(ConfigurationValueProvider... configurationValueProviders) {
+        if (configurationValueProviders == null) {
+            configurationValueProviders = new ConfigurationValueProvider[0];
         }
-        this.configurationProviders = configurationProviders;
+        this.configurationValueProviders = configurationValueProviders;
 
         this.reset();
     }
 
     /**
-     * Resets existing AbstractConfiguration instances to their default values.
+     * Resets existing AbstractConfigurationContainer instances to their default values.
      */
     public void reset() {
-        this.configurations = new HashMap<Class, AbstractConfiguration>();
+        this.configurations = new HashMap<Class, ConfigurationContainer>();
     }
 
 
     /**
-     * Return an instance of the passed AbstractConfiguration type.
+     * Return an instance of the passed AbstractConfigurationContainer type.
      * The same instance is returned from every call to getConfiguration()
      */
-    public <T extends AbstractConfiguration> T getConfiguration(Class<T> type) {
+    public <T extends ConfigurationContainer> T getConfiguration(Class<T> type) {
         if (!configurations.containsKey(type)) {
             configurations.put(type, createConfiguration(type));
         }
@@ -89,12 +89,12 @@ public class LiquibaseConfiguration {
     /**
      * Convenience method for liquibaseConfiguration.getConfiguration(type).getProperty(property)
      */
-    public ConfigurationProperty getProperty(Class<? extends AbstractConfiguration> type, String property) {
-        AbstractConfiguration configuration = getConfiguration(type);
+    public ConfigurationProperty getProperty(Class<? extends ConfigurationContainer> type, String property) {
+        ConfigurationContainer configuration = getConfiguration(type);
         return configuration.getProperty(property);
     }
 
-    protected  <T extends AbstractConfiguration> T createConfiguration(Class<T> type) {
+    protected  <T extends ConfigurationContainer> T createConfiguration(Class<T> type) {
         try {
             T configuration = type.newInstance();
             configuration.init(new SystemPropertyProvider());
@@ -105,19 +105,19 @@ public class LiquibaseConfiguration {
     }
 
     /**
-     * Convenience method for {@link #describeValueLookup(ConfigurationProperty)}
+     * Convenience method for {@link #describeValueLookupLogic(ConfigurationProperty)}
      */
-    public String describeValueLookup(Class<? extends AbstractConfiguration> config, String property) {
-        return describeValueLookup(getProperty(config, property));
+    public String describeValueLookupLogic(Class<? extends ConfigurationContainer> config, String property) {
+        return describeValueLookupLogic(getProperty(config, property));
     }
 
     /**
-     * Generates a human consumable description of how the configured ConfigurationProvider(s) will attempt to set a default value.
+     * Generates a human consumable description of how the configured ConfigurationValueProvider(s) will attempt to set a default value.
      */
-    public String describeValueLookup(ConfigurationProperty property) {
+    public String describeValueLookupLogic(ConfigurationProperty property) {
         List<String> reasons = new ArrayList<String>();
-        for (ConfigurationProvider container : configurationProviders) {
-            reasons.add(container.describeDefaultLookup(property));
+        for (ConfigurationValueProvider container : configurationValueProviders) {
+            reasons.add(container.describeValueLookupLogic(property));
         }
 
         return StringUtils.join(reasons, " AND ");

@@ -1,6 +1,9 @@
 package liquibase.configuration;
 
-public class GlobalConfiguration extends AbstractConfiguration {
+/**
+ * Configuration container for global properties.
+ */
+public class GlobalConfiguration extends AbstractConfigurationContainer {
 
     public static final String SHOULD_RUN = "shouldRun";
     public static final String DATABASECHANGELOG_TABLE_NAME = "databaseChangeLogTableName";
@@ -56,6 +59,9 @@ public class GlobalConfiguration extends AbstractConfiguration {
                 .addAlias("file.encoding");
     }
 
+    /**
+     * Should Liquibase execute
+     */
     public boolean getShouldRun() {
         return getContainer().getValue(SHOULD_RUN, Boolean.class);
     }
@@ -65,6 +71,9 @@ public class GlobalConfiguration extends AbstractConfiguration {
         return this;
     }
 
+    /**
+     * Table name to use for DATABASECHANGELOG
+     */
     public String getDatabaseChangeLogTableName() {
         return getContainer().getValue(DATABASECHANGELOG_TABLE_NAME, String.class);
     }
@@ -74,6 +83,9 @@ public class GlobalConfiguration extends AbstractConfiguration {
         return this;
     }
 
+    /**
+     * Table name to use for DATABASECHANGELOGLOCK
+     */
     public String getDatabaseChangeLogLockTableName() {
         return getContainer().getValue(DATABASECHANGELOGLOCK_TABLE_NAME, String.class);
     }
@@ -83,6 +95,9 @@ public class GlobalConfiguration extends AbstractConfiguration {
         return this;
     }
 
+    /**
+     * Wait time (in minutes) to wait to receive the changelog lock before giving up.
+     */
     public Long getDatabaseChangeLogLockWaitTime() {
         return getContainer().getValue(CHANGELOGLOCK_WAIT_TIME, Long.class);
     }
@@ -92,6 +107,9 @@ public class GlobalConfiguration extends AbstractConfiguration {
         return this;
     }
 
+    /**
+     * Wait time (in seconds) between polling requests to the changelog lock system.
+     */
     public Long getDatabaseChangeLogLockPollRate() {
         return getContainer().getValue(CHANGELOGLOCK_POLL_RATE, Long.class);
     }
@@ -101,6 +119,9 @@ public class GlobalConfiguration extends AbstractConfiguration {
         return this;
     }
 
+    /**
+     * Name of the tablespace to use for liquibase database objects
+     */
     public String getLiquibaseTablespaceName() {
         return getContainer().getValue(LIQUIBASE_TABLESPACE_NAME, String.class);
     }
@@ -110,6 +131,9 @@ public class GlobalConfiguration extends AbstractConfiguration {
         return this;
     }
 
+    /**
+     * Name of the catalog to use for liquibase database objects
+     */
     public String getLiquibaseCatalogName() {
         return getContainer().getValue(LIQUIBASE_CATALOG_NAME, String.class);
     }
@@ -119,6 +143,9 @@ public class GlobalConfiguration extends AbstractConfiguration {
         return this;
     }
 
+    /**
+     * Name of the schema to use for liquibase database objects
+     */
     public String getLiquibaseSchemaName() {
         return getContainer().getValue(LIQUIBASE_SCHEMA_NAME, String.class);
     }
@@ -128,6 +155,9 @@ public class GlobalConfiguration extends AbstractConfiguration {
         return this;
     }
 
+    /**
+     * Line separator to use in output
+     */
     public String getOutputLineSeparator() {
         return getContainer().getValue(OUTPUT_LINE_SEPARATOR, String.class);
     }
@@ -137,6 +167,9 @@ public class GlobalConfiguration extends AbstractConfiguration {
         return this;
     }
 
+    /**
+     * String encoding to use in output.
+     */
     public String getOutputEncoding() {
         return getContainer().getValue(OUTPUT_ENCODING, String.class);
     }

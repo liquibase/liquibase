@@ -1,6 +1,10 @@
 package liquibase.configuration;
 
-public class SystemPropertyProvider implements ConfigurationProvider {
+/**
+ * A ConfigurationValueProvider implementation that looks for overriding values in system properties.
+ * Looks for system properties in the format "NAMESPACE.PROPERTY_NAME".
+ */
+public class SystemPropertyProvider implements ConfigurationValueProvider {
 
     @Override
     public Object getValue(String namespace, String property) {
@@ -8,7 +12,7 @@ public class SystemPropertyProvider implements ConfigurationProvider {
     }
 
     @Override
-    public String describeDefaultLookup(ConfigurationProperty property) {
+    public String describeValueLookupLogic(ConfigurationProperty property) {
         return "System property '"+property.getNamespace()+"."+property.getName()+"'";
     }
 }

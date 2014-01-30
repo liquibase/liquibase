@@ -1,8 +1,11 @@
 package liquibase.parser;
 
-import liquibase.configuration.AbstractConfiguration;
+import liquibase.configuration.AbstractConfigurationContainer;
 
-public class ChangeLogParserCofiguration extends AbstractConfiguration {
+/**
+ * Configuration container for properties applicable to most {@link liquibase.parser.ChangeLogParser} implementations
+ */
+public class ChangeLogParserCofiguration extends AbstractConfigurationContainer {
 
     public static final String SUPPORT_PROPERTY_ESCAPING = "supportPropertyEscaping";
 

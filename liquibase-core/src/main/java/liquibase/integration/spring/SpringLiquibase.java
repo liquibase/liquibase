@@ -281,7 +281,7 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
         ConfigurationProperty shouldRunProperty = LiquibaseConfiguration.getInstance().getProperty(GlobalConfiguration.class, GlobalConfiguration.SHOULD_RUN);
 
 		if (!shouldRunProperty.getValue(Boolean.class)) {
-			LogFactory.getLogger().info("Liquibase did not run because "+ LiquibaseConfiguration.getInstance().describeValueLookup(shouldRunProperty)+" was set to false");
+			LogFactory.getLogger().info("Liquibase did not run because "+ LiquibaseConfiguration.getInstance().describeValueLookupLogic(shouldRunProperty)+" was set to false");
 			return;
 		}
 		if (!shouldRun) {

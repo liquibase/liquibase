@@ -1,8 +1,11 @@
 package liquibase.logging.core;
 
-import liquibase.configuration.AbstractConfiguration;
+import liquibase.configuration.AbstractConfigurationContainer;
 
-public class DefaultLoggerConfiguration extends AbstractConfiguration {
+/**
+ * Configuration container for {@link liquibase.logging.core.DefaultLogger} properties
+ */
+public class DefaultLoggerConfiguration extends AbstractConfigurationContainer {
 
     public static final String LOG_LEVEL = "level";
 

@@ -134,7 +134,7 @@ public class LiquibaseServletListener implements ServletContextListener {
         GlobalConfiguration globalConfiguration = LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class);
         if (!globalConfiguration.getShouldRun()) {
             LogFactory.getLogger().info( "Liquibase did not run on " + hostName
-                    + " because "+ LiquibaseConfiguration.getInstance().describeValueLookup(globalConfiguration.getProperty(GlobalConfiguration.SHOULD_RUN))
+                    + " because "+ LiquibaseConfiguration.getInstance().describeValueLookupLogic(globalConfiguration.getProperty(GlobalConfiguration.SHOULD_RUN))
                             + " was set to false");
             return false;
         }
@@ -162,10 +162,10 @@ public class LiquibaseServletListener implements ServletContextListener {
             }
         }
 
-        if (globalConfiguration.getShouldRun() && globalConfiguration.getProperty(GlobalConfiguration.SHOULD_RUN).wasSet()) {
+        if (globalConfiguration.getShouldRun() && globalConfiguration.getProperty(GlobalConfiguration.SHOULD_RUN).getWasOverridden()) {
             shouldRun = true;
             servletContext.log("ignoring " + LIQUIBASE_HOST_INCLUDES + " and "
-                    + LIQUIBASE_HOST_EXCLUDES + ", since " + LiquibaseConfiguration.getInstance().describeValueLookup(globalConfiguration.getProperty(GlobalConfiguration.SHOULD_RUN))
+                    + LIQUIBASE_HOST_EXCLUDES + ", since " + LiquibaseConfiguration.getInstance().describeValueLookupLogic(globalConfiguration.getProperty(GlobalConfiguration.SHOULD_RUN))
                     + "=true");
         }
         if (!shouldRun) {
@@ -233,7 +233,7 @@ public class LiquibaseServletListener implements ServletContextListener {
     public void contextDestroyed(ServletContextEvent servletContextEvent) {
     }
 
-    protected class ServletValueContainer implements ConfigurationProvider {
+    protected class ServletValueContainer implements ConfigurationValueProvider {
 
         private ServletContext servletContext;
         private InitialContext initialContext;
@@ -244,7 +244,7 @@ public class LiquibaseServletListener implements ServletContextListener {
         }
 
         @Override
-        public String describeDefaultLookup(ConfigurationProperty property) {
+        public String describeValueLookupLogic(ConfigurationProperty property) {
             return "JNDI, servlet container init parameter, and system property '"+property.getNamespace()+"."+property.getName()+"'";
         }
 

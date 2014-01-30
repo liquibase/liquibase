@@ -10,7 +10,7 @@ import static junit.framework.TestCase.assertNull;
 
 public class ContextTest {
 
-    private AbstractConfiguration exampleConfiguration;
+    private AbstractConfigurationContainer exampleConfiguration;
 
     @Before
     public void before() {
@@ -48,7 +48,7 @@ public class ContextTest {
         TestCase.assertEquals(Boolean.FALSE, exampleContext.getContainer().getValue("propertyBooleanDefaultTrue", Boolean.class));
     }
 
-    private static class ExampleContext extends AbstractConfiguration {
+    private static class ExampleContext extends AbstractConfigurationContainer {
         private ExampleContext() {
             super("liquibase.example");
 
