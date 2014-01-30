@@ -14,16 +14,20 @@ public abstract class AbstractLogger  implements Logger {
 
     @Override
     public void setLogLevel(String logLevel) {
+        setLogLevel(toLogLevel(logLevel));
+    }
+
+    protected LogLevel toLogLevel(String logLevel) {
         if ("debug".equalsIgnoreCase(logLevel)) {
-            setLogLevel(LogLevel.DEBUG);
+            return LogLevel.DEBUG;
         } else if ("info".equalsIgnoreCase(logLevel)) {
-            setLogLevel(LogLevel.INFO);
+            return LogLevel.INFO;
         } else if ("warning".equalsIgnoreCase(logLevel)) {
-            setLogLevel(LogLevel.WARNING);
+            return LogLevel.WARNING;
         } else if ("severe".equalsIgnoreCase(logLevel)) {
-            setLogLevel(LogLevel.SEVERE);
+            return LogLevel.SEVERE;
         } else if ("off".equalsIgnoreCase(logLevel)) {
-            setLogLevel(LogLevel.OFF);
+            return LogLevel.OFF;
         } else {
             throw new UnexpectedLiquibaseException("Unknown log level: " + logLevel+".  Valid levels are: debug, info, warning, severe, off");
         }
