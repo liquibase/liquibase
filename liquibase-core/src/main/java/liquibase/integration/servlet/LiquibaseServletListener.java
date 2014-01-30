@@ -1,10 +1,7 @@
 package liquibase.integration.servlet;
 
 import liquibase.Liquibase;
-import liquibase.configuration.AbstractConfiguration;
-import liquibase.configuration.ConfigurationProvider;
-import liquibase.configuration.LiquibaseConfiguration;
-import liquibase.configuration.GlobalConfiguration;
+import liquibase.configuration.*;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.jvm.JdbcConnection;
@@ -247,7 +244,7 @@ public class LiquibaseServletListener implements ServletContextListener {
         }
 
         @Override
-        public String describeDefaultLookup(AbstractConfiguration.ConfigurationProperty property) {
+        public String describeDefaultLookup(ConfigurationProperty property) {
             return "JNDI, servlet container init parameter, and system property '"+property.getNamespace()+"."+property.getName()+"'";
         }
 

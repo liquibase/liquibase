@@ -89,7 +89,7 @@ public class LiquibaseConfiguration {
     /**
      * Convenience method for liquibaseConfiguration.getConfiguration(type).getProperty(property)
      */
-    public AbstractConfiguration.ConfigurationProperty getProperty(Class<? extends AbstractConfiguration> type, String property) {
+    public ConfigurationProperty getProperty(Class<? extends AbstractConfiguration> type, String property) {
         AbstractConfiguration configuration = getConfiguration(type);
         return configuration.getProperty(property);
     }
@@ -105,7 +105,7 @@ public class LiquibaseConfiguration {
     }
 
     /**
-     * Convenience method for {@link #describeValueLookup(liquibase.configuration.AbstractConfiguration.ConfigurationProperty)}
+     * Convenience method for {@link #describeValueLookup(ConfigurationProperty)}
      */
     public String describeValueLookup(Class<? extends AbstractConfiguration> config, String property) {
         return describeValueLookup(getProperty(config, property));
@@ -114,7 +114,7 @@ public class LiquibaseConfiguration {
     /**
      * Generates a human consumable description of how the configured ConfigurationProvider(s) will attempt to set a default value.
      */
-    public String describeValueLookup(AbstractConfiguration.ConfigurationProperty property) {
+    public String describeValueLookup(ConfigurationProperty property) {
         List<String> reasons = new ArrayList<String>();
         for (ConfigurationProvider container : configurationProviders) {
             reasons.add(container.describeDefaultLookup(property));

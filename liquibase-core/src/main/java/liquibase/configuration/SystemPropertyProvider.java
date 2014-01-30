@@ -8,7 +8,7 @@ public class SystemPropertyProvider implements ConfigurationProvider {
     }
 
     @Override
-    public String describeDefaultLookup(AbstractConfiguration.ConfigurationProperty property) {
+    public String describeDefaultLookup(ConfigurationProperty property) {
         return "System property '"+property.getNamespace()+"."+property.getName()+"'";
     }
 }
