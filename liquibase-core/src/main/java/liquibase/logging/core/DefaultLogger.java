@@ -22,12 +22,6 @@ public class DefaultLogger extends AbstractLogger {
     private String changeSetName = null;
 
     public DefaultLogger() {
-        String passedLevel = System.getProperty("liquibase.defaultlogger.level");
-        if (passedLevel == null) {
-            setLogLevel(LogLevel.INFO);
-        } else {
-            setLogLevel(passedLevel);
-        }
     }
 
     @Override
