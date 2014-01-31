@@ -409,6 +409,15 @@
 			<xsd:attribute name="constraintName" type="xsd:string" />
 		</xsd:complexType>
 	</xsd:element>
+	
+	<xsd:element name="renamePrimaryKey">
+		<xsd:complexType>
+            <xsd:attributeGroup ref="tableNameAttribute" />
+			<xsd:attribute name="oldConstraintName" type="xsd:string" />
+			<xsd:attribute name="newConstraintName" type="xsd:string"
+				use="required" />
+		</xsd:complexType>
+	</xsd:element>
 
 	<xsd:element name="addUniqueConstraint">
 		<xsd:complexType>
@@ -1148,6 +1157,7 @@
 				maxOccurs="unbounded" />
 			<xsd:element ref="addPrimaryKey" maxOccurs="unbounded" />
 			<xsd:element ref="dropPrimaryKey" maxOccurs="unbounded" />
+			<xsd:element ref="renamePrimaryKey" maxOccurs="unbounded" />
 			<xsd:element ref="addLookupTable" maxOccurs="unbounded" />
 			<xsd:element ref="addAutoIncrement" maxOccurs="unbounded" />
 			<xsd:element ref="addDefaultValue" maxOccurs="unbounded" />

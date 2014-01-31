@@ -520,6 +520,22 @@ public class XMLChangeLogSerializerTest {
         assertEquals("TABLE_NAME", node.getAttribute("tableName"));
         assertEquals("PK_NAME", node.getAttribute("constraintName"));
     }
+    
+    @Test
+    public void createNode_RenamePrimaryKeyChange() throws Exception {
+        RenamePrimaryKeyChange change = new RenamePrimaryKeyChange();
+        change.setSchemaName("SCHEMA_NAME");
+        change.setTableName("TABLE_NAME");
+        change.setOldConstraintName("OLD_NAME");
+        change.setNewConstraintName("NEW_NAME");
+
+        Element node = new XMLChangeLogSerializer(DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument()).createNode(change);
+        assertEquals("renamePrimaryKey", node.getTagName());
+        assertEquals("SCHEMA_NAME", node.getAttribute("schemaName"));
+        assertEquals("TABLE_NAME", node.getAttribute("tableName"));
+        assertEquals("OLD_NAME", node.getAttribute("oldConstraintName"));
+        assertEquals("NEW_NAME", node.getAttribute("newConstraintName"));
+    }
 
     @Test
     public void createNode_DropSequenceChange() throws Exception {
