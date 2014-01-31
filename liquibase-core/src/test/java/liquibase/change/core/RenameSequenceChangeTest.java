@@ -18,7 +18,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 /**
- * Tests for {@link RenameTableChangeTest.java}
+ * Tests for {@link RenameSequenceChange.java}
  */
 public class RenameSequenceChangeTest extends StandardChangeTest {
 
