@@ -53,6 +53,7 @@ public class FormattedSqlChangeLogParserTest {
             ");\n" +
             "--rollback drop table ${tablename};\n" +
             "-- changeset mysql:1\n" +
+            "-- comment: this is a comment\n" +
             "create table mysql_boo (\n" +
             "  id int primary key\n" +
             ");\n" +
@@ -236,6 +237,20 @@ public class FormattedSqlChangeLogParserTest {
         assertEquals("John Doe", changeLog.getChangeSets().get(0).getAuthor());
         assertEquals("12345", changeLog.getChangeSets().get(0).getId());
 
+    }
+
+    @Test
+    public void parse_withComment() throws Exception {
+        String changeLogWithComment = "--liquibase formatted sql\n\n"+
+            "--changeset JohnDoe:12345\n" +
+            "--comment: This is a test comment\n" +
+            "create table test (id int);\n";
+
+        DatabaseChangeLog changeLog = new MockFormattedSqlChangeLogParser(changeLogWithComment).parse("asdf.sql", new ChangeLogParameters(), new JUnitResourceAccessor());
+        assertEquals(1, changeLog.getChangeSets().size());
+        assertEquals("JohnDoe", changeLog.getChangeSets().get(0).getAuthor());
+        assertEquals("12345", changeLog.getChangeSets().get(0).getId());
+        assertEquals("This is a test comment", changeLog.getChangeSets().get(0).getComments());
     }
 
     @Test
