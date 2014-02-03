@@ -8,7 +8,7 @@ target
 /bin
 liquibase.integrationtest.local.properties
 /liquibase
-/derby.log
+derby.log
 /.idea
 *.iml
 .DS_Store
