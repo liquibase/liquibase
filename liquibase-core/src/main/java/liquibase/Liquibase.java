@@ -778,6 +778,9 @@ public class Liquibase {
         return visitor.getSeenChangeSets();
     }
 
+    /**
+     * Returns the ChangeSetStatuses of all changesets in the change log file and history in the order they would be ran.
+     */
     public List<ChangeSetStatus> getChangeSetStatuses(Contexts contexts) throws LiquibaseException {
         changeLogParameters.setContexts(contexts);
 

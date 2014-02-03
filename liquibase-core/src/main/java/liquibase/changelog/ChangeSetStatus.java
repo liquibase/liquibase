@@ -7,6 +7,10 @@ import liquibase.changelog.filter.ChangeSetFilterResult;
 import java.util.Date;
 import java.util.Set;
 
+/**
+ * Contains the current status of a ChangeSet. Normally returned by {@link liquibase.changelog.visitor.StatusVisitor}.
+ * Contains information on whether the changeSet has ran before and will run next time.
+ */
 public class ChangeSetStatus {
 
     private final ChangeSet changeSet;
@@ -38,6 +42,9 @@ public class ChangeSetStatus {
         return currentCheckSum;
     }
 
+    /**
+     * ChangeSet description
+     */
     public String getDescription() {
         return description;
     }
@@ -46,6 +53,9 @@ public class ChangeSetStatus {
         this.description = description;
     }
 
+    /**
+     * ChangeSet comments
+     */
     public String getComments() {
         return comments;
     }
@@ -54,6 +64,9 @@ public class ChangeSetStatus {
         this.comments = comments;
     }
 
+    /**
+     * Will the change set run next time.
+     */
     public boolean getWillRun() {
         return willRun;
     }
@@ -62,6 +75,9 @@ public class ChangeSetStatus {
         this.willRun = willRun;
     }
 
+    /**
+     * Reason the change set will not run next time. Returns null if it will run next time.
+     */
     public ChangeSetFilterResult getSkipReason() {
         return skipReason;
     }
@@ -70,6 +86,9 @@ public class ChangeSetStatus {
         this.skipReason = skipReason;
     }
 
+    /**
+     * Reason(s) the change set will run next time. Returns null if it will not run next time.
+     */
     public Set<ChangeSetFilterResult> getRunReasons() {
         return runReasons;
     }
@@ -78,6 +97,9 @@ public class ChangeSetStatus {
         this.runReasons = runReasons;
     }
 
+    /**
+     * Convenience method to check wither a given ChangeSetFilter type is a reason for running the change set.
+     */
     public boolean isRunReason(Class<? extends ChangeSetFilter> filterType) {
         if (!willRun) {
             return false;
@@ -95,6 +117,9 @@ public class ChangeSetStatus {
         return false;
     }
 
+    /**
+     * Return the checksum stored from the last execution of the change set. Returns null if it has not ran before
+     */
     public CheckSum getStoredCheckSum() {
         return storedCheckSum;
     }
@@ -103,6 +128,9 @@ public class ChangeSetStatus {
         this.storedCheckSum = storedCheckSum;
     }
 
+    /**
+     * Return the date the change set was last executed. Returns null if it has not ran before
+     */
     public Date getDateLastExecuted() {
         return dateLastExecuted;
     }
@@ -111,6 +139,9 @@ public class ChangeSetStatus {
         this.dateLastExecuted = dateLastExecuted;
     }
 
+    /**
+     * Returns true if the change set was ran previously.
+     */
     public boolean getPreviouslyRan() {
         return previouslyRan;
     }

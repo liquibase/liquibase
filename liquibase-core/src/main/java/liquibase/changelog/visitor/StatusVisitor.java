@@ -9,6 +9,10 @@ import liquibase.exception.LiquibaseException;
 
 import java.util.*;
 
+/**
+ * ChangeSetVisitor that will collect the execution status of changeSets without executing them. Also includes changeSets
+ * previously executed against the database but no longer in the change log.
+ */
 public class StatusVisitor implements ChangeSetVisitor, SkippedChangeSetVisitor {
 
     private LinkedHashMap<ChangeSet, ChangeSetStatus> changeSetStatuses = new LinkedHashMap<ChangeSet, ChangeSetStatus>();
@@ -61,10 +65,18 @@ public class StatusVisitor implements ChangeSetVisitor, SkippedChangeSetVisitor 
         return status;
     }
 
+    /**
+     * Convenience method to return the ChangeSetStatus of a given changeSet. Returns null if the changeSet is not know.
+     */
     public ChangeSetStatus getStatus(ChangeSet changeSet) {
         return changeSetStatuses.get(changeSet);
     }
 
+    /**
+     * Return the status of all changeSets, in the order they exist in the databasechangelog.
+     * Any change sets not in the current change log but previously ran against the database will be at the front of the List
+     * with a not run reason type of {@link liquibase.changelog.filter.NotInChangeLogChangeSetFilter}
+     */
     public List<ChangeSetStatus> getStatuses() {
         ArrayList<ChangeSetStatus> returnList = new ArrayList<ChangeSetStatus>();
         for (RanChangeSet changeSet : ranChangeSets) {
@@ -86,6 +98,9 @@ public class StatusVisitor implements ChangeSetVisitor, SkippedChangeSetVisitor 
         return returnList;
     }
 
+    /**
+     * Return the change sets that will execute
+     */
     public List<ChangeSetStatus> getChangeSetsToRun() {
         ArrayList<ChangeSetStatus> returnList = new ArrayList<ChangeSetStatus>();
         for (ChangeSetStatus status : changeSetStatuses.values()) {
@@ -97,6 +112,9 @@ public class StatusVisitor implements ChangeSetVisitor, SkippedChangeSetVisitor 
         return returnList;
     }
 
+    /**
+     * Return the change sets that will NOT execute
+     */
     public List<ChangeSetStatus> getChangeSetsToSkip() {
         ArrayList<ChangeSetStatus> returnList = new ArrayList<ChangeSetStatus>();
         for (ChangeSetStatus status : changeSetStatuses.values()) {

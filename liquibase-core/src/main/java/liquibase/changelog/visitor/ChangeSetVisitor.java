@@ -8,6 +8,12 @@ import liquibase.exception.LiquibaseException;
 
 import java.util.Set;
 
+/**
+ * Called by {@link liquibase.changelog.ChangeLogIterator} when a {@link liquibase.changelog.filter.ChangeSetFilter} accept a changeSet.
+ *
+ * @see liquibase.changelog.visitor.SkippedChangeSetVisitor
+ *
+ */
 public interface ChangeSetVisitor {
 
     public enum Direction {
