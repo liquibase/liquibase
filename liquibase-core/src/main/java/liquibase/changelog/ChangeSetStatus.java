@@ -1,6 +1,7 @@
 package liquibase.changelog;
 
 import liquibase.change.CheckSum;
+import liquibase.changelog.filter.ChangeSetFilter;
 import liquibase.changelog.filter.ChangeSetFilterResult;
 
 import java.util.Date;
@@ -75,6 +76,23 @@ public class ChangeSetStatus {
 
     public void setRunReasons(Set<ChangeSetFilterResult> runReasons) {
         this.runReasons = runReasons;
+    }
+
+    public boolean isRunReason(Class<? extends ChangeSetFilter> filterType) {
+        if (!willRun) {
+            return false;
+        }
+
+        if (runReasons == null) {
+            return false;
+        }
+
+        for (ChangeSetFilterResult result : runReasons) {
+            if (result.getFilter().equals(filterType)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public CheckSum getStoredCheckSum() {
