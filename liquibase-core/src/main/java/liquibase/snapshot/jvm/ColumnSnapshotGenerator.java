@@ -319,6 +319,11 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
             return null;
         }
 
+        if (database instanceof OracleDatabase && !stringVal.startsWith("'") && !stringVal.endsWith("'")) {
+            //oracle returns functions without quotes
+            return new DatabaseFunction(stringVal);
+        }
+
         if (stringVal.startsWith("'") && stringVal.endsWith("'")) {
             stringVal = stringVal.substring(1, stringVal.length() - 1);
         } else if (stringVal.startsWith("((") && stringVal.endsWith("))")) {
