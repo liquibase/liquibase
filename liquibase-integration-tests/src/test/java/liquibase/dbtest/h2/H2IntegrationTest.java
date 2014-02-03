@@ -130,18 +130,5 @@ public class H2IntegrationTest extends AbstractIntegrationTest {
 //        Locale.setDefault(originalDefault);
 //    }
 
-    @Test
-    public void status() throws Exception {
-        Liquibase liquibase = createLiquibase(completeChangeLog);
-        List<ChangeSetStatus> changeSetStatuses = liquibase.getChangeSetStatuses(new Contexts());
-        for (ChangeSetStatus status : changeSetStatuses) {
-            System.out.println(status.getChangeSet().toString()+" = willRun: "+status.getWillRun()+", alreadyRan: "+status.getPreviouslyRan());
-            if (status.getFilterResults() != null) {
-                for (ChangeSetFilterResult result : status.getFilterResults()) {
-                    System.out.println("    Reason: "+result.getMessage());
-                }
-            }
-        }
-    }
 
 }
