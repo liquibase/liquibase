@@ -19,8 +19,7 @@ public class ChangeSetStatus {
     private String comments;
 
     private boolean willRun;
-    private ChangeSetFilterResult skipReason;
-    private Set<ChangeSetFilterResult> runReasons;
+    private Set<ChangeSetFilterResult> filterResults;
 
     private CheckSum storedCheckSum;
     private Date dateLastExecuted;
@@ -76,40 +75,29 @@ public class ChangeSetStatus {
     }
 
     /**
-     * Reason the change set will not run next time. Returns null if it will run next time.
+     * Reasons the change set will or will not run next time. Returns empty set if no reasons were given
      */
-    public ChangeSetFilterResult getSkipReason() {
-        return skipReason;
+    public Set<ChangeSetFilterResult> getFilterResults() {
+        return filterResults;
     }
 
-    public void setSkipReason(ChangeSetFilterResult skipReason) {
-        this.skipReason = skipReason;
+    public void setFilterResults(Set<ChangeSetFilterResult> filterResults) {
+        this.filterResults = filterResults;
     }
 
     /**
-     * Reason(s) the change set will run next time. Returns null if it will not run next time.
+     * Convenience method to check wither a given ChangeSetFilter type is a reason for running the change set or not.
      */
-    public Set<ChangeSetFilterResult> getRunReasons() {
-        return runReasons;
-    }
-
-    public void setRunReasons(Set<ChangeSetFilterResult> runReasons) {
-        this.runReasons = runReasons;
-    }
-
-    /**
-     * Convenience method to check wither a given ChangeSetFilter type is a reason for running the change set.
-     */
-    public boolean isRunReason(Class<? extends ChangeSetFilter> filterType) {
+    public boolean isFilteredBy(Class<? extends ChangeSetFilter> filterType) {
         if (!willRun) {
             return false;
         }
 
-        if (runReasons == null) {
+        if (filterResults == null) {
             return false;
         }
 
-        for (ChangeSetFilterResult result : runReasons) {
+        for (ChangeSetFilterResult result : filterResults) {
             if (result.getFilter().equals(filterType)) {
                 return true;
             }

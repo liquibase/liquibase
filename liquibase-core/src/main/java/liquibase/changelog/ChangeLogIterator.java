@@ -49,7 +49,7 @@ public class ChangeLogIterator {
             for (ChangeSet changeSet : changeSetList) {
                 boolean shouldVisit = true;
                 Set<ChangeSetFilterResult> reasonsAccepted = new HashSet<ChangeSetFilterResult>();
-                ChangeSetFilterResult reasonDenied = null;
+                Set<ChangeSetFilterResult> reasonsDenied = new HashSet<ChangeSetFilterResult>();
                 if (changeSetFilters != null) {
                     for (ChangeSetFilter filter : changeSetFilters) {
                         ChangeSetFilterResult acceptsResult = filter.accepts(changeSet);
@@ -57,7 +57,7 @@ public class ChangeLogIterator {
                             reasonsAccepted.add(acceptsResult);
                         } else {
                             shouldVisit = false;
-                            reasonDenied = acceptsResult;
+                            reasonsDenied.add(acceptsResult);
                             break;
                         }
                     }
@@ -68,7 +68,7 @@ public class ChangeLogIterator {
                     visitor.visit(changeSet, databaseChangeLog, database, reasonsAccepted);
                 } else {
                     if (visitor instanceof SkippedChangeSetVisitor) {
-                        ((SkippedChangeSetVisitor) visitor).skipped(changeSet, databaseChangeLog, database, reasonDenied);
+                        ((SkippedChangeSetVisitor) visitor).skipped(changeSet, databaseChangeLog, database, reasonsDenied);
                     }
                 }
                 log.setChangeSet(null);

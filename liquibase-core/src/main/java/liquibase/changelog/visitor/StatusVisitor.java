@@ -31,14 +31,14 @@ public class StatusVisitor implements ChangeSetVisitor, SkippedChangeSetVisitor 
     public void visit(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database, Set<ChangeSetFilterResult> filterResults) throws LiquibaseException {
         ChangeSetStatus status = addStatus(changeSet, databaseChangeLog, database);
         status.setWillRun(true);
-        status.setRunReasons(filterResults);
+        status.setFilterResults(filterResults);
     }
 
     @Override
-    public void skipped(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database, ChangeSetFilterResult filterResult) throws LiquibaseException {
+    public void skipped(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database, Set<ChangeSetFilterResult> filterResults) throws LiquibaseException {
         ChangeSetStatus status = addStatus(changeSet, databaseChangeLog, database);
         status.setWillRun(false);
-        status.setSkipReason(filterResult);
+        status.setFilterResults(filterResults);
     }
 
     protected ChangeSetStatus addStatus(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database) throws LiquibaseException {
@@ -88,7 +88,7 @@ public class StatusVisitor implements ChangeSetVisitor, SkippedChangeSetVisitor 
             status.setComments(changeSet.getComments());
             status.setDescription(changeSet.getDescription());
             status.setWillRun(false);
-            status.setSkipReason(new ChangeSetFilterResult(false, "Change set is not in change log", NotInChangeLogChangeSetFilter.class));
+            status.setFilterResults(new HashSet<ChangeSetFilterResult>(Arrays.asList(new ChangeSetFilterResult(false, "Change set is not in change log", NotInChangeLogChangeSetFilter.class))));
 
             returnList.add(status);
         }
