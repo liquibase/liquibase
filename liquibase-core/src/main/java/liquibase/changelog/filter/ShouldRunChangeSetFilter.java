@@ -23,19 +23,19 @@ public class ShouldRunChangeSetFilter implements ChangeSetFilter {
     
     @Override
     @SuppressWarnings({"RedundantIfStatement"})
-    public boolean accepts(ChangeSet changeSet) {
+    public ChangeSetFilterResult accepts(ChangeSet changeSet) {
         for (RanChangeSet ranChangeSet : ranChangeSets) {
             if (changeSetsMatch(changeSet, ranChangeSet)) {
                 if (changeSet.shouldAlwaysRun()) {
-                    return true;
+                    return new ChangeSetFilterResult(true, "Change set always runs", this.getClass());
                 }
                 if (changeSet.shouldRunOnChange() && checksumChanged(changeSet, ranChangeSet)) {
-                    return true;
+                    return new ChangeSetFilterResult(true, "Change set checksum changed", this.getClass());
                 }
-                return false;
+                return new ChangeSetFilterResult(false, "Change set already ran", this.getClass());
             }
         }
-        return true;
+        return new ChangeSetFilterResult(true, "Change set has not ran yet", this.getClass());
     }
 
     protected boolean changeSetsMatch(ChangeSet changeSet, RanChangeSet ranChangeSet) {

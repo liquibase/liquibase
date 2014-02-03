@@ -1,6 +1,10 @@
 package liquibase.dbtest.h2;
 
+import liquibase.Contexts;
 import liquibase.Liquibase;
+import liquibase.changelog.ChangeSetStatus;
+import liquibase.changelog.filter.ChangeSetFilterResult;
+import liquibase.changelog.visitor.StatusVisitor;
 import liquibase.dbtest.AbstractIntegrationTest;
 import liquibase.diff.DiffGeneratorFactory;
 import liquibase.diff.DiffResult;
@@ -11,6 +15,8 @@ import liquibase.diff.output.report.DiffToReport;
 import liquibase.exception.ValidationFailedException;
 import liquibase.snapshot.*;
 import org.junit.Test;
+
+import java.util.List;
 
 public class H2IntegrationTest extends AbstractIntegrationTest {
 
@@ -123,5 +129,19 @@ public class H2IntegrationTest extends AbstractIntegrationTest {
 //        testRunChangeLog();
 //        Locale.setDefault(originalDefault);
 //    }
+
+    @Test
+    public void status() throws Exception {
+        Liquibase liquibase = createLiquibase(completeChangeLog);
+        List<ChangeSetStatus> changeSetStatuses = liquibase.getChangeSetStatuses(new Contexts());
+        for (ChangeSetStatus status : changeSetStatuses) {
+            System.out.println(status.getChangeSet().toString()+" = willRun: "+status.getWillRun()+", alreadyRan: "+status.getPreviouslyRan()+", reason: "+status.getSkipReason());
+            if (status.getRunReasons() != null) {
+                for (ChangeSetFilterResult result : status.getRunReasons()) {
+                    System.out.println("    Reason: "+result.getMessage());
+                }
+            }
+        }
+    }
     
 }

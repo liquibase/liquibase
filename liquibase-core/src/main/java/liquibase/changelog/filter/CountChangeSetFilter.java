@@ -12,8 +12,13 @@ public class CountChangeSetFilter implements ChangeSetFilter {
     }
 
     @Override
-    public boolean accepts(ChangeSet changeSet) {
+    public ChangeSetFilterResult accepts(ChangeSet changeSet) {
         changeSetsSeen++;
-        return changeSetsSeen <= changeSetsToAllow;
+
+        if (changeSetsSeen <= changeSetsToAllow) {
+            return new ChangeSetFilterResult(true, "One of "+changeSetsToAllow+" change sets to run", this.getClass());
+        } else {
+            return new ChangeSetFilterResult(false, "Only running "+changeSetsToAllow+" change sets", this.getClass());
+        }
     }
 }
