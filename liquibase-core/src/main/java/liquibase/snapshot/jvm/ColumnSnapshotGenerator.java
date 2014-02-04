@@ -344,12 +344,8 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                 return new DatabaseFunction(stringVal);
             }
             if (maybeDate != null) {
-                if (maybeDate instanceof java.sql.Date) {
-                    stringVal = new ISODateFormat().format((java.sql.Date) maybeDate);
-                } else if (maybeDate instanceof Timestamp) {
-                    stringVal = new ISODateFormat().format((Timestamp) maybeDate);
-                } else if (maybeDate instanceof Time) {
-                    stringVal = new ISODateFormat().format((Time) maybeDate);
+                if (maybeDate instanceof java.util.Date) {
+                    return maybeDate;
                 } else {
                     return new DatabaseFunction(stringVal);
                 }
