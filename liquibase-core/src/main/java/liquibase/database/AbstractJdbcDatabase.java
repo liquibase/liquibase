@@ -202,7 +202,7 @@ public abstract class AbstractJdbcDatabase implements Database {
     @Override
     public int getDatabaseMajorVersion() throws DatabaseException {
         if (connection == null) {
-            return -1;
+            return 999;
         }
         try {
             return connection.getDatabaseMajorVersion();
