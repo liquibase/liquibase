@@ -146,6 +146,8 @@ public class SequenceSnapshotGenerator extends JdbcSnapshotGenerator {
                     "AND 'nextval(''\"'||relname||'\"''::regclass)' not in (select adsrc from pg_attrdef where adsrc is not null)";
         } else if (database instanceof MSSQLDatabase) {
                 return "SELECT SEQUENCE_NAME, " +
+                        "cast(START_VALUE AS BIGINT) AS START_VALUE, " +
+                        "cast(MINIMUM_VALUE AS BIGINT) AS MIN_VALUE, " +
                         "cast(MAXIMUM_VALUE AS BIGINT) AS MAX_VALUE, " +
                         "CAST(INCREMENT AS BIGINT) AS INCREMENT_BY, " +
                         "CYCLE_OPTION AS WILL_CYCLE " +
