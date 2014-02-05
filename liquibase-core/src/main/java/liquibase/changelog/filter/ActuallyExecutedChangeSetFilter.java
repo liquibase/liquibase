@@ -12,8 +12,12 @@ public class ActuallyExecutedChangeSetFilter extends RanChangeSetFilter {
     }
 
     @Override
-    public boolean accepts(ChangeSet changeSet) {
+    public ChangeSetFilterResult accepts(ChangeSet changeSet) {
         RanChangeSet ranChangeSet = getRanChangeSet(changeSet);
-        return ranChangeSet != null && (ranChangeSet.getExecType() == null || ranChangeSet.getExecType().equals(ChangeSet.ExecType.EXECUTED) || ranChangeSet.getExecType().equals(ChangeSet.ExecType.RERAN));
+        if (ranChangeSet != null && (ranChangeSet.getExecType() == null || ranChangeSet.getExecType().equals(ChangeSet.ExecType.EXECUTED) || ranChangeSet.getExecType().equals(ChangeSet.ExecType.RERAN))) {
+            return new ChangeSetFilterResult(true, "Change set was executed previously", this.getClass());
+        } else {
+            return new ChangeSetFilterResult(false, "Change set was not previously executed", this.getClass());
+        }
     }
 }

@@ -781,4 +781,16 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
         return STANDARD_CHANGELOG_NAMESPACE;
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof ChangeSet)) {
+            return false;
+        }
+        return this.toString(false).equals(((ChangeSet) obj).toString(false));
+    }
+
+    @Override
+    public int hashCode() {
+        return toString(false).hashCode();
+    }
 }

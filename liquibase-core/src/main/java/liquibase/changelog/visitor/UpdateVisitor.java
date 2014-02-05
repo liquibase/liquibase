@@ -4,11 +4,14 @@ import liquibase.changelog.ChangeSet;
 import liquibase.changelog.ChangeSet.ExecType;
 import liquibase.changelog.ChangeSet.RunStatus;
 import liquibase.changelog.DatabaseChangeLog;
+import liquibase.changelog.filter.ChangeSetFilterResult;
 import liquibase.database.Database;
 import liquibase.database.ObjectQuotingStrategy;
 import liquibase.exception.LiquibaseException;
 import liquibase.logging.LogFactory;
 import liquibase.logging.Logger;
+
+import java.util.Set;
 
 public class UpdateVisitor implements ChangeSetVisitor {
 
@@ -33,7 +36,7 @@ public class UpdateVisitor implements ChangeSetVisitor {
     }
 
     @Override
-    public void visit(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database) throws LiquibaseException {
+    public void visit(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database, Set<ChangeSetFilterResult> filterResults) throws LiquibaseException {
         ChangeSet.RunStatus runStatus = this.database.getRunStatus(changeSet);
         log.debug("Running Changeset:" + changeSet);
         fireWillRun(changeSet, databaseChangeLog, database, runStatus);

@@ -15,14 +15,14 @@ public class NotRanChangeSetFilter implements ChangeSetFilter {
 
     @Override
     @SuppressWarnings({"RedundantIfStatement"})
-    public boolean accepts(ChangeSet changeSet) {
+    public ChangeSetFilterResult accepts(ChangeSet changeSet) {
         for (RanChangeSet ranChangeSet : ranChangeSets) {
             if (ranChangeSet.getId().equalsIgnoreCase(changeSet.getId())
                     && ranChangeSet.getAuthor().equalsIgnoreCase(changeSet.getAuthor())
                     && ranChangeSet.getChangeLog().equalsIgnoreCase(changeSet.getFilePath())) {
-                return false;
+                return new ChangeSetFilterResult(false, "Change set already ran", this.getClass());
             }
         }
-        return true;
+        return new ChangeSetFilterResult(true, "Change set not yet ran", this.getClass());
     }
 }
