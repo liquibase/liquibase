@@ -23,12 +23,8 @@ public class MySQLConnSupplier extends ConnectionSupplier {
     @Override
     public Set<String> getPuppetModules() {
         Set<String> modules = super.getPuppetModules();
-        addPuppetModules(modules);
-        return modules;
-    }
-
-    protected void addPuppetModules(Set<String> modules) {
         modules.add("puppetlabs/mysql");
+        return modules;
     }
 
     @Override

@@ -128,6 +128,7 @@ public class VagrantControl {
         writePuppetFiles(vagrantInfo, databases);
 
         mainApp.out("Vagrant Box "+vagrantInfo.configName+" created. To start the box, run 'liquibase-sdk vagrant up "+vagrantInfo.configName+"'");
+        mainApp.out("NOTE: If you do not already have a vagrant box called "+vagrantInfo.configName+" installed, run 'vagrant init "+vagrantInfo.boxName+" VALID_URL'");
     }
 
     public void provision(VagrantInfo vagrantInfo, CommandLine commandLine) {
@@ -285,7 +286,7 @@ public class VagrantControl {
 
         Map<String, Object> context = new HashMap<String, Object>();
         context.put("configVmBox", vagrantInfo.boxName);
-        context.put("configVmBoxUrl", "RUN 'vagrant init "+vagrantInfo.boxName+" URL' using the box URL of your choice.");
+        context.put("configVmBoxUrl", "about:NOTE: Run 'vagrant init "+vagrantInfo.boxName+" URL' using the box URL of your choice.");
         context.put("configVmNetworkIp", vagrantInfo.hostName);
         context.put("vmCustomizeMemory", "8192");
 
