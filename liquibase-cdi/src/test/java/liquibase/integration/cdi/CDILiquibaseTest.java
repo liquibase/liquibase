@@ -1,7 +1,10 @@
 package liquibase.integration.cdi;
 
+import liquibase.configuration.LiquibaseConfiguration;
 import org.jboss.weld.environment.se.Weld;
 import org.jboss.weld.environment.se.WeldContainer;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -13,6 +16,12 @@ import static org.junit.Assert.*;
  */
 public class CDILiquibaseTest {
 
+    @Before
+    @After
+    public void clearProperty() {
+        System.clearProperty("liquibase.shouldRun");
+        LiquibaseConfiguration.getInstance().reset();
+    }
 
     @Test
     public void shouldntRunWhenShouldRunIsFalse() {
