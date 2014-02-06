@@ -28,7 +28,7 @@ public class ShouldRunChangeSetFilterTest  {
 
         ShouldRunChangeSetFilter filter = new ShouldRunChangeSetFilter(database);
 
-        assertTrue(filter.accepts(new ChangeSet("1", "testAuthor", false, false, "path/changelog", null, null, null)));
+        assertTrue(filter.accepts(new ChangeSet("1", "testAuthor", false, false, "path/changelog", null, null, null)).isAccepted());
     }
 
     @Test
@@ -37,17 +37,17 @@ public class ShouldRunChangeSetFilterTest  {
 
         ShouldRunChangeSetFilter filter = new ShouldRunChangeSetFilter(database);
 
-        assertFalse("Already ran changeset should not be accepted", filter.accepts(new ChangeSet("1", "testAuthor", false, false, "path/changelog", null, null, null)));
+        assertFalse("Already ran changeset should not be accepted", filter.accepts(new ChangeSet("1", "testAuthor", false, false, "path/changelog", null, null, null)).isAccepted());
 
-        assertTrue("AlwaysRun changesets should always be accepted", filter.accepts(new ChangeSet("1", "testAuthor", true, false, "path/changelog", null, null, null)));
+        assertTrue("AlwaysRun changesets should always be accepted", filter.accepts(new ChangeSet("1", "testAuthor", true, false, "path/changelog", null, null, null)).isAccepted());
 
-        assertTrue("RunOnChange changed changeset should be accepted", filter.accepts(new ChangeSet("1", "testAuthor", false, true, "path/changelog", null, null, null)));
+        assertTrue("RunOnChange changed changeset should be accepted", filter.accepts(new ChangeSet("1", "testAuthor", false, true, "path/changelog", null, null, null)).isAccepted());
 
-        assertTrue("ChangeSet with different id should be accepted", filter.accepts(new ChangeSet("3", "testAuthor", false, false, "path/changelog", null, null, null)));
+        assertTrue("ChangeSet with different id should be accepted", filter.accepts(new ChangeSet("3", "testAuthor", false, false, "path/changelog", null, null, null)).isAccepted());
 
-        assertTrue("ChangeSet with different author should be accepted", filter.accepts(new ChangeSet("1", "otherAuthor", false, false, "path/changelog", null, null, null)));
+        assertTrue("ChangeSet with different author should be accepted", filter.accepts(new ChangeSet("1", "otherAuthor", false, false, "path/changelog", null, null, null)).isAccepted());
 
-        assertTrue("ChangSet with different path should be accepted", filter.accepts(new ChangeSet("1", "testAuthor", false, false, "other/changelog", null, null, null)));
+        assertTrue("ChangSet with different path should be accepted", filter.accepts(new ChangeSet("1", "testAuthor", false, false, "other/changelog", null, null, null)).isAccepted());
     }
 
     @Test
@@ -57,7 +57,7 @@ public class ShouldRunChangeSetFilterTest  {
 
         ShouldRunChangeSetFilter filter = new ShouldRunChangeSetFilter(database, true);
 
-        assertFalse(filter.accepts(changeSetWithClasspathPrefix));
+        assertFalse(filter.accepts(changeSetWithClasspathPrefix).isAccepted());
     }
 
     @Test
@@ -67,7 +67,7 @@ public class ShouldRunChangeSetFilterTest  {
 
         ShouldRunChangeSetFilter filter = new ShouldRunChangeSetFilter(database, true);
 
-        assertFalse(filter.accepts(changeSet));
+        assertFalse(filter.accepts(changeSet).isAccepted());
     }
 
     @Test
@@ -77,7 +77,7 @@ public class ShouldRunChangeSetFilterTest  {
 
         ShouldRunChangeSetFilter filter = new ShouldRunChangeSetFilter(database, true);
 
-        assertFalse(filter.accepts(changeSet));
+        assertFalse(filter.accepts(changeSet).isAccepted());
     }
 
     private Database given_a_database_with_two_executed_changesets() throws DatabaseException {
