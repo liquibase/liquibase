@@ -1,6 +1,6 @@
 package liquibase.database.core.supplier;
 
-public class MySQLSupplierWindows extends MySQLSupplier {
+public class MySQLConnSupplierWindows extends MySQLConnSupplier {
 
     @Override
     public String getConfigurationName() {

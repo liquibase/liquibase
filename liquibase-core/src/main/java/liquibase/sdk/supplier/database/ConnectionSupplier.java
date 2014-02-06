@@ -105,10 +105,11 @@ public abstract class ConnectionSupplier implements Cloneable {
                 "Version: "+ version +"\n"+
                 "Standard User: "+ getDatabaseUsername()+"\n"+
                 "         Password: "+ getDatabasePassword()+"\n"+
-                "Alternate User: "+ getAlternateUsername()+"\n"+
-                "          Password: "+ getAlternateUserPassword()+"\n"+
                 "Primary Catalog: "+ getPrimaryCatalog()+"\n"+
                 "Primary Schema: "+ getPrimarySchema()+"\n"+
+                "\n"+
+                "Alternate User: "+ getAlternateUsername()+"\n"+
+                "          Password: "+ getAlternateUserPassword()+"\n"+
                 "Alternate Catalog: "+ getAlternateCatalog()+"\n"+
                 "Alternate Schema: "+ getAlternateSchema()+"\n"+
                 "Alternate Tablespace: "+ getAlternateTablespace()+"\n";

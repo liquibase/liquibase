@@ -2,10 +2,10 @@ package liquibase.database.core.supplier;
 
 import liquibase.sdk.supplier.database.ConnectionSupplier;
 
-public class MSSQLSupplier extends ConnectionSupplier {
+public class InformixConnSupplier extends ConnectionSupplier {
     @Override
     public String getDatabaseShortName() {
-        return "mssql";
+        return "informix";
     }
 
     @Override
@@ -14,12 +14,7 @@ public class MSSQLSupplier extends ConnectionSupplier {
     }
 
     @Override
-    public String getVagrantBoxName() {
-        return "windows";
-    }
-
-    @Override
     public String getUrl() {
-        return "jdbc:sqlserver://"+ getHostname() +":1433;databaseName=liquibase";
+        return "jdbc:informix-sqli://" + getHostname() + ":9088/liquibase:informixserver=ol_ids_1150_1";
     }
 }

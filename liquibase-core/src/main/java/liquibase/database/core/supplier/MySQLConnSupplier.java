@@ -4,7 +4,7 @@ import liquibase.sdk.supplier.database.ConnectionSupplier;
 
 import java.util.Set;
 
-public class MySQLSupplier extends ConnectionSupplier {
+public class MySQLConnSupplier extends ConnectionSupplier {
     @Override
     public String getDatabaseShortName() {
         return "mysql";

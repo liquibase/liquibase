@@ -6,7 +6,7 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.Set;
 
-public class OracleSupplier extends ConnectionSupplier {
+public class OracleConnSupplier extends ConnectionSupplier {
     @Override
     public String getDatabaseShortName() {
         return "oracle";

@@ -2,10 +2,10 @@ package liquibase.database.core.supplier;
 
 import liquibase.sdk.supplier.database.ConnectionSupplier;
 
-public class DerbySupplier extends ConnectionSupplier {
+public class MSSQLConnSupplier extends ConnectionSupplier {
     @Override
     public String getDatabaseShortName() {
-        return "derby";
+        return "mssql";
     }
 
     @Override
@@ -14,7 +14,12 @@ public class DerbySupplier extends ConnectionSupplier {
     }
 
     @Override
+    public String getVagrantBoxName() {
+        return "windows";
+    }
+
+    @Override
     public String getUrl() {
-        return "jdbc:derby:liquibase;create=true";
+        return "jdbc:sqlserver://"+ getHostname() +":1433;databaseName=liquibase";
     }
 }

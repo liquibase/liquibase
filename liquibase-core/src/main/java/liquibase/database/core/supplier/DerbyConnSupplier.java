@@ -2,10 +2,10 @@ package liquibase.database.core.supplier;
 
 import liquibase.sdk.supplier.database.ConnectionSupplier;
 
-public class SybaseASASupplier extends ConnectionSupplier {
+public class DerbyConnSupplier extends ConnectionSupplier {
     @Override
     public String getDatabaseShortName() {
-        return "asany";
+        return "derby";
     }
 
     @Override
@@ -15,6 +15,6 @@ public class SybaseASASupplier extends ConnectionSupplier {
 
     @Override
     public String getUrl() {
-        return "jdbc:sybase:Tds:"+ getHostname() +":9810/servicename=prior";
+        return "jdbc:derby:liquibase;create=true";
     }
 }

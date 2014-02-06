@@ -5,7 +5,7 @@ import liquibase.sdk.supplier.database.ConnectionSupplier;
 import java.util.Arrays;
 import java.util.Set;
 
-public class DB2Supplier extends ConnectionSupplier {
+public class DB2ConnSupplier extends ConnectionSupplier {
     @Override
     public String getDatabaseShortName() {
         return "db2";

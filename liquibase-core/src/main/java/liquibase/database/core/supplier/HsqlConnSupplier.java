@@ -2,10 +2,10 @@ package liquibase.database.core.supplier;
 
 import liquibase.sdk.supplier.database.ConnectionSupplier;
 
-public class SQLiteSupplier extends ConnectionSupplier {
+public class HsqlConnSupplier extends ConnectionSupplier {
     @Override
     public String getDatabaseShortName() {
-        return "sqlite";
+        return "hsqldb";
     }
 
     @Override
@@ -15,6 +15,6 @@ public class SQLiteSupplier extends ConnectionSupplier {
 
     @Override
     public String getUrl() {
-        return "jdbc:sqlite:sqlite/liquibase.db";
+        return "jdbc:hsqldb:mem:liquibase";
     }
 }

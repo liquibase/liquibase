@@ -4,7 +4,7 @@ import liquibase.sdk.supplier.database.ConnectionSupplier;
 
 import java.util.Set;
 
-public class PostgresSupplier extends ConnectionSupplier {
+public class PostgresConnSupplier extends ConnectionSupplier {
     @Override
     public String getDatabaseShortName() {
         return "postgresql";

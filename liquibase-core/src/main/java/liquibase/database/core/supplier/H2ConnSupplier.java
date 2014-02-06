@@ -2,11 +2,7 @@ package liquibase.database.core.supplier;
 
 import liquibase.sdk.supplier.database.ConnectionSupplier;
 
-public class SybaseSupplier extends ConnectionSupplier {
-    @Override
-    public String getDatabaseShortName() {
-        return "sybase";
-    }
+public class H2ConnSupplier extends ConnectionSupplier {
 
     @Override
     public String getConfigurationName() {
@@ -14,7 +10,12 @@ public class SybaseSupplier extends ConnectionSupplier {
     }
 
     @Override
+    public String getDatabaseShortName() {
+        return "h2";
+    }
+
+    @Override
     public String getUrl() {
-        return "jdbc:sybase:Tds:"+ getHostname()+":5000/liquibase";
+        return "jdbc:h2:mem:liquibase";
     }
 }
