@@ -8,6 +8,7 @@ import liquibase.database.core.MSSQLDatabase;
 import liquibase.datatype.DataTypeInfo;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
+import liquibase.statement.DatabaseFunction;
 
 @DataTypeInfo(name="mediumint", minParameters = 0, maxParameters = 1, priority = LiquibaseDataType.PRIORITY_DEFAULT)
 public class MediumIntType extends LiquibaseDataType {
@@ -35,6 +36,10 @@ public class MediumIntType extends LiquibaseDataType {
         if (value == null || value.toString().equalsIgnoreCase("null")) {
             return null;
         }
+        if (value instanceof DatabaseFunction) {
+            return value.toString();
+        }
+
         if (value instanceof Boolean)
             return Boolean.TRUE.equals(value) ? "1" : "0";
         else

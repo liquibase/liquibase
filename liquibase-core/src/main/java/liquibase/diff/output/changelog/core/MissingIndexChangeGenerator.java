@@ -5,6 +5,7 @@ import liquibase.change.Change;
 import liquibase.change.ColumnConfig;
 import liquibase.change.core.CreateIndexChange;
 import liquibase.database.Database;
+import liquibase.database.core.OracleDatabase;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.changelog.ChangeGeneratorChain;
 import liquibase.diff.output.changelog.MissingObjectChangeGenerator;
@@ -58,10 +59,16 @@ public class MissingIndexChangeGenerator implements MissingObjectChangeGenerator
 //            continue;
 //        }
 
-        for (String columnName : index.getColumns()) {
+        if (comparisonDatabase instanceof OracleDatabase && index.getFilterCondition() != null) {
             AddColumnConfig column = new AddColumnConfig();
-            column.setName(columnName);
+            column.setName(index.getFilterCondition());
             change.addColumn(column);
+        } else {
+            for (String columnName : index.getColumns()) {
+                AddColumnConfig column = new AddColumnConfig();
+                column.setName(columnName);
+                change.addColumn(column);
+            }
         }
 
         return new Change[] { change };

@@ -7,6 +7,7 @@ import java.sql.ResultSet;
 import liquibase.CatalogAndSchema;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
+import liquibase.database.OfflineConnection;
 import liquibase.sql.UnparsedSql;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
@@ -173,7 +174,7 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
 
     @Override
     protected String getConnectionSchemaName() {
-        if (getConnection() == null) {
+        if (getConnection() == null || getConnection() instanceof OfflineConnection) {
             return null;
         }
         try {

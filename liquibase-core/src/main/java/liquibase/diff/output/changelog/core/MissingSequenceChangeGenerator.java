@@ -44,6 +44,11 @@ public class MissingSequenceChangeGenerator implements MissingObjectChangeGenera
         }
         change.setStartValue(sequence.getStartValue());
         change.setIncrementBy(sequence.getIncrementBy());
+        change.setMinValue(sequence.getMinValue());
+        change.setMaxValue(sequence.getMaxValue());
+        change.setCacheSize(sequence.getCacheSize());
+        change.setCycle(sequence.getWillCycle());
+        change.setOrdered(sequence.getOrdered());
 
         return new Change[] { change };
 

@@ -5,6 +5,7 @@ import liquibase.database.core.*;
 import liquibase.datatype.DataTypeInfo;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
+import liquibase.statement.DatabaseFunction;
 import liquibase.util.StringUtils;
 
 @DataTypeInfo(name="clob", aliases = {"longvarchar", "text", "longtext", "java.sql.Types.LONGVARCHAR", "java.sql.Types.CLOB"}, minParameters = 0, maxParameters = 0, priority = LiquibaseDataType.PRIORITY_DEFAULT)
@@ -17,6 +18,11 @@ public class ClobType extends LiquibaseDataType {
         if (value == null || value.toString().equalsIgnoreCase("null")) {
             return null;
         }
+
+        if (value instanceof DatabaseFunction) {
+            return value.toString();
+        }
+
         String val = String.valueOf(value);
         // postgres type character varying gets identified as a char type
         // simple sanity check to avoid double quoting a value

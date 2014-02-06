@@ -4,6 +4,7 @@ import liquibase.database.Database;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.datatype.DataTypeInfo;
 import liquibase.datatype.LiquibaseDataType;
+import liquibase.statement.DatabaseFunction;
 import liquibase.util.StringUtils;
 
 @DataTypeInfo(name="char", aliases = "java.sql.Types.CHAR", minParameters = 0, maxParameters = 1, priority = LiquibaseDataType.PRIORITY_DEFAULT)
@@ -14,6 +15,11 @@ public class CharType extends LiquibaseDataType {
         if (value == null || value.toString().equalsIgnoreCase("null")) {
             return null;
         }
+
+        if (value instanceof DatabaseFunction) {
+            return value.toString();
+        }
+
         String val = String.valueOf(value);
         // postgres type character varying gets identified as a char type
         // simple sanity check to avoid double quoting a value
