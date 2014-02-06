@@ -1,16 +1,14 @@
 package liquibase.changelog;
 
 import liquibase.changelog.filter.*;
+import liquibase.changelog.visitor.SkippedChangeSetVisitor;
 import liquibase.changelog.visitor.ChangeSetVisitor;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
 import liquibase.logging.LogFactory;
 import liquibase.logging.Logger;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 public class ChangeLogIterator {
     private DatabaseChangeLog databaseChangeLog;
@@ -50,20 +48,30 @@ public class ChangeLogIterator {
 
             for (ChangeSet changeSet : changeSetList) {
                 boolean shouldVisit = true;
+                Set<ChangeSetFilterResult> reasonsAccepted = new HashSet<ChangeSetFilterResult>();
+                Set<ChangeSetFilterResult> reasonsDenied = new HashSet<ChangeSetFilterResult>();
                 if (changeSetFilters != null) {
                     for (ChangeSetFilter filter : changeSetFilters) {
-                        if (!filter.accepts(changeSet)) {
+                        ChangeSetFilterResult acceptsResult = filter.accepts(changeSet);
+                        if (acceptsResult.isAccepted()) {
+                            reasonsAccepted.add(acceptsResult);
+                        } else {
                             shouldVisit = false;
+                            reasonsDenied.add(acceptsResult);
                             break;
                         }
                     }
                 }
 
+                log.setChangeSet(changeSet);
                 if (shouldVisit) {
-                    log.setChangeSet(changeSet);
-                    visitor.visit(changeSet, databaseChangeLog, database);
-                    log.setChangeSet(null);
+                    visitor.visit(changeSet, databaseChangeLog, database, reasonsAccepted);
+                } else {
+                    if (visitor instanceof SkippedChangeSetVisitor) {
+                        ((SkippedChangeSetVisitor) visitor).skipped(changeSet, databaseChangeLog, database, reasonsDenied);
+                    }
                 }
+                log.setChangeSet(null);
             }
         } finally {
             log.setChangeLog(null);

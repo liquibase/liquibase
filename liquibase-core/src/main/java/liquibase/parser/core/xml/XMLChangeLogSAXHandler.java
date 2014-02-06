@@ -1,54 +1,14 @@
 package liquibase.parser.core.xml;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.net.URLDecoder;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.Enumeration;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.Stack;
-import java.util.TreeSet;
-import java.util.jar.JarEntry;
-import java.util.jar.JarFile;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import liquibase.Contexts;
-import liquibase.change.AddColumnConfig;
-import liquibase.change.Change;
-import liquibase.change.ChangeFactory;
-import liquibase.change.ChangeWithColumns;
-import liquibase.change.ColumnConfig;
-import liquibase.change.ConstraintsConfig;
-import liquibase.change.core.AbstractModifyDataChange;
-import liquibase.change.core.AddColumnChange;
-import liquibase.change.core.CreateIndexChange;
-import liquibase.change.core.CreateProcedureChange;
-import liquibase.change.core.CreateViewChange;
-import liquibase.change.core.ExecuteShellCommandChange;
-import liquibase.change.core.InsertDataChange;
-import liquibase.change.core.LoadDataChange;
-import liquibase.change.core.LoadDataColumnConfig;
-import liquibase.change.core.RawSQLChange;
-import liquibase.change.core.StopChange;
-import liquibase.change.core.UpdateDataChange;
+import liquibase.change.*;
+import liquibase.change.core.*;
 import liquibase.change.custom.CustomChangeWrapper;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
+import liquibase.configuration.LiquibaseConfiguration;
+import liquibase.parser.ChangeLogParserCofiguration;
 import liquibase.database.ObjectQuotingStrategy;
 import liquibase.exception.CustomChangeException;
 import liquibase.exception.LiquibaseException;
@@ -70,10 +30,24 @@ import liquibase.util.FileUtil;
 import liquibase.util.ObjectUtil;
 import liquibase.util.StringUtils;
 import liquibase.util.file.FilenameUtils;
-
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.net.URLDecoder;
+import java.util.*;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 class XMLChangeLogSAXHandler extends DefaultHandler {
 
@@ -558,8 +532,7 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
 		}
       DatabaseChangeLog changeLog;
       try {
-         changeLog= changeLogParserFactory.getParser(fileName, resourceAccessor).parse(fileName, changeLogParameters,
-                resourceAccessor);
+         changeLog= changeLogParserFactory.getParser(fileName, resourceAccessor).parse(fileName, changeLogParameters, resourceAccessor);
       } catch (UnknownChangelogFormatException e) {
         log.warning("included file "+relativeBaseFileName + "/" + fileName + " is not a recognized file type");
                     return false;
@@ -679,7 +652,7 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
 						// incorrectly expanded. If we haven't enabled escaping, then retain the current behavior.
 						String expandedExpression = textString;
 
-						if (false == ChangeLogParameters.EnableEscaping) {
+						if (!LiquibaseConfiguration.getInstance().getConfiguration(ChangeLogParserCofiguration.class).getSupportPropertyEscaping()) {
 							expandedExpression = changeLogParameters.expandExpressions(textString);
 						}
 						((RawSQLChange) change).setSql(expandedExpression);

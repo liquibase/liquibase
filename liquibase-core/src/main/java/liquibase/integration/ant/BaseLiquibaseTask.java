@@ -1,6 +1,8 @@
 package liquibase.integration.ant;
 
 import liquibase.Liquibase;
+import liquibase.configuration.LiquibaseConfiguration;
+import liquibase.configuration.GlobalConfiguration;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.jvm.JdbcConnection;
@@ -345,9 +347,9 @@ public abstract class BaseLiquibaseTask extends Task {
     }
 
     protected boolean shouldRun() {
-        String shouldRunProperty = System.getProperty(Liquibase.SHOULD_RUN_SYSTEM_PROPERTY);
-        if (shouldRunProperty != null && !Boolean.valueOf(shouldRunProperty)) {
-            log("Liquibase did not run because '" + Liquibase.SHOULD_RUN_SYSTEM_PROPERTY + "' system property was set to false");
+        GlobalConfiguration globalConfiguration = LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class);
+        if (!globalConfiguration.getShouldRun()) {
+            log("Liquibase did not run because " + LiquibaseConfiguration.getInstance().describeValueLookupLogic(globalConfiguration.getProperty(GlobalConfiguration.SHOULD_RUN)) + " was set to false");
             return false;
         }
         return true;

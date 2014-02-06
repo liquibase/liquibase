@@ -5,12 +5,14 @@ import liquibase.change.core.RawSQLChange;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
+import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.exception.ChangeLogParseException;
 import liquibase.precondition.core.PreconditionContainer;
 import liquibase.precondition.core.SqlPrecondition;
 import liquibase.resource.ResourceAccessor;
 import liquibase.test.JUnitResourceAccessor;
 import liquibase.util.StringUtils;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.io.ByteArrayInputStream;
@@ -77,6 +79,11 @@ public class FormattedSqlChangeLogParserTest {
         "--precondition-invalid-type 123\n" +
         "select 1;"
         ;
+
+    @Before
+    public void before() {
+        LiquibaseConfiguration.getInstance().reset();
+    }
 
     @Test
     public void supports() throws Exception {

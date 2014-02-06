@@ -1,26 +1,9 @@
 package liquibase.integration.commandline;
 
-import java.io.*;
-import java.lang.reflect.Field;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
-import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
-import java.util.jar.JarEntry;
-import java.util.jar.JarFile;
-
 import liquibase.Liquibase;
 import liquibase.change.CheckSum;
+import liquibase.configuration.LiquibaseConfiguration;
+import liquibase.configuration.GlobalConfiguration;
 import liquibase.database.Database;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.exception.CommandLineParsingException;
@@ -39,6 +22,17 @@ import liquibase.util.ISODateFormat;
 import liquibase.util.LiquibaseUtil;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
+
+import java.io.*;
+import java.lang.reflect.Field;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
+import java.text.ParseException;
+import java.util.*;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 
 /**
  * Class for executing Liquibase via the command line.
@@ -85,9 +79,10 @@ public class Main {
 
     public static void main(String args[]) throws CommandLineParsingException, IOException {
         try {
-            String shouldRunProperty = System.getProperty(Liquibase.SHOULD_RUN_SYSTEM_PROPERTY);
-            if (shouldRunProperty != null && !Boolean.valueOf(shouldRunProperty)) {
-                System.err.println("Liquibase did not run because '" + Liquibase.SHOULD_RUN_SYSTEM_PROPERTY + "' system property was set to false");
+            GlobalConfiguration globalConfiguration = LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class);
+
+            if (!globalConfiguration.getShouldRun()) {
+                System.err.println("Liquibase did not run because '" + LiquibaseConfiguration.getInstance().describeValueLookupLogic(globalConfiguration.getProperty(GlobalConfiguration.SHOULD_RUN)) + " was set to false");
                 return;
             }
 
@@ -1031,13 +1026,8 @@ public class Main {
     }
 
     private Writer getOutputWriter() throws UnsupportedEncodingException {
-        String charsetName = StringUtils.trimToNull(System.getProperty("liquibase.file.encoding"));
-        if (charsetName == null) {
-            charsetName = StringUtils.trimToNull(System.getProperty("file.encoding"));
-        }
-        if (charsetName == null) {
-            charsetName = "UTF-8";
-        }
+        String charsetName = LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding();
+
         return new OutputStreamWriter(System.out, charsetName);
     }
 

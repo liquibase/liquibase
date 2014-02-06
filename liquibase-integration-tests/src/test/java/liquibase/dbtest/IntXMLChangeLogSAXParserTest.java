@@ -1,9 +1,8 @@
 package liquibase.dbtest;
 
+import liquibase.changelog.ChangeLogParameters;
 import liquibase.parser.core.xml.XMLChangeLogSAXParser;
 import liquibase.test.JUnitResourceAccessor;
-import liquibase.changelog.ChangeLogParameters;
-
 import org.junit.Test;
 
 public class IntXMLChangeLogSAXParserTest {

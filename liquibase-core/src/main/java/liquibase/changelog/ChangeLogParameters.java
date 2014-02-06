@@ -1,29 +1,21 @@
 package liquibase.changelog;
 
-import static liquibase.Liquibase.ENABLE_CHANGELOG_PROP_ESCAPING;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import liquibase.Contexts;
+import liquibase.configuration.LiquibaseConfiguration;
+import liquibase.parser.ChangeLogParserCofiguration;
 import liquibase.database.Database;
 import liquibase.database.DatabaseList;
 import liquibase.exception.DatabaseException;
 import liquibase.util.StringUtils;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 public class ChangeLogParameters {
 	
-	public static final boolean EnableEscaping;
-	
-	static {
-		String enableEscaping = System.getProperty(ENABLE_CHANGELOG_PROP_ESCAPING, "false");
-		EnableEscaping = Boolean.valueOf(enableEscaping);
-	}
-
     private List<ChangeLogParameter> changeLogParameters = new ArrayList<ChangeLogParameter>();
     private ExpressionExpander expressionExpander;
     private Database currentDatabase;
@@ -77,7 +69,7 @@ public class ChangeLogParameters {
         }
 
 
-        this.expressionExpander = new ExpressionExpander(this, EnableEscaping);
+        this.expressionExpander = new ExpressionExpander(this);
         this.currentDatabase = database;
         this.currentContexts = new Contexts();
     }
@@ -204,12 +196,8 @@ public class ChangeLogParameters {
         private static final Pattern EXPRESSION_PATTERN = Pattern.compile("(\\$\\{[^\\}]+\\})");
 
         public ExpressionExpander(ChangeLogParameters changeLogParameters) {
-            this(changeLogParameters, false);
-        }
-        
-        public ExpressionExpander(ChangeLogParameters changeLogParameters, boolean enableEscaping) {
             this.changeLogParameters = changeLogParameters;
-            this.enableEscaping = enableEscaping;
+            this.enableEscaping = LiquibaseConfiguration.getInstance().getConfiguration(ChangeLogParserCofiguration.class).getSupportPropertyEscaping();
         }
 
         public String expandExpressions(String text) {

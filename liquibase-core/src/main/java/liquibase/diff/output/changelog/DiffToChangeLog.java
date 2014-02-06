@@ -3,6 +3,8 @@ package liquibase.diff.output.changelog;
 import liquibase.CatalogAndSchema;
 import liquibase.change.Change;
 import liquibase.changelog.ChangeSet;
+import liquibase.configuration.GlobalConfiguration;
+import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
 import liquibase.database.ObjectQuotingStrategy;
 import liquibase.diff.DiffResult;
@@ -83,7 +85,7 @@ public class DiffToChangeLog {
                 return;
             }
 
-            String lineSeparator = System.getProperty("line.separator");
+            String lineSeparator = LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputLineSeparator();
             BufferedReader fileReader = new BufferedReader(new FileReader(file));
             String line;
             long offset = 0;
