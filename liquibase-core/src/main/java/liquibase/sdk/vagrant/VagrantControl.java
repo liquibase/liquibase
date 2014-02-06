@@ -206,7 +206,7 @@ public class VagrantControl {
     }
 
     private void writePuppetFiles(VagrantInfo vagrantInfo, Collection<ConnectionSupplier> databases) throws Exception {
-        copyFile("liquibase/sdk/vagrant/puppet-bootstrap.sh", vagrantInfo.boxDir).setExecutable(true);
+        copyFile("liquibase/sdk/vagrant/shell/bootstrap.sh", new File(vagrantInfo.boxDir, "shell")).setExecutable(true);
 
         writePuppetFile(vagrantInfo, databases);
 

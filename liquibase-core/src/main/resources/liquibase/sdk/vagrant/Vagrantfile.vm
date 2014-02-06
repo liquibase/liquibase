@@ -16,14 +16,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
      vb.customize ["modifyvm", :id, "--memory", "${vmCustomizeMemory}"]
   end
 
-  config.vm.provision :shell do |shell|
-    shell.inline = "/vagrant/puppet-bootstrap.sh"
-  end
-
-  config.vm.provision :puppet, :module_path => "modules" do |puppet|
-    puppet.manifests_path = "manifests"
-    puppet.manifest_file  = "init.pp"
-	#puppet.options = "--debug --verbose"
-  end
+  config.vm.provision :shell, :path => "shell/bootstrap.sh"
 
 end

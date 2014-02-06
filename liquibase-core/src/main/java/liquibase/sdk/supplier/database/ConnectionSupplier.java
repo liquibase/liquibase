@@ -71,7 +71,7 @@ public abstract class ConnectionSupplier implements Cloneable {
     }
 
     public String getVagrantBoxName() {
-        return "liquibase.centos";
+        return "liquibase.linux.centos.x64";
     }
 
     public Set<String> getRequiredPackages(String vagrantBoxName) {

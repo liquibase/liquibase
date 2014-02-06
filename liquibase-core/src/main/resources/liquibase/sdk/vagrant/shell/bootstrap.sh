@@ -11,8 +11,8 @@ if ! gem list librarian-puppet -i > /dev/null 2>&1; then
 fi
 
 echo "Running librarian-puppet install"
-mkdir -p /etc/puppet
-cd /etc/puppet
+mkdir -p /usr/share/puppet
+cd /usr/share/puppet
 cp /vagrant/Puppetfile .
 librarian-puppet install
 
@@ -20,4 +20,5 @@ echo 'Copying vagrant-install-files...'
 mkdir -p /install
 cp -rn /vagrant-install-files/* /install
 
-echo "puppet-boostrap.sh done"
+echo 'Running puppet...'
+puppet apply -vv  --modulepath=/usr/share/puppet/modules/:/vagrant/modules /vagrant/manifests/init.pp

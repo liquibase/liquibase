@@ -4,6 +4,6 @@ public class MySQLConnSupplierWindows extends MySQLConnSupplier {
 
     @Override
     public String getConfigurationName() {
-        return "windows";
+        return "liquibase.windows.2008r2.x64";
     }
 }
