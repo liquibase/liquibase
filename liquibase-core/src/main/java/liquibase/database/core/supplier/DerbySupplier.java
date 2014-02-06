@@ -1,8 +1,8 @@
-package liquibase.database.core.config;
+package liquibase.database.core.supplier;
 
-import liquibase.sdk.supplier.database.ConnectionConfiguration;
+import liquibase.sdk.supplier.database.ConnectionSupplier;
 
-public class DerbyConfigStandard extends ConnectionConfiguration {
+public class DerbySupplier extends ConnectionSupplier {
     @Override
     public String getDatabaseShortName() {
         return "derby";

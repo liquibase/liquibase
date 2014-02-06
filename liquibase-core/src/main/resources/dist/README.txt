@@ -70,3 +70,24 @@ Provisioning:
     Provisioning in Vagrant is handed primarily by puppet, although there is a shell provisioning that is done first to
     bootstrap anything that cannot be done in puppet. The starting puppet file will be manifests/init.pp within each
     vagrant config. For example, linux-standard/manifests/init.pp
+
+Windows Vagrant Box:
+
+    To run windows-based databases, you need a base windows box. The easiest way is to download the Windows 2008R2 180 day trial
+    image from http://www.microsoft.com/en-us/download/confirmation.aspx?id=16572. Since it is a trial that times out, you will need
+    to re-do this process every 180 days. If you have a valid MSDN license you can use the same process to create a image that does not time out.
+
+    Once downloaded, create a new VirtualBox machine to be your vagrant base box. In the initial wizard, do not create or a virtual hard drive because
+    attaching the .vhd you downloaded will attach it as a SATA drive which does not boot. Once it is created, go to the Storage settings and add the downloaded
+    .vhd in the IDE controller. The trial server Administrator password is Pass@word1
+
+    Once booted, follow the steps in https://github.com/WinRb/vagrant-windows.
+    Before "vagrant package":
+       - Make sure to set the host name to "vagrant" and create a "vagrant" user as administrator
+       - Install VirtualBox guest tools
+       - Disable audio and USB (need to change mouse to ps/2 to disable usb)
+       - Activate Windows
+       - Install windows updates (it may take several rounds)
+       - Disable firewall
+
+

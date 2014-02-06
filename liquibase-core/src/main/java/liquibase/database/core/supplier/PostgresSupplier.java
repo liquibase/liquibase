@@ -1,10 +1,10 @@
-package liquibase.database.core.config;
+package liquibase.database.core.supplier;
 
-import liquibase.sdk.supplier.database.ConnectionConfiguration;
+import liquibase.sdk.supplier.database.ConnectionSupplier;
 
 import java.util.Set;
 
-public class PostgresConfigStandard extends ConnectionConfiguration {
+public class PostgresSupplier extends ConnectionSupplier {
     @Override
     public String getDatabaseShortName() {
         return "postgresql";

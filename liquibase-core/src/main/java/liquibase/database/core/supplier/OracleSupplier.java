@@ -1,12 +1,12 @@
-package liquibase.database.core.config;
+package liquibase.database.core.supplier;
 
-import liquibase.sdk.supplier.database.ConnectionConfiguration;
+import liquibase.sdk.supplier.database.ConnectionSupplier;
 
 import java.io.File;
 import java.util.Arrays;
 import java.util.Set;
 
-public class OracleConfigStandard extends ConnectionConfiguration {
+public class OracleSupplier extends ConnectionSupplier {
     @Override
     public String getDatabaseShortName() {
         return "oracle";

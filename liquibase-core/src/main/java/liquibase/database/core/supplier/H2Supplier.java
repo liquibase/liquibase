@@ -1,8 +1,8 @@
-package liquibase.database.core.config;
+package liquibase.database.core.supplier;
 
-import liquibase.sdk.supplier.database.ConnectionConfiguration;
+import liquibase.sdk.supplier.database.ConnectionSupplier;
 
-public class H2ConfigStandard extends ConnectionConfiguration {
+public class H2Supplier extends ConnectionSupplier {
 
     @Override
     public String getConfigurationName() {

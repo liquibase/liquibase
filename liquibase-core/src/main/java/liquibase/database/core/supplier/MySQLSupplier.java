@@ -1,10 +1,10 @@
-package liquibase.database.core.config;
+package liquibase.database.core.supplier;
 
-import liquibase.sdk.supplier.database.ConnectionConfiguration;
+import liquibase.sdk.supplier.database.ConnectionSupplier;
 
 import java.util.Set;
 
-public class MySQLConfigStandard extends ConnectionConfiguration {
+public class MySQLSupplier extends ConnectionSupplier {
     @Override
     public String getDatabaseShortName() {
         return "mysql";
@@ -23,8 +23,12 @@ public class MySQLConfigStandard extends ConnectionConfiguration {
     @Override
     public Set<String> getPuppetModules() {
         Set<String> modules = super.getPuppetModules();
-        modules.add("puppetlabs/mysql");
+        addPuppetModules(modules);
         return modules;
+    }
+
+    protected void addPuppetModules(Set<String> modules) {
+        modules.add("puppetlabs/mysql");
     }
 
     @Override

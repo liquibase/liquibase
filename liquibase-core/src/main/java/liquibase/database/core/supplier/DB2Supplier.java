@@ -1,11 +1,11 @@
-package liquibase.database.core.config;
+package liquibase.database.core.supplier;
 
-import liquibase.sdk.supplier.database.ConnectionConfiguration;
+import liquibase.sdk.supplier.database.ConnectionSupplier;
 
 import java.util.Arrays;
 import java.util.Set;
 
-public class DB2ConfigStandard extends ConnectionConfiguration {
+public class DB2Supplier extends ConnectionSupplier {
     @Override
     public String getDatabaseShortName() {
         return "db2";

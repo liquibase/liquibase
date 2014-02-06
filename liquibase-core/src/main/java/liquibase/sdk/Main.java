@@ -6,6 +6,7 @@ import liquibase.util.StringUtils;
 import org.apache.commons.cli.*;
 
 import java.io.File;
+import java.io.FilenameFilter;
 import java.util.*;
 
 public class Main {
@@ -125,7 +126,21 @@ public class Main {
 
 
     public File getSdkRoot() {
-        return new File(".").getAbsoluteFile();
+        File dir = new File(".").getAbsoluteFile();
+        while (dir != null) {
+            if (dir.listFiles(new FilenameFilter() {
+                @Override
+                public boolean accept(File dir, String name) {
+                    return name.equals("liquibase-sdk.bat");
+                }
+            }).length > 0) {
+                return dir;
+            }
+
+            dir = dir.getParentFile();
+        }
+
+        throw new UnexpectedLiquibaseException("Could not find Liquibase SDK home. Please run liquibase-sdk from the liquibase/sdk directory or one of it's sub directories");
     }
 
     public String getCommand() {
@@ -210,9 +225,8 @@ public class Main {
             super(message);
         }
 
-        private UserError(String message, Throwable cause) {
+        UserError(String message, Throwable cause) {
             super(message, cause);
         }
     }
-
 }
