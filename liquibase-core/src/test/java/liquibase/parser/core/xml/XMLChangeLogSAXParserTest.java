@@ -1,13 +1,5 @@
 package liquibase.parser.core.xml;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-
-import java.util.List;
-
 import liquibase.change.AddColumnConfig;
 import liquibase.change.Change;
 import liquibase.change.ChangeFactory;
@@ -19,16 +11,25 @@ import liquibase.change.custom.ExampleCustomSqlChange;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
-import liquibase.changelog.ChangeLogParameters;
+import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.core.MockDatabase;
 import liquibase.exception.ChangeLogParseException;
 import liquibase.precondition.core.OrPrecondition;
 import liquibase.precondition.core.PreconditionContainer;
 import liquibase.test.JUnitResourceAccessor;
-
+import org.junit.Before;
 import org.junit.Test;
 
+import java.util.List;
+
+import static org.junit.Assert.*;
+
 public class XMLChangeLogSAXParserTest {
+
+    @Before
+    public void before() {
+        LiquibaseConfiguration.getInstance().reset();
+    }
 
     @Test
     public void simpleChangeLog() throws Exception {

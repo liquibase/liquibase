@@ -1,15 +1,21 @@
 package liquibase.changelog;
 
 import liquibase.Contexts;
+import liquibase.configuration.LiquibaseConfiguration;
+import liquibase.database.core.H2Database;
 import org.junit.Before;
 import org.junit.Test;
-import static org.junit.Assert.*;
-import liquibase.database.core.H2Database;
 
-import java.util.Arrays;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 
 public class ChangeLogParametersTest {
+
+    @Before
+    public void before() {
+        LiquibaseConfiguration.getInstance().reset();
+    }
 
     @Test
     public void setParameterValue_doubleSet() {

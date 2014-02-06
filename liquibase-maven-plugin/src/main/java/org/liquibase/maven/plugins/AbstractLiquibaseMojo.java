@@ -1,26 +1,8 @@
 package org.liquibase.maven.plugins;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
-import java.lang.reflect.Field;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
-
 import liquibase.Liquibase;
+import liquibase.configuration.LiquibaseConfiguration;
+import liquibase.configuration.GlobalConfiguration;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
@@ -37,6 +19,13 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.wagon.authentication.AuthenticationInfo;
+
+import java.io.*;
+import java.lang.reflect.Field;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.util.*;
 
 /**
  * A base class for providing Liquibase {@link liquibase.Liquibase} functionality.
@@ -293,10 +282,10 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
             }
         }
 
-        String shouldRunProperty = System.getProperty(Liquibase.SHOULD_RUN_SYSTEM_PROPERTY);
-        if (shouldRunProperty != null && !Boolean.valueOf(shouldRunProperty)) {
-            getLog().info("Liquibase did not run because '" + Liquibase.SHOULD_RUN_SYSTEM_PROPERTY
-                    + "' system property was set to false");
+        LiquibaseConfiguration liquibaseConfiguration = LiquibaseConfiguration.getInstance();
+
+        if (!liquibaseConfiguration.getConfiguration(GlobalConfiguration.class).getShouldRun()) {
+            getLog().info("Liquibase did not run because " + liquibaseConfiguration.describeValueLookupLogic(GlobalConfiguration.class, GlobalConfiguration.SHOULD_RUN) + " was set to false");
             return;
         }
 

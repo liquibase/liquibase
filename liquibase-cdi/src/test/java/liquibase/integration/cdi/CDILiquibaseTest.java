@@ -1,6 +1,5 @@
 package liquibase.integration.cdi;
 
-import liquibase.Liquibase;
 import org.jboss.weld.environment.se.Weld;
 import org.jboss.weld.environment.se.WeldContainer;
 import org.junit.Test;
@@ -17,7 +16,7 @@ public class CDILiquibaseTest {
 
     @Test
     public void shouldntRunWhenShouldRunIsFalse() {
-        System.setProperty(Liquibase.SHOULD_RUN_SYSTEM_PROPERTY,"false");
+        System.setProperty("liquibase.shouldRun", "false");
         WeldContainer weld = new Weld().initialize();
         CDILiquibase cdiLiquibase = weld.instance().select(CDILiquibase.class).get();
         assertNotNull(cdiLiquibase);
@@ -27,7 +26,7 @@ public class CDILiquibaseTest {
 
     @Test
     public void shouldRunWhenShouldRunIsTrue() {
-        System.setProperty(Liquibase.SHOULD_RUN_SYSTEM_PROPERTY,"true");
+        System.setProperty("liquibase.shouldRun", "true");
         WeldContainer weld = new Weld().initialize();
         CDILiquibase cdiLiquibase = weld.instance().select(CDILiquibase.class).get();
         assertNotNull(cdiLiquibase);

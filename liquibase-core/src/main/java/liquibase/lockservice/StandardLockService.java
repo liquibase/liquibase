@@ -1,5 +1,7 @@
 package liquibase.lockservice;
 
+import liquibase.configuration.GlobalConfiguration;
+import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
 import liquibase.database.core.DerbyDatabase;
 import liquibase.exception.DatabaseException;
@@ -27,22 +29,11 @@ public class StandardLockService implements LockService {
 
     private boolean hasChangeLogLock = false;
 
-    private long changeLogLockWaitTime = 1000 * 60 * 5;  //default to 5 mins
-    private long changeLogLocRecheckTime = 1000 * 10;  //default to every 10 seconds
-
-    public static final String LOCK_WAIT_TIME_SYSTEM_PROPERTY = "liquibase.changeLogLockWaitTimeInMinutes";
+    private Long changeLogLockPollRate;
+    private long changeLogLocRecheckTime;
 
     private boolean hasDatabaseChangeLogLockTable = false;
     private boolean isDatabaseChangeLogLockTableInitialized = false;
-
-    {
-        try {
-            changeLogLockWaitTime = 1000 * 60 * Long.parseLong(System.getProperty(LOCK_WAIT_TIME_SYSTEM_PROPERTY));
-            LogFactory.getLogger().info("lockWaitTime change to: " + changeLogLockWaitTime);
-        } catch (NumberFormatException e) {
-            // was non or not valid configuration, we will keep the standard value
-        }
-    }
 
     public StandardLockService() {
     }
@@ -62,14 +53,28 @@ public class StandardLockService implements LockService {
         this.database = database;
     }
 
+    public Long getChangeLogLockWaitTime() {
+        if (changeLogLockPollRate != null) {
+            return changeLogLockPollRate;
+        }
+        return LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getDatabaseChangeLogLockWaitTime();
+    }
+
     @Override
     public void setChangeLogLockWaitTime(long changeLogLockWaitTime) {
-        this.changeLogLockWaitTime = changeLogLockWaitTime;
+        this.changeLogLockPollRate = changeLogLockWaitTime;
     }
 
     @Override
     public void setChangeLogLockRecheckTime(long changeLogLocRecheckTime) {
         this.changeLogLocRecheckTime = changeLogLocRecheckTime;
+    }
+
+    public Long getChangeLogLockRecheckTime() {
+        if (changeLogLockPollRate != null) {
+            return changeLogLockPollRate;
+        }
+        return LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getDatabaseChangeLogLockPollRate();
     }
 
     @Override
@@ -143,13 +148,13 @@ public class StandardLockService implements LockService {
     public void waitForLock() throws LockException {
 
         boolean locked = false;
-        long timeToGiveUp = new Date().getTime() + changeLogLockWaitTime;
+        long timeToGiveUp = new Date().getTime() + (getChangeLogLockWaitTime() * 1000 * 60);
         while (!locked && new Date().getTime() < timeToGiveUp) {
             locked = acquireLock();
             if (!locked) {
                 LogFactory.getLogger().info("Waiting for changelog lock....");
                 try {
-                    Thread.sleep(changeLogLocRecheckTime);
+                    Thread.sleep(getChangeLogLockRecheckTime() * 1000);
                 } catch (InterruptedException e) {
                     ;
                 }

@@ -1,6 +1,8 @@
 package liquibase.integration.cdi;
 
 import liquibase.Liquibase;
+import liquibase.configuration.GlobalConfiguration;
+import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.jvm.JdbcConnection;
@@ -102,9 +104,9 @@ public class CDILiquibase implements Extension {
             return;
         }
 
-        String shouldRunProperty = System.getProperty(Liquibase.SHOULD_RUN_SYSTEM_PROPERTY);
-        if (shouldRunProperty != null && !Boolean.valueOf(shouldRunProperty)) {
-            log.info("Liquibase did not run on " + hostName + " because '" + Liquibase.SHOULD_RUN_SYSTEM_PROPERTY + "' system property was set to false");
+        LiquibaseConfiguration liquibaseConfiguration = LiquibaseConfiguration.getInstance();
+        if (!liquibaseConfiguration.getConfiguration(GlobalConfiguration.class).getShouldRun()) {
+            log.info("Liquibase did not run on " + hostName + " because " + liquibaseConfiguration.describeValueLookupLogic(GlobalConfiguration.class, GlobalConfiguration.SHOULD_RUN) + " was set to false");
             return;
         }
         initialized = true;
