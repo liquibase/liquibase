@@ -6,7 +6,6 @@ VAGRANTFILE_API_VERSION = "2"
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.box = "${configVmBox}"
-  config.vm.box_url = "${configVmBoxUrl}"
 
   #config.vm.hostname = "liquibase-test.example.com"
 

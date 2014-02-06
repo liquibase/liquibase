@@ -286,7 +286,6 @@ public class VagrantControl {
 
         Map<String, Object> context = new HashMap<String, Object>();
         context.put("configVmBox", vagrantInfo.boxName);
-        context.put("configVmBoxUrl", "about:NOTE: Run 'vagrant init "+vagrantInfo.boxName+" URL' using the box URL of your choice.");
         context.put("configVmNetworkIp", vagrantInfo.hostName);
         context.put("vmCustomizeMemory", "8192");
 
