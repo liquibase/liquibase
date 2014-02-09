@@ -53,6 +53,7 @@ public abstract class BaseLiquibaseTask extends Task {
     private String databaseChangeLogLockTableName;
     private String databaseChangeLogObjectsTablespace;
     private boolean outputDefaultSchema = true; // Default based on setting in AbstractJdbcDatabase
+    private boolean outputDefaultCatalog = true;
 
 
     private Map<String, Object> changeLogProperties = new HashMap<String, Object>();
@@ -267,6 +268,7 @@ public abstract class BaseLiquibaseTask extends Task {
         database.setDefaultCatalogName(defaultCatalogName);
         database.setDefaultSchemaName(defaultSchemaName);
         database.setOutputDefaultSchema(isOutputDefaultSchema());
+        database.setOutputDefaultCatalog(isOutputDefaultCatalog());
 
         if (getDatabaseChangeLogTableName() != null)
             database.setDatabaseChangeLogTableName(getDatabaseChangeLogTableName());
@@ -418,6 +420,19 @@ public abstract class BaseLiquibaseTask extends Task {
 
     public String getLogLevel() {
         return LogFactory.getLogger().getLogLevel().name();
+    }
+
+    public boolean isOutputDefaultCatalog() {
+        return outputDefaultCatalog;
+    }
+
+    /**
+     * If not set, defaults to true
+     *
+     * @param outputDefaultCatalog True to output the default catalog.
+     */
+    public void setOutputDefaultCatalog(boolean outputDefaultCatalog) {
+        this.outputDefaultCatalog = outputDefaultCatalog;
     }
 
     public void setLogLevel(String level) {
