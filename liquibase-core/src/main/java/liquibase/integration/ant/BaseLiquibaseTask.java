@@ -418,10 +418,6 @@ public abstract class BaseLiquibaseTask extends Task {
         this.outputDefaultSchema = outputDefaultSchema;
     }
 
-    public String getLogLevel() {
-        return LogFactory.getLogger().getLogLevel().name();
-    }
-
     public boolean isOutputDefaultCatalog() {
         return outputDefaultCatalog;
     }
@@ -433,6 +429,10 @@ public abstract class BaseLiquibaseTask extends Task {
      */
     public void setOutputDefaultCatalog(boolean outputDefaultCatalog) {
         this.outputDefaultCatalog = outputDefaultCatalog;
+    }
+
+    public String getLogLevel() {
+        return LogFactory.getLogger().getLogLevel().name();
     }
 
     public void setLogLevel(String level) {
