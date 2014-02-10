@@ -22,9 +22,10 @@ See below for more information.
 SDK DIRECTORY STRUCTURE
 ----------------------------------------
 
+** For more information, see http://liquibase.org/documentation/sdk**
+
 The "sdk" directory contains liquibase-sdk shell and batch scripts for running the Liquibase SDK application.
 The Liquibase-sdk application allows you to create and manage test databases in virtual machines, execute tests, and more.
-For more information, see http://liquibase.org/documentation/sdk
 
 The "javadoc" directory contains the Liquibase core library API documentation.
 
@@ -49,51 +50,3 @@ the "liquibase-sdk vagrant" command.
 For commercial databases, the generated vagrant configurations expect the installers/zip/etc. files to be placed in
 LIQUIBASE_HOME/sdk/vagrant/install-files/PRODUCT. Where PRODUCT is "oracle", "mssql", "windows" etc. Running
 "liquibase-sdk vagrant init" should give you information on what files are expected in this directory.
-
-Standard Network Setup:
-
-    The vagrant boxes are configured to create host-only IPs on 10.10.100.100 range.
-    Firewalls are disabled since they are host-only. Check the output of "liquibase-sdk vagrant init" for any variation
-
-Standard Database Setup:
-
-    Databases are configured with a username of "liquibase" and a password of "liquibase". If that is combination is not
-    supported on a database, something as close as possible will be used.
-    Check the output of "liquibase-sdk vagrant init" for any variation
-
-    If the database supports catalogs, a catalog called "liquibase" is created
-    If the database supports schemas, a schema called "lqschema" is created.
-    Check the output of "liquibase-sdk vagrant init" for any variation
-
-Provisioning:
-
-    Provisioning in Vagrant is handed primarily by puppet, although there is a shell provisioning that is done first to
-    bootstrap anything that cannot be done in puppet. The starting puppet file will be manifests/init.pp within each
-    vagrant config. For example, linux-standard/manifests/init.pp
-
-Windows Vagrant Box:
-
-    To run windows-based databases, you need a base windows box. The easiest way is to download the Windows 2008R2 180 day trial
-    image from http://www.microsoft.com/en-us/download/confirmation.aspx?id=16572. Since it is a trial that times out, you will need
-    to re-do this process every 180 days. If you have a valid MSDN license you can use the same process to create a image that does not time out.
-
-    Once downloaded, create a new VirtualBox machine to be your vagrant base box. In the initial wizard, do not create or a virtual hard drive because
-    attaching the .vhd you downloaded will attach it as a SATA drive which does not boot. Once it is created, go to the Storage settings and add the downloaded
-    .vhd in the IDE controller. The trial server Administrator password is Pass@word1
-
-    Once booted, follow the steps in https://github.com/WinRb/vagrant-windows.
-    Before "vagrant package":
-       - Make sure to set the host name to "vagrant" and create a "vagrant" user as administrator
-       - Install VirtualBox guest tools
-       - Disable audio and USB (need to change mouse to ps/2 to disable usb)
-       - Activate Windows
-       - Install windows updates (it may take several rounds)
-       - Disable firewall
-       - Install puppet from http://puppetlabs.com/misc/download-options
-       - Enable remote desktop (optional)
-   Package with: vagrant package --base YOUR_VIRTUALBOX_MACHINE_NAME
-   Install with: vagrant box add liquibase.windows.2008r2.x64 package.box
-
-
-
-

@@ -125,7 +125,7 @@ public class VagrantControl {
         writeConfigFiles(vagrantInfo, databases);
 
         mainApp.out("Vagrant Box "+vagrantInfo.configName+" created. To start the box, run 'liquibase-sdk vagrant up "+vagrantInfo.configName+"'");
-        mainApp.out("NOTE: If you do not already have a vagrant box called "+vagrantInfo.boxName+" installed, run 'vagrant init "+vagrantInfo.boxName+" VALID_URL'");
+        mainApp.out("NOTE: If you do not already have a vagrant box called "+vagrantInfo.boxName+" installed, run 'vagrant box add "+vagrantInfo.boxName+" VALID_URL'");
     }
 
     public void provision(VagrantInfo vagrantInfo, CommandLine commandLine) {
@@ -133,7 +133,7 @@ public class VagrantControl {
     }
 
     public void destroy(VagrantInfo vagrantInfo, CommandLine commandLine) {
-        runVagrant(vagrantInfo, "destroy");
+        runVagrant(vagrantInfo, "destroy", "--force");
     }
 
     public void halt(VagrantInfo vagrantInfo, CommandLine commandLine) {
