@@ -11,13 +11,18 @@ public class PostgresConnSupplier extends ConnectionSupplier {
     }
 
     @Override
+    public String getAdminUsername() {
+        return "root";
+    }
+
+    @Override
     public String getConfigurationName() {
-        return NAME_STANDARD;
+        return CONFIG_NAME_STANDARD;
     }
 
     @Override
     public String getUrl() {
-        return "jdbc:postgresql://"+ getHostname() +"/liquibase";
+        return "jdbc:postgresql://"+ getIpAddress() +"/liquibase";
     }
 
     @Override

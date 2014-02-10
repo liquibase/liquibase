@@ -89,5 +89,11 @@ Windows Vagrant Box:
        - Activate Windows
        - Install windows updates (it may take several rounds)
        - Disable firewall
+       - Install puppet from http://puppetlabs.com/misc/download-options
+       - Enable remote desktop (optional)
+   Package with: vagrant package --base YOUR_VIRTUALBOX_MACHINE_NAME
+   Install with: vagrant box add liquibase.windows.2008r2.x64 package.box
+
+
 
 

@@ -9,12 +9,17 @@ public class InformixConnSupplier extends ConnectionSupplier {
     }
 
     @Override
+    public String getAdminUsername() {
+        return null;
+    }
+
+    @Override
     public String getConfigurationName() {
-        return NAME_STANDARD;
+        return CONFIG_NAME_STANDARD;
     }
 
     @Override
     public String getUrl() {
-        return "jdbc:informix-sqli://" + getHostname() + ":9088/liquibase:informixserver=ol_ids_1150_1";
+        return "jdbc:informix-sqli://" + getIpAddress() + ":9088/liquibase:informixserver=ol_ids_1150_1";
     }
 }

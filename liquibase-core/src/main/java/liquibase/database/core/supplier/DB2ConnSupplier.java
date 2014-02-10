@@ -13,12 +13,17 @@ public class DB2ConnSupplier extends ConnectionSupplier {
 
     @Override
     public String getConfigurationName() {
-        return NAME_STANDARD;
+        return CONFIG_NAME_STANDARD;
+    }
+
+    @Override
+    public String getAdminUsername() {
+        return null;
     }
 
     @Override
     public String getUrl() {
-        return "jdbc:db2://"+ getHostname() +":50000/lqbase";
+        return "jdbc:db2://"+ getIpAddress() +":50000/lqbase";
     }
 
     @Override

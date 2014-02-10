@@ -1,14 +1,19 @@
 package liquibase.sdk.supplier.database;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
 public abstract class ConnectionSupplier implements Cloneable {
 
-    public static final String NAME_STANDARD = "standard";
+    public static final String CONFIG_NAME_STANDARD = "standard";
+
+    public String VAGRANT_BOX_NAME_WINDOWS_STANDARD = "liquibase.windows.2008r2.x64";
+    public String VAGRANT_BOX_NAME_LINUX_STANDARD = "liquibase.linux.centos.x64";
 
     public String version;
-    private String hostname = "10.10.100.100";
+    private String ipAddress = "10.10.100.100";
 
     public abstract String getDatabaseShortName();
     public abstract String getConfigurationName();
@@ -51,12 +56,18 @@ public abstract class ConnectionSupplier implements Cloneable {
         return "liquibase2";
     }
 
-    public String getHostname() {
-        return hostname;
+    public abstract String getAdminUsername();
+
+    public String getAdminPassword() {
+        return "liquibase";
     }
 
-    public void setHostname(String hostname) {
-        this.hostname = hostname;
+    public String getIpAddress() {
+        return ipAddress;
+    }
+
+    public void setIpAddress(String ipAddress) {
+        this.ipAddress = ipAddress;
     }
 
     public Set<String> getPuppetModules() {
@@ -71,14 +82,14 @@ public abstract class ConnectionSupplier implements Cloneable {
     }
 
     public String getVagrantBoxName() {
-        return "liquibase.linux.centos.x64";
+        return VAGRANT_BOX_NAME_LINUX_STANDARD;
     }
 
     public Set<String> getRequiredPackages(String vagrantBoxName) {
         return new HashSet<String>();
     }
 
-    public String getPuppetInit(String box) {
+    public String getPuppetInit(String box) throws IOException {
         return null;
     }
 
@@ -106,12 +117,16 @@ public abstract class ConnectionSupplier implements Cloneable {
                 "Standard User: "+ getDatabaseUsername()+"\n"+
                 "         Password: "+ getDatabasePassword()+"\n"+
                 "Primary Catalog: "+ getPrimaryCatalog()+"\n"+
-                "Primary Schema: "+ getPrimarySchema()+"\n"+
+                "Primary Schema: "+ getPrimarySchema()+" (if applicable)\n"+
                 "\n"+
                 "Alternate User: "+ getAlternateUsername()+"\n"+
                 "          Password: "+ getAlternateUserPassword()+"\n"+
                 "Alternate Catalog: "+ getAlternateCatalog()+"\n"+
-                "Alternate Schema: "+ getAlternateSchema()+"\n"+
+                "Alternate Schema: "+ getAlternateSchema()+" (if applicable)\n"+
                 "Alternate Tablespace: "+ getAlternateTablespace()+"\n";
+    }
+
+    public void writeConfigFiles(File configDir) throws IOException {
+
     }
 }

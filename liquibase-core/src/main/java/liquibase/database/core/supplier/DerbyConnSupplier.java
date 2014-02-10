@@ -9,8 +9,13 @@ public class DerbyConnSupplier extends ConnectionSupplier {
     }
 
     @Override
+    public String getAdminUsername() {
+        return null;
+    }
+
+    @Override
     public String getConfigurationName() {
-        return NAME_STANDARD;
+        return CONFIG_NAME_STANDARD;
     }
 
     @Override

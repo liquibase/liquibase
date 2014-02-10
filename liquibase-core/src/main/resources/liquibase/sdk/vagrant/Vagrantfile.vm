@@ -5,17 +5,18 @@
 VAGRANTFILE_API_VERSION = "2"
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
-  config.vm.box = "${configVmBox}"
+    config.vm.box = "${configVmBox}"
 
-  #config.vm.hostname = "liquibase-test.example.com"
+    config.vm.network :private_network, ip: "${configVmNetworkIp}"
+    config.vm.synced_folder "../install-files", "/vagrant-install-files"
 
-  config.vm.network :private_network, ip: "${configVmNetworkIp}"
-  config.vm.synced_folder "../install-files", "/vagrant-install-files"
+${windowsConfig}
 
-  config.vm.provider :virtualbox do |vb|
-     vb.customize ["modifyvm", :id, "--memory", "${vmCustomizeMemory}"]
-  end
+    config.vm.provider :virtualbox do |vb|
+        vb.customize ["modifyvm", :id, "--memory", "${vmCustomizeMemory}"]
+        # vb.gui = true
+    end
 
-  config.vm.provision :shell, :path => "shell/bootstrap.sh"
+    config.vm.provision :shell, :path => "${configVmProvisionScript}"
 
 end

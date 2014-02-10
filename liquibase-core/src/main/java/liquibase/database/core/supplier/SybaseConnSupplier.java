@@ -9,12 +9,17 @@ public class SybaseConnSupplier extends ConnectionSupplier {
     }
 
     @Override
+    public String getAdminUsername() {
+        return "sa";
+    }
+
+    @Override
     public String getConfigurationName() {
-        return NAME_STANDARD;
+        return CONFIG_NAME_STANDARD;
     }
 
     @Override
     public String getUrl() {
-        return "jdbc:sybase:Tds:"+ getHostname()+":5000/liquibase";
+        return "jdbc:sybase:Tds:"+ getIpAddress()+":5000/liquibase";
     }
 }

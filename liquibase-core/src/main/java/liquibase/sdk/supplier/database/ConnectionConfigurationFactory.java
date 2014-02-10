@@ -78,7 +78,7 @@ public class ConnectionConfigurationFactory {
                         potential.setVersion(params.get("version"));
                     }
                     if (params.containsKey("hostname")) {
-                        potential.setHostname(params.get("hostname"));
+                        potential.setIpAddress(params.get("hostname"));
                     }
                     returnList.add(potential);
                     foundConfig = true;

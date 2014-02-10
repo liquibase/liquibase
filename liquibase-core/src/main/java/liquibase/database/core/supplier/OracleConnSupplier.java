@@ -13,13 +13,18 @@ public class OracleConnSupplier extends ConnectionSupplier {
     }
 
     @Override
+    public String getAdminUsername() {
+        return "liquibase";
+    }
+
+    @Override
     public String getConfigurationName() {
-        return NAME_STANDARD;
+        return CONFIG_NAME_STANDARD;
     }
 
     @Override
     public String getUrl() {
-        return "jdbc:oracle:thin:@" + getHostname() + ":1521:"+getDatabaseUsername();
+        return "jdbc:oracle:thin:@" + getIpAddress() + ":1521:"+getDatabaseUsername();
     }
 
     @Override

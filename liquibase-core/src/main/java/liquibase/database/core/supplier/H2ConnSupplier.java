@@ -6,7 +6,12 @@ public class H2ConnSupplier extends ConnectionSupplier {
 
     @Override
     public String getConfigurationName() {
-        return NAME_STANDARD;
+        return CONFIG_NAME_STANDARD;
+    }
+
+    @Override
+    public String getAdminUsername() {
+        return null;
     }
 
     @Override

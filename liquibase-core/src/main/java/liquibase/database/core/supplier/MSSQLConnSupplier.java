@@ -9,8 +9,13 @@ public class MSSQLConnSupplier extends ConnectionSupplier {
     }
 
     @Override
+    public String getAdminUsername() {
+        return "sa";
+    }
+
+    @Override
     public String getConfigurationName() {
-        return NAME_STANDARD;
+        return CONFIG_NAME_STANDARD;
     }
 
     @Override
@@ -20,6 +25,6 @@ public class MSSQLConnSupplier extends ConnectionSupplier {
 
     @Override
     public String getUrl() {
-        return "jdbc:sqlserver://"+ getHostname() +":1433;databaseName=liquibase";
+        return "jdbc:sqlserver://"+ getIpAddress() +":1433;databaseName=liquibase";
     }
 }
