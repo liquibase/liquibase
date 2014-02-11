@@ -219,7 +219,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
             if (("SYSTEM".equals(example.getName()) || "SYS".equals(example.getName()) || "CTXSYS".equals(example.getName()) || "XDB".equals(example.getName()))) {
                 return true;
             }
-        } else if (example instanceof Table) {
+        } else if (example.getName() != null) {
             if (example.getName().startsWith("BIN$")) { //oracle deleted table
                 return true;
             } else if (example.getName().startsWith("AQ$")) { //oracle AQ tables
