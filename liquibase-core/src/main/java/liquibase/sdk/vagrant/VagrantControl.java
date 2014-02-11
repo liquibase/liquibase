@@ -352,19 +352,21 @@ public class VagrantControl {
         context.put("vmCustomizeMemory", "8192");
 
         String shellScript;
+        String osLevelConfig;
         if (vagrantInfo.boxName.contains("windows")) {
-            String config = "config.vm.guest = :windows\n"
+            osLevelConfig = "config.vm.guest = :windows\n"
                     + "config.vm.network :forwarded_port, guest: 3389, host: 3389, id: \"rdp\"\n"
                     + "config.vm.network :forwarded_port, guest: 5985, host: 5985, id: \"winrm\", auto_correct: true\n"
                     + "config.windows.halt_timeout = 30\n"
                     + "config.winrm.username = 'vagrant'\n";
 
-            context.put("windowsConfig", StringUtils.indent(config, 4));
             shellScript = "shell/bootstrap.bat";
         } else {
             shellScript = "shell/bootstrap.sh";
+            osLevelConfig = "";
         }
 
+        context.put("osLevelConfig", StringUtils.indent(osLevelConfig, 4));
         context.put("configVmProvisionScript", shellScript);
 
         TemplateService.getInstance().write("liquibase/sdk/vagrant/Vagrantfile.vm", new File(vagrantInfo.boxDir,"Vagrantfile"), context);

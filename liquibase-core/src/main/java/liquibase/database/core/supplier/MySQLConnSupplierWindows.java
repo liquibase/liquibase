@@ -59,6 +59,5 @@ public class MySQLConnSupplierWindows extends MySQLConnSupplier {
         context.put("supplier", this);
 
         TemplateService.getInstance().write("liquibase/sdk/vagrant/supplier/mysql/mysql.ini.vm", new File(configDir, "mysql.ini"), context);
-        TemplateService.getInstance().write("liquibase/sdk/vagrant/supplier/mysql/mysql.init.sql.vm", new File(configDir, "mysql.init.sql"), context);
     }
 }

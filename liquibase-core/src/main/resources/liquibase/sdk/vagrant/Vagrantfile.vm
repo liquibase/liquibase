@@ -10,7 +10,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     config.vm.network :private_network, ip: "${configVmNetworkIp}"
     config.vm.synced_folder "../install-files", "/vagrant-install-files"
 
-${windowsConfig}
+${osLevelConfig}
 
     config.vm.provider :virtualbox do |vb|
         vb.customize ["modifyvm", :id, "--memory", "${vmCustomizeMemory}"]

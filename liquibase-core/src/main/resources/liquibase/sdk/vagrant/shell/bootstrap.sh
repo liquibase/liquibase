@@ -21,4 +21,4 @@ mkdir -p /install
 cp -rn /vagrant-install-files/* /install
 
 echo 'Running puppet...'
-puppet apply -vv  --modulepath=/usr/share/puppet/modules/:/vagrant/modules /vagrant/manifests/init.pp
+puppet apply -vv  --color=false --modulepath=/usr/share/puppet/modules/:/vagrant/modules /vagrant/manifests/init.pp
