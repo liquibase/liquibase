@@ -100,24 +100,45 @@ public class VagrantControl {
                 }
             }
 
-            if (vagrantInfo.hostName == null) {
-                vagrantInfo.hostName = connectionConfig.getIpAddress();
+            if (vagrantInfo.ipAddress == null) {
+                vagrantInfo.ipAddress = connectionConfig.getIpAddress();
             } else {
-                if (!vagrantInfo.hostName.equals(connectionConfig.getIpAddress())) {
-                    throw new UnexpectedLiquibaseException("Configuration " + connectionConfig + " does not match previously defined hostname " + vagrantInfo.hostName);
+                if (!vagrantInfo.ipAddress.equals(connectionConfig.getIpAddress())) {
+                    throw new UnexpectedLiquibaseException("Configuration " + connectionConfig + " does not match previously defined hostname " + vagrantInfo.ipAddress);
                 }
             }
         }
 
-        mainApp.out(StringUtils.indent("Vagrant Box: " + vagrantInfo.boxName));
-        mainApp.out(StringUtils.indent("Hostname: " + vagrantInfo.hostName));
+        Properties liquibaseVagrantProperties = new Properties();
+
+        mainApp.out(StringUtils.indent("Vagrant Base: " + vagrantInfo.boxName));
+        mainApp.out(StringUtils.indent("Hostname: " + vagrantInfo.ipAddress));
+
+        liquibaseVagrantProperties.put("box.ipaddress", vagrantInfo.ipAddress);
+        liquibaseVagrantProperties.put("box.base", vagrantInfo.boxName);
 
         mainApp.out("");
 
+        int i = 0;
         for (ConnectionSupplier config : databases) {
             mainApp.out("Database Configuration For '" + config.toString() + "':");
             mainApp.out(StringUtils.indent(config.getDescription()));
             mainApp.out("");
+
+            addVagrantConfigProperty(i, "supplier", config.toString(), liquibaseVagrantProperties);
+            addVagrantConfigProperty(i, "shortName", config.getDatabaseShortName(), liquibaseVagrantProperties);
+            addVagrantConfigProperty(i, "version", config.getVersion(), liquibaseVagrantProperties);
+            addVagrantConfigProperty(i, "jdbcUrl", config.getJdbcUrl(), liquibaseVagrantProperties);
+            addVagrantConfigProperty(i, "adminUsername", config.getAdminUsername(), liquibaseVagrantProperties);
+            addVagrantConfigProperty(i, "adminPassword", config.getAdminPassword(), liquibaseVagrantProperties);
+            addVagrantConfigProperty(i, "primaryCatalog", config.getPrimaryCatalog(), liquibaseVagrantProperties);
+            addVagrantConfigProperty(i, "primarySchema", config.getPrimarySchema(), liquibaseVagrantProperties);
+            addVagrantConfigProperty(i, "altCatalog", config.getAlternateCatalog(), liquibaseVagrantProperties);
+            addVagrantConfigProperty(i, "altSchema", config.getAlternateSchema(), liquibaseVagrantProperties);
+            addVagrantConfigProperty(i, "username", config.getDatabaseUsername(), liquibaseVagrantProperties);
+            addVagrantConfigProperty(i, "password", config.getDatabasePassword(), liquibaseVagrantProperties);
+            addVagrantConfigProperty(i, "altUsername", config.getAlternateUsername(), liquibaseVagrantProperties);
+            addVagrantConfigProperty(i, "altPassword", config.getAlternateUserPassword(), liquibaseVagrantProperties);
         }
 
         writeVagrantFile(vagrantInfo);
@@ -164,14 +185,28 @@ public class VagrantControl {
                 propertiesFiles.add(fileName);
             }
 
+            FileOutputStream vagrantPropertiesStream = new FileOutputStream(new File(vagrantInfo.boxDir, "liquibase.vagrant.properties"));
+            try {
+                liquibaseVagrantProperties.store(vagrantPropertiesStream, "Original configuration for vagrant box "+ vagrantInfo.boxDir.getName());
+            } finally {
+                vagrantPropertiesStream.flush();
+                vagrantPropertiesStream.close();
+            }
+
         }
 
-        mainApp.out("Vagrant Box "+vagrantInfo.configName+" created. To start the box, run 'liquibase-sdk vagrant up "+vagrantInfo.configName+"'");
+        mainApp.out("Vagrant box '"+vagrantInfo.configName+"' created. To start the box, run 'liquibase-sdk vagrant up "+vagrantInfo.configName+"'");
         if (propertiesFiles.size() > 0) {
             mainApp.out("Created workspace properties file(s): "+StringUtils.join(propertiesFiles, ", "));
         }
         mainApp.out("Make sure any needed JDBC drivers are added to LIQUIBASE_HOME/lib");
         mainApp.out("NOTE: If you do not already have a vagrant box called "+vagrantInfo.boxName+" installed, run 'vagrant box add "+vagrantInfo.boxName+" VALID_URL'");
+    }
+
+    protected void addVagrantConfigProperty(int index, String name, Object value, Properties properties) {
+        if (value != null) {
+            properties.put("database."+index+"."+name, value);
+        }
     }
 
     public void provision(VagrantInfo vagrantInfo, CommandLine commandLine) {
@@ -348,7 +383,7 @@ public class VagrantControl {
 
         Map<String, Object> context = new HashMap<String, Object>();
         context.put("configVmBox", vagrantInfo.boxName);
-        context.put("configVmNetworkIp", vagrantInfo.hostName);
+        context.put("configVmNetworkIp", vagrantInfo.ipAddress);
         context.put("vmCustomizeMemory", "8192");
 
         String shellScript;
@@ -387,6 +422,6 @@ public class VagrantControl {
         private File vagrantRoot;
         private String boxName;
         private File boxDir;
-        private String hostName;
+        private String ipAddress;
     }
 }
