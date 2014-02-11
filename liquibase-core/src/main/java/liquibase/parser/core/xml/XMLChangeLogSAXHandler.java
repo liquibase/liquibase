@@ -24,6 +24,7 @@ import liquibase.precondition.PreconditionLogic;
 import liquibase.precondition.core.PreconditionContainer;
 import liquibase.precondition.core.SqlPrecondition;
 import liquibase.resource.ResourceAccessor;
+import liquibase.serializer.LiquibaseSerializable;
 import liquibase.sql.visitor.SqlVisitor;
 import liquibase.sql.visitor.SqlVisitorFactory;
 import liquibase.util.FileUtil;
@@ -666,9 +667,19 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
 					} else if (change instanceof StopChange) {
 						((StopChange) change).setMessage(textString);
 					} else {
-						throw new RuntimeException("Unexpected text in "
-                                + changeFactory.getChangeMetaData(change).getName());
-					}
+                        boolean foundTextParam = false;
+                        for (ChangeParameterMetaData metadata : changeFactory.getChangeMetaData(change).getParameters().values()) {
+                            if (metadata.getSerializationType() == LiquibaseSerializable.SerializationType.DIRECT_VALUE) {
+                                metadata.setValue(change, textString);
+                                foundTextParam = true;
+                                break;
+                            }
+                        }
+
+                        if (!foundTextParam) {
+                            throw new RuntimeException("Unexpected text in " + changeFactory.getChangeMetaData(change).getName());
+                        }
+                    }
 				}
 				text = null;
 				if (inRollback) {
