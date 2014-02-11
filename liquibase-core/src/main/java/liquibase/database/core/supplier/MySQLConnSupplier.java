@@ -1,23 +1,33 @@
-package liquibase.database.core.config;
+package liquibase.database.core.supplier;
 
-import liquibase.sdk.supplier.database.ConnectionConfiguration;
+import liquibase.sdk.supplier.database.ConnectionSupplier;
 
+import java.io.IOException;
 import java.util.Set;
 
-public class MySQLConfigStandard extends ConnectionConfiguration {
+public class MySQLConnSupplier extends ConnectionSupplier {
     @Override
     public String getDatabaseShortName() {
         return "mysql";
     }
 
-    @Override
-    public String getConfigurationName() {
-        return NAME_STANDARD;
+    public int getPort() {
+        return 3306;
     }
 
     @Override
-    public String getUrl() {
-        return "jdbc:mysql://"+ getHostname() +"/liquibase";
+    public String getAdminUsername() {
+        return "root";
+    }
+
+    @Override
+    public String getConfigurationName() {
+        return CONFIG_NAME_STANDARD;
+    }
+
+    @Override
+    public String getJdbcUrl() {
+        return "jdbc:mysql://"+ getIpAddress() +"/"+getPrimaryCatalog();
     }
 
     @Override
@@ -33,7 +43,7 @@ public class MySQLConfigStandard extends ConnectionConfiguration {
     }
 
     @Override
-    public String getPuppetInit(String box) {
+    public String getPuppetInit(String box) throws IOException {
         return "class { '::mysql::server':\n" +
                 "    root_password => 'root',\n"+
                 (getVersion() == null ? "" : "    package_ensure => '"+getVersion()+"',\n")+

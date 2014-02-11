@@ -1,11 +1,11 @@
-package liquibase.database.core.config;
+package liquibase.database.core.supplier;
 
-import liquibase.sdk.supplier.database.ConnectionConfiguration;
+import liquibase.sdk.supplier.database.ConnectionSupplier;
 
 import java.util.Arrays;
 import java.util.Set;
 
-public class DB2ConfigStandard extends ConnectionConfiguration {
+public class DB2ConnSupplier extends ConnectionSupplier {
     @Override
     public String getDatabaseShortName() {
         return "db2";
@@ -13,12 +13,17 @@ public class DB2ConfigStandard extends ConnectionConfiguration {
 
     @Override
     public String getConfigurationName() {
-        return NAME_STANDARD;
+        return CONFIG_NAME_STANDARD;
     }
 
     @Override
-    public String getUrl() {
-        return "jdbc:db2://"+ getHostname() +":50000/lqbase";
+    public String getAdminUsername() {
+        return null;
+    }
+
+    @Override
+    public String getJdbcUrl() {
+        return "jdbc:db2://"+ getIpAddress() +":50000/lqbase";
     }
 
     @Override

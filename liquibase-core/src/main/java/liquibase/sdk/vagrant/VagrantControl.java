@@ -2,17 +2,13 @@ package liquibase.sdk.vagrant;
 
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.sdk.Main;
+import liquibase.sdk.TemplateService;
 import liquibase.sdk.exception.UnexpectedLiquibaseSdkException;
-import liquibase.sdk.supplier.database.ConnectionConfiguration;
+import liquibase.sdk.supplier.database.ConnectionSupplier;
 import liquibase.sdk.supplier.database.ConnectionConfigurationFactory;
 import liquibase.util.StringUtils;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
-import org.apache.velocity.Template;
-import org.apache.velocity.VelocityContext;
-import org.apache.velocity.app.VelocityEngine;
-import org.apache.velocity.runtime.RuntimeConstants;
-import org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader;
 
 import java.io.*;
 import java.util.*;
@@ -79,63 +75,103 @@ public class VagrantControl {
 
         List<String> configs = commandLine.getArgList().subList(2, commandLine.getArgList().size());
 
+        if (configs.size() == 0) {
+            mainApp.fatal("No database configurations specified");
+        }
+
         mainApp.out("Vagrant Machine Setup:");
-        mainApp.divider();
         mainApp.out(StringUtils.indent("Local Path: " + vagrantInfo.boxDir.getAbsolutePath()));
         mainApp.out(StringUtils.indent("Config Name: " + vagrantInfo.configName));
         mainApp.out(StringUtils.indent("Database Config(s): " + StringUtils.join(configs, ", ")));
 
-        Collection<ConnectionConfiguration> databases = null;
+        Collection<ConnectionSupplier> databases = null;
         try {
             databases = ConnectionConfigurationFactory.getInstance().findConfigurations(configs);
         } catch (ConnectionConfigurationFactory.UnknownDatabaseException e) {
             mainApp.fatal(e);
         }
 
-        String[] boxInfo = null;
-        for (ConnectionConfiguration connectionConfig : databases) {
-            String[] absoluteBox = getAbsoluteBox(connectionConfig.getVagrantBoxName(), vagrantInfo);
-
-            if (boxInfo == null) {
-                boxInfo = absoluteBox;
+        for (ConnectionSupplier connectionConfig : databases) {
+            if (vagrantInfo.boxName == null) {
+                vagrantInfo.boxName = connectionConfig.getVagrantBoxName();
             } else {
-                if (!boxInfo[0].equals(absoluteBox[0])) {
-                    throw new UnexpectedLiquibaseException("Configuration " + connectionConfig + " needs vagrant box " + absoluteBox[0] + ", not " + boxInfo[0] + " like other configurations");
+                if (!vagrantInfo.boxName.equals(connectionConfig.getVagrantBoxName())) {
+                    throw new UnexpectedLiquibaseException("Configuration " + connectionConfig + " needs vagrant box " + connectionConfig.getVagrantBoxName() + ", not " + vagrantInfo.boxName + " like other configurations");
                 }
             }
 
             if (vagrantInfo.hostName == null) {
-                vagrantInfo.hostName = connectionConfig.getHostname();
+                vagrantInfo.hostName = connectionConfig.getIpAddress();
             } else {
-                if (!vagrantInfo.hostName.equals(connectionConfig.getHostname())) {
+                if (!vagrantInfo.hostName.equals(connectionConfig.getIpAddress())) {
                     throw new UnexpectedLiquibaseException("Configuration " + connectionConfig + " does not match previously defined hostname " + vagrantInfo.hostName);
                 }
             }
         }
 
-        if (boxInfo == null) {
-            throw new UnexpectedLiquibaseException("Null boxInfo");
-        }
-
-        vagrantInfo.boxName = boxInfo[0];
-        vagrantInfo.boxUrl = boxInfo[1];
-
-        mainApp.out(StringUtils.indent("Base Box Url: " + vagrantInfo.boxUrl));
+        mainApp.out(StringUtils.indent("Vagrant Box: " + vagrantInfo.boxName));
         mainApp.out(StringUtils.indent("Hostname: " + vagrantInfo.hostName));
 
         mainApp.out("");
 
-        for (ConnectionConfiguration config : databases) {
-            mainApp.out("Connection Configuration For '" + config.toString() + "':");
-            mainApp.divider();
+        for (ConnectionSupplier config : databases) {
+            mainApp.out("Database Configuration For '" + config.toString() + "':");
             mainApp.out(StringUtils.indent(config.getDescription()));
             mainApp.out("");
         }
 
         writeVagrantFile(vagrantInfo);
         writePuppetFiles(vagrantInfo, databases);
+        writeConfigFiles(vagrantInfo, databases);
+
+        Set<String> propertiesFiles = new HashSet<String>();
+        for (ConnectionSupplier connectionSupplier : databases) {
+            String fileName;
+            if (databases.size() == 1) {
+                fileName = "liquibase."+vagrantInfo.boxDir.getName()+".properties";
+            } else {
+                fileName = "liquibase."+vagrantInfo.boxDir.getName()+"-"+connectionSupplier.getConfigurationName()+".properties";
+            }
+
+            String propertiesFile =
+                    "### Connection Property File For Vagrant Box '"+ vagrantInfo.boxName+"'\n"+
+                    "### Example use: .."+File.separator+".."+File.separator+"liquibase --defaultsFile="+fileName+" update\n\n"+
+                    "classpath: changelog\n" +
+                    "changeLogFile=com/example/changelog.xml\n" +
+                    "username="+connectionSupplier.getDatabaseUsername()+"\n" +
+                    "password="+connectionSupplier.getDatabaseUsername()+"\n" +
+                    "url="+connectionSupplier.getJdbcUrl()+"\n" +
+                    "#logLevel=DEBUG\n" +
+                    "#referenceUrl="+connectionSupplier.getJdbcUrl()+"\n" +
+                    "#referenceUsername="+connectionSupplier.getDatabaseUsername()+"\n" +
+                    "#referencePassword="+connectionSupplier.getDatabasePassword()+"\n";
+
+            fileName = "workspace/" + fileName;
+
+
+            File propertyFile = new File(mainApp.getSdkRoot(), fileName);
+            if (propertyFile.exists()) {
+                mainApp.out("NOTE: Not overwriting existing workspace properties file "+propertyFile.getAbsolutePath());
+            } else {
+                FileWriter writer = new FileWriter(propertyFile);
+                try {
+                    writer.write(propertiesFile);
+                } finally {
+                    writer.flush();
+                    writer.close();
+                }
+
+                propertiesFiles.add(fileName);
+            }
+
+        }
 
         mainApp.out("Vagrant Box "+vagrantInfo.configName+" created. To start the box, run 'liquibase-sdk vagrant up "+vagrantInfo.configName+"'");
+        if (propertiesFiles.size() > 0) {
+            mainApp.out("Created workspace properties file(s): "+StringUtils.join(propertiesFiles, ", "));
+        }
+        mainApp.out("Make sure any needed JDBC drivers are added to LIQUIBASE_HOME/lib");
+        mainApp.out("NOTE: If you do not already have a vagrant box called "+vagrantInfo.boxName+" installed, run 'vagrant box add "+vagrantInfo.boxName+" VALID_URL'");
     }
 
     public void provision(VagrantInfo vagrantInfo, CommandLine commandLine) {
@@ -143,7 +179,7 @@ public class VagrantControl {
     }
 
     public void destroy(VagrantInfo vagrantInfo, CommandLine commandLine) {
-        runVagrant(vagrantInfo, "destroy");
+        runVagrant(vagrantInfo, "destroy", "--force");
     }
 
     public void halt(VagrantInfo vagrantInfo, CommandLine commandLine) {
@@ -212,8 +248,9 @@ public class VagrantControl {
 
     }
 
-    private void writePuppetFiles(VagrantInfo vagrantInfo, Collection<ConnectionConfiguration> databases) throws Exception {
-        copyFile("liquibase/sdk/vagrant/puppet-bootstrap.sh", vagrantInfo.boxDir).setExecutable(true);
+    private void writePuppetFiles(VagrantInfo vagrantInfo, Collection<ConnectionSupplier> databases) throws Exception {
+        copyFile("liquibase/sdk/vagrant/shell/bootstrap.sh", new File(vagrantInfo.boxDir, "shell")).setExecutable(true);
+        copyFile("liquibase/sdk/vagrant/shell/bootstrap.bat", new File(vagrantInfo.boxDir, "shell")).setExecutable(true);
 
         writePuppetFile(vagrantInfo, databases);
 
@@ -225,11 +262,11 @@ public class VagrantControl {
         copyFile("liquibase/sdk/vagrant/modules/my_firewall/manifests/post.pp", new File(modulesDir, "my_firewall/manifests"));
     }
 
-    private void writePuppetFile(VagrantInfo vagrantInfo, Collection<ConnectionConfiguration> databases) throws Exception {
+    private void writePuppetFile(VagrantInfo vagrantInfo, Collection<ConnectionSupplier> databases) throws Exception {
         Set<String> forges = new HashSet<String>();
         Set<String> modules = new HashSet<String>();
 
-        for (ConnectionConfiguration config : databases) {
+        for (ConnectionSupplier config : databases) {
             forges.addAll(config.getPuppetForges(vagrantInfo.configName));
             modules.addAll(config.getPuppetModules());
         }
@@ -238,20 +275,16 @@ public class VagrantControl {
         context.put("puppetForges", forges);
         context.put("puppetModules", modules);
 
-        writeVelocityFile("liquibase/sdk/vagrant/Puppetfile.vm", vagrantInfo.boxDir, context);
+        TemplateService.getInstance().write("liquibase/sdk/vagrant/Puppetfile.vm", new File(vagrantInfo.boxDir, "Puppetfile"), context);
     }
 
-    private void writeManifestsInit(VagrantInfo vagrantInfo, Collection<ConnectionConfiguration> databases) throws Exception {
+    private void writeManifestsInit(VagrantInfo vagrantInfo, Collection<ConnectionSupplier> databases) throws Exception {
         File manifestsDir = new File(vagrantInfo.boxDir, "manifests");
         manifestsDir.mkdirs();
 
-        Set<String> requiredPackages = new HashSet<String>();
-        requiredPackages.add("unzip");
-
         Set<String> puppetBlocks = new HashSet<String>();
 
-        for (ConnectionConfiguration config : databases) {
-            requiredPackages.addAll(config.getRequiredPackages(vagrantInfo.configName));
+        for (ConnectionSupplier config : databases) {
             String thisInit = config.getPuppetInit(vagrantInfo.configName);
             if (thisInit != null) {
                 puppetBlocks.add(thisInit);
@@ -259,10 +292,32 @@ public class VagrantControl {
         }
 
         Map<String, Object> context = new HashMap<String, Object>();
-        context.put("requiredPackages", requiredPackages);
         context.put("puppetBlocks", puppetBlocks);
 
-        writeVelocityFile("liquibase/sdk/vagrant/manifests/init.pp.vm", manifestsDir, context);
+        String osLevelConfig;
+        if (vagrantInfo.boxName.contains("linux")) {
+            osLevelConfig = "service { \"iptables\":\n" +
+                    "  ensure => \"stopped\",\n" +
+                    "}\n\n";
+
+            Set<String> requiredPackages = new HashSet<String>();
+            requiredPackages.add("unzip");
+
+            for (ConnectionSupplier config : databases) {
+                requiredPackages.addAll(config.getRequiredPackages(vagrantInfo.configName));
+            }
+
+            for (String requiredPackage : requiredPackages) {
+                osLevelConfig += "package { \""+requiredPackage+"\":\n" +
+                        "    ensure => \"installed\"\n" +
+                        "}\n\n";
+            }
+        } else {
+            osLevelConfig = "";
+        }
+        context.put("osLevelConfig", osLevelConfig);
+
+        TemplateService.getInstance().write("liquibase/sdk/vagrant/manifests/init.pp.vm", new File(manifestsDir, "init.pp"), context);
     }
 
     private File copyFile(String sourcePath, File outputDir) throws Exception {
@@ -293,68 +348,32 @@ public class VagrantControl {
 
         Map<String, Object> context = new HashMap<String, Object>();
         context.put("configVmBox", vagrantInfo.boxName);
-        context.put("configVmBoxUrl", vagrantInfo.boxUrl);
         context.put("configVmNetworkIp", vagrantInfo.hostName);
         context.put("vmCustomizeMemory", "8192");
 
-        writeVelocityFile("liquibase/sdk/vagrant/Vagrantfile.vm", vagrantInfo.boxDir, context);
+        String shellScript;
+        if (vagrantInfo.boxName.contains("windows")) {
+            String config = "config.vm.guest = :windows\n"
+                    + "config.vm.network :forwarded_port, guest: 3389, host: 3389, id: \"rdp\"\n"
+                    + "config.vm.network :forwarded_port, guest: 5985, host: 5985, id: \"winrm\", auto_correct: true\n"
+                    + "config.windows.halt_timeout = 30\n"
+                    + "config.winrm.username = 'vagrant'\n";
+
+            context.put("windowsConfig", StringUtils.indent(config, 4));
+            shellScript = "shell/bootstrap.bat";
+        } else {
+            shellScript = "shell/bootstrap.sh";
+        }
+
+        context.put("configVmProvisionScript", shellScript);
+
+        TemplateService.getInstance().write("liquibase/sdk/vagrant/Vagrantfile.vm", new File(vagrantInfo.boxDir,"Vagrantfile"), context);
     }
 
-    protected String[] getAbsoluteBox(String vagrantBoxName, VagrantInfo vagrantInfo) {
-        Properties properties = new Properties();
-        try {
-            properties.load(new FileReader(new File(vagrantInfo.vagrantRoot, "vagrant-boxes.default.properties")));
-        } catch (IOException e) {
-            throw new UnexpectedLiquibaseException(e);
+    private void writeConfigFiles(VagrantInfo vagrantInfo, Collection<ConnectionSupplier> databases) throws IOException {
+        for (ConnectionSupplier config : databases) {
+                config.writeConfigFiles(new File(vagrantInfo.boxDir, "modules/conf"));
         }
-
-        File file = new File(vagrantInfo.vagrantRoot, "vagrant-boxes.properties");
-        if (file.exists()) {
-            try {
-                properties.load(new FileReader(file));
-            } catch (IOException e) {
-                throw new UnexpectedLiquibaseException(e);
-            }
-        }
-
-        String absoluteKey = vagrantBoxName;
-        String value = properties.getProperty(absoluteKey);
-        while (value != null && !value.contains("://")) {
-            absoluteKey = properties.getProperty(absoluteKey);
-            value = properties.getProperty(absoluteKey);
-        }
-
-        if (value == null) {
-            throw new UnexpectedLiquibaseException("Could not determine box url for " + absoluteKey);
-        }
-        return new String[]{absoluteKey, value};
-
-    }
-
-    private void writeVelocityFile(String templatePath, File outputDir, Map<String, Object> contextParams) throws Exception {
-        VelocityEngine engine = new VelocityEngine();
-        engine.setProperty(RuntimeConstants.RESOURCE_LOADER, "classpath");
-        engine.setProperty("classpath.resource.loader.class", ClasspathResourceLoader.class.getName());
-        engine.init();
-
-        InputStream input = this.getClass().getClassLoader().getResourceAsStream(templatePath);
-        if (input == null) {
-            throw new IOException("Template file " + templatePath + " doesn't exist");
-        }
-
-        VelocityContext context = new VelocityContext();
-        for (Map.Entry<String, Object> entry : contextParams.entrySet()) {
-            context.put(entry.getKey(), entry.getValue());
-        }
-
-        Template template = engine.getTemplate(templatePath, "UTF-8");
-        outputDir.mkdirs();
-        BufferedWriter writer = new BufferedWriter(new FileWriter(new File(outputDir, templatePath.replaceFirst(".*/", "").replaceFirst(".vm$", ""))));
-
-        template.merge(context, writer);
-
-        writer.flush();
-        writer.close();
     }
 
     public Options getOptions() {
@@ -366,7 +385,6 @@ public class VagrantControl {
         private File vagrantRoot;
         private String boxName;
         private File boxDir;
-        private String boxUrl;
         private String hostName;
     }
 }

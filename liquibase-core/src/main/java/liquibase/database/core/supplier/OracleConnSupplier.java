@@ -1,25 +1,30 @@
-package liquibase.database.core.config;
+package liquibase.database.core.supplier;
 
-import liquibase.sdk.supplier.database.ConnectionConfiguration;
+import liquibase.sdk.supplier.database.ConnectionSupplier;
 
 import java.io.File;
 import java.util.Arrays;
 import java.util.Set;
 
-public class OracleConfigStandard extends ConnectionConfiguration {
+public class OracleConnSupplier extends ConnectionSupplier {
     @Override
     public String getDatabaseShortName() {
         return "oracle";
     }
 
     @Override
-    public String getConfigurationName() {
-        return NAME_STANDARD;
+    public String getAdminUsername() {
+        return "liquibase";
     }
 
     @Override
-    public String getUrl() {
-        return "jdbc:oracle:thin:@" + getHostname() + ":1521:"+getDatabaseUsername();
+    public String getConfigurationName() {
+        return CONFIG_NAME_STANDARD;
+    }
+
+    @Override
+    public String getJdbcUrl() {
+        return "jdbc:oracle:thin:@" + getIpAddress() + ":1521:"+getDatabaseUsername();
     }
 
     @Override

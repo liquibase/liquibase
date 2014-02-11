@@ -1,23 +1,28 @@
-package liquibase.database.core.config;
+package liquibase.database.core.supplier;
 
-import liquibase.sdk.supplier.database.ConnectionConfiguration;
+import liquibase.sdk.supplier.database.ConnectionSupplier;
 
 import java.util.Set;
 
-public class PostgresConfigStandard extends ConnectionConfiguration {
+public class PostgresConnSupplier extends ConnectionSupplier {
     @Override
     public String getDatabaseShortName() {
         return "postgresql";
     }
 
     @Override
-    public String getConfigurationName() {
-        return NAME_STANDARD;
+    public String getAdminUsername() {
+        return "root";
     }
 
     @Override
-    public String getUrl() {
-        return "jdbc:postgresql://"+ getHostname() +"/liquibase";
+    public String getConfigurationName() {
+        return CONFIG_NAME_STANDARD;
+    }
+
+    @Override
+    public String getJdbcUrl() {
+        return "jdbc:postgresql://"+ getIpAddress() +"/liquibase";
     }
 
     @Override

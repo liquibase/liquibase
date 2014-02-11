@@ -22,9 +22,10 @@ See below for more information.
 SDK DIRECTORY STRUCTURE
 ----------------------------------------
 
+** For more information, see http://liquibase.org/documentation/sdk**
+
 The "sdk" directory contains liquibase-sdk shell and batch scripts for running the Liquibase SDK application.
 The Liquibase-sdk application allows you to create and manage test databases in virtual machines, execute tests, and more.
-For more information, see http://liquibase.org/documentation/sdk
 
 The "javadoc" directory contains the Liquibase core library API documentation.
 
@@ -49,24 +50,3 @@ the "liquibase-sdk vagrant" command.
 For commercial databases, the generated vagrant configurations expect the installers/zip/etc. files to be placed in
 LIQUIBASE_HOME/sdk/vagrant/install-files/PRODUCT. Where PRODUCT is "oracle", "mssql", "windows" etc. Running
 "liquibase-sdk vagrant init" should give you information on what files are expected in this directory.
-
-Standard Network Setup:
-
-    The vagrant boxes are configured to create host-only IPs on 10.10.100.100 range.
-    Firewalls are disabled since they are host-only. Check the output of "liquibase-sdk vagrant init" for any variation
-
-Standard Database Setup:
-
-    Databases are configured with a username of "liquibase" and a password of "liquibase". If that is combination is not
-    supported on a database, something as close as possible will be used.
-    Check the output of "liquibase-sdk vagrant init" for any variation
-
-    If the database supports catalogs, a catalog called "liquibase" is created
-    If the database supports schemas, a schema called "lqschema" is created.
-    Check the output of "liquibase-sdk vagrant init" for any variation
-
-Provisioning:
-
-    Provisioning in Vagrant is handed primarily by puppet, although there is a shell provisioning that is done first to
-    bootstrap anything that cannot be done in puppet. The starting puppet file will be manifests/init.pp within each
-    vagrant config. For example, linux-standard/manifests/init.pp
