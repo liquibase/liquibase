@@ -5,7 +5,7 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd
         http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
 
-    <changeSet id="1" author="chuck">
+    <changeSet id="1" author="alice">
         <createTable tableName="debug_info">
             <column name="message" type="varchar(255)"/>
             <column name="date_ran" type="datetime">
@@ -14,7 +14,7 @@
         </createTable>
     </changeSet>
 
-    <changeSet id="run-mark" author="chuck" runAlways="true">
+    <changeSet id="run-mark" author="alice" runAlways="true">
         <insert tableName="debug_info">
             <column name="message" value="Liquibase update was ran"/>
             <column name="date_ran" valueComputed="current_datetime"/>
@@ -38,17 +38,17 @@
         <rollback/>
     </changeSet>
 
-    <changeSet id="dbms-oracle" author="chuck" dbms="oracle">
+    <changeSet id="dbms-h2" author="alice" dbms="h2">
         <insert tableName="debug_info">
-            <column name="message" value="An oracle changeset was ran"/>
+            <column name="message" value="An h2 changeset was ran"/>
             <column name="date_ran" valueComputed="current_datetime"/>
         </insert>
         <rollback/>
     </changeSet>
 
-    <changeSet id="dbms-oracle" author="chuck" dbms="!db2">
+    <changeSet id="dbms-not-derby" author="alice" dbms="!derby">
         <insert tableName="debug_info">
-            <column name="message">A changest that does not run on db2 was ran</column>
+            <column name="message">A changest that does not run on derby was ran</column>
             <column name="date_ran" valueComputed="current_datetime"/>
         </insert>
         <rollback/>
@@ -62,7 +62,7 @@
         <rollback/>
     </changeSet>
 
-    <changeSet id="context-test" author="chuck" context="test">
+    <changeSet id="context-test" author="bob" context="test">
         <insert tableName="debug_info">
             <column name="message">A 'test' context changeset was ran</column>
             <column name="date_ran" valueComputed="current_datetime"/>
@@ -73,7 +73,6 @@
     <include file="com/example/features/employees.xml"/>
     <include file="features/store.sql" relativeToChangelogFile="true"/>
 
-    <include file="com/example/versions/v1.yaml"/>
-    <include file="com/example/versions/v2.yaml"/>
+    <includeAll path="com/example/versions"/>
 
 </databaseChangeLog>
