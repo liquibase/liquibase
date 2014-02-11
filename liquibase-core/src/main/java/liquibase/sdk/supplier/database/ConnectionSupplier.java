@@ -18,7 +18,7 @@ public abstract class ConnectionSupplier implements Cloneable {
     public abstract String getDatabaseShortName();
     public abstract String getConfigurationName();
 
-    public abstract String getUrl();
+    public abstract String getJdbcUrl();
 
     public String getPrimaryCatalog() {
         return "liquibase";
@@ -112,7 +112,7 @@ public abstract class ConnectionSupplier implements Cloneable {
             version = "LATEST";
         }
 
-        return "JDBC Url: "+getUrl()+"\n"+
+        return "JDBC Url: "+ getJdbcUrl()+"\n"+
                 "Version: "+ version +"\n"+
                 "Standard User: "+ getDatabaseUsername()+"\n"+
                 "         Password: "+ getDatabasePassword()+"\n"+

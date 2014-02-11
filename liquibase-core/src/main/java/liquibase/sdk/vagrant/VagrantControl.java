@@ -124,7 +124,53 @@ public class VagrantControl {
         writePuppetFiles(vagrantInfo, databases);
         writeConfigFiles(vagrantInfo, databases);
 
+        Set<String> propertiesFiles = new HashSet<String>();
+        for (ConnectionSupplier connectionSupplier : databases) {
+            String fileName;
+            if (databases.size() == 1) {
+                fileName = "liquibase."+vagrantInfo.boxDir.getName()+".properties";
+            } else {
+                fileName = "liquibase."+vagrantInfo.boxDir.getName()+"-"+connectionSupplier.getConfigurationName()+".properties";
+            }
+
+            String propertiesFile =
+                    "### Connection Property File For Vagrant Box '"+ vagrantInfo.boxName+"'\n"+
+                    "### Example use: .."+File.separator+".."+File.separator+"liquibase --defaultsFile="+fileName+" update\n\n"+
+                    "classpath: changelog\n" +
+                    "changeLogFile=com/example/changelog.xml\n" +
+                    "username="+connectionSupplier.getDatabaseUsername()+"\n" +
+                    "password="+connectionSupplier.getDatabaseUsername()+"\n" +
+                    "url="+connectionSupplier.getJdbcUrl()+"\n" +
+                    "#logLevel=DEBUG\n" +
+                    "#referenceUrl="+connectionSupplier.getJdbcUrl()+"\n" +
+                    "#referenceUsername="+connectionSupplier.getDatabaseUsername()+"\n" +
+                    "#referencePassword="+connectionSupplier.getDatabasePassword()+"\n";
+
+            fileName = "workspace/" + fileName;
+
+
+            File propertyFile = new File(mainApp.getSdkRoot(), fileName);
+            if (propertyFile.exists()) {
+                mainApp.out("NOTE: Not overwriting existing workspace properties file "+propertyFile.getAbsolutePath());
+            } else {
+                FileWriter writer = new FileWriter(propertyFile);
+                try {
+                    writer.write(propertiesFile);
+                } finally {
+                    writer.flush();
+                    writer.close();
+                }
+
+                propertiesFiles.add(fileName);
+            }
+
+        }
+
         mainApp.out("Vagrant Box "+vagrantInfo.configName+" created. To start the box, run 'liquibase-sdk vagrant up "+vagrantInfo.configName+"'");
+        if (propertiesFiles.size() > 0) {
+            mainApp.out("Created workspace properties file(s): "+StringUtils.join(propertiesFiles, ", "));
+        }
+        mainApp.out("Make sure any needed JDBC drivers are added to LIQUIBASE_HOME/lib");
         mainApp.out("NOTE: If you do not already have a vagrant box called "+vagrantInfo.boxName+" installed, run 'vagrant box add "+vagrantInfo.boxName+" VALID_URL'");
     }
 

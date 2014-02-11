@@ -23,7 +23,7 @@ public class OracleConnSupplier extends ConnectionSupplier {
     }
 
     @Override
-    public String getUrl() {
+    public String getJdbcUrl() {
         return "jdbc:oracle:thin:@" + getIpAddress() + ":1521:"+getDatabaseUsername();
     }
 

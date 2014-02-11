@@ -24,7 +24,7 @@ public class MSSQLConnSupplier extends ConnectionSupplier {
     }
 
     @Override
-    public String getUrl() {
+    public String getJdbcUrl() {
         return "jdbc:sqlserver://"+ getIpAddress() +":1433;databaseName=liquibase";
     }
 }

@@ -19,7 +19,7 @@ public class SybaseASAConnSupplier extends ConnectionSupplier {
     }
 
     @Override
-    public String getUrl() {
+    public String getJdbcUrl() {
         return "jdbc:sybase:Tds:"+ getIpAddress() +":9810/servicename=prior";
     }
 }

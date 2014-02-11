@@ -22,7 +22,7 @@ public class DB2ConnSupplier extends ConnectionSupplier {
     }
 
     @Override
-    public String getUrl() {
+    public String getJdbcUrl() {
         return "jdbc:db2://"+ getIpAddress() +":50000/lqbase";
     }
 

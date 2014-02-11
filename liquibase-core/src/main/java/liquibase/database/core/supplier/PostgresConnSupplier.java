@@ -21,7 +21,7 @@ public class PostgresConnSupplier extends ConnectionSupplier {
     }
 
     @Override
-    public String getUrl() {
+    public String getJdbcUrl() {
         return "jdbc:postgresql://"+ getIpAddress() +"/liquibase";
     }
 

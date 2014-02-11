@@ -19,7 +19,7 @@ public class HsqlConnSupplier extends ConnectionSupplier {
     }
 
     @Override
-    public String getUrl() {
+    public String getJdbcUrl() {
         return "jdbc:hsqldb:mem:liquibase";
     }
 }

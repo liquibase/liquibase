@@ -36,7 +36,7 @@ public class AllDatabases extends ParameterSupplier {
 
     protected DatabaseConnection openConnection(ConnectionSupplier connectionConfig) {
         try {
-            final String url = connectionConfig.getUrl();
+            final String url = connectionConfig.getJdbcUrl();
             if (connectionsAttempted.containsKey(url)) {
                 JdbcConnection connection = (JdbcConnection) connectionsByUrl.get(url);
                 if (connection == null) {
@@ -114,7 +114,7 @@ public class AllDatabases extends ParameterSupplier {
     }
 
     public DatabaseConnection openDatabaseConnection(ConnectionSupplier connectionSupplier) throws Exception {
-        String url = connectionSupplier.getUrl();
+        String url = connectionSupplier.getJdbcUrl();
         assertNotNull("Null jdbc url", url);
 
         String username = connectionSupplier.getDatabaseUsername();

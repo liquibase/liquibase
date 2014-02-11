@@ -20,7 +20,7 @@ public class H2ConnSupplier extends ConnectionSupplier {
     }
 
     @Override
-    public String getUrl() {
+    public String getJdbcUrl() {
         return "jdbc:h2:mem:liquibase";
     }
 }

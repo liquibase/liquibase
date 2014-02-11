@@ -19,7 +19,7 @@ public class SQLiteConnSupplier extends ConnectionSupplier {
     }
 
     @Override
-    public String getUrl() {
+    public String getJdbcUrl() {
         return "jdbc:sqlite:sqlite/liquibase.db";
     }
 }
