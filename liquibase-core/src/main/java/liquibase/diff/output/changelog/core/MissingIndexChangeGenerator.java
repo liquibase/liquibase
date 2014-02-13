@@ -59,16 +59,10 @@ public class MissingIndexChangeGenerator implements MissingObjectChangeGenerator
 //            continue;
 //        }
 
-        if (comparisonDatabase instanceof OracleDatabase && index.getFilterCondition() != null) {
+        for (String columnName : index.getColumns()) {
             AddColumnConfig column = new AddColumnConfig();
-            column.setName(index.getFilterCondition());
+            column.setName(columnName);
             change.addColumn(column);
-        } else {
-            for (String columnName : index.getColumns()) {
-                AddColumnConfig column = new AddColumnConfig();
-                column.setName(columnName);
-                change.addColumn(column);
-            }
         }
 
         return new Change[] { change };
