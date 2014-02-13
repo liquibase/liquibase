@@ -46,7 +46,11 @@ public class DerbyDatabase extends AbstractJdbcDatabase {
         // CORE-1230 - don't shutdown derby network server
         if (url.startsWith("jdbc:derby://")) {
             return "org.apache.derby.jdbc.ClientDriver";
-        } else if (url.startsWith("jdbc:derby") || url.startsWith("java:derby")) {
+        }
+        else if (url.startsWith("jdbc:sqlfire://")) {
+            return "com.vmware.sqlfire.jdbc.ClientDriver";
+        }
+        else if (url.startsWith("jdbc:derby") || url.startsWith("java:derby")) {
             return "org.apache.derby.jdbc.EmbeddedDriver";
         }
         return null;
