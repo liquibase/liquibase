@@ -19,7 +19,7 @@ public class MSSQLConnSupplier extends ConnectionSupplier {
     }
 
     @Override
-    public String getVagrantBoxName() {
+    public String getVagrantBaseBoxName() {
         return "windows";
     }
 

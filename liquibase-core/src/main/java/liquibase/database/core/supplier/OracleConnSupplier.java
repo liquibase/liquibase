@@ -35,7 +35,7 @@ public class OracleConnSupplier extends ConnectionSupplier {
     }
 
     @Override
-    public String getVagrantBoxName() {
+    public String getVagrantBaseBoxName() {
         return "linux.centos.6_4";
     }
 

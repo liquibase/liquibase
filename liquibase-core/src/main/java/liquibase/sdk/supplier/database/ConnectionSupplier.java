@@ -81,7 +81,7 @@ public abstract class ConnectionSupplier implements Cloneable {
         return forges;
     }
 
-    public String getVagrantBoxName() {
+    public String getVagrantBaseBoxName() {
         return VAGRANT_BOX_NAME_LINUX_STANDARD;
     }
 

@@ -32,7 +32,7 @@ public class MySQLConnSupplierWindows extends MySQLConnSupplier {
     }
 
     @Override
-    public String getVagrantBoxName() {
+    public String getVagrantBaseBoxName() {
         return VAGRANT_BOX_NAME_WINDOWS_STANDARD;
     }
 
