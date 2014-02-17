@@ -2,6 +2,8 @@ package liquibase.database.core;
 
 import junit.framework.TestCase;
 import liquibase.database.Database;
+import liquibase.database.ObjectQuotingStrategy;
+import liquibase.structure.core.Table;
 
 public class HsqlDatabaseTest extends TestCase {
     public void testGetDefaultDriver() {
@@ -23,4 +25,17 @@ public class HsqlDatabaseTest extends TestCase {
         assertNull(database.getConcatSql((String[]) null));
     }
 
+    /**
+     * Verifies that {@link HsqlDatabase#escapeObjectName(String, Class)}
+     * respects the value of {@link HsqlDatabase#getObjectQuotingStrategy()}.
+     */
+    public void testEscapeObjectName() {
+        Database databaseWithDefaultQuoting = new HsqlDatabase();
+        databaseWithDefaultQuoting.setObjectQuotingStrategy(ObjectQuotingStrategy.LEGACY);
+        assertEquals("Test", databaseWithDefaultQuoting.escapeObjectName("Test", Table.class));
+        
+        Database databaseWithAllQuoting = new HsqlDatabase();
+        databaseWithAllQuoting.setObjectQuotingStrategy(ObjectQuotingStrategy.QUOTE_ALL_OBJECTS);
+        assertEquals("\"Test\"", databaseWithAllQuoting.escapeObjectName("Test", Table.class));
+    }
 }
