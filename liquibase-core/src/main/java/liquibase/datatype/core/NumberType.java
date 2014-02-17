@@ -34,7 +34,7 @@ public class NumberType extends LiquibaseDataType {
         }
 
         if (database instanceof OracleDatabase) {
-            if (getParameters().length > 0 && getParameters()[0].equals("0") && getParameters()[1].equals("-127")) {
+            if (getParameters().length > 1 && getParameters()[0].equals("0") && getParameters()[1].equals("-127")) {
                 return new DatabaseDataType("NUMBER");
             } else {
                 return new DatabaseDataType("NUMBER", getParameters());
