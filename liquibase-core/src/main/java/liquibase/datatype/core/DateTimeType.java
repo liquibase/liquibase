@@ -43,9 +43,12 @@ public class DateTimeType extends LiquibaseDataType {
         if (database instanceof MySQLDatabase) {
             boolean supportsParameters = true;
             try {
-                supportsParameters = database.getDatabaseMajorVersion() >= 5
-                        && database.getDatabaseMinorVersion() >= 6
-                        && ((MySQLDatabase) database).getDatabasePatchVersion() >= 4;
+                int major = database.getDatabaseMajorVersion();
+                int minor = database.getDatabaseMinorVersion();
+                int patch = ((MySQLDatabase) database).getDatabasePatchVersion();
+                supportsParameters = (major > 5)
+                                     || ((major == 5) && (minor > 6))
+                                     || ((major == 5) && (minor == 6) && (patch >= 4));
             } catch (Exception ignore) {
                 //assume supports parameters
             }
