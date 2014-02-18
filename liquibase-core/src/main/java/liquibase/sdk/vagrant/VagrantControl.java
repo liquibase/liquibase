@@ -78,8 +78,8 @@ public class VagrantControl {
 
 
         mainApp.out("Vagrant Machine Setup:");
+        mainApp.out(StringUtils.indent("Vagrant Box Name: " + vagrantInfo.boxName));
         mainApp.out(StringUtils.indent("Local Path: " + vagrantInfo.boxDir.getAbsolutePath()));
-        mainApp.out(StringUtils.indent("Config Name: " + vagrantInfo.boxName));
         mainApp.out(StringUtils.indent("Database Config(s): " + StringUtils.join(databaseConfigs, ", ")));
 
         Collection<ConnectionSupplier> databases = null;
@@ -107,7 +107,7 @@ public class VagrantControl {
             }
         }
 
-        mainApp.out(StringUtils.indent("Vagrant Base: " + vagrantInfo.baseBoxName));
+        mainApp.out(StringUtils.indent("Vagrant Base Box: " + vagrantInfo.baseBoxName));
         mainApp.out(StringUtils.indent("IP Address: " + vagrantInfo.ipAddress));
 
         Properties liquibaseVagrantProperties = new Properties();
@@ -346,7 +346,10 @@ public class VagrantControl {
                         "}\n\n";
             }
         } else {
-            osLevelConfig = "";
+            osLevelConfig = "package { '7zip':\n" +
+                    "    ensure  => '9.20',\n" +
+                    "    source\t=>\t\"http://downloads.sourceforge.net/sevenzip/7z920-x64.msi\",\n" +
+                    "}\n";
         }
         context.put("osLevelConfig", osLevelConfig);
 
@@ -380,7 +383,7 @@ public class VagrantControl {
     private void writeVagrantFile(VagrantInfo vagrantInfo) throws Exception {
 
         Map<String, Object> context = new HashMap<String, Object>();
-        context.put("configVmBox", vagrantInfo.boxName);
+        context.put("configVmBox", vagrantInfo.baseBoxName);
         context.put("configVmNetworkIp", vagrantInfo.ipAddress);
         context.put("vmCustomizeMemory", "8192");
 

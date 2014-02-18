@@ -97,6 +97,20 @@ public abstract class ConnectionSupplier implements Cloneable {
         return version;
     }
 
+    public String getShortVersion() {
+        if (getVersion() == null) {
+            return "LATEST";
+        }
+        String[] split = getVersion().split("\\.");
+        if (split.length == 1) {
+            return split[0];
+        } else {
+            return split[0]+"."+split[1];
+        }
+    }
+
+
+
     public void setVersion(String version) {
         this.version = version;
     }

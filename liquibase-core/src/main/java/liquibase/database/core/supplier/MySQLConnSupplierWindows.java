@@ -19,10 +19,6 @@ public class MySQLConnSupplierWindows extends MySQLConnSupplier {
         return "5.5.36";
     }
 
-    public String getShortVersion() {
-        return getVersion().replaceFirst("\\.\\d+$", "");
-    }
-
     public String getSourceUrl() {
         return "http://dev.mysql.com/get/Downloads/MySQL-"+getShortVersion()+"/mysql-"+getVersion()+"-winx64.msi";
     }

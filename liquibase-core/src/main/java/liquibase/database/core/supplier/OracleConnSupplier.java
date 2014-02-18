@@ -152,10 +152,6 @@ public class OracleConnSupplier extends ConnectionSupplier {
         return "12.1.0.1";
     }
 
-    protected String getShortVersion() {
-        return "12.1";
-    }
-
     public String getMemoryTotal() {
         return "800";
     }

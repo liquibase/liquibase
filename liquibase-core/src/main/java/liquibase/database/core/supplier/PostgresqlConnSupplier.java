@@ -2,9 +2,10 @@ package liquibase.database.core.supplier;
 
 import liquibase.sdk.supplier.database.ConnectionSupplier;
 
+import java.io.IOException;
 import java.util.Set;
 
-public class PostgresConnSupplier extends ConnectionSupplier {
+public class PostgresqlConnSupplier extends ConnectionSupplier {
     @Override
     public String getDatabaseShortName() {
         return "postgresql";
@@ -12,7 +13,7 @@ public class PostgresConnSupplier extends ConnectionSupplier {
 
     @Override
     public String getAdminUsername() {
-        return "root";
+        return "postgres";
     }
 
     @Override
@@ -33,7 +34,7 @@ public class PostgresConnSupplier extends ConnectionSupplier {
     }
 
     @Override
-    public String getPuppetInit(String box) {
+    public String getPuppetInit(String box) throws IOException {
         return "class { '::postgresql::server':\n" +
                 "    ip_mask_deny_postgres_user => '0.0.0.0/32',\n" +
                 "    ip_mask_allow_all_users    => '0.0.0.0/0',\n" +

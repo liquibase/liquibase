@@ -1,0 +1,5 @@
+CREATE USER ${supplier.databaseUsername} WITH CREATEDB CREATEUSER ENCRYPTED PASSWORD '${supplier.databasePassword}';
+CREATE USER ${supplier.alternateUsername} WITH CREATEDB CREATEUSER ENCRYPTED PASSWORD '${supplier.alternateUserPassword}';
+
+CREATE DATABASE ${supplier.primaryCatalog} with owner ${supplier.databaseUsername};
+CREATE DATABASE ${supplier.alternateCatalog} with owner ${supplier.alternateUsername};
