@@ -53,7 +53,7 @@ public class ConnectionConfigurationFactory {
         configsByDatabase.get(databaseShortName).add(config);
     }
 
-    public Collection<ConnectionSupplier> findConfigurations(List<String> descriptions) throws UnknownDatabaseException {
+    public Collection<ConnectionSupplier> findConfigurations(String[] descriptions) throws UnknownDatabaseException {
         List<ConnectionSupplier> returnList = new ArrayList<ConnectionSupplier>();
         for (String config : descriptions) {
             Map<String, String> params = null;

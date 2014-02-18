@@ -262,6 +262,7 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                 String filterCondition = row.getString("FILTER_CONDITION");
                 if (filterCondition != null) {
                     filterCondition = filterCondition.replaceAll("\"", "");
+                    columnName = filterCondition;
                 }
 
                 if (type == DatabaseMetaData.tableIndexStatistic) {
@@ -281,7 +282,6 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                     returnIndex.setTable((Table) new Table().setName(row.getString("TABLE_NAME")).setSchema(schema));
                     returnIndex.setName(indexName);
                     returnIndex.setUnique(!nonUnique);
-                    returnIndex.setFilterCondition(filterCondition);
                     foundIndexes.put(indexName, returnIndex);
                 }
 

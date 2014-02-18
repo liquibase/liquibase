@@ -27,7 +27,7 @@ public class DB2ConnSupplier extends ConnectionSupplier {
     }
 
     @Override
-    public String getVagrantBoxName() {
+    public String getVagrantBaseBoxName() {
         return "linux.centos.6_4";
     }
 

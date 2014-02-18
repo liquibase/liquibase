@@ -85,15 +85,6 @@ public class Index extends AbstractDatabaseObject {
         return StringUtils.join(getColumns(), ", ");
     }
 
-    public String getFilterCondition() {
-        return getAttribute("filterCondition", String.class);
-    }
-
-    public Index setFilterCondition(String filterCondition) {
-        this.setAttribute("filterCondition", filterCondition);
-        return this;
-    }
-
     public Index setUnique(Boolean value) {
         this.setAttribute("unique", value);
         return this;

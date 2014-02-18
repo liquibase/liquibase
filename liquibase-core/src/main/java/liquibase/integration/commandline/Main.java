@@ -247,11 +247,13 @@ public class Main {
                     if (!cmdParm.startsWith("--referenceUsername")
                         && !cmdParm.startsWith("--referencePassword")
                         && !cmdParm.startsWith("--referenceDriver")
+                        && !cmdParm.startsWith("--referenceDefaultCatalogName")
+                        && !cmdParm.startsWith("--referenceDefaultSchemaName")
                             && !cmdParm.startsWith("--includeSchema")
                             && !cmdParm.startsWith("--includeCatalog")
                             && !cmdParm.startsWith("--includeTablespace")
                             && !cmdParm.startsWith("--referenceUrl")) {
-                        messages.add("unexpected command parameters: "+commandParams);
+                        messages.add("unexpected command parameter: "+cmdParm);
                     }
                 }
             }
@@ -528,7 +530,11 @@ public class Main {
         stream.println(" --referenceUrl=<value>                     Reference Database URL");
         stream.println("");
         stream.println("Optional Diff Parameters:");
-        stream.println(" --referenceDriver=<jdbc.driver.ClassName>  Reference Database driver class name");
+        stream.println(" --defaultCatalogName=<name>                Default database catalog to use");
+        stream.println(" --defaultSchemaName=<name>                 Default database schema to use");
+        stream.println(" --referenceDefaultCatalogName=<name>       Reference database catalog to use");
+        stream.println(" --referenceDefaultSchemaName=<name>        Reference database schema to use");
+        stream.println(" --referenceDriver=<jdbc.driver.ClassName>  Reference database driver class name");
         stream.println(" --dataOutputDirectory=DIR                  Output data as CSV in the given ");
         stream.println("                                            directory");
         stream.println(" --diffTypes                                List of diff types to include in");
