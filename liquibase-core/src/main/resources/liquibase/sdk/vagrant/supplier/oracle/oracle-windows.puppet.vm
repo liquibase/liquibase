@@ -1,0 +1,50 @@
+user { 'oracle':
+    ensure => present,
+} ->
+
+
+file { '${supplier.installDir}':
+    ensure => "directory",
+} ->
+
+exec { 'unzip oracle disk 1':
+	command	=>	'"C:\Program Files\7-Zip\7z.exe" x "c:/vagrant-install-files/oracle/${supplier.zipFileBase}_1of2*.zip" -o"${supplier.installDir}" -y -aos',
+    creates => '${supplier.installDir}\database\setup.exe'
+} ->
+
+exec { 'unzip oracle disk 2':
+	command	=>	'"C:\Program Files\7-Zip\7z.exe" x "c:/vagrant-install-files/oracle/${supplier.zipFileBase}_2of2*.zip" -o"${supplier.installDir}" -y -aos',
+    creates => '${supplier.installDir}\database\welcome.html'
+
+} ->
+
+exec { 'runInstaller':
+    command => '${supplier.installDir}\database\install\oui.exe -responseFile c:\vagrant\modules\conf\oracle\oracle_install.rsp -silent -waitforcompletion',
+    creates => '${supplier.oracleHome}',
+}
+
+#exec { '${supplier.installDir}\oracleInventory\orainstRoot.sh':
+#} ->
+
+#exec { '${supplier.oracleHome}/root.sh':
+#    creates => '/etc/oratab'
+#} ->
+#
+#exec { 'dbca':
+#    command => '${supplier.oracleHome}/bin/dbca -silent -createDatabase -responseFile /vagrant/modules/conf/oracle/oracle_install.rsp -templateName General_Purpose.dbc -gdbName ${supplier.globalName} -sysPassword ${supplier.sysPassword} -systemPassword ${supplier.systemPassword}',
+#    user => 'oracle',
+#    creates => '${supplier.installDir}/oradata/${supplier.sid}'
+#} ->
+#
+#exec { 'configToolAllCommands':
+#    command => '/bin/sh -c ${supplier.oracleHome}/cfgtoollogs/configToolAllCommands RESPONSE_FILE=/vagrant/modules/conf/oracle/oracle_install.rsp',
+#} ->
+
+
+#exec { 'oracle sql init':
+#    command => '${supplier.oracleHome}/bin/sqlplus system/${supplier.systemPassword}@localhost/${supplier.sid} @/vagrant/modules/conf/oracle/oracle_init.sql',
+#    environment => 'ORACLE_HOME=${supplier.oracleHome}',
+#    user => 'oracle',
+#    creates => '${supplier.installDir}/oradata/${supplier.sid}/${supplier.alternateTablespace}.dbf',
+#}
+

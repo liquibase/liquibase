@@ -24,11 +24,6 @@ public class PostgresqlConnSupplierWindows extends PostgresqlConnSupplier {
     }
 
     @Override
-    public String getVagrantBaseBoxName() {
-        return VAGRANT_BOX_NAME_WINDOWS_STANDARD;
-    }
-
-    @Override
     public String getPuppetInit(String box) throws IOException {
         Map<String, Object> context = new HashMap<String, Object>();
         context.put("supplier", this);

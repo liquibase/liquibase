@@ -12,10 +12,6 @@ if not exist c:\usr\share\puppet\.librarian (
     call librarian-puppet install
 )
 
-REM echo Copying vagrant-install-files...
-mkdir \install
-REM copy \vagrant-install-files\* \install
-
 echo Running puppet.....
 call puppet apply -vv  --color=false --modulepath=c:\usr\share\puppet\modules\;c:\vagrant\modules c:\vagrant\manifests\init.pp
 

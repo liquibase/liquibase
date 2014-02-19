@@ -27,11 +27,6 @@ public class DB2ConnSupplier extends ConnectionSupplier {
     }
 
     @Override
-    public String getVagrantBaseBoxName() {
-        return "linux.centos.6_4";
-    }
-
-    @Override
     public Set<String> getRequiredPackages(String vagrantBoxName) {
         Set<String> requiredPackages = super.getRequiredPackages(vagrantBoxName);
         requiredPackages.addAll(Arrays.asList("compat-libstdc++-33", "pam.i686", "numactl"));
