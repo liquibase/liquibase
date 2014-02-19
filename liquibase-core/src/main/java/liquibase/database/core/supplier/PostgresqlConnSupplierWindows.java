@@ -43,17 +43,4 @@ public class PostgresqlConnSupplierWindows extends PostgresqlConnSupplier {
                 "REQUIRES: LIQUIBASE_HOME/sdk/vagrant/install-files/postgresql/postgresql-"+getVersion()+"-windows-x64-binaries.zip. Download Win x86-64 archive from http://www.enterprisedb.com/products-services-training/pgbindownload\n"+
                 "Admin 'postgres' user password: "+getAdminPassword();
     }
-
-    @Override
-    public void writeConfigFiles(File configDir) throws IOException {
-        super.writeConfigFiles(configDir);
-
-        Map<String, Object> context = new HashMap<String, Object>();
-        context.put("supplier", this);
-
-        TemplateService.getInstance().write("liquibase/sdk/vagrant/supplier/postgresql/postgresql.init.sql.vm", new File(configDir, "postgresql.init.sql"), context);
-        TemplateService.getInstance().write("liquibase/sdk/vagrant/supplier/postgresql/postgresql.conf.vm", new File(configDir, "postgresql.conf"), context);
-        TemplateService.getInstance().write("liquibase/sdk/vagrant/supplier/postgresql/pg_hba.conf.vm", new File(configDir, "pg_hba.conf"), context);
-    }
-
 }

@@ -65,7 +65,7 @@ max_connections = 100			# (change requires restart)
 # Note:  Increasing max_connections costs ~400 bytes of shared memory per
 # connection slot, plus lock space (see max_locks_per_transaction).
 #superuser_reserved_connections = 3	# (change requires restart)
-#unix_socket_directories = ''	# comma-separated list of directories
+#unix_socket_directories = '/tmp'       # comma-separated list of directories
 					# (change requires restart)
 #unix_socket_group = ''			# (change requires restart)
 #unix_socket_permissions = 0777		# begin with 0 to use octal notation
@@ -295,25 +295,25 @@ shared_buffers = 128MB			# min 128kB
 
 # - Where to Log -
 
-#log_destination = 'stderr'		# Valid values are combinations of
+log_destination = 'stderr'              # Valid values are combinations of
 					# stderr, csvlog, syslog, and eventlog,
 					# depending on platform.  csvlog
 					# requires logging_collector to be on.
 
 # This is used when logging to stderr:
-#logging_collector = off		# Enable capturing of stderr and csvlog
+logging_collector = on                  # Enable capturing of stderr and csvlog
 					# into log files. Required to be on for
 					# csvlogs.
 					# (change requires restart)
 
 # These are only used if logging_collector is on:
-#log_directory = 'pg_log'		# directory where log files are written,
+log_directory = 'pg_log'                # directory where log files are written,
 					# can be absolute or relative to PGDATA
-#log_filename = 'postgresql-%Y-%m-%d_%H%M%S.log'	# log file name pattern,
+log_filename = 'postgresql-%a.log'      # log file name pattern,
 					# can include strftime() escapes
 #log_file_mode = 0600			# creation mode for log files,
 					# begin with 0 to use octal notation
-#log_truncate_on_rotation = off		# If on, an existing log file with the
+log_truncate_on_rotation = on           # If on, an existing log file with the
 					# same name as the new log file will be
 					# truncated rather than appended to.
 					# But such truncation only occurs on
@@ -321,9 +321,9 @@ shared_buffers = 128MB			# min 128kB
 					# or size-driven rotation.  Default is
 					# off, meaning append to existing files
 					# in all cases.
-#log_rotation_age = 1d			# Automatic rotation of logfiles will
+log_rotation_age = 1d                   # Automatic rotation of logfiles will
 					# happen after that time.  0 disables.
-#log_rotation_size = 10MB		# Automatic rotation of logfiles will
+log_rotation_size = 0                   # Automatic rotation of logfiles will
 					# happen after that much log output.
 					# 0 disables.
 
@@ -393,7 +393,7 @@ shared_buffers = 128MB			# min 128kB
 #log_duration = off
 #log_error_verbosity = default		# terse, default, or verbose messages
 #log_hostname = off
-#log_line_prefix = ''			# special values:
+log_line_prefix = '< %m >'                      # special values:
 					#   %a = application name
 					#   %u = user name
 					#   %d = database name
@@ -418,7 +418,7 @@ shared_buffers = 128MB			# min 128kB
 #log_temp_files = -1			# log temporary files equal or larger
 					# than the specified size in kilobytes;
 					# -1 disables, 0 logs all temp files
-log_timezone = 'GMT'
+log_timezone = 'UTC'
 
 
 #------------------------------------------------------------------------------
@@ -500,7 +500,7 @@ log_timezone = 'GMT'
 
 datestyle = 'iso, mdy'
 #intervalstyle = 'postgres'
-timezone = 'GMT'
+timezone = 'UTC'
 #timezone_abbreviations = 'Default'     # Select the set of available time zone
 					# abbreviations.  Currently, there are
 					#   Default
@@ -513,11 +513,11 @@ timezone = 'GMT'
 					# encoding
 
 # These settings are initialized by initdb, but they can be changed.
-lc_messages = 'English_United States.1252'			# locale for system error message
+lc_messages = 'en_US.UTF-8'                     # locale for system error message
 					# strings
-lc_monetary = 'English_United States.1252'			# locale for monetary formatting
-lc_numeric = 'English_United States.1252'			# locale for number formatting
-lc_time = 'English_United States.1252'				# locale for time formatting
+lc_monetary = 'en_US.UTF-8'                     # locale for monetary formatting
+lc_numeric = 'en_US.UTF-8'                      # locale for number formatting
+lc_time = 'en_US.UTF-8'                         # locale for time formatting
 
 # default configuration for text search
 default_text_search_config = 'pg_catalog.english'
