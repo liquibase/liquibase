@@ -1,6 +1,7 @@
 package liquibase.database.core.supplier;
 
 import liquibase.sdk.TemplateService;
+import liquibase.sdk.exception.UnexpectedLiquibaseSdkException;
 import liquibase.sdk.supplier.database.ConnectionSupplier;
 
 import java.io.File;
@@ -54,7 +55,7 @@ public class OracleConnSupplier extends ConnectionSupplier {
                 "make",
                 "sysstat",
                 "rlwrap"
-                ));
+        ));
 
         return requiredPackages;
     }
@@ -74,6 +75,7 @@ public class OracleConnSupplier extends ConnectionSupplier {
         context.put("supplier", this);
 
         TemplateService.getInstance().write("liquibase/sdk/vagrant/supplier/oracle/oracle_install.rsp.vm", new File(configDir, "oracle/oracle_install.rsp"), context);
+        TemplateService.getInstance().write("liquibase/sdk/vagrant/supplier/oracle/oracle_netca.rsp.vm", new File(configDir, "oracle/oracle_netca.rsp"), context);
         TemplateService.getInstance().write("liquibase/sdk/vagrant/supplier/oracle/oracle.init.sql.vm", new File(configDir, "oracle/oracle_init.sql"), context);
     }
 
@@ -84,7 +86,11 @@ public class OracleConnSupplier extends ConnectionSupplier {
     }
 
     public String getZipFileBase() {
-        return "linuxamd64_12c_database";
+        if (getVersion().startsWith("12.")) {
+            return "linuxamd64_12c_database";
+        } else {
+            throw new UnexpectedLiquibaseSdkException("Unsupported oracle version: "+getVersion());
+        }
     }
 
     public String getInstallDir() {
@@ -92,7 +98,11 @@ public class OracleConnSupplier extends ConnectionSupplier {
     }
 
     public String getOracleHome() {
-        return getInstallDir()+"/12c";
+        if (getVersion().startsWith("12.")) {
+            return getInstallDir()+getFileSeparator()+"12c";
+        } else {
+            throw new UnexpectedLiquibaseSdkException("Unsupported oracle version: "+getVersion());
+        }
     }
 
     public String getGlobalName() {
@@ -109,6 +119,10 @@ public class OracleConnSupplier extends ConnectionSupplier {
 
     public String getSid() {
         return "lqbase";
+    }
+    
+   public String getFileSeparator() {
+        return "/";
     }
 
     @Override

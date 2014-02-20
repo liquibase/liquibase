@@ -46,7 +46,7 @@ UNIX_GROUP_NAME=oracle
 # This is an optional parameter if installing on
 # Windows based Operating System.
 #-------------------------------------------------------------------------------
-INVENTORY_LOCATION=/opt/oracle/oracleInventory
+INVENTORY_LOCATION=${supplier.installDir}${supplier.fileSeparator}oracleInventory
 
 #-------------------------------------------------------------------------------
 # Specify the languages in which the components will be installed.
@@ -88,12 +88,12 @@ SELECTED_LANGUAGES=en
 #-------------------------------------------------------------------------------
 # Specify the complete path of the Oracle Home.
 #-------------------------------------------------------------------------------
-ORACLE_HOME=/opt/oracle/12c
+ORACLE_HOME=${supplier.oracleHome}
 
 #-------------------------------------------------------------------------------
 # Specify the complete path of the Oracle Base.
 #-------------------------------------------------------------------------------
-ORACLE_BASE=/opt/oracle
+ORACLE_BASE=${supplier.installDir}
 
 #-------------------------------------------------------------------------------
 # Specify the installation edition of the component.
@@ -372,14 +372,14 @@ oracle.install.db.config.starterdb.storageType=FILE_SYSTEM_STORAGE
 #
 # Applicable only when oracle.install.db.config.starterdb.storage=FILE_SYSTEM_STORAGE
 #-------------------------------------------------------------------------------
-oracle.install.db.config.starterdb.fileSystemStorage.dataLocation=/opt/oracle/data
+oracle.install.db.config.starterdb.fileSystemStorage.dataLocation=${supplier.installDir}${supplier.fileSeparator}data
 
 #-------------------------------------------------------------------------------
 # Specify the recovery location.
 #
 # Applicable only when oracle.install.db.config.starterdb.storage=FILE_SYSTEM_STORAGE
 #-------------------------------------------------------------------------------
-oracle.install.db.config.starterdb.fileSystemStorage.recoveryLocation=/opt/oracle/recovery
+oracle.install.db.config.starterdb.fileSystemStorage.recoveryLocation=${supplier.installDir}${supplier.fileSeparator}recovery
 
 #-------------------------------------------------------------------------------
 # Specify the existing ASM disk groups to be used for storage.
@@ -394,6 +394,20 @@ oracle.install.db.config.asm.diskGroup=
 # Applicable only when oracle.install.db.config.starterdb.storage=ASM_STORAGE
 #-------------------------------------------------------------------------------
 oracle.install.db.config.asm.ASMSNMPPassword=
+
+#----------------------------------------------------------------------------------------------
+# Specify the Oracle Home user.
+#
+# Oracle recommends that you specify a Windows User Account with limited privilege to install
+# and configure a secure Oracle home. Set oracle.install.IsBuiltInAccount to true
+# if you want to use BuiltIn Account.
+#
+# Set oracle.install.IsBuiltInAccount to false if you want to use Windows Account user
+# as Oracle Home user.
+#------------------------------------------------------------------------------------------------
+oracle.install.IsBuiltInAccount=false
+oracle.install.OracleHomeUserName=oracle
+oracle.install.OracleHomeUserPassword=oracle
 
 #------------------------------------------------------------------------------
 # Specify the My Oracle Support Account Username.

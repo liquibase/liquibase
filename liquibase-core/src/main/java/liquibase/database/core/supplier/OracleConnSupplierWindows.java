@@ -1,6 +1,7 @@
 package liquibase.database.core.supplier;
 
 import liquibase.sdk.TemplateService;
+import liquibase.sdk.exception.UnexpectedLiquibaseSdkException;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -19,7 +20,15 @@ public class OracleConnSupplierWindows extends OracleConnSupplier {
 
     @Override
     public String getZipFileBase() {
-        return "winx64_12c_database";
+        if (getVersion().startsWith("12.")) {
+            return "winx64_12c_database";
+        } else {
+            throw new UnexpectedLiquibaseSdkException("Unsupported oracle version: "+getVersion());
+        }
+    }
+
+    public String getFileSeparator() {
+        return "\\";
     }
 
     @Override

@@ -1,5 +1,6 @@
 user { 'oracle':
     ensure => present,
+    password => 'oracle',
 } ->
 
 
@@ -19,32 +20,24 @@ exec { 'unzip oracle disk 2':
 } ->
 
 exec { 'runInstaller':
-    command => '${supplier.installDir}\database\install\oui.exe -responseFile c:\vagrant\modules\conf\oracle\oracle_install.rsp -silent -waitforcompletion',
+    command => '${supplier.installDir}\database\install\oui.exe -responseFile c:\vagrant\modules\conf\oracle\oracle_install.rsp -silent -waitforcompletion -nowait -ignorePrereq -ignoreSysPrereqs',
     creates => '${supplier.oracleHome}',
+    returns => [0,3], #errors but seems to work
+} ->
+
+exec { 'dbca':
+    command => 'c:\windows\system32\cmd.exe /c ${supplier.oracleHome}\bin\dbca.bat -silent -createDatabase -responseFile c:\vagrant\modules\conf\oracle\oracle_install.rsp -templateName General_Purpose.dbc -gdbName ${supplier.globalName} -sysPassword ${supplier.sysPassword} -systemPassword ${supplier.systemPassword} -serviceUserPassword oracle',
+    creates => '${supplier.installDir}\oradata\${supplier.sid}',
+    timeout => 1000
+} ->
+
+exec { 'netca':
+    command => 'c:\windows\system32\cmd.exe /c ${supplier.oracleHome}\bin\netca.bat -silent -insttype typical -orahome ${supplier.oracleHome} -responseFile c:\vagrant\modules\conf\oracle\oracle_netca.rsp',
+} ->
+
+exec { 'oracle sql init':
+    command => '${supplier.oracleHome}\bin\sqlplus.exe system/${supplier.systemPassword}@localhost/${supplier.sid} @c:\vagrant\modules\conf\oracle\oracle_init.sql',
+    environment => 'ORACLE_HOME=${supplier.oracleHome}',
+    creates => '${supplier.installDir}/oradata/${supplier.sid}/${supplier.alternateTablespace}.dbf',
 }
-
-#exec { '${supplier.installDir}\oracleInventory\orainstRoot.sh':
-#} ->
-
-#exec { '${supplier.oracleHome}/root.sh':
-#    creates => '/etc/oratab'
-#} ->
-#
-#exec { 'dbca':
-#    command => '${supplier.oracleHome}/bin/dbca -silent -createDatabase -responseFile /vagrant/modules/conf/oracle/oracle_install.rsp -templateName General_Purpose.dbc -gdbName ${supplier.globalName} -sysPassword ${supplier.sysPassword} -systemPassword ${supplier.systemPassword}',
-#    user => 'oracle',
-#    creates => '${supplier.installDir}/oradata/${supplier.sid}'
-#} ->
-#
-#exec { 'configToolAllCommands':
-#    command => '/bin/sh -c ${supplier.oracleHome}/cfgtoollogs/configToolAllCommands RESPONSE_FILE=/vagrant/modules/conf/oracle/oracle_install.rsp',
-#} ->
-
-
-#exec { 'oracle sql init':
-#    command => '${supplier.oracleHome}/bin/sqlplus system/${supplier.systemPassword}@localhost/${supplier.sid} @/vagrant/modules/conf/oracle/oracle_init.sql',
-#    environment => 'ORACLE_HOME=${supplier.oracleHome}',
-#    user => 'oracle',
-#    creates => '${supplier.installDir}/oradata/${supplier.sid}/${supplier.alternateTablespace}.dbf',
-#}
 
