@@ -1,0 +1,9 @@
+CREATE USER ${supplier.databaseUsername} IDENTIFIED BY ${supplier.databasePassword};
+CREATE USER ${supplier.alternateUsername} IDENTIFIED BY ${supplier.alternateUserPassword};
+
+GRANT ALL PRIVILEGES TO ${supplier.databaseUsername};
+GRANT ALL PRIVILEGES TO ${supplier.alternateUsername};
+
+create tablespace liquibase2 datafile '${supplier.installDir}${supplier.fileSeparator}oradata${supplier.fileSeparator}${supplier.sid}${supplier.fileSeparator}${supplier.alternateTablespace}.dbf' SIZE 5M autoextend on next 5M;
+
+EXIT;

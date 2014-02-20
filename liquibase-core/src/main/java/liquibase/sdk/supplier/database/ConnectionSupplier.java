@@ -82,6 +82,9 @@ public abstract class ConnectionSupplier implements Cloneable {
     }
 
     public String getVagrantBaseBoxName() {
+        if (getConfigurationName().equals("windows")) {
+            return VAGRANT_BOX_NAME_WINDOWS_STANDARD;
+        }
         return VAGRANT_BOX_NAME_LINUX_STANDARD;
     }
 

@@ -146,11 +146,7 @@ public class VagrantControl {
         Set<String> propertiesFiles = new HashSet<String>();
         for (ConnectionSupplier connectionSupplier : databases) {
             String fileName;
-            if (databases.size() == 1) {
-                fileName = "liquibase."+vagrantInfo.boxDir.getName()+".properties";
-            } else {
-                fileName = "liquibase."+vagrantInfo.boxDir.getName()+"-"+connectionSupplier.getDatabaseShortName()+".properties";
-            }
+            fileName = "liquibase."+vagrantInfo.boxDir.getName()+"-"+connectionSupplier.getDatabaseShortName()+".properties";
 
             String propertiesFile =
                     "### Connection Property File For Vagrant Box '"+ vagrantInfo.boxName+"'\n"+

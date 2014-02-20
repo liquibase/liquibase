@@ -19,11 +19,6 @@ public class MSSQLConnSupplier extends ConnectionSupplier {
     }
 
     @Override
-    public String getVagrantBaseBoxName() {
-        return "windows";
-    }
-
-    @Override
     public String getJdbcUrl() {
         return "jdbc:sqlserver://"+ getIpAddress() +":1433;databaseName=liquibase";
     }
