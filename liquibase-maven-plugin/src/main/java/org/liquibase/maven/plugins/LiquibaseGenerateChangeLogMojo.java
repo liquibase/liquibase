@@ -83,7 +83,7 @@ public class LiquibaseGenerateChangeLogMojo extends
         getLog().info("Generating Change Log from database " + database.toString());
         try {
             CommandLineUtils.doGenerateChangeLog(outputChangeLogFile, database, defaultCatalogName, defaultSchemaName, StringUtils.trimToNull(diffTypes),
-                    StringUtils.trimToNull(changeSetAuthor), StringUtils.trimToNull(changeSetContext), StringUtils.trimToNull(dataDir), new DiffOutputControl());
+                    StringUtils.trimToNull(changeSetAuthor), StringUtils.trimToNull(changeSetContext), StringUtils.trimToNull(dataDir), new DiffOutputControl(outputDefaultCatalog, outputDefaultSchema, true));
             getLog().info("Output written to Change Log file, " + outputChangeLogFile);
         }
         catch (IOException e) {
