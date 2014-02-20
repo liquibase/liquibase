@@ -1,5 +1,8 @@
 package liquibase.util;
 
+import liquibase.datatype.LiquibaseDataType;
+import liquibase.datatype.core.BigIntType;
+import liquibase.datatype.core.DecimalType;
 import liquibase.statement.DatabaseFunction;
 import liquibase.statement.SequenceCurrentValueFunction;
 import liquibase.statement.SequenceNextValueFunction;
@@ -14,7 +17,31 @@ import java.util.Map;
 public class ObjectUtil {
 
 	private static Map<Class<?>,Method[]>methodCache = new HashMap<Class<?>, Method[]>();
-	
+    
+	/**
+	 * has <code>dataType</code> auto increment property ?
+	 * @param dataType
+	 * @return
+	 * 
+	 * @author justcoon
+	 * 
+	 * @see DecimalType#isAutoIncrement()
+	 * @see BigIntType#isAutoIncrement()
+	 */
+	public static boolean isAutoIncrement(LiquibaseDataType dataType){
+        boolean retVal = false;
+        String methodName = "isAutoIncrement";
+        Method[] methods = dataType.getClass().getMethods();
+        for (Method method : methods) {
+            if (method.getName().equals(methodName) && method.getParameterTypes().length == 0) {
+                retVal = true;
+                break;
+            }
+        }
+
+        return retVal;
+    }
+
     public static Object getProperty(Object object, String propertyName) throws IllegalAccessException, InvocationTargetException {
         String methodName = "get" + propertyName.substring(0, 1).toUpperCase(Locale.ENGLISH) + propertyName.substring(1);
         Method[] methods = object.getClass().getMethods();
