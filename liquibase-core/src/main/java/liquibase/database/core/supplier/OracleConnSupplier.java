@@ -134,8 +134,6 @@ public class OracleConnSupplier extends ConnectionSupplier {
                 "SYS User Password: "+getSysPassword()+"\n"+
                 "SYSTEM User Password: "+getSystemPassword()+"\n"+
                 "\n"+
-                "REQUIRES: postgresql-"+getVersion()+"-windows-x64-binaries.zip. Download Win x86-64 archive from http://www.enterprisedb.com/products-services-training/pgbindownload\n"+
-
                 "NOTE: You must manually download the oracle installation files into LIQUIBASE_HOME/sdk/vagrant/install-files/oracle/\n"+
                 "      You can download the install files from http://www.oracle.com/technetwork/database/enterprise-edition/downloads/index.html with a free OTN account\n"+
                 "      Expected files: "+getZipFileBase()+"_*.zip\n"+

@@ -8,6 +8,7 @@ import java.util.Set;
 public abstract class ConnectionSupplier implements Cloneable {
 
     public static final String CONFIG_NAME_STANDARD = "standard";
+    public static final String CONFIG_NAME_WINDOWS = "windows";
 
     public String VAGRANT_BOX_NAME_WINDOWS_STANDARD = "liquibase.windows.2008r2.x64";
     public String VAGRANT_BOX_NAME_LINUX_STANDARD = "liquibase.linux.centos.x64";
