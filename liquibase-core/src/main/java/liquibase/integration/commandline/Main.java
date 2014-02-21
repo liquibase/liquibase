@@ -1,7 +1,9 @@
 package liquibase.integration.commandline;
 
+import liquibase.CatalogAndSchema;
 import liquibase.Liquibase;
 import liquibase.change.CheckSum;
+import liquibase.command.SnapshotCommand;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.configuration.GlobalConfiguration;
 import liquibase.database.Database;
@@ -329,6 +331,7 @@ public class Main {
                 || "diff".equalsIgnoreCase(arg)
                 || "diffChangeLog".equalsIgnoreCase(arg)
                 || "generateChangeLog".equalsIgnoreCase(arg)
+                || "snapshot".equalsIgnoreCase(arg)
                 || "calculateCheckSum".equalsIgnoreCase(arg)
                 || "clearCheckSums".equalsIgnoreCase(arg)
                 || "dbDoc".equalsIgnoreCase(arg)
@@ -443,6 +446,8 @@ public class Main {
         stream.println("                                updating again. Useful for testing");
         stream.println("                                rollback support");
         stream.println(" generateChangeLog              Writes Change Log XML to copy the current state");
+        stream.println("                                of the database to standard out");
+        stream.println(" snapshot                       Writes the current state");
         stream.println("                                of the database to standard out");
         stream.println("");
         stream.println("Diff Commands");
@@ -806,6 +811,12 @@ public class Main {
                 return;
             } else if ("generateChangeLog".equalsIgnoreCase(command)) {
                 CommandLineUtils.doGenerateChangeLog(changeLogFile, database, defaultCatalogName, defaultSchemaName, StringUtils.trimToNull(diffTypes), StringUtils.trimToNull(changeSetAuthor), StringUtils.trimToNull(changeSetContext), StringUtils.trimToNull(dataOutputDirectory), diffOutputControl);
+                return;
+            } else if ("snapshot".equalsIgnoreCase(command)) {
+                SnapshotCommand command = new SnapshotCommand();
+                command.setDatabase(database);
+                command.addExample(new CatalogAndSchema(defaultCatalogName, defaultSchemaName));
+                System.out.println(command.execute());
                 return;
             }
 

@@ -9,11 +9,7 @@ import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.util.StringUtils;
 
 import java.io.File;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import java.util.*;
 import java.io.OutputStream;
 import java.io.IOException;
 
@@ -23,7 +19,7 @@ public class StringSnapshotSerializer implements SnapshotSerializer {
 
     @Override
     public String[] getValidFileExtensions() {
-        return new String[]{"txt", "checksum"};
+        return new String[]{"checksum"};
     }
 
     @Override
@@ -127,7 +123,20 @@ public class StringSnapshotSerializer implements SnapshotSerializer {
         }
 
         String returnString = "{\n";
-        for (Object key : new TreeSet(collection.keySet())) {
+        TreeSet sortedCollection = new TreeSet(new Comparator() {
+            @Override
+            public int compare(Object o1, Object o2) {
+                if (o1 instanceof Comparable) {
+                    return ((Comparable) o1).compareTo(o2);
+                } else if (o1 instanceof Class) {
+                    return ((Class) o1).getName().compareTo(((Class) o2).getName());
+                } else {
+                    throw new ClassCastException(o1.getClass().getName()+" cannot be cast to java.lang.Comparable or java.lang.Class");
+                }
+            }
+        });
+        sortedCollection.addAll(collection.keySet());
+        for (Object key : sortedCollection) {
             returnString += indent(indent) + key.toString() + "=\"" + collection.get(key) + "\",\n";
         }
         returnString = returnString.replaceFirst(",$", "");

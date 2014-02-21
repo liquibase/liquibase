@@ -102,6 +102,16 @@ public class StringUtils {
     }
 
     public static String join(Collection<String> collection, String delimiter) {
+        return join(collection, delimiter, new StringUtilsFormatter() {
+            @Override
+            public String toString(Object obj) {
+                return (String) obj;
+            }
+        });
+
+    }
+
+    public static String join(Collection collection, String delimiter, StringUtilsFormatter formatter) {
         if (collection == null) {
             return null;
         }
@@ -111,8 +121,8 @@ public class StringUtils {
         }
         
         StringBuffer buffer = new StringBuffer();
-        for (String val : collection) {
-            buffer.append(val).append(delimiter);
+        for (Object val : collection) {
+            buffer.append(formatter.toString(val)).append(delimiter);
         }
 
         String returnString = buffer.toString();
@@ -219,5 +229,9 @@ public class StringUtils {
 
     public static boolean isAscii(char ch) {
         return ch < 128;
+    }
+
+    public static interface StringUtilsFormatter<Type> {
+        public String toString(Type obj);
     }
 }

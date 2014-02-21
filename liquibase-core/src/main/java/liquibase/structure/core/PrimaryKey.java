@@ -100,7 +100,11 @@ public class PrimaryKey extends AbstractDatabaseObject {
 
     @Override
     public String toString() {
-        return getName() + " on " + getTable().getName() + "(" + getColumnNames() + ")";
+        if (getTable() == null) {
+            return getName();
+        } else {
+            return getName() + " on " + getTable().getName() + "(" + getColumnNames() + ")";
+        }
     }
 
     public List<String> getColumnNamesAsList() {
