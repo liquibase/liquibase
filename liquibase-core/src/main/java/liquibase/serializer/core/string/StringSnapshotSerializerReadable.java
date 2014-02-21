@@ -7,7 +7,6 @@ import liquibase.serializer.SnapshotSerializer;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.SnapshotControl;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.core.Catalog;
 import liquibase.structure.core.Schema;
 import liquibase.util.StringUtils;
 
@@ -18,6 +17,7 @@ import java.util.*;
 public class StringSnapshotSerializerReadable implements SnapshotSerializer {
 
     private static final int INDENT_LENGTH = 4;
+    private int expandDepth = 1;
 
     @Override
     public String[] getValidFileExtensions() {
@@ -95,7 +95,7 @@ public class StringSnapshotSerializerReadable implements SnapshotSerializer {
 
         StringBuilder buffer = new StringBuilder();
 
-        final boolean expandContainedObjects = parentNames.size() <= 1;
+        final boolean expandContainedObjects = parentNames.size() <= getExpandDepth();
 
         final List<String> attributes = sort(databaseObject.getAttributes());
         for (String attribute : attributes) {
@@ -148,6 +148,14 @@ public class StringSnapshotSerializerReadable implements SnapshotSerializer {
 
         return buffer.toString().replaceFirst("\n$", "");
 
+    }
+
+    public int getExpandDepth() {
+        return expandDepth;
+    }
+
+    public void setExpandDepth(int expandDepth) {
+        this.expandDepth = expandDepth;
     }
 
     protected void addDivider(StringBuilder buffer) {
