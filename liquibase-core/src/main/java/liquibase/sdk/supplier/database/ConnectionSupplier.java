@@ -1,8 +1,11 @@
 package liquibase.sdk.supplier.database;
 
+import liquibase.sdk.TemplateService;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 public abstract class ConnectionSupplier implements Cloneable {
@@ -22,45 +25,45 @@ public abstract class ConnectionSupplier implements Cloneable {
     public abstract String getJdbcUrl();
 
     public String getPrimaryCatalog() {
-        return "liquibase";
+        return "lbcat";
     }
 
     public String getPrimarySchema() {
-        return "liquibase";
+        return "lbschema";
     }
 
     public String getDatabaseUsername() {
-        return "liquibase";
+        return "lbuser";
     }
 
     public String getDatabasePassword() {
-        return "liquibase";
+        return "lbuser";
     }
 
     public String getAlternateUsername() {
-        return "liquibaseb";
+        return "lbuser2";
     }
 
     public String getAlternateUserPassword() {
-        return "liquibase";
+        return "lbuser2";
     }
 
     public String getAlternateCatalog() {
-        return "liquibaseb";
+        return "lbcat2";
     }
 
     public String getAlternateSchema() {
-        return "liquibaseb";
+        return "lbschema2";
     }
 
     public String getAlternateTablespace() {
-        return "liquibase2";
+        return "lbtbsp2";
     }
 
     public abstract String getAdminUsername();
 
     public String getAdminPassword() {
-        return "liquibase";
+        return "lbadmin";
     }
 
     public String getIpAddress() {
@@ -93,7 +96,7 @@ public abstract class ConnectionSupplier implements Cloneable {
         return new HashSet<String>();
     }
 
-    public String getPuppetInit(String box) throws IOException {
+    public String getPuppetInit(Map<String, Object> context) throws IOException {
         return null;
     }
 
@@ -144,7 +147,37 @@ public abstract class ConnectionSupplier implements Cloneable {
                 "Alternate Tablespace: "+ getAlternateTablespace()+"\n";
     }
 
-    public void writeConfigFiles(File configDir) throws IOException {
+    public Set<ConfigFile> generateConfigFiles(Map<String, Object> context) throws IOException {
+        Set<ConfigFile> set = new HashSet<ConfigFile>();
+        return set;
+    }
 
+    public static class ConfigFile {
+
+        private final String templatePath;
+        private final Map<String, Object> context;
+        private final String outputFileName;
+
+        public ConfigFile(String templatePath, Map<String, Object> context) {
+            this.templatePath = templatePath;
+            this.context = context;
+            this.outputFileName = templatePath.replaceFirst(".*/", "").replaceFirst("\\.vm$", "");
+        }
+
+        public String getTemplatePath() {
+            return templatePath;
+        }
+
+        public Map<String, Object> getContext() {
+            return context;
+        }
+
+        public String getOutputFileName() {
+            return outputFileName;
+        }
+
+        public void write(File outputFile) throws IOException {
+            TemplateService.getInstance().write(templatePath, outputFile, context);
+        }
     }
 }

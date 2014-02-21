@@ -32,9 +32,7 @@ public class OracleConnSupplierWindows extends OracleConnSupplier {
     }
 
     @Override
-    public String getPuppetInit(String box) throws IOException {
-        Map<String, Object> context = new HashMap<String, Object>();
-        context.put("supplier", this);
+    public String getPuppetInit(Map<String, Object> context) throws IOException {
         return TemplateService.getInstance().output("liquibase/sdk/vagrant/supplier/oracle/oracle-windows.puppet.vm", context);
     }
 }

@@ -3,6 +3,7 @@ package liquibase.database.core.supplier;
 import liquibase.sdk.supplier.database.ConnectionSupplier;
 
 import java.util.Arrays;
+import java.util.Map;
 import java.util.Set;
 
 public class DB2ConnSupplier extends ConnectionSupplier {
@@ -35,7 +36,7 @@ public class DB2ConnSupplier extends ConnectionSupplier {
     }
 
     @Override
-    public String getPuppetInit(String box) {
+    public String getPuppetInit(Map<String, Object> context) {
         return "Package <| |> -> Exec['unzip db2']\n" +
                 "\n" +
                 "exec {'unzip db2':\n" +

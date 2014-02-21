@@ -6,11 +6,11 @@ package { 'mysql':
 
 exec { "Init Mysql":
     require => Package["mysql"],
-    command => '${supplier.installDir}\bin\MySQLInstanceConfig.exe -i -q "-l${supplier.installDir}\install.log.txt" "-nMySQL Server ${supplier.shortVersion}" "-p${supplier.installDir}" -v${${supplier.version}} "-tc:\vagrant\modules\conf\mysql.ini" "-c${supplier.installDir}\mysql.ini" ServerType=DEVELOPMENT DatabaseType=MIXED ConnectionUsage=DSS Port=${supplier.port} ServiceName=MySQL RootPassword=${supplier.adminPassword}',
+    command => '${supplier.installDir}\bin\MySQLInstanceConfig.exe -i -q "-l${supplier.installDir}\install.log.txt" "-nMySQL Server ${supplier.shortVersion}" "-p${supplier.installDir}" -v${${supplier.version}} "-tc:\vagrant\modules\conf\mysql\mysql.ini" "-c${supplier.installDir}\mysql.ini" ServerType=DEVELOPMENT DatabaseType=MIXED ConnectionUsage=DSS Port=${supplier.port} ServiceName=MySQL RootPassword=${supplier.adminPassword}',
     creates => '${supplier.installDir}\mysql.ini'
 }
 
 exec { "Create users and databases":
     require => Exec["Init Mysql"],
-    command => 'c:\windows\system32\cmd.exe /c ${supplier.installDir}\bin\mysql.exe -u ${supplier.adminUsername} -p${supplier.adminPassword} mysql < c:\vagrant\modules\conf\mysql.init.sql'
+    command => 'c:\windows\system32\cmd.exe /c ${supplier.installDir}\bin\mysql.exe -u ${supplier.adminUsername} -p${supplier.adminPassword} mysql < c:\vagrant\modules\conf\mysql\mysql.init.sql'
 }

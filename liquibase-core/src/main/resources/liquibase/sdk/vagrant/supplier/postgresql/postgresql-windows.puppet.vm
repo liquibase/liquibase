@@ -10,7 +10,7 @@ exec { 'unzip postgresql':
 } ->
 
 file {'postgresql-password.txt':
-  path    => 'c:/vagrant/modules/conf/postgresql-password.txt',
+  path    => 'c:/vagrant/modules/conf/postgresql/postgresql-password.txt',
   ensure  => present,
   content => "${supplier.adminPassword}",
 } ->
@@ -21,11 +21,11 @@ exec { 'initdb':
 } ->
 
 exec { 'copy postgresql.conf':
-    command => 'c:\windows\system32\cmd.exe /c copy c:\vagrant\modules\conf\postgresql.conf ${supplier.installDir}\data\postgresql.conf'
+    command => 'c:\windows\system32\cmd.exe /c copy c:\vagrant\modules\conf\postgresql\postgresql.conf ${supplier.installDir}\data\postgresql.conf'
 } ->
 
 exec { 'copy pg_hba.conf':
-    command => 'c:\windows\system32\cmd.exe /c copy c:\vagrant\modules\conf\pg_hba.conf ${supplier.installDir}\data\pg_hba.conf'
+    command => 'c:\windows\system32\cmd.exe /c copy c:\vagrant\modules\conf\postgresql\pg_hba.conf ${supplier.installDir}\data\pg_hba.conf'
 } ->
 
 exec { 'register postgresql service':
@@ -40,5 +40,5 @@ exec { 'start postgresql':
 
 exec { 'postgresql init sql':
     environment => 'PGPASSWORD=${supplier.adminPassword}',
-    command => 'c:\windows\system32\cmd.exe /c ${supplier.installDir}\pgsql\bin\psql.exe -w -f c:\vagrant\modules\conf\postgresql.init.sql -U ${supplier.adminUsername}',
+    command => 'c:\windows\system32\cmd.exe /c ${supplier.installDir}\pgsql\bin\psql.exe -w -f c:\vagrant\modules\conf\postgresql\postgresql.init.sql -U ${supplier.adminUsername}',
 }

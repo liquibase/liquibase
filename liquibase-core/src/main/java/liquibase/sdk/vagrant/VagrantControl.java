@@ -1,5 +1,6 @@
 package liquibase.sdk.vagrant;
 
+import com.sun.security.auth.login.ConfigFile;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.sdk.Main;
 import liquibase.sdk.TemplateService;
@@ -314,7 +315,10 @@ public class VagrantControl {
         Set<String> puppetBlocks = new HashSet<String>();
 
         for (ConnectionSupplier config : databases) {
-            String thisInit = config.getPuppetInit(vagrantInfo.boxName);
+            Map<String, Object> context = new HashMap<String, Object>();
+            context.put("supplier", this);
+
+            String thisInit = config.getPuppetInit(context);
             if (thisInit != null) {
                 puppetBlocks.add(thisInit);
             }
@@ -405,8 +409,19 @@ public class VagrantControl {
     }
 
     private void writeConfigFiles(VagrantInfo vagrantInfo, Collection<ConnectionSupplier> databases) throws IOException {
+        Map<String, Object> context = new HashMap<String, Object>();
         for (ConnectionSupplier config : databases) {
-                config.writeConfigFiles(new File(vagrantInfo.boxDir, "modules/conf"));
+            context.put("supplier", config);
+
+            Set<ConnectionSupplier.ConfigFile> configFiles = config.generateConfigFiles(context);
+            if (configFiles != null) {
+                for (ConnectionSupplier.ConfigFile configFile : configFiles) {
+                    File outputFile = new File(vagrantInfo.boxDir+"/modules/conf/" + config.getDatabaseShortName(), configFile.getOutputFileName());
+                    outputFile.getParentFile().mkdirs();
+
+                    configFile.write(outputFile);
+                }
+            }
         }
     }
 

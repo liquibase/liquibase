@@ -5,8 +5,8 @@ import liquibase.sdk.supplier.database.ConnectionSupplier;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 public class MSSQLConnSupplier extends ConnectionSupplier {
     @Override
@@ -35,9 +35,7 @@ public class MSSQLConnSupplier extends ConnectionSupplier {
     }
 
     @Override
-    public String getPuppetInit(String box) throws IOException {
-        Map<String, Object> context = new HashMap<String, Object>();
-        context.put("supplier", this);
+    public String getPuppetInit(Map<String, Object> context) throws IOException {
         return TemplateService.getInstance().output("liquibase/sdk/vagrant/supplier/mssql/mssql.puppet.vm", context);
     }
 
@@ -52,13 +50,11 @@ public class MSSQLConnSupplier extends ConnectionSupplier {
     }
 
     @Override
-    public void writeConfigFiles(File configDir) throws IOException {
-        super.writeConfigFiles(configDir);
+    public Set<ConfigFile> generateConfigFiles(Map<String, Object> context) throws IOException {
+        Set<ConfigFile> configFiles = super.generateConfigFiles(context);
+        configFiles.add(new ConfigFile("liquibase/sdk/vagrant/supplier/mssql/mssql.init.sql.vm", context));
 
-        Map<String, Object> context = new HashMap<String, Object>();
-        context.put("supplier", this);
-
-        TemplateService.getInstance().write("liquibase/sdk/vagrant/supplier/mssql/mssql.init.sql.vm", new File(configDir, "mssql/mssql.init.sql"), context);
+        return configFiles;
     }
 
 

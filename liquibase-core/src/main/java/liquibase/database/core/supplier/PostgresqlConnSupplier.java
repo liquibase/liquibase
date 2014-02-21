@@ -5,7 +5,6 @@ import liquibase.sdk.supplier.database.ConnectionSupplier;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -38,23 +37,20 @@ public class PostgresqlConnSupplier extends ConnectionSupplier {
     }
 
     @Override
-    public String getPuppetInit(String box) throws IOException {
-        Map<String, Object> context = new HashMap<String, Object>();
-        context.put("supplier", this);
+    public String getPuppetInit(Map<String, Object> context) throws IOException {
         return TemplateService.getInstance().output("liquibase/sdk/vagrant/supplier/postgresql/postgresql-linux.puppet.vm", context);
     }
 
 
     @Override
-    public void writeConfigFiles(File configDir) throws IOException {
-        super.writeConfigFiles(configDir);
+    public Set<ConfigFile> generateConfigFiles(Map<String, Object> context) throws IOException {
+        Set<ConfigFile> configFiles = super.generateConfigFiles(context);
 
-        Map<String, Object> context = new HashMap<String, Object>();
-        context.put("supplier", this);
+        configFiles.add(new ConfigFile("liquibase/sdk/vagrant/supplier/postgresql/postgresql.init.sql.vm", context));
+        configFiles.add(new ConfigFile("liquibase/sdk/vagrant/supplier/postgresql/postgresql.conf.vm", context));
+        configFiles.add(new ConfigFile("liquibase/sdk/vagrant/supplier/postgresql/pg_hba.conf.vm", context));
 
-        TemplateService.getInstance().write("liquibase/sdk/vagrant/supplier/postgresql/postgresql.init.sql.vm", new File(configDir, "postgresql.init.sql"), context);
-        TemplateService.getInstance().write("liquibase/sdk/vagrant/supplier/postgresql/postgresql.conf.vm", new File(configDir, "postgresql.conf"), context);
-        TemplateService.getInstance().write("liquibase/sdk/vagrant/supplier/postgresql/pg_hba.conf.vm", new File(configDir, "pg_hba.conf"), context);
+        return configFiles;
     }
 
 //    @Override

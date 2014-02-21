@@ -21,11 +21,11 @@ exec { '/sbin/service postgresql-9.3 initdb':
 } ->
 
 file { '/var/lib/pgsql/9.3/data/postgresql.conf':
-    source => '/vagrant/modules/conf/postgresql.conf'
+    source => '/vagrant/modules/conf/postgresql/postgresql.conf'
 } ->
 
 file { '/var/lib/pgsql/9.3/data/pg_hba.conf':
-    source => '/vagrant/modules/conf/pg_hba.conf'
+    source => '/vagrant/modules/conf/postgresql/pg_hba.conf'
 } ->
 
 service { 'postgresql-9.3':
@@ -34,5 +34,5 @@ service { 'postgresql-9.3':
 
 exec { 'postgresql init sql':
     environment => 'PGPASSWORD=${supplier.adminPassword}',
-    command => '/usr/bin/psql -w -f /vagrant/modules/conf/postgresql.init.sql -U ${supplier.adminUsername} -h localhost',
+    command => '/usr/bin/psql -w -f /vagrant/modules/conf/postgresql/postgresql.init.sql -U ${supplier.adminUsername} -h localhost',
 }

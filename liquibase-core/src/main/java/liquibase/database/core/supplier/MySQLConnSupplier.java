@@ -5,7 +5,6 @@ import liquibase.sdk.supplier.database.ConnectionSupplier;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -49,18 +48,15 @@ public class MySQLConnSupplier extends ConnectionSupplier {
     }
 
     @Override
-    public void writeConfigFiles(File configDir) throws IOException {
-        super.writeConfigFiles(configDir);
+    public Set<ConfigFile> generateConfigFiles(Map<String, Object> context) throws IOException {
+        Set<ConfigFile> configFiles = super.generateConfigFiles(context);
+        configFiles.add(new ConfigFile("liquibase/sdk/vagrant/supplier/mysql/mysql.init.sql.vm", context));
 
-        Map<String, Object> context = new HashMap<String, Object>();
-        context.put("supplier", this);
-
-
-        TemplateService.getInstance().write("liquibase/sdk/vagrant/supplier/mysql/mysql.init.sql.vm", new File(configDir, "mysql.init.sql"), context);
+        return configFiles;
     }
 
     @Override
-    public String getPuppetInit(String box) throws IOException {
+    public String getPuppetInit(Map<String, Object> context) throws IOException {
         return "class { '::mysql::server':\n" +
                 "    require => Package['mysql'],\n"+
                 "    root_password => '"+getAdminPassword()+"',\n"+
@@ -70,7 +66,7 @@ public class MySQLConnSupplier extends ConnectionSupplier {
                 "\n" +
                 "exec { \"Create mysql users and databases\":\n" +
                 "    require => Class['::mysql::server'],\n" +
-                "    command => '/bin/sh -c \"mysql -u "+getAdminUsername()+" -p"+getAdminPassword()+" mysql < /vagrant/modules/conf/mysql.init.sql\"'\n" +
+                "    command => '/bin/sh -c \"mysql -u "+getAdminUsername()+" -p"+getAdminPassword()+" mysql < /vagrant/modules/conf/mysql/mysql.init.sql\"'\n" +
                 "}\n";
 
     }
