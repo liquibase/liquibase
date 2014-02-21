@@ -1,0 +1,23 @@
+exec { 'wget mysql repo':
+    command => '/usr/bin/wget -O /tmp/mysql-repo.rpm http://dev.mysql.com/get/mysql-community-release-el6-5.noarch.rpm',
+    creates => '/tmp/mysql-repo.rpm'
+} ->
+
+exec { 'install mysql repo':
+    command => '/bin/rpm -ihv /tmp/mysql-repo.rpm',
+    creates => '/etc/yum.repos.d/mysql-community.repo'
+} ->
+
+package { 'mysql-community-server':
+    ensure => installed,
+} ->
+
+service { 'mysqld':
+    enable => true,
+    ensure => "running",
+} ->
+
+exec { "mysql init sql":
+    command => '/usr/bin/mysql -u ${supplier.adminUsername} mysql < /vagrant/modules/conf/mysql/mysql.init.sql',
+    creates => '/var/lib/mysql/${supplier.primaryCatalog}'
+}

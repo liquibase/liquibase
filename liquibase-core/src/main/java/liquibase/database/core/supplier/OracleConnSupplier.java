@@ -1,10 +1,8 @@
 package liquibase.database.core.supplier;
 
-import liquibase.sdk.TemplateService;
 import liquibase.sdk.exception.UnexpectedLiquibaseSdkException;
 import liquibase.sdk.supplier.database.ConnectionSupplier;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Map;
@@ -29,6 +27,16 @@ public class OracleConnSupplier extends ConnectionSupplier {
     @Override
     public String getJdbcUrl() {
         return "jdbc:oracle:thin:@" + getIpAddress() + ":1521:"+getSid();
+    }
+
+    @Override
+    public String getPrimaryCatalog() {
+        return getDatabaseUsername();
+    }
+
+    @Override
+    public String getAlternateCatalog() {
+        return getAlternateUsername();
     }
 
     @Override
@@ -60,18 +68,18 @@ public class OracleConnSupplier extends ConnectionSupplier {
     }
 
     @Override
-    public String getPuppetInit(Map<String, Object> context) throws IOException {
-        return TemplateService.getInstance().output("liquibase/sdk/vagrant/supplier/oracle/oracle-linux.puppet.vm", context);
+    public ConfigTemplate getPuppetTemplate(Map<String, Object> context) {
+        return new ConfigTemplate("liquibase/sdk/vagrant/supplier/oracle/oracle-linux.puppet.vm", context);
     }
 
     @Override
-    public Set<ConfigFile> generateConfigFiles(Map<String, Object> context) throws IOException {
-        Set<ConfigFile> configFiles = super.generateConfigFiles(context);
-        configFiles.add(new ConfigFile("liquibase/sdk/vagrant/supplier/oracle/oracle_install.rsp.vm", context));
-        configFiles.add(new ConfigFile("liquibase/sdk/vagrant/supplier/oracle/oracle_netca.rsp.vm", context));
-        configFiles.add(new ConfigFile("liquibase/sdk/vagrant/supplier/oracle/oracle.init.sql.vm", context));
+    public Set<ConfigTemplate> generateConfigFiles(Map<String, Object> context) throws IOException {
+        Set<ConfigTemplate> configTemplates = super.generateConfigFiles(context);
+        configTemplates.add(new ConfigTemplate("liquibase/sdk/vagrant/supplier/oracle/oracle_install.rsp.vm", context));
+        configTemplates.add(new ConfigTemplate("liquibase/sdk/vagrant/supplier/oracle/oracle_netca.rsp.vm", context));
+        configTemplates.add(new ConfigTemplate("liquibase/sdk/vagrant/supplier/oracle/oracle.init.sql.vm", context));
 
-        return configFiles;
+        return configTemplates;
     }
 
 
@@ -100,10 +108,6 @@ public class OracleConnSupplier extends ConnectionSupplier {
         }
     }
 
-    public String getGlobalName() {
-        return "lqbase";
-    }
-
     public String getSysPassword() {
         return getAdminPassword();
     }
@@ -129,7 +133,7 @@ public class OracleConnSupplier extends ConnectionSupplier {
                 "SYS User Password: "+getSysPassword()+"\n"+
                 "SYSTEM User Password: "+getSystemPassword()+"\n"+
                 "\n"+
-                "NOTE: You must manually download the oracle installation files into LIQUIBASE_HOME/sdk/vagrant/install-files/oracle/\n"+
+                "REQUIRED: You must manually download the oracle installation files into LIQUIBASE_HOME/sdk/vagrant/install-files/oracle/\n"+
                 "      You can download the install files from http://www.oracle.com/technetwork/database/enterprise-edition/downloads/index.html with a free OTN account\n"+
                 "      Expected files: "+getZipFileBase()+"_*.zip\n"+
                 "\n"+

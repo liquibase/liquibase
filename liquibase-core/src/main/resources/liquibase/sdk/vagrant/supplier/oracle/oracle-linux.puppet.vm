@@ -42,18 +42,18 @@ exec { 'configToolAllCommands':
 
 
 exec { 'dbca':
-    command => '${supplier.oracleHome}/bin/dbca -silent -createDatabase -responseFile /vagrant/modules/conf/oracle/oracle_install.rsp -templateName General_Purpose.dbc -gdbName ${supplier.globalName} -sysPassword ${supplier.sysPassword} -systemPassword ${supplier.systemPassword}',
+    command => '${supplier.oracleHome}/bin/dbca -silent -createDatabase -responseFile /vagrant/modules/conf/oracle/oracle_install.rsp -templateName General_Purpose.dbc -gdbName ${supplier.sid} -sysPassword ${supplier.sysPassword} -systemPassword ${supplier.systemPassword}',
     user => 'oracle',
     creates => '${supplier.installDir}/oradata/${supplier.sid}'
 } ->
 
 
 exec { 'oracle sql init':
-    command => '${supplier.oracleHome}/bin/sqlplus system/${supplier.systemPassword}@localhost/${supplier.sid} @/vagrant/modules/conf/oracle/oracle_init.sql',
+    command => '${supplier.oracleHome}/bin/sqlplus system/${supplier.systemPassword}@localhost/${supplier.sid} @/vagrant/modules/conf/oracle/oracle.init.sql',
     environment => 'ORACLE_HOME=${supplier.oracleHome}',
     user => 'oracle',
     creates => '${supplier.installDir}/oradata/${supplier.sid}/${supplier.alternateTablespace}.dbf',
-}
+} ->
 
 file{ '/etc/oratab':
     content => '${supplier.sid}:${supplier.oracleHome}:Y\n'

@@ -1,9 +1,5 @@
 package liquibase.database.core.supplier;
 
-import liquibase.sdk.TemplateService;
-import liquibase.sdk.supplier.database.ConnectionSupplier;
-
-import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 import java.util.Set;
@@ -29,8 +25,8 @@ public class MySQLConnSupplierWindows extends MySQLConnSupplier {
     }
 
     @Override
-    public String getPuppetInit(Map<String, Object> context) throws IOException {
-        return TemplateService.getInstance().output("liquibase/sdk/vagrant/supplier/mysql/mysql-windows.puppet.vm", context);
+    public ConfigTemplate getPuppetTemplate(Map<String, Object> context) {
+        return new ConfigTemplate("liquibase/sdk/vagrant/supplier/mysql/mysql-windows.puppet.vm", context);
     }
 
     @Override
@@ -42,11 +38,11 @@ public class MySQLConnSupplierWindows extends MySQLConnSupplier {
     }
 
     @Override
-    public Set<ConfigFile> generateConfigFiles(Map<String, Object> context) throws IOException {
-        Set<ConfigFile> configFiles = super.generateConfigFiles(context);
+    public Set<ConfigTemplate> generateConfigFiles(Map<String, Object> context) throws IOException {
+        Set<ConfigTemplate> configTemplates = super.generateConfigFiles(context);
 
-        configFiles.add(new ConfigFile("liquibase/sdk/vagrant/supplier/mysql/mysql.ini.vm", context));
+        configTemplates.add(new ConfigTemplate("liquibase/sdk/vagrant/supplier/mysql/mysql.ini.vm", context));
 
-        return configFiles;
+        return configTemplates;
     }
 }

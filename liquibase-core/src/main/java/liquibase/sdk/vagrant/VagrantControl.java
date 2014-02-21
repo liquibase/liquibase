@@ -1,6 +1,5 @@
 package liquibase.sdk.vagrant;
 
-import com.sun.security.auth.login.ConfigFile;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.sdk.Main;
 import liquibase.sdk.TemplateService;
@@ -316,11 +315,11 @@ public class VagrantControl {
 
         for (ConnectionSupplier config : databases) {
             Map<String, Object> context = new HashMap<String, Object>();
-            context.put("supplier", this);
+            context.put("supplier", config);
 
-            String thisInit = config.getPuppetInit(context);
+            ConnectionSupplier.ConfigTemplate thisInit = config.getPuppetTemplate(context);
             if (thisInit != null) {
-                puppetBlocks.add(thisInit);
+                puppetBlocks.add(thisInit.output());
             }
         }
 
@@ -413,13 +412,13 @@ public class VagrantControl {
         for (ConnectionSupplier config : databases) {
             context.put("supplier", config);
 
-            Set<ConnectionSupplier.ConfigFile> configFiles = config.generateConfigFiles(context);
-            if (configFiles != null) {
-                for (ConnectionSupplier.ConfigFile configFile : configFiles) {
-                    File outputFile = new File(vagrantInfo.boxDir+"/modules/conf/" + config.getDatabaseShortName(), configFile.getOutputFileName());
+            Set<ConnectionSupplier.ConfigTemplate> configTemplates = config.generateConfigFiles(context);
+            if (configTemplates != null) {
+                for (ConnectionSupplier.ConfigTemplate configTemplate : configTemplates) {
+                    File outputFile = new File(vagrantInfo.boxDir+"/modules/conf/" + config.getDatabaseShortName(), configTemplate.getOutputFileName());
                     outputFile.getParentFile().mkdirs();
 
-                    configFile.write(outputFile);
+                    configTemplate.write(outputFile);
                 }
             }
         }

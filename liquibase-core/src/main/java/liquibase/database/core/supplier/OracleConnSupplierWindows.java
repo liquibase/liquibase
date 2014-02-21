@@ -1,10 +1,7 @@
 package liquibase.database.core.supplier;
 
-import liquibase.sdk.TemplateService;
 import liquibase.sdk.exception.UnexpectedLiquibaseSdkException;
 
-import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
 
 public class OracleConnSupplierWindows extends OracleConnSupplier {
@@ -32,7 +29,7 @@ public class OracleConnSupplierWindows extends OracleConnSupplier {
     }
 
     @Override
-    public String getPuppetInit(Map<String, Object> context) throws IOException {
-        return TemplateService.getInstance().output("liquibase/sdk/vagrant/supplier/oracle/oracle-windows.puppet.vm", context);
+    public ConfigTemplate getPuppetTemplate(Map<String, Object> context) {
+        return new ConfigTemplate("liquibase/sdk/vagrant/supplier/oracle/oracle-windows.puppet.vm", context);
     }
 }

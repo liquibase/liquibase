@@ -220,7 +220,7 @@ oracle.install.db.config.starterdb.type=GENERAL_PURPOSE
 #-------------------------------------------------------------------------------
 # Specify the Starter Database Global Database Name.
 #-------------------------------------------------------------------------------
-oracle.install.db.config.starterdb.globalDBName=${supplier.globalName}
+oracle.install.db.config.starterdb.globalDBName=${supplier.sid}
 
 #-------------------------------------------------------------------------------
 # Specify the Starter Database SID.

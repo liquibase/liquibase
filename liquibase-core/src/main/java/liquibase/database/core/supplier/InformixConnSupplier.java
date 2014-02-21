@@ -2,6 +2,8 @@ package liquibase.database.core.supplier;
 
 import liquibase.sdk.supplier.database.ConnectionSupplier;
 
+import java.util.Map;
+
 public class InformixConnSupplier extends ConnectionSupplier {
     @Override
     public String getDatabaseShortName() {
@@ -10,6 +12,11 @@ public class InformixConnSupplier extends ConnectionSupplier {
 
     @Override
     public String getAdminUsername() {
+        return null;
+    }
+
+    @Override
+    public ConfigTemplate getPuppetTemplate(Map<String, Object> context) {
         return null;
     }
 

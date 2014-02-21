@@ -1,9 +1,5 @@
 package liquibase.database.core.supplier;
 
-import liquibase.sdk.TemplateService;
-
-import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
 
 public class PostgresqlConnSupplierWindows extends PostgresqlConnSupplier {
@@ -23,8 +19,8 @@ public class PostgresqlConnSupplierWindows extends PostgresqlConnSupplier {
     }
 
     @Override
-    public String getPuppetInit(Map<String, Object> context) throws IOException {
-        return TemplateService.getInstance().output("liquibase/sdk/vagrant/supplier/postgresql/postgresql-windows.puppet.vm", context);
+    public ConfigTemplate getPuppetTemplate(Map<String, Object> context) {
+        return new ConfigTemplate("liquibase/sdk/vagrant/supplier/postgresql/postgresql-windows.puppet.vm", context);
     }
 
     @Override

@@ -26,7 +26,7 @@ exec { 'runInstaller':
 } ->
 
 exec { 'dbca':
-    command => 'c:\windows\system32\cmd.exe /c ${supplier.oracleHome}\bin\dbca.bat -silent -createDatabase -responseFile c:\vagrant\modules\conf\oracle\oracle_install.rsp -templateName General_Purpose.dbc -gdbName ${supplier.globalName} -sysPassword ${supplier.sysPassword} -systemPassword ${supplier.systemPassword} -serviceUserPassword oracle',
+    command => 'c:\windows\system32\cmd.exe /c ${supplier.oracleHome}\bin\dbca.bat -silent -createDatabase -responseFile c:\vagrant\modules\conf\oracle\oracle_install.rsp -templateName General_Purpose.dbc -gdbName ${supplier.sid} -sysPassword ${supplier.sysPassword} -systemPassword ${supplier.systemPassword} -serviceUserPassword oracle',
     creates => '${supplier.installDir}\oradata\${supplier.sid}',
     timeout => 1000
 } ->
@@ -36,7 +36,7 @@ exec { 'netca':
 } ->
 
 exec { 'oracle sql init':
-    command => '${supplier.oracleHome}\bin\sqlplus.exe system/${supplier.systemPassword}@localhost/${supplier.sid} @c:\vagrant\modules\conf\oracle\oracle_init.sql',
+    command => '${supplier.oracleHome}\bin\sqlplus.exe system/${supplier.systemPassword}@localhost/${supplier.sid} @c:\vagrant\modules\conf\oracle\oracle.init.sql',
     environment => 'ORACLE_HOME=${supplier.oracleHome}',
     creates => '${supplier.installDir}/oradata/${supplier.sid}/${supplier.alternateTablespace}.dbf',
 }

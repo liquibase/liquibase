@@ -1,0 +1,14 @@
+Package <| |> -> Exec['unzip db2']
+exec {'unzip db2':
+    command     => '/bin/tar xfzv /install/db2/*expc.tar.gz',
+    cwd     => '/install/db2/',
+    creates  => '/install/db2/expc/',
+    path    => ['/usr/bin', '/usr/sbin', '/bin'],
+}
+
+exec {'/install/db2/expc/db2setup -r /install/db2/db2expc.rsp':
+     require     => [Exec['unzip db2'], User['liquibase'],
+     cwd     => '/install/db2/expc',
+     creates  => '/opt/ibm/db2/',
+     path    => ['/usr/bin', '/usr/sbin', '/bin'],
+}

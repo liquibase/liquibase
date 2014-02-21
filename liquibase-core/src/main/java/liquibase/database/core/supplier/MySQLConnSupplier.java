@@ -1,9 +1,7 @@
 package liquibase.database.core.supplier;
 
-import liquibase.sdk.TemplateService;
 import liquibase.sdk.supplier.database.ConnectionSupplier;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 import java.util.Set;
@@ -41,33 +39,16 @@ public class MySQLConnSupplier extends ConnectionSupplier {
     }
 
     @Override
-    public Set<String> getRequiredPackages(String vagrantBoxName) {
-        Set<String> packages = super.getRequiredPackages(vagrantBoxName);
-        packages.add("mysql");
-        return packages;
+    public Set<ConfigTemplate> generateConfigFiles(Map<String, Object> context) throws IOException {
+        Set<ConfigTemplate> configTemplates = super.generateConfigFiles(context);
+        configTemplates.add(new ConfigTemplate("liquibase/sdk/vagrant/supplier/mysql/mysql.init.sql.vm", context));
+
+        return configTemplates;
     }
 
     @Override
-    public Set<ConfigFile> generateConfigFiles(Map<String, Object> context) throws IOException {
-        Set<ConfigFile> configFiles = super.generateConfigFiles(context);
-        configFiles.add(new ConfigFile("liquibase/sdk/vagrant/supplier/mysql/mysql.init.sql.vm", context));
-
-        return configFiles;
-    }
-
-    @Override
-    public String getPuppetInit(Map<String, Object> context) throws IOException {
-        return "class { '::mysql::server':\n" +
-                "    require => Package['mysql'],\n"+
-                "    root_password => '"+getAdminPassword()+"',\n"+
-                (getVersion() == null ? "" : "    package_ensure => '"+getVersion()+"',\n")+
-                "    override_options => { 'mysqld' => { 'bind_address'  => '0.0.0.0' } }, \n" +
-                "}\n" +
-                "\n" +
-                "exec { \"Create mysql users and databases\":\n" +
-                "    require => Class['::mysql::server'],\n" +
-                "    command => '/bin/sh -c \"mysql -u "+getAdminUsername()+" -p"+getAdminPassword()+" mysql < /vagrant/modules/conf/mysql/mysql.init.sql\"'\n" +
-                "}\n";
+    public ConfigTemplate getPuppetTemplate(Map<String, Object> context) {
+        return new ConfigTemplate("liquibase/sdk/vagrant/supplier/mysql/mysql-linux.puppet.vm", context);
 
     }
 }

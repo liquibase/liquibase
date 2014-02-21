@@ -1,6 +1,8 @@
 package liquibase.sdk.supplier.database;
 
+import liquibase.database.DatabaseFactory;
 import liquibase.sdk.TemplateService;
+import org.apache.velocity.Template;
 
 import java.io.File;
 import java.io.IOException;
@@ -96,9 +98,7 @@ public abstract class ConnectionSupplier implements Cloneable {
         return new HashSet<String>();
     }
 
-    public String getPuppetInit(Map<String, Object> context) throws IOException {
-        return null;
-    }
+    public abstract ConfigTemplate getPuppetTemplate(Map<String, Object> context);
 
     public String getVersion() {
         return version;
@@ -147,18 +147,18 @@ public abstract class ConnectionSupplier implements Cloneable {
                 "Alternate Tablespace: "+ getAlternateTablespace()+"\n";
     }
 
-    public Set<ConfigFile> generateConfigFiles(Map<String, Object> context) throws IOException {
-        Set<ConfigFile> set = new HashSet<ConfigFile>();
+    public Set<ConfigTemplate> generateConfigFiles(Map<String, Object> context) throws IOException {
+        Set<ConfigTemplate> set = new HashSet<ConfigTemplate>();
         return set;
     }
 
-    public static class ConfigFile {
+    public static class ConfigTemplate {
 
         private final String templatePath;
         private final Map<String, Object> context;
         private final String outputFileName;
 
-        public ConfigFile(String templatePath, Map<String, Object> context) {
+        public ConfigTemplate(String templatePath, Map<String, Object> context) {
             this.templatePath = templatePath;
             this.context = context;
             this.outputFileName = templatePath.replaceFirst(".*/", "").replaceFirst("\\.vm$", "");
@@ -178,6 +178,10 @@ public abstract class ConnectionSupplier implements Cloneable {
 
         public void write(File outputFile) throws IOException {
             TemplateService.getInstance().write(templatePath, outputFile, context);
+        }
+
+        public String output() throws IOException {
+            return TemplateService.getInstance().output(templatePath, context);
         }
     }
 }
