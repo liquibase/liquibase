@@ -14,8 +14,8 @@ import java.sql.Statement;
 import java.util.*;
 
 class ResultSetCache {
-    private int timesSingleQueried = 0;
-    private boolean didBulkQuery = false;
+    private Map<String, Integer> timesSingleQueried = new HashMap<String, Integer>();
+    private Map<String, Boolean> didBulkQuery = new HashMap<String, Boolean>();
 
     private Map<String, Map<String, List<CachedRow>>> cacheBySchema = new HashMap<String, Map<String, List<CachedRow>>>();
 
@@ -37,17 +37,21 @@ class ResultSetCache {
                 return cache.get(wantedKey);
             }
 
-            if (didBulkQuery) {
+            if (didBulkQuery.containsKey(schemaKey) && didBulkQuery.get(schemaKey)) {
                 return new ArrayList<CachedRow>();
             }
 
             List<CachedRow> results;
-            if (resultSetExtractor.shouldBulkSelect(this)) {
+            if (resultSetExtractor.shouldBulkSelect(schemaKey, this)) {
                 cache.clear(); //remove any existing single fetches that may be duplicated
                 results = resultSetExtractor.bulkFetch();
-                didBulkQuery = true;
+                didBulkQuery.put(schemaKey, true);
             } else {
-                timesSingleQueried++;
+                Integer previousCount = timesSingleQueried.get(schemaKey);
+                if (previousCount == null) {
+                    previousCount = 0;
+                }
+                timesSingleQueried.put(schemaKey, previousCount+1);
                 results = resultSetExtractor.fastFetch();
             }
 
@@ -166,8 +170,8 @@ class ResultSetCache {
             this.database = database;
         }
 
-        boolean shouldBulkSelect(ResultSetCache resultSetCache) {
-            return resultSetCache.timesSingleQueried >= 3;
+        boolean shouldBulkSelect(String schemaKey, ResultSetCache resultSetCache) {
+            return resultSetCache.getTimesSingleQueried(schemaKey) >= 3;
         }
 
         List<CachedRow> executeAndExtract(String sql, Database database) throws DatabaseException, SQLException {
@@ -234,6 +238,14 @@ class ResultSetCache {
         }
 
 
+    }
+
+    private int getTimesSingleQueried(String schemaKey) {
+        Integer integer = timesSingleQueried.get(schemaKey);
+        if (integer == null) {
+            return 0;
+        }
+        return integer;
     }
 
     public abstract static class SingleResultSetExtractor extends ResultSetExtractor {

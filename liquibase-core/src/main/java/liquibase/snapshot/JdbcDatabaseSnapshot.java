@@ -15,8 +15,6 @@ import liquibase.util.StringUtils;
 import java.sql.*;
 import java.util.*;
 
-import liquibase.logging.LogFactory;
-
 public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
     private CachingDatabaseMetaData cachingDatabaseMetaData;
 
@@ -100,7 +98,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
 
                 @Override
-                boolean shouldBulkSelect(ResultSetCache resultSetCache) {
+                boolean shouldBulkSelect(String schemaKey, ResultSetCache resultSetCache) {
                     return false;
                 }
             });
@@ -175,9 +173,9 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
 
                 @Override
-                boolean shouldBulkSelect(ResultSetCache resultSetCache) {
+                boolean shouldBulkSelect(String schemaKey, ResultSetCache resultSetCache) {
                     if (database instanceof OracleDatabase) {
-                        return super.shouldBulkSelect(resultSetCache);
+                        return super.shouldBulkSelect(schemaKey, resultSetCache);
                     }
                     return false;
                 }
@@ -204,7 +202,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
 
                 @Override
-                boolean shouldBulkSelect(ResultSetCache resultSetCache) {
+                boolean shouldBulkSelect(String schemaKey, ResultSetCache resultSetCache) {
                     Set<String> seenTables = resultSetCache.getInfo("seenTables", Set.class);
                     if (seenTables == null) {
                         seenTables = new HashSet<String>();
@@ -363,7 +361,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
 
                 @Override
-                boolean shouldBulkSelect(ResultSetCache resultSetCache) {
+                boolean shouldBulkSelect(String schemaKey, ResultSetCache resultSetCache) {
                     return false;
                 }
             });
