@@ -539,6 +539,12 @@ public class Main {
         stream.println(" --defaultSchemaName=<name>                 Default database schema to use");
         stream.println(" --referenceDefaultCatalogName=<name>       Reference database catalog to use");
         stream.println(" --referenceDefaultSchemaName=<name>        Reference database schema to use");
+        stream.println(" --includeCatalog=<true|false>              If true, the catalog will be");
+        stream.println("                                            included in generated changeSets");
+        stream.println("                                            Defaults to false");
+        stream.println(" --includeSchema=<true|false>               If true, the schema will be");
+        stream.println("                                            included in generated changeSets");
+        stream.println("                                            Defaults to false");
         stream.println(" --referenceDriver=<jdbc.driver.ClassName>  Reference database driver class name");
         stream.println(" --dataOutputDirectory=DIR                  Output data as CSV in the given ");
         stream.println("                                            directory");
@@ -801,7 +807,7 @@ public class Main {
             boolean includeCatalog = Boolean.parseBoolean(getCommandParam("includeCatalog", "false"));
             boolean includeSchema = Boolean.parseBoolean(getCommandParam("includeSchema", "false"));
             boolean includeTablespace = Boolean.parseBoolean(getCommandParam("includeTablespace", "false"));
-            DiffOutputControl diffOutputControl = new DiffOutputControl(includeCatalog, includeSchema, includeTablespace);
+            DiffOutputControl diffOutputControl = new DiffOutputControl(includeCatalog, includeSchema, includeTablespace).addIncludedSchema(new CatalogAndSchema(defaultCatalogName, defaultSchemaName));
 
             if ("diff".equalsIgnoreCase(command)) {
                 CommandLineUtils.doDiff(createReferenceDatabaseFromCommandParams(commandParams), database, StringUtils.trimToNull(diffTypes));

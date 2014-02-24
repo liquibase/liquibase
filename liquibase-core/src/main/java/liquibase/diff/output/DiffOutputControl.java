@@ -1,5 +1,6 @@
 package liquibase.diff.output;
 
+import liquibase.CatalogAndSchema;
 import liquibase.database.Database;
 import liquibase.database.InternalDatabase;
 import liquibase.database.core.H2Database;
@@ -7,8 +8,15 @@ import liquibase.diff.output.changelog.ChangeGeneratorFactory;
 import liquibase.diff.output.changelog.core.MissingDataExternalFileChangeGenerator;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.DatabaseObjectCollection;
+import liquibase.structure.core.Schema;
+
+import java.util.HashSet;
+import java.util.Set;
 
 public class DiffOutputControl {
+
+    private Set<CatalogAndSchema> includeSchemas = new HashSet<CatalogAndSchema>();
+
     private boolean includeSchema;
     private boolean includeCatalog;
     private boolean includeTablespace;
@@ -84,7 +92,36 @@ public class DiffOutputControl {
     }
 
     public boolean alreadyHandledChanged(DatabaseObject changedObject, Database accordingTo) {
-        return alreadyHandledChanged.contains(changedObject);    }
+        return alreadyHandledChanged.contains(changedObject);
+    }
+
+    public DiffOutputControl addIncludedSchema(Schema schema) {
+        this.includeSchemas.add(schema.toCatalogAndSchema());
+        return this;
+    }
+
+    public DiffOutputControl addIncludedSchema(CatalogAndSchema schema) {
+        this.includeSchemas.add(schema);
+        return this;
+    }
+
+    public boolean shouldOutput(DatabaseObject object, Database accordingTo) {
+        if (includeSchemas.size() > 0) {
+            Schema schema = object.getSchema();
+            if (schema == null) {
+                return true;
+            }
+            CatalogAndSchema objectCatalogAndSchema = schema.toCatalogAndSchema();
+            for (CatalogAndSchema catalogAndSchema : includeSchemas) {
+                if (objectCatalogAndSchema.equals(catalogAndSchema, accordingTo)) {
+                    return true;
+                }
+            }
+            return false;
+        } else {
+            return true;
+        }
+    }
 
     private static class DatabaseForHash extends H2Database implements InternalDatabase {
         @Override

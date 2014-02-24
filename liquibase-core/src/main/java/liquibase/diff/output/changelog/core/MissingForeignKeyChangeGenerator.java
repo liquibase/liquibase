@@ -40,10 +40,10 @@ public class MissingForeignKeyChangeGenerator implements MissingObjectChangeGene
         change.setConstraintName(fk.getName());
 
         change.setReferencedTableName(fk.getPrimaryKeyTable().getName());
-        if (control.isIncludeCatalog()) {
+        if (!((ForeignKey) missingObject).getPrimaryKeyTable().getSchema().equals(((ForeignKey) missingObject).getForeignKeyTable().getSchema()) || control.isIncludeCatalog()) {
             change.setReferencedTableCatalogName(fk.getPrimaryKeyTable().getSchema().getCatalogName());
         }
-        if (control.isIncludeSchema()) {
+        if (!((ForeignKey) missingObject).getPrimaryKeyTable().getSchema().equals(((ForeignKey) missingObject).getForeignKeyTable().getSchema()) || control.isIncludeSchema()) {
             change.setReferencedTableSchemaName(fk.getPrimaryKeyTable().getSchema().getName());
         }
         change.setReferencedColumnNames(fk.getPrimaryKeyColumns());

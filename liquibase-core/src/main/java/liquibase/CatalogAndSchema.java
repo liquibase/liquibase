@@ -21,7 +21,10 @@ public class CatalogAndSchema {
     }
 
     public boolean equals(CatalogAndSchema catalogAndSchema, Database database) {
-        return this.equals(catalogAndSchema); //todo: use database param or remove method
+        catalogAndSchema = database.correctSchema(catalogAndSchema);
+        CatalogAndSchema thisCatalogAndSchema = database.correctSchema(this);
+
+        return catalogAndSchema.toString().equals(thisCatalogAndSchema.toString());
     }
 
     @Override

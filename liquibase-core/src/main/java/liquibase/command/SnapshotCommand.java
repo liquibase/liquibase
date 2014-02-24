@@ -51,7 +51,6 @@ public class SnapshotCommand extends AbstractCommand {
 
     @Override
     protected Object run() throws Exception {
-        System.out.println("Snapshot!");
         SnapshotControl snapshotControl = new SnapshotControl(database);
 
         DatabaseSnapshot snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(catalogs.toArray(new CatalogAndSchema[catalogs.size()]), database, snapshotControl);
