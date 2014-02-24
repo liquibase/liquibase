@@ -12,6 +12,17 @@ public class CatalogAndSchema {
         this.schemaName = schemaName;
     }
 
+    public CatalogAndSchema(String catalogAndOrSchema) {
+        String[] split = catalogAndOrSchema.split("\\.");
+        if (split.length == 1) {
+            schemaName = split[0];
+        } else {
+            catalogName = split[0];
+            schemaName = split[1];
+        }
+
+    }
+
     public String getCatalogName() {
         return catalogName;
     }
@@ -24,7 +35,7 @@ public class CatalogAndSchema {
         catalogAndSchema = database.correctSchema(catalogAndSchema);
         CatalogAndSchema thisCatalogAndSchema = database.correctSchema(this);
 
-        return catalogAndSchema.toString().equals(thisCatalogAndSchema.toString());
+        return catalogAndSchema.toString().equalsIgnoreCase(thisCatalogAndSchema.toString());
     }
 
     @Override

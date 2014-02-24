@@ -1,5 +1,6 @@
 package liquibase.command;
 
+import liquibase.CatalogAndSchema;
 import liquibase.database.Database;
 import liquibase.diff.DiffGeneratorFactory;
 import liquibase.diff.DiffResult;
@@ -26,6 +27,8 @@ public class DiffCommand extends AbstractCommand {
     private Class<? extends DatabaseObject>[] snapshotTypes;
     private PrintStream outputStream;
     private CompareControl compareControl;
+    private CatalogAndSchema[] referenceSchemas;
+    private CatalogAndSchema[] targetSchemas;
 
 
     @Override
@@ -98,6 +101,23 @@ public class DiffCommand extends AbstractCommand {
         return this;
     }
 
+    public CatalogAndSchema[] getReferenceSchemas() {
+        return referenceSchemas;
+    }
+
+    public DiffCommand setReferenceSchemas(CatalogAndSchema[] referenceSchemas) {
+        this.referenceSchemas = referenceSchemas;
+        return this;
+    }
+
+    public CatalogAndSchema[] getTargetSchemas() {
+        return targetSchemas;
+    }
+
+    public DiffCommand setTargetSchemas(CatalogAndSchema[] targetSchemas) {
+        this.targetSchemas = targetSchemas;
+        return this;
+    }
 
     @Override
     protected Object run() throws Exception {
@@ -109,10 +129,28 @@ public class DiffCommand extends AbstractCommand {
     }
 
     protected DiffResult createDiffResult() throws DatabaseException, InvalidExampleException {
-        DatabaseSnapshot referenceSnapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(referenceDatabase.getDefaultSchema(), referenceDatabase, new SnapshotControl(referenceDatabase, snapshotTypes));
-        DatabaseSnapshot targetSnapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(targetDatabase.getDefaultSchema(), targetDatabase, new SnapshotControl(targetDatabase));
+        DatabaseSnapshot referenceSnapshot = createReferenceSnapshot();
+        DatabaseSnapshot targetSnapshot = createTargetSnapshot();
 
         CompareControl compareControl = new CompareControl(referenceSnapshot.getSnapshotControl().getTypesToInclude());
         return DiffGeneratorFactory.getInstance().compare(referenceSnapshot, targetSnapshot, compareControl);
+    }
+
+    protected DatabaseSnapshot createTargetSnapshot() throws DatabaseException, InvalidExampleException {
+        CatalogAndSchema[] schemas = getTargetSchemas();
+        if (schemas == null) {
+            schemas = new CatalogAndSchema[] {targetDatabase.getDefaultSchema()};
+        }
+
+        return SnapshotGeneratorFactory.getInstance().createSnapshot(schemas, targetDatabase, new SnapshotControl(targetDatabase, snapshotTypes));
+    }
+
+    protected DatabaseSnapshot createReferenceSnapshot() throws DatabaseException, InvalidExampleException {
+        CatalogAndSchema[] schemas = getReferenceSchemas();
+        if (schemas == null) {
+            schemas = new CatalogAndSchema[] {referenceDatabase.getDefaultSchema()};
+        }
+
+        return SnapshotGeneratorFactory.getInstance().createSnapshot(schemas, referenceDatabase, new SnapshotControl(referenceDatabase, snapshotTypes));
     }
 }

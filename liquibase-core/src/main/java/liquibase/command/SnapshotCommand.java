@@ -6,7 +6,7 @@ import liquibase.serializer.SnapshotSerializerFactory;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.SnapshotControl;
 import liquibase.snapshot.SnapshotGeneratorFactory;
-import liquibase.structure.DatabaseObject;
+import liquibase.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,8 +14,7 @@ import java.util.List;
 public class SnapshotCommand extends AbstractCommand {
 
     private Database database;
-    private List<DatabaseObject> examples = new ArrayList<DatabaseObject>();
-    private List<CatalogAndSchema> catalogs = new ArrayList<CatalogAndSchema>();
+    private CatalogAndSchema[] schemas;
     private String serializerFormat = "txt";
 
     @Override
@@ -32,13 +31,29 @@ public class SnapshotCommand extends AbstractCommand {
         return database;
     }
 
-    public void addExample(CatalogAndSchema catalogAndSchema) {
-        catalogs.add(catalogAndSchema);
+    public SnapshotCommand setSchemas(CatalogAndSchema... catalogAndSchema) {
+        schemas = catalogAndSchema;
+        return this;
     }
 
-    public void addExample(DatabaseObject example) {
-        examples.add(example);
+    public SnapshotCommand setSchemas(String... schemas) {
+        if (schemas == null || schemas.length == 0 || schemas[0] == null) {
+            this.schemas = null;
+            return this;
+        }
+
+        schemas = StringUtils.join(schemas, ",").split("\\s*,\\s*");
+        List<CatalogAndSchema> finalList = new ArrayList<CatalogAndSchema>();
+        for (String schema : schemas) {
+            finalList.add(database.correctSchema(new CatalogAndSchema(schema)));
+        }
+
+        this.schemas = finalList.toArray(new CatalogAndSchema[finalList.size()]);
+
+
+        return this;
     }
+
 
     public String getSerializerFormat() {
         return serializerFormat;
@@ -53,7 +68,11 @@ public class SnapshotCommand extends AbstractCommand {
     protected Object run() throws Exception {
         SnapshotControl snapshotControl = new SnapshotControl(database);
 
-        DatabaseSnapshot snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(catalogs.toArray(new CatalogAndSchema[catalogs.size()]), database, snapshotControl);
+        CatalogAndSchema[] schemas = this.schemas;
+        if (schemas == null) {
+            schemas = new CatalogAndSchema[] {database.getDefaultSchema()};
+        }
+        DatabaseSnapshot snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(schemas, database, snapshotControl);
 
         return SnapshotSerializerFactory.getInstance().getSerializer(getSerializerFormat()).serialize(snapshot, true);
     }

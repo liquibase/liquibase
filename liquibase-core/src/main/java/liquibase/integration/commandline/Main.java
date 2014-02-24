@@ -539,6 +539,12 @@ public class Main {
         stream.println(" --defaultSchemaName=<name>                 Default database schema to use");
         stream.println(" --referenceDefaultCatalogName=<name>       Reference database catalog to use");
         stream.println(" --referenceDefaultSchemaName=<name>        Reference database schema to use");
+        stream.println(" --targetSchemas=<name1,name2>              Target database schemas to include");
+        stream.println("                                            objects from in comparison");
+        stream.println(" --referenceSchemas=<name1,name2>           Reference database schemas to include");
+        stream.println("                                            objects from in comparison");
+        stream.println(" --schemas=<name1,name2>                    Database schemas to include");
+        stream.println("                                            objects from in generateChangeLog");
         stream.println(" --includeCatalog=<true|false>              If true, the catalog will be");
         stream.println("                                            included in generated changeSets");
         stream.println("                                            Defaults to false");
@@ -807,7 +813,7 @@ public class Main {
             boolean includeCatalog = Boolean.parseBoolean(getCommandParam("includeCatalog", "false"));
             boolean includeSchema = Boolean.parseBoolean(getCommandParam("includeSchema", "false"));
             boolean includeTablespace = Boolean.parseBoolean(getCommandParam("includeTablespace", "false"));
-            DiffOutputControl diffOutputControl = new DiffOutputControl(includeCatalog, includeSchema, includeTablespace).addIncludedSchema(new CatalogAndSchema(defaultCatalogName, defaultSchemaName));
+            DiffOutputControl diffOutputControl = new DiffOutputControl(includeCatalog, includeSchema, includeTablespace);
 
             if ("diff".equalsIgnoreCase(command)) {
                 CommandLineUtils.doDiff(createReferenceDatabaseFromCommandParams(commandParams), database, StringUtils.trimToNull(diffTypes));
@@ -816,12 +822,25 @@ public class Main {
                 CommandLineUtils.doDiffToChangeLog(changeLogFile, createReferenceDatabaseFromCommandParams(commandParams), database, diffOutputControl,  StringUtils.trimToNull(diffTypes));
                 return;
             } else if ("generateChangeLog".equalsIgnoreCase(command)) {
-                CommandLineUtils.doGenerateChangeLog(changeLogFile, database, defaultCatalogName, defaultSchemaName, StringUtils.trimToNull(diffTypes), StringUtils.trimToNull(changeSetAuthor), StringUtils.trimToNull(changeSetContext), StringUtils.trimToNull(dataOutputDirectory), diffOutputControl);
+                String referenceSchemas = getCommandParam("schemas", null);
+                if (referenceSchemas == null) {
+                    diffOutputControl.addIncludedSchema(new CatalogAndSchema(defaultCatalogName, defaultSchemaName));
+                    CommandLineUtils.doGenerateChangeLog(changeLogFile, database, defaultCatalogName, defaultSchemaName, StringUtils.trimToNull(diffTypes), StringUtils.trimToNull(changeSetAuthor), StringUtils.trimToNull(changeSetContext), StringUtils.trimToNull(dataOutputDirectory), diffOutputControl);
+                } else {
+                    List<CatalogAndSchema> schemas = new ArrayList<CatalogAndSchema>();
+                    for (String schema : referenceSchemas.split(",")) {
+                        CatalogAndSchema correctedSchema = database.correctSchema(new CatalogAndSchema(schema));
+                        schemas.add(correctedSchema);
+                        diffOutputControl.addIncludedSchema(correctedSchema);
+                    }
+                    CommandLineUtils.doGenerateChangeLog(changeLogFile, database, schemas.toArray(new CatalogAndSchema[schemas.size()]), StringUtils.trimToNull(diffTypes), StringUtils.trimToNull(changeSetAuthor), StringUtils.trimToNull(changeSetContext), StringUtils.trimToNull(dataOutputDirectory), diffOutputControl);
+                }
+
                 return;
             } else if ("snapshot".equalsIgnoreCase(command)) {
                 SnapshotCommand command = new SnapshotCommand();
                 command.setDatabase(database);
-                command.addExample(new CatalogAndSchema(defaultCatalogName, defaultSchemaName));
+                command.setSchemas(getCommandParam("schemas", database.getDefaultSchema().toString()));
                 System.out.println(command.execute());
                 return;
             }

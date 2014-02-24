@@ -1,10 +1,11 @@
 package liquibase.command;
 
-import liquibase.diff.DiffGeneratorFactory;
 import liquibase.diff.DiffResult;
 import liquibase.diff.compare.CompareControl;
 import liquibase.diff.output.changelog.DiffToChangeLog;
+import liquibase.exception.DatabaseException;
 import liquibase.snapshot.DatabaseSnapshot;
+import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.SnapshotControl;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.util.StringUtils;
@@ -41,12 +42,7 @@ public class GenerateChangeLogCommand extends DiffToChangeLogCommand {
 
     @Override
     protected Object run() throws Exception {
-        SnapshotControl snapshotControl = new SnapshotControl(getReferenceDatabase(), getSnapshotTypes());
-
-//        compareControl.addStatusListener(new OutDiffStatusListener());
-
-        DatabaseSnapshot originalDatabaseSnapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(getCompareControl().getSchemas(CompareControl.DatabaseRole.REFERENCE), getReferenceDatabase(), snapshotControl);
-        DiffResult diffResult = DiffGeneratorFactory.getInstance().compare(originalDatabaseSnapshot, SnapshotGeneratorFactory.getInstance().createSnapshot(getCompareControl().getSchemas(CompareControl.DatabaseRole.REFERENCE), null, snapshotControl), getCompareControl());
+        DiffResult diffResult = createDiffResult();
 
         DiffToChangeLog changeLogWriter = new DiffToChangeLog(diffResult, getDiffOutputControl());
 
@@ -65,5 +61,11 @@ public class GenerateChangeLogCommand extends DiffToChangeLogCommand {
 
         return null;
 
+    }
+
+    @Override
+    protected DatabaseSnapshot createTargetSnapshot() throws DatabaseException, InvalidExampleException {
+        SnapshotControl snapshotControl = new SnapshotControl(getReferenceDatabase(), getSnapshotTypes());
+        return SnapshotGeneratorFactory.getInstance().createSnapshot(getCompareControl().getSchemas(CompareControl.DatabaseRole.REFERENCE), null, snapshotControl);
     }
 }

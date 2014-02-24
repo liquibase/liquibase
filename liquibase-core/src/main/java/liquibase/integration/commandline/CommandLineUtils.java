@@ -94,8 +94,16 @@ public class CommandLineUtils {
     }
 
     public static void doGenerateChangeLog(String changeLogFile, Database originalDatabase, String catalogName, String schemaName, String snapshotTypes, String author, String context, String dataDir, DiffOutputControl diffOutputControl) throws DatabaseException, IOException, ParserConfigurationException, InvalidExampleException, LiquibaseException {
+        doGenerateChangeLog(changeLogFile, originalDatabase, new CatalogAndSchema[] {new CatalogAndSchema(catalogName, schemaName)}, snapshotTypes, author, context, dataDir, diffOutputControl);
+    }
 
-        CompareControl compareControl = new CompareControl(new CompareControl.SchemaComparison[] {new CompareControl.SchemaComparison(new CatalogAndSchema(catalogName, schemaName), new CatalogAndSchema(catalogName, schemaName))}, snapshotTypes);
+    public static void doGenerateChangeLog(String changeLogFile, Database originalDatabase, CatalogAndSchema[] schemas, String snapshotTypes, String author, String context, String dataDir, DiffOutputControl diffOutputControl) throws DatabaseException, IOException, ParserConfigurationException, InvalidExampleException, LiquibaseException {
+        CompareControl.SchemaComparison[] comparisons = new CompareControl.SchemaComparison[schemas.length];
+        int i=0;
+        for (CatalogAndSchema schema : schemas) {
+            comparisons[i++] = new CompareControl.SchemaComparison(schema, schema);
+        }
+        CompareControl compareControl = new CompareControl(comparisons, snapshotTypes);
         diffOutputControl.setDataDir(dataDir);
 
         GenerateChangeLogCommand command = new GenerateChangeLogCommand();
@@ -103,6 +111,7 @@ public class CommandLineUtils {
         command.setReferenceDatabase(originalDatabase)
                 .setSnapshotTypes(snapshotTypes)
                 .setOutputStream(System.out)
+                .setReferenceSchemas(schemas)
                 .setCompareControl(compareControl);
         command.setChangeLogFile(changeLogFile)
                 .setDiffOutputControl(diffOutputControl);
