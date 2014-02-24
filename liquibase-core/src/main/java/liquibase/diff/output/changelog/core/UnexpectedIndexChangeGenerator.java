@@ -40,10 +40,10 @@ public class UnexpectedIndexChangeGenerator implements UnexpectedObjectChangeGen
 
         DropIndexChange change = new DropIndexChange();
         change.setTableName(index.getTable().getName());
-        if (control.isIncludeCatalog()) {
+        if (control.getIncludeCatalog()) {
             change.setCatalogName(index.getTable().getSchema().getCatalogName());
         }
-        if (control.isIncludeSchema()) {
+        if (control.getIncludeSchema()) {
             change.setSchemaName(index.getTable().getSchema().getName());
         }
         change.setIndexName(index.getName());

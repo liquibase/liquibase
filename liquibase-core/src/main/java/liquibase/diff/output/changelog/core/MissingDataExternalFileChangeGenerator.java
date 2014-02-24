@@ -1,8 +1,6 @@
 package liquibase.diff.output.changelog.core;
 
 import liquibase.change.Change;
-import liquibase.change.ColumnConfig;
-import liquibase.change.core.InsertDataChange;
 import liquibase.change.core.LoadDataChange;
 import liquibase.change.core.LoadDataColumnConfig;
 import liquibase.database.Database;
@@ -124,10 +122,10 @@ public class MissingDataExternalFileChangeGenerator extends MissingDataChangeGen
             LoadDataChange change = new LoadDataChange();
             change.setFile(fileName);
             change.setEncoding("UTF-8");
-            if (outputControl.isIncludeCatalog()) {
+            if (outputControl.getIncludeCatalog()) {
                 change.setCatalogName(table.getSchema().getCatalogName());
             }
-            if (outputControl.isIncludeSchema()) {
+            if (outputControl.getIncludeSchema()) {
                 change.setSchemaName(table.getSchema().getName());
             }
             change.setTableName(table.getName());

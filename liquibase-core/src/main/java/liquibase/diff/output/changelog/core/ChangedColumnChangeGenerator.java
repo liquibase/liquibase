@@ -66,10 +66,10 @@ public class ChangedColumnChangeGenerator implements ChangedObjectChangeGenerato
             boolean nullable = (Boolean) nullableDifference.getReferenceValue();
             if (nullable) {
                 DropNotNullConstraintChange change = new DropNotNullConstraintChange();
-                if (control.isIncludeCatalog()) {
+                if (control.getIncludeCatalog()) {
                     change.setCatalogName(column.getRelation().getSchema().getCatalog().getName());
                 }
-                if (control.isIncludeSchema()) {
+                if (control.getIncludeSchema()) {
                     change.setSchemaName(column.getRelation().getSchema().getName());
                 }
                 change.setTableName(column.getRelation().getName());
@@ -78,10 +78,10 @@ public class ChangedColumnChangeGenerator implements ChangedObjectChangeGenerato
                 changes.add(change);
             } else {
                 AddNotNullConstraintChange change = new AddNotNullConstraintChange();
-                if (control.isIncludeCatalog()) {
+                if (control.getIncludeCatalog()) {
                     change.setCatalogName(column.getRelation().getSchema().getCatalog().getName());
                 }
-                if (control.isIncludeSchema()) {
+                if (control.getIncludeSchema()) {
                     change.setSchemaName(column.getRelation().getSchema().getName());
                 }
                 change.setTableName(column.getRelation().getName());
@@ -100,10 +100,10 @@ public class ChangedColumnChangeGenerator implements ChangedObjectChangeGenerato
                 //todo: Support dropping auto increments
             } else {
                 AddAutoIncrementChange change = new AddAutoIncrementChange();
-                if (control.isIncludeCatalog()) {
+                if (control.getIncludeCatalog()) {
                     change.setCatalogName(column.getRelation().getSchema().getCatalog().getName());
                 }
-                if (control.isIncludeSchema()) {
+                if (control.getIncludeSchema()) {
                     change.setSchemaName(column.getRelation().getSchema().getName());
                 }
                 change.setTableName(column.getRelation().getName());
@@ -118,10 +118,10 @@ public class ChangedColumnChangeGenerator implements ChangedObjectChangeGenerato
         Difference typeDifference = differences.getDifference("type");
         if (typeDifference != null) {
             ModifyDataTypeChange change = new ModifyDataTypeChange();
-            if (control.isIncludeCatalog()) {
+            if (control.getIncludeCatalog()) {
                 change.setCatalogName(column.getRelation().getSchema().getCatalog().getName());
             }
-            if (control.isIncludeSchema()) {
+            if (control.getIncludeSchema()) {
                 change.setSchemaName(column.getRelation().getSchema().getName());
             }
             change.setTableName(column.getRelation().getName());
@@ -142,10 +142,10 @@ public class ChangedColumnChangeGenerator implements ChangedObjectChangeGenerato
             LiquibaseDataType columnDataType = DataTypeFactory.getInstance().from(column.getType());
             if (value == null) {
                 DropDefaultValueChange change = new DropDefaultValueChange();
-                if (control.isIncludeCatalog()) {
+                if (control.getIncludeCatalog()) {
                     change.setCatalogName(column.getRelation().getSchema().getCatalog().getName());
                 }
-                if (control.isIncludeSchema()) {
+                if (control.getIncludeSchema()) {
                     change.setSchemaName(column.getRelation().getSchema().getName());
                 }
                 change.setTableName(column.getRelation().getName());
@@ -156,10 +156,10 @@ public class ChangedColumnChangeGenerator implements ChangedObjectChangeGenerato
 
             } else {
                 AddDefaultValueChange change = new AddDefaultValueChange();
-                if (control.isIncludeCatalog()) {
+                if (control.getIncludeCatalog()) {
                     change.setCatalogName(column.getRelation().getSchema().getCatalog().getName());
                 }
-                if (control.isIncludeSchema()) {
+                if (control.getIncludeSchema()) {
                     change.setSchemaName(column.getRelation().getSchema().getName());
                 }
                 change.setTableName(column.getRelation().getName());

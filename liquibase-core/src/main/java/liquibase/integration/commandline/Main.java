@@ -233,7 +233,7 @@ public class Main {
             || "calculateCheckSum".equalsIgnoreCase(command)
             || "dbDoc".equalsIgnoreCase(command)
             || "tag".equalsIgnoreCase(command)) {
-            
+
             if (commandParams.size() > 0 && commandParams.iterator().next().startsWith("-")) {
                 messages.add("unexpected command parameters: "+commandParams);
             }
@@ -260,7 +260,7 @@ public class Main {
                 }
             }
         }
-        
+
     }
 
     private void validateCommandParameters(final List<String> messages) {
@@ -797,7 +797,7 @@ public class Main {
 
         FileSystemResourceAccessor fsOpener = new FileSystemResourceAccessor();
         CommandLineResourceAccessor clOpener = new CommandLineResourceAccessor(classLoader);
-        Database database = CommandLineUtils.createDatabaseObject(classLoader, this.url, 
+        Database database = CommandLineUtils.createDatabaseObject(classLoader, this.url,
             this.username, this.password, this.driver, this.defaultCatalogName,this.defaultSchemaName,  Boolean.parseBoolean(outputDefaultCatalog), Boolean.parseBoolean(outputDefaultSchema), this.databaseClass, this.driverPropertiesFile, null, null);
         try {
 

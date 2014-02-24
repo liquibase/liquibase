@@ -37,7 +37,7 @@ public class DiffOutputControl {
         this.includeTablespace = includeTablespace;
     }
 
-    public boolean isIncludeSchema() {
+    public boolean getIncludeSchema() {
         return includeSchema;
     }
 
@@ -46,7 +46,7 @@ public class DiffOutputControl {
         return this;
     }
 
-    public boolean isIncludeCatalog() {
+    public boolean getIncludeCatalog() {
         return includeCatalog;
     }
 
@@ -55,7 +55,7 @@ public class DiffOutputControl {
         return this;
     }
 
-    public boolean isIncludeTablespace() {
+    public boolean getIncludeTablespace() {
         return includeTablespace;
     }
 
