@@ -4,6 +4,7 @@ import liquibase.CatalogAndSchema;
 import liquibase.diff.DiffResult;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.changelog.DiffToChangeLog;
+import liquibase.util.StringUtils;
 
 import java.io.PrintStream;
 
@@ -54,7 +55,7 @@ public class DiffToChangeLogCommand extends DiffCommand {
             outputStream = System.out;
         }
 
-        if (changeLogFile == null) {
+        if (StringUtils.trimToNull(changeLogFile) == null) {
             new DiffToChangeLog(diffResult, diffOutputControl).print(outputStream);
         } else {
             new DiffToChangeLog(diffResult, diffOutputControl).print(changeLogFile);

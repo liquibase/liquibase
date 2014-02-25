@@ -13,6 +13,7 @@ import liquibase.snapshot.SnapshotControl;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.DatabaseObjectFactory;
+import liquibase.structure.core.Schema;
 import liquibase.util.StringUtils;
 
 import java.io.PrintStream;
@@ -132,7 +133,21 @@ public class DiffCommand extends AbstractCommand {
         DatabaseSnapshot referenceSnapshot = createReferenceSnapshot();
         DatabaseSnapshot targetSnapshot = createTargetSnapshot();
 
-        CompareControl compareControl = new CompareControl(referenceSnapshot.getSnapshotControl().getTypesToInclude());
+        CompareControl.SchemaComparison[] comparisons = new CompareControl.SchemaComparison[referenceSchemas.length];
+        int i=0;
+        for (CatalogAndSchema schema : referenceSchemas) {
+            CatalogAndSchema targetSchema = null;
+            if (targetSchemas == null) {
+                targetSchema = schema;
+            } else {
+                targetSchema = targetSchemas[i];
+            }
+            comparisons[i] = new CompareControl.SchemaComparison(schema, targetSchema);
+            i++;
+        }
+
+        compareControl = new CompareControl(comparisons,referenceSnapshot.getSnapshotControl().getTypesToInclude());
+
         return DiffGeneratorFactory.getInstance().compare(referenceSnapshot, targetSnapshot, compareControl);
     }
 
@@ -154,3 +169,4 @@ public class DiffCommand extends AbstractCommand {
         return SnapshotGeneratorFactory.getInstance().createSnapshot(schemas, referenceDatabase, new SnapshotControl(referenceDatabase, snapshotTypes));
     }
 }
+

@@ -55,9 +55,15 @@ public class CommandLineUtils {
     }
 
     public static void doDiff(Database referenceDatabase, Database targetDatabase, String snapshotTypes) throws LiquibaseException {
+        doDiff(referenceDatabase, targetDatabase, snapshotTypes, null);
+    }
+
+    public static void doDiff(Database referenceDatabase, Database targetDatabase, String snapshotTypes, CatalogAndSchema[] schemas) throws LiquibaseException {
         DiffCommand diffCommand = new DiffCommand()
                 .setReferenceDatabase(referenceDatabase)
                 .setTargetDatabase(targetDatabase)
+                .setReferenceSchemas(schemas)
+                .setTargetSchemas(schemas)
                 .setSnapshotTypes(snapshotTypes)
                 .setOutputStream(System.out);
 
@@ -76,11 +82,23 @@ public class CommandLineUtils {
                                          DiffOutputControl diffOutputControl,
                                          String snapshotTypes)
             throws LiquibaseException, IOException, ParserConfigurationException {
+        doDiffToChangeLog(changeLogFile, referenceDatabase, targetDatabase, diffOutputControl, snapshotTypes, null);
+    }
+
+        public static void doDiffToChangeLog(String changeLogFile,
+                                         Database referenceDatabase,
+                                         Database targetDatabase,
+                                         DiffOutputControl diffOutputControl,
+                                         String snapshotTypes,
+                                         CatalogAndSchema[] schemas)
+            throws LiquibaseException, IOException, ParserConfigurationException {
 
         DiffToChangeLogCommand command = new DiffToChangeLogCommand();
         command.setReferenceDatabase(referenceDatabase)
                 .setTargetDatabase(targetDatabase)
                 .setSnapshotTypes(snapshotTypes)
+                .setReferenceSchemas(schemas)
+                .setTargetSchemas(schemas)
                 .setOutputStream(System.out);
         command.setChangeLogFile(changeLogFile)
                 .setDiffOutputControl(diffOutputControl);
