@@ -13,18 +13,29 @@ import java.util.Set;
 public abstract class ConnectionSupplier implements Cloneable {
 
     public static final String CONFIG_NAME_STANDARD = "standard";
-    public static final String CONFIG_NAME_WINDOWS = "windows";
 
     public String VAGRANT_BOX_NAME_WINDOWS_STANDARD = "liquibase.windows.2008r2.x64";
     public String VAGRANT_BOX_NAME_LINUX_STANDARD = "liquibase.linux.centos.x64";
 
-    public String version;
+    private String version;
     private String ipAddress = "10.10.100.100";
+    private String os = "linux";
 
     public abstract String getDatabaseShortName();
-    public abstract String getConfigurationName();
+
+    public String getConfigurationName() {
+        return CONFIG_NAME_STANDARD;
+    }
 
     public abstract String getJdbcUrl();
+
+    public String getOs() {
+        return os;
+    }
+
+    public void setOs(String os) {
+        this.os = os;
+    }
 
     public String getPrimaryCatalog() {
         return "lbcat";
@@ -88,7 +99,7 @@ public abstract class ConnectionSupplier implements Cloneable {
     }
 
     public String getVagrantBaseBoxName() {
-        if (getConfigurationName().equals("windows")) {
+        if (getOs().equals("windows")) {
             return VAGRANT_BOX_NAME_WINDOWS_STANDARD;
         }
         return VAGRANT_BOX_NAME_LINUX_STANDARD;
@@ -150,6 +161,22 @@ public abstract class ConnectionSupplier implements Cloneable {
     public Set<ConfigTemplate> generateConfigFiles(Map<String, Object> context) throws IOException {
         Set<ConfigTemplate> set = new HashSet<ConfigTemplate>();
         return set;
+    }
+
+    protected boolean isWindows() {
+        return getOs().equalsIgnoreCase("windows");
+    }
+
+    protected boolean isLinux() {
+        return getOs().equalsIgnoreCase("linux");
+    }
+
+    public String getFileSeparator() {
+        if (isWindows()) {
+            return "\\";
+        } else {
+            return "/";
+        }
     }
 
     public static class ConfigTemplate {

@@ -21,11 +21,6 @@ public class SQLiteConnSupplier extends ConnectionSupplier {
     }
 
     @Override
-    public String getConfigurationName() {
-        return CONFIG_NAME_STANDARD;
-    }
-
-    @Override
     public String getJdbcUrl() {
         return "jdbc:sqlite:sqlite/liquibase.db";
     }

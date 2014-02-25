@@ -21,11 +21,6 @@ public class HsqlConnSupplier extends ConnectionSupplier {
     }
 
     @Override
-    public String getConfigurationName() {
-        return CONFIG_NAME_STANDARD;
-    }
-
-    @Override
     public String getJdbcUrl() {
         return "jdbc:hsqldb:mem:liquibase";
     }

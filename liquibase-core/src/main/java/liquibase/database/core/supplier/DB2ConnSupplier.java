@@ -13,11 +13,6 @@ public class DB2ConnSupplier extends ConnectionSupplier {
     }
 
     @Override
-    public String getConfigurationName() {
-        return CONFIG_NAME_STANDARD;
-    }
-
-    @Override
     public String getAdminUsername() {
         return null;
     }
