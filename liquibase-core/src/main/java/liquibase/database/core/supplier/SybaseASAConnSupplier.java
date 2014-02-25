@@ -21,11 +21,6 @@ public class SybaseASAConnSupplier extends ConnectionSupplier {
     }
 
     @Override
-    public String getConfigurationName() {
-        return CONFIG_NAME_STANDARD;
-    }
-
-    @Override
     public String getJdbcUrl() {
         return "jdbc:sybase:Tds:"+ getIpAddress() +":9810/servicename=prior";
     }

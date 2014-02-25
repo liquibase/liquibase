@@ -20,11 +20,6 @@ public class OracleConnSupplier extends ConnectionSupplier {
     }
 
     @Override
-    public String getConfigurationName() {
-        return CONFIG_NAME_STANDARD;
-    }
-
-    @Override
     public String getJdbcUrl() {
         return "jdbc:oracle:thin:@" + getIpAddress() + ":1521:"+getSid();
     }
@@ -69,7 +64,11 @@ public class OracleConnSupplier extends ConnectionSupplier {
 
     @Override
     public ConfigTemplate getPuppetTemplate(Map<String, Object> context) {
-        return new ConfigTemplate("liquibase/sdk/vagrant/supplier/oracle/oracle-linux.puppet.vm", context);
+        if (isWindows()) {
+            return new ConfigTemplate("liquibase/sdk/vagrant/supplier/oracle/oracle-windows.puppet.vm", context);
+        } else {
+            return new ConfigTemplate("liquibase/sdk/vagrant/supplier/oracle/oracle-linux.puppet.vm", context);
+        }
     }
 
     @Override
@@ -90,14 +89,22 @@ public class OracleConnSupplier extends ConnectionSupplier {
 
     public String getZipFileBase() {
         if (getVersion().startsWith("12.")) {
-            return "linuxamd64_12c_database";
+            if (isWindows()) {
+                return "winx64_12c_database";
+            } else {
+                return "linuxamd64_12c_database";
+            }
         } else {
             throw new UnexpectedLiquibaseSdkException("Unsupported oracle version: "+getVersion());
         }
     }
 
     public String getInstallDir() {
-        return "/opt/oracle";
+        if (isWindows()) {
+            return "C:\\oracle-"+getVersion();
+        } else {
+            return "/opt/oracle";
+        }
     }
 
     public String getOracleHome() {
@@ -120,10 +127,6 @@ public class OracleConnSupplier extends ConnectionSupplier {
         return "lqbase";
     }
     
-   public String getFileSeparator() {
-        return "/";
-    }
-
     @Override
     public String getDescription() {
         return super.getDescription() +

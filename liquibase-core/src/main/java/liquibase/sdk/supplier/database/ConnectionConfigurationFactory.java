@@ -80,6 +80,9 @@ public class ConnectionConfigurationFactory {
                     if (params.containsKey("hostname")) {
                         potential.setIpAddress(params.get("hostname"));
                     }
+                    if (params.containsKey("os")) {
+                        potential.setOs(params.get("os"));
+                    }
                     returnList.add(potential);
                     foundConfig = true;
                     break;

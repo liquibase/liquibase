@@ -17,9 +17,8 @@ public class PostgresqlConnSupplier extends ConnectionSupplier {
         return "postgres";
     }
 
-    @Override
-    public String getConfigurationName() {
-        return CONFIG_NAME_STANDARD;
+    public String getInstallDir() {
+        return "C:\\pgsql-"+getShortVersion();
     }
 
     @Override
@@ -36,7 +35,11 @@ public class PostgresqlConnSupplier extends ConnectionSupplier {
 
     @Override
     public ConfigTemplate getPuppetTemplate(Map<String, Object> context) {
-        return new ConfigTemplate("liquibase/sdk/vagrant/supplier/postgresql/postgresql-linux.puppet.vm", context);
+        if (isWindows()) {
+            return new ConfigTemplate("liquibase/sdk/vagrant/supplier/postgresql/postgresql-windows.puppet.vm", context);
+        } else {
+            return new ConfigTemplate("liquibase/sdk/vagrant/supplier/postgresql/postgresql-linux.puppet.vm", context);
+        }
     }
 
 
@@ -50,4 +53,19 @@ public class PostgresqlConnSupplier extends ConnectionSupplier {
 
         return configTemplates;
     }
+
+    @Override
+    public String getDescription() {
+        if (isWindows()) {
+            return super.getDescription() + "\n"+
+                    "Install Dir: "+getInstallDir()+"\n" +
+                    "REQUIRES: LIQUIBASE_HOME/sdk/vagrant/install-files/windows/vcredist_64.exe. Download Microsoft Visual C++ 2010 Redistributable Package (x64) from http://www.microsoft.com/en-us/download/confirmation.aspx?id=14632\n"+
+                    "REQUIRES: LIQUIBASE_HOME/sdk/vagrant/install-files/postgresql/postgresql-"+getVersion()+"-windows-x64-binaries.zip. Download Win x86-64 archive from http://www.enterprisedb.com/products-services-training/pgbindownload\n"+
+                    "Admin 'postgres' user password: "+getAdminPassword();
+        } else {
+            return super.getDescription();
+        }
+    }
+
+
 }
