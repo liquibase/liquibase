@@ -71,7 +71,7 @@ public class UnknownType extends LiquibaseDataType {
                 parameters = new Object[0];
             } else if (getName().toUpperCase().startsWith("INTERVAL ")) {
                 return new DatabaseDataType(getName().replaceAll("\\(\\d+\\)", ""));
-            } else {
+            } else if (((OracleDatabase) database).getUserDefinedTypes().contains(getName().toUpperCase())) {
                 return new DatabaseDataType(getName().toUpperCase()); //user defined tye
             }
         }
