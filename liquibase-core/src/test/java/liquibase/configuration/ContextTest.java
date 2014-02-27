@@ -57,6 +57,11 @@ public class ContextTest {
             getContainer().addProperty("propertyBooleanDefaultFalse", Boolean.class).setDefaultValue(false);
         }
 
+        @Override
+        public void setValue(String propertyName, Object value) {
+          throw new RuntimeException("Not implemented");
+        }
+
     }
 
 

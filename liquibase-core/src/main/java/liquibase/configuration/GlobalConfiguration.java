@@ -178,4 +178,11 @@ public class GlobalConfiguration extends AbstractConfigurationContainer {
         getContainer().setValue(OUTPUT_ENCODING, name);
         return this;
     }
+
+    @Override
+    public void setValue(String propertyName, Object value) {
+      ConfigurationContainer container = getContainer();
+      container.addProperty(propertyName, Object.class);
+      container.setValue(propertyName, value);
+    }
 }
