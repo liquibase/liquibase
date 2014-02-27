@@ -493,4 +493,9 @@ public abstract class AbstractChange implements Change {
     public String getSerializedObjectNamespace() {
         return GENERIC_CHANGELOG_EXTENSION_NAMESPACE;
     }
+
+    @Override
+    public String toString() {
+        return ChangeFactory.getInstance().getChangeMetaData(this).getName();
+    }
 }
