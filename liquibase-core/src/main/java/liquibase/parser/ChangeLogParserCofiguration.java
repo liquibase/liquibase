@@ -26,9 +26,4 @@ public class ChangeLogParserCofiguration extends AbstractConfigurationContainer 
         getContainer().setValue(SUPPORT_PROPERTY_ESCAPING, support);
         return this;
     }
-
-    @Override
-    public void setValue(String propertyName, Object value) {
-      throw new RuntimeException("Not implemented");
-    }
 }

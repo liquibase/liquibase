@@ -25,9 +25,4 @@ public class DefaultLoggerConfiguration extends AbstractConfigurationContainer {
         getContainer().setValue(LOG_LEVEL, name);
         return this;
     }
-
-    @Override
-    public void setValue(String propertyName, Object value) {
-      throw new RuntimeException("Not implemented");
-    }
 }
