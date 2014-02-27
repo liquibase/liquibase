@@ -49,22 +49,6 @@ import java.util.*;
  * 
  *      &lt;property name=&quot;changeLog&quot; value=&quot;classpath:db-changelog.xml&quot; /&gt;
  * 
- *      &lt;!-- The following configuration options are optional --&gt;
- * 
- *      &lt;property name=&quot;executeEnabled&quot; value=&quot;true&quot; /&gt;
- * 
- *      &lt;!--
- *      If set to true, writeSqlFileEnabled will write the generated
- *      SQL to a file before executing it.
- *      --&gt;
- *      &lt;property name=&quot;writeSqlFileEnabled&quot; value=&quot;true&quot; /&gt;
- * 
- *      &lt;!--
- *      sqlOutputDir specifies the directory into which the SQL file
- *      will be written, if so configured.
- *      --&gt;
- *      &lt;property name=&quot;sqlOutputDir&quot; value=&quot;c:\sql&quot; /&gt;
- * 
  * &lt;/bean&gt;
  * 
  * </pre>
