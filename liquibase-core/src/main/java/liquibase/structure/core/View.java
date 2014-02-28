@@ -5,6 +5,11 @@ public class View extends Relation {
     public View() {
     }
 
+    public View(String catalogName, String schemaName, String tableName) {
+        this.setSchema(new Schema(catalogName, schemaName));
+        setName(tableName);
+    }
+
     @Override
     public Relation setSchema(Schema schema) {
         return super.setSchema(schema);    //To change body of overridden methods use File | Settings | File Templates.

@@ -1,8 +1,10 @@
 package liquibase.sdk.standardtest.change
 
+import liquibase.CatalogAndSchema
 import liquibase.change.ChangeFactory
 import liquibase.database.DatabaseFactory
-import liquibase.sdk.supplier.change.ChangeSupplier
+import liquibase.database.OfflineConnection
+import liquibase.sdk.supplier.change.ChangeSupplierFactory
 import liquibase.sdk.supplier.database.DatabaseSupplier
 import liquibase.sdk.supplier.resource.ResourceSupplier
 import liquibase.sdk.verifytest.TestPermutation
@@ -13,7 +15,7 @@ import spock.lang.*
 
 class StandardChangeSpec extends Specification {
 
-    @Shared changeSupplier = new ChangeSupplier()
+    @Shared changeSupplier = new ChangeSupplierFactory()
     @Shared databaseSupplier = new DatabaseSupplier()
     @Shared resourceSupplier = new ResourceSupplier()
     @Rule TestName testName = new TestName()
@@ -42,12 +44,13 @@ class StandardChangeSpec extends Specification {
 
         if (!change.supports(database)) permutation.skipMessage = "DATABASE NOT SUPPORTED"
         if (change.generateStatementsVolatile(database)) permutation.skipMessage = "CHANGE SQL IS VOLATILE"
+        permutation.canVerify = database.connection != null && !(database.connection instanceof OfflineConnection)
 
         permutation.addSetup({
             def changeMetaData = ChangeFactory.getInstance().getChangeMetaData(change)
             for (paramName in changeMetaData.getRequiredParameters(database).keySet()) {
                 def param = changeMetaData.parameters.get(paramName)
-                def exampleValue = param.exampleValue
+                def exampleValue = param.getExampleValue(database)
 
                 permutation.note("Change Parameter", exampleValue)
                 param.setValue(change, exampleValue)
@@ -63,10 +66,14 @@ class StandardChangeSpec extends Specification {
         permutation.addAssertion( {assert !change.validate(database).hasErrors(), "Change has errors: ${change.validate(database).errorMessages}"} as TestPermutation.Assertion)
 
         permutation.addVerification( {
-            if (database.connection == null) throw new TestPermutation.CannotVerifyException("No database connection")
-
+            changeSupplier.prepareDatabase(change, database)
             database.executeStatements(change, null, null)
         } as TestPermutation.Verification)
+
+        permutation.addCleanup( {
+            changeSupplier.revertDatabase(change, database)
+            database.dropDatabaseObjects(CatalogAndSchema.DEFAULT);
+        } as TestPermutation.Cleanup)
 
         expect:
         permutation.test()

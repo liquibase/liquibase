@@ -1,6 +1,8 @@
 package liquibase.diff;
 
+import liquibase.database.Database;
 import liquibase.diff.compare.CompareControl;
+import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.exception.DatabaseException;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.structure.DatabaseObject;
@@ -78,6 +80,17 @@ public class DiffResult {
         return set;
     }
 
+    public <T extends DatabaseObject> T getMissingObject(T example) {
+        Database accordingTo = getComparisonSnapshot().getDatabase();
+        DatabaseObjectComparatorFactory comparator = DatabaseObjectComparatorFactory.getInstance();
+        for (T obj : (Set<T>) getMissingObjects(example.getClass())) {
+            if (comparator.isSameObject(obj, example, accordingTo)) {
+                return obj;
+            }
+        }
+        return null;
+    }
+
     public void addMissingObject(DatabaseObject obj) {
         missingObjects.add(obj);
     }
@@ -102,6 +115,16 @@ public class DiffResult {
         return set;
     }
 
+    public <T extends DatabaseObject> T getUnexpectedObject(T example) {
+        Database accordingTo = this.getComparisonSnapshot().getDatabase();
+        DatabaseObjectComparatorFactory comparator = DatabaseObjectComparatorFactory.getInstance();
+        for (T obj : (Set<T>) getUnexpectedObjects(example.getClass())) {
+            if (comparator.isSameObject(obj, example, accordingTo)) {
+                return obj;
+            }
+        }
+        return null;
+    }
 
     public void addUnexpectedObject(DatabaseObject obj) {
         unexpectedObjects.add(obj);
@@ -125,6 +148,17 @@ public class DiffResult {
         SortedMap<T, ObjectDifferences> map = new TreeMap<T, ObjectDifferences>(comparator);
         map.putAll(getChangedObjects(type));
         return map;
+    }
+
+    public ObjectDifferences getChangedObject(DatabaseObject example) {
+        Database accordingTo = this.getComparisonSnapshot().getDatabase();
+        DatabaseObjectComparatorFactory comparator = DatabaseObjectComparatorFactory.getInstance();
+        for (Map.Entry<? extends DatabaseObject, ObjectDifferences> entry : getChangedObjects(example.getClass()).entrySet()) {
+            if (comparator.isSameObject(entry.getKey(), example, accordingTo)) {
+                return entry.getValue();
+            }
+        }
+        return null;
     }
 
 

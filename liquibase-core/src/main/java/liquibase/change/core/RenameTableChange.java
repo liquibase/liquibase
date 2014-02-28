@@ -43,7 +43,7 @@ public class RenameTableChange extends AbstractChange {
         this.schemaName = schemaName;
     }
 
-    @DatabaseChangeProperty(mustEqualExisting = "table", description = "Name of the table to rename")
+    @DatabaseChangeProperty(mustEqualExisting = "table", description = "Name of the table to rename", exampleValue = "person")
     public String getOldTableName() {
         return oldTableName;
     }
@@ -52,7 +52,7 @@ public class RenameTableChange extends AbstractChange {
         this.oldTableName = oldTableName;
     }
 
-    @DatabaseChangeProperty(description = "New name for the table")
+    @DatabaseChangeProperty(description = "New name for the table", exampleValue = "employee")
     public String getNewTableName() {
         return newTableName;
     }

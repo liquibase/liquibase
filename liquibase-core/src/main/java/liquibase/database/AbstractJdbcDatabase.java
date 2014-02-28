@@ -337,7 +337,7 @@ public abstract class AbstractJdbcDatabase implements Database {
      * @return
      */
     protected String getConnectionSchemaName() {
-        if (connection == null) {
+        if (connection == null || connection instanceof OfflineConnection) {
             return null;
         }
         try {

@@ -70,7 +70,7 @@ public class AddDefaultValueChange extends AbstractChange {
         this.columnName = columnName;
     }
 
-    @DatabaseChangeProperty(description = "Current data type of the column to add default value to", exampleValue = "int")
+    @DatabaseChangeProperty(description = "Current data type of the column to add default value to", exampleValue = "varchar(50)")
     public String getColumnDataType() {
 		return columnDataType;
 	}

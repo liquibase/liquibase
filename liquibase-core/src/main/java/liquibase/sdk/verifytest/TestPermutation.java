@@ -1,5 +1,7 @@
 package liquibase.sdk.verifytest;
 
+import liquibase.sdk.exception.UnexpectedLiquibaseSdkException;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.SortedMap;
@@ -17,17 +19,11 @@ public class TestPermutation {
     private List<Setup> setupCommands = new ArrayList<Setup>();
     private List<Assertion> assertions = new ArrayList<Assertion>();
     private List<Verification> verifications = new ArrayList<Verification>();
-    private Boolean verified;
+    private List<Cleanup> cleanupCommands = new ArrayList<Cleanup>();
 
-    //    private Boolean validated;
-//
-//    public TestPermutation(VerifyTest run) {
-//        this(run.getPermutationName());
-//        this.permutationDefinition = run.getPermutationDefinition();
-//        this.background = run.getInfo();
-//        this.data = run.getData();
-//    }
-//
+    private Boolean verified;
+    private boolean canVerify;
+
     public TestPermutation(String permutationName) {
         this.permutationName = permutationName;
         this.key = permutationName;
@@ -43,6 +39,14 @@ public class TestPermutation {
 
     public String getSkipMessage() {
         return skipMessage;
+    }
+
+    public boolean getCanVerify() {
+        return canVerify;
+    }
+
+    public void setCanVerify(boolean canVerify) {
+        this.canVerify = canVerify;
     }
 
     public void setSkipMessage(String skipMessage) {
@@ -100,6 +104,15 @@ public class TestPermutation {
     public void addVerification(Verification verification) {
         verifications.add(verification);
     }
+
+    public List<Cleanup> getCleanup() {
+        return cleanupCommands;
+    }
+
+    public void addCleanup(Cleanup cleanup) {
+        cleanupCommands.add(cleanup);
+    }
+
     public void test() {
         if (skipMessage != null) {
             return;
@@ -113,14 +126,33 @@ public class TestPermutation {
             assertion.run();
         }
 
-        try {
-            for (Verification verification : this.verifications) {
-                verification.run();
-            }
-        } catch (CannotVerifyException e) {
-            this.verified = false;
+        if (!canVerify) {
+            return;
         }
-        this.verified = true;
+
+        Exception cleanupError = null;
+        try {
+            try {
+                for (Verification verification : this.verifications) {
+                    verification.run();
+                }
+            } catch (CannotVerifyException e) {
+                this.verified = false;
+            }
+            this.verified = true;
+        } finally {
+            for (Cleanup cleanup : cleanupCommands) {
+                try {
+                    cleanup.run();
+                } catch (Exception e) {
+                    cleanupError = e;
+                }
+            }
+        }
+
+        if (cleanupError != null) {
+            throw new UnexpectedLiquibaseSdkException("Cleanup error", cleanupError);
+        }
     }
 
     public Boolean getVerified() {
@@ -136,6 +168,10 @@ public class TestPermutation {
     }
 
     public static interface Verification {
+        public void run();
+    }
+
+    public static interface Cleanup {
         public void run();
     }
 

@@ -16,6 +16,15 @@ public class UniqueConstraint extends AbstractDatabaseObject {
         setAttribute("disabled", false);
     }
 
+    public UniqueConstraint(String name, String tableCatalog, String tableSchema, String tableName, String... columns) {
+        this();
+        setName(name);
+        if (tableName != null && columns != null) {
+            setTable(new Table(tableCatalog, tableSchema, tableName));
+            setColumns(StringUtils.join(columns, ","));
+        }
+    }
+
 	@Override
     public DatabaseObject[] getContainingObjects() {
 		List<DatabaseObject> columns = new ArrayList<DatabaseObject>();

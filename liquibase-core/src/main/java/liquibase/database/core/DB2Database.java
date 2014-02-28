@@ -3,6 +3,7 @@ package liquibase.database.core;
 import liquibase.CatalogAndSchema;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
+import liquibase.database.OfflineConnection;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.structure.DatabaseObject;
 import liquibase.exception.DatabaseException;
@@ -79,7 +80,7 @@ public class DB2Database extends AbstractJdbcDatabase {
         }
 
 
-        if (getConnection() == null) {
+        if (getConnection() == null || getConnection() instanceof OfflineConnection) {
             return null;
         }
         Statement stmt = null;

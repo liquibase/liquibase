@@ -8,6 +8,14 @@ import java.math.BigInteger;
 
 public class Sequence extends AbstractDatabaseObject {
 
+    public Sequence() {
+    }
+
+    public Sequence(String catalogName, String schemaName, String sequenceName) {
+        this.setSchema(new Schema(catalogName, schemaName));
+        this.setName(sequenceName);
+    }
+
     @Override
     public DatabaseObject[] getContainingObjects() {
         return null;

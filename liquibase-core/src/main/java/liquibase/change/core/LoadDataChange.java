@@ -229,7 +229,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
         return false;
     }
 
-    protected CSVReader getCSVReader() throws IOException {
+    public CSVReader getCSVReader() throws IOException {
         ResourceAccessor opener = getResourceAccessor();
         if (opener == null) {
             throw new UnexpectedLiquibaseException("No file opener specified for "+getFile());

@@ -18,6 +18,7 @@ import liquibase.changelog.filter.ContextChangeSetFilter;
 import liquibase.changelog.filter.DbmsChangeSetFilter;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
+import liquibase.database.OfflineConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.Executor;
@@ -143,16 +144,18 @@ public class InformixDatabase extends AbstractJdbcDatabase {
     @Override
     public void setConnection(final DatabaseConnection connection) {
         super.setConnection(connection);
-        try {
-        	/*
-        	 * TODO Maybe there is a better place for this.
-        	 * For each session this statement has to be executed,
-        	 * to allow newlines in quoted strings
-        	 */
-			ExecutorService.getInstance().getExecutor(this).execute(new RawSqlStatement("EXECUTE PROCEDURE IFX_ALLOW_NEWLINE('T');"));
-		} catch (Exception e) {
-			throw new UnexpectedLiquibaseException("Could not allow newline characters in quoted strings with IFX_ALLOW_NEWLINE", e);
-		}
+        if (!(connection instanceof OfflineConnection)) {
+            try {
+                /*
+                 * TODO Maybe there is a better place for this.
+                 * For each session this statement has to be executed,
+                 * to allow newlines in quoted strings
+                 */
+                ExecutorService.getInstance().getExecutor(this).execute(new RawSqlStatement("EXECUTE PROCEDURE IFX_ALLOW_NEWLINE('T');"));
+            } catch (Exception e) {
+                throw new UnexpectedLiquibaseException("Could not allow newline characters in quoted strings with IFX_ALLOW_NEWLINE", e);
+            }
+        }
     }
 
 	@Override

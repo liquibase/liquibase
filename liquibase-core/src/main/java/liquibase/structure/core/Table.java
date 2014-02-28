@@ -16,6 +16,11 @@ public class Table extends Relation {
         setAttribute("uniqueConstraints", new ArrayList<UniqueConstraint>());
     }
 
+    public Table(String catalogName, String schemaName, String tableName) {
+        this.setSchema(new Schema(catalogName, schemaName));
+        setName(tableName);
+    }
+
     public PrimaryKey getPrimaryKey() {
         return getAttribute("primaryKey", PrimaryKey.class);
     }

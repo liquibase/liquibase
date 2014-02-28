@@ -3,11 +3,15 @@ package liquibase.change;
 import liquibase.change.core.*;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.core.MSSQLDatabase;
+import liquibase.database.core.MockDatabase;
 import liquibase.database.core.MySQLDatabase;
 import liquibase.database.core.OracleDatabase;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.serializer.LiquibaseSerializable;
 import org.junit.Test;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import static liquibase.test.Assert.assertSetsEqual;
 import static org.junit.Assert.*;
@@ -16,7 +20,10 @@ public class ChangeParameterMetaDataTest {
 
     @Test
     public void constructor() {
-        ChangeParameterMetaData metaData = new ChangeParameterMetaData(new ExampleAbstractChange(), "x", "y", "desc", "examp", "2.1", Integer.class, new String[]{"mysql", "mssql"}, new String[] {"h2", "mysql","mssql"}, "column", LiquibaseSerializable.SerializationType.NESTED_OBJECT);
+        Map<String, Object> examples = new HashMap<String, Object>();
+        examples.put("all", "examp");
+
+        ChangeParameterMetaData metaData = new ChangeParameterMetaData(new ExampleAbstractChange(), "x", "y", "desc", examples, "2.1", Integer.class, new String[]{"mysql", "mssql"}, new String[] {"h2", "mysql","mssql"}, "column", LiquibaseSerializable.SerializationType.NESTED_OBJECT);
         assertEquals("x", metaData.getParameterName()) ;
         assertEquals("y", metaData.getDisplayName());
         assertEquals("integer", metaData.getDataType());
@@ -26,7 +33,7 @@ public class ChangeParameterMetaDataTest {
         assertEquals("column", metaData.getMustEqualExisting());
         assertEquals(LiquibaseSerializable.SerializationType.NESTED_OBJECT, metaData.getSerializationType());
         assertEquals("desc", metaData.getDescription());
-        assertEquals("examp", metaData.getExampleValue());
+        assertEquals("examp", metaData.getExampleValue(new MockDatabase()));
         assertEquals("2.1", metaData.getSince());
 
         assertEquals(3, metaData.getSupportedDatabases().size());

@@ -12,6 +12,15 @@ public class Column extends AbstractDatabaseObject {
     public Column() {
     }
 
+    public Column(Class<? extends Relation> relationType, String catalogName, String schemaName, String tableName, String columnName) {
+        if (Table.class.isAssignableFrom(relationType)) {
+            this.setRelation(new Table(catalogName, schemaName, tableName));
+        } else if (View.class.isAssignableFrom(relationType)) {
+            this.setRelation(new View(catalogName, schemaName, tableName));
+        }
+        setName(columnName);
+    }
+
     public Relation getRelation() {
         return getAttribute("relation", Relation.class);
     }
