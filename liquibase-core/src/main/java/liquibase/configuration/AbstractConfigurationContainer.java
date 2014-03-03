@@ -66,6 +66,11 @@ public abstract class AbstractConfigurationContainer implements ConfigurationCon
             }
         }
     }
+    
+    @Override
+    public void setValue(String propertyName, Object value) {
+      getContainer().setValue(propertyName, value);
+    }
 
     /**
      * Like a java.util.Map, but with extra logic for working with ConfigurationProperties.
