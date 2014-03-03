@@ -16,7 +16,7 @@ file {'postgresql-password.txt':
 } ->
 
 exec { 'initdb':
-    command => '"${supplier.installDir}\pgsql\bin\initdb.exe" -U ${supplier.adminUsername} -A password --auth-host=password --pwfile=c:\vagrant\modules\conf\postgresql-password.txt  -E utf8 -D "${supplier.installDir}\data"',
+    command => '"${supplier.installDir}\pgsql\bin\initdb.exe" -U ${supplier.adminUsername} -A password --auth-host=password --pwfile=c:\vagrant\modules\conf\postgresql\postgresql-password.txt  -E utf8 -D "${supplier.installDir}\data"',
     creates => '${supplier.installDir}\data',
 } ->
 
