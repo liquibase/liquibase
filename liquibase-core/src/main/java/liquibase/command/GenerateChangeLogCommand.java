@@ -48,6 +48,7 @@ public class GenerateChangeLogCommand extends DiffToChangeLogCommand {
 
         changeLogWriter.setChangeSetAuthor(author);
         changeLogWriter.setChangeSetContext(context);
+        changeLogWriter.setChangeSetPath(getChangeLogFile());
 
         if (StringUtils.trimToNull(getChangeLogFile()) != null) {
             changeLogWriter.print(getChangeLogFile());
