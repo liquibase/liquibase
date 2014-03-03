@@ -106,6 +106,11 @@ public class StringSnapshotSerializerReadable implements SnapshotSerializer {
                 continue;
             }
             Object value = databaseObject.getAttribute(attribute, Object.class);
+
+            if (value instanceof Schema) {
+                continue;
+            }
+
             if (value instanceof DatabaseObject) {
                 if (parentNames.contains(((DatabaseObject) value).getName())) {
                     value = null;
