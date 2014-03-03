@@ -5,26 +5,18 @@
 VAGRANTFILE_API_VERSION = "2"
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
-  config.vm.box = "${configVmBox}"
-  config.vm.box_url = "${configVmBoxUrl}"
+    config.vm.box = "${configVmBox}"
 
-  #config.vm.hostname = "liquibase-test.example.com"
+    config.vm.network :private_network, ip: "${configVmNetworkIp}"
+    config.vm.synced_folder "../install-files", "/vagrant-install-files"
 
-  config.vm.network :private_network, ip: "${configVmNetworkIp}"
-  config.vm.synced_folder "../install-files", "/vagrant-install-files"
+${osLevelConfig}
 
-  config.vm.provider :virtualbox do |vb|
-     vb.customize ["modifyvm", :id, "--memory", "${vmCustomizeMemory}"]
-  end
+    config.vm.provider :virtualbox do |vb|
+        vb.customize ["modifyvm", :id, "--memory", "${vmCustomizeMemory}"]
+        # vb.gui = true
+    end
 
-  config.vm.provision :shell do |shell|
-    shell.inline = "/vagrant/puppet-bootstrap.sh"
-  end
-
-  config.vm.provision :puppet, :module_path => "modules" do |puppet|
-    puppet.manifests_path = "manifests"
-    puppet.manifest_file  = "init.pp"
-	#puppet.options = "--debug --verbose"
-  end
+    config.vm.provision :shell, :path => "${configVmProvisionScript}"
 
 end

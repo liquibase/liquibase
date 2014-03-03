@@ -36,10 +36,10 @@ public class UnexpectedPrimaryKeyChangeGenerator implements UnexpectedObjectChan
         PrimaryKey pk = (PrimaryKey) unexpectedObject;
         DropPrimaryKeyChange change = new DropPrimaryKeyChange();
         change.setTableName(pk.getTable().getName());
-        if (control.isIncludeCatalog()) {
+        if (control.getIncludeCatalog()) {
             change.setCatalogName(pk.getTable().getSchema().getCatalogName());
         }
-        if (control.isIncludeSchema()) {
+        if (control.getIncludeSchema()) {
             change.setSchemaName(pk.getTable().getSchema().getName());
         }
         change.setConstraintName(pk.getName());

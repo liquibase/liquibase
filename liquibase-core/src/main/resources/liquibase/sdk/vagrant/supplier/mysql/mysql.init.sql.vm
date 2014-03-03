@@ -1,0 +1,13 @@
+CREATE DATABASE ${supplier.primaryCatalog};
+CREATE DATABASE ${supplier.alternateCatalog};
+
+CREATE USER '${supplier.adminUsername}'@'%' IDENTIFIED BY '${supplier.adminPassword}';
+GRANT ALL PRIVILEGES ON *.* TO '${supplier.adminUsername}'@'%' WITH GRANT OPTION;
+
+CREATE USER '${supplier.databaseUsername}'@'%' IDENTIFIED BY '${supplier.databasePassword}';
+GRANT ALL PRIVILEGES ON *.* TO '${supplier.databaseUsername}'@'%' WITH GRANT OPTION;
+
+CREATE USER '${supplier.alternateUsername}'@'%' IDENTIFIED BY '${supplier.alternateUserPassword}';
+GRANT ALL PRIVILEGES ON *.* TO '${supplier.alternateUsername}'@'%' WITH GRANT OPTION;
+
+FLUSH PRIVILEGES;

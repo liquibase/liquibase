@@ -9,6 +9,7 @@ import liquibase.executor.ExecutorService;
 import liquibase.logging.LogFactory;
 import liquibase.statement.DatabaseFunction;
 import liquibase.statement.core.RawCallStatement;
+import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Catalog;
 import liquibase.structure.core.Schema;
@@ -18,6 +19,7 @@ import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -28,6 +30,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
 
 
     private Set<String> reservedWords = new HashSet<String>();
+    private Set<String> userDefinedTypes = null;
 
     public OracleDatabase() {
         super.unquotedObjectsAreUppercased=true;
@@ -219,7 +222,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
             if (("SYSTEM".equals(example.getName()) || "SYS".equals(example.getName()) || "CTXSYS".equals(example.getName()) || "XDB".equals(example.getName()))) {
                 return true;
             }
-        } else if (example instanceof Table) {
+        } else if (example.getName() != null) {
             if (example.getName().startsWith("BIN$")) { //oracle deleted table
                 return true;
             } else if (example.getName().startsWith("AQ$")) { //oracle AQ tables
@@ -284,5 +287,20 @@ public class OracleDatabase extends AbstractJdbcDatabase {
     @Override
     public boolean jdbcCallsCatalogsSchemas() {
         return true;
+    }
+
+    public Set<String> getUserDefinedTypes() {
+        if (userDefinedTypes == null) {
+            userDefinedTypes = new HashSet<String>();
+            if (getConnection() != null && !(getConnection() instanceof OfflineConnection)) {
+                try {
+                    userDefinedTypes.addAll(ExecutorService.getInstance().getExecutor(this).queryForList(new RawSqlStatement("SELECT TYPE_NAME FROM USER_TYPES"), String.class));
+                } catch (DatabaseException e) {
+                    //ignore error
+                }
+            }
+        }
+
+        return userDefinedTypes;
     }
 }

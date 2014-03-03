@@ -68,7 +68,7 @@ public abstract class AbstractChangeLogHistoryService implements ChangeLogHistor
         for (RanChangeSet ranChangeSet : this.getRanChangeSets()) {
             if (ranChangeSet.getLastCheckSum() == null) {
                 ChangeSet changeSet = databaseChangeLog.getChangeSet(ranChangeSet);
-                if (changeSet != null && new ContextChangeSetFilter(contexts).accepts(changeSet) && new DbmsChangeSetFilter(getDatabase()).accepts(changeSet)) {
+                if (changeSet != null && new ContextChangeSetFilter(contexts).accepts(changeSet).isAccepted() && new DbmsChangeSetFilter(getDatabase()).accepts(changeSet).isAccepted()) {
                     LogFactory.getLogger().debug("Updating null or out of date checksum on changeSet " + changeSet + " to correct value");
                     replaceChecksum(changeSet);
                 }

@@ -63,7 +63,11 @@ public class DataType {
             unsigned = true;
         }
 
-        if (columnSize != null) {
+        if (columnSize == null) {
+            if (decimalDigits != null) {
+                value += "(*, "+decimalDigits+")";
+            }
+        } else {
             value += "(";
             value += columnSize;
 

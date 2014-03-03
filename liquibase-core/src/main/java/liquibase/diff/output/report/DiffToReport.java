@@ -1,12 +1,15 @@
 package liquibase.diff.output.report;
 
+import liquibase.CatalogAndSchema;
 import liquibase.diff.Difference;
 import liquibase.diff.ObjectDifferences;
+import liquibase.diff.compare.CompareControl;
 import liquibase.structure.DatabaseObject;
 import liquibase.diff.DiffResult;
 import liquibase.diff.StringDiff;
 import liquibase.exception.DatabaseException;
 import liquibase.structure.DatabaseObjectComparator;
+import liquibase.structure.core.Schema;
 
 import java.io.PrintStream;
 import java.util.*;
@@ -51,6 +54,10 @@ public class DiffToReport {
         return type.getSimpleName().replaceAll("([A-Z])", " $1").trim() + "(s)";
     }
 
+    protected boolean getIncludeSchema() {
+        return diffResult.getCompareControl().getSchemaComparisons().length > 1;
+    }
+
     protected void printChangedComparison(String title, Map<? extends DatabaseObject, ObjectDifferences> objects, PrintStream out) {
         out.print(title + ": ");
         if (objects.size() == 0) {
@@ -68,13 +75,22 @@ public class DiffToReport {
         }
     }
 
-    protected void printSetComparison(String title, Set<?> objects, PrintStream out) {
+    protected void printSetComparison(String title, Set<? extends DatabaseObject> objects, PrintStream out) {
         out.print(title + ": ");
+        Schema lastSchema = null;
         if (objects.size() == 0) {
             out.println("NONE");
         } else {
             out.println();
-            for (Object object : objects) {
+            for (DatabaseObject object : objects) {
+                if (getIncludeSchema() && object.getSchema() != null && (lastSchema == null || !lastSchema.equals(object.getSchema()))) {
+                    lastSchema = object.getSchema();
+                    String schemaName = object.getSchema().getName();
+                    if (schemaName == null) {
+                        schemaName = object.getSchema().getCatalogName();
+                    }
+                    out.println("  SCHEMA: "+schemaName);
+                }
                 out.println("     " + object);
             }
         }

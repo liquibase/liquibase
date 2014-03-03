@@ -10,9 +10,11 @@ import java.util.Set;
 
 public class AfterTagChangeSetFilter implements ChangeSetFilter {
 
+    private final String tag;
     private Set<String> changeLogsAfterTag = new HashSet<String>();
 
     public AfterTagChangeSetFilter(String tag, List<RanChangeSet> ranChangeSets) throws RollbackFailedException {
+        this.tag = tag;
         boolean seenTag = false;
         for (RanChangeSet ranChangeSet : ranChangeSets) {
             if (seenTag && !tag.equalsIgnoreCase(ranChangeSet.getTag())) {
@@ -34,7 +36,11 @@ public class AfterTagChangeSetFilter implements ChangeSetFilter {
     }
 
     @Override
-    public boolean accepts(ChangeSet changeSet) {
-        return changeLogsAfterTag.contains(changeLogToString(changeSet.getId(), changeSet.getAuthor(), changeSet.getFilePath()));
+    public ChangeSetFilterResult accepts(ChangeSet changeSet) {
+        if (changeLogsAfterTag.contains(changeLogToString(changeSet.getId(), changeSet.getAuthor(), changeSet.getFilePath()))) {
+            return new ChangeSetFilterResult(true, "Change set is before tag '"+tag+"'", this.getClass());
+        } else {
+            return new ChangeSetFilterResult(false, "Change set after tag '"+tag+"'", this.getClass());
+        }
     }
 }

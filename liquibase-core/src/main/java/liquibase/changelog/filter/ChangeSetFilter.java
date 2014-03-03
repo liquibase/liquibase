@@ -4,5 +4,5 @@ import liquibase.changelog.ChangeSet;
 
 public interface ChangeSetFilter {
 
-    public boolean accepts(ChangeSet changeSet);
+    public ChangeSetFilterResult accepts(ChangeSet changeSet);
 }

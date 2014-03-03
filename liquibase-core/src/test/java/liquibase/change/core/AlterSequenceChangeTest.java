@@ -59,7 +59,6 @@ public class AlterSequenceChangeTest extends StandardChangeTest {
     protected boolean changeIsUnsupported(Database database) {
         return database instanceof SQLiteDatabase
                 || database instanceof SybaseASADatabase
-                || database instanceof MSSQLDatabase
                 || database instanceof MySQLDatabase
                 || database instanceof DerbyDatabase
                 || database instanceof SybaseDatabase;

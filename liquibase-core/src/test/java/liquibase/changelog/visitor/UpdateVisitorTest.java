@@ -3,11 +3,14 @@ package liquibase.changelog.visitor;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.ChangeSet.RunStatus;
 import liquibase.changelog.DatabaseChangeLog;
+import liquibase.changelog.filter.ChangeSetFilterResult;
 import liquibase.database.Database;
 import static org.easymock.classextension.EasyMock.*;
 
 import liquibase.database.ObjectQuotingStrategy;
 import org.junit.Test;
+
+import java.util.HashSet;
 
 public class UpdateVisitorTest {
 
@@ -41,7 +44,7 @@ public class UpdateVisitorTest {
         replay(listener);
 
         UpdateVisitor visitor = new UpdateVisitor(database, listener);
-        visitor.visit(changeSet, databaseChangeLog, database);
+        visitor.visit(changeSet, databaseChangeLog, database, null);
 
         verify(database);
         verify(changeSet);

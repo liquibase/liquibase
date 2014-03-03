@@ -7,7 +7,6 @@ import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.changelog.ChangeGeneratorChain;
 import liquibase.diff.output.changelog.UnexpectedObjectChangeGenerator;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.core.ForeignKey;
 import liquibase.structure.core.Sequence;
 import liquibase.structure.core.Table;
 
@@ -36,10 +35,10 @@ public class UnexpectedSequenceChangeGenerator implements UnexpectedObjectChange
 
         DropSequenceChange change = new DropSequenceChange();
         change.setSequenceName(sequence.getName());
-        if (control.isIncludeCatalog()) {
+        if (control.getIncludeCatalog()) {
             change.setCatalogName(sequence.getSchema().getCatalogName());
         }
-        if (control.isIncludeSchema()) {
+        if (control.getIncludeSchema()) {
             change.setSchemaName(sequence.getSchema().getName());
         }
 

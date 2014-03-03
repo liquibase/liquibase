@@ -1,0 +1,14 @@
+user { 'mssql':
+    ensure => present,
+    password => 'mssql',
+} ->
+
+
+exec { 'mssql install':
+    command => 'c:\vagrant-install-files\mssql\sqlexpr_x64_ENU.exe /q /ACTION=Install /FEATURES=SQL /INSTANCENAME=${supplier.instanceName} /SQLSVCACCOUNT="mssql" /SQLSVCPASSWORD="mssql" /SQLSYSADMINACCOUNTS="mssql" /AGTSVCACCOUNT="NT AUTHORITY\Network Service" /IACCEPTSQLSERVERLICENSETERMS /UPDATEENABLED="False" /TCPENABLED=1 /SAPWD="${supplier.adminPassword}" /SECURITYMODE="SQL"',
+    creates => 'C:\Program Files\Microsoft SQL Server\MSSQL11.MSSQLSERVER',
+} ->
+
+exec { 'mssql init sql':
+    command => '"C:\Program Files\Microsoft SQL Server\110\Tools\Binn\sqlcmd.exe" -i c:\vagrant\modules\conf\mssql\mssql.init.sql'
+}

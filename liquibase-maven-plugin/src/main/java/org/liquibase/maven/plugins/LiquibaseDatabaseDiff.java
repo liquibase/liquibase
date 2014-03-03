@@ -6,6 +6,7 @@ import java.io.IOException;
 
 import javax.xml.parsers.ParserConfigurationException;
 
+import liquibase.CatalogAndSchema;
 import liquibase.Liquibase;
 import liquibase.database.Database;
 import liquibase.diff.output.DiffOutputControl;
@@ -145,7 +146,7 @@ public class LiquibaseDatabaseDiff extends AbstractLiquibaseChangeLogMojo {
         getLog().info("Performing Diff on database " + db.toString());
         if (diffChangeLogFile != null) {
             try {
-                CommandLineUtils.doDiffToChangeLog(diffChangeLogFile, referenceDatabase, db, new DiffOutputControl(diffIncludeCatalog, diffIncludeSchema, diffIncludeTablespace), StringUtils.trimToNull(diffTypes));
+                CommandLineUtils.doDiffToChangeLog(diffChangeLogFile, referenceDatabase, db, new DiffOutputControl(diffIncludeCatalog, diffIncludeSchema, diffIncludeTablespace).addIncludedSchema(new CatalogAndSchema(referenceDefaultCatalogName, referenceDefaultSchemaName)), StringUtils.trimToNull(diffTypes));
                 getLog().info("Differences written to Change Log File, " + diffChangeLogFile);
             }
             catch (IOException e) {

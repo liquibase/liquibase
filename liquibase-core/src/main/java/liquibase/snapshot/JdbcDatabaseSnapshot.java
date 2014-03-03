@@ -15,8 +15,6 @@ import liquibase.util.StringUtils;
 import java.sql.*;
 import java.util.*;
 
-import liquibase.logging.LogFactory;
-
 public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
     private CachingDatabaseMetaData cachingDatabaseMetaData;
 
@@ -100,7 +98,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
 
                 @Override
-                boolean shouldBulkSelect(ResultSetCache resultSetCache) {
+                boolean shouldBulkSelect(String schemaKey, ResultSetCache resultSetCache) {
                     return false;
                 }
             });
@@ -109,6 +107,8 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
         public List<CachedRow> getIndexInfo(final String catalogName, final String schemaName, final String tableName, final String indexName) throws DatabaseException {
             return getResultSetCache("getIndexInfo").get(new ResultSetCache.UnionResultSetExtractor(database) {
 
+
+                public boolean bulkFetch = false;
 
                 @Override
                 public ResultSetCache.RowData rowKeyParameters(CachedRow row) {
@@ -134,11 +134,11 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                                 "JOIN ALL_INDEXES i on i.index_name = c.index_name " +
                                 "LEFT JOIN all_ind_expressions e on (e.column_position = c.column_position AND e.index_name = c.index_name) " +
                                 "WHERE c.TABLE_OWNER='" + database.correctObjectName(catalogAndSchema.getCatalogName(), Schema.class) + "'";
-                        if (tableName != null) {
+                        if (!bulkFetch && tableName != null) {
                             sql += " AND c.TABLE_NAME='" + database.correctObjectName(tableName, Table.class) + "'";
                         }
 
-                        if (indexName != null) {
+                        if (!bulkFetch && indexName != null) {
                             sql += " AND c.INDEX_NAME='" + database.correctObjectName(indexName, Index.class) + "'";
                         }
 
@@ -167,14 +167,15 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
                 @Override
 				public List<CachedRow> bulkFetch() throws SQLException, DatabaseException {
+                    this.bulkFetch = true;
                     return fastFetch();
                 }
 
 
                 @Override
-                boolean shouldBulkSelect(ResultSetCache resultSetCache) {
+                boolean shouldBulkSelect(String schemaKey, ResultSetCache resultSetCache) {
                     if (database instanceof OracleDatabase) {
-                        return super.shouldBulkSelect(resultSetCache);
+                        return super.shouldBulkSelect(schemaKey, resultSetCache);
                     }
                     return false;
                 }
@@ -201,7 +202,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
 
                 @Override
-                boolean shouldBulkSelect(ResultSetCache resultSetCache) {
+                boolean shouldBulkSelect(String schemaKey, ResultSetCache resultSetCache) {
                     Set<String> seenTables = resultSetCache.getInfo("seenTables", Set.class);
                     if (seenTables == null) {
                         seenTables = new HashSet<String>();
@@ -360,7 +361,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
 
                 @Override
-                boolean shouldBulkSelect(ResultSetCache resultSetCache) {
+                boolean shouldBulkSelect(String schemaKey, ResultSetCache resultSetCache) {
                     return false;
                 }
             });

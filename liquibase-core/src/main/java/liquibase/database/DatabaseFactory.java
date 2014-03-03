@@ -250,6 +250,14 @@ public class DatabaseFactory {
         implementedDatabases.clear();
     }
 
+    public Database getDatabase(String shortName) {
+        if (!implementedDatabases.containsKey(shortName)) {
+            return null;
+        }
+        return implementedDatabases.get(shortName).iterator().next();
+
+    }
+
     private static class DatabaseComparator implements Comparator<Database> {
         @Override
         public int compare(Database o1, Database o2) {

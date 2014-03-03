@@ -11,7 +11,6 @@ import liquibase.diff.output.changelog.ChangedObjectChangeGenerator;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Index;
 import liquibase.structure.core.PrimaryKey;
-import liquibase.structure.core.Table;
 import liquibase.structure.core.UniqueConstraint;
 import liquibase.util.StringUtils;
 
@@ -49,11 +48,11 @@ public class ChangedPrimaryKeyChangeGenerator  implements ChangedObjectChangeGen
         addPkChange.setConstraintName(pk.getName());
 
 
-        if (control.isIncludeCatalog()) {
+        if (control.getIncludeCatalog()) {
             dropPkChange.setCatalogName(pk.getSchema().getCatalogName());
             addPkChange.setCatalogName(pk.getSchema().getCatalogName());
         }
-        if (control.isIncludeSchema()) {
+        if (control.getIncludeSchema()) {
             dropPkChange.setSchemaName(pk.getSchema().getName());
             addPkChange.setSchemaName(pk.getSchema().getName());
         }

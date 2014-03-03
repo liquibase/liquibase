@@ -40,10 +40,10 @@ public class UnexpectedUniqueConstraintChangeGenerator implements UnexpectedObje
 
         DropUniqueConstraintChange change = new DropUniqueConstraintChange();
         change.setTableName(uc.getTable().getName());
-        if (control.isIncludeCatalog()) {
+        if (control.getIncludeCatalog()) {
             change.setCatalogName(uc.getTable().getSchema().getCatalogName());
         }
-        if (control.isIncludeSchema()) {
+        if (control.getIncludeSchema()) {
             change.setSchemaName(uc.getTable().getSchema().getName());
         }
         change.setConstraintName(uc.getName());

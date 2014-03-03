@@ -1,0 +1,38 @@
+exec { 'wget postgresql repo':
+    command => '/usr/bin/wget -O /tmp/postgresql-repo.rpm http://yum.postgresql.org/9.3/redhat/rhel-6.4-x86_64/pgdg-centos93-9.3-1.noarch.rpm',
+    creates => '/tmp/postgresql-repo.rpm'
+} ->
+
+exec { 'install postgresql repo':
+    command => '/bin/rpm -ihv /tmp/postgresql-repo.rpm',
+    creates => '/etc/yum.repos.d/pgdg-93-centos.repo'
+} ->
+
+package { 'postgresql93-server':
+    ensure => installed,
+} ->
+
+exec { '/sbin/chkconfig postgresql-9.3 on':
+} ->
+
+
+exec { '/sbin/service postgresql-9.3 initdb':
+    creates => '/var/lib/pgsql/9.3/data/pg_hba.conf'
+} ->
+
+file { '/var/lib/pgsql/9.3/data/postgresql.conf':
+    source => '/vagrant/modules/conf/postgresql/postgresql.conf'
+} ->
+
+file { '/var/lib/pgsql/9.3/data/pg_hba.conf':
+    source => '/vagrant/modules/conf/postgresql/pg_hba.conf'
+} ->
+
+service { 'postgresql-9.3':
+    ensure => "running",
+} ->
+
+exec { 'postgresql init sql':
+    environment => 'PGPASSWORD=${supplier.adminPassword}',
+    command => '/usr/bin/psql -w -f /vagrant/modules/conf/postgresql/postgresql.init.sql -U ${supplier.adminUsername} -h localhost',
+}

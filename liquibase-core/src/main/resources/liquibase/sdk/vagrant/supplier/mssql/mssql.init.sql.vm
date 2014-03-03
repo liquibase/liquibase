@@ -1,0 +1,49 @@
+USE master;
+GO
+
+CREATE LOGIN [${supplier.databaseUsername}] WITH PASSWORD = '${supplier.databasePassword}';
+GO
+
+CREATE LOGIN [${supplier.alternateUsername}] WITH PASSWORD = '${supplier.alternateUserPassword}';
+GO
+
+
+--primary database
+CREATE DATABASE [${supplier.primaryCatalog}]
+GO
+
+USE ${supplier.primaryCatalog};
+GO
+
+CREATE USER ${supplier.databaseUsername} FOR LOGIN ${supplier.databaseUsername};
+GO
+
+EXEC sp_addrolemember 'db_owner', '${supplier.databaseUsername}';
+GO
+
+CREATE USER ${supplier.alternateUsername} FOR LOGIN ${supplier.alternateUsername};
+GO
+
+EXEC sp_addrolemember 'db_owner', '${supplier.alternateUsername}';
+GO
+
+
+
+--alternate database
+CREATE DATABASE [${supplier.alternateCatalog}]
+GO
+
+USE ${supplier.alternateCatalog};
+GO
+
+CREATE USER ${supplier.databaseUsername} FOR LOGIN ${supplier.databaseUsername};
+GO
+
+EXEC sp_addrolemember 'db_owner', '${supplier.databaseUsername}';
+GO
+
+CREATE USER ${supplier.alternateUsername} FOR LOGIN ${supplier.alternateUsername};
+GO
+
+EXEC sp_addrolemember 'db_owner', '${supplier.alternateUsername}';
+GO

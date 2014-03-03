@@ -2,6 +2,7 @@ package liquibase.logging.core;
 
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
+import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.logging.LogLevel;
 import liquibase.util.StringUtils;
 
@@ -21,12 +22,6 @@ public class DefaultLogger extends AbstractLogger {
     private String changeSetName = null;
 
     public DefaultLogger() {
-        String passedLevel = System.getProperty("liquibase.defaultlogger.level");
-        if (passedLevel == null) {
-            setLogLevel(LogLevel.INFO);
-        } else {
-            setLogLevel(passedLevel);
-        }
     }
 
     @Override
@@ -37,6 +32,17 @@ public class DefaultLogger extends AbstractLogger {
     @Override
     public void setName(String name) {
         this.name = name;
+    }
+
+    @Override
+    public LogLevel getLogLevel() {
+        LogLevel logLevel = super.getLogLevel();
+
+        if (logLevel == null) {
+            return toLogLevel(LiquibaseConfiguration.getInstance().getConfiguration(DefaultLoggerConfiguration.class).getLogLevel());
+        } else {
+            return logLevel;
+        }
     }
 
     @Override

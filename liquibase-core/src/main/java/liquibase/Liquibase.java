@@ -9,15 +9,7 @@ import java.util.*;
 
 import liquibase.change.CheckSum;
 import liquibase.changelog.*;
-import liquibase.changelog.filter.AfterTagChangeSetFilter;
-import liquibase.changelog.filter.AlreadyRanChangeSetFilter;
-import liquibase.changelog.filter.ChangeSetFilter;
-import liquibase.changelog.filter.ContextChangeSetFilter;
-import liquibase.changelog.filter.CountChangeSetFilter;
-import liquibase.changelog.filter.DbmsChangeSetFilter;
-import liquibase.changelog.filter.ExecutedAfterChangeSetFilter;
-import liquibase.changelog.filter.NotRanChangeSetFilter;
-import liquibase.changelog.filter.ShouldRunChangeSetFilter;
+import liquibase.changelog.filter.*;
 import liquibase.changelog.visitor.*;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
@@ -62,9 +54,6 @@ import javax.xml.parsers.ParserConfigurationException;
  */
 public class Liquibase {
 
-    public static final String SHOULD_RUN_SYSTEM_PROPERTY = "liquibase.should.run";
-    public static final String ENABLE_CHANGELOG_PROP_ESCAPING = "liquibase.enableEscaping";
-
     private DatabaseChangeLog databaseChangeLog;
     private String changeLogFile;
     private ResourceAccessor resourceAccessor;
@@ -102,6 +91,7 @@ public class Liquibase {
         if (changeLogFile != null) {
             this.changeLogFile = changeLogFile.replace('\\', '/');  //convert to standard / if using absolute path on windows
         }
+
         this.resourceAccessor = resourceAccessor;
         this.changeLogParameters = new ChangeLogParameters(database);
         this.database = database;
@@ -638,8 +628,8 @@ public class Liquibase {
                         new DbmsChangeSetFilter(database),
                         new ChangeSetFilter() {
                             @Override
-                            public boolean accepts(ChangeSet changeSet) {
-                                return listVisitor.getSeenChangeSets().contains(changeSet);
+                            public ChangeSetFilterResult accepts(ChangeSet changeSet) {
+                                return new ChangeSetFilterResult(listVisitor.getSeenChangeSets().contains(changeSet), null, null);
                             }
                         });
             }
@@ -784,6 +774,25 @@ public class Liquibase {
         ListVisitor visitor = new ListVisitor();
         logIterator.run(visitor, database);
         return visitor.getSeenChangeSets();
+    }
+
+    /**
+     * Returns the ChangeSetStatuses of all changesets in the change log file and history in the order they would be ran.
+     */
+    public List<ChangeSetStatus> getChangeSetStatuses(Contexts contexts) throws LiquibaseException {
+        changeLogParameters.setContexts(contexts);
+
+        DatabaseChangeLog changeLog = getDatabaseChangeLog();
+
+        checkLiquibaseTables(true, changeLog, contexts);
+
+        changeLog.validate(database, contexts);
+
+        ChangeLogIterator logIterator = getStandardChangelogIterator(contexts, changeLog);
+
+        StatusVisitor visitor = new StatusVisitor(database);
+        logIterator.run(visitor, database);
+        return visitor.getStatuses();
     }
 
     public void reportStatus(boolean verbose, String contexts, Writer out) throws LiquibaseException {

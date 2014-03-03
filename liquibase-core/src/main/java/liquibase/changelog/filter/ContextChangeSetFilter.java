@@ -23,7 +23,7 @@ public class ContextChangeSetFilter implements ChangeSetFilter {
     }
 
     @Override
-    public boolean accepts(ChangeSet changeSet) {
+    public ChangeSetFilterResult accepts(ChangeSet changeSet) {
         List<SqlVisitor> visitorsToRemove = new ArrayList<SqlVisitor>();
         for (SqlVisitor visitor : changeSet.getSqlVisitors()) {
             if (visitor.getContexts() != null && visitor.getContexts().size() > 0) {
@@ -41,19 +41,19 @@ public class ContextChangeSetFilter implements ChangeSetFilter {
         changeSet.getSqlVisitors().removeAll(visitorsToRemove);
 
         if (contexts == null || contexts.size() == 0) {
-            return true;
+            return new ChangeSetFilterResult(true, "No runtime context specified, all contexts will run", this.getClass());
         }
 
         if (changeSet.getContexts() == null || changeSet.getContexts().size() == 0) {
-            return true;
+            return new ChangeSetFilterResult(true, "Change set runs under all contexts", this.getClass());
         }
         
         for (String context : changeSet.getContexts()) {
             if (contexts.contains(context.toLowerCase())) {
-                return true;
+                return new ChangeSetFilterResult(true, "Context matches '"+contexts.toString()+"'", this.getClass());
             }
         }
 
-        return false;
+        return new ChangeSetFilterResult(false, "Context does not match '"+contexts.toString()+"'", this.getClass());
     }
 }

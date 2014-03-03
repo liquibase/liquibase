@@ -5,3 +5,4 @@
 -- ], ]
 -- Change Parameter: tableName=person
 ALTER TABLE person ADD id INTEGER;
+CALL SYSPROC.ADMIN_CMD ('REORG TABLE person');

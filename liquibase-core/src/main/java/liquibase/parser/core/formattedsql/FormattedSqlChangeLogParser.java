@@ -78,6 +78,7 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
             Pattern stripCommentsPattern = Pattern.compile(".*stripComments:(\\w+).*", Pattern.CASE_INSENSITIVE);
             Pattern splitStatementsPattern = Pattern.compile(".*splitStatements:(\\w+).*", Pattern.CASE_INSENSITIVE);
             Pattern endDelimiterPattern = Pattern.compile(".*endDelimiter:(\\S*).*", Pattern.CASE_INSENSITIVE);
+            Pattern commentPattern = Pattern.compile("\\-\\-[\\s]*comment: (.*)", Pattern.CASE_INSENSITIVE);
 
             Pattern runOnChangePattern = Pattern.compile(".*runOnChange:(\\w+).*", Pattern.CASE_INSENSITIVE);
             Pattern runAlwaysPattern = Pattern.compile(".*runAlways:(\\w+).*", Pattern.CASE_INSENSITIVE);
@@ -151,10 +152,16 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                     currentRollbackSql = new StringBuffer();
                 } else {
                     if (changeSet != null) {
+                        Matcher commentMatcher = commentPattern.matcher(line);
                         Matcher rollbackMatcher = rollbackPattern.matcher(line);
                         Matcher preconditionsMatcher = preconditionsPattern.matcher(line);
                         Matcher preconditionMatcher = preconditionPattern.matcher(line);
-                        if (rollbackMatcher.matches()) {
+
+                        if (commentMatcher.matches()) {
+                            if (commentMatcher.groupCount() == 1) {
+                                changeSet.setComments(commentMatcher.group(1));
+                            }
+                        } else if (rollbackMatcher.matches()) {
                             if (rollbackMatcher.groupCount() == 1) {
                                 currentRollbackSql.append(rollbackMatcher.group(1)).append("\n");
                             }

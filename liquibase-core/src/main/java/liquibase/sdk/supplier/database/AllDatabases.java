@@ -25,7 +25,7 @@ public class AllDatabases extends ParameterSupplier {
     public List<PotentialAssignment> getValueSources(ParameterSignature sig) {
         List<PotentialAssignment> returnList = new ArrayList<PotentialAssignment>();
         for (Database database :  DatabaseFactory.getInstance().getImplementedDatabases()) {
-            for (ConnectionConfiguration config : ConnectionConfigurationFactory.getInstance().getConfigurations(database)) {
+            for (ConnectionSupplier config : ConnectionConfigurationFactory.getInstance().getConfigurations(database)) {
                 database.setConnection(openConnection(config));
                 returnList.add(PotentialAssignment.forValue(database.getShortName()+" - "+config.getConfigurationName(), database));
             }
@@ -34,9 +34,9 @@ public class AllDatabases extends ParameterSupplier {
         return returnList;
     }
 
-    protected DatabaseConnection openConnection(ConnectionConfiguration connectionConfig) {
+    protected DatabaseConnection openConnection(ConnectionSupplier connectionConfig) {
         try {
-            final String url = connectionConfig.getUrl();
+            final String url = connectionConfig.getJdbcUrl();
             if (connectionsAttempted.containsKey(url)) {
                 JdbcConnection connection = (JdbcConnection) connectionsByUrl.get(url);
                 if (connection == null) {
@@ -113,12 +113,12 @@ public class AllDatabases extends ParameterSupplier {
 
     }
 
-    public DatabaseConnection openDatabaseConnection(ConnectionConfiguration connectionConfiguration) throws Exception {
-        String url = connectionConfiguration.getUrl();
+    public DatabaseConnection openDatabaseConnection(ConnectionSupplier connectionSupplier) throws Exception {
+        String url = connectionSupplier.getJdbcUrl();
         assertNotNull("Null jdbc url", url);
 
-        String username = connectionConfiguration.getDatabaseUsername();
-        String password = connectionConfiguration.getDatabasePassword();
+        String username = connectionSupplier.getDatabaseUsername();
+        String password = connectionSupplier.getDatabasePassword();
 
 
         JDBCDriverClassLoader jdbcDriverLoader = new JDBCDriverClassLoader();

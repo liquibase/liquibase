@@ -3,34 +3,22 @@ package liquibase.diff.output.changelog.core;
 import liquibase.change.Change;
 import liquibase.change.ColumnConfig;
 import liquibase.change.core.InsertDataChange;
-import liquibase.change.core.LoadDataChange;
-import liquibase.change.core.LoadDataColumnConfig;
 import liquibase.database.Database;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.changelog.ChangeGeneratorChain;
 import liquibase.diff.output.changelog.MissingObjectChangeGenerator;
-import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.executor.ExecutorService;
-import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
-import liquibase.util.ISODateFormat;
 import liquibase.util.JdbcUtils;
-import liquibase.util.csv.CSVWriter;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 public class MissingDataChangeGenerator implements MissingObjectChangeGenerator {
 
@@ -82,10 +70,10 @@ public class MissingDataChangeGenerator implements MissingObjectChangeGenerator 
             List<Change> changes = new ArrayList<Change>();
             while (rs.next()) {
                 InsertDataChange change = new InsertDataChange();
-                if (outputControl.isIncludeCatalog()) {
+                if (outputControl.getIncludeCatalog()) {
                     change.setCatalogName(table.getSchema().getCatalogName());
                 }
-                if (outputControl.isIncludeSchema()) {
+                if (outputControl.getIncludeSchema()) {
                     change.setSchemaName(table.getSchema().getName());
                 }
                 change.setTableName(table.getName());

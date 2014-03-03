@@ -2,7 +2,6 @@ package liquibase.diff.output.changelog.core;
 
 import liquibase.change.AddColumnConfig;
 import liquibase.change.Change;
-import liquibase.change.ColumnConfig;
 import liquibase.change.core.CreateIndexChange;
 import liquibase.database.Database;
 import liquibase.diff.output.DiffOutputControl;
@@ -41,13 +40,13 @@ public class MissingIndexChangeGenerator implements MissingObjectChangeGenerator
 
         CreateIndexChange change = new CreateIndexChange();
         change.setTableName(index.getTable().getName());
-        if (control.isIncludeTablespace()) {
+        if (control.getIncludeTablespace()) {
             change.setTablespace(index.getTablespace());
         }
-        if (control.isIncludeCatalog()) {
+        if (control.getIncludeCatalog()) {
             change.setCatalogName(index.getTable().getSchema().getCatalogName());
         }
-        if (control.isIncludeSchema()) {
+        if (control.getIncludeSchema()) {
             change.setSchemaName(index.getTable().getSchema().getName());
         }
         change.setIndexName(index.getName());

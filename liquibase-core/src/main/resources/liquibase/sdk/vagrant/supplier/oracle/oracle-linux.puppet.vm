@@ -1,0 +1,60 @@
+user { 'oracle':
+    ensure => present,
+} ->
+
+group { 'oracle':
+    ensure => present,
+    members => ['oracle'],
+} ->
+
+file { "${supplier.installDir}":
+    ensure => "directory",
+    owner => "oracle",
+    group => "oracle",
+} ->
+
+exec { 'unzip oracle':
+    command => '/bin/bash -c \'for f in "/vagrant-install-files/oracle/${supplier.zipFileBase}_*.zip";do /usr/bin/unzip "$f";done\'',
+    cwd => '${supplier.installDir}',
+    creates => '${supplier.installDir}/database',
+    user => 'oracle',
+    require => Package['unzip']
+} ->
+
+exec { 'runInstaller':
+    command => "${supplier.installDir}/database/runInstaller -responseFile /vagrant/modules/conf/oracle/oracle_install.rsp -silent -waitforcompletion",
+    creates => '${supplier.oracleHome}',
+    user => 'oracle'
+} ->
+
+exec { '${supplier.installDir}/oracleInventory/orainstRoot.sh':
+} ->
+
+exec { '${supplier.oracleHome}/root.sh':
+    creates => '/etc/oratab'
+} ->
+
+exec { 'configToolAllCommands':
+    command => '/bin/sh -c ${supplier.oracleHome}/cfgtoollogs/configToolAllCommands RESPONSE_FILE=/vagrant/modules/conf/oracle/oracle_install.rsp',
+    user => 'oracle',
+    returns => [0,3]
+} ->
+
+
+exec { 'dbca':
+    command => '${supplier.oracleHome}/bin/dbca -silent -createDatabase -responseFile /vagrant/modules/conf/oracle/oracle_install.rsp -templateName General_Purpose.dbc -gdbName ${supplier.sid} -sysPassword ${supplier.sysPassword} -systemPassword ${supplier.systemPassword}',
+    user => 'oracle',
+    creates => '${supplier.installDir}/oradata/${supplier.sid}'
+} ->
+
+
+exec { 'oracle sql init':
+    command => '${supplier.oracleHome}/bin/sqlplus system/${supplier.systemPassword}@localhost/${supplier.sid} @/vagrant/modules/conf/oracle/oracle.init.sql',
+    environment => 'ORACLE_HOME=${supplier.oracleHome}',
+    user => 'oracle',
+    creates => '${supplier.installDir}/oradata/${supplier.sid}/${supplier.alternateTablespace}.dbf',
+} ->
+
+file{ '/etc/oratab':
+    content => '${supplier.sid}:${supplier.oracleHome}:Y\n'
+}

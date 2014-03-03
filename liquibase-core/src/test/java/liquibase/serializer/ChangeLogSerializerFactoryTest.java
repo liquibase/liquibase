@@ -64,7 +64,7 @@ public class ChangeLogSerializerFactoryTest {
 	@Test
     public void builtInGeneratorsAreFound() {
         Map<String, ChangeLogSerializer> generators = ChangeLogSerializerFactory.getInstance().getSerializers();
-        assertEquals(4, generators.size());
+        assertEquals(5, generators.size());
     }
 
     @Test

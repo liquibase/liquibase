@@ -1,11 +1,5 @@
 package liquibase.change.core;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.util.Enumeration;
-
 import liquibase.change.CheckSum;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.ChangeSet;
@@ -15,10 +9,15 @@ import liquibase.parser.ChangeLogParserFactory;
 import liquibase.resource.CompositeResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 import liquibase.serializer.core.string.StringChangeLogSerializer;
-
 import liquibase.test.JUnitResourceAccessor;
 import org.junit.Assert;
 import org.junit.Test;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.util.Enumeration;
 
 public class UpdateDataChangeTest {
 

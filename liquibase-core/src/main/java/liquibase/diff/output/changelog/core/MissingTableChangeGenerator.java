@@ -49,10 +49,10 @@ public class MissingTableChangeGenerator implements MissingObjectChangeGenerator
 
         CreateTableChange change = new CreateTableChange();
         change.setTableName(missingTable.getName());
-        if (control.isIncludeCatalog()) {
+        if (control.getIncludeCatalog()) {
             change.setCatalogName(missingTable.getSchema().getCatalogName());
         }
-        if (control.isIncludeSchema()) {
+        if (control.getIncludeSchema()) {
             change.setSchemaName(missingTable.getSchema().getName());
         }
         if (missingTable.getRemarks() != null) {

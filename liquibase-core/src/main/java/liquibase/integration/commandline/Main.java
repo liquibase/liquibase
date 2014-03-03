@@ -1,26 +1,11 @@
 package liquibase.integration.commandline;
 
-import java.io.*;
-import java.lang.reflect.Field;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
-import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
-import java.util.jar.JarEntry;
-import java.util.jar.JarFile;
-
+import liquibase.CatalogAndSchema;
 import liquibase.Liquibase;
 import liquibase.change.CheckSum;
+import liquibase.command.SnapshotCommand;
+import liquibase.configuration.LiquibaseConfiguration;
+import liquibase.configuration.GlobalConfiguration;
 import liquibase.database.Database;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.exception.CommandLineParsingException;
@@ -39,6 +24,17 @@ import liquibase.util.ISODateFormat;
 import liquibase.util.LiquibaseUtil;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
+
+import java.io.*;
+import java.lang.reflect.Field;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
+import java.text.ParseException;
+import java.util.*;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 
 /**
  * Class for executing Liquibase via the command line.
@@ -85,9 +81,10 @@ public class Main {
 
     public static void main(String args[]) throws CommandLineParsingException, IOException {
         try {
-            String shouldRunProperty = System.getProperty(Liquibase.SHOULD_RUN_SYSTEM_PROPERTY);
-            if (shouldRunProperty != null && !Boolean.valueOf(shouldRunProperty)) {
-                System.err.println("Liquibase did not run because '" + Liquibase.SHOULD_RUN_SYSTEM_PROPERTY + "' system property was set to false");
+            GlobalConfiguration globalConfiguration = LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class);
+
+            if (!globalConfiguration.getShouldRun()) {
+                System.err.println("Liquibase did not run because '" + LiquibaseConfiguration.getInstance().describeValueLookupLogic(globalConfiguration.getProperty(GlobalConfiguration.SHOULD_RUN)) + " was set to false");
                 return;
             }
 
@@ -236,7 +233,7 @@ public class Main {
             || "calculateCheckSum".equalsIgnoreCase(command)
             || "dbDoc".equalsIgnoreCase(command)
             || "tag".equalsIgnoreCase(command)) {
-            
+
             if (commandParams.size() > 0 && commandParams.iterator().next().startsWith("-")) {
                 messages.add("unexpected command parameters: "+commandParams);
             }
@@ -252,16 +249,19 @@ public class Main {
                     if (!cmdParm.startsWith("--referenceUsername")
                         && !cmdParm.startsWith("--referencePassword")
                         && !cmdParm.startsWith("--referenceDriver")
+                        && !cmdParm.startsWith("--referenceDefaultCatalogName")
+                        && !cmdParm.startsWith("--referenceDefaultSchemaName")
                             && !cmdParm.startsWith("--includeSchema")
                             && !cmdParm.startsWith("--includeCatalog")
                             && !cmdParm.startsWith("--includeTablespace")
+                            && !cmdParm.startsWith("--schemas")
                             && !cmdParm.startsWith("--referenceUrl")) {
-                        messages.add("unexpected command parameters: "+commandParams);
+                        messages.add("unexpected command parameter: "+cmdParm);
                     }
                 }
             }
         }
-        
+
     }
 
     private void validateCommandParameters(final List<String> messages) {
@@ -332,6 +332,7 @@ public class Main {
                 || "diff".equalsIgnoreCase(arg)
                 || "diffChangeLog".equalsIgnoreCase(arg)
                 || "generateChangeLog".equalsIgnoreCase(arg)
+                || "snapshot".equalsIgnoreCase(arg)
                 || "calculateCheckSum".equalsIgnoreCase(arg)
                 || "clearCheckSums".equalsIgnoreCase(arg)
                 || "dbDoc".equalsIgnoreCase(arg)
@@ -447,6 +448,8 @@ public class Main {
         stream.println("                                rollback support");
         stream.println(" generateChangeLog              Writes Change Log XML to copy the current state");
         stream.println("                                of the database to standard out");
+        stream.println(" snapshot                       Writes the current state");
+        stream.println("                                of the database to standard out");
         stream.println("");
         stream.println("Diff Commands");
         stream.println(" diff [diff parameters]          Writes description of differences");
@@ -533,7 +536,19 @@ public class Main {
         stream.println(" --referenceUrl=<value>                     Reference Database URL");
         stream.println("");
         stream.println("Optional Diff Parameters:");
-        stream.println(" --referenceDriver=<jdbc.driver.ClassName>  Reference Database driver class name");
+        stream.println(" --defaultCatalogName=<name>                Default database catalog to use");
+        stream.println(" --defaultSchemaName=<name>                 Default database schema to use");
+        stream.println(" --referenceDefaultCatalogName=<name>       Reference database catalog to use");
+        stream.println(" --referenceDefaultSchemaName=<name>        Reference database schema to use");
+        stream.println(" --schemas=<name1,name2>                    Database schemas to include");
+        stream.println("                                            objects from in comparison");
+        stream.println(" --includeCatalog=<true|false>              If true, the catalog will be");
+        stream.println("                                            included in generated changeSets");
+        stream.println("                                            Defaults to false");
+        stream.println(" --includeSchema=<true|false>               If true, the schema will be");
+        stream.println("                                            included in generated changeSets");
+        stream.println("                                            Defaults to false");
+        stream.println(" --referenceDriver=<jdbc.driver.ClassName>  Reference database driver class name");
         stream.println(" --dataOutputDirectory=DIR                  Output data as CSV in the given ");
         stream.println("                                            directory");
         stream.println(" --diffTypes                                List of diff types to include in");
@@ -785,7 +800,7 @@ public class Main {
 
         FileSystemResourceAccessor fsOpener = new FileSystemResourceAccessor();
         CommandLineResourceAccessor clOpener = new CommandLineResourceAccessor(classLoader);
-        Database database = CommandLineUtils.createDatabaseObject(classLoader, this.url, 
+        Database database = CommandLineUtils.createDatabaseObject(classLoader, this.url,
             this.username, this.password, this.driver, this.defaultCatalogName,this.defaultSchemaName,  Boolean.parseBoolean(outputDefaultCatalog), Boolean.parseBoolean(outputDefaultSchema), this.databaseClass, this.driverPropertiesFile, null, null);
         try {
 
@@ -797,14 +812,38 @@ public class Main {
             boolean includeTablespace = Boolean.parseBoolean(getCommandParam("includeTablespace", "false"));
             DiffOutputControl diffOutputControl = new DiffOutputControl(includeCatalog, includeSchema, includeTablespace);
 
+            String referenceSchemaNames = getCommandParam("schemas", null);
+            CatalogAndSchema[] finalSchemas;
+            if (referenceSchemaNames == null) {
+                finalSchemas = new CatalogAndSchema[] {new CatalogAndSchema(defaultCatalogName, defaultSchemaName)};
+            } else {
+                List<CatalogAndSchema> schemas = new ArrayList<CatalogAndSchema>();
+                for (String schema : referenceSchemaNames.split(",")) {
+                    CatalogAndSchema correctedSchema = database.correctSchema(new CatalogAndSchema(schema));
+                    schemas.add(correctedSchema);
+                    diffOutputControl.addIncludedSchema(correctedSchema);
+                }
+                finalSchemas  = schemas.toArray(new CatalogAndSchema[schemas.size()]);
+            }
+
+            for (CatalogAndSchema schema : finalSchemas) {
+                diffOutputControl.addIncludedSchema(schema);
+            }
+
             if ("diff".equalsIgnoreCase(command)) {
-                CommandLineUtils.doDiff(createReferenceDatabaseFromCommandParams(commandParams), database, StringUtils.trimToNull(diffTypes));
+                CommandLineUtils.doDiff(createReferenceDatabaseFromCommandParams(commandParams), database, StringUtils.trimToNull(diffTypes), finalSchemas);
                 return;
             } else if ("diffChangeLog".equalsIgnoreCase(command)) {
-                CommandLineUtils.doDiffToChangeLog(changeLogFile, createReferenceDatabaseFromCommandParams(commandParams), database, diffOutputControl,  StringUtils.trimToNull(diffTypes));
+                CommandLineUtils.doDiffToChangeLog(changeLogFile, createReferenceDatabaseFromCommandParams(commandParams), database, diffOutputControl,  StringUtils.trimToNull(diffTypes), finalSchemas);
                 return;
             } else if ("generateChangeLog".equalsIgnoreCase(command)) {
-                CommandLineUtils.doGenerateChangeLog(changeLogFile, database, defaultCatalogName, defaultSchemaName, StringUtils.trimToNull(diffTypes), StringUtils.trimToNull(changeSetAuthor), StringUtils.trimToNull(changeSetContext), StringUtils.trimToNull(dataOutputDirectory), diffOutputControl);
+                CommandLineUtils.doGenerateChangeLog(changeLogFile, database, finalSchemas, StringUtils.trimToNull(diffTypes), StringUtils.trimToNull(changeSetAuthor), StringUtils.trimToNull(changeSetContext), StringUtils.trimToNull(dataOutputDirectory), diffOutputControl);
+                return;
+            } else if ("snapshot".equalsIgnoreCase(command)) {
+                SnapshotCommand command = new SnapshotCommand();
+                command.setDatabase(database);
+                command.setSchemas(getCommandParam("schemas", database.getDefaultSchema().toString()));
+                System.out.println(command.execute());
                 return;
             }
 
@@ -1031,13 +1070,8 @@ public class Main {
     }
 
     private Writer getOutputWriter() throws UnsupportedEncodingException {
-        String charsetName = StringUtils.trimToNull(System.getProperty("liquibase.file.encoding"));
-        if (charsetName == null) {
-            charsetName = StringUtils.trimToNull(System.getProperty("file.encoding"));
-        }
-        if (charsetName == null) {
-            charsetName = "UTF-8";
-        }
+        String charsetName = LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding();
+
         return new OutputStreamWriter(System.out, charsetName);
     }
 

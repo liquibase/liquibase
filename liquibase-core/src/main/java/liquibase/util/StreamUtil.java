@@ -4,6 +4,8 @@ import java.io.*;
 import java.nio.charset.Charset;
 
 import liquibase.changelog.ChangeSet;
+import liquibase.configuration.GlobalConfiguration;
+import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.resource.ResourceAccessor;
 import liquibase.resource.UtfBomAwareReader;
 
@@ -12,10 +14,8 @@ import liquibase.resource.UtfBomAwareReader;
  */
 public class StreamUtil {
 	
-	final public static String lineSeparator = System.getProperty("line.separator");
-	
     public static String getLineSeparator() {
-        return lineSeparator;
+        return LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputLineSeparator();
     }
 
     /**

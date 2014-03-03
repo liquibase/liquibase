@@ -2,7 +2,6 @@ package liquibase.diff.output.changelog.core;
 
 import liquibase.change.AddColumnConfig;
 import liquibase.change.Change;
-import liquibase.change.ColumnConfig;
 import liquibase.change.core.CreateIndexChange;
 import liquibase.change.core.DropIndexChange;
 import liquibase.database.Database;
@@ -56,11 +55,11 @@ public class ChangedIndexChangeGenerator implements ChangedObjectChangeGenerator
         addIndexChange.setIndexName(index.getName());
 
 
-        if (control.isIncludeCatalog()) {
+        if (control.getIncludeCatalog()) {
             dropIndexChange.setCatalogName(index.getSchema().getCatalogName());
             addIndexChange.setCatalogName(index.getSchema().getCatalogName());
         }
-        if (control.isIncludeSchema()) {
+        if (control.getIncludeSchema()) {
             dropIndexChange.setSchemaName(index.getSchema().getName());
             addIndexChange.setSchemaName(index.getSchema().getName());
         }

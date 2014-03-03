@@ -499,8 +499,7 @@ public class YamlChangeLogParser implements ChangeLogParser {
                 fileName = FilenameUtils.getFullPath(relativeBaseFileName) + fileName;
             }
         }
-        DatabaseChangeLog changeLog = ChangeLogParserFactory.getInstance().getParser(fileName, resourceAccessor).parse(fileName, changeLogParameters,
-                resourceAccessor);
+        DatabaseChangeLog changeLog = ChangeLogParserFactory.getInstance().getParser(fileName, resourceAccessor).parse(fileName, changeLogParameters, resourceAccessor);
         PreconditionContainer preconditions = changeLog.getPreconditions();
         if (preconditions != null) {
             if (null == databaseChangeLog.getPreconditions()) {
