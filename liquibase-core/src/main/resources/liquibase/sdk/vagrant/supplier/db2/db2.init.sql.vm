@@ -1,0 +1,9 @@
+CREATE DATABASE LBCAT;
+
+CONNECT TO LBCAT;
+
+CREATE SCHEMA ${supplier.primarySchema};
+CREATE SCHEMA ${supplier.alternateSchema};
+
+GRANT DBADM ON DATABASE TO USER ${supplier.databaseUsername};
+GRANT DBADM ON DATABASE TO USER ${supplier.alternateUsername};
