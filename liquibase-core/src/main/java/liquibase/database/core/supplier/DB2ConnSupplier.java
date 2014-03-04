@@ -2,11 +2,15 @@ package liquibase.database.core.supplier;
 
 import liquibase.sdk.supplier.database.ConnectionSupplier;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Set;
 
 public class DB2ConnSupplier extends ConnectionSupplier {
+    private String installDir = "C:\\Program Files\\IBM\\SQLLIB\\";
+    private String sshInstalDir = "C:\\Program Files\\IBM\\IBM SSH Server";
+
     @Override
     public String getDatabaseShortName() {
         return "db2";
@@ -19,12 +23,22 @@ public class DB2ConnSupplier extends ConnectionSupplier {
 
     @Override
     public String getAdminUsername() {
-        return null;
+        return "db2admin";
+    }
+
+    @Override
+    public String getPrimaryCatalog() {
+        return super.getPrimaryCatalog().toUpperCase();
+    }
+
+    @Override
+    public String getAlternateCatalog() {
+        return super.getAlternateCatalog().toUpperCase();
     }
 
     @Override
     public String getJdbcUrl() {
-        return "jdbc:db2://"+ getIpAddress() +":50000/lqbase";
+        return "jdbc:db2://"+ getIpAddress() +":50000/"+getPrimaryCatalog().toLowerCase();
     }
 
     @Override
@@ -38,6 +52,31 @@ public class DB2ConnSupplier extends ConnectionSupplier {
     @Override
     public ConfigTemplate getPuppetTemplate(Map<String, Object> context) {
         return new ConfigTemplate("liquibase/sdk/vagrant/supplier/db2/db2.puppet.vm", context);
+    }
+
+    @Override
+    public Set<ConfigTemplate> generateConfigFiles(Map<String, Object> context) throws IOException {
+        Set<ConfigTemplate> configTemplates = super.generateConfigFiles(context);
+        configTemplates.add(new ConfigTemplate("liquibase/sdk/vagrant/supplier/db2/db2exprc_install.windows.rsp.vm", context));
+
+        return configTemplates;
+    }
+
+
+    public String getInstallDir() {
+        return installDir;
+    }
+
+    public void setInstallDir(String installDir) {
+        this.installDir = installDir;
+    }
+
+    public String getSshInstalDir() {
+        return sshInstalDir;
+    }
+
+    public void setSshInstalDir(String sshInstalDir) {
+        this.sshInstalDir = sshInstalDir;
     }
 
     //    @Override
