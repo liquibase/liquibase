@@ -91,6 +91,17 @@ public class DB2ConnSupplier extends ConnectionSupplier {
         this.sshInstallDir = sshInstallDir;
     }
 
+    @Override
+    public String getDescription() {
+        return super.getDescription() +
+                "Instance Name: "+ getInstanceName()+"\n"+
+                "Install Directory: "+getInstallDir()+"\n" +
+                "\n"+
+                "REQUIRED: You must manually download the db2 express installation files into LIQUIBASE_HOME/sdk/vagrant/install-files/db2/\n"+
+                "      You can download the DB2 Express-C install files from http://www-01.ibm.com/software/data/db2/linux-unix-windows/downloads.html\n"+
+                "      Expected file(s): v10.5fp1_winx64_expc.exe";
+    }
+
     //    @Override
 //    public Set<String> getRequiredPackages() {
 //        Set<String> requiredPackages = super.getRequiredPackages();
