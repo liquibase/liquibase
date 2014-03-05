@@ -207,7 +207,7 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
         String processedSQL = normalizeLineEndings(sql);
         for (String statement : StringUtils.processMutliLineSQL(processedSQL, isStripComments(), isSplitStatements(), getEndDelimiter())) {
             if (database instanceof MSSQLDatabase) {
-                 statement = statement.replaceAll("\n", "\r\n");
+                 statement = statement.replaceAll("\\n", "\r\n");
              }
 
             String escapedStatement = statement;

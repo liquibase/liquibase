@@ -308,7 +308,7 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
         }
         String definition = sb.toString();
 
-        String finalDef =definition.replaceAll("\r\n", "\n");
+        String finalDef =definition.replaceAll("\\r\\n", "\n");
         finalDef = INITIAL_COMMENT_PATTERN.matcher(finalDef).replaceFirst("").trim(); //handle views that start with '/****** Script for XYZ command from SSMS  ******/'
         finalDef = CREATE_VIEW_AS_PATTERN.matcher(finalDef).replaceFirst("").trim();
 
