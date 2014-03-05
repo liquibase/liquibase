@@ -1,6 +1,7 @@
 exec { "vcredist_x64_2010.exe":
      cwd => 'c:\vagrant-install-files\windows',
      command => 'c:\vagrant-install-files\windows\vcredist_x64.exe /q',
+     returns => [0,5100],
 } ->
 
 exec { 'unzip postgresql':
