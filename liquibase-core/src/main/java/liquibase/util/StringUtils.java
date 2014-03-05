@@ -65,10 +65,10 @@ public class StringUtils {
      */
     public static String[] splitSQL(String multiLineSQL, String endDelimiter) {
         if (endDelimiter == null) {
-            endDelimiter = ";\\s*\n|;$|\n[gG][oO]\\s*\n|\n[Gg][oO]\\s*$";
+            endDelimiter = ";\\s*\\n|;$|\\n[gG][oO]\\s*\\n|\\n[Gg][oO]\\s*$";
         } else {
             if (endDelimiter.equalsIgnoreCase("go")) {
-                endDelimiter = "\n[gG][oO]\\s*\n|\n[Gg][oO]\\s*$";
+                endDelimiter = "\\n[gG][oO]\\s*\\n|\\n[Gg][oO]\\s*$";
             }
         }
         String[] initialSplit = multiLineSQL.split(endDelimiter);
@@ -92,7 +92,7 @@ public class StringUtils {
      * @return The String without the comments in
      */
     public static String stripComments(String multiLineSQL) {
-        String strippedSingleLines = Pattern.compile("\\s*\\-\\-.*\n").matcher(multiLineSQL).replaceAll("\n");
+        String strippedSingleLines = Pattern.compile("\\s*\\-\\-.*\\n").matcher(multiLineSQL).replaceAll("\n");
         strippedSingleLines = Pattern.compile("\\s*\\-\\-.*$").matcher(strippedSingleLines).replaceAll("\n");
         return Pattern.compile("/\\*.*?\\*/", Pattern.DOTALL).matcher(strippedSingleLines).replaceAll("").trim();
     }
