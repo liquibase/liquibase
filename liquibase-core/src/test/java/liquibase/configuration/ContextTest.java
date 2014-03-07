@@ -56,7 +56,6 @@ public class ContextTest {
             getContainer().addProperty("propertyBooleanDefaultTrue", Boolean.class).setDefaultValue(true).addAlias("property.default.true");
             getContainer().addProperty("propertyBooleanDefaultFalse", Boolean.class).setDefaultValue(false);
         }
-
     }
 
 

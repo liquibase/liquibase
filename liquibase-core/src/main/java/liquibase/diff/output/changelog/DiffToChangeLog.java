@@ -32,6 +32,7 @@ public class DiffToChangeLog {
 
     private String changeSetContext;
     private String changeSetAuthor;
+    private String changeSetPath;
     private DiffResult diffResult;
     private DiffOutputControl diffOutputControl;
 
@@ -204,7 +205,7 @@ public class DiffToChangeLog {
 
     protected ChangeSet generateChangeSet(Change change, ObjectQuotingStrategy quotingStrategy) {
         ChangeSet changeSet = new ChangeSet(generateId(), getChangeSetAuthor(), false, false,
-                null, changeSetContext, null, quotingStrategy, null);
+                getChangeSetPath(), changeSetContext, null, quotingStrategy, null);
         changeSet.addChange(change);
 
         return changeSet;
@@ -224,6 +225,14 @@ public class DiffToChangeLog {
 
     public void setChangeSetAuthor(String changeSetAuthor) {
         this.changeSetAuthor = changeSetAuthor;
+    }
+
+    public String getChangeSetPath() {
+        return changeSetPath;
+    }
+
+    public void setChangeSetPath(String changeSetPath) {
+        this.changeSetPath = changeSetPath;
     }
 
     public void setIdRoot(String idRoot) {

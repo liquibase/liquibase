@@ -16,13 +16,15 @@ import java.util.Set;
 public abstract class ConnectionSupplier implements Cloneable {
 
     public static final String CONFIG_NAME_STANDARD = "standard";
+    public static final String OS_LINUX = "linux";
+    public static final String OS_WINDOWS = "windows";
 
     public String VAGRANT_BOX_NAME_WINDOWS_STANDARD = "liquibase.windows.2008r2.x64";
     public String VAGRANT_BOX_NAME_LINUX_STANDARD = "liquibase.linux.centos.x64";
 
     private String version;
     private String ipAddress = "10.10.100.100";
-    private String os = "linux";
+    private String os = OS_LINUX;
 
     public abstract String getDatabaseShortName();
 
@@ -102,7 +104,7 @@ public abstract class ConnectionSupplier implements Cloneable {
     }
 
     public String getVagrantBaseBoxName() {
-        if (getOs().equals("windows")) {
+        if (getOs().equals(OS_WINDOWS)) {
             return VAGRANT_BOX_NAME_WINDOWS_STANDARD;
         }
         return VAGRANT_BOX_NAME_LINUX_STANDARD;
@@ -167,11 +169,11 @@ public abstract class ConnectionSupplier implements Cloneable {
     }
 
     protected boolean isWindows() {
-        return getOs().equalsIgnoreCase("windows");
+        return getOs().equalsIgnoreCase(OS_WINDOWS);
     }
 
     protected boolean isLinux() {
-        return getOs().equalsIgnoreCase("linux");
+        return getOs().equalsIgnoreCase(OS_LINUX);
     }
 
     public String getFileSeparator() {
@@ -186,7 +188,7 @@ public abstract class ConnectionSupplier implements Cloneable {
         return DriverManager.getConnection(this.getJdbcUrl(), this.getDatabaseUsername(), this.getDatabasePassword());
     }
 
-    public static class ConfigTemplate {
+        public static class ConfigTemplate {
 
         private final String templatePath;
         private final Map<String, Object> context;

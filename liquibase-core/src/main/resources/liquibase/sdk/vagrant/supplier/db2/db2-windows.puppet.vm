@@ -1,0 +1,28 @@
+user { '${supplier.databaseUsername}':
+    ensure => present,
+    password => '${supplier.databasePassword}',
+} ->
+
+user { '${supplier.alternateUsername}':
+    ensure => present,
+    password => '${supplier.alternateUserPassword}',
+} ->
+
+exec { 'unzip db2':
+	command	=>	'"C:\Program Files\7-Zip\7z.exe" x "c:/vagrant-install-files/db2/v10.5fp1_winx64_expc.exe" -o"c:\db2-setup" -y -aos',
+    creates => 'c:\db2-setup',
+    require => Package["7zip"],
+} ->
+
+exec { 'db2 setup':
+    command => 'c:\db2-setup\EXPC\setup.exe /u c:\vagrant\modules\conf\db2\db2expc_install.windows.rsp /l c:\db2-setup\install.log',
+    creates  => '${supplier.installDir}'
+} ->
+
+exec { 'db2start':
+    command => '"c:\Program Files\IBM\SQLLIB\BIN\db2cmd.exe" -c db2start'
+} ->
+
+exec { 'db2 init sql':
+    command => '"C:\Program Files\IBM\SQLLIB\BIN\db2cmd.exe" -c -w -i db2 -t -f c:\vagrant\modules\conf\db2\db2.init.sql'
+}

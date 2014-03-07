@@ -27,6 +27,11 @@ public class MSSQLConnSupplier extends ConnectionSupplier {
     }
 
     @Override
+    public String getOs() {
+        return OS_WINDOWS;
+    }
+
+    @Override
     public ConfigTemplate getPuppetTemplate(Map<String, Object> context) {
         return new ConfigTemplate("liquibase/sdk/vagrant/supplier/mssql/mssql.puppet.vm", context);
     }

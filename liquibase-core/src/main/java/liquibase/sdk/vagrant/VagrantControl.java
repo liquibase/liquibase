@@ -329,6 +329,7 @@ public class VagrantControl {
         String osLevelConfig;
         if (vagrantInfo.baseBoxName.contains("linux")) {
             osLevelConfig = "service { \"iptables\":\n" +
+                    "  enable => false,\n"+
                     "  ensure => \"stopped\",\n" +
                     "}\n\n";
 

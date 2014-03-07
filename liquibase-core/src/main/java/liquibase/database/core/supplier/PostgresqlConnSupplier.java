@@ -22,6 +22,15 @@ public class PostgresqlConnSupplier extends ConnectionSupplier {
     }
 
     @Override
+    public String getVersion() {
+        String version = super.getVersion();
+        if (version == null) {
+            return "9.3.2-3";
+        }
+        return version;
+    }
+
+    @Override
     public String getJdbcUrl() {
         return "jdbc:postgresql://"+ getIpAddress() +"/"+getPrimaryCatalog();
     }

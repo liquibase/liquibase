@@ -11,6 +11,7 @@ import liquibase.exception.DateParseException;
 import liquibase.structure.core.Catalog;
 import liquibase.structure.core.Schema;
 import liquibase.util.JdbcUtils;
+import liquibase.util.StringUtils;
 
 import java.sql.ResultSet;
 import java.sql.Statement;
@@ -91,9 +92,9 @@ public class DB2Database extends AbstractJdbcDatabase {
             if (rs.next()) {
                 String result = rs.getString(1);
                 if (result != null) {
-                    this.defaultSchemaName = result;
+                    this.defaultSchemaName = StringUtils.trimToNull(result);
                 } else {
-                    this.defaultSchemaName = super.getDefaultSchemaName();
+                    this.defaultSchemaName = StringUtils.trimToNull(super.getDefaultSchemaName());
                 }
             }
         } catch (Exception e) {
