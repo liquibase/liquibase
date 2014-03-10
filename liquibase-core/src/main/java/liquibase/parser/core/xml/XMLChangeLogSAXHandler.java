@@ -69,6 +69,7 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
 	private final Stack<PreconditionLogic> preconditionLogicStack = new Stack<PreconditionLogic>();
 	private ChangeSet changeSet;
 	private String paramName;
+	private String groupContext;
 	private final ResourceAccessor resourceAccessor;
 	private Precondition currentPrecondition;
 
@@ -266,6 +267,8 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
 				if (!foundResource) {
 					throw new SAXException("Could not find directory or directory was empty for includeAll '" + pathName + "'");
 				}
+			} else if ("contextGroup".equals(qName)){
+				groupContext = atts.getValue("context");
 			} else if (changeSet == null && "changeSet".equals(qName)) {
 				boolean alwaysRun = false;
 				boolean runOnChange = false;
@@ -287,7 +290,7 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
 				}
 
 				changeSet = new ChangeSet(atts.getValue("id"), atts.getValue("author"), alwaysRun, runOnChange, filePath,
-						atts.getValue("context"), atts.getValue("dbms"), Boolean.valueOf(atts.getValue("runInTransaction")),
+						mergeGroupContext(atts.getValue("context")), atts.getValue("dbms"), Boolean.valueOf(atts.getValue("runInTransaction")),
 						quotingStrategy, databaseChangeLog);
 				if (StringUtils.trimToNull(atts.getValue("failOnError")) != null) {
 					changeSet.setFailOnError(Boolean.parseBoolean(atts.getValue("failOnError")));
@@ -514,6 +517,21 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
 			setProperty(column, attributeName, attributeValue);
 		}
 	}
+	
+	private String mergeGroupContext(String context) {
+		StringBuffer mergedContext = new StringBuffer();
+		if (context != null && !context.isEmpty()) {
+			mergedContext.append(context);
+		}
+		
+		if (groupContext != null && !groupContext.isEmpty()) {
+			if (mergedContext.length() > 0) {
+				mergedContext.append(",");
+			}
+			mergedContext.append(groupContext);
+		}
+		return mergedContext.toString();
+	}
 
 	protected boolean handleIncludedChangeLog(String fileName, boolean isRelativePath, String relativeBaseFileName)
 			throws LiquibaseException {
@@ -624,6 +642,8 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
 			} else if (changeSet != null && "comment".equals(qName)) {
 				changeSet.setComments(textString);
 				text = new StringBuffer();
+			} else if ("contextGroup".equals(qName)) {
+				groupContext = null;
 			} else if (changeSet != null && "changeSet".equals(qName)) {
 				handleChangeSet(changeSet);
 				changeSet = null;
