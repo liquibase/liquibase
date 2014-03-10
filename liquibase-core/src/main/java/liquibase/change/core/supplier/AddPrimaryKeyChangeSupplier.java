@@ -8,12 +8,16 @@ import liquibase.change.core.CreateTableChange;
 import liquibase.diff.DiffResult;
 import liquibase.exception.DatabaseException;
 import liquibase.sdk.supplier.change.AbstractChangeSupplier;
-import liquibase.structure.core.Column;
 import liquibase.structure.core.PrimaryKey;
 
 import static junit.framework.Assert.assertNotNull;
 
 public class AddPrimaryKeyChangeSupplier extends AbstractChangeSupplier<AddPrimaryKeyChange>  {
+
+    public AddPrimaryKeyChangeSupplier() {
+        super(AddPrimaryKeyChange.class);
+    }
+
     @Override
     public Change[]  prepareDatabase(AddPrimaryKeyChange change) throws DatabaseException {
         CreateTableChange createTableChange = new CreateTableChange();

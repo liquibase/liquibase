@@ -33,6 +33,15 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
     private Boolean relativeToChangelogFile;
     private String encoding = null;
 
+    @Override
+    public boolean generateStatementsVolatile(Database database) {
+        return false;
+    }
+
+    @Override
+    public boolean generateRollbackStatementsVolatile(Database database) {
+        return false;
+    }
 
     public String getCatalogName() {
         return catalogName;
@@ -50,6 +59,7 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
         this.schemaName = schemaName;
     }
 
+    @DatabaseChangeProperty(exampleValue = "new_customer")
     public String getProcedureName() {
         return procedureName;
     }
@@ -235,12 +245,16 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
 
     @Override
     protected Map<String, Object> createExampleValueMetaData(String parameterName, DatabaseChangeProperty changePropertyAnnotation) {
-        Map<String, Object> returnMap = new HashMap<String, Object>();
 
-        returnMap.put(new HsqlDatabase().getShortName(), "CREATE PROCEDURE new_customer(firstname VARCHAR(50), lastname VARCHAR(50))\n" +
-                "   MODIFIES SQL DATA\n" +
-                "   INSERT INTO CUSTOMERS (first_name, last_name) VALUES (firstname, lastname)");
+        if (parameterName.equals("procedureText") || parameterName.equals("procedureBody")) {
+            Map<String, Object> returnMap = super.createExampleValueMetaData(parameterName, changePropertyAnnotation);
+            returnMap.put(new HsqlDatabase().getShortName(), "CREATE PROCEDURE new_customer(firstname VARCHAR(50), lastname VARCHAR(50))\n" +
+                    "   MODIFIES SQL DATA\n" +
+                    "   INSERT INTO CUSTOMERS (first_name, last_name) VALUES (firstname, lastname)");
 
-        return returnMap;
+            return returnMap;
+        } else {
+            return super.createExampleValueMetaData(parameterName, changePropertyAnnotation);
+        }
     }
 }

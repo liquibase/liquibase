@@ -13,6 +13,11 @@ import liquibase.structure.core.View;
 import static junit.framework.TestCase.assertNotNull;
 
 public class DropViewChangeSupplier extends AbstractChangeSupplier<DropViewChange>  {
+
+    public DropViewChangeSupplier() {
+        super(DropViewChange.class);
+    }
+
     @Override
     public Change[]  prepareDatabase(DropViewChange change) throws DatabaseException {
         CreateTableChange createTableChange = new CreateTableChange();

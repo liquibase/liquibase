@@ -13,6 +13,11 @@ import liquibase.structure.core.PrimaryKey;
 import static junit.framework.TestCase.assertNotNull;
 
 public class DropPrimaryKeyChangeSupplier extends AbstractChangeSupplier<DropPrimaryKeyChange>  {
+
+    public DropPrimaryKeyChangeSupplier() {
+        super(DropPrimaryKeyChange.class);
+    }
+
     @Override
     public Change[]  prepareDatabase(DropPrimaryKeyChange change) throws DatabaseException {
         CreateTableChange createTableChange = new CreateTableChange();

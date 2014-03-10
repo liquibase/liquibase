@@ -3,16 +3,22 @@ package liquibase.change.core.supplier;
 import liquibase.change.Change;
 import liquibase.change.ColumnConfig;
 import liquibase.change.ConstraintsConfig;
-import liquibase.change.core.*;
+import liquibase.change.core.CreateProcedureChange;
+import liquibase.change.core.CreateTableChange;
+import liquibase.change.core.DropProcedureChange;
 import liquibase.diff.DiffResult;
 import liquibase.exception.DatabaseException;
 import liquibase.sdk.supplier.change.AbstractChangeSupplier;
-import liquibase.structure.core.PrimaryKey;
 import liquibase.structure.core.StoredProcedure;
 
 import static junit.framework.TestCase.assertNotNull;
 
 public class DropProcedureChangeSupplier extends AbstractChangeSupplier<DropProcedureChange> {
+
+    public DropProcedureChangeSupplier() {
+        super(DropProcedureChange.class);
+    }
+
     @Override
     public Change[]  prepareDatabase(DropProcedureChange change) throws DatabaseException {
         CreateTableChange createTableChange = new CreateTableChange();

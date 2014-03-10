@@ -12,9 +12,13 @@ import liquibase.structure.core.Table;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.TestCase.assertNotNull;
-import static junit.framework.TestCase.assertNull;
 
 public class DropDefaultValueChangeSupplier extends AbstractChangeSupplier<DropDefaultValueChange>  {
+
+    public DropDefaultValueChangeSupplier() {
+        super(DropDefaultValueChange.class);
+    }
+
     @Override
     public Change[]  prepareDatabase(DropDefaultValueChange change) throws Exception {
         CreateTableChange createTableChange = new CreateTableChange();

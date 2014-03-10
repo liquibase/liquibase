@@ -33,6 +33,14 @@ public abstract class OutputFormat {
                 return ((Sql) value).toSql();
             }
 
+            if (value instanceof Object[]) {
+                return new ArrayFormat(this).format(value);
+            }
+
+            if (value instanceof Collection) {
+                return new CollectionFormat(this).format(value);
+            }
+
             return value.toString();
         }
     }
@@ -48,21 +56,36 @@ public abstract class OutputFormat {
         }
     }
 
-    public static class CollectionFormat extends OutputFormat {
+    public static class ArrayFormat extends OutputFormat {
 
         private StringUtils.StringUtilsFormatter itemFormatter;
 
-        public CollectionFormat() {
+        public ArrayFormat(final OutputFormat itemFormatter) {
             this.itemFormatter = new StringUtils.StringUtilsFormatter() {
                 @Override
                 public String toString(Object obj) {
-                    return (String) obj;
+                    return itemFormatter.format(obj);
                 }
             };
         }
 
-        public CollectionFormat(StringUtils.StringUtilsFormatter itemFormatter) {
-            this.itemFormatter = itemFormatter;
+        @Override
+        public String format(Object value) {
+            return StringUtils.join((Object[]) value, ", ", itemFormatter);
+        }
+    }
+
+    public static class CollectionFormat extends OutputFormat {
+
+        private StringUtils.StringUtilsFormatter itemFormatter;
+
+        public CollectionFormat(final OutputFormat itemFormatter) {
+            this.itemFormatter = new StringUtils.StringUtilsFormatter() {
+                @Override
+                public String toString(Object obj) {
+                    return itemFormatter.format(obj);
+                }
+            };
         }
 
         @Override

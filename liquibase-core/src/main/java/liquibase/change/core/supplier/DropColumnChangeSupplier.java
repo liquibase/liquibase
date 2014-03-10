@@ -12,6 +12,11 @@ import liquibase.structure.core.Table;
 import static junit.framework.Assert.assertNotNull;
 
 public class DropColumnChangeSupplier extends AbstractChangeSupplier<DropColumnChange>  {
+
+    public DropColumnChangeSupplier() {
+        super(DropColumnChange.class);
+    }
+
     @Override
     public Change[]  prepareDatabase(DropColumnChange change) throws Exception {
         CreateTableChange createTableChange = new CreateTableChange();

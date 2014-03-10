@@ -11,6 +11,11 @@ import liquibase.structure.core.View;
 import static junit.framework.TestCase.assertNotNull;
 
 public class CreateViewChangeSupplier extends AbstractChangeSupplier<CreateViewChange>  {
+
+    public CreateViewChangeSupplier() {
+        super(CreateViewChange.class);
+    }
+
     @Override
     public Change[]  prepareDatabase(CreateViewChange change) throws Exception {
 

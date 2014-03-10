@@ -15,6 +15,11 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 public class DropNotNullConstraintChangeSupplier extends AbstractChangeSupplier<DropNotNullConstraintChange>  {
+
+    public DropNotNullConstraintChangeSupplier() {
+        super(DropNotNullConstraintChange.class);
+    }
+
     @Override
     public Change[]  prepareDatabase(DropNotNullConstraintChange change) throws Exception {
         CreateTableChange createTableChange = new CreateTableChange();

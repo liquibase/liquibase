@@ -5,7 +5,7 @@ import liquibase.change.ColumnConfig;
 import liquibase.change.ConstraintsConfig;
 import liquibase.change.core.AddForeignKeyConstraintChange;
 import liquibase.change.core.CreateTableChange;
-import liquibase.change.core.DropForeignKeyConstraintChange;
+import liquibase.change.core.DropAllForeignKeyConstraintsChange;
 import liquibase.diff.DiffResult;
 import liquibase.exception.DatabaseException;
 import liquibase.sdk.supplier.change.AbstractChangeSupplier;
@@ -13,14 +13,14 @@ import liquibase.structure.core.ForeignKey;
 
 import static junit.framework.TestCase.assertNotNull;
 
-public class DropForeignKeyConstraintChangeSupplier extends AbstractChangeSupplier<DropForeignKeyConstraintChange>  {
+public class DropAllForeignKeyConstraintsChangeSupplier extends AbstractChangeSupplier<DropAllForeignKeyConstraintsChange> {
 
-    public DropForeignKeyConstraintChangeSupplier() {
-        super(DropForeignKeyConstraintChange.class);
+    public DropAllForeignKeyConstraintsChangeSupplier() {
+        super(DropAllForeignKeyConstraintsChange.class);
     }
 
     @Override
-    public Change[]  prepareDatabase(DropForeignKeyConstraintChange change) throws DatabaseException {
+    public Change[]  prepareDatabase(DropAllForeignKeyConstraintsChange change) throws DatabaseException {
         CreateTableChange createBaseTable = new CreateTableChange();
         createBaseTable.setCatalogName(change.getBaseTableCatalogName());
         createBaseTable.setSchemaName(change.getBaseTableSchemaName());
@@ -38,14 +38,14 @@ public class DropForeignKeyConstraintChangeSupplier extends AbstractChangeSuppli
         createFKChange.setReferencedTableSchemaName(change.getBaseTableSchemaName());
         createFKChange.setReferencedTableName(change.getBaseTableName());
         createFKChange.setReferencedColumnNames("id");
-        createFKChange.setConstraintName(change.getConstraintName());
+        createFKChange.setConstraintName("fk_test");
 
         return new Change[] {createBaseTable, createFKChange };
 
     }
 
     @Override
-    public void checkDiffResult(DiffResult diffResult, DropForeignKeyConstraintChange change) {
-        assertNotNull(diffResult.getMissingObject(new ForeignKey(change.getConstraintName(), change.getBaseTableCatalogName(), change.getBaseTableSchemaName(), change.getBaseTableName())));
+    public void checkDiffResult(DiffResult diffResult, DropAllForeignKeyConstraintsChange change) {
+        assertNotNull(diffResult.getMissingObject(new ForeignKey("fk_test", change.getBaseTableCatalogName(), change.getBaseTableSchemaName(), change.getBaseTableName())));
     }
 }

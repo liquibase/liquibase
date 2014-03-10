@@ -13,9 +13,13 @@ import liquibase.structure.core.Table;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
-import static junit.framework.Assert.assertNull;
 
 public class AddNotNullConstraintChangeSupplier extends AbstractChangeSupplier<AddNotNullConstraintChange>  {
+
+    public AddNotNullConstraintChangeSupplier() {
+        super(AddNotNullConstraintChange.class);
+    }
+
     @Override
     public Change[]  prepareDatabase(AddNotNullConstraintChange change) throws DatabaseException {
         CreateTableChange createTableChange = new CreateTableChange();

@@ -1,11 +1,9 @@
 package liquibase.sdk.verifytest;
 
 import liquibase.sdk.exception.UnexpectedLiquibaseSdkException;
+import liquibase.util.StringUtils;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.SortedMap;
-import java.util.TreeMap;
+import java.util.*;
 
 public class TestPermutation {
 
@@ -17,7 +15,6 @@ public class TestPermutation {
     private SortedMap<String,Value> notes = new TreeMap<String, Value>();
 
     private List<Setup> setupCommands = new ArrayList<Setup>();
-    private List<Assertion> assertions = new ArrayList<Assertion>();
     private List<Verification> verifications = new ArrayList<Verification>();
     private List<Cleanup> cleanupCommands = new ArrayList<Cleanup>();
 
@@ -57,6 +54,10 @@ public class TestPermutation {
         return setupCommands;
     }
 
+    public void addAssertion(Setup setup) {
+        this.setupCommands.add(setup);
+    }
+
     public void addSetup(Setup setup) {
         this.setupCommands.add(setup);
     }
@@ -89,14 +90,6 @@ public class TestPermutation {
         data.put(key, new Value(value, outputFormat));
     }
 
-    public List<Assertion> getAssertions() {
-        return assertions;
-    }
-
-    public void addAssertion(Assertion assertion) {
-        assertions.add(assertion);
-    }
-
     public List<Verification> getVerifications() {
         return verifications;
     }
@@ -118,12 +111,22 @@ public class TestPermutation {
             return;
         }
 
-        for (Setup setup : this.setupCommands) {
-            setup.run();
-        }
+        try {
+            for (Setup setup : this.setupCommands) {
+                String message = setup.run();
 
-        for (Assertion assertion : this.assertions) {
-            assertion.run();
+                if (message != null) {
+                    canVerify = false;
+                    skipMessage = message;
+                    break;
+                }
+            }
+        } catch (Throwable e) {
+            String message = "Error executing setup\n"+
+                    "Description: "+ output(description)+"\n"+
+                    "Notes: "+output(notes)+"\n"+
+                    "Data: "+output(data);
+            throw new RuntimeException(message, e);
         }
 
         if (!canVerify) {
@@ -138,6 +141,12 @@ public class TestPermutation {
                 }
             } catch (CannotVerifyException e) {
                 this.verified = false;
+            } catch (Throwable e) {
+                String message = "Error executing verification\n"+
+                        "Description: "+ output(description)+"\n"+
+                        "Notes: "+output(notes)+"\n"+
+                        "Data: "+output(data);
+                throw new RuntimeException(message, e);
             }
             this.verified = true;
         } finally {
@@ -155,16 +164,21 @@ public class TestPermutation {
         }
     }
 
+    private String output(SortedMap<String, Value> map) {
+        List<String> out = new ArrayList<String>();
+        for (Map.Entry<String, Value> entry : map.entrySet()) {
+            out.add(entry.getKey()+"="+entry.getValue().serialize());
+        }
+
+        return StringUtils.join(out, ", ");
+    }
+
     public Boolean getVerified() {
         return verified;
     }
 
     public static interface Setup {
-        public void run();
-    }
-
-    public static interface Assertion {
-        public void run();
+        public String run();
     }
 
     public static interface Verification {

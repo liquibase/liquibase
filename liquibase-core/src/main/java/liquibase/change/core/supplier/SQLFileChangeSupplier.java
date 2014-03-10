@@ -9,6 +9,11 @@ import liquibase.diff.DiffResult;
 import liquibase.sdk.supplier.change.AbstractChangeSupplier;
 
 public class SQLFileChangeSupplier extends AbstractChangeSupplier<SQLFileChange>  {
+
+    public SQLFileChangeSupplier() {
+        super(SQLFileChange.class);
+    }
+
     @Override
     public Change[] prepareDatabase(SQLFileChange change) throws Exception {
         CreateTableChange createTableChange = new CreateTableChange();

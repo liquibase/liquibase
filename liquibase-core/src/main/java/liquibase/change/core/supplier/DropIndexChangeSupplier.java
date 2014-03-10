@@ -15,6 +15,11 @@ import static junit.framework.TestCase.assertNotNull;
 
 public class DropIndexChangeSupplier extends AbstractChangeSupplier<DropIndexChange>  {
 
+    public DropIndexChangeSupplier() {
+        super(DropIndexChange.class);
+    }
+
+
     @Override
     public Change[]  prepareDatabase(DropIndexChange change) throws Exception {
         String usedTableName = change.getTableName();

@@ -56,6 +56,7 @@ public class DropUniqueConstraintChange extends AbstractChange {
         this.constraintName = constraintName;
     }
 
+    @DatabaseChangeProperty(exampleValue = "name")
     public String getUniqueColumns() {
 		return uniqueColumns;
 	}

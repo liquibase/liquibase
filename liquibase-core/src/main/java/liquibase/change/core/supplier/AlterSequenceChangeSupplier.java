@@ -13,6 +13,10 @@ import static junit.framework.Assert.assertEquals;
 
 public class AlterSequenceChangeSupplier extends AbstractChangeSupplier<AlterSequenceChange>  {
 
+    public AlterSequenceChangeSupplier() {
+        super(AlterSequenceChange.class);
+    }
+
     @Override
     public Change[]  prepareDatabase(AlterSequenceChange change) throws DatabaseException {
         CreateSequenceChange createSequenceChange = new CreateSequenceChange();

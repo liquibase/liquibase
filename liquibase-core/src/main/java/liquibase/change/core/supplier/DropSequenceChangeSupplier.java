@@ -11,6 +11,11 @@ import liquibase.structure.core.Sequence;
 import static junit.framework.TestCase.assertNotNull;
 
 public class DropSequenceChangeSupplier extends AbstractChangeSupplier<DropSequenceChange>  {
+
+    public DropSequenceChangeSupplier() {
+        super(DropSequenceChange.class);
+    }
+
     @Override
     public Change[]  prepareDatabase(DropSequenceChange change) throws DatabaseException {
         CreateSequenceChange createSequenceChange = new CreateSequenceChange();

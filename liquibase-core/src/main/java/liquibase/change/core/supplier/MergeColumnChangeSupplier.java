@@ -13,6 +13,11 @@ import liquibase.structure.core.Table;
 import static junit.framework.TestCase.assertNotNull;
 
 public class MergeColumnChangeSupplier extends AbstractChangeSupplier<MergeColumnChange>  {
+
+    public MergeColumnChangeSupplier() {
+        super(MergeColumnChange.class);
+    }
+
     @Override
     public Change[]  prepareDatabase(MergeColumnChange change) throws DatabaseException {
         CreateTableChange createTableChange = new CreateTableChange();

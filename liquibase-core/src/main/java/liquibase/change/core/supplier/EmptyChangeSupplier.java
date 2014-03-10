@@ -8,6 +8,11 @@ import liquibase.sdk.supplier.change.AbstractChangeSupplier;
 import static junit.framework.Assert.assertEquals;
 
 public class EmptyChangeSupplier extends AbstractChangeSupplier<EmptyChange>  {
+
+    public EmptyChangeSupplier() {
+        super(EmptyChange.class);
+    }
+
     @Override
     public Change[] prepareDatabase(EmptyChange change) throws Exception {
         return null;

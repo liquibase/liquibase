@@ -13,6 +13,11 @@ import liquibase.structure.core.UniqueConstraint;
 import static junit.framework.Assert.assertNotNull;
 
 public class DropUniqueConstraintChangeSupplier extends AbstractChangeSupplier<DropUniqueConstraintChange>  {
+
+    public DropUniqueConstraintChangeSupplier() {
+        super(DropUniqueConstraintChange.class);
+    }
+
     @Override
     public Change[]  prepareDatabase(DropUniqueConstraintChange change) throws Exception {
         CreateTableChange createTableChange = new CreateTableChange();

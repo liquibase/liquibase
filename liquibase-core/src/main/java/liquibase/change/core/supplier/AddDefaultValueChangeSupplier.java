@@ -15,6 +15,11 @@ import static junit.framework.TestCase.assertNull;
 import static org.junit.Assert.assertNotNull;
 
 public class AddDefaultValueChangeSupplier extends AbstractChangeSupplier<AddDefaultValueChange> {
+
+    public AddDefaultValueChangeSupplier() {
+        super(AddDefaultValueChange.class);
+    }
+
     @Override
     public Change[] prepareDatabase(AddDefaultValueChange change) throws Exception {
         CreateTableChange createTableChange = new CreateTableChange();

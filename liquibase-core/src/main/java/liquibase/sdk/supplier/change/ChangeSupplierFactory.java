@@ -3,6 +3,7 @@ package liquibase.sdk.supplier.change;
 import liquibase.change.Change;
 import liquibase.change.ChangeFactory;
 import liquibase.database.Database;
+import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.ExecutorService;
 import liquibase.sdk.exception.UnexpectedLiquibaseSdkException;
 import liquibase.servicelocator.ServiceLocator;
@@ -33,7 +34,7 @@ public class ChangeSupplierFactory {
     }
 
     public void prepareDatabase(Change change, Database database) {
-        ChangeSupplier supplier = getChangeSupplier(change);
+        ChangeSupplier supplier = getSupplier(change);
 
         try {
             Change[] changes = supplier.prepareDatabase(change);
@@ -48,7 +49,7 @@ public class ChangeSupplierFactory {
     }
 
     public void revertDatabase(Change change, Database database) {
-        ChangeSupplier supplier = getChangeSupplier(change);
+        ChangeSupplier supplier = getSupplier(change);
 
         try {
             Change[] changes = supplier.revertDatabase(change);
@@ -62,7 +63,7 @@ public class ChangeSupplierFactory {
         }
     }
 
-    protected ChangeSupplier getChangeSupplier(Change change) {
+    protected ChangeSupplier getSupplier(Change change) {
         String supplierClassName = change.getClass().getName().replaceFirst("(.*)\\.(\\w+)", "$1\\.supplier\\.$2Supplier");
         try {
             Class supplierClass = Class.forName(supplierClassName);
@@ -73,6 +74,14 @@ public class ChangeSupplierFactory {
             throw new UnexpectedLiquibaseSdkException("Error instantiating supplier class " + supplierClassName);
         } catch (IllegalAccessException e) {
             throw new UnexpectedLiquibaseSdkException("Error instantiating supplier class " + supplierClassName);
+        }
+    }
+
+    public ChangeSupplier getSupplier(Class<? extends Change> change) {
+        try {
+            return getSupplier(change.newInstance());
+        } catch (Exception e) {
+            throw new UnexpectedLiquibaseException(e);
         }
     }
 }

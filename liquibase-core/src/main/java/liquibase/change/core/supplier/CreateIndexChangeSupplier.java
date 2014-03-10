@@ -16,6 +16,11 @@ import java.util.List;
 import static junit.framework.Assert.assertNotNull;
 
 public class CreateIndexChangeSupplier extends AbstractChangeSupplier<CreateIndexChange>  {
+
+    public CreateIndexChangeSupplier() {
+        super(CreateIndexChange.class);
+    }
+
     @Override
     public Change[]  prepareDatabase(CreateIndexChange change) throws DatabaseException {
         CreateTableChange createTableChange = new CreateTableChange();

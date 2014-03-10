@@ -9,12 +9,15 @@ import liquibase.diff.DiffResult;
 import liquibase.exception.DatabaseException;
 import liquibase.sdk.supplier.change.AbstractChangeSupplier;
 import liquibase.structure.core.ForeignKey;
-import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
 
 import static junit.framework.Assert.assertNotNull;
 
 public class AddForeignKeyConstraintChangeSupplier extends AbstractChangeSupplier<AddForeignKeyConstraintChange>  {
+
+    public AddForeignKeyConstraintChangeSupplier() {
+        super(AddForeignKeyConstraintChange.class);
+    }
 
     @Override
     public Change[]  prepareDatabase(AddForeignKeyConstraintChange change) throws DatabaseException {

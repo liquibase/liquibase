@@ -13,6 +13,11 @@ import liquibase.statement.core.RawSqlStatement;
 import static org.junit.Assert.assertTrue;
 
 public class RawSQLChangeSupplier extends AbstractChangeSupplier<RawSQLChange>  {
+
+    public RawSQLChangeSupplier() {
+        super(RawSQLChange.class);
+    }
+
     @Override
     public Change[]  prepareDatabase(RawSQLChange change) throws DatabaseException {
         CreateTableChange createTableChange = new CreateTableChange();

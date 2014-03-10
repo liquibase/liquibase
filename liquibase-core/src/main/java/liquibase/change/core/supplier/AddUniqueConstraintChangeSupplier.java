@@ -10,6 +10,11 @@ import liquibase.sdk.supplier.change.AbstractChangeSupplier;
 import liquibase.structure.core.UniqueConstraint;
 
 public class AddUniqueConstraintChangeSupplier extends AbstractChangeSupplier<AddUniqueConstraintChange>  {
+
+    public AddUniqueConstraintChangeSupplier() {
+        super(AddUniqueConstraintChange.class);
+    }
+
     @Override
     public Change[]  prepareDatabase(AddUniqueConstraintChange change) throws Exception {
         CreateTableChange createTableChange = new CreateTableChange();

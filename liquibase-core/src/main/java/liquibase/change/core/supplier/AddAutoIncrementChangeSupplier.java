@@ -5,7 +5,6 @@ import liquibase.change.ColumnConfig;
 import liquibase.change.ConstraintsConfig;
 import liquibase.change.core.AddAutoIncrementChange;
 import liquibase.change.core.CreateTableChange;
-import liquibase.change.core.DropTableChange;
 import liquibase.diff.DiffResult;
 import liquibase.diff.ObjectDifferences;
 import liquibase.exception.DatabaseException;
@@ -14,11 +13,15 @@ import liquibase.structure.core.Column;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
 public class AddAutoIncrementChangeSupplier extends AbstractChangeSupplier<AddAutoIncrementChange>  {
+
+    public AddAutoIncrementChangeSupplier() {
+        super(AddAutoIncrementChange.class);
+    }
+
     @Override
     public Change[] prepareDatabase(AddAutoIncrementChange change) throws DatabaseException {
         CreateTableChange createTable = new CreateTableChange();

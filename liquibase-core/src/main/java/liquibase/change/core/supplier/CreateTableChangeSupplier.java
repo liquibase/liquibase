@@ -9,6 +9,11 @@ import liquibase.structure.core.Table;
 import static junit.framework.Assert.assertNotNull;
 
 public class CreateTableChangeSupplier extends AbstractChangeSupplier<CreateTableChange>  {
+
+    public CreateTableChangeSupplier() {
+        super(CreateTableChange.class);
+    }
+
     @Override
     public Change[] prepareDatabase(CreateTableChange change) throws Exception {
         return null;

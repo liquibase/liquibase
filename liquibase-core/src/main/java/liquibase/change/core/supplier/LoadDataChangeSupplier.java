@@ -8,6 +8,11 @@ import liquibase.diff.DiffResult;
 import liquibase.sdk.supplier.change.AbstractChangeSupplier;
 
 public class LoadDataChangeSupplier extends AbstractChangeSupplier<LoadDataChange>  {
+
+    public LoadDataChangeSupplier() {
+        super(LoadDataChange.class);
+    }
+
     @Override
     public Change[]  prepareDatabase(LoadDataChange change) throws Exception {
         CreateTableChange createTableChange = new CreateTableChange();

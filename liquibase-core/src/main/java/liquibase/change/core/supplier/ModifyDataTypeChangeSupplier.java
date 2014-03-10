@@ -1,6 +1,5 @@
 package liquibase.change.core.supplier;
 
-import junit.framework.Assert;
 import liquibase.change.Change;
 import liquibase.change.ColumnConfig;
 import liquibase.change.core.CreateTableChange;
@@ -11,10 +10,14 @@ import liquibase.sdk.supplier.change.AbstractChangeSupplier;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Table;
 
-import static junit.framework.Assert.assertEquals;
 import static junit.framework.TestCase.assertNotNull;
 
 public class ModifyDataTypeChangeSupplier extends AbstractChangeSupplier<ModifyDataTypeChange>  {
+
+    public ModifyDataTypeChangeSupplier() {
+        super(ModifyDataTypeChange.class);
+    }
+
     @Override
     public Change[]  prepareDatabase(ModifyDataTypeChange change) throws Exception {
         CreateTableChange createTableChange = new CreateTableChange();

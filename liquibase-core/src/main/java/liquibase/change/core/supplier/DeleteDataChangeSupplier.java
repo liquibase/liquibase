@@ -7,13 +7,14 @@ import liquibase.change.core.DeleteDataChange;
 import liquibase.change.core.InsertDataChange;
 import liquibase.diff.DiffResult;
 import liquibase.exception.DatabaseException;
-import liquibase.executor.ExecutorService;
 import liquibase.sdk.supplier.change.AbstractChangeSupplier;
-import liquibase.statement.core.RawSqlStatement;
-
-import static org.junit.Assert.assertTrue;
 
 public class DeleteDataChangeSupplier extends AbstractChangeSupplier<DeleteDataChange>  {
+
+    public DeleteDataChangeSupplier() {
+        super(DeleteDataChange.class);
+    }
+
     @Override
     public Change[]  prepareDatabase(DeleteDataChange change) throws DatabaseException {
         CreateTableChange createTableChange = new CreateTableChange();

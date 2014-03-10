@@ -9,6 +9,11 @@ import liquibase.structure.core.View;
 import static junit.framework.Assert.assertNotNull;
 
 public class RenameViewChangeSupplier extends AbstractChangeSupplier<RenameViewChange>  {
+
+    public RenameViewChangeSupplier() {
+        super(RenameViewChange.class);
+    }
+
     @Override
     public Change[] prepareDatabase(RenameViewChange change) throws Exception {
         return null;

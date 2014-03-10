@@ -324,7 +324,9 @@ public class ChangeParameterMetaData {
         Map standardExamples = new HashMap();
         standardExamples.put("tableName", "person");
         standardExamples.put("schemaName", "public");
+        standardExamples.put("tableSchemaName", "public");
         standardExamples.put("catalogName", "cat");
+        standardExamples.put("tableCatalogName", "cat");
         standardExamples.put("columnName", "id");
         standardExamples.put("columnNames", "id, name");
         standardExamples.put("indexName", "idx_address");
@@ -341,7 +343,7 @@ public class ChangeParameterMetaData {
             return standardExamples.get(parameterName);
         }
 
-        for (String prefix : new String[] {"base", "new", "old"}) {
+        for (String prefix : new String[] {"base", "referenced", "new", "old"}) {
             if (parameterName.startsWith(prefix)) {
                 String mainName = StringUtils.lowerCaseFirst(parameterName.replaceFirst("^"+prefix, ""));
                 if (standardExamples.containsKey(mainName)) {

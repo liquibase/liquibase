@@ -14,6 +14,10 @@ import static junit.framework.TestCase.assertNotNull;
 
 public class RenameColumnChangeSupplier extends AbstractChangeSupplier<RenameColumnChange>  {
 
+    public RenameColumnChangeSupplier() {
+        super(RenameColumnChange.class);
+    }
+
     @Override
     public Change[]  prepareDatabase(RenameColumnChange change) throws Exception {
         CreateTableChange createTableChange = new CreateTableChange();

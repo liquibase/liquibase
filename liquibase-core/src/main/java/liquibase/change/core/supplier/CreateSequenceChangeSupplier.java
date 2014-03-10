@@ -5,11 +5,15 @@ import liquibase.change.core.CreateSequenceChange;
 import liquibase.diff.DiffResult;
 import liquibase.sdk.supplier.change.AbstractChangeSupplier;
 import liquibase.structure.core.Sequence;
-import liquibase.structure.core.Table;
 
 import static junit.framework.Assert.assertNotNull;
 
 public class CreateSequenceChangeSupplier extends AbstractChangeSupplier<CreateSequenceChange>  {
+
+    public CreateSequenceChangeSupplier() {
+        super(CreateSequenceChange.class);
+    }
+
     @Override
     public Change[] prepareDatabase(CreateSequenceChange change) throws Exception {
         return null;

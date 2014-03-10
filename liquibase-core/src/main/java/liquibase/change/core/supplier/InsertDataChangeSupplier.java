@@ -6,18 +6,18 @@ import liquibase.change.core.CreateTableChange;
 import liquibase.change.core.InsertDataChange;
 import liquibase.database.Database;
 import liquibase.diff.DiffResult;
-import liquibase.diff.ObjectDifferences;
 import liquibase.executor.ExecutorService;
 import liquibase.sdk.supplier.change.AbstractChangeSupplier;
-import liquibase.snapshot.SnapshotControl;
 import liquibase.statement.core.RawSqlStatement;
-import liquibase.structure.core.Data;
-
-import java.util.Map;
 
 import static org.junit.Assert.assertTrue;
 
 public class InsertDataChangeSupplier extends AbstractChangeSupplier<InsertDataChange>  {
+
+    public InsertDataChangeSupplier() {
+        super(InsertDataChange.class);
+    }
+
     @Override
     public Change[]  prepareDatabase(InsertDataChange change) throws Exception {
         CreateTableChange createTableChange = new CreateTableChange();

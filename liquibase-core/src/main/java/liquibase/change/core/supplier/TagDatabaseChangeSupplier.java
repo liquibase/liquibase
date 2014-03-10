@@ -17,6 +17,11 @@ import liquibase.statement.core.RawSqlStatement;
 import static org.junit.Assert.assertTrue;
 
 public class TagDatabaseChangeSupplier extends AbstractChangeSupplier<TagDatabaseChange> {
+
+    public TagDatabaseChangeSupplier() {
+        super(TagDatabaseChange.class);
+    }
+
     @Override
     public Change[] prepareDatabase(TagDatabaseChange change) throws Exception {
         return new Change[]{new AbstractChange() {

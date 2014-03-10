@@ -11,6 +11,11 @@ import liquibase.structure.core.Table;
 import static junit.framework.TestCase.assertNotNull;
 
 public class RenameTableChangeSupplier extends AbstractChangeSupplier<RenameTableChange>  {
+
+    public RenameTableChangeSupplier() {
+        super(RenameTableChange.class);
+    }
+
     @Override
     public Change[]  prepareDatabase(RenameTableChange change) throws Exception {
         CreateTableChange createTableChange = new CreateTableChange();

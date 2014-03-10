@@ -5,20 +5,18 @@ import liquibase.change.ColumnConfig;
 import liquibase.change.core.AddColumnChange;
 import liquibase.change.core.CreateTableChange;
 import liquibase.diff.DiffResult;
-import liquibase.diff.ObjectDifferences;
 import liquibase.sdk.supplier.change.AbstractChangeSupplier;
-import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
 
-import java.util.SortedSet;
-
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 
 public class AddColumnChangeSupplier extends AbstractChangeSupplier<AddColumnChange>  {
+    public AddColumnChangeSupplier() {
+        super(AddColumnChange.class);
+    }
+
     @Override
     public Change[] prepareDatabase(AddColumnChange change) throws Exception {
         CreateTableChange createTableChange = new CreateTableChange();

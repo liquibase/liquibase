@@ -7,7 +7,6 @@ import liquibase.change.core.CreateTableChange;
 import liquibase.diff.DiffResult;
 import liquibase.exception.DatabaseException;
 import liquibase.sdk.supplier.change.AbstractChangeSupplier;
-import liquibase.structure.core.Column;
 import liquibase.structure.core.ForeignKey;
 import liquibase.structure.core.Table;
 
@@ -15,6 +14,11 @@ import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
 
 public class AddLookupTableChangeSupplier extends AbstractChangeSupplier<AddLookupTableChange>  {
+
+    public AddLookupTableChangeSupplier() {
+        super(AddLookupTableChange.class);
+    }
+
     @Override
     public Change[]  prepareDatabase(AddLookupTableChange change) throws DatabaseException {
         CreateTableChange createTableChange= new CreateTableChange();

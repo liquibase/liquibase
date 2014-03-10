@@ -11,6 +11,11 @@ import liquibase.diff.DiffResult;
 import liquibase.sdk.supplier.change.AbstractChangeSupplier;
 
 public class CreateProcedureChangeSupplier extends AbstractChangeSupplier<CreateProcedureChange>  {
+
+    public CreateProcedureChangeSupplier() {
+        super(CreateProcedureChange.class);
+    }
+
     @Override
     public Change[] prepareDatabase(CreateProcedureChange change) throws Exception {
         CreateTableChange createTableChange = new CreateTableChange();

@@ -8,6 +8,11 @@ import liquibase.diff.DiffResult;
 import liquibase.sdk.supplier.change.AbstractChangeSupplier;
 
 public class UpdateDataChangeSupplier extends AbstractChangeSupplier<UpdateDataChange>  {
+
+    public UpdateDataChangeSupplier() {
+        super(UpdateDataChange.class);
+    }
+
     @Override
     public Change[]  prepareDatabase(UpdateDataChange change) throws Exception {
         CreateTableChange createTableChange = new CreateTableChange();
@@ -19,6 +24,11 @@ public class UpdateDataChangeSupplier extends AbstractChangeSupplier<UpdateDataC
             createTableChange.addColumn(new ColumnConfig().setName(column.getName()).setType("int"));
         }
         createTableChange.addColumn(new ColumnConfig().setName("other_column").setType("int"));
+
+        if (change.getWhere() != null) {
+            String whereColumn = change.getWhere().replaceFirst("(.*?)=.*", "$1");
+            createTableChange.addColumn(new ColumnConfig().setName(whereColumn).setType("varchar(50)"));
+        }
 
         return new Change[] {createTableChange };
     }
