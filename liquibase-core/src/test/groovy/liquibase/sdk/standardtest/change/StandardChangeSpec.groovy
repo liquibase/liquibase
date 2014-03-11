@@ -11,6 +11,7 @@ import liquibase.sdk.supplier.change.ChangeSupplierFactory
 import liquibase.sdk.supplier.database.DatabaseSupplier
 import liquibase.sdk.supplier.resource.ResourceSupplier
 import liquibase.sdk.verifytest.TestPermutation
+import liquibase.sdk.verifytest.VerifiedTest
 import liquibase.serializer.core.string.StringChangeLogSerializer
 import liquibase.sqlgenerator.SqlGeneratorFactory
 import org.junit.Rule
@@ -22,7 +23,6 @@ class StandardChangeSpec extends Specification {
     @Shared changeSupplier = new ChangeSupplierFactory()
     @Shared databaseSupplier = new DatabaseSupplier()
     @Shared resourceSupplier = new ResourceSupplier()
-    @Rule TestName testName = new TestName()
 
     @Unroll("Change <#change> has at least one supported database")
     def "change class has at least one supported database" () {
@@ -41,10 +41,12 @@ class StandardChangeSpec extends Specification {
     @Unroll("valid properties for #changeClass.name are valid sql against #database.shortName")
     def "valid properties are valid sql" () {
         expect:
+        def test = new VerifiedTest(this.getClass().getName(), "valid properties are valid sql")
+
         for (Change change in changeSupplier.getSupplier(changeClass).getAllParameterPermutations(database)) {
             def changeSet = new ChangeSet("1", "StandardChangeSpec-test", false, false, "com/example/dbchangelog.xml", null, null, null)
             change.setChangeSet(changeSet)
-            def permutation = new TestPermutation(testName.methodName)
+            def permutation = new TestPermutation(test)
             permutation.describe("Database", database.shortName);
             permutation.describe("Change Class", change.class);
             permutation.describe("Change", change)
@@ -90,7 +92,7 @@ class StandardChangeSpec extends Specification {
                 database.dropDatabaseObjects(CatalogAndSchema.DEFAULT);
             } as TestPermutation.Cleanup)
 
-            permutation.test()
+            permutation.test(test)
         }
 
 
@@ -106,8 +108,8 @@ class StandardChangeSpec extends Specification {
 //        permutation.describe("Change Class", change.class);
 //
 //
-//        if (!change.supports(database)) permutation.skipMessage = "DATABASE NOT SUPPORTED"
-//        if (change.generateStatementsVolatile(database)) permutation.skipMessage = "CHANGE SQL IS VOLATILE"
+//        if (!change.supports(database)) permutation.notVerifiedMessage = "DATABASE NOT SUPPORTED"
+//        if (change.generateStatementsVolatile(database)) permutation.notVerifiedMessage = "CHANGE SQL IS VOLATILE"
 //        permutation.canVerify = database.connection != null && !(database.connection instanceof OfflineConnection)
 //
 //        permutation.addSetup({

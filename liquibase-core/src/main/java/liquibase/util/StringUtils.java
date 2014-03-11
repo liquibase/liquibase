@@ -246,7 +246,10 @@ public class StringUtils {
     private static class ToStringFormatter implements StringUtilsFormatter {
         @Override
         public String toString(Object obj) {
-            return (String) obj;
+            if (obj == null) {
+                return null;
+            }
+            return obj.toString();
         }
     }
 }

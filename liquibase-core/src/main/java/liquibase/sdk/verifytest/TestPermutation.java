@@ -1,41 +1,37 @@
 package liquibase.sdk.verifytest;
 
 import liquibase.sdk.exception.UnexpectedLiquibaseSdkException;
+import liquibase.util.MD5Util;
 import liquibase.util.StringUtils;
 
 import java.util.*;
 
 public class TestPermutation {
 
-    private String permutationName;
-    private String key;
-    private String skipMessage;
+    private String notVerifiedMessage;
     private SortedMap<String, Value> data = new TreeMap<String, Value>();
     private SortedMap<String,Value> description = new TreeMap<String, Value>();
+    private String key = "";
+    private String longKey = "";
     private SortedMap<String,Value> notes = new TreeMap<String, Value>();
 
     private List<Setup> setupCommands = new ArrayList<Setup>();
     private List<Verification> verifications = new ArrayList<Verification>();
     private List<Cleanup> cleanupCommands = new ArrayList<Cleanup>();
 
-    private Boolean verified;
+    private boolean verified = false;
     private boolean canVerify;
 
-    public TestPermutation(String permutationName) {
-        this.permutationName = permutationName;
-        this.key = permutationName;
+    public TestPermutation(VerifiedTest test) {
+        test.addPermutation(this);
     }
 
     public String getKey() {
         return key;
     }
 
-    public String getPermutationName() {
-        return permutationName;
-    }
-
-    public String getSkipMessage() {
-        return skipMessage;
+    public String getNotVerifiedMessage() {
+        return notVerifiedMessage;
     }
 
     public boolean getCanVerify() {
@@ -46,8 +42,8 @@ public class TestPermutation {
         this.canVerify = canVerify;
     }
 
-    public void setSkipMessage(String skipMessage) {
-        this.skipMessage = skipMessage;
+    public void setNotVerifiedMessage(String notVerifiedMessage) {
+        this.notVerifiedMessage = notVerifiedMessage;
     }
 
     public List<Setup> getSetup() {
@@ -66,12 +62,35 @@ public class TestPermutation {
         return description;
     }
 
+    public String getLongKey() {
+        return longKey;
+    }
+
+    public SortedMap<String, Value> getNotes() {
+        return notes;
+    }
+
+    public SortedMap<String, Value> getData() {
+        return data;
+    }
+
     public void describe(String key, Object value) {
         describe(key, value, OutputFormat.DefaultFormat);
     }
 
     public void describe(String key, Object value, OutputFormat outputFormat) {
         description.put(key, new Value(value, outputFormat));
+        recomputeKey();
+    }
+
+    protected void recomputeKey() {
+        longKey = StringUtils.join(description, ",", new StringUtils.StringUtilsFormatter() {
+            @Override
+            public String toString(Object obj) {
+                return ((Value) obj).serialize();
+            }
+        });
+        key = MD5Util.computeMD5(longKey);
     }
 
     public void note(String key, Object value) {
@@ -106,8 +125,11 @@ public class TestPermutation {
         cleanupCommands.add(cleanup);
     }
 
-    public void test() {
-        if (skipMessage != null) {
+    public void test(VerifiedTest test) throws Exception {
+        TestPermutation previousRun = VerifiedTestFactory.getInstance().getSavedRun(test, this);
+
+        if (notVerifiedMessage != null) {
+            save(test);
             return;
         }
 
@@ -117,7 +139,7 @@ public class TestPermutation {
 
                 if (message != null) {
                     canVerify = false;
-                    skipMessage = message;
+                    notVerifiedMessage = message;
                     break;
                 }
             }
@@ -130,6 +152,7 @@ public class TestPermutation {
         }
 
         if (!canVerify) {
+            save(test);
             return;
         }
 
@@ -162,6 +185,12 @@ public class TestPermutation {
         if (cleanupError != null) {
             throw new UnexpectedLiquibaseSdkException("Cleanup error", cleanupError);
         }
+
+        save(test);
+    }
+
+    protected void save(VerifiedTest test) throws Exception {
+        VerifiedTestFactory.getInstance().saveRun(test, this);
     }
 
     private String output(SortedMap<String, Value> map) {
@@ -173,8 +202,12 @@ public class TestPermutation {
         return StringUtils.join(out, ", ");
     }
 
-    public Boolean getVerified() {
+    public boolean getVerified() {
         return verified;
+    }
+
+    public void setVerified(boolean verified) {
+        this.verified = verified;
     }
 
     public static interface Setup {
