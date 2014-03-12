@@ -333,6 +333,7 @@ public class Main {
                 || "diffChangeLog".equalsIgnoreCase(arg)
                 || "generateChangeLog".equalsIgnoreCase(arg)
                 || "snapshot".equalsIgnoreCase(arg)
+                || "snapshotReference".equalsIgnoreCase(arg)
                 || "calculateCheckSum".equalsIgnoreCase(arg)
                 || "clearCheckSums".equalsIgnoreCase(arg)
                 || "dbDoc".equalsIgnoreCase(arg)
@@ -450,6 +451,8 @@ public class Main {
         stream.println("                                of the database to standard out");
         stream.println(" snapshot                       Writes the current state");
         stream.println("                                of the database to standard out");
+        stream.println(" snapshotReference              Writes the current state");
+        stream.println("                                of the referenceUrl database to standard out");
         stream.println("");
         stream.println("Diff Commands");
         stream.println(" diff [diff parameters]          Writes description of differences");
@@ -843,6 +846,13 @@ public class Main {
                 SnapshotCommand command = new SnapshotCommand();
                 command.setDatabase(database);
                 command.setSchemas(getCommandParam("schemas", database.getDefaultSchema().toString()));
+                System.out.println(command.execute());
+                return;
+            } else if ("snapshotReference".equalsIgnoreCase(command)) {
+                SnapshotCommand command = new SnapshotCommand();
+                Database referenceDatabase = createReferenceDatabaseFromCommandParams(commandParams);
+                command.setDatabase(referenceDatabase);
+                command.setSchemas(getCommandParam("schemas", referenceDatabase.getDefaultSchema().toString()));
                 System.out.println(command.execute());
                 return;
             }
