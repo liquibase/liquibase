@@ -28,8 +28,6 @@ public class DiffCommand extends AbstractCommand {
     private Class<? extends DatabaseObject>[] snapshotTypes;
     private PrintStream outputStream;
     private CompareControl compareControl;
-    private CatalogAndSchema[] referenceSchemas;
-    private CatalogAndSchema[] targetSchemas;
 
 
     @Override
@@ -102,24 +100,6 @@ public class DiffCommand extends AbstractCommand {
         return this;
     }
 
-    public CatalogAndSchema[] getReferenceSchemas() {
-        return referenceSchemas;
-    }
-
-    public DiffCommand setReferenceSchemas(CatalogAndSchema[] referenceSchemas) {
-        this.referenceSchemas = referenceSchemas;
-        return this;
-    }
-
-    public CatalogAndSchema[] getTargetSchemas() {
-        return targetSchemas;
-    }
-
-    public DiffCommand setTargetSchemas(CatalogAndSchema[] targetSchemas) {
-        this.targetSchemas = targetSchemas;
-        return this;
-    }
-
     @Override
     protected Object run() throws Exception {
         DiffResult diffResult = createDiffResult();
@@ -133,37 +113,37 @@ public class DiffCommand extends AbstractCommand {
         DatabaseSnapshot referenceSnapshot = createReferenceSnapshot();
         DatabaseSnapshot targetSnapshot = createTargetSnapshot();
 
-        CompareControl.SchemaComparison[] comparisons = new CompareControl.SchemaComparison[referenceSchemas.length];
-        int i=0;
-        for (CatalogAndSchema schema : referenceSchemas) {
-            CatalogAndSchema targetSchema = null;
-            if (targetSchemas == null) {
-                targetSchema = schema;
-            } else {
-                targetSchema = targetSchemas[i];
-            }
-            comparisons[i] = new CompareControl.SchemaComparison(schema, targetSchema);
-            i++;
-        }
-
-        compareControl = new CompareControl(comparisons,referenceSnapshot.getSnapshotControl().getTypesToInclude());
-
         return DiffGeneratorFactory.getInstance().compare(referenceSnapshot, targetSnapshot, compareControl);
     }
 
     protected DatabaseSnapshot createTargetSnapshot() throws DatabaseException, InvalidExampleException {
-        CatalogAndSchema[] schemas = getTargetSchemas();
-        if (schemas == null) {
-            schemas = new CatalogAndSchema[] {targetDatabase.getDefaultSchema()};
-        }
+        CatalogAndSchema[] schemas;
 
+        if (compareControl == null || compareControl.getSchemaComparisons() == null) {
+            schemas = new CatalogAndSchema[]{targetDatabase.getDefaultSchema()};
+        } else {
+            schemas =new CatalogAndSchema[compareControl.getSchemaComparisons().length];
+
+            int i = 0;
+            for (CompareControl.SchemaComparison comparison : compareControl.getSchemaComparisons()) {
+                schemas[i++] = comparison.getComparisonSchema();
+            }
+        }
         return SnapshotGeneratorFactory.getInstance().createSnapshot(schemas, targetDatabase, new SnapshotControl(targetDatabase, snapshotTypes));
     }
 
     protected DatabaseSnapshot createReferenceSnapshot() throws DatabaseException, InvalidExampleException {
-        CatalogAndSchema[] schemas = getReferenceSchemas();
-        if (schemas == null) {
-            schemas = new CatalogAndSchema[] {referenceDatabase.getDefaultSchema()};
+        CatalogAndSchema[] schemas;
+
+        if (compareControl == null || compareControl.getSchemaComparisons() == null) {
+            schemas = new CatalogAndSchema[]{targetDatabase.getDefaultSchema()};
+        } else {
+            schemas =new CatalogAndSchema[compareControl.getSchemaComparisons().length];
+
+            int i = 0;
+            for (CompareControl.SchemaComparison comparison : compareControl.getSchemaComparisons()) {
+                schemas[i++] = comparison.getReferenceSchema();
+            }
         }
 
         return SnapshotGeneratorFactory.getInstance().createSnapshot(schemas, referenceDatabase, new SnapshotControl(referenceDatabase, snapshotTypes));

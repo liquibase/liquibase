@@ -58,12 +58,11 @@ public class CommandLineUtils {
         doDiff(referenceDatabase, targetDatabase, snapshotTypes, null);
     }
 
-    public static void doDiff(Database referenceDatabase, Database targetDatabase, String snapshotTypes, CatalogAndSchema[] schemas) throws LiquibaseException {
+    public static void doDiff(Database referenceDatabase, Database targetDatabase, String snapshotTypes, CompareControl.SchemaComparison[] schemaComparisons) throws LiquibaseException {
         DiffCommand diffCommand = new DiffCommand()
                 .setReferenceDatabase(referenceDatabase)
                 .setTargetDatabase(targetDatabase)
-                .setReferenceSchemas(schemas)
-                .setTargetSchemas(schemas)
+                .setCompareControl(new CompareControl(schemaComparisons, snapshotTypes))
                 .setSnapshotTypes(snapshotTypes)
                 .setOutputStream(System.out);
 
@@ -90,15 +89,14 @@ public class CommandLineUtils {
                                          Database targetDatabase,
                                          DiffOutputControl diffOutputControl,
                                          String snapshotTypes,
-                                         CatalogAndSchema[] schemas)
+                                         CompareControl.SchemaComparison[] schemaComparisons)
             throws LiquibaseException, IOException, ParserConfigurationException {
 
         DiffToChangeLogCommand command = new DiffToChangeLogCommand();
         command.setReferenceDatabase(referenceDatabase)
                 .setTargetDatabase(targetDatabase)
                 .setSnapshotTypes(snapshotTypes)
-                .setReferenceSchemas(schemas)
-                .setTargetSchemas(schemas)
+                .setCompareControl(new CompareControl(schemaComparisons, snapshotTypes))
                 .setOutputStream(System.out);
         command.setChangeLogFile(changeLogFile)
                 .setDiffOutputControl(diffOutputControl);
@@ -129,7 +127,6 @@ public class CommandLineUtils {
         command.setReferenceDatabase(originalDatabase)
                 .setSnapshotTypes(snapshotTypes)
                 .setOutputStream(System.out)
-                .setReferenceSchemas(schemas)
                 .setCompareControl(compareControl);
         command.setChangeLogFile(changeLogFile)
                 .setDiffOutputControl(diffOutputControl);
