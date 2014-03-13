@@ -20,10 +20,14 @@ public class VerifiedTestWriter {
             }
         });
         for (TestPermutation permutation : permutations) {
+            if (!permutation.isValid()) {
+                continue;
+            }
+
             out.append("## Permutation: ").append(permutation.getKey()).append(" ##\n\n");
             out.append("- _VERIFIED:_ ").append(String.valueOf(permutation.getVerified()));
-            if (!permutation.getVerified() && StringUtils.trimToNull(permutation.getNotVerifiedMessage()) != null) {
-                out.append(" ").append(StringUtils.trimToEmpty(permutation.getNotVerifiedMessage()));
+            if (!permutation.getVerified() && StringUtils.trimToNull(permutation.getNotRanMessage()) != null) {
+                out.append(" ").append(StringUtils.trimToEmpty(permutation.getNotRanMessage()));
             }
             out.append("\n");
 

@@ -1,5 +1,6 @@
 package liquibase.sdk.verifytest;
 
+import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.sdk.exception.UnexpectedLiquibaseSdkException;
 import liquibase.util.MD5Util;
 import liquibase.util.StringUtils;
@@ -8,7 +9,7 @@ import java.util.*;
 
 public class TestPermutation {
 
-    private String notVerifiedMessage;
+    private String notRanMessage;
     private SortedMap<String, Value> data = new TreeMap<String, Value>();
     private SortedMap<String,Value> description = new TreeMap<String, Value>();
     private String key = "";
@@ -19,8 +20,11 @@ public class TestPermutation {
     private List<Verification> verifications = new ArrayList<Verification>();
     private List<Cleanup> cleanupCommands = new ArrayList<Cleanup>();
 
+    private boolean valid = true;
     private boolean verified = false;
     private boolean canVerify;
+
+    public static OkResult OK = new OkResult();
 
     public TestPermutation(VerifiedTest test) {
         test.addPermutation(this);
@@ -28,10 +32,6 @@ public class TestPermutation {
 
     public String getKey() {
         return key;
-    }
-
-    public String getNotVerifiedMessage() {
-        return notVerifiedMessage;
     }
 
     public boolean getCanVerify() {
@@ -42,8 +42,20 @@ public class TestPermutation {
         this.canVerify = canVerify;
     }
 
-    public void setNotVerifiedMessage(String notVerifiedMessage) {
-        this.notVerifiedMessage = notVerifiedMessage;
+    public boolean isValid() {
+        return valid;
+    }
+
+    public void setValid(boolean valid) {
+        this.valid = valid;
+    }
+
+    public String getNotRanMessage() {
+        return notRanMessage;
+    }
+
+    public void setNotRanMessage(String notRanMessage) {
+        this.notRanMessage = notRanMessage;
     }
 
     public List<Setup> getSetup() {
@@ -128,19 +140,27 @@ public class TestPermutation {
     public void test(VerifiedTest test) throws Exception {
         TestPermutation previousRun = VerifiedTestFactory.getInstance().getSavedRun(test, this);
 
-        if (notVerifiedMessage != null) {
+        if (notRanMessage != null) {
             save(test);
             return;
         }
 
         try {
             for (Setup setup : this.setupCommands) {
-                String message = setup.run();
+                SetupResult result = setup.run();
 
-                if (message != null) {
-                    canVerify = false;
-                    notVerifiedMessage = message;
-                    break;
+                if (result == null) {
+                    throw new UnexpectedLiquibaseException("No result returned by setup");
+                } else {
+                    if (!result.isValid()) {
+                        valid = false;
+                        canVerify = false;
+                        notRanMessage = result.getMessage();
+                        break;
+                    } else if (!result.canVerify()) {
+                        canVerify = false;
+                        notRanMessage = result.getMessage();
+                    }
                 }
             }
         } catch (Throwable e) {
@@ -151,7 +171,7 @@ public class TestPermutation {
             throw new RuntimeException(message, e);
         }
 
-        if (!canVerify) {
+        if (!valid || !canVerify) {
             save(test);
             return;
         }
@@ -210,8 +230,86 @@ public class TestPermutation {
         this.verified = verified;
     }
 
+    public static interface SetupResult {
+        boolean isValid();
+        boolean canVerify();
+        String getMessage();
+    }
+
+    public static class Invalid implements SetupResult {
+
+        private String message;
+
+        public Invalid(String message) {
+            this.message = message;
+        }
+
+        @Override
+        public boolean isValid() {
+            return false;
+        }
+
+        @Override
+        public boolean canVerify() {
+            return false;
+        }
+
+        @Override
+        public String getMessage() {
+            return message;
+        }
+    }
+
+    public static class CannotVerify implements SetupResult {
+
+        private String message;
+
+        public CannotVerify(String message) {
+            this.message = message;
+        }
+
+        @Override
+        public boolean isValid() {
+            return true;
+        }
+
+        @Override
+        public boolean canVerify() {
+            return false;
+        }
+
+        @Override
+        public String getMessage() {
+            return message;
+        }
+    }
+
+
+    public static class OkResult implements SetupResult {
+
+        public OkResult() {
+        }
+
+        @Override
+        public boolean isValid() {
+            return true;
+        }
+
+        @Override
+        public boolean canVerify() {
+            return true;
+        }
+
+        @Override
+        public String getMessage() {
+            return null;
+        }
+    }
+
+
+
     public static interface Setup {
-        public String run();
+        public SetupResult run();
     }
 
     public static interface Verification {

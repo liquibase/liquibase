@@ -98,7 +98,7 @@ public class VerifiedTestReader {
                     String[] splitValue = value.split("\\s+", 2);
                     currentPermutation.setVerified(Boolean.valueOf(splitValue[0]));
                     if (splitValue.length > 1) {
-                        currentPermutation.setNotVerifiedMessage(splitValue[1]);
+                        currentPermutation.setNotRanMessage(splitValue[1]);
                     }
                 } else {
                     throw new UnexpectedLiquibaseException("Unknown internal parameter "+ key);

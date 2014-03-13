@@ -57,29 +57,29 @@ class StandardChangeSpec extends Specification {
 
             permutation.addSetup({
                 change.resourceAccessor = resourceSupplier.simpleResourceAccessor
-                return null
+                return TestPermutation.OK
             } as TestPermutation.Setup)
 
             permutation.addAssertion({
-                if (!change.supports(database)) return "DATABASE NOT SUPPORTED"
-                if (change.generateStatementsVolatile(database)) return "CHANGE SQL IS VOLATILE"
+                if (!change.supports(database)) return new TestPermutation.Invalid("Database not supported")
+                if (change.generateStatementsVolatile(database)) return new TestPermutation.Invalid("Change SQL is 'volitile'. Cannot test reliably")
 
                 def validationErrors = change.validate(database)
                 if (validationErrors.requiredErrorMessages.size() > 0) {
-                    return "Missing required parameters"
+                    return new TestPermutation.Invalid("Missing required parameters")
                 }
                 if (validationErrors.unsupportedErrorMessages.size() > 0) {
-                    return "Used unsupported parameters"
+                    return new TestPermutation.Invalid("Used unsupported parameters")
                 }
                 if (validationErrors.hasErrors()) {
-                    return "Change has errors: #validationErrors.errorMessages"
+                    return new TestPermutation.Invalid("Change has errors: #validationErrors.errorMessages")
                 }
-                return null
+                return TestPermutation.OK
             } as TestPermutation.Setup)
 
             permutation.addSetup({
                 permutation.data("sql", SqlGeneratorFactory.instance.generateSql(change, database as Database))
-                return null
+                return TestPermutation.OK
             } as TestPermutation.Setup)
 
             permutation.addVerification( {

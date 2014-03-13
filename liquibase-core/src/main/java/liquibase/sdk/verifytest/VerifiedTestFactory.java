@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -83,7 +84,11 @@ public class VerifiedTestFactory {
 
     protected File getBaseDirectory(VerifiedTest test) {
         String testClassName = test.getTestClass().replace(".", "/") + ".class";
-        File testClass = new File(this.getClass().getClassLoader().getResource(testClassName).getFile());
+        URL resource = this.getClass().getClassLoader().getResource(testClassName);
+        if (resource == null) {
+            return new File(".").getAbsoluteFile();
+        }
+        File testClass = new File(resource.getFile());
         File classesRoot = new File(testClass.getAbsolutePath().replace(testClassName.replace("/", File.separator), ""));
         return new File(classesRoot.getParentFile().getParentFile(), "src/test/resources");
     }

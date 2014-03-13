@@ -104,9 +104,17 @@ NOTE: This output is generated when the test is ran. DO NOT EDIT MANUALLY
 
         permutation = new TestPermutation(test)
         permutation.setVerified(false)
-        permutation.notVerifiedMessage = "Was too lazy"
+        permutation.notRanMessage = "Was too lazy"
         permutation.describe("String Parameter 1", "param 1 on permutation 2")
         permutation.describe("String Parameter 2", "param 2 on permutation 2")
+        permutation.data("String data", "No notes, just one data")
+
+        permutation = new TestPermutation(test)
+        permutation.setVerified(false)
+        permutation.setValid(false)
+        permutation.notRanMessage = "Invalid: Something was wrong with the parameters"
+        permutation.describe("String Parameter 1", "param 1 on permutation 3")
+        permutation.describe("String Parameter 2", "param 2 on permutation 3")
         permutation.data("String data", "No notes, just one data")
 
 

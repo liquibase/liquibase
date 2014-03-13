@@ -9,7 +9,7 @@ class VerifiedTestFactorySpec extends Specification {
         def test = new VerifiedTest("com.example.ExampleClass", "testing something")
 
         then:
-        VerifiedTestFactory.instance.getFile(test).absolutePath.replace(VerifiedTestFactory.instance.baseDirectory.absolutePath, "").replace("\\", "/") == "/com/example/ExampleClass.testing_something.accepted.md"
+        VerifiedTestFactory.instance.getFile(test).absolutePath.replace(VerifiedTestFactory.instance.getBaseDirectory(test).absolutePath, "").replace("\\", "/") == "/com/example/ExampleClass.testing_something.accepted.md"
     }
 
     def "getBaseDirectory"() {

@@ -34,7 +34,7 @@ class VerifiedTestReaderSpec extends Specification {
         assertTestsSame(test, readTest)
 
         cleanup:
-        reader.close()
+        reader && reader.close()
     }
 
     def assertTestsSame(expected, actual) {
