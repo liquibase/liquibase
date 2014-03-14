@@ -1,7 +1,9 @@
 package liquibase.sdk;
 
+import liquibase.command.LiquibaseCommand;
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.sdk.vagrant.VagrantControl;
+import liquibase.sdk.vagrant.VagrantCommand;
+import liquibase.sdk.watch.WatchCommand;
 import liquibase.util.StringUtils;
 import org.apache.commons.cli.*;
 
@@ -36,21 +38,23 @@ public class Main {
                 return;
             }
 
-            VagrantControl vagrantControl;
+            LiquibaseCommand command;
+            CommandLineParser commandParser = new GnuParser();
             if (main.command.equals("vagrant")) {
-                vagrantControl = new VagrantControl(main);
+                command = new VagrantCommand(main);
+                try {
+                    CommandLine commandArguments = commandParser.parse(((VagrantCommand) command).getOptions(), main.commandArgs.toArray(new String[main.commandArgs.size()]));
+                    ((VagrantCommand) command).setup(commandArguments);
+                } catch (ParseException e) {
+                    throw new UserError("Error parsing command arguments: "+e.getMessage());
+                }
+            } else if (main.command.equals("watch")) {
+                command = new WatchCommand();
             } else {
                 throw new UserError("Unknown command: "+main.command);
             }
 
-            CommandLineParser commandParser = new GnuParser();
-            try {
-                CommandLine commandArguments = commandParser.parse(vagrantControl.getOptions(), main.commandArgs.toArray(new String[main.commandArgs.size()]));
-
-                vagrantControl.execute(commandArguments);
-            } catch (ParseException e) {
-                throw new UserError("Error parsing command arguments: "+e.getMessage());
-            }
+            command.execute();
 
             main.divider();
             main.out("Command executed successfully");

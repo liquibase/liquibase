@@ -1,5 +1,7 @@
 package liquibase.sdk.vagrant;
 
+import liquibase.command.AbstractCommand;
+import liquibase.command.CommandValidationErrors;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.sdk.Main;
 import liquibase.sdk.TemplateService;
@@ -14,11 +16,14 @@ import org.apache.commons.cli.Options;
 import java.io.*;
 import java.util.*;
 
-public class VagrantControl {
+public class VagrantCommand extends AbstractCommand {
     private final Main mainApp;
     private String vagrantPath;
+    private String command;
+    private VagrantInfo vagrantInfo;
+    private CommandLine commandCommandLine;
 
-    public VagrantControl(Main mainApp) {
+    public VagrantCommand(Main mainApp) {
         this.mainApp = mainApp;
 
         this.vagrantPath = this.mainApp.getPath("vagrant.bat", "vagrant.sh", "vagrant");
@@ -30,51 +35,67 @@ public class VagrantControl {
         mainApp.debug("Vagrant path: " + vagrantPath);
     }
 
-    public void execute(CommandLine commandCommandLine) throws Exception {
 
+    @Override
+    public String getName() {
+        return "vagrant";
+    }
+
+    @Override
+    public CommandValidationErrors validate() {
+        return new CommandValidationErrors(this);
+    }
+
+    public void setup(CommandLine commandCommandLine) throws Exception {
         List<String> commandArgs = commandCommandLine.getArgList();
 
-        VagrantInfo vagrantInfo = new VagrantInfo();
+        vagrantInfo = new VagrantInfo();
         if (commandArgs.size() < 2) {
             mainApp.fatal("Usage: liquibase-sdk vagrant BOX_NAME COMMAND");
         }
 
         vagrantInfo.boxName = commandArgs.get(0);
-        String command = commandArgs.get(1);
+        command = commandArgs.get(1);
 
         vagrantInfo.vagrantRoot = new File(mainApp.getSdkRoot(), "vagrant");
         vagrantInfo.boxDir = new File(vagrantInfo.vagrantRoot, vagrantInfo.boxName).getCanonicalFile();
 
+        this.commandCommandLine = commandCommandLine;
+    }
+
+    @Override
+    protected Object run() throws Exception {
         if (command.equals("init")) {
-            this.init(vagrantInfo, commandCommandLine);
+            this.init();
         } else if (command.equals("up")) {
-            this.up(vagrantInfo, commandCommandLine);
+            this.up();
         } else if (command.equals("provision")) {
-            this.provision(vagrantInfo, commandCommandLine);
+            this.provision();
         } else if (command.equals("destroy")) {
-            this.destroy(vagrantInfo, commandCommandLine);
+            this.destroy();
         } else if (command.equals("halt")) {
-            this.halt(vagrantInfo, commandCommandLine);
+            this.halt();
         } else if (command.equals("reload")) {
-            this.reload(vagrantInfo, commandCommandLine);
+            this.reload();
         } else if (command.equals("resume")) {
-            this.resume(vagrantInfo, commandCommandLine);
+            this.resume();
         } else if (command.equals("status")) {
-            this.status(vagrantInfo, commandCommandLine);
+            this.status();
         } else if (command.equals("suspend")) {
-            this.suspend(vagrantInfo, commandCommandLine);
+            this.suspend();
         } else {
             mainApp.fatal("Unknown vagrant command '"+ command+"'");
         }
+        return "Successful";
     }
 
-    public void init(VagrantInfo vagrantInfo, CommandLine commandLine) throws Exception {
+    public void init() throws Exception {
 
-        if (!commandLine.hasOption("databases")) {
+        if (!commandCommandLine.hasOption("databases")) {
             mainApp.fatal("vagrant init requires --databases option");
         }
 
-        String[] databaseConfigs = commandLine.getOptionValue("databases").split("\\s*,\\s*");
+        String[] databaseConfigs = commandCommandLine.getOptionValue("databases").split("\\s*,\\s*");
 
 
         mainApp.out("Vagrant Machine Setup:");
@@ -203,35 +224,35 @@ public class VagrantControl {
         }
     }
 
-    public void provision(VagrantInfo vagrantInfo, CommandLine commandLine) {
+    public void provision() {
         runVagrant(vagrantInfo, "provision");
     }
 
-    public void destroy(VagrantInfo vagrantInfo, CommandLine commandLine) {
+    public void destroy() {
         runVagrant(vagrantInfo, "destroy", "--force");
     }
 
-    public void halt(VagrantInfo vagrantInfo, CommandLine commandLine) {
+    public void halt() {
         runVagrant(vagrantInfo, "halt");
     }
 
-    public void reload(VagrantInfo vagrantInfo, CommandLine commandLine) {
+    public void reload() {
         runVagrant(vagrantInfo, "reload");
     }
 
-    public void resume(VagrantInfo vagrantInfo, CommandLine commandLine) {
+    public void resume() {
         runVagrant(vagrantInfo, "resume");
     }
 
-    public void status(VagrantInfo vagrantInfo, CommandLine commandLine) {
+    public void status() {
         runVagrant(vagrantInfo, "status");
     }
 
-    public void suspend(VagrantInfo vagrantInfo, CommandLine commandLine) {
+    public void suspend() {
         runVagrant(vagrantInfo, "suspend");
     }
 
-    public void up(VagrantInfo vagrantInfo, CommandLine commandLine) {
+    public void up() {
         mainApp.out("Starting vagrant in " + vagrantInfo.boxDir.getAbsolutePath());
         mainApp.out("Config Name: " + vagrantInfo.boxName);
         mainApp.divider();
