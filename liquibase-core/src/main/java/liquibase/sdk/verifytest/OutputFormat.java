@@ -1,10 +1,14 @@
 package liquibase.sdk.verifytest;
 
 import liquibase.database.Database;
+import liquibase.serializer.LiquibaseSerializable;
+import liquibase.serializer.core.string.StringChangeLogSerializer;
 import liquibase.sql.Sql;
 import liquibase.util.StringUtils;
 
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 public abstract class OutputFormat {
 
@@ -41,6 +45,21 @@ public abstract class OutputFormat {
                 return new CollectionFormat(this).format(value);
             }
 
+            if (value instanceof TestPermutation.Value) {
+                return ((TestPermutation.Value) value).serialize();
+            }
+
+            if (value instanceof LiquibaseSerializable) {
+                Map<String, String> map = new HashMap<String, String>();
+                for (String field : ((LiquibaseSerializable) value).getSerializableFields()) {
+                    Object serializedValue = ((LiquibaseSerializable) value).getSerializableFieldValue(field);
+                    if (serializedValue != null) {
+                        map.put(field, serializedValue.toString());
+                    }
+                }
+                return StringUtils.join(map, ",");
+            }
+
             return value.toString();
         }
     }
@@ -50,6 +69,10 @@ public abstract class OutputFormat {
         public String format(Object value) {
             if (value == null) {
                 return null;
+            }
+
+            if (value instanceof TestPermutation.Value) {
+                return ((TestPermutation.Value) value).serialize();
             }
 
             return (String) value;

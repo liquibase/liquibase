@@ -49,8 +49,7 @@ class StandardChangeSpec extends Specification {
             def permutation = new TestPermutation(test)
             permutation.describe("Database", database.shortName);
             permutation.describe("Change Class", change.class);
-            permutation.describe("Change", change)
-            permutation.describe("Change Parameters", ChangeFactory.instance.getParameters(change))
+            permutation.describeAsTable("Change Parameters", ChangeFactory.instance.getParameters(change))
 
 
             permutation.canVerify = database.connection != null && !(database.connection instanceof OfflineConnection)

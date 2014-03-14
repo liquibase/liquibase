@@ -37,6 +37,26 @@ class VerifiedTestReaderSpec extends Specification {
         reader && reader.close()
     }
 
+    def "read complex test with table"() {
+        when:
+        def test = new VerifiedTestWriterSpec().createComplexTestWithTable()
+        def testAsString = write(test)
+        def reader = new StringReader(testAsString)
+        def readTest
+        try {
+            readTest = new VerifiedTestReader().read(reader)
+        } catch (Throwable e) {
+            println testAsString
+            throw e
+        }
+
+        then:
+        assertTestsSame(test, readTest)
+
+        cleanup:
+        reader && reader.close()
+    }
+
     def assertTestsSame(expected, actual) {
         def writer = new VerifiedTestWriter()
         def expectedString = new StringWriter()

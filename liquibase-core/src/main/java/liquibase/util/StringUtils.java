@@ -239,6 +239,15 @@ public class StringUtils {
         return ch < 128;
     }
 
+    public static String pad(String value, int length) {
+        value = StringUtils.trimToEmpty(value);
+        if (value.length() >= length) {
+            return value;
+        }
+
+        return value + StringUtils.repeat(" ", length - value.length());
+    }
+
     public static interface StringUtilsFormatter<Type> {
         public String toString(Type obj);
     }

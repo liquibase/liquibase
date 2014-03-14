@@ -12,8 +12,12 @@ public class TestPermutation {
     private String notRanMessage;
     private SortedMap<String, Value> data = new TreeMap<String, Value>();
     private SortedMap<String,Value> description = new TreeMap<String, Value>();
+    private Map<String, Value> rowDescription;
+    private String rowDescriptionParameter;
+    private String rowFullKey = "";
     private String key = "";
-    private String longKey = "";
+    private String tableKey = "";
+    private String fullKey = "";
     private SortedMap<String,Value> notes = new TreeMap<String, Value>();
 
     private List<Setup> setupCommands = new ArrayList<Setup>();
@@ -74,8 +78,24 @@ public class TestPermutation {
         return description;
     }
 
-    public String getLongKey() {
-        return longKey;
+    public String getRowDescriptionParameter() {
+        return rowDescriptionParameter;
+    }
+
+    public Map<String, Value> getRowDescription() {
+        return rowDescription;
+    }
+
+    public String getRowFullKey() {
+        return rowFullKey;
+    }
+
+    public String getFullKey() {
+        return fullKey;
+    }
+
+    public String getTableKey() {
+        return tableKey;
     }
 
     public SortedMap<String, Value> getNotes() {
@@ -95,14 +115,38 @@ public class TestPermutation {
         recomputeKey();
     }
 
+    public void describeAsTable(String key, Map value) {
+        describeAsTable(key, value, OutputFormat.DefaultFormat);
+    }
+
+    public void describeAsTable(String key, Map<String, ?> value, OutputFormat outputFormat) {
+        rowDescriptionParameter = key;
+        rowDescription = new HashMap<String, Value>();
+        for (Map.Entry<String, ?> entry : value.entrySet()) {
+            rowDescription.put(entry.getKey(), new Value(entry.getValue(), outputFormat));
+        }
+
+        recomputeKey();
+    }
+
     protected void recomputeKey() {
-        longKey = StringUtils.join(description, ",", new StringUtils.StringUtilsFormatter() {
+        SortedMap<String, Value> fullDescription = new TreeMap<String, Value>(description);
+        StringUtils.StringUtilsFormatter formatter = new StringUtils.StringUtilsFormatter() {
             @Override
             public String toString(Object obj) {
                 return ((Value) obj).serialize();
             }
-        });
-        key = MD5Util.computeMD5(longKey);
+        };
+
+        if (rowDescription != null) {
+            for (Map.Entry<String, Value> rowEntry : rowDescription.entrySet()) {
+                fullDescription.put(rowEntry.getKey(), rowEntry.getValue());
+            }
+            rowFullKey = StringUtils.join(rowDescription, ",", formatter);
+        }
+        tableKey = StringUtils.join(description, ",", formatter);
+        fullKey = StringUtils.join(fullDescription, ",", formatter);
+        key = MD5Util.computeMD5(fullKey);
     }
 
     public void note(String key, Object value) {
@@ -334,14 +378,22 @@ public class TestPermutation {
     public static class Value {
         private Object value;
         private OutputFormat format;
+        private String stringValue;
 
         public Value(Object value, OutputFormat format) {
             this.value = value;
             this.format = format;
         }
 
+        public Object getValue() {
+            return value;
+        }
+
         public String serialize() {
-            return format.format(value);
+            if (stringValue == null) {
+                stringValue = format.format(value);
+            }
+            return stringValue;
         }
     }
 

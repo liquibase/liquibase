@@ -15,6 +15,7 @@ public class VerifiedTestFactory {
     private static final VerifiedTestFactory instance = new VerifiedTestFactory();
 
     Map<File, VerifiedTest> filesToWrite = new HashMap<File, VerifiedTest>();
+    Map<String, File> baseDirectoriesByClass = new HashMap<String, File>();
 
     public static VerifiedTestFactory getInstance() {
         return instance;
@@ -84,13 +85,16 @@ public class VerifiedTestFactory {
 
     protected File getBaseDirectory(VerifiedTest test) {
         String testClassName = test.getTestClass().replace(".", "/") + ".class";
-        URL resource = this.getClass().getClassLoader().getResource(testClassName);
-        if (resource == null) {
-            return new File(".").getAbsoluteFile();
+        if (!baseDirectoriesByClass.containsKey(testClassName)) {
+            URL resource = this.getClass().getClassLoader().getResource(testClassName);
+            if (resource == null) {
+                return new File(".").getAbsoluteFile();
+            }
+            File testClass = new File(resource.getFile());
+            File classesRoot = new File(testClass.getAbsolutePath().replace(testClassName.replace("/", File.separator), ""));
+            baseDirectoriesByClass.put(testClassName, new File(classesRoot.getParentFile().getParentFile(), "src/test/resources"));
         }
-        File testClass = new File(resource.getFile());
-        File classesRoot = new File(testClass.getAbsolutePath().replace(testClassName.replace("/", File.separator), ""));
-        return new File(classesRoot.getParentFile().getParentFile(), "src/test/resources");
+        return baseDirectoriesByClass.get(testClassName);
     }
 
     protected File getFile(VerifiedTest test) {
