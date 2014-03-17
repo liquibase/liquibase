@@ -32,6 +32,12 @@
             <version>1.7</version>
             <scope>compile</scope>
         </dependency>
+        <dependency>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-servlet</artifactId>
+            <version>8.1.14.v20131031</version>
+            <scope>compile</scope>
+        </dependency>
 
         <dependency>
           <groupId>junit</groupId>

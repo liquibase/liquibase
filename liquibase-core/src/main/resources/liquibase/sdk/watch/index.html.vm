@@ -1,0 +1,41 @@
+<html>
+<head>
+    <title>Liquibase SDK: Watch</title>
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/css/bootstrap-theme.min.css">
+
+    <script src="/js/jquery-1.11.0.min.js"></script>
+    <script src="/js/bootstrap.min.js"></script>
+
+    <style>
+        table th {
+            background-color:#ddd
+        }
+    </style>
+</head>
+<body style="margin:20px">
+
+$snapshot
+
+$details
+
+<script>
+  $(function () {
+    $('#tabs a:first').tab('show')
+  })
+
+  $(".object-name").click(function(event) {
+        event.preventDefault();
+        hash = $(event.target).prop("href").replace(/.*#/, "#")
+        $(".object-details").hide()
+        $(hash).show()
+  });
+
+  $(".close").click(function(event) {
+        window.scrollTo(0,0);
+        $(".object-details").hide()
+  });
+</script>
+
+</body>
+</html>
