@@ -1,5 +1,6 @@
 package liquibase.sdk.watch;
 
+import com.sun.org.apache.xpath.internal.SourceTree;
 import liquibase.changelog.ChangeLogHistoryServiceFactory;
 import liquibase.changelog.StandardChangeLogHistoryService;
 import liquibase.command.AbstractCommand;
@@ -14,6 +15,7 @@ import liquibase.integration.commandline.CommandLineResourceAccessor;
 import liquibase.lockservice.LockService;
 import liquibase.lockservice.LockServiceFactory;
 import liquibase.resource.CompositeResourceAccessor;
+import liquibase.sdk.Main;
 import liquibase.sdk.TemplateService;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.SnapshotControl;
@@ -44,9 +46,52 @@ import java.util.*;
 
 public class WatchCommand extends AbstractCommand {
 
+    private String url;
+    private String username;
+    private String password;
+    private int port = 8080;
+
+    private Main mainApp;
+
+    public WatchCommand(Main mainApp) {
+        this.mainApp = mainApp;
+    }
+
     @Override
     public String getName() {
         return "watch";
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public int getPort() {
+        return port;
+    }
+
+    public void setPort(int port) {
+        this.port = port;
     }
 
     @Override
@@ -56,7 +101,7 @@ public class WatchCommand extends AbstractCommand {
 
     @Override
     protected Object run() throws Exception {
-        Server server = new Server(8080);
+        Server server = new Server(port);
 
         List<URL> jarUrls = new ArrayList<URL>();
         File libDir = new File("../../lib/");
@@ -71,7 +116,7 @@ public class WatchCommand extends AbstractCommand {
         CompositeResourceAccessor resourceAccessor = new CompositeResourceAccessor(
                 new CommandLineResourceAccessor(new URLClassLoader(jarUrls.toArray(new URL[jarUrls.size()]), this.getClass().getClassLoader()))
         );
-        Database database = DatabaseFactory.getInstance().openDatabase("jdbc:mysql://10.10.100.100:3306/lbcat", "lbuser", "lbuser", resourceAccessor);
+        Database database = DatabaseFactory.getInstance().openDatabase(url, username, password, resourceAccessor);
 
         ResourceHandler staticHandler = new ResourceHandler();
         staticHandler.setDirectoriesListed(false);
@@ -83,7 +128,10 @@ public class WatchCommand extends AbstractCommand {
 
         server.setHandler(handlers);
         server.start();
+
+        mainApp.out("Liquibase Watch running on http://localhost:"+getPort()+"/");
         server.join();
+
 
         return "Started";
     }
@@ -101,7 +149,10 @@ public class WatchCommand extends AbstractCommand {
         public void handle(String url, Request request, HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws IOException, ServletException {
             try {
 
-                if (url.equals("/index.html") || url.equals("/") || url.equals("")) {
+                if (url.equals("/favicon.ico")) {
+                    httpServletResponse.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                    request.setHandled(true);
+                } else if (url.equals("/index.html") || url.equals("/") || url.equals("")) {
                     Map<String, Object> context = new HashMap<String, Object>();
                     this.loadIndexData(context);
 
