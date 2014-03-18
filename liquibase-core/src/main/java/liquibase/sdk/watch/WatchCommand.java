@@ -121,7 +121,7 @@ public class WatchCommand extends AbstractCommand {
         ResourceHandler staticHandler = new ResourceHandler();
         staticHandler.setDirectoriesListed(false);
         staticHandler.setWelcomeFiles(new String[]{"index.html"});
-        staticHandler.setResourceBase(new File(getClass().getClassLoader().getResource("liquibase/sdk/watch/index.html.vm").toURI()).getParentFile().getAbsolutePath());
+        staticHandler.setResourceBase(getClass().getClassLoader().getResource("liquibase/sdk/watch/index.html.vm").toExternalForm().replaceFirst("index.html.vm$", ""));
 
         HandlerList handlers = new HandlerList();
         handlers.setHandlers(new Handler[]{new DynamicContentHandler(database), staticHandler, new DefaultHandler()});
