@@ -11,11 +11,14 @@ import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.integration.commandline.CommandLineResourceAccessor;
+import liquibase.lockservice.LockService;
+import liquibase.lockservice.LockServiceFactory;
 import liquibase.resource.CompositeResourceAccessor;
 import liquibase.sdk.TemplateService;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.SnapshotControl;
 import liquibase.snapshot.SnapshotGeneratorFactory;
+import liquibase.statement.core.SelectFromDatabaseChangeLogStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Schema;
 import liquibase.util.ISODateFormat;
@@ -34,6 +37,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.*;
@@ -97,7 +101,7 @@ public class WatchCommand extends AbstractCommand {
         public void handle(String url, Request request, HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws IOException, ServletException {
             try {
 
-            if (url.equals("/index.html") || url.equals("/") || url.equals("")) {
+                if (url.equals("/index.html") || url.equals("/") || url.equals("")) {
                     Map<String, Object> context = new HashMap<String, Object>();
                     this.loadIndexData(context);
 
@@ -105,6 +109,27 @@ public class WatchCommand extends AbstractCommand {
                     httpServletResponse.setStatus(HttpServletResponse.SC_OK);
 
                     TemplateService.getInstance().write("liquibase/sdk/watch/index.html.vm", httpServletResponse.getWriter(), context);
+                    request.setHandled(true);
+                } else if (url.equals("/liquibase-status.json")) {
+                    LockService lockService = LockServiceFactory.getInstance().getLockService(database);
+                    lockService.waitForLock();
+                    List<Map<String, ?>> rows;
+                    try {
+                        SelectFromDatabaseChangeLogStatement select = new SelectFromDatabaseChangeLogStatement("COUNT(*) AS ROW_COUNT", "MAX(DATEEXECUTED) AS LAST_EXEC");
+                        rows = executor.queryForList(select);
+                    } finally {
+                        lockService.releaseLock();
+                    }
+                    PrintWriter writer = httpServletResponse.getWriter();
+
+                    httpServletResponse.setContentType("application/json");
+                    httpServletResponse.setStatus(HttpServletResponse.SC_OK);
+                    if (rows.size() == 0) {
+                        writer.print("{'count': 0}");
+                    } else {
+                        Map<String, ?> row = rows.iterator().next();
+                        writer.print("{\"count\":"+row.get("ROW_COUNT")+", \"lastExec\": \""+new ISODateFormat().format((Date) row.get("LAST_EXEC"))+"\"}");
+                    }
                     request.setHandled(true);
                 }
             } catch (Throwable e) {
@@ -116,19 +141,19 @@ public class WatchCommand extends AbstractCommand {
             String outString = "<table class='table table-striped table-bordered table-condensed'>";
             outString += "<tr><th>Id</th><th>Author</th><th>Path</th><th>ExecType</th><th>Tag</th></tr>";
 
-            StandardChangeLogHistoryService changeLogService = (StandardChangeLogHistoryService) ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database);
-            List<Map> ranChangeSets = (List) changeLogService.queryDatabaseChangeLogTable(database);
+            SelectFromDatabaseChangeLogStatement select = new SelectFromDatabaseChangeLogStatement("FILENAME", "AUTHOR", "ID", "MD5SUM", "DATEEXECUTED", "ORDEREXECUTED", "EXECTYPE", "DESCRIPTION", "COMMENTS", "TAG", "LIQUIBASE").setOrderBy("DATEEXECUTED DESC", "ORDEREXECUTED DESC"); //going in opposite order for easier reading
+            List<Map> ranChangeSets = (List) ExecutorService.getInstance().getExecutor(database).queryForList(select);
 
             String changeLogDetails = "";
             for (Map row : ranChangeSets) {
-                String id = cleanHtmlId(row.get("ID")+":"+row.get("AUTHOR")+":"+row.get("FILENAME"));
-                outString +="<tr>"+
-                "<td><a style='color:black' class='object-name' href='#"+id+"'>"+StringUtils.escapeHtml((String) row.get("ID"))+"</a></td>"+
-                "<td><a style='color:black' class='object-name' href='#"+id+"'>"+StringUtils.escapeHtml((String) row.get("AUTHOR"))+"</a></td>"+
-                "<td><a style='color:black' class='object-name' href='#"+id+"'>"+StringUtils.escapeHtml((String) row.get("FILENAME"))+"</a></td>"+
-                "<td><a style='color:black' class='object-name' href='#"+id+"'>"+row.get("EXECTYPE")+"</a></td>"+
-                "<td><a style='color:black' class='object-name' href='#"+id+"'>"+StringUtils.escapeHtml((String) StringUtils.trimToEmpty((String) row.get("TAG")))+"</a></td>"+
-                "</tr>";
+                String id = cleanHtmlId(row.get("ID") + ":" + row.get("AUTHOR") + ":" + row.get("FILENAME"));
+                outString += "<tr>" +
+                        "<td><a style='color:black' class='object-name' href='#" + id + "'>" + StringUtils.escapeHtml((String) row.get("ID")) + "</a></td>" +
+                        "<td><a style='color:black' class='object-name' href='#" + id + "'>" + StringUtils.escapeHtml((String) row.get("AUTHOR")) + "</a></td>" +
+                        "<td><a style='color:black' class='object-name' href='#" + id + "'>" + StringUtils.escapeHtml((String) row.get("FILENAME")) + "</a></td>" +
+                        "<td><a style='color:black' class='object-name' href='#" + id + "'>" + row.get("EXECTYPE") + "</a></td>" +
+                        "<td><a style='color:black' class='object-name' href='#" + id + "'>" + StringUtils.escapeHtml((String) StringUtils.trimToEmpty((String) row.get("TAG"))) + "</a></td>" +
+                        "</tr>";
 
                 changeLogDetails += wrapDetails(id, row.get("ID") + " :: " + row.get("AUTHOR") + " :: " + row.get("FILENAME"), writeDatabaseChangeLogDetails(row));
             }
@@ -146,17 +171,17 @@ public class WatchCommand extends AbstractCommand {
             String outString = "<table class='table table-striped table-bordered table-condensed'>";
 
 
-            outString +="<tr><td><strong>Id</strong></td><td>"+row.get("ID")+"</td></tr>\n"+
-                    "<tr><td><strong>Author</strong></td><td>"+row.get("AUTHOR")+"</td></tr>\n"+
-                    "<tr><td><strong>Filename</strong></td><td>"+row.get("FILENAME")+"</td></tr>\n"+
-                    "<tr><td><strong>DateExecuted</strong></td><td>"+new ISODateFormat().format((Date) row.get("DATEEXECUTED"))+"</td></tr>\n"+
-                    "<tr><td><strong>OrderExecuted</strong></td><td>"+row.get("ORDEREXECUTED")+"</td></tr>\n"+
-                    "<tr><td><strong>ExecType</strong></td><td>"+row.get("EXECTYPE")+"</td></tr>\n"+
-                    "<tr><td><strong>MD5Sum</strong></td><td>"+row.get("MD5SUM")+"</td></tr>\n"+
-                    "<tr><td><strong>Description</strong></td><td>"+row.get("DESCRIPTION")+"</td></tr>\n"+
-                    "<tr><td><strong>Comments</strong></td><td>"+row.get("COMMENTS")+"</td></tr>\n"+
-                    "<tr><td><strong>Tag</strong></td><td>"+StringUtils.trimToNull((String) row.get("TAG"))+"</td></tr>\n"+
-                    "<tr><td><strong>Liquibase</strong></td><td>"+row.get("LIQUIBASE")+"</td></tr>\n";
+            outString += "<tr><td><strong>Id</strong></td><td>" + row.get("ID") + "</td></tr>\n" +
+                    "<tr><td><strong>Author</strong></td><td>" + row.get("AUTHOR") + "</td></tr>\n" +
+                    "<tr><td><strong>Filename</strong></td><td>" + row.get("FILENAME") + "</td></tr>\n" +
+                    "<tr><td><strong>DateExecuted</strong></td><td>" + new ISODateFormat().format((Date) row.get("DATEEXECUTED")) + "</td></tr>\n" +
+                    "<tr><td><strong>OrderExecuted</strong></td><td>" + row.get("ORDEREXECUTED") + "</td></tr>\n" +
+                    "<tr><td><strong>ExecType</strong></td><td>" + row.get("EXECTYPE") + "</td></tr>\n" +
+                    "<tr><td><strong>MD5Sum</strong></td><td>" + row.get("MD5SUM") + "</td></tr>\n" +
+                    "<tr><td><strong>Description</strong></td><td>" + row.get("DESCRIPTION") + "</td></tr>\n" +
+                    "<tr><td><strong>Comments</strong></td><td>" + row.get("COMMENTS") + "</td></tr>\n" +
+                    "<tr><td><strong>Tag</strong></td><td>" + StringUtils.trimToNull((String) row.get("TAG")) + "</td></tr>\n" +
+                    "<tr><td><strong>Liquibase</strong></td><td>" + row.get("LIQUIBASE") + "</td></tr>\n";
             outString += "</table>";
 
             return outString;
@@ -225,7 +250,7 @@ public class WatchCommand extends AbstractCommand {
                         for (DatabaseObject databaseObject : databaseObjects) {
                             String id = databaseObject.getClass().getName() + "-" + databaseObject.getName();
                             id = cleanHtmlId(id);
-                            typeBuffer.append("<li><a style='color:black' class='object-name' href='#"+id+"'>").append(StringUtils.escapeHtml(databaseObject.getName())).append("</a></li>\n");
+                            typeBuffer.append("<li><a style='color:black' class='object-name' href='#" + id + "'>").append(StringUtils.escapeHtml(databaseObject.getName())).append("</a></li>\n");
                             detailsBuilder.append(wrapDetails(id, databaseObject.getName(), writeDatabaseObject(databaseObject, new HashSet<String>(), databaseObject.getName()))).append("\n");
                         }
 
@@ -250,7 +275,7 @@ public class WatchCommand extends AbstractCommand {
 
         protected String wrapDetails(String id, String title, String details) {
             StringBuilder buffer = new StringBuilder();
-            buffer.append("<div class='panel panel-primary object-details' style='display:none;' id='"+id+"'>");
+            buffer.append("<div class='panel panel-primary object-details' style='display:none;' id='" + id + "'>");
             buffer.append("<div class='panel-heading'> <button type=\"button\" class=\"close\" data-dismiss=\"modal\" aria-hidden=\"true\">&times;</button><h3 style='margin-top:0px; margin-bottom:0px'>").append(StringUtils.escapeHtml(title)).append("</h3></div>\n");
             buffer.append("<div class='panel-body'>");
             buffer.append(StringUtils.indent(details, 4));
@@ -361,7 +386,7 @@ public class WatchCommand extends AbstractCommand {
 
             String finalOut = singleValueOut.toString();
             if (finalOut.length() > 0) {
-                finalOut = "<h4>Attributes:</h4><table class='table table-bordered table-condensed'>"+finalOut+"</table><br>";
+                finalOut = "<h4>Attributes:</h4><table class='table table-bordered table-condensed'>" + finalOut + "</table><br>";
             }
             finalOut = finalOut + multiValueOut.toString();
             return finalOut;
