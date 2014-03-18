@@ -50,13 +50,7 @@ $details
   $(".object-name").click(function(event) {
         event.preventDefault();
         hash = $(event.target).prop("href").replace(/.*#/, "#")
-        $(".object-details").hide()
-        $(hash).show()
-  });
-
-  $(".close").click(function(event) {
-        window.scrollTo(0,0);
-        $(".object-details").hide()
+        $(hash).modal()
   });
 
   var liquibaseStateCount = null;

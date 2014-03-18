@@ -326,11 +326,13 @@ public class WatchCommand extends AbstractCommand {
 
         protected String wrapDetails(String id, String title, String details) {
             StringBuilder buffer = new StringBuilder();
-            buffer.append("<div class='panel panel-primary object-details' style='display:none;' id='" + id + "'>");
-            buffer.append("<div class='panel-heading'> <button type=\"button\" class=\"close\" data-dismiss=\"modal\" aria-hidden=\"true\">&times;</button><h3 style='margin-top:0px; margin-bottom:0px'>").append(StringUtils.escapeHtml(title)).append("</h3></div>\n");
-            buffer.append("<div class='panel-body'>");
+            buffer.append("<div class='modal fade' id='"+id+"'><div class='modal-dialog modal-lg'><div class='modal-content'>");
+            buffer.append("<div class='modal-header'><button type='button' class='close' data-dismiss='modal' aria-hidden='true'>&times;</button><h4 class='modal-title'>").append(StringUtils.escapeHtml(title)).append("</h4></div>\n");
+            buffer.append("<div class='modal-body'>");
             buffer.append(StringUtils.indent(details, 4));
-            buffer.append("</div></div>");
+            buffer.append("</div>");
+            buffer.append("<div class='modal-footer'><button type='button' class='btn btn-default' data-dismiss='modal'>Close</button></div>");
+            buffer.append("</div></div></div>");
 
             return buffer.toString();
 
@@ -413,7 +415,7 @@ public class WatchCommand extends AbstractCommand {
                             for (String rowAttribute : rowAttributes) {
                                 header += "<th>" + rowAttribute + "</th>";
                             }
-                            value = "<table class='table table-bordered table-condensed' style='margin-bottom:0px'><tr>" + header + "</tr>\n" + StringUtils.indent((String) value, 4) + "</table>";
+                            value = "<div overflow='scroll' style='overflow-x:auto'><table class='table table-bordered table-condensed' style='margin-bottom:0px'><tr>" + header + "</tr>\n" + StringUtils.indent((String) value, 4) + "</table></div>";
                         } else {
                             value = databaseObject.getSerializableFieldValue(attribute);
                         }
