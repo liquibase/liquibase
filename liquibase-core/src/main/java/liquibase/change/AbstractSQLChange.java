@@ -169,7 +169,7 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
             }
 
             if (sql != null) {
-                stream = new ByteArrayInputStream(sql.getBytes());
+                stream = new ByteArrayInputStream(sql.getBytes("UTF-8"));
             }
 
             return CheckSum.compute(new NormalizingStream(this.getEndDelimiter(), this.isSplitStatements(), this.isStripComments(), stream), false);
