@@ -2,6 +2,7 @@ package liquibase.change.core;
 
 import liquibase.change.*;
 import liquibase.database.Database;
+import liquibase.exception.ValidationErrors;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.UpdateExecutablePreparedStatement;
 import liquibase.statement.core.UpdateStatement;
@@ -16,6 +17,13 @@ public class UpdateDataChange extends AbstractModifyDataChange implements Change
 
     public UpdateDataChange() {
         columns = new ArrayList<ColumnConfig>();
+    }
+
+    @Override
+    public ValidationErrors validate(Database database) {
+        ValidationErrors validate = super.validate(database);
+        validate.checkRequiredField("columns", getColumns());
+        return validate;
     }
 
     @Override

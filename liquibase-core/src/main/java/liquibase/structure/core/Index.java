@@ -22,6 +22,22 @@ public class Index extends AbstractDatabaseObject {
         setAttribute("associatedWith", new HashSet<String>());
     }
 
+    public Index(String indexName) {
+        this();
+        setName(indexName);
+    }
+
+    public Index(String indexName, String catalogName, String schemaName, String tableName, String... columns) {
+        this();
+        setName(indexName);
+        if (tableName != null) {
+            setTable(new Table(catalogName, schemaName, tableName));
+            if (columns != null && columns.length > 0) {
+                setColumns(StringUtils.join(columns, ","));
+            }
+        }
+    }
+
     @Override
     public DatabaseObject[] getContainingObjects() {
         return new DatabaseObject[] {

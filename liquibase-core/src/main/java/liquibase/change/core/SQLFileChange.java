@@ -40,6 +40,16 @@ public class SQLFileChange extends AbstractSQLChange {
     private String path;
     private Boolean relativeToChangelogFile;
 
+    @Override
+    public boolean generateStatementsVolatile(Database database) {
+        return false;
+    }
+
+    @Override
+    public boolean generateRollbackStatementsVolatile(Database database) {
+        return false;
+    }
+
     @DatabaseChangeProperty(description = "The file path of the SQL file to load", requiredForDatabase = "all", exampleValue = "my/path/file.sql")
     public String getPath() {
         return path;

@@ -55,7 +55,7 @@ public class VerifyChangeClassesTest extends AbstractVerifyTest {
 
                 for (String paramName : new TreeSet<String>(changeMetaData.getRequiredParameters(database).keySet())) {
                     ChangeParameterMetaData param = changeMetaData.getParameters().get(paramName);
-                    Object paramValue = param.getExampleValue();
+                    Object paramValue = param.getExampleValue(database);
                     String serializedValue;
                     serializedValue = formatParameter(paramValue);
                     state.addComment("Change Parameter: " + param.getParameterName() + "=" + serializedValue);
@@ -107,7 +107,7 @@ public class VerifyChangeClassesTest extends AbstractVerifyTest {
                 ArrayList<String> requiredParams = new ArrayList<String>(changeMetaData.getRequiredParameters(database).keySet());
                 for (String paramName : requiredParams) {
                     ChangeParameterMetaData param = changeMetaData.getParameters().get(paramName);
-                    Object paramValue = param.getExampleValue();
+                    Object paramValue = param.getExampleValue(database);
                     param.setValue(change, paramValue);
                 }
 
@@ -172,7 +172,7 @@ public class VerifyChangeClassesTest extends AbstractVerifyTest {
 //
                     for (String paramName : new TreeSet<String>(changeMetaData.getRequiredParameters(database).keySet())) {
                         ChangeParameterMetaData param = changeMetaData.getParameters().get(paramName);
-                        Object paramValue = param.getExampleValue();
+                        Object paramValue = param.getExampleValue(database);
                         String serializedValue;
                         serializedValue = formatParameter(paramValue);
                         state.addComment("Required Change Parameter: "+ param.getParameterName()+"="+ serializedValue);
@@ -184,7 +184,7 @@ public class VerifyChangeClassesTest extends AbstractVerifyTest {
                         if (!param.supports(database)) {
                             continue;
                         }
-                        Object paramValue = param.getExampleValue();
+                        Object paramValue = param.getExampleValue(database);
                         String serializedValue;
                         serializedValue = formatParameter(paramValue);
                         state.addComment("Optional Change Parameter: "+ param.getParameterName()+"="+ serializedValue);

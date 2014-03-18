@@ -2,11 +2,7 @@ package liquibase.change.core;
 
 import liquibase.change.*;
 import liquibase.database.Database;
-import liquibase.database.core.DB2Database;
-import liquibase.database.core.InformixDatabase;
-import liquibase.database.core.MSSQLDatabase;
-import liquibase.database.core.OracleDatabase;
-import liquibase.database.core.SybaseASADatabase;
+import liquibase.database.core.*;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.statement.core.ReorganizeTableStatement;
@@ -132,6 +128,14 @@ public class AddLookupTableChange extends AbstractChange {
 
     public void setConstraintName(String constraintName) {
         this.constraintName = constraintName;
+    }
+
+    @Override
+    public boolean supports(Database database) {
+        if (database instanceof HsqlDatabase) {
+            return false;
+        }
+        return super.supports(database);
     }
 
     @Override

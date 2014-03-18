@@ -3,6 +3,7 @@ package liquibase.change;
 import liquibase.change.core.LoadDataColumnConfig;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
+import liquibase.database.DatabaseList;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
 import liquibase.serializer.LiquibaseSerializable;
@@ -31,7 +32,7 @@ public class ChangeParameterMetaData {
     private Change change;
     private String parameterName;
     private String description;
-    private String exampleValue;
+    private Map<String, Object> exampleValues;
     private String displayName;
     private String dataType;
     private String since;
@@ -40,7 +41,7 @@ public class ChangeParameterMetaData {
     private String mustEqualExisting;
     private LiquibaseSerializable.SerializationType serializationType;
 
-    public ChangeParameterMetaData(Change change, String parameterName, String displayName, String description, String exampleValue, String since, Type dataType, String[] requiredForDatabase, String[] supportedDatabases, String mustEqualExisting, LiquibaseSerializable.SerializationType serializationType) {
+    public ChangeParameterMetaData(Change change, String parameterName, String displayName, String description, Map<String, Object> exampleValues, String since, Type dataType, String[] requiredForDatabase, String[] supportedDatabases, String mustEqualExisting, LiquibaseSerializable.SerializationType serializationType) {
         if (parameterName == null) {
             throw new UnexpectedLiquibaseException("Unexpected null parameterName");
         }
@@ -58,7 +59,7 @@ public class ChangeParameterMetaData {
         this.parameterName = parameterName;
         this.displayName = displayName;
         this.description = description;
-        this.exampleValue = exampleValue;
+        this.exampleValues = exampleValues;
         if (dataType instanceof Class) {
             this.dataType = StringUtils.lowerCaseFirst(((Class) dataType).getSimpleName());
         } else if (dataType instanceof ParameterizedType) {
@@ -93,7 +94,7 @@ public class ChangeParameterMetaData {
                     if (!change.generateStatementsVolatile(database)) {
                         Change testChange = change.getClass().newInstance();
                         ValidationErrors originalErrors = getStatementErrors(testChange, database);
-                        this.setValue(testChange, this.getExampleValue());
+                        this.setValue(testChange, this.getExampleValue(database));
                         ValidationErrors finalErrors = getStatementErrors(testChange, database);
                         if (finalErrors.getUnsupportedErrorMessages().size() == 0 || finalErrors.getUnsupportedErrorMessages().size() == originalErrors.getUnsupportedErrorMessages().size()) {
                             computedDatabases.add(database.getShortName());
@@ -133,7 +134,7 @@ public class ChangeParameterMetaData {
                     if (!change.generateStatementsVolatile(database)) {
                         Change testChange = change.getClass().newInstance();
                         ValidationErrors originalErrors = getStatementErrors(testChange, database);
-                        this.setValue(testChange, this.getExampleValue());
+                        this.setValue(testChange, this.getExampleValue(database));
                         ValidationErrors finalErrors = getStatementErrors(testChange, database);
                         if (originalErrors.getRequiredErrorMessages().size() > 0 && finalErrors.getRequiredErrorMessages().size() < originalErrors.getRequiredErrorMessages().size()) {
                             computedDatabases.add(database.getShortName());
@@ -303,15 +304,29 @@ public class ChangeParameterMetaData {
         return serializationType;
     }
 
-    public Object getExampleValue() {
-        if (exampleValue != null) {
-            return exampleValue;
+    public Object getExampleValue(Database database) {
+        if (exampleValues != null) {
+            Object exampleValue = null;
+
+            for (Map.Entry<String, Object> entry: exampleValues.entrySet()) {
+                if (entry.getKey().equalsIgnoreCase("all")) {
+                    exampleValue = entry.getValue();
+                } else if (DatabaseList.definitionMatches(entry.getKey(), database, false)) {
+                    return entry.getValue();
+                }
+            }
+
+            if (exampleValue != null) {
+                return exampleValue;
+            }
         }
 
         Map standardExamples = new HashMap();
         standardExamples.put("tableName", "person");
         standardExamples.put("schemaName", "public");
+        standardExamples.put("tableSchemaName", "public");
         standardExamples.put("catalogName", "cat");
+        standardExamples.put("tableCatalogName", "cat");
         standardExamples.put("columnName", "id");
         standardExamples.put("columnNames", "id, name");
         standardExamples.put("indexName", "idx_address");
@@ -328,7 +343,7 @@ public class ChangeParameterMetaData {
             return standardExamples.get(parameterName);
         }
 
-        for (String prefix : new String[] {"base", "new", "old"}) {
+        for (String prefix : new String[] {"base", "referenced", "new", "old"}) {
             if (parameterName.startsWith(prefix)) {
                 String mainName = StringUtils.lowerCaseFirst(parameterName.replaceFirst("^"+prefix, ""));
                 if (standardExamples.containsKey(mainName)) {

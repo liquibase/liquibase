@@ -2,10 +2,7 @@ package liquibase.util;
 
 import liquibase.database.Database;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Pattern;
 
 /**
@@ -97,17 +94,16 @@ public class StringUtils {
         return Pattern.compile("/\\*.*?\\*/", Pattern.DOTALL).matcher(strippedSingleLines).replaceAll("").trim();
     }
 
+    public static String join(Object[] array, String delimiter, StringUtilsFormatter formatter) {
+        return join(Arrays.asList(array), delimiter, formatter);
+    }
+
     public static String join(String[] array, String delimiter) {
         return join(Arrays.asList(array), delimiter);
     }
 
     public static String join(Collection<String> collection, String delimiter) {
-        return join(collection, delimiter, new StringUtilsFormatter() {
-            @Override
-            public String toString(Object obj) {
-                return (String) obj;
-            }
-        });
+        return join(collection, delimiter, new ToStringFormatter());
 
     }
 
@@ -127,6 +123,18 @@ public class StringUtils {
 
         String returnString = buffer.toString();
         return returnString.substring(0, returnString.length()-delimiter.length());
+    }
+
+    public static String join(Map map, String delimiter) {
+        return join(map, delimiter, new ToStringFormatter());
+    }
+
+    public static String join(Map map, String delimiter, StringUtilsFormatter formatter) {
+        List<String> list = new ArrayList<String>();
+        for (Map.Entry entry : (Set<Map.Entry>) map.entrySet()) {
+            list.add(entry.getKey().toString()+"="+formatter.toString(entry.getValue()));
+        }
+        return join(list, delimiter);
     }
 
     public static List<String> splitAndTrim(String s, String regex) {
@@ -247,7 +255,26 @@ public class StringUtils {
         return out.toString();
     }
 
+    public static String pad(String value, int length) {
+        value = StringUtils.trimToEmpty(value);
+        if (value.length() >= length) {
+            return value;
+        }
+
+        return value + StringUtils.repeat(" ", length - value.length());
+    }
+
     public static interface StringUtilsFormatter<Type> {
         public String toString(Type obj);
+    }
+
+    private static class ToStringFormatter implements StringUtilsFormatter {
+        @Override
+        public String toString(Object obj) {
+            if (obj == null) {
+                return null;
+            }
+            return obj.toString();
+        }
     }
 }

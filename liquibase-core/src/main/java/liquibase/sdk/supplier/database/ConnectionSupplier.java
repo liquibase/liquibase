@@ -6,6 +6,9 @@ import org.apache.velocity.Template;
 
 import java.io.File;
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -181,7 +184,11 @@ public abstract class ConnectionSupplier implements Cloneable {
         }
     }
 
-    public static class ConfigTemplate {
+    public Connection openConnection() throws SQLException {
+        return DriverManager.getConnection(this.getJdbcUrl(), this.getDatabaseUsername(), this.getDatabasePassword());
+    }
+
+        public static class ConfigTemplate {
 
         private final String templatePath;
         private final Map<String, Object> context;

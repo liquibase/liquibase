@@ -2,6 +2,7 @@ package liquibase.change.core;
 
 import liquibase.change.*;
 import liquibase.database.Database;
+import liquibase.exception.ValidationErrors;
 import liquibase.statement.InsertExecutablePreparedStatement;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.InsertStatement;
@@ -23,6 +24,13 @@ public class InsertDataChange extends AbstractChange implements ChangeWithColumn
 
     public InsertDataChange() {
         columns = new ArrayList<ColumnConfig>();
+    }
+
+    @Override
+    public ValidationErrors validate(Database database) {
+        ValidationErrors validate = super.validate(database);
+        validate.checkRequiredField("columns", columns);
+        return validate;
     }
 
     @DatabaseChangeProperty(mustEqualExisting ="table.catalog", since = "3.0")

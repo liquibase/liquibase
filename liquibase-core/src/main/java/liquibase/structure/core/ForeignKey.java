@@ -9,6 +9,25 @@ import java.util.List;
 
 public class ForeignKey extends AbstractDatabaseObject{
 
+    public ForeignKey() {
+    }
+
+    public ForeignKey(String name) {
+        setName(name);
+
+    }
+
+    public ForeignKey(String name, String foreignKeyCatalog, String foreignKeySchema, String foreignKeyTable, String... baseTableColumns) {
+        setName(name);
+        if (foreignKeyTable != null) {
+            setForeignKeyTable(new Table(foreignKeyCatalog, foreignKeySchema, foreignKeyTable));
+        }
+        if (baseTableColumns != null && baseTableColumns.length > 0 && baseTableColumns[0] != null) {
+            setForeignKeyColumns(StringUtils.join(baseTableColumns, ","));
+        }
+
+    }
+
     @Override
     public DatabaseObject[] getContainingObjects() {
 

@@ -2,6 +2,7 @@ package liquibase.change.core;
 
 import liquibase.change.*;
 import liquibase.database.Database;
+import liquibase.exception.ValidationErrors;
 import liquibase.statement.SequenceNextValueFunction;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.DatabaseFunction;
@@ -69,7 +70,7 @@ public class AddDefaultValueChange extends AbstractChange {
         this.columnName = columnName;
     }
 
-    @DatabaseChangeProperty(description = "Current data type of the column to add default value to", exampleValue = "int")
+    @DatabaseChangeProperty(description = "Current data type of the column to add default value to", exampleValue = "varchar(50)")
     public String getColumnDataType() {
 		return columnDataType;
 	}
@@ -78,7 +79,7 @@ public class AddDefaultValueChange extends AbstractChange {
 		this.columnDataType = columnDataType;
 	}
 
-    @DatabaseChangeProperty(description = "Default value. Either this property or one of the other defaultValue* properties are required.", exampleValue = "Something Else", requiredForDatabase = "none")
+    @DatabaseChangeProperty(description = "Default value. Either this property or one of the other defaultValue* properties are required.", exampleValue = "Something Else", requiredForDatabase = "all")
     public String getDefaultValue() {
         return defaultValue;
     }

@@ -49,6 +49,11 @@ public class UnparsedSql implements Sql {
     }
 
     @Override
+    public String toString() {
+        return toSql()+getEndDelimiter();
+    }
+
+    @Override
     public String getEndDelimiter() {
         return endDelimiter;
     }

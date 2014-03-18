@@ -6,12 +6,27 @@ import liquibase.util.StringUtils;
 
 import javax.swing.text.TableView;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class PrimaryKey extends AbstractDatabaseObject {
 
     public PrimaryKey() {
         setAttribute("columnNames", new ArrayList());
+    }
+
+    public PrimaryKey(String name, String tableCatalogName, String tableSchemaName, String tableName, String... columnNames) {
+        this();
+        setName(name);
+        if (tableName != null) {
+            Table table = new Table(tableCatalogName, tableSchemaName, tableName);
+
+            if (columnNames != null) {
+                setAttribute("columnNames", Arrays.asList(columnNames));
+            }
+
+            setTable(table);
+        }
     }
 
     @Override

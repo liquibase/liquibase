@@ -2,6 +2,7 @@ package liquibase.change.core;
 
 import liquibase.change.*;
 import liquibase.database.Database;
+import liquibase.database.core.HsqlDatabase;
 import liquibase.database.core.OracleDatabase;
 import liquibase.database.core.DB2Database;
 import liquibase.exception.UnexpectedLiquibaseException;
@@ -14,6 +15,8 @@ import liquibase.util.StringUtils;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
 
 @DatabaseChange(name = "createProcedure",
         description = "Defines the definition for a stored procedure. This command is better to use for creating procedures than the raw sql command because it will not attempt to strip comments or break up lines.\n\nOften times it is best to use the CREATE OR REPLACE syntax along with setting runOnChange='true' on the enclosing changeSet tag. That way if you need to make a change to your procedure you can simply change your existing code rather than creating a new REPLACE PROCEDURE call. The advantage to this approach is that it keeps your change log smaller and allows you to more easily see what has changed in your procedure code through your source control system's diff command.",
@@ -30,6 +33,15 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
     private Boolean relativeToChangelogFile;
     private String encoding = null;
 
+    @Override
+    public boolean generateStatementsVolatile(Database database) {
+        return false;
+    }
+
+    @Override
+    public boolean generateRollbackStatementsVolatile(Database database) {
+        return false;
+    }
 
     public String getCatalogName() {
         return catalogName;
@@ -47,6 +59,7 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
         this.schemaName = schemaName;
     }
 
+    @DatabaseChangeProperty(exampleValue = "new_customer")
     public String getProcedureName() {
         return procedureName;
     }
@@ -228,5 +241,20 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
     @Override
     public String getSerializedObjectNamespace() {
         return STANDARD_CHANGELOG_NAMESPACE;
+    }
+
+    @Override
+    protected Map<String, Object> createExampleValueMetaData(String parameterName, DatabaseChangeProperty changePropertyAnnotation) {
+
+        if (parameterName.equals("procedureText") || parameterName.equals("procedureBody")) {
+            Map<String, Object> returnMap = super.createExampleValueMetaData(parameterName, changePropertyAnnotation);
+            returnMap.put(new HsqlDatabase().getShortName(), "CREATE PROCEDURE new_customer(firstname VARCHAR(50), lastname VARCHAR(50))\n" +
+                    "   MODIFIES SQL DATA\n" +
+                    "   INSERT INTO CUSTOMERS (first_name, last_name) VALUES (firstname, lastname)");
+
+            return returnMap;
+        } else {
+            return super.createExampleValueMetaData(parameterName, changePropertyAnnotation);
+        }
     }
 }
