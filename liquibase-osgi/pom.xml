@@ -77,7 +77,8 @@
                             org.mortbay.log.*;resolution:=optional,
                             org.mortbay.util.ajax.*;resolution:=optional,
                             org.slf4j.helpers.*;resolution:=optional,
-                            org.slf4j.spi.*;resolution:=optional
+                            org.slf4j.spi.*;resolution:=optional,
+                            org.junit.*;resolution:=optional
                         </Import-Package>
                         <Embed-Dependency>
                             *;scope=compile|runtime;type=!pom;inline=false;artifactId=!slf4j-api
