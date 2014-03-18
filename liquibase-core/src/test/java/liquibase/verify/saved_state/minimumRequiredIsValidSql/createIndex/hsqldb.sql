@@ -3,5 +3,6 @@
 --     name="id"
 --     type="int"
 -- ], ]
+-- Change Parameter: indexName=idx_address
 -- Change Parameter: tableName=person
-CREATE INDEX ON person(id);
+CREATE INDEX idx_address ON person(id);

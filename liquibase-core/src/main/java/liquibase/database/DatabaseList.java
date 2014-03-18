@@ -62,6 +62,12 @@ public class DatabaseList {
     }
 
     public static boolean definitionMatches(Collection<String> definition, Database database, boolean returnValueIfEmptyList) {
-        return definitionMatches(definition, database.getShortName(), returnValueIfEmptyList);
+        String shortName;
+        if (database == null) {
+            shortName = "null";
+        } else {
+            shortName = database.getShortName();
+        }
+        return definitionMatches(definition, shortName, returnValueIfEmptyList);
     }
 }

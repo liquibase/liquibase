@@ -712,7 +712,7 @@ public class AbstractChangeTest {
     public void createExampleMetaData() {
         DatabaseChangeProperty property = mock(DatabaseChangeProperty.class);
         when(property.exampleValue()).thenReturn("int");
-        assertEquals("int", new ExampleAbstractChange().createExampleValueMetaData("x", property));
+        assertEquals("int", new ExampleAbstractChange().createExampleValueMetaData("x", property).get("all"));
     }
 
     @Test

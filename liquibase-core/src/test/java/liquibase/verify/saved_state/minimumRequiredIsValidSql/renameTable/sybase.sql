@@ -1,4 +1,4 @@
 -- Database: sybase
--- Change Parameter: newTableName=person
+-- Change Parameter: newTableName=employee
 -- Change Parameter: oldTableName=person
-exec sp_rename 'person', 'person';
+exec sp_rename 'person', 'employee';

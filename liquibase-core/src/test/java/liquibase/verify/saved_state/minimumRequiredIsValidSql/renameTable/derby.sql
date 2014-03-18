@@ -1,4 +1,4 @@
 -- Database: derby
--- Change Parameter: newTableName=person
+-- Change Parameter: newTableName=employee
 -- Change Parameter: oldTableName=person
-RENAME TABLE person TO person;
+RENAME TABLE person TO employee;

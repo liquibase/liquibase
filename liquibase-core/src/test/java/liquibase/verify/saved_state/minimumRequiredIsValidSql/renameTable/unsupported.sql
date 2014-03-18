@@ -1,4 +1,4 @@
 -- Database: unsupported
--- Change Parameter: newTableName=person
+-- Change Parameter: newTableName=employee
 -- Change Parameter: oldTableName=person
-RENAME person TO person;
+RENAME person TO employee;

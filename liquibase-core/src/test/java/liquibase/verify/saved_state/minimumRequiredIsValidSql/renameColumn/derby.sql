@@ -1,5 +1,5 @@
 -- Database: derby
--- Change Parameter: newColumnName=id
--- Change Parameter: oldColumnName=id
+-- Change Parameter: newColumnName=full_name
+-- Change Parameter: oldColumnName=name
 -- Change Parameter: tableName=person
-RENAME COLUMN person.id TO id;
+RENAME COLUMN person.name TO full_name;

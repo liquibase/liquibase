@@ -1,11 +1,7 @@
 -- Database: hsqldb
--- Change Parameter: procedureBody=CREATE OR REPLACE PROCEDURE testHello
---     IS
---     BEGIN
---       DBMS_OUTPUT.PUT_LINE('Hello From The Database!');
---     END;
-CREATE OR REPLACE PROCEDURE testHello
-    IS
-    BEGIN
-      DBMS_OUTPUT.PUT_LINE('Hello From The Database!');
-    END;;
+-- Change Parameter: procedureBody=CREATE PROCEDURE new_customer(firstname VARCHAR(50), lastname VARCHAR(50))
+--    MODIFIES SQL DATA
+--    INSERT INTO CUSTOMERS (first_name, last_name) VALUES (firstname, lastname)
+CREATE PROCEDURE new_customer(firstname VARCHAR(50), lastname VARCHAR(50))
+   MODIFIES SQL DATA
+   INSERT INTO CUSTOMERS (first_name, last_name) VALUES (firstname, lastname);

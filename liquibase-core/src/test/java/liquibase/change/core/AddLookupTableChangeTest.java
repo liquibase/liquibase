@@ -4,6 +4,7 @@ import liquibase.change.ChangeFactory;
 import liquibase.change.StandardChangeTest;
 import liquibase.database.Database;
 import liquibase.database.core.FirebirdDatabase;
+import liquibase.database.core.HsqlDatabase;
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.statement.SqlStatement;
 import static org.junit.Assert.*;
@@ -63,6 +64,7 @@ public class AddLookupTableChangeTest extends StandardChangeTest {
     @Override
     protected boolean changeIsUnsupported(Database database) {
         return database instanceof FirebirdDatabase
-                || database instanceof SQLiteDatabase;
+                || database instanceof SQLiteDatabase
+                || database instanceof HsqlDatabase;
     }
 }
