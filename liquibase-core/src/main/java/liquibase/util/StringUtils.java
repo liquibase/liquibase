@@ -231,6 +231,22 @@ public class StringUtils {
         return ch < 128;
     }
 
+    public static String escapeHtml(String str) {
+        StringBuilder out = new StringBuilder();
+        int len = str.length();
+        for (int i = 0; i < len; i++) {
+            char c = str.charAt(i);
+                if (c > 0x7F) {
+                    out.append("&#");
+                    out.append(Integer.toString(c, 10));
+                    out.append(';');
+                } else {
+                    out.append(c);
+                }
+        }
+        return out.toString();
+    }
+
     public static interface StringUtilsFormatter<Type> {
         public String toString(Type obj);
     }

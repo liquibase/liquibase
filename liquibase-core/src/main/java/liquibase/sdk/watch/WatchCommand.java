@@ -1,8 +1,6 @@
 package liquibase.sdk.watch;
 
-import liquibase.changelog.ChangeLogHistoryService;
 import liquibase.changelog.ChangeLogHistoryServiceFactory;
-import liquibase.changelog.RanChangeSet;
 import liquibase.changelog.StandardChangeLogHistoryService;
 import liquibase.command.AbstractCommand;
 import liquibase.command.CommandValidationErrors;
@@ -14,14 +12,10 @@ import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.integration.commandline.CommandLineResourceAccessor;
 import liquibase.resource.CompositeResourceAccessor;
-import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.sdk.TemplateService;
-import liquibase.serializer.LiquibaseSerializable;
-import liquibase.serializer.SnapshotSerializerFactory;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.SnapshotControl;
 import liquibase.snapshot.SnapshotGeneratorFactory;
-import liquibase.statement.core.SelectFromDatabaseChangeLogStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Schema;
 import liquibase.util.ISODateFormat;
@@ -29,7 +23,10 @@ import liquibase.util.StringUtils;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.handler.*;
+import org.eclipse.jetty.server.handler.AbstractHandler;
+import org.eclipse.jetty.server.handler.DefaultHandler;
+import org.eclipse.jetty.server.handler.HandlerList;
+import org.eclipse.jetty.server.handler.ResourceHandler;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -37,7 +34,6 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.*;
@@ -79,7 +75,7 @@ public class WatchCommand extends AbstractCommand {
         staticHandler.setResourceBase(new File(getClass().getClassLoader().getResource("liquibase/sdk/watch/index.html.vm").toURI()).getParentFile().getAbsolutePath());
 
         HandlerList handlers = new HandlerList();
-        handlers.setHandlers(new Handler[]{new DatabaseChangeLogHandler(database), staticHandler, new DefaultHandler()});
+        handlers.setHandlers(new Handler[]{new DynamicContentHandler(database), staticHandler, new DefaultHandler()});
 
         server.setHandler(handlers);
         server.start();
@@ -88,11 +84,11 @@ public class WatchCommand extends AbstractCommand {
         return "Started";
     }
 
-    private static class DatabaseChangeLogHandler extends AbstractHandler {
+    private static class DynamicContentHandler extends AbstractHandler {
         private final Database database;
         private final Executor executor;
 
-        public DatabaseChangeLogHandler(Database database) {
+        public DynamicContentHandler(Database database) {
             this.database = database;
             executor = ExecutorService.getInstance().getExecutor(database);
         }
@@ -102,10 +98,8 @@ public class WatchCommand extends AbstractCommand {
             try {
 
             if (url.equals("/index.html") || url.equals("/") || url.equals("")) {
-                    DatabaseSnapshot snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(database.getDefaultSchema(), database, new SnapshotControl(database));
-
                     Map<String, Object> context = new HashMap<String, Object>();
-                    this.serialize(snapshot, context);
+                    this.loadIndexData(context);
 
                     httpServletResponse.setContentType("text/html");
                     httpServletResponse.setStatus(HttpServletResponse.SC_OK);
@@ -118,7 +112,7 @@ public class WatchCommand extends AbstractCommand {
             }
         }
 
-        protected void writeDatabaseChangeLog(Map<String, Object> context) throws DatabaseException {
+        protected void writeDatabaseChangeLogTab(Map<String, Object> context) throws DatabaseException {
             String outString = "<table class='table table-striped table-bordered table-condensed'>";
             outString += "<tr><th>Id</th><th>Author</th><th>Path</th><th>ExecType</th><th>Tag</th></tr>";
 
@@ -127,22 +121,25 @@ public class WatchCommand extends AbstractCommand {
 
             String changeLogDetails = "";
             for (Map row : ranChangeSets) {
-                String id = row.get("ID")+":"+row.get("AUTHOR")+":"+row.get("FILENAME");
-                id = id.replaceAll("[^a-zA-Z0-9_\\-]", "_");
+                String id = cleanHtmlId(row.get("ID")+":"+row.get("AUTHOR")+":"+row.get("FILENAME"));
                 outString +="<tr>"+
-                "<td><a style='color:black' class='object-name' href='#"+id+"'>"+row.get("ID")+"</a></td>"+
-                "<td><a style='color:black' class='object-name' href='#"+id+"'>"+row.get("AUTHOR")+"</a></td>"+
-                "<td><a style='color:black' class='object-name' href='#"+id+"'>"+row.get("FILENAME")+"</a></td>"+
+                "<td><a style='color:black' class='object-name' href='#"+id+"'>"+StringUtils.escapeHtml((String) row.get("ID"))+"</a></td>"+
+                "<td><a style='color:black' class='object-name' href='#"+id+"'>"+StringUtils.escapeHtml((String) row.get("AUTHOR"))+"</a></td>"+
+                "<td><a style='color:black' class='object-name' href='#"+id+"'>"+StringUtils.escapeHtml((String) row.get("FILENAME"))+"</a></td>"+
                 "<td><a style='color:black' class='object-name' href='#"+id+"'>"+row.get("EXECTYPE")+"</a></td>"+
-                "<td><a style='color:black' class='object-name' href='#"+id+"'>"+StringUtils.trimToEmpty((String) row.get("TAG"))+"</a></td>"+
+                "<td><a style='color:black' class='object-name' href='#"+id+"'>"+StringUtils.escapeHtml((String) StringUtils.trimToEmpty((String) row.get("TAG")))+"</a></td>"+
                 "</tr>";
 
-                changeLogDetails += details(id, row.get("ID")+" :: "+row.get("AUTHOR")+" :: "+row.get("FILENAME"), writeDatabaseChangeLogDetails(row));
+                changeLogDetails += wrapDetails(id, row.get("ID") + " :: " + row.get("AUTHOR") + " :: " + row.get("FILENAME"), writeDatabaseChangeLogDetails(row));
             }
             outString += "</table>";
 
             context.put("changeLog", outString);
             context.put("changeLogDetails", changeLogDetails);
+        }
+
+        private String cleanHtmlId(String id) {
+            return id.replaceAll("[^a-zA-Z0-9_\\-]", "_");
         }
 
         protected String writeDatabaseChangeLogDetails(Map row) throws DatabaseException {
@@ -165,17 +162,19 @@ public class WatchCommand extends AbstractCommand {
             return outString;
         }
 
-        public void serialize(DatabaseSnapshot snapshot, Map<String, Object> context) {
+        public void loadIndexData(Map<String, Object> context) {
             try {
+                DatabaseSnapshot snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(database.getDefaultSchema(), database, new SnapshotControl(database));
+
                 StringBuilder buffer = new StringBuilder();
                 Database database = snapshot.getDatabase();
 
-                buffer.append("<div class='panel panel-default'>");
-                buffer.append("<div class='panel-heading'><h2 style='margin-top:0px; margin-bottom:0px'>").append(database.getConnection().getURL()).append("</h2></div>\n");
+                buffer.append("<div class='panel panel-primary'>");
+                buffer.append("<div class='panel-heading'><h2 style='margin-top:0px; margin-bottom:0px'>").append(StringUtils.escapeHtml(database.getConnection().getURL())).append("</h2></div>\n");
                 buffer.append("<div class='panel-body'>");
-                buffer.append("<strong>Database type:</strong> ").append(database.getDatabaseProductName()).append("<br>\n");
-                buffer.append("<strong>Database version:</strong> ").append(database.getDatabaseProductVersion()).append("<br>\n");
-                buffer.append("<strong>Database user:</strong> ").append(database.getConnection().getConnectionUserName()).append("<br>\n");
+                buffer.append("<strong>Database type:</strong> ").append(StringUtils.escapeHtml(database.getDatabaseProductName())).append("<br>\n");
+                buffer.append("<strong>Database version:</strong> ").append(StringUtils.escapeHtml(database.getDatabaseProductVersion())).append("<br>\n");
+                buffer.append("<strong>Database user:</strong> ").append(StringUtils.escapeHtml(database.getConnection().getConnectionUserName())).append("<br>\n");
 
                 Set<Schema> schemas = snapshot.get(Schema.class);
                 if (schemas.size() > 1) {
@@ -210,7 +209,7 @@ public class WatchCommand extends AbstractCommand {
                 catalogBuffer.append("<div class='tab-content' style='margin-bottom:20px;'>\n");
 
                 catalogBuffer.append("<div class='tab-pane' style='border: 1px #ddd solid; border-top:none' id='databasechangelog-tab'>\n");
-                writeDatabaseChangeLog(context);
+                writeDatabaseChangeLogTab(context);
                 detailsBuilder.append(context.get("changeLogDetails"));
                 catalogBuffer.append(context.get("changeLog"));
                 catalogBuffer.append("</div>");
@@ -225,9 +224,9 @@ public class WatchCommand extends AbstractCommand {
                         StringBuilder typeBuffer = new StringBuilder();
                         for (DatabaseObject databaseObject : databaseObjects) {
                             String id = databaseObject.getClass().getName() + "-" + databaseObject.getName();
-                            id = id.replaceAll("[^a-zA-Z0-9\\-\\_]", "_");
-                            typeBuffer.append("<li><a style='color:black' class='object-name' href='#"+id+"'>").append(databaseObject.getName()).append("</a></li>\n");
-                            detailsBuilder.append(details(id, databaseObject.getName(), serialize(databaseObject, new HashSet<String>(), databaseObject.getName()))).append("\n");
+                            id = cleanHtmlId(id);
+                            typeBuffer.append("<li><a style='color:black' class='object-name' href='#"+id+"'>").append(StringUtils.escapeHtml(databaseObject.getName())).append("</a></li>\n");
+                            detailsBuilder.append(wrapDetails(id, databaseObject.getName(), writeDatabaseObject(databaseObject, new HashSet<String>(), databaseObject.getName()))).append("\n");
                         }
 
                         catalogBuffer.append(StringUtils.indent(typeBuffer.toString(), 4)).append("\n");
@@ -249,10 +248,10 @@ public class WatchCommand extends AbstractCommand {
 
         }
 
-        private String details(String id, String title, String details) {
+        protected String wrapDetails(String id, String title, String details) {
             StringBuilder buffer = new StringBuilder();
-            buffer.append("<div class='panel panel-default object-details' style='display:none;' id='"+id+"'>");
-            buffer.append("<div class='panel-heading'> <button type=\"button\" class=\"close\" data-dismiss=\"modal\" aria-hidden=\"true\">&times;</button><h3 style='margin-top:0px; margin-bottom:0px'>").append(title).append("</h3></div>\n");
+            buffer.append("<div class='panel panel-primary object-details' style='display:none;' id='"+id+"'>");
+            buffer.append("<div class='panel-heading'> <button type=\"button\" class=\"close\" data-dismiss=\"modal\" aria-hidden=\"true\">&times;</button><h3 style='margin-top:0px; margin-bottom:0px'>").append(StringUtils.escapeHtml(title)).append("</h3></div>\n");
             buffer.append("<div class='panel-body'>");
             buffer.append(StringUtils.indent(details, 4));
             buffer.append("</div></div>");
@@ -261,7 +260,7 @@ public class WatchCommand extends AbstractCommand {
 
         }
 
-        private String serialize(final DatabaseObject databaseObject, Set<String> oldParentNames, String newParentName) {
+        protected String writeDatabaseObject(final DatabaseObject databaseObject, Set<String> oldParentNames, String newParentName) {
             final Set<String> parentNames = new HashSet<String>(oldParentNames);
             parentNames.add(newParentName);
 
@@ -322,7 +321,7 @@ public class WatchCommand extends AbstractCommand {
                                         String row = "<tr>";
                                         for (String attribute : rowAttributes) {
                                             if (((DatabaseObject) obj).getAttributes().contains(attribute)) {
-                                                row += "<td>" + ((DatabaseObject) obj).getSerializableFieldValue(attribute);
+                                                row += "<td>" + StringUtils.escapeHtml(((DatabaseObject) obj).getSerializableFieldValue(attribute).toString());
                                             } else {
                                                 row += "<td></td>";
                                             }
@@ -350,7 +349,7 @@ public class WatchCommand extends AbstractCommand {
                 if (value != null) {
                     if (multiValue) {
                         multiValueOut.append("<h4>").append(attribute).append(":</h4>");
-                        multiValueOut.append(value);
+                        multiValueOut.append(StringUtils.escapeHtml(value.toString()));
                         multiValueOut.append("<br>");
                     } else {
                         singleValueOut.append("<tr><td><strong>").append(attribute).append("</strong></td><td>");

@@ -1,5 +1,7 @@
 package liquibase.dbdoc;
 
+import liquibase.util.StringUtils;
+
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -39,7 +41,7 @@ public class HTMLListWriter {
                 fileWriter.append(DBDocUtil.toFileName(object.toString().toLowerCase()));
                 fileWriter.append(getTargetExtension());
                 fileWriter.append("\" target=\"objectFrame\">");
-                fileWriter.append(DBDocUtil.htmlEncode(object.toString()));
+                fileWriter.append(StringUtils.escapeHtml(object.toString()));
                 fileWriter.append("</A><BR>\n");
             }
 
