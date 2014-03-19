@@ -22,6 +22,7 @@ public abstract class LiquibaseDataType implements PrioritizedService {
 
     private List<Object> parameters = new ArrayList<Object>();
     private String additionalInformation;
+    private String rawDefinition;
 
     protected LiquibaseDataType(LiquibaseDataType originalType) {
     	name = originalType.name;
@@ -87,6 +88,10 @@ public abstract class LiquibaseDataType implements PrioritizedService {
 
     public void setAdditionalInformation(String additionalInformation) {
         this.additionalInformation = additionalInformation;
+    }
+
+    public String getRawDefinition() {
+        return rawDefinition;
     }
 
     public boolean validate(Database database) {
@@ -170,6 +175,6 @@ public abstract class LiquibaseDataType implements PrioritizedService {
     }
 
     public void finishInitialization(String originalDefinition) {
-
+        this.rawDefinition = originalDefinition;
     }
 }
