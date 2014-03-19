@@ -412,8 +412,8 @@ public class VagrantCommand extends AbstractCommand {
         String osLevelConfig;
         if (vagrantInfo.baseBoxName.contains("windows")) {
             osLevelConfig = "config.vm.guest = :windows\n"
-                    + "config.vm.network :forwarded_port, guest: 3389, host: 3389, id: \"rdp\"\n"
-                    + "config.vm.network :forwarded_port, guest: 5985, host: 5985, id: \"winrm\", auto_correct: true\n"
+                    + "config.vm.network :forwarded_port, guest: 3389, host: 83389, id: \"rdp\", auto_correct: true\n"
+                    + "config.vm.network :forwarded_port, guest: 5985, host: 85985, id: \"winrm\", auto_correct: true\n"
                     + "config.windows.halt_timeout = 30\n"
                     + "config.winrm.username = 'vagrant'\n";
 
