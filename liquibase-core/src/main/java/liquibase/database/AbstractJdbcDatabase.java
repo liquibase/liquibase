@@ -981,7 +981,7 @@ public abstract class AbstractJdbcDatabase implements Database {
         if (objectName.contains("(")) {
             return false;
         }
-        return objectName.contains("-") || startsWithNumeric(objectName) || isReservedWord(objectName);
+        return objectName.contains("-") || startsWithNumeric(objectName) || isReservedWord(objectName) || objectName.contains(" ");
     }
 
     public String quoteObject(final String objectName, final Class<? extends DatabaseObject> objectType) {
