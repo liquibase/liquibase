@@ -49,13 +49,6 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
         return true;
     }
 
-    @Override
-    public ValidationErrors validate(Database database) {
-        ValidationErrors validate = super.validate(database);
-        validate.checkRequiredField("columns", getColumns());
-        return validate;
-    }
-
     @DatabaseChangeProperty(mustEqualExisting ="table.catalog", since = "3.0")
     public String getCatalogName() {
         return catalogName;
