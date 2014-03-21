@@ -3,9 +3,7 @@ package liquibase.command;
 import liquibase.CatalogAndSchema;
 import liquibase.database.Database;
 import liquibase.serializer.SnapshotSerializerFactory;
-import liquibase.snapshot.DatabaseSnapshot;
-import liquibase.snapshot.SnapshotControl;
-import liquibase.snapshot.SnapshotGeneratorFactory;
+import liquibase.snapshot.*;
 import liquibase.util.StringUtils;
 
 import java.util.ArrayList;
@@ -16,6 +14,7 @@ public class SnapshotCommand extends AbstractCommand {
     private Database database;
     private CatalogAndSchema[] schemas;
     private String serializerFormat = "txt";
+    private SnapshotListener snapshotListener;
 
     @Override
     public String getName() {
@@ -59,18 +58,27 @@ public class SnapshotCommand extends AbstractCommand {
         return serializerFormat;
     }
 
-    public void setSerializerFormat(String serializerFormat) {
+    public SnapshotCommand setSerializerFormat(String serializerFormat) {
         this.serializerFormat = serializerFormat;
+        return this;
     }
 
+    public SnapshotListener getSnapshotListener() {
+        return snapshotListener;
+    }
+
+    public void setSnapshotListener(SnapshotListener snapshotListener) {
+        this.snapshotListener = snapshotListener;
+    }
 
     @Override
     protected Object run() throws Exception {
         SnapshotControl snapshotControl = new SnapshotControl(database);
+        snapshotControl.setSnapshotListener(snapshotListener);
 
         CatalogAndSchema[] schemas = this.schemas;
         if (schemas == null) {
-            schemas = new CatalogAndSchema[] {database.getDefaultSchema()};
+            schemas = new CatalogAndSchema[]{database.getDefaultSchema()};
         }
         DatabaseSnapshot snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(schemas, database, snapshotControl);
 

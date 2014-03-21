@@ -7,10 +7,7 @@ import liquibase.diff.DiffResult;
 import liquibase.diff.compare.CompareControl;
 import liquibase.diff.output.report.DiffToReport;
 import liquibase.exception.DatabaseException;
-import liquibase.snapshot.DatabaseSnapshot;
-import liquibase.snapshot.InvalidExampleException;
-import liquibase.snapshot.SnapshotControl;
-import liquibase.snapshot.SnapshotGeneratorFactory;
+import liquibase.snapshot.*;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.DatabaseObjectFactory;
 import liquibase.structure.core.Schema;
@@ -27,6 +24,9 @@ public class DiffCommand extends AbstractCommand {
     private Database targetDatabase;
     private Class<? extends DatabaseObject>[] snapshotTypes;
     private PrintStream outputStream;
+    private SnapshotListener snapshotListener;
+    private SnapshotControl referenceSnapshotControl;
+    private SnapshotControl targetSnapshotControl;
     private CompareControl compareControl;
 
 
@@ -91,6 +91,33 @@ public class DiffCommand extends AbstractCommand {
         return this;
     }
 
+    public SnapshotControl getReferenceSnapshotControl() {
+        return referenceSnapshotControl;
+    }
+
+    public DiffCommand setReferenceSnapshotControl(SnapshotControl referenceSnapshotControl) {
+        this.referenceSnapshotControl = referenceSnapshotControl;
+        return this;
+    }
+
+    public SnapshotControl getTargetSnapshotControl() {
+        return targetSnapshotControl;
+    }
+
+    public DiffCommand setTargetSnapshotControl(SnapshotControl targetSnapshotControl) {
+        this.targetSnapshotControl = targetSnapshotControl;
+        return this;
+    }
+
+    public SnapshotListener getSnapshotListener() {
+        return snapshotListener;
+    }
+
+    public DiffCommand setSnapshotListener(SnapshotListener snapshotListener) {
+        this.snapshotListener = snapshotListener;
+        return this;
+    }
+
     public CompareControl getCompareControl() {
         return compareControl;
     }
@@ -129,7 +156,14 @@ public class DiffCommand extends AbstractCommand {
                 schemas[i++] = comparison.getComparisonSchema();
             }
         }
-        return SnapshotGeneratorFactory.getInstance().createSnapshot(schemas, targetDatabase, new SnapshotControl(targetDatabase, snapshotTypes));
+        SnapshotControl snapshotControl = getTargetSnapshotControl();
+        if (snapshotControl == null) {
+            snapshotControl = new SnapshotControl(targetDatabase, snapshotTypes);
+        }
+        if (getSnapshotListener() != null) {
+            snapshotControl.setSnapshotListener(getSnapshotListener());
+        }
+        return SnapshotGeneratorFactory.getInstance().createSnapshot(schemas, targetDatabase, snapshotControl);
     }
 
     protected DatabaseSnapshot createReferenceSnapshot() throws DatabaseException, InvalidExampleException {
@@ -146,7 +180,14 @@ public class DiffCommand extends AbstractCommand {
             }
         }
 
-        return SnapshotGeneratorFactory.getInstance().createSnapshot(schemas, referenceDatabase, new SnapshotControl(referenceDatabase, snapshotTypes));
+        SnapshotControl snapshotControl = getReferenceSnapshotControl();
+        if (snapshotControl == null) {
+            snapshotControl = new SnapshotControl(referenceDatabase, snapshotTypes);
+        }
+        if (getSnapshotListener() != null) {
+            snapshotControl.setSnapshotListener(getSnapshotListener());
+        }
+        return SnapshotGeneratorFactory.getInstance().createSnapshot(schemas, referenceDatabase, snapshotControl);
     }
 }
 
