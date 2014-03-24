@@ -32,6 +32,9 @@ public class ISODateFormat {
     }
 
     public String format(Date date) {
+        if (date == null) {
+            return null;
+        }
         if (date instanceof java.sql.Date) {
             return format(((java.sql.Date) date));
         } else if (date instanceof Time) {
