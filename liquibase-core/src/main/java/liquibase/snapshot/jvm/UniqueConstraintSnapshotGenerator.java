@@ -120,7 +120,7 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
         } else if (database instanceof MSSQLDatabase) {
             sql = "select TC.CONSTRAINT_NAME as CONSTRAINT_NAME, CC.COLUMN_NAME as COLUMN_NAME from INFORMATION_SCHEMA.TABLE_CONSTRAINTS TC " +
                     "inner join INFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE CC on TC.CONSTRAINT_NAME = CC.CONSTRAINT_NAME " +
-                    "where TC.CONSTRAINT_SCHEMA='" + database.correctObjectName(schema.getCatalogName(), Catalog.class) + "' " +
+                    "where TC.CONSTRAINT_SCHEMA='" + database.correctObjectName(schema.getName(), Schema.class) + "' " +
                     "and TC.TABLE_NAME='" + database.correctObjectName(example.getTable().getName(), Table.class) + "' " +
                     "and TC.CONSTRAINT_NAME='" + database.correctObjectName(name, UniqueConstraint.class) + "'" +
                     "order by TC.CONSTRAINT_NAME";
