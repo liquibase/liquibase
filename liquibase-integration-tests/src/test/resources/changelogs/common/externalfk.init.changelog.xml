@@ -6,7 +6,7 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
 
     <changeSet id="1" author="lujop">
-        <createTable tableName="countries" schemaName="liquibaseb">
+        <createTable tableName="countries" schemaName="lbcat2">
             <column name="id" type="int">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
@@ -26,7 +26,7 @@
         <addForeignKeyConstraint
                 baseTableName="person" baseColumnNames="country_id"
                 constraintName="fk_person_country"
-                referencedTableName="countries" referencedTableSchemaName="liquibaseb" referencedColumnNames="id"
+                referencedTableName="countries" referencedTableSchemaName="lbcat2" referencedColumnNames="id"
         />
     </changeSet>
     

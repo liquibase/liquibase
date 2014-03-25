@@ -6,7 +6,7 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
 
     <changeSet id="1" author="nvoxland">
-        <createTable schemaName="liquibaseb" tableName="person2">
+        <createTable schemaName="lbcat2" tableName="person2">
             <column name="id" type="int">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
@@ -18,24 +18,24 @@
     </changeSet>
     <changeSet id="2" author="nvoxland">
         <comment>Add a username column so we can use "person" for authentication</comment>
-        <addColumn schemaName="liquibaseb" tableName="person2">
+        <addColumn schemaName="lbcat2" tableName="person2">
             <column name="username" type="varchar(8)"/>
         </addColumn>
     </changeSet>
     <changeSet id="5" author="nvoxland" context="test">
-        <insert schemaName="liquibaseb" tableName="person2">
+        <insert schemaName="lbcat2" tableName="person2">
             <column name="id" valueNumeric="1"/>
             <column name="firstname" value="John"/>
             <column name="lastname" value="Doe"/>
             <column name="username" value="jdoe"/>
         </insert>
-        <insert schemaName="liquibaseb" tableName="person2">
+        <insert schemaName="lbcat2" tableName="person2">
             <column name="id" valueNumeric="2"/>
             <column name="firstname" value="Jane"/>
             <column name="lastname" value="Doe"/>
             <column name="username" value="janedoe"/>
         </insert>
-        <insert schemaName="liquibaseb" tableName="person2">
+        <insert schemaName="lbcat2" tableName="person2">
             <column name="id" valueNumeric="3"/>
             <column name="firstname" value="Bob"/>
             <column name="lastname" value="Johnson"/>
@@ -43,10 +43,10 @@
         </insert>
     </changeSet>
     <!--<changeSet id="6" author="nvoxland">-->
-        <!--<dropColumn schemaName="liquibaseb" tableName="person2" columnName="username"/>-->
+        <!--<dropColumn schemaName="lbcat2" tableName="person2" columnName="username"/>-->
     <!--</changeSet>-->
     <changeSet id="7" author="nvoxland">
-        <createTable schemaName="liquibaseb" tableName="company2">
+        <createTable schemaName="lbcat2" tableName="company2">
             <column name="id" type="int">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
@@ -56,34 +56,34 @@
         </createTable>
     </changeSet>
     <changeSet id="7" author="bjohnson" context="test">
-        <insert schemaName="liquibaseb" tableName="company2">
+        <insert schemaName="lbcat2" tableName="company2">
             <column name="id" valueNumeric="1"/>
             <column name="name" value="ACME Corp"/>
         </insert>
-        <insert schemaName="liquibaseb" tableName="company2">
+        <insert schemaName="lbcat2" tableName="company2">
             <column name="id" valueNumeric="2"/>
             <column name="name" value="Widgets Inc."/>
         </insert>
     </changeSet>
     <!--<changeSet id="7a" author="nvoxland">-->
-        <!--<addColumn schemaName="liquibaseb" tableName="company2">-->
+        <!--<addColumn schemaName="lbcat2" tableName="company2">-->
             <!--<column name="company_id" type="int">-->
                 <!--<constraints nullable="true" foreignKeyName="fk_employee_company" references="employee(id)"/>-->
             <!--</column>-->
         <!--</addColumn>-->
     <!--</changeSet>-->
     <changeSet id="8" author="bjohnson">
-        <dropNotNullConstraint schemaName="liquibaseb" tableName="company2" columnName="name" columnDataType="varchar(50)"/>
+        <dropNotNullConstraint schemaName="lbcat2" tableName="company2" columnName="name" columnDataType="varchar(50)"/>
     </changeSet>
     <!--<changeSet id="8.1" author="bjohnson">-->
-        <!--<addNotNullConstraint schemaName="liquibaseb" tableName='company2' columnName="name" defaultNullValue="UNKNOWN"-->
+        <!--<addNotNullConstraint schemaName="lbcat2" tableName='company2' columnName="name" defaultNullValue="UNKNOWN"-->
                               <!--columnDataType="varchar(50)"/>-->
     <!--</changeSet>-->
     <!--<changeSet id="9" author="nvoxland">-->
-        <!--<renameTable schemaName="liquibaseb" oldTableName="employee2" newTableName="company2"/>-->
+        <!--<renameTable schemaName="lbcat2" oldTableName="employee2" newTableName="company2"/>-->
     <!--</changeSet>-->
     <changeSet id="10" author="nvoxland">
-        <createTable schemaName="liquibaseb" tableName="testtable2">
+        <createTable schemaName="lbcat2" tableName="testtable2">
             <column name="id" type="int">
                 <constraints primaryKey="true" nullable="false"/>
             </column>
@@ -91,30 +91,30 @@
                 <constraints nullable="false"/>
             </column>
             <column name="person_id" type="int">
-                <constraints nullable="false" foreignKeyName="fk_test_person" references="liquibaseb.person2(id)"/>
+                <constraints nullable="false" foreignKeyName="fk_test_person" references="lbcat2.person2(id)"/>
             </column>
         </createTable>
     </changeSet>
     <changeSet id="11" author="nvoxland">
-        <dropTable schemaName="liquibaseb" tableName="testtable2"/>
+        <dropTable schemaName="lbcat2" tableName="testtable2"/>
     </changeSet>
 
     <changeSet id="12" author="nvoxland">
-        <createIndex indexName="idx_company_name2" schemaName="liquibaseb" tableName="company2">
+        <createIndex indexName="idx_company_name2" schemaName="lbcat2" tableName="company2">
             <column name="name"/>
         </createIndex>
-        <createIndex indexName="idx_person_lastname2" schemaName="liquibaseb" tableName="person2">
+        <createIndex indexName="idx_person_lastname2" schemaName="lbcat2" tableName="person2">
             <column name="lastname"/>
         </createIndex>
     </changeSet>
 
     <changeSet id="13" author="nvoxland">
-        <dropIndex indexName="idx_person_lastname2" schemaName="liquibaseb" tableName="person2"/>
+        <dropIndex indexName="idx_person_lastname2" schemaName="lbcat2" tableName="person2"/>
     </changeSet>
 
     <changeSet id="19" author="nvoxland">
         <mergeColumns
-                schemaName="liquibaseb"
+                schemaName="lbcat2"
                 tableName="person2"
                 column1Name="firstname"
                 joinString=" "
@@ -124,25 +124,25 @@
     </changeSet>
 
     <changeSet id="22" author="nvoxland">
-        <addColumn schemaName="liquibaseb" tableName="person2">
+        <addColumn schemaName="lbcat2" tableName="person2">
             <column name="employer_id" type="int"/>
         </addColumn>
     </changeSet>
 
     <changeSet id="23" author="nvoxland">
         <addForeignKeyConstraint
-                baseTableSchemaName="liquibaseb" baseTableName="person2" baseColumnNames="employer_id"
+                baseTableSchemaName="lbcat2" baseTableName="person2" baseColumnNames="employer_id"
                 constraintName="fk_person_employer"
-                referencedTableSchemaName="liquibaseb" referencedTableName="company2" referencedColumnNames="id"
+                referencedTableSchemaName="lbcat2" referencedTableName="company2" referencedColumnNames="id"
                 deleteCascade="true"/>
     </changeSet>
 
     <changeSet id="24" author="nvoxland">
-        <dropForeignKeyConstraint baseTableSchemaName="liquibaseb" baseTableName="person2" constraintName="fk_person_employer"/>
+        <dropForeignKeyConstraint baseTableSchemaName="lbcat2" baseTableName="person2" constraintName="fk_person_employer"/>
     </changeSet>
 
     <changeSet id="25" author="nvoxland">
-        <createTable schemaName="liquibaseb" tableName="address2">
+        <createTable schemaName="lbcat2" tableName="address2">
             <column name="id" type="int"/>
             <column name="line1" type="varchar(255)"/>
             <column name="line2" type="varchar(255)"/>
@@ -153,15 +153,15 @@
     </changeSet>
 
     <changeSet id="25.1" author="nvoxland">
-        <addNotNullConstraint schemaName="liquibaseb" tableName="address2" columnName="id" columnDataType="int" defaultNullValue="0"/>
+        <addNotNullConstraint schemaName="lbcat2" tableName="address2" columnName="id" columnDataType="int" defaultNullValue="0"/>
     </changeSet>
 
     <changeSet id="25.2" author="nvoxland">
-        <addPrimaryKey schemaName="liquibaseb" tableName="address2" columnNames="id" constraintName="pk_address2"/>
+        <addPrimaryKey schemaName="lbcat2" tableName="address2" columnNames="id" constraintName="pk_address2"/>
     </changeSet>
 
     <changeSet id="26" author="nvoxland">
-        <insert schemaName="liquibaseb" tableName="address2">
+        <insert schemaName="lbcat2" tableName="address2">
             <column name="id" valueNumeric="1"/>
             <column name="line1" value="123 4th St"/>
             <column name="line2" value="Suite 432"/>
@@ -169,21 +169,21 @@
             <column name="state" value="NY"/>
             <column name="postalcode" value="01235"/>
         </insert>
-        <insert schemaName="liquibaseb" tableName="address2">
+        <insert schemaName="lbcat2" tableName="address2">
             <column name="id" valueNumeric="2"/>
             <column name="line1" value="6123 64th St"/>
             <column name="city" value="New York"/>
             <column name="state" value="NY"/>
             <column name="postalcode" value="01235"/>
         </insert>
-        <insert schemaName="liquibaseb" tableName="address2">
+        <insert schemaName="lbcat2" tableName="address2">
             <column name="id" valueNumeric="3"/>
             <column name="line1" value="One Liquibase Way"/>
             <column name="city" value="Fargo"/>
             <column name="state" value="ND"/>
             <column name="postalcode" value="58103"/>
         </insert>
-        <insert schemaName="liquibaseb" tableName="address2">
+        <insert schemaName="lbcat2" tableName="address2">
             <column name="id" valueNumeric="4"/>
             <column name="line1" value="123 Main Ave"/>
             <column name="city" value="City With No State"/>
@@ -193,44 +193,44 @@
 
     <!--<changeSet id="27" author="nvoxland">-->
         <!--<addLookupTable-->
-                <!--existingTableSchemaName="liquibaseb" existingTableName="address2" existingColumnName="state"-->
-                <!--newTableSchemaName="liquibaseb" newTableName="state2" newColumnName="id" newColumnDataType="char(2)"/>-->
+                <!--existingTableSchemaName="lbcat2" existingTableName="address2" existingColumnName="state"-->
+                <!--newTableSchemaName="lbcat2" newTableName="state2" newColumnName="id" newColumnDataType="char(2)"/>-->
     <!--</changeSet>-->
 
     <changeSet id="28" author="nvoxland">
-        <addDefaultValue schemaName="liquibaseb" tableName="address2" columnName="line2" columnDataType="varchar(255)" defaultValue="N/A"/>
+        <addDefaultValue schemaName="lbcat2" tableName="address2" columnName="line2" columnDataType="varchar(255)" defaultValue="N/A"/>
     </changeSet>
 
     <changeSet id="29" author="nvoxland">
-        <dropDefaultValue schemaName="liquibaseb" tableName="address2" columnName="line2" columnDataType="varchar(255)"/>
+        <dropDefaultValue schemaName="lbcat2" tableName="address2" columnName="line2" columnDataType="varchar(255)"/>
     </changeSet>
 
     <changeSet id="30" author="nvoxland">
-        <createTable schemaName="liquibaseb" tableName="pkTest2">
+        <createTable schemaName="lbcat2" tableName="pkTest2">
             <column name="id" type="int"/>
             <column name="valueCol" type="varchar(50)"/>
         </createTable>
     </changeSet>
 
     <!--<changeSet id="31" author="nvoxland">-->
-        <!--<addPrimaryKey schemaName="liquibaseb" tableName="pkTest2" columnNames="id" constraintName="pk_pktest"/>-->
+        <!--<addPrimaryKey schemaName="lbcat2" tableName="pkTest2" columnNames="id" constraintName="pk_pktest"/>-->
     <!--</changeSet>-->
 
     <!--<changeSet id="32" author="nvoxland">-->
-        <!--<dropPrimaryKey schemaName="liquibaseb" tableName="pkTest2" constraintName="pk_pktest"/>-->
+        <!--<dropPrimaryKey schemaName="lbcat2" tableName="pkTest2" constraintName="pk_pktest"/>-->
     <!--</changeSet>-->
 
     <!--<changeSet id="33" author="nvoxland">-->
-        <!--<addUniqueConstraint schemaName="liquibaseb" tableName="address2" columnNames="line1, line2" constraintName="uq_address_l1l2"/>-->
+        <!--<addUniqueConstraint schemaName="lbcat2" tableName="address2" columnNames="line1, line2" constraintName="uq_address_l1l2"/>-->
     <!--</changeSet>-->
 
     <!--<changeSet id="34" author="nvoxland">-->
-        <!--<dropUniqueConstraint schemaName="liquibaseb" tableName="address2" constraintName="uq_address_l1l2"/>-->
+        <!--<dropUniqueConstraint schemaName="lbcat2" tableName="address2" constraintName="uq_address_l1l2"/>-->
     <!--</changeSet>-->
 
 
     <changeSet id="35" author="nvoxland">
-        <createTable schemaName="liquibaseb" tableName="tableToRollback2">
+        <createTable schemaName="lbcat2" tableName="tableToRollback2">
             <column name="id" type="int"/>
         </createTable>
     </changeSet>

@@ -7,7 +7,7 @@
     <preConditions>
         <dbms type="mysql"/>
         <sqlCheck expectedResult="1">select 1</sqlCheck>
-        <runningAs username="liquibase"/>
+        <runningAs username="lbuser"/>
     </preConditions>
 
     <changeSet id="1" author="nvoxland">
@@ -139,10 +139,10 @@
 
     <changeSet id="16" author="nvoxland">
         <createView viewName="personView">
-            select * from liquibase.person
+            select * from lbcat.person
         </createView>
         <createView viewName="personView" replaceIfExists="true">
-            select * from liquibase.person
+            select * from lbcat.person
         </createView>
     </changeSet>
 

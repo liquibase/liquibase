@@ -144,7 +144,7 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
             }
 
             if(database instanceof MySQLDatabase && statement.getColumnRemarks(column) != null){
-                buffer.append(" COMMENT '" + statement.getColumnRemarks(column) + "'");
+                buffer.append(" COMMENT '" + database.escapeStringForDatabase(statement.getColumnRemarks(column)) + "'");
 
             }
 
@@ -285,7 +285,7 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
         }
 
         if( database instanceof MySQLDatabase && statement.getRemarks() != null) {
-            sql += " COMMENT='"+statement.getRemarks()+"' ";
+            sql += " COMMENT='"+database.escapeStringForDatabase(statement.getRemarks())+"' ";
         }
         additionalSql.add(0, new UnparsedSql(sql, getAffectedTable(statement)));
         return additionalSql.toArray(new Sql[additionalSql.size()]);

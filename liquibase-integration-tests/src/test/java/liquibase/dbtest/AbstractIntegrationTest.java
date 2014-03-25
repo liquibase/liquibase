@@ -215,7 +215,7 @@ public abstract class AbstractIntegrationTest {
 
     protected CatalogAndSchema[] getSchemasToDrop() throws DatabaseException {
         return new CatalogAndSchema[]{
-                new CatalogAndSchema(null, database.correctObjectName("liquibaseb", Schema.class)),
+                new CatalogAndSchema(null, database.correctObjectName("lbcat2", Schema.class)),
                 new CatalogAndSchema(null, database.getDefaultSchemaName())
         };
     }
@@ -538,7 +538,7 @@ public abstract class AbstractIntegrationTest {
         Liquibase liquibase = createLiquibase(includedChangeLog);
         clearDatabase(liquibase);
 
-        database.setDefaultSchemaName("liquibaseb");
+        database.setDefaultSchemaName("lbcat2");
 
         LockService lockService = LockServiceFactory.getInstance().getLockService(database);
         lockService.forceReleaseLock();
@@ -547,7 +547,7 @@ public abstract class AbstractIntegrationTest {
 
         DatabaseSnapshot originalSnapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(database.getDefaultSchema(), database, new SnapshotControl(database));
 
-        CompareControl compareControl = new CompareControl(new CompareControl.SchemaComparison[]{new CompareControl.SchemaComparison(CatalogAndSchema.DEFAULT, new CatalogAndSchema(null, "liquibaseb"))}, originalSnapshot.getSnapshotControl().getTypesToInclude());
+        CompareControl compareControl = new CompareControl(new CompareControl.SchemaComparison[]{new CompareControl.SchemaComparison(CatalogAndSchema.DEFAULT, new CatalogAndSchema(null, "lbcat2"))}, originalSnapshot.getSnapshotControl().getTypesToInclude());
         DiffResult diffResult = DiffGeneratorFactory.getInstance().compare(database, null, compareControl);
 
         File tempFile = File.createTempFile("liquibase-test", ".xml");
@@ -566,12 +566,12 @@ public abstract class AbstractIntegrationTest {
         //run again to test changelog testing logic
         Executor executor = ExecutorService.getInstance().getExecutor(database);
         try {
-            executor.execute(new DropTableStatement("liquibaseb", "liquibaseb", database.getDatabaseChangeLogTableName(), false));
+            executor.execute(new DropTableStatement("lbcat2", "lbcat2", database.getDatabaseChangeLogTableName(), false));
         } catch (DatabaseException e) {
             //ok
         }
         try {
-            executor.execute(new DropTableStatement("liquibaseb", "liquibaseb", database.getDatabaseChangeLogLockTableName(), false));
+            executor.execute(new DropTableStatement("lbcat2", "lbcat2", database.getDatabaseChangeLogLockTableName(), false));
         } catch (DatabaseException e) {
             //ok
         }
@@ -579,7 +579,7 @@ public abstract class AbstractIntegrationTest {
 
         DatabaseConnection connection = DatabaseTestContext.getInstance().getConnection(url);
         database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(connection);
-        database.setDefaultSchemaName("liquibaseb");
+        database.setDefaultSchemaName("lbcat2");
         liquibase = createLiquibase(tempFile.getName());
         try {
             liquibase.update(this.contexts);

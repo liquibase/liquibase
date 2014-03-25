@@ -52,7 +52,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
         }
 
         public List<CachedRow> getForeignKeys(final String catalogName, final String schemaName, final String tableName, final String fkName) throws DatabaseException {
-            return getResultSetCache("getCrossReference").get(new ResultSetCache.UnionResultSetExtractor(database) {
+            return getResultSetCache("getImportedKeys").get(new ResultSetCache.UnionResultSetExtractor(database) {
 
 
                 @Override
@@ -89,7 +89,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                         if (database instanceof OracleDatabase) {
                             throw new RuntimeException("Should have bulk selected");
                         } else {
-                            returnList.addAll(extract(databaseMetaData.getCrossReference(jdbcCatalogName, jdbcSchemaName, foundTable, null, null, null)));
+                            returnList.addAll(extract(databaseMetaData.getImportedKeys(jdbcCatalogName, jdbcSchemaName, foundTable)));
                         }
                     }
 

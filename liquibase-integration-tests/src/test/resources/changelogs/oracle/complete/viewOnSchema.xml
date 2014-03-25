@@ -9,14 +9,14 @@
     </preConditions>
 
     <changeSet id="2" author="tbassett">
-        <createTable tableName="BOOK2" schemaName="LIQUIBASEB">
+        <createTable tableName="BOOK2" schemaName="lbcat2">
             <column name="id" type="int"/>
             <column name="title" type="varchar(50)"/>
         </createTable>
     </changeSet>
 
     <changeSet id="3" author="tbassett">
-        <createView viewName="V_BOOK2" schemaName="LIQUIBASEB" replaceIfExists="true">
+        <createView viewName="V_BOOK2" schemaName="lbcat2" replaceIfExists="true">
             SELECT * FROM book2
         </createView>
     </changeSet>

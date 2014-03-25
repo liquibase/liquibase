@@ -22,7 +22,7 @@ import static junit.framework.Assert.assertTrue;
 public class MySQLIntegrationTest extends AbstractIntegrationTest {
 
     public MySQLIntegrationTest() throws Exception {
-        super("mysql", "jdbc:mysql://"+ getDatabaseServerHostname("MySQL") +"/liquibase");
+        super("mysql", "jdbc:mysql://"+ getDatabaseServerHostname("MySQL") +":3306/lbcat");
     }
 
     @Test

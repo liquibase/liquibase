@@ -9,14 +9,14 @@
     </preConditions>
 
     <changeSet id="1" author="tbassett">
-        <createTable tableName="book" schemaName="LIQUIBASEB">
+        <createTable tableName="book" schemaName="lbcat2">
             <column name="id" type="int"/>
             <column name="title" type="varchar(50)"/>
         </createTable>
     </changeSet>
 
     <changeSet id="2" author="tbassett">
-        <createIndex tableName="book" indexName="idx_book_id" schemaName="LIQUIBASEB">
+        <createIndex tableName="book" indexName="idx_book_id" schemaName="lbcat2">
             <column name="id" />
         </createIndex>
     </changeSet>
