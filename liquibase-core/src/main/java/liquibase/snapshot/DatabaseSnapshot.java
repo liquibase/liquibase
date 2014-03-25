@@ -28,6 +28,17 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable{
         this.snapshotControl = snapshotControl;
 
         if (examples != null) {
+            Set<Catalog> catalogs = new HashSet<Catalog>();
+            for (DatabaseObject object : examples) {
+                if (object instanceof Schema) {
+                    catalogs.add(((Schema) object).getCatalog());
+                }
+            }
+
+            for (Catalog catalog : catalogs) {
+                this.snapshotControl.addType(catalog.getClass(), database);
+                include(catalog);
+            }
             for (DatabaseObject obj : examples) {
                 this.snapshotControl.addType(obj.getClass(), database);
 
