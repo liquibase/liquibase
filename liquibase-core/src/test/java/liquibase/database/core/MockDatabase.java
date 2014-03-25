@@ -39,9 +39,13 @@ public class MockDatabase implements Database, InternalDatabase {
 
     private boolean outputDefaultSchema;
     private boolean outputDefaultCatalog;
+    private boolean supportsCatalogs = true;
+    private boolean supportsSchemas = true;
+    private String defaultCatalogName;
+    private String defaultSchemaName;
 
 
-	@Override
+    @Override
     public int getPriority() {
         return PRIORITY_DEFAULT;
     }
@@ -176,22 +180,22 @@ public class MockDatabase implements Database, InternalDatabase {
 
     @Override
     public String getDefaultCatalogName() {
-        return null;
+        return defaultCatalogName;
     }
 
     @Override
     public void setDefaultCatalogName(final String catalogName) throws DatabaseException {
-
+        this.defaultCatalogName = catalogName;
     }
 
     @Override
     public String getDefaultSchemaName()  {
-        return null;
+        return defaultSchemaName;
     }
 
     @Override
     public void setDefaultSchemaName(final String schemaName) throws DatabaseException {
-
+        this.defaultSchemaName = schemaName;
     }
 
     @Override
@@ -396,12 +400,20 @@ public class MockDatabase implements Database, InternalDatabase {
 
     @Override
     public boolean supportsSchemas() {
-        return true;
+        return supportsSchemas;
+    }
+
+    public void setSupportsSchemas(boolean supportsSchemas) {
+        this.supportsSchemas = supportsSchemas;
     }
 
     @Override
     public boolean supportsCatalogs() {
-        return true;
+        return supportsCatalogs;
+    }
+
+    public void setSupportsCatalogs(boolean supportsCatalogs) {
+        this.supportsCatalogs = supportsCatalogs;
     }
 
     public boolean supportsCatalogInObjectName() {

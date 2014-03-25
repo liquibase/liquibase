@@ -253,48 +253,15 @@ public abstract class AbstractJdbcDatabase implements Database {
     }
 
     @Override
+    /**
+     * @deprecated Use {@link liquibase.CatalogAndSchema#correct(Database)})
+     */
     public CatalogAndSchema correctSchema(final CatalogAndSchema schema) {
         if (schema == null) {
             return new CatalogAndSchema(getDefaultCatalogName(), getDefaultSchemaName());
         }
-        String catalogName = StringUtils.trimToNull(schema.getCatalogName());
-        String schemaName = StringUtils.trimToNull(schema.getSchemaName());
 
-        if (supportsCatalogs() && supportsSchemas()) {
-            if (catalogName == null) {
-                catalogName = getDefaultCatalogName();
-            } else {
-                catalogName = correctObjectName(catalogName, Catalog.class);
-            }
-
-            if (schemaName == null) {
-                schemaName = getDefaultSchemaName();
-            } else {
-                schemaName = correctObjectName(schemaName, Schema.class);
-            }
-        } else if (!supportsCatalogs() && !supportsSchemas()) {
-            return new CatalogAndSchema(null, null);
-        } else if (supportsCatalogs()) { //schema is null
-            if (catalogName == null) {
-                if (schemaName == null) {
-                    catalogName = getDefaultCatalogName();
-                } else {
-                    catalogName = schemaName;
-                }
-            }
-            schemaName = catalogName;
-        } else if (supportsSchemas()) {
-            if (schemaName == null) {
-                if (catalogName == null) {
-                    schemaName = getDefaultSchemaName();
-                } else {
-                    schemaName = catalogName;
-                }
-            }
-            catalogName = schemaName;
-        }
-        return new CatalogAndSchema(catalogName, schemaName);
-
+        return schema.correct(this);
     }
 
     @Override

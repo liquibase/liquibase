@@ -44,7 +44,7 @@ public class SnapshotCommand extends AbstractCommand {
         schemas = StringUtils.join(schemas, ",").split("\\s*,\\s*");
         List<CatalogAndSchema> finalList = new ArrayList<CatalogAndSchema>();
         for (String schema : schemas) {
-            finalList.add(database.correctSchema(new CatalogAndSchema(schema)));
+            finalList.add(database.correctSchema(new CatalogAndSchema(null, schema)));
         }
 
         this.schemas = finalList.toArray(new CatalogAndSchema[finalList.size()]);

@@ -1,7 +1,14 @@
 package liquibase;
 
 import liquibase.database.Database;
+import liquibase.util.StringUtils;
 
+/**
+ * Object representing a database catalog and schema. This differs from {@link liquibase.structure.core.Schema} in that it has
+ * not come from an actual database Schema.
+ * <p>
+ * A null value for catalogName or schemaName signifies the default catalog/schema.
+ */
 public class CatalogAndSchema {
     private String catalogName;
     private String schemaName;
@@ -12,17 +19,6 @@ public class CatalogAndSchema {
         this.schemaName = schemaName;
     }
 
-    public CatalogAndSchema(String catalogAndOrSchema) {
-        String[] split = catalogAndOrSchema.split("\\.");
-        if (split.length == 1) {
-            schemaName = split[0];
-        } else {
-            catalogName = split[0];
-            schemaName = split[1];
-        }
-
-    }
-
     public String getCatalogName() {
         return catalogName;
     }
@@ -31,24 +27,82 @@ public class CatalogAndSchema {
         return schemaName;
     }
 
-    public boolean equals(CatalogAndSchema catalogAndSchema, Database database) {
-        catalogAndSchema = database.correctSchema(catalogAndSchema);
-        CatalogAndSchema thisCatalogAndSchema = database.correctSchema(this);
+    public boolean equals(CatalogAndSchema catalogAndSchema, Database accordingTo) {
+        if (!accordingTo.supportsCatalogs()) {
+            return true;
+        }
 
-        return catalogAndSchema.toString().equalsIgnoreCase(thisCatalogAndSchema.toString());
+        catalogAndSchema = catalogAndSchema.correct(accordingTo);
+        CatalogAndSchema thisCatalogAndSchema = this.correct(accordingTo);
+
+        boolean catalogMatches;
+        if (catalogAndSchema.getCatalogName() == null) {
+            catalogMatches = (thisCatalogAndSchema.getCatalogName() == null);
+        } else {
+            catalogMatches = catalogAndSchema.getCatalogName().equalsIgnoreCase(thisCatalogAndSchema.getCatalogName());
+        }
+
+        if (!catalogMatches) {
+            return false;
+        }
+
+        if (accordingTo.supportsSchemas()) {
+            if (catalogAndSchema.getSchemaName() == null) {
+                return thisCatalogAndSchema.getSchemaName() == null;
+            } else {
+                return catalogAndSchema.getSchemaName().equalsIgnoreCase(thisCatalogAndSchema.getSchemaName());
+            }
+        } else {
+            return true;
+        }
     }
 
+
+    /**
+     * This method returns a new CatalogAndSchema adjusted based on the configuration of the passed database.
+     * If the database does not support schemas, the returned object will have a null schema.
+     * If the database does not support catalogs, the returned object will have a null catalog.
+     * If either the schema or catalog matches the database default catalog or schema, they will be nulled out.
+     */
+    public CatalogAndSchema correct(Database accordingTo) {
+        String catalogName = StringUtils.trimToNull(getCatalogName());
+        String schemaName = StringUtils.trimToNull(getSchemaName());
+
+        if (!accordingTo.supportsCatalogs()) {
+            return new CatalogAndSchema(null, null);
+        }
+
+        if (catalogName != null && catalogName.equalsIgnoreCase(accordingTo.getDefaultCatalogName())) {
+            catalogName = null;
+        }
+
+        if (accordingTo.supportsSchemas()) {
+            if (schemaName != null && schemaName.equalsIgnoreCase(accordingTo.getDefaultSchemaName())) {
+                schemaName = null;
+            }
+        } else {
+            schemaName = null;
+        }
+
+        return new CatalogAndSchema(catalogName, schemaName);
+
+    }
+
+    /**
+     * String version includes both catalog and schema. If either is null it returns the string "DEFAULT" in its place.
+     */
     @Override
     public String toString() {
-        if (catalogName == null && schemaName == null) {
-            return "DEFAULT";
+        String catalogName = getCatalogName();
+        String schemaName = getSchemaName();
+
+        if (catalogName == null) {
+            catalogName = "DEFAULT";
         }
-        if (catalogName != null && schemaName == null) {
-            return catalogName;
+        if (schemaName == null) {
+            schemaName = "DEFAULT";
         }
-        if (catalogName == null && schemaName != null) {
-            return schemaName;
-        }
+
         return catalogName+"."+schemaName;
     }
 }
