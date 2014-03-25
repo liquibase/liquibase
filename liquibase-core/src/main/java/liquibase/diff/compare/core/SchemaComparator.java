@@ -27,10 +27,6 @@ public class SchemaComparator implements DatabaseObjectComparator {
 
     @Override
     public boolean isSameObject(DatabaseObject databaseObject1, DatabaseObject databaseObject2, Database accordingTo, DatabaseObjectComparatorChain chain) {
-        if (chain.isSameObject(databaseObject1, databaseObject2, accordingTo)) {
-            return true;
-        }
-
         if (!(databaseObject1 instanceof Schema && databaseObject2 instanceof Schema)) {
             return false;
         }
@@ -46,7 +42,7 @@ public class SchemaComparator implements DatabaseObjectComparator {
                 return false;
             }
         }
-        if (accordingTo.supportsSchemas()) {
+        if (accordingTo.supportsCatalogs() && accordingTo.supportsSchemas()) {
             String thisSchemaName = thisSchema.getSchemaName();
             String otherSchemaName = otherSchema.getSchemaName();
             if (thisSchemaName == null) {

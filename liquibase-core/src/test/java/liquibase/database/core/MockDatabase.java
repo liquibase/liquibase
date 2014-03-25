@@ -609,7 +609,7 @@ public class MockDatabase implements Database, InternalDatabase {
 
     @Override
     public CatalogAndSchema correctSchema(final CatalogAndSchema schema) {
-        return schema;
+        return schema.correct(this);
     }
 
     @Override
