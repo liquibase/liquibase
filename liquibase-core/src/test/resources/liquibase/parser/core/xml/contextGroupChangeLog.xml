@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog src/main/resources/liquibase/parser/core/xml/dbchangelog-3.2.xsd">
+
+	<contextGroup context="context1,context3">
+		<changeSet id="1" author="macton">
+			<createTable tableName="person">
+				<column name="id" type="int">
+					<constraints primaryKey="true" nullable="false" />
+				</column>
+				<column name="firstname" type="varchar(50)" />
+				<column name="lastname" type="varchar(50)">
+					<constraints nullable="false" />
+				</column>
+			</createTable>
+		</changeSet>
+
+		<changeSet id="2" author="macton" runAlways="true"
+			runOnChange="true">
+			<comment>Testing add column</comment>
+			<addColumn tableName="person">
+				<column name="username" type="varchar(255)" />
+			</addColumn>
+			<addColumn tableName="person">
+				<column name="hireDate" type="date" />
+			</addColumn>
+			<rollback>
+				alter table person drop column username;
+				alter table person drop column hireDate;
+			</rollback>
+		</changeSet>
+	</contextGroup>
+
+	<contextGroup context="context2">
+		<changeSet id="3" author="bob" context="context4" runAlways="false"
+			runOnChange="false">
+			<createTable tableName="company">
+				<column name="id" type="int">
+					<constraints primaryKey="true" nullable="false" />
+				</column>
+				<column name="name" type="varchar(50)" />
+			</createTable>
+		</changeSet>
+	</contextGroup>
+	
+	<changeSet id="4" author="jim">
+		<createTable tableName="account">
+			<column name="id" type="int">
+				<constraints primaryKey="true" nullable="false" />
+			</column>
+			<column name="type" type="varchar(75)" />
+		</createTable>
+	</changeSet>
+
+</databaseChangeLog>

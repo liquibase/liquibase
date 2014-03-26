@@ -85,18 +85,93 @@
 	<xsd:element name="databaseChangeLog">
 		<xsd:complexType>
 			<xsd:sequence>
-				<xsd:element name="property" minOccurs="0" maxOccurs="unbounded">
-					<xsd:complexType>
-						<xsd:attribute name="file" type="xsd:string" />
-						<xsd:attribute name="name" type="xsd:string" />
-						<xsd:attribute name="value" type="xsd:string" />
-						<xsd:attribute name="dbms" type="xsd:string" />
-						<xsd:attribute name="context" type="xsd:string" />
+				<xsd:element ref="property" minOccurs="0" maxOccurs="unbounded" />
+
+				<xsd:element ref="preConditions" minOccurs="0"
+					maxOccurs="1" />
+				
+				<xsd:choice minOccurs="0" maxOccurs="unbounded">
+					<xsd:element ref="changeSet" minOccurs="0" maxOccurs="unbounded" />
+						
+
+					<!-- include -->
+					<xsd:element ref="include" minOccurs="0" maxOccurs="unbounded" />
+				
+					<xsd:element ref="includeAll" minOccurs="0" maxOccurs="unbounded" />
+					
+					<xsd:element name="contextGroup" minOccurs="0" maxOccurs="unbounded">
+						<xsd:complexType>
+							<xsd:sequence>
+								<xsd:element ref="property" minOccurs="0" maxOccurs="unbounded" />
+
+								<xsd:element ref="preConditions" minOccurs="0"
+									maxOccurs="1" />
+				
+								<xsd:choice minOccurs="0" maxOccurs="unbounded">
+									<xsd:element ref="changeSet" minOccurs="0" maxOccurs="unbounded" />
+										
+				
+									<!-- include -->
+									<xsd:element ref="include" minOccurs="0" maxOccurs="unbounded" />
+								
+									<xsd:element ref="includeAll" minOccurs="0" maxOccurs="unbounded" />
+								</xsd:choice>
+							</xsd:sequence>
+							<xsd:attribute name="context" type="xsd:string" use="required"/>
+						</xsd:complexType>
+					</xsd:element>
+				</xsd:choice>
+			</xsd:sequence>
+			<xsd:attributeGroup ref="changeLogAttributes" />
+			<xsd:anyAttribute namespace="##other" />
+		</xsd:complexType>
+	</xsd:element>
+	
+	<xsd:element name="property">
+		<xsd:complexType>
+			<xsd:attribute name="file" type="xsd:string" />
+			<xsd:attribute name="name" type="xsd:string" />
+			<xsd:attribute name="value" type="xsd:string" />
+			<xsd:attribute name="dbms" type="xsd:string" />
+			<xsd:attribute name="context" type="xsd:string" />
+		</xsd:complexType>
+	</xsd:element>
+	
+	<xsd:element name="preConditions">
+		<xsd:complexType>
+			<xsd:choice>
+				<xsd:group ref="PreConditionChildren" maxOccurs="unbounded" />
+			</xsd:choice>
+			<xsd:attribute name="onFailMessage" type="xsd:string" />
+			<xsd:attribute name="onErrorMessage" type="xsd:string" />
+			<xsd:attribute name="onFail"
+				type="onChangeLogPreconditionErrorOrFail" />
+			<xsd:attribute name="onError"
+				type="onChangeLogPreconditionErrorOrFail" />
+			<xsd:attribute name="onSqlOutput"
+				type="onChangeLogPreconditionOnSqlOutput" />
+		</xsd:complexType>
+	</xsd:element>
+	
+	<xsd:element name="changeSet">
+		<xsd:complexType>
+			<xsd:sequence>
+				<xsd:element name="validCheckSum" minOccurs="0"
+					maxOccurs="unbounded">
+					<xsd:complexType mixed="true">
+						<xsd:sequence>
+							<xsd:element ref="comment" minOccurs="0"
+								maxOccurs="1" />
+						</xsd:sequence>
 					</xsd:complexType>
 				</xsd:element>
-
 				<xsd:element name="preConditions" minOccurs="0"
 					maxOccurs="1">
+                                <xsd:annotation>
+                                    <xsd:appinfo>
+                                        <xsd:documentation>onChangeLogPreconditionOnSqlOutput determines what should happen when evaluating this precondition in updateSQL mode.  TEST: Run precondition, FAIL: Fail precondition, IGNORE: Skip precondition check [DEFAULT]</xsd:documentation>
+                                    </xsd:appinfo>
+                                </xsd:annotation>
 					<xsd:complexType>
 						<xsd:choice>
 							<xsd:group ref="PreConditionChildren" maxOccurs="unbounded" />
@@ -104,92 +179,51 @@
 						<xsd:attribute name="onFailMessage" type="xsd:string" />
 						<xsd:attribute name="onErrorMessage" type="xsd:string" />
 						<xsd:attribute name="onFail"
-							type="onChangeLogPreconditionErrorOrFail" />
+							type="onChangeSetPreconditionErrorOrFail" />
 						<xsd:attribute name="onError"
-							type="onChangeLogPreconditionErrorOrFail" />
+							type="onChangeSetPreconditionErrorOrFail" />
 						<xsd:attribute name="onSqlOutput"
 							type="onChangeLogPreconditionOnSqlOutput" />
 					</xsd:complexType>
 				</xsd:element>
-
-				<xsd:choice minOccurs="0" maxOccurs="unbounded">
-					<xsd:element name="changeSet" minOccurs="0" maxOccurs="unbounded">
-						<xsd:complexType>
-							<xsd:sequence>
-								<xsd:element name="validCheckSum" minOccurs="0"
-									maxOccurs="unbounded">
-									<xsd:complexType mixed="true">
-										<xsd:sequence>
-											<xsd:element ref="comment" minOccurs="0"
-												maxOccurs="1" />
-										</xsd:sequence>
-									</xsd:complexType>
-								</xsd:element>
-								<xsd:element name="preConditions" minOccurs="0"
-									maxOccurs="1">
-                                    <xsd:annotation>
-                                        <xsd:appinfo>
-                                            <xsd:documentation>onChangeLogPreconditionOnSqlOutput determines what should happen when evaluating this precondition in updateSQL mode.  TEST: Run precondition, FAIL: Fail precondition, IGNORE: Skip precondition check [DEFAULT]</xsd:documentation>
-                                        </xsd:appinfo>
-                                    </xsd:annotation>
-									<xsd:complexType>
-										<xsd:choice>
-											<xsd:group ref="PreConditionChildren" maxOccurs="unbounded" />
-										</xsd:choice>
-										<xsd:attribute name="onFailMessage" type="xsd:string" />
-										<xsd:attribute name="onErrorMessage" type="xsd:string" />
-										<xsd:attribute name="onFail"
-											type="onChangeSetPreconditionErrorOrFail" />
-										<xsd:attribute name="onError"
-											type="onChangeSetPreconditionErrorOrFail" />
-										<xsd:attribute name="onSqlOutput"
-											type="onChangeLogPreconditionOnSqlOutput" />
-									</xsd:complexType>
-								</xsd:element>
-								<xsd:choice>
-									<xsd:element ref="tagDatabase" maxOccurs="1" />
-									<xsd:group ref="changeSetChildren" minOccurs="0"
-										maxOccurs="unbounded" />
-								</xsd:choice>
-
-								<xsd:element name="modifySql" minOccurs="0"
-									maxOccurs="unbounded">
-									<xsd:complexType>
-										<xsd:choice>
-											<xsd:group ref="modifySqlChildren" minOccurs="1"
-												maxOccurs="unbounded" />
-										</xsd:choice>
-										<xsd:attribute name="dbms" type="xsd:string" />
-										<xsd:attribute name="context" type="xsd:string" />
-										<xsd:attribute name="applyToRollback" type="booleanExp" />
-									</xsd:complexType>
-								</xsd:element>
-
-							</xsd:sequence>
-							<xsd:attributeGroup ref="changeSetAttributes" />
-							<xsd:anyAttribute namespace="##other" />
-						</xsd:complexType>
-					</xsd:element>
-
-					<!-- include -->
-					<xsd:element name="include" minOccurs="0" maxOccurs="unbounded">
-						<xsd:complexType>
-							<xsd:attribute name="file" type="xsd:string" use="required" />
-							<xsd:attribute name="relativeToChangelogFile" type="booleanExp" />
-							<xsd:anyAttribute namespace="##other" />
-						</xsd:complexType>
-					</xsd:element>
-					<xsd:element name="includeAll" minOccurs="0" maxOccurs="unbounded">
-						<xsd:complexType>
-							<xsd:attribute name="path" type="xsd:string" use="required" />
-							<xsd:attribute name="relativeToChangelogFile" type="booleanExp" />
-                            <xsd:attribute name="filter" type="xsd:string" />
-							<xsd:anyAttribute namespace="##other" />
-						</xsd:complexType>
-					</xsd:element>
+				<xsd:choice>
+					<xsd:element ref="tagDatabase" maxOccurs="1" />
+					<xsd:group ref="changeSetChildren" minOccurs="0"
+						maxOccurs="unbounded" />
 				</xsd:choice>
+
+				<xsd:element name="modifySql" minOccurs="0"
+					maxOccurs="unbounded">
+					<xsd:complexType>
+						<xsd:choice>
+							<xsd:group ref="modifySqlChildren" minOccurs="1"
+								maxOccurs="unbounded" />
+						</xsd:choice>
+						<xsd:attribute name="dbms" type="xsd:string" />
+						<xsd:attribute name="context" type="xsd:string" />
+						<xsd:attribute name="applyToRollback" type="booleanExp" />
+					</xsd:complexType>
+				</xsd:element>
+
 			</xsd:sequence>
-			<xsd:attributeGroup ref="changeLogAttributes" />
+			<xsd:attributeGroup ref="changeSetAttributes" />
+			<xsd:anyAttribute namespace="##other" />
+		</xsd:complexType>
+	</xsd:element>
+	
+	<xsd:element name="include">
+		<xsd:complexType>
+			<xsd:attribute name="file" type="xsd:string" use="required" />
+			<xsd:attribute name="relativeToChangelogFile" type="booleanExp" />
+			<xsd:anyAttribute namespace="##other" />
+		</xsd:complexType>
+	</xsd:element>
+	
+	<xsd:element name="includeAll">
+		<xsd:complexType>
+			<xsd:attribute name="path" type="xsd:string" use="required" />
+			<xsd:attribute name="relativeToChangelogFile" type="booleanExp" />
+                        <xsd:attribute name="filter" type="xsd:string" />
 			<xsd:anyAttribute namespace="##other" />
 		</xsd:complexType>
 	</xsd:element>
