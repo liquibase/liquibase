@@ -124,4 +124,9 @@ public class UnsupportedDatabase extends AbstractJdbcDatabase {
     public boolean supportsTablespaces() {
         return false;
     }
+
+    @Override
+    public boolean supportsSequences() {
+        return false;
+    }
 }

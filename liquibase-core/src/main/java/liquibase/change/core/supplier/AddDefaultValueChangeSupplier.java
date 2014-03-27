@@ -30,7 +30,15 @@ public class AddDefaultValueChangeSupplier extends AbstractChangeSupplier<AddDef
 
         String type = change.getColumnDataType();
         if (type == null) {
-            type = "varchar(255)";
+            if (change.getDefaultValueDate() != null) {
+                type = "datetime";
+            } else if (change.getDefaultValueBoolean() != null) {
+                type = "boolean";
+            } else if (change.getDefaultValueNumeric() != null) {
+                type = "decimal";
+            } else {
+                type = "varchar(255)";
+            }
         }
         createTableChange.addColumn(new ColumnConfig().setName(change.getColumnName()).setType(type));
 

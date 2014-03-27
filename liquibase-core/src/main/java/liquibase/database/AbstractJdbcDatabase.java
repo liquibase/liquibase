@@ -1375,9 +1375,13 @@ public abstract class AbstractJdbcDatabase implements Database {
     }
 
     private boolean isCurrentTimeFunction(final String functionValue) {
+        if (functionValue == null) {
+            return false;
+        }
+
         return functionValue.startsWith("current_timestamp")
                 || functionValue.startsWith("current_datetime")
-                || getCurrentDateTimeFunction().equalsIgnoreCase(functionValue);
+                || functionValue.equalsIgnoreCase(getCurrentDateTimeFunction());
     }
 
     @Override

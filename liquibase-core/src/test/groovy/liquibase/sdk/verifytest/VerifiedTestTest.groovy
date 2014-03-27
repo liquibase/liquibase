@@ -2,7 +2,7 @@ package liquibase.sdk.verifytest
 
 import spock.lang.Specification
 
-class VerifiedTestSpec extends Specification {
+class VerifiedTestTest extends Specification {
 
     def "remove permutation"() {
         given:

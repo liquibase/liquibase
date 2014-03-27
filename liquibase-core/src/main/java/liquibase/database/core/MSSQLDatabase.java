@@ -47,6 +47,8 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
     public MSSQLDatabase() {
         super.setCurrentDateTimeFunction("GETDATE()");
 
+        super.sequenceNextValueFunction = "NEXT VALUE FOR %s";
+
         systemTablesAndViews.add("syscolumns");
         systemTablesAndViews.add("syscomments");
         systemTablesAndViews.add("sysdepends");

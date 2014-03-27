@@ -2,7 +2,7 @@ package liquibase.sdk.verifytest
 
 import spock.lang.Specification
 
-class VerifiedTestFactorySpec extends Specification {
+class VerifiedTestFactoryTest extends Specification {
 
     def "getFileName"() {
         when:

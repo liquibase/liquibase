@@ -2,7 +2,7 @@ package liquibase.sdk.verifytest
 
 import spock.lang.Specification
 
-class TestPermutationSpec extends Specification {
+class TestPermutationTest extends Specification {
 
     def "getKey with no definition is empty string"() {
         given:

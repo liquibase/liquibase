@@ -34,6 +34,39 @@ public class AddDefaultValueChange extends AbstractChange {
     private DatabaseFunction defaultValueComputed;
     private SequenceNextValueFunction defaultValueSequenceNext;
 
+    @Override
+    public ValidationErrors validate(Database database) {
+        ValidationErrors validate = new ValidationErrors();
+
+        int nonNullValues = 0;
+        if (defaultValue != null) {
+            nonNullValues++;
+        }
+        if (defaultValueNumeric != null) {
+            nonNullValues++;
+        }
+        if (defaultValueBoolean != null) {
+            nonNullValues++;
+        }
+        if (defaultValueDate != null) {
+            nonNullValues++;
+        }
+        if (defaultValueComputed != null) {
+            nonNullValues++;
+        }
+        if (defaultValueSequenceNext != null) {
+            nonNullValues++;
+        }
+
+        if (nonNullValues > 1) {
+            validate.addError("Only one defaultValue* value can be specified");
+        } else {
+            validate.addAll(super.validate(database));
+        }
+
+        return validate;
+    }
+
     @DatabaseChangeProperty(mustEqualExisting ="column.relation.catalog", since = "3.0")
     public String getCatalogName() {
         return catalogName;
@@ -89,7 +122,7 @@ public class AddDefaultValueChange extends AbstractChange {
     }
 
 
-    @DatabaseChangeProperty(requiredForDatabase = "none")
+    @DatabaseChangeProperty(requiredForDatabase = "none", exampleValue = "439.2")
     public String getDefaultValueNumeric() {
         return defaultValueNumeric;
     }
@@ -98,7 +131,7 @@ public class AddDefaultValueChange extends AbstractChange {
         this.defaultValueNumeric = defaultValueNumeric;
     }
 
-    @DatabaseChangeProperty(requiredForDatabase = "none")
+    @DatabaseChangeProperty(requiredForDatabase = "none", exampleValue = "2008-02-12T12:34:03")
     public String getDefaultValueDate() {
         return defaultValueDate;
     }

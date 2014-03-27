@@ -18,7 +18,7 @@ import org.junit.Rule
 import org.junit.rules.TestName
 import spock.lang.*
 
-class StandardChangeSpec extends Specification {
+class StandardChangeTest extends Specification {
 
     @Shared changeSupplier = new ChangeSupplierFactory()
     @Shared databaseSupplier = new DatabaseSupplier()
@@ -44,11 +44,11 @@ class StandardChangeSpec extends Specification {
         def test = new VerifiedTest(this.getClass().getName(), "valid properties are valid sql")
 
         for (Change change in changeSupplier.getSupplier(changeClass).getAllParameterPermutations(database)) {
-            def changeSet = new ChangeSet("1", "StandardChangeSpec-test", false, false, "com/example/dbchangelog.xml", null, null, null)
+            def changeSet = new ChangeSet("1", "StandardChangeTest-test", false, false, "com/example/dbchangelog.xml", null, null, null)
             change.setChangeSet(changeSet)
             def permutation = new TestPermutation(test)
             permutation.describe("Database", database.shortName);
-            permutation.describe("Change Class", change.class);
+            permutation.describeAsGroup("Change", ChangeFactory.instance.getChangeMetaData(change).getName())
             permutation.describeAsTable("Change Parameters", ChangeFactory.instance.getParameters(change))
 
 
