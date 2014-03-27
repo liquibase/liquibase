@@ -8,13 +8,9 @@ import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.servicelocator.ServiceLocator;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.core.Relation;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
 
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.lang.reflect.TypeVariable;
 import java.util.*;
 
 public class SnapshotGeneratorFactory {
@@ -116,7 +112,7 @@ public class SnapshotGeneratorFactory {
         }
         Schema[] schemas = new Schema[examples.length];
         for (int i = 0; i< schemas.length; i++) {
-            examples[i] = database.correctSchema(examples[i]);
+            examples[i] = examples[i].customize(database);
             schemas[i] = new Schema(examples[i].getCatalogName(), examples[i].getSchemaName());
         }
         return createSnapshot(schemas, database, snapshotControl);

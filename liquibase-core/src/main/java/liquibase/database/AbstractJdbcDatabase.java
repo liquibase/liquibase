@@ -248,20 +248,23 @@ public abstract class AbstractJdbcDatabase implements Database {
         return connection.getCatalog();
     }
 
+    /**
+     * @deprecated use {@link liquibase.CatalogAndSchema#standardize(Database)}
+     */
     public CatalogAndSchema correctSchema(final String catalog, final String schema) {
-        return correctSchema(new CatalogAndSchema(catalog, schema));
+        return new CatalogAndSchema(catalog, schema).standardize(this);
     }
 
     @Override
     /**
-     * @deprecated Use {@link liquibase.CatalogAndSchema#correct(Database)})
+     * @deprecated Use {@link liquibase.CatalogAndSchema#standardize(Database)}) or {@link liquibase.CatalogAndSchema#customize(Database)}
      */
     public CatalogAndSchema correctSchema(final CatalogAndSchema schema) {
         if (schema == null) {
             return new CatalogAndSchema(getDefaultCatalogName(), getDefaultSchemaName());
         }
 
-        return schema.correct(this);
+        return schema.standardize(this);
     }
 
     @Override
@@ -780,7 +783,7 @@ public abstract class AbstractJdbcDatabase implements Database {
     }
 
     public boolean isSystemView(CatalogAndSchema schema, final String viewName) {
-        schema = correctSchema(schema);
+        schema = schema.customize(this);
         if ("information_schema".equalsIgnoreCase(schema.getSchemaName())) {
             return true;
         } else if (getSystemViews().contains(viewName)) {
@@ -835,7 +838,7 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     @Override
     public String getViewDefinition(CatalogAndSchema schema, final String viewName) throws DatabaseException {
-        schema = correctSchema(schema);
+        schema = schema.customize(this);
         String definition = (String) ExecutorService.getInstance().getExecutor(this).queryForObject(new GetViewDefinitionStatement(schema.getCatalogName(), schema.getSchemaName(), viewName), String.class);
         if (definition == null) {
             return null;
@@ -1275,7 +1278,7 @@ public abstract class AbstractJdbcDatabase implements Database {
     }
 
     public CatalogAndSchema getSchemaFromJdbcInfo(final String rawCatalogName, final String rawSchemaName) {
-        return this.correctSchema(new CatalogAndSchema(rawCatalogName, rawSchemaName));
+        return new CatalogAndSchema(rawCatalogName, rawSchemaName).customize(this);
     }
 
     public String getJdbcCatalogName(final CatalogAndSchema schema) {

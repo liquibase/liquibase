@@ -4,7 +4,6 @@ import liquibase.CatalogAndSchema;
 import liquibase.database.Database;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.core.MySQLDatabase;
-import liquibase.structure.core.Schema;
 import liquibase.structure.core.View;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
@@ -23,7 +22,7 @@ public class GetViewDefinitionGenerator extends AbstractSqlGenerator<GetViewDefi
 
     @Override
     public Sql[] generateSql(GetViewDefinitionStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-        CatalogAndSchema schema = database.correctSchema(new CatalogAndSchema(statement.getCatalogName(), statement.getSchemaName()));
+        CatalogAndSchema schema = new CatalogAndSchema(statement.getCatalogName(), statement.getSchemaName()).customize(database);
 
         String sql;
         if (database instanceof MSSQLDatabase)

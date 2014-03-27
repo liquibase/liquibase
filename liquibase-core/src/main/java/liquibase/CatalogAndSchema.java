@@ -1,6 +1,8 @@
 package liquibase;
 
 import liquibase.database.Database;
+import liquibase.structure.core.Catalog;
+import liquibase.structure.core.Schema;
 import liquibase.util.StringUtils;
 
 /**
@@ -32,8 +34,8 @@ public class CatalogAndSchema {
             return true;
         }
 
-        catalogAndSchema = catalogAndSchema.correct(accordingTo);
-        CatalogAndSchema thisCatalogAndSchema = this.correct(accordingTo);
+        catalogAndSchema = catalogAndSchema.customize(accordingTo);
+        CatalogAndSchema thisCatalogAndSchema = this.customize(accordingTo);
 
         boolean catalogMatches;
         if (catalogAndSchema.getCatalogName() == null) {
@@ -63,8 +65,11 @@ public class CatalogAndSchema {
      * If the database does not support schemas, the returned object will have a null schema.
      * If the database does not support catalogs, the returned object will have a null catalog.
      * If either the schema or catalog matches the database default catalog or schema, they will be nulled out.
-     */
-    public CatalogAndSchema correct(Database accordingTo) {
+     * Catalog and/or schema names will be upper case.
+     *
+     * @see {@link CatalogAndSchema#customize(liquibase.database.Database)}
+     * */
+    public CatalogAndSchema standardize(Database accordingTo) {
         String catalogName = StringUtils.trimToNull(getCatalogName());
         String schemaName = StringUtils.trimToNull(getSchemaName());
 
@@ -84,8 +89,47 @@ public class CatalogAndSchema {
             schemaName = null;
         }
 
+        if (catalogName != null) {
+            catalogName = catalogName.toUpperCase();
+        }
+        if (schemaName != null) {
+            schemaName = schemaName.toUpperCase();
+        }
+
         return new CatalogAndSchema(catalogName, schemaName);
 
+    }
+
+    /**
+     * Returns a new CatalogAndSchema object with null/default catalog and schema names set to the
+     * correct default catalog and schema. If the database does not support catalogs or schemas they will
+     * retain a null value.
+     * Catalog and schema capitalization will match what the database expects.
+     *
+     * @see {@link CatalogAndSchema#standardize(liquibase.database.Database)}
+     */
+    public CatalogAndSchema customize(Database accordingTo) {
+        CatalogAndSchema standard = standardize(accordingTo);
+
+        String catalogName = standard.getCatalogName();
+        String schemaName = standard.getSchemaName();
+
+        if (catalogName == null) {
+            catalogName = accordingTo.getDefaultCatalogName();
+        }
+
+        if (schemaName == null) {
+            schemaName = accordingTo.getDefaultSchemaName();
+        }
+
+        if (catalogName != null) {
+            catalogName = accordingTo.correctObjectName(catalogName, Catalog.class);
+        }
+        if (schemaName != null) {
+            schemaName = accordingTo.correctObjectName(schemaName, Schema.class);
+        }
+
+        return new CatalogAndSchema(catalogName, schemaName);
     }
 
     /**

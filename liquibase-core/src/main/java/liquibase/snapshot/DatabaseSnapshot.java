@@ -120,7 +120,7 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable{
         }
 
         if (example instanceof Schema && example.getName() == null && (((Schema) example).getCatalog() == null || ((Schema) example).getCatalogName() == null)) {
-            CatalogAndSchema catalogAndSchema = database.correctSchema(((Schema) example).toCatalogAndSchema());
+            CatalogAndSchema catalogAndSchema = ((Schema) example).toCatalogAndSchema().customize(database);
             example = (T) new Schema(catalogAndSchema.getCatalogName(), catalogAndSchema.getSchemaName());
         }
 

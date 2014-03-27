@@ -58,8 +58,8 @@ class CatalogAndSchemaTest extends Specification {
         new CatalogAndSchema(null, "schema1")   | new CatalogAndSchema(null, null)        | "cat1" | "schema1" | true  | true
     }
 
-    @Unroll("correct schema #schema.catalogName/#schema.schemaName default #defaultCatalogName/#defaultSchemaName")
-    def correct() {
+    @Unroll("standardize schema #schema.catalogName/#schema.schemaName default #defaultCatalogName/#defaultSchemaName")
+    def standardize() {
         given:
         if (defaultCatalogName != null) {
             databaseThatSupportsSchemas.defaultCatalogName = defaultCatalogName
@@ -70,9 +70,9 @@ class CatalogAndSchemaTest extends Specification {
         }
 
         when:
-        def correctedSupportsSchemas = schema.correct(databaseThatSupportsSchemas)
-        def correctedNotSupportsSchemas = schema.correct(databaseThatDoesNotSupportSchemas)
-        def correctedNotSupportsCatalogs = schema.correct(databaseThatDoesNotSupportCatalogs)
+        def correctedSupportsSchemas = schema.standardize(databaseThatSupportsSchemas)
+        def correctedNotSupportsSchemas = schema.standardize(databaseThatDoesNotSupportSchemas)
+        def correctedNotSupportsCatalogs = schema.standardize(databaseThatDoesNotSupportCatalogs)
 
         then:
         "${correctedSupportsSchemas.catalogName}.${correctedSupportsSchemas.schemaName}" == expectIfSupportsSchemas
@@ -85,13 +85,50 @@ class CatalogAndSchemaTest extends Specification {
         new CatalogAndSchema(null, null)        | "MyCat" | null       | "null.null"    | "null.null"
         new CatalogAndSchema(null, null)        | null    | "MySchema" | "null.null"    | "null.null"
         new CatalogAndSchema(null, null)        | "MyCat" | "MySchema" | "null.null"    | "null.null"
-        new CatalogAndSchema("Cat1", null)      | null    | null       | "Cat1.null"    | "Cat1.null"
+        new CatalogAndSchema("Cat1", null)      | null    | null       | "CAT1.null"    | "CAT1.null"
         new CatalogAndSchema("Cat1", null)      | "Cat1"  | null       | "null.null"    | "null.null"
-        new CatalogAndSchema("Cat1", "Schema1") | null    | null       | "Cat1.Schema1" | "Cat1.null"
-        new CatalogAndSchema("Cat1", "Schema2") | null    | null       | "Cat1.Schema2" | "Cat1.null"
-        new CatalogAndSchema("Cat1", "Schema1") | null    | "Schema1"  | "Cat1.null"    | "Cat1.null"
+        new CatalogAndSchema("Cat1", "Schema1") | null    | null       | "CAT1.SCHEMA1" | "CAT1.null"
+        new CatalogAndSchema("Cat1", "Schema2") | null    | null       | "CAT1.SCHEMA2" | "CAT1.null"
+        new CatalogAndSchema("Cat1", "Schema1") | null    | "Schema1"  | "CAT1.null"    | "CAT1.null"
         new CatalogAndSchema("Cat1", "Schema1") | "Cat1"  | "Schema1"  | "null.null"    | "null.null"
         new CatalogAndSchema("Cat1", "Schema1") | "CaT1"  | "SCHeMA1"  | "null.null"    | "null.null"
+
+    }
+
+    @Unroll("customize schema #schema.catalogName/#schema.schemaName default #defaultCatalogName/#defaultSchemaName")
+    def customize() {
+        given:
+        if (defaultCatalogName != null) {
+            databaseThatSupportsSchemas.defaultCatalogName = defaultCatalogName
+            databaseThatDoesNotSupportSchemas.defaultCatalogName = defaultCatalogName
+        }
+        if (defaultSchemaName != null) {
+            databaseThatSupportsSchemas.defaultSchemaName = defaultSchemaName
+        }
+
+        when:
+        def correctedSupportsSchemas = schema.customize(databaseThatSupportsSchemas)
+        def correctedNotSupportsSchemas = schema.customize(databaseThatDoesNotSupportSchemas)
+        def correctedNotSupportsCatalogs = schema.customize(databaseThatDoesNotSupportCatalogs)
+
+        then:
+        "${correctedSupportsSchemas.catalogName}.${correctedSupportsSchemas.schemaName}" == expectIfSupportsSchemas
+        "${correctedNotSupportsSchemas.catalogName}.${correctedNotSupportsSchemas.schemaName}" == expectIfNotSupportsSchemas
+        "${correctedNotSupportsCatalogs.catalogName}.${correctedNotSupportsCatalogs.schemaName}" == "null.null"
+
+        where:
+        schema | defaultCatalogName | defaultSchemaName | expectIfSupportsSchemas | expectIfNotSupportsSchemas
+        new CatalogAndSchema(null, null)        | null    | null       | "null.null"    | "null.null"
+        new CatalogAndSchema(null, null)        | "MyCat" | null       | "mycaT.null"    | "mycaT.null"
+        new CatalogAndSchema(null, null)        | null    | "MySchema" | "null.myschemA"    | "null.null"
+        new CatalogAndSchema(null, null)        | "MyCat" | "MySchema" | "mycaT.myschemA"    | "mycaT.null"
+        new CatalogAndSchema("Cat1", null)      | null    | null       | "cat1.null"    | "cat1.null"
+        new CatalogAndSchema("Cat1", null)      | "Cat1"  | null       | "cat1.null"    | "cat1.null"
+        new CatalogAndSchema("Cat1", "Schema1") | null    | null       | "cat1.schema1" | "cat1.null"
+        new CatalogAndSchema("Cat1", "Schema2") | null    | null       | "cat1.schema2" | "cat1.null"
+        new CatalogAndSchema("Cat1", "Schema1") | null    | "Schema1"  | "cat1.schema1"    | "cat1.null"
+        new CatalogAndSchema("Cat1", "Schema1") | "Cat1"  | "Schema1"  | "cat1.schema1"    | "cat1.null"
+        new CatalogAndSchema("Cat1", "Schema1") | "CaT1"  | "SCHeMA1"  | "cat1.schema1"    | "cat1.null"
 
     }
 

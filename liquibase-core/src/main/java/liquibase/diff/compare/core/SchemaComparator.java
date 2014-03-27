@@ -31,15 +31,18 @@ public class SchemaComparator implements DatabaseObjectComparator {
             return false;
         }
 
-        CatalogAndSchema thisSchema = accordingTo.correctSchema(((Schema) databaseObject1).toCatalogAndSchema());
-        CatalogAndSchema otherSchema = accordingTo.correctSchema(((Schema) databaseObject2).toCatalogAndSchema());
+        CatalogAndSchema thisSchema = ((Schema) databaseObject1).toCatalogAndSchema().standardize(accordingTo);
+        CatalogAndSchema otherSchema = ((Schema) databaseObject2).toCatalogAndSchema().standardize(accordingTo);
 
         if (accordingTo.supportsCatalogs()) {
             if (thisSchema.getCatalogName() == null) {
-                return otherSchema.getCatalogName() == null || accordingTo.getDefaultCatalogName() == null || accordingTo.getDefaultCatalogName().equalsIgnoreCase(otherSchema.getCatalogName());
+                if (!(otherSchema.getCatalogName() == null || accordingTo.getDefaultCatalogName() == null || accordingTo.getDefaultCatalogName().equalsIgnoreCase(otherSchema.getCatalogName()))) {
+                    return false;
             }
+            } else {
             if (!thisSchema.getCatalogName().equalsIgnoreCase(otherSchema.getCatalogName())) {
                 return false;
+                }
             }
         }
         if (accordingTo.supportsCatalogs() && accordingTo.supportsSchemas()) {
