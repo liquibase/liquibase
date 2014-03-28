@@ -123,7 +123,7 @@ public class VerifiedTestWriter {
                 continue;
             }
 
-            out.append("## Permutation Group for ").append(permutations.get(0).getRowDescriptionParameter()).append(": ").append(MD5Util.computeMD5(tableKey)).append(" ##\n\n");
+            out.append("## Permutation Group for ").append(permutations.get(0).getRowDescriptionParameter()).append(": ").append(MD5Util.computeMD5(tableKey).substring(0, 16)).append(" ##\n\n");
             for (Map.Entry<String, TestPermutation.Value> descriptionEntry : permutations.get(0).getDescription().entrySet()) {
                 appendMapEntry(descriptionEntry, out);
             }

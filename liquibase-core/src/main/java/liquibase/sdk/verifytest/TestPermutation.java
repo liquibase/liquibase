@@ -161,7 +161,7 @@ public class TestPermutation {
         }
         tableKey = StringUtils.join(description, ",", formatter);
         fullKey = StringUtils.join(fullDescription, ",", formatter);
-        key = MD5Util.computeMD5(fullKey);
+        key = MD5Util.computeMD5(fullKey).substring(0, 16);
     }
 
     public void note(String key, Object value) {
