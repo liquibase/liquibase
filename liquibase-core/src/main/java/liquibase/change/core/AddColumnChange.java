@@ -12,6 +12,7 @@ import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.*;
 import liquibase.statement.core.AddColumnStatement;
+import liquibase.statement.core.AlterTableStatement;
 import liquibase.statement.core.ReorganizeTableStatement;
 import liquibase.statement.core.SetColumnRemarksStatement;
 import liquibase.statement.core.UpdateStatement;
@@ -86,6 +87,7 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
     public SqlStatement[] generateStatements(Database database) {
 
         List<SqlStatement> sql = new ArrayList<SqlStatement>();
+        List<AddColumnStatement> addColumns = new ArrayList<AddColumnStatement>();
 
         if (getColumns().size() == 0) {
             return new SqlStatement[] {
@@ -135,7 +137,11 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
                 addColumnStatement.setAddAtPosition(column.getPosition());
             }
 
-            sql.add(addColumnStatement);
+            if (database instanceof MySQLDatabase) {
+                addColumns.add(addColumnStatement);
+            } else {
+                sql.add(addColumnStatement);
+            }
 
             if (database instanceof DB2Database) {
                 sql.add(new ReorganizeTableStatement(getCatalogName(), getSchemaName(), getTableName()));
@@ -156,6 +162,12 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
                   sql.add(remarksStatement);
               }
           }
+      }
+
+      if (database instanceof MySQLDatabase) {
+          AlterTableStatement alterTable = new AlterTableStatement(catalogName, schemaName, tableName);
+          alterTable.setColumns(addColumns);
+          sql.add(0, alterTable);
       }
 
       return sql.toArray(new SqlStatement[sql.size()]);

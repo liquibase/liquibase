@@ -1,6 +1,7 @@
 package liquibase.sql;
 
 import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.Column;
 import liquibase.util.StringUtils;
 
 import java.util.*;
@@ -13,14 +14,22 @@ public class UnparsedSql implements Sql {
 
 
     public UnparsedSql(String sql, DatabaseObject... affectedDatabaseObjects) {
+        this(sql, Arrays.asList(affectedDatabaseObjects));
+    }
+
+    public UnparsedSql(String sql, Collection<DatabaseObject> affectedDatabaseObjects) {
         this(sql, ";", affectedDatabaseObjects);
     }
 
     public UnparsedSql(String sql, String endDelimiter, DatabaseObject... affectedDatabaseObjects) {
+        this(sql, endDelimiter, Arrays.asList(affectedDatabaseObjects));
+    }
+
+    public UnparsedSql(String sql, String endDelimiter, Collection<DatabaseObject> affectedDatabaseObjects) {
         this.sql = StringUtils.trimToEmpty(sql.trim());
         this.endDelimiter = endDelimiter;
 
-        this.affectedDatabaseObjects.addAll(Arrays.asList(affectedDatabaseObjects));
+        this.affectedDatabaseObjects.addAll(affectedDatabaseObjects);
         List<DatabaseObject> moreAffectedDatabaseObjects = new ArrayList<DatabaseObject>();
 
         boolean foundMore = true;
