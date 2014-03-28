@@ -1,17 +1,28 @@
 package liquibase.change.core;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
 import java.math.BigInteger;
 
-import liquibase.change.*;
+import liquibase.change.AddColumnConfig;
+import liquibase.change.Change;
+import liquibase.change.ChangeFactory;
+import liquibase.change.ConstraintsConfig;
+import liquibase.change.StandardChangeTest;
 import liquibase.database.Database;
 import liquibase.database.core.DB2Database;
+import liquibase.database.core.MySQLDatabase;
 import liquibase.statement.ColumnConstraint;
 import liquibase.statement.ForeignKeyConstraint;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.AddColumnStatement;
+import liquibase.statement.core.AlterTableStatement;
 import liquibase.statement.core.ReorganizeTableStatement;
 import liquibase.statement.core.UpdateStatement;
-import static org.junit.Assert.*;
+
 import org.junit.Test;
 
 /**
@@ -107,32 +118,55 @@ public class AddColumnChangeTest extends StandardChangeTest {
                     assertTrue(sqlStatements[1] instanceof ReorganizeTableStatement);
                     assertTrue(sqlStatements[2] instanceof AddColumnStatement);
                     assertTrue(sqlStatements[3] instanceof ReorganizeTableStatement);
+                } else if (database instanceof MySQLDatabase) {
+                    assertEquals(1, sqlStatements.length);
+                    assertTrue(sqlStatements[0] instanceof AlterTableStatement);
                 } else {
                     assertEquals(2, sqlStatements.length);
                     assertTrue(sqlStatements[0] instanceof AddColumnStatement);
                     assertTrue(sqlStatements[1] instanceof AddColumnStatement);
                 }
 
-                AddColumnStatement firstAddColumnStatement = (AddColumnStatement) sqlStatements[0];
-                AddColumnStatement secondAddColumnStatement = null;
-                if (database instanceof DB2Database) {
-                    secondAddColumnStatement = (AddColumnStatement) sqlStatements[2];
+                if (database instanceof MySQLDatabase) {
+                    AlterTableStatement alterTableStatement = (AlterTableStatement) sqlStatements[0];
+                    assertEquals("SCHEMA", alterTableStatement.getSchemaName());
+                    assertEquals("TAB", alterTableStatement.getTableName());
+
+                    AddColumnStatement firstAddColumnStatement = alterTableStatement.getColumns().get(0);
+                    assertEquals("NEWCOL", firstAddColumnStatement.getColumnName());
+                    assertEquals("TYP", firstAddColumnStatement.getColumnType());
+                    assertFalse(firstAddColumnStatement.isPrimaryKey());
+                    assertFalse(firstAddColumnStatement.isNullable());
+
+                    AddColumnStatement secondAddColumnStatement = alterTableStatement.getColumns().get(1);
+                    assertEquals("SCHEMA", secondAddColumnStatement.getSchemaName());
+                    assertEquals("TAB", secondAddColumnStatement.getTableName());
+                    assertEquals("NEWCOL2", secondAddColumnStatement.getColumnName());
+                    assertEquals("TYP2", secondAddColumnStatement.getColumnType());
+                    assertTrue(secondAddColumnStatement.isNullable());
                 } else {
-                    secondAddColumnStatement = (AddColumnStatement) sqlStatements[1];
+                    AddColumnStatement firstAddColumnStatement = (AddColumnStatement) sqlStatements[0];
+
+                    assertEquals("SCHEMA", firstAddColumnStatement.getSchemaName());
+                    assertEquals("TAB", firstAddColumnStatement.getTableName());
+                    assertEquals("NEWCOL", firstAddColumnStatement.getColumnName());
+                    assertEquals("TYP", firstAddColumnStatement.getColumnType());
+                    assertFalse(firstAddColumnStatement.isPrimaryKey());
+                    assertFalse(firstAddColumnStatement.isNullable());
+
+                    AddColumnStatement secondAddColumnStatement = null;
+                    if (database instanceof DB2Database) {
+                        secondAddColumnStatement = (AddColumnStatement) sqlStatements[2];
+                    } else {
+                        secondAddColumnStatement = (AddColumnStatement) sqlStatements[1];
+                    }
+
+                    assertEquals("SCHEMA", secondAddColumnStatement.getSchemaName());
+                    assertEquals("TAB", secondAddColumnStatement.getTableName());
+                    assertEquals("NEWCOL2", secondAddColumnStatement.getColumnName());
+                    assertEquals("TYP2", secondAddColumnStatement.getColumnType());
+                    assertTrue(secondAddColumnStatement.isNullable());
                 }
-
-                assertEquals("SCHEMA", firstAddColumnStatement.getSchemaName());
-                assertEquals("TAB", firstAddColumnStatement.getTableName());
-                assertEquals("NEWCOL", firstAddColumnStatement.getColumnName());
-                assertEquals("TYP", firstAddColumnStatement.getColumnType());
-                assertFalse(firstAddColumnStatement.isPrimaryKey());
-                assertFalse(firstAddColumnStatement.isNullable());
-
-                assertEquals("SCHEMA", secondAddColumnStatement.getSchemaName());
-                assertEquals("TAB", secondAddColumnStatement.getTableName());
-                assertEquals("NEWCOL2", secondAddColumnStatement.getColumnName());
-                assertEquals("TYP2", secondAddColumnStatement.getColumnType());
-                assertTrue(secondAddColumnStatement.isNullable());
             }
         });
     }
@@ -157,21 +191,29 @@ public class AddColumnChangeTest extends StandardChangeTest {
             @Override
             public void validate(SqlStatement[] sqlStatements, Database database) {
 
+                AddColumnStatement addColumnStatement;
+
                 if (database instanceof DB2Database) {
                     assertEquals(2, sqlStatements.length);
                     assertTrue(sqlStatements[0] instanceof AddColumnStatement);
                     assertTrue(sqlStatements[1] instanceof ReorganizeTableStatement);
+                    addColumnStatement = (AddColumnStatement) sqlStatements[0];
+                } else if (database instanceof MySQLDatabase) {
+                    assertEquals(1, sqlStatements.length);
+                    assertTrue(sqlStatements[0] instanceof AlterTableStatement);
+                    addColumnStatement = ((AlterTableStatement) sqlStatements[0]).getColumns().get(0);
                 } else {
                     assertEquals(1, sqlStatements.length);
                     assertTrue(sqlStatements[0] instanceof AddColumnStatement);
+                    addColumnStatement = (AddColumnStatement) sqlStatements[0];
                 }
 
-                assertEquals("SCHEMA", ((AddColumnStatement) sqlStatements[0]).getSchemaName());
-                assertEquals("TAB", ((AddColumnStatement) sqlStatements[0]).getTableName());
-                assertEquals("NEWCOL", ((AddColumnStatement) sqlStatements[0]).getColumnName());
-                assertEquals("TYP", ((AddColumnStatement) sqlStatements[0]).getColumnType());
-                assertFalse(((AddColumnStatement) sqlStatements[0]).isPrimaryKey());
-                assertTrue(((AddColumnStatement) sqlStatements[0]).isNullable());
+                assertEquals("SCHEMA", addColumnStatement.getSchemaName());
+                assertEquals("TAB", addColumnStatement.getTableName());
+                assertEquals("NEWCOL", addColumnStatement.getColumnName());
+                assertEquals("TYP", addColumnStatement.getColumnType());
+                assertFalse(addColumnStatement.isPrimaryKey());
+                assertTrue(addColumnStatement.isNullable());
             }
         });
     }
@@ -195,21 +237,29 @@ public class AddColumnChangeTest extends StandardChangeTest {
         testChangeOnAll(refactoring, new GenerateAllValidator() {
             @Override
             public void validate(SqlStatement[] sqlStatements, Database database) {
+                AddColumnStatement addColumnStatement;
+
                 if (database instanceof DB2Database) {
                     assertEquals(2, sqlStatements.length);
                     assertTrue(sqlStatements[0] instanceof AddColumnStatement);
                     assertTrue(sqlStatements[1] instanceof ReorganizeTableStatement);
+                    addColumnStatement = (AddColumnStatement) sqlStatements[0];
+                } else if (database instanceof MySQLDatabase) {
+                    assertEquals(1, sqlStatements.length);
+                    assertTrue(sqlStatements[0] instanceof AlterTableStatement);
+                    addColumnStatement = ((AlterTableStatement) sqlStatements[0]).getColumns().get(0);
                 } else {
                     assertEquals(1, sqlStatements.length);
                     assertTrue(sqlStatements[0] instanceof AddColumnStatement);
+                    addColumnStatement = (AddColumnStatement) sqlStatements[0];
                 }
 
-                assertEquals("SCHEMA", ((AddColumnStatement) sqlStatements[0]).getSchemaName());
-                assertEquals("TAB", ((AddColumnStatement) sqlStatements[0]).getTableName());
-                assertEquals("NEWCOL", ((AddColumnStatement) sqlStatements[0]).getColumnName());
-                assertEquals("TYP", ((AddColumnStatement) sqlStatements[0]).getColumnType());
-                assertFalse(((AddColumnStatement) sqlStatements[0]).isPrimaryKey());
-                assertFalse(((AddColumnStatement) sqlStatements[0]).isNullable());
+                assertEquals("SCHEMA", addColumnStatement.getSchemaName());
+                assertEquals("TAB", addColumnStatement.getTableName());
+                assertEquals("NEWCOL", addColumnStatement.getColumnName());
+                assertEquals("TYP", addColumnStatement.getColumnType());
+                assertFalse(addColumnStatement.isPrimaryKey());
+                assertFalse(addColumnStatement.isNullable());
             }
         });
     }
@@ -234,16 +284,24 @@ public class AddColumnChangeTest extends StandardChangeTest {
         testChangeOnAll(refactoring, new GenerateAllValidator() {
             @Override
             public void validate(SqlStatement[] sqlStatements, Database database) {
+                AddColumnStatement addColumnStatement;
+
                 if (database instanceof DB2Database) {
                     assertEquals(2, sqlStatements.length);
                     assertTrue(sqlStatements[0] instanceof AddColumnStatement);
                     assertTrue(sqlStatements[1] instanceof ReorganizeTableStatement);
+                    addColumnStatement = (AddColumnStatement) sqlStatements[0];
+                } else if (database instanceof MySQLDatabase) {
+                    assertEquals(1, sqlStatements.length);
+                    assertTrue(sqlStatements[0] instanceof AlterTableStatement);
+                    addColumnStatement = ((AlterTableStatement) sqlStatements[0]).getColumns().get(0);
                 } else {
                     assertEquals(1, sqlStatements.length);
                     assertTrue(sqlStatements[0] instanceof AddColumnStatement);
+                    addColumnStatement = (AddColumnStatement) sqlStatements[0];
                 }
 
-                assertTrue(((AddColumnStatement) sqlStatements[0]).isPrimaryKey());
+                assertTrue(addColumnStatement.isPrimaryKey());
             }
         });
     }
@@ -270,18 +328,26 @@ public class AddColumnChangeTest extends StandardChangeTest {
         testChangeOnAll(refactoring, new GenerateAllValidator() {
             @Override
             public void validate(SqlStatement[] sqlStatements, Database database) {
+                AddColumnStatement addColumnStatement;
+
                 if (database instanceof DB2Database) {
                     assertEquals(2, sqlStatements.length);
                     assertTrue(sqlStatements[0] instanceof AddColumnStatement);
                     assertTrue(sqlStatements[1] instanceof ReorganizeTableStatement);
+                    addColumnStatement = (AddColumnStatement) sqlStatements[0];
+                } else if (database instanceof MySQLDatabase) {
+                    assertEquals(1, sqlStatements.length);
+                    assertTrue(sqlStatements[0] instanceof AlterTableStatement);
+                    addColumnStatement = ((AlterTableStatement) sqlStatements[0]).getColumns().get(0);
                 } else {
                     assertEquals(1, sqlStatements.length);
                     assertTrue(sqlStatements[0] instanceof AddColumnStatement);
+                    addColumnStatement = (AddColumnStatement) sqlStatements[0];
                 }
 
-                assertTrue(((AddColumnStatement) sqlStatements[0]).isPrimaryKey());
+                assertTrue(addColumnStatement.isPrimaryKey());
                 boolean foundFkInfo = false;
-                for (ColumnConstraint constraint : ((AddColumnStatement) sqlStatements[0]).getConstraints()) {
+                for (ColumnConstraint constraint : addColumnStatement.getConstraints()) {
                     if (constraint instanceof ForeignKeyConstraint) {
                         foundFkInfo = true;
                     }
@@ -313,19 +379,28 @@ public class AddColumnChangeTest extends StandardChangeTest {
         testChangeOnAll(refactoring, new GenerateAllValidator() {
             @Override
             public void validate(SqlStatement[] sqlStatements, Database database) {
+                AddColumnStatement addColumnStatement;
+
                 if (database instanceof DB2Database) {
                     assertEquals(3, sqlStatements.length);
                     assertTrue(sqlStatements[0] instanceof AddColumnStatement);
                     assertTrue(sqlStatements[1] instanceof ReorganizeTableStatement);
                     assertTrue(sqlStatements[2] instanceof UpdateStatement);
+                    addColumnStatement = (AddColumnStatement) sqlStatements[0];
+                } else if (database instanceof MySQLDatabase) {
+                    assertEquals(2, sqlStatements.length);
+                    assertTrue(sqlStatements[0] instanceof AlterTableStatement);
+                    assertTrue(sqlStatements[1] instanceof UpdateStatement);
+                    addColumnStatement = ((AlterTableStatement) sqlStatements[0]).getColumns().get(0);
                 } else {
                     assertEquals(2, sqlStatements.length);
                     assertTrue(sqlStatements[0] instanceof AddColumnStatement);
                     assertTrue(sqlStatements[1] instanceof UpdateStatement);
+                    addColumnStatement = (AddColumnStatement) sqlStatements[0];
                 }
 
-                assertTrue(((AddColumnStatement) sqlStatements[0]).isPrimaryKey());
-                assertTrue(((AddColumnStatement) sqlStatements[0]).isAutoIncrement());
+                assertTrue(addColumnStatement.isPrimaryKey());
+                assertTrue(addColumnStatement.isAutoIncrement());
 
                 assertEquals("TAB", ((UpdateStatement) sqlStatements[sqlStatements.length - 1]).getTableName());
                 assertEquals("SOME VALUE", ((UpdateStatement) sqlStatements[sqlStatements.length - 1]).getNewColumnValues().get("NEWCOL"));
@@ -356,20 +431,28 @@ public class AddColumnChangeTest extends StandardChangeTest {
         testChangeOnAll(refactoring, new GenerateAllValidator() {
             @Override
             public void validate(SqlStatement[] sqlStatements, Database database) {
+                AddColumnStatement addColumnStatement;
+
                 if (database instanceof DB2Database) {
                     assertEquals(2, sqlStatements.length);
                     assertTrue(sqlStatements[0] instanceof AddColumnStatement);
                     assertTrue(sqlStatements[1] instanceof ReorganizeTableStatement);
+                    addColumnStatement = (AddColumnStatement) sqlStatements[0];
+                } else if (database instanceof MySQLDatabase) {
+                    assertEquals(1, sqlStatements.length);
+                    assertTrue(sqlStatements[0] instanceof AlterTableStatement);
+                    addColumnStatement = ((AlterTableStatement) sqlStatements[0]).getColumns().get(0);
                 } else {
                     assertEquals(1, sqlStatements.length);
                     assertTrue(sqlStatements[0] instanceof AddColumnStatement);
+                    addColumnStatement = (AddColumnStatement) sqlStatements[0];
                 }
 
-                assertTrue(((AddColumnStatement) sqlStatements[0]).isPrimaryKey());
-                assertTrue(((AddColumnStatement) sqlStatements[0]).isAutoIncrement());
-                assertNotNull(((AddColumnStatement) sqlStatements[0]).getAutoIncrementConstraint());
-                assertEquals(BigInteger.valueOf(2), ((AddColumnStatement) sqlStatements[0]).getAutoIncrementConstraint().getStartWith());
-                assertEquals(BigInteger.TEN, ((AddColumnStatement) sqlStatements[0]).getAutoIncrementConstraint().getIncrementBy());
+                assertTrue(addColumnStatement.isPrimaryKey());
+                assertTrue(addColumnStatement.isAutoIncrement());
+                assertNotNull(addColumnStatement.getAutoIncrementConstraint());
+                assertEquals(BigInteger.valueOf(2), addColumnStatement.getAutoIncrementConstraint().getStartWith());
+                assertEquals(BigInteger.TEN, addColumnStatement.getAutoIncrementConstraint().getIncrementBy());
             }
         });
     }
