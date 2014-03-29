@@ -26,6 +26,7 @@ import liquibase.statement.core.AddColumnStatement;
 import liquibase.statement.core.AddForeignKeyConstraintStatement;
 import liquibase.statement.core.AddUniqueConstraintStatement;
 import liquibase.statement.core.AlterTableStatement;
+import liquibase.statement.core.DropColumnStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Schema;
@@ -42,7 +43,7 @@ public class AlterTableGenerator extends AbstractSqlGenerator<AlterTableStatemen
     public ValidationErrors validate(AlterTableStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
 
-        for (AddColumnStatement addColumnStatement : statement.getColumns()) {
+        for (AddColumnStatement addColumnStatement : statement.getAddColumns()) {
             validationErrors.checkRequiredField("columnName", addColumnStatement.getColumnName());
             validationErrors.checkRequiredField("columnType", addColumnStatement.getColumnType());
             validationErrors.checkRequiredField("tableName", addColumnStatement.getTableName());
@@ -61,6 +62,13 @@ public class AlterTableGenerator extends AbstractSqlGenerator<AlterTableStatemen
                 validationErrors.addError("Cannot add column on specific position");
             }
         }
+        for (DropColumnStatement dropColumnStatement : statement.getDropColumns()) {
+            validationErrors.checkRequiredField("tableName", dropColumnStatement.getTableName());
+            validationErrors.checkRequiredField("columnName", dropColumnStatement.getColumnName());
+            if (!dropColumnStatement.getTableName().equals(statement.getTableName())) {
+                validationErrors.addError("Only one table is supported");
+            }
+        }
 
         return validationErrors;
     }
@@ -69,15 +77,37 @@ public class AlterTableGenerator extends AbstractSqlGenerator<AlterTableStatemen
     public Sql[] generateSql(AlterTableStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
 
         String alterTable = "ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " ";
-        
-        for (int i = 0; i < statement.getColumns().size(); i++) {
-            AddColumnStatement addColumnStatement = statement.getColumns().get(i);
+
+        if (!statement.getAddColumns().isEmpty()) {
+            alterTable = generateAddColumns(statement, database, alterTable);
+        }
+        if (!statement.getDropColumns().isEmpty()) {
+            alterTable = generateDropColumns(statement, database, alterTable);
+        }
+
+        UnparsedSql result = new UnparsedSql(alterTable, getAffectedColumns(statement));
+
+        List<Sql> returnSql = new ArrayList<Sql>();
+        returnSql.add(result);
+
+        for (AddColumnStatement addColumnStatement : statement.getAddColumns()) {
+            addUniqueConstrantStatements(addColumnStatement, database, returnSql);
+            addForeignKeyStatements(addColumnStatement, database, returnSql);
+        }
+
+        return returnSql.toArray(new Sql[returnSql.size()]);
+    }
+
+    private String generateAddColumns(AlterTableStatement statement, Database database, String inAlterTable) {
+        String alterTable = inAlterTable;
+        for (int i = 0; i < statement.getAddColumns().size(); i++) {
+            AddColumnStatement addColumnStatement = statement.getAddColumns().get(i);
             if (i > 0) {
                 alterTable += ", ";
             }
         
             alterTable += "ADD " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(),
-                    addColumnStatement.getColumnName()) + " " + DataTypeFactory.getInstance().fromDescription(addColumnStatement.getColumnType() + (addColumnStatement.isAutoIncrement() ? "{autoIncrement:true}" : "")).toDatabaseDataType(database);
+                    addColumnStatement.getColumnName()) + " " + DataTypeFactory.getInstance().fromDescription(addColumnStatement.getColumnType() + (addColumnStatement.isAutoIncrement() ? "{autoIncrement:true}" : ""), null).toDatabaseDataType(database);
 
             if (addColumnStatement.isAutoIncrement() && database.supportsAutoIncrement()) {
                 AutoIncrementConstraint autoIncrementConstraint = addColumnStatement.getAutoIncrementConstraint();
@@ -102,21 +132,26 @@ public class AlterTableGenerator extends AbstractSqlGenerator<AlterTableStatemen
                 alterTable += " COMMENT '" + addColumnStatement.getRemarks() + "' ";
             }
         }
+        return alterTable;
+    }
 
-        List<Sql> returnSql = new ArrayList<Sql>();
-        returnSql.add(new UnparsedSql(alterTable, getAffectedColumns(statement)));
+    private String generateDropColumns(AlterTableStatement statement, Database database, String inAlterTable) {
+        String alterTable = inAlterTable;
+        for (int i = 0; i < statement.getDropColumns().size(); i++) {
+            DropColumnStatement dropColumnStatement = statement.getDropColumns().get(i);
+            if (i > 0 || !statement.getAddColumns().isEmpty()) {
+                alterTable += ", ";
+            }
 
-        for (AddColumnStatement addColumnStatement : statement.getColumns()) {
-            addUniqueConstrantStatements(addColumnStatement, database, returnSql);
-            addForeignKeyStatements(addColumnStatement, database, returnSql);
+            alterTable += "DROP COLUMN " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(),
+                    dropColumnStatement.getColumnName());
         }
-
-        return returnSql.toArray(new Sql[returnSql.size()]);
+        return alterTable;
     }
 
     protected Collection<DatabaseObject> getAffectedColumns(AlterTableStatement statement) {
         Collection<DatabaseObject> result = new ArrayList<DatabaseObject>();
-        for (AddColumnStatement addColumnStatement : statement.getColumns()) {
+        for (AddColumnStatement addColumnStatement : statement.getAddColumns()) {
             result.add(new Column()
                 .setRelation(new Table().setName(statement.getTableName()).setSchema(new Schema(statement.getCatalogName(), statement.getSchemaName())))
                 .setName(addColumnStatement.getColumnName()));

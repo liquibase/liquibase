@@ -9,6 +9,7 @@ import liquibase.sqlgenerator.MockSqlGeneratorChain;
 import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.statement.core.AddColumnStatement;
 import liquibase.statement.core.AlterTableStatement;
+import liquibase.statement.core.DropColumnStatement;
 
 import org.junit.Test;
 
@@ -40,7 +41,7 @@ public class AlterTableGeneratorTest extends AbstractSqlGeneratorTest<AlterTable
     }
 
     @Test
-    public void testMySQLWithTwoColumns() {
+    public void testMySQLAddTwoColumns() {
         AlterTableStatement statement = new AlterTableStatement(null, SCHEMA_NAME, TABLE_NAME);
         statement.addColumn(new AddColumnStatement(null, null, TABLE_NAME, COLUMN1_NAME, COLUMN_TYPE, null));
         statement.addColumn(new AddColumnStatement(null, null, TABLE_NAME, COLUMN2_NAME, COLUMN_TYPE, null));
@@ -50,6 +51,20 @@ public class AlterTableGeneratorTest extends AbstractSqlGeneratorTest<AlterTable
 
         assertEquals(
                 "ALTER TABLE schema_name.table_name ADD column1_name COLUMN_TYPE NULL, ADD column2_name COLUMN_TYPE NULL",
+                sql[0].toSql());
+    }
+
+    @Test
+    public void testMySQLDropTwoColumns() {
+        AlterTableStatement statement = new AlterTableStatement(null, SCHEMA_NAME, TABLE_NAME);
+        statement.dropColumn(new DropColumnStatement(null, null, TABLE_NAME, COLUMN1_NAME));
+        statement.dropColumn(new DropColumnStatement(null, null, TABLE_NAME, COLUMN2_NAME));
+
+        Sql[] sql = generatorUnderTest.generateSql(statement, new MySQLDatabase(), new MockSqlGeneratorChain());
+        assertEquals(1, sql.length);
+
+        assertEquals(
+                "ALTER TABLE schema_name.table_name DROP COLUMN column1_name, DROP COLUMN column2_name",
                 sql[0].toSql());
     }
 }

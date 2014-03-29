@@ -166,7 +166,7 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
 
       if (database instanceof MySQLDatabase) {
           AlterTableStatement alterTable = new AlterTableStatement(catalogName, schemaName, tableName);
-          alterTable.setColumns(addColumns);
+          alterTable.setAddColumns(addColumns);
           sql.add(0, alterTable);
       }
 

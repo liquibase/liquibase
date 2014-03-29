@@ -11,7 +11,8 @@ public class AlterTableStatement extends AbstractSqlStatement {
     private String schemaName;
     private String tableName;
 
-    private List<AddColumnStatement> columns = new ArrayList<AddColumnStatement>();
+    private List<AddColumnStatement> addColumns = new ArrayList<AddColumnStatement>();
+    private List<DropColumnStatement> dropColumns = new ArrayList<DropColumnStatement>();
 
     public AlterTableStatement(String catalogName, String schemaName, String tableName) {
         this.catalogName = catalogName;
@@ -31,15 +32,27 @@ public class AlterTableStatement extends AbstractSqlStatement {
         return tableName;
     }
 
-    public List<AddColumnStatement> getColumns() {
-        return columns;
+    public List<AddColumnStatement> getAddColumns() {
+        return addColumns;
     }
 
-    public void setColumns(List<AddColumnStatement> columns) {
-        this.columns = columns;
+    public void setAddColumns(List<AddColumnStatement> columns) {
+        this.addColumns = columns;
     }
 
     public void addColumn(AddColumnStatement column) {
-        columns.add(column);
+        addColumns.add(column);
+    }
+
+    public List<DropColumnStatement> getDropColumns() {
+        return dropColumns;
+    }
+
+    public void setDropColumn(List<DropColumnStatement> columns) {
+        this.dropColumns = columns;
+    }
+
+    public void dropColumn(DropColumnStatement column) {
+        dropColumns.add(column);
     }
 }
