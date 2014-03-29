@@ -132,13 +132,13 @@ public class AddColumnChangeTest extends StandardChangeTest {
                     assertEquals("SCHEMA", alterTableStatement.getSchemaName());
                     assertEquals("TAB", alterTableStatement.getTableName());
 
-                    AddColumnStatement firstAddColumnStatement = alterTableStatement.getColumns().get(0);
+                    AddColumnStatement firstAddColumnStatement = alterTableStatement.getAddColumns().get(0);
                     assertEquals("NEWCOL", firstAddColumnStatement.getColumnName());
                     assertEquals("TYP", firstAddColumnStatement.getColumnType());
                     assertFalse(firstAddColumnStatement.isPrimaryKey());
                     assertFalse(firstAddColumnStatement.isNullable());
 
-                    AddColumnStatement secondAddColumnStatement = alterTableStatement.getColumns().get(1);
+                    AddColumnStatement secondAddColumnStatement = alterTableStatement.getAddColumns().get(1);
                     assertEquals("SCHEMA", secondAddColumnStatement.getSchemaName());
                     assertEquals("TAB", secondAddColumnStatement.getTableName());
                     assertEquals("NEWCOL2", secondAddColumnStatement.getColumnName());
@@ -201,7 +201,7 @@ public class AddColumnChangeTest extends StandardChangeTest {
                 } else if (database instanceof MySQLDatabase) {
                     assertEquals(1, sqlStatements.length);
                     assertTrue(sqlStatements[0] instanceof AlterTableStatement);
-                    addColumnStatement = ((AlterTableStatement) sqlStatements[0]).getColumns().get(0);
+                    addColumnStatement = ((AlterTableStatement) sqlStatements[0]).getAddColumns().get(0);
                 } else {
                     assertEquals(1, sqlStatements.length);
                     assertTrue(sqlStatements[0] instanceof AddColumnStatement);
@@ -247,7 +247,7 @@ public class AddColumnChangeTest extends StandardChangeTest {
                 } else if (database instanceof MySQLDatabase) {
                     assertEquals(1, sqlStatements.length);
                     assertTrue(sqlStatements[0] instanceof AlterTableStatement);
-                    addColumnStatement = ((AlterTableStatement) sqlStatements[0]).getColumns().get(0);
+                    addColumnStatement = ((AlterTableStatement) sqlStatements[0]).getAddColumns().get(0);
                 } else {
                     assertEquals(1, sqlStatements.length);
                     assertTrue(sqlStatements[0] instanceof AddColumnStatement);
@@ -294,7 +294,7 @@ public class AddColumnChangeTest extends StandardChangeTest {
                 } else if (database instanceof MySQLDatabase) {
                     assertEquals(1, sqlStatements.length);
                     assertTrue(sqlStatements[0] instanceof AlterTableStatement);
-                    addColumnStatement = ((AlterTableStatement) sqlStatements[0]).getColumns().get(0);
+                    addColumnStatement = ((AlterTableStatement) sqlStatements[0]).getAddColumns().get(0);
                 } else {
                     assertEquals(1, sqlStatements.length);
                     assertTrue(sqlStatements[0] instanceof AddColumnStatement);
@@ -338,7 +338,7 @@ public class AddColumnChangeTest extends StandardChangeTest {
                 } else if (database instanceof MySQLDatabase) {
                     assertEquals(1, sqlStatements.length);
                     assertTrue(sqlStatements[0] instanceof AlterTableStatement);
-                    addColumnStatement = ((AlterTableStatement) sqlStatements[0]).getColumns().get(0);
+                    addColumnStatement = ((AlterTableStatement) sqlStatements[0]).getAddColumns().get(0);
                 } else {
                     assertEquals(1, sqlStatements.length);
                     assertTrue(sqlStatements[0] instanceof AddColumnStatement);
@@ -391,7 +391,7 @@ public class AddColumnChangeTest extends StandardChangeTest {
                     assertEquals(2, sqlStatements.length);
                     assertTrue(sqlStatements[0] instanceof AlterTableStatement);
                     assertTrue(sqlStatements[1] instanceof UpdateStatement);
-                    addColumnStatement = ((AlterTableStatement) sqlStatements[0]).getColumns().get(0);
+                    addColumnStatement = ((AlterTableStatement) sqlStatements[0]).getAddColumns().get(0);
                 } else {
                     assertEquals(2, sqlStatements.length);
                     assertTrue(sqlStatements[0] instanceof AddColumnStatement);
@@ -441,7 +441,7 @@ public class AddColumnChangeTest extends StandardChangeTest {
                 } else if (database instanceof MySQLDatabase) {
                     assertEquals(1, sqlStatements.length);
                     assertTrue(sqlStatements[0] instanceof AlterTableStatement);
-                    addColumnStatement = ((AlterTableStatement) sqlStatements[0]).getColumns().get(0);
+                    addColumnStatement = ((AlterTableStatement) sqlStatements[0]).getAddColumns().get(0);
                 } else {
                     assertEquals(1, sqlStatements.length);
                     assertTrue(sqlStatements[0] instanceof AddColumnStatement);
