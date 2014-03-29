@@ -11,15 +11,16 @@ import java.util.List;
 import liquibase.change.AddColumnConfig;
 import liquibase.change.Change;
 import liquibase.change.ChangeFactory;
+import liquibase.change.ColumnConfig;
 import liquibase.change.core.AddColumnChange;
 import liquibase.change.core.CreateTableChange;
+import liquibase.change.core.DropColumnChange;
 import liquibase.change.core.RawSQLChange;
 import liquibase.change.custom.CustomChangeWrapper;
 import liquibase.change.custom.ExampleCustomSqlChange;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
-import liquibase.changelog.ChangeLogParameters;
 import liquibase.database.core.MockDatabase;
 import liquibase.exception.ChangeLogParseException;
 import liquibase.precondition.core.OrPrecondition;
@@ -436,5 +437,24 @@ public class XMLChangeLogSAXParserTest {
         assertEquals("middlename", columnConfig.getName());
 
 		assertEquals(Integer.valueOf(1), columnConfig.getPosition());
+	}
+
+    @Test
+    public void addDropMultipleColumns() throws Exception {
+        DatabaseChangeLog changeLog = new XMLChangeLogSAXParser().parse("liquibase/parser/core/xml/addDropColumnsChangeLog.xml", new ChangeLogParameters(), new JUnitResourceAccessor());
+
+        ChangeSet addColumnsChangeSet = changeLog.getChangeSets().get(1);
+        Change addColumnsChange = addColumnsChangeSet.getChanges().get(0);
+        List<AddColumnConfig> addColumns = ((AddColumnChange) addColumnsChange).getColumns();
+        assertEquals(2, addColumns.size());
+        assertEquals("firstname", addColumns.get(0).getName());
+        assertEquals("lastname", addColumns.get(1).getName());
+
+        ChangeSet dropColumnsChangeSet = changeLog.getChangeSets().get(2);
+        Change dropColumnsChange = dropColumnsChangeSet.getChanges().get(0);
+        List<ColumnConfig> dropColumns = ((DropColumnChange) dropColumnsChange).getColumns();
+        assertEquals(2, dropColumns.size());
+        assertEquals("firstname", dropColumns.get(0).getName());
+        assertEquals("lastname", dropColumns.get(1).getName());
 	}
 }
