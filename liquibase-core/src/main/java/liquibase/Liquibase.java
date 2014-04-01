@@ -173,7 +173,7 @@ public class Liquibase {
         this.update(new Contexts(contexts));
     }
     /**
-     * Executes Liquibase "update" logic which ensures that the configured {@link Database} is up to dat according to the configured changelog file.
+     * Executes Liquibase "update" logic which ensures that the configured {@link Database} is up to date according to the configured changelog file.
      * To run in "no context mode", pass a null or empty context object.
      */
     public void update(Contexts contexts) throws LiquibaseException {
