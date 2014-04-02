@@ -2,7 +2,6 @@ package liquibase.structure.core;
 
 import liquibase.structure.AbstractDatabaseObject;
 import liquibase.structure.DatabaseObject;
-import sun.security.util.BigInt;
 
 import java.math.BigInteger;
 
