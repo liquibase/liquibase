@@ -120,4 +120,14 @@ public interface Change extends LiquibaseSerializable {
      * If true, this change cannot be used in an updateSql-style commands because Liquibase cannot know the {@link SqlStatement} objects until all changeSets prior have been actually executed.
      */
     public boolean generateRollbackStatementsVolatile(Database database);
+
+    /**
+     * Validate that this change executed successfully against the given database. Returns null if validation was successful, or an error message if it failed.
+     */
+    public String verifyUpdate(Database database);
+
+    /**
+     * Validate that this change rolled back successfully against the given database. Returns null if validation was successful, or an error message if it failed.
+     */
+    public String verifyRollback(Database database);
 }

@@ -5,8 +5,12 @@ import liquibase.database.Database;
 import liquibase.database.core.MySQLDatabase;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.datatype.LiquibaseDataType;
+import liquibase.exception.PreconditionErrorException;
+import liquibase.exception.PreconditionFailedException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
+import liquibase.precondition.Precondition;
+import liquibase.precondition.core.TableExistsPrecondition;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.*;
 import liquibase.statement.core.CreateTableStatement;
@@ -141,6 +145,16 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
                 inverse
         };
     }
+
+    protected Precondition createVerifyUpdatePrecondition() {
+        TableExistsPrecondition precondition = new TableExistsPrecondition();
+        precondition.setCatalogName(getCatalogName());
+        precondition.setSchemaName(getSchemaName());
+        precondition.setTableName(getTableName());
+        return precondition;
+    }
+
+
 
     @Override
     @DatabaseChangeProperty(requiredForDatabase = "all")

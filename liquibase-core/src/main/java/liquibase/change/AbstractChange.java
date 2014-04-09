@@ -5,6 +5,8 @@ import java.util.*;
 
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
+import liquibase.precondition.Precondition;
+import liquibase.precondition.core.NotPrecondition;
 import liquibase.structure.DatabaseObject;
 import liquibase.exception.*;
 import liquibase.resource.ResourceAccessor;
@@ -367,6 +369,49 @@ public abstract class AbstractChange implements Change {
         }
 
         return changeValidationErrors;
+    }
+
+    @Override
+    public String verifyUpdate(Database database) {
+        Precondition precondition = createVerifyUpdatePrecondition();
+
+        try {
+            if (precondition != null) {
+                precondition.check(database, null, null);
+            }
+        } catch (PreconditionFailedException e) {
+            return e.getMessage();
+        } catch (PreconditionErrorException e) {
+            return e.getMessage();
+        }
+
+        return null;
+    }
+
+    @Override
+    public String verifyRollback(Database database) {
+        Precondition precondition = createVerifyUpdatePrecondition();
+
+        NotPrecondition notPrecondition = new NotPrecondition();
+        notPrecondition.addNestedPrecondition(precondition);
+
+        try {
+            notPrecondition.check(database, null, null);
+        } catch (PreconditionFailedException e) {
+            return e.getMessage();
+        } catch (PreconditionErrorException e) {
+            return e.getMessage();
+        }
+
+        return null;
+    }
+
+
+    /**
+     * Standard {@link #verifyUpdate(liquibase.database.Database)} and {@link #verifyRollback(liquibase.database.Database)}  implementation uses this method for verification logic.
+     */
+    protected Precondition createVerifyUpdatePrecondition() {
+        return null;
     }
 
     /**

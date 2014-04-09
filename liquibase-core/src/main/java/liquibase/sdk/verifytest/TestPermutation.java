@@ -14,7 +14,7 @@ public class TestPermutation {
     private SortedMap<String,Value> description = new TreeMap<String, Value>();
     private String group;
 
-    private Map<String, Value> rowDescription;
+    private TreeMap<String, Value> rowDescription;
     private String rowDescriptionParameter;
     private String rowFullKey = "";
     private String key = "";
@@ -136,7 +136,7 @@ public class TestPermutation {
 
     public void describeAsTable(String key, Map<String, ?> value, OutputFormat outputFormat) {
         rowDescriptionParameter = key;
-        rowDescription = new HashMap<String, Value>();
+        rowDescription = new TreeMap<String, Value>();
         for (Map.Entry<String, ?> entry : value.entrySet()) {
             rowDescription.put(entry.getKey(), new Value(entry.getValue(), outputFormat));
         }
@@ -250,6 +250,7 @@ public class TestPermutation {
             } catch (Throwable e) {
                 String message = "Error executing verification\n"+
                         "Description: "+ output(description)+"\n"+
+                        (rowDescription == null ? "" : "Row Description: "+output(rowDescription)+"\n")+
                         "Notes: "+output(notes)+"\n"+
                         "Data: "+output(data);
                 throw new RuntimeException(message, e);
