@@ -25,7 +25,7 @@ public class TinyIntType  extends LiquibaseDataType {
 
     @Override
     public DatabaseDataType toDatabaseDataType(Database database) {
-        if (database instanceof DerbyDatabase || database instanceof PostgresDatabase) {
+        if (database instanceof DerbyDatabase || database instanceof PostgresDatabase || database instanceof FirebirdDatabase) {
             return new DatabaseDataType("SMALLINT");
         }
         if (database instanceof MSSQLDatabase) {
