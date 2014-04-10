@@ -8,7 +8,8 @@ import liquibase.exception.ValidationErrors
 import liquibase.sdk.supplier.change.ChangeSupplierFactory
 import liquibase.sdk.supplier.resource.ResourceSupplier
 import liquibase.serializer.LiquibaseSerializable;
-import liquibase.serializer.core.string.StringChangeLogSerializer;
+import liquibase.serializer.core.string.StringChangeLogSerializer
+import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.DatabaseFunction;
 import liquibase.statement.SequenceNextValueFunction;
 import liquibase.statement.SqlStatement;
@@ -41,6 +42,10 @@ public abstract class StandardChangeTest extends Specification {
 
     @Shared changeSupplier = new ChangeSupplierFactory()
     @Shared resourceSupplier = new ResourceSupplier()
+
+    def cleanup() {
+        SnapshotGeneratorFactory.reset()
+    }
 
     def "refactoring name matches expected class name"() {
         expect:

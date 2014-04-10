@@ -3,12 +3,17 @@ package liquibase.change.core;
 import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.database.core.PostgresDatabase;
+import liquibase.exception.DatabaseException;
+import liquibase.snapshot.InvalidExampleException;
+import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.SequenceNextValueFunction;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.AddAutoIncrementStatement;
 import liquibase.statement.core.AddDefaultValueStatement;
 import liquibase.statement.core.CreateSequenceStatement;
 import liquibase.statement.core.SetNullableStatement;
+import liquibase.structure.core.Column;
+import liquibase.structure.core.Table;
 
 import java.math.BigInteger;
 
@@ -111,6 +116,68 @@ public class AddAutoIncrementChange extends AbstractChange {
     @Override
     public String getConfirmationMessage() {
         return "Auto-increment added to " + getTableName() + "." + getColumnName();
+    }
+
+    @Override
+    public VerificationResult verifyUpdate(Database database) {
+        Table example = new Table(getCatalogName(), getSchemaName(), getTableName());
+        try {
+            Table table = SnapshotGeneratorFactory.getInstance().createSnapshot(example, database);
+            if (table == null) return new VerificationResult.Failed("Table does not exist");
+
+            Column column = table.getColumn(getColumnName());
+            if (column == null) return new VerificationResult.Failed("Column does not exist");
+
+            boolean autoIncrement = column.isAutoIncrement();
+            if (!autoIncrement) {
+                return new VerificationResult(false, "Column is not auto-increment");
+            }
+            if (getStartWith() != null && column.getAutoIncrementInformation().getStartWith() != null) {
+                if (!getStartWith().equals(column.getAutoIncrementInformation().getStartWith())) {
+                    return new VerificationResult(false, "Starts with incorrect");
+                }
+            }
+
+            if (getIncrementBy() != null && column.getAutoIncrementInformation().getIncrementBy() != null) {
+                if (!getIncrementBy().equals(column.getAutoIncrementInformation().getIncrementBy())) {
+                    return new VerificationResult(false, "Increment by incorrect");
+                }
+            }
+
+
+            return new VerificationResult(true);
+
+        } catch (Exception e) {
+            return new VerificationResult.Failed(e);
+        }
+
+
+    }
+
+    @Override
+    public VerificationResult verifyRollback(Database database) {
+        Table example = new Table(getCatalogName(), getSchemaName(), getTableName());
+        try {
+            Table table = SnapshotGeneratorFactory.getInstance().createSnapshot(example, database);
+            if (table == null) {
+                return new VerificationResult.Failed("Table does not exist");
+            }
+            Column column = table.getColumn(getColumnName());
+            if (column == null) {
+                return new VerificationResult.Failed("Column does not exist");
+            }
+            boolean autoIncrement = column.isAutoIncrement();
+            if (autoIncrement) {
+                return new VerificationResult(false, "Column is auto-increment");
+            }
+
+            return new VerificationResult(true);
+
+        } catch (Exception e) {
+            return new VerificationResult.Failed(e);
+        }
+
+
     }
 
     @Override

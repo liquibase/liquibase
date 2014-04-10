@@ -24,6 +24,10 @@ public class VerificationResult {
         return passed;
     }
 
+    public boolean getVerifiedPassed() {
+        return verified && passed;
+    }
+
     public String getMessage() {
         return message;
     }

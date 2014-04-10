@@ -17,7 +17,9 @@ public class Table extends Relation {
     }
 
     public Table(String catalogName, String schemaName, String tableName) {
-        this.setSchema(new Schema(catalogName, schemaName));
+        if (catalogName != null || schemaName != null) {
+            this.setSchema(new Schema(catalogName, schemaName));
+        }
         setName(tableName);
     }
 

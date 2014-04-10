@@ -219,8 +219,8 @@ public class Column extends AbstractDatabaseObject {
         }
 
         public AutoIncrementInformation(Number startWith, Number incrementBy) {
-            this.startWith = BigInteger.valueOf(startWith.longValue());
-            this.incrementBy = BigInteger.valueOf(incrementBy.longValue());
+            this.startWith = startWith == null ? null : BigInteger.valueOf(startWith.longValue());
+            this.incrementBy = incrementBy == null ? null : BigInteger.valueOf(incrementBy.longValue());
         }
 
         public BigInteger getStartWith() {

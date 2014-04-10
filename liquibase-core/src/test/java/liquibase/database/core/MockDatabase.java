@@ -734,4 +734,9 @@ public class MockDatabase implements Database, InternalDatabase {
     public void addReservedWords(Collection<String> words) {
 
     }
+
+    @Override
+    public String toString() {
+        return "Mock database";
+    }
 }

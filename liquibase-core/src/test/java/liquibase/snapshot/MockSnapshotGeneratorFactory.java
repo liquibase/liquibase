@@ -4,6 +4,8 @@ import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.Column;
+import liquibase.structure.core.Relation;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -25,8 +27,17 @@ public class MockSnapshotGeneratorFactory extends SnapshotGeneratorFactory{
         return new MockDatabaseSnapshot(objects, examples, database, snapshotControl);
     }
 
-    public void addObject(DatabaseObject object) {
-        this.objects.add(object);
+    public void addObjects(DatabaseObject... objects) {
+        for (DatabaseObject object : objects) {
+            this.objects.add(object);
+
+            if (object instanceof Relation) {
+                for (Column column : ((Relation) object).getColumns()) {
+                    this.objects.add(column);
+                }
+            }
+        }
+
     }
 
 
