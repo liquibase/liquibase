@@ -27,6 +27,14 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable{
         allFound = new DatabaseObjectCollection(database);
         this.snapshotControl = snapshotControl;
 
+        init(examples);
+
+        this.serializableFields =  new HashSet<String>();
+        this.serializableFields.add("snapshotControl");
+        this.serializableFields.add("objects");
+    }
+
+    protected void init(DatabaseObject[] examples) throws DatabaseException, InvalidExampleException {
         if (examples != null) {
             Set<Catalog> catalogs = new HashSet<Catalog>();
             for (DatabaseObject object : examples) {
@@ -45,10 +53,6 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable{
                 include(obj);
             }
         }
-
-        this.serializableFields =  new HashSet<String>();
-        this.serializableFields.add("snapshotControl");
-        this.serializableFields.add("objects");
     }
 
     public DatabaseSnapshot(DatabaseObject[] examples, Database database) throws DatabaseException, InvalidExampleException {
@@ -258,7 +262,7 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable{
     }
 
 
-    private SnapshotGeneratorChain createGeneratorChain(Class<? extends DatabaseObject> databaseObjectType, Database database) {
+    protected SnapshotGeneratorChain createGeneratorChain(Class<? extends DatabaseObject> databaseObjectType, Database database) {
         SortedSet<SnapshotGenerator> generators = SnapshotGeneratorFactory.getInstance().getGenerators(databaseObjectType, database);
         if (generators == null || generators.size() == 0) {
             return null;

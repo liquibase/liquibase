@@ -372,38 +372,13 @@ public abstract class AbstractChange implements Change {
     }
 
     @Override
-    public String verifyUpdate(Database database) {
-        Precondition precondition = createVerifyUpdatePrecondition();
-
-        try {
-            if (precondition != null) {
-                precondition.check(database, null, null);
-            }
-        } catch (PreconditionFailedException e) {
-            return e.getMessage();
-        } catch (PreconditionErrorException e) {
-            return e.getMessage();
-        }
-
-        return null;
+    public VerificationResult verifyUpdate(Database database) {
+        return new VerificationResult.Failed("Not implemented");
     }
 
     @Override
-    public String verifyRollback(Database database) {
-        Precondition precondition = createVerifyUpdatePrecondition();
-
-        NotPrecondition notPrecondition = new NotPrecondition();
-        notPrecondition.addNestedPrecondition(precondition);
-
-        try {
-            notPrecondition.check(database, null, null);
-        } catch (PreconditionFailedException e) {
-            return e.getMessage();
-        } catch (PreconditionErrorException e) {
-            return e.getMessage();
-        }
-
-        return null;
+    public VerificationResult verifyRollback(Database database) {
+        return new VerificationResult.Failed("Not implemented");
     }
 
 

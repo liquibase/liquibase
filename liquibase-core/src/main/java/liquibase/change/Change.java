@@ -124,10 +124,10 @@ public interface Change extends LiquibaseSerializable {
     /**
      * Validate that this change executed successfully against the given database. Returns null if validation was successful, or an error message if it failed.
      */
-    public String verifyUpdate(Database database);
+    public VerificationResult verifyUpdate(Database database);
 
     /**
      * Validate that this change rolled back successfully against the given database. Returns null if validation was successful, or an error message if it failed.
      */
-    public String verifyRollback(Database database);
+    public VerificationResult verifyRollback(Database database);
 }

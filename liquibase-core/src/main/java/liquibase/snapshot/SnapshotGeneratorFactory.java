@@ -11,6 +11,7 @@ import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
 public class SnapshotGeneratorFactory {
@@ -19,7 +20,7 @@ public class SnapshotGeneratorFactory {
 
     private List<SnapshotGenerator> generators = new ArrayList<SnapshotGenerator>();
 
-    private SnapshotGeneratorFactory() {
+    protected SnapshotGeneratorFactory() {
         Class[] classes;
         try {
             classes = ServiceLocator.getInstance().findClasses(SnapshotGenerator.class);

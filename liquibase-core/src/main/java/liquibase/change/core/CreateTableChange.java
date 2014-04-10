@@ -5,17 +5,18 @@ import liquibase.database.Database;
 import liquibase.database.core.MySQLDatabase;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.datatype.LiquibaseDataType;
-import liquibase.exception.PreconditionErrorException;
-import liquibase.exception.PreconditionFailedException;
-import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.exception.ValidationErrors;
+import liquibase.exception.*;
 import liquibase.precondition.Precondition;
 import liquibase.precondition.core.TableExistsPrecondition;
+import liquibase.snapshot.InvalidExampleException;
+import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.*;
 import liquibase.statement.core.CreateTableStatement;
 import liquibase.statement.core.SetColumnRemarksStatement;
 import liquibase.statement.core.SetTableRemarksStatement;
+import liquibase.structure.core.Relation;
+import liquibase.structure.core.Table;
 import liquibase.util.StringUtils;
 
 import java.util.ArrayList;
@@ -146,15 +147,25 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
         };
     }
 
-    protected Precondition createVerifyUpdatePrecondition() {
-        TableExistsPrecondition precondition = new TableExistsPrecondition();
-        precondition.setCatalogName(getCatalogName());
-        precondition.setSchemaName(getSchemaName());
-        precondition.setTableName(getTableName());
-        return precondition;
+    @Override
+    public VerificationResult verifyUpdate(Database database) {
+        try {
+            Table example = (Table) new Table().setName(getTableName()).setSchema(getCatalogName(), getSchemaName());
+            return new VerificationResult(SnapshotGeneratorFactory.getInstance().has(example, database));
+        } catch (Exception e) {
+            return new VerificationResult.Failed(e.getMessage());
+        }
     }
 
-
+    @Override
+    public VerificationResult verifyRollback(Database database) {
+        try {
+            Table example = (Table) new Table().setName(getTableName()).setSchema(getCatalogName(), getSchemaName());
+            return new VerificationResult(!SnapshotGeneratorFactory.getInstance().has(example, database));
+        } catch (Exception e) {
+            return new VerificationResult.Failed(e);
+        }
+    }
 
     @Override
     @DatabaseChangeProperty(requiredForDatabase = "all")
