@@ -57,6 +57,8 @@ import java.util.*;
  */
 public class SpringLiquibase implements InitializingBean, BeanNameAware, ResourceLoaderAware {
 
+    private boolean disablePreConditions = false;
+
     public class SpringResourceOpener implements ResourceAccessor {
 
         private String parentFile;
@@ -327,7 +329,10 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 
 	protected Liquibase createLiquibase(Connection c) throws LiquibaseException {
 		Liquibase liquibase = new Liquibase(getChangeLog(), createResourceOpener(), createDatabase(c));
-        liquibase.setIgnoreClasspathPrefix(isIgnoreClasspathPrefix());
+		liquibase.setIgnoreClasspathPrefix(isIgnoreClasspathPrefix());
+		if (disablePreConditions) {
+			liquibase.disablePreconditions();
+		}
 		if (parameters != null) {
 			for (Map.Entry<String, String> entry : parameters.entrySet()) {
 				liquibase.setChangeLogParameter(entry.getKey(), entry.getValue());
@@ -396,6 +401,10 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 
 	public void setRollbackFile(File rollbackFile) {
 		this.rollbackFile = rollbackFile;
+    }
+
+    public void setDisablePreConditions(boolean disablePreConditions) {
+        this.disablePreConditions = disablePreConditions;
     }
 
     public boolean isIgnoreClasspathPrefix() {
