@@ -6,7 +6,6 @@ import java.util.*;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.precondition.Precondition;
-import liquibase.precondition.core.NotPrecondition;
 import liquibase.structure.DatabaseObject;
 import liquibase.exception.*;
 import liquibase.resource.ResourceAccessor;
@@ -372,18 +371,33 @@ public abstract class AbstractChange implements Change {
     }
 
     @Override
-    public VerificationResult verifyUpdate(Database database) {
-        return new VerificationResult.Failed("Not implemented");
+    public VerificationResult verifyExecuted(Database database) {
+        return new VerificationResult.Unverified("Not implemented");
+    }
+
+    /**
+     * Default implementation just calls {@link #verifyExecuted(liquibase.database.Database)}
+     */
+    @Override
+    public VerificationResult verifyExecutedDetailed(Database database) {
+        return verifyExecuted(database);
     }
 
     @Override
-    public VerificationResult verifyRollback(Database database) {
-        return new VerificationResult.Failed("Not implemented");
+    public VerificationResult verifyNotExecuted(Database database) {
+        return new VerificationResult.Unverified("Not implemented");
     }
 
+    /**
+     * Default implementation just calls {@link #verifyNotExecuted(liquibase.database.Database)}
+     */
+    @Override
+    public VerificationResult verifyNotExecutedDetailed(Database database) {
+        return verifyNotExecuted(database);
+    }
 
     /**
-     * Standard {@link #verifyUpdate(liquibase.database.Database)} and {@link #verifyRollback(liquibase.database.Database)}  implementation uses this method for verification logic.
+     * Standard {@link #verifyExecuted(liquibase.database.Database)} and {@link #verifyNotExecuted(liquibase.database.Database)}  implementation uses this method for verification logic.
      */
     protected Precondition createVerifyUpdatePrecondition() {
         return null;

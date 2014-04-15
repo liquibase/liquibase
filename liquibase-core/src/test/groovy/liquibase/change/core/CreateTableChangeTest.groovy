@@ -4,9 +4,7 @@ import liquibase.change.ColumnConfig
 import liquibase.change.ConstraintsConfig
 import liquibase.change.StandardChangeTest
 import liquibase.database.core.MockDatabase
-import liquibase.executor.ExecutorService
 import liquibase.snapshot.MockSnapshotGeneratorFactory
-import liquibase.snapshot.SnapshotGenerator
 import liquibase.snapshot.SnapshotGeneratorFactory
 import liquibase.statement.DatabaseFunction
 import liquibase.statement.ForeignKeyConstraint
@@ -168,14 +166,18 @@ public class CreateTableChangeTest extends StandardChangeTest {
         def snapshotFactory = new MockSnapshotGeneratorFactory()
         SnapshotGeneratorFactory.instance = snapshotFactory
 
+        then: "when no tables"
+        assert !change.verifyExecuted(database).passed
+
+        when: "another table exists but not the target table"
+        snapshotFactory.addObjects(new Table(null, null, "other_table"))
         then:
-        assert !change.verifyUpdate(database).passed
+        assert !change.verifyExecuted(database).passed
 
-        snapshotFactory.addObject(new Table(null, null, "other_table"))
-        assert !change.verifyUpdate(database).passed
-
-        snapshotFactory.addObject(new Table(null, null, "test_table"))
-        assert change.verifyUpdate(database).passed
+        when: "expected table exists"
+        snapshotFactory.addObjects(new Table(null, null, "test_table"))
+        then:
+        assert change.verifyExecuted(database).verifiedPassed
 
     }
 
@@ -188,13 +190,13 @@ public class CreateTableChangeTest extends StandardChangeTest {
         SnapshotGeneratorFactory.instance = snapshotFactory
 
         then:
-        assert change.verifyRollback(database).passed
+        assert change.verifyNotExecuted(database).passed
 
-        snapshotFactory.addObject(new Table(null, null, "other_table"))
-        assert change.verifyRollback(database).passed
+        snapshotFactory.addObjects(new Table(null, null, "other_table"))
+        assert change.verifyNotExecuted(database).passed
 
-        snapshotFactory.addObject(new Table(null, null, "test_table"))
-        assert !change.verifyRollback(database).passed
+        snapshotFactory.addObjects(new Table(null, null, "test_table"))
+        assert !change.verifyNotExecuted(database).passed
 
     }
 }

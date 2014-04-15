@@ -1,23 +1,13 @@
 package liquibase.change.core;
 
 import liquibase.change.ChangeFactory;
-import liquibase.change.StandardChangeTest;
-import liquibase.change.ChangeMetaData;
-import liquibase.database.Database;
+import liquibase.change.StandardChangeTest
 import liquibase.database.core.*
 import liquibase.snapshot.MockSnapshotGeneratorFactory
-import liquibase.snapshot.SnapshotGeneratorFactory;
-import liquibase.statement.SqlStatement;
-import liquibase.statement.core.AddAutoIncrementStatement;
-import liquibase.statement.core.AddDefaultValueStatement;
-import liquibase.statement.core.CreateSequenceStatement;
-import liquibase.statement.core.SetNullableStatement
+import liquibase.snapshot.SnapshotGeneratorFactory
 import liquibase.structure.core.Column
 import liquibase.structure.core.Table
-import spock.lang.Unroll;
-
-import static org.junit.Assert.*;
-import org.junit.Test;
+import spock.lang.Unroll
 
 public class AddAutoIncrementChangeTest extends StandardChangeTest {
 
@@ -48,8 +38,8 @@ public class AddAutoIncrementChangeTest extends StandardChangeTest {
 
     }
 
-    @Unroll("verifyUpdate with #columnStartWith / #columnIncrementBy vs #changeStartWith / #changeIncrementBy")
-    def "verifyUpdate"() {
+    @Unroll("verifyExecuted with #columnStartWith / #columnIncrementBy vs #changeStartWith / #changeIncrementBy")
+    def "verifyUpdate and details"() {
         when:
         def database = new MockDatabase()
         def snapshotFactory = new MockSnapshotGeneratorFactory()
@@ -65,22 +55,23 @@ public class AddAutoIncrementChangeTest extends StandardChangeTest {
         change.columnName = testColumn.name
 
         then:
-        assert !change.verifyUpdate(database).verified
+        assert !change.verifyExecuted(database).verified
 
         when: "Objects exist but not auto-increment"
         snapshotFactory.addObjects(table)
         then:
-        assert !change.verifyUpdate(database).verifiedPassed
+        assert !change.verifyExecuted(database).verifiedPassed
 
         when: "Column is auto-increment"
         testColumn.autoIncrementInformation = new Column.AutoIncrementInformation(columnStartWith, columnIncrementBy)
         change.startWith = changeStartWith
         change.incrementBy = changeIncrementBy
         then:
-        change.verifyUpdate(database).verifiedPassed == expectedResult
+        assert change.verifyExecuted(database).verifiedPassed
+        change.verifyExecutedDetailed(database).verifiedPassed == expectedDetailResult
 
         where:
-        columnStartWith | columnIncrementBy | changeStartWith | changeIncrementBy | expectedResult
+        columnStartWith | columnIncrementBy | changeStartWith | changeIncrementBy | expectedDetailResult
         null | null | null | null | true
         2    | 4    | null | null | true
         2    | 4    | 2    | null | true
@@ -91,7 +82,7 @@ public class AddAutoIncrementChangeTest extends StandardChangeTest {
 
     }
 
-    def "verifyRollback"() {
+    def "verifyNotExecuted"() {
         when:
         def database = new MockDatabase()
         def snapshotFactory = new MockSnapshotGeneratorFactory()
@@ -107,16 +98,16 @@ public class AddAutoIncrementChangeTest extends StandardChangeTest {
         change.columnName = testColumn.name
 
         then:
-        assert !change.verifyRollback(database).verified
+        assert !change.verifyNotExecuted(database).verified
 
         when: "Objects exist but not auto-increment"
         snapshotFactory.addObjects(table)
         then:
-        assert change.verifyRollback(database).verifiedPassed
+        assert change.verifyNotExecuted(database).verifiedPassed
 
         when: "Column is auto-increment"
         testColumn.autoIncrementInformation = new Column.AutoIncrementInformation()
         then:
-        assert !change.verifyRollback(database).verifiedPassed
+        assert !change.verifyNotExecuted(database).verifiedPassed
     }
 }

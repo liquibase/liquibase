@@ -42,6 +42,7 @@ public class MockDatabase implements Database, InternalDatabase {
     private boolean supportsSchemas = true;
     private String defaultCatalogName;
     private String defaultSchemaName;
+    private boolean caseSensitive;
 
 
     @Override
@@ -126,7 +127,11 @@ public class MockDatabase implements Database, InternalDatabase {
 
     @Override
     public boolean isCaseSensitive() {
-        return false;
+        return caseSensitive;
+    }
+
+    public void setCaseSensitive(boolean caseSensitive) {
+        this.caseSensitive = caseSensitive;
     }
 
     @Override

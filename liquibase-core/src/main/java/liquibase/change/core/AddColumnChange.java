@@ -8,12 +8,16 @@ import java.util.Set;
 import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.database.core.*;
+import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.*;
 import liquibase.statement.core.AddColumnStatement;
 import liquibase.statement.core.ReorganizeTableStatement;
 import liquibase.statement.core.SetColumnRemarksStatement;
 import liquibase.statement.core.UpdateStatement;
+import liquibase.structure.core.Column;
+import liquibase.structure.core.PrimaryKey;
+import liquibase.structure.core.Table;
 import liquibase.util.StringUtils;
 
 /**
@@ -180,6 +184,60 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
         }
 
         return inverses.toArray(new Change[inverses.size()]);
+    }
+
+    @Override
+    public VerificationResult verifyExecuted(Database database) {
+        try {
+            for (AddColumnConfig column : getColumns()) {
+                boolean exists = SnapshotGeneratorFactory.getInstance().has(new Column(Table.class, getCatalogName(), getSchemaName(), getTableName(), column.getName()), database);
+                if (!exists) {
+                    return new VerificationResult(false, "Column "+column.getName()+" does not exist");
+                }
+            }
+        } catch (Exception e) {
+            return new VerificationResult.Unverified(e);
+        }
+
+        return new VerificationResult(true);
+    }
+
+    @Override
+    public VerificationResult verifyExecutedDetailed(Database database) {
+        VerificationResult result = verifyExecuted(database);
+        if (!result.getVerifiedPassed()) {
+            return result;
+        }
+
+        try {
+            for (AddColumnConfig columnConfig : getColumns()) {
+                Column snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(new Column(Table.class, getCatalogName(), getSchemaName(), getTableName(), columnConfig.getName()), database);
+                PrimaryKey snapshotPK = ((Table) snapshot.getRelation()).getPrimaryKey();
+
+                ConstraintsConfig constraints = columnConfig.getConstraints();
+                result.additionalCheck(constraints.isPrimaryKey() == (snapshotPK != null && snapshotPK.getColumnNamesAsList().contains(columnConfig.getName())), "Column "+columnConfig.getName()+" not set as primary key");
+            }
+        } catch (Exception e) {
+            return new VerificationResult.Unverified(e);
+        }
+
+        return new VerificationResult(true);
+    }
+
+    @Override
+    public VerificationResult verifyNotExecuted(Database database) {
+        try {
+            for (AddColumnConfig column : getColumns()) {
+                boolean exists = SnapshotGeneratorFactory.getInstance().has(new Column(Table.class, getCatalogName(), getSchemaName(), getTableName(), column.getName()), database);
+                if (exists) {
+                    return new VerificationResult(false, "Column "+column.getName()+" does exists");
+                }
+            }
+        } catch (Exception e) {
+            return new VerificationResult.Unverified(e);
+        }
+
+        return new VerificationResult(true);
     }
 
     @Override

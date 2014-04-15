@@ -46,21 +46,32 @@ class SchemaComparatorTest extends Specification {
 
         expect:
         DatabaseObjectComparatorFactory.instance.isSameObject(object1, object2, databaseThatSupportsSchemas) == isSameIfSupportsSchemas
+        DatabaseObjectComparatorFactory.instance.isSameObject(object2, object1, databaseThatSupportsSchemas) == isSameIfSupportsSchemas
+
         DatabaseObjectComparatorFactory.instance.isSameObject(object1, object2, databaseThatDoesNotSupportSchemas) == isSameIfNotSupportsSchemas
-        DatabaseObjectComparatorFactory.instance.isSameObject(object1, object2, databaseThatDoesNotSupportCatalogs) == true // always true if doesn't support catalogs
+        DatabaseObjectComparatorFactory.instance.isSameObject(object2, object1, databaseThatDoesNotSupportSchemas) == isSameIfNotSupportsSchemas
+
+        // always true if doesn't support catalogs
+        DatabaseObjectComparatorFactory.instance.isSameObject(object1, object2, databaseThatDoesNotSupportCatalogs) == true
+        DatabaseObjectComparatorFactory.instance.isSameObject(object2, object1, databaseThatDoesNotSupportCatalogs) == true
 
 
         where:
         object1 | object2 | defaultSchema | isSameIfSupportsSchemas | isSameIfNotSupportsSchemas
         new Schema((String) null, null) | new Schema((String) null, null) | null      | true  | true
+        new Schema((String) null, null) | new Schema((String) null, null) | "MySchem" | true  | true
+        new Schema((String) null, null) | null                            | null      | true  | true
+        new Schema((String) null, null) | null                            | "MySchem" | true  | true
         new Schema("Cat1", null)        | new Schema("Cat1", null)        | null      | true  | true
         new Schema("Cat1", null)        | new Schema("Cat2", null)        | null      | false | false
         new Schema("Cat1", "Schem1")    | new Schema("Cat1", "Schem1")    | null      | true  | true
         new Schema("Cat1", "Schem1")    | new Schema("Cat1", "Schem2")    | null      | false | true
         new Schema("Cat1", "Schem1")    | new Schema("Cat1", "Schem1")    | "MySchem" | true  | true
-        new Schema("Cat1", "MySchem")   | new Schema("Cat1", null)        | "MySchem" | true  | true //null matches default schema
-        new Schema("Cat1", null)        | new Schema("Cat1", "MySchem")   | "MySchem" | true  | true //null matches default schema
-        new Schema("Cat1", "schem2")    | new Schema("Cat1", null)        | "MySchem" | false | true
+        new Schema("Cat1", "MySchem")   | new Schema("Cat1", null)        | "MySchem" | true  | true
+        //null matches default schema
+        new Schema("Cat1", null) | new Schema("Cat1", "MySchem") | "MySchem" | true | true
+        //null matches default schema
+        new Schema("Cat1", "schem2") | new Schema("Cat1", null) | "MySchem" | false | true
     }
 
 }

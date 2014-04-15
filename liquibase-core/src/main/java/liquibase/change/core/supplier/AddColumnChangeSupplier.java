@@ -4,11 +4,14 @@ import liquibase.change.Change;
 import liquibase.change.ColumnConfig;
 import liquibase.change.core.AddColumnChange;
 import liquibase.change.core.CreateTableChange;
+import liquibase.database.Database;
 import liquibase.diff.DiffResult;
 import liquibase.sdk.supplier.change.AbstractChangeSupplier;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
+
+import java.util.Collection;
 
 import static org.junit.Assert.assertNotNull;
 

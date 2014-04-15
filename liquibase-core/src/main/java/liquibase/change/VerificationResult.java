@@ -11,9 +11,11 @@ public class VerificationResult {
         this(passed, null);
     }
 
-    public VerificationResult(boolean passed, String message) {
+    public VerificationResult(boolean passed, String failedMessage) {
         this.passed = passed;
-        this.message = message;
+        if (!passed) {
+            this.message = failedMessage;
+        }
     }
 
     public boolean getVerified() {
@@ -26,6 +28,10 @@ public class VerificationResult {
 
     public boolean getVerifiedPassed() {
         return verified && passed;
+    }
+
+    public boolean getVerifiedFailed() {
+        return verified && !passed;
     }
 
     public String getMessage() {
@@ -55,13 +61,24 @@ public class VerificationResult {
         return out;
     }
 
-    public static class Failed extends VerificationResult {
-        public Failed(String message) {
+    /**
+     * Convenience method to run another check for this verification result. If this result already failed, this will be a no-op.
+     * If this result had passed before and the new checkResult fails this result will change to failed.
+     */
+    public void additionalCheck(boolean newPassedValue, String failMessage) {
+        if (this.passed && !newPassedValue) {
+            this.passed = false;
+            this.message = failMessage;
+        }
+    }
+
+    public static class Unverified extends VerificationResult {
+        public Unverified(String message) {
             super(false, message);
             this.verified = false;
         }
 
-        public Failed(Throwable e) {
+        public Unverified(Throwable e) {
             this(e.getMessage());
             this.exception = e;
         }

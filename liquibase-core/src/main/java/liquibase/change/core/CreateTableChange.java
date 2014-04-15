@@ -6,16 +6,12 @@ import liquibase.database.core.MySQLDatabase;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.datatype.LiquibaseDataType;
 import liquibase.exception.*;
-import liquibase.precondition.Precondition;
-import liquibase.precondition.core.TableExistsPrecondition;
-import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.*;
 import liquibase.statement.core.CreateTableStatement;
 import liquibase.statement.core.SetColumnRemarksStatement;
 import liquibase.statement.core.SetTableRemarksStatement;
-import liquibase.structure.core.Relation;
 import liquibase.structure.core.Table;
 import liquibase.util.StringUtils;
 
@@ -148,22 +144,22 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
     }
 
     @Override
-    public VerificationResult verifyUpdate(Database database) {
+    public VerificationResult verifyExecuted(Database database) {
         try {
             Table example = (Table) new Table().setName(getTableName()).setSchema(getCatalogName(), getSchemaName());
-            return new VerificationResult(SnapshotGeneratorFactory.getInstance().has(example, database));
+            return new VerificationResult(SnapshotGeneratorFactory.getInstance().has(example, database), "Table does not exist");
         } catch (Exception e) {
-            return new VerificationResult.Failed(e.getMessage());
+            return new VerificationResult.Unverified(e.getMessage());
         }
     }
 
     @Override
-    public VerificationResult verifyRollback(Database database) {
+    public VerificationResult verifyNotExecuted(Database database) {
         try {
             Table example = (Table) new Table().setName(getTableName()).setSchema(getCatalogName(), getSchemaName());
             return new VerificationResult(!SnapshotGeneratorFactory.getInstance().has(example, database));
         } catch (Exception e) {
-            return new VerificationResult.Failed(e);
+            return new VerificationResult.Unverified(e);
         }
     }
 
