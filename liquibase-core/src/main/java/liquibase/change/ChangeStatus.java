@@ -28,7 +28,11 @@ public class ChangeStatus {
 
 
     public ChangeStatus assertCorrect(boolean correct, String incorrectMessage) {
-        if (!correct) {
+        if (correct) {
+            if (status == null) {
+                status = Status.complete;
+            }
+        } else {
             if (this.status == null || this.status == Status.complete) {
                 this.status = Status.incorrect;
                 this.message = incorrectMessage;

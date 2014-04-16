@@ -125,6 +125,8 @@ public class ColumnConfig implements LiquibaseSerializable {
     }
 
 
+
+
     /**
      * The name of the column.
      */
