@@ -70,13 +70,14 @@ public class ForeignKey extends AbstractDatabaseObject{
         return getAttribute("primaryKeyColumns", String.class);
     }
 
-    public void addPrimaryKeyColumn(String primaryKeyColumn) {
+    public ForeignKey addPrimaryKeyColumn(String primaryKeyColumn) {
         if ((this.getPrimaryKeyColumns() == null)
                 || (this.getPrimaryKeyColumns().length() == 0)) {
             this.setPrimaryKeyColumns(primaryKeyColumn);
         } else {
             this.setPrimaryKeyColumns(this.getPrimaryKeyColumns() + ", " + primaryKeyColumn);
         }
+        return this;
     }
 
     public ForeignKey setPrimaryKeyColumns(String primaryKeyColumns) {
@@ -131,7 +132,7 @@ public class ForeignKey extends AbstractDatabaseObject{
 
 
     public boolean isDeferrable() {
-        return getAttribute("deferrable", Boolean.class);
+        return getAttribute("deferrable", Boolean.class, false);
     }
 
     public ForeignKey setDeferrable(boolean deferrable) {
@@ -141,7 +142,7 @@ public class ForeignKey extends AbstractDatabaseObject{
 
 
     public boolean isInitiallyDeferred() {
-        return getAttribute("initiallyDeferred", Boolean.class);
+        return getAttribute("initiallyDeferred", Boolean.class, false);
     }
 
     public ForeignKey setInitiallyDeferred(boolean initiallyDeferred) {

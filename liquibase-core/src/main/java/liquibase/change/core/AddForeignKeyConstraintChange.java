@@ -3,10 +3,13 @@ package liquibase.change.core;
 import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
+import liquibase.snapshot.SnapshotGeneratorFactory;
+import liquibase.structure.core.ForeignKey;
 import liquibase.structure.core.ForeignKeyConstraintType;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.AddForeignKeyConstraintStatement;
+import liquibase.structure.core.Table;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -254,6 +257,48 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
                 inverse
         };
     }
+
+    @Override
+    public VerificationResult verifyExecuted(Database database) {
+        try {
+            ForeignKey example = new ForeignKey(getConstraintName(), getBaseTableCatalogName(), getBaseTableSchemaName(), getBaseTableName());
+            example.setPrimaryKeyTable(new Table(getReferencedTableCatalogName(), getReferencedTableSchemaName(), getReferencedTableName()));
+            example.setForeignKeyColumns(getBaseColumnNames());
+            example.setPrimaryKeyColumns(getReferencedColumnNames());
+
+            VerificationResult result = new VerificationResult(true);
+
+            ForeignKey snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(example, database);
+            result.additionalCheck(snapshot != null, "Foreign key does not exist");
+
+            if (snapshot != null) {
+                if (getInitiallyDeferred() != null) {
+                    result.additionalCheck(getInitiallyDeferred().equals(snapshot.isInitiallyDeferred()), "Initially deferred incorrect");
+                }
+                if (getDeferrable() != null) {
+                    result.additionalCheck(getDeferrable().equals(snapshot.isDeferrable()), "Initially deferred incorrect");
+                }
+            }
+
+            return result;
+
+        } catch (Exception e) {
+            return new VerificationResult.Unverified(e);
+        }
+    }
+
+    @Override
+    public VerificationResult verifyNotExecuted(Database database) {
+        try {
+            ForeignKey example = new ForeignKey(getConstraintName(), getBaseTableCatalogName(), getBaseTableSchemaName(), getBaseTableName());
+            example.setPrimaryKeyTable(new Table(getReferencedTableCatalogName(), getReferencedTableSchemaName(), getReferencedTableName()));
+            example.setForeignKeyColumns(getBaseColumnNames());
+            example.setPrimaryKeyColumns(getReferencedColumnNames());
+
+            return new VerificationResult(!SnapshotGeneratorFactory.getInstance().has(example, database), "Foreign key exists");
+        } catch (Exception e) {
+            return new VerificationResult.Unverified(e);
+        }    }
 
     @Override
     public String getConfirmationMessage() {

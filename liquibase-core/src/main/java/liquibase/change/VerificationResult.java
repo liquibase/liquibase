@@ -52,7 +52,7 @@ public class VerificationResult {
                 out = "Failed verification";
             }
         } else {
-            out = "Could not verify";
+            out = "Unable to verify";
         }
         if (message != null) {
             out += ": "+message;

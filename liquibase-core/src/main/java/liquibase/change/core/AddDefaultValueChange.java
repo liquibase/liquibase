@@ -3,20 +3,24 @@ package liquibase.change.core;
 import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.exception.ValidationErrors;
+import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.SequenceNextValueFunction;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.DatabaseFunction;
 import liquibase.statement.core.AddDefaultValueStatement;
+import liquibase.structure.core.Column;
+import liquibase.structure.core.Table;
 import liquibase.util.ISODateFormat;
 
 import java.text.NumberFormat;
 import java.text.ParseException;
+import java.util.Date;
 import java.util.Locale;
 
 /**
  * Sets a new default value to an existing column.
  */
-@DatabaseChange(name="addDefaultValue",
+@DatabaseChange(name = "addDefaultValue",
         description = "Adds a default value to the database definition for the specified column.\n" +
                 "One of defaultValue, defaultValueNumeric, defaultValueBoolean or defaultValueDate must be set",
         priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "column")
@@ -67,7 +71,7 @@ public class AddDefaultValueChange extends AbstractChange {
         return validate;
     }
 
-    @DatabaseChangeProperty(mustEqualExisting ="column.relation.catalog", since = "3.0")
+    @DatabaseChangeProperty(mustEqualExisting = "column.relation.catalog", since = "3.0")
     public String getCatalogName() {
         return catalogName;
     }
@@ -76,7 +80,7 @@ public class AddDefaultValueChange extends AbstractChange {
         this.catalogName = catalogName;
     }
 
-    @DatabaseChangeProperty(mustEqualExisting ="column.relation.schema")
+    @DatabaseChangeProperty(mustEqualExisting = "column.relation.schema")
     public String getSchemaName() {
         return schemaName;
     }
@@ -85,7 +89,7 @@ public class AddDefaultValueChange extends AbstractChange {
         this.schemaName = schemaName;
     }
 
-    @DatabaseChangeProperty(mustEqualExisting = "column.relation",description = "Name of the table to containing the column", exampleValue = "file")
+    @DatabaseChangeProperty(mustEqualExisting = "column.relation", description = "Name of the table to containing the column", exampleValue = "file")
     public String getTableName() {
         return tableName;
     }
@@ -105,12 +109,12 @@ public class AddDefaultValueChange extends AbstractChange {
 
     @DatabaseChangeProperty(description = "Current data type of the column to add default value to", exampleValue = "varchar(50)")
     public String getColumnDataType() {
-		return columnDataType;
-	}
-    
+        return columnDataType;
+    }
+
     public void setColumnDataType(String columnDataType) {
-		this.columnDataType = columnDataType;
-	}
+        this.columnDataType = columnDataType;
+    }
 
     @DatabaseChangeProperty(description = "Default value. Either this property or one of the other defaultValue* properties are required.", exampleValue = "Something Else", requiredForDatabase = "none")
     public String getDefaultValue() {
@@ -193,7 +197,7 @@ public class AddDefaultValueChange extends AbstractChange {
         } else if (getDefaultValueSequenceNext() != null) {
             defaultValue = getDefaultValueSequenceNext();
         }
-        
+
         return new SqlStatement[]{
                 new AddDefaultValueStatement(getCatalogName(), getSchemaName(), getTableName(), getColumnName(), getColumnDataType(), defaultValue)
         };
@@ -220,5 +224,52 @@ public class AddDefaultValueChange extends AbstractChange {
     @Override
     public String getSerializedObjectNamespace() {
         return STANDARD_CHANGELOG_NAMESPACE;
+    }
+
+    @Override
+    public VerificationResult verifyExecuted(Database database) {
+        try {
+            Column column = SnapshotGeneratorFactory.getInstance().createSnapshot(new Column(Table.class, getCatalogName(), getSchemaName(), getTableName(), getColumnName()), database);
+            if (column == null) {
+                return new VerificationResult.Unverified("Column " + getColumnName() + " does not exist");
+            }
+
+            if (column.getDefaultValue() == null) {
+                return new VerificationResult(false, "Column "+getColumnName()+" has no default value");
+            }
+
+            if (getDefaultValue() != null) {
+                return new VerificationResult(getDefaultValue().equals(column.getDefaultValue()), "Default value was "+column.getDefaultValue());
+            } else if (getDefaultValueDate() != null) {
+                return new VerificationResult(getDefaultValueDate().equals(new ISODateFormat().format((Date) column.getDefaultValue())), "Default value was "+column.getDefaultValue());
+            } else if (getDefaultValueNumeric() != null) {
+                return new VerificationResult(getDefaultValueNumeric().equals(column.getDefaultValue().toString()), "Default value was "+column.getDefaultValue());
+            } else if (getDefaultValueBoolean() != null) {
+                return new VerificationResult(getDefaultValueBoolean().equals(column.getDefaultValue()), "Default value was "+column.getDefaultValue());
+            } else if (getDefaultValueComputed() != null) {
+                return new VerificationResult(getDefaultValueComputed().equals(column.getDefaultValue()), "Default value was "+column.getDefaultValue());
+            } else if (getDefaultValueSequenceNext() != null) {
+                return new VerificationResult(getDefaultValueSequenceNext().equals(column.getDefaultValue()), "Default value was "+column.getDefaultValue());
+            } else {
+                return new VerificationResult.Unverified("Unknown default value type");
+            }
+        } catch (Exception e) {
+            return new VerificationResult.Unverified(e);
+        }
+    }
+
+    @Override
+    public VerificationResult verifyNotExecuted(Database database) {
+        try {
+            Column column = SnapshotGeneratorFactory.getInstance().createSnapshot(new Column(Table.class, getCatalogName(), getSchemaName(), getTableName(), getColumnName()), database);
+            if (column == null) {
+                return new VerificationResult.Unverified("Column " + getColumnName() + " does not exist");
+            }
+
+            return new VerificationResult(column.getDefaultValue() == null, "Column "+getColumnName()+" has a default value");
+
+        } catch (Exception e) {
+            return new VerificationResult.Unverified(e);
+        }
     }
 }
