@@ -621,6 +621,9 @@ public class MockDatabase implements Database, InternalDatabase {
      * Returns name all lower case except for the last letter capital for easier detection of corrected names.
      */
     public String correctObjectName(final String name, final Class<? extends DatabaseObject> objectType) {
+        if (name == null) {
+            return null;
+        }
         String finalName = name.toLowerCase();
         finalName = finalName.substring(0, finalName.length()-1)+finalName.substring(finalName.length()-1, finalName.length()).toUpperCase();
         return finalName;

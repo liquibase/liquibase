@@ -123,25 +123,8 @@ public class AddAutoIncrementChange extends AbstractChange {
             Column column = SnapshotGeneratorFactory.getInstance().createSnapshot(example, database);
             if (column == null) return new VerificationResult.Unverified("Column does not exist");
 
-            return new VerificationResult(column.isAutoIncrement(), "Column is not auto-increment");
-        } catch (Exception e) {
-            return new VerificationResult.Unverified(e);
-        }
 
-
-    }
-
-    @Override
-    public VerificationResult verifyExecutedDetailed(Database database) {
-        VerificationResult result = verifyExecuted(database);
-        if (!result.getVerifiedPassed()) {
-            return result;
-        }
-
-        Column example = new Column(Table.class, getCatalogName(), getSchemaName(), getTableName(), getColumnName());
-        try {
-            Column column = SnapshotGeneratorFactory.getInstance().createSnapshot(example, database);
-
+            VerificationResult result = new VerificationResult(column.isAutoIncrement(), "Column is not auto-increment");
             if (getStartWith() != null && column.getAutoIncrementInformation().getStartWith() != null) {
                 result.additionalCheck(getStartWith().equals(column.getAutoIncrementInformation().getStartWith()), "startsWith incorrect");
             }
@@ -151,7 +134,6 @@ public class AddAutoIncrementChange extends AbstractChange {
             }
 
             return result;
-
         } catch (Exception e) {
             return new VerificationResult.Unverified(e);
         }

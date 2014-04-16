@@ -38,8 +38,8 @@ public class AddAutoIncrementChangeTest extends StandardChangeTest {
 
     }
 
-    @Unroll("verifyExecuted with #columnStartWith / #columnIncrementBy vs #changeStartWith / #changeIncrementBy")
-    def "verifyUpdate and details"() {
+    @Unroll("#featureName with #columnStartWith / #columnIncrementBy vs #changeStartWith / #changeIncrementBy")
+    def "verifyUpdate"() {
         when:
         def database = new MockDatabase()
         def snapshotFactory = new MockSnapshotGeneratorFactory()
@@ -67,11 +67,10 @@ public class AddAutoIncrementChangeTest extends StandardChangeTest {
         change.startWith = changeStartWith
         change.incrementBy = changeIncrementBy
         then:
-        assert change.verifyExecuted(database).verifiedPassed
-        change.verifyExecutedDetailed(database).verifiedPassed == expectedDetailResult
+        change.verifyExecuted(database).verifiedPassed == expectedResult
 
         where:
-        columnStartWith | columnIncrementBy | changeStartWith | changeIncrementBy | expectedDetailResult
+        columnStartWith | columnIncrementBy | changeStartWith | changeIncrementBy | expectedResult
         null | null | null | null | true
         2    | 4    | null | null | true
         2    | 4    | 2    | null | true

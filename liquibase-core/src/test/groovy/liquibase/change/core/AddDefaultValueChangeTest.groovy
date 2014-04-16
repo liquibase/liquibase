@@ -54,7 +54,6 @@ public class AddDefaultValueChangeTest extends StandardChangeTest {
         testColumn.defaultValue = snapshotDefaultValue
         then:
         assert change.verifyExecuted(database).verifiedPassed == expectedResult
-        change.verifyExecutedDetailed(database).verifiedPassed == expectedResult
 
         where:
         snapshotDefaultValue | changeDefaultValue | methodName | expectedResult

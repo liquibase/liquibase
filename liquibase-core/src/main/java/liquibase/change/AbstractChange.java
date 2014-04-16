@@ -375,25 +375,9 @@ public abstract class AbstractChange implements Change {
         return new VerificationResult.Unverified("Not implemented");
     }
 
-    /**
-     * Default implementation just calls {@link #verifyExecuted(liquibase.database.Database)}
-     */
-    @Override
-    public VerificationResult verifyExecutedDetailed(Database database) {
-        return verifyExecuted(database);
-    }
-
     @Override
     public VerificationResult verifyNotExecuted(Database database) {
         return new VerificationResult.Unverified("Not implemented");
-    }
-
-    /**
-     * Default implementation just calls {@link #verifyNotExecuted(liquibase.database.Database)}
-     */
-    @Override
-    public VerificationResult verifyNotExecutedDetailed(Database database) {
-        return verifyNotExecuted(database);
     }
 
     /**

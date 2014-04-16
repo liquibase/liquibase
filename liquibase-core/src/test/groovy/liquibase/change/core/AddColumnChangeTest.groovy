@@ -104,7 +104,8 @@ public class AddColumnChangeTest extends StandardChangeTest {
         assert change.verifyExecuted(database).verifiedPassed
     }
 
-    def "verifyUpdateDetails with default value"() {
+    @Unroll
+    def "verifyUpdate with default value"() {
         when:
         def database = new MockDatabase()
         def snapshotFactory = new MockSnapshotGeneratorFactory()
@@ -129,7 +130,8 @@ public class AddColumnChangeTest extends StandardChangeTest {
                 .findAll({ ((AddColumnChange) it).getColumns().findAll({it.defaultValueObject != null}).size() > 0 })
     }
 
-    def "verifyUpdateDetails with auto-increment"() {
+    @Unroll
+    def "verifyUpdate with auto-increment"() {
         when:
         def database = new MockDatabase()
         def snapshotFactory = new MockSnapshotGeneratorFactory()
@@ -154,7 +156,8 @@ public class AddColumnChangeTest extends StandardChangeTest {
                 .findAll({ ((AddColumnChange) it).getColumns().findAll({it.isAutoIncrement() }).size() > 0})
     }
 
-    def "verifyUpdateDetails with primary key"() {
+    @Unroll
+    def "verifyUpdate with primary key"() {
         when:
         def database = new MockDatabase()
         def snapshotFactory = new MockSnapshotGeneratorFactory()

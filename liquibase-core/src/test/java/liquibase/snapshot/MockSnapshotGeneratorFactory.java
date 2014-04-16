@@ -35,6 +35,7 @@ public class MockSnapshotGeneratorFactory extends SnapshotGeneratorFactory{
                 for (Column column : ((Relation) object).getColumns()) {
                     this.objects.add(column);
                 }
+                this.objects.add(object.getSchema());
             }
         }
 

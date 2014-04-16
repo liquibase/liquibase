@@ -122,28 +122,14 @@ public interface Change extends LiquibaseSerializable {
     public boolean generateRollbackStatementsVolatile(Database database);
 
     /**
-     * Validate that this change executed successfully against the given database. This will check that the update completed at a high level without checking details.
-     * For example, a change to add a column will check that the column exists but will not check data type, default values, etc.
-     *
-     * @see #verifyExecutedDetailed(liquibase.database.Database)
+     * Validate that this change executed successfully against the given database. This will check that the update completed at a high level plus check details of the change.
+     * For example, a change to add a column will check that the column exists plus data type, default values, etc.
      */
     public VerificationResult verifyExecuted(Database database);
 
     /**
-     * Performs all the logic of {@link #verifyExecuted(liquibase.database.Database)} plus additional verification of update details.
-     * For example, a change to add a column will check not just that the column exists but also data type, default values, etc.
-     *
-     * @see #verifyExecuted(liquibase.database.Database)
-     */
-    public VerificationResult verifyExecutedDetailed(Database database);
-
-    /**
-     * Validate that this change rolled back successfully against the given database. This will check that the rollback completed at a high level without checking details of the rollback.
+     * Validate that this change rolled back successfully against the given database.
      */
     public VerificationResult verifyNotExecuted(Database database);
 
-    /**
-     * Performs all the logic of {@link #verifyNotExecuted(liquibase.database.Database)} plus additional verification of rollback details.
-     */
-    public VerificationResult verifyNotExecutedDetailed(Database database);
 }
