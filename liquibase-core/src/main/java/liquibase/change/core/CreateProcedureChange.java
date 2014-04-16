@@ -234,6 +234,11 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
     }
 
     @Override
+    public ChangeStatus checkStatus(Database database) {
+        return new ChangeStatus().unknown("Cannot check createProcedure status");
+    }
+
+    @Override
     public String getConfirmationMessage() {
         return "Stored procedure created";
     }
