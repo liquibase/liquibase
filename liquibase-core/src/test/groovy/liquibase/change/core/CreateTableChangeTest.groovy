@@ -158,7 +158,7 @@ public class CreateTableChangeTest extends StandardChangeTest {
         assert !keyConstraint.isInitiallyDeferred()
     }
 
-    def "verifyUpdate"() {
+    def "verifyExecuted"() {
         when:
         def change = new CreateTableChange()
         change.tableName = "test_table"

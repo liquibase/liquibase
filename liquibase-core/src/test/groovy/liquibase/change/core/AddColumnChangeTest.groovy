@@ -16,11 +16,11 @@ public class AddColumnChangeTest extends StandardChangeTest {
 
     def "add and remove column methods"() throws Exception {
         when:
-    	def columnA = new AddColumnConfig();
-    	columnA.setName("a");
+        def columnA = new AddColumnConfig();
+        columnA.setName("a");
 
         def columnB = new AddColumnConfig();
-    	columnB.setName("b");
+        columnB.setName("b");
 
         def change = new AddColumnChange();
 
@@ -53,7 +53,7 @@ public class AddColumnChangeTest extends StandardChangeTest {
         refactoring.getConfirmationMessage() == "Columns NEWCOL(TYP) added to TAB"
     }
 
-    def "verifyUpdate"() {
+    def "verifyExecuted and verifyNotExecuted"() {
         when:
         def database = new MockDatabase()
         def snapshotFactory = new MockSnapshotGeneratorFactory()
@@ -79,33 +79,65 @@ public class AddColumnChangeTest extends StandardChangeTest {
         change.addColumn(testColumnConfig)
 
         then: "table is not there yet"
-        assert !change.verifyExecuted(database).verifiedPassed
+        assert change.verifyExecuted(database).verifiedFailed
+        assert change.verifyNotExecuted(database).verifiedPassed
 
         when: "Table exists but not column"
         snapshotFactory.addObjects(table)
         then:
-        assert !change.verifyExecuted(database).verifiedPassed
+        assert change.verifyExecuted(database).verifiedFailed
+        assert change.verifyNotExecuted(database).verifiedPassed
 
         when: "Column 1 is added"
         table.getColumns().add(testColumn)
         snapshotFactory.addObjects(testColumn)
         then:
         assert change.verifyExecuted(database).verifiedPassed
+        assert change.verifyNotExecuted(database).verifiedFailed
 
         when: "Change expects two columns"
         change.addColumn(testColumnConfig2)
         then:
-        assert !change.verifyExecuted(database).verifiedPassed
+        assert change.verifyExecuted(database).verifiedFailed
+        assert change.verifyNotExecuted(database).verifiedFailed // column 1 is there so notExecuted fails
 
         when: "Column 2 is added"
         table.getColumns().add(testColumn2)
         snapshotFactory.addObjects(testColumn2)
         then:
         assert change.verifyExecuted(database).verifiedPassed
+        assert change.verifyNotExecuted(database).verifiedFailed
     }
 
     @Unroll
-    def "verifyUpdate with default value"() {
+    def "verifyExecuted and verifyNotExecuted with default value"() {
+        when:
+        def database = new MockDatabase()
+        def snapshotFactory = new MockSnapshotGeneratorFactory()
+        SnapshotGeneratorFactory.instance = snapshotFactory
+
+        def table = new Table(((AddColumnChange) change).getCatalogName(), ((AddColumnChange) change).getSchemaName(), ((AddColumnChange) change).getTableName())
+        snapshotFactory.addObjects(table)
+
+        then:
+        assert !change.verifyExecuted(database).verifiedPassed
+
+        when: "Column is added"
+        addColumnsToSnapshot(table, change, snapshotFactory)
+
+        then:
+        assert change.verifyExecuted(database).verifiedPassed
+        assert change.verifyNotExecuted(database).verifiedFailed
+
+        where:
+        change << changeSupplier
+                .getSupplier(AddColumnChange.class).getAllParameterPermutations(new MockDatabase())
+                .findAll({ changeSupplier.isValid(it, new MockDatabase()) })
+                .findAll({ ((AddColumnChange) it).getColumns().findAll({ it.defaultValueObject != null }).size() > 0 })
+    }
+
+    @Unroll
+    def "verifyExecuted with auto-increment"() {
         when:
         def database = new MockDatabase()
         def snapshotFactory = new MockSnapshotGeneratorFactory()
@@ -126,38 +158,12 @@ public class AddColumnChangeTest extends StandardChangeTest {
         where:
         change << changeSupplier
                 .getSupplier(AddColumnChange.class).getAllParameterPermutations(new MockDatabase())
-                .findAll({changeSupplier.isValid(it, new MockDatabase())})
-                .findAll({ ((AddColumnChange) it).getColumns().findAll({it.defaultValueObject != null}).size() > 0 })
+                .findAll({ changeSupplier.isValid(it, new MockDatabase()) })
+                .findAll({ ((AddColumnChange) it).getColumns().findAll({ it.isAutoIncrement() }).size() > 0 })
     }
 
     @Unroll
-    def "verifyUpdate with auto-increment"() {
-        when:
-        def database = new MockDatabase()
-        def snapshotFactory = new MockSnapshotGeneratorFactory()
-        SnapshotGeneratorFactory.instance = snapshotFactory
-
-        def table = new Table(((AddColumnChange) change).getCatalogName(), ((AddColumnChange) change).getSchemaName(), ((AddColumnChange) change).getTableName())
-        snapshotFactory.addObjects(table)
-
-        then:
-        assert !change.verifyExecuted(database).verifiedPassed
-
-        when: "Column is added"
-        addColumnsToSnapshot(table, change, snapshotFactory)
-
-        then:
-        assert change.verifyExecuted(database).verifiedPassed
-
-        where:
-        change << changeSupplier
-                .getSupplier(AddColumnChange.class).getAllParameterPermutations(new MockDatabase())
-                .findAll({changeSupplier.isValid(it, new MockDatabase())})
-                .findAll({ ((AddColumnChange) it).getColumns().findAll({it.isAutoIncrement() }).size() > 0})
-    }
-
-    @Unroll
-    def "verifyUpdate with primary key"() {
+    def "verifyExecuted with primary key"() {
         when:
         def database = new MockDatabase()
         def snapshotFactory = new MockSnapshotGeneratorFactory()
@@ -181,8 +187,12 @@ public class AddColumnChangeTest extends StandardChangeTest {
         where:
         change << changeSupplier
                 .getSupplier(AddColumnChange.class).getAllParameterPermutations(new MockDatabase())
-                .findAll({changeSupplier.isValid(it, new MockDatabase())})
-                .findAll({ ((AddColumnChange) it).getColumns().findAll({it.getConstraints() != null && it.getConstraints().isPrimaryKey()}).size() > 0 })
+                .findAll({ changeSupplier.isValid(it, new MockDatabase()) })
+                .findAll({
+            ((AddColumnChange) it).getColumns().findAll({
+                it.getConstraints() != null && it.getConstraints().isPrimaryKey()
+            }).size() > 0
+        })
     }
 
     protected void addColumnsToSnapshot(Table table, Change change, MockSnapshotGeneratorFactory snapshotFactory) {
@@ -207,29 +217,4 @@ public class AddColumnChangeTest extends StandardChangeTest {
             }
         }
     }
-
-    def "verifyNotExecuted"() {
-        when:
-        def database = new MockDatabase()
-        def snapshotFactory = new MockSnapshotGeneratorFactory()
-        SnapshotGeneratorFactory.instance = snapshotFactory
-
-        def table = new Table(null, null, "test_table")
-        def testColumn = new Column(Table.class, null, null, table.name, "test_col")
-        table.getColumns().add(new Column(Table.class, null, null, table.name, "other_col"))
-
-        def change = new AddColumnChange()
-        change.tableName = table.name
-        change.addColumn(new AddColumnConfig().setName(testColumn.name))
-
-        then: "column is not there"
-        assert change.verifyNotExecuted(database).verifiedPassed
-
-        when: "Column is there"
-        table.getColumns().add(testColumn)
-        snapshotFactory.addObjects(testColumn)
-        then:
-        assert change.verifyNotExecuted(database).verifiedFailed
-    }
-
 }

@@ -31,7 +31,7 @@ public class AddForeignKeyConstraintChangeTest extends StandardChangeTest {
     }
 
     @Unroll
-    def "verifyUpdate"() {
+    def "verifyExecuted"() {
         when:
         def database = new MockDatabase()
         def snapshotFactory = new MockSnapshotGeneratorFactory()
@@ -77,49 +77,19 @@ public class AddForeignKeyConstraintChangeTest extends StandardChangeTest {
         }
         snapshotFactory.addObjects(fk)
         then:
-        assert change.verifyExecuted(database).verifiedPassed == expectedResult
+        assert change.verifyExecuted(database).verifiedPassed == expectedExecutedResult
+        assert change.verifyNotExecuted(database).verifiedPassed == expectedNotExecutedResult
+
 
         where:
-        snapshotRefTable | snapshotRefColumn | changeDeferrable | changeInitiallyDeferred | snapshotDeferrable | snapshotInitiallyDeferred | expectedResult
-        "ref_table"  | "ref_col"  | null | null | null | null | true
-        "ref_table2" | "ref_col"  | null | null | null | null | false
-        "ref_table"  | "ref_col2" | null | null | null | null | false
-        "ref_table"  | "ref_col"  | true | true | true | true | true
-        "ref_table"  | "ref_col"  | null | null | null | true | true
-        "ref_table"  | "ref_col"  | null | null | true | null | true
-        "ref_table"  | "ref_col"  | true | null | null | null | false
-        "ref_table"  | "ref_col"  | null | true | null | null | false
-    }
-
-    def "verifyNotExecuted"() {
-        when:
-        def database = new MockDatabase()
-        def snapshotFactory = new MockSnapshotGeneratorFactory()
-        SnapshotGeneratorFactory.instance = snapshotFactory
-
-        def baseTable = new Table(null, null, "base_table")
-        def baseColumn = new Column(Table.class, null, null, baseTable.name, "base_col")
-        baseTable.getColumns().add(new Column(Table.class, null, null, baseTable.name, "other_col"))
-        baseTable.getColumns().add(baseColumn)
-
-        def refTable = new Table(null, null, "ref_table")
-        def refColumn = new Column(Table.class, null, null, refTable.name, "ref_col")
-        refTable.getColumns().add(refColumn)
-
-        snapshotFactory.addObjects(baseTable, refTable)
-
-        def change = new AddForeignKeyConstraintChange()
-        change.baseTableName = baseTable.name
-        change.baseColumnNames = baseColumn.name
-        change.referencedTableName = refTable.name
-        change.referencedColumnNames = refColumn.name
-
-        then: "fk is not there"
-        assert change.verifyNotExecuted(database).verifiedPassed
-
-        when: "FK is there"
-        snapshotFactory.addObjects(new ForeignKey(null, null, null, baseTable.name, baseColumn.name).setPrimaryKeyTable(refTable).addPrimaryKeyColumn(refColumn.name))
-        then:
-        assert change.verifyNotExecuted(database).verifiedFailed
+        snapshotRefTable | snapshotRefColumn | changeDeferrable | changeInitiallyDeferred | snapshotDeferrable | snapshotInitiallyDeferred | expectedExecutedResult | expectedNotExecutedResult
+        "ref_table"  | "ref_col"  | null | null | null | null | true  | false
+        "ref_table2" | "ref_col"  | null | null | null | null | false | true
+        "ref_table"  | "ref_col2" | null | null | null | null | false | true
+        "ref_table"  | "ref_col"  | true | true | true | true | true  | false
+        "ref_table"  | "ref_col"  | null | null | null | true | true  | false
+        "ref_table"  | "ref_col"  | null | null | true | null | true  | false
+        "ref_table"  | "ref_col"  | true | null | null | null | false | false
+        "ref_table"  | "ref_col"  | null | true | null | null | false | false
     }
 }

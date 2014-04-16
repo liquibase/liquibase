@@ -217,7 +217,7 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
             for (AddColumnConfig column : getColumns()) {
                 boolean exists = SnapshotGeneratorFactory.getInstance().has(new Column(Table.class, getCatalogName(), getSchemaName(), getTableName(), column.getName()), database);
                 if (exists) {
-                    return new VerificationResult(false, "Column "+column.getName()+" does exists");
+                    return new VerificationResult(false, "Column "+column.getName()+" does exist");
                 }
             }
         } catch (Exception e) {

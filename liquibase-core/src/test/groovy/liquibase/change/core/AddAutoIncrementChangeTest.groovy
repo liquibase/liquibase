@@ -39,7 +39,7 @@ public class AddAutoIncrementChangeTest extends StandardChangeTest {
     }
 
     @Unroll("#featureName with #columnStartWith / #columnIncrementBy vs #changeStartWith / #changeIncrementBy")
-    def "verifyUpdate"() {
+    def "verifyExecuted"() {
         when:
         def database = new MockDatabase()
         def snapshotFactory = new MockSnapshotGeneratorFactory()
@@ -56,57 +56,32 @@ public class AddAutoIncrementChangeTest extends StandardChangeTest {
 
         then:
         assert !change.verifyExecuted(database).verified
+        assert !change.verifyNotExecuted(database).verified
+
 
         when: "Objects exist but not auto-increment"
         snapshotFactory.addObjects(table)
         then:
-        assert !change.verifyExecuted(database).verifiedPassed
+        assert change.verifyExecuted(database).verifiedFailed
+        assert change.verifyNotExecuted(database).verifiedPassed
 
         when: "Column is auto-increment"
         testColumn.autoIncrementInformation = new Column.AutoIncrementInformation(columnStartWith, columnIncrementBy)
         change.startWith = changeStartWith
         change.incrementBy = changeIncrementBy
         then:
-        change.verifyExecuted(database).verifiedPassed == expectedResult
+        change.verifyExecuted(database).verifiedPassed == expectedExecutedResult
+        change.verifyNotExecuted(database).verifiedPassed == expectedNotExecutedResult
 
         where:
-        columnStartWith | columnIncrementBy | changeStartWith | changeIncrementBy | expectedResult
-        null | null | null | null | true
-        2    | 4    | null | null | true
-        2    | 4    | 2    | null | true
-        2    | 4    | null | 4    | true
-        2    | 4    | 2    | 4    | true
-        3    | 5    | 1    | 5    | false
-        3    | 5    | 3    | 2    | false
+        columnStartWith | columnIncrementBy | changeStartWith | changeIncrementBy | expectedExecutedResult | expectedNotExecutedResult
+        null | null | null | null | true  | false
+        2    | 4    | null | null | true  | false
+        2    | 4    | 2    | null | true  | false
+        2    | 4    | null | 4    | true  | false
+        2    | 4    | 2    | 4    | true  | false
+        3    | 5    | 1    | 5    | false | false
+        3    | 5    | 3    | 2    | false | false
 
-    }
-
-    def "verifyNotExecuted"() {
-        when:
-        def database = new MockDatabase()
-        def snapshotFactory = new MockSnapshotGeneratorFactory()
-        SnapshotGeneratorFactory.instance = snapshotFactory
-
-        def table = new Table(null, null, "test_table")
-        def testColumn = new Column(Table.class, null, null, table.name, "test_col")
-        table.getColumns().add(new Column(Table.class, null, null, table.name, "other_col"))
-        table.getColumns().add(testColumn)
-
-        def change = new AddAutoIncrementChange()
-        change.tableName = table.name
-        change.columnName = testColumn.name
-
-        then:
-        assert !change.verifyNotExecuted(database).verified
-
-        when: "Objects exist but not auto-increment"
-        snapshotFactory.addObjects(table)
-        then:
-        assert change.verifyNotExecuted(database).verifiedPassed
-
-        when: "Column is auto-increment"
-        testColumn.autoIncrementInformation = new Column.AutoIncrementInformation()
-        then:
-        assert !change.verifyNotExecuted(database).verifiedPassed
     }
 }
