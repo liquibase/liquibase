@@ -1,5 +1,6 @@
 package liquibase.change.core
 
+import liquibase.change.ChangeStatus
 import liquibase.change.StandardChangeTest;
 import liquibase.database.core.MockDatabase
 import liquibase.snapshot.MockSnapshotGeneratorFactory
@@ -23,8 +24,8 @@ public class AddDefaultValueChangeTest extends StandardChangeTest {
         change.getConfirmationMessage() == "Default value added to TABLE_NAME.COLUMN_NAME"
     }
 
-    @Unroll("#featureName with snapshot/change default values of #snapshotDefaultValue / #changeDefaultValue")
-    def "verifyExecuted"() {
+    @Unroll
+    def "checkStatus"() {
         when:
         def database = new MockDatabase()
         def snapshotFactory = new MockSnapshotGeneratorFactory()
@@ -34,7 +35,6 @@ public class AddDefaultValueChangeTest extends StandardChangeTest {
         def testColumn = new Column(Table.class, null, null, table.name, "test_col")
         table.getColumns().add(new Column(Table.class, null, null, table.name, "other_col"))
         table.getColumns().add(testColumn)
-        snapshotFactory.addObjects(table)
 
         def change = new AddDefaultValueChange()
         change.tableName = table.name
@@ -43,35 +43,35 @@ public class AddDefaultValueChangeTest extends StandardChangeTest {
         change."$methodName" = changeDefaultValue
 
         then:
-        assert change.verifyExecuted(database).verifiedFailed
+        assert change.checkStatus(database).status == ChangeStatus.Status.unknown
 
         when: "Objects exist no default value"
         snapshotFactory.addObjects(table)
         then:
-        assert change.verifyExecuted(database).verifiedFailed
+        assert change.checkStatus(database).status == ChangeStatus.Status.notApplied
 
         when: "Column has a default value"
         testColumn.defaultValue = snapshotDefaultValue
         then:
-        assert change.verifyExecuted(database).verifiedPassed == expectedExecutedResult
+        assert change.checkStatus(database).status == expectedResult
 
         where:
-        snapshotDefaultValue | changeDefaultValue | methodName | expectedExecutedResult | expectedNotExecutedResult
-        "car"                                      | "car"                                     | "defaultValue"             | true  | false
-        "car"                                      | "boat"                                    | "defaultValue"             | false | true
-        2                                          | 2                                         | "defaultValueNumeric"      | true  | false
-        2.1                                        | 2.1                                       | "defaultValueNumeric"      | true  | false
-        2.1                                        | 8                                         | "defaultValueNumeric"      | false | true
-        new java.sql.Date(3813898913)              | "1970-02-13"                              | "defaultValueDate"         | true  | false
-        new java.sql.Date(3813898913)              | "1870-02-13"                              | "defaultValueDate"         | false | true
-        new java.sql.Timestamp(3813898913)         | "1970-02-13T21:24:58.913"                 | "defaultValueDate"         | true  | false
-        true                                       | true                                      | "defaultValueBoolean"      | true  | false
-        true                                       | false                                     | "defaultValueBoolean"      | false | true
-        false                                      | false                                     | "defaultValueBoolean"      | true  | false
-        false                                      | true                                      | "defaultValueBoolean"      | false | true
-        new DatabaseFunction("now()")              | new DatabaseFunction("now()")             | "defaultValueComputed"     | true  | false
-        new DatabaseFunction("now()")              | new DatabaseFunction("later()")           | "defaultValueComputed"     | false | true
-        new SequenceNextValueFunction("seq_test")  | new SequenceNextValueFunction("seq_test") | "defaultValueSequenceNext" | true  | false
-        new SequenceNextValueFunction("seq_other") | new SequenceNextValueFunction("seq_test") | "defaultValueSequenceNext" | false | true
+        snapshotDefaultValue | changeDefaultValue | methodName | expectedResult
+        "car"                                      | "car"                                     | "defaultValue"             | ChangeStatus.Status.complete
+        "car"                                      | "boat"                                    | "defaultValue"             | ChangeStatus.Status.incorrect
+        2                                          | 2                                         | "defaultValueNumeric"      | ChangeStatus.Status.complete
+        2.1                                        | 2.1                                       | "defaultValueNumeric"      | ChangeStatus.Status.complete
+        2.1                                        | 8                                         | "defaultValueNumeric"      | ChangeStatus.Status.incorrect
+        new java.sql.Date(3813898913)              | "1970-02-13"                              | "defaultValueDate"         | ChangeStatus.Status.complete
+        new java.sql.Date(3813898913)              | "1870-02-13"                              | "defaultValueDate"         | ChangeStatus.Status.incorrect
+        new java.sql.Timestamp(3813898913)         | "1970-02-13T21:24:58.913"                 | "defaultValueDate"         | ChangeStatus.Status.complete
+        true                                       | true                                      | "defaultValueBoolean"      | ChangeStatus.Status.complete
+        true                                       | false                                     | "defaultValueBoolean"      | ChangeStatus.Status.incorrect
+        false                                      | false                                     | "defaultValueBoolean"      | ChangeStatus.Status.complete
+        false                                      | true                                      | "defaultValueBoolean"      | ChangeStatus.Status.incorrect
+        new DatabaseFunction("now()")              | new DatabaseFunction("now()")             | "defaultValueComputed"     | ChangeStatus.Status.complete
+        new DatabaseFunction("now()")              | new DatabaseFunction("later()")           | "defaultValueComputed"     | ChangeStatus.Status.incorrect
+        new SequenceNextValueFunction("seq_test")  | new SequenceNextValueFunction("seq_test") | "defaultValueSequenceNext" | ChangeStatus.Status.complete
+        new SequenceNextValueFunction("seq_other") | new SequenceNextValueFunction("seq_test") | "defaultValueSequenceNext" | ChangeStatus.Status.incorrect
     }
 }

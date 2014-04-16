@@ -144,22 +144,12 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
     }
 
     @Override
-    public VerificationResult verifyExecuted(Database database) {
+    public ChangeStatus checkStatus(Database database) {
         try {
             Table example = (Table) new Table().setName(getTableName()).setSchema(getCatalogName(), getSchemaName());
-            return new VerificationResult(SnapshotGeneratorFactory.getInstance().has(example, database), "Table does not exist");
+            return new ChangeStatus().assertComplete(SnapshotGeneratorFactory.getInstance().has(example, database), "Table does not exist");
         } catch (Exception e) {
-            return new VerificationResult.Unverified(e.getMessage());
-        }
-    }
-
-    @Override
-    public VerificationResult verifyNotExecuted(Database database) {
-        try {
-            Table example = (Table) new Table().setName(getTableName()).setSchema(getCatalogName(), getSchemaName());
-            return new VerificationResult(!SnapshotGeneratorFactory.getInstance().has(example, database));
-        } catch (Exception e) {
-            return new VerificationResult.Unverified(e);
+            return new ChangeStatus().unknown(e.getMessage());
         }
     }
 

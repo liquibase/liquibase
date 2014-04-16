@@ -117,41 +117,26 @@ public class AddAutoIncrementChange extends AbstractChange {
     }
 
     @Override
-    public VerificationResult verifyExecuted(Database database) {
+    public ChangeStatus checkStatus(Database database) {
+        ChangeStatus result = new ChangeStatus();
         Column example = new Column(Table.class, getCatalogName(), getSchemaName(), getTableName(), getColumnName());
         try {
             Column column = SnapshotGeneratorFactory.getInstance().createSnapshot(example, database);
-            if (column == null) return new VerificationResult.Unverified("Column does not exist");
+            if (column == null) return result.unknown("Column does not exist");
 
 
-            VerificationResult result = new VerificationResult(column.isAutoIncrement(), "Column is not auto-increment");
+            result.assertComplete(column.isAutoIncrement(), "Column is not auto-increment");
             if (getStartWith() != null && column.getAutoIncrementInformation().getStartWith() != null) {
-                result.additionalCheck(getStartWith().equals(column.getAutoIncrementInformation().getStartWith()), "startsWith incorrect");
+                result.assertCorrect(getStartWith().equals(column.getAutoIncrementInformation().getStartWith()), "startsWith incorrect");
             }
 
             if (getIncrementBy() != null && column.getAutoIncrementInformation().getIncrementBy() != null) {
-                result.additionalCheck(getIncrementBy().equals(column.getAutoIncrementInformation().getIncrementBy()), "Increment by incorrect");
+                result.assertCorrect(getIncrementBy().equals(column.getAutoIncrementInformation().getIncrementBy()), "Increment by incorrect");
             }
 
             return result;
         } catch (Exception e) {
-            return new VerificationResult.Unverified(e);
-        }
-
-
-    }
-
-    @Override
-    public VerificationResult verifyNotExecuted(Database database) {
-        Column example = new Column(Table.class, getCatalogName(), getSchemaName(), getTableName(), getColumnName());
-        try {
-            Column column = SnapshotGeneratorFactory.getInstance().createSnapshot(example, database);
-            if (column == null) {
-                return new VerificationResult.Unverified("Column does not exist");
-            }
-            return new VerificationResult(!column.isAutoIncrement(), "Column is still auto-increment");
-        } catch (Exception e) {
-            return new VerificationResult.Unverified(e);
+            return result.unknown(e);
         }
 
 

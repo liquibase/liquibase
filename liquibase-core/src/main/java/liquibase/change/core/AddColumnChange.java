@@ -187,44 +187,27 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
     }
 
     @Override
-    public VerificationResult verifyExecuted(Database database) {
+    public ChangeStatus checkStatus(Database database) {
+        ChangeStatus result = new ChangeStatus();
         try {
-            VerificationResult result = new VerificationResult(true);
             for (AddColumnConfig column : getColumns()) {
                 Column snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(new Column(Table.class, getCatalogName(), getSchemaName(), getTableName(), column.getName()), database);
-                if (snapshot == null) {
-                    return new VerificationResult(false, "Column "+column.getName()+" does not exist");
-                }
+                result.assertComplete(snapshot != null, "Column "+column.getName()+" does not exist");
 
-                PrimaryKey snapshotPK = ((Table) snapshot.getRelation()).getPrimaryKey();
+                if (snapshot != null) {
+                    PrimaryKey snapshotPK = ((Table) snapshot.getRelation()).getPrimaryKey();
 
-                ConstraintsConfig constraints = column.getConstraints();
-                if (constraints != null) {
-                    result.additionalCheck(constraints.isPrimaryKey() == (snapshotPK != null && snapshotPK.getColumnNamesAsList().contains(column.getName())), "Column "+column.getName()+" not set as primary key");
-                }
-
-            }
-        } catch (Exception e) {
-            return new VerificationResult.Unverified(e);
-        }
-
-        return new VerificationResult(true);
-    }
-
-    @Override
-    public VerificationResult verifyNotExecuted(Database database) {
-        try {
-            for (AddColumnConfig column : getColumns()) {
-                boolean exists = SnapshotGeneratorFactory.getInstance().has(new Column(Table.class, getCatalogName(), getSchemaName(), getTableName(), column.getName()), database);
-                if (exists) {
-                    return new VerificationResult(false, "Column "+column.getName()+" does exist");
+                    ConstraintsConfig constraints = column.getConstraints();
+                    if (constraints != null) {
+                        result.assertComplete(constraints.isPrimaryKey() == (snapshotPK != null && snapshotPK.getColumnNamesAsList().contains(column.getName())), "Column " + column.getName() + " not set as primary key");
+                    }
                 }
             }
         } catch (Exception e) {
-            return new VerificationResult.Unverified(e);
+            return result.unknown(e);
         }
 
-        return new VerificationResult(true);
+        return result;
     }
 
     @Override

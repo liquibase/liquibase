@@ -225,7 +225,8 @@ public class AddLookupTableChange extends AbstractChange {
     }
 
     @Override
-    public VerificationResult verifyExecuted(Database database) {
+    public ChangeStatus checkStatus(Database database) {
+        ChangeStatus result = new ChangeStatus();
         try {
             Table newTableExample = new Table(getNewTableCatalogName(), getNewTableSchemaName(), getNewTableName());
             Column newColumnExample = new Column(Table.class, getNewTableCatalogName(), getNewTableSchemaName(), getNewTableName(), getNewColumnName());
@@ -235,40 +236,14 @@ public class AddLookupTableChange extends AbstractChange {
             foreignKeyExample.setForeignKeyColumns(getExistingColumnName());
             foreignKeyExample.setPrimaryKeyColumns(getNewColumnName());
 
-            VerificationResult result = new VerificationResult(true);
-
-            result.additionalCheck(SnapshotGeneratorFactory.getInstance().has(newTableExample, database), "New table does not exist");
-            result.additionalCheck(SnapshotGeneratorFactory.getInstance().has(newColumnExample, database), "New column does not exist");
-            result.additionalCheck(SnapshotGeneratorFactory.getInstance().has(foreignKeyExample, database), "Foreign key does not exist");
+            result.assertComplete(SnapshotGeneratorFactory.getInstance().has(newTableExample, database), "New table does not exist");
+            result.assertComplete(SnapshotGeneratorFactory.getInstance().has(newColumnExample, database), "New column does not exist");
+            result.assertComplete(SnapshotGeneratorFactory.getInstance().has(foreignKeyExample, database), "Foreign key does not exist");
 
             return result;
 
         } catch (Exception e) {
-            return new VerificationResult.Unverified(e);
-        }
-    }
-
-    @Override
-    public VerificationResult verifyNotExecuted(Database database) {
-        try {
-            Table newTableExample = new Table(getNewTableCatalogName(), getNewTableSchemaName(), getNewTableName());
-            Column newColumnExample = new Column(Table.class, getNewTableCatalogName(), getNewTableSchemaName(), getNewTableName(), getNewColumnName());
-
-            ForeignKey foreignKeyExample = new ForeignKey(getConstraintName(), getExistingTableCatalogName(), getExistingTableSchemaName(), getExistingTableName());
-            foreignKeyExample.setPrimaryKeyTable(newTableExample);
-            foreignKeyExample.setForeignKeyColumns(getExistingColumnName());
-            foreignKeyExample.setPrimaryKeyColumns(getNewColumnName());
-
-            VerificationResult result = new VerificationResult(true);
-
-            result.additionalCheck(!SnapshotGeneratorFactory.getInstance().has(newTableExample, database), "New table exists");
-            result.additionalCheck(!SnapshotGeneratorFactory.getInstance().has(newColumnExample, database), "New column exist");
-            result.additionalCheck(!SnapshotGeneratorFactory.getInstance().has(foreignKeyExample, database), "Foreign key exists");
-
-            return result;
-
-        } catch (Exception e) {
-            return new VerificationResult.Unverified(e);
+            return result.unknown(e);
         }
     }
 

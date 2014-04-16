@@ -1,6 +1,7 @@
 package liquibase.change.core;
 
-import liquibase.change.ChangeFactory;
+import liquibase.change.ChangeFactory
+import liquibase.change.ChangeStatus;
 import liquibase.change.StandardChangeTest
 import liquibase.database.core.*
 import liquibase.snapshot.MockSnapshotGeneratorFactory
@@ -38,8 +39,8 @@ public class AddAutoIncrementChangeTest extends StandardChangeTest {
 
     }
 
-    @Unroll("#featureName with #columnStartWith / #columnIncrementBy vs #changeStartWith / #changeIncrementBy")
-    def "verifyExecuted"() {
+    @Unroll
+    def "checkStatus"() {
         when:
         def database = new MockDatabase()
         def snapshotFactory = new MockSnapshotGeneratorFactory()
@@ -55,33 +56,30 @@ public class AddAutoIncrementChangeTest extends StandardChangeTest {
         change.columnName = testColumn.name
 
         then:
-        assert !change.verifyExecuted(database).verified
-        assert !change.verifyNotExecuted(database).verified
+        assert change.checkStatus(database).status == ChangeStatus.Status.unknown
 
 
         when: "Objects exist but not auto-increment"
         snapshotFactory.addObjects(table)
         then:
-        assert change.verifyExecuted(database).verifiedFailed
-        assert change.verifyNotExecuted(database).verifiedPassed
+        assert change.checkStatus(database).status == ChangeStatus.Status.notApplied
 
         when: "Column is auto-increment"
         testColumn.autoIncrementInformation = new Column.AutoIncrementInformation(columnStartWith, columnIncrementBy)
         change.startWith = changeStartWith
         change.incrementBy = changeIncrementBy
         then:
-        change.verifyExecuted(database).verifiedPassed == expectedExecutedResult
-        change.verifyNotExecuted(database).verifiedPassed == expectedNotExecutedResult
+        change.checkStatus(database).status == expectedResult
 
         where:
-        columnStartWith | columnIncrementBy | changeStartWith | changeIncrementBy | expectedExecutedResult | expectedNotExecutedResult
-        null | null | null | null | true  | false
-        2    | 4    | null | null | true  | false
-        2    | 4    | 2    | null | true  | false
-        2    | 4    | null | 4    | true  | false
-        2    | 4    | 2    | 4    | true  | false
-        3    | 5    | 1    | 5    | false | false
-        3    | 5    | 3    | 2    | false | false
+        columnStartWith | columnIncrementBy | changeStartWith | changeIncrementBy | expectedResult
+        null | null | null | null | ChangeStatus.Status.complete
+        2    | 4    | null | null | ChangeStatus.Status.complete
+        2    | 4    | 2    | null | ChangeStatus.Status.complete
+        2    | 4    | null | 4    | ChangeStatus.Status.complete
+        2    | 4    | 2    | 4    | ChangeStatus.Status.complete
+        3    | 5    | 1    | 5    | ChangeStatus.Status.incorrect
+        3    | 5    | 3    | 2    | ChangeStatus.Status.incorrect
 
     }
 }

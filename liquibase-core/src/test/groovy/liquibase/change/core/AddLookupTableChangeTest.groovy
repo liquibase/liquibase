@@ -1,20 +1,13 @@
-package liquibase.change.core;
+package liquibase.change.core
 
-import liquibase.change.ChangeFactory;
-import liquibase.change.StandardChangeTest;
-import liquibase.database.Database;
-import liquibase.database.core.FirebirdDatabase;
-import liquibase.database.core.HsqlDatabase
-import liquibase.database.core.MockDatabase;
-import liquibase.database.core.SQLiteDatabase
+import liquibase.change.ChangeStatus
+import liquibase.change.StandardChangeTest
+import liquibase.database.core.MockDatabase
 import liquibase.snapshot.MockSnapshotGeneratorFactory
-import liquibase.snapshot.SnapshotGeneratorFactory;
-import liquibase.statement.SqlStatement
+import liquibase.snapshot.SnapshotGeneratorFactory
 import liquibase.structure.core.Column
 import liquibase.structure.core.ForeignKey
-import liquibase.structure.core.Table;
-
-import static org.junit.Assert.*;
+import liquibase.structure.core.Table
 
 public class AddLookupTableChangeTest extends StandardChangeTest {
 
@@ -28,7 +21,7 @@ public class AddLookupTableChangeTest extends StandardChangeTest {
         change.getConfirmationMessage() == "Lookup table added for OLD_TABLE_NAME.OLD_COLUMN_NAME"
     }
 
-    def "verifyExecuted and verifyNotExecuted"() {
+    def "checkStatus"() {
         when:
         def database = new MockDatabase()
         def snapshotFactory = new MockSnapshotGeneratorFactory()
@@ -55,19 +48,16 @@ public class AddLookupTableChangeTest extends StandardChangeTest {
         change.setConstraintName(fk.name)
 
         then: "no new table yet"
-        assert change.verifyExecuted(database).verifiedFailed
-        assert change.verifyNotExecuted(database).verifiedPassed
+        assert change.checkStatus(database).status == ChangeStatus.Status.notApplied
 
         when: "new table exists but no FK"
         snapshotFactory.addObjects(newTable)
         then:
-        assert change.verifyExecuted(database).verifiedFailed
-        assert change.verifyNotExecuted(database).verifiedFailed
+        assert change.checkStatus(database).status == ChangeStatus.Status.incorrect
 
         when: "FK and table exist"
         snapshotFactory.addObjects(fk)
         then:
-        assert change.verifyExecuted(database).verifiedPassed
-        assert change.verifyNotExecuted(database).verifiedFailed
+        assert change.checkStatus(database).status == ChangeStatus.Status.complete
     }
 }

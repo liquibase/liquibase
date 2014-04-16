@@ -1,5 +1,6 @@
 package liquibase.change.core
 
+import liquibase.change.ChangeStatus
 import liquibase.change.ColumnConfig
 import liquibase.change.ConstraintsConfig
 import liquibase.change.StandardChangeTest
@@ -158,7 +159,7 @@ public class CreateTableChangeTest extends StandardChangeTest {
         assert !keyConstraint.isInitiallyDeferred()
     }
 
-    def "verifyExecuted"() {
+    def "checkStatus"() {
         when:
         def change = new CreateTableChange()
         change.tableName = "test_table"
@@ -167,36 +168,17 @@ public class CreateTableChangeTest extends StandardChangeTest {
         SnapshotGeneratorFactory.instance = snapshotFactory
 
         then: "when no tables"
-        assert !change.verifyExecuted(database).passed
+        assert change.checkStatus(database).status == ChangeStatus.Status.notApplied
 
         when: "another table exists but not the target table"
         snapshotFactory.addObjects(new Table(null, null, "other_table"))
         then:
-        assert !change.verifyExecuted(database).passed
+        assert change.checkStatus(database).status == ChangeStatus.Status.notApplied
 
         when: "expected table exists"
         snapshotFactory.addObjects(new Table(null, null, "test_table"))
         then:
-        assert change.verifyExecuted(database).verifiedPassed
-
-    }
-
-    def "verifyRollback"() {
-        when:
-        def change = new CreateTableChange()
-        change.tableName = "test_table"
-        def database = new MockDatabase()
-        def snapshotFactory = new MockSnapshotGeneratorFactory()
-        SnapshotGeneratorFactory.instance = snapshotFactory
-
-        then:
-        assert change.verifyNotExecuted(database).passed
-
-        snapshotFactory.addObjects(new Table(null, null, "other_table"))
-        assert change.verifyNotExecuted(database).passed
-
-        snapshotFactory.addObjects(new Table(null, null, "test_table"))
-        assert !change.verifyNotExecuted(database).passed
+        assert change.checkStatus(database).status == ChangeStatus.Status.complete
 
     }
 }

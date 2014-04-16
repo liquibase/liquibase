@@ -1,21 +1,14 @@
-package liquibase.change.core;
+package liquibase.change.core
 
-import liquibase.change.ChangeFactory;
-import liquibase.change.StandardChangeTest;
-import liquibase.database.Database;
-import liquibase.database.core.MockDatabase;
-import liquibase.database.core.SQLiteDatabase
+import liquibase.change.ChangeStatus
+import liquibase.change.StandardChangeTest
+import liquibase.database.core.MockDatabase
 import liquibase.snapshot.MockSnapshotGeneratorFactory
-import liquibase.snapshot.SnapshotGeneratorFactory;
-import liquibase.statement.SqlStatement;
-import liquibase.statement.core.AddForeignKeyConstraintStatement
+import liquibase.snapshot.SnapshotGeneratorFactory
 import liquibase.structure.core.Column
 import liquibase.structure.core.ForeignKey
 import liquibase.structure.core.Table
-import spock.lang.Unroll;
-
-import static org.junit.Assert.*;
-import org.junit.Test;
+import spock.lang.Unroll
 
 public class AddForeignKeyConstraintChangeTest extends StandardChangeTest {
 
@@ -31,7 +24,7 @@ public class AddForeignKeyConstraintChangeTest extends StandardChangeTest {
     }
 
     @Unroll
-    def "verifyExecuted"() {
+    def "checkStatus"() {
         when:
         def database = new MockDatabase()
         def snapshotFactory = new MockSnapshotGeneratorFactory()
@@ -60,12 +53,12 @@ public class AddForeignKeyConstraintChangeTest extends StandardChangeTest {
         }
 
         then: "no table yet"
-        assert !change.verifyExecuted(database).passed
+        assert change.checkStatus(database).status == ChangeStatus.Status.notApplied
 
         when: "Objects exist no FK"
         snapshotFactory.addObjects(baseTable, refTable)
         then:
-        assert change.verifyExecuted(database).verifiedFailed
+        assert change.checkStatus(database).status == ChangeStatus.Status.notApplied
 
         when: "FK exists"
         def fk = new ForeignKey(null, null, null, baseTable.name, baseColumn.name).setPrimaryKeyTable(refTable).addPrimaryKeyColumn(refColumn.name)
@@ -77,19 +70,18 @@ public class AddForeignKeyConstraintChangeTest extends StandardChangeTest {
         }
         snapshotFactory.addObjects(fk)
         then:
-        assert change.verifyExecuted(database).verifiedPassed == expectedExecutedResult
-        assert change.verifyNotExecuted(database).verifiedPassed == expectedNotExecutedResult
+        assert change.checkStatus(database).status == expectedResult
 
 
         where:
-        snapshotRefTable | snapshotRefColumn | changeDeferrable | changeInitiallyDeferred | snapshotDeferrable | snapshotInitiallyDeferred | expectedExecutedResult | expectedNotExecutedResult
-        "ref_table"  | "ref_col"  | null | null | null | null | true  | false
-        "ref_table2" | "ref_col"  | null | null | null | null | false | true
-        "ref_table"  | "ref_col2" | null | null | null | null | false | true
-        "ref_table"  | "ref_col"  | true | true | true | true | true  | false
-        "ref_table"  | "ref_col"  | null | null | null | true | true  | false
-        "ref_table"  | "ref_col"  | null | null | true | null | true  | false
-        "ref_table"  | "ref_col"  | true | null | null | null | false | false
-        "ref_table"  | "ref_col"  | null | true | null | null | false | false
+        snapshotRefTable | snapshotRefColumn | changeDeferrable | changeInitiallyDeferred | snapshotDeferrable | snapshotInitiallyDeferred | expectedResult
+        "ref_table"  | "ref_col"  | null | null | null | null | ChangeStatus.Status.complete
+        "ref_table2" | "ref_col"  | null | null | null | null | ChangeStatus.Status.notApplied
+        "ref_table"  | "ref_col2" | null | null | null | null | ChangeStatus.Status.notApplied
+        "ref_table"  | "ref_col"  | true | true | true | true | ChangeStatus.Status.complete
+        "ref_table"  | "ref_col"  | null | null | null | true | ChangeStatus.Status.complete
+        "ref_table"  | "ref_col"  | null | null | true | null | ChangeStatus.Status.complete
+        "ref_table"  | "ref_col"  | true | null | null | null | ChangeStatus.Status.incorrect
+        "ref_table"  | "ref_col"  | null | true | null | null | ChangeStatus.Status.incorrect
     }
 }

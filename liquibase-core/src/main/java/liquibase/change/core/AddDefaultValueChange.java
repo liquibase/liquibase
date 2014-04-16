@@ -227,49 +227,36 @@ public class AddDefaultValueChange extends AbstractChange {
     }
 
     @Override
-    public VerificationResult verifyExecuted(Database database) {
+    public ChangeStatus checkStatus(Database database) {
+        ChangeStatus result = new ChangeStatus();
         try {
             Column column = SnapshotGeneratorFactory.getInstance().createSnapshot(new Column(Table.class, getCatalogName(), getSchemaName(), getTableName(), getColumnName()), database);
             if (column == null) {
-                return new VerificationResult.Unverified("Column " + getColumnName() + " does not exist");
+                return result.unknown("Column " + getColumnName() + " does not exist");
             }
 
+            result.assertComplete(column.getDefaultValue() != null, "Column "+getColumnName()+" has no default value");
             if (column.getDefaultValue() == null) {
-                return new VerificationResult(false, "Column "+getColumnName()+" has no default value");
+                return result;
             }
 
             if (getDefaultValue() != null) {
-                return new VerificationResult(getDefaultValue().equals(column.getDefaultValue()), "Default value was "+column.getDefaultValue());
+                return result.assertCorrect(getDefaultValue().equals(column.getDefaultValue()), "Default value was "+column.getDefaultValue());
             } else if (getDefaultValueDate() != null) {
-                return new VerificationResult(getDefaultValueDate().equals(new ISODateFormat().format((Date) column.getDefaultValue())), "Default value was "+column.getDefaultValue());
+                return result.assertCorrect(getDefaultValueDate().equals(new ISODateFormat().format((Date) column.getDefaultValue())), "Default value was "+column.getDefaultValue());
             } else if (getDefaultValueNumeric() != null) {
-                return new VerificationResult(getDefaultValueNumeric().equals(column.getDefaultValue().toString()), "Default value was "+column.getDefaultValue());
+                return result.assertCorrect(getDefaultValueNumeric().equals(column.getDefaultValue().toString()), "Default value was "+column.getDefaultValue());
             } else if (getDefaultValueBoolean() != null) {
-                return new VerificationResult(getDefaultValueBoolean().equals(column.getDefaultValue()), "Default value was "+column.getDefaultValue());
+                return result.assertCorrect(getDefaultValueBoolean().equals(column.getDefaultValue()), "Default value was "+column.getDefaultValue());
             } else if (getDefaultValueComputed() != null) {
-                return new VerificationResult(getDefaultValueComputed().equals(column.getDefaultValue()), "Default value was "+column.getDefaultValue());
+                return result.assertCorrect(getDefaultValueComputed().equals(column.getDefaultValue()), "Default value was "+column.getDefaultValue());
             } else if (getDefaultValueSequenceNext() != null) {
-                return new VerificationResult(getDefaultValueSequenceNext().equals(column.getDefaultValue()), "Default value was "+column.getDefaultValue());
+                return result.assertCorrect(getDefaultValueSequenceNext().equals(column.getDefaultValue()), "Default value was "+column.getDefaultValue());
             } else {
-                return new VerificationResult.Unverified("Unknown default value type");
+                return result.unknown("Unknown default value type");
             }
         } catch (Exception e) {
-            return new VerificationResult.Unverified(e);
-        }
-    }
-
-    @Override
-    public VerificationResult verifyNotExecuted(Database database) {
-        try {
-            Column column = SnapshotGeneratorFactory.getInstance().createSnapshot(new Column(Table.class, getCatalogName(), getSchemaName(), getTableName(), getColumnName()), database);
-            if (column == null) {
-                return new VerificationResult.Unverified("Column " + getColumnName() + " does not exist");
-            }
-
-            return new VerificationResult(column.getDefaultValue() == null, "Column "+getColumnName()+" has a default value");
-
-        } catch (Exception e) {
-            return new VerificationResult.Unverified(e);
+            return result.unknown(e);
         }
     }
 }
