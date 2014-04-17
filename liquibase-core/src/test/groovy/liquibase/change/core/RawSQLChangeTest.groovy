@@ -1,6 +1,11 @@
-package liquibase.change.core;
+package liquibase.change.core
 
-import liquibase.change.StandardChangeTest;
+import liquibase.change.ChangeStatus;
+import liquibase.change.StandardChangeTest
+import liquibase.database.core.MockDatabase
+import liquibase.snapshot.MockSnapshotGeneratorFactory
+import liquibase.snapshot.SnapshotGeneratorFactory;
+
 import static org.junit.Assert.*;
 
 import org.junit.Before;
@@ -24,6 +29,19 @@ public class RawSQLChangeTest extends StandardChangeTest {
     @Override
     protected boolean canUseStandardGenerateCheckSumTest() {
         return false;
+    }
+
+    def "checkStatus"() {
+        when:
+        def database = new MockDatabase()
+        def snapshotFactory = new MockSnapshotGeneratorFactory()
+        SnapshotGeneratorFactory.instance = snapshotFactory
+
+        def change = new RawSQLChange()
+
+        then:
+        assert change.checkStatus(database).status == ChangeStatus.Status.unknown
+        assert change.checkStatus(database).message == "Cannot check raw sql status"
     }
 
 }

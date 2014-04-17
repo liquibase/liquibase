@@ -1,11 +1,17 @@
-package liquibase.change.core;
+package liquibase.change.core
 
+import liquibase.change.ChangeStatus;
 import liquibase.change.StandardChangeTest;
 import liquibase.database.Database;
 import liquibase.database.core.FirebirdDatabase;
-import liquibase.database.core.MockDatabase;
+import liquibase.database.core.MockDatabase
+import liquibase.snapshot.MockSnapshotGeneratorFactory
+import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.SqlStatement;
-import liquibase.statement.core.RenameTableStatement;
+import liquibase.statement.core.RenameTableStatement
+import liquibase.structure.core.Column
+import liquibase.structure.core.Table;
+
 import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
@@ -20,5 +26,37 @@ public class RenameTableChangeTest extends StandardChangeTest {
 
         then:
         "Table OLD_NAME renamed to NEW_NAME" == change.getConfirmationMessage()
+    }
+
+    def "checkStatus"() {
+        when:
+        def database = new MockDatabase()
+        def snapshotFactory = new MockSnapshotGeneratorFactory()
+        SnapshotGeneratorFactory.instance = snapshotFactory
+
+        def oldTable = new Table(null, null, "test_table")
+        def newTable = new Table(null, null, "new_table")
+
+        def change = new RenameTableChange()
+        change.oldTableName= oldTable.name
+        change.newTableName= newTable.name
+
+        then: "neither table is not there yet"
+        assert change.checkStatus(database).status == ChangeStatus.Status.unknown
+
+        when: "old table is there"
+        snapshotFactory.addObjects(oldTable)
+        then:
+        assert change.checkStatus(database).status == ChangeStatus.Status.notApplied
+
+        when: "old and new tables are there"
+        snapshotFactory.addObjects(newTable)
+        then:
+        assert change.checkStatus(database).status == ChangeStatus.Status.unknown
+
+        when: "just new table is there"
+        snapshotFactory.removeObjects(oldTable)
+        then:
+        assert change.checkStatus(database).status == ChangeStatus.Status.complete
     }
 }

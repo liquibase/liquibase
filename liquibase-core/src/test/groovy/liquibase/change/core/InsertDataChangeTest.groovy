@@ -1,13 +1,11 @@
-package liquibase.change.core;
+package liquibase.change.core
 
-import liquibase.change.StandardChangeTest;
-import liquibase.change.ColumnConfig;
-import liquibase.database.core.MockDatabase;
-import liquibase.statement.SqlStatement;
-import liquibase.statement.core.InsertStatement;
-import static org.junit.Assert.*;
-import org.junit.Before;
-import org.junit.Test;
+import liquibase.change.ChangeStatus
+import liquibase.change.ColumnConfig
+import liquibase.change.StandardChangeTest
+import liquibase.database.core.MockDatabase
+import liquibase.snapshot.MockSnapshotGeneratorFactory
+import liquibase.snapshot.SnapshotGeneratorFactory
 
 public class InsertDataChangeTest extends StandardChangeTest {
 
@@ -44,5 +42,18 @@ public class InsertDataChangeTest extends StandardChangeTest {
     @Override
     protected String getExpectedChangeName() {
         return "insert"
+    }
+
+    def "checkStatus"() {
+        when:
+        def database = new MockDatabase()
+        def snapshotFactory = new MockSnapshotGeneratorFactory()
+        SnapshotGeneratorFactory.instance = snapshotFactory
+
+        def change = new InsertDataChange()
+
+        then:
+        assert change.checkStatus(database).status == ChangeStatus.Status.unknown
+        assert change.checkStatus(database).message == "Cannot check insertData status"
     }
 }

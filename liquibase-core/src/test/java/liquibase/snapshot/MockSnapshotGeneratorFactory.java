@@ -41,6 +41,18 @@ public class MockSnapshotGeneratorFactory extends SnapshotGeneratorFactory{
 
     }
 
+    public void removeObjects(DatabaseObject... objects) {
+        for (DatabaseObject object : objects) {
+            this.objects.remove(object);
+
+            if (object instanceof Relation) {
+                for (Column column : ((Relation) object).getColumns()) {
+                    this.objects.remove(column);
+                }
+            }
+        }
+
+    }
 
 
 }

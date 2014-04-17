@@ -2,9 +2,12 @@ package liquibase.change.core
 
 import liquibase.change.Change
 import liquibase.change.ChangeFactory
+import liquibase.change.ChangeStatus
 import liquibase.change.StandardChangeTest;
 import liquibase.database.core.MockDatabase;
-import liquibase.resource.ClassLoaderResourceAccessor;
+import liquibase.resource.ClassLoaderResourceAccessor
+import liquibase.snapshot.MockSnapshotGeneratorFactory
+import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.InsertStatement
 import spock.lang.Unroll;
@@ -147,5 +150,18 @@ public class LoadDataChangeTest extends StandardChangeTest {
     @Override
     protected boolean canUseStandardGenerateCheckSumTest() {
         return false
+    }
+
+    def "checkStatus"() {
+        when:
+        def database = new MockDatabase()
+        def snapshotFactory = new MockSnapshotGeneratorFactory()
+        SnapshotGeneratorFactory.instance = snapshotFactory
+
+        def change = new LoadDataChange()
+
+        then:
+        assert change.checkStatus(database).status == ChangeStatus.Status.unknown
+        assert change.checkStatus(database).message == "Cannot check loadData status"
     }
 }
