@@ -1,11 +1,13 @@
 package liquibase.change.core
 
-import liquibase.change.ChangeFactory;
+import liquibase.change.ChangeFactory
+import liquibase.change.ChangeStatus;
 import liquibase.change.CheckSum
 import liquibase.change.StandardChangeTest;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.ChangeSet;
-import liquibase.changelog.DatabaseChangeLog;
+import liquibase.changelog.DatabaseChangeLog
+import liquibase.database.core.MockDatabase;
 import liquibase.parser.ChangeLogParser;
 import liquibase.parser.ChangeLogParserFactory;
 import liquibase.resource.CompositeResourceAccessor;
@@ -36,6 +38,16 @@ public class UpdateDataChangeTest extends StandardChangeTest {
     @Override
     protected String getExpectedChangeName() {
         return "update"
+    }
+
+    def "checkStatus"() {
+        when:
+        def database = new MockDatabase()
+        def change = new UpdateDataChange()
+
+        then:
+        assert change.checkStatus(database).status == ChangeStatus.Status.unknown
+        assert change.checkStatus(database).message == "Cannot check updateData status"
     }
 
 

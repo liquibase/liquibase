@@ -88,9 +88,6 @@ public class SQLFileChangeTest extends StandardChangeTest {
     def "checkStatus"() {
         when:
         def database = new MockDatabase()
-        def snapshotFactory = new MockSnapshotGeneratorFactory()
-        SnapshotGeneratorFactory.instance = snapshotFactory
-
         def change = new RawSQLChange()
 
         then:
