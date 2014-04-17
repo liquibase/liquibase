@@ -11,6 +11,9 @@ import liquibase.statement.DatabaseFunction
 import liquibase.statement.ForeignKeyConstraint
 import liquibase.statement.SequenceNextValueFunction
 import liquibase.statement.core.CreateTableStatement
+import liquibase.structure.core.Column
+import liquibase.structure.core.DataType
+import liquibase.structure.core.PrimaryKey
 import liquibase.structure.core.Table
 import spock.lang.Unroll
 
@@ -161,8 +164,17 @@ public class CreateTableChangeTest extends StandardChangeTest {
 
     def "checkStatus"() {
         when:
+        def table = new Table(null, null, "test_table")
+        def column1 = new Column(Table.class, table.schema.catalogName, table.schema.name, table.name, "column_1").setType(new DataType("int")).setRelation(table)
+        def column2 = new Column(Table.class, table.schema.catalogName, table.schema.name, table.name, "column_2").setType(new DataType("boolean")).setRelation(table)
+        def column3 = new Column(Table.class, table.schema.catalogName, table.schema.name, table.name, "column_3").setType(new DataType("varchar(10)")).setRelation(table)
+
         def change = new CreateTableChange()
-        change.tableName = "test_table"
+        change.tableName = table.name
+        change.addColumn(new ColumnConfig(column1).setType(column1.type.toString()))
+        change.addColumn(new ColumnConfig(column2).setType(column2.type.toString()))
+        change.addColumn(new ColumnConfig(column3).setType(column3.type.toString()))
+
         def database = new MockDatabase()
         def snapshotFactory = new MockSnapshotGeneratorFactory()
         SnapshotGeneratorFactory.instance = snapshotFactory
@@ -175,8 +187,38 @@ public class CreateTableChangeTest extends StandardChangeTest {
         then:
         assert change.checkStatus(database).status == ChangeStatus.Status.notApplied
 
-        when: "expected table exists"
-        snapshotFactory.addObjects(new Table(null, null, "test_table"))
+        when: "expected table exists but is missing columns"
+        table.getColumns().add(column1)
+        table.getColumns().add(column2)
+        snapshotFactory.addObjects(table)
+        then:
+        assert change.checkStatus(database).status == ChangeStatus.Status.incorrect
+
+        when: "all columns exist"
+        table.getColumns().add(column3)
+        snapshotFactory.addObjects(column3)
+        then:
+        assert change.checkStatus(database).status == ChangeStatus.Status.complete
+
+        when: "column is supposed to be primary key but table is not"
+        change.getColumns().get(0).setConstraints(new ConstraintsConfig().setPrimaryKey(true))
+        then:
+        assert change.checkStatus(database).status == ChangeStatus.Status.incorrect
+
+        when: "table has primary key as expected"
+        def pk = new PrimaryKey("pk_test", table.schema.catalogName, table.schema.name, table.name, column1.name)
+        table.setPrimaryKey(pk)
+        snapshotFactory.addObjects(pk)
+        then:
+        assert change.checkStatus(database).status == ChangeStatus.Status.complete
+
+        when: "nullability is different"
+        change.getColumns().get(1).setConstraints(new ConstraintsConfig().setNullable(false))
+        then:
+        assert change.checkStatus(database).status == ChangeStatus.Status.incorrect
+
+        when: "column nullability matches"
+        table.getColumns().get(1).nullable = false
         then:
         assert change.checkStatus(database).status == ChangeStatus.Status.complete
 
