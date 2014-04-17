@@ -1,12 +1,12 @@
 package liquibase.change.core;
 
-import liquibase.change.AbstractChange;
-import liquibase.change.DatabaseChange;
-import liquibase.change.ChangeMetaData;
-import liquibase.change.DatabaseChangeProperty;
+import liquibase.change.*;
 import liquibase.database.Database;
+import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.DropIndexStatement;
+import liquibase.structure.core.ForeignKey;
+import liquibase.structure.core.Index;
 
 /**
  * Drops an existing index.
@@ -53,6 +53,15 @@ public class DropIndexChange extends AbstractChange {
         return new SqlStatement[] {
             new DropIndexStatement(getIndexName(), getCatalogName(), getSchemaName(), getTableName(), getAssociatedWith())
         };
+    }
+
+    @Override
+    public ChangeStatus checkStatus(Database database) {
+        try {
+            return new ChangeStatus().assertComplete(!SnapshotGeneratorFactory.getInstance().has(new Index(getIndexName(), getCatalogName(), getSchemaName(), getTableName()), database), "Index exists");
+        } catch (Exception e) {
+            return new ChangeStatus().unknown(e);
+        }
     }
 
     @Override

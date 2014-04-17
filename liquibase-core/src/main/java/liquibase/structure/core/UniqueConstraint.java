@@ -21,7 +21,9 @@ public class UniqueConstraint extends AbstractDatabaseObject {
         setName(name);
         if (tableName != null && columns != null) {
             setTable(new Table(tableCatalog, tableSchema, tableName));
-            setColumns(StringUtils.join(columns, ","));
+            if (columns.length > 0) {
+                setColumns(StringUtils.join(columns, ","));
+            }
         }
     }
 
