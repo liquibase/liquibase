@@ -2,8 +2,10 @@ package liquibase.change.core;
 
 import liquibase.change.*;
 import liquibase.database.Database;
+import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.AddUniqueConstraintStatement;
+import liquibase.structure.core.UniqueConstraint;
 
 /**
  * Adds a unique constraint to an existing column.
@@ -131,6 +133,23 @@ public class AddUniqueConstraintChange extends AbstractChange {
                         .setDisabled(disabled);
 
         return new SqlStatement[] { statement };
+    }
+
+
+    @Override
+    public ChangeStatus checkStatus(Database database) {
+        ChangeStatus result = new ChangeStatus();
+        try {
+            UniqueConstraint example = new UniqueConstraint(getConstraintName(), getCatalogName(), getSchemaName(), getTableName(), getColumnNames().split("\\s+,\\s+"));
+
+            UniqueConstraint snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(example, database);
+            result.assertComplete(snapshot != null, "Unique constraint does not exist");
+
+            return result;
+
+        } catch (Exception e) {
+            return result.unknown(e);
+        }
     }
 
 //    private SqlStatement[] generateStatementsForSQLiteDatabase(Database database) {

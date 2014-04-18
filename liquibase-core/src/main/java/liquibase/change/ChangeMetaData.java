@@ -87,6 +87,19 @@ public class ChangeMetaData implements PrioritizedService {
     }
 
     /**
+     * Return the parameters of the given change that are set to a non-null value. Will never return a null map, only an empty or populated map.
+     */
+    public Map<String, ChangeParameterMetaData> getSetParameters(Change change) {
+        Map<String, ChangeParameterMetaData> returnMap = new HashMap<String, ChangeParameterMetaData>();
+        for (Map.Entry<String, ChangeParameterMetaData> entry : getParameters().entrySet()) {
+            if (entry.getValue().getCurrentValue(change) != null) {
+                returnMap.put(entry.getKey(), entry.getValue());
+            }
+        }
+        return Collections.unmodifiableMap(returnMap);
+    }
+
+    /**
      *  Returns the required parameters for this change for the given database. Will never return a null map, only an empty or populated map.
      */
     public Map<String, ChangeParameterMetaData> getRequiredParameters(Database database) {

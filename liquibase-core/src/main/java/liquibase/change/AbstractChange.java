@@ -5,6 +5,7 @@ import java.util.*;
 
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
+import liquibase.precondition.Precondition;
 import liquibase.structure.DatabaseObject;
 import liquibase.exception.*;
 import liquibase.resource.ResourceAccessor;
@@ -367,6 +368,11 @@ public abstract class AbstractChange implements Change {
         }
 
         return changeValidationErrors;
+    }
+
+    @Override
+    public ChangeStatus checkStatus(Database database) {
+        return new ChangeStatus().unknown("Not implemented");
     }
 
     /**

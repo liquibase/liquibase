@@ -1,9 +1,14 @@
 package liquibase.structure.core;
 
+import liquibase.change.ColumnConfig;
+import liquibase.change.ConstraintsConfig;
+import liquibase.database.Database;
+import liquibase.datatype.DataTypeFactory;
 import liquibase.structure.AbstractDatabaseObject;
 import liquibase.structure.DatabaseObject;
 
 import java.math.BigInteger;
+import java.util.List;
 
 public class Column extends AbstractDatabaseObject {
 
@@ -21,13 +26,33 @@ public class Column extends AbstractDatabaseObject {
         setName(columnName);
     }
 
+    public Column(ColumnConfig columnConfig) {
+        setName(columnConfig.getName());
+        setType(new DataType(columnConfig.getType()));
+
+        if (columnConfig.getDefaultValue() != null) {
+            setDefaultValue(columnConfig.getDefaultValueObject());
+        }
+
+        if (columnConfig.isAutoIncrement()) {
+            setAutoIncrementInformation(new AutoIncrementInformation(columnConfig.getStartWith(), columnConfig.getIncrementBy()));
+        }
+
+        ConstraintsConfig constraints = columnConfig.getConstraints();
+        if (constraints != null) {
+            setNullable(constraints.isNullable());
+        }
+
+        setRemarks(columnConfig.getRemarks());
+    }
+
     public Relation getRelation() {
         return getAttribute("relation", Relation.class);
     }
 
     @Override
     public DatabaseObject[] getContainingObjects() {
-        return new DatabaseObject[] {
+        return new DatabaseObject[]{
                 getRelation()
         };
     }
@@ -48,7 +73,7 @@ public class Column extends AbstractDatabaseObject {
         return relation.getSchema();
     }
 
-	@Override
+    @Override
     public String getName() {
         return name;
     }
@@ -93,7 +118,7 @@ public class Column extends AbstractDatabaseObject {
     }
 
     public boolean isAutoIncrement() {
-       return getAutoIncrementInformation() != null;
+        return getAutoIncrementInformation() != null;
     }
 
     public AutoIncrementInformation getAutoIncrementInformation() {
@@ -107,7 +132,7 @@ public class Column extends AbstractDatabaseObject {
     @Override
     public String toString() {
         String tableOrViewName = getRelation().getName();
-        return tableOrViewName +"."+getName();
+        return tableOrViewName + "." + getName();
     }
 
 
@@ -215,12 +240,12 @@ public class Column extends AbstractDatabaseObject {
         private BigInteger incrementBy;
 
         public AutoIncrementInformation() {
-            this(1,1);
+            this(1, 1);
         }
 
         public AutoIncrementInformation(Number startWith, Number incrementBy) {
-            this.startWith = BigInteger.valueOf(startWith.longValue());
-            this.incrementBy = BigInteger.valueOf(incrementBy.longValue());
+            this.startWith = startWith == null ? null : BigInteger.valueOf(startWith.longValue());
+            this.incrementBy = incrementBy == null ? null : BigInteger.valueOf(incrementBy.longValue());
         }
 
         public BigInteger getStartWith() {
@@ -233,7 +258,7 @@ public class Column extends AbstractDatabaseObject {
 
         @Override
         public String toString() {
-            return "AUTO INCREMENT START WITH "+startWith+" INCREMENT BY "+incrementBy;
+            return "AUTO INCREMENT START WITH " + startWith + " INCREMENT BY " + incrementBy;
         }
     }
 }

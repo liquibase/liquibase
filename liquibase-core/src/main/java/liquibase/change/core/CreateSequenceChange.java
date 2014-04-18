@@ -2,8 +2,10 @@ package liquibase.change.core;
 
 import liquibase.change.*;
 import liquibase.database.Database;
+import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.CreateSequenceStatement;
+import liquibase.structure.core.Sequence;
 
 import java.math.BigInteger;
 
@@ -125,6 +127,38 @@ public class CreateSequenceChange extends AbstractChange {
                 .setCycle(getCycle())
                 .setCacheSize(getCacheSize())
         };
+    }
+
+    @Override
+    public ChangeStatus checkStatus(Database database) {
+        ChangeStatus result = new ChangeStatus();
+        try {
+            Sequence sequence = SnapshotGeneratorFactory.getInstance().createSnapshot(new Sequence(getCatalogName(), getSchemaName(), getSequenceName()), database);
+            result.assertComplete(sequence != null, "Sequence " + getSequenceName() + " does not exist");
+            if (sequence != null) {
+                if (getIncrementBy() != null) {
+                    result.assertCorrect(getIncrementBy().equals(sequence.getIncrementBy()), "Increment by has a different value");
+                }
+                if (getMinValue() != null) {
+                    result.assertCorrect(getMinValue().equals(sequence.getMinValue()), "Min Value is different");
+                }
+                if (getMaxValue() != null) {
+                    result.assertCorrect(getMaxValue().equals(sequence.getMaxValue()), "Max Value is different");
+                }
+                if (isOrdered() != null) {
+                    result.assertCorrect(isOrdered().equals(sequence.getOrdered()), "Max Value is different");
+                }
+                if (getCycle() != null) {
+                    result.assertCorrect(getCycle().equals(sequence.getWillCycle()), "Will Cycle is different");
+                }
+                if (getCacheSize() != null) {
+                    result.assertCorrect(getCacheSize().equals(sequence.getCacheSize()), "Cache size is different");
+                }
+            }
+        } catch (Exception e) {
+            return result.unknown(e);
+        }
+        return result;
     }
 
     @Override

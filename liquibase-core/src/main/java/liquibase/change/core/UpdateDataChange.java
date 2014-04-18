@@ -97,6 +97,11 @@ public class UpdateDataChange extends AbstractModifyDataChange implements Change
     }
 
     @Override
+    public ChangeStatus checkStatus(Database database) {
+        return new ChangeStatus().unknown("Cannot check updateData status");
+    }
+
+    @Override
     public String getConfirmationMessage() {
         return "Data updated in " + getTableName();
     }

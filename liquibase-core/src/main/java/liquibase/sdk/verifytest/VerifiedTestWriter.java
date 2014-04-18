@@ -9,17 +9,22 @@ import java.util.*;
 
 public class VerifiedTestWriter {
 
-    public void write(VerifiedTest test, Writer out) throws IOException {
-        out.append("# Test: ").append(test.getTestClass()).append(" \"").append(test.getTestName()).append("\" #\n\n");
+    public void write(VerifiedTest test, Writer out, String group) throws IOException {
+        out.append("# Test: ").append(test.getTestClass()).append(" \"").append(test.getTestName()).append("\"");
+        if (group != null) {
+            out.append(" Group \"").append(group).append("\"");
+        }
+        out.append(" #\n\n");
+
         out.append("NOTE: This output is generated when the test is ran. DO NOT EDIT MANUALLY\n\n");
 
-        printNonTablePermutations(test, out);
-        printTablePermutations(test, out);
+        printNonTablePermutations(test, out, group);
+        printTablePermutations(test, out, group);
 
         out.flush();
     }
 
-    protected void printNonTablePermutations(VerifiedTest test, Writer out) throws IOException {
+    protected void printNonTablePermutations(VerifiedTest test, Writer out, String group) throws IOException {
         List<TestPermutation> permutations = new ArrayList(test.getPermutations());
         Collections.sort(permutations, new Comparator<TestPermutation>() {
             @Override
@@ -34,6 +39,10 @@ public class VerifiedTestWriter {
             }
 
             if (!permutation.isValid()) {
+                continue;
+            }
+
+            if (group != null && !group.equals(permutation.getGroup())) {
                 continue;
             }
 
@@ -79,12 +88,17 @@ public class VerifiedTestWriter {
         return message;
     }
 
-    protected void printTablePermutations(VerifiedTest test, Writer out) throws IOException {
+    protected void printTablePermutations(VerifiedTest test, Writer out, String group) throws IOException {
         SortedMap<String, List<TestPermutation>> permutationsByTable = new TreeMap<String, List<TestPermutation>>();
         for (TestPermutation permutation : test.getPermutations()) {
             if (permutation.getRowDescriptionParameter() == null) {
                 continue;
             }
+
+            if (group != null && !group.equals(permutation.getGroup())) {
+                continue;
+            }
+
             String tableKey = permutation.getTableKey();
             if (!permutationsByTable.containsKey(tableKey)) {
                 permutationsByTable.put(tableKey, new ArrayList<TestPermutation>());
@@ -109,7 +123,7 @@ public class VerifiedTestWriter {
                 continue;
             }
 
-            out.append("## Permutation Group for ").append(permutations.get(0).getRowDescriptionParameter()).append(": ").append(MD5Util.computeMD5(tableKey)).append(" ##\n\n");
+            out.append("## Permutation Group for ").append(permutations.get(0).getRowDescriptionParameter()).append(": ").append(MD5Util.computeMD5(tableKey).substring(0, 16)).append(" ##\n\n");
             for (Map.Entry<String, TestPermutation.Value> descriptionEntry : permutations.get(0).getDescription().entrySet()) {
                 appendMapEntry(descriptionEntry, out);
             }

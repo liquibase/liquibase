@@ -3,9 +3,12 @@ package liquibase.change.core;
 import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.database.core.DB2Database;
+import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.AddPrimaryKeyStatement;
 import liquibase.statement.core.ReorganizeTableStatement;
+import liquibase.structure.core.PrimaryKey;
+import liquibase.structure.core.Table;
 
 /**
  * Creates a primary key out of an existing column or set of columns.
@@ -96,7 +99,23 @@ public class AddPrimaryKeyChange extends AbstractChange {
         };
     }
 
-//    private SqlStatement[] generateStatementsForSQLiteDatabase(Database database) {
+    @Override
+    public ChangeStatus checkStatus(Database database) {
+        ChangeStatus result = new ChangeStatus();
+        try {
+            PrimaryKey example = new PrimaryKey(getConstraintName(), getCatalogName(), getSchemaName(), getTableName(), getColumnNames().split("\\s+,\\s+"));
+
+            PrimaryKey snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(example, database);
+            result.assertComplete(snapshot != null, "Primary key does not exist");
+
+            return result;
+
+        } catch (Exception e) {
+            return result.unknown(e);
+        }
+    }
+
+    //    private SqlStatement[] generateStatementsForSQLiteDatabase(Database database) {
 //        // SQLite does not support this ALTER TABLE operation until now.
 //        // or more information: http://www.sqlite.org/omitted.html
 //        // This is a small work around...

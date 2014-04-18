@@ -1,12 +1,11 @@
 package liquibase.change.core;
 
-import liquibase.change.AbstractChange;
-import liquibase.change.DatabaseChange;
-import liquibase.change.ChangeMetaData;
-import liquibase.change.DatabaseChangeProperty;
+import liquibase.change.*;
 import liquibase.database.Database;
+import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.AlterSequenceStatement;
+import liquibase.structure.core.Sequence;
 
 import java.math.BigInteger;
 
@@ -97,6 +96,33 @@ public class AlterSequenceChange extends AbstractChange {
                 .setMinValue(getMinValue())
                 .setOrdered(isOrdered())
         };
+    }
+
+    @Override
+    public ChangeStatus checkStatus(Database database) {
+        ChangeStatus result = new ChangeStatus();
+        try {
+            Sequence sequence = SnapshotGeneratorFactory.getInstance().createSnapshot(new Sequence(getCatalogName(), getSchemaName(), getSequenceName()), database);
+            if (sequence == null) {
+                return result.unknown("Sequence " + getSequenceName() + " does not exist");
+            }
+
+            if (getIncrementBy() != null) {
+                result.assertCorrect(getIncrementBy().equals(sequence.getIncrementBy()), "Increment by has a different value");
+            }
+            if (getMinValue() != null) {
+                result.assertCorrect(getMinValue().equals(sequence.getMinValue()), "Min Value is different");
+            }
+            if (getMaxValue() != null) {
+                result.assertCorrect(getMaxValue().equals(sequence.getMaxValue()), "Max Value is different");
+            }
+            if (isOrdered() != null) {
+                result.assertCorrect(isOrdered().equals(sequence.getOrdered()), "Max Value is different");
+            }
+        } catch (Exception e) {
+            return result.unknown(e);
+        }
+        return result;
     }
 
     @Override

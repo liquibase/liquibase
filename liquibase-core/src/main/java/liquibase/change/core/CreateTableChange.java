@@ -5,13 +5,16 @@ import liquibase.database.Database;
 import liquibase.database.core.MySQLDatabase;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.datatype.LiquibaseDataType;
-import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.exception.ValidationErrors;
+import liquibase.exception.*;
+import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.*;
 import liquibase.statement.core.CreateTableStatement;
 import liquibase.statement.core.SetColumnRemarksStatement;
 import liquibase.statement.core.SetTableRemarksStatement;
+import liquibase.structure.core.Column;
+import liquibase.structure.core.PrimaryKey;
+import liquibase.structure.core.Table;
 import liquibase.util.StringUtils;
 
 import java.util.ArrayList;
@@ -140,6 +143,43 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
         return new Change[]{
                 inverse
         };
+    }
+
+    @Override
+    public ChangeStatus checkStatus(Database database) {
+        try {
+            Table example = (Table) new Table().setName(getTableName()).setSchema(getCatalogName(), getSchemaName());
+            ChangeStatus status = new ChangeStatus();
+            Table tableSnapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(example, database);
+            status.assertComplete(tableSnapshot != null, "Table does not exist");
+
+            if (tableSnapshot != null) {
+                for (ColumnConfig columnConfig : getColumns()) {
+                    Column columnSnapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(new Column(columnConfig).setRelation(tableSnapshot), database);
+                    status.assertCorrect(columnSnapshot != null, "Column "+columnConfig.getName()+" is missing");
+                    if (columnSnapshot != null) {
+                        ConstraintsConfig constraints = columnConfig.getConstraints();
+                        if (constraints != null) {
+                            if (constraints.isPrimaryKey() != null && constraints.isPrimaryKey()) {
+                                PrimaryKey tablePk = tableSnapshot.getPrimaryKey();
+                                status.assertCorrect(tablePk != null && tablePk.getColumnNamesAsList().contains(columnConfig.getName()), "Column "+columnConfig.getName()+" is not part of the primary key");
+                            }
+                            if (constraints.isNullable() != null) {
+                                if (constraints.isNullable()) {
+                                    status.assertCorrect(columnSnapshot.isNullable() == null || columnSnapshot.isNullable(), "Column "+columnConfig.getName()+" nullability does not match");
+                                } else {
+                                    status.assertCorrect(columnSnapshot.isNullable() != null && !columnSnapshot.isNullable(), "Column "+columnConfig.getName()+" nullability does not match");
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            return status;
+        } catch (Exception e) {
+            return new ChangeStatus().unknown(e);
+        }
     }
 
     @Override

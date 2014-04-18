@@ -1,18 +1,14 @@
 package liquibase.database.core;
 
 import java.math.BigInteger;
-import java.sql.Connection;
-import java.sql.ResultSet;
 
 import liquibase.CatalogAndSchema;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.OfflineConnection;
-import liquibase.sql.UnparsedSql;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Index;
-import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
 import liquibase.structure.core.View;
 import liquibase.exception.DatabaseException;
@@ -20,13 +16,11 @@ import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.ExecutorService;
 import liquibase.statement.core.GetViewDefinitionStatement;
 
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
-import liquibase.database.jvm.JdbcConnection;
+
 import liquibase.logging.LogFactory;
 
 /**
@@ -46,6 +40,8 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
 
     public MSSQLDatabase() {
         super.setCurrentDateTimeFunction("GETDATE()");
+
+        super.sequenceNextValueFunction = "NEXT VALUE FOR %s";
 
         systemTablesAndViews.add("syscolumns");
         systemTablesAndViews.add("syscomments");
@@ -301,7 +297,7 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
 
     @Override
     public String getViewDefinition(CatalogAndSchema schema, String viewName) throws DatabaseException {
-          schema = correctSchema(schema);
+          schema = schema.customize(this);
         List<String> defLines = (List<String>) ExecutorService.getInstance().getExecutor(this).queryForList(new GetViewDefinitionStatement(schema.getCatalogName(), schema.getSchemaName(), viewName), String.class);
         StringBuffer sb = new StringBuffer();
         for (String defLine : defLines) {

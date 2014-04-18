@@ -84,4 +84,8 @@ public class ChangeSupplierFactory {
             throw new UnexpectedLiquibaseException(e);
         }
     }
+
+    public boolean isValid(Change change, Database database) {
+        return getSupplier(change).isValid(change, database);
+    }
 }

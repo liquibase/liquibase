@@ -7,13 +7,11 @@ import liquibase.CatalogAndSchema;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.core.Catalog;
 import liquibase.structure.core.Index;
 import liquibase.structure.core.PrimaryKey;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.ExecutorService;
 import liquibase.statement.core.RawSqlStatement;
-import liquibase.structure.core.Schema;
 
 /**
  * Encapsulates MySQL database support.
@@ -193,7 +191,7 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
 
     @Override
     public CatalogAndSchema getSchemaFromJdbcInfo(String rawCatalogName, String rawSchemaName) {
-        return this.correctSchema(new CatalogAndSchema(rawCatalogName, null));
+        return new CatalogAndSchema(rawCatalogName, null).customize(this);
     }
 
     @Override

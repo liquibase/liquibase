@@ -826,7 +826,7 @@ public class Main {
                 List<CompareControl.SchemaComparison> schemaComparisons = new ArrayList<CompareControl.SchemaComparison>();
                 List<CatalogAndSchema> schemas = new ArrayList<CatalogAndSchema>();
                 for (String schema : referenceSchemaNames.split(",")) {
-                    CatalogAndSchema correctedSchema = database.correctSchema(new CatalogAndSchema(schema));
+                    CatalogAndSchema correctedSchema = new CatalogAndSchema(null, schema).customize(database);
                     schemaComparisons.add(new CompareControl.SchemaComparison(correctedSchema, correctedSchema));
                     schemas.add(correctedSchema);
                     diffOutputControl.addIncludedSchema(correctedSchema);

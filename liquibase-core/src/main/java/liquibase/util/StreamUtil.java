@@ -197,7 +197,7 @@ public class StreamUtil {
             } else {
                 base = changeSet.getChangeLog().getPhysicalFilePath().replaceAll("\\\\","/");
             }
-            if (!base.contains("/")) {
+            if (base == null || !base.contains("/")) {
                 base = ".";
             }
 

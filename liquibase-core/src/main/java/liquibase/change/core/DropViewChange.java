@@ -1,12 +1,11 @@
 package liquibase.change.core;
 
-import liquibase.change.AbstractChange;
-import liquibase.change.DatabaseChange;
-import liquibase.change.ChangeMetaData;
-import liquibase.change.DatabaseChangeProperty;
+import liquibase.change.*;
 import liquibase.database.Database;
+import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.DropViewStatement;
+import liquibase.structure.core.View;
 
 /**
  * Drops an existing view.
@@ -51,6 +50,16 @@ public class DropViewChange extends AbstractChange {
                 new DropViewStatement(getCatalogName(), getSchemaName(), getViewName()),
         };
     }
+
+    @Override
+    public ChangeStatus checkStatus(Database database) {
+        try {
+            return new ChangeStatus().assertComplete(!SnapshotGeneratorFactory.getInstance().has(new View(getCatalogName(), getSchemaName(), getViewName()), database), "View exists");
+        } catch (Exception e) {
+            return new ChangeStatus().unknown(e);
+        }
+    }
+
 
     @Override
     public String getConfirmationMessage() {
