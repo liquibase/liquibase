@@ -1,10 +1,6 @@
 package liquibase.dbtest.h2;
 
-import liquibase.Contexts;
 import liquibase.Liquibase;
-import liquibase.changelog.ChangeSetStatus;
-import liquibase.changelog.filter.ChangeSetFilterResult;
-import liquibase.changelog.visitor.StatusVisitor;
 import liquibase.dbtest.AbstractIntegrationTest;
 import liquibase.diff.DiffGeneratorFactory;
 import liquibase.diff.DiffResult;
@@ -15,8 +11,6 @@ import liquibase.diff.output.report.DiffToReport;
 import liquibase.exception.ValidationFailedException;
 import liquibase.snapshot.*;
 import org.junit.Test;
-
-import java.util.List;
 
 public class H2IntegrationTest extends AbstractIntegrationTest {
 

@@ -1,5 +1,6 @@
 package liquibase.changelog;
 
+import liquibase.ContextExpression;
 import liquibase.Contexts;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.parser.ChangeLogParserCofiguration;
@@ -87,9 +88,9 @@ public class ChangeLogParameters {
     }
 
     public void set(String key, String value, String contexts, String databases) {
-        set(key, value, new Contexts(contexts), databases);
+        set(key, value, new ContextExpression(contexts), databases);
     }
-    public void set(String key, String value, Contexts contexts, String databases) {
+    public void set(String key, String value, ContextExpression contexts, String databases) {
         changeLogParameters.add(new ChangeLogParameter(key, value, contexts, databases));
     }
 
@@ -125,7 +126,7 @@ public class ChangeLogParameters {
     private class ChangeLogParameter {
         private String key;
         private Object value;
-        private Contexts validContexts;
+        private ContextExpression validContexts;
         private List<String> validDatabases;
 
         public ChangeLogParameter(String key, Object value) {
@@ -134,14 +135,14 @@ public class ChangeLogParameters {
         }
 
         public ChangeLogParameter(String key, Object value, String validContexts, String validDatabases) {
-            this(key, value, new Contexts(validContexts), StringUtils.splitAndTrim(validDatabases, ","));
+            this(key, value, new ContextExpression(validContexts), StringUtils.splitAndTrim(validDatabases, ","));
         }
 
-        private ChangeLogParameter(String key, Object value, Contexts validContexts, String validDatabases) {
+        private ChangeLogParameter(String key, Object value, ContextExpression validContexts, String validDatabases) {
             this(key, value, validContexts, StringUtils.splitAndTrim(validDatabases, ","));
         }
 
-        public ChangeLogParameter(String key, Object value, Contexts validContexts, List<String> validDatabases) {
+        public ChangeLogParameter(String key, Object value, ContextExpression validContexts, List<String> validDatabases) {
             this.key = key;
             this.value = value;
             this.validContexts = validContexts;
@@ -160,7 +161,7 @@ public class ChangeLogParameters {
             return validDatabases;
         }
 
-        public Contexts getValidContexts() {
+        public ContextExpression getValidContexts() {
             return validContexts;
         }
 
@@ -170,17 +171,7 @@ public class ChangeLogParameters {
         }
 
         public boolean isValid() {
-            boolean isValid = true;
-            if (validContexts != null && validContexts.size() > 0) {
-                if (ChangeLogParameters.this.currentContexts != null && ChangeLogParameters.this.currentContexts.size() > 0) {
-                    isValid = false;
-                    for (String currentContext : ChangeLogParameters.this.currentContexts) {
-                        if (validContexts.contains(currentContext)) {
-                            isValid = true;
-                        }
-                    }
-                }
-            }
+            boolean isValid = validContexts == null || validContexts.matches(ChangeLogParameters.this.currentContexts);
 
             if (isValid) {
                 isValid = DatabaseList.definitionMatches(validDatabases, currentDatabase, true);

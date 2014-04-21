@@ -1,5 +1,6 @@
 package liquibase.changelog.filter;
 
+import liquibase.ContextExpression;
 import liquibase.Contexts;
 import liquibase.changelog.ChangeSet;
 
@@ -15,7 +16,7 @@ public class ContextChangeSetFilterTest {
     private static final class TestSqlVisitor extends AbstractSqlVisitor {
 
         public TestSqlVisitor(final String... contexts) {
-            setContexts(new Contexts(contexts));
+            setContexts(new ContextExpression(contexts));
         }
 
         @Override
@@ -69,7 +70,7 @@ public class ContextChangeSetFilterTest {
 
     @Test
     public void singleContexts() {
-        ContextChangeSetFilter filter = new ContextChangeSetFilter("TEST1");
+        ContextChangeSetFilter filter = new ContextChangeSetFilter(new Contexts("TEST1"));
 
         assertTrue(filter.accepts(new ChangeSet(null, null, false, false, null, "test1", null, null)).isAccepted());
         assertTrue(filter.accepts(new ChangeSet(null, null, false, false, null, "test1, test2", null, null)).isAccepted());
@@ -79,7 +80,7 @@ public class ContextChangeSetFilterTest {
 
     @Test
     public void multiContexts() {
-        ContextChangeSetFilter filter = new ContextChangeSetFilter("test1", "test2");
+        ContextChangeSetFilter filter = new ContextChangeSetFilter(new Contexts("test1", "test2"));
 
         assertTrue(filter.accepts(new ChangeSet(null, null, false, false, null, "test1", null, null)).isAccepted());
         assertTrue(filter.accepts(new ChangeSet(null, null, false, false, null, "test2", null, null)).isAccepted());
@@ -92,7 +93,7 @@ public class ContextChangeSetFilterTest {
 
     @Test
     public void multiContextsSingeParameter() {
-        ContextChangeSetFilter filter = new ContextChangeSetFilter("test1, test2");
+        ContextChangeSetFilter filter = new ContextChangeSetFilter(new Contexts("test1, test2"));
 
         assertTrue(filter.accepts(new ChangeSet(null, null, false, false, null, "test1", null, null)).isAccepted());
         assertTrue(filter.accepts(new ChangeSet(null, null, false, false, null, "test2", null, null)).isAccepted());
@@ -106,7 +107,7 @@ public class ContextChangeSetFilterTest {
 
     @Test
     public void visitorContextFilterLowerLower() {
-        ContextChangeSetFilter filter = new ContextChangeSetFilter("test1");
+        ContextChangeSetFilter filter = new ContextChangeSetFilter(new Contexts("test1"));
 
         ChangeSet changeSet = new ChangeSet(null, null, false, false, null, null, null, null);
         changeSet.addSqlVisitor(new TestSqlVisitor("test1"));
@@ -118,7 +119,7 @@ public class ContextChangeSetFilterTest {
 
     @Test
     public void visitorContextFilterUpperLower() {
-        ContextChangeSetFilter filter = new ContextChangeSetFilter("TEST1");
+        ContextChangeSetFilter filter = new ContextChangeSetFilter(new Contexts("TEST1"));
 
         ChangeSet changeSet = new ChangeSet(null, null, false, false, null, null, null, null);
         changeSet.addSqlVisitor(new TestSqlVisitor("test1"));
@@ -130,7 +131,7 @@ public class ContextChangeSetFilterTest {
 
     @Test
     public void visitorContextFilterUpperUpper() {
-        ContextChangeSetFilter filter = new ContextChangeSetFilter("TEST1");
+        ContextChangeSetFilter filter = new ContextChangeSetFilter(new Contexts("TEST1"));
 
         ChangeSet changeSet = new ChangeSet(null, null, false, false, null, null, null, null);
         changeSet.addSqlVisitor(new TestSqlVisitor("TEST1"));
@@ -142,7 +143,7 @@ public class ContextChangeSetFilterTest {
 
     @Test
     public void visitorContextFilterLowerUpper() {
-        ContextChangeSetFilter filter = new ContextChangeSetFilter("test1");
+        ContextChangeSetFilter filter = new ContextChangeSetFilter(new Contexts("test1"));
 
         ChangeSet changeSet = new ChangeSet(null, null, false, false, null, null, null, null);
         changeSet.addSqlVisitor(new TestSqlVisitor("TEST1"));

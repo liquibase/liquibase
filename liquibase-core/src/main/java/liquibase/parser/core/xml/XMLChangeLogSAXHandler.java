@@ -1,5 +1,6 @@
 package liquibase.parser.core.xml;
 
+import liquibase.ContextExpression;
 import liquibase.Contexts;
 import liquibase.change.*;
 import liquibase.change.core.*;
@@ -77,7 +78,7 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
 
 	private boolean inModifySql = false;
 	private Set<String> modifySqlDbmsList;
-	private Contexts modifySqlContexts;
+	private ContextExpression modifySqlContexts;
 	private boolean modifySqlAppliedOnRollback = false;
 
     protected XMLChangeLogSAXHandler(String physicalChangeLogLocation,
@@ -345,7 +346,7 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
 					modifySqlDbmsList = new HashSet<String>(StringUtils.splitAndTrim(atts.getValue("dbms"), ","));
 				}
 				if (StringUtils.trimToNull(atts.getValue("context")) != null) {
-					modifySqlContexts = new Contexts(atts.getValue("context"));
+					modifySqlContexts = new ContextExpression(atts.getValue("context"));
 				}
 				if (StringUtils.trimToNull(atts.getValue("applyToRollback")) != null) {
 					modifySqlAppliedOnRollback = Boolean.valueOf(atts.getValue("applyToRollback"));

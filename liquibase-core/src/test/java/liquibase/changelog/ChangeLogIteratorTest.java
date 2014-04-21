@@ -1,5 +1,6 @@
 package liquibase.changelog;
 
+import liquibase.Contexts;
 import liquibase.changelog.filter.ChangeSetFilterResult;
 import liquibase.changelog.filter.ContextChangeSetFilter;
 import liquibase.changelog.filter.DbmsChangeSetFilter;
@@ -43,7 +44,7 @@ public class ChangeLogIteratorTest {
     public void runChangeSet_singleFilterIterator() throws Exception {
         TestChangeSetVisitor testChangeLogVisitor = new TestChangeSetVisitor();
 
-        ChangeLogIterator iterator = new ChangeLogIterator(changeLog, new ContextChangeSetFilter("test1"));
+        ChangeLogIterator iterator = new ChangeLogIterator(changeLog, new ContextChangeSetFilter(new Contexts("test1")));
         iterator.run(testChangeLogVisitor, null);
         assertEquals(4, testChangeLogVisitor.visitedChangeSets.size());
     }
@@ -52,7 +53,7 @@ public class ChangeLogIteratorTest {
     public void runChangeSet_doubleFilterIterator() throws Exception {
         TestChangeSetVisitor testChangeLogVisitor = new TestChangeSetVisitor();
 
-        ChangeLogIterator iterator = new ChangeLogIterator(changeLog, new ContextChangeSetFilter("test1"), new DbmsChangeSetFilter(new MySQLDatabase()));
+        ChangeLogIterator iterator = new ChangeLogIterator(changeLog, new ContextChangeSetFilter(new Contexts("test1")), new DbmsChangeSetFilter(new MySQLDatabase()));
         iterator.run(testChangeLogVisitor, null);
         assertEquals(3, testChangeLogVisitor.visitedChangeSets.size());
         assertEquals("1", testChangeLogVisitor.visitedChangeSets.get(0).getId());
@@ -65,7 +66,7 @@ public class ChangeLogIteratorTest {
     public void runChangeSet_reverseVisitor() throws Exception {
         TestChangeSetVisitor testChangeLogVisitor = new ReverseChangeSetVisitor();
 
-        ChangeLogIterator iterator = new ChangeLogIterator(changeLog, new ContextChangeSetFilter("test1"), new DbmsChangeSetFilter(new MySQLDatabase()));
+        ChangeLogIterator iterator = new ChangeLogIterator(changeLog, new ContextChangeSetFilter(new Contexts("test1")), new DbmsChangeSetFilter(new MySQLDatabase()));
         iterator.run(testChangeLogVisitor, null);
         assertEquals(3, testChangeLogVisitor.visitedChangeSets.size());
         assertEquals("5", testChangeLogVisitor.visitedChangeSets.get(0).getId());

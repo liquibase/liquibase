@@ -4,7 +4,12 @@ import liquibase.util.StringUtils;
 
 import java.util.*;
 
-public class Contexts extends HashSet<String> {
+/**
+ * List of contexts Liquibase is running under.
+ */
+public class Contexts {
+
+    private HashSet<String> contexts = new HashSet<String>();
 
     public Contexts() {
     }
@@ -13,7 +18,9 @@ public class Contexts extends HashSet<String> {
         if (contexts.length == 1) {
             parseContextString(contexts[0]);
         } else {
-            addAll(Arrays.asList(contexts));
+            for (String context : contexts) {
+                this.contexts.add(context.toLowerCase());
+            }
         }
     }
 
@@ -27,20 +34,36 @@ public class Contexts extends HashSet<String> {
         if (contexts == null) {
             return;
         }
-        addAll(StringUtils.splitAndTrim(contexts, ","));
+        for (String context : StringUtils.splitAndTrim(contexts, ",")) {
+            this.contexts.add(context.toLowerCase());
+        }
+
     }
 
     public Contexts(Collection<String> contexts) {
-        addAll(contexts);
+        if (contexts != null) {
+            for (String context : contexts) {
+                this.contexts.add(context.toLowerCase());
+            }
+
+        }
     }
 
-    @Override
-    public boolean add(String s) {
-        return super.add(s.toLowerCase());
+    public boolean add(String context) {
+        return this.contexts.add(context.toLowerCase());
     }
 
     @Override
     public String toString() {
-        return StringUtils.join(new TreeSet(this),",");
+        return StringUtils.join(new TreeSet(this.contexts),",");
+    }
+
+
+    public boolean isEmpty() {
+        return this.contexts == null || this.contexts.isEmpty();
+    }
+
+    public Set<String> getContexts() {
+        return Collections.unmodifiableSet(contexts);
     }
 }

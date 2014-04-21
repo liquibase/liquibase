@@ -11,7 +11,6 @@ import java.util.Date;
 import java.util.List;
 
 import liquibase.CatalogAndSchema;
-import liquibase.Contexts;
 import liquibase.Liquibase;
 import liquibase.change.Change;
 import liquibase.changelog.ChangeSet;

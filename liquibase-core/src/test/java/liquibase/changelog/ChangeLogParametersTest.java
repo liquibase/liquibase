@@ -1,5 +1,6 @@
 package liquibase.changelog;
 
+import liquibase.ContextExpression;
 import liquibase.Contexts;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.core.H2Database;
@@ -38,7 +39,7 @@ public class ChangeLogParametersTest {
     public void setParameterValue_doubleSetButSecondWrongDatabase() {
         ChangeLogParameters changeLogParameters = new ChangeLogParameters(new H2Database());
 
-        changeLogParameters.set("doubleSet", "originalValue", new Contexts(), "baddb");
+        changeLogParameters.set("doubleSet", "originalValue", new ContextExpression(), "baddb");
         changeLogParameters.set("doubleSet", "newValue");
 
         assertEquals("newValue", changeLogParameters.getValue("doubleSet"));
@@ -48,7 +49,7 @@ public class ChangeLogParametersTest {
     public void setParameterValue_multiDatabase() {
         ChangeLogParameters changeLogParameters = new ChangeLogParameters(new H2Database());
 
-        changeLogParameters.set("doubleSet", "originalValue", new Contexts(), "baddb, h2");
+        changeLogParameters.set("doubleSet", "originalValue", new ContextExpression(), "baddb, h2");
 
         assertEquals("originalValue", changeLogParameters.getValue("doubleSet"));
     }
