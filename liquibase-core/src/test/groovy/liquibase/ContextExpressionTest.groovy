@@ -48,18 +48,21 @@ class ContextExpressionTest extends Specification {
         assert new ContextExpression(testContexts).matches(new Contexts(currentContexts)) == expectedResult
 
         where:
-        testContexts | currentContexts  | expectedResult
-        "test"       | "test"           | true
-        "test"       | "TEST"           | true
-        "TEST"       | "test"           | true
-        "test"       | "prod"           | false
-        "prod"       | "test"           | false
-        "test, aug"  | "test"           | true
-        "test, aug"  | "aug"            | true
-        "test, AUG"  | "Aug"            | true
-        "test, aug"  | "sept"           | false
-        "test, aug"  | "aug, test"      | true
-        "test, aug"  | "jan, feb, test" | true
+        testContexts   | currentContexts  | expectedResult
+        "test"         | "test"           | true
+        "test"         | "TEST"           | true
+        "TEST"         | "test"           | true
+        "test"         | "prod"           | false
+        "prod"         | "test"           | false
+        "test, aug"    | "test"           | true
+        "test, aug"    | "aug"            | true
+        "test, AUG"    | "Aug"            | true
+        "test, aug"    | "sept"           | false
+        "test, aug"    | "aug, test"      | true
+        "test, aug"    | "jan, feb, test" | true
+        "test context" | "test context"   | true
+        "test context" | "test"           | false
+        "test"         | "test context"   | false
     }
 
     @Unroll("#featureName: testContexts #testContexts currentContexts: #currentContexts")
@@ -91,6 +94,8 @@ class ContextExpressionTest extends Specification {
         "a and b"         | "a,c"           | false
         "a and b"         | "c"             | false
         "b and a"         | "a,b"           | true
+        "a AND b"         | "a"             | false
+        "a AND b"         | "a,b"           | true
         "a and !b"        | "a"             | true
         "a and !b"        | "a,c"           | true
         "a and !b"        | "a,b"           | false
@@ -98,6 +103,9 @@ class ContextExpressionTest extends Specification {
         "  a   and   b  " | "a"             | false
         "  a   and   b  " | "b"             | false
         "  a   and   b  " | "a,b"           | true
+        "x y and t u"     | "x y"           | false
+        "x y and t u"     | "t u"           | false
+        "x y and t u"     | "x y, t u"      | true
     }
 
     @Unroll("#featureName: testContexts #testContexts currentContexts: #currentContexts")
@@ -113,6 +121,8 @@ class ContextExpressionTest extends Specification {
         "a or b"        | "a,b,c"         | true
         "a or b"        | "c"             | false
         "a or b"        | "c,d"           | false
+        "a OR b"        | "a"             | true
+        "a OR b"        | "c"             | false
         "b or a"        | "a,b"           | true
         "a or !b"       | "a"             | true
         "a or !b"       | "a,c"           | true
@@ -121,6 +131,10 @@ class ContextExpressionTest extends Specification {
         "a    or   b  " | "a"             | true
         " a   or   b  " | "b"             | true
         " a   or   b  " | "c"             | false
+        "x y or 1 2"    | "x y"           | true
+        "x y or 1 2"    | "1 2"           | true
+        "x y or 1 2"    | "a b"           | false
+        "x y or 1 2"    | "x 1"           | false
     }
 
     @Unroll("#featureName: testContexts #testContexts currentContexts: #currentContexts")
