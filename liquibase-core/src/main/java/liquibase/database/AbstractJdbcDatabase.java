@@ -248,53 +248,23 @@ public abstract class AbstractJdbcDatabase implements Database {
         return connection.getCatalog();
     }
 
+    /**
+     * @deprecated use {@link liquibase.CatalogAndSchema#standardize(Database)}
+     */
     public CatalogAndSchema correctSchema(final String catalog, final String schema) {
-        return correctSchema(new CatalogAndSchema(catalog, schema));
+        return new CatalogAndSchema(catalog, schema).standardize(this);
     }
 
     @Override
+    /**
+     * @deprecated Use {@link liquibase.CatalogAndSchema#standardize(Database)}) or {@link liquibase.CatalogAndSchema#customize(Database)}
+     */
     public CatalogAndSchema correctSchema(final CatalogAndSchema schema) {
         if (schema == null) {
             return new CatalogAndSchema(getDefaultCatalogName(), getDefaultSchemaName());
         }
-        String catalogName = StringUtils.trimToNull(schema.getCatalogName());
-        String schemaName = StringUtils.trimToNull(schema.getSchemaName());
 
-        if (supportsCatalogs() && supportsSchemas()) {
-            if (catalogName == null) {
-                catalogName = getDefaultCatalogName();
-            } else {
-                catalogName = correctObjectName(catalogName, Catalog.class);
-            }
-
-            if (schemaName == null) {
-                schemaName = getDefaultSchemaName();
-            } else {
-                schemaName = correctObjectName(schemaName, Schema.class);
-            }
-        } else if (!supportsCatalogs() && !supportsSchemas()) {
-            return new CatalogAndSchema(null, null);
-        } else if (supportsCatalogs()) { //schema is null
-            if (catalogName == null) {
-                if (schemaName == null) {
-                    catalogName = getDefaultCatalogName();
-                } else {
-                    catalogName = schemaName;
-                }
-            }
-            schemaName = catalogName;
-        } else if (supportsSchemas()) {
-            if (schemaName == null) {
-                if (catalogName == null) {
-                    schemaName = getDefaultSchemaName();
-                } else {
-                    schemaName = catalogName;
-                }
-            }
-            catalogName = schemaName;
-        }
-        return new CatalogAndSchema(catalogName, schemaName);
-
+        return schema.standardize(this);
     }
 
     @Override
@@ -813,7 +783,7 @@ public abstract class AbstractJdbcDatabase implements Database {
     }
 
     public boolean isSystemView(CatalogAndSchema schema, final String viewName) {
-        schema = correctSchema(schema);
+        schema = schema.customize(this);
         if ("information_schema".equalsIgnoreCase(schema.getSchemaName())) {
             return true;
         } else if (getSystemViews().contains(viewName)) {
@@ -868,7 +838,7 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     @Override
     public String getViewDefinition(CatalogAndSchema schema, final String viewName) throws DatabaseException {
-        schema = correctSchema(schema);
+        schema = schema.customize(this);
         String definition = (String) ExecutorService.getInstance().getExecutor(this).queryForObject(new GetViewDefinitionStatement(schema.getCatalogName(), schema.getSchemaName(), viewName), String.class);
         if (definition == null) {
             return null;
@@ -1308,7 +1278,7 @@ public abstract class AbstractJdbcDatabase implements Database {
     }
 
     public CatalogAndSchema getSchemaFromJdbcInfo(final String rawCatalogName, final String rawSchemaName) {
-        return this.correctSchema(new CatalogAndSchema(rawCatalogName, rawSchemaName));
+        return new CatalogAndSchema(rawCatalogName, rawSchemaName).customize(this);
     }
 
     public String getJdbcCatalogName(final CatalogAndSchema schema) {
@@ -1375,9 +1345,13 @@ public abstract class AbstractJdbcDatabase implements Database {
     }
 
     private boolean isCurrentTimeFunction(final String functionValue) {
+        if (functionValue == null) {
+            return false;
+        }
+
         return functionValue.startsWith("current_timestamp")
                 || functionValue.startsWith("current_datetime")
-                || getCurrentDateTimeFunction().equalsIgnoreCase(functionValue);
+                || functionValue.equalsIgnoreCase(getCurrentDateTimeFunction());
     }
 
     @Override

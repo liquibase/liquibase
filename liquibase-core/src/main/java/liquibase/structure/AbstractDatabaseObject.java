@@ -56,6 +56,15 @@ public abstract class AbstractDatabaseObject implements DatabaseObject {
     }
 
     @Override
+    public <T> T getAttribute(String attribute, Class<T> type, T defaultValue) {
+        T value = (T) attributes.get(attribute);
+        if (value == null) {
+            return defaultValue;
+        }
+        return value;
+    }
+
+    @Override
     public DatabaseObject setAttribute(String attribute, Object value) {
         if (value == null) {
             attributes.remove(attribute);

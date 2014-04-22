@@ -235,7 +235,10 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
         return false;
     }
 
-
+    @Override
+    public ChangeStatus checkStatus(Database database) {
+        return new ChangeStatus().unknown("Cannot check raw sql status");
+    }
 
     protected String normalizeLineEndings(String string) {
         return string.replace("\r", "");

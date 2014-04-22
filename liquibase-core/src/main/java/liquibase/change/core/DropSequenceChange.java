@@ -1,12 +1,11 @@
 package liquibase.change.core;
 
-import liquibase.change.AbstractChange;
-import liquibase.change.DatabaseChange;
-import liquibase.change.ChangeMetaData;
-import liquibase.change.DatabaseChangeProperty;
+import liquibase.change.*;
 import liquibase.database.Database;
+import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.DropSequenceStatement;
+import liquibase.structure.core.Sequence;
 
 /**
  * Drops an existing sequence.
@@ -49,6 +48,16 @@ public class DropSequenceChange extends AbstractChange {
     public SqlStatement[] generateStatements(Database database) {
         return new SqlStatement[]{new DropSequenceStatement(getCatalogName(), getSchemaName(), getSequenceName())};
     }
+
+    @Override
+    public ChangeStatus checkStatus(Database database) {
+        try {
+            return new ChangeStatus().assertComplete(!SnapshotGeneratorFactory.getInstance().has(new Sequence(getCatalogName(), getSchemaName(), getSequenceName()), database), "Sequence exists");
+        } catch (Exception e) {
+            return new ChangeStatus().unknown(e);
+        }
+    }
+
 
     @Override
     public String getConfirmationMessage() {

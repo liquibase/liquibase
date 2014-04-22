@@ -38,9 +38,14 @@ public class MockDatabase implements Database, InternalDatabase {
 
     private boolean outputDefaultSchema;
     private boolean outputDefaultCatalog;
+    private boolean supportsCatalogs = true;
+    private boolean supportsSchemas = true;
+    private String defaultCatalogName;
+    private String defaultSchemaName;
+    private boolean caseSensitive;
 
 
-	@Override
+    @Override
     public int getPriority() {
         return PRIORITY_DEFAULT;
     }
@@ -122,7 +127,11 @@ public class MockDatabase implements Database, InternalDatabase {
 
     @Override
     public boolean isCaseSensitive() {
-        return false;
+        return caseSensitive;
+    }
+
+    public void setCaseSensitive(boolean caseSensitive) {
+        this.caseSensitive = caseSensitive;
     }
 
     @Override
@@ -175,22 +184,22 @@ public class MockDatabase implements Database, InternalDatabase {
 
     @Override
     public String getDefaultCatalogName() {
-        return null;
+        return defaultCatalogName;
     }
 
     @Override
     public void setDefaultCatalogName(final String catalogName) throws DatabaseException {
-
+        this.defaultCatalogName = catalogName;
     }
 
     @Override
     public String getDefaultSchemaName()  {
-        return null;
+        return defaultSchemaName;
     }
 
     @Override
     public void setDefaultSchemaName(final String schemaName) throws DatabaseException {
-
+        this.defaultSchemaName = schemaName;
     }
 
     @Override
@@ -395,12 +404,20 @@ public class MockDatabase implements Database, InternalDatabase {
 
     @Override
     public boolean supportsSchemas() {
-        return true;
+        return supportsSchemas;
+    }
+
+    public void setSupportsSchemas(boolean supportsSchemas) {
+        this.supportsSchemas = supportsSchemas;
     }
 
     @Override
     public boolean supportsCatalogs() {
-        return true;
+        return supportsCatalogs;
+    }
+
+    public void setSupportsCatalogs(boolean supportsCatalogs) {
+        this.supportsCatalogs = supportsCatalogs;
     }
 
     public boolean supportsCatalogInObjectName() {
@@ -596,16 +613,24 @@ public class MockDatabase implements Database, InternalDatabase {
 
     @Override
     public CatalogAndSchema correctSchema(final CatalogAndSchema schema) {
-        return schema;
+        return schema.standardize(this);
     }
 
     @Override
+    /**
+     * Returns name all lower case except for the last letter capital for easier detection of corrected names.
+     */
     public String correctObjectName(final String name, final Class<? extends DatabaseObject> objectType) {
-        return name;
+        if (name == null) {
+            return null;
+        }
+        String finalName = name.toLowerCase();
+        finalName = finalName.substring(0, finalName.length()-1)+finalName.substring(finalName.length()-1, finalName.length()).toUpperCase();
+        return finalName;
     }
 
     public String correctObjectName(final String name, final Class<? extends DatabaseObject> objectType, final boolean quoteCorrectedName) {
-        return name;
+        return correctObjectName(name, objectType);
     }
 
     @Override
@@ -716,5 +741,10 @@ public class MockDatabase implements Database, InternalDatabase {
     @Override
     public void addReservedWords(Collection<String> words) {
 
+    }
+
+    @Override
+    public String toString() {
+        return "Mock database";
     }
 }

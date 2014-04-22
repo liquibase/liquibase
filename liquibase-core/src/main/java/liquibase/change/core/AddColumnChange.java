@@ -8,12 +8,16 @@ import java.util.Set;
 import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.database.core.*;
+import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.*;
 import liquibase.statement.core.AddColumnStatement;
 import liquibase.statement.core.ReorganizeTableStatement;
 import liquibase.statement.core.SetColumnRemarksStatement;
 import liquibase.statement.core.UpdateStatement;
+import liquibase.structure.core.Column;
+import liquibase.structure.core.PrimaryKey;
+import liquibase.structure.core.Table;
 import liquibase.util.StringUtils;
 
 /**
@@ -180,6 +184,30 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
         }
 
         return inverses.toArray(new Change[inverses.size()]);
+    }
+
+    @Override
+    public ChangeStatus checkStatus(Database database) {
+        ChangeStatus result = new ChangeStatus();
+        try {
+            for (AddColumnConfig column : getColumns()) {
+                Column snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(new Column(Table.class, getCatalogName(), getSchemaName(), getTableName(), column.getName()), database);
+                result.assertComplete(snapshot != null, "Column "+column.getName()+" does not exist");
+
+                if (snapshot != null) {
+                    PrimaryKey snapshotPK = ((Table) snapshot.getRelation()).getPrimaryKey();
+
+                    ConstraintsConfig constraints = column.getConstraints();
+                    if (constraints != null) {
+                        result.assertComplete(constraints.isPrimaryKey() == (snapshotPK != null && snapshotPK.getColumnNamesAsList().contains(column.getName())), "Column " + column.getName() + " not set as primary key");
+                    }
+                }
+            }
+        } catch (Exception e) {
+            return result.unknown(e);
+        }
+
+        return result;
     }
 
     @Override

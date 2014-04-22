@@ -1,5 +1,6 @@
 package liquibase.change.core;
 
+import liquibase.change.ChangeStatus;
 import liquibase.change.DatabaseChange;
 import liquibase.change.ChangeMetaData;
 import liquibase.change.DatabaseChangeProperty;
@@ -79,5 +80,10 @@ public class LoadUpdateDataChange extends LoadDataChange {
     @Override
     public String getSerializedObjectNamespace() {
         return STANDARD_CHANGELOG_NAMESPACE;
+    }
+
+    @Override
+    public ChangeStatus checkStatus(Database database) {
+        return new ChangeStatus().unknown("Cannot check loadUpdateData status");
     }
 }

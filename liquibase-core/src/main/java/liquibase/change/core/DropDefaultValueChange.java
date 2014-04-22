@@ -2,8 +2,11 @@ package liquibase.change.core;
 
 import liquibase.change.*;
 import liquibase.database.Database;
+import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.DropDefaultValueStatement;
+import liquibase.structure.core.Column;
+import liquibase.structure.core.Table;
 
 /**
  * Removes the default value from an existing column.
@@ -73,6 +76,17 @@ public class DropDefaultValueChange extends AbstractChange {
         return new SqlStatement[]{
                 new DropDefaultValueStatement(getCatalogName(), getSchemaName(), getTableName(), getColumnName(), getColumnDataType()),
         };
+    }
+
+    @Override
+    public ChangeStatus checkStatus(Database database) {
+        try {
+            Column snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(new Column(Table.class, getCatalogName(), getSchemaName(), getTableName(), getColumnName()), database);
+            return new ChangeStatus().assertComplete(snapshot.getDefaultValue() == null, "Column has a default value");
+        } catch (Exception e) {
+            return new ChangeStatus().unknown(e);
+        }
+
     }
     
 //    private SqlStatement[] generateStatementsForSQLiteDatabase(Database database) {

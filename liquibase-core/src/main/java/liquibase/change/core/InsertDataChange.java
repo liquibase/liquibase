@@ -120,6 +120,11 @@ public class InsertDataChange extends AbstractChange implements ChangeWithColumn
         };
     }
 
+    @Override
+    public ChangeStatus checkStatus(Database database) {
+        return new ChangeStatus().unknown("Cannot check insertData status");
+    }
+
     /**
      * @see liquibase.change.Change#getConfirmationMessage()
      */

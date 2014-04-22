@@ -3,9 +3,12 @@ package liquibase.change.core;
 import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.database.core.DB2Database;
+import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RenameTableStatement;
 import liquibase.statement.core.ReorganizeTableStatement;
+import liquibase.structure.core.Column;
+import liquibase.structure.core.Table;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -70,6 +73,28 @@ public class RenameTableChange extends AbstractChange {
         }
 
         return statements.toArray(new SqlStatement[statements.size()]);
+    }
+
+    @Override
+    public ChangeStatus checkStatus(Database database) {
+        try {
+            ChangeStatus changeStatus = new ChangeStatus();
+            Table newTable = SnapshotGeneratorFactory.getInstance().createSnapshot(new Table(getCatalogName(), getSchemaName(), getNewTableName()), database);
+            Table oldTable = SnapshotGeneratorFactory.getInstance().createSnapshot(new Table(getCatalogName(), getSchemaName(), getOldTableName()), database);
+
+            if (newTable == null && oldTable == null) {
+                return changeStatus.unknown("Neither table exists");
+            }
+            if (newTable != null && oldTable != null) {
+                return changeStatus.unknown("Both tables exist");
+            }
+            changeStatus.assertComplete(newTable != null, "New table does not exist");
+
+            return changeStatus;
+        } catch (Exception e) {
+            return new ChangeStatus().unknown(e);
+        }
+
     }
 
     @Override

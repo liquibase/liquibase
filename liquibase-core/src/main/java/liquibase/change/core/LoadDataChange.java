@@ -281,6 +281,11 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
     }
 
     @Override
+    public ChangeStatus checkStatus(Database database) {
+        return new ChangeStatus().unknown("Cannot check loadData status");
+    }
+
+    @Override
     public String getConfirmationMessage() {
         return "Data loaded from "+getFile()+" into "+getTableName();
     }
@@ -294,7 +299,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
                 throw new UnexpectedLiquibaseException(getFile() + " could not be found");
             }
             stream = new BufferedInputStream(stream);
-            return CheckSum.compute(stream, true);
+            return CheckSum.compute(getTableName()+":"+CheckSum.compute(stream, true));
         } catch (IOException e) {
             throw new UnexpectedLiquibaseException(e);
         } finally {

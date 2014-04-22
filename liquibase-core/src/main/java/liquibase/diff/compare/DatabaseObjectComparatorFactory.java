@@ -6,6 +6,7 @@ import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.servicelocator.ServiceLocator;
 import liquibase.structure.AbstractDatabaseObject;
 import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.Schema;
 import liquibase.util.StringUtils;
 
 import java.util.*;
@@ -97,6 +98,15 @@ public class DatabaseObjectComparatorFactory {
     public boolean isSameObject(DatabaseObject object1, DatabaseObject object2, Database accordingTo) {
         if (object1 == null && object2 == null) {
             return true;
+        }
+
+        if (object1 instanceof Schema || object2 instanceof Schema) {
+            if (object1 == null) {
+                object1 = new Schema();
+            }
+            if (object2 == null) {
+                object2 = new Schema();
+            }
         }
         if (object1 == null || object2 == null) {
             return false;

@@ -3,10 +3,13 @@ package liquibase.change.core;
 import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.database.core.*;
+import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.statement.core.ReorganizeTableStatement;
 import liquibase.structure.core.Column;
+import liquibase.structure.core.ForeignKey;
+import liquibase.structure.core.Table;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -219,6 +222,29 @@ public class AddLookupTableChange extends AbstractChange {
         statements.addAll(Arrays.asList(addFKChange.generateStatements(database)));
 
         return statements.toArray(new SqlStatement[statements.size()]);
+    }
+
+    @Override
+    public ChangeStatus checkStatus(Database database) {
+        ChangeStatus result = new ChangeStatus();
+        try {
+            Table newTableExample = new Table(getNewTableCatalogName(), getNewTableSchemaName(), getNewTableName());
+            Column newColumnExample = new Column(Table.class, getNewTableCatalogName(), getNewTableSchemaName(), getNewTableName(), getNewColumnName());
+
+            ForeignKey foreignKeyExample = new ForeignKey(getConstraintName(), getExistingTableCatalogName(), getExistingTableSchemaName(), getExistingTableName());
+            foreignKeyExample.setPrimaryKeyTable(newTableExample);
+            foreignKeyExample.setForeignKeyColumns(getExistingColumnName());
+            foreignKeyExample.setPrimaryKeyColumns(getNewColumnName());
+
+            result.assertComplete(SnapshotGeneratorFactory.getInstance().has(newTableExample, database), "New table does not exist");
+            result.assertComplete(SnapshotGeneratorFactory.getInstance().has(newColumnExample, database), "New column does not exist");
+            result.assertComplete(SnapshotGeneratorFactory.getInstance().has(foreignKeyExample, database), "Foreign key does not exist");
+
+            return result;
+
+        } catch (Exception e) {
+            return result.unknown(e);
+        }
     }
 
     @Override

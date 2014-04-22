@@ -3,12 +3,15 @@ package liquibase.change.core;
 import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.database.core.PostgresDatabase;
+import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.SequenceNextValueFunction;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.AddAutoIncrementStatement;
 import liquibase.statement.core.AddDefaultValueStatement;
 import liquibase.statement.core.CreateSequenceStatement;
 import liquibase.statement.core.SetNullableStatement;
+import liquibase.structure.core.Column;
+import liquibase.structure.core.Table;
 
 import java.math.BigInteger;
 
@@ -111,6 +114,32 @@ public class AddAutoIncrementChange extends AbstractChange {
     @Override
     public String getConfirmationMessage() {
         return "Auto-increment added to " + getTableName() + "." + getColumnName();
+    }
+
+    @Override
+    public ChangeStatus checkStatus(Database database) {
+        ChangeStatus result = new ChangeStatus();
+        Column example = new Column(Table.class, getCatalogName(), getSchemaName(), getTableName(), getColumnName());
+        try {
+            Column column = SnapshotGeneratorFactory.getInstance().createSnapshot(example, database);
+            if (column == null) return result.unknown("Column does not exist");
+
+
+            result.assertComplete(column.isAutoIncrement(), "Column is not auto-increment");
+            if (getStartWith() != null && column.getAutoIncrementInformation().getStartWith() != null) {
+                result.assertCorrect(getStartWith().equals(column.getAutoIncrementInformation().getStartWith()), "startsWith incorrect");
+            }
+
+            if (getIncrementBy() != null && column.getAutoIncrementInformation().getIncrementBy() != null) {
+                result.assertCorrect(getIncrementBy().equals(column.getAutoIncrementInformation().getIncrementBy()), "Increment by incorrect");
+            }
+
+            return result;
+        } catch (Exception e) {
+            return result.unknown(e);
+        }
+
+
     }
 
     @Override
