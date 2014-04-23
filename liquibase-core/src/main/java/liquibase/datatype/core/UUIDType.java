@@ -31,4 +31,12 @@ public class UUIDType extends LiquibaseDataType {
         }
         return new DatabaseDataType("char", 36);
     }
+
+    @Override
+    public String objectToSql(Object value, Database database) {
+        if (database instanceof MSSQLDatabase) {
+            return "'"+value+"'";
+        }
+        return super.objectToSql(value, database);
+    }
 }

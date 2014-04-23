@@ -182,14 +182,14 @@ public class DatabaseTestContext {
         if (url.startsWith("jdbc:hsqldb")) {
             return "sa";
         }
-        return "liquibase";
+        return "lbuser";
     }
 
     private String getPassword(String url) {
         if (url.startsWith("jdbc:hsqldb")) {
             return "";
         }
-        return "liquibase";
+        return "lbuser";
     }
 
     public static DatabaseTestContext getInstance() {

@@ -1,0 +1,13 @@
+Package <| |> -> Exec['unzip db2']
+
+exec {'unzip db2':
+    command     => '/bin/tar xfzv /vagrant-install-files/db2/v10.5fp1_linuxx64_expc.tar.gz',
+    cwd     => '/tmp',
+    creates  => '/tmp/expc',
+} ->
+
+exec {'db2setup':
+    command => '/bin/sh -c /tmp/expc/db2setup -r /vagrant/modules/conf/db2/db2expc_install.linux.rsp',
+     creates  => '/opt/ibm/db2/',
+     path    => ['/usr/bin', '/usr/sbin', '/bin'],
+}

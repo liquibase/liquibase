@@ -337,7 +337,7 @@ public abstract class AbstractJdbcDatabase implements Database {
      * @return
      */
     protected String getConnectionSchemaName() {
-        if (connection == null) {
+        if (connection == null || connection instanceof OfflineConnection) {
             return null;
         }
         try {
@@ -981,7 +981,7 @@ public abstract class AbstractJdbcDatabase implements Database {
         if (objectName.contains("(")) {
             return false;
         }
-        return objectName.contains("-") || startsWithNumeric(objectName) || isReservedWord(objectName);
+        return objectName.contains("-") || startsWithNumeric(objectName) || isReservedWord(objectName) || objectName.contains(" ");
     }
 
     public String quoteObject(final String objectName, final Class<? extends DatabaseObject> objectType) {

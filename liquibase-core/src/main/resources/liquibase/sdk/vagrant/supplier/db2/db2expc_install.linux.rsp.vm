@@ -173,7 +173,7 @@ INSTALL_TYPE              = TYPICAL         ** TYPICAL, COMPACT, CUSTOM
 ** instance keywords must be specified. The instance set is comprised of the
 ** identifying prefix value for the INSTANCE key followed by the keys that are
 ** prefixed by the specified INSTANCE prefix value.
-INSTANCE                  = DB2INST1        ** char(8)  no spaces
+INSTANCE                  = ${supplier.instanceName}        ** char(8)  no spaces
 
 ** Real name of the instance, and also the user ID of instance owner. It can be
 ** different from the value of the INSTANCE keyword. If an existing ID is
@@ -183,32 +183,32 @@ INSTANCE                  = DB2INST1        ** char(8)  no spaces
 ** not locked and that the password has not expired. IBM DB2 pureScale Feature
 ** users must specify a name that is unique across the IBM DB2 pureScale
 ** implementation.
-LQBASE.NAME             = LQBASE        ** char(8)  no spaces, no upper case letters
+${supplier.instanceName}.NAME             = ${supplier.instanceName}        ** char(8)  no spaces, no upper case letters
 
 ** The UID will be generated if the keyword is not specified - highly
 ** recommended.
-*LQBASE.UID             =                 ** Unsigned integer
-LQBASE.GROUP_NAME       = db2iadm1        ** char(30) no spaces
+*${supplier.instanceName}.UID             =                 ** Unsigned integer
+${supplier.instanceName}.GROUP_NAME       = db2iadm1        ** char(30) no spaces
 
 ** Use a generated GID if no value provided - highly recommended.
-*LQBASE.GID             =                 ** Unsigned integer
-LQBASE.HOME_DIRECTORY   =                 ** char(64) no spaces. Valid for root installation only
-LQBASE.PASSWORD         = lqbase       ** Valid for root installation only
-*LQBASE.TYPE            = WSE             ** WSE STANDALONE CLIENT
+*${supplier.instanceName}.GID             =                 ** Unsigned integer
+${supplier.instanceName}.HOME_DIRECTORY   =                 ** char(64) no spaces. Valid for root installation only
+${supplier.instanceName}.PASSWORD         = ${supplier.adminPassword}       ** Valid for root installation only
+*${supplier.instanceName}.TYPE            = WSE             ** WSE STANDALONE CLIENT
 
 ** Set the instance to be auto-started after system reboot. The AUTOSTART
 ** keyword can only be used by a root installation. This keyword is invalid for
 ** non-root installation.
-LQBASE.AUTOSTART        = YES             ** YES or NO
+${supplier.instanceName}.AUTOSTART        = YES             ** YES or NO
 
 ** The START_DURING_INSTALL keyword will start the instance during the
 ** installation.  If this keyword is not specified, the behavior follows the
 ** AUTOSTART keyword above.
-*LQBASE.START_DURING_INSTALL = YES         ** YES or NO. Default is YES.
-*LQBASE.SVCENAME        = db2c_db2inst1   ** BLANK or char(14). Reserved for root installation only
-*LQBASE.PORT_NUMBER     = 50000           ** 1024 - 65535, Reserved for root installation only
-*LQBASE.CLIENT_IMPORT_PROFILE =           ** a full path or a file in the same directory as the response file
-*LQBASE.AUTHENTICATION  = SERVER          ** CLIENT, SERVER, or SERVER_ENCRYPT
+*${supplier.instanceName}.START_DURING_INSTALL = YES         ** YES or NO. Default is YES.
+*${supplier.instanceName}.SVCENAME        = db2c_db2inst1   ** BLANK or char(14). Reserved for root installation only
+*${supplier.instanceName}.PORT_NUMBER     = 50000           ** 1024 - 65535, Reserved for root installation only
+*${supplier.instanceName}.CLIENT_IMPORT_PROFILE =           ** a full path or a file in the same directory as the response file
+*${supplier.instanceName}.AUTHENTICATION  = SERVER          ** CLIENT, SERVER, or SERVER_ENCRYPT
 
 ** Fenced User Creation Settings
 ** -----------------------------
@@ -218,237 +218,237 @@ LQBASE.AUTOSTART        = YES             ** YES or NO
 
 ** Make sure the user name specified for FENCED_USERNAME is not locked and its
 ** password has not expired.
-LQBASE.FENCED_USERNAME  = db2sdfe1        ** char(8)  no spaces, no upper case letters
+${supplier.instanceName}.FENCED_USERNAME  = db2sdfe1        ** char(8)  no spaces, no upper case letters
 
 ** If no value is provided for FENCED_UID keyword, the DB2 installer will
 ** generate one for you. This is highly recommended.
-*LQBASE.FENCED_UID      =                 ** Unsigned integer
-LQBASE.FENCED_GROUP_NAME = db2fsdm1       ** char(30)  no spaces
+*${supplier.instanceName}.FENCED_UID      =                 ** Unsigned integer
+${supplier.instanceName}.FENCED_GROUP_NAME = db2fsdm1       ** char(30)  no spaces
 
 ** If no value is provided for FENCED_GID keyword, the DB2 installer will
 ** generate one for you. This is highly recommended.
-*LQBASE.FENCED_GID      =                 ** Unsigned integer
-*LQBASE.FENCED_HOME_DIRECTORY =           ** char(64) no spaces
+*${supplier.instanceName}.FENCED_GID      =                 ** Unsigned integer
+*${supplier.instanceName}.FENCED_HOME_DIRECTORY =           ** char(64) no spaces
 
 ** This FENCED_PASSWORD is required if the fenced user ID is a new user
-LQBASE.FENCED_PASSWORD =   lqbase         ** char(8)
+${supplier.instanceName}.FENCED_PASSWORD =   ${supplier.adminPassword}         ** char(8)
 
 ** Text Search Configuration
 ** -------------------------
-*LQBASE.CONFIGURE_TEXT_SEARCH = NO        ** YES or NO
-*LQBASE.TEXT_SEARCH_HTTP_SERVICE_NAME = db2j_db2inst1 ** BLANK or char(14). Valid for root installation only
-*LQBASE.TEXT_SEARCH_HTTP_PORT_NUMBER = 55000 ** Any unused port number from 1024 - 65535
+*${supplier.instanceName}.CONFIGURE_TEXT_SEARCH = NO        ** YES or NO
+*${supplier.instanceName}.TEXT_SEARCH_HTTP_SERVICE_NAME = db2j_db2inst1 ** BLANK or char(14). Valid for root installation only
+*${supplier.instanceName}.TEXT_SEARCH_HTTP_PORT_NUMBER = 55000 ** Any unused port number from 1024 - 65535
 
 ** Instance DBM CFG Settings
 ** -------------------------
-*LQBASE.AGENTPRI        =                 ** SYSTEM, -1 or 41-128
-*LQBASE.ASLHEAPSZ       =                 ** 1 - 524288
-*LQBASE.AUDIT_BUF_SZ    =                 ** 0 - 65000
-*LQBASE.CATALOG_NOAUTH  =                 ** 0, 1, YES or NO
-*LQBASE.CLUSTER_MGR     =                 ** TSA, VENDOR:<fully qualified vendor library>
-*LQBASE.CPUSPEED        =                 ** -1 or 1e-10 - 1
-*LQBASE.DFTDBPATH       =                 ** any valid path
-*LQBASE.DFT_ACCOUNT_STR =                 ** BLANK or char(25)
-*LQBASE.DFT_MON_BUFPOOL =                 ** ON or OFF
-*LQBASE.DFT_MON_LOCK    =                 ** ON or OFF
-*LQBASE.DFT_MON_SORT    =                 ** ON or OFF
-*LQBASE.DFT_MON_STMT    =                 ** ON or OFF
-*LQBASE.DFT_MON_TABLE   =                 ** ON or OFF
-*LQBASE.DFT_MON_UOW     =                 ** ON or OFF
-*LQBASE.DFT_MON_TIMESTAMP =               ** ON or OFF
-*LQBASE.DIAGLEVEL       =                 ** 0 - 4
-*LQBASE.DIAGPATH        =                 ** BLANK or char(215)
-*LQBASE.DIAGSIZE        =                 ** A value specified in MB and limited by the available disk space in DIAGPATH. Minimum 2 MB must be specified.
-*LQBASE.FENCED_POOL     = -1 or AUTOMATIC ** -1(MAX_COORDAGENTS), AUTOMATIC or a number in range [0, 64000]
-*LQBASE.INSTANCE_MEMORY = AUTOMATIC       ** AUTOMATIC or a number in range [0, 1000000] for 32-bit and [0, 68719476736] for 64-bit
-*LQBASE.HEALTH_MON      =                 ** default is ON; ON or OFF
-*LQBASE.MAX_CONNECTIONS = -1 or AUTOMATIC ** -1, AUTOMATIC or [1, 64000]
-*LQBASE.FED_NOAUTH      = NO              ** YES or NO, default is NO
-*LQBASE.DIR_CACHE       =                 ** YES or NO
-*LQBASE.DISCOVER        =                 ** DISABLE, KNOWN or SEARCH
-*LQBASE.DISCOVER_COMM   =                 ** BLANK or TCPIP
-*LQBASE.DISCOVER_INST   =                 ** ENABLE or DISABLE
-*LQBASE.FCM_NUM_ANCHORS =                 ** -1 or 128 - FCM_NUM_RQB
-*LQBASE.FCM_NUM_BUFFERS =                 ** 128 - 65300
-*LQBASE.FCM_NUM_CONNECT =                 ** -1 or 128 - FCM_NUM_RQB
-*LQBASE.FCM_NUM_RQB     =                 ** 128 - 120000
-*LQBASE.INDEXREC        =                 ** ACCESS or RESTART
-*LQBASE.INTRA_PARALLEL  = NO              ** SYSTEM, YES or NO
-*LQBASE.JAVA_HEAP_SZ    =                 ** 0 - 4096
-*LQBASE.JDK_PATH        =                 ** BLANK or char(255)
-*LQBASE.SSL_SVR_KEYDB   =                 ** BLANK or char(1023)
-*LQBASE.SSL_SVR_STASH   =                 ** BLANK or char(1023)
-*LQBASE.SSL_SVR_LABEL   =                 ** BLANK or char(1023)
-*LQBASE.SSL_SVCENAME    =                 ** BLANK or char(14)
-*LQBASE.SSL_CIPHERSPECS =                 ** BLANK or char(255)
-*LQBASE.SSL_VERSIONS    =                 ** BLANK or char(255)
-*LQBASE.SSL_CLNT_KEYDB  =                 ** BLANK or char(1023)
-*LQBASE.SSL_CLNT_STASH  =                 ** BLANK or char(1023)
-*LQBASE.ALTERNATE_AUTH_ENC =              ** NOT_SPECIFIED, AES_ONLY, AES_CMP
-*LQBASE.KEEPDARI        =                 ** YES or NO
-*LQBASE.MAXAGENTS       =                 ** 1 - 64000
-*LQBASE.MAXCAGENTS      =                 ** -1 or 1 - MAX_COORDAGENTS
-*LQBASE.MAXDARI         =                 ** -1 or 1 - MAX_COORDAGENTS
-*LQBASE.MAXTOTFILOP     =                 ** 100 - 32768
-*LQBASE.MAX_COORDAGENTS = 200 or AUTOMATIC ** 200, AUTOMATIC, -1 or 0 - 64000, -1 translates into a value of 200
-*LQBASE.MAX_QUERYDEGREE =                 ** ANY, -1 or 1 - 32767
-*LQBASE.MON_HEAP_SZ     = AUTOMATIC       ** AUTOMATIC or 0 - 60000
-*LQBASE.NUMDB           =                 ** 1 - 256
-*LQBASE.NUM_INITAGENTS  = 0               ** 0 - 64000
-*LQBASE.NUM_INITDARIS   =                 ** 0 - MAXDARI
-*LQBASE.NUM_INITFENCED  = 0               ** 0 - 64000
-*LQBASE.NUM_POOLAGENTS  = 100 or AUTOMATIC ** -1, AUTOMATIC or 0 - 64000
-*LQBASE.QUERY_HEAP_SZ   =                 ** 2 - 524288
-*LQBASE.RESTBUFSZ       =                 ** 16 - 524288
-*LQBASE.RESYNC_INTERVAL =                 ** 1 - 60000
-*LQBASE.ROUTE_OBJ_NAME  =                 ** BLANK or char(255)
-*LQBASE.RQRIOBLK        =                 ** 4096 - 65535
-*LQBASE.SHEAPTHRES      =                 ** 250 - 2097152
-*LQBASE.SPM_LOG_FILE_SZ =                 ** 4 - 1000
-*LQBASE.SPM_LOG_PATH    =                 ** BLANK or char(226)
-*LQBASE.SPM_MAX_RESYNC  =                 ** 10 - 256
-*LQBASE.SPM_NAME        =                 ** BLANK or char(8)
-*LQBASE.SYSADM_GROUP    =                 ** BLANK or char(30)
-*LQBASE.SYSCTRL_GROUP   =                 ** BLANK or char(30)
-*LQBASE.SYSMAINT_GROUP  =                 ** BLANK or char(30)
-*LQBASE.TP_MON_NAME     =                 ** BLANK or char(19)
-*LQBASE.TRUST_ALLCLNTS  =                 ** YES, NO or DRDAONLY
-*LQBASE.TRUST_CLNTAUTH  =                 ** CLIENT or SERVER
-*LQBASE.UDF_MEM_SZ      =                 ** 128 - 60000
-*LQBASE.FCM_NUM_CHANNELS =                ** 128, 524288
-*LQBASE.FEDERATED_ASYNC = 0               ** ANY or 0 - 32767
+*${supplier.instanceName}.AGENTPRI        =                 ** SYSTEM, -1 or 41-128
+*${supplier.instanceName}.ASLHEAPSZ       =                 ** 1 - 524288
+*${supplier.instanceName}.AUDIT_BUF_SZ    =                 ** 0 - 65000
+*${supplier.instanceName}.CATALOG_NOAUTH  =                 ** 0, 1, YES or NO
+*${supplier.instanceName}.CLUSTER_MGR     =                 ** TSA, VENDOR:<fully qualified vendor library>
+*${supplier.instanceName}.CPUSPEED        =                 ** -1 or 1e-10 - 1
+*${supplier.instanceName}.DFTDBPATH       =                 ** any valid path
+*${supplier.instanceName}.DFT_ACCOUNT_STR =                 ** BLANK or char(25)
+*${supplier.instanceName}.DFT_MON_BUFPOOL =                 ** ON or OFF
+*${supplier.instanceName}.DFT_MON_LOCK    =                 ** ON or OFF
+*${supplier.instanceName}.DFT_MON_SORT    =                 ** ON or OFF
+*${supplier.instanceName}.DFT_MON_STMT    =                 ** ON or OFF
+*${supplier.instanceName}.DFT_MON_TABLE   =                 ** ON or OFF
+*${supplier.instanceName}.DFT_MON_UOW     =                 ** ON or OFF
+*${supplier.instanceName}.DFT_MON_TIMESTAMP =               ** ON or OFF
+*${supplier.instanceName}.DIAGLEVEL       =                 ** 0 - 4
+*${supplier.instanceName}.DIAGPATH        =                 ** BLANK or char(215)
+*${supplier.instanceName}.DIAGSIZE        =                 ** A value specified in MB and limited by the available disk space in DIAGPATH. Minimum 2 MB must be specified.
+*${supplier.instanceName}.FENCED_POOL     = -1 or AUTOMATIC ** -1(MAX_COORDAGENTS), AUTOMATIC or a number in range [0, 64000]
+*${supplier.instanceName}.INSTANCE_MEMORY = AUTOMATIC       ** AUTOMATIC or a number in range [0, 1000000] for 32-bit and [0, 68719476736] for 64-bit
+*${supplier.instanceName}.HEALTH_MON      =                 ** default is ON; ON or OFF
+*${supplier.instanceName}.MAX_CONNECTIONS = -1 or AUTOMATIC ** -1, AUTOMATIC or [1, 64000]
+*${supplier.instanceName}.FED_NOAUTH      = NO              ** YES or NO, default is NO
+*${supplier.instanceName}.DIR_CACHE       =                 ** YES or NO
+*${supplier.instanceName}.DISCOVER        =                 ** DISABLE, KNOWN or SEARCH
+*${supplier.instanceName}.DISCOVER_COMM   =                 ** BLANK or TCPIP
+*${supplier.instanceName}.DISCOVER_INST   =                 ** ENABLE or DISABLE
+*${supplier.instanceName}.FCM_NUM_ANCHORS =                 ** -1 or 128 - FCM_NUM_RQB
+*${supplier.instanceName}.FCM_NUM_BUFFERS =                 ** 128 - 65300
+*${supplier.instanceName}.FCM_NUM_CONNECT =                 ** -1 or 128 - FCM_NUM_RQB
+*${supplier.instanceName}.FCM_NUM_RQB     =                 ** 128 - 120000
+*${supplier.instanceName}.INDEXREC        =                 ** ACCESS or RESTART
+*${supplier.instanceName}.INTRA_PARALLEL  = NO              ** SYSTEM, YES or NO
+*${supplier.instanceName}.JAVA_HEAP_SZ    =                 ** 0 - 4096
+*${supplier.instanceName}.JDK_PATH        =                 ** BLANK or char(255)
+*${supplier.instanceName}.SSL_SVR_KEYDB   =                 ** BLANK or char(1023)
+*${supplier.instanceName}.SSL_SVR_STASH   =                 ** BLANK or char(1023)
+*${supplier.instanceName}.SSL_SVR_LABEL   =                 ** BLANK or char(1023)
+*${supplier.instanceName}.SSL_SVCENAME    =                 ** BLANK or char(14)
+*${supplier.instanceName}.SSL_CIPHERSPECS =                 ** BLANK or char(255)
+*${supplier.instanceName}.SSL_VERSIONS    =                 ** BLANK or char(255)
+*${supplier.instanceName}.SSL_CLNT_KEYDB  =                 ** BLANK or char(1023)
+*${supplier.instanceName}.SSL_CLNT_STASH  =                 ** BLANK or char(1023)
+*${supplier.instanceName}.ALTERNATE_AUTH_ENC =              ** NOT_SPECIFIED, AES_ONLY, AES_CMP
+*${supplier.instanceName}.KEEPDARI        =                 ** YES or NO
+*${supplier.instanceName}.MAXAGENTS       =                 ** 1 - 64000
+*${supplier.instanceName}.MAXCAGENTS      =                 ** -1 or 1 - MAX_COORDAGENTS
+*${supplier.instanceName}.MAXDARI         =                 ** -1 or 1 - MAX_COORDAGENTS
+*${supplier.instanceName}.MAXTOTFILOP     =                 ** 100 - 32768
+*${supplier.instanceName}.MAX_COORDAGENTS = 200 or AUTOMATIC ** 200, AUTOMATIC, -1 or 0 - 64000, -1 translates into a value of 200
+*${supplier.instanceName}.MAX_QUERYDEGREE =                 ** ANY, -1 or 1 - 32767
+*${supplier.instanceName}.MON_HEAP_SZ     = AUTOMATIC       ** AUTOMATIC or 0 - 60000
+*${supplier.instanceName}.NUMDB           =                 ** 1 - 256
+*${supplier.instanceName}.NUM_INITAGENTS  = 0               ** 0 - 64000
+*${supplier.instanceName}.NUM_INITDARIS   =                 ** 0 - MAXDARI
+*${supplier.instanceName}.NUM_INITFENCED  = 0               ** 0 - 64000
+*${supplier.instanceName}.NUM_POOLAGENTS  = 100 or AUTOMATIC ** -1, AUTOMATIC or 0 - 64000
+*${supplier.instanceName}.QUERY_HEAP_SZ   =                 ** 2 - 524288
+*${supplier.instanceName}.RESTBUFSZ       =                 ** 16 - 524288
+*${supplier.instanceName}.RESYNC_INTERVAL =                 ** 1 - 60000
+*${supplier.instanceName}.ROUTE_OBJ_NAME  =                 ** BLANK or char(255)
+*${supplier.instanceName}.RQRIOBLK        =                 ** 4096 - 65535
+*${supplier.instanceName}.SHEAPTHRES      =                 ** 250 - 2097152
+*${supplier.instanceName}.SPM_LOG_FILE_SZ =                 ** 4 - 1000
+*${supplier.instanceName}.SPM_LOG_PATH    =                 ** BLANK or char(226)
+*${supplier.instanceName}.SPM_MAX_RESYNC  =                 ** 10 - 256
+*${supplier.instanceName}.SPM_NAME        =                 ** BLANK or char(8)
+*${supplier.instanceName}.SYSADM_GROUP    =                 ** BLANK or char(30)
+*${supplier.instanceName}.SYSCTRL_GROUP   =                 ** BLANK or char(30)
+*${supplier.instanceName}.SYSMAINT_GROUP  =                 ** BLANK or char(30)
+*${supplier.instanceName}.TP_MON_NAME     =                 ** BLANK or char(19)
+*${supplier.instanceName}.TRUST_ALLCLNTS  =                 ** YES, NO or DRDAONLY
+*${supplier.instanceName}.TRUST_CLNTAUTH  =                 ** CLIENT or SERVER
+*${supplier.instanceName}.UDF_MEM_SZ      =                 ** 128 - 60000
+*${supplier.instanceName}.FCM_NUM_CHANNELS =                ** 128, 524288
+*${supplier.instanceName}.FEDERATED_ASYNC = 0               ** ANY or 0 - 32767
 
 ** Instance Profile Registry Settings
 ** ----------------------------------
-*LQBASE.DB2ACCOUNT      =                 ** BLANK or char(199)
-*LQBASE.DB2BIDI         =                 ** BLANK, 0, 1, YES, NO, ON, OFF, Y, N, TRUE, FALSE, T or F
-*LQBASE.DB2BQTIME       =                 ** BLANK or 1 - MAX
-*LQBASE.DB2BQTRY        =                 ** BLANK or 0 - MAX
-*LQBASE.DB2CHKPTR       =                 ** BLANK, 0, 1, YES, NO, ON, OFF, Y, N, TRUE, FALSE, T or F
-*LQBASE.DB2CLIINIPATH   =                 ** BLANK or char(260)
-*LQBASE.DB2CODEPAGE     =                 ** BLANK or 0 - MAX
-*LQBASE.DB2COUNTRY      =                 ** BLANK or 1 - 999
-*LQBASE.DB2DBDFT        =                 ** BLANK or char(8)
-*LQBASE.DB2DEFPREP      =                 ** BLANK, ALL, 0, 1, YES, NO, ON, OFF, Y, N, TRUE, FALSE, T or F
-*LQBASE.DB2ENVLIST      =                 ** BLANK or char()
-*LQBASE.DB2INCLUDE      =                 ** BLANK or char()
-*LQBASE.DB2IQTIME       =                 ** BLANK or 1 - MAX
-*LQBASE.DB2LIBPATH      =                 ** BLANK or char()
-*LQBASE.DB2LOADREC      =                 ** BLANK or char(260)
-*LQBASE.DB2LOCK_TO_RB   =                 ** BLANK or STATEMENT
-*LQBASE.DB2NOEXITLIST   =                 ** BLANK, 0, 1, YES, NO, ON, OFF, Y, N, TRUE, FALSE, T or F
-*LQBASE.DB2OLDEVMON     =                 ** BLANK or char()
-*LQBASE.DB2OPTIONS      =                 ** BLANK or -/+[a,c,e[c,s],n,o,p,s,t,v,w,x] and/or -[f,l,r,z]filename
-*LQBASE.DB2_OPTSTATS_LOG =                ** OFF or ON with parameters {NUM | SIZE | NAME | DIR}
-*LQBASE.DB2PRIORITIES   =                 ** BLANK or char()
-*LQBASE.DB2RQTIME       =                 ** BLANK or 1 - MAX
-*LQBASE.DB2_SET_MAX_CONTAINER_SIZE =      ** -1 (no limit) or any integer greater than 64MB
-*LQBASE.DB2SORT         =                 ** BLANK or char(260)
-*LQBASE.DB2_SYSTEM_MONITOR_SETTINGS =     ** Controls parameters OLD_CPU_USAGE and DISABLE_CPU_USAGE with ON or OFF values
-*LQBASE.DB2_AVOID_PREFETCH =              ** BLANK, 0, 1, YES, NO, ON, OFF, Y, N, TRUE, FALSE, T or F
-*LQBASE.DB2_CORRELATED_PREDICATES =       ** BLANK, 0, 1, YES, NO, ON, OFF, Y, N, TRUE, FALSE, T or F
-*LQBASE.DB2_FORCE_NLS_CACHE =             ** BLANK, 0, 1, YES, NO, ON, OFF, Y, N, TRUE, FALSE, T or F
-*LQBASE.DB2_HASH_JOIN   =                 ** BLANK, 0, 1, YES, NO, ON, OFF, Y, N, TRUE, FALSE, T or F
-*LQBASE.DB2_INDEX_FREE  =                 ** BLANK or 0 - 60
-*LQBASE.DB2_LIKE_VARCHAR =                ** BLANK, 0, 1, YES, NO, ON, OFF, Y, N, TRUE, FALSE, T, F or 0.0 - 5.0 (exclusive)
-*LQBASE.DB2_LOADSORT_STACKSZ =            ** BLANK or 1 - MAX
-*LQBASE.DB2_NO_PKG_LOCK =                 ** BLANK, 0, 1, YES, NO, ON, OFF, Y, N, TRUE, FALSE, T or F
-*LQBASE.DB2_PARALLEL_IO =                 ** BLANK, * or 0-4095,0-4095,...
-*LQBASE.DB2_PRED_FACTORIZE =              ** BLANK, 0, 1, YES, NO, ON, OFF, Y, N, TRUE, FALSE, T or F
-*LQBASE.DB2_STRIPED_CONTAINERS =          ** BLANK, 0, 1, YES, NO, ON, OFF, Y, N, TRUE, FALSE, T or F
-*LQBASE.DB2INSTOWNER    =                 ** BLANK or char(30)
-*LQBASE.DB2DBMSADDR     =                 ** BLANK or char(10)
-*LQBASE.DB2_DISABLE_FLUSH_LOG =           ** BLANK or ON, OFF
-*LQBASE.DB2LOCALE       =                 ** BLANK or YES, NO
-*LQBASE.DB2NODE         =                 ** BLANK or YES NO
-*LQBASE.DB2_USE_PAGE_CONTAINER_TAG =      ** BLANK or ON
-*LQBASE.DB2TCPCONNMGRS  =                 ** BLANK or 1 - 8
-*LQBASE.DB2_PARTITIONEDLOAD_DEFAULT =     ** BLANK or YES, NO
-*LQBASE.DB2_INLIST_TO_NLJN =              ** BLANK or YES, NO
-*LQBASE.DB2_SELECTIVITY =                 ** BLANK or YES, NO
-*LQBASE.DB2_REDUCED_OPTIMIZATION =        ** BLANK, DISABLE, YES, NO, 0 - MAX
-*LQBASE.DB2_BINSORT     =                 ** BLANK or YES, NO
-*LQBASE.DB2BPVARS       =                 ** BLANK or char()
-*LQBASE.DB2_ENABLE_BUFPD =                ** BLANK or ON, OFF
-*LQBASE.DB2_EVMON_EVENT_LIST_SIZE = 0     ** A value specified in KB, MB or GB and limited by the available memory from the monitor heap
-*LQBASE.DB2_EXTENDED_OPTIMIZATION =       ** BLANK or ON, OFF
-*LQBASE.DB2FODC         = Concatenation of all FODC parameters: CORELIMIT, DUMPCORE, DUMDIR, MEMSCAN and SERVICELEVEL ** CORELIMIT, DUMPCORE, DUMPDIR and MEMSCAN parameters are set different for Unix and Windows
-*LQBASE.DB2MAXFSCRSEARCH =                ** BLANK or -1, 1 - 33554
-*LQBASE.DB2MEMDISCLAIM  =                 ** BLANK or YES, NO
-*LQBASE.DB2_VENDOR_INI  =                 ** BLANK or char()
-*LQBASE.DB2_XBSA_LIBRARY =                ** BLANK or char()
-*LQBASE.DB2LDAP_SEARCH_SCOPE =            ** BLANK LOCAL DOMAIN GLOBAL
-*LQBASE.DB2MEMMAXFREE   =                 ** BLANK or char()
-*LQBASE.DB2NTMEMSIZE    =                 ** BLANK or char()
-*LQBASE.DB2_OVERRIDE_BPF =                ** BLANK or 1 - MAX
-*LQBASE.DB2_DJ_COMM     =                 ** BLANK or char()
-*LQBASE.DB2ADMINSERVER  =                 ** BLANK or char(64)
-*LQBASE.DB2_PINNED_BP   = NO              ** YES or NO
-*LQBASE.DB2REMOTEPREG   =                 ** BLANK or char(64)
-*LQBASE.DB2_ANTIJOIN    =                 ** BLANK or YES, NO, EXTEND
-*LQBASE.DB2_COLLECT_TS_REC_INFO =         ** BLANK or YES, NO
-*LQBASE.DB2PROCESSORS   =                 ** BLANK or 1 - MAX
-*LQBASE.DB2ASSUMEUPDATE =                 ** BLANK or ON, OFF
-*LQBASE.DB2_SKIPDELETED =                 ** BLANK or ON, OFF
-*LQBASE.DB2_SQLROUTINE_PREPOPTS =         ** BLANK or char()
-*LQBASE.DB2_INDEX_TYPE2 =                 ** BLANK or ON, OFF
-*LQBASE.DB2_APM_PERFORMANCE =             ** BLANK or ON, OFF
-*LQBASE.DB2_FMP_COMM_HEAPSZ =             ** BLANK or 1 - MAX
-*LQBASE.DB2_EVALUNCOMMITTED =             ** BLANK or YES, NO
-*LQBASE.DB2_NO_FORK_CHECK =               ** BLANK or ON, OFF
-*LQBASE.DB2_KEEPTABLELOCK =               ** BLANK or ON, OFF
-*LQBASE.DB2GRAPHICUNICODESERVER =         ** BLANK or ON, OFF
-*LQBASE.DB2_MINIMIZE_LISTPREFETCH =       ** BLANK or YES, NO
-*LQBASE.DB2_TRUSTED_BINDIN =              ** BLANK or ON, OFF, CHECK
-*LQBASE.DB2_CLPPROMPT   =                 ** BLANK or char(99)
-*LQBASE.DB2_FORCE_APP_ON_MAX_LOG =        ** BLANK or TRUE, FALSE
-*LQBASE.DB2_CLP_EDITOR  =                 ** BLANK or char()
-*LQBASE.DB2_CLP_HISTSIZE =                ** BLANK or 1 - 500
-*LQBASE.DB2_LOAD_COPY_NO_OVERRIDE =       ** BLANK or LOCAL, DOMAIN, GLOBAL
-*LQBASE.DB2_MAX_NON_TABLE_LOCKS =         ** BLANK or 1 - MAX
-*LQBASE.DB2_USE_ALTERNATE_PAGE_CLEANING =  ** BLANK or ON, OFF
-*LQBASE.DB2_SCATTERED_IO =                ** BLANK or ON, OFF
-*LQBASE.DB2_NO_MPFA_FOR_NEW_DB =          ** BLANK or YES, NO
-*LQBASE.DB2_OBJECT_TABLE_ENTRIES =        ** BLANK or 0 - 50000
-*LQBASE.DB2_VIEW_REOPT_VALUES =           ** BLANK or YES, NO
-*LQBASE.DB2_SELUDI_COMM_BUFFER =          ** BLANK or ON, OFF
-*LQBASE.DB2_ENABLE_AUTOCONFIG_DEFAULT =   ** BLANK, YES, NO
-*LQBASE.DB2_OPT_MAX_TEMP_SIZE =           ** BLANK or 0 - MAX
-*LQBASE.DB2RCMD_LEGACY_MODE =             ** YES, ON, TRUE, 1 or NO, OFF, FALSE, 0
-*LQBASE.DB2_LARGE_PAGE_MEM =              ** *, DB
-*LQBASE.DB2_MAX_LOB_BLOCK_SIZE = 0        ** 0 - 21487483647
-*LQBASE.DB2AUTH         =                 ** BLANK or char()
-*LQBASE.DB2CONNECT_DISCONNECT_ON_INTERRUPT = NO ** YES, TRUE, 1 or NO, FALSE, 0
-*LQBASE.DB2CONNECT_ENABLE_EURO_CODEPAGE =  ** BLANK or char()
-*LQBASE.DB2FCMCOMM      = TCPIP4          ** TCPIP4 or TCPIP6
-*LQBASE.DB2FFDC         =                 ** BLANK, ON, CORE:OFF
-*LQBASE.DB2LOADFLAGS    =                 ** BLANK or char()
-*LQBASE.DB2TCP_CLIENT_CONTIMEOUT = 0      ** 0 - 32767
-*LQBASE.DB2TCP_CLIENT_RCVTIMEOUT = 0      ** 0 - 32767
-*LQBASE.DB2TRC_DEF_BUFFSIZE =             ** BLANK or char()
-*LQBASE.DB2YIELD        =                 ** BLANK or char()
-*LQBASE.DB2_ASYNC_IO_MAXFILOP = MAXFILOP  ** MAXFILOP - MAX
-*LQBASE.DB2_BAR_AUTONOMIC_DISABLE =       ** BLANK or char()
-*LQBASE.DB2_CONNRETRIES_INTERVAL =        ** BLANK or char()
-*LQBASE.DB2_DXX_PATHS_ALLOWED_READ =      ** BLANK or char()
-*LQBASE.DB2_DXX_PATHS_ALLOWED_WRITE =     ** BLANK or char()
-*LQBASE.DB2_HADR_BUF_SIZE = 2*LOGBUFSZ    ** BLANK or 0 - MAX
-*LQBASE.DB2_LOGGING_DETAIL =              ** BLANK or char()
-*LQBASE.DB2_MAP_XML_AS_CLOB_FOR_DLC = NO  ** YES, NO
-*LQBASE.DB2_MAX_CLIENT_CONNRETRIES =      ** BLANK or char()
-*LQBASE.DB2_MAX_INACT_STMTS =             ** 0 - 4294967296
-*LQBASE.DB2_MDC_ROLLOUT = IMMEDIATE       ** DEFER, IMMEDIATE or OFF
-*LQBASE.DB2_MINIMUM_CLIENT_LEVEL =        ** BLANK or char()
-*LQBASE.DB2_NUM_CKPW_DAEMONS = 3          ** 0 - 100
-*LQBASE.DB2_RESOURCE_POLICY =             ** valid path to configuration file
-*LQBASE.DB2_SKIPINSERTED = OFF            ** ON, OFF
-*LQBASE.DB2_SMS_TRUNC_TMPTABLE_THRESH =   ** -1, 0-n where n is the number of extents per container that are to be maintained
-*LQBASE.DB2_SNAPSHOT_NOAUTH =             ** BLANK or char()
-*LQBASE.DB2_TAPEMGR_TAPE_EXPIRATION =     ** BLANK or char()
-*LQBASE.DB2_UPDDBCFG_SINGLE_DBPARTITION =  ** YES, 1, TRUE or NO, 0, FALSE
-*LQBASE.DB2_USE_DB2JCCT2_JROUTINE =       ** ON, YES, 1, TRUE or OFF, NO, 0, FALSE
-*LQBASE.DB2_UTIL_MSGPATH = instanceName/tmp directory ** BLANK or char()
-*LQBASE.DB2_WORKLOAD    = Not set         ** BLANK, SAP
+*${supplier.instanceName}.DB2ACCOUNT      =                 ** BLANK or char(199)
+*${supplier.instanceName}.DB2BIDI         =                 ** BLANK, 0, 1, YES, NO, ON, OFF, Y, N, TRUE, FALSE, T or F
+*${supplier.instanceName}.DB2BQTIME       =                 ** BLANK or 1 - MAX
+*${supplier.instanceName}.DB2BQTRY        =                 ** BLANK or 0 - MAX
+*${supplier.instanceName}.DB2CHKPTR       =                 ** BLANK, 0, 1, YES, NO, ON, OFF, Y, N, TRUE, FALSE, T or F
+*${supplier.instanceName}.DB2CLIINIPATH   =                 ** BLANK or char(260)
+*${supplier.instanceName}.DB2CODEPAGE     =                 ** BLANK or 0 - MAX
+*${supplier.instanceName}.DB2COUNTRY      =                 ** BLANK or 1 - 999
+*${supplier.instanceName}.DB2DBDFT        =                 ** BLANK or char(8)
+*${supplier.instanceName}.DB2DEFPREP      =                 ** BLANK, ALL, 0, 1, YES, NO, ON, OFF, Y, N, TRUE, FALSE, T or F
+*${supplier.instanceName}.DB2ENVLIST      =                 ** BLANK or char()
+*${supplier.instanceName}.DB2INCLUDE      =                 ** BLANK or char()
+*${supplier.instanceName}.DB2IQTIME       =                 ** BLANK or 1 - MAX
+*${supplier.instanceName}.DB2LIBPATH      =                 ** BLANK or char()
+*${supplier.instanceName}.DB2LOADREC      =                 ** BLANK or char(260)
+*${supplier.instanceName}.DB2LOCK_TO_RB   =                 ** BLANK or STATEMENT
+*${supplier.instanceName}.DB2NOEXITLIST   =                 ** BLANK, 0, 1, YES, NO, ON, OFF, Y, N, TRUE, FALSE, T or F
+*${supplier.instanceName}.DB2OLDEVMON     =                 ** BLANK or char()
+*${supplier.instanceName}.DB2OPTIONS      =                 ** BLANK or -/+[a,c,e[c,s],n,o,p,s,t,v,w,x] and/or -[f,l,r,z]filename
+*${supplier.instanceName}.DB2_OPTSTATS_LOG =                ** OFF or ON with parameters {NUM | SIZE | NAME | DIR}
+*${supplier.instanceName}.DB2PRIORITIES   =                 ** BLANK or char()
+*${supplier.instanceName}.DB2RQTIME       =                 ** BLANK or 1 - MAX
+*${supplier.instanceName}.DB2_SET_MAX_CONTAINER_SIZE =      ** -1 (no limit) or any integer greater than 64MB
+*${supplier.instanceName}.DB2SORT         =                 ** BLANK or char(260)
+*${supplier.instanceName}.DB2_SYSTEM_MONITOR_SETTINGS =     ** Controls parameters OLD_CPU_USAGE and DISABLE_CPU_USAGE with ON or OFF values
+*${supplier.instanceName}.DB2_AVOID_PREFETCH =              ** BLANK, 0, 1, YES, NO, ON, OFF, Y, N, TRUE, FALSE, T or F
+*${supplier.instanceName}.DB2_CORRELATED_PREDICATES =       ** BLANK, 0, 1, YES, NO, ON, OFF, Y, N, TRUE, FALSE, T or F
+*${supplier.instanceName}.DB2_FORCE_NLS_CACHE =             ** BLANK, 0, 1, YES, NO, ON, OFF, Y, N, TRUE, FALSE, T or F
+*${supplier.instanceName}.DB2_HASH_JOIN   =                 ** BLANK, 0, 1, YES, NO, ON, OFF, Y, N, TRUE, FALSE, T or F
+*${supplier.instanceName}.DB2_INDEX_FREE  =                 ** BLANK or 0 - 60
+*${supplier.instanceName}.DB2_LIKE_VARCHAR =                ** BLANK, 0, 1, YES, NO, ON, OFF, Y, N, TRUE, FALSE, T, F or 0.0 - 5.0 (exclusive)
+*${supplier.instanceName}.DB2_LOADSORT_STACKSZ =            ** BLANK or 1 - MAX
+*${supplier.instanceName}.DB2_NO_PKG_LOCK =                 ** BLANK, 0, 1, YES, NO, ON, OFF, Y, N, TRUE, FALSE, T or F
+*${supplier.instanceName}.DB2_PARALLEL_IO =                 ** BLANK, * or 0-4095,0-4095,...
+*${supplier.instanceName}.DB2_PRED_FACTORIZE =              ** BLANK, 0, 1, YES, NO, ON, OFF, Y, N, TRUE, FALSE, T or F
+*${supplier.instanceName}.DB2_STRIPED_CONTAINERS =          ** BLANK, 0, 1, YES, NO, ON, OFF, Y, N, TRUE, FALSE, T or F
+*${supplier.instanceName}.DB2INSTOWNER    =                 ** BLANK or char(30)
+*${supplier.instanceName}.DB2DBMSADDR     =                 ** BLANK or char(10)
+*${supplier.instanceName}.DB2_DISABLE_FLUSH_LOG =           ** BLANK or ON, OFF
+*${supplier.instanceName}.DB2LOCALE       =                 ** BLANK or YES, NO
+*${supplier.instanceName}.DB2NODE         =                 ** BLANK or YES NO
+*${supplier.instanceName}.DB2_USE_PAGE_CONTAINER_TAG =      ** BLANK or ON
+*${supplier.instanceName}.DB2TCPCONNMGRS  =                 ** BLANK or 1 - 8
+*${supplier.instanceName}.DB2_PARTITIONEDLOAD_DEFAULT =     ** BLANK or YES, NO
+*${supplier.instanceName}.DB2_INLIST_TO_NLJN =              ** BLANK or YES, NO
+*${supplier.instanceName}.DB2_SELECTIVITY =                 ** BLANK or YES, NO
+*${supplier.instanceName}.DB2_REDUCED_OPTIMIZATION =        ** BLANK, DISABLE, YES, NO, 0 - MAX
+*${supplier.instanceName}.DB2_BINSORT     =                 ** BLANK or YES, NO
+*${supplier.instanceName}.DB2BPVARS       =                 ** BLANK or char()
+*${supplier.instanceName}.DB2_ENABLE_BUFPD =                ** BLANK or ON, OFF
+*${supplier.instanceName}.DB2_EVMON_EVENT_LIST_SIZE = 0     ** A value specified in KB, MB or GB and limited by the available memory from the monitor heap
+*${supplier.instanceName}.DB2_EXTENDED_OPTIMIZATION =       ** BLANK or ON, OFF
+*${supplier.instanceName}.DB2FODC         = Concatenation of all FODC parameters: CORELIMIT, DUMPCORE, DUMDIR, MEMSCAN and SERVICELEVEL ** CORELIMIT, DUMPCORE, DUMPDIR and MEMSCAN parameters are set different for Unix and Windows
+*${supplier.instanceName}.DB2MAXFSCRSEARCH =                ** BLANK or -1, 1 - 33554
+*${supplier.instanceName}.DB2MEMDISCLAIM  =                 ** BLANK or YES, NO
+*${supplier.instanceName}.DB2_VENDOR_INI  =                 ** BLANK or char()
+*${supplier.instanceName}.DB2_XBSA_LIBRARY =                ** BLANK or char()
+*${supplier.instanceName}.DB2LDAP_SEARCH_SCOPE =            ** BLANK LOCAL DOMAIN GLOBAL
+*${supplier.instanceName}.DB2MEMMAXFREE   =                 ** BLANK or char()
+*${supplier.instanceName}.DB2NTMEMSIZE    =                 ** BLANK or char()
+*${supplier.instanceName}.DB2_OVERRIDE_BPF =                ** BLANK or 1 - MAX
+*${supplier.instanceName}.DB2_DJ_COMM     =                 ** BLANK or char()
+*${supplier.instanceName}.DB2ADMINSERVER  =                 ** BLANK or char(64)
+*${supplier.instanceName}.DB2_PINNED_BP   = NO              ** YES or NO
+*${supplier.instanceName}.DB2REMOTEPREG   =                 ** BLANK or char(64)
+*${supplier.instanceName}.DB2_ANTIJOIN    =                 ** BLANK or YES, NO, EXTEND
+*${supplier.instanceName}.DB2_COLLECT_TS_REC_INFO =         ** BLANK or YES, NO
+*${supplier.instanceName}.DB2PROCESSORS   =                 ** BLANK or 1 - MAX
+*${supplier.instanceName}.DB2ASSUMEUPDATE =                 ** BLANK or ON, OFF
+*${supplier.instanceName}.DB2_SKIPDELETED =                 ** BLANK or ON, OFF
+*${supplier.instanceName}.DB2_SQLROUTINE_PREPOPTS =         ** BLANK or char()
+*${supplier.instanceName}.DB2_INDEX_TYPE2 =                 ** BLANK or ON, OFF
+*${supplier.instanceName}.DB2_APM_PERFORMANCE =             ** BLANK or ON, OFF
+*${supplier.instanceName}.DB2_FMP_COMM_HEAPSZ =             ** BLANK or 1 - MAX
+*${supplier.instanceName}.DB2_EVALUNCOMMITTED =             ** BLANK or YES, NO
+*${supplier.instanceName}.DB2_NO_FORK_CHECK =               ** BLANK or ON, OFF
+*${supplier.instanceName}.DB2_KEEPTABLELOCK =               ** BLANK or ON, OFF
+*${supplier.instanceName}.DB2GRAPHICUNICODESERVER =         ** BLANK or ON, OFF
+*${supplier.instanceName}.DB2_MINIMIZE_LISTPREFETCH =       ** BLANK or YES, NO
+*${supplier.instanceName}.DB2_TRUSTED_BINDIN =              ** BLANK or ON, OFF, CHECK
+*${supplier.instanceName}.DB2_CLPPROMPT   =                 ** BLANK or char(99)
+*${supplier.instanceName}.DB2_FORCE_APP_ON_MAX_LOG =        ** BLANK or TRUE, FALSE
+*${supplier.instanceName}.DB2_CLP_EDITOR  =                 ** BLANK or char()
+*${supplier.instanceName}.DB2_CLP_HISTSIZE =                ** BLANK or 1 - 500
+*${supplier.instanceName}.DB2_LOAD_COPY_NO_OVERRIDE =       ** BLANK or LOCAL, DOMAIN, GLOBAL
+*${supplier.instanceName}.DB2_MAX_NON_TABLE_LOCKS =         ** BLANK or 1 - MAX
+*${supplier.instanceName}.DB2_USE_ALTERNATE_PAGE_CLEANING =  ** BLANK or ON, OFF
+*${supplier.instanceName}.DB2_SCATTERED_IO =                ** BLANK or ON, OFF
+*${supplier.instanceName}.DB2_NO_MPFA_FOR_NEW_DB =          ** BLANK or YES, NO
+*${supplier.instanceName}.DB2_OBJECT_TABLE_ENTRIES =        ** BLANK or 0 - 50000
+*${supplier.instanceName}.DB2_VIEW_REOPT_VALUES =           ** BLANK or YES, NO
+*${supplier.instanceName}.DB2_SELUDI_COMM_BUFFER =          ** BLANK or ON, OFF
+*${supplier.instanceName}.DB2_ENABLE_AUTOCONFIG_DEFAULT =   ** BLANK, YES, NO
+*${supplier.instanceName}.DB2_OPT_MAX_TEMP_SIZE =           ** BLANK or 0 - MAX
+*${supplier.instanceName}.DB2RCMD_LEGACY_MODE =             ** YES, ON, TRUE, 1 or NO, OFF, FALSE, 0
+*${supplier.instanceName}.DB2_LARGE_PAGE_MEM =              ** *, DB
+*${supplier.instanceName}.DB2_MAX_LOB_BLOCK_SIZE = 0        ** 0 - 21487483647
+*${supplier.instanceName}.DB2AUTH         =                 ** BLANK or char()
+*${supplier.instanceName}.DB2CONNECT_DISCONNECT_ON_INTERRUPT = NO ** YES, TRUE, 1 or NO, FALSE, 0
+*${supplier.instanceName}.DB2CONNECT_ENABLE_EURO_CODEPAGE =  ** BLANK or char()
+*${supplier.instanceName}.DB2FCMCOMM      = TCPIP4          ** TCPIP4 or TCPIP6
+*${supplier.instanceName}.DB2FFDC         =                 ** BLANK, ON, CORE:OFF
+*${supplier.instanceName}.DB2LOADFLAGS    =                 ** BLANK or char()
+*${supplier.instanceName}.DB2TCP_CLIENT_CONTIMEOUT = 0      ** 0 - 32767
+*${supplier.instanceName}.DB2TCP_CLIENT_RCVTIMEOUT = 0      ** 0 - 32767
+*${supplier.instanceName}.DB2TRC_DEF_BUFFSIZE =             ** BLANK or char()
+*${supplier.instanceName}.DB2YIELD        =                 ** BLANK or char()
+*${supplier.instanceName}.DB2_ASYNC_IO_MAXFILOP = MAXFILOP  ** MAXFILOP - MAX
+*${supplier.instanceName}.DB2_BAR_AUTONOMIC_DISABLE =       ** BLANK or char()
+*${supplier.instanceName}.DB2_CONNRETRIES_INTERVAL =        ** BLANK or char()
+*${supplier.instanceName}.DB2_DXX_PATHS_ALLOWED_READ =      ** BLANK or char()
+*${supplier.instanceName}.DB2_DXX_PATHS_ALLOWED_WRITE =     ** BLANK or char()
+*${supplier.instanceName}.DB2_HADR_BUF_SIZE = 2*LOGBUFSZ    ** BLANK or 0 - MAX
+*${supplier.instanceName}.DB2_LOGGING_DETAIL =              ** BLANK or char()
+*${supplier.instanceName}.DB2_MAP_XML_AS_CLOB_FOR_DLC = NO  ** YES, NO
+*${supplier.instanceName}.DB2_MAX_CLIENT_CONNRETRIES =      ** BLANK or char()
+*${supplier.instanceName}.DB2_MAX_INACT_STMTS =             ** 0 - 4294967296
+*${supplier.instanceName}.DB2_MDC_ROLLOUT = IMMEDIATE       ** DEFER, IMMEDIATE or OFF
+*${supplier.instanceName}.DB2_MINIMUM_CLIENT_LEVEL =        ** BLANK or char()
+*${supplier.instanceName}.DB2_NUM_CKPW_DAEMONS = 3          ** 0 - 100
+*${supplier.instanceName}.DB2_RESOURCE_POLICY =             ** valid path to configuration file
+*${supplier.instanceName}.DB2_SKIPINSERTED = OFF            ** ON, OFF
+*${supplier.instanceName}.DB2_SMS_TRUNC_TMPTABLE_THRESH =   ** -1, 0-n where n is the number of extents per container that are to be maintained
+*${supplier.instanceName}.DB2_SNAPSHOT_NOAUTH =             ** BLANK or char()
+*${supplier.instanceName}.DB2_TAPEMGR_TAPE_EXPIRATION =     ** BLANK or char()
+*${supplier.instanceName}.DB2_UPDDBCFG_SINGLE_DBPARTITION =  ** YES, 1, TRUE or NO, 0, FALSE
+*${supplier.instanceName}.DB2_USE_DB2JCCT2_JROUTINE =       ** ON, YES, 1, TRUE or OFF, NO, 0, FALSE
+*${supplier.instanceName}.DB2_UTIL_MSGPATH = instanceName/tmp directory ** BLANK or char()
+*${supplier.instanceName}.DB2_WORKLOAD    = Not set         ** BLANK, SAP
 
 ** 2nd (non-pureScale) Instance Creation Settings
 ** ----------------------------------------------
@@ -647,7 +647,7 @@ LQBASE.FENCED_PASSWORD =   lqbase         ** char(8)
 *contact1.CONTACT_NAME    =                 ** userName
 *contact1.EMAIL           =                 ** sysadmin@yourcompany.com - email address where the notification should be sent
 *contact1.PAGER           =                 ** YES or NO
-*contact1.INSTANCE        =                 ** LQBASE - instance that this contact belongs to, this should be one of the values of keyword INSTANCE.
+*contact1.INSTANCE        =                 ** ${supplier.instanceName} - instance that this contact belongs to, this should be one of the values of keyword INSTANCE.
 
 ** Information Center Settings
 ** ---------------------------

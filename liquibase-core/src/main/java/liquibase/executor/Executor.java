@@ -1,5 +1,6 @@
 package liquibase.executor;
 
+import liquibase.change.Change;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 import liquibase.sql.visitor.SqlVisitor;
@@ -36,6 +37,10 @@ public interface Executor {
 
 
     /** Write methods */
+    void execute(Change change) throws DatabaseException;
+
+    void execute(Change change, List<SqlVisitor> sqlVisitors) throws DatabaseException;
+
     void execute(SqlStatement sql) throws DatabaseException;
 
     void execute(SqlStatement sql, List<SqlVisitor> sqlVisitors) throws DatabaseException;

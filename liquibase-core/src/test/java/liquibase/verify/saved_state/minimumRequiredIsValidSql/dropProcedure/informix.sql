@@ -1,3 +1,3 @@
 -- Database: informix
--- Change Parameter: procedureName=full_name
-DROP PROCEDURE full_name;
+-- Change Parameter: procedureName=new_customer
+DROP PROCEDURE new_customer;

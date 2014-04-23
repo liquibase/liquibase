@@ -63,6 +63,8 @@ public class Liquibase {
 
     private ChangeLogParameters changeLogParameters;
     private ChangeExecListener changeExecListener;
+    private ChangeLogSyncListener changeLogSyncListener;
+
     private boolean ignoreClasspathPrefix = true;
 
     /**
@@ -524,7 +526,7 @@ public class Liquibase {
                     new ContextChangeSetFilter(contexts),
                     new DbmsChangeSetFilter(database));
 
-            logIterator.run(new ChangeLogSyncVisitor(database), database);
+            logIterator.run(new ChangeLogSyncVisitor(database, changeLogSyncListener), database);
         } finally {
             lockService.releaseLock();
         }
@@ -1034,8 +1036,13 @@ public class Liquibase {
     private LockService getLockService() {
         return LockServiceFactory.getInstance().getLockService(database);
     }
+
     public void setChangeExecListener(ChangeExecListener listener) {
       this.changeExecListener = listener;
+    }
+
+    public void setChangeLogSyncListener(ChangeLogSyncListener changeLogSyncListener) {
+        this.changeLogSyncListener = changeLogSyncListener;
     }
 
     public void setIgnoreClasspathPrefix(boolean ignoreClasspathPrefix) {

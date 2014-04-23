@@ -1,5 +1,5 @@
 -- Database: sybase
--- Change Parameter: newColumnName=id
--- Change Parameter: oldColumnName=id
+-- Change Parameter: newColumnName=full_name
+-- Change Parameter: oldColumnName=name
 -- Change Parameter: tableName=person
-exec sp_rename 'person.id', 'id';
+exec sp_rename 'person.name', 'full_name';

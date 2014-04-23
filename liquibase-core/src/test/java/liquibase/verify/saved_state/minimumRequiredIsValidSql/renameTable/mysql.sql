@@ -1,4 +1,4 @@
 -- Database: mysql
--- Change Parameter: newTableName=person
+-- Change Parameter: newTableName=employee
 -- Change Parameter: oldTableName=person
-ALTER TABLE person RENAME person;
+ALTER TABLE person RENAME employee;

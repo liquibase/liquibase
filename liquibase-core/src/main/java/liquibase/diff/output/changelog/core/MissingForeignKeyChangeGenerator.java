@@ -23,13 +23,14 @@ public class MissingForeignKeyChangeGenerator implements MissingObjectChangeGene
         return new Class[] {
                 Table.class,
                 Column.class,
-                PrimaryKey.class
+                PrimaryKey.class,
+                UniqueConstraint.class
         };
     }
 
     @Override
     public Class<? extends DatabaseObject>[] runBeforeTypes() {
-        return new Class[] { Index.class, UniqueConstraint.class };
+        return new Class[] { Index.class };
     }
 
     @Override

@@ -195,8 +195,7 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
         List<RanChangeSet> ranChangeSetList = new ArrayList<RanChangeSet>();
         if (hasDatabaseChangeLogTable()) {
             LogFactory.getLogger().info("Reading from " + databaseChangeLogTableName);
-            SqlStatement select = new SelectFromDatabaseChangeLogStatement("FILENAME", "AUTHOR", "ID", "MD5SUM", "DATEEXECUTED", "ORDEREXECUTED", "TAG", "EXECTYPE", "DESCRIPTION", "COMMENTS").setOrderBy("DATEEXECUTED ASC", "ORDEREXECUTED ASC");
-            List<Map<String, ?>> results = ExecutorService.getInstance().getExecutor(database).queryForList(select);
+            List<Map<String, ?>> results = queryDatabaseChangeLogTable(database);
             for (Map rs : results) {
                 String fileName = rs.get("FILENAME").toString();
                 String author = rs.get("AUTHOR").toString();
@@ -227,6 +226,11 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
             }
         }
         return ranChangeSetList;
+    }
+
+    public List<Map<String, ?>> queryDatabaseChangeLogTable(Database database) throws DatabaseException {
+        SelectFromDatabaseChangeLogStatement select = new SelectFromDatabaseChangeLogStatement("FILENAME", "AUTHOR", "ID", "MD5SUM", "DATEEXECUTED", "ORDEREXECUTED", "EXECTYPE", "DESCRIPTION", "COMMENTS", "TAG", "LIQUIBASE").setOrderBy("DATEEXECUTED ASC", "ORDEREXECUTED ASC");
+        return ExecutorService.getInstance().getExecutor(database).queryForList(select);
     }
 
     @Override

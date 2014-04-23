@@ -3,12 +3,16 @@ package liquibase.structure.core;
 import liquibase.structure.AbstractDatabaseObject;
 import liquibase.structure.DatabaseObject;
 
+import java.util.*;
+
 public class Catalog extends AbstractDatabaseObject {
 
     public Catalog() {
+        setAttribute("objects",  new HashMap<Class<? extends DatabaseObject>, Set<DatabaseObject>>());
     }
 
     public Catalog(String name) {
+        this();
         setAttribute("name", name);
     }
 
@@ -38,6 +42,30 @@ public class Catalog extends AbstractDatabaseObject {
         return this;
     }
 
+    protected Map<Class<? extends DatabaseObject>, Set<DatabaseObject>> getObjects() {
+        return getAttribute("objects", Map.class);
+    }
+
+    public <DatabaseObjectType extends DatabaseObject> List<DatabaseObjectType> getDatabaseObjects(Class<DatabaseObjectType> type) {
+        Set<DatabaseObjectType> databaseObjects = (Set<DatabaseObjectType>) getObjects().get(type);
+        if (databaseObjects == null) {
+            return new ArrayList<DatabaseObjectType>();
+        }
+        return new ArrayList<DatabaseObjectType>(databaseObjects);
+    }
+
+    public void addDatabaseObject(DatabaseObject databaseObject) {
+        if (databaseObject == null) {
+            return;
+        }
+        Set<DatabaseObject> objects = this.getObjects().get(databaseObject.getClass());
+        if (objects == null) {
+            objects = new HashSet<DatabaseObject>();
+            this.getObjects().put(databaseObject.getClass(), objects);
+        }
+        objects.add(databaseObject);
+
+    }
 
     @Override
     public boolean equals(Object o) {

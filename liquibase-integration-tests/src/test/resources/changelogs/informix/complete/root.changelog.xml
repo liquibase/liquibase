@@ -7,7 +7,7 @@
 
     <preConditions>
         <dbms type="informix"/>
-        <runningAs username="liquibase"/>
+        <runningAs username="lbuser"/>
     </preConditions>
 
     <changeSet id="1" author="nvoxland">

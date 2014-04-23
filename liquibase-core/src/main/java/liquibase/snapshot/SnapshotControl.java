@@ -16,6 +16,7 @@ import java.util.*;
 public class SnapshotControl implements LiquibaseSerializable {
 
     private Set<Class<? extends DatabaseObject>> types;
+    private SnapshotListener snapshotListener;
 
     public SnapshotControl(Database database) {
         setTypes(DatabaseObjectFactory.getInstance().getStandardTypes(), database);
@@ -31,6 +32,14 @@ public class SnapshotControl implements LiquibaseSerializable {
 
     public SnapshotControl(Database database, String types) {
         setTypes(DatabaseObjectFactory.getInstance().parseTypes(types), database);
+    }
+
+    public SnapshotListener getSnapshotListener() {
+        return snapshotListener;
+    }
+
+    public void setSnapshotListener(SnapshotListener snapshotListener) {
+        this.snapshotListener = snapshotListener;
     }
 
     @Override

@@ -6,7 +6,7 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
     <preConditions>
             <dbms type="mssql"/>
-            <runningAs username="liquibase"/>
+            <runningAs username="lbuser"/>
     </preConditions>
 
     <changeSet id="1" author="nvoxland">
@@ -305,7 +305,7 @@
     <changeSet id="1" author="colin" runOnChange="true">
         <preConditions onFail="MARK_RAN">
             <not>
-                <viewExists schemaName="LIQUIBASEB" viewName="PERSON_VIEW"/>
+                <viewExists schemaName="lbcat2" viewName="PERSON_VIEW"/>
             </not>
         </preConditions>
         <comment>Checking if person_view present, and adding if not</comment>

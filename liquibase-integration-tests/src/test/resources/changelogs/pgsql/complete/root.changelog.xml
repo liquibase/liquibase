@@ -7,7 +7,7 @@
 
     <preConditions>
             <dbms type="postgresql"/>
-            <runningAs username="liquibase"/>
+            <runningAs username="lbuser"/>
     </preConditions>
 
     <changeSet id="1" author="nvoxland">

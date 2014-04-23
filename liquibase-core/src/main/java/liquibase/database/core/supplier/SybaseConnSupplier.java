@@ -22,11 +22,6 @@ public class SybaseConnSupplier extends ConnectionSupplier {
     }
 
     @Override
-    public String getConfigurationName() {
-        return CONFIG_NAME_STANDARD;
-    }
-
-    @Override
     public String getJdbcUrl() {
         return "jdbc:sybase:Tds:"+ getIpAddress()+":5000/liquibase";
     }

@@ -27,8 +27,10 @@ public class DateTimeType extends LiquibaseDataType {
             return new DatabaseDataType("TIMESTAMP");
         }
 
-        if (database instanceof MSSQLDatabase && getParameters().length > 0 && "16".equals(getParameters()[0])) {
-            return new DatabaseDataType("SMALLDATETIME");
+        if (database instanceof MSSQLDatabase) {
+            if ((getParameters().length > 0 && "16".equals(getParameters()[0])) || "SMALLDATETIME".equalsIgnoreCase(getRawDefinition())) {
+                   return new DatabaseDataType("SMALLDATETIME");
+            }
         }
         if (database instanceof InformixDatabase) {
             return new DatabaseDataType("DATETIME YEAR TO FRACTION", 5);

@@ -4,6 +4,7 @@ import liquibase.change.*;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.exception.ValidationErrors;
 import liquibase.exception.Warnings;
 import liquibase.logging.LogFactory;
 import liquibase.logging.Logger;
@@ -93,6 +94,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
         this.encoding = encoding;
     }
 
+    @DatabaseChangeProperty(exampleValue = ",")
     public String getSeparator() {
 		return separator;
 	}
@@ -104,6 +106,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
 		this.separator = separator;
 	}
 
+    @DatabaseChangeProperty(exampleValue = "'")
 	public String getQuotchar() {
 		return quotchar;
 	}
@@ -229,7 +232,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
         return false;
     }
 
-    protected CSVReader getCSVReader() throws IOException {
+    public CSVReader getCSVReader() throws IOException {
         ResourceAccessor opener = getResourceAccessor();
         if (opener == null) {
             throw new UnexpectedLiquibaseException("No file opener specified for "+getFile());

@@ -7,7 +7,7 @@
 
     <preConditions>
         <or>
-            <runningAs username="liquibase" />
+            <runningAs username="lbuser" />
             <runningAs username="sa" />
         </or>
     </preConditions>

@@ -6,6 +6,9 @@ import org.apache.velocity.Template;
 
 import java.io.File;
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -13,18 +16,31 @@ import java.util.Set;
 public abstract class ConnectionSupplier implements Cloneable {
 
     public static final String CONFIG_NAME_STANDARD = "standard";
-    public static final String CONFIG_NAME_WINDOWS = "windows";
+    public static final String OS_LINUX = "linux";
+    public static final String OS_WINDOWS = "windows";
 
     public String VAGRANT_BOX_NAME_WINDOWS_STANDARD = "liquibase.windows.2008r2.x64";
     public String VAGRANT_BOX_NAME_LINUX_STANDARD = "liquibase.linux.centos.x64";
 
-    public String version;
+    private String version;
     private String ipAddress = "10.10.100.100";
+    private String os = OS_LINUX;
 
     public abstract String getDatabaseShortName();
-    public abstract String getConfigurationName();
+
+    public String getConfigurationName() {
+        return CONFIG_NAME_STANDARD;
+    }
 
     public abstract String getJdbcUrl();
+
+    public String getOs() {
+        return os;
+    }
+
+    public void setOs(String os) {
+        this.os = os;
+    }
 
     public String getPrimaryCatalog() {
         return "lbcat";
@@ -88,7 +104,7 @@ public abstract class ConnectionSupplier implements Cloneable {
     }
 
     public String getVagrantBaseBoxName() {
-        if (getConfigurationName().equals("windows")) {
+        if (getOs().equals(OS_WINDOWS)) {
             return VAGRANT_BOX_NAME_WINDOWS_STANDARD;
         }
         return VAGRANT_BOX_NAME_LINUX_STANDARD;
@@ -152,7 +168,27 @@ public abstract class ConnectionSupplier implements Cloneable {
         return set;
     }
 
-    public static class ConfigTemplate {
+    protected boolean isWindows() {
+        return getOs().equalsIgnoreCase(OS_WINDOWS);
+    }
+
+    protected boolean isLinux() {
+        return getOs().equalsIgnoreCase(OS_LINUX);
+    }
+
+    public String getFileSeparator() {
+        if (isWindows()) {
+            return "\\";
+        } else {
+            return "/";
+        }
+    }
+
+    public Connection openConnection() throws SQLException {
+        return DriverManager.getConnection(this.getJdbcUrl(), this.getDatabaseUsername(), this.getDatabasePassword());
+    }
+
+        public static class ConfigTemplate {
 
         private final String templatePath;
         private final Map<String, Object> context;

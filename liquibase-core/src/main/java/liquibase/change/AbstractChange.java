@@ -120,14 +120,14 @@ public abstract class AbstractChange implements Change {
 
             String mustEqualExisting = createMustEqualExistingMetaData(parameterName, changePropertyAnnotation);
             String description = createDescriptionMetaData(parameterName, changePropertyAnnotation);
-            String example = createExampleValueMetaData(parameterName, changePropertyAnnotation);
+            Map<String, Object> examples = createExampleValueMetaData(parameterName, changePropertyAnnotation);
             String since = createSinceMetaData(parameterName, changePropertyAnnotation);
             SerializationType serializationType = createSerializationTypeMetaData(parameterName, changePropertyAnnotation);
             String[] requiredForDatabase = createRequiredDatabasesMetaData(parameterName, changePropertyAnnotation);
             String[] supportsDatabase = createSupportedDatabasesMetaData(parameterName, changePropertyAnnotation);
 
 
-            return new ChangeParameterMetaData(this, parameterName, displayName, description, example, since, type, requiredForDatabase, supportsDatabase, mustEqualExisting, serializationType);
+            return new ChangeParameterMetaData(this, parameterName, displayName, description, examples, since, type, requiredForDatabase, supportsDatabase, mustEqualExisting, serializationType);
         } catch (Exception e) {
             throw new UnexpectedLiquibaseException(e);
         }
@@ -180,14 +180,18 @@ public abstract class AbstractChange implements Change {
 
     /**
      * Create the {@link ChangeParameterMetaData} "example" value. Uses the value on the DatabaseChangeProperty annotation or returns null as a default.
+     * Returns map with key=database short name, value=example. Use short-name "all" as the fallback.
      */
     @SuppressWarnings("UnusedParameters")
-    protected String createExampleValueMetaData(String parameterName, DatabaseChangeProperty changePropertyAnnotation) {
+    protected Map<String, Object> createExampleValueMetaData(String parameterName, DatabaseChangeProperty changePropertyAnnotation) {
         if (changePropertyAnnotation == null) {
             return null;
         }
 
-        return StringUtils.trimToNull(changePropertyAnnotation.exampleValue());
+        Map<String, Object> examples = new HashMap<String, Object>();
+        examples.put("all", StringUtils.trimToNull(changePropertyAnnotation.exampleValue()));
+
+        return examples;
     }
 
     /**
@@ -492,5 +496,10 @@ public abstract class AbstractChange implements Change {
     @Override
     public String getSerializedObjectNamespace() {
         return GENERIC_CHANGELOG_EXTENSION_NAMESPACE;
+    }
+
+    @Override
+    public String toString() {
+        return ChangeFactory.getInstance().getChangeMetaData(this).getName();
     }
 }

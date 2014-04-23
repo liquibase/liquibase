@@ -5,13 +5,11 @@ import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.serializer.LiquibaseSerializable;
-import liquibase.servicelocator.ServiceLocator;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.DatabaseObjectCollection;
 import liquibase.structure.core.*;
 import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 
-import java.lang.reflect.Field;
 import java.util.*;
 
 public abstract class DatabaseSnapshot implements LiquibaseSerializable{
@@ -30,6 +28,17 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable{
         this.snapshotControl = snapshotControl;
 
         if (examples != null) {
+            Set<Catalog> catalogs = new HashSet<Catalog>();
+            for (DatabaseObject object : examples) {
+                if (object instanceof Schema) {
+                    catalogs.add(((Schema) object).getCatalog());
+                }
+            }
+
+            for (Catalog catalog : catalogs) {
+                this.snapshotControl.addType(catalog.getClass(), database);
+                include(catalog);
+            }
             for (DatabaseObject obj : examples) {
                 this.snapshotControl.addType(obj.getClass(), database);
 
@@ -127,7 +136,13 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable{
             return null;
         }
 
+        SnapshotListener snapshotListener = snapshotControl.getSnapshotListener();
+
         SnapshotGeneratorChain chain = createGeneratorChain(example.getClass(), database);
+        if (snapshotListener != null) {
+            snapshotListener.willSnapshot(example, database);
+        }
+
         T object = chain.snapshot(example, this);
 
         if (object == null) {
@@ -149,6 +164,11 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable{
                 throw new UnexpectedLiquibaseException(e);
             }
         }
+
+        if (snapshotListener != null) {
+            snapshotListener.finishedSnapshot(example, object, database);
+        }
+
         return object;
     }
 

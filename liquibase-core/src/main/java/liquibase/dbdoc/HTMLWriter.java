@@ -136,7 +136,7 @@ public abstract class HTMLWriter {
                     fileWriter.append("<TR BGCOLOR=\"#EEEEFF\" CLASS=\"TableSubHeadingColor\">\n");
                     writeTD(fileWriter, "<a href='../changelogs/"+DBDocUtil.toFileName(change.getChangeSet().getFilePath())+".html'>"+change.getChangeSet().getFilePath()+"</a>");
                     writeTD(fileWriter, change.getChangeSet().getId());
-                    writeTD(fileWriter, "<a href='../authors/"+DBDocUtil.toFileName(change.getChangeSet().getAuthor().toLowerCase())+".html'>"+DBDocUtil.htmlEncode(change.getChangeSet().getAuthor().toLowerCase())+"</a>");
+                    writeTD(fileWriter, "<a href='../authors/"+DBDocUtil.toFileName(change.getChangeSet().getAuthor().toLowerCase())+".html'>"+StringUtils.escapeHtml(change.getChangeSet().getAuthor().toLowerCase())+"</a>");
 
                     ChangeSet.RunStatus runStatus = database.getRunStatus(change.getChangeSet());
                     if (runStatus.equals(ChangeSet.RunStatus.NOT_RAN)) {

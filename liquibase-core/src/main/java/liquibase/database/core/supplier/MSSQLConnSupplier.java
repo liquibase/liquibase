@@ -12,16 +12,6 @@ public class MSSQLConnSupplier extends ConnectionSupplier {
         return "mssql";
     }
 
-    @Override
-    public String getConfigurationName() {
-        return CONFIG_NAME_STANDARD;
-    }
-
-    @Override
-    public String getVagrantBaseBoxName() {
-        return VAGRANT_BOX_NAME_WINDOWS_STANDARD;
-    }
-
     public String getInstanceName() {
         return "MSSQLSERVER";
     }
@@ -37,6 +27,11 @@ public class MSSQLConnSupplier extends ConnectionSupplier {
     }
 
     @Override
+    public String getOs() {
+        return OS_WINDOWS;
+    }
+
+    @Override
     public ConfigTemplate getPuppetTemplate(Map<String, Object> context) {
         return new ConfigTemplate("liquibase/sdk/vagrant/supplier/mssql/mssql.puppet.vm", context);
     }
@@ -49,7 +44,7 @@ public class MSSQLConnSupplier extends ConnectionSupplier {
                 "REQUIRES: You must manually download the sql server express installation files into LIQUIBASE_HOME/sdk/vagrant/install-files/mssql/SQLEXPR_x64_ENU.exe\n"+
                 "      You can download the install files from http://www.microsoft.com/en-us/sqlserver/get-sql-server/try-it.aspx#tab2\n"+
                 "\n"+
-                "NOTE: If Exec[mssql install] fails, you may need to remote desktop to the vagrant box and run the failed command locally. After running, re-run liquibase-sdk vagrant [BOX_NAME] provision. Watch the process manager for SQLEXPR_x64_ENU.exe to exit\n"+
+                "NOTE: If Exec[mssql install] fails, you may need to remote desktop to the vagrant box and run the failed command locally. After running, re-run liquibase-sdk vagrant [BOX_NAME] provision. Watch the process manager for SQLEXPR_x64_ENU.exe to exit. You may want to change the '/q' flag to '/qs' for more feedback.\n"+
                 "\n";
     }
 

@@ -1,9 +1,14 @@
 package liquibase.sdk;
 
+import liquibase.command.LiquibaseCommand;
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.sdk.vagrant.VagrantControl;
+import liquibase.logging.LogFactory;
+import liquibase.logging.LogLevel;
+import liquibase.sdk.vagrant.VagrantCommand;
+import liquibase.sdk.watch.WatchCommand;
 import liquibase.util.StringUtils;
 import org.apache.commons.cli.*;
+import org.eclipse.jetty.util.log.StdErrLog;
 
 import java.io.File;
 import java.io.FilenameFilter;
@@ -36,21 +41,40 @@ public class Main {
                 return;
             }
 
-            VagrantControl vagrantControl;
+            LiquibaseCommand command;
+            CommandLineParser commandParser = new GnuParser();
             if (main.command.equals("vagrant")) {
-                vagrantControl = new VagrantControl(main);
+                command = new VagrantCommand(main);
+                try {
+                    CommandLine commandArguments = commandParser.parse(((VagrantCommand) command).getOptions(), main.commandArgs.toArray(new String[main.commandArgs.size()]));
+                    ((VagrantCommand) command).setup(commandArguments);
+                } catch (ParseException e) {
+                    throw new UserError("Error parsing command arguments: "+e.getMessage());
+                }
+            } else if (main.command.equals("watch")) {
+                ((StdErrLog) org.eclipse.jetty.util.log.Log.getRootLogger()).setLevel(StdErrLog.LEVEL_WARN);
+                LogFactory.getInstance().setDefaultLoggingLevel(LogLevel.WARNING);
+                command = new WatchCommand(main);
+
+                Options options = new Options();
+                options.addOption(OptionBuilder.hasArg().withDescription("Webserver port. Default 8080").create("port"));
+                options.addOption(OptionBuilder.hasArg().withDescription("Database URL").isRequired().create("url"));
+                options.addOption(OptionBuilder.hasArg().withDescription("Database username").isRequired().create("username"));
+                options.addOption(OptionBuilder.hasArg().withDescription("Database password").isRequired().create("password"));
+
+                CommandLine commandArguments = commandParser.parse(options, main.commandArgs.toArray(new String[main.commandArgs.size()]));
+                ((WatchCommand) command).setUrl(commandArguments.getOptionValue("url"));
+                ((WatchCommand) command).setUsername(commandArguments.getOptionValue("username"));
+                ((WatchCommand) command).setPassword(commandArguments.getOptionValue("password"));
+                if (commandArguments.hasOption("port")) {
+                    ((WatchCommand) command).setPort(Integer.valueOf(commandArguments.getOptionValue("port")));
+                }
+
             } else {
                 throw new UserError("Unknown command: "+main.command);
             }
 
-            CommandLineParser commandParser = new GnuParser();
-            try {
-                CommandLine commandArguments = commandParser.parse(vagrantControl.getOptions(), main.commandArgs.toArray(new String[main.commandArgs.size()]));
-
-                vagrantControl.execute(commandArguments);
-            } catch (ParseException e) {
-                throw new UserError("Error parsing command arguments: "+e.getMessage());
-            }
+            command.execute();
 
             main.divider();
             main.out("Command executed successfully");

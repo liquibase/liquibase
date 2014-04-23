@@ -1,0 +1,101 @@
+<html>
+<head>
+    <title>Liquibase SDK: Watch</title>
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/css/bootstrap-theme.min.css">
+
+    <script src="/js/jquery-1.11.0.min.js"></script>
+    <script src="/js/bootstrap.min.js"></script>
+
+    <style>
+        table th {
+            background-color:#ddd
+        }
+
+        .loading-modal {
+            display:    none;
+            position:   fixed;
+            z-index:    1000;
+            top:        0;
+            left:       0;
+            height:     100%;
+            width:      100%;
+            background: rgba( 255, 255, 255, .8 )
+                        url('/css/ajax-loader.gif')
+                        50% 50%
+                        no-repeat;
+        }
+
+        body.loading {
+            overflow: hidden;
+        }
+
+        body.loading .loading-modal {
+            display: block;
+        }
+    </style>
+</head>
+<body style="margin:20px">
+
+$snapshot
+
+<a name="details-start"></a>
+$details
+
+<script>
+  $(function () {
+    $('#tabs a:first').tab('show')
+  })
+
+  $(".object-name").click(function(event) {
+        event.preventDefault();
+        hash = $(event.target).prop("href").replace(/.*#/, "#")
+        $(hash).modal()
+  });
+
+  var liquibaseStateCount = null;
+  var liquibaseStateLastExec = null;
+  (function(){
+      var callee = arguments.callee;
+      $.ajax({
+        url: "/liquibase-status.json"
+      }).done(function(data) {
+            if (liquibaseStateCount == null) {
+                liquibaseStateCount = data.count;
+                liquibaseStateLastExec = data.lastExec;
+            } else if (liquibaseStateCount !== data.count || liquibaseStateLastExec !== data.lastExec) {
+                $("body").addClass("loading");
+                window.location.reload();
+                return;
+            }
+            setTimeout(callee, 5000);
+      }).fail(function() {
+        $('#liquibase-state-error').modal()
+      });
+  })();
+
+</script>
+
+
+<div class="modal fade" id="liquibase-state-error">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title">Read Error Error</h4>
+      </div>
+      <div class="modal-body">
+        <p>Error reading Liquibase state. Auto-refresh disabled</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="loading-modal"><!-- Place at bottom of page --></div>
+
+
+</body>
+</html>
