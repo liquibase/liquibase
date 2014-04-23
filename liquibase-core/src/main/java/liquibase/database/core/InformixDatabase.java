@@ -1,7 +1,6 @@
 package liquibase.database.core;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -9,36 +8,15 @@ import java.util.Set;
 import java.util.regex.Pattern;
 
 import liquibase.CatalogAndSchema;
-import liquibase.Contexts;
-import liquibase.change.CheckSum;
-import liquibase.changelog.ChangeSet;
-import liquibase.changelog.DatabaseChangeLog;
-import liquibase.changelog.RanChangeSet;
-import liquibase.changelog.filter.ContextChangeSetFilter;
-import liquibase.changelog.filter.DbmsChangeSetFilter;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.OfflineConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
-import liquibase.logging.LogFactory;
-import liquibase.snapshot.SnapshotControl;
-import liquibase.snapshot.SnapshotGeneratorFactory;
-import liquibase.statement.SqlStatement;
-import liquibase.statement.core.AddColumnStatement;
-import liquibase.statement.core.CreateDatabaseChangeLogTableStatement;
 import liquibase.statement.core.GetViewDefinitionStatement;
-import liquibase.statement.core.ModifyDataTypeStatement;
 import liquibase.statement.core.RawSqlStatement;
-import liquibase.statement.core.SelectFromDatabaseChangeLogStatement;
-import liquibase.statement.core.SetNullableStatement;
-import liquibase.statement.core.UpdateChangeSetChecksumStatement;
-import liquibase.statement.core.UpdateStatement;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.core.Column;
-import liquibase.structure.core.Table;
 
 public class InformixDatabase extends AbstractJdbcDatabase {
 

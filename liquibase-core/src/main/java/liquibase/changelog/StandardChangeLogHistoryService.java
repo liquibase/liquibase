@@ -2,8 +2,6 @@ package liquibase.changelog;
 
 import liquibase.Contexts;
 import liquibase.change.CheckSum;
-import liquibase.changelog.filter.ContextChangeSetFilter;
-import liquibase.changelog.filter.DbmsChangeSetFilter;
 import liquibase.database.Database;
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.exception.DatabaseException;

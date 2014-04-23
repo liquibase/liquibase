@@ -1,5 +1,6 @@
 package liquibase.changelog;
 
+import liquibase.ContextExpression;
 import liquibase.Contexts;
 import liquibase.change.Change;
 import liquibase.change.ChangeFactory;
@@ -108,7 +109,7 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
     /**
      * Runtime contexts in which the changeSet will be executed.  If null or empty, will execute regardless of contexts set
      */
-    private Contexts contexts;
+    private ContextExpression contexts;
 
     /**
      * Databases for which this changeset should run.  The string values should match the value returned from Database.getShortName()
@@ -197,7 +198,7 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
         this.runOnChange = runOnChange;
         this.runInTransaction = runInTransaction;
         this.objectQuotingStrategy = quotingStrategy;
-        this.contexts = new Contexts(contextList);
+        this.contexts = new ContextExpression(contextList);
         if (StringUtils.trimToNull(dbmsList) != null) {
             String[] strings = dbmsList.toLowerCase().split(",");
             dbmsSet = new HashSet<String>();
@@ -484,7 +485,7 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
         return author;
     }
 
-    public Contexts getContexts() {
+    public ContextExpression getContexts() {
         return contexts;
     }
 
@@ -723,12 +724,8 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
         }
 
         if (field.equals("context")) {
-            if (this.getContexts() != null && this.getContexts().size() > 0) {
-                StringBuffer contextString = new StringBuffer();
-                for (String context : this.getContexts()) {
-                    contextString.append(context).append(",");
-                }
-                return contextString.toString().replaceFirst(",$", "");
+            if (!this.getContexts().isEmpty()) {
+                return this.getContexts().toString();
             } else {
                 return null;
             }

@@ -1,5 +1,6 @@
 package liquibase.parser.core.yaml;
 
+import liquibase.ContextExpression;
 import liquibase.Contexts;
 import liquibase.change.*;
 import liquibase.change.core.AddColumnChange;
@@ -173,7 +174,7 @@ public class YamlChangeLogParser implements ChangeLogParser {
                                     } else if (param.equals("context")) {
                                         String value = getValue(visitorParams, param, String.class, changeLogParameters);
                                         String context = value.toString().replace(" ", "");
-                                        sqlVisitor.setContexts(new Contexts(context.split(",")));
+                                        sqlVisitor.setContexts(new ContextExpression(context));
                                     } else if (param.equals("applyToRollback")) {
                                         Boolean value = getValue(visitorParams, param, Boolean.class, changeLogParameters);
                                         sqlVisitor.setApplyToRollback(value);
