@@ -136,7 +136,7 @@ public class FormattedSqlChangeLogParserTest {
         assertTrue(changeLog.getChangeSets().get(1).isAlwaysRun());
         assertTrue(changeLog.getChangeSets().get(1).isRunOnChange());
         assertFalse(changeLog.getChangeSets().get(1).isRunInTransaction());
-        assertEquals("y", changeLog.getChangeSets().get(1).getContexts().toString());
+        assertEquals("(y)", changeLog.getChangeSets().get(1).getContexts().toString());
         assertEquals("mysql", StringUtils.join(changeLog.getChangeSets().get(1).getDbmsSet(), ","));
         assertEquals(1, changeLog.getChangeSets().get(1).getRollBackChanges().length);
         assertEquals("delete from table1;\n" +

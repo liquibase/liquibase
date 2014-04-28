@@ -27,7 +27,7 @@ public class ContextChangeSetFilter implements ChangeSetFilter {
         }
         changeSet.getSqlVisitors().removeAll(visitorsToRemove);
 
-        if (contexts.isEmpty()) {
+        if (contexts == null || contexts.isEmpty()) {
             return new ChangeSetFilterResult(true, "No runtime context specified, all contexts will run", this.getClass());
         }
 
