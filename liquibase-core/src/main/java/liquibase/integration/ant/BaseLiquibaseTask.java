@@ -200,7 +200,6 @@ public abstract class BaseLiquibaseTask extends Task {
             changeLogFile = getChangeLogFile().trim();
         }
         Liquibase liquibase = new Liquibase(changeLogFile, new CompositeResourceAccessor(antFO, fsFO), database);
-        liquibase.setCurrentDateTimeFunction(currentDateTimeFunction);
         for (Map.Entry<String, Object> entry : changeLogProperties.entrySet()) {
             liquibase.setChangeLogParameter(entry.getKey(), entry.getValue());
         }
@@ -219,7 +218,7 @@ public abstract class BaseLiquibaseTask extends Task {
 
         final List<URL> taskClassPath = new ArrayList<URL>();
         for (String string : strings) {
-            URL url = new File(string).toURL();
+            URL url = new File(string).toURI().toURL();
             taskClassPath.add(url);
         }
 
@@ -278,6 +277,10 @@ public abstract class BaseLiquibaseTask extends Task {
 
         if (getDatabaseChangeLogObjectsTablespace() != null)
             database.setLiquibaseTablespaceName(getDatabaseChangeLogObjectsTablespace());
+
+        if(getCurrentDateTimeFunction() != null) {
+            database.setCurrentDateTimeFunction(getCurrentDateTimeFunction());
+        }
 
         return database;
     }
