@@ -455,26 +455,29 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
 			} else if (change instanceof ExecuteShellCommandChange && "arg".equals(qName)) {
 				((ExecuteShellCommandChange) change).addArg(atts.getValue("value"));
 			} else if (change != null) {
-				String creatorMethod = "create" + localName.substring(0, 1).toUpperCase() + localName.substring(1);
+                ChangeParameterMetaData param = ChangeFactory.getInstance().getChangeMetaData(change).getParameters().get(localName);
+                if (param == null || param.getSerializationType() == LiquibaseSerializable.SerializationType.NESTED_OBJECT ) {
+                    String creatorMethod = "create" + localName.substring(0, 1).toUpperCase() + localName.substring(1);
 
-				Object objectToCreateFrom;
-				if (changeSubObjects.size() == 0) {
-					objectToCreateFrom = change;
-				} else {
-					objectToCreateFrom = changeSubObjects.peek();
-				}
+                    Object objectToCreateFrom;
+                    if (changeSubObjects.size() == 0) {
+                        objectToCreateFrom = change;
+                    } else {
+                        objectToCreateFrom = changeSubObjects.peek();
+                    }
 
-				Method method;
-				try {
-					method = objectToCreateFrom.getClass().getMethod(creatorMethod);
-				} catch (NoSuchMethodException e) {
-					throw new MigrationFailedException(changeSet, "Could not find creator method " + creatorMethod + " for tag: "
-							+ localName);
-				}
-				Object subObject = method.invoke(objectToCreateFrom);
-				setAllProperties(subObject, atts);
+                    Method method;
+                    try {
+                        method = objectToCreateFrom.getClass().getMethod(creatorMethod);
+                    } catch (NoSuchMethodException e) {
+                        throw new MigrationFailedException(changeSet, "Could not find creator method " + creatorMethod + " for tag: "
+                                + localName);
+                    }
+                    Object subObject = method.invoke(objectToCreateFrom);
+                    setAllProperties(subObject, atts);
 
-				changeSubObjects.push(subObject);
+                    changeSubObjects.push(subObject);
+                }
 			} else {
 				throw new MigrationFailedException(changeSet, "Unexpected tag: " + localName);
 			}
@@ -575,8 +578,12 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
 
 		try {
 			if (changeSubObjects.size() > 0) {
-				changeSubObjects.pop();
-			} else if (rootPrecondition != null) {
+                Object subObject = changeSubObjects.pop();
+                if (textString != null) {
+                    setProperty(subObject, "text", textString);
+                    text = null;
+                }
+            } else if (rootPrecondition != null) {
 				if ("preConditions".equals(qName)) {
 					if (changeSet == null) {
 						databaseChangeLog.setPreconditions(rootPrecondition);
@@ -697,7 +704,9 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
 				modifySqlDbmsList = null;
 				modifySqlContexts = null;
 				modifySqlAppliedOnRollback = false;
-			}
+			} else if (change != null && textString != null) {
+                setProperty(change, localName, textString);
+            }
 		} catch (Exception e) {
 			log.severe("Error thrown as a SAXException: " + e.getMessage(), e);
 			throw new SAXException(databaseChangeLog.getPhysicalFilePath() + ": " + e.getMessage(), e);

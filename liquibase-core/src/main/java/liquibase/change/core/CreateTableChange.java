@@ -59,7 +59,7 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
     @Override
     public SqlStatement[] generateStatements(Database database) {
 
-        CreateTableStatement statement = new CreateTableStatement(getCatalogName(), getSchemaName(), getTableName(),getRemarks());
+        CreateTableStatement statement = generateCreateTableStatement();
         for (ColumnConfig column : getColumns()) {
             ConstraintsConfig constraints = column.getConstraints();
             boolean isAutoIncrement = column.isAutoIncrement() != null && column.isAutoIncrement();
@@ -131,6 +131,10 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
         }
 
         return statements.toArray(new SqlStatement[statements.size()]);
+    }
+
+    protected CreateTableStatement generateCreateTableStatement() {
+        return new CreateTableStatement(getCatalogName(), getSchemaName(), getTableName(),getRemarks());
     }
 
     @Override
