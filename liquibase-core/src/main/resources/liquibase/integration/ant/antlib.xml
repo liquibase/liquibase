@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<antlib>
+    <!-- Import all pre-1.7 tasks for compatibility. -->
+    <taskdef resource="liquibasetasks.properties"/>
+</antlib>
