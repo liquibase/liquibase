@@ -97,7 +97,7 @@ public class GenerateChangeLogTask extends BaseLiquibaseTask {
 			if (getChangeLogFile() == null) {
 				new DiffToChangeLog(diffResult, diffOutputConfig).print(writer);
 			} else {
-                new DiffToChangeLog(diffResult, diffOutputConfig).print(getChangeLogFile());
+                new DiffToChangeLog(diffResult, diffOutputConfig).print(getChangeLogFile().toString());
 			}
 
 			writer.flush();

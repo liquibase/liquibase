@@ -18,6 +18,7 @@ import org.apache.tools.ant.Project;
 import org.apache.tools.ant.Task;
 import org.apache.tools.ant.types.Path;
 import org.apache.tools.ant.types.Reference;
+import org.apache.tools.ant.types.resources.FileResource;
 
 import java.io.*;
 import java.net.URL;
@@ -36,7 +37,7 @@ import java.util.logging.LogRecord;
  * that are common to all tasks.
  */
 public abstract class BaseLiquibaseTask extends Task {
-    private String changeLogFile;
+    private FileResource changeLogFile;
     private String driver;
     private String url;
     private String username;
@@ -45,7 +46,7 @@ public abstract class BaseLiquibaseTask extends Task {
     private boolean promptOnNonLocalDatabase = false;
     private String currentDateTimeFunction;
     private String contexts;
-    private String outputFile;
+    private FileResource outputFile;
     private String defaultCatalogName;
     private String defaultSchemaName;
     private String databaseClass;
@@ -120,12 +121,12 @@ public abstract class BaseLiquibaseTask extends Task {
         this.password = password.trim();
     }
 
-    public String getChangeLogFile() {
+    public FileResource getChangeLogFile() {
         return changeLogFile;
     }
 
-    public void setChangeLogFile(String changeLogFile) {
-        this.changeLogFile = changeLogFile.trim();
+    public void setChangeLogFile(FileResource changeLogFile) {
+        this.changeLogFile = changeLogFile;
     }
 
     public Path createClasspath() {
@@ -147,26 +148,26 @@ public abstract class BaseLiquibaseTask extends Task {
         this.currentDateTimeFunction = currentDateTimeFunction.trim();
     }
 
-    public String getOutputFile() {
+    public FileResource getOutputFile() {
         return outputFile;
     }
 
-    public void setOutputFile(String outputFile) {
-        this.outputFile = outputFile.trim();
+    public void setOutputFile(FileResource outputFile) {
+        this.outputFile = outputFile;
     }
 
     public Writer createOutputWriter() throws IOException {
         if (outputFile == null) {
             return null;
         }
-        return new FileWriter(new File(getOutputFile()));
+        return new FileWriter(getOutputFile().getFile());
     }
 
     public PrintStream createPrintStream() throws IOException {
         if (outputFile == null) {
             return null;
         }
-        return new PrintStream(new File(getOutputFile()));
+        return new PrintStream(getOutputFile().getFile());
     }
 
     public String getDefaultCatalogName() {
@@ -195,11 +196,11 @@ public abstract class BaseLiquibaseTask extends Task {
 
         Database database = createDatabaseObject(getDriver(), getUrl(), getUsername(), getPassword(), getDefaultCatalogName(), getDefaultSchemaName(), getDatabaseClass());
 
-        String changeLogFile = null;
+        String changeLogFilePath = null;
         if (getChangeLogFile() != null) {
-            changeLogFile = getChangeLogFile().trim();
+            changeLogFilePath = getChangeLogFile().toString();
         }
-        Liquibase liquibase = new Liquibase(changeLogFile, new CompositeResourceAccessor(antFO, fsFO), database);
+        Liquibase liquibase = new Liquibase(changeLogFilePath, new CompositeResourceAccessor(antFO, fsFO), database);
         for (Map.Entry<String, Object> entry : changeLogProperties.entrySet()) {
             liquibase.setChangeLogParameter(entry.getKey(), entry.getValue());
         }

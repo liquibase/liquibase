@@ -15,7 +15,7 @@ public class DiffDatabaseToChangeLogTask extends DiffDatabaseTask {
         if (getChangeLogFile() == null) {
             new DiffToChangeLog(diffResult, diffOutputControl).print(writer);
         } else {
-            new DiffToChangeLog(diffResult, diffOutputControl).print(getChangeLogFile());
+            new DiffToChangeLog(diffResult, diffOutputControl).print(getChangeLogFile().toString());
         }
     }
 }
