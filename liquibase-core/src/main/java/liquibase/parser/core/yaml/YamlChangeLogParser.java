@@ -41,7 +41,7 @@ public class YamlChangeLogParser implements ChangeLogParser {
 
     @Override
     public boolean supports(String changeLogFile, ResourceAccessor resourceAccessor) {
-        return changeLogFile.endsWith("."+ getSupportedFileExtension());
+        return changeLogFile.toLowerCase().endsWith("."+ getSupportedFileExtension());
     }
 
     protected String getSupportedFileExtension() {

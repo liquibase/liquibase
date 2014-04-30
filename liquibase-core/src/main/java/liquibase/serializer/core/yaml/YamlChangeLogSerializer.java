@@ -8,6 +8,7 @@ import liquibase.serializer.LiquibaseSerializable;
 import liquibase.statement.DatabaseFunction;
 import liquibase.statement.SequenceCurrentValueFunction;
 import liquibase.statement.SequenceNextValueFunction;
+import liquibase.util.StringUtils;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.introspector.FieldProperty;
@@ -21,9 +22,7 @@ import org.yaml.snakeyaml.representer.Represent;
 import org.yaml.snakeyaml.representer.Representer;
 
 import java.beans.IntrospectionException;
-import java.io.File;
-import java.io.IOException;
-import java.io.OutputStream;
+import java.io.*;
 import java.lang.reflect.Type;
 import java.sql.Timestamp;
 import java.util.*;
@@ -98,7 +97,13 @@ public class YamlChangeLogSerializer implements ChangeLogSerializer {
 
     @Override
     public void write(List<ChangeSet> changeSets, OutputStream out) throws IOException {
-        //To change body of implemented methods use File | Settings | File Templates.
+        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out));
+        writer.write("databaseChangeLog:\n");
+        for (ChangeSet changeSet : changeSets) {
+            writer.write(StringUtils.indent(serialize(changeSet, true), 2));
+            writer.write("\n");
+        }
+        writer.flush();
     }
 
     @Override
