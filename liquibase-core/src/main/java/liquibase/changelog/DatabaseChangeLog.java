@@ -104,7 +104,9 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             if (changeSet.getFilePath().equalsIgnoreCase(path)
                     && changeSet.getAuthor().equalsIgnoreCase(author)
                     && changeSet.getId().equalsIgnoreCase(id)
-                    && (null == changeSet.getDbmsSet()
+                    && (changeSet.getDbmsSet() == null
+                    || changeLogParameters == null
+                    || changeLogParameters.getValue("database.typeName") == null
                     || changeSet.getDbmsSet().isEmpty()
                     || changeSet.getDbmsSet().contains(changeLogParameters.getValue("database.typeName").toString()))) {
                 return changeSet;

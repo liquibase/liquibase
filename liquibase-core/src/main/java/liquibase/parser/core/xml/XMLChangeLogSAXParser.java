@@ -29,14 +29,8 @@ public class XMLChangeLogSAXParser implements ChangeLogParser {
 
     public XMLChangeLogSAXParser() {
         saxParserFactory = SAXParserFactory.newInstance();
-
-        if (System.getProperty("java.vm.version").startsWith("1.4")) {
-            saxParserFactory.setValidating(false);
-            saxParserFactory.setNamespaceAware(false);
-        } else {
-            saxParserFactory.setValidating(true);
-            saxParserFactory.setNamespaceAware(true);
-        }
+        saxParserFactory.setValidating(true);
+        saxParserFactory.setNamespaceAware(true);
     }
 
     @Override
@@ -50,7 +44,7 @@ public class XMLChangeLogSAXParser implements ChangeLogParser {
 
     @Override
     public boolean supports(String changeLogFile, ResourceAccessor resourceAccessor) {
-        return changeLogFile.endsWith("xml");
+        return changeLogFile.toLowerCase().endsWith("xml");
     }
 
     @Override

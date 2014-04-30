@@ -532,7 +532,9 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
 
     public void addRollBackSQL(String sql) {
         if (StringUtils.trimToNull(sql) == null) {
-            rollBackChanges.add(new EmptyChange());
+            if (this.rollBackChanges.size() == 0) {
+                rollBackChanges.add(new EmptyChange());
+            }
             return;
         }
 
@@ -612,6 +614,10 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
 
     public void addValidCheckSum(String text) {
         validCheckSums.add(CheckSum.parse(text));
+    }
+
+    public Set<CheckSum> getValidCheckSums() {
+        return Collections.unmodifiableSet(validCheckSums);
     }
 
     public boolean isCheckSumValid(CheckSum storedCheckSum) {

@@ -37,6 +37,10 @@ public class CustomPreconditionWrapper implements Precondition {
         this.classLoader = classLoader;
     }
 
+    public String getParamValue(String key) {
+        return paramValues.get(key);
+    }
+
     public void setParam(String name, String value) {
         this.params.add(name);
         this.paramValues.put(name, value);

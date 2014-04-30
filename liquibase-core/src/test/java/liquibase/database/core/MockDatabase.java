@@ -167,7 +167,7 @@ public class MockDatabase implements Database, InternalDatabase {
 
     @Override
     public String getShortName() {
-        return null;
+        return "mock";
     }
 
     public String getDriverName() throws DatabaseException {

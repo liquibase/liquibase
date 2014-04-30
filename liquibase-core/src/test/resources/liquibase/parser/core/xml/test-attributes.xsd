@@ -1,5 +1,0 @@
-<schema xmlns="http://www.w3.org/2001/XMLSchema" targetNamespace="http://liquibase.example.com/test"
-	elementFormDefault="qualified" attributeFormDefault="qualified">
-
-	<attribute name="meainglessAttribute" type="string" />
-</schema>

@@ -22,6 +22,7 @@ import liquibase.util.StringUtils;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -59,6 +60,9 @@ public class ExecuteShellCommandChange extends AbstractChange {
         this.args.add(arg);
     }
 
+    public List<String> getArgs() {
+        return Collections.unmodifiableList(args);
+    }
 
     public void setOs(String os) {
         this.os = StringUtils.splitAndTrim(os, ",");
@@ -107,7 +111,7 @@ public class ExecuteShellCommandChange extends AbstractChange {
                 public Sql[] generate(Database database) {
                     List<String> commandArray = new ArrayList<String>();
                     commandArray.add(executable);
-                    commandArray.addAll(args);
+                    commandArray.addAll(getArgs());
 
                     try {
                         ProcessBuilder pb = new ProcessBuilder(commandArray);
