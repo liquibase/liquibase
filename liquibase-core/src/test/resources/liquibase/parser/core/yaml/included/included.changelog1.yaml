@@ -1,0 +1,11 @@
+databaseChangeLog:
+    - changeSet:
+        id: 1
+        author: nvoxland
+        changes:
+            - createTable:
+                tableName: included_table_1
+                columns:
+                    - column:
+                        name: id
+                        type: int

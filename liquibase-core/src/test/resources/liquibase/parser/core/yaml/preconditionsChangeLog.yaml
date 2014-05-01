@@ -1,0 +1,30 @@
+databaseChangeLog:
+    - preConditions:
+        - runningAs:
+            username: testUser
+        - or:
+            - dbms:
+                type: mssql
+            - dbms:
+                type: mysql
+    - changeSet:
+        id: 1
+        author: nvoxland
+        changes:
+            - createTable:
+                tableName: person_yaml
+                columns:
+                    - column:
+                        name: id
+                        type: int
+                        constraints:
+                            primaryKey: true
+                            nullable: false
+                    - column:
+                        name: name
+                        type: varchar(255)
+                        constraints:
+                            nullable: false
+                    - column:
+                        name: age
+                        type: int

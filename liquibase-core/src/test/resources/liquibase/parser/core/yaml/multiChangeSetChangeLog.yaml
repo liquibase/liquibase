@@ -1,0 +1,81 @@
+databaseChangeLog:
+    - changeSet:
+        id: 1
+        author: nvoxland
+        changes:
+        - createTable:
+            columns:
+            - column:
+                constraints:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                name: id
+                type: int
+            - column:
+                name: firstname
+                type: varchar(50)
+            - column:
+                constraints:
+                  constraints:
+                    nullable: false
+                name: lastname
+                type: varchar(50)
+            tableName: person
+
+    - changeSet:
+        id: 2
+        author: nvoxland
+        alwaysRun: true
+        runOnChange: true
+        comment: Testing add column
+        changes:
+        - addColumn:
+            columns:
+            - column:
+                name: username
+                type: varchar(255)
+            tableName: person
+        - addColumn:
+            columns:
+            - column:
+                name: hireDate
+                type: date
+            tableName: person
+        rollback:
+        - sql:
+            sql: alter table person drop column username
+        - sql:
+            sql: alter table person drop column hireDate
+
+    - changeSet:
+        id: 3
+        author: bob
+        changes:
+        - createTable:
+            columns:
+            - column:
+                constraints:
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                name: id
+                type: int
+            - column:
+                name: name
+                type: varchar(50)
+            tableName: company
+
+    - changeSet:
+        id: 3
+        author: dag
+        changes:
+        - customChange:
+            class: liquibase.change.custom.ExampleCustomSqlChange
+            params:
+                - param:
+                    name: tableName
+                    value: table
+                - param:
+                    name: columnName
+                    value: column

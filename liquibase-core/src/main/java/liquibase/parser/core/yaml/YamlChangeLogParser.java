@@ -1,14 +1,15 @@
 package liquibase.parser.core.yaml;
 
 import liquibase.ContextExpression;
-import liquibase.Contexts;
 import liquibase.change.*;
 import liquibase.change.core.AddColumnChange;
 import liquibase.change.core.CreateIndexChange;
+import liquibase.change.custom.CustomChangeWrapper;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.exception.ChangeLogParseException;
+import liquibase.exception.CustomChangeException;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.logging.LogFactory;
@@ -60,7 +61,7 @@ public class YamlChangeLogParser implements ChangeLogParser {
         try {
             InputStream changeLogStream = resourceAccessor.getResourceAsStream(physicalChangeLogLocation);
             if (changeLogStream == null) {
-                throw new ChangeLogParseException("Change log file "+physicalChangeLogLocation+" does not exist");
+                throw new ChangeLogParseException(physicalChangeLogLocation+" does not exist");
             }
 
             Map changeLogAsMap = null;
@@ -96,6 +97,7 @@ public class YamlChangeLogParser implements ChangeLogParser {
                             getValue(changeSetMap, "dbms", String.class, changeLogParameters),
                             changeLog
                     );
+                    changeSet.setComments(getValue(changeSetMap, "comment", String.class, changeLogParameters));
 
                     try {
 
@@ -264,19 +266,7 @@ public class YamlChangeLogParser implements ChangeLogParser {
                             continue;
                         }
 
-                        Map<String, Object> preconditionMap = (Map) preconditionContainerMap.get(preconditionName);
-                        Precondition precondition = PreconditionFactory.getInstance().create(preconditionName);
-
-                        try {
-                            for (Map.Entry<String, Object> param : preconditionMap.entrySet()) {
-                                ObjectUtil.setProperty(precondition, (String) param.getKey(), param.getValue().toString());
-//                                precondition.getChangeMetaData().getParameters().get(param.getKey()).setValue(change, param.getValue());
-                            }
-                        } catch (Throwable e) {
-                            throw new ChangeLogParseException(e);
-                        }
-
-                        rootPrecondition.addNestedPrecondition(precondition);
+                        parsePrecondition(preconditionName, preconditionContainerMap, rootPrecondition);
                     }
 
                     changeLog.setPreconditions(rootPrecondition);
@@ -307,8 +297,34 @@ public class YamlChangeLogParser implements ChangeLogParser {
 
             return changeLog;
         } catch (Throwable e) {
+            if (e instanceof ChangeLogParseException) {
+                throw (ChangeLogParseException) e;
+            }
             throw new ChangeLogParseException(e);
         }
+    }
+
+    protected void parsePrecondition(String preconditionName, Map<String, Object> parsedPrecondition, PreconditionLogic rootPrecondition) throws ChangeLogParseException {
+        Precondition precondition = PreconditionFactory.getInstance().create(preconditionName);
+        if (precondition instanceof PreconditionLogic) {
+            List<Map<String, Object>> children = (List<Map<String, Object>>) parsedPrecondition.get(preconditionName);
+            for (Map<String, Object> child : children) {
+                String childName = child.keySet().iterator().next();
+                parsePrecondition(childName, child, ((PreconditionLogic) precondition));
+            }
+        } else {
+            Map<String, Object> preconditionMap = (Map) parsedPrecondition.get(preconditionName);
+
+            try {
+                for (Map.Entry<String, Object> param : preconditionMap.entrySet()) {
+                    ObjectUtil.setProperty(precondition, (String) param.getKey(), param.getValue().toString());
+                    //                                precondition.getChangeMetaData().getParameters().get(param.getKey()).setValue(change, param.getValue());
+                }
+            } catch (Throwable e) {
+                throw new ChangeLogParseException(e);
+            }
+        }
+        rootPrecondition.addNestedPrecondition(precondition);
     }
 
     public Change parseChange(Map<String, Object> changeMap, ChangeLogParameters changeLogParameters, ResourceAccessor resourceAccessor, ChangeSet changeSet) throws ChangeLogParseException {
@@ -322,92 +338,108 @@ public class YamlChangeLogParser implements ChangeLogParser {
 
         for (Map.Entry<String, Object> param : ((Map<String, Object>) changeMap.get(changeName)).entrySet()) {
             ChangeParameterMetaData changeParameterMetaData = ChangeFactory.getInstance().getChangeMetaData(change).getParameters().get(param.getKey());
-            if (changeParameterMetaData == null) {
-                throw new ChangeLogParseException("Unexpected parameter " + param.getKey() + " for " + changeName);
-            }
-            Object value = param.getValue();
-            String dataType = changeParameterMetaData.getDataType();
-            if (dataType.equals("list of columnConfig") || dataType.equals("list of addColumnConfig")) {
-                List<ColumnConfig> columnList = new ArrayList<ColumnConfig>();
-                for (Map<String, Map<String, Object>> columnMap : (List<Map<String, Map<String, Object>>>) value ) {
-                    if (columnMap.size() != 1) {
-                        throw new ChangeLogParseException("Invalid 'column' syntax");
-                    }
-                    Map<String, Object> column = columnMap.get("column");
-                    ColumnConfig columnConfig;
-                    if (change instanceof CreateIndexChange || change instanceof AddColumnChange) {
-                        columnConfig = new AddColumnConfig();
-                    } else {
-                        columnConfig = new ColumnConfig();
-                    }
 
-                    columnConfig.setName(getValue(column, "name", String.class, changeLogParameters));
-                    columnConfig.setType(getValue(column, "type", String.class, changeLogParameters));
-                    columnConfig.setAutoIncrement(getValue(column, "autoIncrement", Boolean.class, changeLogParameters));
-                    columnConfig.setIncrementBy(getValue(column, "incrementBy", BigInteger.class, changeLogParameters));
-                    columnConfig.setRemarks(getValue(column, "remarks", String.class, changeLogParameters));
-                    columnConfig.setStartWith(getValue(column, "startWith", BigInteger.class, changeLogParameters));
-
-                    columnConfig.setValue(getValue(column, "value", String.class, changeLogParameters));
-                    columnConfig.setValueNumeric(getValue(column, "valueNumeric", String.class, changeLogParameters));
-                    columnConfig.setValueBlobFile(getValue(column, "valueBlobFile", String.class, changeLogParameters));
-                    columnConfig.setValueBoolean(getValue(column, "valueBoolean", String.class, changeLogParameters));
-                    columnConfig.setValueClobFile(getValue(column, "valueClob", String.class, changeLogParameters));
-                    columnConfig.setValueDate(getValue(column, "valueDate", String.class, changeLogParameters));
-                    String valueComputed = getValue(column, "valueComputed", String.class, changeLogParameters);
-                    if (valueComputed != null) {
-                        columnConfig.setValueComputed(new DatabaseFunction(valueComputed));
-                    }
-                    String valueSequenceCurrent = getValue(column, "valueSequenceCurrent", String.class, changeLogParameters);
-                    if (valueSequenceCurrent != null) {
-                        columnConfig.setValueSequenceCurrent(new SequenceCurrentValueFunction(valueSequenceCurrent));
-                    }
-                    String valueSequenceNext = getValue(column, "valueSequenceNext", String.class, changeLogParameters);
-                    if (valueSequenceNext != null) {
-                        columnConfig.setValueSequenceNext(new SequenceNextValueFunction(valueSequenceNext));
-                    }
-
-                    columnConfig.setDefaultValueNumeric(getValue(column, "defaultValueNumeric", Number.class, changeLogParameters));
-                    columnConfig.setDefaultValueBoolean(getValue(column, "defaultValueBoolean", Boolean.class, changeLogParameters));
-                    columnConfig.setDefaultValueDate(getValue(column, "defaultValueDate", String.class, changeLogParameters));
-                    String defaultValueComputed = getValue(column, "defaultValueComputed", String.class, changeLogParameters);
-                    if (defaultValueComputed != null) {
-                        columnConfig.setDefaultValueComputed(new DatabaseFunction(defaultValueComputed));
-                    }
-                    String defaultValueSequenceNext = getValue(column, "defaultValueSequenceNext", String.class, changeLogParameters);
-                    if (defaultValueSequenceNext != null) {
-                        columnConfig.setDefaultValueSequenceNext(new SequenceNextValueFunction(defaultValueSequenceNext));
-                    }
-
-                    Map<String, Object> constraintsMap = (Map<String, Object>) column.get("constraints");
-                    if (constraintsMap != null) {
-                        ConstraintsConfig constraints = new ConstraintsConfig();
-                        constraints.setCheckConstraint(getValue(constraintsMap, "checkConstraint", String.class, changeLogParameters));
-                        constraints.setDeferrable(getValue(constraintsMap, "deferrable", Boolean.class, changeLogParameters));
-                        constraints.setInitiallyDeferred(getValue(constraintsMap, "initiallyDeferred", Boolean.class, changeLogParameters));
-                        constraints.setDeleteCascade(getValue(constraintsMap, "deleteCascade", String.class, changeLogParameters));
-                        constraints.setForeignKeyName(getValue(constraintsMap, "foreignKeyName", String.class, changeLogParameters));
-                        constraints.setReferencedColumnNames(getValue(constraintsMap, "referencedColumnNames", String.class, changeLogParameters));
-                        constraints.setReferencedTableName(getValue(constraintsMap, "referencedTableName", String.class, changeLogParameters));
-                        constraints.setReferences(getValue(constraintsMap, "references", String.class, changeLogParameters));
-                        constraints.setNullable(getValue(constraintsMap, "nullable", Boolean.class, changeLogParameters));
-                        constraints.setPrimaryKey(getValue(constraintsMap, "primaryKey", String.class, changeLogParameters));
-                        constraints.setPrimaryKeyTablespace(getValue(constraintsMap, "primaryKeyTablespace", String.class, changeLogParameters));
-                        constraints.setPrimaryKeyName(getValue(constraintsMap, "primaryKeyName", String.class, changeLogParameters));
-                        constraints.setUnique(getValue(constraintsMap, "unique", Boolean.class, changeLogParameters));
-                        constraints.setUniqueConstraintName(getValue(constraintsMap, "uniqueConstraintName", String.class, changeLogParameters));
-
-                        columnConfig.setConstraints(constraints);
-                    }
-                    columnList.add(columnConfig);
-
+            if (change instanceof CustomChangeWrapper && param.getKey().equals("params")) {
+                List<Map<String, Object>> params = (List<Map<String, Object>>) param.getValue();
+                for (Map paramMap : params) {
+                    paramMap = (Map<String, Object>) paramMap.get("param");
+                    ((CustomChangeWrapper) change).setParam(paramMap.get("name").toString(), paramMap.get("value").toString());
                 }
-                value = columnList;
+            } else if (change instanceof CustomChangeWrapper && param.getKey().equals("class")) {
+                try {
+                    ((CustomChangeWrapper) change).setClassLoader(resourceAccessor.toClassLoader());
+                    ((CustomChangeWrapper) change).setClass((String) param.getValue());
+                } catch (CustomChangeException e) {
+                    throw new ChangeLogParseException(e);
+                }
+            } else {
+                if (changeParameterMetaData == null) {
+                    throw new ChangeLogParseException("Unexpected parameter " + param.getKey() + " for " + changeName);
+                }
+                Object value = param.getValue();
+                String dataType = changeParameterMetaData.getDataType();
+                if (dataType.equals("list of columnConfig") || dataType.equals("list of addColumnConfig")) {
+                    List<ColumnConfig> columnList = new ArrayList<ColumnConfig>();
+                    for (Map<String, Map<String, Object>> columnMap : (List<Map<String, Map<String, Object>>>) value) {
+                        if (columnMap.size() != 1) {
+                            throw new ChangeLogParseException("Invalid 'column' syntax");
+                        }
+                        Map<String, Object> column = columnMap.get("column");
+                        ColumnConfig columnConfig;
+                        if (change instanceof CreateIndexChange || change instanceof AddColumnChange) {
+                            columnConfig = new AddColumnConfig();
+                        } else {
+                            columnConfig = new ColumnConfig();
+                        }
 
-//                                    } else if (!dataType.equals("string")) {
-//                                        System.out.println("other");
+                        columnConfig.setName(getValue(column, "name", String.class, changeLogParameters));
+                        columnConfig.setType(getValue(column, "type", String.class, changeLogParameters));
+                        columnConfig.setAutoIncrement(getValue(column, "autoIncrement", Boolean.class, changeLogParameters));
+                        columnConfig.setIncrementBy(getValue(column, "incrementBy", BigInteger.class, changeLogParameters));
+                        columnConfig.setRemarks(getValue(column, "remarks", String.class, changeLogParameters));
+                        columnConfig.setStartWith(getValue(column, "startWith", BigInteger.class, changeLogParameters));
+
+                        columnConfig.setValue(getValue(column, "value", String.class, changeLogParameters));
+                        columnConfig.setValueNumeric(getValue(column, "valueNumeric", String.class, changeLogParameters));
+                        columnConfig.setValueBlobFile(getValue(column, "valueBlobFile", String.class, changeLogParameters));
+                        columnConfig.setValueBoolean(getValue(column, "valueBoolean", String.class, changeLogParameters));
+                        columnConfig.setValueClobFile(getValue(column, "valueClob", String.class, changeLogParameters));
+                        columnConfig.setValueDate(getValue(column, "valueDate", String.class, changeLogParameters));
+                        String valueComputed = getValue(column, "valueComputed", String.class, changeLogParameters);
+                        if (valueComputed != null) {
+                            columnConfig.setValueComputed(new DatabaseFunction(valueComputed));
+                        }
+                        String valueSequenceCurrent = getValue(column, "valueSequenceCurrent", String.class, changeLogParameters);
+                        if (valueSequenceCurrent != null) {
+                            columnConfig.setValueSequenceCurrent(new SequenceCurrentValueFunction(valueSequenceCurrent));
+                        }
+                        String valueSequenceNext = getValue(column, "valueSequenceNext", String.class, changeLogParameters);
+                        if (valueSequenceNext != null) {
+                            columnConfig.setValueSequenceNext(new SequenceNextValueFunction(valueSequenceNext));
+                        }
+
+                        columnConfig.setDefaultValueNumeric(getValue(column, "defaultValueNumeric", Number.class, changeLogParameters));
+                        columnConfig.setDefaultValueBoolean(getValue(column, "defaultValueBoolean", Boolean.class, changeLogParameters));
+                        columnConfig.setDefaultValueDate(getValue(column, "defaultValueDate", String.class, changeLogParameters));
+                        String defaultValueComputed = getValue(column, "defaultValueComputed", String.class, changeLogParameters);
+                        if (defaultValueComputed != null) {
+                            columnConfig.setDefaultValueComputed(new DatabaseFunction(defaultValueComputed));
+                        }
+                        String defaultValueSequenceNext = getValue(column, "defaultValueSequenceNext", String.class, changeLogParameters);
+                        if (defaultValueSequenceNext != null) {
+                            columnConfig.setDefaultValueSequenceNext(new SequenceNextValueFunction(defaultValueSequenceNext));
+                        }
+
+                        Map<String, Object> constraintsMap = (Map<String, Object>) column.get("constraints");
+                        if (constraintsMap != null) {
+                            ConstraintsConfig constraints = new ConstraintsConfig();
+                            constraints.setCheckConstraint(getValue(constraintsMap, "checkConstraint", String.class, changeLogParameters));
+                            constraints.setDeferrable(getValue(constraintsMap, "deferrable", Boolean.class, changeLogParameters));
+                            constraints.setInitiallyDeferred(getValue(constraintsMap, "initiallyDeferred", Boolean.class, changeLogParameters));
+                            constraints.setDeleteCascade(getValue(constraintsMap, "deleteCascade", String.class, changeLogParameters));
+                            constraints.setForeignKeyName(getValue(constraintsMap, "foreignKeyName", String.class, changeLogParameters));
+                            constraints.setReferencedColumnNames(getValue(constraintsMap, "referencedColumnNames", String.class, changeLogParameters));
+                            constraints.setReferencedTableName(getValue(constraintsMap, "referencedTableName", String.class, changeLogParameters));
+                            constraints.setReferences(getValue(constraintsMap, "references", String.class, changeLogParameters));
+                            constraints.setNullable(getValue(constraintsMap, "nullable", Boolean.class, changeLogParameters));
+                            constraints.setPrimaryKey(getValue(constraintsMap, "primaryKey", String.class, changeLogParameters));
+                            constraints.setPrimaryKeyTablespace(getValue(constraintsMap, "primaryKeyTablespace", String.class, changeLogParameters));
+                            constraints.setPrimaryKeyName(getValue(constraintsMap, "primaryKeyName", String.class, changeLogParameters));
+                            constraints.setUnique(getValue(constraintsMap, "unique", Boolean.class, changeLogParameters));
+                            constraints.setUniqueConstraintName(getValue(constraintsMap, "uniqueConstraintName", String.class, changeLogParameters));
+
+                            columnConfig.setConstraints(constraints);
+                        }
+                        columnList.add(columnConfig);
+
+                    }
+                    value = columnList;
+
+                    //                                    } else if (!dataType.equals("string")) {
+                    //                                        System.out.println("other");
+                }
+                changeParameterMetaData.setValue(change, value);
             }
-            changeParameterMetaData.setValue(change, value);
         }
         return change;
     }
