@@ -78,6 +78,7 @@ public abstract class BaseLiquibaseTask extends Task {
             executeWithLiquibaseClassloader();
         } finally {
             loader.resetThreadContextLoader();
+            loader.cleanup();
         }
     }
 
