@@ -14,28 +14,29 @@
 
     <target name="setUp">
         <sql driver="${jdbc.driver}" url="${jdbc.url}" userid="${db.user}" password="${db.password}" encoding="UTF-8"
-             src="sql/h2-setup.sql"/>
+             src="${liquibase.test.ant.basedir}/sql/h2-setup.sql"/>
         <mkdir dir="${temp.dir}"/>
     </target>
 
     <target name="tearDown">
         <sql driver="${jdbc.driver}" url="${jdbc.url}" userid="${db.user}" password="${db.password}" encoding="UTF-8"
-             src="sql/h2-teardown.sql"/>
+             src="${liquibase.test.ant.basedir}/sql/h2-teardown.sql"/>
     </target>
 
     <target name="testUpdateDatabase">
         <db:assertTableDoesntExist driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"
                                    table="DATABASECHANGELOG"/>
         <lb:updateDatabase driver="${jdbc.driver}" url="${jdbc.url}" username="${db.user}" password="${db.password}"
-                           changelogfile="changelog/simple-changelog.xml" classpathref="basic-classpath"/>
+                           changelogfile="${liquibase.test.ant.basedir}/changelog/simple-changelog.xml"
+                           classpathref="basic-classpath"/>
         <db:assertTableExists driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"
                               table="DATABASECHANGELOG"/>
     </target>
 
     <target name="testUpdateDatabaseOutputToFile">
         <lb:updateDatabase driver="${jdbc.driver}" url="${jdbc.url}" username="${db.user}" password="${db.password}"
-                           changelogfile="changelog/simple-changelog.xml" classpathref="basic-classpath"
-                           outputfile="${temp.dir}/output.sql"/>
+                           changelogfile="${liquibase.test.ant.basedir}/changelog/simple-changelog.xml"
+                           classpathref="basic-classpath" outputfile="${temp.dir}/output.sql"/>
         <db:assertTableDoesntExist driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"
                               table="DATABASECHANGELOG"/>
         <au:assertFileExists file="${temp.dir}/output.sql"/>
@@ -44,7 +45,8 @@
     <target name="testUpdateDatabaseFailMissingUrl">
         <au:expectfailure>
             <lb:updateDatabase driver="${jdbc.driver}" username="${db.user}" password="${db.password}"
-                               changelogfile="changelog/simple-changelog.xml" classpathref="basic-classpath"/>
+                               changelogfile="${liquibase.test.ant.basedir}/changelog/simple-changelog.xml"
+                               classpathref="basic-classpath"/>
         </au:expectfailure>
     </target>
 
@@ -52,7 +54,8 @@
         <db:assertTableDoesntExist driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"
                                    table="DATABASECHANGELOG"/>
         <lb:updateDatabase driver="${jdbc.driver}" url="${jdbc.url}" username="${db.user}" password="${db.password}"
-                           changelogfile="changelog/changelog-with-properties.xml" classpathref="basic-classpath">
+                           changelogfile="${liquibase.test.ant.basedir}/changelog/changelog-with-properties.xml"
+                           classpathref="basic-classpath">
             <lb:changeLogProperty name="column.one" value="new_column_one"/>
             <lb:changeLogProperty name="column.two" value="new_column_two"/>
         </lb:updateDatabase>
