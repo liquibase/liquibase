@@ -112,6 +112,20 @@
         </dependency>
 
         <dependency>
+            <groupId>org.apache.ant</groupId>
+            <artifactId>ant-antunit</artifactId>
+            <version>1.2</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <version>1.3.176</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>
             <version>1.5.0</version>
@@ -263,6 +277,7 @@
                 <version>1.4</version>
                 <configuration>
                     <providerSelection>2.0</providerSelection>
+                    <source/>
                 </configuration>
                 <executions>
                     <execution>

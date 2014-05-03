@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="DatabaseUpdateTaskTest" basedir="." xmlns="antlib:org.apache.tools.ant" xmlns:au="antlib:org.apache.ant.antunit"
+         xmlns:lb="antlib:liquibase.integration.ant" xmlns:db="antlib:liquibase.integration.ant.test">
+    <tempfile property="temp.dir" prefix="DatabaseUpdateTaskTest" destDir="${java.io.tmpdir}" deleteonexit="true"/>
+
+    <path id="basic-classpath">
+        <pathelement path="${java.class.path}"/>
+    </path>
+
+    <property name="jdbc.driver" value="org.h2.Driver"/>
+    <property name="jdbc.url" value="jdbc:h2:mem:test;DB_CLOSE_DELAY=-1"/>
+    <property name="db.user" value="sa"/>
+    <property name="db.password" value=""/>
+
+    <target name="setUp">
+        <sql driver="${jdbc.driver}" url="${jdbc.url}" userid="${db.user}" password="${db.password}" encoding="UTF-8"
+             src="sql/h2-setup.sql"/>
+        <mkdir dir="${temp.dir}"/>
+    </target>
+
+    <target name="tearDown">
+        <sql driver="${jdbc.driver}" url="${jdbc.url}" userid="${db.user}" password="${db.password}" encoding="UTF-8"
+             src="sql/h2-teardown.sql"/>
+    </target>
+
+    <target name="testUpdateDatabase">
+        <db:assertTableDoesntExist driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"
+                                   table="DATABASECHANGELOG"/>
+        <lb:updateDatabase driver="${jdbc.driver}" url="${jdbc.url}" username="${db.user}" password="${db.password}"
+                           changelogfile="changelog/simple-changelog.xml" classpathref="basic-classpath"/>
+        <db:assertTableExists driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"
+                              table="DATABASECHANGELOG"/>
+    </target>
+
+    <target name="testUpdateDatabaseOutputToFile">
+        <lb:updateDatabase driver="${jdbc.driver}" url="${jdbc.url}" username="${db.user}" password="${db.password}"
+                           changelogfile="changelog/simple-changelog.xml" classpathref="basic-classpath"
+                           outputfile="${temp.dir}/output.sql"/>
+        <db:assertTableDoesntExist driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"
+                              table="DATABASECHANGELOG"/>
+        <au:assertFileExists file="${temp.dir}/output.sql"/>
+    </target>
+
+    <target name="testUpdateDatabaseFailMissingUrl">
+        <au:expectfailure>
+            <lb:updateDatabase driver="${jdbc.driver}" username="${db.user}" password="${db.password}"
+                               changelogfile="changelog/simple-changelog.xml" classpathref="basic-classpath"/>
+        </au:expectfailure>
+    </target>
+
+    <target name="testUpdateDatabaseWithChangeLogParameters">
+        <db:assertTableDoesntExist driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"
+                                   table="DATABASECHANGELOG"/>
+        <lb:updateDatabase driver="${jdbc.driver}" url="${jdbc.url}" username="${db.user}" password="${db.password}"
+                           changelogfile="changelog/changelog-with-properties.xml" classpathref="basic-classpath">
+            <lb:changeLogProperty name="column.one" value="new_column_one"/>
+            <lb:changeLogProperty name="column.two" value="new_column_two"/>
+        </lb:updateDatabase>
+        <db:assertTableExists driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"
+                              table="DATABASECHANGELOG"/>
+        <db:assertColumnExists driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"
+                               table="USERS" column="NEW_COLUMN_ONE"/>
+        <db:assertColumnExists driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"
+                               table="USERS" column="NEW_COLUMN_TWO"/>
+    </target>
+</project>

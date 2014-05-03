@@ -1,21 +1,19 @@
 package liquibase.integration.ant;
 
-import liquibase.integration.ant.DatabaseUpdateTask;
-import org.apache.tools.ant.Project;
-import static org.junit.Assert.*;
-import org.junit.Test;
+import junit.framework.TestSuite;
+import org.apache.ant.antunit.junit3.AntUnitSuite;
+import org.apache.ant.antunit.junit4.AntUnitSuiteRunner;
+import org.junit.runner.RunWith;
 
-/**
- * Tests for {@link DatabaseUpdateTask}
- */
+import java.io.File;
+import java.net.URISyntaxException;
+import java.net.URL;
+
+@RunWith(AntUnitSuiteRunner.class)
 public class DatabaseUpdateTaskTest {
-
-    @Test
-    public void createClasspath() throws Exception {
-        DatabaseUpdateTask databaseUpdateTask = new DatabaseUpdateTask();
-        Project project = new Project();
-        databaseUpdateTask.setProject(project);
-
-        assertEquals(project, databaseUpdateTask.createClasspath().getProject());
+    public static TestSuite suite() throws URISyntaxException {
+        URL resource = DatabaseUpdateTaskTest.class.getResource("/liquibase/integration/ant/DatabaseUpdateTaskTest.xml");
+        File file = new File(resource.toURI());
+        return new AntUnitSuite(file, DatabaseUpdateTaskTest.class);
     }
 }
