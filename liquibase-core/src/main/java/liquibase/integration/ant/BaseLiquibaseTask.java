@@ -12,6 +12,7 @@ import liquibase.logging.Logger;
 import liquibase.resource.CompositeResourceAccessor;
 import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.resource.ResourceAccessor;
+import liquibase.util.StringUtils;
 import org.apache.tools.ant.AntClassLoader;
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Project;
@@ -47,6 +48,7 @@ public abstract class BaseLiquibaseTask extends Task {
     private String currentDateTimeFunction;
     private String contexts;
     private FileResource outputFile;
+    private String outputEncoding;
     private String defaultCatalogName;
     private String defaultSchemaName;
     private String databaseClass;
@@ -160,14 +162,22 @@ public abstract class BaseLiquibaseTask extends Task {
         if (outputFile == null) {
             return null;
         }
-        return new FileWriter(getOutputFile().getFile());
+        GlobalConfiguration globalConfiguration = LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class);
+        String encoding = (StringUtils.trimToNull(outputEncoding) == null) ? globalConfiguration.getOutputEncoding() : outputEncoding.trim();
+        return new OutputStreamWriter(getOutputFile().getOutputStream(), encoding);
     }
 
     public PrintStream createPrintStream() throws IOException {
         if (outputFile == null) {
             return null;
         }
-        return new PrintStream(getOutputFile().getFile());
+        GlobalConfiguration globalConfiguration = LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class);
+        String encoding = (StringUtils.trimToNull(outputEncoding) == null) ? globalConfiguration.getOutputEncoding() : outputEncoding.trim();
+        return new PrintStream(getOutputFile().getOutputStream(), false, encoding);
+    }
+
+    public void setOutputEncoding(String outputEncoding) {
+        this.outputEncoding = outputEncoding;
     }
 
     public String getDefaultCatalogName() {
