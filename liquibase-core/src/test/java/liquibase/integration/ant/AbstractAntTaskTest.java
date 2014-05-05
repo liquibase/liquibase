@@ -6,9 +6,9 @@ import java.net.URLDecoder;
 public abstract class AbstractAntTaskTest {
     protected static void setProperties() {
         // Main source root
-        String name = DatabaseUpdateTask.class.getName();
+        String name = BaseLiquibaseTask.class.getName();
         final String resourceName = "/" + name.replace('.', '/') + ".class";
-        String absoluteFilePath = DatabaseUpdateTask.class.getResource(resourceName).getFile();
+        String absoluteFilePath = BaseLiquibaseTask.class.getResource(resourceName).getFile();
         try {
             absoluteFilePath = URLDecoder.decode(absoluteFilePath, "UTF-8");
         } catch (UnsupportedEncodingException e) {
@@ -18,10 +18,10 @@ public abstract class AbstractAntTaskTest {
         System.setProperty("liquibase.test.classes.root", classesDir);
 
         // Test source root
-        String testClassName = DatabaseUpdateTaskTest.class.getName();
-        String testSimpleName = DatabaseUpdateTaskTest.class.getSimpleName() + ".class";
+        String testClassName = AbstractAntTaskTest.class.getName();
+        String testSimpleName = AbstractAntTaskTest.class.getSimpleName() + ".class";
         final String testResourceName = "/" + testClassName.replace('.', '/') + ".class";
-        String testAbsoluteFilePath = DatabaseUpdateTaskTest.class.getResource(testResourceName).getFile();
+        String testAbsoluteFilePath = AbstractAntTaskTest.class.getResource(testResourceName).getFile();
         try {
             testAbsoluteFilePath = URLDecoder.decode(testAbsoluteFilePath, "UTF-8");
         } catch (UnsupportedEncodingException e) {
