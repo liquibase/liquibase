@@ -1,8 +1,8 @@
 package liquibase.sql.visitor;
 
 import liquibase.ContextExpression;
-import liquibase.Contexts;
 import liquibase.change.CheckSum;
+import liquibase.parser.core.ParsedNode;
 import liquibase.serializer.ReflectionSerializer;
 import liquibase.serializer.core.string.StringChangeLogSerializer;
 
@@ -72,4 +72,15 @@ public abstract class AbstractSqlVisitor implements SqlVisitor {
     public String getSerializedObjectNamespace() {
         return GENERIC_CHANGELOG_EXTENSION_NAMESPACE;
     }
+
+    @Override
+    public void load(ParsedNode parsedNode) {
+        throw new RuntimeException("TODO");
+    }
+
+    @Override
+    public ParsedNode serialize() {
+        throw new RuntimeException("TODO");
+    }
+
 }

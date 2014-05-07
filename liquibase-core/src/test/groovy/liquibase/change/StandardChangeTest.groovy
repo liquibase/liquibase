@@ -9,6 +9,7 @@ import liquibase.sdk.supplier.change.ChangeSupplierFactory
 import liquibase.sdk.supplier.resource.ResourceSupplier
 import liquibase.serializer.LiquibaseSerializable;
 import liquibase.serializer.core.string.StringChangeLogSerializer
+import liquibase.serializer.core.xml.XMLChangeLogSerializer
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.DatabaseFunction;
 import liquibase.statement.SequenceNextValueFunction;
@@ -16,7 +17,8 @@ import liquibase.statement.SqlStatement;
 import liquibase.test.TestContext;
 import org.junit.Test
 import spock.lang.Shared
-import spock.lang.Specification;
+import spock.lang.Specification
+import spock.lang.Unroll;
 
 import java.io.InputStream;
 import java.lang.reflect.Field;
@@ -37,8 +39,6 @@ import static org.junit.Assert.fail;
  * Base test class for changes
  */
 public abstract class StandardChangeTest extends Specification {
-
-    protected Change testChangeInstance;
 
     @Shared changeSupplier = new ChangeSupplierFactory()
     @Shared resourceSupplier = new ResourceSupplier()
@@ -89,6 +89,22 @@ public abstract class StandardChangeTest extends Specification {
 
         }
         assert seenCheckSums.size() > 0 : "No changes found to check checksums for"
+    }
+
+    @Unroll()
+    def "parse and load work together"() {
+        expect:
+        def serialized = change.serialize()
+        assert serialized != null
+
+        def newChange = changeClass.newInstance() as Change
+        newChange.load(serialized)
+        def reserialized = newChange.serialize()
+
+        serialized == reserialized
+
+        where:
+        change << changeSupplier.getSupplier(changeClass).getAllParameterPermutations(new MockDatabase())
     }
 
     protected boolean canUseStandardGenerateCheckSumTest() {

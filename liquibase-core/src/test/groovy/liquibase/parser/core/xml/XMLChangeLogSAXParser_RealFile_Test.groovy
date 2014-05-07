@@ -27,7 +27,7 @@ import spock.lang.Unroll
 import static org.hamcrest.Matchers.containsInAnyOrder
 import static spock.util.matcher.HamcrestSupport.that
 
-public class XMLChangeLogSAXParserTest extends Specification {
+public class XMLChangeLogSAXParser_RealFile_Test extends Specification {
 
     @Shared resourceSupplier = new ResourceSupplier()
 
@@ -60,8 +60,8 @@ public class XMLChangeLogSAXParserTest extends Specification {
         def path = "liquibase/parser/core/xml/simpleChangeLog.xml"
         when:
         def changeLog = new XMLChangeLogSAXParser().parse(path, new ChangeLogParameters(), new JUnitResourceAccessor());
-        def changeSet = changeLog.getChangeSets().get(0);
-        def change = changeSet.getChanges().get(0);
+        def changeSet = changeLog.changeSets[0];
+        def change = changeSet.changes[0];
 
         then:
         changeLog.getLogicalFilePath() == path
@@ -80,11 +80,11 @@ public class XMLChangeLogSAXParserTest extends Specification {
         assert change instanceof CreateTableChange
         change.tableName == "person"
         change.columns.size() == 3
-        change.columns.get(0).name == "id"
-        change.columns.get(0).type == "int"
-        change.columns.get(0).constraints != null
-        assert change.columns.get(0).constraints.primaryKey
-        assert !change.columns.get(0).constraints.nullable
+        change.columns[0].name == "id"
+        change.columns[0].type == "int"
+        change.columns[0].constraints != null
+        assert change.columns[0].constraints.primaryKey
+        assert !change.columns[0].constraints.nullable
 
         change.columns.get(1).name == "firstname"
         change.columns.get(1).type == "varchar(50)"
@@ -109,16 +109,16 @@ public class XMLChangeLogSAXParserTest extends Specification {
         changeLog.getPreconditions().getNestedPreconditions().size() == 0
         changeLog.getChangeSets().size() == 4
 
-        changeLog.getChangeSets().get(0).getAuthor() == "nvoxland"
-        changeLog.getChangeSets().get(0).getId() == "1"
-        changeLog.getChangeSets().get(0).getChanges().size() == 1
-        changeLog.getChangeSets().get(0).getFilePath() == path
-        changeLog.getChangeSets().get(0).getComments() == null
-        assert !changeLog.getChangeSets().get(0).shouldAlwaysRun()
-        assert !changeLog.getChangeSets().get(0).shouldRunOnChange()
+        changeLog.getChangeSets()[0].getAuthor() == "nvoxland"
+        changeLog.getChangeSets()[0].getId() == "1"
+        changeLog.getChangeSets()[0].getChanges().size() == 1
+        changeLog.getChangeSets()[0].getFilePath() == path
+        changeLog.getChangeSets()[0].getComments() == null
+        assert !changeLog.getChangeSets()[0].shouldAlwaysRun()
+        assert !changeLog.getChangeSets()[0].shouldRunOnChange()
 
-        ChangeFactory.getInstance().getChangeMetaData(changeLog.getChangeSets().get(0).getChanges().get(0)).getName() == "createTable"
-        assert changeLog.getChangeSets().get(0).getChanges().get(0) instanceof CreateTableChange
+        ChangeFactory.getInstance().getChangeMetaData(changeLog.getChangeSets()[0].getChanges()[0]).getName() == "createTable"
+        assert changeLog.getChangeSets()[0].getChanges()[0] instanceof CreateTableChange
 
         then:
         changeLog.getChangeSets().get(1).getAuthor() == "nvoxland"
@@ -132,8 +132,8 @@ public class XMLChangeLogSAXParserTest extends Specification {
         assert changeLog.getChangeSets().get(1).getRollBackChanges()[0] instanceof RawSQLChange
         assert changeLog.getChangeSets().get(1).getRollBackChanges()[1] instanceof RawSQLChange
 
-        ChangeFactory.getInstance().getChangeMetaData(changeLog.getChangeSets().get(1).getChanges().get(0)).getName() == "addColumn"
-        assert changeLog.getChangeSets().get(1).getChanges().get(0) instanceof AddColumnChange
+        ChangeFactory.getInstance().getChangeMetaData(changeLog.getChangeSets().get(1).getChanges()[0]).getName() == "addColumn"
+        assert changeLog.getChangeSets().get(1).getChanges()[0] instanceof AddColumnChange
 
         ChangeFactory.getInstance().getChangeMetaData(changeLog.getChangeSets().get(1).getChanges().get(1)).getName() == "addColumn"
         assert changeLog.getChangeSets().get(1).getChanges().get(1) instanceof AddColumnChange
@@ -146,17 +146,17 @@ public class XMLChangeLogSAXParserTest extends Specification {
         assert !changeLog.getChangeSets().get(2).shouldAlwaysRun()
         assert !changeLog.getChangeSets().get(2).shouldRunOnChange()
 
-        ChangeFactory.getInstance().getChangeMetaData(changeLog.getChangeSets().get(2).getChanges().get(0)).getName() == "createTable"
-        assert changeLog.getChangeSets().get(2).getChanges().get(0) instanceof CreateTableChange
+        ChangeFactory.getInstance().getChangeMetaData(changeLog.getChangeSets().get(2).getChanges()[0]).getName() == "createTable"
+        assert changeLog.getChangeSets().get(2).getChanges()[0] instanceof CreateTableChange
 
 
         changeLog.getChangeSets().get(3).getChanges().size() == 1
 
-        assert changeLog.getChangeSets().get(3).getChanges().get(0) instanceof CustomChangeWrapper
-        assert changeLog.getChangeSets().get(3).getChanges().get(0).getCustomChange() instanceof ExampleCustomSqlChange
-        changeLog.getChangeSets().get(3).getChanges().get(0).generateStatements(new MockDatabase()) //fills out customChange params
-        changeLog.getChangeSets().get(3).getChanges().get(0).getCustomChange().getTableName() == "table"
-        changeLog.getChangeSets().get(3).getChanges().get(0).getCustomChange().getColumnName() == "column"
+        assert changeLog.getChangeSets().get(3).getChanges()[0] instanceof CustomChangeWrapper
+        assert changeLog.getChangeSets().get(3).getChanges()[0].getCustomChange() instanceof ExampleCustomSqlChange
+        changeLog.getChangeSets().get(3).getChanges()[0].generateStatements(new MockDatabase()) //fills out customChange params
+        changeLog.getChangeSets().get(3).getChanges()[0].getCustomChange().getTableName() == "table"
+        changeLog.getChangeSets().get(3).getChanges()[0].getCustomChange().getColumnName() == "column"
     }
 
     def "local path can be set in changelog file logicalPathChangeLog.xml"() throws Exception {
@@ -170,7 +170,7 @@ public class XMLChangeLogSAXParserTest extends Specification {
 
         changeLog.getPreconditions().getNestedPreconditions().size() == 0
         changeLog.getChangeSets().size() == 1
-        changeLog.getChangeSets().get(0).getFilePath() == "liquibase/parser-logical/xml/logicalPathChangeLog.xml"
+        changeLog.getChangeSets()[0].getFilePath() == "liquibase/parser-logical/xml/logicalPathChangeLog.xml"
 
     }
 
@@ -186,12 +186,12 @@ public class XMLChangeLogSAXParserTest extends Specification {
         changeLog.getPreconditions() != null
         changeLog.getPreconditions().getNestedPreconditions().size() == 2
 
-        changeLog.getPreconditions().getNestedPreconditions().get(0).getName() == "runningAs"
-        ((RunningAsPrecondition) changeLog.getPreconditions().getNestedPreconditions().get(0)).getUsername() == "testUser"
+        changeLog.getPreconditions().getNestedPreconditions()[0].getName() == "runningAs"
+        ((RunningAsPrecondition) changeLog.getPreconditions().getNestedPreconditions()[0]).getUsername() == "testUser"
 
         changeLog.getPreconditions().getNestedPreconditions().get(1).getName() == "or"
-        ((OrPrecondition) changeLog.getPreconditions().getNestedPreconditions().get(1)).getNestedPreconditions().get(0).getName() == "dbms"
-        ((DBMSPrecondition) ((OrPrecondition) changeLog.getPreconditions().getNestedPreconditions().get(1)).getNestedPreconditions().get(0)).getType() == "mssql"
+        ((OrPrecondition) changeLog.getPreconditions().getNestedPreconditions().get(1)).getNestedPreconditions()[0].getName() == "dbms"
+        ((DBMSPrecondition) ((OrPrecondition) changeLog.getPreconditions().getNestedPreconditions().get(1)).getNestedPreconditions()[0]).getType() == "mssql"
         ((OrPrecondition) changeLog.getPreconditions().getNestedPreconditions().get(1)).getNestedPreconditions().get(1).getName() == "dbms"
         ((DBMSPrecondition) ((OrPrecondition) changeLog.getPreconditions().getNestedPreconditions().get(1)).getNestedPreconditions().get(1)).getType() == "mysql"
 
@@ -207,7 +207,7 @@ public class XMLChangeLogSAXParserTest extends Specification {
         changeLog.getLogicalFilePath() == path
         changeLog.getPhysicalFilePath() == path
 
-        ((PreconditionContainer) changeLog.getPreconditions().getNestedPreconditions().get(0)).getNestedPreconditions().size() == 0
+        ((PreconditionContainer) changeLog.getPreconditions().getNestedPreconditions()[0]).getNestedPreconditions().size() == 0
         changeLog.getChangeSets().size() == 7
         changeLog.getChangeSets()[0].toString(false) == "${path}::1::nvoxland"
         changeLog.getChangeSets()[1].toString(false) == "liquibase/parser/core/xml/simpleChangeLog.xml::1::nvoxland"
@@ -217,9 +217,9 @@ public class XMLChangeLogSAXParserTest extends Specification {
         changeLog.getChangeSets()[5].toString(false) == "liquibase/parser/core/xml/included/raw-2.sql::raw::includeAll"
         changeLog.getChangeSets()[6].toString(false) == "liquibase/parser/core/xml/included/raw.sql::raw::includeAll"
 
-        ((CreateTableChange) changeLog.getChangeSets().get(0).getChanges().get(0)).getTableName() == "employee"
-        ((CreateTableChange) changeLog.getChangeSet("liquibase/parser/core/xml/simpleChangeLog.xml", "nvoxland", "1").getChanges().get(0)).getTableName() == "person"
-        ((AddColumnChange) changeLog.getChangeSet(path, "nvoxland", "2").getChanges().get(0)).getTableName() == "employee"
+        ((CreateTableChange) changeLog.getChangeSets()[0].getChanges()[0]).getTableName() == "employee"
+        ((CreateTableChange) changeLog.getChangeSet("liquibase/parser/core/xml/simpleChangeLog.xml", "nvoxland", "1").getChanges()[0]).getTableName() == "person"
+        ((AddColumnChange) changeLog.getChangeSet(path, "nvoxland", "2").getChanges()[0]).getTableName() == "employee"
         ((CreateTableChange) changeLog.getChangeSet("liquibase/parser/core/xml/included/included.changelog1.xml", "nvoxland", "1").getChanges()[0]).getTableName() == "included_table_1"
         ((CreateTableChange) changeLog.getChangeSet("liquibase/parser/core/xml/included/included.changelog2.xml", "nvoxland", "1").getChanges()[0]).getTableName() == "included_table_2"
 
@@ -237,8 +237,8 @@ public class XMLChangeLogSAXParserTest extends Specification {
         changeLog.getPhysicalFilePath() == doubleNestedFileName
 
         changeLog.getPreconditions().getNestedPreconditions().size() == 1
-        PreconditionContainer nested = (PreconditionContainer) changeLog.getPreconditions().getNestedPreconditions().get(0);
-        ((PreconditionContainer) nested.getNestedPreconditions().get(0)).getNestedPreconditions().size() == 0
+        PreconditionContainer nested = (PreconditionContainer) changeLog.getPreconditions().getNestedPreconditions()[0];
+        ((PreconditionContainer) nested.getNestedPreconditions()[0]).getNestedPreconditions().size() == 0
         changeLog.getChangeSets().size() == 8
         changeLog.getChangeSets()[0].toString(false) == "${doubleNestedFileName}::1::nvoxland"
         changeLog.getChangeSets()[1].toString(false) == "${nestedFileName}::1::nvoxland"
@@ -300,14 +300,14 @@ public class XMLChangeLogSAXParserTest extends Specification {
         changeLog.getPreconditions().getNestedPreconditions().size() == 0
         changeLog.getChangeSets().size() == 1
 
-        ChangeSet changeSet = changeLog.getChangeSets().get(0);
+        ChangeSet changeSet = changeLog.getChangeSets()[0];
         changeSet.getAuthor() == "nvoxland"
         changeSet.getId() == "1"
         changeSet.getChanges().size() == 1
         changeSet.getFilePath() == path
         changeSet.getComments() == "Some comments go here"
 
-        Change change = changeSet.getChanges().get(0);
+        Change change = changeSet.getChanges()[0];
         ChangeFactory.getInstance().getChangeMetaData(change).getName() == "createTable"
         assert change instanceof CreateTableChange
     }
@@ -326,11 +326,11 @@ public class XMLChangeLogSAXParserTest extends Specification {
         then: "changeSet 1"
 		changeLog.getChangeSets().size() == 2
 
-		changeLog.getChangeSets().get(0).getAuthor() == "paikens"
-		changeLog.getChangeSets().get(0).getId() == "1"
-        changeLog.getChangeSets().get(0).comments == "Some values: overridden: 'Value passed in', not.overridden: 'value from changelog 2', database: 'database mock', contextNote: 'context prod', contextNote2: '\${contextNote2}'"
-		((RawSQLChange) changeLog.getChangeSets().get(0).getChanges().get(0)).getSql() == "create table my_table_name;"
-		((RawSQLChange) changeLog.getChangeSets().get(0).getRollBackChanges()[0]).getSql() == "drop table my_table_name"
+		changeLog.getChangeSets()[0].getAuthor() == "paikens"
+		changeLog.getChangeSets()[0].getId() == "1"
+        changeLog.getChangeSets()[0].comments == "Some values: overridden: 'Value passed in', not.overridden: 'value from changelog 2', database: 'database mock', contextNote: 'context prod', contextNote2: '\${contextNote2}'"
+		((RawSQLChange) changeLog.getChangeSets()[0].getChanges()[0]).getSql() == "create table my_table_name;"
+		((RawSQLChange) changeLog.getChangeSets()[0].getRollBackChanges()[0]).getSql() == "drop table my_table_name"
 
         and: "changeSet 2"
         changeLog.getChangeSets().get(1).getAuthor() == "nvoxland"

@@ -1,6 +1,7 @@
 package liquibase.change;
 
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.parser.core.ParsedNode;
 import liquibase.serializer.LiquibaseSerializable;
 import liquibase.serializer.ReflectionSerializer;
 import liquibase.util.StringUtils;
@@ -311,5 +312,15 @@ public class ConstraintsConfig implements LiquibaseSerializable {
     @Override
     public String getSerializedObjectNamespace() {
         return STANDARD_CHANGELOG_NAMESPACE;
+    }
+
+    @Override
+    public void load(ParsedNode parsedNode) {
+        throw new RuntimeException("TODO");
+    }
+
+    @Override
+    public ParsedNode serialize() {
+        throw new RuntimeException("TODO");
     }
 }

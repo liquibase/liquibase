@@ -4,6 +4,10 @@ import liquibase.change.AbstractSQLChange;
 import liquibase.change.DatabaseChange;
 import liquibase.change.ChangeMetaData;
 import liquibase.change.DatabaseChangeProperty;
+import liquibase.parser.core.ParsedNode;
+import liquibase.util.StringUtils;
+
+import java.text.ParseException;
 
 /**
  * Allows execution of arbitrary SQL.  This change can be used when existing changes are either don't exist,
@@ -59,4 +63,12 @@ public class RawSQLChange extends AbstractSQLChange {
         return STANDARD_CHANGELOG_NAMESPACE;
     }
 
+    @Override
+    public void load(ParsedNode parsedNode) throws ParseException {
+        super.load(parsedNode);
+        String nestedSql = StringUtils.trimToNull(parsedNode.getValue(String.class));
+        if (nestedSql != null) {
+            setSql(nestedSql);
+        }
+    }
 }

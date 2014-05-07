@@ -3,6 +3,7 @@ package liquibase.structure;
 import liquibase.database.Database;
 import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.parser.core.ParsedNode;
 import liquibase.serializer.LiquibaseSerializable;
 
 import java.util.*;
@@ -143,4 +144,15 @@ public class DatabaseObjectCollection implements LiquibaseSerializable {
     public boolean contains(DatabaseObject wantedObject) {
         return get(wantedObject) != null;
     }
+
+    @Override
+    public void load(ParsedNode parsedNode) {
+        throw new RuntimeException("TODO");
+    }
+
+    @Override
+    public ParsedNode serialize() {
+        throw new RuntimeException("TODO");
+    }
+
 }

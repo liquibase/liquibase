@@ -5,6 +5,7 @@ import liquibase.change.ColumnConfig
 import liquibase.change.ConstraintsConfig
 import liquibase.change.StandardChangeTest
 import liquibase.database.core.MockDatabase
+import liquibase.parser.core.ParsedNode
 import liquibase.snapshot.MockSnapshotGeneratorFactory
 import liquibase.snapshot.SnapshotGeneratorFactory
 import liquibase.statement.DatabaseFunction
@@ -63,7 +64,7 @@ public class CreateTableChangeTest extends StandardChangeTest {
         }
 
         where:
-        defaultValue | method | expectedValue
+        defaultValue                              | method                     | expectedValue
         null                                      | "defaultValue"             | "SAME"
         "DEFAULTVALUE"                            | "defaultValue"             | "SAME"
         Boolean.TRUE                              | "defaultValueBoolean"      | "SAME"
@@ -137,10 +138,10 @@ public class CreateTableChangeTest extends StandardChangeTest {
 
         where:
         deferrable | initiallyDeferred
-        true | true
-        false | true
-        true | false
-        false | false
+        true       | true
+        false      | true
+        true       | false
+        false      | false
     }
 
     def "foreign keys default not deferrable"() throws Exception {
@@ -221,6 +222,23 @@ public class CreateTableChangeTest extends StandardChangeTest {
         table.getColumns().get(1).nullable = false
         then:
         assert change.checkStatus(database).status == ChangeStatus.Status.complete
+    }
 
+    def "load can take nested 'column' nodes, not just 'columns' nodes"() {
+        when:
+        def node = new ParsedNode(null, "createTable").addChildren([tableName: "table_name"])
+                .addChildren([column: [name: "column1", type: "type1"]])
+                .addChildren([column: [name: "column2", type: "type2"]])
+        def change = new CreateTableChange()
+        change.load(node)
+
+        then:
+        change.tableName == "table_name"
+        change.columns.size() == 2
+        change.columns[0].name == "column1"
+        change.columns[0].type == "type1"
+
+        change.columns[1].name == "column2"
+        change.columns[1].type == "type2"
     }
 }

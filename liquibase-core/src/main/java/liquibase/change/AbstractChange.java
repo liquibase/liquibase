@@ -1,11 +1,12 @@
 package liquibase.change;
 
 import java.lang.reflect.Type;
+import java.text.ParseException;
 import java.util.*;
 
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
-import liquibase.precondition.Precondition;
+import liquibase.parser.core.ParsedNode;
 import liquibase.structure.DatabaseObject;
 import liquibase.exception.*;
 import liquibase.resource.ResourceAccessor;
@@ -507,5 +508,38 @@ public abstract class AbstractChange implements Change {
     @Override
     public String toString() {
         return ChangeFactory.getInstance().getChangeMetaData(this).getName();
+    }
+
+    @Override
+    public void load(ParsedNode parsedNode) throws ParseException {
+        ChangeMetaData metaData = ChangeFactory.getInstance().getChangeMetaData(this);
+        for (ChangeParameterMetaData param : metaData.getParameters().values()) {
+            if (Collection.class.isAssignableFrom(param.getDataTypeClass())) {
+                if (param.getDataTypeClassParameters().length == 1 && param.getDataTypeClassParameters()[0].equals(ColumnConfig.class)) {
+                    for (ParsedNode child : parsedNode.getChildren(null, param.getParameterName())) {
+                        ColumnConfig columnConfig = new ColumnConfig();
+                        columnConfig.load(child);
+                        ((ChangeWithColumns) this).addColumn(columnConfig);
+                    }
+                }
+            } else {
+                param.setValue(this, parsedNode.getChildValue(null, param.getParameterName(), param.getDataTypeClass()));
+            }
+        }
+    }
+
+    @Override
+    public ParsedNode serialize() {
+        try {
+            ParsedNode node = new ParsedNode(null, getSerializedObjectName());
+            ChangeMetaData metaData = ChangeFactory.getInstance().getChangeMetaData(this);
+            for (ChangeParameterMetaData param : metaData.getSetParameters(this).values()) {
+                node.addChild(null, param.getParameterName(), param.getCurrentValue(this));
+            }
+
+            return node;
+        } catch (ChangeLogParseException e) {
+            throw new UnexpectedLiquibaseException(e);
+        }
     }
 }

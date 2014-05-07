@@ -7,10 +7,9 @@ import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
 import liquibase.changelog.ChangeLogParameters;
-import liquibase.changelog.DatabaseChangeLog;
 import liquibase.exception.ChangeLogParseException;
 import liquibase.logging.LogFactory;
-import liquibase.parser.ChangeLogParser;
+import liquibase.parser.core.ParsedNode;
 import liquibase.resource.UtfBomStripperInputStream;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.file.FilenameUtils;
@@ -23,7 +22,7 @@ import org.xml.sax.SAXNotSupportedException;
 import org.xml.sax.SAXParseException;
 import org.xml.sax.XMLReader;
 
-public class XMLChangeLogSAXParser implements ChangeLogParser {
+public class XMLChangeLogSAXParser extends AbstractChangeLogParser {
 
     private SAXParserFactory saxParserFactory;
 
@@ -48,8 +47,7 @@ public class XMLChangeLogSAXParser implements ChangeLogParser {
     }
 
     @Override
-    public DatabaseChangeLog parse(String physicalChangeLogLocation, ChangeLogParameters changeLogParameters, ResourceAccessor resourceAccessor) throws ChangeLogParseException {
-
+    protected ParsedNode parseToNode(String physicalChangeLogLocation, ChangeLogParameters changeLogParameters, ResourceAccessor resourceAccessor) throws ChangeLogParseException {
         InputStream inputStream = null;
         try {
             SAXParser parser = saxParserFactory.newSAXParser();
@@ -94,7 +92,7 @@ public class XMLChangeLogSAXParser implements ChangeLogParser {
             xmlReader.setContentHandler(contentHandler);
             xmlReader.parse(new InputSource(new UtfBomStripperInputStream(inputStream)));
 
-            return contentHandler.getDatabaseChangeLog();
+            return contentHandler.getDatabaseChangeLogTree();
         } catch (ChangeLogParseException e) {
             throw e;
         } catch (IOException e) {

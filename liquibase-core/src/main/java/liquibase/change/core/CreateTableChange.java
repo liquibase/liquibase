@@ -6,6 +6,7 @@ import liquibase.database.core.MySQLDatabase;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.datatype.LiquibaseDataType;
 import liquibase.exception.*;
+import liquibase.parser.core.ParsedNode;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.*;
@@ -17,6 +18,7 @@ import liquibase.structure.core.PrimaryKey;
 import liquibase.structure.core.Table;
 import liquibase.util.StringUtils;
 
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -258,4 +260,13 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
         return STANDARD_CHANGELOG_NAMESPACE;
     }
 
+    @Override
+    public void load(ParsedNode parsedNode) throws ParseException {
+        super.load(parsedNode);
+        for (ParsedNode columnNode : parsedNode.getChildren(null, "column")) {
+            ColumnConfig columnConfig = new ColumnConfig();
+            columnConfig.load(columnNode);
+            addColumn(columnConfig);
+        }
+    }
 }

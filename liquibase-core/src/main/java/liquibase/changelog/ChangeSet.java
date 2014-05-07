@@ -1,7 +1,6 @@
 package liquibase.changelog;
 
 import liquibase.ContextExpression;
-import liquibase.Contexts;
 import liquibase.change.Change;
 import liquibase.change.ChangeFactory;
 import liquibase.change.CheckSum;
@@ -17,6 +16,7 @@ import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.logging.LogFactory;
 import liquibase.logging.Logger;
+import liquibase.parser.core.ParsedNode;
 import liquibase.precondition.Conditional;
 import liquibase.precondition.core.ErrorPrecondition;
 import liquibase.precondition.core.FailedPrecondition;
@@ -27,6 +27,7 @@ import liquibase.statement.SqlStatement;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
 
+import java.text.ParseException;
 import java.util.*;
 
 /**
@@ -175,6 +176,12 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
         return runOnChange;
     }
 
+    public ChangeSet(DatabaseChangeLog databaseChangeLog) {
+        this.changes = new ArrayList<Change>();
+        log = LogFactory.getLogger();
+        this.changeLog = databaseChangeLog;
+    }
+
     public ChangeSet(String id, String author, boolean alwaysRun, boolean runOnChange, String filePath, String contextList, String dbmsList, DatabaseChangeLog databaseChangeLog) {
         this(id, author, alwaysRun, runOnChange, filePath, contextList, dbmsList, true, ObjectQuotingStrategy.LEGACY, databaseChangeLog);
     }
@@ -189,8 +196,7 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
 
     public ChangeSet(String id, String author, boolean alwaysRun, boolean runOnChange, String filePath, String contextList, String dbmsList,
                      boolean runInTransaction, ObjectQuotingStrategy quotingStrategy, DatabaseChangeLog databaseChangeLog) {
-        this.changes = new ArrayList<Change>();
-        log = LogFactory.getLogger();
+        this(databaseChangeLog);
         this.id = id;
         this.author = author;
         this.filePath = filePath;
@@ -199,6 +205,10 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
         this.runInTransaction = runInTransaction;
         this.objectQuotingStrategy = quotingStrategy;
         this.contexts = new ContextExpression(contextList);
+        setDbms(dbmsList);
+    }
+
+    protected void setDbms(String dbmsList) {
         if (StringUtils.trimToNull(dbmsList) != null) {
             String[] strings = dbmsList.toLowerCase().split(",");
             dbmsSet = new HashSet<String>();
@@ -206,7 +216,6 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
                 dbmsSet.add(string.trim().toLowerCase());
             }
         }
-        this.changeLog = databaseChangeLog;
     }
 
     public String getFilePath() {
@@ -226,6 +235,63 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
 
         return CheckSum.compute(stringToMD5.toString());
     }
+
+    @Override
+    public void load(ParsedNode node) throws ParseException {
+        this.id = node.getChildValue(null, "id", String.class);
+        this.author = node.getChildValue(null, "author", String.class);
+        this.alwaysRun  = node.getChildValue(null, "runAlways", false);
+        this.runOnChange  = node.getChildValue(null, "runOnChange", false);
+        this.contexts = new ContextExpression(node.getChildValue(null, "context", String.class));
+        setDbms(node.getChildValue(null, "dbms", String.class));
+        this.runInTransaction  = node.getChildValue(null, "runInTransaction", true);
+        this.comments = node.getChildValue(null, "comment", String.class);
+
+        String objectQuotingStrategyString = StringUtils.trimToNull(node.getChildValue(null, "objectQuotingStrategy", String.class));
+        this.objectQuotingStrategy = ObjectQuotingStrategy.LEGACY;
+        if (objectQuotingStrategyString != null) {
+            this.objectQuotingStrategy = ObjectQuotingStrategy.valueOf(objectQuotingStrategyString);
+        }
+
+        this.filePath = StringUtils.trimToNull(node.getChildValue(null, "logicalFilePath", String.class));
+        if (filePath == null) {
+            filePath = changeLog.getFilePath();
+        }
+
+        this.setFailOnError(node.getChildValue(null, "failOnError", true));
+        this.setFailOnError(node.getChildValue(null, "onValidationFail", true));
+
+        Object value = node.getValue();
+        if (value == null) {
+            for (ParsedNode child : node.getChildren()) {
+                addPotentialChangeNode(child);
+            }
+        } else {
+            if (value instanceof ParsedNode) {
+                addPotentialChangeNode((ParsedNode) value);
+            } else if (value instanceof Collection) {
+                for (Object child : ((Collection) value)) {
+                    if (child instanceof ParsedNode) {
+                        addPotentialChangeNode((ParsedNode) child);
+                    }
+                }
+            }
+        }
+    }
+
+    protected void addPotentialChangeNode(ParsedNode value) throws ParseException {
+        Change change = ChangeFactory.getInstance().create(((ParsedNode) value).getNodeName());
+        if (change != null) {
+            change.load(((ParsedNode) value));
+            this.addChange(change);
+        }
+    }
+
+    @Override
+    public ParsedNode serialize() {
+        throw new RuntimeException("TODO");
+    }
+
 
     public ExecType execute(DatabaseChangeLog databaseChangeLog, Database database) throws MigrationFailedException {
         return execute(databaseChangeLog, null, database);

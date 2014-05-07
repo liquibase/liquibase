@@ -35,6 +35,8 @@ public class ChangeParameterMetaData {
     private Map<String, Object> exampleValues;
     private String displayName;
     private String dataType;
+    private Class dataTypeClass;
+    private Type[] dataTypeClassParameters = new Type[0];
     private String since;
     private Set<String> requiredForDatabase;
     private Set<String> supportedDatabases;
@@ -62,8 +64,11 @@ public class ChangeParameterMetaData {
         this.exampleValues = exampleValues;
         if (dataType instanceof Class) {
             this.dataType = StringUtils.lowerCaseFirst(((Class) dataType).getSimpleName());
+            this.dataTypeClass = (Class) dataType;
         } else if (dataType instanceof ParameterizedType) {
             this.dataType = StringUtils.lowerCaseFirst(((Class) ((ParameterizedType) dataType).getRawType()).getSimpleName() + " of " + StringUtils.lowerCaseFirst(((Class) ((ParameterizedType) dataType).getActualTypeArguments()[0]).getSimpleName()));
+            this.dataTypeClass = (Class) ((ParameterizedType) dataType).getRawType();
+            this.dataTypeClassParameters = ((ParameterizedType) dataType).getActualTypeArguments();
         }
 
         this.mustEqualExisting = mustEqualExisting;
@@ -193,6 +198,14 @@ public class ChangeParameterMetaData {
      */
     public String getDataType() {
         return dataType;
+    }
+
+    public Class getDataTypeClass() {
+        return dataTypeClass;
+    }
+
+    public Type[] getDataTypeClassParameters() {
+        return dataTypeClassParameters;
     }
 
     /**

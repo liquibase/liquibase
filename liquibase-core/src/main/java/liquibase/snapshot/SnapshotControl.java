@@ -2,14 +2,10 @@ package liquibase.snapshot;
 
 import liquibase.database.Database;
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.logging.LogFactory;
+import liquibase.parser.core.ParsedNode;
 import liquibase.serializer.LiquibaseSerializable;
-import liquibase.servicelocator.ServiceLocator;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.core.Catalog;
 import liquibase.structure.core.DatabaseObjectFactory;
-import liquibase.structure.core.Schema;
-import liquibase.util.StringUtils;
 
 import java.util.*;
 
@@ -105,4 +101,15 @@ public class SnapshotControl implements LiquibaseSerializable {
     public boolean shouldInclude(Class<? extends DatabaseObject> type) {
         return types.contains(type);
     }
+
+    @Override
+    public void load(ParsedNode parsedNode) {
+        throw new RuntimeException("TODO");
+    }
+
+    @Override
+    public ParsedNode serialize() {
+        throw new RuntimeException("TODO");
+    }
+
 }

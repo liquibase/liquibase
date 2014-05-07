@@ -1,6 +1,7 @@
 package liquibase.util
 
 import spock.lang.Specification
+import spock.lang.Unroll
 
 class StringUtilsSpec extends Specification {
 
@@ -16,6 +17,29 @@ class StringUtilsSpec extends Specification {
         [key1: "a", key2: "b"]            | "key1=aXkey2=b"          | "X"
         [key1: "a", key2: "b", key3: "c"] | "key1=a, key2=b, key3=c" | ", "
     }
+
+    @Unroll
+    def "join sorted"() {
+        expect:
+        StringUtils.join(array, ",", sorted) == expected
+
+        where:
+        array           | sorted | expected
+        ["a", "c", "b"] | true   | "a,b,c"
+        ["a", "c", "b"] | false  | "a,c,b"
+    }
+
+    @Unroll
+    def "join with formatter sorted"() {
+        expect:
+        StringUtils.join(array, ",", new StringUtils.ToStringFormatter(), sorted) == expected
+
+        where:
+        array     | sorted | expected
+        [1, 3, 2] | true   | "1,2,3"
+        [1, 3, 2] | false  | "1,3,2"
+    }
+
 
     def "pad"() {
         expect:

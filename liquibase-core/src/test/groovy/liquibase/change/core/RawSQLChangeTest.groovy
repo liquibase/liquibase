@@ -3,13 +3,9 @@ package liquibase.change.core
 import liquibase.change.ChangeStatus;
 import liquibase.change.StandardChangeTest
 import liquibase.database.core.MockDatabase
+import liquibase.parser.core.ParsedNode
 import liquibase.snapshot.MockSnapshotGeneratorFactory
-import liquibase.snapshot.SnapshotGeneratorFactory;
-
-import static org.junit.Assert.*;
-
-import org.junit.Before;
-import org.junit.Test;
+import liquibase.snapshot.SnapshotGeneratorFactory
 
 public class RawSQLChangeTest extends StandardChangeTest {
 
@@ -42,6 +38,20 @@ public class RawSQLChangeTest extends StandardChangeTest {
         then:
         assert change.checkStatus(database).status == ChangeStatus.Status.unknown
         assert change.checkStatus(database).message == "Cannot check raw sql status"
+    }
+
+    def "load with sql as value or as 'sql' child"() {
+        when:
+        def changeFromValue = new RawSQLChange()
+        changeFromValue.load(new ParsedNode(null, "sql").setValue("select * from x"))
+
+        def changeFromChild = new RawSQLChange()
+        changeFromChild.load(new ParsedNode(null, "sql").addChild(null, "sql", "select * from y"))
+
+        then:
+        changeFromValue.getSql() == "select * from x"
+        changeFromChild.getSql() == "select * from y"
+
     }
 
 }

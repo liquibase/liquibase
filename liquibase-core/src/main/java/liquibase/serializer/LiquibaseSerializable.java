@@ -1,5 +1,8 @@
 package liquibase.serializer;
 
+import liquibase.parser.core.ParsedNode;
+
+import java.text.ParseException;
 import java.util.Set;
 
 public interface LiquibaseSerializable {
@@ -25,5 +28,9 @@ public interface LiquibaseSerializable {
     public SerializationType getSerializableFieldType(String field);
 
     String getSerializedObjectNamespace();
+
+    public void load(ParsedNode parsedNode) throws ParseException;
+
+    public ParsedNode serialize();
 
 }

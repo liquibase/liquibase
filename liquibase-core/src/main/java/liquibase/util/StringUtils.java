@@ -125,6 +125,25 @@ public class StringUtils {
         return returnString.substring(0, returnString.length()-delimiter.length());
     }
 
+    public static String join(Collection collection, String delimiter, StringUtilsFormatter formatter, boolean sorted) {
+        if (sorted) {
+            TreeSet<String> sortedSet = new TreeSet<String>();
+            for (Object obj : collection) {
+                sortedSet.add(formatter.toString(obj));
+            }
+            return join(sortedSet, delimiter);
+        }
+        return join(collection, delimiter, formatter);
+    }
+
+    public static String join(Collection<String> collection, String delimiter, boolean sorted) {
+        if (sorted) {
+            return join(new TreeSet<String>(collection), delimiter);
+        } else {
+            return join(collection, delimiter);
+        }
+    }
+
     public static String join(Map map, String delimiter) {
         return join(map, delimiter, new ToStringFormatter());
     }
@@ -268,7 +287,7 @@ public class StringUtils {
         public String toString(Type obj);
     }
 
-    private static class ToStringFormatter implements StringUtilsFormatter {
+    public static class ToStringFormatter implements StringUtilsFormatter {
         @Override
         public String toString(Object obj) {
             if (obj == null) {
