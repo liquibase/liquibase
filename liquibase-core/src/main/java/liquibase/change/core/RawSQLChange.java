@@ -5,6 +5,7 @@ import liquibase.change.DatabaseChange;
 import liquibase.change.ChangeMetaData;
 import liquibase.change.DatabaseChangeProperty;
 import liquibase.parser.core.ParsedNode;
+import liquibase.resource.ResourceAccessor;
 import liquibase.util.StringUtils;
 
 import java.text.ParseException;
@@ -64,8 +65,8 @@ public class RawSQLChange extends AbstractSQLChange {
     }
 
     @Override
-    public void load(ParsedNode parsedNode) throws ParseException {
-        super.load(parsedNode);
+    public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParseException {
+        super.load(parsedNode, resourceAccessor);
         String nestedSql = StringUtils.trimToNull(parsedNode.getValue(String.class));
         if (nestedSql != null) {
             setSql(nestedSql);

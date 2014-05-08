@@ -7,11 +7,16 @@ import liquibase.changelog.visitor.ValidatingVisitor;
 import liquibase.database.Database;
 import liquibase.database.ObjectQuotingStrategy;
 import liquibase.exception.LiquibaseException;
+import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationFailedException;
 import liquibase.logging.LogFactory;
+import liquibase.parser.ChangeLogParserFactory;
+import liquibase.parser.core.ParsedNode;
 import liquibase.precondition.Conditional;
 import liquibase.precondition.core.PreconditionContainer;
+import liquibase.resource.ResourceAccessor;
 
+import java.text.ParseException;
 import java.util.*;
 
 /**
@@ -164,4 +169,31 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
     public ChangeSet getChangeSet(RanChangeSet ranChangeSet) {
         return getChangeSet(ranChangeSet.getChangeLog(), ranChangeSet.getAuthor(), ranChangeSet.getId());
     }
+
+    public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParseException {
+        for (ParsedNode childNode : parsedNode.getChildren()) {
+            String nodeName = childNode.getNodeName();
+            if (nodeName.equals("changeSet")) {
+                this.addChangeSet(createChangeSet(childNode, resourceAccessor));
+            } else if (nodeName.equals("include")) {
+                String path = childNode.getChildValue(null, "path", String.class);
+                try {
+                    DatabaseChangeLog childChangeLog = ChangeLogParserFactory.getInstance().getParser(path, resourceAccessor).parse(path, null, resourceAccessor);
+                    for (ChangeSet changeSet : childChangeLog.getChangeSets()) {
+                        this.addChangeSet(changeSet);
+                    }
+                } catch (LiquibaseException e) {
+                    throw new UnexpectedLiquibaseException(e);
+                }
+            }
+        }
+    }
+
+    protected ChangeSet createChangeSet(ParsedNode node, ResourceAccessor resourceAccessor) throws ParseException {
+        ChangeSet changeSet = new ChangeSet(this);
+        changeSet.load(node, resourceAccessor);
+        return changeSet;
+    }
+
+
 }

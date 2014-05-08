@@ -1,16 +1,20 @@
 package liquibase.change
 
 import liquibase.parser.core.ParsedNode
+import liquibase.sdk.supplier.resource.ResourceSupplier
 import liquibase.serializer.LiquibaseSerializable
 import liquibase.statement.DatabaseFunction
 import liquibase.statement.SequenceNextValueFunction
 import liquibase.structure.core.*
+import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.Unroll
 
 import java.text.ParseException
 
 public class ColumnConfigTest  extends Specification {
+
+    @Shared resourceSupplier = new ResourceSupplier();
 
     def constructor_everythingSet() {
         when:
@@ -422,7 +426,7 @@ public class ColumnConfigTest  extends Specification {
             testValue = "347.22"
         }
         node.addChild(null, field, testValue)
-        column.load(node)
+        column.load(node, resourceSupplier.simpleResourceAccessor)
 
         then:
         assert column.getSerializableFieldValue(field).toString() == testValue.toString()
@@ -445,7 +449,7 @@ public class ColumnConfigTest  extends Specification {
             testValue = "true"
         }
         constraintNode.addChild(null, field, testValue)
-        column.load(node)
+        column.load(node,resourceSupplier.simpleResourceAccessor)
 
         then:
         assert column.getConstraints().getSerializableFieldValue(field).toString() == testValue.toString()

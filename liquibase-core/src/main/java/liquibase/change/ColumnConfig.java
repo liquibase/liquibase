@@ -8,8 +8,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
-import com.sun.org.apache.xpath.internal.operations.Bool;
 import liquibase.parser.core.ParsedNode;
+import liquibase.resource.ResourceAccessor;
 import liquibase.serializer.LiquibaseSerializable;
 import liquibase.serializer.ReflectionSerializer;
 import liquibase.statement.DatabaseFunction;
@@ -673,7 +673,7 @@ public class ColumnConfig implements LiquibaseSerializable {
     }
 
     @Override
-    public void load(ParsedNode parsedNode) throws ParseException {
+    public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParseException {
         name = parsedNode.getChildValue(null, "name", String.class);
         type = parsedNode.getChildValue(null, "type", String.class);
         encoding = parsedNode.getChildValue(null, "encoding", String.class);

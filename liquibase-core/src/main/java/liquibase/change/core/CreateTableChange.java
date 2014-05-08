@@ -7,6 +7,7 @@ import liquibase.datatype.DataTypeFactory;
 import liquibase.datatype.LiquibaseDataType;
 import liquibase.exception.*;
 import liquibase.parser.core.ParsedNode;
+import liquibase.resource.ResourceAccessor;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.*;
@@ -261,11 +262,11 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
     }
 
     @Override
-    public void load(ParsedNode parsedNode) throws ParseException {
-        super.load(parsedNode);
+    public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParseException {
+        super.load(parsedNode, resourceAccessor);
         for (ParsedNode columnNode : parsedNode.getChildren(null, "column")) {
             ColumnConfig columnConfig = new ColumnConfig();
-            columnConfig.load(columnNode);
+            columnConfig.load(columnNode, resourceAccessor);
             addColumn(columnConfig);
         }
     }

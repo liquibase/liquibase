@@ -2,6 +2,7 @@ package liquibase.change;
 
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.parser.core.ParsedNode;
+import liquibase.resource.ResourceAccessor;
 import liquibase.serializer.LiquibaseSerializable;
 import liquibase.serializer.ReflectionSerializer;
 import liquibase.util.StringUtils;
@@ -315,7 +316,7 @@ public class ConstraintsConfig implements LiquibaseSerializable {
     }
 
     @Override
-    public void load(ParsedNode parsedNode) {
+    public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) {
         throw new RuntimeException("TODO");
     }
 

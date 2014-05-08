@@ -1,38 +1,15 @@
 package liquibase.change
 
-import liquibase.change.core.AddAutoIncrementChange
-import liquibase.changelog.ChangeSet;
-import liquibase.database.Database
-import liquibase.database.core.MockDatabase;
-import liquibase.exception.ValidationErrors
+import liquibase.changelog.ChangeSet
+import liquibase.database.core.MockDatabase
 import liquibase.sdk.supplier.change.ChangeSupplierFactory
 import liquibase.sdk.supplier.resource.ResourceSupplier
-import liquibase.serializer.LiquibaseSerializable;
 import liquibase.serializer.core.string.StringChangeLogSerializer
-import liquibase.serializer.core.xml.XMLChangeLogSerializer
-import liquibase.snapshot.SnapshotGeneratorFactory;
-import liquibase.statement.DatabaseFunction;
-import liquibase.statement.SequenceNextValueFunction;
-import liquibase.statement.SqlStatement;
-import liquibase.test.TestContext;
-import org.junit.Test
+import liquibase.snapshot.SnapshotGeneratorFactory
 import spock.lang.Shared
 import spock.lang.Specification
-import spock.lang.Unroll;
+import spock.lang.Unroll
 
-import java.io.InputStream;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 /**
@@ -98,7 +75,7 @@ public abstract class StandardChangeTest extends Specification {
         assert serialized != null
 
         def newChange = changeClass.newInstance() as Change
-        newChange.load(serialized)
+        newChange.load(serialized,resourceSupplier.simpleResourceAccessor)
         def reserialized = newChange.serialize()
 
         serialized == reserialized

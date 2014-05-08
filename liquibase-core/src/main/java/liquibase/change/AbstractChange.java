@@ -511,14 +511,14 @@ public abstract class AbstractChange implements Change {
     }
 
     @Override
-    public void load(ParsedNode parsedNode) throws ParseException {
+    public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParseException {
         ChangeMetaData metaData = ChangeFactory.getInstance().getChangeMetaData(this);
         for (ChangeParameterMetaData param : metaData.getParameters().values()) {
             if (Collection.class.isAssignableFrom(param.getDataTypeClass())) {
                 if (param.getDataTypeClassParameters().length == 1 && param.getDataTypeClassParameters()[0].equals(ColumnConfig.class)) {
                     for (ParsedNode child : parsedNode.getChildren(null, param.getParameterName())) {
                         ColumnConfig columnConfig = new ColumnConfig();
-                        columnConfig.load(child);
+                        columnConfig.load(child, resourceAccessor);
                         ((ChangeWithColumns) this).addColumn(columnConfig);
                     }
                 }

@@ -43,10 +43,10 @@ public class RawSQLChangeTest extends StandardChangeTest {
     def "load with sql as value or as 'sql' child"() {
         when:
         def changeFromValue = new RawSQLChange()
-        changeFromValue.load(new ParsedNode(null, "sql").setValue("select * from x"))
+        changeFromValue.load(new ParsedNode(null, "sql").setValue("select * from x"), resourceSupplier.simpleResourceAccessor)
 
         def changeFromChild = new RawSQLChange()
-        changeFromChild.load(new ParsedNode(null, "sql").addChild(null, "sql", "select * from y"))
+        changeFromChild.load(new ParsedNode(null, "sql").addChild(null, "sql", "select * from y"), resourceSupplier.simpleResourceAccessor)
 
         then:
         changeFromValue.getSql() == "select * from x"

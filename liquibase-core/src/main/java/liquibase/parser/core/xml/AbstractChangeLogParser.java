@@ -20,22 +20,13 @@ public abstract class AbstractChangeLogParser implements ChangeLogParser {
         }
 
         DatabaseChangeLog changeLog = new DatabaseChangeLog(physicalChangeLogLocation);
-
         try {
-            for (ParsedNode node : parsedNode.getChildren(null, "changeSet")) {
-                changeLog.addChangeSet(createChangeSet(node, changeLog));
-            }
+            changeLog.load(parsedNode, resourceAccessor);
         } catch (ParseException e) {
             throw new ChangeLogParseException(e);
         }
 
         return changeLog;
-    }
-
-    protected ChangeSet createChangeSet(ParsedNode node, DatabaseChangeLog changeLog) throws ParseException {
-        ChangeSet changeSet = new ChangeSet(changeLog);
-        changeSet.load(node);
-        return changeSet;
     }
 
     protected abstract ParsedNode parseToNode(String physicalChangeLogLocation, ChangeLogParameters changeLogParameters, ResourceAccessor resourceAccessor) throws ChangeLogParseException;

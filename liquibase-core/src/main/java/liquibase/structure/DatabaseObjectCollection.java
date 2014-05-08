@@ -4,6 +4,7 @@ import liquibase.database.Database;
 import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.parser.core.ParsedNode;
+import liquibase.resource.ResourceAccessor;
 import liquibase.serializer.LiquibaseSerializable;
 
 import java.util.*;
@@ -146,7 +147,7 @@ public class DatabaseObjectCollection implements LiquibaseSerializable {
     }
 
     @Override
-    public void load(ParsedNode parsedNode) {
+    public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) {
         throw new RuntimeException("TODO");
     }
 

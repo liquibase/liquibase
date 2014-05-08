@@ -3,6 +3,7 @@ package liquibase.sql.visitor;
 import liquibase.ContextExpression;
 import liquibase.change.CheckSum;
 import liquibase.parser.core.ParsedNode;
+import liquibase.resource.ResourceAccessor;
 import liquibase.serializer.ReflectionSerializer;
 import liquibase.serializer.core.string.StringChangeLogSerializer;
 
@@ -74,7 +75,7 @@ public abstract class AbstractSqlVisitor implements SqlVisitor {
     }
 
     @Override
-    public void load(ParsedNode parsedNode) {
+    public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) {
         throw new RuntimeException("TODO");
     }
 

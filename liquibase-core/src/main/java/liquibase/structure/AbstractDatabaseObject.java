@@ -2,6 +2,7 @@ package liquibase.structure;
 
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.parser.core.ParsedNode;
+import liquibase.resource.ResourceAccessor;
 import liquibase.serializer.LiquibaseSerializable;
 import liquibase.util.StringUtils;
 
@@ -122,7 +123,7 @@ public abstract class AbstractDatabaseObject implements DatabaseObject {
     }
 
     @Override
-    public void load(ParsedNode parsedNode) {
+    public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) {
         throw new RuntimeException("TODO");
     }
 

@@ -21,6 +21,7 @@ import liquibase.precondition.Conditional;
 import liquibase.precondition.core.ErrorPrecondition;
 import liquibase.precondition.core.FailedPrecondition;
 import liquibase.precondition.core.PreconditionContainer;
+import liquibase.resource.ResourceAccessor;
 import liquibase.serializer.LiquibaseSerializable;
 import liquibase.sql.visitor.SqlVisitor;
 import liquibase.statement.SqlStatement;
@@ -237,7 +238,7 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
     }
 
     @Override
-    public void load(ParsedNode node) throws ParseException {
+    public void load(ParsedNode node, ResourceAccessor resourceAccessor) throws ParseException {
         this.id = node.getChildValue(null, "id", String.class);
         this.author = node.getChildValue(null, "author", String.class);
         this.alwaysRun  = node.getChildValue(null, "runAlways", false);
@@ -261,29 +262,62 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
         this.setFailOnError(node.getChildValue(null, "failOnError", true));
         this.setFailOnError(node.getChildValue(null, "onValidationFail", true));
 
+        for (ParsedNode child : node.getChildren()) {
+            handleChildNode(child, resourceAccessor);
+        }
+
         Object value = node.getValue();
-        if (value == null) {
-            for (ParsedNode child : node.getChildren()) {
-                addPotentialChangeNode(child);
-            }
-        } else {
+        if (value != null) {
             if (value instanceof ParsedNode) {
-                addPotentialChangeNode((ParsedNode) value);
+                handleChildNode((ParsedNode) value, resourceAccessor);
             } else if (value instanceof Collection) {
                 for (Object child : ((Collection) value)) {
                     if (child instanceof ParsedNode) {
-                        addPotentialChangeNode((ParsedNode) child);
+                        handleChildNode((ParsedNode) child, resourceAccessor);
                     }
                 }
             }
         }
     }
 
-    protected void addPotentialChangeNode(ParsedNode value) throws ParseException {
-        Change change = ChangeFactory.getInstance().create(((ParsedNode) value).getNodeName());
-        if (change != null) {
-            change.load(((ParsedNode) value));
-            this.addChange(change);
+    protected void handleChildNode(ParsedNode child, ResourceAccessor resourceAccessor) throws ParseException {
+        if (child.getNodeName().equals("rollback")) {
+            handleRollbackNode(child, resourceAccessor);
+        } else {
+            addChange(toChange(child, resourceAccessor));
+        }
+    }
+
+    protected void handleRollbackNode(ParsedNode rollbackNode, ResourceAccessor resourceAccessor) throws ParseException {
+        for (ParsedNode childNode : rollbackNode.getChildren()) {
+            addRollbackChange(toChange(childNode, resourceAccessor));
+        }
+
+        Object value = rollbackNode.getValue();
+        if (value != null) {
+            if (value instanceof String) {
+                String finalValue = StringUtils.trimToNull((String) value);
+                if (finalValue != null) {
+                    String[] strings = StringUtils.processMutliLineSQL(finalValue, true, true, ";");
+                    for (String string : strings) {
+                        addRollbackChange(new RawSQLChange(string));
+                    }
+                }
+            } else if (value instanceof ParsedNode) {
+                addRollbackChange(toChange((ParsedNode) value, resourceAccessor));
+            } else {
+                throw new ParseException("Unexpected object: "+value.getClass().getName()+" '"+value.toString()+"'", 0);
+            }
+        }
+    }
+
+    protected Change toChange(ParsedNode value, ResourceAccessor resourceAccessor) throws ParseException {
+        Change change = ChangeFactory.getInstance().create(value.getNodeName());
+        if (change == null) {
+            return null;
+        } else {
+            change.load(value, resourceAccessor);
+            return change;
         }
     }
 
@@ -539,6 +573,9 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
     }
 
     public void addChange(Change change) {
+        if (change == null) {
+            return;
+        }
         changes.add(change);
         change.setChangeSet(this);
     }
@@ -610,6 +647,9 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
     }
 
     public void addRollbackChange(Change change) {
+        if (change == null) {
+            return;
+        }
         rollBackChanges.add(change);
     }
 

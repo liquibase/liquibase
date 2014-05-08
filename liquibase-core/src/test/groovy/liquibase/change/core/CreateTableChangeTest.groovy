@@ -230,7 +230,7 @@ public class CreateTableChangeTest extends StandardChangeTest {
                 .addChildren([column: [name: "column1", type: "type1"]])
                 .addChildren([column: [name: "column2", type: "type2"]])
         def change = new CreateTableChange()
-        change.load(node)
+        change.load(node, resourceSupplier.simpleResourceAccessor)
 
         then:
         change.tableName == "table_name"
