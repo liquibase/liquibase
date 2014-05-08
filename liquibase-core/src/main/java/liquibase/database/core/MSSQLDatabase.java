@@ -350,7 +350,7 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
             try {
                 if (getConnection() != null) {
                     String collation = ExecutorService.getInstance().getExecutor(this).queryForObject(new RawSqlStatement("SELECT CONVERT(varchar(100), SERVERPROPERTY('COLLATION'))"), String.class);
-                    caseSensitive = collation.contains("_CI_");
+                    caseSensitive = ! collation.contains("_CI_");
                 }
             } catch (Exception e) {
                 LogFactory.getLogger().warning("Cannot determine case sensitivity from MSSQL", e);
