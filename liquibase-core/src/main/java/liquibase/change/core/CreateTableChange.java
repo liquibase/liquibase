@@ -262,8 +262,7 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
     }
 
     @Override
-    public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParseException {
-        super.load(parsedNode, resourceAccessor);
+    public void customLoadLogic(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParseException {
         for (ParsedNode columnNode : parsedNode.getChildren(null, "column")) {
             ColumnConfig columnConfig = new ColumnConfig();
             columnConfig.load(columnNode, resourceAccessor);

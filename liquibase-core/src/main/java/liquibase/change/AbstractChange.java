@@ -511,8 +511,9 @@ public abstract class AbstractChange implements Change {
     }
 
     @Override
-    public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParseException {
+    public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParseException, SetupException {
         ChangeMetaData metaData = ChangeFactory.getInstance().getChangeMetaData(this);
+        this.setResourceAccessor(resourceAccessor);
         for (ChangeParameterMetaData param : metaData.getParameters().values()) {
             if (Collection.class.isAssignableFrom(param.getDataTypeClass())) {
                 if (param.getDataTypeClassParameters().length == 1 && param.getDataTypeClassParameters()[0].equals(ColumnConfig.class)) {
@@ -526,6 +527,12 @@ public abstract class AbstractChange implements Change {
                 param.setValue(this, parsedNode.getChildValue(null, param.getParameterName(), param.getDataTypeClass()));
             }
         }
+        customLoadLogic(parsedNode, resourceAccessor);
+        this.finishInitialization();
+    }
+
+    protected void customLoadLogic(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParseException {
+
     }
 
     @Override

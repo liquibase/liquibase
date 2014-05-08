@@ -47,7 +47,7 @@ public class ResourceSupplier {
 
         @Override
         public ClassLoader toClassLoader() {
-            return null;  //To change body of implemented methods use File | Settings | File Templates.
+            return this.getClass().getClassLoader();
         }
     }
 }

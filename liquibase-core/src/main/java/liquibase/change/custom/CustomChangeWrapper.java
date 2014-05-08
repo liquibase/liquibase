@@ -6,9 +6,12 @@ import liquibase.change.ChangeMetaData;
 import liquibase.change.DatabaseChangeProperty;
 import liquibase.database.Database;
 import liquibase.exception.*;
+import liquibase.parser.core.ParsedNode;
+import liquibase.resource.ResourceAccessor;
 import liquibase.statement.SqlStatement;
 import liquibase.util.ObjectUtil;
 
+import java.text.ParseException;
 import java.util.*;
 
 /**
@@ -283,4 +286,28 @@ public class CustomChangeWrapper extends AbstractChange {
         return STANDARD_CHANGELOG_NAMESPACE;
     }
 
+    @Override
+    public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParseException, SetupException {
+        setClassLoader(resourceAccessor.toClassLoader());
+        try {
+            setClass(parsedNode.getChildValue(null, "class", String.class));
+        } catch (CustomChangeException e) {
+            throw new SetupException(e);
+        }
+        super.load(parsedNode, resourceAccessor);
+    }
+
+    @Override
+    public void customLoadLogic(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParseException {
+        for (ParsedNode child : parsedNode.getChildren(null, "param")) {
+            Object value = child.getValue();
+            if (value == null) {
+                value = child.getChildValue(null, "value");
+            }
+            if (value != null) {
+                value = value.toString();
+            }
+            this.setParam(child.getChildValue(null, "name", String.class), (String) value);
+        }
+    }
 }

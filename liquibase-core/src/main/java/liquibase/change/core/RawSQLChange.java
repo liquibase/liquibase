@@ -65,8 +65,7 @@ public class RawSQLChange extends AbstractSQLChange {
     }
 
     @Override
-    public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParseException {
-        super.load(parsedNode, resourceAccessor);
+    public void customLoadLogic(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParseException {
         String nestedSql = StringUtils.trimToNull(parsedNode.getValue(String.class));
         if (nestedSql != null) {
             setSql(nestedSql);

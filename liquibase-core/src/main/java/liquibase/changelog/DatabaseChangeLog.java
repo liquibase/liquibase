@@ -7,6 +7,7 @@ import liquibase.changelog.visitor.ValidatingVisitor;
 import liquibase.database.Database;
 import liquibase.database.ObjectQuotingStrategy;
 import liquibase.exception.LiquibaseException;
+import liquibase.exception.SetupException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationFailedException;
 import liquibase.logging.LogFactory;
@@ -170,7 +171,8 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         return getChangeSet(ranChangeSet.getChangeLog(), ranChangeSet.getAuthor(), ranChangeSet.getId());
     }
 
-    public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParseException {
+    public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParseException, SetupException {
+        setLogicalFilePath(parsedNode.getChildValue(null, "logicalFilePath", String.class));
         for (ParsedNode childNode : parsedNode.getChildren()) {
             String nodeName = childNode.getNodeName();
             if (nodeName.equals("changeSet")) {
@@ -189,7 +191,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         }
     }
 
-    protected ChangeSet createChangeSet(ParsedNode node, ResourceAccessor resourceAccessor) throws ParseException {
+    protected ChangeSet createChangeSet(ParsedNode node, ResourceAccessor resourceAccessor) throws ParseException, SetupException {
         ChangeSet changeSet = new ChangeSet(this);
         changeSet.load(node, resourceAccessor);
         return changeSet;

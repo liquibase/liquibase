@@ -238,7 +238,7 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
     }
 
     @Override
-    public void load(ParsedNode node, ResourceAccessor resourceAccessor) throws ParseException {
+    public void load(ParsedNode node, ResourceAccessor resourceAccessor) throws ParseException, SetupException {
         this.id = node.getChildValue(null, "id", String.class);
         this.author = node.getChildValue(null, "author", String.class);
         this.alwaysRun  = node.getChildValue(null, "runAlways", false);
@@ -280,7 +280,7 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
         }
     }
 
-    protected void handleChildNode(ParsedNode child, ResourceAccessor resourceAccessor) throws ParseException {
+    protected void handleChildNode(ParsedNode child, ResourceAccessor resourceAccessor) throws ParseException, SetupException {
         if (child.getNodeName().equals("rollback")) {
             handleRollbackNode(child, resourceAccessor);
         } else {
@@ -288,7 +288,7 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
         }
     }
 
-    protected void handleRollbackNode(ParsedNode rollbackNode, ResourceAccessor resourceAccessor) throws ParseException {
+    protected void handleRollbackNode(ParsedNode rollbackNode, ResourceAccessor resourceAccessor) throws ParseException, SetupException {
         for (ParsedNode childNode : rollbackNode.getChildren()) {
             addRollbackChange(toChange(childNode, resourceAccessor));
         }
@@ -311,7 +311,7 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
         }
     }
 
-    protected Change toChange(ParsedNode value, ResourceAccessor resourceAccessor) throws ParseException {
+    protected Change toChange(ParsedNode value, ResourceAccessor resourceAccessor) throws ParseException, SetupException {
         Change change = ChangeFactory.getInstance().create(value.getNodeName());
         if (change == null) {
             return null;
