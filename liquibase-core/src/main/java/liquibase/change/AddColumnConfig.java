@@ -1,6 +1,11 @@
 package liquibase.change;
 
 
+import liquibase.parser.core.ParsedNode;
+import liquibase.resource.ResourceAccessor;
+
+import java.text.ParseException;
+
 public class AddColumnConfig extends ColumnConfig {
 
     private String afterColumn;
@@ -29,5 +34,13 @@ public class AddColumnConfig extends ColumnConfig {
 
     public void setPosition(Integer position) {
         this.position = position;
+    }
+
+    @Override
+    public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParseException {
+        super.load(parsedNode, resourceAccessor);
+        this.beforeColumn = parsedNode.getChildValue(null, "beforeColumn", String.class);
+        this.afterColumn = parsedNode.getChildValue(null, "afterColumn", String.class);
+        this.position = parsedNode.getChildValue(null, "position", Integer.class);
     }
 }

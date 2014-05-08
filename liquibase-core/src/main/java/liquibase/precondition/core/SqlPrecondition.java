@@ -6,10 +6,11 @@ import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.exception.*;
 import liquibase.executor.ExecutorService;
+import liquibase.precondition.AbstractPrecondition;
 import liquibase.precondition.Precondition;
 import liquibase.statement.core.RawSqlStatement;
 
-public class SqlPrecondition implements Precondition {
+public class SqlPrecondition extends AbstractPrecondition {
 
     private String expectedResult;
     private String sql;
@@ -58,6 +59,11 @@ public class SqlPrecondition implements Precondition {
         } catch (DatabaseException e) {
             throw new PreconditionErrorException(e, changeLog, this);
         }
+    }
+
+    @Override
+    public String getSerializedObjectNamespace() {
+        return STANDARD_CHANGELOG_NAMESPACE;
     }
 
     @Override

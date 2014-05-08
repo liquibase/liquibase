@@ -514,18 +514,28 @@ public abstract class AbstractChange implements Change {
     public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParseException, SetupException {
         ChangeMetaData metaData = ChangeFactory.getInstance().getChangeMetaData(this);
         this.setResourceAccessor(resourceAccessor);
-        for (ChangeParameterMetaData param : metaData.getParameters().values()) {
-            if (Collection.class.isAssignableFrom(param.getDataTypeClass())) {
-                if (param.getDataTypeClassParameters().length == 1 && param.getDataTypeClassParameters()[0].equals(ColumnConfig.class)) {
-                    for (ParsedNode child : parsedNode.getChildren(null, param.getParameterName())) {
-                        ColumnConfig columnConfig = new ColumnConfig();
-                        columnConfig.load(child, resourceAccessor);
-                        ((ChangeWithColumns) this).addColumn(columnConfig);
+        try {
+            for (ChangeParameterMetaData param : metaData.getParameters().values()) {
+                if (Collection.class.isAssignableFrom(param.getDataTypeClass())) {
+                    Class collectionType = (Class) param.getDataTypeClassParameters()[0];
+                    if (param.getDataTypeClassParameters().length == 1 && ColumnConfig.class.isAssignableFrom(collectionType)) {
+                        List<ParsedNode> columnNodes = new ArrayList<ParsedNode>(parsedNode.getChildren(null, param.getParameterName()));
+                        columnNodes.addAll(parsedNode.getChildren(null, "column"));
+
+                        for (ParsedNode child : columnNodes) {
+                            ColumnConfig columnConfig = (ColumnConfig) collectionType.newInstance();
+                            columnConfig.load(child, resourceAccessor);
+                            ((ChangeWithColumns) this).addColumn(columnConfig);
+                        }
                     }
+                } else {
+                    param.setValue(this, parsedNode.getChildValue(null, param.getParameterName(), param.getDataTypeClass()));
                 }
-            } else {
-                param.setValue(this, parsedNode.getChildValue(null, param.getParameterName(), param.getDataTypeClass()));
             }
+        } catch (InstantiationException e) {
+            throw new UnexpectedLiquibaseException(e);
+        } catch (IllegalAccessException e) {
+            throw new UnexpectedLiquibaseException(e);
         }
         customLoadLogic(parsedNode, resourceAccessor);
         this.finishInitialization();

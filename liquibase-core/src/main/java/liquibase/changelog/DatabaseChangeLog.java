@@ -173,21 +173,42 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
 
     public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParseException, SetupException {
         setLogicalFilePath(parsedNode.getChildValue(null, "logicalFilePath", String.class));
-        for (ParsedNode childNode : parsedNode.getChildren()) {
-            String nodeName = childNode.getNodeName();
-            if (nodeName.equals("changeSet")) {
-                this.addChangeSet(createChangeSet(childNode, resourceAccessor));
-            } else if (nodeName.equals("include")) {
-                String path = childNode.getChildValue(null, "path", String.class);
-                try {
-                    DatabaseChangeLog childChangeLog = ChangeLogParserFactory.getInstance().getParser(path, resourceAccessor).parse(path, null, resourceAccessor);
-                    for (ChangeSet changeSet : childChangeLog.getChangeSets()) {
-                        this.addChangeSet(changeSet);
+
+        Object value = parsedNode.getValue();
+        if (value != null) {
+            if (value instanceof ParsedNode) {
+                handleChildNode(((ParsedNode) value), resourceAccessor);
+            } else if (value instanceof Collection) {
+                for (Object childValue : ((Collection) value)) {
+                    if (childValue instanceof ParsedNode) {
+                        handleChildNode((ParsedNode) childValue, resourceAccessor);
                     }
-                } catch (LiquibaseException e) {
-                    throw new UnexpectedLiquibaseException(e);
                 }
             }
+        }
+
+        for (ParsedNode childNode : parsedNode.getChildren()) {
+            handleChildNode(childNode, resourceAccessor);
+        }
+    }
+
+    protected void handleChildNode(ParsedNode node, ResourceAccessor resourceAccessor) throws ParseException, SetupException {
+        String nodeName = node.getNodeName();
+        if (nodeName.equals("changeSet")) {
+            this.addChangeSet(createChangeSet(node, resourceAccessor));
+        } else if (nodeName.equals("include")) {
+            String path = node.getChildValue(null, "file", String.class);
+            try {
+                DatabaseChangeLog childChangeLog = ChangeLogParserFactory.getInstance().getParser(path, resourceAccessor).parse(path, null, resourceAccessor);
+                for (ChangeSet changeSet : childChangeLog.getChangeSets()) {
+                    this.addChangeSet(changeSet);
+                }
+            } catch (LiquibaseException e) {
+                throw new UnexpectedLiquibaseException(e);
+            }
+        } else if (nodeName.equals("preConditions")) {
+            this.preconditionContainer = new PreconditionContainer();
+            this.preconditionContainer.load(node, resourceAccessor);
         }
     }
 

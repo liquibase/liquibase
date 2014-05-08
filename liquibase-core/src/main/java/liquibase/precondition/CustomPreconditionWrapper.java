@@ -4,8 +4,6 @@ import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.exception.*;
-import liquibase.precondition.core.ErrorPrecondition;
-import liquibase.precondition.core.FailedPrecondition;
 import liquibase.util.ObjectUtil;
 
 import java.util.HashMap;
@@ -13,7 +11,7 @@ import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-public class CustomPreconditionWrapper implements Precondition {
+public class CustomPreconditionWrapper extends AbstractPrecondition {
 
     private String className;
     private ClassLoader classLoader;
@@ -85,6 +83,11 @@ public class CustomPreconditionWrapper implements Precondition {
         } catch (CustomPreconditionErrorException e) {
             throw new PreconditionErrorException(new ErrorPrecondition(e, changeLog, this));
         }
+    }
+
+    @Override
+    public String getSerializedObjectNamespace() {
+        return STANDARD_CHANGELOG_NAMESPACE;
     }
 
     @Override

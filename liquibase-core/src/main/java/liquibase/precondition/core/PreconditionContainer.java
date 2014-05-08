@@ -1,18 +1,22 @@
 package liquibase.precondition.core;
 
+import liquibase.exception.*;
+import liquibase.parser.core.ParsedNode;
+import liquibase.precondition.ErrorPrecondition;
+import liquibase.precondition.FailedPrecondition;
+import liquibase.precondition.Precondition;
+import liquibase.precondition.PreconditionFactory;
+import liquibase.resource.ResourceAccessor;
 import liquibase.util.StringUtils;
 import liquibase.util.StreamUtil;
 import liquibase.database.Database;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.ChangeSet;
-import liquibase.exception.PreconditionFailedException;
-import liquibase.exception.PreconditionErrorException;
-import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.exception.ValidationFailedException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.logging.LogFactory;
 
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -240,4 +244,19 @@ public class PreconditionContainer extends AndPrecondition {
             }
         }
     }
+
+    @Override
+    public String getSerializedObjectNamespace() {
+        return STANDARD_CHANGELOG_NAMESPACE;
+    }
+
+//    public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParseException, SetupException {
+//        for (ParsedNode childNode : parsedNode.getChildren()) {
+//            Precondition childPrecondition = PreconditionFactory.getInstance().create(childNode.getNodeName());
+//            if (childPrecondition != null) {
+//                childPrecondition.load(childNode);
+//                addNestedPrecondition(childPrecondition);
+//            }
+//        }
+//    }
 }

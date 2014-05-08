@@ -1,4 +1,4 @@
-package liquibase.precondition.core;
+package liquibase.precondition;
 
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.precondition.Precondition;

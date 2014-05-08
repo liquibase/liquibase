@@ -8,11 +8,12 @@ import liquibase.exception.PreconditionFailedException;
 import liquibase.exception.ValidationErrors;
 import liquibase.exception.Warnings;
 import liquibase.executor.ExecutorService;
+import liquibase.precondition.AbstractPrecondition;
 import liquibase.precondition.Precondition;
 import liquibase.statement.core.TableRowCountStatement;
 import liquibase.util.StringUtils;
 
-public class RowCountPrecondition implements Precondition {
+public class RowCountPrecondition extends AbstractPrecondition {
 
     private String catalogName;
     private String schemaName;
@@ -84,6 +85,11 @@ public class RowCountPrecondition implements Precondition {
 
     protected String getFailureMessage(int result) {
         return "Table "+tableName+" is not empty. Contains "+result+" rows";
+    }
+
+    @Override
+    public String getSerializedObjectNamespace() {
+        return STANDARD_CHANGELOG_NAMESPACE;
     }
 
     @Override

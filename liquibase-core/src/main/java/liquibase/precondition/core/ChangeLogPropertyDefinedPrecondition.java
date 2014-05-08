@@ -2,6 +2,7 @@ package liquibase.precondition.core;
 
 import liquibase.exception.ValidationErrors;
 import liquibase.exception.Warnings;
+import liquibase.precondition.AbstractPrecondition;
 import liquibase.precondition.Precondition;
 import liquibase.database.Database;
 import liquibase.changelog.DatabaseChangeLog;
@@ -10,10 +11,15 @@ import liquibase.changelog.ChangeLogParameters;
 import liquibase.exception.PreconditionFailedException;
 import liquibase.exception.PreconditionErrorException;
 
-public class ChangeLogPropertyDefinedPrecondition implements Precondition {
+public class ChangeLogPropertyDefinedPrecondition extends AbstractPrecondition {
 
     private String property;
     private String value;
+
+    @Override
+    public String getSerializedObjectNamespace() {
+        return STANDARD_CHANGELOG_NAMESPACE;
+    }
 
     @Override
     public String getName() {

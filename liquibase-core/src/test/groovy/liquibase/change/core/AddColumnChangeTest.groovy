@@ -5,6 +5,7 @@ import liquibase.change.Change
 import liquibase.change.ChangeStatus
 import liquibase.change.StandardChangeTest
 import liquibase.database.core.MockDatabase
+import liquibase.parser.core.ParsedNode
 import liquibase.snapshot.MockSnapshotGeneratorFactory
 import liquibase.snapshot.SnapshotGeneratorFactory
 import liquibase.structure.core.Column
@@ -189,6 +190,27 @@ public class AddColumnChangeTest extends StandardChangeTest {
                 it.getConstraints() != null && it.getConstraints().isPrimaryKey()
             }).size() > 0
         })
+    }
+
+    def "load method works"() {
+        when:
+        def node = new ParsedNode(null, "addColumn")
+                .addChildren([tableName: "table_name"])
+                .addChild(new ParsedNode(null, "column").addChildren([name: "col_1", type:"int", beforeColumn: "before_col"]))
+                .addChild(new ParsedNode(null, "column").addChildren([name: "col_2", type:"int", position: "3"]))
+        def change = new AddColumnChange()
+        change.load(node, resourceSupplier.simpleResourceAccessor)
+
+        then:
+        change.tableName == "table_name"
+        change.columns.size() == 2
+        change.columns[0].name == "col_1"
+        change.columns[0].type == "int"
+        change.columns[0].beforeColumn == "before_col"
+
+        change.columns[1].name == "col_2"
+        change.columns[1].type == "int"
+        change.columns[1].position== 3
     }
 
     protected void addColumnsToSnapshot(Table table, Change change, MockSnapshotGeneratorFactory snapshotFactory) {

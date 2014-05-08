@@ -3,6 +3,7 @@ package liquibase.precondition.core;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
+import liquibase.precondition.AbstractPrecondition;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.structure.core.ForeignKey;
 import liquibase.exception.*;
@@ -11,11 +12,16 @@ import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
 import liquibase.util.StringUtils;
 
-public class ForeignKeyExistsPrecondition implements Precondition {
+public class ForeignKeyExistsPrecondition extends AbstractPrecondition {
     private String catalogName;
     private String schemaName;
     private String foreignKeyTableName;
     private String foreignKeyName;
+
+    @Override
+    public String getSerializedObjectNamespace() {
+        return STANDARD_CHANGELOG_NAMESPACE;
+    }
 
     public String getCatalogName() {
         return catalogName;
