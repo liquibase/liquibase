@@ -5,10 +5,14 @@ import liquibase.change.DatabaseChange;
 import liquibase.change.ChangeMetaData;
 import liquibase.change.DatabaseChangeProperty;
 import liquibase.database.Database;
+import liquibase.parser.core.ParsedNode;
+import liquibase.resource.ResourceAccessor;
 import liquibase.sql.Sql;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RuntimeStatement;
 import liquibase.util.StringUtils;
+
+import java.text.ParseException;
 
 @DatabaseChange(name="stop", description = "Stops Liquibase execution with a message. Mainly useful for debugging and stepping through a changelog", priority = ChangeMetaData.PRIORITY_DEFAULT, since = "1.9")
 public class StopChange extends AbstractChange {
@@ -54,5 +58,13 @@ public class StopChange extends AbstractChange {
     @Override
     public String getSerializedObjectNamespace() {
         return STANDARD_CHANGELOG_NAMESPACE;
+    }
+
+    @Override
+    protected void customLoadLogic(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParseException {
+        Object value = parsedNode.getValue();
+        if (value != null && value instanceof String) {
+            setMessage((String) value);
+        }
     }
 }

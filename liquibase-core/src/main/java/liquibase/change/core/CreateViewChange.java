@@ -3,12 +3,15 @@ package liquibase.change.core;
 import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.database.core.SQLiteDatabase;
+import liquibase.parser.core.ParsedNode;
+import liquibase.resource.ResourceAccessor;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.CreateViewStatement;
 import liquibase.statement.core.DropViewStatement;
 import liquibase.structure.core.View;
 
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -127,5 +130,13 @@ public class CreateViewChange extends AbstractChange {
     @Override
     public String getSerializedObjectNamespace() {
         return STANDARD_CHANGELOG_NAMESPACE;
+    }
+
+    @Override
+    protected void customLoadLogic(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParseException {
+        Object value = parsedNode.getValue();
+        if (value instanceof String) {
+            this.setSelectQuery((String) value);
+        }
     }
 }

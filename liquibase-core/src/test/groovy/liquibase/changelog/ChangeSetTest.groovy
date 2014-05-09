@@ -2,25 +2,32 @@ package liquibase.changelog
 
 import liquibase.change.CheckSum;
 import liquibase.change.core.AddDefaultValueChange;
-import liquibase.change.core.CreateTableChange;
+import liquibase.change.core.CreateTableChange
+import liquibase.change.core.DropTableChange
+import liquibase.change.core.EmptyChange;
 import liquibase.change.core.InsertDataChange
 import liquibase.change.core.RawSQLChange
 import liquibase.change.core.RenameTableChange
 import liquibase.parser.core.ParsedNode
+import liquibase.precondition.core.RunningAsPrecondition
 import liquibase.sdk.supplier.resource.ResourceSupplier
+import liquibase.sql.visitor.ReplaceSqlVisitor
+import org.hamcrest.Matchers
 import spock.lang.Shared
 import spock.lang.Specification
 
 import static org.junit.Assert.*
+import static spock.util.matcher.HamcrestSupport.that
 
 public class ChangeSetTest extends Specification {
 
-    @Shared resourceSupplier = new ResourceSupplier()
+    @Shared
+            resourceSupplier = new ResourceSupplier()
 
     def getDescriptions() {
         when:
         def insertDescription = "insert";
-        def changeSet = new ChangeSet("testId", "testAuthor", false, false,null, null, null, null);
+        def changeSet = new ChangeSet("testId", "testAuthor", false, false, null, null, null, null);
         then:
         changeSet.getDescription() == "Empty"
 
@@ -42,8 +49,8 @@ public class ChangeSetTest extends Specification {
 
     def generateCheckSum() {
         when:
-        def changeSet1 = new ChangeSet("testId", "testAuthor", false, false,null, null, null, null);
-        def changeSet2 = new ChangeSet("testId", "testAuthor", false, false,null, null, null, null);
+        def changeSet1 = new ChangeSet("testId", "testAuthor", false, false, null, null, null, null);
+        def changeSet2 = new ChangeSet("testId", "testAuthor", false, false, null, null, null, null);
 
         def change = new AddDefaultValueChange();
         change.setSchemaName("SCHEMA_NAME");
@@ -68,7 +75,7 @@ public class ChangeSetTest extends Specification {
 
     def isCheckSumValid_validCheckSum() {
         when:
-        def changeSet = new ChangeSet("1", "2",false, false, "/test.xml",null, null, null);
+        def changeSet = new ChangeSet("1", "2", false, false, "/test.xml", null, null, null);
 
         then:
         assertTrue(changeSet.isCheckSumValid(changeSet.generateCheckSum()));
@@ -77,7 +84,7 @@ public class ChangeSetTest extends Specification {
     def isCheckSumValid_invalidCheckSum() {
         when:
         def checkSum = CheckSum.parse("2:asdf");
-        def changeSet = new ChangeSet("1", "2",false, false, "/test.xml",null, null, null);
+        def changeSet = new ChangeSet("1", "2", false, false, "/test.xml", null, null, null);
 
         then:
         assert !changeSet.isCheckSumValid(checkSum)
@@ -87,7 +94,7 @@ public class ChangeSetTest extends Specification {
         when:
         CheckSum checkSum = CheckSum.parse("2:asdf");
 
-        ChangeSet changeSet = new ChangeSet("1", "2",false, false, "/test.xml",null, null, null);
+        ChangeSet changeSet = new ChangeSet("1", "2", false, false, "/test.xml", null, null, null);
         changeSet.addValidCheckSum(changeSet.generateCheckSum().toString());
 
         then:
@@ -97,7 +104,7 @@ public class ChangeSetTest extends Specification {
     def "load empty node"() {
         when:
         def changeSet = new ChangeSet(new DatabaseChangeLog("com/example/test.xml"))
-        def node = new ParsedNode(null, "changeSet").addChildren([id: "1", author:"nvoxland"])
+        def node = new ParsedNode(null, "changeSet").addChildren([id: "1", author: "nvoxland"])
         changeSet.load(node, resourceSupplier.simpleResourceAccessor)
         then:
         changeSet.toString(false) == "com/example/test.xml::1::nvoxland"
@@ -123,7 +130,8 @@ public class ChangeSetTest extends Specification {
             }
             node.addChild(null, param, testValue[param])
         }
-        changeSet.load(node,resourceSupplier.simpleResourceAccessor)
+        node.addChild(null, "onValidationFail", "MARK_RAN")
+        changeSet.load(node, resourceSupplier.simpleResourceAccessor)
 
         then:
 
@@ -134,6 +142,7 @@ public class ChangeSetTest extends Specification {
                 assert changeSet.getSerializableFieldValue(param).toString() == testValue[param]
             }
         }
+        changeSet.onValidationFail.toString() == "MARK_RAN"
 
     }
 
@@ -141,10 +150,10 @@ public class ChangeSetTest extends Specification {
         when:
         def changeSet = new ChangeSet(new DatabaseChangeLog("com/example/test.xml"))
         def node = new ParsedNode(null, "changeSet")
-                .addChildren([id: "1", author:"nvoxland"])
+                .addChildren([id: "1", author: "nvoxland"])
                 .addChild(new ParsedNode(null, "createTable").addChild(null, "tableName", "table_1"))
                 .addChild(new ParsedNode(null, "createTable").addChild(null, "tableName", "table_2"))
-        changeSet.load(node,resourceSupplier.simpleResourceAccessor)
+        changeSet.load(node, resourceSupplier.simpleResourceAccessor)
 
         then:
         changeSet.toString(false) == "com/example/test.xml::1::nvoxland"
@@ -157,8 +166,8 @@ public class ChangeSetTest extends Specification {
         when:
         def changeSet = new ChangeSet(new DatabaseChangeLog("com/example/test.xml"))
         def node = new ParsedNode(null, "changeSet")
-            .addChild(new ParsedNode(null, "createTable").addChild(null, "tableName", "table_1"))
-            .setValue(new ParsedNode(null, "rollback").setValue("rollback logic here"))
+                .addChild(new ParsedNode(null, "createTable").addChild(null, "tableName", "table_1"))
+                .setValue(new ParsedNode(null, "rollback").setValue("rollback logic here"))
         changeSet.load(node, resourceSupplier.simpleResourceAccessor)
 
         then:
@@ -187,9 +196,9 @@ public class ChangeSetTest extends Specification {
         def node = new ParsedNode(null, "changeSet")
                 .addChild(new ParsedNode(null, "createTable").addChild(null, "tableName", "table_1"))
                 .setValue([
-                    new ParsedNode(null, "rollback").setValue(new ParsedNode(null, "renameTable").addChild(null, "newTableName", "rename_to_x")),
-                    new ParsedNode(null, "rollback").setValue(new ParsedNode(null, "renameTable").addChild(null, "newTableName", "rename_to_y"))
-                ])
+                new ParsedNode(null, "rollback").setValue(new ParsedNode(null, "renameTable").addChild(null, "newTableName", "rename_to_x")),
+                new ParsedNode(null, "rollback").setValue(new ParsedNode(null, "renameTable").addChild(null, "newTableName", "rename_to_y"))
+        ])
         changeSet.load(node, resourceSupplier.simpleResourceAccessor)
 
         then:
@@ -232,5 +241,120 @@ public class ChangeSetTest extends Specification {
         ((RawSQLChange) changeSet.rollBackChanges[0]).sql == "rollback sql 1"
         ((RawSQLChange) changeSet.rollBackChanges[1]).sql == "rollback sql 2"
         changeSet.rollBackChanges.size() == 2
+    }
+
+    def "load node with valid checksums as children"() {
+        when:
+        def changeSet = new ChangeSet(new DatabaseChangeLog("com/example/test.xml"))
+        def node = new ParsedNode(null, "changeSet")
+                .addChild(null, "validCheckSum", "c2b7b29ce3a75940893cd022501852e2")
+                .addChild(null, "validCheckSum", "8:d54da29ce3a75940858cd093501158b8")
+        changeSet.load(node, resourceSupplier.simpleResourceAccessor)
+
+        then:
+        changeSet.validCheckSums.size() == 2
+        new ArrayList(changeSet.validCheckSums)[0].toString() == "1:c2b7b29ce3a75940893cd022501852e2"
+        new ArrayList(changeSet.validCheckSums)[1].toString() == "8:d54da29ce3a75940858cd093501158b8"
+    }
+
+    def "load node with valid checksums in value"() {
+        when:
+        def changeSet = new ChangeSet(new DatabaseChangeLog("com/example/test.xml"))
+        def node = new ParsedNode(null, "changeSet").setValue([
+                new ParsedNode(null, "validCheckSum").setValue("c2b7b29ce3a75940893cd022501852e2"),
+                new ParsedNode(null, "validCheckSum").setValue("8:d54da29ce3a75940858cd093501158b8")
+        ])
+        changeSet.load(node, resourceSupplier.simpleResourceAccessor)
+
+        then:
+        changeSet.validCheckSums.size() == 2
+        new ArrayList(changeSet.validCheckSums)[0].toString() == "1:c2b7b29ce3a75940893cd022501852e2"
+        new ArrayList(changeSet.validCheckSums)[1].toString() == "8:d54da29ce3a75940858cd093501158b8"
+    }
+
+    def "load node with preconditions as child"() {
+        when:
+        def changeSet = new ChangeSet(new DatabaseChangeLog("com/example/test.xml"))
+        changeSet.load(new ParsedNode(null, "changeSet").addChildren([preConditions: [
+                [runningAs: [username: "my_user"]],
+                [runningAs: [username: "my_other_user"]],
+        ]]), resourceSupplier.simpleResourceAccessor)
+
+        then:
+        changeSet.preconditions.nestedPreconditions.size() == 2
+        ((RunningAsPrecondition) changeSet.preconditions.nestedPreconditions[0]).username == "my_user"
+        ((RunningAsPrecondition) changeSet.preconditions.nestedPreconditions[1]).username == "my_other_user"
+    }
+
+    def "load node with preconditions as value"() {
+        when:
+        def changeSet = new ChangeSet(new DatabaseChangeLog("com/example/test.xml"))
+        changeSet.load(new ParsedNode(null, "changeSet").setValue(new ParsedNode(null, "preConditions").addChildren([
+                [runningAs: [username: "my_user"]],
+                [runningAs: [username: "my_other_user"]],
+        ])), resourceSupplier.simpleResourceAccessor)
+
+        then:
+        changeSet.preconditions.nestedPreconditions.size() == 2
+        ((RunningAsPrecondition) changeSet.preconditions.nestedPreconditions[0]).username == "my_user"
+        ((RunningAsPrecondition) changeSet.preconditions.nestedPreconditions[1]).username == "my_other_user"
+    }
+
+    def "load with modifySql as value"() {
+        when:
+        def changeSet = new ChangeSet(new DatabaseChangeLog("com/example/test.xml"))
+        changeSet.load(new ParsedNode(null, "changeSet").setValue([
+                new ParsedNode(null, "modifySql").addChildren([applyToRollback: "true", replace: [replace: "a", with: "b"]]),
+                new ParsedNode(null, "modifySql").addChildren([dbms: "mysql, oracle", context: "live, test", applyToRollback: "false"]).addChildren([
+                        [replace: [replace: "x1", with: "y1"]],
+                        [replace: [replace: "x2", with: "y2"]],
+                ])
+        ]), resourceSupplier.simpleResourceAccessor)
+
+        then:
+        changeSet.sqlVisitors.size() == 3
+        assert ((ReplaceSqlVisitor) changeSet.sqlVisitors[0]).applyToRollback
+        ((ReplaceSqlVisitor) changeSet.sqlVisitors[0]).applicableDbms == null
+        ((ReplaceSqlVisitor) changeSet.sqlVisitors[0]).contexts == null
+        ((ReplaceSqlVisitor) changeSet.sqlVisitors[0]).replace == "a"
+        ((ReplaceSqlVisitor) changeSet.sqlVisitors[0]).with == "b"
+
+        that( ((ReplaceSqlVisitor) changeSet.sqlVisitors[1]).applicableDbms, Matchers.containsInAnyOrder(["mysql", "oracle"].toArray()))
+        ((ReplaceSqlVisitor) changeSet.sqlVisitors[1]).contexts.toString() == "(live), (test)"
+        ((ReplaceSqlVisitor) changeSet.sqlVisitors[1]).replace == "x1"
+        ((ReplaceSqlVisitor) changeSet.sqlVisitors[1]).with == "y1"
+
+        that( ((ReplaceSqlVisitor) changeSet.sqlVisitors[2]).applicableDbms, Matchers.containsInAnyOrder(["mysql", "oracle"].toArray()))
+        ((ReplaceSqlVisitor) changeSet.sqlVisitors[2]).contexts.toString() == "(live), (test)"
+        ((ReplaceSqlVisitor) changeSet.sqlVisitors[2]).replace == "x2"
+        ((ReplaceSqlVisitor) changeSet.sqlVisitors[2]).with == "y2"
+    }
+
+    def "load with empty rollback creates an EmptyChange"() {
+        when:
+        def changeSet = new ChangeSet(new DatabaseChangeLog("com/example/test.xml"))
+        changeSet.load(new ParsedNode(null, "changeSet").addChild(new ParsedNode(null, "rollback")), resourceSupplier.simpleResourceAccessor)
+
+        then:
+        changeSet.changes.size() == 0
+        changeSet.rollBackChanges.size() == 1
+        changeSet.rollBackChanges[0] instanceof EmptyChange
+    }
+
+    def "load with rollback referencing earlier changeSet"() {
+        def path = "com/example/test.xml"
+        when:
+        def changeLog = new DatabaseChangeLog(path)
+        changeLog.load(new ParsedNode(null, "databaseChangeLog")
+                .addChildren([changeSet: [id: "1", author:"nvoxland", createTable: [tableName: "table1"]]])
+                .addChildren([changeSet: [id: "2", author:"nvoxland", createTable: [tableName: "table2"]]])
+                .addChildren([changeSet: [id: "3", author:"nvoxland", dropTable: [tableName: "tableX"], rollback: [changeSetId: "2", changeSetAuthor: "nvoxland", changeSetPath: path]]])
+        , resourceSupplier.simpleResourceAccessor)
+
+        then:
+        changeLog.getChangeSet(path, "nvoxland", "3").changes.size() == 1
+        ((DropTableChange) changeLog.getChangeSet(path, "nvoxland", "3").changes[0]).tableName == "tableX"
+        changeLog.getChangeSet(path, "nvoxland", "3").rollBackChanges.size() == 1
+        ((CreateTableChange) changeLog.getChangeSet(path, "nvoxland", "3").rollBackChanges[0]).tableName == "table2"
     }
 }

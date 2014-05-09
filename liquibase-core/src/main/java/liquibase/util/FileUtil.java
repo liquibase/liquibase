@@ -2,6 +2,11 @@ package liquibase.util;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
+import java.net.URLDecoder;
+import java.util.Enumeration;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 
 public class FileUtil {
     /**
@@ -68,4 +73,35 @@ public class FileUtil {
         }
     }
 
+    public static File extractZipFile(URL resource) throws IOException {
+        String file = resource.getFile();
+        String path = file.split("!")[0];
+        if (path.matches("file:\\/[A-Za-z]:\\/.*")) {
+            path = path.replaceFirst("file:\\/", "");
+        } else {
+            path = path.replaceFirst("file:", "");
+        }
+        path = URLDecoder.decode(path, "UTF-8");
+        File zipfile = new File(path);
+
+        File tempDir = File.createTempFile("liquibase-unzip", ".dir");
+        tempDir.delete();
+        tempDir.mkdir();
+
+        JarFile jarFile = new JarFile(zipfile);
+        try {
+            Enumeration<JarEntry> entries = jarFile.entries();
+            while (entries.hasMoreElements()) {
+                JarEntry entry = entries.nextElement();
+                File entryFile = new File(tempDir, entry.getName());
+                entryFile.mkdirs();
+            }
+
+            FileUtil.forceDeleteOnExit(tempDir);
+        } finally {
+            jarFile.close();
+        }
+
+        return tempDir;
+    }
 }

@@ -759,35 +759,5 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
 //		}
 //	}
 //
-//	static File extractZipFile(URL resource) throws IOException {
-//		String file = resource.getFile();
-//		String path = file.split("!")[0];
-//		if (path.matches("file:\\/[A-Za-z]:\\/.*")) {
-//			path = path.replaceFirst("file:\\/", "");
-//		} else {
-//			path = path.replaceFirst("file:", "");
-//		}
-//		path = URLDecoder.decode(path, "UTF-8");
-//		File zipfile = new File(path);
-//
-//		File tempDir = File.createTempFile("liquibase-sax", ".dir");
-//		tempDir.delete();
-//		tempDir.mkdir();
-//
-//        JarFile jarFile = new JarFile(zipfile);
-//        try {
-//            Enumeration<JarEntry> entries = jarFile.entries();
-//            while (entries.hasMoreElements()) {
-//                JarEntry entry = entries.nextElement();
-//                File entryFile = new File(tempDir, entry.getName());
-//                entryFile.mkdirs();
-//            }
-//
-//            FileUtil.forceDeleteOnExit(tempDir);
-//        } finally {
-//            jarFile.close();
-//        }
-//
-//		return tempDir;
-//	}
+
 }

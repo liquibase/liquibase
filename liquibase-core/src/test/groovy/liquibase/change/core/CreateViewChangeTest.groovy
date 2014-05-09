@@ -3,6 +3,7 @@ package liquibase.change.core
 import liquibase.change.ChangeStatus
 import liquibase.change.StandardChangeTest
 import liquibase.database.core.MockDatabase
+import liquibase.parser.core.ParsedNode
 import liquibase.snapshot.MockSnapshotGeneratorFactory
 import liquibase.snapshot.SnapshotGeneratorFactory
 import liquibase.structure.core.View
@@ -37,5 +38,15 @@ public class CreateViewChangeTest extends StandardChangeTest {
         snapshotFactory.addObjects(view)
         then:
         assert change.checkStatus(database).status == ChangeStatus.Status.complete
+    }
+
+    def "load works with nested query"() {
+        when:
+        def change = new CreateViewChange()
+        change.load(new ParsedNode(null, "createView").addChild(null, "viewName", "my_view").setValue("select * from test"), resourceSupplier.simpleResourceAccessor)
+
+        then:
+        change.viewName == "my_view"
+        change.selectQuery == "select * from test"
     }
 }

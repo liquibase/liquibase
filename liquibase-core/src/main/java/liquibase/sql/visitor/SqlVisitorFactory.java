@@ -40,7 +40,7 @@ public class SqlVisitorFactory {
     public SqlVisitor create(String tagName) {
         Class<?> aClass = tagToClassMap.get(tagName);
         if (aClass == null) {
-            throw new RuntimeException("Unknown tag: " + tagName);
+            return null;
         }
         try {
             return (SqlVisitor) aClass.newInstance();

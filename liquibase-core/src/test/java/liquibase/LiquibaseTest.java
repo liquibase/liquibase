@@ -22,7 +22,7 @@ import liquibase.parser.ChangeLogParser;
 import liquibase.parser.ChangeLogParserFactory;
 import liquibase.resource.ResourceAccessor;
 import liquibase.test.Assert;
-import liquibase.test.MockResourceAccessor;
+import liquibase.resource.MockResourceAccessor;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;

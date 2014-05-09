@@ -67,7 +67,7 @@ public class ObjectUtil {
         } catch (IllegalAccessException e) {
             throw new UnexpectedLiquibaseException(e);
         } catch (IllegalArgumentException e) {
-            throw new UnexpectedLiquibaseException("Cannot call "+method.toString()+" with value of type "+finalValue.getClass());
+            throw new UnexpectedLiquibaseException("Cannot call "+method.toString()+" with value of type "+finalValue.getClass().getName());
         } catch (InvocationTargetException e) {
             throw new UnexpectedLiquibaseException(e);
         }

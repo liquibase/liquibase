@@ -12,6 +12,8 @@ import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.executor.LoggingExecutor;
 import liquibase.logging.LogFactory;
+import liquibase.parser.core.ParsedNode;
+import liquibase.resource.ResourceAccessor;
 import liquibase.sql.Sql;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.CommentStatement;
@@ -21,6 +23,7 @@ import liquibase.util.StringUtils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -165,5 +168,16 @@ public class ExecuteShellCommandChange extends AbstractChange {
     @Override
     public String getSerializedObjectNamespace() {
         return STANDARD_CHANGELOG_NAMESPACE;
+    }
+
+    @Override
+    protected void customLoadLogic(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParseException {
+        for (ParsedNode arg : parsedNode.getChildren(null, "arg")) {
+            addArg(arg.getChildValue(null, "value", String.class));
+        }
+        List<String> os = StringUtils.splitAndTrim(StringUtils.trimToEmpty(parsedNode.getChildValue(null, "os", String.class)), ",");
+        if (os.size() > 0) {
+            this.os = os;
+        }
     }
 }

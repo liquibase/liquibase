@@ -4,7 +4,8 @@ import liquibase.change.Change
 import liquibase.change.ChangeFactory
 import liquibase.change.ChangeStatus
 import liquibase.change.StandardChangeTest;
-import liquibase.database.core.MockDatabase;
+import liquibase.database.core.MockDatabase
+import liquibase.parser.core.ParsedNode;
 import liquibase.resource.ClassLoaderResourceAccessor
 import liquibase.snapshot.MockSnapshotGeneratorFactory
 import liquibase.snapshot.SnapshotGeneratorFactory;
@@ -163,5 +164,23 @@ public class LoadDataChangeTest extends StandardChangeTest {
         then:
         assert change.checkStatus(database).status == ChangeStatus.Status.unknown
         assert change.checkStatus(database).message == "Cannot check loadData status"
+    }
+
+    def "load works"() {
+        when:
+        def change = new LoadDataChange()
+        change.load(new ParsedNode(null, "loadData")
+                .addChildren([
+                [column: [name: "id"]],
+                [column: [name: "new_col", header:"new_col_header"]],
+        ]), resourceSupplier.simpleResourceAccessor)
+
+        then:
+        change.columns.size() == 2
+        change.columns[0].name == "id"
+        change.columns[0].header == null
+
+        change.columns[1].name == "new_col"
+        change.columns[1].header == "new_col_header"
     }
 }

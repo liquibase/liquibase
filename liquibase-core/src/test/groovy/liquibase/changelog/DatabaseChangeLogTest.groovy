@@ -1,15 +1,49 @@
 package liquibase.changelog
 
 import liquibase.change.core.CreateTableChange
+import liquibase.change.core.RawSQLChange
 import liquibase.parser.core.ParsedNode
+import liquibase.precondition.core.OrPrecondition
+import liquibase.precondition.core.PreconditionContainer
 import liquibase.precondition.core.RunningAsPrecondition
 import liquibase.sdk.supplier.resource.ResourceSupplier
+import liquibase.resource.MockResourceAccessor
 import spock.lang.Shared
 import spock.lang.Specification
 
 class DatabaseChangeLogTest extends Specification {
 
     @Shared resourceSupplier = new ResourceSupplier()
+    def test1Xml = '''<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.2.xsd">
+
+    <preConditions>
+        <runningAs username="testUser"/>
+        <or>
+            <dbms type="mssql"/>
+            <dbms type="mysql"/>
+        </or>
+    </preConditions>
+
+    <changeSet id="1" author="nvoxland">
+        <createTable tableName="person">
+            <column name="id" type="int">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="firstname" type="varchar(50)"/>
+            <column name="lastname" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+</databaseChangeLog>'''
+
+    def testSql = '''-- an included raw sql file
+create table sql_table (id int);
+create view sql_view as select * from sql_table;'''
+
 
     def "getChangeSet passing id, author and file"() {
         def path = "com/example/path.xml"
@@ -88,4 +122,69 @@ class DatabaseChangeLogTest extends Specification {
         ((CreateTableChange) changeLogFromChildren.changeSets[1].changes[0]).tableName == "my_other_table"
         ((CreateTableChange) changeLogFromValue.changeSets[1].changes[0]).tableName == "my_other_table"
     }
+
+    def "included changelog files have their preconditions and changes included in root changelog"() {
+        when:
+        def resourceAccessor = new MockResourceAccessor(["com/example/test1.xml": test1Xml, "com/example/test2.xml": test1Xml.replace("testUser", "otherUser").replace("person", "person2")])
+
+        def rootChangeLog = new DatabaseChangeLog("com/example/root.xml")
+        rootChangeLog.load(new ParsedNode(null, "databaseChangeLog")
+                .addChild(new ParsedNode(null, "preConditions").addChildren([runningAs: [username: "user1"]]))
+                .addChildren([changeSet: [id: "1", author: "nvoxland", createTable: [tableName: "test_table", schemaName: "test_schema"]]])
+                .addChildren([include: [file: "com/example/test1.xml"]])
+                .addChildren([include: [file: "com/example/test2.xml"]])
+        , resourceAccessor)
+
+        then:
+        rootChangeLog.preconditions.nestedPreconditions.size() == 3
+        ((RunningAsPrecondition) rootChangeLog.preconditions.nestedPreconditions[0]).username == "user1"
+
+        ((PreconditionContainer) rootChangeLog.preconditions.nestedPreconditions[1]).nestedPreconditions.size() == 2
+        ((RunningAsPrecondition) ((PreconditionContainer) rootChangeLog.preconditions.nestedPreconditions[1]).nestedPreconditions[0]).username == "testUser"
+        ((OrPrecondition) ((PreconditionContainer) rootChangeLog.preconditions.nestedPreconditions[1]).nestedPreconditions[1]).nestedPreconditions.size() == 2
+
+        ((PreconditionContainer) rootChangeLog.preconditions.nestedPreconditions[2]).nestedPreconditions.size() == 2
+        ((RunningAsPrecondition) ((PreconditionContainer) rootChangeLog.preconditions.nestedPreconditions[2]).nestedPreconditions[0]).username == "otherUser"
+        ((OrPrecondition) ((PreconditionContainer) rootChangeLog.preconditions.nestedPreconditions[2]).nestedPreconditions[1]).nestedPreconditions.size() == 2
+
+        rootChangeLog.changeSets.size() == 3
+        ((CreateTableChange) rootChangeLog.getChangeSet("com/example/root.xml", "nvoxland", "1").changes[0]).tableName == "test_table"
+        ((CreateTableChange) rootChangeLog.getChangeSet("com/example/test1.xml", "nvoxland", "1").changes[0]).tableName == "person"
+        ((CreateTableChange) rootChangeLog.getChangeSet("com/example/test2.xml", "nvoxland", "1").changes[0]).tableName == "person2"
+    }
+
+    def "includeAll files have preconditions and changeSets loaded"() {
+        when:
+        def resourceAccessor = new MockResourceAccessor([
+                "com/example/test1.xml": test1Xml,
+                "com/example/test2.xml": test1Xml.replace("testUser", "otherUser").replace("person", "person2"),
+                "com/example/test.sql" : testSql
+        ])
+
+        def rootChangeLog = new DatabaseChangeLog("com/example/root.xml")
+        rootChangeLog.load(new ParsedNode(null, "databaseChangeLog")
+                .addChild(new ParsedNode(null, "preConditions").addChildren([runningAs: [username: "user1"]]))
+                .addChildren([changeSet: [id: "1", author: "nvoxland", createTable: [tableName: "test_table", schemaName: "test_schema"]]])
+                .addChildren([includeAll: [path: "com/example"]])
+                , resourceAccessor)
+
+        then:
+        rootChangeLog.preconditions.nestedPreconditions.size() == 4
+        ((RunningAsPrecondition) rootChangeLog.preconditions.nestedPreconditions[0]).username == "user1"
+
+        ((PreconditionContainer) rootChangeLog.preconditions.nestedPreconditions[1]).nestedPreconditions.size() == 2
+        ((RunningAsPrecondition) ((PreconditionContainer) rootChangeLog.preconditions.nestedPreconditions[1]).nestedPreconditions[0]).username == "testUser"
+        ((OrPrecondition) ((PreconditionContainer) rootChangeLog.preconditions.nestedPreconditions[1]).nestedPreconditions[1]).nestedPreconditions.size() == 2
+
+        ((PreconditionContainer) rootChangeLog.preconditions.nestedPreconditions[2]).nestedPreconditions.size() == 2
+        ((RunningAsPrecondition) ((PreconditionContainer) rootChangeLog.preconditions.nestedPreconditions[2]).nestedPreconditions[0]).username == "otherUser"
+        ((OrPrecondition) ((PreconditionContainer) rootChangeLog.preconditions.nestedPreconditions[2]).nestedPreconditions[1]).nestedPreconditions.size() == 2
+
+        rootChangeLog.changeSets.size() == 4
+        ((CreateTableChange) rootChangeLog.getChangeSet("com/example/root.xml", "nvoxland", "1").changes[0]).tableName == "test_table"
+        ((CreateTableChange) rootChangeLog.getChangeSet("file:com/example/test1.xml", "nvoxland", "1").changes[0]).tableName == "person"
+        ((CreateTableChange) rootChangeLog.getChangeSet("file:com/example/test2.xml", "nvoxland", "1").changes[0]).tableName == "person2"
+        ((RawSQLChange) rootChangeLog.getChangeSet("file:com/example/test.sql", "includeAll", "raw").changes[0]).sql == testSql
+    }
+
 }

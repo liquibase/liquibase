@@ -24,6 +24,7 @@ import liquibase.precondition.core.PreconditionContainer;
 import liquibase.resource.ResourceAccessor;
 import liquibase.serializer.LiquibaseSerializable;
 import liquibase.sql.visitor.SqlVisitor;
+import liquibase.sql.visitor.SqlVisitorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
@@ -259,8 +260,9 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
             filePath = changeLog.getFilePath();
         }
 
-        this.setFailOnError(node.getChildValue(null, "failOnError", true));
-        this.setFailOnError(node.getChildValue(null, "onValidationFail", true));
+        this.setFailOnError(node.getChildValue(null, "failOnError", Boolean.class));
+        String onValidationFailString = node.getChildValue(null, "onValidationFail", "HALT");
+        this.setOnValidationFail(ValidationFailOption.valueOf(onValidationFailString));
 
         for (ParsedNode child : node.getChildren()) {
             handleChildNode(child, resourceAccessor);
@@ -283,14 +285,75 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
     protected void handleChildNode(ParsedNode child, ResourceAccessor resourceAccessor) throws ParseException, SetupException {
         if (child.getNodeName().equals("rollback")) {
             handleRollbackNode(child, resourceAccessor);
+        } else if (child.getNodeName().equals("validCheckSum")) {
+            addValidCheckSum(child.getValue(String.class));
+        } else if (child.getNodeName().equals("modifySql")) {
+            String dbmsString = StringUtils.trimToNull(child.getChildValue(null, "dbms", String.class));
+            String contextString = StringUtils.trimToNull(child.getChildValue(null, "context", String.class));
+            boolean applyToRollback = child.getChildValue(null, "applyToRollback", false);
+
+            Set<String> dbms = new HashSet<String>();
+            if (dbmsString != null) {
+                dbms.addAll(StringUtils.splitAndTrim(dbmsString, ","));
+            }
+            ContextExpression context = null;
+            if (contextString != null) {
+                context = new ContextExpression(contextString);
+            }
+
+            List<ParsedNode> potentialVisitors = new ArrayList<ParsedNode>(child.getChildren());
+            Object childValue = child.getValue();
+            if (childValue instanceof ParsedNode) {
+                potentialVisitors.add(child);
+            } else if (childValue instanceof Collection) {
+                for (Object nested: (Collection) childValue) {
+                    if (nested instanceof ParsedNode) {
+                        potentialVisitors.add((ParsedNode) nested);
+                    }
+                }
+            }
+            for (ParsedNode node : potentialVisitors) {
+                SqlVisitor sqlVisitor = SqlVisitorFactory.getInstance().create(node.getNodeName());
+                if (sqlVisitor != null) {
+                    sqlVisitor.setApplyToRollback(applyToRollback);
+                    if (dbms.size() > 0) {
+                        sqlVisitor.setApplicableDbms(dbms);
+                    }
+                    sqlVisitor.setContexts(context);
+                    sqlVisitor.load(node, resourceAccessor);
+                    addSqlVisitor(sqlVisitor);
+                }
+            }
+
+
+        } else if (child.getNodeName().equals("preConditions")) {
+            this.preconditions = new PreconditionContainer();
+            this.preconditions.load(child, resourceAccessor);
         } else {
             addChange(toChange(child, resourceAccessor));
         }
     }
 
     protected void handleRollbackNode(ParsedNode rollbackNode, ResourceAccessor resourceAccessor) throws ParseException, SetupException {
+        String changeSetId = rollbackNode.getChildValue(null, "changeSetId", String.class);
+        if (changeSetId != null) {
+            String changeSetAuthor = rollbackNode.getChildValue(null, "changeSetAuthor", String.class);
+            String changeSetPath = rollbackNode.getChildValue(null, "changeSetPath", String.class);
+
+            ChangeSet changeSet = this.getChangeLog().getChangeSet(changeSetPath, changeSetAuthor, changeSetId);
+            if (changeSet == null) {
+                throw new SetupException("Change set "+new ChangeSet(changeSetId, changeSetAuthor, false, false, changeSetPath, null, null, null).toString(false)+" does not exist");
+            }
+            for (Change change : changeSet.getChanges()) {
+                addRollbackChange(change);
+            }
+            return;
+        }
+
+        boolean foundValue = false;
         for (ParsedNode childNode : rollbackNode.getChildren()) {
             addRollbackChange(toChange(childNode, resourceAccessor));
+            foundValue =  true;
         }
 
         Object value = rollbackNode.getValue();
@@ -301,13 +364,18 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
                     String[] strings = StringUtils.processMutliLineSQL(finalValue, true, true, ";");
                     for (String string : strings) {
                         addRollbackChange(new RawSQLChange(string));
+                        foundValue = true;
                     }
                 }
             } else if (value instanceof ParsedNode) {
                 addRollbackChange(toChange((ParsedNode) value, resourceAccessor));
+                foundValue = true;
             } else {
                 throw new ParseException("Unexpected object: "+value.getClass().getName()+" '"+value.toString()+"'", 0);
             }
+        }
+        if (!foundValue) {
+            addRollbackChange(new EmptyChange());
         }
     }
 

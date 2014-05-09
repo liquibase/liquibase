@@ -9,7 +9,8 @@ import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog
 import liquibase.database.core.MockDatabase;
 import liquibase.parser.ChangeLogParser;
-import liquibase.parser.ChangeLogParserFactory;
+import liquibase.parser.ChangeLogParserFactory
+import liquibase.parser.core.ParsedNode;
 import liquibase.resource.CompositeResourceAccessor;
 import liquibase.resource.ResourceAccessor;
 import liquibase.serializer.core.string.StringChangeLogSerializer;
@@ -50,5 +51,20 @@ public class UpdateDataChangeTest extends StandardChangeTest {
         assert change.checkStatus(database).message == "Cannot check updateData status"
     }
 
+    def "load with whereParams"() {
+        when:
+        def change = new UpdateDataChange()
+        def whereParams = new ParsedNode(null, "whereParams")
+                .addChild(new ParsedNode(null, "param").addChild(null, "valueNumeric", "134"))
+                .addChild(new ParsedNode(null, "param").addChildren([name: "other_val", value: "asdf"]))
+        change.load(new ParsedNode(null, "updateData").addChild(null, "tableName", "updateTest").addChild(whereParams), resourceSupplier.simpleResourceAccessor)
+
+        then:
+        change.tableName == "updateTest"
+        change.whereParams.size() == 2
+        change.whereParams[0].valueNumeric == 134
+        change.whereParams[1].name == "other_val"
+        change.whereParams[1].value == "asdf"
+    }
 
 }

@@ -4,8 +4,11 @@ import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.exception.*;
+import liquibase.parser.core.ParsedNode;
+import liquibase.resource.ResourceAccessor;
 import liquibase.util.ObjectUtil;
 
+import java.text.ParseException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.SortedSet;
@@ -93,5 +96,23 @@ public class CustomPreconditionWrapper extends AbstractPrecondition {
     @Override
     public String getName() {
         return "customPrecondition";
+    }
+
+    @Override
+    public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParseException, SetupException {
+        setClassLoader(resourceAccessor.toClassLoader());
+        setClassName(parsedNode.getChildValue(null, "className", String.class));
+        for (ParsedNode child : parsedNode.getChildren(null, "param")) {
+            Object value = child.getValue();
+            if (value == null) {
+                value = child.getChildValue(null, "value");
+            }
+            if (value != null) {
+                value = value.toString();
+            }
+            this.setParam(child.getChildValue(null, "name", String.class), (String) value);
+        }
+        super.load(parsedNode, resourceAccessor);
+
     }
 }
