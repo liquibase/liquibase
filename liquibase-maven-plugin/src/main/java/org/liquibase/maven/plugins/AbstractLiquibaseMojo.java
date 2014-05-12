@@ -12,6 +12,7 @@ import liquibase.logging.LogFactory;
 import liquibase.resource.CompositeResourceAccessor;
 import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.resource.ResourceAccessor;
+import liquibase.util.StreamUtil;
 import liquibase.util.ui.UIFactory;
 import org.apache.maven.artifact.manager.WagonManager;
 import org.apache.maven.plugin.AbstractMojo;
@@ -411,7 +412,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
             getLog().info("  File: " + propertyFile);
             InputStream is;
             try {
-                is = fo.getResourceAsStream(propertyFile);
+                is = StreamUtil.singleInputStream(propertyFile, fo);
             } catch (IOException e) {
                 throw new UnexpectedLiquibaseException(e);
             }

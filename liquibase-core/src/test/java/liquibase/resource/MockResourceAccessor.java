@@ -18,27 +18,34 @@ public class MockResourceAccessor implements ResourceAccessor {
         this.contentByFileName = contentByFileName;
     }
 
-    public InputStream getResourceAsStream(String file) throws IOException {
-        if (contentByFileName.containsKey(file)) {
-            return new ByteArrayInputStream(contentByFileName.get(file).getBytes());
-        } else if (file.startsWith("file:///")) {
-            return getResourceAsStream(file.replaceFirst("file:///", ""));
+    @Override
+    public Set<InputStream> getResourcesAsStream(String path) throws IOException {
+        InputStream stream = null;
+        if (contentByFileName.containsKey(path)) {
+            stream = new ByteArrayInputStream(contentByFileName.get(path).getBytes());
+        } else if (path.startsWith("file:///")) {
+            return getResourcesAsStream(path.replaceFirst("file:///", ""));
         }
-        return null;
+        if (stream == null) {
+            return null;
+        } else {
+            return new HashSet<InputStream>(Arrays.asList(stream));
+        }
     }
 
-    public Enumeration<URL> getResources(String packageName) throws IOException {
-        Vector<URL> urls = new Vector<URL>();
+    @Override
+    public Set<String> list(String relativeTo, String path, boolean includeFiles, boolean includeDirectories, boolean recursive) throws IOException {
+        Set<String> returnSet = new HashSet<String>();
         for (String file : contentByFileName.keySet()) {
-            if (file.startsWith(packageName)) {
+            if (file.startsWith(path)) {
                 String urlName = file;
                 if (!urlName.contains(":")) {
                     urlName = "file:///"+urlName;
                 }
-                urls.add(new URL(urlName));
+                returnSet.add(urlName);
             }
         }
-        return urls.elements();
+        return returnSet;
     }
 
     public ClassLoader toClassLoader() {

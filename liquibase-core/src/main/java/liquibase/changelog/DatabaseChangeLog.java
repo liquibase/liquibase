@@ -11,18 +11,12 @@ import liquibase.logging.LogFactory;
 import liquibase.logging.Logger;
 import liquibase.parser.ChangeLogParserFactory;
 import liquibase.parser.core.ParsedNode;
-import liquibase.parser.core.xml.IncludeAllFilter;
 import liquibase.precondition.Conditional;
 import liquibase.precondition.core.PreconditionContainer;
 import liquibase.resource.ResourceAccessor;
-import liquibase.util.FileUtil;
 import liquibase.util.file.FilenameUtils;
 
 import java.io.File;
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.text.ParseException;
 import java.util.*;
 
@@ -244,118 +238,27 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             log.debug("includeAll for " + pathName);
             log.debug("Using file opener for includeAll: " + resourceAccessor.toString());
 
+            String relativeTo = null;
             if (isRelativeToChangelogFile) {
-                File changeLogFile = null;
+                relativeTo = this.getPhysicalFilePath();
+            }
 
-                Enumeration<URL> resources = resourceAccessor.getResources(this.getPhysicalFilePath());
-                while (resources.hasMoreElements()) {
-                    try {
-                        changeLogFile = new File(resources.nextElement().toURI());
-                    } catch (URISyntaxException e) {
-                        continue; //ignore error, probably a URL or something like that
+            Set<String> unsortedResources = resourceAccessor.list(relativeTo, pathName, true, false, true);
+            SortedSet<String> resources = new TreeSet<String>();
+            if (unsortedResources != null) {
+                for (String resourcePath : unsortedResources) {
+                    if (resourceFilter == null || resourceFilter.include(resourcePath)) {
+                        resources.add(resourcePath);
                     }
-                    if (changeLogFile.exists()) {
-                        break;
-                    } else {
-                        changeLogFile = null;
-                    }
-                }
-
-                if (changeLogFile == null) {
-                    throw new SetupException("Cannot determine physical location of " + this.getPhysicalFilePath());
-                }
-
-                File resourceBase = new File(changeLogFile.getParentFile(), pathName);
-
-                if (!resourceBase.exists()) {
-                    throw new SetupException("Resource directory for includeAll does not exist [" + resourceBase.getAbsolutePath() + "]");
-                }
-
-                pathName = resourceBase.getPath();
-                pathName = pathName.replaceFirst("^\\Q" + changeLogFile.getParentFile().getAbsolutePath() + "\\E", "");
-                pathName = this.getFilePath().replaceFirst("/[^/]*$", "") + pathName;
-                pathName = pathName.replace('\\', '/');
-                if (!pathName.endsWith("/")) {
-                    pathName = pathName + "/";
-                }
-
-                while (pathName.matches(".*/\\.\\./.*")) {
-                    pathName = pathName.replaceFirst("/[^/]+/\\.\\./", "/");
                 }
             }
 
-            Enumeration<URL> resourcesEnum = resourceAccessor.getResources(pathName);
-            SortedSet<URL> resources = new TreeSet<URL>(new Comparator<URL>() {
-                @Override
-                public int compare(URL o1, URL o2) {
-                    return o1.toString().compareTo(o2.toString());
-                }
-            });
-            while (resourcesEnum.hasMoreElements()) {
-                resources.add(resourcesEnum.nextElement());
-            }
-
-            boolean foundResource = false;
-
-            Set<String> seenPaths = new HashSet<String>();
-            List<String> includedChangeLogs = new LinkedList<String>();
-            for (URL fileUrl : resources) {
-                if (!fileUrl.toExternalForm().startsWith("file:")) {
-                    if (fileUrl.toExternalForm().startsWith("jar:file:") || fileUrl.toExternalForm().startsWith("wsjar:file:")
-                            || fileUrl.toExternalForm().startsWith("zip:")) {
-                        File zipFileDir = FileUtil.extractZipFile(fileUrl);
-                        if (pathName.startsWith("classpath:")) {
-                            log.debug("replace classpath");
-                            pathName = pathName.replaceFirst("classpath:", "");
-                        }
-                        if (pathName.startsWith("classpath*:")) {
-                            log.debug("replace classpath*");
-                            pathName = pathName.replaceFirst("classpath\\*:", "");
-                        }
-                        URI fileUri = new File(zipFileDir, pathName).toURI();
-                        fileUrl = fileUri.toURL();
-                    } else {
-                        log.debug(fileUrl.toExternalForm() + " is not a file path");
-                        continue;
-                    }
-                }
-                File file = new File(fileUrl.toURI());
-                log.debug("includeAll using path " + file.getCanonicalPath());
-                if (!file.exists()) {
-                    throw new SetupException("includeAll path " + pathName + " could not be found.  Tried in " + file.toString());
-                }
-                if (file.isDirectory()) {
-                    log.debug(file.getCanonicalPath() + " is a directory");
-                    for (File childFile : new TreeSet<File>(Arrays.asList(file.listFiles()))) {
-                        String path = pathName + childFile.getName();
-                        if (!seenPaths.add(path)) {
-                            log.debug("already included " + path);
-                            continue;
-                        }
-
-                        includedChangeLogs.add(path);
-                    }
-                } else {
-                    String path = pathName + file.getName();
-                    if (!seenPaths.add(path)) {
-                        log.debug("already included " + path);
-                        continue;
-                    }
-                    includedChangeLogs.add(path);
-                }
-            }
-            if (resourceFilter != null) {
-                includedChangeLogs = resourceFilter.filter(includedChangeLogs);
-            }
-
-            for (String path : includedChangeLogs) {
-                if (include(path, false, resourceAccessor)) {
-                    foundResource = true;
-                }
-            }
-
-            if (!foundResource) {
+            if (resources.size() == 0) {
                 throw new SetupException("Could not find directory or directory was empty for includeAll '" + pathName + "'");
+            }
+
+            for (String path : resources) {
+                include(path, false, resourceAccessor);
             }
         } catch (Exception e) {
             throw new SetupException(e);

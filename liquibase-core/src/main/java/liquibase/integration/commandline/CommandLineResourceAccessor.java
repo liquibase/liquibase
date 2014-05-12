@@ -1,22 +1,20 @@
 package liquibase.integration.commandline;
 
-import liquibase.resource.ResourceAccessor;
+import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.util.StringUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.List;
+import java.util.*;
 
 /**
- * Implementation of liquibase.FileOpener for the command line app.
- *
- * @see liquibase.resource.ResourceAccessor
+ * Extension of {@link liquibase.resource.ClassLoaderResourceAccessor} that adds extra fuzzy searching logic based on
+ * what users may enter that is different than what is exactly correct.
  */
-public class CommandLineResourceAccessor implements ResourceAccessor {
+public class CommandLineResourceAccessor extends ClassLoaderResourceAccessor {
+
     private ClassLoader loader;
 
     public CommandLineResourceAccessor(ClassLoader loader) {
@@ -24,24 +22,45 @@ public class CommandLineResourceAccessor implements ResourceAccessor {
     }
 
     @Override
-    public InputStream getResourceAsStream(String file) throws IOException {
-        URL resource = loader.getResource(file);
-        if (resource == null) {
-            // One more try. People are often confused about leading
-            // slashes in resource paths...
-            if (file.startsWith("/")) {
-                resource = loader.getResource(file.substring(1));
-            }
-            if (resource == null) {
-                return null;
+    public Set<InputStream> getResourcesAsStream(String path) throws IOException {
+        Set<InputStream> resourcesAsStream = super.getResourcesAsStream(path);
+        if (resourcesAsStream == null) {
+            for (String altPath : getAlternatePaths(path)) {
+                resourcesAsStream = super.getResourcesAsStream(altPath);
+                if (resourcesAsStream != null) {
+                    return resourcesAsStream;
+                }
             }
         }
-        return resource.openStream();
+        return resourcesAsStream;
     }
 
     @Override
-    public Enumeration<URL> getResources(String packageName) throws IOException {
-        return loader.getResources(packageName);
+    public Set<String> list(String relativeTo, String path, boolean includeFiles, boolean includeDirectories, boolean recursive) throws IOException {
+        Set<String> contents = super.list(relativeTo, path, includeFiles, includeDirectories, recursive);
+        if (contents == null || contents.size() == 0) {
+            for (String altPath : getAlternatePaths(path)) {
+                contents = super.list(relativeTo, altPath, includeFiles, includeDirectories, recursive);
+                if (contents != null && contents.size() > 0) {
+                    return contents;
+                }
+            }
+        }
+        return contents;
+    }
+
+    /**
+     * Return alternate options for the given path that the user maybe meant. Return in order of likelihood.
+     */
+    protected List<String> getAlternatePaths(String path) {
+        List<String> alternatePaths = new ArrayList<String>();
+
+        if (path.startsWith("/")) { //People are often confused about leading slashes in resource paths...
+            alternatePaths.add(path.substring(1));
+        }
+
+        return alternatePaths;
+
     }
 
     @Override

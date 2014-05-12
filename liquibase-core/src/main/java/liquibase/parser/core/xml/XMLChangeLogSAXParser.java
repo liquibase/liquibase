@@ -12,6 +12,7 @@ import liquibase.logging.LogFactory;
 import liquibase.parser.core.ParsedNode;
 import liquibase.resource.UtfBomStripperInputStream;
 import liquibase.resource.ResourceAccessor;
+import liquibase.util.StreamUtil;
 import liquibase.util.file.FilenameUtils;
 
 import org.xml.sax.ErrorHandler;
@@ -83,7 +84,7 @@ public class XMLChangeLogSAXParser extends AbstractChangeLogParser {
                 }
             });
         	
-            inputStream = resourceAccessor.getResourceAsStream(physicalChangeLogLocation);
+            inputStream = StreamUtil.singleInputStream(physicalChangeLogLocation, resourceAccessor);
             if (inputStream == null) {
                 throw new ChangeLogParseException(physicalChangeLogLocation + " does not exist");
             }

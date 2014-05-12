@@ -1379,4 +1379,8 @@ public class SystemUtils {
         return new File(System.getProperty(USER_HOME_KEY));
     }
 
+    public static boolean isWindows() {
+        return System.getProperty("os.name").startsWith("Windows ");
+    }
+
 }

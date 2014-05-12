@@ -4,6 +4,7 @@ import liquibase.parser.LiquibaseParser;
 import liquibase.parser.NamespaceDetails;
 import liquibase.parser.NamespaceDetailsFactory;
 import liquibase.serializer.LiquibaseSerializer;
+import liquibase.util.StreamUtil;
 import org.xml.sax.InputSource;
 
 import java.io.IOException;
@@ -77,7 +78,7 @@ public class LiquibaseEntityResolver implements EntityResolver2 {
                 return null;
             }
             try {
-                InputStream resourceAsStream = resourceAccessor.getResourceAsStream(xsdFile);
+                InputStream resourceAsStream = StreamUtil.singleInputStream(xsdFile, resourceAccessor);
 
                 if (resourceAsStream == null) {
                     if (Thread.currentThread().getContextClassLoader() != null) {
@@ -104,7 +105,7 @@ public class LiquibaseEntityResolver implements EntityResolver2 {
     private InputSource tryResolveFromResourceAccessor(String systemId) {
         String path=FilenameUtils.concat(basePath, systemId);
         try {
-            InputStream resourceAsStream = resourceAccessor.getResourceAsStream(path);
+            InputStream resourceAsStream = StreamUtil.singleInputStream(path, resourceAccessor);
             if (resourceAsStream == null) {
                 return null;
             }

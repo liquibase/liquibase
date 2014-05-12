@@ -34,7 +34,7 @@ public class SqlChangeLogParser implements ChangeLogParser {
         RawSQLChange change = new RawSQLChange();
 
         try {
-            InputStream sqlStream = resourceAccessor.getResourceAsStream(physicalChangeLogLocation);
+            InputStream sqlStream = StreamUtil.singleInputStream(physicalChangeLogLocation, resourceAccessor);
             if (sqlStream == null) {
                 throw new ChangeLogParseException("File does not exist: "+physicalChangeLogLocation);
             }

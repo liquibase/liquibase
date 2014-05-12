@@ -48,7 +48,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.*;
-import java.net.URL;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.*;
@@ -660,10 +659,9 @@ public abstract class AbstractIntegrationTest {
         }
 
 
-        Enumeration<URL> urls = new JUnitResourceAccessor().getResources(includedChangeLog);
-        URL completeChangeLogURL = urls.nextElement();
+        Set<String> urls = new JUnitResourceAccessor().list(null, includedChangeLog, true, false, true);
+        String absolutePathOfChangeLog = urls.iterator().next();
 
-        String absolutePathOfChangeLog = completeChangeLogURL.toExternalForm();
         absolutePathOfChangeLog = absolutePathOfChangeLog.replaceFirst("file:\\/", "");
         if (System.getProperty("os.name").startsWith("Windows ")) {
             absolutePathOfChangeLog = absolutePathOfChangeLog.replace('/', '\\');

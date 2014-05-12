@@ -28,6 +28,7 @@ import liquibase.statement.DatabaseFunction;
 import liquibase.statement.SequenceCurrentValueFunction;
 import liquibase.statement.SequenceNextValueFunction;
 import liquibase.util.ObjectUtil;
+import liquibase.util.StreamUtil;
 import liquibase.util.file.FilenameUtils;
 import org.yaml.snakeyaml.Yaml;
 
@@ -59,7 +60,7 @@ public class YamlChangeLogParser implements ChangeLogParser {
         Yaml yaml = new Yaml();
 
         try {
-            InputStream changeLogStream = resourceAccessor.getResourceAsStream(physicalChangeLogLocation);
+            InputStream changeLogStream = StreamUtil.singleInputStream(physicalChangeLogLocation, resourceAccessor);
             if (changeLogStream == null) {
                 throw new ChangeLogParseException(physicalChangeLogLocation+" does not exist");
             }
@@ -227,7 +228,7 @@ public class YamlChangeLogParser implements ChangeLogParser {
                         changeLog.getChangeLogParameters().set(name, value.toString(), context, dbms);
                     } else if (file != null) {
                         Properties props = new Properties();
-                        InputStream propertiesStream = resourceAccessor.getResourceAsStream(file);
+                        InputStream propertiesStream = StreamUtil.singleInputStream(file, resourceAccessor);
                         if (propertiesStream == null) {
                             log.info("Could not open properties file " + file);
                         } else {

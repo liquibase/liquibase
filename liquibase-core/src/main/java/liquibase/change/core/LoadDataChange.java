@@ -13,12 +13,14 @@ import liquibase.resource.UtfBomAwareReader;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.InsertStatement;
 import liquibase.structure.core.Column;
+import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
 import liquibase.util.csv.CSVReader;
 
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 
 @DatabaseChange(name="loadData",
@@ -233,15 +235,11 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
     }
 
     public CSVReader getCSVReader() throws IOException {
-        ResourceAccessor opener = getResourceAccessor();
-        if (opener == null) {
-            throw new UnexpectedLiquibaseException("No file opener specified for "+getFile());
+        ResourceAccessor resourceAccessor = getResourceAccessor();
+        if (resourceAccessor == null) {
+            throw new UnexpectedLiquibaseException("No file resourceAccessor specified for "+getFile());
         }
-        InputStream stream = opener.getResourceAsStream(getFile());
-        if (stream == null) {
-            throw new UnexpectedLiquibaseException("Data file "+getFile()+" was not found");
-        }
-
+        InputStream stream = StreamUtil.singleInputStream(getFile(), resourceAccessor);
         Reader streamReader;
         if (getEncoding() == null) {
             streamReader = new UtfBomAwareReader(stream);
@@ -251,10 +249,10 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
 
         char quotchar;
         if (0 == this.quotchar.length() ) {
-        	// hope this is impossible to have a field surrounded with non ascii char 0x01
-        	quotchar = '\1';
+            // hope this is impossible to have a field surrounded with non ascii char 0x01
+            quotchar = '\1';
         } else {
-        	quotchar = this.quotchar.charAt(0);
+            quotchar = this.quotchar.charAt(0);
         }
 
         return new CSVReader(streamReader, separator.charAt(0), quotchar );
@@ -294,7 +292,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
     public CheckSum generateCheckSum() {
         InputStream stream = null;
         try {
-            stream = getResourceAccessor().getResourceAsStream(getFile());
+            stream = StreamUtil.singleInputStream(getFile(), getResourceAccessor());
             if (stream == null) {
                 throw new UnexpectedLiquibaseException(getFile() + " could not be found");
             }
@@ -306,9 +304,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
             if (stream != null) {
                 try {
                     stream.close();
-                } catch (IOException e) {
-                    ;
-                }
+                } catch (IOException ignore) { }
             }
         }
     }

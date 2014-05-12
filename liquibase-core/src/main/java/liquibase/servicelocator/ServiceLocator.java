@@ -90,12 +90,10 @@ public class ServiceLocator {
         		addPackageToScan(value);
         	}
         } else {
-	        Enumeration<URL> manifests = null;
+	        Set<InputStream> manifests;
 	        try {
-	            manifests = resourceAccessor.getResources("META-INF/MANIFEST.MF");
-	            while (manifests.hasMoreElements()) {
-	                URL url = manifests.nextElement();
-	                InputStream is = url.openStream();
+	            manifests = resourceAccessor.getResourcesAsStream("META-INF/MANIFEST.MF");
+	            for (InputStream is : manifests) {
 	                Manifest manifest = new Manifest(is);
 	                String attributes = StringUtils.trimToNull(manifest.getMainAttributes().getValue("Liquibase-Package"));
 	                if (attributes != null) {
