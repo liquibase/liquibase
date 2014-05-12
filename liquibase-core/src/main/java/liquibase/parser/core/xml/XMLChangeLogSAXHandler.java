@@ -8,6 +8,7 @@ import liquibase.logging.LogFactory;
 import liquibase.logging.Logger;
 import liquibase.parser.ChangeLogParserFactory;
 import liquibase.parser.core.ParsedNode;
+import liquibase.parser.core.ParsedNodeException;
 import liquibase.precondition.PreconditionFactory;
 import liquibase.resource.ResourceAccessor;
 import liquibase.sql.visitor.SqlVisitorFactory;
@@ -82,7 +83,7 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
             }
             nodeStack.push(node);
             textStack.push(new StringBuffer());
-        } catch (ChangeLogParseException e) {
+        } catch (ParsedNodeException e) {
             throw new SAXException(e);
         }
     }
@@ -95,7 +96,7 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
             if (!StringUtils.trimToEmpty(seenText).equals("")) {
                 node.setValue(seenText);
             }
-        } catch (ChangeLogParseException e) {
+        } catch (ParsedNodeException e) {
             throw new SAXException(e);
         }
     }

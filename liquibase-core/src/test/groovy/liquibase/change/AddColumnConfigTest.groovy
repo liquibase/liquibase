@@ -1,6 +1,8 @@
 package liquibase.change
 
+import liquibase.exception.SetupException
 import liquibase.parser.core.ParsedNode
+import liquibase.parser.core.ParsedNodeException
 import liquibase.sdk.supplier.resource.ResourceSupplier
 import spock.lang.Shared
 import spock.lang.Specification
@@ -13,7 +15,13 @@ class AddColumnConfigTest extends Specification {
         when:
         def node = new ParsedNode(null, "column").addChildren([beforeColumn: "before_col", afterColumn: "after_col", position: 4, name: "col_name"])
         def column = new AddColumnConfig()
-        column.load(node, resourceSupplier.simpleResourceAccessor)
+        try {
+            column.load(node, resourceSupplier.simpleResourceAccessor)
+        } catch (ParsedNodeException e) {
+            e.printStackTrace()
+        } catch (SetupException e) {
+            e.printStackTrace()
+        }
 
         then:
         column.beforeColumn == "before_col"

@@ -4,6 +4,7 @@ import liquibase.ContextExpression;
 import liquibase.change.CheckSum;
 import liquibase.exception.SetupException;
 import liquibase.parser.core.ParsedNode;
+import liquibase.parser.core.ParsedNodeException;
 import liquibase.resource.ResourceAccessor;
 import liquibase.serializer.ReflectionSerializer;
 import liquibase.serializer.core.string.StringChangeLogSerializer;
@@ -77,15 +78,15 @@ public abstract class AbstractSqlVisitor implements SqlVisitor {
     }
 
     @Override
-    public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws SetupException {
+    public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException, SetupException {
         for (ParsedNode childNode : parsedNode.getChildren()) {
             try {
-                if (ObjectUtil.hasWriteProperty(this, childNode.getNodeName())) {
+                if (ObjectUtil.hasWriteProperty(this, childNode.getName())) {
                     Object value = childNode.getValue();
                     if (value != null) {
                         value = value.toString();
                     }
-                    ObjectUtil.setProperty(this, childNode.getNodeName(), (String) value);
+                    ObjectUtil.setProperty(this, childNode.getName(), (String) value);
                 }
             } catch (Exception e) {
                 throw new SetupException("Error setting property", e);

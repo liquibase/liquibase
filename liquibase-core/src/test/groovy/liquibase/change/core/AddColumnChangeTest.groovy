@@ -5,7 +5,9 @@ import liquibase.change.Change
 import liquibase.change.ChangeStatus
 import liquibase.change.StandardChangeTest
 import liquibase.database.core.MockDatabase
+import liquibase.exception.SetupException
 import liquibase.parser.core.ParsedNode
+import liquibase.parser.core.ParsedNodeException
 import liquibase.snapshot.MockSnapshotGeneratorFactory
 import liquibase.snapshot.SnapshotGeneratorFactory
 import liquibase.structure.core.Column
@@ -199,7 +201,13 @@ public class AddColumnChangeTest extends StandardChangeTest {
                 .addChild(new ParsedNode(null, "column").addChildren([name: "col_1", type:"int", beforeColumn: "before_col"]))
                 .addChild(new ParsedNode(null, "column").addChildren([name: "col_2", type:"int", position: "3"]))
         def change = new AddColumnChange()
-        change.load(node, resourceSupplier.simpleResourceAccessor)
+        try {
+            change.load(node, resourceSupplier.simpleResourceAccessor)
+        } catch (ParsedNodeException e) {
+            e.printStackTrace()
+        } catch (SetupException e) {
+            e.printStackTrace()
+        }
 
         then:
         change.tableName == "table_name"

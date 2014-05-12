@@ -5,12 +5,12 @@ import liquibase.database.Database;
 import liquibase.exception.SetupException;
 import liquibase.exception.ValidationErrors;
 import liquibase.parser.core.ParsedNode;
+import liquibase.parser.core.ParsedNodeException;
 import liquibase.resource.ResourceAccessor;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.UpdateExecutablePreparedStatement;
 import liquibase.statement.core.UpdateStatement;
 
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -116,12 +116,18 @@ public class UpdateDataChange extends AbstractModifyDataChange implements Change
     }
 
     @Override
-    protected void customLoadLogic(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParseException {
+    protected void customLoadLogic(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException {
         ParsedNode whereParams = parsedNode.getChild(null, "whereParams");
         if (whereParams != null) {
             for (ParsedNode param : whereParams.getChildren(null, "param")) {
                 ColumnConfig columnConfig = new ColumnConfig();
-                columnConfig.load(param, resourceAccessor);
+                try {
+                    columnConfig.load(param, resourceAccessor);
+                } catch (ParsedNodeException e) {
+                    e.printStackTrace();
+                } catch (SetupException e) {
+                    e.printStackTrace();
+                }
                 addWhereParam(columnConfig);
             }
         }

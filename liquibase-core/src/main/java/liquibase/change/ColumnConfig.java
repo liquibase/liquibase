@@ -8,7 +8,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
+import liquibase.exception.SetupException;
 import liquibase.parser.core.ParsedNode;
+import liquibase.parser.core.ParsedNodeException;
 import liquibase.resource.ResourceAccessor;
 import liquibase.serializer.LiquibaseSerializable;
 import liquibase.serializer.ReflectionSerializer;
@@ -673,7 +675,7 @@ public class ColumnConfig implements LiquibaseSerializable {
     }
 
     @Override
-    public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParseException {
+    public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException, SetupException {
         name = parsedNode.getChildValue(null, "name", String.class);
         type = parsedNode.getChildValue(null, "type", String.class);
         encoding = parsedNode.getChildValue(null, "encoding", String.class);
@@ -719,7 +721,7 @@ public class ColumnConfig implements LiquibaseSerializable {
         loadConstraints(parsedNode.getChild(null, "constraints"));
     }
 
-    protected void loadConstraints(ParsedNode constraintsNode) throws ParseException {
+    protected void loadConstraints(ParsedNode constraintsNode) throws ParsedNodeException {
         if (constraintsNode == null) {
             return;
         }

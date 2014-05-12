@@ -1,6 +1,8 @@
 package liquibase.precondition.core
 
+import liquibase.exception.SetupException
 import liquibase.parser.core.ParsedNode
+import liquibase.parser.core.ParsedNodeException
 import liquibase.sdk.supplier.resource.ResourceSupplier
 import spock.lang.Shared
 import spock.lang.Specification
@@ -13,7 +15,13 @@ class PreconditionContainerTest extends Specification {
         when:
         def node = new ParsedNode(null, "preConditions").addChildren([onFail: "MARK_RAN", onError: "CONTINUE", onSqlOutput: "IGNORE", onFailMessage: "I Failed", onErrorMessage: "I Errored"])
         def container = new PreconditionContainer()
-        container.load(node, resourceSupplier.simpleResourceAccessor)
+        try {
+            container.load(node, resourceSupplier.simpleResourceAccessor)
+        } catch (ParsedNodeException e) {
+            e.printStackTrace()
+        } catch (SetupException e) {
+            e.printStackTrace()
+        }
 
         then:
         container.onFail.toString() == "MARK_RAN"
@@ -27,7 +35,13 @@ class PreconditionContainerTest extends Specification {
         when:
         def node = new ParsedNode(null, "preConditions").addChildren([onFail: "MARK_RAN"]).setValue(new ParsedNode(null, "tableExists").addChildren([tableName: "my_table"]))
         def container = new PreconditionContainer()
-        container.load(node, resourceSupplier.simpleResourceAccessor)
+        try {
+            container.load(node, resourceSupplier.simpleResourceAccessor)
+        } catch (ParsedNodeException e) {
+            e.printStackTrace()
+        } catch (SetupException e) {
+            e.printStackTrace()
+        }
 
         then:
         container.onFail.toString() == "MARK_RAN"
@@ -43,7 +57,13 @@ class PreconditionContainerTest extends Specification {
                 new ParsedNode(null, "tableExists").addChildren([tableName: "my_table"]),
         ])
         def container = new PreconditionContainer()
-        container.load(node, resourceSupplier.simpleResourceAccessor)
+        try {
+            container.load(node, resourceSupplier.simpleResourceAccessor)
+        } catch (ParsedNodeException e) {
+            e.printStackTrace()
+        } catch (SetupException e) {
+            e.printStackTrace()
+        }
 
         then:
         container.onFail.toString() == "MARK_RAN"
@@ -60,7 +80,13 @@ class PreconditionContainerTest extends Specification {
                 .addChild(new ParsedNode(null, "tableExists").addChildren([tableName: "my_table"]))
 
         def container = new PreconditionContainer()
-        container.load(node, resourceSupplier.simpleResourceAccessor)
+        try {
+            container.load(node, resourceSupplier.simpleResourceAccessor)
+        } catch (ParsedNodeException e) {
+            e.printStackTrace()
+        } catch (SetupException e) {
+            e.printStackTrace()
+        }
 
         then:
         container.onFail.toString() == "MARK_RAN"
@@ -81,7 +107,13 @@ class PreconditionContainerTest extends Specification {
                 .addChild(new ParsedNode(null, "tableExists").addChildren([tableName: "my_table"]))
 
         def container = new PreconditionContainer()
-        container.load(node, resourceSupplier.simpleResourceAccessor)
+        try {
+            container.load(node, resourceSupplier.simpleResourceAccessor)
+        } catch (ParsedNodeException e) {
+            e.printStackTrace()
+        } catch (SetupException e) {
+            e.printStackTrace()
+        }
 
         then:
         container.onFail.toString() == "MARK_RAN"

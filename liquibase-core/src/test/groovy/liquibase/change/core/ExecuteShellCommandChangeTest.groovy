@@ -1,6 +1,7 @@
 package liquibase.change.core
 
-import liquibase.parser.core.ParsedNode
+import liquibase.exception.SetupException
+import liquibase.parser.core.ParsedNodeException
 import liquibase.sdk.supplier.resource.ResourceSupplier
 import org.hamcrest.Matchers
 import spock.lang.Shared
@@ -15,11 +16,17 @@ class ExecuteShellCommandChangeTest extends Specification {
     def "load works correctly"() {
         when:
         def change = new ExecuteShellCommandChange()
-        change.load(new ParsedNode(null, "executeCommand")
-                .addChildren([executable:"/usr/bin/test", os:"linux,mac"])
-                .addChild(new ParsedNode(null, "arg").addChild(null, "value", "-out"))
-                .addChild(new ParsedNode(null, "arg").addChild(null, "value", "-test"))
-        , resourceSupplier.simpleResourceAccessor)
+        try {
+            change.load(new liquibase.parser.core.ParsedNode(null, "executeCommand")
+                    .addChildren([executable: "/usr/bin/test", os: "linux,mac"])
+                    .addChild(new liquibase.parser.core.ParsedNode(null, "arg").addChild(null, "value", "-out"))
+                    .addChild(new liquibase.parser.core.ParsedNode(null, "arg").addChild(null, "value", "-test"))
+                    , resourceSupplier.simpleResourceAccessor)
+        } catch (ParsedNodeException e) {
+            e.printStackTrace()
+        } catch (SetupException e) {
+            e.printStackTrace()
+        }
 
         then:
         change.executable == "/usr/bin/test"

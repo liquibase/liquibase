@@ -5,10 +5,9 @@ import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.exception.*;
 import liquibase.parser.core.ParsedNode;
+import liquibase.parser.core.ParsedNodeException;
 import liquibase.resource.ResourceAccessor;
-import liquibase.serializer.LiquibaseSerializable;
 
-import java.text.ParseException;
 import java.util.Set;
 
 public class MockPrecondition implements Precondition {
@@ -33,7 +32,7 @@ public class MockPrecondition implements Precondition {
     }
 
     @Override
-    public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParseException, SetupException {
+    public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException, SetupException {
 
     }
 

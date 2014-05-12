@@ -23,8 +23,6 @@ public class MockResourceAccessor implements ResourceAccessor {
         InputStream stream = null;
         if (contentByFileName.containsKey(path)) {
             stream = new ByteArrayInputStream(contentByFileName.get(path).getBytes());
-        } else if (path.startsWith("file:///")) {
-            return getResourcesAsStream(path.replaceFirst("file:///", ""));
         }
         if (stream == null) {
             return null;
@@ -38,11 +36,7 @@ public class MockResourceAccessor implements ResourceAccessor {
         Set<String> returnSet = new HashSet<String>();
         for (String file : contentByFileName.keySet()) {
             if (file.startsWith(path)) {
-                String urlName = file;
-                if (!urlName.contains(":")) {
-                    urlName = "file:///"+urlName;
-                }
-                returnSet.add(urlName);
+                returnSet.add(file);
             }
         }
         return returnSet;

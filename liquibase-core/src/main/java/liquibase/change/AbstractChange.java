@@ -1,12 +1,12 @@
 package liquibase.change;
 
 import java.lang.reflect.Type;
-import java.text.ParseException;
 import java.util.*;
 
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.parser.core.ParsedNode;
+import liquibase.parser.core.ParsedNodeException;
 import liquibase.structure.DatabaseObject;
 import liquibase.exception.*;
 import liquibase.resource.ResourceAccessor;
@@ -511,7 +511,7 @@ public abstract class AbstractChange implements Change {
     }
 
     @Override
-    public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParseException, SetupException {
+    public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException, SetupException {
         ChangeMetaData metaData = ChangeFactory.getInstance().getChangeMetaData(this);
         this.setResourceAccessor(resourceAccessor);
         try {
@@ -535,7 +535,7 @@ public abstract class AbstractChange implements Change {
 
 
                         for (ParsedNode child : columnNodes) {
-                            if (child.getNodeName().equals("column") || child.getNodeName().equals("columns")) {
+                            if (child.getName().equals("column") || child.getName().equals("columns")) {
                                 ColumnConfig columnConfig = (ColumnConfig) collectionType.newInstance();
                                 columnConfig.load(child, resourceAccessor);
                                 ((ChangeWithColumns) this).addColumn(columnConfig);
@@ -555,22 +555,18 @@ public abstract class AbstractChange implements Change {
         this.finishInitialization();
     }
 
-    protected void customLoadLogic(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParseException {
+    protected void customLoadLogic(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException {
 
     }
 
     @Override
-    public ParsedNode serialize() {
-        try {
-            ParsedNode node = new ParsedNode(null, getSerializedObjectName());
-            ChangeMetaData metaData = ChangeFactory.getInstance().getChangeMetaData(this);
-            for (ChangeParameterMetaData param : metaData.getSetParameters(this).values()) {
-                node.addChild(null, param.getParameterName(), param.getCurrentValue(this));
-            }
-
-            return node;
-        } catch (ChangeLogParseException e) {
-            throw new UnexpectedLiquibaseException(e);
+    public ParsedNode serialize() throws ParsedNodeException {
+        ParsedNode node = new ParsedNode(null, getSerializedObjectName());
+        ChangeMetaData metaData = ChangeFactory.getInstance().getChangeMetaData(this);
+        for (ChangeParameterMetaData param : metaData.getSetParameters(this).values()) {
+            node.addChild(null, param.getParameterName(), param.getCurrentValue(this));
         }
+
+        return node;
     }
 }

@@ -11,13 +11,13 @@ import liquibase.logging.LogFactory;
 import liquibase.logging.Logger;
 import liquibase.parser.ChangeLogParserFactory;
 import liquibase.parser.core.ParsedNode;
+import liquibase.parser.core.ParsedNodeException;
 import liquibase.precondition.Conditional;
 import liquibase.precondition.core.PreconditionContainer;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.file.FilenameUtils;
 
 import java.io.File;
-import java.text.ParseException;
 import java.util.*;
 
 /**
@@ -175,29 +175,16 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         return getChangeSet(ranChangeSet.getChangeLog(), ranChangeSet.getAuthor(), ranChangeSet.getId());
     }
 
-    public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParseException, SetupException {
+    public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException, SetupException {
         setLogicalFilePath(parsedNode.getChildValue(null, "logicalFilePath", String.class));
-
-        Object value = parsedNode.getValue();
-        if (value != null) {
-            if (value instanceof ParsedNode) {
-                handleChildNode(((ParsedNode) value), resourceAccessor);
-            } else if (value instanceof Collection) {
-                for (Object childValue : ((Collection) value)) {
-                    if (childValue instanceof ParsedNode) {
-                        handleChildNode((ParsedNode) childValue, resourceAccessor);
-                    }
-                }
-            }
-        }
 
         for (ParsedNode childNode : parsedNode.getChildren()) {
             handleChildNode(childNode, resourceAccessor);
         }
     }
 
-    protected void handleChildNode(ParsedNode node, ResourceAccessor resourceAccessor) throws ParseException, SetupException {
-        String nodeName = node.getNodeName();
+    protected void handleChildNode(ParsedNode node, ResourceAccessor resourceAccessor) throws ParsedNodeException, SetupException {
+        String nodeName = node.getName();
         if (nodeName.equals("changeSet")) {
             this.addChangeSet(createChangeSet(node, resourceAccessor));
         } else if (nodeName.equals("include")) {
@@ -220,14 +207,18 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
                 }
             }
 
-            includeAll(path, node.getChildValue(null, "relativeToChangelogFile", false), resourceFilter, resourceAccessor);
+            includeAll(path, node.getChildValue(null, "relativeToChangelogFile", false), resourceFilter, getStandardChangeLogComparator(), resourceAccessor);
         } else if (nodeName.equals("preConditions")) {
             this.preconditionContainer = new PreconditionContainer();
-            this.preconditionContainer.load(node, resourceAccessor);
+            try {
+                this.preconditionContainer.load(node, resourceAccessor);
+            } catch (ParsedNodeException e) {
+                e.printStackTrace();
+            }
         }
     }
 
-    public void includeAll(String pathName, boolean isRelativeToChangelogFile, IncludeAllFilter resourceFilter, ResourceAccessor resourceAccessor) throws SetupException {
+    public void includeAll(String pathName, boolean isRelativeToChangelogFile, IncludeAllFilter resourceFilter, Comparator<String> resourceComparator, ResourceAccessor resourceAccessor) throws SetupException {
         try {
             pathName = pathName.replace('\\', '/');
 
@@ -244,7 +235,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
             }
 
             Set<String> unsortedResources = resourceAccessor.list(relativeTo, pathName, true, false, true);
-            SortedSet<String> resources = new TreeSet<String>();
+            SortedSet<String> resources = new TreeSet<String>(resourceComparator);
             if (unsortedResources != null) {
                 for (String resourcePath : unsortedResources) {
                     if (resourceFilter == null || resourceFilter.include(resourcePath)) {
@@ -302,11 +293,23 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         return true;
     }
 
-    protected ChangeSet createChangeSet(ParsedNode node, ResourceAccessor resourceAccessor) throws ParseException, SetupException {
+    protected ChangeSet createChangeSet(ParsedNode node, ResourceAccessor resourceAccessor) throws ParsedNodeException, SetupException {
         ChangeSet changeSet = new ChangeSet(this);
-        changeSet.load(node, resourceAccessor);
+        try {
+            changeSet.load(node, resourceAccessor);
+        } catch (ParsedNodeException e) {
+            e.printStackTrace();
+        }
         return changeSet;
     }
 
+    protected Comparator<String> getStandardChangeLogComparator() {
+        return new Comparator<String>() {
+            @Override
+            public int compare(String o1, String o2) {
+                return o1. compareTo(o2);
+            }
+        };
+    }
 
 }

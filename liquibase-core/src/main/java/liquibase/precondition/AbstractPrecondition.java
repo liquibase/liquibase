@@ -2,12 +2,10 @@ package liquibase.precondition;
 
 import liquibase.exception.SetupException;
 import liquibase.parser.core.ParsedNode;
+import liquibase.parser.core.ParsedNodeException;
 import liquibase.resource.ResourceAccessor;
-import liquibase.serializer.LiquibaseSerializable;
 import liquibase.util.ObjectUtil;
 
-import java.lang.reflect.InvocationTargetException;
-import java.text.ParseException;
 import java.util.Set;
 
 public abstract class AbstractPrecondition implements Precondition {
@@ -17,15 +15,15 @@ public abstract class AbstractPrecondition implements Precondition {
         return getName();
     }
 
-    public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParseException, SetupException {
+    public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException, SetupException {
         for (ParsedNode childNode : parsedNode.getChildren()) {
             try {
-                if (ObjectUtil.hasWriteProperty(this, childNode.getNodeName())) {
+                if (ObjectUtil.hasWriteProperty(this, childNode.getName())) {
                     Object value = childNode.getValue();
                     if (value != null) {
                         value = value.toString();
                     }
-                    ObjectUtil.setProperty(this, childNode.getNodeName(), (String) value);
+                    ObjectUtil.setProperty(this, childNode.getName(), (String) value);
                 }
             } catch (Exception e) {
                 throw new SetupException("Error setting property", e);

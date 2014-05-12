@@ -7,11 +7,11 @@ import liquibase.change.DatabaseChangeProperty;
 import liquibase.database.Database;
 import liquibase.exception.*;
 import liquibase.parser.core.ParsedNode;
+import liquibase.parser.core.ParsedNodeException;
 import liquibase.resource.ResourceAccessor;
 import liquibase.statement.SqlStatement;
 import liquibase.util.ObjectUtil;
 
-import java.text.ParseException;
 import java.util.*;
 
 /**
@@ -287,7 +287,7 @@ public class CustomChangeWrapper extends AbstractChange {
     }
 
     @Override
-    public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParseException, SetupException {
+    public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException, SetupException {
         setClassLoader(resourceAccessor.toClassLoader());
         try {
             setClass(parsedNode.getChildValue(null, "class", String.class));
@@ -298,7 +298,7 @@ public class CustomChangeWrapper extends AbstractChange {
     }
 
     @Override
-    public void customLoadLogic(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParseException {
+    public void customLoadLogic(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException {
         for (ParsedNode child : parsedNode.getChildren(null, "param")) {
             Object value = child.getValue();
             if (value == null) {

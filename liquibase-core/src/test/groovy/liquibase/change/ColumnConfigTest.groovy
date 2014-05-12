@@ -1,6 +1,8 @@
 package liquibase.change
 
+import liquibase.exception.SetupException
 import liquibase.parser.core.ParsedNode
+import liquibase.parser.core.ParsedNodeException
 import liquibase.sdk.supplier.resource.ResourceSupplier
 import liquibase.serializer.LiquibaseSerializable
 import liquibase.statement.DatabaseFunction
@@ -426,7 +428,13 @@ public class ColumnConfigTest  extends Specification {
             testValue = "347.22"
         }
         node.addChild(null, field, testValue)
-        column.load(node, resourceSupplier.simpleResourceAccessor)
+        try {
+            column.load(node, resourceSupplier.simpleResourceAccessor)
+        } catch (ParsedNodeException e) {
+            e.printStackTrace()
+        } catch (SetupException e) {
+            e.printStackTrace()
+        }
 
         then:
         assert column.getSerializableFieldValue(field).toString() == testValue.toString()
@@ -449,7 +457,13 @@ public class ColumnConfigTest  extends Specification {
             testValue = "true"
         }
         constraintNode.addChild(null, field, testValue)
-        column.load(node,resourceSupplier.simpleResourceAccessor)
+        try {
+            column.load(node, resourceSupplier.simpleResourceAccessor)
+        } catch (ParsedNodeException e) {
+            e.printStackTrace()
+        } catch (SetupException e) {
+            e.printStackTrace()
+        }
 
         then:
         assert column.getConstraints().getSerializableFieldValue(field).toString() == testValue.toString()

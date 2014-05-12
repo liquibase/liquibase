@@ -82,7 +82,7 @@ class ParsedNodeTest extends Specification {
         1          | 1
         "a"        | "a"
         [1, 2]     | [1, 2]
-        [a: "val"] | new ParsedNode(null, "a").setValue("val")
+        [a: "val"] | null
     }
 
     @Unroll
@@ -99,10 +99,10 @@ class ParsedNodeTest extends Specification {
     }
 
     @Unroll("#featureName expecting #expected")
-    def "addChildren with various values"() {
+    def "setValue with various values"() {
         when:
         def changeLog = new ParsedNode(null, "root")
-        changeLog.addChildren(children)
+        changeLog.setValue(children)
 
         then:
         changeLog.toString() == expected
@@ -115,22 +115,22 @@ class ParsedNodeTest extends Specification {
         [x: "1", y: "2", child1: [childX: "1"], child2: [childX: "2", childY: [grandChild1: "AA", grandChild2: "BB"], childZ: "3"], z: "4"] | "root[child1[childX=1],child2[childX=2,childY[grandChild1=AA,grandChild2=BB],childZ=3],x=1,y=2,z=4]"
         ["1", "2", "3"]                                                                                                                     | "root=(1,2,3)"
         [x: "1", list: ["a", "b", "c"]]                                                                                                     | "root[list=(a,b,c),x=1]"
-        [x: "1", list: ["a", [childNode: "cn1"], [childNode2: [childNode2a: "cn2", childNode2b: "cn2b"]], "b"]]                             | "root[list=(a,b,childNode2[childNode2a=cn2,childNode2b=cn2b],childNode=cn1),x=1]"
+        [x: "1", list: ["a", [childNode: "cn1"], [childNode2: [childNode2a: "cn2", childNode2b: "cn2b"]], "b"]]                             | "root[list[childNode2[childNode2a=cn2,childNode2b=cn2b],childNode=cn1]=(a,b),x=1]"
     }
 
     def "getChildren passing search string"() {
         when:
-        def changeLog = new ParsedNode(null, "root").addChildren([att1: "1", att2: "2-1", node1: [node1a: "1a", node1b: "1b"]]).addChild(null, "att2", "2-2")
+        def changeLog = new ParsedNode(null, "root").setValue([att1: "1", att2: "2-1", node1: [node1a: "1a", node1b: "1b"]]).addChild(null, "att2", "2-2")
 
         then:
         changeLog.getChildren(null, "att1").size() == 1
-        changeLog.getChildren(null, "att1")[0].nodeName == "att1"
+        changeLog.getChildren(null, "att1")[0].name == "att1"
         changeLog.getChildren(null, "att1")[0].value == "1"
 
         changeLog.getChildren(null, "att2").size() == 2
-        changeLog.getChildren(null, "att2")[0].nodeName == "att2"
+        changeLog.getChildren(null, "att2")[0].name == "att2"
         changeLog.getChildren(null, "att2")[0].value == "2-1"
-        changeLog.getChildren(null, "att2")[1].nodeName == "att2"
+        changeLog.getChildren(null, "att2")[1].name == "att2"
         changeLog.getChildren(null, "att2")[1].value == "2-2"
 
         changeLog.getChildren(null, "node1").size() == 1
@@ -139,7 +139,7 @@ class ParsedNodeTest extends Specification {
 
     def "getChildValue with default"() {
         when:
-        def changeLog = new ParsedNode(null, "root").addChildren([letter: "a", number: 1, bool: false])
+        def changeLog = new ParsedNode(null, "root").setValue([letter: "a", number: 1, bool: false])
 
         then:
         changeLog.getChildValue(null, "letter", "b") == "a"
@@ -204,6 +204,116 @@ class ParsedNodeTest extends Specification {
         "dateTimeString" | Date.class       | new Date(new ISODateFormat().parse("2017-02-20 12:31:55").getTime())
         "dateTimeValue"  | String.class     | "2013-11-17 19:44:21.0"
         "dateTimeValue"  | Date.class       | new Date(new ISODateFormat().parse("2013-11-17 19:44:21").getTime())
+
+    }
+
+    def "setValue passing a ParsedNode will add it as a child instead"() {
+        when:
+        def node = new ParsedNode(null, "root")
+        node.setValue(new ParsedNode(null, "valueNode").setValue("the node value"))
+
+        then:
+        node.value == null
+        node.getChild(null, "valueNode").value == "the node value"
+    }
+
+    def "setValue passing in a collection of ParsedNodes will add them as children instead"() {
+        when:
+        def node = new ParsedNode(null, "root")
+        node.setValue([
+                new ParsedNode(null, "valueNode1").setValue("value 1a"),
+                new ParsedNode(null, "valueNode2").setValue("value 2"),
+                new ParsedNode(null, "valueNode1").setValue("value 1b"),
+        ])
+
+        then:
+        node.value == null
+        node.getChildren(null, "valueNode1")[0].value == "value 1a"
+        node.getChildren(null, "valueNode1")[1].value == "value 1b"
+        node.getChild(null, "valueNode2").value == "value 2"
+    }
+
+    def "setValue passing in a collection of maps will add them as child nodes instead"() {
+        when:
+        def node = new ParsedNode(null, "root")
+        node.setValue([
+                [valueNode1: "value 1a"],
+                [valueNode2: "value 2"],
+                [valueNode1: "value 1b"],
+        ])
+
+        then:
+        node.value == null
+        node.getChildren(null, "valueNode1")[0].value == "value 1a"
+        node.getChildren(null, "valueNode1")[1].value == "value 1b"
+        node.getChild(null, "valueNode2").value == "value 2"
+    }
+
+    def "setValue passing in a collection of objects including one simple object will add them as child nodes and a simple value"() {
+        when:
+        def node = new ParsedNode(null, "root")
+        node.setValue([
+                [valueNode1: "value 1a"],
+                [valueNode2: "value 2"],
+                "simple value",
+                new ParsedNode(null, "valueNode1").setValue("value 1b"),
+        ])
+
+        then:
+        node.value == "simple value"
+        node.getChildren(null, "valueNode1")[0].value == "value 1a"
+        node.getChildren(null, "valueNode1")[1].value == "value 1b"
+        node.getChild(null, "valueNode2").value == "value 2"
+    }
+
+    def "setValue passing in a collection of objects including multiple simple objects will add them as child nodes and a list of simple values"() {
+        when:
+        def node = new ParsedNode(null, "root")
+        node.setValue([
+                [valueNode1: "value 1a"],
+                "simple value 1",
+                [valueNode2: "value 2"],
+                "simple value 2",
+                new ParsedNode(null, "valueNode1").setValue("value 1b"),
+        ])
+
+        then:
+        node.value instanceof List
+        node.value[0] == "simple value 1"
+        node.value[1] == "simple value 2"
+        node.getChildren(null, "valueNode1")[0].value == "value 1a"
+        node.getChildren(null, "valueNode1")[1].value == "value 1b"
+        node.getChild(null, "valueNode2").value == "value 2"
+    }
+
+    @Unroll
+    def "addChild with a map"() {
+        when:
+        def node = new ParsedNode(null, "root").addChildren(map)
+
+        then:
+        node.toString() == expected
+
+        where:
+        map                                                                                                                   | expected
+        null                                                                                                                  | "root"
+        new HashMap()                                                                                                         | "root"
+        [test1: "a value"]                                                                                                    | "root[test1=a value]"
+        [test1: [child1a: "child value a", child1b: "child value b"]]                                                         | "root[test1[child1a=child value a,child1b=child value b]]"
+        [test1: [child1a: "child value a", child1b: ["child value b1", "child value b2"]]]                                    | "root[test1[child1a=child value a,child1b=(child value b1,child value b2)]]"
+        [test1: [child1a: "child value a", child1b: [grandChild1: [gc1: "x", gc2: "y"], grandChild2: "grand child value b"]]] | "root[test1[child1a=child value a,child1b[grandChild1[gc1=x,gc2=y],grandChild2=grand child value b]]]"
+
+    }
+
+    def "getChild when multiple match should throw exception"() {
+        when:
+        def node = new ParsedNode(null, "root")
+                .addChild(null, "child", "value 1")
+                .addChild(null, "child", "value 2")
+        node.getChild(null, "child")
+
+        then:
+        thrown(ParsedNodeException)
 
     }
 }

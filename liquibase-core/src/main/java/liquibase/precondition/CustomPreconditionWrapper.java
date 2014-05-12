@@ -5,10 +5,10 @@ import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.exception.*;
 import liquibase.parser.core.ParsedNode;
+import liquibase.parser.core.ParsedNodeException;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.ObjectUtil;
 
-import java.text.ParseException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.SortedSet;
@@ -99,7 +99,7 @@ public class CustomPreconditionWrapper extends AbstractPrecondition {
     }
 
     @Override
-    public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParseException, SetupException {
+    public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException, SetupException {
         setClassLoader(resourceAccessor.toClassLoader());
         setClassName(parsedNode.getChildValue(null, "className", String.class));
         for (ParsedNode child : parsedNode.getChildren(null, "param")) {

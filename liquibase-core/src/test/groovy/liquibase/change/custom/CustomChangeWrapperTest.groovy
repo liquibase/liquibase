@@ -1,14 +1,13 @@
 package liquibase.change.custom
 
-import junit.framework.Assert
 import liquibase.database.Database
 import liquibase.database.core.MockDatabase
 import liquibase.exception.*
 import liquibase.parser.core.ParsedNode
+import liquibase.parser.core.ParsedNodeException
 import liquibase.resource.ResourceAccessor
 import liquibase.sdk.supplier.resource.ResourceSupplier
 import liquibase.statement.SqlStatement
-import org.junit.Test
 import spock.lang.Shared
 import spock.lang.Specification
 
@@ -266,7 +265,13 @@ public class CustomChangeWrapperTest extends Specification {
                 .addChild(new ParsedNode(null, "otherNode").setValue("should be ignored"))
                 .addChild(new ParsedNode(null, "param").addChildren([name: "param 3"]).setValue("param 3 value"))
         def change = new CustomChangeWrapper()
-        change.load(node, resourceSupplier.simpleResourceAccessor)
+        try {
+            change.load(node, resourceSupplier.simpleResourceAccessor)
+        } catch (ParsedNodeException e) {
+            e.printStackTrace()
+        } catch (SetupException e) {
+            e.printStackTrace()
+        }
 
         then:
         change.classLoader != null

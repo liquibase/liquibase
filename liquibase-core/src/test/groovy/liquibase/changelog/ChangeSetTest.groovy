@@ -1,13 +1,7 @@
 package liquibase.changelog
 
-import liquibase.change.CheckSum;
-import liquibase.change.core.AddDefaultValueChange;
-import liquibase.change.core.CreateTableChange
-import liquibase.change.core.DropTableChange
-import liquibase.change.core.EmptyChange;
-import liquibase.change.core.InsertDataChange
-import liquibase.change.core.RawSQLChange
-import liquibase.change.core.RenameTableChange
+import liquibase.change.CheckSum
+import liquibase.change.core.*
 import liquibase.parser.core.ParsedNode
 import liquibase.precondition.core.RunningAsPrecondition
 import liquibase.sdk.supplier.resource.ResourceSupplier
@@ -16,13 +10,12 @@ import org.hamcrest.Matchers
 import spock.lang.Shared
 import spock.lang.Specification
 
-import static org.junit.Assert.*
+import static org.junit.Assert.assertTrue
 import static spock.util.matcher.HamcrestSupport.that
 
 public class ChangeSetTest extends Specification {
 
-    @Shared
-            resourceSupplier = new ResourceSupplier()
+    @Shared resourceSupplier = new ResourceSupplier()
 
     def getDescriptions() {
         when:
@@ -106,6 +99,7 @@ public class ChangeSetTest extends Specification {
         def changeSet = new ChangeSet(new DatabaseChangeLog("com/example/test.xml"))
         def node = new ParsedNode(null, "changeSet").addChildren([id: "1", author: "nvoxland"])
         changeSet.load(node, resourceSupplier.simpleResourceAccessor)
+
         then:
         changeSet.toString(false) == "com/example/test.xml::1::nvoxland"
         changeSet.changes.size() == 0
@@ -134,7 +128,6 @@ public class ChangeSetTest extends Specification {
         changeSet.load(node, resourceSupplier.simpleResourceAccessor)
 
         then:
-
         for (param in fields) {
             if (param == "context") {
                 assert changeSet.getSerializableFieldValue(param).toString() == "(${testValue[param]})"
@@ -289,7 +282,7 @@ public class ChangeSetTest extends Specification {
     def "load node with preconditions as value"() {
         when:
         def changeSet = new ChangeSet(new DatabaseChangeLog("com/example/test.xml"))
-        changeSet.load(new ParsedNode(null, "changeSet").setValue(new ParsedNode(null, "preConditions").addChildren([
+        changeSet.load(new ParsedNode(null, "changeSet").setValue(new ParsedNode(null, "preConditions").setValue([
                 [runningAs: [username: "my_user"]],
                 [runningAs: [username: "my_other_user"]],
         ])), resourceSupplier.simpleResourceAccessor)
@@ -305,7 +298,7 @@ public class ChangeSetTest extends Specification {
         def changeSet = new ChangeSet(new DatabaseChangeLog("com/example/test.xml"))
         changeSet.load(new ParsedNode(null, "changeSet").setValue([
                 new ParsedNode(null, "modifySql").addChildren([applyToRollback: "true", replace: [replace: "a", with: "b"]]),
-                new ParsedNode(null, "modifySql").addChildren([dbms: "mysql, oracle", context: "live, test", applyToRollback: "false"]).addChildren([
+                new ParsedNode(null, "modifySql").addChildren([dbms: "mysql, oracle", context: "live, test", applyToRollback: "false"]).setValue([
                         [replace: [replace: "x1", with: "y1"]],
                         [replace: [replace: "x2", with: "y2"]],
                 ])

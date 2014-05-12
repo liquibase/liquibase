@@ -2,6 +2,8 @@ package liquibase.change
 
 import liquibase.changelog.ChangeSet
 import liquibase.database.core.MockDatabase
+import liquibase.exception.SetupException
+import liquibase.parser.core.ParsedNodeException
 import liquibase.sdk.supplier.change.ChangeSupplierFactory
 import liquibase.sdk.supplier.resource.ResourceSupplier
 import liquibase.serializer.core.string.StringChangeLogSerializer
@@ -75,7 +77,13 @@ public abstract class StandardChangeTest extends Specification {
         assert serialized != null
 
         def newChange = changeClass.newInstance() as Change
-        newChange.load(serialized,resourceSupplier.simpleResourceAccessor)
+        try {
+            newChange.load(serialized, resourceSupplier.simpleResourceAccessor)
+        } catch (ParsedNodeException e) {
+            e.printStackTrace()
+        } catch (SetupException e) {
+            e.printStackTrace()
+        }
         def reserialized = newChange.serialize()
 
         serialized == reserialized

@@ -1,37 +1,63 @@
 package liquibase.parser.core;
 
-import liquibase.exception.ChangeLogParseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.util.ISODateFormat;
 import liquibase.util.StringUtils;
 
 import java.math.BigInteger;
-import java.text.ParseException;
 import java.util.*;
 
+/**
+ * Acts as a standard abstract syntax layer for changelogs defined in different formats.
+ * {@link liquibase.parser.ChangeLogParser} implementations and other classes that work with multiple formats can create objects
+ * directs or create instances of this class which can then be passed to the load() method of the object they want to configure.
+ * For example, {@link liquibase.change.Change#load(ParsedNode, liquibase.resource.ResourceAccessor)}.
+ * <p/>
+ * ParsedNodes are a simple key/value structure with the following characteristics:
+ * <ul>
+ * <li>Keys include a namespace as well as the node name</li>
+ * <li>There can be multiple children nodes with the same node namespace+name</li>
+ * <li>There is an unkeyed "value" object in addition to the children nodes</li>
+ * <li>The value node cannot be a ParsedNode. If you attempt to set value to be or contain a ParsedNode it will actually be set as a child</li>
+ * </ul>
+ */
 public class ParsedNode {
     private String namespace;
-    private String nodeName;
+    private String name;
     private List<ParsedNode> children = new ArrayList<ParsedNode>();
     private Object value;
 
-    public ParsedNode(String namespace, String nodeName) {
+    public ParsedNode(String namespace, String name) {
         this.namespace = namespace;
-        this.nodeName = nodeName;
+        this.name = name;
     }
 
+    /**
+     * Each node key contains both a namespace and a name which together identifies the node.
+     */
     public String getNamespace() {
         return namespace;
     }
 
-    public String getNodeName() {
-        return nodeName;
+    /**
+     * Each node key contains both a namespace and a name which together identifies the node.
+     */
+    public String getName() {
+        return name;
     }
 
+    /**
+     * Returns the child ParsedNodes of this node. Returned list is unmodifiableList.
+     */
     public List<ParsedNode> getChildren() {
         return Collections.unmodifiableList(children);
     }
 
+    /**
+     * Returns all child nodes with the given namespace and name.
+     * If none match, an empty list is returned.
+     * Returned list is unmodifiableList.
+     */
     public List<ParsedNode> getChildren(String namespace, String nodename) {
         List<ParsedNode> returnList = new ArrayList<ParsedNode>();
         for (ParsedNode node : children) {
@@ -42,95 +68,113 @@ public class ParsedNode {
         return Collections.unmodifiableList(returnList);
     }
 
+    /**
+     * Return the value associated with this node.
+     */
     public Object getValue() {
         return value;
     }
 
-    public <T> T getValue(Class<T> type) {
-        return (T) value;
+    /**
+     * Return the value associated with this node converted to the given type.
+     *
+     * @throws ParsedNodeException if the current value type cannot be converted
+     */
+    public <T> T getValue(Class<T> type) throws ParsedNodeException {
+        return convertObject(value, type);
     }
 
-    public ParsedNode setValue(Object value) throws ChangeLogParseException {
-        if (value instanceof Collection) {
+    /**
+     * Sets the value of this ParsedNode.
+     * If the passed value is a ParsedNode, it is added as a child, not as the value.
+     * If the passed value is a Map, it is converted to a ParsedNode and added as a child, not as the value.
+     * If the passed value is a Collection, each object is added as a child if it is a ParsedNode or a Map.
+     * If there are multiple simple values in a passed collection, value is set to a List. If there is a single value in a collection, value is set to the single value.
+     */
+    public ParsedNode setValue(Object value) throws ParsedNodeException {
+        if (value instanceof ParsedNode) {
+            this.addChild((ParsedNode) value);
+        } else if (value instanceof Collection) {
             List newValue = new ArrayList();
             for (Object obj : ((Collection) value)) {
                 if (obj instanceof Map) {
-                    newValue.add(mapToChangeLogNode((Map) obj));
+                    addChildren((Map) obj);
+                } else if (obj instanceof ParsedNode) {
+                    addChild(((ParsedNode) obj));
                 } else {
                     newValue.add(obj);
                 }
             }
-            this.value = newValue;
+            if (newValue.size() == 0) {
+                //do nothing
+            } else if (newValue.size() == 1) {
+                this.value = newValue.get(0);
+            } else {
+                this.value = newValue;
+            }
         } else if (value instanceof Map) {
-            this.value = mapToChangeLogNode(((Map) value));
+            addChildren(((Map) value));
         } else {
             this.value = value;
         }
         return this;
     }
 
-    public ParsedNode addChild(String namespace, String nodeName, Object value) throws ChangeLogParseException {
-        addChild(new ParsedNode(namespace, nodeName).setValue(value));
+    /**
+     * Convenience method to add a new ParsedNode with the passed namespace/name and value
+     */
+    public ParsedNode addChild(String namespace, String nodeName, Object value) throws ParsedNodeException {
+        addChild(createNode(namespace, nodeName).setValue(value));
         return this;
     }
 
-    public ParsedNode addChild(ParsedNode node) throws ChangeLogParseException  {
+    protected ParsedNode createNode(String namespace, String nodeName) {
+        return new ParsedNode(namespace, nodeName);
+    }
+
+    /**
+     * Adds the given ParsedNode as a child
+     */
+    public ParsedNode addChild(ParsedNode node) throws ParsedNodeException {
         children.add(node);
         return this;
     }
 
-    public ParsedNode addChildren(Object children) throws ChangeLogParseException {
-        if (children instanceof Map) {
-            for (Map.Entry<String, Object> child : ((Map<String, Object>) children).entrySet()) {
-                if (child.getValue() instanceof Map || child.getValue() instanceof Collection) {
-                    String childKey = child.getKey();
-                    ParsedNode childNode = new ParsedNode(null, childKey);
-
-                    childNode.addChildren(child.getValue());
-                    addChild(childNode);
-                } else {
-                    addChild(null, child.getKey(), child.getValue());
-                }
-            }
-        } else if (children instanceof Collection) {
-            for (Object child : (Collection) children) {
-                if (child instanceof Map) {
-                    child = mapToChangeLogNode((Map) child);
-                }
-
-                if (value == null) {
-                    value = new ArrayList();
-                }
-                ((Collection) value).add(child);
-            }
-        } else {
-            setValue(children);
+    /**
+     * Adds the given map as children of this node.
+     * If the passed map is empty, it is a no-op
+     * For each key in the map, a new child is added with the key as the name and the value (with all {@link #setValue(Object)}) logic) is the value.
+     */
+    public ParsedNode addChildren(Map<String, Object> child) throws ParsedNodeException {
+        if (child == null || child.size() == 0) {
+            return this; //do nothing
         }
+        for (Map.Entry<String, Object> entry : child.entrySet()) {
+            this.addChild(null, entry.getKey(), entry.getValue());
+        }
+
         return this;
     }
 
-    protected ParsedNode mapToChangeLogNode(Map child) throws ChangeLogParseException {
-        if (((Map) child).size() != 1) {
-            throw new ChangeLogParseException("Maps in lists need to have one and only one key");
-        }
-        String childKey = (String) ((Map) child).keySet().iterator().next();
-        ParsedNode childNode = new ParsedNode(null, childKey);
-        childNode.addChildren(((Map) child).get(childKey));
-        return childNode;
-    }
-
-
-    public ParsedNode getChild(String namespace, String name) {
+    /**
+     * Returns the ParsedNode defined by the given namespace and name.
+     * @throws liquibase.parser.core.ParsedNodeException if multiple nodes match.
+     */
+    public ParsedNode getChild(String namespace, String name) throws ParsedNodeException {
+        ParsedNode returnNode = null;
         for (ParsedNode node : children) {
             if (nodeMatches(node, namespace, name)) {
-                return node;
+                if (returnNode != null) {
+                    throw new ParsedNodeException("Multiple nodes match "+namespace+"/"+name);
+                }
+                returnNode = node;
             }
         }
-        return null;
+        return returnNode;
     }
 
     protected boolean nodeMatches(ParsedNode node, String namespace, String nodename) {
-        return namespaceMatches(node, namespace) && node.getNodeName().equals(nodename);
+        return namespaceMatches(node, namespace) && node.getName().equals(nodename);
     }
 
     protected boolean namespaceMatches(ParsedNode node, String namespace) {
@@ -140,7 +184,10 @@ public class ParsedNode {
         return node.getNamespace().equals(namespace);
     }
 
-    public <T> T getChildValue(String namespace, String nodename, T defaultValue) throws ParseException {
+    /**
+     * Convenience method for {@link #getChildValue(String, String, Class)} but returns the passed defaultValue if the given node is null or not defined.
+     */
+    public <T> T getChildValue(String namespace, String nodename, T defaultValue) throws ParsedNodeException {
         T value = (T) getChildValue(namespace, nodename, defaultValue.getClass());
         if (value == null) {
             return defaultValue;
@@ -148,37 +195,55 @@ public class ParsedNode {
         return value;
     }
 
-    public <T> T getChildValue(String namespace, String nodename, Class<T> type) throws ParseException {
+    /**
+     * Returns the value of the given node, converted to the passed type.
+     * @throws liquibase.parser.core.ParsedNodeException if there is an error converting the value
+     */
+    public <T> T getChildValue(String namespace, String nodename, Class<T> type) throws ParsedNodeException {
         Object rawValue = getChildValue(namespace, nodename);
         if (rawValue == null) {
             return null;
         }
+        return convertObject(rawValue, type);
+    }
+
+    protected <T> T convertObject(Object rawValue, Class<T> type) throws ParsedNodeException {
         if (type.isAssignableFrom(rawValue.getClass())) {
             return (T) rawValue;
         }
 
-        if (type.equals(String.class)) {
-            return (T) rawValue.toString();
-        } else if (type.equals(Integer.class)) {
-            return (T) Integer.valueOf(rawValue.toString());
-        } else if (type.equals(Float.class)) {
-            return (T) Float.valueOf(rawValue.toString());
-        } else if (type.equals(Double.class)) {
-            return (T) Double.valueOf(rawValue.toString());
-        } else if (type.equals(Long.class)) {
-            return (T) Long.valueOf(rawValue.toString());
-        } else if (type.equals(BigInteger.class)) {
-            return (T) BigInteger.valueOf(Long.valueOf(rawValue.toString()));
-        } else if (type.equals(Boolean.class) && rawValue instanceof String) {
-            return (T) Boolean.valueOf(rawValue.toString());
-        } else if (type.isAssignableFrom(Date.class)) {
-            return (T) new ISODateFormat().parse(rawValue.toString());
-        } else {
-            throw new UnexpectedLiquibaseException("Cannot convert "+rawValue.getClass().getName()+" '"+rawValue+"' to "+type.getName());
+        try {
+            if (type.equals(String.class)) {
+                return (T) rawValue.toString();
+            } else if (type.equals(Integer.class)) {
+                return (T) Integer.valueOf(rawValue.toString());
+            } else if (type.equals(Float.class)) {
+                return (T) Float.valueOf(rawValue.toString());
+            } else if (type.equals(Double.class)) {
+                return (T) Double.valueOf(rawValue.toString());
+            } else if (type.equals(Long.class)) {
+                return (T) Long.valueOf(rawValue.toString());
+            } else if (type.equals(BigInteger.class)) {
+                return (T) BigInteger.valueOf(Long.valueOf(rawValue.toString()));
+            } else if (type.equals(Boolean.class) && rawValue instanceof String) {
+                return (T) Boolean.valueOf(rawValue.toString());
+            } else if (type.isAssignableFrom(Date.class)) {
+                return (T) new ISODateFormat().parse(rawValue.toString());
+            } else {
+                throw new UnexpectedLiquibaseException("Cannot convert " + rawValue.getClass().getName() + " '" + rawValue + "' to " + type.getName());
+            }
+        } catch (Throwable e) {
+            if (e instanceof UnexpectedLiquibaseException) {
+                throw (UnexpectedLiquibaseException) e;
+            }
+            throw new ParsedNodeException(e);
         }
     }
 
-    public Object getChildValue(String namespace, String nodename) {
+    /**
+     * Returns the value of the given node with no conversion attempted.
+     */
+    public Object getChildValue(String namespace, String nodename) throws ParsedNodeException {
         ParsedNode child = getChild(namespace, nodename);
         if (child == null) {
             return null;
@@ -188,9 +253,9 @@ public class ParsedNode {
 
     @Override
     public String toString() {
-        String string = nodeName;
+        String string = name;
         if (children.size() > 0) {
-            string += "["+ StringUtils.join(children, ",", new StringUtils.ToStringFormatter(), true)+"]";
+            string += "[" + StringUtils.join(children, ",", new StringUtils.ToStringFormatter(), true) + "]";
         }
         if (value != null) {
             String valueString;

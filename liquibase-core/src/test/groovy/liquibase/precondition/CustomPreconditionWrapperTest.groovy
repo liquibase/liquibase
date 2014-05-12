@@ -1,7 +1,8 @@
 package liquibase.precondition
 
-import liquibase.change.custom.CustomChangeWrapper
+import liquibase.exception.SetupException
 import liquibase.parser.core.ParsedNode
+import liquibase.parser.core.ParsedNodeException
 import liquibase.sdk.supplier.resource.ResourceSupplier
 import spock.lang.Shared
 import spock.lang.Specification
@@ -19,7 +20,13 @@ class CustomPreconditionWrapperTest extends Specification {
                 .addChild(new ParsedNode(null, "otherNode").setValue("should be ignored"))
                 .addChild(new ParsedNode(null, "param").addChildren([name: "param 3"]).setValue("param 3 value"))
         def precondition = new CustomPreconditionWrapper()
-        precondition.load(node, resourceSupplier.simpleResourceAccessor)
+        try {
+            precondition.load(node, resourceSupplier.simpleResourceAccessor)
+        } catch (ParsedNodeException e) {
+            e.printStackTrace()
+        } catch (SetupException e) {
+            e.printStackTrace()
+        }
 
         then:
         precondition.classLoader != null

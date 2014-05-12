@@ -2,10 +2,9 @@ package liquibase.precondition;
 
 import liquibase.exception.SetupException;
 import liquibase.parser.core.ParsedNode;
+import liquibase.parser.core.ParsedNodeException;
 import liquibase.resource.ResourceAccessor;
-import org.apache.velocity.runtime.directive.Parse;
 
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -27,7 +26,7 @@ public abstract class PreconditionLogic extends AbstractPrecondition {
     }
 
     @Override
-    public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParseException, SetupException {
+    public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException, SetupException {
         super.load(parsedNode, resourceAccessor);
 
         Object value = parsedNode.getValue();
@@ -47,12 +46,16 @@ public abstract class PreconditionLogic extends AbstractPrecondition {
         }
     }
 
-    protected Precondition toPrecondition(ParsedNode node, ResourceAccessor resourceAccessor) throws ParseException, SetupException {
-        Precondition precondition = PreconditionFactory.getInstance().create(node.getNodeName());
+    protected Precondition toPrecondition(ParsedNode node, ResourceAccessor resourceAccessor) throws ParsedNodeException, SetupException {
+        Precondition precondition = PreconditionFactory.getInstance().create(node.getName());
         if (precondition == null) {
             return null;
         }
-        precondition.load(node, resourceAccessor);
+        try {
+            precondition.load(node, resourceAccessor);
+        } catch (ParsedNodeException e) {
+            e.printStackTrace();
+        }
         return precondition;
     }
 }

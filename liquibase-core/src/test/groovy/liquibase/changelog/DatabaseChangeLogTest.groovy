@@ -87,7 +87,7 @@ create view sql_view as select * from sql_table;'''
     def "load handles both changes and preconditions"() {
         when:
         def children = [
-                new ParsedNode(null, "preConditions").addChildren([[runningAs: [username: "user1"]], [runningAs: [username: "user2"]]]),
+                new ParsedNode(null, "preConditions").setValue([[runningAs: [username: "user1"]], [runningAs: [username: "user2"]]]),
                 new ParsedNode(null, "changeSet").addChildren([id:"1", author: "nvoxland", createTable: [tableName: "my_table"]]),
                 new ParsedNode(null, "changeSet").addChildren([id:"2", author: "nvoxland", createTable: [tableName: "my_other_table"]]),
         ]
@@ -172,19 +172,21 @@ create view sql_view as select * from sql_table;'''
         rootChangeLog.preconditions.nestedPreconditions.size() == 4
         ((RunningAsPrecondition) rootChangeLog.preconditions.nestedPreconditions[0]).username == "user1"
 
-        ((PreconditionContainer) rootChangeLog.preconditions.nestedPreconditions[1]).nestedPreconditions.size() == 2
-        ((RunningAsPrecondition) ((PreconditionContainer) rootChangeLog.preconditions.nestedPreconditions[1]).nestedPreconditions[0]).username == "testUser"
-        ((OrPrecondition) ((PreconditionContainer) rootChangeLog.preconditions.nestedPreconditions[1]).nestedPreconditions[1]).nestedPreconditions.size() == 2
+        ((PreconditionContainer) rootChangeLog.preconditions.nestedPreconditions[1]).nestedPreconditions.size() == 0
 
         ((PreconditionContainer) rootChangeLog.preconditions.nestedPreconditions[2]).nestedPreconditions.size() == 2
-        ((RunningAsPrecondition) ((PreconditionContainer) rootChangeLog.preconditions.nestedPreconditions[2]).nestedPreconditions[0]).username == "otherUser"
+        ((RunningAsPrecondition) ((PreconditionContainer) rootChangeLog.preconditions.nestedPreconditions[2]).nestedPreconditions[0]).username == "testUser"
         ((OrPrecondition) ((PreconditionContainer) rootChangeLog.preconditions.nestedPreconditions[2]).nestedPreconditions[1]).nestedPreconditions.size() == 2
+
+        ((PreconditionContainer) rootChangeLog.preconditions.nestedPreconditions[3]).nestedPreconditions.size() == 2
+        ((RunningAsPrecondition) ((PreconditionContainer) rootChangeLog.preconditions.nestedPreconditions[3]).nestedPreconditions[0]).username == "otherUser"
+        ((OrPrecondition) ((PreconditionContainer) rootChangeLog.preconditions.nestedPreconditions[3]).nestedPreconditions[1]).nestedPreconditions.size() == 2
 
         rootChangeLog.changeSets.size() == 4
         ((CreateTableChange) rootChangeLog.getChangeSet("com/example/root.xml", "nvoxland", "1").changes[0]).tableName == "test_table"
-        ((CreateTableChange) rootChangeLog.getChangeSet("file:com/example/test1.xml", "nvoxland", "1").changes[0]).tableName == "person"
-        ((CreateTableChange) rootChangeLog.getChangeSet("file:com/example/test2.xml", "nvoxland", "1").changes[0]).tableName == "person2"
-        ((RawSQLChange) rootChangeLog.getChangeSet("file:com/example/test.sql", "includeAll", "raw").changes[0]).sql == testSql
+        ((CreateTableChange) rootChangeLog.getChangeSet("com/example/test1.xml", "nvoxland", "1").changes[0]).tableName == "person"
+        ((CreateTableChange) rootChangeLog.getChangeSet("com/example/test2.xml", "nvoxland", "1").changes[0]).tableName == "person2"
+        ((RawSQLChange) rootChangeLog.getChangeSet("com/example/test.sql", "includeAll", "raw").changes[0]).sql == testSql
     }
 
 }

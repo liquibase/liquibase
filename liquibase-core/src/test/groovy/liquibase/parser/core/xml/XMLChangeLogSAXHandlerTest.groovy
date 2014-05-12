@@ -25,7 +25,7 @@ class XMLChangeLogSAXHandlerTest extends Specification {
         handler.endElement(uri, "databaseChangeLog", "databaseChangeLog");
 
         then:
-        handler.databaseChangeLogTree.nodeName == "databaseChangeLog"
+        handler.databaseChangeLogTree.name == "databaseChangeLog"
         handler.databaseChangeLogTree.children.size() == 0
     }
 
@@ -50,7 +50,7 @@ class XMLChangeLogSAXHandlerTest extends Specification {
         handler.endElement(uri, "databaseChangeLog", "databaseChangeLog");
 
         then:
-        handler.databaseChangeLogTree.nodeName == "databaseChangeLog"
+        handler.databaseChangeLogTree.name == "databaseChangeLog"
         handler.databaseChangeLogTree.children.size() == 3
         handler.databaseChangeLogTree.getChild(null, "attr0").value == "attr 0 value"
         handler.databaseChangeLogTree.getChild(null, "attr1").value == "attr 1 value"
@@ -72,7 +72,7 @@ class XMLChangeLogSAXHandlerTest extends Specification {
         handler.endElement(uri, "databaseChangeLog", "databaseChangeLog");
 
         then:
-        handler.databaseChangeLogTree.nodeName == "databaseChangeLog"
+        handler.databaseChangeLogTree.name == "databaseChangeLog"
         handler.databaseChangeLogTree.children.size() == 1
         handler.databaseChangeLogTree.getChild(null, "attr0").value == "attr 0 value"
         handler.databaseChangeLogTree.value == "Start of some more text"
@@ -127,7 +127,7 @@ class XMLChangeLogSAXHandlerTest extends Specification {
         handler.endElement(uri, "databaseChangeLog", "databaseChangeLog");
 
         then:
-        handler.databaseChangeLogTree.nodeName == "databaseChangeLog"
+        handler.databaseChangeLogTree.name == "databaseChangeLog"
         handler.databaseChangeLogTree.children.size() == 5
         handler.databaseChangeLogTree.getChild(null, "attr0").value == "attr 0 value"
         handler.databaseChangeLogTree.getChild(null, "attr1").value == "attr 1 value"

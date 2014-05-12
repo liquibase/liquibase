@@ -252,7 +252,7 @@ public class PreconditionContainer extends AndPrecondition {
 
 //    public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParseException, SetupException {
 //        for (ParsedNode childNode : parsedNode.getChildren()) {
-//            Precondition childPrecondition = PreconditionFactory.getInstance().create(childNode.getNodeName());
+//            Precondition childPrecondition = PreconditionFactory.getInstance().create(childNode.getName());
 //            if (childPrecondition != null) {
 //                childPrecondition.load(childNode);
 //                addNestedPrecondition(childPrecondition);

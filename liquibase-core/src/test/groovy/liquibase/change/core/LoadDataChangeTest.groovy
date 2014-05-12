@@ -1,22 +1,18 @@
 package liquibase.change.core
 
-import liquibase.change.Change
-import liquibase.change.ChangeFactory
 import liquibase.change.ChangeStatus
 import liquibase.change.StandardChangeTest;
 import liquibase.database.core.MockDatabase
-import liquibase.parser.core.ParsedNode;
+import liquibase.exception.SetupException
+import liquibase.parser.core.ParsedNode
+import liquibase.parser.core.ParsedNodeException;
 import liquibase.resource.ClassLoaderResourceAccessor
 import liquibase.snapshot.MockSnapshotGeneratorFactory
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.InsertStatement
-import spock.lang.Unroll;
-
-import static org.junit.Assert.*;
-
-import liquibase.test.JUnitResourceAccessor;
-import org.junit.Test;
+import spock.lang.Unroll
+import liquibase.test.JUnitResourceAccessor
 
 public class LoadDataChangeTest extends StandardChangeTest {
 
@@ -169,10 +165,9 @@ public class LoadDataChangeTest extends StandardChangeTest {
     def "load works"() {
         when:
         def change = new LoadDataChange()
-        change.load(new ParsedNode(null, "loadData")
-                .addChildren([
+        change.load(new ParsedNode(null, "loadData").setValue([
                 [column: [name: "id"]],
-                [column: [name: "new_col", header:"new_col_header"]],
+                [column: [name: "new_col", header: "new_col_header"]],
         ]), resourceSupplier.simpleResourceAccessor)
 
         then:
