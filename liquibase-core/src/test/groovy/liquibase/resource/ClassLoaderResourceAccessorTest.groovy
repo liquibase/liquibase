@@ -26,15 +26,17 @@ class ClassLoaderResourceAccessorTest extends Specification {
         accessor.convertToPath(relativeTo, path) == expected
 
         where:
-        relativeTo                  | path                        | expected
-        null                        | "liquibase/Liquibase.class" | "liquibase/Liquibase.class"
-        ""                          | "liquibase/Liquibase.class" | "liquibase/Liquibase.class"
-        "liquibase"                 | "Liquibase.class"           | "liquibase/Liquibase.class"
-        "liquibase"                 | "Contexts.class"            | "liquibase/Contexts.class"
-        "liquibase/Liquibase.class" | "Contexts.class"            | "liquibase/Contexts.class"
-        "liquibase/"                | "sql/Sql.class"             | "liquibase/sql/Sql.class"
-        "liquibase"                 | "sql/Sql.class"             | "liquibase/sql/Sql.class"
-        "liquibase/Liquibase.class" | "sql/Sql.class"             | "liquibase/sql/Sql.class"
+        relativeTo                         | path                             | expected
+        null                               | "liquibase/Liquibase.class"      | "liquibase/Liquibase.class"
+        ""                                 | "liquibase/Liquibase.class"      | "liquibase/Liquibase.class"
+        "liquibase"                        | "Liquibase.class"                | "liquibase/Liquibase.class"
+        "liquibase"                        | "Contexts.class"                 | "liquibase/Contexts.class"
+        "liquibase/Liquibase.class"        | "Contexts.class"                 | "liquibase/Contexts.class"
+        "liquibase/"                       | "sql/Sql.class"                  | "liquibase/sql/Sql.class"
+        "liquibase"                        | "sql/Sql.class"                  | "liquibase/sql/Sql.class"
+        "liquibase/Liquibase.class"        | "sql/Sql.class"                  | "liquibase/sql/Sql.class"
+        "liquibase/sql"                    | "../Liquibase.class"             | "liquibase/Liquibase.class"
+        "liquibase/database/core/supplier" | "../../jvm/JdbcConnection.class" | "liquibase/database/jvm/JdbcConnection.class"
     }
 
 }

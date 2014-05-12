@@ -88,6 +88,9 @@ public abstract class AbstractResourceAccessor implements ResourceAccessor {
         while (string.contains("/./")) {
             string = string.replace("/./", "/");
         }
+        while (string.matches(".*/.*?/\\.\\./.*")) {
+            string = string.replaceAll("/[^/]+/\\.\\./", "/");
+        }
         return string;
     }
 
