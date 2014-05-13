@@ -15,7 +15,8 @@ import static junit.framework.Assert.assertSame
 
 public class CustomChangeWrapperTest extends Specification {
 
-    @Shared resourceSupplier = new ResourceSupplier()
+    @Shared
+            resourceSupplier = new ResourceSupplier()
 
     def setClassLoader() {
         when:
@@ -35,7 +36,7 @@ public class CustomChangeWrapperTest extends Specification {
 
         then:
         assert changeWrapper.getCustomChange() instanceof ExampleCustomSqlChange
-        changeWrapper.getClassName() == ExampleCustomSqlChange.class.getName() 
+        changeWrapper.getClassName() == ExampleCustomSqlChange.class.getName()
     }
 
 //    @Test TODO: Cannot get this test to fire exception code
@@ -55,7 +56,7 @@ public class CustomChangeWrapperTest extends Specification {
     def setClass_classloaderNotSet() throws CustomChangeException {
         when:
         new CustomChangeWrapper().setClass(ExampleCustomSqlChange.class.getName());
-        
+
         then:
         thrown(CustomChangeException.class)
     }
@@ -64,14 +65,14 @@ public class CustomChangeWrapperTest extends Specification {
         when:
         CustomChangeWrapper changeWrapper = new CustomChangeWrapper();
         then:
-        changeWrapper.getParams().size() == 0 
+        changeWrapper.getParams().size() == 0
 
         when:
         changeWrapper.setParam("param1", "x");
         changeWrapper.setParam("param2", "y");
 
         then:
-        changeWrapper.getParams().size() == 2 
+        changeWrapper.getParams().size() == 2
         assert changeWrapper.getParams().contains("param1")
         assert changeWrapper.getParams().contains("param2")
     }
@@ -80,7 +81,7 @@ public class CustomChangeWrapperTest extends Specification {
         when:
         CustomChangeWrapper changeWrapper = new CustomChangeWrapper();
         then:
-        changeWrapper.getParamValue("notSet")== null
+        changeWrapper.getParamValue("notSet") == null
 
         when:
         changeWrapper.setParam("param1", "x");
@@ -141,8 +142,8 @@ public class CustomChangeWrapperTest extends Specification {
         changeWrapper.generateStatements(new MockDatabase());
 
         then:
-        ((ExampleCustomSqlChange) changeWrapper.customChange).name == "myName" 
-        ((ExampleCustomSqlChange) changeWrapper.customChange).address == "myAddr" 
+        ((ExampleCustomSqlChange) changeWrapper.customChange).name == "myName"
+        ((ExampleCustomSqlChange) changeWrapper.customChange).address == "myAddr"
     }
 
     def generateStatements_paramsSetBad() throws Exception {
@@ -188,7 +189,7 @@ public class CustomChangeWrapperTest extends Specification {
 
         def changeWrapper = new CustomChangeWrapper();
         changeWrapper.customChange = Mock(CustomTaskChange.class);
-        1* ((CustomTaskChange) changeWrapper.customChange).execute(database)
+        1 * ((CustomTaskChange) changeWrapper.customChange).execute(database)
 
         then:
         changeWrapper.generateStatements(database).length == 0
@@ -200,7 +201,7 @@ public class CustomChangeWrapperTest extends Specification {
         changeWrapper.customChange = Mock(CustomChange.class);
 
         changeWrapper.generateStatements(new MockDatabase());
-        
+
         then:
         thrown(UnexpectedLiquibaseException.class)
     }
@@ -217,8 +218,8 @@ public class CustomChangeWrapperTest extends Specification {
         changeWrapper.generateRollbackStatements(new MockDatabase());
 
         then:
-        ((ExampleCustomSqlChange) changeWrapper.customChange).name == "myName" 
-        ((ExampleCustomSqlChange) changeWrapper.customChange).address == "myAddr" 
+        ((ExampleCustomSqlChange) changeWrapper.customChange).name == "myName"
+        ((ExampleCustomSqlChange) changeWrapper.customChange).address == "myAddr"
     }
 
     def generateRollbackStatements_paramsSetBad() throws Exception {
@@ -229,7 +230,7 @@ public class CustomChangeWrapperTest extends Specification {
         changeWrapper.setParam("badParam", "myName");
 
         changeWrapper.generateRollbackStatements(new MockDatabase());
-        
+
         then:
         thrown(UnexpectedLiquibaseException.class)
     }
@@ -253,7 +254,7 @@ public class CustomChangeWrapperTest extends Specification {
         changeWrapper.customChange.getConfirmationMessage() >> "mock message"
 
         then:
-        changeWrapper.getConfirmationMessage() == "mock message" 
+        changeWrapper.getConfirmationMessage() == "mock message"
     }
 
     def "load works correctly"() {
@@ -265,13 +266,7 @@ public class CustomChangeWrapperTest extends Specification {
                 .addChild(new ParsedNode(null, "otherNode").setValue("should be ignored"))
                 .addChild(new ParsedNode(null, "param").addChildren([name: "param 3"]).setValue("param 3 value"))
         def change = new CustomChangeWrapper()
-        try {
-            change.load(node, resourceSupplier.simpleResourceAccessor)
-        } catch (ParsedNodeException e) {
-            e.printStackTrace()
-        } catch (SetupException e) {
-            e.printStackTrace()
-        }
+        change.load(node, resourceSupplier.simpleResourceAccessor)
 
         then:
         change.classLoader != null
@@ -282,6 +277,27 @@ public class CustomChangeWrapperTest extends Specification {
         change.getParamValue("param 2") == "param 2 value"
         change.getParamValue("param 3") == "param 3 value"
 
+    }
+
+    def "load handles params in a 'params' collection"() {
+        when:
+        def node = new ParsedNode(null, "customChange")
+                .addChild(null, "class", "liquibase.change.custom.ExampleCustomSqlChange")
+                .addChild(null, "params", [new ParsedNode(null, "param").addChildren([name: "param 1", value: "param 1 value"]),
+                                           new ParsedNode(null, "param").addChildren([name: "param 2", value: "param 2 value"]),
+                                           new ParsedNode(null, "otherNode").setValue("should be ignored"),
+                                           new ParsedNode(null, "param").addChildren([name: "param 3"]).setValue("param 3 value")])
+        def change = new CustomChangeWrapper()
+        change.load(node, resourceSupplier.simpleResourceAccessor)
+
+        then:
+        change.classLoader != null
+        change.resourceAccessor == resourceSupplier.simpleResourceAccessor
+        change.getCustomChange() instanceof liquibase.change.custom.ExampleCustomSqlChange
+        change.params.size() == 3
+        change.getParamValue("param 1") == "param 1 value"
+        change.getParamValue("param 2") == "param 2 value"
+        change.getParamValue("param 3") == "param 3 value"
     }
 
     public static class ExampleCustomSqlChange implements CustomSqlChange, CustomSqlRollback {

@@ -242,7 +242,7 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
     public void load(ParsedNode node, ResourceAccessor resourceAccessor) throws ParsedNodeException, SetupException {
         this.id = node.getChildValue(null, "id", String.class);
         this.author = node.getChildValue(null, "author", String.class);
-        this.alwaysRun  = node.getChildValue(null, "runAlways", false);
+        this.alwaysRun  = node.getChildValue(null, "runAlways", node.getChildValue(null, "alwaysRun", false));
         this.runOnChange  = node.getChildValue(null, "runOnChange", false);
         this.contexts = new ContextExpression(node.getChildValue(null, "context", String.class));
         setDbms(node.getChildValue(null, "dbms", String.class));
@@ -267,26 +267,23 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
         for (ParsedNode child : node.getChildren()) {
             handleChildNode(child, resourceAccessor);
         }
-
-        Object value = node.getValue();
-        if (value != null) {
-            if (value instanceof ParsedNode) {
-                handleChildNode((ParsedNode) value, resourceAccessor);
-            } else if (value instanceof Collection) {
-                for (Object child : ((Collection) value)) {
-                    if (child instanceof ParsedNode) {
-                        handleChildNode((ParsedNode) child, resourceAccessor);
-                    }
-                }
-            }
-        }
     }
 
     protected void handleChildNode(ParsedNode child, ResourceAccessor resourceAccessor) throws ParsedNodeException, SetupException {
         if (child.getName().equals("rollback")) {
             handleRollbackNode(child, resourceAccessor);
-        } else if (child.getName().equals("validCheckSum")) {
-            addValidCheckSum(child.getValue(String.class));
+        } else if (child.getName().equals("validCheckSum") || child.getName().equals("validCheckSums")) {
+            if (child.getValue() == null) {
+                return;
+            }
+
+            if (child.getValue() instanceof Collection) {
+                for (Object checksum : (Collection) child.getValue()) {
+                    addValidCheckSum((String) checksum);
+                }
+            } else {
+                addValidCheckSum(child.getValue(String.class));
+            }
         } else if (child.getName().equals("modifySql")) {
             String dbmsString = StringUtils.trimToNull(child.getChildValue(null, "dbms", String.class));
             String contextString = StringUtils.trimToNull(child.getChildValue(null, "context", String.class));
@@ -301,17 +298,7 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
                 context = new ContextExpression(contextString);
             }
 
-            List<ParsedNode> potentialVisitors = new ArrayList<ParsedNode>(child.getChildren());
-            Object childValue = child.getValue();
-            if (childValue instanceof ParsedNode) {
-                potentialVisitors.add(child);
-            } else if (childValue instanceof Collection) {
-                for (Object nested: (Collection) childValue) {
-                    if (nested instanceof ParsedNode) {
-                        potentialVisitors.add((ParsedNode) nested);
-                    }
-                }
-            }
+            List<ParsedNode> potentialVisitors = child.getChildren();
             for (ParsedNode node : potentialVisitors) {
                 SqlVisitor sqlVisitor = SqlVisitorFactory.getInstance().create(node.getName());
                 if (sqlVisitor != null) {
@@ -336,6 +323,10 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
                 this.preconditions.load(child, resourceAccessor);
             } catch (ParsedNodeException e) {
                 e.printStackTrace();
+            }
+        } else if (child.getName().equals("changes")) {
+            for (ParsedNode changeNode : child.getChildren()) {
+                handleChildNode(changeNode, resourceAccessor);
             }
         } else {
             addChange(toChange(child, resourceAccessor));
@@ -375,9 +366,6 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
                         foundValue = true;
                     }
                 }
-            } else if (value instanceof ParsedNode) {
-                addRollbackChange(toChange((ParsedNode) value, resourceAccessor));
-                foundValue = true;
             } else {
                 throw new ParsedNodeException("Unexpected object: "+value.getClass().getName()+" '"+value.toString()+"'");
             }

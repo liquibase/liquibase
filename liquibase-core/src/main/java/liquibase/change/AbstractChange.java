@@ -536,9 +536,18 @@ public abstract class AbstractChange implements Change {
 
                         for (ParsedNode child : columnNodes) {
                             if (child.getName().equals("column") || child.getName().equals("columns")) {
-                                ColumnConfig columnConfig = (ColumnConfig) collectionType.newInstance();
-                                columnConfig.load(child, resourceAccessor);
-                                ((ChangeWithColumns) this).addColumn(columnConfig);
+                                List<ParsedNode> columnChildren = child.getChildren(null, "column");
+                                if (columnChildren != null) {
+                                    for (ParsedNode columnChild  : columnChildren) {
+                                        ColumnConfig columnConfig = (ColumnConfig) collectionType.newInstance();
+                                        columnConfig.load(columnChild, resourceAccessor);
+                                        ((ChangeWithColumns) this).addColumn(columnConfig);
+                                    }
+                                } else {
+                                    ColumnConfig columnConfig = (ColumnConfig) collectionType.newInstance();
+                                    columnConfig.load(child, resourceAccessor);
+                                    ((ChangeWithColumns) this).addColumn(columnConfig);
+                                }
                             }
                         }
                     }

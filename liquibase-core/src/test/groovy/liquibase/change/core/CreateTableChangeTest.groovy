@@ -232,13 +232,7 @@ public class CreateTableChangeTest extends StandardChangeTest {
                 .addChildren([column: [name: "column1", type: "type1"]])
                 .addChildren([column: [name: "column2", type: "type2"]])
         def change = new CreateTableChange()
-        try {
-            change.load(node, resourceSupplier.simpleResourceAccessor)
-        } catch (ParsedNodeException e) {
-            e.printStackTrace()
-        } catch (SetupException e) {
-            e.printStackTrace()
-        }
+        change.load(node, resourceSupplier.simpleResourceAccessor)
 
         then:
         change.tableName == "table_name"
@@ -249,4 +243,22 @@ public class CreateTableChangeTest extends StandardChangeTest {
         change.columns[1].name == "column2"
         change.columns[1].type == "type2"
     }
+
+    def "load can take a nested 'columns' collection nodes"() {
+        when:
+        def node = new ParsedNode(null, "createTable").addChildren([tableName: "table_name"])
+                .addChild(null, "columns", [[column: [name: "column1", type: "type1"]], [column: [name: "column2", type: "type2"]]])
+        def change = new CreateTableChange()
+        change.load(node, resourceSupplier.simpleResourceAccessor)
+
+        then:
+        change.tableName == "table_name"
+        change.columns.size() == 2
+        change.columns[0].name == "column1"
+        change.columns[0].type == "type1"
+
+        change.columns[1].name == "column2"
+        change.columns[1].type == "type2"
+    }
+
 }

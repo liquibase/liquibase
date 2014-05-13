@@ -9,7 +9,9 @@ import liquibase.resource.ResourceAccessor;
 import liquibase.serializer.ReflectionSerializer;
 import liquibase.serializer.core.string.StringChangeLogSerializer;
 import liquibase.util.ObjectUtil;
+import liquibase.util.StringUtils;
 
+import java.util.HashSet;
 import java.util.Set;
 
 public abstract class AbstractSqlVisitor implements SqlVisitor {
@@ -81,13 +83,22 @@ public abstract class AbstractSqlVisitor implements SqlVisitor {
     public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException, SetupException {
         for (ParsedNode childNode : parsedNode.getChildren()) {
             try {
-                if (ObjectUtil.hasWriteProperty(this, childNode.getName())) {
-                    Object value = childNode.getValue();
-                    if (value != null) {
-                        value = value.toString();
-                    }
-                    ObjectUtil.setProperty(this, childNode.getName(), (String) value);
-                }
+               if (childNode.getName().equals("dbms")) {
+                    this.setApplicableDbms(new HashSet<String>(StringUtils.splitAndTrim((String) childNode.getValue(), ",")));
+                } else if (childNode.getName().equals("applyToRollback")) {
+                   Boolean value = childNode.getValue(Boolean.class);
+                   if (value != null) {
+                       setApplyToRollback(value);
+                   }
+               } else if (childNode.getName().equals("context") || childNode.getName().equals("contexts")) {
+                   setContexts(new ContextExpression((String) childNode.getValue()));
+                } else  if (ObjectUtil.hasWriteProperty(this, childNode.getName())) {
+                   Object value = childNode.getValue();
+                   if (value != null) {
+                       value = value.toString();
+                   }
+                   ObjectUtil.setProperty(this, childNode.getName(), (String) value);
+               }
             } catch (Exception e) {
                 throw new SetupException("Error setting property", e);
             }

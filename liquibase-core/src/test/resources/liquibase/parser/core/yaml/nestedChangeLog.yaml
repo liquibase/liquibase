@@ -5,7 +5,7 @@ databaseChangeLog:
         author: nvoxland
         changes:
             - createTable:
-                tableName: person_yaml
+                tableName: employee_yaml
                 columns:
                     - column:
                         name: id

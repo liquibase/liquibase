@@ -208,6 +208,9 @@ public class ParsedNode {
     }
 
     protected <T> T convertObject(Object rawValue, Class<T> type) throws ParsedNodeException {
+        if (rawValue == null) {
+            return null;
+        }
         if (type.isAssignableFrom(rawValue.getClass())) {
             return (T) rawValue;
         }

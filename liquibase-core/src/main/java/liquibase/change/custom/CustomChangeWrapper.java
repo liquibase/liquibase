@@ -299,7 +299,12 @@ public class CustomChangeWrapper extends AbstractChange {
 
     @Override
     public void customLoadLogic(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException {
-        for (ParsedNode child : parsedNode.getChildren(null, "param")) {
+        ParsedNode paramsNode = parsedNode.getChild(null, "params");
+        if (paramsNode == null) {
+            paramsNode = parsedNode;
+        }
+
+        for (ParsedNode child : paramsNode.getChildren(null, "param")) {
             Object value = child.getValue();
             if (value == null) {
                 value = child.getChildValue(null, "value");

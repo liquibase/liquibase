@@ -46,6 +46,9 @@ databaseChangeLog:
     - changeSet:
         id: validCheckSums set
         author: nvoxland
+        validCheckSum:
+            - a9b7b29ce3a75940858cd022501852e2
+            - 8:b3d6a29ce3a75940858cd093501151d1
         changes:
             - sql:
                 sql: select count(*) from validchecksum_set
@@ -56,6 +59,8 @@ databaseChangeLog:
         changes:
             - sql:
                 sql: select count(*) from validchecksum_all
+        validCheckSum:
+            - ANY
 
     - changeSet:
         id: only preconditions
@@ -158,6 +163,7 @@ databaseChangeLog:
     - changeSet:
         id: logicalFilePath set
         author: nvoxland
+        logicalFilePath: com/example/other/path.yaml
         changes:
         - sql:
             sql: select * from logical_file_path
@@ -165,12 +171,14 @@ databaseChangeLog:
     - changeSet:
         id: objectQuotingStrategy LEGACY
         author: nvoxland
+        objectQuotingStrategy: LEGACY
         changes:
         - sql:
             sql: select * from legacy_strategy
 
     - changeSet:
         id: objectQuotingStrategy ALL
+        objectQuotingStrategy: QUOTE_ALL_OBJECTS
         author: nvoxland
         changes:
         - sql:
@@ -178,6 +186,7 @@ databaseChangeLog:
 
     - changeSet:
         id: objectQuotingStrategy RESERVED
+        objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
         author: nvoxland
         changes:
         - sql:
@@ -186,6 +195,7 @@ databaseChangeLog:
     - changeSet:
         id: onValidationFail HALT
         author: nvoxland
+        onValidationFail: HALT
         changes:
         - sql:
             sql: select * from halt_on_validation_fail
@@ -193,6 +203,7 @@ databaseChangeLog:
     - changeSet:
         id: onValidationFail MARK_RAN
         author: nvoxland
+        onValidationFail: MARK_RAN
         changes:
         - sql:
             sql: select * from mark_ran_on_validation_fail
@@ -200,6 +211,7 @@ databaseChangeLog:
     - changeSet:
         id: runInTransaction set
         author: nvoxland
+        runInTransaction: false
         changes:
         - sql:
             sql: select * from run_in_transaction
@@ -285,24 +297,25 @@ databaseChangeLog:
                     name: id
                     type: int
         modifySql:
-        - replace:
-            replace: with_modifysql
-            with: after_modifysql
-        - replace:
-            replace: "}"
-            with:
-            dbms: mysql, mock
-            applyToRollback: true
-        - append:
-            value: " , name varchar(255) )"
-            dbms: mysql, mock
-        - append:
-            value: partitioned by stuff
-            context: prod, qa
-        - append:
-            value: engine innodb
-            context: prod
-            dbms: mysql
+            - replace:
+                replace: with_modifysql
+                with: after_modifysql
+            - replace:
+                replace: ")"
+                with: ""
+                dbms: mysql, mock
+                applyToRollback: true
+            - append:
+                value: " , name varchar(255) )"
+                dbms: mysql, mock
+                applyToRollback: true
+            - append:
+                value: " partitioned by stuff"
+                context: prod, qa
+            - append:
+                value: " engine innodb"
+                context: prod
+                dbms: mysql
 
 
     - changeSet:
@@ -428,11 +441,11 @@ databaseChangeLog:
                 name: new_col_seq
                 type: int
         - createIndex:
-            name: id
             indexName: idx_new
             tableName: new_table
             columns:
             - column:
+                name: id
                 constraints:
                     unique: true
         - loadData:
@@ -488,6 +501,12 @@ databaseChangeLog:
         changes:
         - executeCommand:
             executable: /usr/bin/test
+            os: linux, mac
+            args:
+                - arg:
+                    value: "-out"
+                -  arg:
+                    value: "-test"
 
     - changeSet:
         id: view creation

@@ -1,5 +1,5 @@
 databaseChangeLog:
-    logicalFilePath: liquibase/parser-logical/yaml/logicalPathChangeLog.yaml
+    - logicalFilePath: liquibase/parser-logical/yaml/logicalPathChangeLog.yaml
     - changeSet:
         id: 1
         author: nvoxland

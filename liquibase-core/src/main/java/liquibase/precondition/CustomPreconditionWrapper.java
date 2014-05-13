@@ -102,7 +102,13 @@ public class CustomPreconditionWrapper extends AbstractPrecondition {
     public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException, SetupException {
         setClassLoader(resourceAccessor.toClassLoader());
         setClassName(parsedNode.getChildValue(null, "className", String.class));
-        for (ParsedNode child : parsedNode.getChildren(null, "param")) {
+
+        ParsedNode paramsNode = parsedNode.getChild(null, "params");
+        if (paramsNode == null) {
+            paramsNode = parsedNode;
+        }
+
+        for (ParsedNode child : paramsNode.getChildren(null, "param")) {
             Object value = child.getValue();
             if (value == null) {
                 value = child.getChildValue(null, "value");

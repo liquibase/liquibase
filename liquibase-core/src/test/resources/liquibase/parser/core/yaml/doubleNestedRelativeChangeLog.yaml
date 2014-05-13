@@ -18,4 +18,4 @@ databaseChangeLog:
                         type: varchar(255)
 
     - include:
-        file: liquibase/parser/core/yaml/nestedChangeLog.yaml
+        file: liquibase/parser/core/yaml/nestedRelativeChangeLog.yaml

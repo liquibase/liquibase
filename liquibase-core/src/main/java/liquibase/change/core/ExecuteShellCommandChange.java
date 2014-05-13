@@ -172,7 +172,12 @@ public class ExecuteShellCommandChange extends AbstractChange {
 
     @Override
     protected void customLoadLogic(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException {
-        for (ParsedNode arg : parsedNode.getChildren(null, "arg")) {
+        ParsedNode argsNode = parsedNode.getChild(null, "args");
+        if (argsNode == null) {
+            argsNode = parsedNode;
+        }
+
+        for (ParsedNode arg : argsNode.getChildren(null, "arg")) {
             addArg(arg.getChildValue(null, "value", String.class));
         }
         List<String> os = StringUtils.splitAndTrim(StringUtils.trimToEmpty(parsedNode.getChildValue(null, "os", String.class)), ",");

@@ -9,13 +9,15 @@ import liquibase.sql.visitor.ReplaceSqlVisitor
 import org.hamcrest.Matchers
 import spock.lang.Shared
 import spock.lang.Specification
+import spock.lang.Unroll
 
 import static org.junit.Assert.assertTrue
 import static spock.util.matcher.HamcrestSupport.that
 
 public class ChangeSetTest extends Specification {
 
-    @Shared resourceSupplier = new ResourceSupplier()
+    @Shared
+            resourceSupplier = new ResourceSupplier()
 
     def getDescriptions() {
         when:
@@ -114,7 +116,6 @@ public class ChangeSetTest extends Specification {
         for (param in fields) {
             if (param in ["runAlways", "runOnChange", "failOnError"]) {
                 testValue[param] = "true"
-                node.addChild(null, param, testValue[param])
             } else if (param == "context") {
                 testValue[param] = "test or value"
             } else if (param == "rollback" || param == "changes") {
@@ -312,12 +313,12 @@ public class ChangeSetTest extends Specification {
         ((ReplaceSqlVisitor) changeSet.sqlVisitors[0]).replace == "a"
         ((ReplaceSqlVisitor) changeSet.sqlVisitors[0]).with == "b"
 
-        that( ((ReplaceSqlVisitor) changeSet.sqlVisitors[1]).applicableDbms, Matchers.containsInAnyOrder(["mysql", "oracle"].toArray()))
+        that(((ReplaceSqlVisitor) changeSet.sqlVisitors[1]).applicableDbms, Matchers.containsInAnyOrder(["mysql", "oracle"].toArray()))
         ((ReplaceSqlVisitor) changeSet.sqlVisitors[1]).contexts.toString() == "(live), (test)"
         ((ReplaceSqlVisitor) changeSet.sqlVisitors[1]).replace == "x1"
         ((ReplaceSqlVisitor) changeSet.sqlVisitors[1]).with == "y1"
 
-        that( ((ReplaceSqlVisitor) changeSet.sqlVisitors[2]).applicableDbms, Matchers.containsInAnyOrder(["mysql", "oracle"].toArray()))
+        that(((ReplaceSqlVisitor) changeSet.sqlVisitors[2]).applicableDbms, Matchers.containsInAnyOrder(["mysql", "oracle"].toArray()))
         ((ReplaceSqlVisitor) changeSet.sqlVisitors[2]).contexts.toString() == "(live), (test)"
         ((ReplaceSqlVisitor) changeSet.sqlVisitors[2]).replace == "x2"
         ((ReplaceSqlVisitor) changeSet.sqlVisitors[2]).with == "y2"
@@ -339,15 +340,74 @@ public class ChangeSetTest extends Specification {
         when:
         def changeLog = new DatabaseChangeLog(path)
         changeLog.load(new ParsedNode(null, "databaseChangeLog")
-                .addChildren([changeSet: [id: "1", author:"nvoxland", createTable: [tableName: "table1"]]])
-                .addChildren([changeSet: [id: "2", author:"nvoxland", createTable: [tableName: "table2"]]])
-                .addChildren([changeSet: [id: "3", author:"nvoxland", dropTable: [tableName: "tableX"], rollback: [changeSetId: "2", changeSetAuthor: "nvoxland", changeSetPath: path]]])
-        , resourceSupplier.simpleResourceAccessor)
+                .addChildren([changeSet: [id: "1", author: "nvoxland", createTable: [tableName: "table1"]]])
+                .addChildren([changeSet: [id: "2", author: "nvoxland", createTable: [tableName: "table2"]]])
+                .addChildren([changeSet: [id: "3", author: "nvoxland", dropTable: [tableName: "tableX"], rollback: [changeSetId: "2", changeSetAuthor: "nvoxland", changeSetPath: path]]])
+                , resourceSupplier.simpleResourceAccessor)
 
         then:
         changeLog.getChangeSet(path, "nvoxland", "3").changes.size() == 1
         ((DropTableChange) changeLog.getChangeSet(path, "nvoxland", "3").changes[0]).tableName == "tableX"
         changeLog.getChangeSet(path, "nvoxland", "3").rollBackChanges.size() == 1
         ((CreateTableChange) changeLog.getChangeSet(path, "nvoxland", "3").rollBackChanges[0]).tableName == "table2"
+    }
+
+    def "load with changes in 'changes' node is parsed correctly"() {
+        when:
+        def changeSet = new ChangeSet(new DatabaseChangeLog("com/example/test.xml"))
+        def node = new ParsedNode(null, "changeSet")
+                .addChildren([id: "1", author: "nvoxland", changes: [
+                new ParsedNode(null, "createTable").addChild(null, "tableName", "table_1"),
+                new ParsedNode(null, "createTable").addChild(null, "tableName", "table_2")
+        ]])
+        changeSet.load(node, resourceSupplier.simpleResourceAccessor)
+
+        then:
+        changeSet.toString(false) == "com/example/test.xml::1::nvoxland"
+        changeSet.changes.size() == 2
+        changeSet.changes[0].tableName == "table_1"
+        changeSet.changes[1].tableName == "table_2"
+    }
+
+    @Unroll("#featureName: #param=#value")
+    def "load handles alwaysRun or runAlways"() {
+        when:
+        def changeSet = new ChangeSet(new DatabaseChangeLog("com/example/test.xml"))
+        changeSet.load(new ParsedNode(null, "changeSet").addChild(null, param, value), resourceSupplier.simpleResourceAccessor)
+
+        then:
+        changeSet.shouldAlwaysRun() == Boolean.valueOf(value)
+
+        where:
+        param       | value
+        "alwaysRun" | "true"
+        "alwaysRun" | "false"
+        "runAlways" | "true"
+        "runAlways" | "false"
+    }
+
+    @Unroll
+    def "load handles validCheckSum(s) as a collection or a single value"() {
+        when:
+        def changeSet = new ChangeSet(new DatabaseChangeLog("com/example/test.xml"))
+        changeSet.load(new ParsedNode(null, "changeSet").addChild(null, param, value), resourceSupplier.simpleResourceAccessor)
+
+        def expected = value
+        if (value instanceof String) {
+            expected = [value]
+        }
+
+        then:
+        that changeSet.getValidCheckSums().collect({it.toString()}), Matchers.containsInAnyOrder(((List) expected).toArray())
+
+        where:
+        param            | value
+        "validCheckSum"  | "8:a3d6a29ce3a75940858cd093501151d1"
+        "validCheckSums" | "8:a3d6a29ce3a75940858cd093501151d1"
+        "validCheckSum"  | ["8:a3d6a29ce3a75940858cd093501151d1", "8:b4d6a29de3a75940858cd09350115234"]
+        "validCheckSums" | ["8:a3d6a29ce3a75940858cd093501151d1", "8:b4d6a29de3a75940858cd09350115234"]
+        "validCheckSum"  | []
+        "validCheckSums" | []
+
     }
 }
