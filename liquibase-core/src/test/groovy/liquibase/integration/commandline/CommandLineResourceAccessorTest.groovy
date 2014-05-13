@@ -27,7 +27,7 @@ public class CommandLineResourceAccessorTest extends Specification {
 
     def "getContents"() throws Exception {
         when:
-        def contents = createFileOpener().list(null, "liquibase/ant", true, true, true);
+        def contents = createFileOpener().list(null, "liquibase/change", true, true, true);
 
         then:
         contents != null

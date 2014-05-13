@@ -1087,7 +1087,8 @@
 		<xsd:complexType>
 			<xsd:sequence>
 				<xsd:element ref="column" maxOccurs="unbounded" />
-			</xsd:sequence>
+                <xsd:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded" />
+            </xsd:sequence>
 			<xsd:attributeGroup ref="createIndex" />
 		</xsd:complexType>
 	</xsd:element>

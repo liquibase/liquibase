@@ -15,10 +15,8 @@ import java.util.*;
  */
 public class CommandLineResourceAccessor extends ClassLoaderResourceAccessor {
 
-    private ClassLoader loader;
-
     public CommandLineResourceAccessor(ClassLoader loader) {
-        this.loader = loader;
+        super(loader);
     }
 
     @Override
@@ -63,23 +61,4 @@ public class CommandLineResourceAccessor extends ClassLoaderResourceAccessor {
 
     }
 
-    @Override
-    public ClassLoader toClassLoader() {
-        return loader;
-    }
-
-    @Override
-    public String toString() {
-        String description;
-        if (loader instanceof URLClassLoader) {
-            List<String> urls = new ArrayList<String>();
-            for (URL url : ((URLClassLoader) loader).getURLs()) {
-                urls.add(url.toExternalForm());
-            }
-            description = StringUtils.join(urls, ",");
-        } else {
-            description = loader.getClass().getName();
-        }
-        return getClass().getName()+"("+ description +")";
-    }
 }

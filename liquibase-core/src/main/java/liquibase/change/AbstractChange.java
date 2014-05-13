@@ -7,6 +7,7 @@ import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
+import liquibase.serializer.LiquibaseSerializable;
 import liquibase.structure.DatabaseObject;
 import liquibase.exception.*;
 import liquibase.resource.ResourceAccessor;
@@ -537,8 +538,8 @@ public abstract class AbstractChange implements Change {
                         for (ParsedNode child : columnNodes) {
                             if (child.getName().equals("column") || child.getName().equals("columns")) {
                                 List<ParsedNode> columnChildren = child.getChildren(null, "column");
-                                if (columnChildren != null) {
-                                    for (ParsedNode columnChild  : columnChildren) {
+                                if (columnChildren != null && columnChildren.size() > 0) {
+                                    for (ParsedNode columnChild : columnChildren) {
                                         ColumnConfig columnConfig = (ColumnConfig) collectionType.newInstance();
                                         columnConfig.load(columnChild, resourceAccessor);
                                         ((ChangeWithColumns) this).addColumn(columnConfig);
@@ -550,6 +551,19 @@ public abstract class AbstractChange implements Change {
                                 }
                             }
                         }
+                    }
+                } else if (LiquibaseSerializable.class.isAssignableFrom(param.getDataTypeClass())) {
+                    try {
+                        ParsedNode child = parsedNode.getChild(null, param.getParameterName());
+                        if (child != null) {
+                            LiquibaseSerializable serializableChild = (LiquibaseSerializable) param.getDataTypeClass().newInstance();
+                            serializableChild.load(child, resourceAccessor);
+                            param.setValue(this, serializableChild);
+                        }
+                    } catch (InstantiationException e) {
+                        throw new UnexpectedLiquibaseException(e);
+                    } catch (IllegalAccessException e) {
+                        throw new UnexpectedLiquibaseException(e);
                     }
                 } else {
                     param.setValue(this, parsedNode.getChildValue(null, param.getParameterName(), param.getDataTypeClass()));
