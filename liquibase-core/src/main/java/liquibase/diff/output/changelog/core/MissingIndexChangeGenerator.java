@@ -38,7 +38,7 @@ public class MissingIndexChangeGenerator implements MissingObjectChangeGenerator
     public Change[] fixMissing(DatabaseObject missingObject, DiffOutputControl control, Database referenceDatabase, Database comparisonDatabase, ChangeGeneratorChain chain) {
         Index index = (Index) missingObject;
 
-        CreateIndexChange change = new CreateIndexChange();
+        CreateIndexChange change = createCreateIndexChange();
         change.setTableName(index.getTable().getName());
         if (control.getIncludeTablespace()) {
             change.setTablespace(index.getTablespace());
@@ -64,5 +64,9 @@ public class MissingIndexChangeGenerator implements MissingObjectChangeGenerator
         }
 
         return new Change[] { change };
+    }
+
+    protected CreateIndexChange createCreateIndexChange() {
+        return new CreateIndexChange();
     }
 }
