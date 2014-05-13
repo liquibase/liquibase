@@ -1,41 +1,18 @@
 package liquibase.parser.core.yaml;
 
 import liquibase.ContextExpression;
-import liquibase.change.*;
-import liquibase.change.core.AddColumnChange;
-import liquibase.change.core.CreateIndexChange;
-import liquibase.change.custom.CustomChangeWrapper;
 import liquibase.changelog.ChangeLogParameters;
-import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.exception.ChangeLogParseException;
-import liquibase.exception.CustomChangeException;
-import liquibase.exception.LiquibaseException;
-import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.logging.LogFactory;
 import liquibase.logging.Logger;
 import liquibase.parser.ChangeLogParser;
-import liquibase.parser.ChangeLogParserFactory;
 import liquibase.parser.core.ParsedNode;
-import liquibase.precondition.CustomPreconditionWrapper;
-import liquibase.precondition.Precondition;
-import liquibase.precondition.PreconditionFactory;
-import liquibase.precondition.PreconditionLogic;
-import liquibase.precondition.core.PreconditionContainer;
 import liquibase.resource.ResourceAccessor;
-import liquibase.sql.visitor.SqlVisitor;
-import liquibase.sql.visitor.SqlVisitorFactory;
-import liquibase.statement.DatabaseFunction;
-import liquibase.statement.SequenceCurrentValueFunction;
-import liquibase.statement.SequenceNextValueFunction;
-import liquibase.util.ObjectUtil;
 import liquibase.util.StreamUtil;
-import liquibase.util.file.FilenameUtils;
 import org.yaml.snakeyaml.Yaml;
 
-import java.io.File;
 import java.io.InputStream;
-import java.math.BigInteger;
 import java.util.*;
 
 public class YamlChangeLogParser implements ChangeLogParser {
@@ -44,7 +21,7 @@ public class YamlChangeLogParser implements ChangeLogParser {
 
     @Override
     public boolean supports(String changeLogFile, ResourceAccessor resourceAccessor) {
-        return changeLogFile.toLowerCase().endsWith("."+ getSupportedFileExtension());
+        return changeLogFile.toLowerCase().endsWith("." + getSupportedFileExtension());
     }
 
     protected String getSupportedFileExtension() {
@@ -63,23 +40,47 @@ public class YamlChangeLogParser implements ChangeLogParser {
         try {
             InputStream changeLogStream = StreamUtil.singleInputStream(physicalChangeLogLocation, resourceAccessor);
             if (changeLogStream == null) {
-                throw new ChangeLogParseException(physicalChangeLogLocation+" does not exist");
+                throw new ChangeLogParseException(physicalChangeLogLocation + " does not exist");
             }
 
             Map parsedYaml;
             try {
                 parsedYaml = yaml.loadAs(changeLogStream, Map.class);
             } catch (Exception e) {
-                throw new ChangeLogParseException("Syntax error in "+getSupportedFileExtension()+": " + e.getMessage(), e);
+                throw new ChangeLogParseException("Syntax error in " + getSupportedFileExtension() + ": " + e.getMessage(), e);
             }
 
-            DatabaseChangeLog changeLog = new DatabaseChangeLog(physicalChangeLogLocation);
-            changeLog.setChangeLogParameters(changeLogParameters);
             List rootList = (List) parsedYaml.get("databaseChangeLog");
             if (rootList == null) {
                 throw new ChangeLogParseException("Could not find databaseChangeLog node");
             }
+            for (Object obj : rootList) {
+                if (obj instanceof Map && ((Map) obj).containsKey("property")) {
+                    Map property = (Map) ((Map) obj).get("property");
+                    ContextExpression context = new ContextExpression((String) property.get("context"));
+                    if (property.containsKey("name")) {
+                        changeLogParameters.set((String) property.get("name"), (String) property.get("value"), context, (String) property.get("dbms"));
+                    } else if (property.containsKey("file")) {
+                        Properties props = new Properties();
+                        InputStream propertiesStream = StreamUtil.singleInputStream((String) property.get("file"), resourceAccessor);
+                        if (propertiesStream == null) {
+                            log.info("Could not open properties file " + property.get("file"));
+                        } else {
+                            props.load(propertiesStream);
 
+                            for (Map.Entry entry : props.entrySet()) {
+                                changeLogParameters.set(entry.getKey().toString(), entry.getValue().toString(), context, (String) property.get("dbms"));
+                            }
+                        }
+                    }
+                }
+            }
+
+
+            replaceParameters(parsedYaml, changeLogParameters);
+
+            DatabaseChangeLog changeLog = new DatabaseChangeLog(physicalChangeLogLocation);
+            changeLog.setChangeLogParameters(changeLogParameters);
             ParsedNode databaseChangeLogNode = new ParsedNode(null, "databaseChangeLog");
             databaseChangeLogNode.setValue(rootList);
 
@@ -91,6 +92,28 @@ public class YamlChangeLogParser implements ChangeLogParser {
                 throw (ChangeLogParseException) e;
             }
             throw new ChangeLogParseException(e);
+        }
+    }
+
+    protected void replaceParameters(Object obj, ChangeLogParameters changeLogParameters) {
+        if (obj instanceof Map) {
+            for (Map.Entry entry : (Set<Map.Entry>) ((Map) obj).entrySet()) {
+                if (entry.getValue() instanceof Map || entry.getValue() instanceof Collection) {
+                    replaceParameters(entry.getValue(), changeLogParameters);
+                } else if (entry.getValue() instanceof String) {
+                    entry.setValue(changeLogParameters.expandExpressions((String) entry.getValue()));
+                }
+            }
+        } else if (obj instanceof Collection) {
+            ListIterator iterator = ((List) obj).listIterator();
+            while (iterator.hasNext()) {
+                Object child = iterator.next();
+                if (child instanceof Map || child instanceof Collection) {
+                    replaceParameters(child, changeLogParameters);
+                } else if (child instanceof String) {
+                    iterator.set(changeLogParameters.expandExpressions((String) child));
+                }
+            }
         }
     }
 }

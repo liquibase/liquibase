@@ -339,8 +339,8 @@ public class YamlChangeLogParser_RealFile_Test extends Specification {
 
         changeLog.getChangeSets().get(0).getAuthor() == "paikens"
         changeLog.getChangeSets().get(0).getId() == "1"
-        changeLog.getChangeSets().get(0).comments == "Some values: overridden: 'Value passed in', not.overridden: 'value from changelog 2', database: 'database mock', contextNote: 'context prod', contextNote2: '\${contextNote2}'"
-        ((RawSQLChange) changeLog.getChangeSets().get(0).getChanges().get(0)).getSql() == "create table my_table_name;"
+        changeLog.getChangeSets().get(0).comments == "Some values: overridden: 'Value passed in', not.overridden: 'value from changelog 2', database: 'value from mock', contextNote: 'context prod', contextNote2: '\${contextNote2}'"
+        ((RawSQLChange) changeLog.getChangeSets().get(0).getChanges().get(0)).getSql() == "create table my_table_name"
         ((RawSQLChange) changeLog.getChangeSets().get(0).getRollBackChanges()[0]).getSql() == "drop table my_table_name"
 
         and: "changeSet 2"
@@ -350,7 +350,7 @@ public class YamlChangeLogParser_RealFile_Test extends Specification {
 
         ((CreateTableChange) changeLog.getChangeSets().get(1).getChanges()[0]).getTableName() == "my_table_name_2"
         ((CreateTableChange) changeLog.getChangeSets().get(1).getChanges()[0]).getColumns()[0].getName() == "my_column_name"
-        ((CreateTableChange) changeLog.getChangeSets().get(1).getChanges()[0]).getColumns()[0].getDefaultValue() == "a string with an \${unused} param against database mock"
+        ((CreateTableChange) changeLog.getChangeSets().get(1).getChanges()[0]).getColumns()[0].getDefaultValue() == "a string with an \${unused} param against value from mock"
 
     }
 
