@@ -20,7 +20,6 @@ public interface ResourceAccessor {
      * Returns the path to all resources contained in the given root. Returns null if the root does not exist. Throws IOException if there is an error reading an existing root.
      * The passed root is not included in the returned set.
      *
-     * @param relativeTo
      * @param includeFiles Set to false to exclude files in the returned set. Defaults to true
      * @param includeDirectories Set to false to exclude directories in the returned set. Defaults to true
      * @param recursive Set to true and will return paths to contents in sub directories as well. Defaults to false

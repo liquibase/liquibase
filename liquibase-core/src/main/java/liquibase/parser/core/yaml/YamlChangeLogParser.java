@@ -59,7 +59,11 @@ public class YamlChangeLogParser implements ChangeLogParser {
                     Map property = (Map) ((Map) obj).get("property");
                     ContextExpression context = new ContextExpression((String) property.get("context"));
                     if (property.containsKey("name")) {
-                        changeLogParameters.set((String) property.get("name"), (String) property.get("value"), context, (String) property.get("dbms"));
+                        Object value = property.get("value");
+                        if (value != null) {
+                            value = value.toString();
+                        }
+                        changeLogParameters.set((String) property.get("name"), (String) value, context, (String) property.get("dbms"));
                     } else if (property.containsKey("file")) {
                         Properties props = new Properties();
                         InputStream propertiesStream = StreamUtil.singleInputStream((String) property.get("file"), resourceAccessor);

@@ -99,7 +99,7 @@ public class CustomPreconditionWrapper extends AbstractPrecondition {
     }
 
     @Override
-    public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException, SetupException {
+    public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException {
         setClassLoader(resourceAccessor.toClassLoader());
         setClassName(parsedNode.getChildValue(null, "className", String.class));
 

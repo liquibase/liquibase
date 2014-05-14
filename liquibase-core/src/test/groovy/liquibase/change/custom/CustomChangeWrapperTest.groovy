@@ -5,7 +5,6 @@ import liquibase.database.core.MockDatabase
 import liquibase.exception.*
 import liquibase.parser.core.ParsedNode
 import liquibase.parser.core.ParsedNodeException
-import liquibase.resource.ResourceAccessor
 import liquibase.sdk.supplier.resource.ResourceSupplier
 import liquibase.statement.SqlStatement
 import spock.lang.Shared
@@ -136,14 +135,14 @@ public class CustomChangeWrapperTest extends Specification {
         CustomChangeWrapper changeWrapper = new CustomChangeWrapper();
         changeWrapper.setClassLoader(getClass().getClassLoader());
         changeWrapper.setClass(ExampleCustomSqlChange.class.getName());
-        changeWrapper.setParam("name", "myName");
-        changeWrapper.setParam("address", "myAddr");
+        changeWrapper.setParam("tableName", "myName");
+        changeWrapper.setParam("columnName", "myCol");
 
         changeWrapper.generateStatements(new MockDatabase());
 
         then:
-        ((ExampleCustomSqlChange) changeWrapper.customChange).name == "myName"
-        ((ExampleCustomSqlChange) changeWrapper.customChange).address == "myAddr"
+        ((ExampleCustomSqlChange) changeWrapper.customChange).tableName == "myName"
+        ((ExampleCustomSqlChange) changeWrapper.customChange).columnName == "myCol"
     }
 
     def generateStatements_paramsSetBad() throws Exception {
@@ -212,14 +211,14 @@ public class CustomChangeWrapperTest extends Specification {
         CustomChangeWrapper changeWrapper = new CustomChangeWrapper();
         changeWrapper.setClassLoader(getClass().getClassLoader());
         changeWrapper.setClass(ExampleCustomSqlChange.class.getName());
-        changeWrapper.setParam("name", "myName");
-        changeWrapper.setParam("address", "myAddr");
+        changeWrapper.setParam("tableName", "myName");
+        changeWrapper.setParam("columnName", "myCol");
 
         changeWrapper.generateRollbackStatements(new MockDatabase());
 
         then:
-        ((ExampleCustomSqlChange) changeWrapper.customChange).name == "myName"
-        ((ExampleCustomSqlChange) changeWrapper.customChange).address == "myAddr"
+        ((ExampleCustomSqlChange) changeWrapper.customChange).tableName == "myName"
+        ((ExampleCustomSqlChange) changeWrapper.customChange).columnName == "myCol"
     }
 
     def generateRollbackStatements_paramsSetBad() throws Exception {
@@ -266,7 +265,11 @@ public class CustomChangeWrapperTest extends Specification {
                 .addChild(new ParsedNode(null, "otherNode").setValue("should be ignored"))
                 .addChild(new ParsedNode(null, "param").addChildren([name: "param 3"]).setValue("param 3 value"))
         def change = new CustomChangeWrapper()
-        change.load(node, resourceSupplier.simpleResourceAccessor)
+        try {
+            change.load(node, resourceSupplier.simpleResourceAccessor)
+        } catch (ParsedNodeException e) {
+            e.printStackTrace()
+        }
 
         then:
         change.classLoader != null
@@ -288,65 +291,39 @@ public class CustomChangeWrapperTest extends Specification {
                                            new ParsedNode(null, "otherNode").setValue("should be ignored"),
                                            new ParsedNode(null, "param").addChildren([name: "param 3"]).setValue("param 3 value")])
         def change = new CustomChangeWrapper()
-        change.load(node, resourceSupplier.simpleResourceAccessor)
+        try {
+            change.load(node, resourceSupplier.simpleResourceAccessor)
+        } catch (ParsedNodeException e) {
+            e.printStackTrace()
+        }
 
         then:
         change.classLoader != null
         change.resourceAccessor == resourceSupplier.simpleResourceAccessor
-        change.getCustomChange() instanceof liquibase.change.custom.ExampleCustomSqlChange
+        change.getCustomChange() instanceof ExampleCustomSqlChange
         change.params.size() == 3
         change.getParamValue("param 1") == "param 1 value"
         change.getParamValue("param 2") == "param 2 value"
         change.getParamValue("param 3") == "param 3 value"
     }
 
-    public static class ExampleCustomSqlChange implements CustomSqlChange, CustomSqlRollback {
-
-        private String name;
-        private String address;
-
-        public String getName() {
-            return name;
+    def "load handles params as extra attributes collection"() {
+        when:
+        def change = new CustomChangeWrapper()
+        try {
+            change.load(new liquibase.parser.core.ParsedNode(null, "customChange")
+                    .addChildren([class: "liquibase.change.custom.ExampleCustomSqlChange", tableName: "my_table", columnName: "my_col", unusedParam: "unused value"]), resourceSupplier.simpleResourceAccessor)
+        } catch (ParsedNodeException e) {
+            e.printStackTrace()
         }
 
-        public void setName(String name) {
-            this.name = name;
-        }
-
-        public String getAddress() {
-            return address;
-        }
-
-        public void setAddress(String address) {
-            this.address = address;
-        }
-
-        @Override
-        public String getConfirmationMessage() {
-            return null;
-        }
-
-        @Override
-        public void setUp() throws SetupException {
-        }
-
-        @Override
-        public void setFileOpener(ResourceAccessor resourceAccessor) {
-        }
-
-        @Override
-        public ValidationErrors validate(Database database) {
-            return null;
-        }
-
-        @Override
-        public SqlStatement[] generateStatements(Database database) throws CustomChangeException {
-            return new SqlStatement[0];
-        }
-
-        @Override
-        public SqlStatement[] generateRollbackStatements(Database database) throws CustomChangeException, RollbackImpossibleException {
-            return new SqlStatement[0];
-        }
+        then:
+        change.classLoader != null
+        change.resourceAccessor == resourceSupplier.simpleResourceAccessor
+        change.getCustomChange() instanceof ExampleCustomSqlChange
+        change.params.size() == 2
+        change.getParamValue("tableName") == "my_table"
+        change.getParamValue("columnName") == "my_col"
+        change.getParamValue("unusedParam") == null
     }
 }

@@ -1,6 +1,9 @@
 package liquibase.parser.core;
 
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.statement.DatabaseFunction;
+import liquibase.statement.SequenceCurrentValueFunction;
+import liquibase.statement.SequenceNextValueFunction;
 import liquibase.util.ISODateFormat;
 import liquibase.util.StringUtils;
 
@@ -232,6 +235,12 @@ public class ParsedNode {
                 return (T) Boolean.valueOf(rawValue.toString());
             } else if (type.isAssignableFrom(Date.class)) {
                 return (T) new ISODateFormat().parse(rawValue.toString());
+            } else if (type.equals(SequenceNextValueFunction.class)) {
+                return (T) new SequenceNextValueFunction(rawValue.toString());
+            } else if (type.equals(SequenceCurrentValueFunction.class)) {
+                return (T) new SequenceCurrentValueFunction(rawValue.toString());
+            } else if (type.equals(DatabaseFunction.class)) {
+                return (T) new DatabaseFunction(rawValue.toString());
             } else {
                 throw new UnexpectedLiquibaseException("Cannot convert " + rawValue.getClass().getName() + " '" + rawValue + "' to " + type.getName());
             }

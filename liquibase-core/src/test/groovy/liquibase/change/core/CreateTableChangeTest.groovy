@@ -5,7 +5,6 @@ import liquibase.change.ColumnConfig
 import liquibase.change.ConstraintsConfig
 import liquibase.change.StandardChangeTest
 import liquibase.database.core.MockDatabase
-import liquibase.exception.SetupException
 import liquibase.parser.core.ParsedNode
 import liquibase.parser.core.ParsedNodeException
 import liquibase.snapshot.MockSnapshotGeneratorFactory
@@ -232,7 +231,11 @@ public class CreateTableChangeTest extends StandardChangeTest {
                 .addChildren([column: [name: "column1", type: "type1"]])
                 .addChildren([column: [name: "column2", type: "type2"]])
         def change = new CreateTableChange()
-        change.load(node, resourceSupplier.simpleResourceAccessor)
+        try {
+            change.load(node, resourceSupplier.simpleResourceAccessor)
+        } catch (ParsedNodeException e) {
+            e.printStackTrace()
+        }
 
         then:
         change.tableName == "table_name"
@@ -249,7 +252,11 @@ public class CreateTableChangeTest extends StandardChangeTest {
         def node = new ParsedNode(null, "createTable").addChildren([tableName: "table_name"])
                 .addChild(null, "columns", [[column: [name: "column1", type: "type1"]], [column: [name: "column2", type: "type2"]]])
         def change = new CreateTableChange()
-        change.load(node, resourceSupplier.simpleResourceAccessor)
+        try {
+            change.load(node, resourceSupplier.simpleResourceAccessor)
+        } catch (ParsedNodeException e) {
+            e.printStackTrace()
+        }
 
         then:
         change.tableName == "table_name"

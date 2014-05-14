@@ -31,7 +31,7 @@ public interface LiquibaseSerializable {
 
     String getSerializedObjectNamespace();
 
-    public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException, SetupException;
+    public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException;
 
     public ParsedNode serialize() throws ParsedNodeException;
 

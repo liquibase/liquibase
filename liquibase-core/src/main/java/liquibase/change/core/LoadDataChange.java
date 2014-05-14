@@ -248,11 +248,15 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
         }
 
         char quotchar;
-        if (0 == this.quotchar.length() ) {
+        if (StringUtils.trimToEmpty(this.quotchar).length() == 0) {
             // hope this is impossible to have a field surrounded with non ascii char 0x01
             quotchar = '\1';
         } else {
             quotchar = this.quotchar.charAt(0);
+        }
+
+        if (separator == null) {
+            separator = liquibase.util.csv.opencsv.CSVReader.DEFAULT_SEPARATOR + "";
         }
 
         return new CSVReader(streamReader, separator.charAt(0), quotchar );

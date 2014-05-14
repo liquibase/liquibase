@@ -1,6 +1,5 @@
 package liquibase.change
 
-import liquibase.exception.SetupException
 import liquibase.parser.core.ParsedNode
 import liquibase.parser.core.ParsedNodeException
 import liquibase.sdk.supplier.resource.ResourceSupplier
@@ -14,9 +13,10 @@ import spock.lang.Unroll
 
 import java.text.ParseException
 
-public class ColumnConfigTest  extends Specification {
+public class ColumnConfigTest extends Specification {
 
-    @Shared resourceSupplier = new ResourceSupplier();
+    @Shared
+            resourceSupplier = new ResourceSupplier();
 
     def constructor_everythingSet() {
         when:
@@ -73,7 +73,7 @@ public class ColumnConfigTest  extends Specification {
 
         ColumnConfig config = new ColumnConfig(column);
         config.getName() == "colName"
-        
+
         then:
         config.getDefaultValue() == null
         config.getRemarks() == null
@@ -105,7 +105,7 @@ public class ColumnConfigTest  extends Specification {
         column.setType(new DataType("BIGINT"));
 
         ColumnConfig config = new ColumnConfig(column);
-             
+
         then:
         config.getName() == "colName"
         config.getType() == "BIGINT"
@@ -420,7 +420,7 @@ public class ColumnConfigTest  extends Specification {
         def testValue = "value for ${field}"
         if (field in ["defaultValueDate", "valueDate"]) {
             testValue = "2012-03-13 18:52:22.129"
-        } else if (field in ["defaultValueBoolean","valueBoolean", "autoIncrement"]) {
+        } else if (field in ["defaultValueBoolean", "valueBoolean", "autoIncrement"]) {
             testValue = "true"
         } else if (field in ["startWith", "incrementBy"]) {
             testValue = "838"
@@ -432,15 +432,13 @@ public class ColumnConfigTest  extends Specification {
             column.load(node, resourceSupplier.simpleResourceAccessor)
         } catch (ParsedNodeException e) {
             e.printStackTrace()
-        } catch (SetupException e) {
-            e.printStackTrace()
         }
 
         then:
         assert column.getSerializableFieldValue(field).toString() == testValue.toString()
 
         where:
-        field << new ColumnConfig().getSerializableFields().findAll( {!it.equals("constraints")})
+        field << new ColumnConfig().getSerializableFields().findAll({ !it.equals("constraints") })
     }
 
     @Unroll("#featureName: #field")
@@ -461,8 +459,6 @@ public class ColumnConfigTest  extends Specification {
             column.load(node, resourceSupplier.simpleResourceAccessor)
         } catch (ParsedNodeException e) {
             e.printStackTrace()
-        } catch (SetupException e) {
-            e.printStackTrace()
         }
 
         then:
@@ -470,8 +466,27 @@ public class ColumnConfigTest  extends Specification {
 
         where:
         field << new ConstraintsConfig().getSerializableFields()
+    }
 
+    @Unroll("#featureName #param=#value")
+    def "load will convert unparsable values to DatabaseFunctions"() {
+        when:
+        def column = new ColumnConfig()
+        try {
+            column.load(new liquibase.parser.core.ParsedNode(null, "column").addChild(null, param, value), resourceSupplier.simpleResourceAccessor)
+        } catch (ParsedNodeException e) {
+            e.printStackTrace()
+        }
 
+        then:
+        column[computedProperty].toString() == value
+
+        where:
+        param                 | value             | computedProperty
+        "valueDate"           | "now()"           | "valueComputed"
+        "valueNumeric"        | "compute_value()" | "valueComputed"
+        "defaultValueDate"    | "now()"           | "defaultValueComputed"
+        "defaultValueNumeric" | "compute_value()" | "defaultValueComputed"
     }
 
 }

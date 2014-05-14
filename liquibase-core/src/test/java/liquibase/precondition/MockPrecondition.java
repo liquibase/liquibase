@@ -32,7 +32,7 @@ public class MockPrecondition implements Precondition {
     }
 
     @Override
-    public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException, SetupException {
+    public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException {
 
     }
 

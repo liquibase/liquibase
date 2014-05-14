@@ -1,7 +1,6 @@
 package liquibase.change.core
 
 import liquibase.exception.SetupException
-import liquibase.parser.core.ParsedNode
 import liquibase.parser.core.ParsedNodeException
 import liquibase.sdk.supplier.resource.ResourceSupplier
 import org.hamcrest.Matchers
@@ -38,12 +37,16 @@ class ExecuteShellCommandChangeTest extends Specification {
     def "load handles nested 'args' collection"() {
         when:
         def change = new ExecuteShellCommandChange()
-        change.load(new ParsedNode(null, "executeCommand")
-                .addChildren([executable: "/usr/bin/test", os: "linux,mac"])
-                .addChild(new ParsedNode(null, "args")
-                    .addChild(new ParsedNode(null, "arg").addChild(null, "value", "-out"))
-                    .addChild(new ParsedNode(null, "arg").addChild(null, "value", "-test"))
-        ), resourceSupplier.simpleResourceAccessor)
+        try {
+            change.load(new liquibase.parser.core.ParsedNode(null, "executeCommand")
+                    .addChildren([executable: "/usr/bin/test", os: "linux,mac"])
+                    .addChild(new liquibase.parser.core.ParsedNode(null, "args")
+                    .addChild(new liquibase.parser.core.ParsedNode(null, "arg").addChild(null, "value", "-out"))
+                    .addChild(new liquibase.parser.core.ParsedNode(null, "arg").addChild(null, "value", "-test"))
+            ), resourceSupplier.simpleResourceAccessor)
+        } catch (ParsedNodeException e) {
+            e.printStackTrace()
+        }
 
         then:
         change.executable == "/usr/bin/test"

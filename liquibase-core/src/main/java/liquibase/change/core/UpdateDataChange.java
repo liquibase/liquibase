@@ -2,7 +2,6 @@ package liquibase.change.core;
 
 import liquibase.change.*;
 import liquibase.database.Database;
-import liquibase.exception.SetupException;
 import liquibase.exception.ValidationErrors;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
@@ -124,8 +123,6 @@ public class UpdateDataChange extends AbstractModifyDataChange implements Change
                 try {
                     columnConfig.load(param, resourceAccessor);
                 } catch (ParsedNodeException e) {
-                    e.printStackTrace();
-                } catch (SetupException e) {
                     e.printStackTrace();
                 }
                 addWhereParam(columnConfig);

@@ -239,7 +239,7 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
     }
 
     @Override
-    public void load(ParsedNode node, ResourceAccessor resourceAccessor) throws ParsedNodeException, SetupException {
+    public void load(ParsedNode node, ResourceAccessor resourceAccessor) throws ParsedNodeException {
         this.id = node.getChildValue(null, "id", String.class);
         this.author = node.getChildValue(null, "author", String.class);
         this.alwaysRun  = node.getChildValue(null, "runAlways", node.getChildValue(null, "alwaysRun", false));
@@ -269,7 +269,7 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
         }
     }
 
-    protected void handleChildNode(ParsedNode child, ResourceAccessor resourceAccessor) throws ParsedNodeException, SetupException {
+    protected void handleChildNode(ParsedNode child, ResourceAccessor resourceAccessor) throws ParsedNodeException {
         if (child.getName().equals("rollback")) {
             handleRollbackNode(child, resourceAccessor);
         } else if (child.getName().equals("validCheckSum") || child.getName().equals("validCheckSums")) {
@@ -307,11 +307,8 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
                         sqlVisitor.setApplicableDbms(dbms);
                     }
                     sqlVisitor.setContexts(context);
-                    try {
-                        sqlVisitor.load(node, resourceAccessor);
-                    } catch (ParsedNodeException e) {
-                        e.printStackTrace();
-                    }
+                    sqlVisitor.load(node, resourceAccessor);
+
                     addSqlVisitor(sqlVisitor);
                 }
             }
@@ -333,15 +330,15 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
         }
     }
 
-    protected void handleRollbackNode(ParsedNode rollbackNode, ResourceAccessor resourceAccessor) throws ParsedNodeException, SetupException {
+    protected void handleRollbackNode(ParsedNode rollbackNode, ResourceAccessor resourceAccessor) throws ParsedNodeException {
         String changeSetId = rollbackNode.getChildValue(null, "changeSetId", String.class);
         if (changeSetId != null) {
             String changeSetAuthor = rollbackNode.getChildValue(null, "changeSetAuthor", String.class);
-            String changeSetPath = rollbackNode.getChildValue(null, "changeSetPath", String.class);
+            String changeSetPath = rollbackNode.getChildValue(null, "changeSetPath", getFilePath());
 
             ChangeSet changeSet = this.getChangeLog().getChangeSet(changeSetPath, changeSetAuthor, changeSetId);
             if (changeSet == null) {
-                throw new SetupException("Change set "+new ChangeSet(changeSetId, changeSetAuthor, false, false, changeSetPath, null, null, null).toString(false)+" does not exist");
+                throw new ParsedNodeException("Change set "+new ChangeSet(changeSetId, changeSetAuthor, false, false, changeSetPath, null, null, null).toString(false)+" does not exist");
             }
             for (Change change : changeSet.getChanges()) {
                 addRollbackChange(change);
@@ -375,7 +372,7 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
         }
     }
 
-    protected Change toChange(ParsedNode value, ResourceAccessor resourceAccessor) throws ParsedNodeException, SetupException {
+    protected Change toChange(ParsedNode value, ResourceAccessor resourceAccessor) throws ParsedNodeException {
         Change change = ChangeFactory.getInstance().create(value.getName());
         if (change == null) {
             return null;

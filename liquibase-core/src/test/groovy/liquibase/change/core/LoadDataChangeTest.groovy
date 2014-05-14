@@ -3,8 +3,6 @@ package liquibase.change.core
 import liquibase.change.ChangeStatus
 import liquibase.change.StandardChangeTest;
 import liquibase.database.core.MockDatabase
-import liquibase.exception.SetupException
-import liquibase.parser.core.ParsedNode
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.resource.ClassLoaderResourceAccessor
 import liquibase.snapshot.MockSnapshotGeneratorFactory
@@ -165,10 +163,14 @@ public class LoadDataChangeTest extends StandardChangeTest {
     def "load works"() {
         when:
         def change = new LoadDataChange()
-        change.load(new ParsedNode(null, "loadData").setValue([
-                [column: [name: "id"]],
-                [column: [name: "new_col", header: "new_col_header"]],
-        ]), resourceSupplier.simpleResourceAccessor)
+        try {
+            change.load(new liquibase.parser.core.ParsedNode(null, "loadData").setValue([
+                    [column: [name: "id"]],
+                    [column: [name: "new_col", header: "new_col_header"]],
+            ]), resourceSupplier.simpleResourceAccessor)
+        } catch (ParsedNodeException e) {
+            e.printStackTrace()
+        }
 
         then:
         change.columns.size() == 2

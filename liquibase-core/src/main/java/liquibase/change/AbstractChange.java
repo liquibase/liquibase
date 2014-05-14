@@ -512,7 +512,7 @@ public abstract class AbstractChange implements Change {
     }
 
     @Override
-    public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException, SetupException {
+    public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException {
         ChangeMetaData metaData = ChangeFactory.getInstance().getChangeMetaData(this);
         this.setResourceAccessor(resourceAccessor);
         try {
@@ -575,7 +575,11 @@ public abstract class AbstractChange implements Change {
             throw new UnexpectedLiquibaseException(e);
         }
         customLoadLogic(parsedNode, resourceAccessor);
-        this.finishInitialization();
+        try {
+            this.finishInitialization();
+        } catch (SetupException e) {
+            throw new ParsedNodeException(e);
+        }
     }
 
     protected void customLoadLogic(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException {

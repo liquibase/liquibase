@@ -3,6 +3,7 @@ package liquibase.changelog
 import liquibase.change.CheckSum
 import liquibase.change.core.*
 import liquibase.parser.core.ParsedNode
+import liquibase.parser.core.ParsedNodeException
 import liquibase.precondition.core.RunningAsPrecondition
 import liquibase.sdk.supplier.resource.ResourceSupplier
 import liquibase.sql.visitor.ReplaceSqlVisitor
@@ -100,7 +101,11 @@ public class ChangeSetTest extends Specification {
         when:
         def changeSet = new ChangeSet(new DatabaseChangeLog("com/example/test.xml"))
         def node = new ParsedNode(null, "changeSet").addChildren([id: "1", author: "nvoxland"])
-        changeSet.load(node, resourceSupplier.simpleResourceAccessor)
+        try {
+            changeSet.load(node, resourceSupplier.simpleResourceAccessor)
+        } catch (ParsedNodeException e) {
+            e.printStackTrace()
+        }
 
         then:
         changeSet.toString(false) == "com/example/test.xml::1::nvoxland"
@@ -126,7 +131,11 @@ public class ChangeSetTest extends Specification {
             node.addChild(null, param, testValue[param])
         }
         node.addChild(null, "onValidationFail", "MARK_RAN")
-        changeSet.load(node, resourceSupplier.simpleResourceAccessor)
+        try {
+            changeSet.load(node, resourceSupplier.simpleResourceAccessor)
+        } catch (ParsedNodeException e) {
+            e.printStackTrace()
+        }
 
         then:
         for (param in fields) {
@@ -147,7 +156,11 @@ public class ChangeSetTest extends Specification {
                 .addChildren([id: "1", author: "nvoxland"])
                 .addChild(new ParsedNode(null, "createTable").addChild(null, "tableName", "table_1"))
                 .addChild(new ParsedNode(null, "createTable").addChild(null, "tableName", "table_2"))
-        changeSet.load(node, resourceSupplier.simpleResourceAccessor)
+        try {
+            changeSet.load(node, resourceSupplier.simpleResourceAccessor)
+        } catch (ParsedNodeException e) {
+            e.printStackTrace()
+        }
 
         then:
         changeSet.toString(false) == "com/example/test.xml::1::nvoxland"
@@ -162,7 +175,11 @@ public class ChangeSetTest extends Specification {
         def node = new ParsedNode(null, "changeSet")
                 .addChild(new ParsedNode(null, "createTable").addChild(null, "tableName", "table_1"))
                 .setValue(new ParsedNode(null, "rollback").setValue("rollback logic here"))
-        changeSet.load(node, resourceSupplier.simpleResourceAccessor)
+        try {
+            changeSet.load(node, resourceSupplier.simpleResourceAccessor)
+        } catch (ParsedNodeException e) {
+            e.printStackTrace()
+        }
 
         then:
         changeSet.changes.size() == 1
@@ -176,7 +193,11 @@ public class ChangeSetTest extends Specification {
         def node = new ParsedNode(null, "changeSet")
                 .addChild(new ParsedNode(null, "createTable").addChild(null, "tableName", "table_1"))
                 .setValue(new ParsedNode(null, "rollback").setValue(new ParsedNode(null, "renameTable").addChild(null, "newTableName", "rename_to_x")))
-        changeSet.load(node, resourceSupplier.simpleResourceAccessor)
+        try {
+            changeSet.load(node, resourceSupplier.simpleResourceAccessor)
+        } catch (ParsedNodeException e) {
+            e.printStackTrace()
+        }
 
         then:
         changeSet.changes.size() == 1
@@ -193,7 +214,11 @@ public class ChangeSetTest extends Specification {
                 new ParsedNode(null, "rollback").setValue(new ParsedNode(null, "renameTable").addChild(null, "newTableName", "rename_to_x")),
                 new ParsedNode(null, "rollback").setValue(new ParsedNode(null, "renameTable").addChild(null, "newTableName", "rename_to_y"))
         ])
-        changeSet.load(node, resourceSupplier.simpleResourceAccessor)
+        try {
+            changeSet.load(node, resourceSupplier.simpleResourceAccessor)
+        } catch (ParsedNodeException e) {
+            e.printStackTrace()
+        }
 
         then:
         changeSet.changes.size() == 1
@@ -211,7 +236,11 @@ public class ChangeSetTest extends Specification {
                 .addChild(new ParsedNode(null, "rollback").addChild((new ParsedNode(null, "renameTable").addChild(null, "newTableName", "rename_to_b"))))
                 .addChild(new ParsedNode(null, "rollback").setValue("rollback sql"))
 
-        changeSet.load(node, resourceSupplier.simpleResourceAccessor)
+        try {
+            changeSet.load(node, resourceSupplier.simpleResourceAccessor)
+        } catch (ParsedNodeException e) {
+            e.printStackTrace()
+        }
 
         then:
         changeSet.changes.size() == 1
@@ -228,7 +257,11 @@ public class ChangeSetTest extends Specification {
                 .addChild(new ParsedNode(null, "createTable").addChild(null, "tableName", "table_1"))
                 .addChild(new ParsedNode(null, "rollback").setValue("\n--a comment here\nrollback sql 1;\nrollback sql 2\n--final comment"))
 
-        changeSet.load(node, resourceSupplier.simpleResourceAccessor)
+        try {
+            changeSet.load(node, resourceSupplier.simpleResourceAccessor)
+        } catch (ParsedNodeException e) {
+            e.printStackTrace()
+        }
 
         then:
         changeSet.changes.size() == 1
@@ -243,7 +276,11 @@ public class ChangeSetTest extends Specification {
         def node = new ParsedNode(null, "changeSet")
                 .addChild(null, "validCheckSum", "c2b7b29ce3a75940893cd022501852e2")
                 .addChild(null, "validCheckSum", "8:d54da29ce3a75940858cd093501158b8")
-        changeSet.load(node, resourceSupplier.simpleResourceAccessor)
+        try {
+            changeSet.load(node, resourceSupplier.simpleResourceAccessor)
+        } catch (ParsedNodeException e) {
+            e.printStackTrace()
+        }
 
         then:
         changeSet.validCheckSums.size() == 2
@@ -258,7 +295,11 @@ public class ChangeSetTest extends Specification {
                 new ParsedNode(null, "validCheckSum").setValue("c2b7b29ce3a75940893cd022501852e2"),
                 new ParsedNode(null, "validCheckSum").setValue("8:d54da29ce3a75940858cd093501158b8")
         ])
-        changeSet.load(node, resourceSupplier.simpleResourceAccessor)
+        try {
+            changeSet.load(node, resourceSupplier.simpleResourceAccessor)
+        } catch (ParsedNodeException e) {
+            e.printStackTrace()
+        }
 
         then:
         changeSet.validCheckSums.size() == 2
@@ -269,10 +310,14 @@ public class ChangeSetTest extends Specification {
     def "load node with preconditions as child"() {
         when:
         def changeSet = new ChangeSet(new DatabaseChangeLog("com/example/test.xml"))
-        changeSet.load(new ParsedNode(null, "changeSet").addChildren([preConditions: [
-                [runningAs: [username: "my_user"]],
-                [runningAs: [username: "my_other_user"]],
-        ]]), resourceSupplier.simpleResourceAccessor)
+        try {
+            changeSet.load(new liquibase.parser.core.ParsedNode(null, "changeSet").addChildren([preConditions: [
+                    [runningAs: [username: "my_user"]],
+                    [runningAs: [username: "my_other_user"]],
+            ]]), resourceSupplier.simpleResourceAccessor)
+        } catch (ParsedNodeException e) {
+            e.printStackTrace()
+        }
 
         then:
         changeSet.preconditions.nestedPreconditions.size() == 2
@@ -283,10 +328,14 @@ public class ChangeSetTest extends Specification {
     def "load node with preconditions as value"() {
         when:
         def changeSet = new ChangeSet(new DatabaseChangeLog("com/example/test.xml"))
-        changeSet.load(new ParsedNode(null, "changeSet").setValue(new ParsedNode(null, "preConditions").setValue([
-                [runningAs: [username: "my_user"]],
-                [runningAs: [username: "my_other_user"]],
-        ])), resourceSupplier.simpleResourceAccessor)
+        try {
+            changeSet.load(new liquibase.parser.core.ParsedNode(null, "changeSet").setValue(new liquibase.parser.core.ParsedNode(null, "preConditions").setValue([
+                    [runningAs: [username: "my_user"]],
+                    [runningAs: [username: "my_other_user"]],
+            ])), resourceSupplier.simpleResourceAccessor)
+        } catch (ParsedNodeException e) {
+            e.printStackTrace()
+        }
 
         then:
         changeSet.preconditions.nestedPreconditions.size() == 2
@@ -297,13 +346,17 @@ public class ChangeSetTest extends Specification {
     def "load with modifySql as value"() {
         when:
         def changeSet = new ChangeSet(new DatabaseChangeLog("com/example/test.xml"))
-        changeSet.load(new ParsedNode(null, "changeSet").setValue([
-                new ParsedNode(null, "modifySql").addChildren([applyToRollback: "true", replace: [replace: "a", with: "b"]]),
-                new ParsedNode(null, "modifySql").addChildren([dbms: "mysql, oracle", context: "live, test", applyToRollback: "false"]).setValue([
-                        [replace: [replace: "x1", with: "y1"]],
-                        [replace: [replace: "x2", with: "y2"]],
-                ])
-        ]), resourceSupplier.simpleResourceAccessor)
+        try {
+            changeSet.load(new liquibase.parser.core.ParsedNode(null, "changeSet").setValue([
+                    new liquibase.parser.core.ParsedNode(null, "modifySql").addChildren([applyToRollback: "true", replace: [replace: "a", with: "b"]]),
+                    new liquibase.parser.core.ParsedNode(null, "modifySql").addChildren([dbms: "mysql, oracle", context: "live, test", applyToRollback: "false"]).setValue([
+                            [replace: [replace: "x1", with: "y1"]],
+                            [replace: [replace: "x2", with: "y2"]],
+                    ])
+            ]), resourceSupplier.simpleResourceAccessor)
+        } catch (ParsedNodeException e) {
+            e.printStackTrace()
+        }
 
         then:
         changeSet.sqlVisitors.size() == 3
@@ -327,7 +380,11 @@ public class ChangeSetTest extends Specification {
     def "load with empty rollback creates an EmptyChange"() {
         when:
         def changeSet = new ChangeSet(new DatabaseChangeLog("com/example/test.xml"))
-        changeSet.load(new ParsedNode(null, "changeSet").addChild(new ParsedNode(null, "rollback")), resourceSupplier.simpleResourceAccessor)
+        try {
+            changeSet.load(new liquibase.parser.core.ParsedNode(null, "changeSet").addChild(new liquibase.parser.core.ParsedNode(null, "rollback")), resourceSupplier.simpleResourceAccessor)
+        } catch (ParsedNodeException e) {
+            e.printStackTrace()
+        }
 
         then:
         changeSet.changes.size() == 0
@@ -335,6 +392,7 @@ public class ChangeSetTest extends Specification {
         changeSet.rollBackChanges[0] instanceof EmptyChange
     }
 
+    @Unroll("#featureName with changeSetPath=#changeSetPath")
     def "load with rollback referencing earlier changeSet"() {
         def path = "com/example/test.xml"
         when:
@@ -342,7 +400,7 @@ public class ChangeSetTest extends Specification {
         changeLog.load(new ParsedNode(null, "databaseChangeLog")
                 .addChildren([changeSet: [id: "1", author: "nvoxland", createTable: [tableName: "table1"]]])
                 .addChildren([changeSet: [id: "2", author: "nvoxland", createTable: [tableName: "table2"]]])
-                .addChildren([changeSet: [id: "3", author: "nvoxland", dropTable: [tableName: "tableX"], rollback: [changeSetId: "2", changeSetAuthor: "nvoxland", changeSetPath: path]]])
+                .addChildren([changeSet: [id: "3", author: "nvoxland", dropTable: [tableName: "tableX"], rollback: [changeSetId: "2", changeSetAuthor: "nvoxland", changeSetPath: changeSetPath]]])
                 , resourceSupplier.simpleResourceAccessor)
 
         then:
@@ -350,6 +408,9 @@ public class ChangeSetTest extends Specification {
         ((DropTableChange) changeLog.getChangeSet(path, "nvoxland", "3").changes[0]).tableName == "tableX"
         changeLog.getChangeSet(path, "nvoxland", "3").rollBackChanges.size() == 1
         ((CreateTableChange) changeLog.getChangeSet(path, "nvoxland", "3").rollBackChanges[0]).tableName == "table2"
+
+        where:
+        changeSetPath << ["com/example/test.xml", null]
     }
 
     def "load with changes in 'changes' node is parsed correctly"() {
@@ -360,7 +421,11 @@ public class ChangeSetTest extends Specification {
                 new ParsedNode(null, "createTable").addChild(null, "tableName", "table_1"),
                 new ParsedNode(null, "createTable").addChild(null, "tableName", "table_2")
         ]])
-        changeSet.load(node, resourceSupplier.simpleResourceAccessor)
+        try {
+            changeSet.load(node, resourceSupplier.simpleResourceAccessor)
+        } catch (ParsedNodeException e) {
+            e.printStackTrace()
+        }
 
         then:
         changeSet.toString(false) == "com/example/test.xml::1::nvoxland"
@@ -373,7 +438,11 @@ public class ChangeSetTest extends Specification {
     def "load handles alwaysRun or runAlways"() {
         when:
         def changeSet = new ChangeSet(new DatabaseChangeLog("com/example/test.xml"))
-        changeSet.load(new ParsedNode(null, "changeSet").addChild(null, param, value), resourceSupplier.simpleResourceAccessor)
+        try {
+            changeSet.load(new liquibase.parser.core.ParsedNode(null, "changeSet").addChild(null, param, value), resourceSupplier.simpleResourceAccessor)
+        } catch (ParsedNodeException e) {
+            e.printStackTrace()
+        }
 
         then:
         changeSet.shouldAlwaysRun() == Boolean.valueOf(value)
@@ -390,7 +459,11 @@ public class ChangeSetTest extends Specification {
     def "load handles validCheckSum(s) as a collection or a single value"() {
         when:
         def changeSet = new ChangeSet(new DatabaseChangeLog("com/example/test.xml"))
-        changeSet.load(new ParsedNode(null, "changeSet").addChild(null, param, value), resourceSupplier.simpleResourceAccessor)
+        try {
+            changeSet.load(new liquibase.parser.core.ParsedNode(null, "changeSet").addChild(null, param, value), resourceSupplier.simpleResourceAccessor)
+        } catch (ParsedNodeException e) {
+            e.printStackTrace()
+        }
 
         def expected = value
         if (value instanceof String) {

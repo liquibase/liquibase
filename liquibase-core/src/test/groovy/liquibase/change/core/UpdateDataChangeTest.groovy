@@ -3,7 +3,6 @@ package liquibase.change.core
 import liquibase.change.ChangeStatus
 import liquibase.change.StandardChangeTest
 import liquibase.database.core.MockDatabase
-import liquibase.exception.SetupException
 import liquibase.parser.core.ParsedNode
 import liquibase.parser.core.ParsedNodeException
 
@@ -40,7 +39,11 @@ public class UpdateDataChangeTest extends StandardChangeTest {
         def whereParams = new ParsedNode(null, "whereParams")
                 .addChild(new ParsedNode(null, "param").addChild(null, "valueNumeric", "134"))
                 .addChild(new ParsedNode(null, "param").addChildren([name: "other_val", value: "asdf"]))
-        change.load(new ParsedNode(null, "updateData").addChild(null, "tableName", "updateTest").addChild(whereParams), resourceSupplier.simpleResourceAccessor)
+        try {
+            change.load(new liquibase.parser.core.ParsedNode(null, "updateData").addChild(null, "tableName", "updateTest").addChild(whereParams), resourceSupplier.simpleResourceAccessor)
+        } catch (ParsedNodeException e) {
+            e.printStackTrace()
+        }
 
         then:
         change.tableName == "updateTest"

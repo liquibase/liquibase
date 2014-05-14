@@ -2,10 +2,9 @@ package liquibase.precondition.core;
 
 import liquibase.exception.*;
 import liquibase.parser.core.ParsedNode;
+import liquibase.parser.core.ParsedNodeException;
 import liquibase.precondition.ErrorPrecondition;
 import liquibase.precondition.FailedPrecondition;
-import liquibase.precondition.Precondition;
-import liquibase.precondition.PreconditionFactory;
 import liquibase.resource.ResourceAccessor;
 import liquibase.util.StringUtils;
 import liquibase.util.StreamUtil;
@@ -16,7 +15,6 @@ import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.logging.LogFactory;
 
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -250,13 +248,13 @@ public class PreconditionContainer extends AndPrecondition {
         return STANDARD_CHANGELOG_NAMESPACE;
     }
 
-//    public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParseException, SetupException {
-//        for (ParsedNode childNode : parsedNode.getChildren()) {
-//            Precondition childPrecondition = PreconditionFactory.getInstance().create(childNode.getName());
-//            if (childPrecondition != null) {
-//                childPrecondition.load(childNode);
-//                addNestedPrecondition(childPrecondition);
-//            }
-//        }
-//    }
+    @Override
+    public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException {
+        this.setOnError(parsedNode.getChildValue(null, "onError", String.class));
+        this.setOnErrorMessage(parsedNode.getChildValue(null, "onErrorMessage", String.class));
+        this.setOnFail(parsedNode.getChildValue(null, "onFail", String.class));
+        this.setOnFailMessage(parsedNode.getChildValue(null, "onFailMessage", String.class));
+
+        super.load(parsedNode, resourceAccessor);
+    }
 }

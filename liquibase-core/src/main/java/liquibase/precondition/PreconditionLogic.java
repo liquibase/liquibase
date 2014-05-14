@@ -6,7 +6,6 @@ import liquibase.parser.core.ParsedNodeException;
 import liquibase.resource.ResourceAccessor;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 /**
@@ -26,36 +25,21 @@ public abstract class PreconditionLogic extends AbstractPrecondition {
     }
 
     @Override
-    public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException, SetupException {
+    public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException {
         super.load(parsedNode, resourceAccessor);
 
-        Object value = parsedNode.getValue();
-        if (value != null) {
-            if (value instanceof ParsedNode) {
-                addNestedPrecondition(toPrecondition(((ParsedNode) value), resourceAccessor));
-            } else if (value instanceof Collection) {
-                for (Object childValue : ((Collection) value)) {
-                    if (childValue instanceof ParsedNode) {
-                        addNestedPrecondition(toPrecondition(((ParsedNode) childValue), resourceAccessor));
-                    }
-                }
-            }
-        }
         for (ParsedNode child : parsedNode.getChildren()) {
             addNestedPrecondition(toPrecondition(child, resourceAccessor));
         }
     }
 
-    protected Precondition toPrecondition(ParsedNode node, ResourceAccessor resourceAccessor) throws ParsedNodeException, SetupException {
+    protected Precondition toPrecondition(ParsedNode node, ResourceAccessor resourceAccessor) throws ParsedNodeException {
         Precondition precondition = PreconditionFactory.getInstance().create(node.getName());
         if (precondition == null) {
             return null;
         }
-        try {
-            precondition.load(node, resourceAccessor);
-        } catch (ParsedNodeException e) {
-            e.printStackTrace();
-        }
+
+        precondition.load(node, resourceAccessor);
         return precondition;
     }
 }

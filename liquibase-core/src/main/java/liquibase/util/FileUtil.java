@@ -1,12 +1,12 @@
 package liquibase.util;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.util.Enumeration;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+import java.util.zip.ZipInputStream;
 
 public class FileUtil {
     /**
@@ -73,28 +73,37 @@ public class FileUtil {
         }
     }
 
-    public static File extractZipFile(URL resource) throws IOException {
-        String file = resource.getFile();
-        String path = file.split("!")[0];
-        if (path.matches("file:\\/[A-Za-z]:\\/.*")) {
-            path = path.replaceFirst("file:\\/", "");
-        } else {
-            path = path.replaceFirst("file:", "");
-        }
-        path = URLDecoder.decode(path, "UTF-8");
-        File zipfile = new File(path);
-
+    /**
+     * Unzips the given zip file and returns a File object corresponding to the root directory.
+     * The returned directory is a temporary directory that will be deleted on application exit.
+     */
+    public static File unzip(File zipFile) throws IOException {
         File tempDir = File.createTempFile("liquibase-unzip", ".dir");
         tempDir.delete();
         tempDir.mkdir();
 
-        JarFile jarFile = new JarFile(zipfile);
+        JarFile jarFile = new JarFile(zipFile);
         try {
             Enumeration<JarEntry> entries = jarFile.entries();
             while (entries.hasMoreElements()) {
                 JarEntry entry = entries.nextElement();
                 File entryFile = new File(tempDir, entry.getName());
-                entryFile.mkdirs();
+                if (!entry.isDirectory()) {
+                    entryFile.getParentFile().mkdirs();
+                    FileOutputStream out = new FileOutputStream(entryFile);
+
+                    byte[] buf = new byte[1024];
+                    int len;
+                    InputStream inputStream = jarFile.getInputStream(entry);
+                    while ((len = inputStream.read(buf)) > 0) {
+                        if (!zipFile.exists()) {
+                            zipFile.getParentFile().mkdirs();
+                        }
+                        out.write(buf, 0, len);
+                    }
+                    inputStream.close();
+                    out.close();
+                }
             }
 
             FileUtil.forceDeleteOnExit(tempDir);

@@ -1,13 +1,12 @@
 package liquibase.resource;
 
+import liquibase.util.FileUtil;
 import liquibase.util.StringUtils;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.net.URLClassLoader;
+import java.net.*;
 import java.util.*;
 
 /**
@@ -53,6 +52,34 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor {
             return null;
         }
 
+        if (!fileUrl.toExternalForm().startsWith("file:")) {
+            if (fileUrl.toExternalForm().startsWith("jar:file:")
+                    || fileUrl.toExternalForm().startsWith("wsjar:file:")
+                    || fileUrl.toExternalForm().startsWith("zip:")) {
+
+                String file = fileUrl.getFile();
+                String splitPath = file.split("!")[0];
+                if (splitPath.matches("file:\\/[A-Za-z]:\\/.*")) {
+                    splitPath = splitPath.replaceFirst("file:\\/", "");
+                } else {
+                    splitPath = splitPath.replaceFirst("file:", "");
+                }
+                splitPath = URLDecoder.decode(splitPath, "UTF-8");
+                File zipfile = new File(splitPath);
+
+
+                File zipFileDir = FileUtil.unzip(zipfile);
+                if (path.startsWith("classpath:")) {
+                    path = path.replaceFirst("classpath:", "");
+                }
+                if (path.startsWith("classpath*:")) {
+                    path = path.replaceFirst("classpath\\*:", "");
+                }
+                URI fileUri = new File(zipFileDir, path).toURI();
+                fileUrl = fileUri.toURL();
+            }
+        }
+
         try {
             File file = new File(fileUrl.toURI());
             if (file.exists()) {
@@ -61,6 +88,8 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor {
                 return returnSet;
             }
         } catch (URISyntaxException e) {
+            //not a local file
+        } catch (IllegalArgumentException e) {
             //not a local file
         }
 

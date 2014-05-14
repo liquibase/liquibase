@@ -2,6 +2,9 @@ package liquibase.change.core;
 
 import liquibase.change.*;
 import liquibase.database.Database;
+import liquibase.parser.core.ParsedNode;
+import liquibase.parser.core.ParsedNodeException;
+import liquibase.resource.ResourceAccessor;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.DeleteStatement;
 
@@ -37,4 +40,21 @@ public class DeleteDataChange extends AbstractModifyDataChange {
     public String getSerializedObjectNamespace() {
         return STANDARD_CHANGELOG_NAMESPACE;
     }
+
+    @Override
+    protected void customLoadLogic(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException {
+        ParsedNode whereParams = parsedNode.getChild(null, "whereParams");
+        if (whereParams != null) {
+            for (ParsedNode param : whereParams.getChildren(null, "param")) {
+                ColumnConfig columnConfig = new ColumnConfig();
+                try {
+                    columnConfig.load(param, resourceAccessor);
+                } catch (ParsedNodeException e) {
+                    e.printStackTrace();
+                }
+                addWhereParam(columnConfig);
+            }
+        }
+    }
+
 }

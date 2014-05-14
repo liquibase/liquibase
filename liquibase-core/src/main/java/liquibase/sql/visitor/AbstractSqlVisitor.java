@@ -80,7 +80,7 @@ public abstract class AbstractSqlVisitor implements SqlVisitor {
     }
 
     @Override
-    public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException, SetupException {
+    public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException {
         for (ParsedNode childNode : parsedNode.getChildren()) {
             try {
                if (childNode.getName().equals("dbms")) {
@@ -100,7 +100,7 @@ public abstract class AbstractSqlVisitor implements SqlVisitor {
                    ObjectUtil.setProperty(this, childNode.getName(), (String) value);
                }
             } catch (Exception e) {
-                throw new SetupException("Error setting property", e);
+                throw new ParsedNodeException("Error setting property", e);
             }
         }
 

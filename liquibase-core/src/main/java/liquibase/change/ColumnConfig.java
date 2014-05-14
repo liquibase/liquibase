@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
-import liquibase.exception.SetupException;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.resource.ResourceAccessor;
@@ -675,7 +674,7 @@ public class ColumnConfig implements LiquibaseSerializable {
     }
 
     @Override
-    public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException, SetupException {
+    public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException {
         name = parsedNode.getChildValue(null, "name", String.class);
         type = parsedNode.getChildValue(null, "type", String.class);
         encoding = parsedNode.getChildValue(null, "encoding", String.class);
@@ -686,8 +685,16 @@ public class ColumnConfig implements LiquibaseSerializable {
 
 
         value = parsedNode.getChildValue(null, "value", String.class);
-        valueNumeric = parsedNode.getChildValue(null, "valueNumeric", Double.class);
-        valueDate = parsedNode.getChildValue(null, "valueDate", Date.class);
+        try {
+            valueNumeric = parsedNode.getChildValue(null, "valueNumeric", Double.class);
+        } catch (ParsedNodeException e) {
+            valueComputed = new DatabaseFunction(parsedNode.getChildValue(null, "valueNumeric", String.class));
+        }
+        try {
+            valueDate = parsedNode.getChildValue(null, "valueDate", Date.class);
+        } catch (ParsedNodeException e) {
+            valueComputed = new DatabaseFunction(parsedNode.getChildValue(null, "valueDate", String.class));
+        }
         valueBoolean = parsedNode.getChildValue(null, "valueBoolean", Boolean.class);
         valueBlobFile = parsedNode.getChildValue(null, "valueBlobFile", String.class);
         valueClobFile = parsedNode.getChildValue(null, "valueClobFile", String.class);
@@ -706,8 +713,16 @@ public class ColumnConfig implements LiquibaseSerializable {
 
 
         defaultValue = parsedNode.getChildValue(null, "defaultValue", String.class);
-        defaultValueNumeric = parsedNode.getChildValue(null, "defaultValueNumeric", Double.class);
-        defaultValueDate = parsedNode.getChildValue(null, "defaultValueDate", Date.class);
+        try {
+            defaultValueNumeric = parsedNode.getChildValue(null, "defaultValueNumeric", Double.class);
+        } catch (ParsedNodeException e) {
+            defaultValueComputed = new DatabaseFunction(parsedNode.getChildValue(null, "defaultValueNumeric", String.class));
+        }
+        try {
+            defaultValueDate = parsedNode.getChildValue(null, "defaultValueDate", Date.class);
+        } catch (ParsedNodeException e) {
+            defaultValueComputed = new DatabaseFunction(parsedNode.getChildValue(null, "defaultValueDate", String.class));
+        }
         defaultValueBoolean = parsedNode.getChildValue(null, "defaultValueBoolean", Boolean.class);
         String defaultValueComputedString = parsedNode.getChildValue(null, "defaultValueComputed", String.class);
         if (defaultValueComputedString != null) {

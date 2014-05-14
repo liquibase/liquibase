@@ -287,12 +287,12 @@ public class CustomChangeWrapper extends AbstractChange {
     }
 
     @Override
-    public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException, SetupException {
+    public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException {
         setClassLoader(resourceAccessor.toClassLoader());
         try {
             setClass(parsedNode.getChildValue(null, "class", String.class));
         } catch (CustomChangeException e) {
-            throw new SetupException(e);
+            throw new ParsedNodeException(e);
         }
         super.load(parsedNode, resourceAccessor);
     }
@@ -313,6 +313,19 @@ public class CustomChangeWrapper extends AbstractChange {
                 value = value.toString();
             }
             this.setParam(child.getChildValue(null, "name", String.class), (String) value);
+        }
+
+        CustomChange customChange = null;
+        try {
+            customChange = (CustomChange) Class.forName(className, false, resourceAccessor.toClassLoader()).newInstance();
+        } catch (Exception e) {
+            throw new UnexpectedLiquibaseException(e);
+        }
+        for (ParsedNode node : parsedNode.getChildren()) {
+            Object value = node.getValue();
+            if (value != null && ObjectUtil.hasProperty(customChange, node.getName())) {
+                this.setParam(node.getName(), value.toString());
+            }
         }
     }
 }

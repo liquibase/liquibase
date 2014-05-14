@@ -1,7 +1,6 @@
 package liquibase.snapshot;
 
 import liquibase.database.Database;
-import liquibase.exception.SetupException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
@@ -106,7 +105,7 @@ public class SnapshotControl implements LiquibaseSerializable {
     }
 
     @Override
-    public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException, SetupException {
+    public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException {
         throw new RuntimeException("TODO");
     }
 
