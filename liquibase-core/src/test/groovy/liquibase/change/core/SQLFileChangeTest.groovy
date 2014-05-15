@@ -1,6 +1,7 @@
 package liquibase.change.core;
 
 import liquibase.change.AbstractSQLChange
+import liquibase.change.Change
 import liquibase.change.ChangeStatus;
 import liquibase.change.StandardChangeTest;
 import liquibase.changelog.ChangeLogParameters;
@@ -98,6 +99,10 @@ public class SQLFileChangeTest extends StandardChangeTest {
     @Override
     protected boolean canUseStandardGenerateCheckSumTest() {
         return false;
+    }
+
+    def isValidForLoad(Change change) {
+        return ((SQLFileChange) change).path != null;
     }
 
 }

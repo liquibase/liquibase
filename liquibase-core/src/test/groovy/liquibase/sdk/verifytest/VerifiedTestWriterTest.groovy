@@ -262,7 +262,7 @@ NOTE: This output is generated when the test is ran. DO NOT EDIT MANUALLY
 
 NOTE: This output is generated when the test is ran. DO NOT EDIT MANUALLY
 
-## Permutation: 1c90803416ec5a06789992934bb5c227 ##
+## Permutation: 1c90803416ec5a06 ##
 
 - _VERIFIED:_ true
 - **Class Parameter:** liquibase.change.core.CreateTableChange
@@ -288,7 +288,7 @@ NOTE: This output is generated when the test is ran. DO NOT EDIT MANUALLY
 - **int data:** 3838
 
 
-## Permutation: 955bcaf822e25d2f187aa329ac1bd37e ##
+## Permutation: 955bcaf822e25d2f ##
 
 - _VERIFIED:_ true
 - **Group Param:** a
@@ -378,7 +378,7 @@ NOTE: This output is generated when the test is ran. DO NOT EDIT MANUALLY
 
 NOTE: This output is generated when the test is ran. DO NOT EDIT MANUALLY
 
-## Permutation Group for Table Param: 18d9d1387a32c2fcd7b63f662beb3b3f ##
+## Permutation Group for Table Param: 18d9d1387a32c2fc ##
 
 - **Group Param:** a
 - **Multiline Parameter =>**
@@ -386,19 +386,18 @@ NOTE: This output is generated when the test is ran. DO NOT EDIT MANUALLY
     this on a second line
 - **String Parameter 1:** Short Parameter
 
-| Permutation                      | Verified | table param 2 | DETAILS
-| a68130beea635bec7cb6fcd5ccf10b96 | true     | tp2 is b      | **String data**: No notes, just one data
+| Permutation      | Verified | table param 2 | DETAILS
+| a68130beea635bec | true     | tp2 is b      | **String data**: No notes, just one data
 
 
-## Permutation Group for Table Param: 7d75ae643ea143aef68eada05a1223da ##
+## Permutation Group for Table Param: 7d75ae643ea143ae ##
 
 - **Group Param:** a
 - **Param 1:** param 1 is a
 - **Param 2:** param 2 is a
 
-| Permutation                      | Verified | table param 1 | table param 2 | DETAILS
-| 060a77fd1acc5f4a6032f011538a83ce | true     | tp1 is a      | tp2 is a      | **out data**: Permutation 1
-'''.trim()
+| Permutation      | Verified | table param 1 | table param 2 | DETAILS
+| 060a77fd1acc5f4a | true     | tp1 is a      | tp2 is a      | **out data**: Permutation 1'''.trim()
 
         cleanup:
         out && out.close()

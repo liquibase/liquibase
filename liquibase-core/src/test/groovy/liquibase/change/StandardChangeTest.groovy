@@ -1,5 +1,6 @@
 package liquibase.change
 
+import liquibase.change.core.SQLFileChange
 import liquibase.changelog.ChangeSet
 import liquibase.database.core.MockDatabase
 import liquibase.sdk.supplier.change.ChangeSupplierFactory
@@ -75,6 +76,9 @@ public abstract class StandardChangeTest extends Specification {
         assert serialized != null
 
         def newChange = changeClass.newInstance() as Change
+        if (!isValidForLoad(change)) {
+            return;
+        }
         newChange.load(serialized, resourceSupplier.simpleResourceAccessor)
         def reserialized = newChange.serialize()
 
@@ -82,6 +86,10 @@ public abstract class StandardChangeTest extends Specification {
 
         where:
         change << changeSupplier.getSupplier(changeClass).getAllParameterPermutations(new MockDatabase())
+    }
+
+    def isValidForLoad(Change change) {
+        return true;
     }
 
     protected boolean canUseStandardGenerateCheckSumTest() {
