@@ -126,6 +126,7 @@ public class VerifyChangeClassesTest extends AbstractVerifyTest {
         }
     }
 
+    @Ignore
     @Test
     public void extraParamsIsValidSql() throws Exception {
         ChangeFactory changeFactory = ChangeFactory.getInstance();
