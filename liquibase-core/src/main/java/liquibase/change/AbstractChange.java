@@ -60,6 +60,9 @@ public abstract class AbstractChange implements Change {
 
             Set<ChangeParameterMetaData> params = new HashSet<ChangeParameterMetaData>();
             for (PropertyDescriptor property : Introspector.getBeanInfo(this.getClass()).getPropertyDescriptors()) {
+                if (isInvalidProperty(property)) {
+                    continue;
+                }
                 Method readMethod = property.getReadMethod();
                 Method writeMethod = property.getWriteMethod();
                 if (readMethod == null) {
@@ -87,6 +90,10 @@ public abstract class AbstractChange implements Change {
         } catch (Throwable e) {
             throw new UnexpectedLiquibaseException(e);
         }
+    }
+
+    protected boolean isInvalidProperty(PropertyDescriptor property) {
+        return property.getDisplayName().equals("metaClass");
     }
 
     /**

@@ -1,12 +1,5 @@
 package liquibase.change;
 
-import liquibase.change.Change;
-import liquibase.change.ChangeFactory;
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
-import liquibase.change.ChangeMetaData;
 import liquibase.change.core.AddAutoIncrementChange;
 import liquibase.change.core.CreateTableChange;
 import liquibase.change.core.DropTableChange;
@@ -15,14 +8,10 @@ import liquibase.servicelocator.LiquibaseService;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 
-import java.util.Collections;
-import java.util.SortedSet;
 import java.util.TreeSet;
+
+import static org.junit.Assert.*;
 
 public class ChangeFactoryTest {
 
