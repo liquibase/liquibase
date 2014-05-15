@@ -1,12 +1,13 @@
 package liquibase.util
 
+import liquibase.test.TestContext
 import spock.lang.Specification
 
 class FileUtilTest extends Specification {
 
     def unzip() {
         when:
-        def zipFile = new File("liquibase-integration-tests/src/test/resources/packaged-changelog.jar")
+        def zipFile = new File(TestContext.instance.findIntegrationTestProjectRoot(), "src/test/resources/packaged-changelog.jar")
         def outDir = FileUtil.unzip(zipFile)
 
         then:
