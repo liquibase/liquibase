@@ -99,6 +99,14 @@ public class CustomPreconditionWrapper extends AbstractPrecondition {
     }
 
     @Override
+    protected boolean shouldAutoLoad(ParsedNode node) {
+        if (node.getName().equals("params")) {
+            return false;
+        }
+        return super.shouldAutoLoad(node);
+    }
+
+    @Override
     public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException {
         setClassLoader(resourceAccessor.toClassLoader());
         setClassName(parsedNode.getChildValue(null, "className", String.class));

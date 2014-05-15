@@ -20,6 +20,9 @@ public abstract class AbstractLiquibaseSerializable implements LiquibaseSerializ
 
     public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException {
         for (ParsedNode childNode : parsedNode.getChildren()) {
+            if (!shouldAutoLoad(childNode)) {
+                continue;
+            }
             try {
                 if (this.getSerializableFields().contains(childNode.getName())) {
                     Object value = childNode.getValue();
@@ -40,7 +43,10 @@ public abstract class AbstractLiquibaseSerializable implements LiquibaseSerializ
                 }
             }
         }
+    }
 
+    protected boolean shouldAutoLoad(ParsedNode node) {
+        return true;
     }
 
     @Override
