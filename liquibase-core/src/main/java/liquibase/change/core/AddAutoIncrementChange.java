@@ -135,7 +135,7 @@ public class AddAutoIncrementChange extends AbstractChange {
             }
 
             return result;
-        } catch (Exception e) {
+        } catch (Throwable e) {
 //            return result.unknown(e);
             throw new RuntimeException(e);
         }
