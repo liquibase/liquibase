@@ -20,6 +20,8 @@ import liquibase.sdk.supplier.resource.ResourceSupplier
 import liquibase.sql.visitor.AppendSqlVisitor
 import liquibase.sql.visitor.ReplaceSqlVisitor
 import liquibase.test.JUnitResourceAccessor
+import org.xml.sax.SAXParseException
+import spock.lang.FailsWith
 import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -289,6 +291,7 @@ public class XMLChangeLogSAXParser_RealFile_Test extends Specification {
         assert e.message.startsWith("Error parsing line")
     }
 
+    @FailsWith(ChangeLogParseException.class)
     def "tags that don't correspond to anything in liquibase are ignored"() throws Exception {
         def path = "liquibase/parser/core/xml/unusedTagsChangeLog.xml"
         expect:

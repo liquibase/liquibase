@@ -17,7 +17,7 @@ public class CompositeResourceAccessorTest extends Specification {
         first = Mock(ResourceAccessor.class);
         second = Mock(ResourceAccessor.class);
         composite = new CompositeResourceAccessor(first,second);
-        validStream = this.getClass().getClassLoader().getResourceAsStream("liquibase/resource/CompositeFileOpenerTest.class");
+        validStream = this.getClass().getClassLoader().getResourceAsStream("liquibase/resource/CompositeResourceAccessorTest.class");
 
         hasElements = new HashSet<>()
         def resources = this.getClass().getClassLoader().getResources("liquibase")
@@ -28,7 +28,9 @@ public class CompositeResourceAccessorTest extends Specification {
     }
     
     def cleanup() {
-        validStream.close();
+        if (validStream != null) {
+            validStream.close();
+        }
         
     }
     

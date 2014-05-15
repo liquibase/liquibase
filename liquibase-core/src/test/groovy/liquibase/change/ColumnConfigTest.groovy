@@ -489,4 +489,18 @@ public class ColumnConfigTest extends Specification {
         "defaultValueNumeric" | "compute_value()" | "defaultValueComputed"
     }
 
+    @Unroll("#featureName: #expected")
+    def "serialize logic"() {
+        expect:
+        column.serialize().toString() == expected
+
+        where:
+        column                                                                                              | expected
+        new ColumnConfig()                                                                                  | "column"
+        new ColumnConfig().setAutoIncrement(true)                                                           | "column[autoIncrement=true]"
+        new ColumnConfig().setAutoIncrement(true).setName("my_col")                                         | "column[autoIncrement=true,name=my_col]"
+        new ColumnConfig().setAutoIncrement(true).setName("my_col").setConstraints(new ConstraintsConfig()) | "column[autoIncrement=true,constraints,name=my_col]"
+        new ColumnConfig().setAutoIncrement(true).setName("my_col").setConstraints(new ConstraintsConfig().setNullable(true)) | "column[autoIncrement=true,constraints[nullable=true],name=my_col]"
+    }
+
 }

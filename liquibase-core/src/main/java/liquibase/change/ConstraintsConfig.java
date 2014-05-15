@@ -4,6 +4,7 @@ import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.resource.ResourceAccessor;
+import liquibase.serializer.AbstractLiquibaseSerializable;
 import liquibase.serializer.LiquibaseSerializable;
 import liquibase.serializer.ReflectionSerializer;
 import liquibase.util.StringUtils;
@@ -13,7 +14,7 @@ import java.util.Set;
 /**
  * The standard configuration used by Change classes to represent a constraints on a column.
  */
-public class ConstraintsConfig implements LiquibaseSerializable {
+public class ConstraintsConfig extends AbstractLiquibaseSerializable {
 
     private Boolean nullable;
     private Boolean primaryKey;
@@ -297,32 +298,12 @@ public class ConstraintsConfig implements LiquibaseSerializable {
     }
 
     @Override
-    public Set<String> getSerializableFields() {
-        return ReflectionSerializer.getInstance().getFields(this);
-    }
-
-    @Override
-    public Object getSerializableFieldValue(String field) {
-        return ReflectionSerializer.getInstance().getValue(this, field);
-    }
-
-    @Override
-    public SerializationType getSerializableFieldType(String field) {
-        return SerializationType.NAMED_FIELD;
-    }
-
-    @Override
     public String getSerializedObjectNamespace() {
         return STANDARD_CHANGELOG_NAMESPACE;
     }
 
     @Override
     public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException {
-        throw new RuntimeException("TODO");
-    }
-
-    @Override
-    public ParsedNode serialize() {
         throw new RuntimeException("TODO");
     }
 }

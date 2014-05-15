@@ -11,6 +11,7 @@ import java.util.Set;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.resource.ResourceAccessor;
+import liquibase.serializer.AbstractLiquibaseSerializable;
 import liquibase.serializer.LiquibaseSerializable;
 import liquibase.serializer.ReflectionSerializer;
 import liquibase.statement.DatabaseFunction;
@@ -29,7 +30,7 @@ import liquibase.util.StringUtils;
  * It is not required that a column-based Change uses this class, but parsers should look for it so it is a helpful convenience.
  * The definitions of "defaultValue" and "value" will vary based on the Change and may not be applicable in all cases.
  */
-public class ColumnConfig implements LiquibaseSerializable {
+public class ColumnConfig extends AbstractLiquibaseSerializable {
     private String name;
     private String type;
     private String value;
@@ -643,16 +644,6 @@ public class ColumnConfig implements LiquibaseSerializable {
         return "column";
     }
 
-    @Override
-    public Set<String> getSerializableFields() {
-        return ReflectionSerializer.getInstance().getFields(this);
-    }
-
-    @Override
-    public Object getSerializableFieldValue(String field) {
-        return ReflectionSerializer.getInstance().getValue(this, field);
-    }
-
     public SequenceNextValueFunction getDefaultValueSequenceNext() {
         return defaultValueSequenceNext;
     }
@@ -758,11 +749,6 @@ public class ColumnConfig implements LiquibaseSerializable {
         constraints.setDeferrable(constraintsNode.getChildValue(null, "deferrable", Boolean.class));
         setConstraints(constraints);
 
-    }
-
-    @Override
-    public ParsedNode serialize() {
-        throw new RuntimeException("TODO");
     }
 
 }

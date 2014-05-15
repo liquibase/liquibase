@@ -35,7 +35,7 @@ NOTE: This output is generated when the test is ran. DO NOT EDIT MANUALLY'''.tri
 
 NOTE: This output is generated when the test is ran. DO NOT EDIT MANUALLY
 
-## Permutation: 8af3fcf180bb7335e9b82cba567119ba ##
+## Permutation: 8af3fcf180bb7335 ##
 
 - _VERIFIED:_ true
 - **Add Column Parameter 1:** name=col 1
@@ -46,7 +46,7 @@ NOTE: This output is generated when the test is ran. DO NOT EDIT MANUALLY
 - **String data:** No notes, just one data
 
 
-## Permutation: 1c90803416ec5a06789992934bb5c227 ##
+## Permutation: 1c90803416ec5a06 ##
 
 - _VERIFIED:_ true
 - **Class Parameter:** liquibase.change.core.CreateTableChange
@@ -72,7 +72,7 @@ NOTE: This output is generated when the test is ran. DO NOT EDIT MANUALLY
 - **int data:** 3838
 
 
-## Permutation: 955bcaf822e25d2f187aa329ac1bd37e ##
+## Permutation: 955bcaf822e25d2f ##
 
 - _VERIFIED:_ true
 - **Group Param:** a
@@ -83,7 +83,7 @@ NOTE: This output is generated when the test is ran. DO NOT EDIT MANUALLY
 - **String data:** No notes, just one data
 
 
-## Permutation: c8bd894d4bbc320bda277cded9637d18 ##
+## Permutation: c8bd894d4bbc320b ##
 
 - _VERIFIED:_ true
 - **Group Param:** b
@@ -97,7 +97,7 @@ NOTE: This output is generated when the test is ran. DO NOT EDIT MANUALLY
 - **String data:** No notes, just one data
 
 
-## Permutation: 4930c7f23f3d98765ac424be72287029 ##
+## Permutation: 4930c7f23f3d9876 ##
 
 - _VERIFIED:_ false Was too lazy
 - **Group Param:** b
@@ -125,16 +125,16 @@ NOTE: This output is generated when the test is ran. DO NOT EDIT MANUALLY
 
 NOTE: This output is generated when the test is ran. DO NOT EDIT MANUALLY
 
-## Permutation Group for Table Param: 8af3fcf180bb7335e9b82cba567119ba ##
+## Permutation Group for Table Param: 8af3fcf180bb7335 ##
 
 - **Add Column Parameter 1:** name=col 1
 - **Group Param:** b
 
-| Permutation                      | Verified | table param 2 | DETAILS
-| f9b7e83ad5bc4b1d2b6f6671c0033bfb | true     | tp2 is b      | **String data**: No notes, just one data
+| Permutation      | Verified | table param 2 | DETAILS
+| f9b7e83ad5bc4b1d | true     | tp2 is b      | **String data**: No notes, just one data
 
 
-## Permutation Group for Table Param: 18d9d1387a32c2fcd7b63f662beb3b3f ##
+## Permutation Group for Table Param: 18d9d1387a32c2fc ##
 
 - **Group Param:** a
 - **Multiline Parameter =>**
@@ -142,55 +142,55 @@ NOTE: This output is generated when the test is ran. DO NOT EDIT MANUALLY
     this on a second line
 - **String Parameter 1:** Short Parameter
 
-| Permutation                      | Verified | table param 2 | DETAILS
-| a68130beea635bec7cb6fcd5ccf10b96 | true     | tp2 is b      | **String data**: No notes, just one data
+| Permutation      | Verified | table param 2 | DETAILS
+| a68130beea635bec | true     | tp2 is b      | **String data**: No notes, just one data
 
 
-## Permutation Group for Table Param: 7d75ae643ea143aef68eada05a1223da ##
+## Permutation Group for Table Param: 7d75ae643ea143ae ##
 
 - **Group Param:** a
 - **Param 1:** param 1 is a
 - **Param 2:** param 2 is a
 
-| Permutation                      | Verified | table param 1 | table param 2 | DETAILS
-| 060a77fd1acc5f4a6032f011538a83ce | true     | tp1 is a      | tp2 is a      | **out data**: Permutation 1
+| Permutation      | Verified | table param 1 | table param 2 | DETAILS
+| 060a77fd1acc5f4a | true     | tp1 is a      | tp2 is a      | **out data**: Permutation 1
 
 
-## Permutation Group for Table Param: 24076f6d9d1e3902741aeabb46dc5dc3 ##
+## Permutation Group for Table Param: 24076f6d9d1e3902 ##
 
 - **Group Param:** b
 - **Param 1:** param 1 is b
 - **Param 2:** param 2 is b
 
-| Permutation                      | Verified | table param 1 | table param 2 | table param 3 | DETAILS
-| 4d89b3a53901f0347e82e7b0e657aed9 | false    |               | tp2 is b      |               | **out data**: Permutation 2
-| 1560a26a8a7692d2fc3e00311a81011d | false    |               | tp2 is e      |               | **out data**: Permutation 5
-| d2cce7457ad1c274b0e243af16896d2b | false    | tp1 is d      | tp2 is d      | tp3 is d      | __more info__: Some notes for this
-|                                  |          |               |               |               | __yet more info__: Even more notes for this
-|                                  |          |               |               |               | **more out data**: Permutation 4 extra data
-|                                  |          |               |               |               | **out data**: Permutation 4
+| Permutation      | Verified | table param 1 | table param 2 | table param 3 | DETAILS
+| 4d89b3a53901f034 | false    |               | tp2 is b      |               | **out data**: Permutation 2
+| 1560a26a8a7692d2 | false    |               | tp2 is e      |               | **out data**: Permutation 5
+| d2cce7457ad1c274 | false    | tp1 is d      | tp2 is d      | tp3 is d      | __more info__: Some notes for this
+|                  |          |               |               |               | __yet more info__: Even more notes for this
+|                  |          |               |               |               | **more out data**: Permutation 4 extra data
+|                  |          |               |               |               | **out data**: Permutation 4
 
 
-## Permutation Group for Table Param: 14e2a171fa3e1eb9f4c324e6bc789f07 ##
+## Permutation Group for Table Param: 14e2a171fa3e1eb9 ##
 
 - **Group Param:** b
 - **Param 1:** param 1 is c
 - **Param 2:** param 2 is c
 
-| Permutation                      | Verified | table param 1 | table param 2 | table param 3 | DETAILS
-| 64837e3558e4ad7387f2729d0604f44c | true     | tp1 is c      | tp2 is c      | tp3 is c      | __more info__: Some notes for permutation 3
-|                                  |          |               |               |               | **out data**: Permutation 3
+| Permutation      | Verified | table param 1 | table param 2 | table param 3 | DETAILS
+| 64837e3558e4ad73 | true     | tp1 is c      | tp2 is c      | tp3 is c      | __more info__: Some notes for permutation 3
+|                  |          |               |               |               | **out data**: Permutation 3
 
 
-## Permutation Group for Another Param Set: fd46209776fe3cb226b94a22174064cc ##
+## Permutation Group for Another Param Set: fd46209776fe3cb2 ##
 
 - **Group Param:** b
 - **Param 1:** param 1 is d
 - **Param 2:** param 2 is d
 
-| Permutation                      | Verified | table param x1 | DETAILS
-| e1aa992cb6b2145c1b55b6881011ee37 | false    | tpx1 is a      | **out data**: Permutation 6
-| 28cb50a95c64c5f544e671f0b4210d78 | false    | tpx1 is b      | **out data**: Permutation 7<br>With a second line with \\| chars<br>And another with \\| chars
+| Permutation      | Verified | table param x1 | DETAILS
+| e1aa992cb6b2145c | false    | tpx1 is a      | **out data**: Permutation 6
+| 28cb50a95c64c5f5 | false    | tpx1 is b      | **out data**: Permutation 7<br>With a second line with \\| chars<br>And another with \\| chars
 '''.trim()
 
         cleanup:
@@ -218,7 +218,7 @@ NOTE: This output is generated when the test is ran. DO NOT EDIT MANUALLY
 
 NOTE: This output is generated when the test is ran. DO NOT EDIT MANUALLY
 
-## Permutation: 8af3fcf180bb7335e9b82cba567119ba ##
+## Permutation: 8af3fcf180bb7335 ##
 
 - _VERIFIED:_ true
 - **Add Column Parameter 1:** name=col 1
@@ -229,7 +229,7 @@ NOTE: This output is generated when the test is ran. DO NOT EDIT MANUALLY
 - **String data:** No notes, just one data
 
 
-## Permutation: c8bd894d4bbc320bda277cded9637d18 ##
+## Permutation: c8bd894d4bbc320b ##
 
 - _VERIFIED:_ true
 - **Group Param:** b
@@ -243,7 +243,7 @@ NOTE: This output is generated when the test is ran. DO NOT EDIT MANUALLY
 - **String data:** No notes, just one data
 
 
-## Permutation: 4930c7f23f3d98765ac424be72287029 ##
+## Permutation: 4930c7f23f3d9876 ##
 
 - _VERIFIED:_ false Was too lazy
 - **Group Param:** b
@@ -325,50 +325,50 @@ NOTE: This output is generated when the test is ran. DO NOT EDIT MANUALLY
 
 NOTE: This output is generated when the test is ran. DO NOT EDIT MANUALLY
 
-## Permutation Group for Table Param: 8af3fcf180bb7335e9b82cba567119ba ##
+## Permutation Group for Table Param: 8af3fcf180bb7335 ##
 
 - **Add Column Parameter 1:** name=col 1
 - **Group Param:** b
 
-| Permutation                      | Verified | table param 2 | DETAILS
-| f9b7e83ad5bc4b1d2b6f6671c0033bfb | true     | tp2 is b      | **String data**: No notes, just one data
+| Permutation      | Verified | table param 2 | DETAILS
+| f9b7e83ad5bc4b1d | true     | tp2 is b      | **String data**: No notes, just one data
 
 
-## Permutation Group for Table Param: 24076f6d9d1e3902741aeabb46dc5dc3 ##
+## Permutation Group for Table Param: 24076f6d9d1e3902 ##
 
 - **Group Param:** b
 - **Param 1:** param 1 is b
 - **Param 2:** param 2 is b
 
-| Permutation                      | Verified | table param 1 | table param 2 | table param 3 | DETAILS
-| 4d89b3a53901f0347e82e7b0e657aed9 | false    |               | tp2 is b      |               | **out data**: Permutation 2
-| 1560a26a8a7692d2fc3e00311a81011d | false    |               | tp2 is e      |               | **out data**: Permutation 5
-| d2cce7457ad1c274b0e243af16896d2b | false    | tp1 is d      | tp2 is d      | tp3 is d      | __more info__: Some notes for this
-|                                  |          |               |               |               | __yet more info__: Even more notes for this
-|                                  |          |               |               |               | **more out data**: Permutation 4 extra data
-|                                  |          |               |               |               | **out data**: Permutation 4
+| Permutation      | Verified | table param 1 | table param 2 | table param 3 | DETAILS
+| 4d89b3a53901f034 | false    |               | tp2 is b      |               | **out data**: Permutation 2
+| 1560a26a8a7692d2 | false    |               | tp2 is e      |               | **out data**: Permutation 5
+| d2cce7457ad1c274 | false    | tp1 is d      | tp2 is d      | tp3 is d      | __more info__: Some notes for this
+|                  |          |               |               |               | __yet more info__: Even more notes for this
+|                  |          |               |               |               | **more out data**: Permutation 4 extra data
+|                  |          |               |               |               | **out data**: Permutation 4
 
 
-## Permutation Group for Table Param: 14e2a171fa3e1eb9f4c324e6bc789f07 ##
+## Permutation Group for Table Param: 14e2a171fa3e1eb9 ##
 
 - **Group Param:** b
 - **Param 1:** param 1 is c
 - **Param 2:** param 2 is c
 
-| Permutation                      | Verified | table param 1 | table param 2 | table param 3 | DETAILS
-| 64837e3558e4ad7387f2729d0604f44c | true     | tp1 is c      | tp2 is c      | tp3 is c      | __more info__: Some notes for permutation 3
-|                                  |          |               |               |               | **out data**: Permutation 3
+| Permutation      | Verified | table param 1 | table param 2 | table param 3 | DETAILS
+| 64837e3558e4ad73 | true     | tp1 is c      | tp2 is c      | tp3 is c      | __more info__: Some notes for permutation 3
+|                  |          |               |               |               | **out data**: Permutation 3
 
 
-## Permutation Group for Another Param Set: fd46209776fe3cb226b94a22174064cc ##
+## Permutation Group for Another Param Set: fd46209776fe3cb2 ##
 
 - **Group Param:** b
 - **Param 1:** param 1 is d
 - **Param 2:** param 2 is d
 
-| Permutation                      | Verified | table param x1 | DETAILS
-| e1aa992cb6b2145c1b55b6881011ee37 | false    | tpx1 is a      | **out data**: Permutation 6
-| 28cb50a95c64c5f544e671f0b4210d78 | false    | tpx1 is b      | **out data**: Permutation 7<br>With a second line with \\| chars<br>And another with \\| chars
+| Permutation      | Verified | table param x1 | DETAILS
+| e1aa992cb6b2145c | false    | tpx1 is a      | **out data**: Permutation 6
+| 28cb50a95c64c5f5 | false    | tpx1 is b      | **out data**: Permutation 7<br>With a second line with \\| chars<br>And another with \\| chars
 '''.trim()
 
         def out3 = new StringWriter()

@@ -2,8 +2,6 @@ package liquibase.change
 
 import liquibase.changelog.ChangeSet
 import liquibase.database.core.MockDatabase
-import liquibase.exception.SetupException
-import liquibase.parser.core.ParsedNodeException
 import liquibase.sdk.supplier.change.ChangeSupplierFactory
 import liquibase.sdk.supplier.resource.ResourceSupplier
 import liquibase.serializer.core.string.StringChangeLogSerializer
@@ -12,7 +10,7 @@ import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.Unroll
 
-import static org.junit.Assert.fail;
+import static org.junit.Assert.fail
 
 /**
  * Base test class for changes
@@ -77,16 +75,10 @@ public abstract class StandardChangeTest extends Specification {
         assert serialized != null
 
         def newChange = changeClass.newInstance() as Change
-        try {
-            newChange.load(serialized, resourceSupplier.simpleResourceAccessor)
-        } catch (ParsedNodeException e) {
-            e.printStackTrace()
-        } catch (SetupException e) {
-            e.printStackTrace()
-        }
+        newChange.load(serialized, resourceSupplier.simpleResourceAccessor)
         def reserialized = newChange.serialize()
 
-        serialized == reserialized
+        serialized.toString().replaceAll("\\.0(\\D)","\$1") == reserialized.toString().replaceAll("\\.0(\\D)","\$1") //have to replace .0's because of int->decimal conversions
 
         where:
         change << changeSupplier.getSupplier(changeClass).getAllParameterPermutations(new MockDatabase())

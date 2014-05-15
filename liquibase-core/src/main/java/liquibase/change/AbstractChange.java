@@ -591,9 +591,34 @@ public abstract class AbstractChange implements Change {
         ParsedNode node = new ParsedNode(null, getSerializedObjectName());
         ChangeMetaData metaData = ChangeFactory.getInstance().getChangeMetaData(this);
         for (ChangeParameterMetaData param : metaData.getSetParameters(this).values()) {
-            node.addChild(null, param.getParameterName(), param.getCurrentValue(this));
+            Object currentValue = param.getCurrentValue(this);
+            currentValue = serializeValue(currentValue);
+            if (currentValue != null) {
+                node.addChild(null, param.getParameterName(), currentValue);
+            }
         }
 
         return node;
+    }
+
+    protected Object serializeValue(Object value) throws ParsedNodeException {
+        if (value instanceof Collection) {
+            List returnList = new ArrayList();
+            for (Object obj : (Collection) value) {
+                Object objValue = serializeValue(obj);
+                if (objValue != null) {
+                    returnList.add(objValue);
+                }
+            }
+            if (((Collection) value).size() == 0) {
+                return null;
+            } else {
+                return returnList;
+            }
+        } else if (value instanceof LiquibaseSerializable) {
+            return ((LiquibaseSerializable) value).serialize();
+        } else {
+            return value;
+        }
     }
 }

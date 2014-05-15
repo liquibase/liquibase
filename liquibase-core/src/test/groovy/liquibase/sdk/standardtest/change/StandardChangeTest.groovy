@@ -38,6 +38,7 @@ class StandardChangeTest extends Specification {
         change << changeSupplier.extensionChanges
     }
 
+    @Ignore
     @Unroll("valid properties for #changeClass.name are valid sql against #database.shortName")
     def "valid properties are valid sql" () {
         expect:
