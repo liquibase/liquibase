@@ -1,4 +1,4 @@
-package liquibase.database.core;
+package liquibase.sdk.database;
 
 import java.io.IOException;
 import java.io.Writer;

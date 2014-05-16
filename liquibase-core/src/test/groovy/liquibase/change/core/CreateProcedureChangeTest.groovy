@@ -1,14 +1,9 @@
 package liquibase.change.core
 
-import liquibase.change.ChangeStatus;
 import liquibase.change.StandardChangeTest
-import liquibase.database.core.MockDatabase
+import liquibase.sdk.database.MockDatabase
 import liquibase.snapshot.MockSnapshotGeneratorFactory
-import liquibase.snapshot.SnapshotGeneratorFactory;
-
-import static org.junit.Assert.*;
-
-import org.junit.Test;
+import liquibase.snapshot.SnapshotGeneratorFactory
 
 public class CreateProcedureChangeTest extends StandardChangeTest {
 

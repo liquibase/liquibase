@@ -1,21 +1,13 @@
-package liquibase.change.core;
+package liquibase.change.core
 
-import liquibase.change.ChangeFactory
 import liquibase.change.ChangeStatus;
-import liquibase.change.StandardChangeTest;
-import liquibase.database.Database
-import liquibase.database.core.MockDatabase;
-import liquibase.database.core.SQLiteDatabase
+import liquibase.change.StandardChangeTest
+import liquibase.sdk.database.MockDatabase
 import liquibase.snapshot.MockSnapshotGeneratorFactory
 import liquibase.snapshot.SnapshotGeneratorFactory
 import liquibase.structure.core.Column
-import liquibase.structure.core.ForeignKey
 import liquibase.structure.core.PrimaryKey
 import liquibase.structure.core.Table
-import spock.lang.Unroll;
-
-import static org.junit.Assert.*;
-import org.junit.Test;
 
 public class AddPrimaryKeyChangeTest extends StandardChangeTest {
 

@@ -1,23 +1,14 @@
-package liquibase.change.core;
+package liquibase.change.core
 
-import junit.framework.Assert
 import liquibase.change.ChangeStatus
 import liquibase.snapshot.MockSnapshotGeneratorFactory
 import liquibase.snapshot.SnapshotGeneratorFactory
-import spock.lang.Shared
 import liquibase.change.StandardChangeTest;
-import liquibase.database.core.MockDatabase
-import liquibase.exception.LiquibaseException;
+import liquibase.sdk.database.MockDatabase
 import liquibase.resource.ClassLoaderResourceAccessor;
-import liquibase.statement.SqlStatement;
-import liquibase.statement.core.DeleteStatement;
+import liquibase.statement.SqlStatement
 import liquibase.statement.core.InsertOrUpdateStatement;
 import static org.junit.Assert.*
-
-import org.junit.Test;
-
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 
 public class LoadUpdateDataChangeTest extends StandardChangeTest {
 

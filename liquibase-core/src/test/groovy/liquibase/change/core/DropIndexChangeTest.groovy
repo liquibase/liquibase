@@ -2,17 +2,12 @@ package liquibase.change.core
 
 import liquibase.change.ChangeStatus;
 import liquibase.change.StandardChangeTest;
-import liquibase.database.core.MockDatabase
+import liquibase.sdk.database.MockDatabase
 import liquibase.snapshot.MockSnapshotGeneratorFactory
-import liquibase.snapshot.SnapshotGeneratorFactory;
-import liquibase.statement.SqlStatement;
-import liquibase.statement.core.DropIndexStatement
+import liquibase.snapshot.SnapshotGeneratorFactory
 import liquibase.structure.core.Column
 import liquibase.structure.core.Index
-import liquibase.structure.core.Table;
-
-import static org.junit.Assert.*;
-import org.junit.Test;
+import liquibase.structure.core.Table
 
 public class DropIndexChangeTest extends StandardChangeTest {
 

@@ -1,7 +1,7 @@
 package liquibase.lockservice.ext;
 
 import liquibase.database.Database;
-import liquibase.database.core.MockDatabase;
+import liquibase.sdk.database.MockDatabase;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LockException;
 import liquibase.lockservice.DatabaseChangeLogLock;

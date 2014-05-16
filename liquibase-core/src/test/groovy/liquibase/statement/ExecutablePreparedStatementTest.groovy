@@ -4,7 +4,7 @@ import liquibase.change.ColumnConfig
 import liquibase.changelog.ChangeSet
 import liquibase.changelog.DatabaseChangeLog
 import liquibase.database.PreparedStatementFactory
-import liquibase.database.core.MockDatabase
+import liquibase.sdk.database.MockDatabase
 import liquibase.database.jvm.JdbcConnection
 import liquibase.exception.DatabaseException
 import liquibase.resource.ClassLoaderResourceAccessor

@@ -1,9 +1,7 @@
 package liquibase.sqlgenerator.core;
 
-import junit.framework.Assert;
 import liquibase.changelog.ChangeSet;
-import liquibase.database.core.MockDatabase;
-import liquibase.database.core.MySQLDatabase;
+import liquibase.sdk.database.MockDatabase;
 import liquibase.sql.Sql;
 import liquibase.sqlgenerator.AbstractSqlGeneratorTest;
 import liquibase.sqlgenerator.MockSqlGeneratorChain;

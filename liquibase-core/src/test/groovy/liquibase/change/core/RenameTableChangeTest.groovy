@@ -1,20 +1,11 @@
 package liquibase.change.core
 
 import liquibase.change.ChangeStatus;
-import liquibase.change.StandardChangeTest;
-import liquibase.database.Database;
-import liquibase.database.core.FirebirdDatabase;
-import liquibase.database.core.MockDatabase
+import liquibase.change.StandardChangeTest
+import liquibase.sdk.database.MockDatabase
 import liquibase.snapshot.MockSnapshotGeneratorFactory
-import liquibase.snapshot.SnapshotGeneratorFactory;
-import liquibase.statement.SqlStatement;
-import liquibase.statement.core.RenameTableStatement
-import liquibase.structure.core.Column
-import liquibase.structure.core.Table;
-
-import static org.junit.Assert.*;
-import org.junit.Before;
-import org.junit.Test;
+import liquibase.snapshot.SnapshotGeneratorFactory
+import liquibase.structure.core.Table
 
 public class RenameTableChangeTest extends StandardChangeTest {
 

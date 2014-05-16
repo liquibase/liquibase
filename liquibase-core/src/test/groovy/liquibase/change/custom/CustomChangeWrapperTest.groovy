@@ -1,7 +1,7 @@
 package liquibase.change.custom
 
 import liquibase.database.Database
-import liquibase.database.core.MockDatabase
+import liquibase.sdk.database.MockDatabase
 import liquibase.exception.*
 import liquibase.parser.core.ParsedNode
 import liquibase.parser.core.ParsedNodeException

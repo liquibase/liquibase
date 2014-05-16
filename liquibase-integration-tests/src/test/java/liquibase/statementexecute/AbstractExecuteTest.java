@@ -21,7 +21,7 @@ import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.structure.core.Table;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.database.example.ExampleCustomDatabase;
-import liquibase.database.core.MockDatabase;
+import liquibase.sdk.database.MockDatabase;
 import liquibase.database.core.UnsupportedDatabase;
 import liquibase.executor.ExecutorService;
 import liquibase.sql.Sql;

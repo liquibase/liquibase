@@ -4,15 +4,8 @@ import liquibase.change.ChangeStatus;
 import liquibase.change.StandardChangeTest
 import liquibase.changelog.ChangeLogHistoryService
 import liquibase.changelog.ChangeLogHistoryServiceFactory;
-import liquibase.database.core.MockDatabase
-import liquibase.snapshot.SnapshotGeneratorFactory;
-import liquibase.statement.SqlStatement;
-import liquibase.statement.core.TagDatabaseStatement
-import spock.lang.Unroll;
-
-import static org.junit.Assert.*;
-import org.junit.Before;
-import org.junit.Test;
+import liquibase.sdk.database.MockDatabase
+import spock.lang.Unroll
 
 public class TagDatabaseChangeTest extends StandardChangeTest {
 

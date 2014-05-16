@@ -1,15 +1,11 @@
 package liquibase.change.core
 
 import liquibase.change.ChangeStatus;
-import liquibase.change.StandardChangeTest;
-import liquibase.database.Database
-import liquibase.database.core.MockDatabase
+import liquibase.change.StandardChangeTest
+import liquibase.sdk.database.MockDatabase
 import liquibase.snapshot.MockSnapshotGeneratorFactory
 import liquibase.snapshot.SnapshotGeneratorFactory
-import spock.lang.Unroll;
-
-import static org.junit.Assert.*;
-import org.junit.Test;
+import spock.lang.Unroll
 
 public class CreateSequenceChangeTest extends StandardChangeTest {
 
