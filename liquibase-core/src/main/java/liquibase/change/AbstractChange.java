@@ -573,7 +573,11 @@ public abstract class AbstractChange implements Change {
                         throw new UnexpectedLiquibaseException(e);
                     }
                 } else {
-                    param.setValue(this, parsedNode.getChildValue(null, param.getParameterName(), param.getDataTypeClass()));
+                    if (this.getSerializableFieldType(param.getParameterName()) == SerializationType.DIRECT_VALUE) {
+                        param.setValue(this, parsedNode.getValue());
+                    } else {
+                        param.setValue(this, parsedNode.getChildValue(null, param.getParameterName(), param.getDataTypeClass()));
+                    }
                 }
             }
         } catch (InstantiationException e) {
