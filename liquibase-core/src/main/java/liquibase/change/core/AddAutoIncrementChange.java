@@ -3,6 +3,7 @@ package liquibase.change.core;
 import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.database.core.PostgresDatabase;
+import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.SequenceNextValueFunction;
 import liquibase.statement.SqlStatement;
@@ -141,8 +142,7 @@ public class AddAutoIncrementChange extends AbstractChange {
             StringWriter writer = new StringWriter();
             e.printStackTrace(new PrintWriter(writer));
             e.printStackTrace();
-            assert false : writer.toString().replace("\n", "X").replace("\r", "Y");
-            return result.unknown(writer.toString().replace("\n", "X").replace("\r", "Y"));
+            throw new UnexpectedLiquibaseException(writer.toString().replace("\n", "X").replace("\r", "Y"), e);
         }
 
 
