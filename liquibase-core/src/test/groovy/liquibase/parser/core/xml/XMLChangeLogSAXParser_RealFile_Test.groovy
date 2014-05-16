@@ -12,7 +12,7 @@ import liquibase.changelog.ChangeSet
 import liquibase.changelog.DatabaseChangeLog
 import liquibase.configuration.LiquibaseConfiguration
 import liquibase.database.ObjectQuotingStrategy
-import liquibase.database.core.MockDatabase
+import liquibase.sdk.database.MockDatabase
 import liquibase.exception.ChangeLogParseException
 import liquibase.precondition.CustomPreconditionWrapper
 import liquibase.precondition.core.*
@@ -20,7 +20,6 @@ import liquibase.sdk.supplier.resource.ResourceSupplier
 import liquibase.sql.visitor.AppendSqlVisitor
 import liquibase.sql.visitor.ReplaceSqlVisitor
 import liquibase.test.JUnitResourceAccessor
-import org.xml.sax.SAXParseException
 import spock.lang.FailsWith
 import spock.lang.Shared
 import spock.lang.Specification

@@ -1,4 +1,6 @@
-package liquibase.resource;
+package liquibase.sdk.resource;
+
+import liquibase.resource.ResourceAccessor;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;

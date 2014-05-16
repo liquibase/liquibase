@@ -1,18 +1,11 @@
 package liquibase.change.core
 
 import liquibase.change.ChangeStatus;
-import liquibase.change.StandardChangeTest;
-import liquibase.database.Database;
-import liquibase.database.core.*
+import liquibase.change.StandardChangeTest
+import liquibase.sdk.database.MockDatabase
 import liquibase.snapshot.MockSnapshotGeneratorFactory
-import liquibase.snapshot.SnapshotGeneratorFactory;
-import liquibase.statement.SqlStatement;
-import liquibase.statement.core.RenameViewStatement
-import liquibase.structure.core.View;
-
-import static org.junit.Assert.*;
-import org.junit.Before;
-import org.junit.Test;
+import liquibase.snapshot.SnapshotGeneratorFactory
+import liquibase.structure.core.View
 
 public class RenameViewChangeTest extends StandardChangeTest {
 

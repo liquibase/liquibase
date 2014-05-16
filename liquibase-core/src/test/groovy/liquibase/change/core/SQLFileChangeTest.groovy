@@ -1,24 +1,14 @@
-package liquibase.change.core;
+package liquibase.change.core
 
-import liquibase.change.AbstractSQLChange
 import liquibase.change.Change
 import liquibase.change.ChangeStatus;
 import liquibase.change.StandardChangeTest;
 import liquibase.changelog.ChangeLogParameters;
-import liquibase.changelog.ChangeSet;
-import liquibase.database.Database
-import liquibase.database.core.MSSQLDatabase;
-import liquibase.database.core.MockDatabase;
-import liquibase.resource.ClassLoaderResourceAccessor
-import liquibase.snapshot.MockSnapshotGeneratorFactory
-import liquibase.snapshot.SnapshotGeneratorFactory;
+import liquibase.changelog.ChangeSet
+import liquibase.sdk.database.MockDatabase
 import liquibase.statement.SqlStatement
-import liquibase.util.StreamUtil;
-import org.junit.Before;
-import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertEquals
 
 public class SQLFileChangeTest extends StandardChangeTest {
 

@@ -7,7 +7,7 @@ import liquibase.precondition.core.OrPrecondition
 import liquibase.precondition.core.PreconditionContainer
 import liquibase.precondition.core.RunningAsPrecondition
 import liquibase.sdk.supplier.resource.ResourceSupplier
-import liquibase.resource.MockResourceAccessor
+import liquibase.sdk.resource.MockResourceAccessor
 import spock.lang.Shared
 import spock.lang.Specification
 

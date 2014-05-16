@@ -3,7 +3,7 @@ package liquibase.change.core
 import liquibase.change.ChangeStatus
 import liquibase.change.ColumnConfig
 import liquibase.change.StandardChangeTest
-import liquibase.database.core.MockDatabase
+import liquibase.sdk.database.MockDatabase
 import liquibase.snapshot.MockSnapshotGeneratorFactory
 import liquibase.snapshot.SnapshotGeneratorFactory
 

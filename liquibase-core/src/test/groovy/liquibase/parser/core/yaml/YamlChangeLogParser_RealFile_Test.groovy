@@ -22,7 +22,7 @@ import liquibase.changelog.ChangeLogParameters
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog
 import liquibase.database.ObjectQuotingStrategy
-import liquibase.database.core.MockDatabase;
+import liquibase.sdk.database.MockDatabase;
 import liquibase.exception.ChangeLogParseException
 import liquibase.precondition.CustomPreconditionWrapper
 import liquibase.precondition.core.AndPrecondition
@@ -36,31 +36,12 @@ import liquibase.sdk.supplier.resource.ResourceSupplier
 import liquibase.sql.visitor.AppendSqlVisitor
 import liquibase.sql.visitor.ReplaceSqlVisitor
 import liquibase.test.JUnitResourceAccessor
-import liquibase.util.ISODateFormat;
-import org.junit.Test
+import liquibase.util.ISODateFormat
 import spock.lang.Shared
 import spock.lang.Specification
-import spock.lang.Unroll;
-
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.util.Enumeration
+import spock.lang.Unroll
 
 import static org.hamcrest.Matchers.containsInAnyOrder
-import static org.hamcrest.Matchers.containsInAnyOrder
-import static org.hamcrest.Matchers.containsInAnyOrder
-import static org.hamcrest.Matchers.containsInAnyOrder
-import static org.hamcrest.Matchers.containsInAnyOrder
-import static org.hamcrest.Matchers.containsInAnyOrder
-import static org.hamcrest.Matchers.containsInAnyOrder
-import static spock.util.matcher.HamcrestSupport.that
-import static spock.util.matcher.HamcrestSupport.that
-import static spock.util.matcher.HamcrestSupport.that
-import static spock.util.matcher.HamcrestSupport.that
-import static spock.util.matcher.HamcrestSupport.that
-import static spock.util.matcher.HamcrestSupport.that
 import static spock.util.matcher.HamcrestSupport.that;
 
 public class YamlChangeLogParser_RealFile_Test extends Specification {

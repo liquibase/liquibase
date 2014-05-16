@@ -1,9 +1,8 @@
 package liquibase.change;
 
 import liquibase.change.core.*;
-import liquibase.database.DatabaseFactory;
 import liquibase.database.core.MSSQLDatabase;
-import liquibase.database.core.MockDatabase;
+import liquibase.sdk.database.MockDatabase;
 import liquibase.database.core.MySQLDatabase;
 import liquibase.database.core.OracleDatabase;
 import liquibase.exception.UnexpectedLiquibaseException;

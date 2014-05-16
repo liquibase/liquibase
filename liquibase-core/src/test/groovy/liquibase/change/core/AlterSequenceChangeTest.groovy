@@ -1,19 +1,11 @@
 package liquibase.change.core
 
 import liquibase.change.ChangeStatus;
-import liquibase.change.StandardChangeTest;
-import liquibase.database.Database;
-import liquibase.database.core.*
+import liquibase.change.StandardChangeTest
+import liquibase.sdk.database.MockDatabase
 import liquibase.snapshot.MockSnapshotGeneratorFactory
-import liquibase.snapshot.SnapshotGeneratorFactory;
-import liquibase.statement.SqlStatement;
-import liquibase.statement.core.AlterSequenceStatement
-import spock.lang.Unroll;
-
-import static org.junit.Assert.*;
-import org.junit.Test;
-
-import java.math.BigInteger;
+import liquibase.snapshot.SnapshotGeneratorFactory
+import spock.lang.Unroll
 
 public class AlterSequenceChangeTest extends StandardChangeTest {
 

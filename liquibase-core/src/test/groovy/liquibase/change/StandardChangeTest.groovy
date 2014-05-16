@@ -1,8 +1,7 @@
 package liquibase.change
 
-import liquibase.change.core.SQLFileChange
 import liquibase.changelog.ChangeSet
-import liquibase.database.core.MockDatabase
+import liquibase.sdk.database.MockDatabase
 import liquibase.sdk.supplier.change.ChangeSupplierFactory
 import liquibase.sdk.supplier.resource.ResourceSupplier
 import liquibase.serializer.core.string.StringChangeLogSerializer

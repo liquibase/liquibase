@@ -113,4 +113,31 @@ public class FileUtil {
 
         return tempDir;
     }
+
+    public static String getContents(File file) throws IOException {
+        if (!file.exists()) {
+            return null;
+        }
+        FileReader reader = null;
+        try {
+            reader = new FileReader(file);
+            return StreamUtil.getReaderContents(reader);
+        } catch (FileNotFoundException e) {
+            return null;
+        } finally {
+            if (reader != null) {
+                reader.close();
+            }
+        }
+    }
+
+    public static void write(String contents, File file) throws IOException {
+        file.getParentFile().mkdirs();
+        FileOutputStream output = new FileOutputStream(file);
+        try {
+            StreamUtil.copy(new ByteArrayInputStream(contents.getBytes("UTF-8")), output);
+        } finally {
+            output.close();
+        }
+    }
 }

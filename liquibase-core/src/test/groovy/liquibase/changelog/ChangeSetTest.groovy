@@ -166,6 +166,7 @@ public class ChangeSetTest extends Specification {
         changeSet.toString(false) == "com/example/test.xml::1::nvoxland"
         changeSet.changes.size() == 2
         changeSet.changes[0].tableName == "table_1"
+        changeSet.changes[0].changeSet == changeSet
         changeSet.changes[1].tableName == "table_2"
     }
 

@@ -1,5 +1,6 @@
 package liquibase.database.core
 
+import liquibase.sdk.database.MockDatabase
 import liquibase.structure.core.Catalog
 import spock.lang.Specification
 
