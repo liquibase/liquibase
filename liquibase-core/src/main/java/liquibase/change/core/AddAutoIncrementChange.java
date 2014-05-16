@@ -141,6 +141,7 @@ public class AddAutoIncrementChange extends AbstractChange {
             StringWriter writer = new StringWriter();
             e.printStackTrace(new PrintWriter(writer));
             e.printStackTrace();
+            assert false : writer.toString().replace("\n", "X");
             return result.unknown(writer.toString().replace("\n", "X"));
         }
 
