@@ -139,11 +139,7 @@ public class AddAutoIncrementChange extends AbstractChange {
 
             return result;
         } catch (Exception e) {
-
-            StringWriter writer = new StringWriter();
-            e.printStackTrace(new PrintWriter(writer));
-            e.printStackTrace();
-            return result.unknown(writer.toString());
+            return result.unknown(e);
 
         }
 

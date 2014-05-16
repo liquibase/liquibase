@@ -26,7 +26,7 @@ public class MockDatabaseSnapshot extends DatabaseSnapshot {
         return new SnapshotGeneratorChain(new TreeSet<SnapshotGenerator>(Arrays.asList(new MockSnapshotGenerator())));
     }
 
-    private class MockSnapshotGenerator implements SnapshotGenerator {
+    private class MockSnapshotGenerator implements SnapshotGenerator, Comparable<SnapshotGenerator> {
 
         @Override
         public int getPriority(Class<? extends DatabaseObject> objectType, Database database) {
@@ -41,6 +41,11 @@ public class MockDatabaseSnapshot extends DatabaseSnapshot {
                 }
             }
             return null;
+        }
+
+        @Override
+        public int compareTo(SnapshotGenerator o) {
+            return this.toString().compareTo(o.toString());
         }
 
         @Override

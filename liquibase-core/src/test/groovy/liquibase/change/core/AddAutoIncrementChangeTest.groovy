@@ -69,7 +69,6 @@ public class AddAutoIncrementChangeTest extends StandardChangeTest {
         change.startWith = changeStartWith
         change.incrementBy = changeIncrementBy
         then:
-        change.checkStatus(database).message == ""
         change.checkStatus(database).status == expectedResult
 
         where:
