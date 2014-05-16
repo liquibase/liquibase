@@ -380,7 +380,7 @@ public abstract class AbstractChange implements Change {
     }
 
     @Override
-    public ChangeStatus checkStatus(Database database) {
+    public ChangeStatus checkStatus(Database database) throws Exception {
         return new ChangeStatus().unknown("Not implemented");
     }
 
