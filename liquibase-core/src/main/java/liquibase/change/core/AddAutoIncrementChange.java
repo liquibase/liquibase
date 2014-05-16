@@ -13,6 +13,8 @@ import liquibase.statement.core.SetNullableStatement;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Table;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.math.BigInteger;
 
 /**
@@ -135,9 +137,10 @@ public class AddAutoIncrementChange extends AbstractChange {
             }
 
             return result;
-        } catch (Throwable e) {
-//            return result.unknown(e);
-            throw new RuntimeException(e);
+        } catch (Exception e) {
+            StringWriter writer = new StringWriter();
+            e.printStackTrace(new PrintWriter(writer));
+            return result.unknown(writer.toString());
         }
 
 
