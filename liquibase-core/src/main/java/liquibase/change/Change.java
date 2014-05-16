@@ -125,6 +125,6 @@ public interface Change extends LiquibaseSerializable {
      * Validate that this change executed successfully against the given database. This will check that the update completed at a high level plus check details of the change.
      * For example, a change to add a column will check that the column exists plus data type, default values, etc.
      */
-    public ChangeStatus checkStatus(Database database) throws Exception;
+    public ChangeStatus checkStatus(Database database);
 
 }

@@ -120,7 +120,7 @@ public class AddAutoIncrementChange extends AbstractChange {
     }
 
     @Override
-    public ChangeStatus checkStatus(Database database) throws Exception {
+    public ChangeStatus checkStatus(Database database) {
         ChangeStatus result = new ChangeStatus();
         Column example = new Column(Table.class, getCatalogName(), getSchemaName(), getTableName(), getColumnName());
         try {
@@ -139,7 +139,12 @@ public class AddAutoIncrementChange extends AbstractChange {
 
             return result;
         } catch (Exception e) {
-            throw e;
+
+            StringWriter writer = new StringWriter();
+            e.printStackTrace(new PrintWriter(writer));
+            e.printStackTrace();
+            return result.unknown(writer.toString());
+
         }
 
 
