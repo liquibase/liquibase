@@ -31,9 +31,14 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor {
         if (resources == null || !resources.hasMoreElements()) {
             return null;
         }
+        Set<String> seenUrls = new HashSet<String>();
         Set<InputStream> returnSet = new HashSet<InputStream>();
         while (resources.hasMoreElements()) {
             URL url = resources.nextElement();
+            if (seenUrls.contains(url.toExternalForm())) {
+                continue;
+            }
+            seenUrls.add(url.toExternalForm());
             InputStream resourceAsStream = url.openStream();
             if (resourceAsStream != null) {
                 returnSet.add(resourceAsStream);
