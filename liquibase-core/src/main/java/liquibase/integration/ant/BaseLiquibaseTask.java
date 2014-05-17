@@ -72,6 +72,7 @@ public abstract class BaseLiquibaseTask extends Task {
 
         AntClassLoader loader = getProject().createClassLoader(classpath);
         loader.setParent(this.getClass().getClassLoader());
+        loader.setParentFirst(false);
         loader.setThreadContextLoader();
 
         try {
