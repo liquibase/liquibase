@@ -4,7 +4,7 @@
     <tempfile property="temp.dir" prefix="DatabaseUpdateTaskTest" destDir="${java.io.tmpdir}" deleteonexit="true"/>
 
     <path id="basic-classpath">
-        <pathelement path="${java.class.path}"/>
+        <pathelement path="."/>
     </path>
 
     <property name="jdbc.driver" value="org.h2.Driver"/>
