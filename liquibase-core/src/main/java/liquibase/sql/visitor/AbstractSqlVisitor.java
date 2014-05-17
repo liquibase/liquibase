@@ -1,11 +1,17 @@
 package liquibase.sql.visitor;
 
 import liquibase.ContextExpression;
-import liquibase.Contexts;
 import liquibase.change.CheckSum;
+import liquibase.exception.SetupException;
+import liquibase.parser.core.ParsedNode;
+import liquibase.parser.core.ParsedNodeException;
+import liquibase.resource.ResourceAccessor;
 import liquibase.serializer.ReflectionSerializer;
 import liquibase.serializer.core.string.StringChangeLogSerializer;
+import liquibase.util.ObjectUtil;
+import liquibase.util.StringUtils;
 
+import java.util.HashSet;
 import java.util.Set;
 
 public abstract class AbstractSqlVisitor implements SqlVisitor {
@@ -72,4 +78,37 @@ public abstract class AbstractSqlVisitor implements SqlVisitor {
     public String getSerializedObjectNamespace() {
         return GENERIC_CHANGELOG_EXTENSION_NAMESPACE;
     }
+
+    @Override
+    public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException {
+        for (ParsedNode childNode : parsedNode.getChildren()) {
+            try {
+               if (childNode.getName().equals("dbms")) {
+                    this.setApplicableDbms(new HashSet<String>(StringUtils.splitAndTrim((String) childNode.getValue(), ",")));
+                } else if (childNode.getName().equals("applyToRollback")) {
+                   Boolean value = childNode.getValue(Boolean.class);
+                   if (value != null) {
+                       setApplyToRollback(value);
+                   }
+               } else if (childNode.getName().equals("context") || childNode.getName().equals("contexts")) {
+                   setContexts(new ContextExpression((String) childNode.getValue()));
+                } else  if (ObjectUtil.hasWriteProperty(this, childNode.getName())) {
+                   Object value = childNode.getValue();
+                   if (value != null) {
+                       value = value.toString();
+                   }
+                   ObjectUtil.setProperty(this, childNode.getName(), (String) value);
+               }
+            } catch (Exception e) {
+                throw new ParsedNodeException("Error setting property", e);
+            }
+        }
+
+    }
+
+    @Override
+    public ParsedNode serialize() {
+        throw new RuntimeException("TODO");
+    }
+
 }

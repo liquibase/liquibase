@@ -6,6 +6,9 @@ import liquibase.change.ChangeMetaData;
 import liquibase.change.DatabaseChangeProperty;
 import liquibase.database.Database;
 import liquibase.exception.*;
+import liquibase.parser.core.ParsedNode;
+import liquibase.parser.core.ParsedNodeException;
+import liquibase.resource.ResourceAccessor;
 import liquibase.statement.SqlStatement;
 import liquibase.util.ObjectUtil;
 
@@ -283,4 +286,46 @@ public class CustomChangeWrapper extends AbstractChange {
         return STANDARD_CHANGELOG_NAMESPACE;
     }
 
+    @Override
+    public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException {
+        setClassLoader(resourceAccessor.toClassLoader());
+        try {
+            setClass(parsedNode.getChildValue(null, "class", String.class));
+        } catch (CustomChangeException e) {
+            throw new ParsedNodeException(e);
+        }
+        super.load(parsedNode, resourceAccessor);
+    }
+
+    @Override
+    public void customLoadLogic(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException {
+        ParsedNode paramsNode = parsedNode.getChild(null, "params");
+        if (paramsNode == null) {
+            paramsNode = parsedNode;
+        }
+
+        for (ParsedNode child : paramsNode.getChildren(null, "param")) {
+            Object value = child.getValue();
+            if (value == null) {
+                value = child.getChildValue(null, "value");
+            }
+            if (value != null) {
+                value = value.toString();
+            }
+            this.setParam(child.getChildValue(null, "name", String.class), (String) value);
+        }
+
+        CustomChange customChange = null;
+        try {
+            customChange = (CustomChange) Class.forName(className, false, resourceAccessor.toClassLoader()).newInstance();
+        } catch (Exception e) {
+            throw new UnexpectedLiquibaseException(e);
+        }
+        for (ParsedNode node : parsedNode.getChildren()) {
+            Object value = node.getValue();
+            if (value != null && ObjectUtil.hasProperty(customChange, node.getName())) {
+                this.setParam(node.getName(), value.toString());
+            }
+        }
+    }
 }

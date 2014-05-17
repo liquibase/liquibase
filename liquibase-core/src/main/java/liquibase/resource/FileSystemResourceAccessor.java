@@ -7,92 +7,65 @@ import java.net.URLClassLoader;
 import java.util.*;
 
 /**
- * A FileOpener implementation which finds Files in the
- * File System.
- * <p/>
- * FileSystemFileOpeners can use a BaseDirectory to determine
- * where relative paths should be resolved from.
- *
- * @author <a href="mailto:csuml@yahoo.co.uk>Paul Keeble</a>
+ * A @{link ResourceAccessor} implementation which finds Files in the File System.
  */
-public class FileSystemResourceAccessor implements ResourceAccessor {
-    String baseDirectory;
+public class FileSystemResourceAccessor extends AbstractResourceAccessor {
+
+    private File baseDirectory;
 
     /**
-     * Creates using a Base directory of null, all files will be
-     * resolved exactly as they are given.
+     * Creates with no base directory. All files will be resolved exactly as they are given.
      */
     public FileSystemResourceAccessor() {
         baseDirectory = null;
     }
 
     /**
-     * Creates using  a supplied base directory.
-     *
-     * @param base The path to use to resolve relative paths
+     * Creates with base directory for relative path support.
      */
     public FileSystemResourceAccessor(String base) {
-        if (new File(base).isFile())
-            throw new IllegalArgumentException("base must be a directory");
-        baseDirectory = base;
+        baseDirectory = new File(base);
+        if (!baseDirectory.isDirectory()) {
+            throw new IllegalArgumentException(base+" must be a directory");
+        }
     }
 
-    /**
-     * Opens a stream on a file, resolving to the baseDirectory if the
-     * file is relative.
-     */
     @Override
-    public InputStream getResourceAsStream(String file) throws IOException {
-        File absoluteFile = new File(file);
-        File relativeFile = (baseDirectory == null) ? new File(file) : new File(baseDirectory, file);
+    public Set<InputStream> getResourcesAsStream(String path) throws IOException {
+        File absoluteFile = new File(path);
+        File relativeFile = (baseDirectory == null) ? new File(path) : new File(baseDirectory, path);
 
+        InputStream fileStream = null;
         if (absoluteFile.exists() && absoluteFile.isFile() && absoluteFile.isAbsolute()) {
-            return new BufferedInputStream(new FileInputStream(absoluteFile));
+            fileStream = new BufferedInputStream(new FileInputStream(absoluteFile));
         } else if (relativeFile.exists() && relativeFile.isFile()) {
-            return new BufferedInputStream(new FileInputStream(relativeFile));
-        } else {
+            fileStream = new BufferedInputStream(new FileInputStream(relativeFile));
+        }
+        if (fileStream == null) {
             return null;
-
+        } else {
+            Set<InputStream> returnSet = new HashSet<InputStream>();
+            returnSet.add(fileStream);
+            return returnSet;
         }
     }
 
     @Override
-    public Enumeration<URL> getResources(String packageName) throws IOException {
-        String directoryPath = (new File(packageName).isAbsolute() || baseDirectory == null) ? packageName : baseDirectory + File.separator + packageName;
+    public Set<String> list(String relativeTo, String path, boolean includeFiles, boolean includeDirectories, boolean recursive) throws IOException {
+        File absoluteFile = new File(path);
+        File relativeFile = (baseDirectory == null) ? new File(path) : new File(baseDirectory, path);
 
-        File directoryFile = new File(directoryPath);
-        if (!directoryFile.exists()) {
-            return new Vector<URL>().elements();
+        if (absoluteFile.exists() && absoluteFile.isDirectory()) {
+            Set<String> returnSet = new HashSet<String>();
+            getContents(absoluteFile, recursive, includeFiles, includeDirectories, path, returnSet);
+            return returnSet;
+        } else if (relativeFile.exists() && relativeFile.isDirectory()) {
+            Set<String> returnSet = new HashSet<String>();
+            getContents(relativeFile, recursive, includeFiles, includeDirectories, path, returnSet);
+            return returnSet;
         }
 
-        if (!directoryFile.isDirectory()) {
-            return new Vector<URL>(Arrays.asList(directoryFile.toURL())).elements();
-        }
-
-        File[] files = directoryFile.listFiles();
-        
-        List<URL> results = new ArrayList<URL>();
-
-        if (files != null) {
-            for (File f : files) {
-                if (!f.isDirectory())
-                    results.add(f.toURI().toURL());
-            }
-        }
-
-        final Iterator<URL> it = results.iterator();
-        return new Enumeration<URL>() {
-
-            @Override
-            public boolean hasMoreElements() {
-                return it.hasNext();
-            }
-
-            @Override
-            public URL nextElement() {
-                return it.next();
-            }
-        };
+        return null;
     }
 
     @Override
@@ -106,11 +79,11 @@ public class FileSystemResourceAccessor implements ResourceAccessor {
 
     @Override
     public String toString() {
-        String dir = baseDirectory;
+        File dir = baseDirectory;
         if (dir == null) {
-            dir = new File(".").getAbsolutePath();
+            dir = new File(".");
         }
-        return getClass().getName()+"("+ dir +")";
+        return getClass().getName()+"("+ dir.getAbsolutePath() +")";
     }
 
 }

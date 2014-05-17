@@ -18,7 +18,7 @@ import liquibase.util.StringUtils;
  * To create an instance call the constructor as normal and then call
  *
  * @author <a href="mailto:csuml@yahoo.co.uk">Paul Keeble</a>
- * @link{#setFileOpener(FileOpener)} before calling setPath otherwise the
+ * @link{#setResourceAccesssor(ResourceAccessor)} before calling setPath otherwise the
  * file will likely not be found.
  */
 @DatabaseChange(name="sqlFile",

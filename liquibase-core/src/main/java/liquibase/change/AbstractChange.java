@@ -5,6 +5,9 @@ import java.util.*;
 
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
+import liquibase.parser.core.ParsedNode;
+import liquibase.parser.core.ParsedNodeException;
+import liquibase.serializer.LiquibaseSerializable;
 import liquibase.structure.DatabaseObject;
 import liquibase.exception.*;
 import liquibase.resource.ResourceAccessor;
@@ -57,6 +60,9 @@ public abstract class AbstractChange implements Change {
 
             Set<ChangeParameterMetaData> params = new HashSet<ChangeParameterMetaData>();
             for (PropertyDescriptor property : Introspector.getBeanInfo(this.getClass()).getPropertyDescriptors()) {
+                if (isInvalidProperty(property)) {
+                    continue;
+                }
                 Method readMethod = property.getReadMethod();
                 Method writeMethod = property.getWriteMethod();
                 if (readMethod == null) {
@@ -84,6 +90,10 @@ public abstract class AbstractChange implements Change {
         } catch (Throwable e) {
             throw new UnexpectedLiquibaseException(e);
         }
+    }
+
+    protected boolean isInvalidProperty(PropertyDescriptor property) {
+        return property.getDisplayName().equals("metaClass");
     }
 
     /**
@@ -369,6 +379,11 @@ public abstract class AbstractChange implements Change {
         return changeValidationErrors;
     }
 
+    @Override
+    public ChangeStatus checkStatus(Database database) {
+        return new ChangeStatus().unknown("Not implemented");
+    }
+
     /**
      * Implementation relies on value returned from {@link #createInverses()}.
      */
@@ -501,5 +516,120 @@ public abstract class AbstractChange implements Change {
     @Override
     public String toString() {
         return ChangeFactory.getInstance().getChangeMetaData(this).getName();
+    }
+
+    @Override
+    public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException {
+        ChangeMetaData metaData = ChangeFactory.getInstance().getChangeMetaData(this);
+        this.setResourceAccessor(resourceAccessor);
+        try {
+            for (ChangeParameterMetaData param : metaData.getParameters().values()) {
+                if (Collection.class.isAssignableFrom(param.getDataTypeClass())) {
+                    Class collectionType = (Class) param.getDataTypeClassParameters()[0];
+                    if (param.getDataTypeClassParameters().length == 1 && ColumnConfig.class.isAssignableFrom(collectionType)) {
+                        List<ParsedNode> columnNodes = new ArrayList<ParsedNode>(parsedNode.getChildren(null, param.getParameterName()));
+                        columnNodes.addAll(parsedNode.getChildren(null, "column"));
+
+                        Object nodeValue = parsedNode.getValue();
+                        if (nodeValue instanceof ParsedNode) {
+                            columnNodes.add((ParsedNode) nodeValue);
+                        } else if (nodeValue instanceof Collection) {
+                            for (Object nodeValueChild : ((Collection) nodeValue)) {
+                                if (nodeValueChild instanceof ParsedNode) {
+                                    columnNodes.add((ParsedNode) nodeValueChild);
+                                }
+                            }
+                        }
+
+
+                        for (ParsedNode child : columnNodes) {
+                            if (child.getName().equals("column") || child.getName().equals("columns")) {
+                                List<ParsedNode> columnChildren = child.getChildren(null, "column");
+                                if (columnChildren != null && columnChildren.size() > 0) {
+                                    for (ParsedNode columnChild : columnChildren) {
+                                        ColumnConfig columnConfig = (ColumnConfig) collectionType.newInstance();
+                                        columnConfig.load(columnChild, resourceAccessor);
+                                        ((ChangeWithColumns) this).addColumn(columnConfig);
+                                    }
+                                } else {
+                                    ColumnConfig columnConfig = (ColumnConfig) collectionType.newInstance();
+                                    columnConfig.load(child, resourceAccessor);
+                                    ((ChangeWithColumns) this).addColumn(columnConfig);
+                                }
+                            }
+                        }
+                    }
+                } else if (LiquibaseSerializable.class.isAssignableFrom(param.getDataTypeClass())) {
+                    try {
+                        ParsedNode child = parsedNode.getChild(null, param.getParameterName());
+                        if (child != null) {
+                            LiquibaseSerializable serializableChild = (LiquibaseSerializable) param.getDataTypeClass().newInstance();
+                            serializableChild.load(child, resourceAccessor);
+                            param.setValue(this, serializableChild);
+                        }
+                    } catch (InstantiationException e) {
+                        throw new UnexpectedLiquibaseException(e);
+                    } catch (IllegalAccessException e) {
+                        throw new UnexpectedLiquibaseException(e);
+                    }
+                } else {
+                    if (this.getSerializableFieldType(param.getParameterName()) == SerializationType.DIRECT_VALUE) {
+                        param.setValue(this, parsedNode.getValue());
+                    } else {
+                        param.setValue(this, parsedNode.getChildValue(null, param.getParameterName(), param.getDataTypeClass()));
+                    }
+                }
+            }
+        } catch (InstantiationException e) {
+            throw new UnexpectedLiquibaseException(e);
+        } catch (IllegalAccessException e) {
+            throw new UnexpectedLiquibaseException(e);
+        }
+        customLoadLogic(parsedNode, resourceAccessor);
+        try {
+            this.finishInitialization();
+        } catch (SetupException e) {
+            throw new ParsedNodeException(e);
+        }
+    }
+
+    protected void customLoadLogic(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException {
+
+    }
+
+    @Override
+    public ParsedNode serialize() throws ParsedNodeException {
+        ParsedNode node = new ParsedNode(null, getSerializedObjectName());
+        ChangeMetaData metaData = ChangeFactory.getInstance().getChangeMetaData(this);
+        for (ChangeParameterMetaData param : metaData.getSetParameters(this).values()) {
+            Object currentValue = param.getCurrentValue(this);
+            currentValue = serializeValue(currentValue);
+            if (currentValue != null) {
+                node.addChild(null, param.getParameterName(), currentValue);
+            }
+        }
+
+        return node;
+    }
+
+    protected Object serializeValue(Object value) throws ParsedNodeException {
+        if (value instanceof Collection) {
+            List returnList = new ArrayList();
+            for (Object obj : (Collection) value) {
+                Object objValue = serializeValue(obj);
+                if (objValue != null) {
+                    returnList.add(objValue);
+                }
+            }
+            if (((Collection) value).size() == 0) {
+                return null;
+            } else {
+                return returnList;
+            }
+        } else if (value instanceof LiquibaseSerializable) {
+            return ((LiquibaseSerializable) value).serialize();
+        } else {
+            return value;
+        }
     }
 }

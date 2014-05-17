@@ -1,0 +1,30 @@
+databaseChangeLog:
+    - changeSet:
+        id: 1
+        author: nvoxland
+        comment: "Some comments go here"
+        unusedAttribute: changeScopeSet
+        changes:
+            - unusedElement:
+                oneUnused: 1
+                twoUnused: 2
+            - createTable:
+                tableName: person_yaml
+                unusedElement:
+                    oneUnused: 1
+                    twoUnused: 2
+                columns:
+                    - column:
+                        name: id
+                        type: int
+                        constraints:
+                            primaryKey: true
+                            nullable: false
+                    - column:
+                        name: firstname
+                        type: varchar(50)
+                    - column:
+                        name: lastname
+                        type: varchar(50)
+                        constraints:
+                            nullable: false

@@ -832,6 +832,7 @@
 		<xsd:complexType>
 			<xsd:sequence>
 				<xsd:element ref="column" minOccurs="1" maxOccurs="unbounded" />
+                <xsd:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded" />
 			</xsd:sequence>
 			<xsd:attributeGroup ref="tableNameAttribute" />
             <xsd:attribute name="tablespace" type="xsd:string" />            
@@ -1086,7 +1087,8 @@
 		<xsd:complexType>
 			<xsd:sequence>
 				<xsd:element ref="column" maxOccurs="unbounded" />
-			</xsd:sequence>
+                <xsd:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded" />
+            </xsd:sequence>
 			<xsd:attributeGroup ref="createIndex" />
 		</xsd:complexType>
 	</xsd:element>

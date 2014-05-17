@@ -1,0 +1,24 @@
+databaseChangeLog:
+    - logicalFilePath: liquibase/parser-logical/yaml/logicalPathChangeLog.yaml
+    - changeSet:
+        id: 1
+        author: nvoxland
+        changes:
+        - createTable:
+            columns:
+            - column:
+                name: id
+                type: int
+                constraints:
+                    nullable: false
+                    primaryKey: true
+            - column:
+                name: firstname
+                type: varchar(50)
+            - column:
+                type: varchar(50)
+                tableName: person
+                constraints:
+                    nullable: false
+                    name: lastname
+

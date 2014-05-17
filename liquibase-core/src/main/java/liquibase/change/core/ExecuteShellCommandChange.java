@@ -12,6 +12,9 @@ import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.executor.LoggingExecutor;
 import liquibase.logging.LogFactory;
+import liquibase.parser.core.ParsedNode;
+import liquibase.parser.core.ParsedNodeException;
+import liquibase.resource.ResourceAccessor;
 import liquibase.sql.Sql;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.CommentStatement;
@@ -22,6 +25,7 @@ import liquibase.util.StringUtils;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -59,6 +63,9 @@ public class ExecuteShellCommandChange extends AbstractChange {
         this.args.add(arg);
     }
 
+    public List<String> getArgs() {
+        return Collections.unmodifiableList(args);
+    }
 
     public void setOs(String os) {
         this.os = StringUtils.splitAndTrim(os, ",");
@@ -107,7 +114,7 @@ public class ExecuteShellCommandChange extends AbstractChange {
                 public Sql[] generate(Database database) {
                     List<String> commandArray = new ArrayList<String>();
                     commandArray.add(executable);
-                    commandArray.addAll(args);
+                    commandArray.addAll(getArgs());
 
                     try {
                         ProcessBuilder pb = new ProcessBuilder(commandArray);
@@ -161,5 +168,21 @@ public class ExecuteShellCommandChange extends AbstractChange {
     @Override
     public String getSerializedObjectNamespace() {
         return STANDARD_CHANGELOG_NAMESPACE;
+    }
+
+    @Override
+    protected void customLoadLogic(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException {
+        ParsedNode argsNode = parsedNode.getChild(null, "args");
+        if (argsNode == null) {
+            argsNode = parsedNode;
+        }
+
+        for (ParsedNode arg : argsNode.getChildren(null, "arg")) {
+            addArg(arg.getChildValue(null, "value", String.class));
+        }
+        List<String> os = StringUtils.splitAndTrim(StringUtils.trimToEmpty(parsedNode.getChildValue(null, "os", String.class)), ",");
+        if (os.size() > 0) {
+            this.os = os;
+        }
     }
 }

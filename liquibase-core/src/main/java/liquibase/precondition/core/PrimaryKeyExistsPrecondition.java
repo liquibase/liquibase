@@ -3,6 +3,7 @@ package liquibase.precondition.core;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
+import liquibase.precondition.AbstractPrecondition;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.structure.core.PrimaryKey;
 import liquibase.structure.core.Schema;
@@ -11,7 +12,7 @@ import liquibase.precondition.Precondition;
 import liquibase.structure.core.Table;
 import liquibase.util.StringUtils;
 
-public class PrimaryKeyExistsPrecondition implements Precondition {
+public class PrimaryKeyExistsPrecondition extends AbstractPrecondition {
     private String catalogName;
     private String schemaName;
     private String primaryKeyName;
@@ -83,6 +84,11 @@ public class PrimaryKeyExistsPrecondition implements Precondition {
         } catch (Exception e) {
             throw new PreconditionErrorException(e, changeLog, this);
         }
+    }
+
+    @Override
+    public String getSerializedObjectNamespace() {
+        return STANDARD_CHANGELOG_NAMESPACE;
     }
 
     @Override

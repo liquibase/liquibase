@@ -12,7 +12,9 @@ public class TestPermutation {
     private String notRanMessage;
     private SortedMap<String, Value> data = new TreeMap<String, Value>();
     private SortedMap<String,Value> description = new TreeMap<String, Value>();
-    private Map<String, Value> rowDescription;
+    private String group;
+
+    private TreeMap<String, Value> rowDescription;
     private String rowDescriptionParameter;
     private String rowFullKey = "";
     private String key = "";
@@ -78,6 +80,10 @@ public class TestPermutation {
         return description;
     }
 
+    public String getGroup() {
+        return group;
+    }
+
     public String getRowDescriptionParameter() {
         return rowDescriptionParameter;
     }
@@ -115,13 +121,22 @@ public class TestPermutation {
         recomputeKey();
     }
 
+    public void describeAsGroup(String key, Object value) {
+        describeAsGroup(key, value, OutputFormat.DefaultFormat);
+    }
+
+    public void describeAsGroup(String key, Object value, OutputFormat outputFormat) {
+        this.group = key+": "+outputFormat.format(value);
+        describe(key, value);
+    }
+
     public void describeAsTable(String key, Map value) {
         describeAsTable(key, value, OutputFormat.DefaultFormat);
     }
 
     public void describeAsTable(String key, Map<String, ?> value, OutputFormat outputFormat) {
         rowDescriptionParameter = key;
-        rowDescription = new HashMap<String, Value>();
+        rowDescription = new TreeMap<String, Value>();
         for (Map.Entry<String, ?> entry : value.entrySet()) {
             rowDescription.put(entry.getKey(), new Value(entry.getValue(), outputFormat));
         }
@@ -146,7 +161,7 @@ public class TestPermutation {
         }
         tableKey = StringUtils.join(description, ",", formatter);
         fullKey = StringUtils.join(fullDescription, ",", formatter);
-        key = MD5Util.computeMD5(fullKey);
+        key = MD5Util.computeMD5(fullKey).substring(0, 16);
     }
 
     public void note(String key, Object value) {
@@ -208,8 +223,12 @@ public class TestPermutation {
                 }
             }
         } catch (Throwable e) {
+            SortedMap<String, Value> fullDescription = new TreeMap<String, Value>(description);
+            if (rowDescription != null) {
+                fullDescription.putAll(rowDescription);
+            }
             String message = "Error executing setup\n"+
-                    "Description: "+ output(description)+"\n"+
+                    "Description: "+ output(fullDescription)+"\n"+
                     "Notes: "+output(notes)+"\n"+
                     "Data: "+output(data);
             throw new RuntimeException(message, e);
@@ -231,6 +250,7 @@ public class TestPermutation {
             } catch (Throwable e) {
                 String message = "Error executing verification\n"+
                         "Description: "+ output(description)+"\n"+
+                        (rowDescription == null ? "" : "Row Description: "+output(rowDescription)+"\n")+
                         "Notes: "+output(notes)+"\n"+
                         "Data: "+output(data);
                 throw new RuntimeException(message, e);

@@ -1,0 +1,23 @@
+databaseChangeLog:
+    - changeSet:
+        id: 1
+        author: nvoxland
+        comment: "Some comments go here"
+        changes:
+            - createTable:
+                tableName: person_yaml
+                columns:
+                    - column:
+                        name: id
+                        type: int
+                        constraints:
+                            primaryKey: true
+                            nullable: false
+                    - column:
+                        name: name
+                        type: varchar(255)
+                        constraints:
+                            nullable: false
+                    - column:
+                        name: age
+                        type: int

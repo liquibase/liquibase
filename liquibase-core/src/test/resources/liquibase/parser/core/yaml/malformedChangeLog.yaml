@@ -1,0 +1,4 @@
+databaseChangeLog:
+    - changeSet:
+        - id: 1
+        author: nvoxland

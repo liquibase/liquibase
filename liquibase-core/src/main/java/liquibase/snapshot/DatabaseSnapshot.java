@@ -4,6 +4,9 @@ import liquibase.CatalogAndSchema;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.parser.core.ParsedNode;
+import liquibase.parser.core.ParsedNodeException;
+import liquibase.resource.ResourceAccessor;
 import liquibase.serializer.LiquibaseSerializable;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.DatabaseObjectCollection;
@@ -27,6 +30,14 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable{
         allFound = new DatabaseObjectCollection(database);
         this.snapshotControl = snapshotControl;
 
+        init(examples);
+
+        this.serializableFields =  new HashSet<String>();
+        this.serializableFields.add("snapshotControl");
+        this.serializableFields.add("objects");
+    }
+
+    protected void init(DatabaseObject[] examples) throws DatabaseException, InvalidExampleException {
         if (examples != null) {
             Set<Catalog> catalogs = new HashSet<Catalog>();
             for (DatabaseObject object : examples) {
@@ -45,10 +56,6 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable{
                 include(obj);
             }
         }
-
-        this.serializableFields =  new HashSet<String>();
-        this.serializableFields.add("snapshotControl");
-        this.serializableFields.add("objects");
     }
 
     public DatabaseSnapshot(DatabaseObject[] examples, Database database) throws DatabaseException, InvalidExampleException {
@@ -120,7 +127,7 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable{
         }
 
         if (example instanceof Schema && example.getName() == null && (((Schema) example).getCatalog() == null || ((Schema) example).getCatalogName() == null)) {
-            CatalogAndSchema catalogAndSchema = database.correctSchema(((Schema) example).toCatalogAndSchema());
+            CatalogAndSchema catalogAndSchema = ((Schema) example).toCatalogAndSchema().customize(database);
             example = (T) new Schema(catalogAndSchema.getCatalogName(), catalogAndSchema.getSchemaName());
         }
 
@@ -222,7 +229,16 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable{
                     newValues.add(obj);
                 }
             }
-            Collection newCollection = (Collection) fieldValue.getClass().newInstance();
+            Collection newCollection = null;
+            try {
+                Class<?> collectionClass = fieldValue.getClass();
+                if (List.class.isAssignableFrom(collectionClass)) {
+                    collectionClass = ArrayList.class;
+                }
+                newCollection = (Collection) collectionClass.newInstance();
+            } catch (InstantiationException e) {
+                throw e;
+            }
             newCollection.addAll(newValues);
             return newCollection;
         } else if (fieldValue instanceof Map) {
@@ -258,7 +274,7 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable{
     }
 
 
-    private SnapshotGeneratorChain createGeneratorChain(Class<? extends DatabaseObject> databaseObjectType, Database database) {
+    protected SnapshotGeneratorChain createGeneratorChain(Class<? extends DatabaseObject> databaseObjectType, Database database) {
         SortedSet<SnapshotGenerator> generators = SnapshotGeneratorFactory.getInstance().getGenerators(databaseObjectType, database);
         if (generators == null || generators.size() == 0) {
             return null;
@@ -278,5 +294,15 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable{
             }
         }
         return false;
+    }
+
+    @Override
+    public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException {
+        throw new RuntimeException("TODO");
+    }
+
+    @Override
+    public ParsedNode serialize() {
+        throw new RuntimeException("TODO");
     }
 }

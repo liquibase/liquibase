@@ -2,10 +2,12 @@ package liquibase.util;
 
 import java.io.*;
 import java.nio.charset.Charset;
+import java.util.Set;
 
 import liquibase.changelog.ChangeSet;
 import liquibase.configuration.GlobalConfiguration;
 import liquibase.configuration.LiquibaseConfiguration;
+import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.resource.ResourceAccessor;
 import liquibase.resource.UtfBomAwareReader;
 
@@ -172,8 +174,22 @@ public class StreamUtil {
             file = base.replaceFirst("/[^/]*$", "") + "/" + file;
         }
 
-        return resourceAccessor.getResourceAsStream(file);
+        return singleInputStream(file, resourceAccessor);
+    }
 
+    public static InputStream singleInputStream(String path, ResourceAccessor resourceAccessor) throws IOException {
+        Set<InputStream> streams = resourceAccessor.getResourcesAsStream(path);
+        if (streams == null || streams.size() == 0) {
+            return null;
+        }
+        if (streams.size() != 1) {
+            for (InputStream stream : streams) {
+                stream.close();
+            }
+            throw new IOException("Found "+streams.size()+" files that match "+path);
+        }
+
+        return streams.iterator().next();
     }
 
     /**
@@ -197,13 +213,13 @@ public class StreamUtil {
             } else {
                 base = changeSet.getChangeLog().getPhysicalFilePath().replaceAll("\\\\","/");
             }
-            if (!base.contains("/")) {
+            if (base == null || !base.contains("/")) {
                 base = ".";
             }
 
             file = base.replaceFirst("/[^/]*$", "") + "/" + file;
         }
 
-        return resourceAccessor.getResourceAsStream(file);
+        return singleInputStream(file, resourceAccessor);
     }
 }

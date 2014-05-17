@@ -111,9 +111,9 @@ public class DiffOutputControl {
             if (schema == null) {
                 return true;
             }
-            CatalogAndSchema objectCatalogAndSchema = accordingTo.correctSchema(schema.toCatalogAndSchema());
+            CatalogAndSchema objectCatalogAndSchema = schema.toCatalogAndSchema().standardize(accordingTo);
             for (CatalogAndSchema catalogAndSchema : includeSchemas) {
-                catalogAndSchema = accordingTo.correctSchema(schema.toCatalogAndSchema());
+                catalogAndSchema = schema.toCatalogAndSchema().standardize(accordingTo);
                 if (objectCatalogAndSchema.equals(catalogAndSchema, accordingTo)) {
                     return true;
                 }

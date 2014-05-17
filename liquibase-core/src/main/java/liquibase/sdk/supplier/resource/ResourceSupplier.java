@@ -8,8 +8,7 @@ import liquibase.resource.ResourceAccessor;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
-import java.util.Enumeration;
+import java.util.*;
 
 public class ResourceSupplier {
 
@@ -28,26 +27,28 @@ public class ResourceSupplier {
     private static class SimpleResourceAccessor implements liquibase.resource.ResourceAccessor {
 
         @Override
-        public InputStream getResourceAsStream(String file) throws IOException {
-            if (file.toLowerCase().endsWith("csv")) {
-                return new ByteArrayInputStream(usersCsv.getBytes());
-            } else if (file.toLowerCase().endsWith("my-logic.sql")) {
-                return new ByteArrayInputStream(((String)ChangeFactory.getInstance().getChangeMetaData(new CreateProcedureChange()).getParameters().get("procedureBody").getExampleValue(new HsqlDatabase())).getBytes());
-            } else if (file.toLowerCase().endsWith("sql")) {
-                    return new ByteArrayInputStream(fileSql.getBytes());
+        public Set<InputStream> getResourcesAsStream(String path) throws IOException {
+            InputStream stream = null;
+            if (path.toLowerCase().endsWith("csv")) {
+                stream = new ByteArrayInputStream(usersCsv.getBytes());
+            } else if (path.toLowerCase().endsWith("my-logic.sql")) {
+                stream = new ByteArrayInputStream(((String)ChangeFactory.getInstance().getChangeMetaData(new CreateProcedureChange()).getParameters().get("procedureBody").getExampleValue(new HsqlDatabase())).getBytes());
+            } else if (path.toLowerCase().endsWith("sql")) {
+                stream =new ByteArrayInputStream(fileSql.getBytes());
             } else {
-                throw new RuntimeException("Unknown resource type: "+file);
+                throw new RuntimeException("Unknown resource type: "+ path);
             }
+            return new HashSet<InputStream>(Arrays.asList(stream));
         }
 
         @Override
-        public Enumeration<URL> getResources(String packageName) throws IOException {
-            return null;  //To change body of implemented methods use File | Settings | File Templates.
+        public Set<String> list(String relativeTo, String path, boolean includeFiles, boolean includeDirectories, boolean recursive) throws IOException {
+            return null;
         }
 
         @Override
         public ClassLoader toClassLoader() {
-            return null;  //To change body of implemented methods use File | Settings | File Templates.
+            return this.getClass().getClassLoader();
         }
     }
 }

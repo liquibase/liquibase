@@ -1,8 +1,9 @@
 package liquibase.structure;
 
-import liquibase.CatalogAndSchema;
-import liquibase.database.Database;
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.parser.core.ParsedNode;
+import liquibase.parser.core.ParsedNodeException;
+import liquibase.resource.ResourceAccessor;
 import liquibase.serializer.LiquibaseSerializable;
 import liquibase.util.StringUtils;
 
@@ -53,6 +54,15 @@ public abstract class AbstractDatabaseObject implements DatabaseObject {
     @Override
     public <T> T getAttribute(String attribute, Class<T> type) {
         return (T) attributes.get(attribute);
+    }
+
+    @Override
+    public <T> T getAttribute(String attribute, Class<T> type, T defaultValue) {
+        T value = (T) attributes.get(attribute);
+        if (value == null) {
+            return defaultValue;
+        }
+        return value;
     }
 
     @Override
@@ -111,6 +121,16 @@ public abstract class AbstractDatabaseObject implements DatabaseObject {
         } else {
             return LiquibaseSerializable.SerializationType.NAMED_FIELD;
         }
+    }
+
+    @Override
+    public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException {
+        throw new RuntimeException("TODO");
+    }
+
+    @Override
+    public ParsedNode serialize() {
+        throw new RuntimeException("TODO");
     }
 
     @Override

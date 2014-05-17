@@ -4,9 +4,13 @@ import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.database.core.SQLiteDatabase.AlterTableVisitor;
+import liquibase.snapshot.SnapshotGeneratorFactory;
+import liquibase.structure.core.Column;
 import liquibase.structure.core.Index;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.DropPrimaryKeyStatement;
+import liquibase.structure.core.PrimaryKey;
+import liquibase.structure.core.Table;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -76,6 +80,16 @@ public class DropPrimaryKeyChange extends AbstractChange {
         return new SqlStatement[]{
                 new DropPrimaryKeyStatement(getCatalogName(), getSchemaName(), getTableName(), getConstraintName()),
         };
+    }
+
+    @Override
+    public ChangeStatus checkStatus(Database database) {
+        try {
+            return new ChangeStatus().assertComplete(!SnapshotGeneratorFactory.getInstance().has(new PrimaryKey(getConstraintName(), getCatalogName(), getSchemaName(), getTableName()), database), "Primary key exists");
+        } catch (Exception e) {
+            return new ChangeStatus().unknown(e);
+        }
+
     }
     
     private SqlStatement[] generateStatementsForSQLiteDatabase(Database database) {

@@ -18,13 +18,13 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ResourceLoaderAware;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
+import org.springframework.core.io.support.ResourcePatternUtils;
 
 import javax.sql.DataSource;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.*;
@@ -65,28 +65,31 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
         }
 
         @Override
-        public Enumeration<URL> getResources(String packageName) throws IOException {
-            List<URL> tmp = new ArrayList<URL>();
+        public Set<String> list(String relativeTo, String path, boolean includeFiles, boolean includeDirectories, boolean recursive) throws IOException {
+            Set<String> returnSet = new HashSet<String>();
 
-			Resource[] resources = org.springframework.core.io.support.ResourcePatternUtils.getResourcePatternResolver(getResourceLoader())
-					.getResources(adjustClasspath(packageName));
+			Resource[] resources = ResourcePatternUtils.getResourcePatternResolver(getResourceLoader()).getResources(adjustClasspath(path));
 
 			for (Resource res : resources) {
-				tmp.add(res.getURL());
+				returnSet.add(res.getURL().toExternalForm());
 			}
 
-            return Collections.enumeration(tmp);
+            return returnSet;
 		}
 
-		@Override
-        public InputStream getResourceAsStream(String file) throws IOException {
-            Enumeration<URL> resources = getResources(file);
-            // take first found resource from classpath
-			if (resources.hasMoreElements()) {
-				return resources.nextElement().openStream();
-			} else {
-				return null;
-			}
+        @Override
+        public Set<InputStream> getResourcesAsStream(String path) throws IOException {
+            Set<InputStream> returnSet = new HashSet<InputStream>();
+            Resource[] resources = ResourcePatternUtils.getResourcePatternResolver(getResourceLoader()).getResources(adjustClasspath(path));
+
+            if (resources == null || resources.length == 0) {
+                return null;
+            }
+            for (Resource resource : resources) {
+                returnSet.add(resource.getURL().openStream());
+            }
+
+            return returnSet;
 		}
 
 		public Resource getResource(String file) {

@@ -19,6 +19,22 @@ public class VerifiedTest {
         return testClass;
     }
 
+    public boolean hasGroups() {
+        Collection<TestPermutation> permutations = getPermutations();
+        return permutations != null && permutations.size() > 0 && permutations.iterator().next().getGroup() != null;
+    }
+
+    public Set<String> getGroups() {
+        Set<String> returnSet = new HashSet<String>();
+        for (TestPermutation permutation : getPermutations()) {
+            if (permutation.getGroup() != null) {
+                returnSet.add(permutation.getGroup());
+            }
+        }
+
+        return returnSet;
+    }
+
     public String getTestName() {
         return testName;
     }

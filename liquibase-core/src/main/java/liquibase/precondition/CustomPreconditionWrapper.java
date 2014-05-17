@@ -4,8 +4,9 @@ import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.exception.*;
-import liquibase.precondition.core.ErrorPrecondition;
-import liquibase.precondition.core.FailedPrecondition;
+import liquibase.parser.core.ParsedNode;
+import liquibase.parser.core.ParsedNodeException;
+import liquibase.resource.ResourceAccessor;
 import liquibase.util.ObjectUtil;
 
 import java.util.HashMap;
@@ -13,7 +14,7 @@ import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-public class CustomPreconditionWrapper implements Precondition {
+public class CustomPreconditionWrapper extends AbstractPrecondition {
 
     private String className;
     private ClassLoader classLoader;
@@ -35,6 +36,10 @@ public class CustomPreconditionWrapper implements Precondition {
 
     public void setClassLoader(ClassLoader classLoader) {
         this.classLoader = classLoader;
+    }
+
+    public String getParamValue(String key) {
+        return paramValues.get(key);
     }
 
     public void setParam(String name, String value) {
@@ -84,7 +89,44 @@ public class CustomPreconditionWrapper implements Precondition {
     }
 
     @Override
+    public String getSerializedObjectNamespace() {
+        return STANDARD_CHANGELOG_NAMESPACE;
+    }
+
+    @Override
     public String getName() {
         return "customPrecondition";
+    }
+
+    @Override
+    protected boolean shouldAutoLoad(ParsedNode node) {
+        if (node.getName().equals("params")) {
+            return false;
+        }
+        return super.shouldAutoLoad(node);
+    }
+
+    @Override
+    public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException {
+        setClassLoader(resourceAccessor.toClassLoader());
+        setClassName(parsedNode.getChildValue(null, "className", String.class));
+
+        ParsedNode paramsNode = parsedNode.getChild(null, "params");
+        if (paramsNode == null) {
+            paramsNode = parsedNode;
+        }
+
+        for (ParsedNode child : paramsNode.getChildren(null, "param")) {
+            Object value = child.getValue();
+            if (value == null) {
+                value = child.getChildValue(null, "value");
+            }
+            if (value != null) {
+                value = value.toString();
+            }
+            this.setParam(child.getChildValue(null, "name", String.class), (String) value);
+        }
+        super.load(parsedNode, resourceAccessor);
+
     }
 }

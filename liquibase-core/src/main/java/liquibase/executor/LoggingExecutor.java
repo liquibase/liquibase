@@ -31,6 +31,10 @@ public class LoggingExecutor extends AbstractExecutor implements Executor {
         setDatabase(database);
     }
 
+    protected Writer getOutput() {
+        return output;
+    }
+
     @Override
     public void execute(Change change) throws DatabaseException {
         execute(change, new ArrayList<SqlVisitor>());

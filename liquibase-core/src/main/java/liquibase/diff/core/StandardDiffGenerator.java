@@ -71,11 +71,6 @@ public class StandardDiffGenerator implements DiffGenerator {
     protected <T extends DatabaseObject> void compareObjectType(Class<T> type, DatabaseSnapshot referenceSnapshot, DatabaseSnapshot comparisonSnapshot, DiffResult diffResult) {
 
         for (CompareControl.SchemaComparison schemaComparison : diffResult.getCompareControl().getSchemaComparisons()) {
-            CatalogAndSchema referenceSchema = referenceSnapshot.getDatabase().correctSchema(schemaComparison.getReferenceSchema());
-            CatalogAndSchema comparisonSchema = null;
-            if (comparisonSnapshot.getDatabase() != null) {
-                comparisonSchema = comparisonSnapshot.getDatabase().correctSchema(schemaComparison.getComparisonSchema());
-            }
             for (T referenceObject : referenceSnapshot.get(type)) {
 //                if (referenceObject instanceof Table && referenceSnapshot.getDatabase().isLiquibaseTable(referenceSchema, referenceObject.getName())) {
 //                    continue;

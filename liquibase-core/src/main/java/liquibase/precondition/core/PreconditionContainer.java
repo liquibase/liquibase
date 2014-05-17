@@ -1,14 +1,16 @@
 package liquibase.precondition.core;
 
+import liquibase.exception.*;
+import liquibase.parser.core.ParsedNode;
+import liquibase.parser.core.ParsedNodeException;
+import liquibase.precondition.ErrorPrecondition;
+import liquibase.precondition.FailedPrecondition;
+import liquibase.resource.ResourceAccessor;
 import liquibase.util.StringUtils;
 import liquibase.util.StreamUtil;
 import liquibase.database.Database;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.ChangeSet;
-import liquibase.exception.PreconditionFailedException;
-import liquibase.exception.PreconditionErrorException;
-import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.exception.ValidationFailedException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.logging.LogFactory;
@@ -239,5 +241,20 @@ public class PreconditionContainer extends AndPrecondition {
                 }                
             }
         }
+    }
+
+    @Override
+    public String getSerializedObjectNamespace() {
+        return STANDARD_CHANGELOG_NAMESPACE;
+    }
+
+    @Override
+    public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException {
+        this.setOnError(parsedNode.getChildValue(null, "onError", String.class));
+        this.setOnErrorMessage(parsedNode.getChildValue(null, "onErrorMessage", String.class));
+        this.setOnFail(parsedNode.getChildValue(null, "onFail", String.class));
+        this.setOnFailMessage(parsedNode.getChildValue(null, "onFailMessage", String.class));
+
+        super.load(parsedNode, resourceAccessor);
     }
 }

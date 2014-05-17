@@ -1,13 +1,12 @@
 package liquibase.change.core;
 
-import liquibase.change.AbstractChange;
-import liquibase.change.DatabaseChange;
-import liquibase.change.ChangeMetaData;
-import liquibase.change.DatabaseChangeProperty;
+import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.database.core.SQLiteDatabase;
+import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.DropForeignKeyConstraintStatement;
+import liquibase.structure.core.ForeignKey;
 
 /**
  * Drops an existing foreign key constraint.
@@ -71,7 +70,16 @@ public class DropForeignKeyConstraintChange extends AbstractChange {
                         getConstraintName()),
         };    	
     }
-    
+
+    @Override
+    public ChangeStatus checkStatus(Database database) {
+        try {
+            return new ChangeStatus().assertComplete(!SnapshotGeneratorFactory.getInstance().has(new ForeignKey(getConstraintName(), getBaseTableCatalogName(), getBaseTableSchemaName(), getBaseTableCatalogName()), database), "Foreign key exists");
+        } catch (Exception e) {
+            return new ChangeStatus().unknown(e);
+        }
+    }
+
     private SqlStatement[] generateStatementsForSQLiteDatabase() {
     	// SQLite does not support foreign keys until now.
 		// See for more information: http://www.sqlite.org/omitted.html

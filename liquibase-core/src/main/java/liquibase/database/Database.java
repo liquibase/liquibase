@@ -273,8 +273,7 @@ public interface Database extends PrioritizedService {
      * fixes for case issues,
      * replacing null schema or catalog names with the default values
      * removing set schema or catalog names if they are not supported
-     * @param schema
-     * @return
+     * @deprecated use {@link liquibase.CatalogAndSchema#standardize(Database)}
      */
     CatalogAndSchema correctSchema(CatalogAndSchema schema);
 

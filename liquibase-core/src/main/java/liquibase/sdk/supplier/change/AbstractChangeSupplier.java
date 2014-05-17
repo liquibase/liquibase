@@ -1,9 +1,7 @@
 package liquibase.sdk.supplier.change;
 
-import liquibase.change.Change;
-import liquibase.change.ChangeFactory;
-import liquibase.change.ChangeMetaData;
-import liquibase.change.ChangeParameterMetaData;
+import liquibase.change.*;
+import liquibase.change.core.supplier.AddColumnConfigSupplier;
 import liquibase.database.Database;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.util.CollectionUtil;
@@ -31,21 +29,54 @@ public abstract class AbstractChangeSupplier<T extends Change> implements Change
         return null;
     }
 
+    @Override
     public Collection<Change> getAllParameterPermutations(Database database) throws Exception {
         ChangeMetaData changeMetaData = ChangeFactory.getInstance().getChangeMetaData(getChangeName());
         Set<Set<String>> parameterSets = CollectionUtil.powerSet(changeMetaData.getParameters().keySet());
 
         List<Change> changes = new ArrayList<Change>();
-        for (Set<String> params : parameterSets) {
-            Change change = ChangeFactory.getInstance().create(getChangeName());
+        for (Collection<String> params : parameterSets) {
+            Map<String, List<Object>> parameterValues = new HashMap<String, List<Object>>();
             for (String param : params) {
                 ChangeParameterMetaData changeParam = changeMetaData.getParameters().get(param);
-                Object exampleValue = changeParam.getExampleValue(database);
-                changeParam.setValue(change, exampleValue);
+                parameterValues.put(param, new ArrayList());
+                parameterValues.get(param).addAll(getTestValues(changeParam, database));
             }
-            changes.add(change);
+
+            for (Map<String, ?> valuePermutation : CollectionUtil.permutations(parameterValues)) {
+                Change change = ChangeFactory.getInstance().create(getChangeName());
+                for (Map.Entry<String, ?> entry : valuePermutation.entrySet()) {
+                    ChangeParameterMetaData changeParam = changeMetaData.getParameters().get(entry.getKey());
+                    changeParam.setValue(change, entry.getValue());
+                }
+                changes.add(change);
+            }
         }
 
         return changes;
+    }
+
+    protected List getTestValues(ChangeParameterMetaData changeParam, Database database) throws Exception {
+        List values = new ArrayList();
+
+        if (changeParam.getDataType().equals("list of addColumnConfig")) {
+            for (AddColumnConfig config : getAddColumnConfigSupplier().getStandardPermutations(database)) {
+                values.add(new ArrayList<ColumnConfig>(Arrays.asList(config)));
+            }
+
+        } else {
+            Object exampleValue = changeParam.getExampleValue(database);
+            values.add(exampleValue);
+        }
+        return values;
+    }
+
+    protected AddColumnConfigSupplier getAddColumnConfigSupplier() {
+        return new AddColumnConfigSupplier();
+    }
+
+    @Override
+    public boolean isValid(Change change, Database database) {
+        return !change.validate(database).hasErrors();
     }
 }

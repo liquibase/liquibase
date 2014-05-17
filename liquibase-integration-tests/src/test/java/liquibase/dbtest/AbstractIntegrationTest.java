@@ -4,7 +4,7 @@ import liquibase.CatalogAndSchema;
 import liquibase.Contexts;
 import liquibase.Liquibase;
 import liquibase.database.core.OracleDatabase;
-import liquibase.structure.core.Column;
+import liquibase.structure.core.*;
 import liquibase.test.DiffResultAssert;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
@@ -14,9 +14,6 @@ import liquibase.database.jvm.JdbcConnection;
 import liquibase.diff.compare.CompareControl;
 import liquibase.diff.output.report.DiffToReport;
 import liquibase.snapshot.*;
-import liquibase.structure.core.Schema;
-import liquibase.structure.core.Table;
-import liquibase.structure.core.View;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.diff.DiffGeneratorFactory;
 import liquibase.diff.output.DiffOutputControl;
@@ -48,7 +45,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.*;
-import java.net.URL;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.*;
@@ -215,7 +211,7 @@ public abstract class AbstractIntegrationTest {
 
     protected CatalogAndSchema[] getSchemasToDrop() throws DatabaseException {
         return new CatalogAndSchema[]{
-                new CatalogAndSchema(null, database.correctObjectName("lbcat2", Schema.class)),
+                new CatalogAndSchema(database.correctObjectName("lbcat2", Catalog.class), database.correctObjectName("lbschem2", Schema.class)),
                 new CatalogAndSchema(null, database.getDefaultSchemaName())
         };
     }
@@ -660,10 +656,9 @@ public abstract class AbstractIntegrationTest {
         }
 
 
-        Enumeration<URL> urls = new JUnitResourceAccessor().getResources(includedChangeLog);
-        URL completeChangeLogURL = urls.nextElement();
+        Set<String> urls = new JUnitResourceAccessor().list(null, includedChangeLog, true, false, true);
+        String absolutePathOfChangeLog = urls.iterator().next();
 
-        String absolutePathOfChangeLog = completeChangeLogURL.toExternalForm();
         absolutePathOfChangeLog = absolutePathOfChangeLog.replaceFirst("file:\\/", "");
         if (System.getProperty("os.name").startsWith("Windows ")) {
             absolutePathOfChangeLog = absolutePathOfChangeLog.replace('/', '\\');

@@ -8,6 +8,10 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
+import liquibase.parser.core.ParsedNode;
+import liquibase.parser.core.ParsedNodeException;
+import liquibase.resource.ResourceAccessor;
+import liquibase.serializer.AbstractLiquibaseSerializable;
 import liquibase.serializer.LiquibaseSerializable;
 import liquibase.serializer.ReflectionSerializer;
 import liquibase.statement.DatabaseFunction;
@@ -26,7 +30,7 @@ import liquibase.util.StringUtils;
  * It is not required that a column-based Change uses this class, but parsers should look for it so it is a helpful convenience.
  * The definitions of "defaultValue" and "value" will vary based on the Change and may not be applicable in all cases.
  */
-public class ColumnConfig implements LiquibaseSerializable {
+public class ColumnConfig extends AbstractLiquibaseSerializable {
     private String name;
     private String type;
     private String value;
@@ -123,6 +127,8 @@ public class ColumnConfig implements LiquibaseSerializable {
      */
     public ColumnConfig() {
     }
+
+
 
 
     /**
@@ -638,16 +644,6 @@ public class ColumnConfig implements LiquibaseSerializable {
         return "column";
     }
 
-    @Override
-    public Set<String> getSerializableFields() {
-        return ReflectionSerializer.getInstance().getFields(this);
-    }
-
-    @Override
-    public Object getSerializableFieldValue(String field) {
-        return ReflectionSerializer.getInstance().getValue(this, field);
-    }
-
     public SequenceNextValueFunction getDefaultValueSequenceNext() {
         return defaultValueSequenceNext;
     }
@@ -666,6 +662,93 @@ public class ColumnConfig implements LiquibaseSerializable {
     @Override
     public String getSerializedObjectNamespace() {
         return STANDARD_CHANGELOG_NAMESPACE;
+    }
+
+    @Override
+    public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException {
+        name = parsedNode.getChildValue(null, "name", String.class);
+        type = parsedNode.getChildValue(null, "type", String.class);
+        encoding = parsedNode.getChildValue(null, "encoding", String.class);
+        autoIncrement = parsedNode.getChildValue(null, "autoIncrement", Boolean.class);
+        startWith = parsedNode.getChildValue(null, "startWith", BigInteger.class);
+        incrementBy = parsedNode.getChildValue(null, "incrementBy", BigInteger.class);
+        remarks = parsedNode.getChildValue(null, "remarks", String.class);
+
+
+        value = parsedNode.getChildValue(null, "value", String.class);
+        try {
+            valueNumeric = parsedNode.getChildValue(null, "valueNumeric", Double.class);
+        } catch (ParsedNodeException e) {
+            valueComputed = new DatabaseFunction(parsedNode.getChildValue(null, "valueNumeric", String.class));
+        }
+        try {
+            valueDate = parsedNode.getChildValue(null, "valueDate", Date.class);
+        } catch (ParsedNodeException e) {
+            valueComputed = new DatabaseFunction(parsedNode.getChildValue(null, "valueDate", String.class));
+        }
+        valueBoolean = parsedNode.getChildValue(null, "valueBoolean", Boolean.class);
+        valueBlobFile = parsedNode.getChildValue(null, "valueBlobFile", String.class);
+        valueClobFile = parsedNode.getChildValue(null, "valueClobFile", String.class);
+        String valueComputedString = parsedNode.getChildValue(null, "valueComputed", String.class);
+        if (valueComputedString != null) {
+            valueComputed = new DatabaseFunction(valueComputedString);
+        }
+        String valueSequenceNextString = parsedNode.getChildValue(null, "valueSequenceNext", String.class);
+        if (valueSequenceNextString != null) {
+            valueSequenceNext = new SequenceNextValueFunction(valueSequenceNextString);
+        }
+        String valueSequenceCurrentString = parsedNode.getChildValue(null, "valueSequenceCurrent", String.class);
+        if (valueSequenceCurrentString != null) {
+            valueSequenceCurrent = new SequenceCurrentValueFunction(valueSequenceCurrentString);
+        }
+
+
+        defaultValue = parsedNode.getChildValue(null, "defaultValue", String.class);
+        try {
+            defaultValueNumeric = parsedNode.getChildValue(null, "defaultValueNumeric", Double.class);
+        } catch (ParsedNodeException e) {
+            defaultValueComputed = new DatabaseFunction(parsedNode.getChildValue(null, "defaultValueNumeric", String.class));
+        }
+        try {
+            defaultValueDate = parsedNode.getChildValue(null, "defaultValueDate", Date.class);
+        } catch (ParsedNodeException e) {
+            defaultValueComputed = new DatabaseFunction(parsedNode.getChildValue(null, "defaultValueDate", String.class));
+        }
+        defaultValueBoolean = parsedNode.getChildValue(null, "defaultValueBoolean", Boolean.class);
+        String defaultValueComputedString = parsedNode.getChildValue(null, "defaultValueComputed", String.class);
+        if (defaultValueComputedString != null) {
+            defaultValueComputed = new DatabaseFunction(defaultValueComputedString);
+        }
+        String defaultValueSequenceNextString = parsedNode.getChildValue(null, "defaultValueSequenceNext", String.class);
+        if (defaultValueSequenceNextString != null) {
+            defaultValueSequenceNext = new SequenceNextValueFunction(defaultValueSequenceNextString);
+        }
+
+        loadConstraints(parsedNode.getChild(null, "constraints"));
+    }
+
+    protected void loadConstraints(ParsedNode constraintsNode) throws ParsedNodeException {
+        if (constraintsNode == null) {
+            return;
+        }
+
+        ConstraintsConfig constraints = new ConstraintsConfig();
+        constraints.setNullable(constraintsNode.getChildValue(null, "nullable", Boolean.class));
+        constraints.setPrimaryKey(constraintsNode.getChildValue(null, "primaryKey", Boolean.class));
+        constraints.setPrimaryKeyName(constraintsNode.getChildValue(null, "primaryKeyName", String.class));
+        constraints.setPrimaryKeyTablespace(constraintsNode.getChildValue(null, "primaryKeyTablespace", String.class));
+        constraints.setReferences(constraintsNode.getChildValue(null, "references", String.class));
+        constraints.setReferencedTableName(constraintsNode.getChildValue(null, "referencedTableName", String.class));
+        constraints.setReferencedColumnNames(constraintsNode.getChildValue(null, "referencedColumnNames", String.class));
+        constraints.setUnique(constraintsNode.getChildValue(null, "unique", Boolean.class));
+        constraints.setUniqueConstraintName(constraintsNode.getChildValue(null, "uniqueConstraintName", String.class));
+        constraints.setCheckConstraint(constraintsNode.getChildValue(null, "checkConstraint", String.class));
+        constraints.setDeleteCascade(constraintsNode.getChildValue(null, "deleteCascade", Boolean.class));
+        constraints.setForeignKeyName(constraintsNode.getChildValue(null, "foreignKeyName", String.class));
+        constraints.setInitiallyDeferred(constraintsNode.getChildValue(null, "initiallyDeferred", Boolean.class));
+        constraints.setDeferrable(constraintsNode.getChildValue(null, "deferrable", Boolean.class));
+        setConstraints(constraints);
+
     }
 
 }

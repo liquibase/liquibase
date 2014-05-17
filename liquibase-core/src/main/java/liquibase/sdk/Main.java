@@ -4,6 +4,7 @@ import liquibase.command.LiquibaseCommand;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.logging.LogFactory;
 import liquibase.logging.LogLevel;
+import liquibase.sdk.convert.ConvertCommand;
 import liquibase.sdk.vagrant.VagrantCommand;
 import liquibase.sdk.watch.WatchCommand;
 import liquibase.util.StringUtils;
@@ -69,7 +70,18 @@ public class Main {
                 if (commandArguments.hasOption("port")) {
                     ((WatchCommand) command).setPort(Integer.valueOf(commandArguments.getOptionValue("port")));
                 }
+            } else if (main.command.equals("convert")) {
+                command = new ConvertCommand(main);
 
+                Options options = new Options();
+                options.addOption(OptionBuilder.hasArg().withDescription("Original changelog").isRequired().create("src"));
+                options.addOption(OptionBuilder.hasArg().withDescription("Output changelog").isRequired().create("out"));
+                options.addOption(OptionBuilder.hasArg().withDescription("Classpath").create("classpath"));
+
+                CommandLine commandArguments = commandParser.parse(options, main.commandArgs.toArray(new String[main.commandArgs.size()]));
+                ((ConvertCommand) command).setSrc(commandArguments.getOptionValue("src"));
+                ((ConvertCommand) command).setOut(commandArguments.getOptionValue("out"));
+                ((ConvertCommand) command).setClasspath(commandArguments.getOptionValue("classpath"));
             } else {
                 throw new UserError("Unknown command: "+main.command);
             }

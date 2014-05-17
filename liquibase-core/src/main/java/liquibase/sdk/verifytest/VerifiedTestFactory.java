@@ -7,8 +7,10 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URL;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 public class VerifiedTestFactory {
 
@@ -29,13 +31,28 @@ public class VerifiedTestFactory {
                     File file = entry.getKey();
                     VerifiedTest testToWrite = entry.getValue();
                     file.getParentFile().mkdirs();
+
                     try {
-                        FileWriter fileWriter = new FileWriter(file);
-                        try {
-                            new VerifiedTestWriter().write(testToWrite, fileWriter);
-                        } finally {
-                            fileWriter.flush();
-                            fileWriter.close();
+                        if (testToWrite.hasGroups()) {
+                            for (String group : testToWrite.getGroups()) {
+                                String groupValue = group.split(": ", 2)[1];
+                                File groupFile = new File(file.getAbsolutePath().replaceFirst("\\.accepted.md$", "-"+escapeFileName(groupValue)+".accepted.md"));
+                                FileWriter fileWriter = new FileWriter(groupFile);
+                                try {
+                                    new VerifiedTestWriter().write(testToWrite, fileWriter, group);
+                                } finally {
+                                    fileWriter.flush();
+                                    fileWriter.close();
+                                }
+                            }
+                        } else {
+                            FileWriter fileWriter = new FileWriter(file);
+                            try {
+                                new VerifiedTestWriter().write(testToWrite, fileWriter, null);
+                            } finally {
+                                fileWriter.flush();
+                                fileWriter.close();
+                            }
                         }
                     } catch (IOException e) {
                         throw new UnexpectedLiquibaseException(e);
@@ -99,9 +116,13 @@ public class VerifiedTestFactory {
 
     protected File getFile(VerifiedTest test) {
         String testPackageDir = test.getTestClass().replaceFirst("\\.[^\\.]*$", "").replace(".", "/");
-        String fileName = test.getTestClass().replaceFirst(".*\\.","")+"."+test.getTestName().replaceAll("\\s+", "_")+".accepted.md";
+        String fileName = test.getTestClass().replaceFirst(".*\\.","")+"."+ escapeFileName(test.getTestName()) +".accepted.md";
 
         return new File(new File(getBaseDirectory(test), testPackageDir), fileName);
+    }
+
+    private String escapeFileName(String name) {
+        return name.replaceAll("\\s+", "_").replaceAll("[\\-\\.]", "");
     }
 
 }

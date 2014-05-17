@@ -7,6 +7,7 @@ import liquibase.exception.PreconditionErrorException;
 import liquibase.exception.PreconditionFailedException;
 import liquibase.exception.ValidationErrors;
 import liquibase.exception.Warnings;
+import liquibase.precondition.FailedPrecondition;
 import liquibase.precondition.Precondition;
 import liquibase.precondition.PreconditionLogic;
 
@@ -17,6 +18,11 @@ import java.util.List;
  * Container class for all preconditions on a change log.
  */
 public class AndPrecondition extends PreconditionLogic {
+
+    @Override
+    public String getSerializedObjectNamespace() {
+        return STANDARD_CHANGELOG_NAMESPACE;
+    }
 
     @Override
     public Warnings warn(Database database) {

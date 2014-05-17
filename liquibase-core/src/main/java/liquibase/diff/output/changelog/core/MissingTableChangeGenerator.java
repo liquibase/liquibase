@@ -47,7 +47,7 @@ public class MissingTableChangeGenerator implements MissingObjectChangeGenerator
 //            continue;
 //        }
 
-        CreateTableChange change = new CreateTableChange();
+        CreateTableChange change = createCreateTableChange();
         change.setTableName(missingTable.getName());
         if (control.getIncludeCatalog()) {
             change.setCatalogName(missingTable.getSchema().getCatalogName());
@@ -120,5 +120,9 @@ public class MissingTableChangeGenerator implements MissingObjectChangeGenerator
         return new Change[] {
                 change
         };
+    }
+
+    protected CreateTableChange createCreateTableChange() {
+        return new CreateTableChange();
     }
 }

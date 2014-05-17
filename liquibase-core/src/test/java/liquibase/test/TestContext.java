@@ -2,7 +2,7 @@ package liquibase.test;
 
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
-import liquibase.database.core.MockDatabase;
+import liquibase.sdk.database.MockDatabase;
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.ResourceAccessor;

@@ -3,9 +3,14 @@ package liquibase.change.core;
 import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.database.core.SQLiteDatabase;
+import liquibase.parser.core.ParsedNode;
+import liquibase.parser.core.ParsedNodeException;
+import liquibase.resource.ResourceAccessor;
+import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.CreateViewStatement;
 import liquibase.statement.core.DropViewStatement;
+import liquibase.structure.core.View;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -102,6 +107,22 @@ public class CreateViewChange extends AbstractChange {
 		return new Change[] { inverse };
 	}
 
+    @Override
+    public ChangeStatus checkStatus(Database database) {
+        ChangeStatus result = new ChangeStatus();
+        try {
+            View example = new View(getCatalogName(), getSchemaName(), getViewName());
+
+            View snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(example, database);
+            result.assertComplete(snapshot != null, "View does not exist");
+
+            return result;
+
+        } catch (Exception e) {
+            return result.unknown(e);
+        }
+    }
+
 	private boolean supportsReplaceIfExistsOption(Database database) {
 		return !(database instanceof SQLiteDatabase);
 	}
@@ -109,5 +130,13 @@ public class CreateViewChange extends AbstractChange {
     @Override
     public String getSerializedObjectNamespace() {
         return STANDARD_CHANGELOG_NAMESPACE;
+    }
+
+    @Override
+    protected void customLoadLogic(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException {
+        Object value = parsedNode.getValue();
+        if (value instanceof String) {
+            this.setSelectQuery((String) value);
+        }
     }
 }

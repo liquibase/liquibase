@@ -8,17 +8,23 @@ import liquibase.exception.PreconditionErrorException;
 import liquibase.exception.PreconditionFailedException;
 import liquibase.exception.ValidationErrors;
 import liquibase.exception.Warnings;
+import liquibase.precondition.AbstractPrecondition;
 import liquibase.precondition.Precondition;
 
 /**
  * Precondition for specifying the type of database (oracle, mysql, etc.).
  */
 
-public class DBMSPrecondition implements Precondition {
+public class DBMSPrecondition extends AbstractPrecondition {
     private String type;
 
 
     public DBMSPrecondition() {
+    }
+
+    @Override
+    public String getSerializedObjectNamespace() {
+        return STANDARD_CHANGELOG_NAMESPACE;
     }
 
     public String getType() {

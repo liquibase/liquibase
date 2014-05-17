@@ -7,6 +7,9 @@ import liquibase.database.core.OracleDatabase;
 import liquibase.database.core.DB2Database;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
+import liquibase.parser.core.ParsedNode;
+import liquibase.parser.core.ParsedNodeException;
+import liquibase.resource.ResourceAccessor;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.CreateProcedureStatement;
 import liquibase.util.StreamUtil;
@@ -231,6 +234,11 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
         return new SqlStatement[]{
                 new CreateProcedureStatement(getCatalogName(), getSchemaName(), getProcedureName(), logicText, endDelimiter),
         };
+    }
+
+    @Override
+    public ChangeStatus checkStatus(Database database) {
+        return new ChangeStatus().unknown("Cannot check createProcedure status");
     }
 
     @Override

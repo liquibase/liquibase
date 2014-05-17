@@ -60,7 +60,7 @@ public class CreateViewGenerator extends AbstractSqlGenerator<CreateViewStatemen
         } else if (database instanceof MSSQLDatabase) {
             if (statement.isReplaceIfExists()) {
                 //from http://stackoverflow.com/questions/163246/sql-server-equivalent-to-oracles-create-or-replace-view
-                CatalogAndSchema schema = database.correctSchema(new CatalogAndSchema(statement.getCatalogName(), statement.getSchemaName()));
+                CatalogAndSchema schema = new CatalogAndSchema(statement.getCatalogName(), statement.getSchemaName()).customize(database);
                 sql.add(new UnparsedSql("IF NOT EXISTS (SELECT * FROM sys.views WHERE object_id = OBJECT_ID(N'["+ schema.getSchemaName() +"].["+statement.getViewName()+"]'))\n" +
                         "    EXEC sp_executesql N'CREATE VIEW ["+schema.getSchemaName()+"].["+statement.getViewName()+"] AS SELECT ''This is a code stub which will be replaced by an Alter Statement'' as [code_stub]'"));
                 createClause = "ALTER VIEW";

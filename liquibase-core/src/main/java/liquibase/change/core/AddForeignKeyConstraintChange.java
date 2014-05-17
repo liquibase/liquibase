@@ -3,10 +3,13 @@ package liquibase.change.core;
 import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
+import liquibase.snapshot.SnapshotGeneratorFactory;
+import liquibase.structure.core.ForeignKey;
 import liquibase.structure.core.ForeignKeyConstraintType;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.AddForeignKeyConstraintStatement;
+import liquibase.structure.core.Table;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -253,6 +256,34 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
         return new Change[]{
                 inverse
         };
+    }
+
+    @Override
+    public ChangeStatus checkStatus(Database database) {
+        ChangeStatus result = new ChangeStatus();
+        try {
+            ForeignKey example = new ForeignKey(getConstraintName(), getBaseTableCatalogName(), getBaseTableSchemaName(), getBaseTableName());
+            example.setPrimaryKeyTable(new Table(getReferencedTableCatalogName(), getReferencedTableSchemaName(), getReferencedTableName()));
+            example.setForeignKeyColumns(getBaseColumnNames());
+            example.setPrimaryKeyColumns(getReferencedColumnNames());
+
+            ForeignKey snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(example, database);
+            result.assertComplete(snapshot != null, "Foreign key does not exist");
+
+            if (snapshot != null) {
+                if (getInitiallyDeferred() != null) {
+                    result.assertCorrect(getInitiallyDeferred().equals(snapshot.isInitiallyDeferred()), "Initially deferred incorrect");
+                }
+                if (getDeferrable() != null) {
+                    result.assertCorrect(getDeferrable().equals(snapshot.isDeferrable()), "Initially deferred incorrect");
+                }
+            }
+
+            return result;
+
+        } catch (Exception e) {
+            return result.unknown(e);
+        }
     }
 
     @Override
