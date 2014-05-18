@@ -308,7 +308,7 @@ public abstract class BaseLiquibaseTask extends Task {
 
 
     /**
-     * Redirector of logs from java.util.logging to ANT's loggging
+     * Redirector of logs from java.util.logging to ANT's logging
      */
     protected static class LogRedirector {
 
@@ -317,7 +317,7 @@ public abstract class BaseLiquibaseTask extends Task {
         /**
          * Constructor
          *
-         * @param task
+         * @param task Ant task
          */
         protected LogRedirector(Task task) {
             super();
@@ -329,7 +329,7 @@ public abstract class BaseLiquibaseTask extends Task {
         }
 
         protected void registerHandler(Handler theHandler) {
-            Logger logger = LogFactory.getLogger();
+            Logger logger = LogFactory.getInstance().getLog();
         }
 
 
@@ -448,11 +448,11 @@ public abstract class BaseLiquibaseTask extends Task {
     }
 
     public String getLogLevel() {
-        return LogFactory.getLogger().getLogLevel().name();
+        return LogFactory.getInstance().getLog().getLogLevel().name();
     }
 
     public void setLogLevel(String level) {
-        LogFactory.getLogger().setLogLevel(level);
+        LogFactory.getInstance().getLog().setLogLevel(level);
     }
 
     public static class ChangeLogProperty {
