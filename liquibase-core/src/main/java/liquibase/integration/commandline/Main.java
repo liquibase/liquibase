@@ -3,6 +3,7 @@ package liquibase.integration.commandline;
 import liquibase.CatalogAndSchema;
 import liquibase.Liquibase;
 import liquibase.change.CheckSum;
+import liquibase.command.ExecuteSqlCommand;
 import liquibase.command.SnapshotCommand;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.configuration.GlobalConfiguration;
@@ -335,6 +336,7 @@ public class Main {
                 || "generateChangeLog".equalsIgnoreCase(arg)
                 || "snapshot".equalsIgnoreCase(arg)
                 || "snapshotReference".equalsIgnoreCase(arg)
+                || "executeSql".equalsIgnoreCase(arg)
                 || "calculateCheckSum".equalsIgnoreCase(arg)
                 || "clearCheckSums".equalsIgnoreCase(arg)
                 || "dbDoc".equalsIgnoreCase(arg)
@@ -853,6 +855,13 @@ public class Main {
                 SnapshotCommand command = new SnapshotCommand();
                 command.setDatabase(database);
                 command.setSchemas(getCommandParam("schemas", database.getDefaultSchema().toString()));
+                System.out.println(command.execute());
+                return;
+            } else if ("executeSql".equalsIgnoreCase(command)) {
+                ExecuteSqlCommand command = new ExecuteSqlCommand();
+                command.setDatabase(database);
+                command.setSql(getCommandParam("sql", null));
+                command.setSqlFile(getCommandParam("sqlFile", null));
                 System.out.println(command.execute());
                 return;
             } else if ("snapshotReference".equalsIgnoreCase(command)) {
