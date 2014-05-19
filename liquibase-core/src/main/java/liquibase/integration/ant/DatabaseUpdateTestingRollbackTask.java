@@ -1,33 +1,20 @@
 package liquibase.integration.ant;
 
 import liquibase.Liquibase;
+import liquibase.exception.LiquibaseException;
 import liquibase.util.ui.UIFactory;
 import org.apache.tools.ant.BuildException;
 
 /**
  * Ant task for migrating a database forward testing rollback.
  */
-public class DatabaseUpdateTestingRollbackTask extends BaseLiquibaseTask {
+public class DatabaseUpdateTestingRollbackTask extends AbstractChangeLogBasedTask {
     private boolean dropFirst = false;
-
-    public boolean isDropFirst() {
-        return dropFirst;
-    }
-
-    public void setDropFirst(boolean dropFirst) {
-        this.dropFirst = dropFirst;
-    }
 
     @Override
     public void executeWithLiquibaseClassloader() throws BuildException {
-        if (!shouldRun()) {
-            return;
-        }
-
-        Liquibase liquibase = null;
+        Liquibase liquibase = getLiquibase();
         try {
-            liquibase = createLiquibase();
-
             if (isPromptOnNonLocalDatabase()
                     && !liquibase.isSafeToRunUpdate()
                     && UIFactory.getInstance().getFacade().promptForNonLocalDatabase(liquibase.getDatabase())) {
@@ -39,11 +26,16 @@ public class DatabaseUpdateTestingRollbackTask extends BaseLiquibaseTask {
             }
 
             liquibase.updateTestingRollback(getContexts());
-
-        } catch (Exception e) {
-            throw new BuildException(e);
-        } finally {
-            closeDatabase(liquibase);
+        } catch (LiquibaseException e) {
+            throw new BuildException("Unable to update database with a rollback test.", e);
         }
+    }
+
+    public boolean isDropFirst() {
+        return dropFirst;
+    }
+
+    public void setDropFirst(boolean dropFirst) {
+        this.dropFirst = dropFirst;
     }
 }
