@@ -47,6 +47,7 @@ public abstract class AbstractChange implements Change {
     /**
      * Generate the ChangeMetaData for this class. Default implementation reads from the @{@link DatabaseChange } annotation
      * and calls out to {@link #createChangeParameterMetadata(String)} for each property.
+     *
      * @throws UnexpectedLiquibaseException if no @DatabaseChange annotation on this Change class
      */
     @Override
@@ -67,7 +68,7 @@ public abstract class AbstractChange implements Change {
                 Method writeMethod = property.getWriteMethod();
                 if (readMethod == null) {
                     try {
-                        readMethod = this.getClass().getMethod("is"+ StringUtils.upperCaseFirst(property.getName()));
+                        readMethod = this.getClass().getMethod("is" + StringUtils.upperCaseFirst(property.getName()));
                     } catch (Exception ignore) {
                         //it was worth a try
                     }
@@ -103,7 +104,7 @@ public abstract class AbstractChange implements Change {
      *
      * @throws UnexpectedLiquibaseException if the passed parameter does not exist
      */
-    protected ChangeParameterMetaData createChangeParameterMetadata(String parameterName)  {
+    protected ChangeParameterMetaData createChangeParameterMetadata(String parameterName) {
 
         try {
             String displayName = parameterName.replaceAll("([A-Z])", " $1");
@@ -122,7 +123,7 @@ public abstract class AbstractChange implements Change {
 
             Method readMethod = property.getReadMethod();
             if (readMethod == null) {
-                readMethod = getClass().getMethod("is"+StringUtils.upperCaseFirst(property.getName()));
+                readMethod = getClass().getMethod("is" + StringUtils.upperCaseFirst(property.getName()));
             }
             Type type = readMethod.getGenericReturnType();
 
@@ -276,7 +277,7 @@ public abstract class AbstractChange implements Change {
     public boolean generateRollbackStatementsVolatile(Database database) {
         SqlStatement[] statements = generateStatements(database);
         if (statements == null) {
-             return false;
+            return false;
         }
         for (SqlStatement statement : statements) {
             if (SqlGeneratorFactory.getInstance().generateRollbackStatementsVolatile(statement, database)) {
@@ -328,7 +329,7 @@ public abstract class AbstractChange implements Change {
             if (SqlGeneratorFactory.getInstance().supports(statement, database)) {
                 warnings.addAll(SqlGeneratorFactory.getInstance().warn(statement, database));
             } else if (statement.skipOnUnsupported()) {
-                warnings.addWarning(statement.getClass().getName()+" is not supported on " + database.getShortName() + ", but "+ChangeFactory.getInstance().getChangeMetaData(this).getName() + " will still execute");
+                warnings.addWarning(statement.getClass().getName() + " is not supported on " + database.getShortName() + ", but " + ChangeFactory.getInstance().getChangeMetaData(this).getName() + " will still execute");
             }
         }
 
@@ -424,7 +425,7 @@ public abstract class AbstractChange implements Change {
         try {
             for (Change inverse : inverses) {
                 if (!inverse.supports(database)) {
-                    throw new RollbackImpossibleException(ChangeFactory.getInstance().getChangeMetaData(inverse).getName()+" is not supported on "+database.getShortName());
+                    throw new RollbackImpossibleException(ChangeFactory.getInstance().getChangeMetaData(inverse).getName() + " is not supported on " + database.getShortName());
                 }
                 statements.addAll(Arrays.asList(inverse.generateStatements(database)));
             }
@@ -526,36 +527,47 @@ public abstract class AbstractChange implements Change {
             for (ChangeParameterMetaData param : metaData.getParameters().values()) {
                 if (Collection.class.isAssignableFrom(param.getDataTypeClass())) {
                     Class collectionType = (Class) param.getDataTypeClassParameters()[0];
-                    if (param.getDataTypeClassParameters().length == 1 && ColumnConfig.class.isAssignableFrom(collectionType)) {
-                        List<ParsedNode> columnNodes = new ArrayList<ParsedNode>(parsedNode.getChildren(null, param.getParameterName()));
-                        columnNodes.addAll(parsedNode.getChildren(null, "column"));
+                    if (param.getDataTypeClassParameters().length == 1) {
+                        if (ColumnConfig.class.isAssignableFrom(collectionType)) {
+                            List<ParsedNode> columnNodes = new ArrayList<ParsedNode>(parsedNode.getChildren(null, param.getParameterName()));
+                            columnNodes.addAll(parsedNode.getChildren(null, "column"));
 
-                        Object nodeValue = parsedNode.getValue();
-                        if (nodeValue instanceof ParsedNode) {
-                            columnNodes.add((ParsedNode) nodeValue);
-                        } else if (nodeValue instanceof Collection) {
-                            for (Object nodeValueChild : ((Collection) nodeValue)) {
-                                if (nodeValueChild instanceof ParsedNode) {
-                                    columnNodes.add((ParsedNode) nodeValueChild);
+                            Object nodeValue = parsedNode.getValue();
+                            if (nodeValue instanceof ParsedNode) {
+                                columnNodes.add((ParsedNode) nodeValue);
+                            } else if (nodeValue instanceof Collection) {
+                                for (Object nodeValueChild : ((Collection) nodeValue)) {
+                                    if (nodeValueChild instanceof ParsedNode) {
+                                        columnNodes.add((ParsedNode) nodeValueChild);
+                                    }
                                 }
                             }
-                        }
 
 
-                        for (ParsedNode child : columnNodes) {
-                            if (child.getName().equals("column") || child.getName().equals("columns")) {
-                                List<ParsedNode> columnChildren = child.getChildren(null, "column");
-                                if (columnChildren != null && columnChildren.size() > 0) {
-                                    for (ParsedNode columnChild : columnChildren) {
+                            for (ParsedNode child : columnNodes) {
+                                if (child.getName().equals("column") || child.getName().equals("columns")) {
+                                    List<ParsedNode> columnChildren = child.getChildren(null, "column");
+                                    if (columnChildren != null && columnChildren.size() > 0) {
+                                        for (ParsedNode columnChild : columnChildren) {
+                                            ColumnConfig columnConfig = (ColumnConfig) collectionType.newInstance();
+                                            columnConfig.load(columnChild, resourceAccessor);
+                                            ((ChangeWithColumns) this).addColumn(columnConfig);
+                                        }
+                                    } else {
                                         ColumnConfig columnConfig = (ColumnConfig) collectionType.newInstance();
-                                        columnConfig.load(columnChild, resourceAccessor);
+                                        columnConfig.load(child, resourceAccessor);
                                         ((ChangeWithColumns) this).addColumn(columnConfig);
                                     }
-                                } else {
-                                    ColumnConfig columnConfig = (ColumnConfig) collectionType.newInstance();
-                                    columnConfig.load(child, resourceAccessor);
-                                    ((ChangeWithColumns) this).addColumn(columnConfig);
                                 }
+                            }
+                        } else if (LiquibaseSerializable.class.isAssignableFrom(collectionType)) {
+                            List<ParsedNode> childNodes = new ArrayList<ParsedNode>(parsedNode.getChildren(null, param.getParameterName()));
+                            for (ParsedNode childNode : childNodes) {
+                                LiquibaseSerializable childObject = (LiquibaseSerializable) collectionType.newInstance();
+                                childObject.load(childNode, resourceAccessor);
+
+                                ((Collection) param.getCurrentValue(this)).add(childObject);
+
                             }
                         }
                     }
