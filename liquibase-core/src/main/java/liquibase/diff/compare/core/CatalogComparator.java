@@ -9,6 +9,7 @@ import liquibase.diff.compare.DatabaseObjectComparatorChain;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Catalog;
 import liquibase.structure.core.Schema;
+import liquibase.util.StringUtils;
 
 import java.util.Set;
 
@@ -32,7 +33,7 @@ public class CatalogComparator implements DatabaseObjectComparator {
             return false;
         }
 
-        return databaseObject1.getName().equalsIgnoreCase(databaseObject2.getName());
+        return StringUtils.trimToEmpty(databaseObject1.getName()).equalsIgnoreCase(StringUtils.trimToEmpty(databaseObject2.getName()));
     }
 
     @Override
