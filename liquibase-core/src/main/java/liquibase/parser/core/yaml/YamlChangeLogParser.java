@@ -52,7 +52,7 @@ public class YamlChangeLogParser implements ChangeLogParser {
             try {
                 parsedYaml = yaml.loadAs(changeLogStream, Map.class);
             } catch (Exception e) {
-                throw new ChangeLogParseException("Syntax error in " + getSupportedFileExtensions() + ": " + e.getMessage(), e);
+                throw new ChangeLogParseException("Syntax error in " + getSupportedFileExtensions()[0] + ": " + e.getMessage(), e);
             }
 
             List rootList = (List) parsedYaml.get("databaseChangeLog");
