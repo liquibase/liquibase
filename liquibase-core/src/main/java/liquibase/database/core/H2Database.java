@@ -97,7 +97,7 @@ public class H2Database extends AbstractJdbcDatabase {
     public String getViewDefinition(CatalogAndSchema schema, String name) throws DatabaseException {
         String definition = super.getViewDefinition(schema, name);
         if (!definition.startsWith("SELECT")) {
-            definition = definition.replaceFirst(".*?\n", ""); //some h2 versions return "create view....as\nselect
+            definition = definition.replaceFirst(".*?\\n", ""); //some h2 versions return "create view....as\nselect
         }
 
         definition = definition.replaceFirst("/\\*.*",""); //sometimes includes comments at the end
