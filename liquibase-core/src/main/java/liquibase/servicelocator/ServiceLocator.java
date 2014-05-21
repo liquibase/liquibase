@@ -109,6 +109,7 @@ public class ServiceLocator {
 
             if (packagesToScan.size() == 0) {
                 addPackageToScan("liquibase.change");
+                addPackageToScan("liquibase.changelog");
                 addPackageToScan("liquibase.database");
                 addPackageToScan("liquibase.parser");
                 addPackageToScan("liquibase.precondition");
