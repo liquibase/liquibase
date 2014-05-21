@@ -12,6 +12,7 @@ import liquibase.diff.compare.CompareControl;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.exception.CommandLineParsingException;
 import liquibase.exception.DatabaseException;
+import liquibase.exception.LiquibaseException;
 import liquibase.exception.ValidationFailedException;
 import liquibase.lockservice.LockService;
 import liquibase.lockservice.LockServiceFactory;
@@ -52,6 +53,8 @@ public class Main {
     protected String defaultSchemaName;
     protected String outputDefaultSchema = "true";
     protected String outputDefaultCatalog = "true";
+	protected String liquibaseCatalogName;
+	protected String liquibaseSchemaName;
     protected String defaultCatalogName;
     protected String changeLogFile;
     protected String classpath;
@@ -81,7 +84,16 @@ public class Main {
 
     protected Map<String, Object> changeLogParameters = new HashMap<String, Object>();
 
-    public static void main(String args[]) throws CommandLineParsingException, IOException {
+	public static void main(String args[]) throws CommandLineParsingException, IOException {
+		try {
+			run(args);
+		} catch (LiquibaseException e) {
+			System.exit(-1);
+		}
+		System.exit(0);
+	}
+
+    public static void run(String args[]) throws CommandLineParsingException, IOException, LiquibaseException {
         try {
             GlobalConfiguration globalConfiguration = LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class);
 
@@ -106,8 +118,9 @@ public class Main {
             try {
                 main.parseOptions(args);
             } catch (CommandLineParsingException e) {
+	            // Print the help before throwing the exception
                 main.printHelp(Arrays.asList(e.getMessage()), System.err);
-                System.exit(-2);
+                throw e;
             }
 
             File propertiesFile = new File(main.defaultsFile);
@@ -126,25 +139,9 @@ public class Main {
                 return;
             }
 
-            try {
-                main.applyDefaults();
-                main.configureClassLoader();
-                main.doMigration();
-            } catch (Throwable e) {
-                String message = e.getMessage();
-                if (message == null) {
-                    message = "Unknown Reason";
-                }
-
-                if (e.getCause() instanceof ValidationFailedException) {
-                    ((ValidationFailedException) e.getCause()).printDescriptiveError(System.err);
-                } else {
-                    System.err.println("Liquibase "+main.command+" Failed: " + message);
-                    LogFactory.getLogger().severe(message, e);
-                    System.err.println(generateLogLevelWarningMessage());
-                }
-                System.exit(-1);
-            }
+            main.applyDefaults();
+            main.configureClassLoader();
+            main.doMigration();
 
             if ("update".equals(main.command)) {
                 System.err.println("Liquibase Update Successful");
@@ -154,20 +151,32 @@ public class Main {
                 System.err.println("Liquibase '"+main.command+"' Successful");
             }
         } catch (Throwable e) {
-            String message = "Unexpected error running Liquibase: " + e.getMessage();
-            System.err.println(message);
+            String message = e.getMessage();
+	        if ( e.getCause() != null ) {
+		        message = e.getCause().getMessage();
+	        }
+	        if ( message == null ) {
+		        message = "Unknown Reason";
+	        }
+	        // At a minimum, log the message.  We don't need to print the stack
+	        // trace because the logger already did that upstream.
             try {
-                LogFactory.getLogger().severe(message, e);
+	            if ( e.getCause() instanceof ValidationFailedException ) {
+		            ((ValidationFailedException)e.getCause()).printDescriptiveError(System.out);
+	            } else {
+	                System.err.println("Unexpected error running Liquibase: " + message + "\n");
+                    LogFactory.getInstance().getLog().severe(message);
+		            System.err.println(generateLogLevelWarningMessage());
+	            }
             } catch (Exception e1) {
                 e.printStackTrace();
             }
-            System.exit(-3);
+            throw new LiquibaseException("Unexpected error running Liquibase: " + message, e);
         }
-        System.exit(0);
     }
 
     private static String generateLogLevelWarningMessage() {
-        Logger logger = LogFactory.getLogger();
+        Logger logger = LogFactory.getInstance().getLog();
         if (logger != null && logger.getLogLevel() != null && (logger.getLogLevel().equals(LogLevel.OFF))) {
             return "";
         } else {
@@ -512,6 +521,10 @@ public class Main {
         stream.println(" --driverPropertiesFile=</path/to/file.properties>  File with custom properties");
         stream.println("                                            to be set on the JDBC connection");
         stream.println("                                            to be created");
+        stream.println(" --liquibaseCatalogName=<name>              The name of the catalog with the");
+        stream.println("                                            liquibase tables");
+        stream.println(" --liquibaseSchemaName=<name>               The name of the schema with the");
+        stream.println("                                            liquibase tables");
         stream.println(" --includeSystemClasspath=<true|false>      Include the system classpath");
         stream.println("                                            in the Liquibase classpath");
         stream.println("                                            (default: true)");
@@ -796,9 +809,9 @@ public class Main {
 
         try {
             if (null != logFile) {
-                LogFactory.getLogger().setLogLevel(logLevel, logFile);
+	            LogFactory.getInstance().getLog().setLogLevel(logLevel, logFile);
             } else {
-                LogFactory.getLogger().setLogLevel(logLevel);
+	            LogFactory.getInstance().getLog().setLogLevel(logLevel);
             }
         } catch (IllegalArgumentException e) {
             throw new CommandLineParsingException(e.getMessage(), e);
@@ -807,7 +820,7 @@ public class Main {
         FileSystemResourceAccessor fsOpener = new FileSystemResourceAccessor();
         CommandLineResourceAccessor clOpener = new CommandLineResourceAccessor(classLoader);
         Database database = CommandLineUtils.createDatabaseObject(classLoader, this.url,
-            this.username, this.password, this.driver, this.defaultCatalogName,this.defaultSchemaName,  Boolean.parseBoolean(outputDefaultCatalog), Boolean.parseBoolean(outputDefaultSchema), this.databaseClass, this.driverPropertiesFile, null, null);
+            this.username, this.password, this.driver, this.defaultCatalogName,this.defaultSchemaName,  Boolean.parseBoolean(outputDefaultCatalog), Boolean.parseBoolean(outputDefaultSchema), this.databaseClass, this.driverPropertiesFile, this.liquibaseCatalogName, this.liquibaseSchemaName);
         try {
 
 
@@ -849,7 +862,15 @@ public class Main {
                 CommandLineUtils.doDiffToChangeLog(changeLogFile, createReferenceDatabaseFromCommandParams(commandParams), database, diffOutputControl,  StringUtils.trimToNull(diffTypes), finalSchemaComparisons);
                 return;
             } else if ("generateChangeLog".equalsIgnoreCase(command)) {
-                CommandLineUtils.doGenerateChangeLog(changeLogFile, database, finalSchemas, StringUtils.trimToNull(diffTypes), StringUtils.trimToNull(changeSetAuthor), StringUtils.trimToNull(changeSetContext), StringUtils.trimToNull(dataOutputDirectory), diffOutputControl);
+                // By default the generateChangeLog command is destructive, and
+                // Liquibase's attempt to append doesn't work properly. Just
+                // fail the build if the file already exists.
+                File file = new File(changeLogFile);
+                if ( file.exists() ) {
+                    throw new LiquibaseException("ChangeLogFile " + changeLogFile + " already exists!");
+                }
+
+	            CommandLineUtils.doGenerateChangeLog(changeLogFile, database, finalSchemas, StringUtils.trimToNull(diffTypes), StringUtils.trimToNull(changeSetAuthor), StringUtils.trimToNull(changeSetContext), StringUtils.trimToNull(dataOutputDirectory), diffOutputControl);
                 return;
             } else if ("snapshot".equalsIgnoreCase(command)) {
                 SnapshotCommand command = new SnapshotCommand();
@@ -1007,7 +1028,7 @@ public class Main {
                 database.rollback();
                 database.close();
             } catch (DatabaseException e) {
-                LogFactory.getLogger().warning("problem closing connection", e);
+	            LogFactory.getInstance().getLog().warning("problem closing connection", e);
             }
         }
     }
@@ -1067,7 +1088,7 @@ public class Main {
             throw new CommandLineParsingException("referenceUrl parameter missing");
         }
 
-        return CommandLineUtils.createDatabaseObject(classLoader, url, username, password, driver, defaultCatalogName, defaultSchemaName, Boolean.parseBoolean(outputDefaultCatalog), Boolean.parseBoolean(outputDefaultSchema), null, null, null, null);
+        return CommandLineUtils.createDatabaseObject(classLoader, url, username, password, driver, defaultCatalogName, defaultSchemaName, Boolean.parseBoolean(outputDefaultCatalog), Boolean.parseBoolean(outputDefaultSchema), null, null, this.liquibaseCatalogName, this.liquibaseSchemaName);
 //        Driver driverObject;
 //        try {
 //            driverObject = (Driver) Class.forName(driver, true, classLoader).newInstance();
