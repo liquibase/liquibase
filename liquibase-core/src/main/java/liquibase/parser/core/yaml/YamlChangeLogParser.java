@@ -21,11 +21,16 @@ public class YamlChangeLogParser implements ChangeLogParser {
 
     @Override
     public boolean supports(String changeLogFile, ResourceAccessor resourceAccessor) {
-        return changeLogFile.toLowerCase().endsWith("." + getSupportedFileExtension());
+        for (String extension : getSupportedFileExtensions()) {
+            if (changeLogFile.toLowerCase().endsWith("." + extension)) {
+                return true;
+            }
+        }
+        return false;
     }
 
-    protected String getSupportedFileExtension() {
-        return "yaml";
+    protected String[] getSupportedFileExtensions() {
+        return new String[] {"yaml", "yml"};
     }
 
     @Override
@@ -47,7 +52,7 @@ public class YamlChangeLogParser implements ChangeLogParser {
             try {
                 parsedYaml = yaml.loadAs(changeLogStream, Map.class);
             } catch (Exception e) {
-                throw new ChangeLogParseException("Syntax error in " + getSupportedFileExtension() + ": " + e.getMessage(), e);
+                throw new ChangeLogParseException("Syntax error in " + getSupportedFileExtensions() + ": " + e.getMessage(), e);
             }
 
             List rootList = (List) parsedYaml.get("databaseChangeLog");
