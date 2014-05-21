@@ -448,8 +448,8 @@ public class MainTest {
     }
 
     @Test
-    public void testVersionArg() throws IOException, CommandLineParsingException {
-        Main.main(new String[] {"--version"});
+    public void testVersionArg() throws Exception {
+        Main.run(new String[] {"--version"});
 
     }
 
