@@ -177,13 +177,6 @@ public class DataTypeFactory {
             ((BigIntType) liquibaseDataType).setAutoIncrement(true);
         }
 
-        if (primaryKey && liquibaseDataType instanceof IntType) {
-            ((IntType) liquibaseDataType).setAutoIncrement(true);
-        }
-        if (primaryKey && liquibaseDataType instanceof BigIntType) {
-            ((BigIntType) liquibaseDataType).setAutoIncrement(true);
-        }
-
         liquibaseDataType.finishInitialization(dataTypeDefinition);
 
         return liquibaseDataType;

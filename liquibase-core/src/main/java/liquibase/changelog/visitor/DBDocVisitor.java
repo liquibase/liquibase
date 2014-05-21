@@ -107,12 +107,12 @@ public class DBDocVisitor implements ChangeSetVisitor {
                             changesToRunByObject.put(dbObject, new ArrayList<Change>());
                         }
                         changesToRunByObject.get(dbObject).add(change);
+                    } else {
+                       if (!changesByObject.containsKey(dbObject)) {
+                           changesByObject.put(dbObject, new ArrayList<Change>());
+                       }
+                       changesByObject.get(dbObject).add(change);
                     }
-
-                    if (!changesByObject.containsKey(dbObject)) {
-                        changesByObject.put(dbObject, new ArrayList<Change>());
-                    }
-                    changesByObject.get(dbObject).add(change);
                 }
             }
         }
