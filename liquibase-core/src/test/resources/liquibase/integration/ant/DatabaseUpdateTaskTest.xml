@@ -23,7 +23,7 @@
              src="${liquibase.test.ant.basedir}/sql/h2-teardown.sql"/>
     </target>
 
-    <target name="testUpdateDatabase">
+    <target name="testUpdateDatabaseLegacy">
         <db:assertTableDoesntExist driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"
                                    table="DATABASECHANGELOG"/>
         <lb:updateDatabase driver="${jdbc.driver}" url="${jdbc.url}" username="${db.user}" password="${db.password}"
@@ -33,7 +33,7 @@
                               table="DATABASECHANGELOG"/>
     </target>
 
-    <target name="testUpdateDatabaseOutputToFile">
+    <target name="testUpdateDatabaseLegacyOutputToFile">
         <lb:updateDatabase driver="${jdbc.driver}" url="${jdbc.url}" username="${db.user}" password="${db.password}"
                            changelogfile="${liquibase.test.ant.basedir}/changelog/simple-changelog.xml"
                            classpathref="basic-classpath" outputfile="${temp.dir}/output.sql"/>
@@ -42,7 +42,7 @@
         <au:assertFileExists file="${temp.dir}/output.sql"/>
     </target>
 
-    <target name="testUpdateDatabaseFailMissingUrl">
+    <target name="testUpdateDatabaseLegacyFailMissingUrl">
         <au:expectfailure>
             <lb:updateDatabase driver="${jdbc.driver}" username="${db.user}" password="${db.password}"
                                changelogfile="${liquibase.test.ant.basedir}/changelog/simple-changelog.xml"
@@ -50,7 +50,7 @@
         </au:expectfailure>
     </target>
 
-    <target name="testUpdateDatabaseWithChangeLogParameters">
+    <target name="testUpdateDatabaseLegacyWithChangeLogParameters">
         <db:assertTableDoesntExist driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"
                                    table="DATABASECHANGELOG"/>
         <lb:updateDatabase driver="${jdbc.driver}" url="${jdbc.url}" username="${db.user}" password="${db.password}"

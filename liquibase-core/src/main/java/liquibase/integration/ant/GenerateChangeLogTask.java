@@ -8,7 +8,9 @@ import liquibase.diff.output.changelog.DiffToChangeLog;
 import liquibase.exception.DatabaseException;
 import liquibase.integration.ant.type.ChangeLogOutputFile;
 import liquibase.serializer.ChangeLogSerializer;
+import liquibase.serializer.core.formattedsql.FormattedSqlChangeLogSerializer;
 import liquibase.serializer.core.json.JsonChangeLogSerializer;
+import liquibase.serializer.core.string.StringChangeLogSerializer;
 import liquibase.serializer.core.xml.XMLChangeLogSerializer;
 import liquibase.serializer.core.yaml.YamlChangeLogSerializer;
 import org.apache.tools.ant.BuildException;
@@ -43,6 +45,7 @@ public class GenerateChangeLogTask extends BaseLiquibaseTask {
                 FileResource outputFile = changeLogOutputFile.getOutputFile();
                 String encoding = changeLogOutputFile.getEncoding();
                 ChangeLogSerializer changeLogSerializer = changeLogOutputFile.getChangeLogSerializer();
+                log("Writing change log file " + outputFile.toString(), Project.MSG_INFO);
                 printStream = new PrintStream(outputFile.getOutputStream(), true, encoding);
                 liquibase.generateChangeLog(catalogAndSchema, diffToChangeLog, printStream, changeLogSerializer);
             } catch (UnsupportedEncodingException e) {
@@ -67,18 +70,23 @@ public class GenerateChangeLogTask extends BaseLiquibaseTask {
         return new DiffOutputControl(includeCatalog, includeSchema, includeTablespace);
     }
 
-    public void addJson(ChangeLogOutputFile changeLogOutputFile) {
+    public void addConfiguredJson(ChangeLogOutputFile changeLogOutputFile) {
         changeLogOutputFile.setChangeLogSerializer(new JsonChangeLogSerializer());
         changeLogOutputFiles.add(changeLogOutputFile);
     }
 
-    public void addXml(ChangeLogOutputFile changeLogOutputFile) {
+    public void addConfiguredXml(ChangeLogOutputFile changeLogOutputFile) {
         changeLogOutputFile.setChangeLogSerializer(new XMLChangeLogSerializer());
         changeLogOutputFiles.add(changeLogOutputFile);
     }
 
-    public void addYaml(ChangeLogOutputFile changeLogOutputFile) {
+    public void addConfiguredYaml(ChangeLogOutputFile changeLogOutputFile) {
         changeLogOutputFile.setChangeLogSerializer(new YamlChangeLogSerializer());
+        changeLogOutputFiles.add(changeLogOutputFile);
+    }
+
+    public void addConfiguredTxt(ChangeLogOutputFile changeLogOutputFile) {
+        changeLogOutputFile.setChangeLogSerializer(new StringChangeLogSerializer());
         changeLogOutputFiles.add(changeLogOutputFile);
     }
 
@@ -107,13 +115,14 @@ public class GenerateChangeLogTask extends BaseLiquibaseTask {
     }
 
     /**
-     * @deprecated Use {@link #addXml(ChangeLogOutputFile)} instead.
+     * @deprecated Use {@link #addConfiguredXml(ChangeLogOutputFile)} instead.
      */
     @Deprecated
     public void setOutputFile(FileResource outputFile) {
         log("The outputFile attribute is deprecated. Use a nested <xml>, <json>, or <yaml> element instead.", Project.MSG_WARN);
         ChangeLogOutputFile changeLogOutputFile = new ChangeLogOutputFile();
         changeLogOutputFile.setOutputFile(outputFile);
-        addXml(changeLogOutputFile);
+        changeLogOutputFile.setEncoding("UTF-8");
+        addConfiguredXml(changeLogOutputFile);
     }
 }
