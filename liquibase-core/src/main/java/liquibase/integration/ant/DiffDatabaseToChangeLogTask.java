@@ -30,9 +30,9 @@ public class DiffDatabaseToChangeLogTask extends AbstractDatabaseDiffTask {
     protected void executeWithLiquibaseClassloader() throws BuildException {
         for(ChangeLogOutputFile changeLogOutputFile : changeLogOutputFiles) {
             PrintStream printStream = null;
+            String encoding = changeLogOutputFile.getEncoding();
             try {
                 FileResource outputFile = changeLogOutputFile.getOutputFile();
-                String encoding = changeLogOutputFile.getEncoding();
                 ChangeLogSerializer changeLogSerializer = changeLogOutputFile.getChangeLogSerializer();
                 printStream = new PrintStream(outputFile.getOutputStream(), true, encoding);
                 DiffResult diffResult = getDiffResult();
@@ -40,13 +40,13 @@ public class DiffDatabaseToChangeLogTask extends AbstractDatabaseDiffTask {
                 DiffToChangeLog diffToChangeLog = new DiffToChangeLog(diffResult, diffOutputControl);
                 diffToChangeLog.print(printStream, changeLogSerializer);
             } catch (UnsupportedEncodingException e) {
-                throw new BuildException("", e);
+                throw new BuildException("Unable to diff databases to change log file. Encoding [" + encoding + "] is not supported.", e);
             } catch (IOException e) {
-                throw new BuildException("", e);
+                throw new BuildException("Unable to diff databases to change log file. Error creating output stream.", e);
             } catch (ParserConfigurationException e) {
-                throw new BuildException("", e);
+                throw new BuildException("Unable to diff databases to change log file. Error configuring parser.", e);
             } catch (DatabaseException e) {
-                throw new BuildException("", e);
+                throw new BuildException("Unable to diff databases to change log file.", e);
             } finally {
                 FileUtils.close(printStream);
             }

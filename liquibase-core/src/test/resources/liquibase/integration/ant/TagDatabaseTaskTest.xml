@@ -23,12 +23,28 @@
              src="${liquibase.test.ant.basedir}/sql/h2-teardown.sql"/>
     </target>
 
-    <target name="testTagDatabase">
+    <target name="testTagDatabaseLegacy">
         <db:assertTableDoesntExist driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"
                                    table="DATABASECHANGELOG"/>
         <lb:tagDatabase driver="${jdbc.driver}" url="${jdbc.url}" username="${db.user}" password="${db.password}"
                            classpathref="basic-classpath" tag="test-tag"/>
         <db:assertTableExists driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"
                               table="DATABASECHANGELOG"/>
+    </target>
+
+    <target name="testTagDatabase">
+        <db:assertTableDoesntExist driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"
+                                   table="DATABASECHANGELOG"/>
+        <lb:tagDatabase tag="test-tag">
+            <lb:database driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"/>
+        </lb:tagDatabase>
+        <db:assertTableExists driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"
+                              table="DATABASECHANGELOG"/>
+    </target>
+
+    <target name="testTagDatabaseMissingDatabaseElement">
+        <au:expectfailure>
+            <lb:tagDatabase tag="test-tag"/>
+        </au:expectfailure>
     </target>
 </project>
