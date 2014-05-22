@@ -48,9 +48,9 @@ public class GenerateChangeLogTask extends BaseLiquibaseTask {
                 printStream = new PrintStream(outputFile.getOutputStream(), true, encoding);
                 liquibase.generateChangeLog(catalogAndSchema, diffToChangeLog, printStream, changeLogSerializer);
             } catch (UnsupportedEncodingException e) {
-                throw new BuildException("Unable to generate update SQL. Encoding [" + encoding + "] is not supported.", e);
+                throw new BuildException("Unable to generate a change log. Encoding [" + encoding + "] is not supported.", e);
             } catch (IOException e) {
-                throw new BuildException("Unable to generate update SQL. Error creating output stream.", e);
+                throw new BuildException("Unable to generate a change log. Error creating output stream.", e);
             } catch (ParserConfigurationException e) {
                 throw new BuildException("Unable to generate a change log. Error configuring parser.", e);
             } catch (DatabaseException e) {
@@ -60,6 +60,15 @@ public class GenerateChangeLogTask extends BaseLiquibaseTask {
             }
         }
 	}
+
+    @Override
+    protected void validateParameters() {
+        super.validateParameters();
+
+        if(changeLogOutputFiles == null || changeLogOutputFiles.isEmpty()) {
+            throw new BuildException("Unable to generate a change log. No output file defined. Add at least one <xml>, <json>, <yaml>, or <txt> nested element.");
+        }
+    }
 
     private CatalogAndSchema buildCatalogAndSchema(Database database) {
         return new CatalogAndSchema(database.getDefaultCatalogName(), database.getDefaultSchemaName());

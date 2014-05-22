@@ -85,4 +85,20 @@
             </lb:generateChangeLog>
         </au:expectfailure>
     </target>
+
+    <target name="testGenerateChangeLogMissingOutputElement">
+        <au:expectfailure>
+            <lb:generateChangeLog>
+                <lb:database driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"/>
+            </lb:generateChangeLog>
+        </au:expectfailure>
+    </target>
+
+    <target name="testGenerateChangeLogMissingDatabase">
+        <au:expectfailure>
+            <lb:generateChangeLog>
+                <lb:xml outputfile="${temp.dir}/new-change-log.xml" encoding="UTF-8"/>
+            </lb:generateChangeLog>
+        </au:expectfailure>
+    </target>
 </project>
