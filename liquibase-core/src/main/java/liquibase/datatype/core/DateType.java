@@ -32,7 +32,7 @@ public class DateType extends LiquibaseDataType {
         if (value == null || value.toString().equalsIgnoreCase("null")) {
             return null;
         } else if (value instanceof DatabaseFunction) {
-            return ((DatabaseFunction) value).getValue();
+            return database.generateDatabaseFunctionValue((DatabaseFunction) value);
         } else if (value.toString().equals("CURRENT_TIMESTAMP()")) {
               return database.getCurrentDateTimeFunction();
         } else if (value instanceof java.sql.Timestamp) {

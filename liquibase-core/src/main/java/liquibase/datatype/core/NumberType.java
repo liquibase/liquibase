@@ -6,7 +6,7 @@ import liquibase.datatype.DataTypeInfo;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
 
-@DataTypeInfo(name="number", aliases = {"numeric", "java.sql.Types.NUMERIC"}, minParameters = 0, maxParameters = 0, priority = LiquibaseDataType.PRIORITY_DEFAULT)
+@DataTypeInfo(name="number", aliases = {"numeric", "java.sql.Types.NUMERIC"}, minParameters = 0, maxParameters = 2, priority = LiquibaseDataType.PRIORITY_DEFAULT)
 public class NumberType extends LiquibaseDataType {
 
     private boolean autoIncrement;
@@ -34,7 +34,7 @@ public class NumberType extends LiquibaseDataType {
         }
 
         if (database instanceof OracleDatabase) {
-            if (getParameters().length > 0 && getParameters()[0].equals("0") && getParameters()[1].equals("-127")) {
+            if (getParameters().length > 1 && getParameters()[0].equals("0") && getParameters()[1].equals("-127")) {
                 return new DatabaseDataType("NUMBER");
             } else {
                 return new DatabaseDataType("NUMBER", getParameters());

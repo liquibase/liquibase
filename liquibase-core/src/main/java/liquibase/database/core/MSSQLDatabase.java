@@ -305,7 +305,7 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
         }
         String definition = sb.toString();
 
-        String finalDef =definition.replaceAll("\r\n", "\n");
+        String finalDef =definition.replaceAll("\\r\\n", "\n");
         finalDef = INITIAL_COMMENT_PATTERN.matcher(finalDef).replaceFirst("").trim(); //handle views that start with '/****** Script for XYZ command from SSMS  ******/'
         finalDef = CREATE_VIEW_AS_PATTERN.matcher(finalDef).replaceFirst("").trim();
 
@@ -346,7 +346,7 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
             try {
                 if (getConnection() != null) {
                     String collation = ExecutorService.getInstance().getExecutor(this).queryForObject(new RawSqlStatement("SELECT CONVERT(varchar(100), SERVERPROPERTY('COLLATION'))"), String.class);
-                    caseSensitive = collation.contains("_CI_");
+                    caseSensitive = ! collation.contains("_CI_");
                 }
             } catch (Exception e) {
                 LogFactory.getLogger().warning("Cannot determine case sensitivity from MSSQL", e);

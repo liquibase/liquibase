@@ -82,7 +82,7 @@ public class StandardLockService implements LockService {
 
         boolean createdTable = false;
         Executor executor = ExecutorService.getInstance().getExecutor(database);
-        if (!hasDatabaseChangeLogLockTable()) {
+        if (!hasDatabaseChangeLogLockTable && !hasDatabaseChangeLogLockTable()) {
 
             executor.comment("Create Database Lock Table");
             executor.execute(new CreateDatabaseChangeLogLockTableStatement());

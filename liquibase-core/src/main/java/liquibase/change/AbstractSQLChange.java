@@ -169,7 +169,7 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
             }
 
             if (sql != null) {
-                stream = new ByteArrayInputStream(sql.getBytes());
+                stream = new ByteArrayInputStream(sql.getBytes("UTF-8"));
             }
 
             return CheckSum.compute(new NormalizingStream(this.getEndDelimiter(), this.isSplitStatements(), this.isStripComments(), stream), false);
@@ -207,7 +207,7 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
         String processedSQL = normalizeLineEndings(sql);
         for (String statement : StringUtils.processMutliLineSQL(processedSQL, isStripComments(), isSplitStatements(), getEndDelimiter())) {
             if (database instanceof MSSQLDatabase) {
-                 statement = statement.replaceAll("\n", "\r\n");
+                 statement = statement.replaceAll("\\n", "\r\n");
              }
 
             String escapedStatement = statement;

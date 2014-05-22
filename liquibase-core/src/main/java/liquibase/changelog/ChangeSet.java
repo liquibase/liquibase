@@ -425,7 +425,7 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
             executor.comment("Changeset " + toString(false));
             if (StringUtils.trimToNull(getComments()) != null) {
                 String comments = getComments();
-                String[] lines = comments.split("\n");
+                String[] lines = comments.split("\\n");
                 for (int i = 0; i < lines.length; i++) {
                     if (i > 0) {
                         lines[i] = database.getLineComment() + " " + lines[i];

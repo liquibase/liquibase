@@ -35,6 +35,7 @@ import liquibase.logging.Logger;
 import liquibase.parser.ChangeLogParser;
 import liquibase.parser.ChangeLogParserFactory;
 import liquibase.resource.ResourceAccessor;
+import liquibase.serializer.ChangeLogSerializer;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.SnapshotControl;
@@ -173,7 +174,7 @@ public class Liquibase {
         this.update(new Contexts(contexts));
     }
     /**
-     * Executes Liquibase "update" logic which ensures that the configured {@link Database} is up to dat according to the configured changelog file.
+     * Executes Liquibase "update" logic which ensures that the configured {@link Database} is up to date according to the configured changelog file.
      * To run in "no context mode", pass a null or empty context object.
      */
     public void update(Contexts contexts) throws LiquibaseException {
@@ -1053,8 +1054,11 @@ public class Liquibase {
         return ignoreClasspathPrefix;
     }
 
-
     public void generateChangeLog(CatalogAndSchema catalogAndSchema, DiffToChangeLog changeLogWriter, PrintStream outputStream, Class<? extends DatabaseObject>... snapshotTypes) throws DatabaseException, IOException, ParserConfigurationException {
+        generateChangeLog(catalogAndSchema, changeLogWriter, outputStream, null, snapshotTypes);
+    }
+
+    public void generateChangeLog(CatalogAndSchema catalogAndSchema, DiffToChangeLog changeLogWriter, PrintStream outputStream, ChangeLogSerializer changeLogSerializer, Class<? extends DatabaseObject>... snapshotTypes) throws DatabaseException, IOException, ParserConfigurationException {
         Set<Class<? extends DatabaseObject>> finalCompareTypes = null;
         if (snapshotTypes != null && snapshotTypes.length > 0) {
             finalCompareTypes = new HashSet<Class<? extends DatabaseObject>>(Arrays.asList(snapshotTypes));
@@ -1071,7 +1075,11 @@ public class Liquibase {
 
             changeLogWriter.setDiffResult(diffResult);
 
-            changeLogWriter.print(outputStream);
+            if(changeLogSerializer != null) {
+                changeLogWriter.print(outputStream, changeLogSerializer);
+            } else {
+                changeLogWriter.print(outputStream);
+            }
         } catch (InvalidExampleException e) {
             throw new UnexpectedLiquibaseException(e);
         }
