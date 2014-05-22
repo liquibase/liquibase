@@ -83,11 +83,17 @@ public class XMLChangeLogSerializer implements ChangeLogSerializer {
 
         Map<String, String> shortNameByNamespace = new HashMap<String, String>();
         Map<String, String> urlByNamespace = new HashMap<String, String>();
-        for (String namespace : ChangeFactory.getInstance().getAllChangeNamespaces()) {
-            NamespaceDetails details = NamespaceDetailsFactory.getInstance().getNamespaceDetails(this, namespace);
-            if (details != null) {
-                shortNameByNamespace.put(namespace, details.getShortName(namespace));
-                urlByNamespace.put(namespace, details.getSchemaUrl(namespace));
+
+        for (NamespaceDetails details : NamespaceDetailsFactory.getInstance().getNamespaceDetails()) {
+            for (String namespace : details.getNamespaces()) {
+                if (details.supports(this, namespace)){
+                    String shortName = details.getShortName(namespace);
+                    String url = details.getSchemaUrl(namespace);
+                    if (shortName != null && url != null) {
+                        shortNameByNamespace.put(namespace, shortName);
+                        urlByNamespace.put(namespace, url);
+                    }
+                }
             }
         }
 

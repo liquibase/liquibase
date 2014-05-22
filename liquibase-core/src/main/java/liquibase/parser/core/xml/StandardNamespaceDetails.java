@@ -44,6 +44,14 @@ public class StandardNamespaceDetails implements NamespaceDetails {
     }
 
     @Override
+    public String[] getNamespaces() {
+        return new String[] {
+                LiquibaseSerializable.STANDARD_CHANGELOG_NAMESPACE,
+                LiquibaseSerializable.GENERIC_CHANGELOG_EXTENSION_NAMESPACE
+        };
+    }
+
+    @Override
     public String getSchemaUrl(String namespaceOrUrl) {
         if (namespaceOrUrl.equals(LiquibaseSerializable.STANDARD_CHANGELOG_NAMESPACE)) {
             return "http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-" + XMLChangeLogSAXParser.getSchemaVersion() + ".xsd";
