@@ -8,7 +8,6 @@ import liquibase.diff.output.changelog.DiffToChangeLog;
 import liquibase.exception.DatabaseException;
 import liquibase.integration.ant.type.ChangeLogOutputFile;
 import liquibase.serializer.ChangeLogSerializer;
-import liquibase.serializer.core.formattedsql.FormattedSqlChangeLogSerializer;
 import liquibase.serializer.core.json.JsonChangeLogSerializer;
 import liquibase.serializer.core.string.StringChangeLogSerializer;
 import liquibase.serializer.core.xml.XMLChangeLogSerializer;
@@ -40,18 +39,18 @@ public class GenerateChangeLogTask extends BaseLiquibaseTask {
         DiffToChangeLog diffToChangeLog = new DiffToChangeLog(diffOutputControl);
 
         for(ChangeLogOutputFile changeLogOutputFile : changeLogOutputFiles) {
+            String encoding = changeLogOutputFile.getEncoding();
             PrintStream printStream = null;
             try {
                 FileResource outputFile = changeLogOutputFile.getOutputFile();
-                String encoding = changeLogOutputFile.getEncoding();
                 ChangeLogSerializer changeLogSerializer = changeLogOutputFile.getChangeLogSerializer();
                 log("Writing change log file " + outputFile.toString(), Project.MSG_INFO);
                 printStream = new PrintStream(outputFile.getOutputStream(), true, encoding);
                 liquibase.generateChangeLog(catalogAndSchema, diffToChangeLog, printStream, changeLogSerializer);
             } catch (UnsupportedEncodingException e) {
-                throw new BuildException("", e);
+                throw new BuildException("Unable to generate update SQL. Encoding [" + encoding + "] is not supported.", e);
             } catch (IOException e) {
-                throw new BuildException("", e);
+                throw new BuildException("Unable to generate update SQL. Error creating output stream.", e);
             } catch (ParserConfigurationException e) {
                 throw new BuildException("Unable to generate a change log. Error configuring parser.", e);
             } catch (DatabaseException e) {
@@ -119,10 +118,9 @@ public class GenerateChangeLogTask extends BaseLiquibaseTask {
      */
     @Deprecated
     public void setOutputFile(FileResource outputFile) {
-        log("The outputFile attribute is deprecated. Use a nested <xml>, <json>, or <yaml> element instead.", Project.MSG_WARN);
+        log("The outputFile attribute is deprecated. Use a nested <xml>, <json>, <yaml>, or <txt> element instead.", Project.MSG_WARN);
         ChangeLogOutputFile changeLogOutputFile = new ChangeLogOutputFile();
         changeLogOutputFile.setOutputFile(outputFile);
-        changeLogOutputFile.setEncoding("UTF-8");
         addConfiguredXml(changeLogOutputFile);
     }
 }
