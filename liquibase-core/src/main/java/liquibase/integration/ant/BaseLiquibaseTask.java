@@ -132,6 +132,11 @@ public abstract class BaseLiquibaseTask extends Task {
         return new CompositeResourceAccessor(fileSystemResourceAccessor, classLoaderResourceAccessor);
     }
 
+    /**
+     * Convenience method to get the change log file path from the change log file resource if it exists.
+     *
+     * @return The change log file path string.
+     */
     private String getChangeLogFilePath() {
         FileResource changeLogFile = getChangeLogFile();
         return (changeLogFile != null) ? changeLogFile.toString() : null;
@@ -324,6 +329,7 @@ public abstract class BaseLiquibaseTask extends Task {
      * This method does nothing. Use child implementations.
      */
     public FileResource getOutputFile() {
+        // This method is deprecated. Use child implementations.
         return null;
     }
 

@@ -33,6 +33,7 @@ public abstract class AbstractChangeLogBasedTask extends BaseLiquibaseTask {
      * Gets the change log file set from Ant.
      * @return The change log file resource.
      */
+    @Override
     public FileResource getChangeLogFile() {
         return changeLogFile;
     }

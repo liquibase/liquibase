@@ -1,31 +1,84 @@
 package liquibase.integration.ant;
 
-import liquibase.CatalogAndSchema;
-import liquibase.database.Database;
 import liquibase.diff.DiffResult;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.changelog.DiffToChangeLog;
+import liquibase.exception.DatabaseException;
+import liquibase.integration.ant.type.ChangeLogOutputFile;
+import liquibase.serializer.ChangeLogSerializer;
+import liquibase.serializer.core.json.JsonChangeLogSerializer;
+import liquibase.serializer.core.xml.XMLChangeLogSerializer;
+import liquibase.serializer.core.yaml.YamlChangeLogSerializer;
 import org.apache.tools.ant.BuildException;
+import org.apache.tools.ant.types.resources.FileResource;
+import org.apache.tools.ant.util.FileUtils;
 
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.IOException;
 import java.io.PrintStream;
+import java.io.UnsupportedEncodingException;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 public class DiffDatabaseToChangeLogTask extends AbstractDatabaseDiffTask {
+    private Set<ChangeLogOutputFile> changeLogOutputFiles = new LinkedHashSet<ChangeLogOutputFile>();
     private boolean includeSchema = true;
     private boolean includeCatalog = true;
     private boolean includeTablespace = true;
 
-    protected void outputDiff(PrintStream writer, DiffResult diffResult, Database targetDatabase) throws Exception {
-        DiffOutputControl diffOutputControl = new DiffOutputControl(getIncludeCatalog(), getIncludeSchema(), getIncludeTablespace()).addIncludedSchema(new CatalogAndSchema(getDefaultCatalogName(), getDefaultSchemaName()));
-        if (getChangeLogFile() == null) {
-            new DiffToChangeLog(diffResult, diffOutputControl).print(writer);
-        } else {
-            new DiffToChangeLog(diffResult, diffOutputControl).print(getChangeLogFile().toString());
+    @Override
+    protected void executeWithLiquibaseClassloader() throws BuildException {
+        for(ChangeLogOutputFile changeLogOutputFile : changeLogOutputFiles) {
+            PrintStream printStream = null;
+            try {
+                FileResource outputFile = changeLogOutputFile.getOutputFile();
+                String encoding = changeLogOutputFile.getEncoding();
+                ChangeLogSerializer changeLogSerializer = changeLogOutputFile.getChangeLogSerializer();
+                printStream = new PrintStream(outputFile.getOutputStream(), true, encoding);
+                DiffResult diffResult = getDiffResult();
+                DiffOutputControl diffOutputControl = getDiffOutputControl();
+                DiffToChangeLog diffToChangeLog = new DiffToChangeLog(diffResult, diffOutputControl);
+                diffToChangeLog.print(printStream, changeLogSerializer);
+            } catch (UnsupportedEncodingException e) {
+                throw new BuildException("", e);
+            } catch (IOException e) {
+                throw new BuildException("", e);
+            } catch (ParserConfigurationException e) {
+                throw new BuildException("", e);
+            } catch (DatabaseException e) {
+                throw new BuildException("", e);
+            } finally {
+                FileUtils.close(printStream);
+            }
         }
     }
 
     @Override
-    protected void executeWithLiquibaseClassloader() throws BuildException {
+    protected void validateParameters() {
+        super.validateParameters();
 
+        if(changeLogOutputFiles.isEmpty()) {
+            throw new BuildException("At least one output file element (<json>, <yaml>, or <xml>)must be defined.");
+        }
+    }
+
+    private DiffOutputControl getDiffOutputControl() {
+        return new DiffOutputControl(includeCatalog, includeSchema, includeTablespace);
+    }
+
+    public void addJson(ChangeLogOutputFile changeLogOutputFile) {
+        changeLogOutputFile.setChangeLogSerializer(new JsonChangeLogSerializer());
+        changeLogOutputFiles.add(changeLogOutputFile);
+    }
+
+    public void addXml(ChangeLogOutputFile changeLogOutputFile) {
+        changeLogOutputFile.setChangeLogSerializer(new XMLChangeLogSerializer());
+        changeLogOutputFiles.add(changeLogOutputFile);
+    }
+
+    public void addYaml(ChangeLogOutputFile changeLogOutputFile) {
+        changeLogOutputFile.setChangeLogSerializer(new YamlChangeLogSerializer());
+        changeLogOutputFiles.add(changeLogOutputFile);
     }
 
     public boolean getIncludeCatalog() {
