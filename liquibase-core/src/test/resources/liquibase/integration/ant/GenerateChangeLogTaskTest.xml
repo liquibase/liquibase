@@ -12,6 +12,8 @@
     <property name="db.user" value="sa"/>
     <property name="db.password" value=""/>
 
+    <lb:database id="test-db" driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"/>
+
     <target name="setUp">
         <sql driver="${jdbc.driver}" url="${jdbc.url}" userid="${db.user}" password="${db.password}" encoding="UTF-8"
              src="${liquibase.test.ant.basedir}/sql/h2-setup.sql"/>
@@ -24,7 +26,7 @@
         <delete dir="${test.dir}"/>
     </target>
 
-    <target name="testLegacyGenerateChangeLog">
+    <target name="testGenerateChangeLogLegacy">
         <lb:generateChangeLog driver="${jdbc.driver}" url="${jdbc.url}" username="${db.user}" password="${db.password}"
                               outputFile="${temp.dir}/new-change-log.xml"
                               classpathref="basic-classpath"/>
@@ -75,6 +77,13 @@
         <au:assertFileExists file="${temp.dir}/new-change-log.yaml"/>
         <au:assertFileExists file="${temp.dir}/new-change-log.json"/>
         <au:assertFileExists file="${temp.dir}/new-change-log.txt"/>
+    </target>
+
+    <target name="testGenerateChangeLogDatabaseRef">
+        <lb:generateChangeLog databaseref="test-db">
+            <lb:xml outputfile="${temp.dir}/new-change-log.xml" encoding="UTF-8"/>
+        </lb:generateChangeLog>
+        <au:assertFileExists file="${temp.dir}/new-change-log.xml"/>
     </target>
 
     <target name="testGenerateChangeLogBadOutputEncoding">

@@ -12,6 +12,8 @@
     <property name="db.user" value="sa"/>
     <property name="db.password" value=""/>
 
+    <lb:database id="test-db" driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"/>
+
     <target name="setUp">
         <sql driver="${jdbc.driver}" url="${jdbc.url}" userid="${db.user}" password="${db.password}" encoding="UTF-8"
              src="${liquibase.test.ant.basedir}/sql/h2-setup.sql"/>
@@ -38,6 +40,14 @@
         <lb:tagDatabase tag="test-tag">
             <lb:database driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"/>
         </lb:tagDatabase>
+        <db:assertTableExists driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"
+                              table="DATABASECHANGELOG"/>
+    </target>
+
+    <target name="testTagDatabaseWithRef">
+        <db:assertTableDoesntExist driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"
+                                   table="DATABASECHANGELOG"/>
+        <lb:tagDatabase databaseref="test-db" tag="test-tag"/>
         <db:assertTableExists driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"
                               table="DATABASECHANGELOG"/>
     </target>

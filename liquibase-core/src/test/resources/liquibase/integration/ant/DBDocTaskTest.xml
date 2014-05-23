@@ -12,6 +12,8 @@
     <property name="db.user" value="sa"/>
     <property name="db.password" value=""/>
 
+    <lb:database id="test-db" driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"/>
+
     <target name="setUp">
         <sql driver="${jdbc.driver}" url="${jdbc.url}" userid="${db.user}" password="${db.password}" encoding="UTF-8"
              src="${liquibase.test.ant.basedir}/sql/h2-setup.sql"/>
@@ -33,6 +35,12 @@
     <target name="testDbDoc">
         <lb:dbDoc outputdirectory="${temp.dir}/dbdoc" changelog="${liquibase.test.ant.basedir}/changelog/simple-changelog.xml">
             <lb:database driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"/>
+        </lb:dbDoc>
+        <au:assertFileExists file="${temp.dir}/dbdoc"/>
+    </target>
+
+    <target name="testDbDocDatabaseRef">
+        <lb:dbDoc databaseref="test-db" outputdirectory="${temp.dir}/dbdoc" changelog="${liquibase.test.ant.basedir}/changelog/simple-changelog.xml">
         </lb:dbDoc>
         <au:assertFileExists file="${temp.dir}/dbdoc"/>
     </target>
