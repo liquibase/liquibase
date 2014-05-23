@@ -2,4 +2,7 @@
 <antlib>
     <!-- Import all pre-1.7 tasks for compatibility. -->
     <taskdef resource="liquibasetasks.properties"/>
+
+    <typedef name="database" classname="liquibase.integration.ant.type.DatabaseType"/>
+    <typedef name="changelogparameters" classname="liquibase.integration.ant.type.ChangeLogParametersType"/>
 </antlib>

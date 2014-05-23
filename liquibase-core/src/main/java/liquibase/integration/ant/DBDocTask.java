@@ -5,6 +5,8 @@ import liquibase.exception.LiquibaseException;
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.types.resources.FileResource;
 
+import java.io.File;
+
 public class DBDocTask extends BaseLiquibaseTask {
     private FileResource outputDirectory;
     private FileResource changeLog;
@@ -12,6 +14,17 @@ public class DBDocTask extends BaseLiquibaseTask {
 
     @Override
     public void executeWithLiquibaseClassloader() throws BuildException {
+        File outputDirFile = outputDirectory.getFile();
+        if(!outputDirFile.exists()) {
+            boolean success = outputDirFile.mkdirs();
+            if(!success) {
+                throw new BuildException("Unable to create output directory.");
+            }
+        }
+        if(!outputDirFile.isDirectory()) {
+            throw new BuildException("Output path is not a directory.");
+        }
+
         Liquibase liquibase = getLiquibase();
         try {
             if (contexts != null) {
@@ -33,9 +46,6 @@ public class DBDocTask extends BaseLiquibaseTask {
         }
         if(outputDirectory == null) {
             throw new BuildException("Output directory is required.");
-        }
-        if(!outputDirectory.isDirectory()) {
-            throw new BuildException("The output directory attribute is not a directory.");
         }
     }
 
