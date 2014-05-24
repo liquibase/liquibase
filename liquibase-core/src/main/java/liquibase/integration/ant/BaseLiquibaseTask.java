@@ -14,6 +14,7 @@ import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.CompositeResourceAccessor;
 import liquibase.resource.FileSystemResourceAccessor;
 import liquibase.resource.ResourceAccessor;
+import liquibase.util.ui.UIFactory;
 import org.apache.tools.ant.AntClassLoader;
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Project;
@@ -42,8 +43,7 @@ public abstract class BaseLiquibaseTask extends Task {
     private Path classpath;
     private DatabaseType databaseType;
     private ChangeLogParametersType changeLogParameters;
-
-    private boolean promptOnNonLocalDatabase = false; // TODO: Remove?
+    private boolean promptOnNonLocalDatabase = false;
 
     public BaseLiquibaseTask() {
         super();
@@ -67,6 +67,11 @@ public abstract class BaseLiquibaseTask extends Task {
             liquibase = new Liquibase(changeLogFilePath, resourceAccessor, database);
             if(changeLogParameters != null) {
                 changeLogParameters.applyParameters(liquibase);
+            }
+            if (isPromptOnNonLocalDatabase() && !liquibase.isSafeToRunUpdate() &&
+                    UIFactory.getInstance().getFacade().promptForNonLocalDatabase(liquibase.getDatabase())) {
+                log("User chose not to run task against a non-local database.", Project.MSG_INFO);
+                return;
             }
             if(shouldRun()) {
                 executeWithLiquibaseClassloader();
@@ -195,8 +200,6 @@ public abstract class BaseLiquibaseTask extends Task {
         changeLogParameters = new ChangeLogParametersType(getProject());
         changeLogParameters.setRefid(changeLogParametersRef);
     }
-
-
 
     public boolean isPromptOnNonLocalDatabase() {
         return promptOnNonLocalDatabase;

@@ -2,7 +2,6 @@ package liquibase.integration.ant;
 
 import liquibase.Liquibase;
 import liquibase.exception.LiquibaseException;
-import liquibase.util.ui.UIFactory;
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.types.resources.FileResource;
 import org.apache.tools.ant.util.FileUtils;
@@ -22,11 +21,6 @@ public class DatabaseUpdateTask extends AbstractChangeLogBasedTask {
         Writer writer = null;
         Liquibase liquibase = getLiquibase();
         try {
-            if (isPromptOnNonLocalDatabase() && !liquibase.isSafeToRunUpdate() &&
-                    UIFactory.getInstance().getFacade().promptForNonLocalDatabase(liquibase.getDatabase())) {
-                throw new BuildException("Chose not to run against non-production database");
-            }
-
             FileResource outputFile = getOutputFile();
             if(outputFile != null) {
                 writer = getOutputFileWriter();

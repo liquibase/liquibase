@@ -38,7 +38,7 @@
     <target name="testDropAllTask">
         <db:assertTableExists driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"
                              table="USERS"/>
-        <lb:dropAllDatabaseObjects loglevel="debug">
+        <lb:dropAllDatabaseObjects>
             <lb:database driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"/>
         </lb:dropAllDatabaseObjects>
         <db:assertTableDoesntExist driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"
