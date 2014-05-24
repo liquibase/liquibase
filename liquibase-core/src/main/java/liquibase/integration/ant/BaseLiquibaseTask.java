@@ -407,7 +407,7 @@ public abstract class BaseLiquibaseTask extends Task {
     }
 
     /**
-     * @deprecated Use {@link ChangeLogParametersType#addChangeLogParameter(org.apache.tools.ant.taskdefs.Property)} instead.
+     * @deprecated Use {@link ChangeLogParametersType#addConfiguredChangeLogParameter(Property)} instead.
      */
     @Deprecated
     public void addConfiguredChangeLogProperty(ChangeLogProperty changeLogProperty) {
@@ -415,7 +415,7 @@ public abstract class BaseLiquibaseTask extends Task {
         Property property = new Property();
         property.setName(changeLogProperty.getName());
         property.setValue(changeLogProperty.getValue());
-        getChangeLogParametersType().addChangeLogParameter(property);
+        getChangeLogParametersType().addConfiguredChangeLogParameter(property);
     }
 
     /**

@@ -21,7 +21,7 @@ class TableExistsCondition extends ProjectComponent implements Condition {
         try {
             sql = Sql.newInstance(url, user, password, driver)
             DatabaseMetaData metaData = sql.getConnection().getMetaData()
-            ResultSet tables = metaData.getTables(null, null, table, null)
+            ResultSet tables = metaData.getTables(null, null, table, ["TABLE"] as String[])
             return tables.next()
         } finally {
             sql?.close()

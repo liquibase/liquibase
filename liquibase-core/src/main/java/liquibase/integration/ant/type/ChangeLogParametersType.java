@@ -47,7 +47,7 @@ public class ChangeLogParametersType extends DataType {
         return isReference() ? ((ChangeLogParametersType) getCheckedRef()).getPropertySets() : propertySets;
     }
 
-    public void add(PropertySet propertySet) {
+    public void addConfigured(PropertySet propertySet) {
         propertySets.add(propertySet);
     }
 
@@ -55,7 +55,7 @@ public class ChangeLogParametersType extends DataType {
         return isReference() ? ((ChangeLogParametersType) getCheckedRef()).getChangeLogParameters() : parameters;
     }
 
-    public void addChangeLogParameter(Property parameter) {
+    public void addConfiguredChangeLogParameter(Property parameter) {
         parameters.add(parameter);
     }
 }

@@ -12,7 +12,17 @@
     <property name="db.user" value="sa"/>
     <property name="db.password" value=""/>
 
+    <property name="column.one" value="new_column_one"/>
+    <property name="column.two" value="new_column_two"/>
+    <propertyset id="db-propertyset">
+        <propertyref prefix="column"/>
+    </propertyset>
+
     <lb:database id="test-db" driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"/>
+
+    <lb:changelogparameters id="test-parameters">
+        <propertyset refid="db-propertyset"/>
+    </lb:changelogparameters>
 
     <target name="setUp">
         <sql driver="${jdbc.driver}" url="${jdbc.url}" userid="${db.user}" password="${db.password}" encoding="UTF-8"
@@ -83,6 +93,30 @@
         <db:assertTableDoesntExist driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"
                                    table="DATABASECHANGELOG"/>
         <lb:updateDatabase databaseref="test-db" changelogfile="${liquibase.test.ant.basedir}/changelog/simple-changelog.xml"/>
+        <db:assertTableExists driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"
+                              table="DATABASECHANGELOG"/>
+    </target>
+
+    <target name="testUpdateDatabaseChangeLogParametersPropertySet">
+        <db:assertTableDoesntExist driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"
+                                   table="DATABASECHANGELOG"/>
+        <lb:updateDatabase changelogfile="${liquibase.test.ant.basedir}/changelog/changelog-with-properties.xml">
+            <lb:database driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"/>
+            <lb:changelogparameters>
+                <propertyset refid="db-propertyset"/>
+            </lb:changelogparameters>
+        </lb:updateDatabase>
+        <db:assertTableExists driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"
+                              table="DATABASECHANGELOG"/>
+    </target>
+
+    <target name="testUpdateDatabaseChangeLogParametersPropertySetWithRef">
+        <db:assertTableDoesntExist driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"
+                                   table="DATABASECHANGELOG"/>
+        <lb:updateDatabase changelogfile="${liquibase.test.ant.basedir}/changelog/changelog-with-properties.xml"
+                           changelogparametersref="test-parameters">
+            <lb:database driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"/>
+        </lb:updateDatabase>
         <db:assertTableExists driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"
                               table="DATABASECHANGELOG"/>
     </target>
