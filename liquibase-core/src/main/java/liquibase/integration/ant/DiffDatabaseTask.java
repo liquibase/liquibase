@@ -26,13 +26,22 @@ public class DiffDatabaseTask extends AbstractDatabaseDiffTask {
             log("Writing diff report " + outputFile.toString(), Project.MSG_INFO);
             diffReport.print();
         } catch (DatabaseException e) {
-            throw new BuildException("", e);
+            throw new BuildException("Unable to make diff report.", e);
         } catch (UnsupportedEncodingException e) {
-            throw new BuildException("", e);
+            throw new BuildException("Unable to make diff report. Encoding [" + outputEncoding + "] is not supported.", e);
         } catch (IOException e) {
-            throw new BuildException("", e);
+            throw new BuildException("Unable to make diff report. Error opening output stream.", e);
         } finally {
             FileUtils.close(printStream);
+        }
+    }
+
+    @Override
+    protected void validateParameters() {
+        super.validateParameters();
+
+        if(outputFile == null) {
+            throw new BuildException("Unable to make diff report. Output file is required.");
         }
     }
 

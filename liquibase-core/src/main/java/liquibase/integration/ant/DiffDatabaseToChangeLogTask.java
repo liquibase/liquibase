@@ -7,9 +7,11 @@ import liquibase.exception.DatabaseException;
 import liquibase.integration.ant.type.ChangeLogOutputFile;
 import liquibase.serializer.ChangeLogSerializer;
 import liquibase.serializer.core.json.JsonChangeLogSerializer;
+import liquibase.serializer.core.string.StringChangeLogSerializer;
 import liquibase.serializer.core.xml.XMLChangeLogSerializer;
 import liquibase.serializer.core.yaml.YamlChangeLogSerializer;
 import org.apache.tools.ant.BuildException;
+import org.apache.tools.ant.Project;
 import org.apache.tools.ant.types.resources.FileResource;
 import org.apache.tools.ant.util.FileUtils;
 
@@ -58,7 +60,7 @@ public class DiffDatabaseToChangeLogTask extends AbstractDatabaseDiffTask {
         super.validateParameters();
 
         if(changeLogOutputFiles.isEmpty()) {
-            throw new BuildException("At least one output file element (<json>, <yaml>, or <xml>)must be defined.");
+            throw new BuildException("At least one output file element (<json>, <yaml>, <xml>, or <txt>)must be defined.");
         }
     }
 
@@ -66,18 +68,23 @@ public class DiffDatabaseToChangeLogTask extends AbstractDatabaseDiffTask {
         return new DiffOutputControl(includeCatalog, includeSchema, includeTablespace);
     }
 
-    public void addJson(ChangeLogOutputFile changeLogOutputFile) {
+    public void addConfiguredJson(ChangeLogOutputFile changeLogOutputFile) {
         changeLogOutputFile.setChangeLogSerializer(new JsonChangeLogSerializer());
         changeLogOutputFiles.add(changeLogOutputFile);
     }
 
-    public void addXml(ChangeLogOutputFile changeLogOutputFile) {
+    public void addConfiguredXml(ChangeLogOutputFile changeLogOutputFile) {
         changeLogOutputFile.setChangeLogSerializer(new XMLChangeLogSerializer());
         changeLogOutputFiles.add(changeLogOutputFile);
     }
 
-    public void addYaml(ChangeLogOutputFile changeLogOutputFile) {
+    public void addConfiguredYaml(ChangeLogOutputFile changeLogOutputFile) {
         changeLogOutputFile.setChangeLogSerializer(new YamlChangeLogSerializer());
+        changeLogOutputFiles.add(changeLogOutputFile);
+    }
+
+    public void addConfiguredTxt(ChangeLogOutputFile changeLogOutputFile) {
+        changeLogOutputFile.setChangeLogSerializer(new StringChangeLogSerializer());
         changeLogOutputFiles.add(changeLogOutputFile);
     }
 
@@ -103,5 +110,17 @@ public class DiffDatabaseToChangeLogTask extends AbstractDatabaseDiffTask {
 
     public void setIncludeTablespace(boolean includeTablespace) {
         this.includeTablespace = includeTablespace;
+    }
+
+    /**
+     * @deprecated Use {@link #addConfiguredXml(ChangeLogOutputFile)} instead.
+     * @param outputFile The file to write the change log to.
+     */
+    @Deprecated
+    public void setOutputFile(FileResource outputFile) {
+        log("The outputFile attribute is deprecated. Use a nested <xml>, <json>, <yaml>, or <txt> element instead.", Project.MSG_WARN);
+        ChangeLogOutputFile changeLogOutputFile = new ChangeLogOutputFile();
+        changeLogOutputFile.setOutputFile(outputFile);
+        addConfiguredXml(changeLogOutputFile);
     }
 }
