@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="DropAllTaskTest" basedir="." xmlns="antlib:org.apache.tools.ant" xmlns:au="antlib:org.apache.ant.antunit"
          xmlns:lb="antlib:liquibase.integration.ant" xmlns:db="antlib:liquibase.integration.ant.test">
-    <tempfile property="temp.dir" prefix="DropAllTaskTest" destDir="${java.io.tmpdir}" deleteonexit="true"/>
+    <tempfile property="temp.dir" prefix="DropAllTaskTest" destDir="${java.io.tmpdir}"/>
 
     <path id="basic-classpath">
         <pathelement path="."/>
@@ -24,6 +24,7 @@
     <target name="tearDown">
         <sql driver="${jdbc.driver}" url="${jdbc.url}" userid="${db.user}" password="${db.password}" encoding="UTF-8"
              src="${liquibase.test.ant.basedir}/sql/h2-teardown.sql"/>
+        <delete dir="${temp.dir}"/>
     </target>
 
     <target name="testDropAllTaskLegacy">
