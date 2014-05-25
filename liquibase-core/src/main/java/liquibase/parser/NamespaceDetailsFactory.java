@@ -39,6 +39,10 @@ public class NamespaceDetailsFactory {
 
     }
 
+    public Collection<NamespaceDetails> getNamespaceDetails() {
+        return Collections.unmodifiableCollection(namespaceDetails);
+    }
+
     public NamespaceDetails getNamespaceDetails(LiquibaseParser parser, String namespace) {
         SortedSet<NamespaceDetails> validNamespaceDetails = new TreeSet<NamespaceDetails>(new SerializerNamespaceDetailsComparator());
 
