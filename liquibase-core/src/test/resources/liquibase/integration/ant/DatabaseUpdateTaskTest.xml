@@ -122,6 +122,20 @@
                               table="DATABASECHANGELOG"/>
     </target>
 
+    <target name="testUpdateDatabaseConnectionProperties">
+        <db:assertTableDoesntExist driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"
+                                   table="DATABASECHANGELOG"/>
+        <lb:updateDatabase changelogfile="${liquibase.test.ant.basedir}/changelog/simple-changelog.xml">
+            <lb:database driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}">
+                <lb:connectionproperties>
+                    <lb:connectionproperty name="OPTIMIZE_DISTINCT" value="true"/>
+                </lb:connectionproperties>
+            </lb:database>
+        </lb:updateDatabase>
+        <db:assertTableExists driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"
+                              table="DATABASECHANGELOG"/>
+    </target>
+
     <target name="testUpdateDatabaseMissingDatabase">
         <au:expectfailure>
             <lb:updateDatabase changelogfile="${liquibase.test.ant.basedir}/changelog/simple-changelog.xml"/>

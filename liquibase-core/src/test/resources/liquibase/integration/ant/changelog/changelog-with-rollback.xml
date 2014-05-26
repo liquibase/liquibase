@@ -7,6 +7,8 @@
             <column name="first_name" value="test"/>
             <column name="last_name" value="name"/>
         </insert>
-        <rollback/>
+        <rollback>
+            DELETE FROM users WHERE first_name = 'test' AND last_name = 'name' LIMIT 1;
+        </rollback>
     </changeSet>
 </databaseChangeLog>
