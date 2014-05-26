@@ -122,6 +122,12 @@ public abstract class BaseLiquibaseTask extends Task {
         return true;
     }
 
+    protected String getDefaultOutputEncoding() {
+        LiquibaseConfiguration liquibaseConfiguration = LiquibaseConfiguration.getInstance();
+        GlobalConfiguration globalConfiguration = liquibaseConfiguration.getConfiguration(GlobalConfiguration.class);
+        return globalConfiguration.getOutputEncoding();
+    }
+
     /**
      * Subclasses that override this method must always call <code>super.validateParameters()</code> method.
      */

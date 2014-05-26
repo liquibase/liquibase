@@ -1,7 +1,5 @@
 package liquibase.integration.ant;
 
-import liquibase.configuration.GlobalConfiguration;
-import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.util.StringUtils;
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.types.resources.FileResource;
@@ -59,8 +57,7 @@ public abstract class AbstractChangeLogBasedTask extends BaseLiquibaseTask {
     }
 
     public String getOutputEncoding() {
-        GlobalConfiguration globalConfiguration = LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class);
-        return (StringUtils.trimToNull(outputEncoding) == null) ? globalConfiguration.getOutputEncoding() : outputEncoding.trim();
+        return (StringUtils.trimToNull(outputEncoding) == null) ? getDefaultOutputEncoding() : outputEncoding.trim();
     }
 
     public void setOutputEncoding(String outputEncoding) {

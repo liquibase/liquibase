@@ -36,6 +36,14 @@
         <delete dir="${temp.dir}"/>
     </target>
 
+    <target name="testDiffDatabaseToChangeLogLegacy">
+        <lb:diffDatabaseToChangeLog driver="${jdbc.driver}" url="${db1.jdbc.url}" username="${db.user}"
+                                    password="${db.password}" referencedriver="${jdbc.driver}"
+                                    referenceurl="${db2.jdbc.url}" referenceusername="${db.user}"
+                                    referencepassword="${db.password}" outputFile="${temp.dir}/diff-changelog.xml"/>
+        <au:assertFileExists file="${temp.dir}/diff-changelog.xml"/>
+    </target>
+
     <target name="testDiffDatabaseToChangeLogXmlOutput">
         <lb:diffDatabaseToChangeLog>
             <lb:database driver="${jdbc.driver}" url="${db1.jdbc.url}" user="${db.user}" password="${db.password}"/>

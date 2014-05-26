@@ -36,6 +36,13 @@
         <delete dir="${temp.dir}"/>
     </target>
 
+    <target name="testDiffDatabaseLegacy">
+        <lb:diffDatabase driver="${jdbc.driver}" url="${db1.jdbc.url}" username="${db.user}" password="${db.password}"
+                         referencedriver="${jdbc.driver}" referenceurl="${db2.jdbc.url}" referenceusername="${db.user}"
+                         referencepassword="${db.password}" outputfile="${temp.dir}/diff.txt"/>
+        <au:assertFileExists file="${temp.dir}/diff.txt"/>
+    </target>
+
     <target name="testDiffDatabase">
         <lb:diffDatabase outputfile="${temp.dir}/diff.txt">
             <lb:database driver="${jdbc.driver}" url="${db1.jdbc.url}" user="${db.user}" password="${db.password}"/>

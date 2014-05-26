@@ -32,7 +32,7 @@ public class DiffDatabaseToChangeLogTask extends AbstractDatabaseDiffTask {
     protected void executeWithLiquibaseClassloader() throws BuildException {
         for(ChangeLogOutputFile changeLogOutputFile : changeLogOutputFiles) {
             PrintStream printStream = null;
-            String encoding = changeLogOutputFile.getEncoding();
+            String encoding = getOutputEncoding(changeLogOutputFile);
             try {
                 FileResource outputFile = changeLogOutputFile.getOutputFile();
                 ChangeLogSerializer changeLogSerializer = changeLogOutputFile.getChangeLogSerializer();
@@ -62,6 +62,11 @@ public class DiffDatabaseToChangeLogTask extends AbstractDatabaseDiffTask {
         if(changeLogOutputFiles.isEmpty()) {
             throw new BuildException("At least one output file element (<json>, <yaml>, <xml>, or <txt>)must be defined.");
         }
+    }
+
+    public String getOutputEncoding(ChangeLogOutputFile changeLogOutputFile) {
+        String encoding = changeLogOutputFile.getEncoding();
+        return (encoding == null) ? getDefaultOutputEncoding() : encoding;
     }
 
     private DiffOutputControl getDiffOutputControl() {

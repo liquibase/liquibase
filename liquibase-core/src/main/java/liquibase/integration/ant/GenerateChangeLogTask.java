@@ -39,7 +39,7 @@ public class GenerateChangeLogTask extends BaseLiquibaseTask {
         DiffToChangeLog diffToChangeLog = new DiffToChangeLog(diffOutputControl);
 
         for(ChangeLogOutputFile changeLogOutputFile : changeLogOutputFiles) {
-            String encoding = changeLogOutputFile.getEncoding();
+            String encoding = getOutputEncoding(changeLogOutputFile);
             PrintStream printStream = null;
             try {
                 FileResource outputFile = changeLogOutputFile.getOutputFile();
@@ -68,6 +68,11 @@ public class GenerateChangeLogTask extends BaseLiquibaseTask {
         if(changeLogOutputFiles == null || changeLogOutputFiles.isEmpty()) {
             throw new BuildException("Unable to generate a change log. No output file defined. Add at least one <xml>, <json>, <yaml>, or <txt> nested element.");
         }
+    }
+
+    private String getOutputEncoding(ChangeLogOutputFile changeLogOutputFile) {
+        String encoding = changeLogOutputFile.getEncoding();
+        return (encoding == null) ? getDefaultOutputEncoding() : encoding;
     }
 
     private CatalogAndSchema buildCatalogAndSchema(Database database) {

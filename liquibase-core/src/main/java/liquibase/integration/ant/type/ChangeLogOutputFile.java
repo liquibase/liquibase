@@ -5,7 +5,7 @@ import org.apache.tools.ant.types.resources.FileResource;
 
 public class ChangeLogOutputFile {
     private FileResource outputFile;
-    private String encoding = System.getProperty("file.encoding");
+    private String encoding;
     private ChangeLogSerializer changeLogSerializer;
 
     public ChangeLogSerializer getChangeLogSerializer() {
