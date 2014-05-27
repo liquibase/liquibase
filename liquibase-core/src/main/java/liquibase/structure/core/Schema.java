@@ -19,16 +19,15 @@ public class Schema extends AbstractDatabaseObject {
     }
 
     public Schema(String catalog, String schemaName) {
-        catalog = StringUtils.trimToNull(catalog);
+        this(new Catalog(catalog), schemaName);
+    }
+    
+    public Schema(Catalog catalog, String schemaName) {
         schemaName = StringUtils.trimToNull(schemaName);
 
         setAttribute("name", schemaName);
-        setAttribute("catalog", new Catalog(catalog));
-        setAttribute("objects",  new HashMap<Class<? extends DatabaseObject>, Set<DatabaseObject>>());
-    }
-    
-    public Schema(Catalog catalog, String name) {
-        this(catalog.getName(), name);
+        setAttribute("catalog", catalog);
+        setAttribute("objects", new HashMap<Class<? extends DatabaseObject>, Set<DatabaseObject>>());
     }
 
     @Override
@@ -42,6 +41,16 @@ public class Schema extends AbstractDatabaseObject {
         setAttribute("name", name);
         return this;
     }
+
+    public boolean isDefault() {
+        return getAttribute("default", false);
+    }
+
+    public Schema setDefault(Boolean isDefault) {
+        setAttribute("default", isDefault);
+        return this;
+    }
+
 
     @Override
     public Schema getSchema() {
@@ -82,15 +91,34 @@ public class Schema extends AbstractDatabaseObject {
     @Override
     public String toString() {
         String catalogName = getCatalogName();
+
+        String schemaName = getName();
+        if (schemaName == null) {
+            schemaName = "DEFAULT";
+        }
+
         if (catalogName == null) {
-            return getName();
+            return schemaName;
         } else {
-            return catalogName +"."+getName();
+            return catalogName +"."+ schemaName;
         }
     }
 
     public CatalogAndSchema toCatalogAndSchema() {
-        return new CatalogAndSchema(getCatalogName(), getName());
+        String catalogName;
+        if (getCatalog() != null && getCatalog().isDefault()) {
+            catalogName = null;
+        } else {
+            catalogName = getCatalogName();
+        }
+
+        String schemaName;
+        if (isDefault()) {
+            schemaName = null;
+        } else {
+            schemaName = getName();
+        }
+        return new CatalogAndSchema(catalogName, schemaName);
     }
 
     protected Map<Class<? extends DatabaseObject>, Set<DatabaseObject>> getObjects() {

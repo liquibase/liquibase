@@ -30,7 +30,7 @@ public interface DatabaseObject extends Comparable, LiquibaseSerializable {
 
     <T> T getAttribute(String attribute, Class<T> type);
 
-    <T> T getAttribute(String attribute, Class<T> type, T defaultValue);
+    <T> T getAttribute(String attribute, T defaultValue);
 
     DatabaseObject setAttribute(String attribute, Object value);
 

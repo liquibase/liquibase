@@ -18,7 +18,11 @@ public class Catalog extends AbstractDatabaseObject {
 
     @Override
     public String toString() {
-        return getName();
+        String name = getName();
+        if (name == null) {
+            return "DEFAULT";
+        }
+        return name;
     }
 
     @Override
@@ -39,6 +43,15 @@ public class Catalog extends AbstractDatabaseObject {
     @Override
     public Catalog setName(String name) {
         setAttribute("name", name);
+        return this;
+    }
+
+    public boolean isDefault() {
+        return getAttribute("default", false);
+    }
+
+    public Catalog setDefault(Boolean isDefault) {
+        setAttribute("default", isDefault);
         return this;
     }
 
@@ -85,4 +98,6 @@ public class Catalog extends AbstractDatabaseObject {
     public int hashCode() {
         return getName() != null ? getName().hashCode() : 0;
     }
+
+
 }
