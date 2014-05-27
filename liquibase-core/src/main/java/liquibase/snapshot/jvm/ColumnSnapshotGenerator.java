@@ -315,11 +315,6 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
             return val;
         }
 
-        String stringVal = (String) val;
-        if (stringVal.isEmpty()) {
-            return null;
-        }
-
         int type = Integer.MIN_VALUE;
         if (columnInfo.getType().getDataTypeId() != null) {
             type = columnInfo.getType().getDataTypeId();
@@ -327,6 +322,16 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
         String typeName = columnInfo.getType().getTypeName();
 
         LiquibaseDataType liquibaseDataType = DataTypeFactory.getInstance().from(columnInfo.getType());
+
+        String stringVal = (String) val;
+        if (stringVal.isEmpty()) {
+            if (liquibaseDataType instanceof CharType) {
+                return "";
+            } else {
+                return null;
+            }
+        }
+
 
         if (database instanceof OracleDatabase && !stringVal.startsWith("'") && !stringVal.endsWith("'")) {
             //oracle returns functions without quotes
