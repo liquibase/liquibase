@@ -98,7 +98,7 @@ public class DataTypeFactory {
         }
 
         String additionalInfo = null;
-        if (dataTypeName.toLowerCase().startsWith("bit varying")) {
+        if (dataTypeName.toLowerCase().startsWith("bit varying") || dataTypeName.toLowerCase().startsWith("character varying")) {
             //not going to do anything. Special case for postgres in our tests, need to better support handling these types of differences
         } else {
             String[] splitTypeName = dataTypeName.split("\\s+", 2);
