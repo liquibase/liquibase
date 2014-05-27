@@ -254,7 +254,7 @@ public class FormattedSqlChangeLogParserTest extends Specification {
     @Unroll
     def parse_multipleDbms() throws Exception {
         when:
-        def changeLog = new MockFormattedSqlChangeLogParser(changeLogWithMultipleDbms).parse("asdf.sql", new ChangeLogParameters(), new JUnitResourceAccessor())
+        def changeLog = new MockFormattedSqlChangeLogParser(changelog).parse("asdf.sql", new ChangeLogParameters(), new JUnitResourceAccessor())
         def dbmsSet = changeLog.getChangeSets().get(0).getDbmsSet()
 
         then:
@@ -266,11 +266,24 @@ public class FormattedSqlChangeLogParserTest extends Specification {
         that dbmsSet, Matchers.containsInAnyOrder(expected.toArray())
 
         where:
-        changeLogWithMultipleDbms                                                                               | expected
+        changelog                                                                                               | expected
         "--liquibase formatted sql\n\n--changeset John Doe:12345 dbms:db2,db2i\ncreate table test (id int);\n"  | ["db2", "db2i"]
         "--liquibase formatted sql\n\n--changeset John Doe:12345 dbms:db2, db2i\ncreate table test (id int);\n" | ["db2"]
         "--liquibase formatted sql\n\n--changeset John Doe:12345 dbms:db2,\ncreate table test (id int);\n"      | ["db2"]
         "--liquibase formatted sql\n\n--changeset John Doe:12345 dbms:,db2,\ncreate table test (id int);\n"     | null
+    }
+
+    @Unroll("#featureName: #example")
+    def "example file"() {
+        when:
+        def changeLog = new MockFormattedSqlChangeLogParser(example).parse("asdf.sql", new ChangeLogParameters(), new JUnitResourceAccessor())
+
+        then:
+        ((RawSQLChange) changeLog.changeSets[0].changes[0]).sql == expected
+
+        where:
+        example                                                                                                  | expected
+        "--liquibase formatted sql\n--changeset John Doe:12345\nCREATE PROC TEST\nAnother Line\nEND MY PROC;\n/" | "CREATE PROC TEST\nAnother Line\nEND MY PROC;\n/"
     }
 
     private static class MockFormattedSqlChangeLogParser extends FormattedSqlChangeLogParser {
