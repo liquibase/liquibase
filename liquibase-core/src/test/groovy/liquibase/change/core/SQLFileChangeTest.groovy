@@ -13,14 +13,16 @@ import static org.junit.Assert.assertEquals
 
 public class SQLFileChangeTest extends StandardChangeTest {
 
-    def "generateStatements returns empty array if file does not exist"() throws Exception {
+    def "generateStatements throws Exception if file does not exist"() throws Exception {
         when:
         def change = new SQLFileChange();
         change.setPath("doesnotexist.sql");
         change.finishInitialization();
 
+        change.generateStatements(new MockDatabase())
+
         then:
-        change.generateStatements(new MockDatabase()) == []
+         thrown(IOException)
 
     }
 
