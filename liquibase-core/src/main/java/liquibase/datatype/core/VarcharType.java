@@ -2,6 +2,7 @@ package liquibase.datatype.core;
 
 import liquibase.database.Database;
 import liquibase.database.core.InformixDatabase;
+import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.core.OracleDatabase;
 import liquibase.datatype.DataTypeInfo;
 import liquibase.datatype.DatabaseDataType;
@@ -9,6 +10,7 @@ import liquibase.datatype.LiquibaseDataType;
 
 @DataTypeInfo(name="varchar", aliases = {"java.sql.Types.VARCHAR", "java.lang.String", "varchar2", "character varying"}, minParameters = 0, maxParameters = 1, priority = LiquibaseDataType.PRIORITY_DEFAULT)
 public class VarcharType extends CharType {
+
     @Override
     public DatabaseDataType toDatabaseDataType(Database database) {
         if (database instanceof OracleDatabase) {
@@ -17,6 +19,18 @@ public class VarcharType extends CharType {
 
         if (database instanceof InformixDatabase && getSize() > 255) {
             return new DatabaseDataType("LVARCHAR", getParameters());
+        }
+
+        if (database instanceof MSSQLDatabase) {
+            if (getParameters() != null && getParameters().length > 0) {
+                Object param1 = getParameters()[0];
+                if (param1.toString().matches("\\d+")) {
+                    if (Long.valueOf(param1.toString()) > 8000) {
+                        return new DatabaseDataType("VARCHAR", "MAX");
+                    }
+                }
+            }
+            return new DatabaseDataType("VARCHAR", getParameters());
         }
 
         return super.toDatabaseDataType(database);
