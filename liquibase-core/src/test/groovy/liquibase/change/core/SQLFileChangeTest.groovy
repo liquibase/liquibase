@@ -5,6 +5,7 @@ import liquibase.change.ChangeStatus;
 import liquibase.change.StandardChangeTest;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.ChangeSet
+import liquibase.exception.UnexpectedLiquibaseException
 import liquibase.sdk.database.MockDatabase
 import liquibase.sdk.resource.MockResourceAccessor
 import liquibase.statement.SqlStatement
@@ -22,8 +23,7 @@ public class SQLFileChangeTest extends StandardChangeTest {
         change.generateStatements(new MockDatabase())
 
         then:
-         thrown(IOException)
-
+         thrown(UnexpectedLiquibaseException.class)
     }
 
     def "lines from file parse into one or more statements correctly"() throws Exception {
