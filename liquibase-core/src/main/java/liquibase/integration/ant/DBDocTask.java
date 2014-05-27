@@ -62,7 +62,7 @@ public class DBDocTask extends BaseLiquibaseTask {
         this.outputDirectory = outputDirectory;
     }
 
-    public void setChangeLog(FileResource changeLog) {
+    public void setChangeLogFile(FileResource changeLog) {
         this.changeLog = changeLog;
     }
 
