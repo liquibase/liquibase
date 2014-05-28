@@ -197,18 +197,13 @@ public class DiffToChangeLog {
 
     private void addToChangeSets(Change[] changes, List<ChangeSet> changeSets, ObjectQuotingStrategy quotingStrategy) {
         if (changes != null) {
+            ChangeSet changeSet = new ChangeSet(generateId(), getChangeSetAuthor(), false, false, null, changeSetContext,
+                    null, quotingStrategy, null);
             for (Change change : changes) {
-                changeSets.add(generateChangeSet(change, quotingStrategy));
+                changeSet.addChange(change);
             }
+            changeSets.add(changeSet);
         }
-    }
-
-    protected ChangeSet generateChangeSet(Change change, ObjectQuotingStrategy quotingStrategy) {
-        ChangeSet changeSet = new ChangeSet(generateId(), getChangeSetAuthor(), false, false,
-                getChangeSetPath(), changeSetContext, null, quotingStrategy, null);
-        changeSet.addChange(change);
-
-        return changeSet;
     }
 
     protected String getChangeSetAuthor() {
