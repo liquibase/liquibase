@@ -36,7 +36,7 @@ public class IntType extends LiquibaseDataType {
                 return new DatabaseDataType("SERIAL");
             }
         }
-        if (database instanceof MSSQLDatabase || database instanceof HsqlDatabase || database instanceof FirebirdDatabase) {
+        if (database instanceof MSSQLDatabase || database instanceof HsqlDatabase || database instanceof FirebirdDatabase || database instanceof InformixDatabase) {
             return new DatabaseDataType("INT");
         }
         if (database instanceof SQLiteDatabase ) {
