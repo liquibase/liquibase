@@ -2,6 +2,7 @@ package liquibase.datatype.core;
 
 import liquibase.database.Database;
 import liquibase.database.core.MSSQLDatabase;
+import liquibase.database.core.PostgresDatabase;
 import liquibase.datatype.DataTypeInfo;
 import liquibase.datatype.LiquibaseDataType;
 import liquibase.statement.DatabaseFunction;
@@ -23,7 +24,7 @@ public class CharType extends LiquibaseDataType {
         String val = String.valueOf(value);
         // postgres type character varying gets identified as a char type
         // simple sanity check to avoid double quoting a value
-        if (val.startsWith("'") && val.endsWith("'")) {
+        if (database instanceof PostgresDatabase && val.startsWith("'") && val.endsWith("'")) {
             return val;
         } else {
             if (database instanceof MSSQLDatabase && !StringUtils.isAscii(val)) {
