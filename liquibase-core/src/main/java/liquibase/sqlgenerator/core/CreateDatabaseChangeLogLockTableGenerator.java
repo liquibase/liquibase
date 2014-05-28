@@ -27,10 +27,10 @@ public class CreateDatabaseChangeLogLockTableGenerator extends AbstractSqlGenera
     public Sql[] generateSql(CreateDatabaseChangeLogLockTableStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         CreateTableStatement createTableStatement = new CreateTableStatement(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName())
                 .setTablespace(database.getLiquibaseTablespaceName())
-                .addPrimaryKeyColumn("ID", DataTypeFactory.getInstance().fromDescription("INT"), null, null, null, new NotNullConstraint())
-                .addColumn("LOCKED", DataTypeFactory.getInstance().fromDescription("BOOLEAN"), null, new ColumnConstraint[]{new NotNullConstraint()})
-                .addColumn("LOCKGRANTED", DataTypeFactory.getInstance().fromDescription("DATETIME"))
-                .addColumn("LOCKEDBY", DataTypeFactory.getInstance().fromDescription("VARCHAR(255)"));
+                .addPrimaryKeyColumn("ID", DataTypeFactory.getInstance().fromDescription("INT", database), null, null, null, new NotNullConstraint())
+                .addColumn("LOCKED", DataTypeFactory.getInstance().fromDescription("BOOLEAN", database), null, new ColumnConstraint[]{new NotNullConstraint()})
+                .addColumn("LOCKGRANTED", DataTypeFactory.getInstance().fromDescription("DATETIME", database))
+                .addColumn("LOCKEDBY", DataTypeFactory.getInstance().fromDescription("VARCHAR(255)", database));
         List<Sql> sql = new ArrayList<Sql>();
 
         sql.addAll(Arrays.asList(SqlGeneratorFactory.getInstance().generateSql(createTableStatement, database)));

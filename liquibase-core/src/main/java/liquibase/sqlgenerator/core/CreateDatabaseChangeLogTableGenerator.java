@@ -30,17 +30,17 @@ public class CreateDatabaseChangeLogTableGenerator extends AbstractSqlGenerator<
     	
         CreateTableStatement createTableStatement = new CreateTableStatement(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName())
                 .setTablespace(database.getLiquibaseTablespaceName())
-                .addColumn("ID", DataTypeFactory.getInstance().fromDescription("VARCHAR(" + getIdColumnSize() + ")"), null, null, null, new NotNullConstraint())
-                .addColumn("AUTHOR", DataTypeFactory.getInstance().fromDescription("VARCHAR(" + getAuthorColumnSize() + ")"), null, null, null, new NotNullConstraint())
-                .addColumn("FILENAME", DataTypeFactory.getInstance().fromDescription("VARCHAR(" + getFilenameColumnSize() + ")"), null, null, null, new NotNullConstraint())
-                .addColumn("DATEEXECUTED", DataTypeFactory.getInstance().fromDescription("datetime"), null, null, new NotNullConstraint())
-                .addColumn("ORDEREXECUTED", DataTypeFactory.getInstance().fromDescription("INT"), new NotNullConstraint())
-                .addColumn("EXECTYPE", DataTypeFactory.getInstance().fromDescription("VARCHAR(10)"), new NotNullConstraint())
-                .addColumn("MD5SUM", DataTypeFactory.getInstance().fromDescription("VARCHAR(35)"))
-                .addColumn("DESCRIPTION", DataTypeFactory.getInstance().fromDescription("VARCHAR(255)"))
-                .addColumn("COMMENTS", DataTypeFactory.getInstance().fromDescription("VARCHAR(255)"))
-                .addColumn("TAG", DataTypeFactory.getInstance().fromDescription("VARCHAR(255)"))
-                .addColumn("LIQUIBASE", DataTypeFactory.getInstance().fromDescription("VARCHAR(20)"));
+                .addColumn("ID", DataTypeFactory.getInstance().fromDescription("VARCHAR(" + getIdColumnSize() + ")", database), null, null, null, new NotNullConstraint())
+                .addColumn("AUTHOR", DataTypeFactory.getInstance().fromDescription("VARCHAR(" + getAuthorColumnSize() + ")", database), null, null, null, new NotNullConstraint())
+                .addColumn("FILENAME", DataTypeFactory.getInstance().fromDescription("VARCHAR(" + getFilenameColumnSize() + ")", database), null, null, null, new NotNullConstraint())
+                .addColumn("DATEEXECUTED", DataTypeFactory.getInstance().fromDescription("datetime", database), null, null, new NotNullConstraint())
+                .addColumn("ORDEREXECUTED", DataTypeFactory.getInstance().fromDescription("INT", database), new NotNullConstraint())
+                .addColumn("EXECTYPE", DataTypeFactory.getInstance().fromDescription("VARCHAR(10)", database), new NotNullConstraint())
+                .addColumn("MD5SUM", DataTypeFactory.getInstance().fromDescription("VARCHAR(35)", database))
+                .addColumn("DESCRIPTION", DataTypeFactory.getInstance().fromDescription("VARCHAR(255)", database))
+                .addColumn("COMMENTS", DataTypeFactory.getInstance().fromDescription("VARCHAR(255)", database))
+                .addColumn("TAG", DataTypeFactory.getInstance().fromDescription("VARCHAR(255)", database))
+                .addColumn("LIQUIBASE", DataTypeFactory.getInstance().fromDescription("VARCHAR(20)", database));
 
         return SqlGeneratorFactory.getInstance().generateSql(createTableStatement, database);
     }

@@ -56,7 +56,7 @@ public class ModifyDataTypeGenerator extends AbstractSqlGenerator<ModifyDataType
         alterTable += getPreDataTypeString(database); // adds a space if nothing else
 
         // add column type
-        alterTable += DataTypeFactory.getInstance().fromDescription(statement.getNewDataType()).toDatabaseDataType(database);
+        alterTable += DataTypeFactory.getInstance().fromDescription(statement.getNewDataType(), database).toDatabaseDataType(database);
 
         return new Sql[]{new UnparsedSql(alterTable, getAffectedTable(statement))};
     }

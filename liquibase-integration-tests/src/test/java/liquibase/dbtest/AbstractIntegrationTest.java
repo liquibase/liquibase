@@ -228,7 +228,7 @@ public abstract class AbstractIntegrationTest {
         ((JdbcConnection) database.getConnection()).getUnderlyingConnection().createStatement().execute("CREATE TABLE DATABASECHANGELOG (id varchar(150) NOT NULL, " +
                 "author varchar(150) NOT NULL, " +
                 "filename varchar(255) NOT NULL, " +
-                "dateExecuted "+ DataTypeFactory.getInstance().fromDescription("datetime").toDatabaseDataType(database) +" NOT NULL, " +
+                "dateExecuted "+ DataTypeFactory.getInstance().fromDescription("datetime", database).toDatabaseDataType(database) +" NOT NULL, " +
                 "md5sum varchar(32), " +
                 "description varchar(255), " +
                 "comments varchar(255), " +

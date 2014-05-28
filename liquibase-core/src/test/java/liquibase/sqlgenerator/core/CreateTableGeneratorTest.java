@@ -52,7 +52,7 @@ public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTab
         for (Database database : TestContext.getInstance().getAllDatabases()) {
             if (database instanceof OracleDatabase) {
                 CreateTableStatement statement = new CreateTableStatement(CATALOG_NAME, SCHEMA_NAME, TABLE_NAME);
-                statement.addColumn(COLUMN_NAME1, DataTypeFactory.getInstance().fromDescription("java.sql.Types.TIMESTAMP"), new ColumnConfig().setDefaultValue("null").getDefaultValueObject());
+                statement.addColumn(COLUMN_NAME1, DataTypeFactory.getInstance().fromDescription("java.sql.Types.TIMESTAMP", database), new ColumnConfig().setDefaultValue("null").getDefaultValueObject());
                 if (shouldBeImplementation(database)) {
                     assertEquals("CREATE TABLE CATALOG_NAME.TABLE_NAME (COLUMN1_NAME TIMESTAMP DEFAULT null)", this.generatorUnderTest.generateSql(statement, database, null)[0].toSql());
                 }
@@ -64,7 +64,7 @@ public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTab
     public void testWithColumnSpecificIntType() {
         for (Database database : TestContext.getInstance().getAllDatabases()) {
                 CreateTableStatement statement = new CreateTableStatement(CATALOG_NAME, SCHEMA_NAME, TABLE_NAME);
-                statement.addColumn(COLUMN_NAME1, DataTypeFactory.getInstance().fromDescription("int(11) unsigned"));
+                statement.addColumn(COLUMN_NAME1, DataTypeFactory.getInstance().fromDescription("int(11) unsigned", database));
         }
     }
 
@@ -371,7 +371,7 @@ public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTab
 	    		CreateTableStatement statement = new CreateTableStatement(CATALOG_NAME, SCHEMA_NAME, TABLE_NAME);
 	    		statement.addColumn(
 	    			COLUMN_NAME1,
-	    			DataTypeFactory.getInstance().fromDescription("BIGINT{autoIncrement:true}"),
+	    			DataTypeFactory.getInstance().fromDescription("BIGINT{autoIncrement:true}", database),
 	    			new AutoIncrementConstraint(COLUMN_NAME1)
 	    		);
 
@@ -389,7 +389,7 @@ public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTab
 	    		CreateTableStatement statement = new CreateTableStatement(CATALOG_NAME, SCHEMA_NAME, TABLE_NAME);
 	    		statement.addColumn(
 	    			COLUMN_NAME1,
-	    			DataTypeFactory.getInstance().fromDescription("BIGINT{autoIncrement:true}"),
+	    			DataTypeFactory.getInstance().fromDescription("BIGINT{autoIncrement:true}", database),
 	    			new AutoIncrementConstraint(COLUMN_NAME1, BigInteger.ZERO, null)
 	    		);
 
@@ -407,7 +407,7 @@ public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTab
 	    		CreateTableStatement statement = new CreateTableStatement(CATALOG_NAME, SCHEMA_NAME, TABLE_NAME);
 	    		statement.addColumn(
 	    			COLUMN_NAME1,
-	    			DataTypeFactory.getInstance().fromDescription("BIGINT{autoIncrement:true}"),
+	    			DataTypeFactory.getInstance().fromDescription("BIGINT{autoIncrement:true}", database),
 	    			new AutoIncrementConstraint(COLUMN_NAME1, BigInteger.ZERO, BigInteger.TEN)
 	    		);
 
@@ -425,7 +425,7 @@ public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTab
 	    		CreateTableStatement statement = new CreateTableStatement(CATALOG_NAME, SCHEMA_NAME, TABLE_NAME);
 	    		statement.addColumn(
 	    			COLUMN_NAME1,
-	    			DataTypeFactory.getInstance().fromDescription("BIGINT{autoIncrement:true}"),
+	    			DataTypeFactory.getInstance().fromDescription("BIGINT{autoIncrement:true}", database),
 	    			new AutoIncrementConstraint(COLUMN_NAME1)
 	    		);
 
@@ -443,7 +443,7 @@ public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTab
 	    		CreateTableStatement statement = new CreateTableStatement(CATALOG_NAME, SCHEMA_NAME, TABLE_NAME);
 	    		statement.addColumn(
 	    			COLUMN_NAME1,
-	    			DataTypeFactory.getInstance().fromDescription("BIGINT{autoIncrement:true}"),
+	    			DataTypeFactory.getInstance().fromDescription("BIGINT{autoIncrement:true}", database),
 	    			new AutoIncrementConstraint(COLUMN_NAME1, BigInteger.ZERO, null)
 	    		);
 
@@ -461,7 +461,7 @@ public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTab
 	    		CreateTableStatement statement = new CreateTableStatement(CATALOG_NAME, SCHEMA_NAME, TABLE_NAME);
 	    		statement.addColumn(
 	    			COLUMN_NAME1,
-	    			DataTypeFactory.getInstance().fromDescription("BIGINT{autoIncrement:true}"),
+	    			DataTypeFactory.getInstance().fromDescription("BIGINT{autoIncrement:true}", database),
 	    			new AutoIncrementConstraint(COLUMN_NAME1, BigInteger.ZERO, BigInteger.TEN)
 	    		);
 
@@ -479,7 +479,7 @@ public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTab
 	    		CreateTableStatement statement = new CreateTableStatement(CATALOG_NAME, SCHEMA_NAME, TABLE_NAME);
 	    		statement.addColumn(
 	    			COLUMN_NAME1,
-	    			DataTypeFactory.getInstance().fromDescription("BIGINT{autoIncrement:true}"),
+	    			DataTypeFactory.getInstance().fromDescription("BIGINT{autoIncrement:true}", database),
 	    			new AutoIncrementConstraint(COLUMN_NAME1)
 	    		);
 
@@ -497,7 +497,7 @@ public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTab
 	    		CreateTableStatement statement = new CreateTableStatement(CATALOG_NAME, SCHEMA_NAME, TABLE_NAME);
 	    		statement.addColumn(
 	    			COLUMN_NAME1,
-	    			DataTypeFactory.getInstance().fromDescription("BIGINT{autoIncrement:true}"),
+	    			DataTypeFactory.getInstance().fromDescription("BIGINT{autoIncrement:true}", database),
 	    			new AutoIncrementConstraint(COLUMN_NAME1, BigInteger.ZERO, null)
 	    		);
 
@@ -515,7 +515,7 @@ public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTab
 	    		CreateTableStatement statement = new CreateTableStatement(CATALOG_NAME, SCHEMA_NAME, TABLE_NAME);
 	    		statement.addColumn(
 	    			COLUMN_NAME1,
-	    			DataTypeFactory.getInstance().fromDescription("BIGINT{autoIncrement:true}"),
+	    			DataTypeFactory.getInstance().fromDescription("BIGINT{autoIncrement:true}", database),
 	    			new AutoIncrementConstraint(COLUMN_NAME1, BigInteger.ZERO, BigInteger.TEN)
 	    		);
 
@@ -533,7 +533,7 @@ public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTab
 	    		CreateTableStatement statement = new CreateTableStatement(CATALOG_NAME, SCHEMA_NAME, TABLE_NAME);
 	    		statement.addColumn(
 	    			COLUMN_NAME1,
-	    			DataTypeFactory.getInstance().fromDescription("BIGINT{autoIncrement:true}"),
+	    			DataTypeFactory.getInstance().fromDescription("BIGINT{autoIncrement:true}", database),
 	    			new AutoIncrementConstraint(COLUMN_NAME1)
 	    		);
 
@@ -551,7 +551,7 @@ public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTab
 	    		CreateTableStatement statement = new CreateTableStatement(CATALOG_NAME, SCHEMA_NAME, TABLE_NAME);
 	    		statement.addColumn(
 	    			COLUMN_NAME1,
-	    			DataTypeFactory.getInstance().fromDescription("BIGINT{autoIncrement:true}"),
+	    			DataTypeFactory.getInstance().fromDescription("BIGINT{autoIncrement:true}", database),
 	    			new AutoIncrementConstraint(COLUMN_NAME1, BigInteger.ONE, null)
 	    		);
 
@@ -569,7 +569,7 @@ public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTab
 	    		CreateTableStatement statement = new CreateTableStatement(CATALOG_NAME, SCHEMA_NAME, TABLE_NAME);
 	    		statement.addColumn(
 	    			COLUMN_NAME1,
-	    			DataTypeFactory.getInstance().fromDescription("BIGINT{autoIncrement:true}"),
+	    			DataTypeFactory.getInstance().fromDescription("BIGINT{autoIncrement:true}", database),
 	    			new AutoIncrementConstraint(COLUMN_NAME1, BigInteger.ONE, BigInteger.TEN)
 	    		);
 
@@ -587,7 +587,7 @@ public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTab
 	    		CreateTableStatement statement = new CreateTableStatement(CATALOG_NAME, SCHEMA_NAME, TABLE_NAME);
 	    		statement.addColumn(
 	    			COLUMN_NAME1,
-	    			DataTypeFactory.getInstance().fromDescription("BIGINT{autoIncrement:true}"),
+	    			DataTypeFactory.getInstance().fromDescription("BIGINT{autoIncrement:true}", database),
 	    			new AutoIncrementConstraint(COLUMN_NAME1)
 	    		);
 
@@ -605,7 +605,7 @@ public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTab
 	    		CreateTableStatement statement = new CreateTableStatement(CATALOG_NAME, SCHEMA_NAME, TABLE_NAME);
 	    		statement.addColumn(
 	    			COLUMN_NAME1,
-	    			DataTypeFactory.getInstance().fromDescription("BIGINT{autoIncrement:true}"),
+	    			DataTypeFactory.getInstance().fromDescription("BIGINT{autoIncrement:true}", database),
 	    			new AutoIncrementConstraint(COLUMN_NAME1, BigInteger.ZERO, null)
 	    		);
 
@@ -623,7 +623,7 @@ public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTab
 	    		CreateTableStatement statement = new CreateTableStatement(CATALOG_NAME, SCHEMA_NAME, TABLE_NAME);
 	    		statement.addColumn(
 	    			COLUMN_NAME1,
-	    			DataTypeFactory.getInstance().fromDescription("BIGINT{autoIncrement:true}"),
+	    			DataTypeFactory.getInstance().fromDescription("BIGINT{autoIncrement:true}", database),
 	    			new AutoIncrementConstraint(COLUMN_NAME1, BigInteger.ZERO, BigInteger.TEN)
 	    		);
 
@@ -641,7 +641,7 @@ public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTab
 	    		CreateTableStatement statement = new CreateTableStatement(CATALOG_NAME, SCHEMA_NAME, TABLE_NAME);
 	    		statement.addColumn(
 	    			COLUMN_NAME1,
-	    			DataTypeFactory.getInstance().fromDescription("BIGINT{autoIncrement:true}"),
+	    			DataTypeFactory.getInstance().fromDescription("BIGINT{autoIncrement:true}", database),
 	    			new AutoIncrementConstraint(COLUMN_NAME1)
 	    		);
 
@@ -659,7 +659,7 @@ public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTab
 	    		CreateTableStatement statement = new CreateTableStatement(CATALOG_NAME, SCHEMA_NAME, TABLE_NAME);
 	    		statement.addColumn(
 	    			COLUMN_NAME1,
-	    			DataTypeFactory.getInstance().fromDescription("BIGINT{autoIncrement:true}"),
+	    			DataTypeFactory.getInstance().fromDescription("BIGINT{autoIncrement:true}", database),
 	    			new AutoIncrementConstraint(COLUMN_NAME1, BigInteger.valueOf(2), null)
 	    		);
 
@@ -677,7 +677,7 @@ public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTab
 	    		CreateTableStatement statement = new CreateTableStatement(CATALOG_NAME, SCHEMA_NAME, TABLE_NAME);
 	    		statement.addColumn(
 	    			COLUMN_NAME1,
-	    			DataTypeFactory.getInstance().fromDescription("BIGINT{autoIncrement:true}"),
+	    			DataTypeFactory.getInstance().fromDescription("BIGINT{autoIncrement:true}", database),
 	    			new AutoIncrementConstraint(COLUMN_NAME1, BigInteger.valueOf(2), BigInteger.TEN)
 	    		);
 
@@ -696,7 +696,7 @@ public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTab
 	    		CreateTableStatement statement = new CreateTableStatement(CATALOG_NAME, SCHEMA_NAME, TABLE_NAME);
 	    		statement.addColumn(
 	    			COLUMN_NAME1,
-	    			DataTypeFactory.getInstance().fromDescription("BIGINT{autoIncrement:true}"),
+	    			DataTypeFactory.getInstance().fromDescription("BIGINT{autoIncrement:true}", database),
 	    			new AutoIncrementConstraint(COLUMN_NAME1)
 	    		);
 
@@ -714,7 +714,7 @@ public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTab
 	    		CreateTableStatement statement = new CreateTableStatement(CATALOG_NAME, SCHEMA_NAME, TABLE_NAME);
 	    		statement.addColumn(
 	    			COLUMN_NAME1,
-	    			DataTypeFactory.getInstance().fromDescription("BIGINT{autoIncrement:true}"),
+	    			DataTypeFactory.getInstance().fromDescription("BIGINT{autoIncrement:true}", database),
 	    			new AutoIncrementConstraint(COLUMN_NAME1, BigInteger.ZERO, null)
 	    		);
 
@@ -733,7 +733,7 @@ public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTab
 	    		CreateTableStatement statement = new CreateTableStatement(CATALOG_NAME, SCHEMA_NAME, TABLE_NAME);
 	    		statement.addColumn(
 	    			COLUMN_NAME1,
-	    			DataTypeFactory.getInstance().fromDescription("BIGINT{autoIncrement:true}"),
+	    			DataTypeFactory.getInstance().fromDescription("BIGINT{autoIncrement:true}", database),
 	    			new AutoIncrementConstraint(COLUMN_NAME1, BigInteger.ZERO, BigInteger.TEN)
 	    		);
 
@@ -752,7 +752,7 @@ public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTab
 	    		CreateTableStatement statement = new CreateTableStatement(CATALOG_NAME, SCHEMA_NAME, TABLE_NAME);
 	    		statement.addColumn(
 	    			COLUMN_NAME1,
-	    			DataTypeFactory.getInstance().fromDescription("BIGINT{autoIncrement:true}"),
+	    			DataTypeFactory.getInstance().fromDescription("BIGINT{autoIncrement:true}", database),
 	    			new AutoIncrementConstraint(COLUMN_NAME1)
 	    		);
 
@@ -770,7 +770,7 @@ public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTab
 	    		CreateTableStatement statement = new CreateTableStatement(CATALOG_NAME, SCHEMA_NAME, TABLE_NAME);
 	    		statement.addColumn(
 	    			COLUMN_NAME1,
-	    			DataTypeFactory.getInstance().fromDescription("BIGINT{autoIncrement:true}"),
+	    			DataTypeFactory.getInstance().fromDescription("BIGINT{autoIncrement:true}", database),
 	    			new AutoIncrementConstraint(COLUMN_NAME1, BigInteger.valueOf(2), null)
 	    		);
 
@@ -789,7 +789,7 @@ public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTab
 	    		CreateTableStatement statement = new CreateTableStatement(CATALOG_NAME, SCHEMA_NAME, TABLE_NAME);
 	    		statement.addColumn(
 	    			COLUMN_NAME1,
-	    			DataTypeFactory.getInstance().fromDescription("BIGINT{autoIncrement:true}"),
+	    			DataTypeFactory.getInstance().fromDescription("BIGINT{autoIncrement:true}", database),
 	    			new AutoIncrementConstraint(COLUMN_NAME1, BigInteger.valueOf(2), BigInteger.TEN)
 	    		);
 
@@ -808,7 +808,7 @@ public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTab
 	    		CreateTableStatement statement = new CreateTableStatement(CATALOG_NAME, SCHEMA_NAME, TABLE_NAME);
 	    		statement.addColumn(
 	    			COLUMN_NAME1,
-	    			DataTypeFactory.getInstance().fromDescription("BIGINT{autoIncrement:true}"),
+	    			DataTypeFactory.getInstance().fromDescription("BIGINT{autoIncrement:true}", database),
 	    			new AutoIncrementConstraint(COLUMN_NAME1)
 	    		);
 
@@ -826,7 +826,7 @@ public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTab
 	    		CreateTableStatement statement = new CreateTableStatement(CATALOG_NAME, SCHEMA_NAME, TABLE_NAME);
 	    		statement.addColumn(
 	    			COLUMN_NAME1,
-	    			DataTypeFactory.getInstance().fromDescription("BIGINT{autoIncrement:true}"),
+	    			DataTypeFactory.getInstance().fromDescription("BIGINT{autoIncrement:true}", database),
 	    			new AutoIncrementConstraint(COLUMN_NAME1, BigInteger.valueOf(2), null)
 	    		);
 
@@ -845,7 +845,7 @@ public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTab
 	    		CreateTableStatement statement = new CreateTableStatement(CATALOG_NAME, SCHEMA_NAME, TABLE_NAME);
 	    		statement.addColumn(
 	    			COLUMN_NAME1,
-	    			DataTypeFactory.getInstance().fromDescription("BIGINT{autoIncrement:true}"),
+	    			DataTypeFactory.getInstance().fromDescription("BIGINT{autoIncrement:true}", database),
 	    			new AutoIncrementConstraint(COLUMN_NAME1, BigInteger.valueOf(2), BigInteger.TEN)
 	    		);
 
@@ -864,7 +864,7 @@ public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTab
 	    		CreateTableStatement statement = new CreateTableStatement(CATALOG_NAME, SCHEMA_NAME, TABLE_NAME);
 	    		statement.addColumn(
 	    			COLUMN_NAME1,
-	    			DataTypeFactory.getInstance().fromDescription("BIGINT{autoIncrement:true}"),
+	    			DataTypeFactory.getInstance().fromDescription("BIGINT{autoIncrement:true}", database),
 	    			new AutoIncrementConstraint(COLUMN_NAME1)
 	    		);
 
@@ -882,7 +882,7 @@ public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTab
 	    		CreateTableStatement statement = new CreateTableStatement(CATALOG_NAME, SCHEMA_NAME, TABLE_NAME);
 	    		statement.addColumn(
 	    			COLUMN_NAME1,
-	    			DataTypeFactory.getInstance().fromDescription("BIGINT{autoIncrement:true}"),
+	    			DataTypeFactory.getInstance().fromDescription("BIGINT{autoIncrement:true}", database),
 	    			new AutoIncrementConstraint(COLUMN_NAME1, BigInteger.valueOf(2), null)
 	    		);
 
@@ -901,7 +901,7 @@ public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTab
 	    		CreateTableStatement statement = new CreateTableStatement(CATALOG_NAME, SCHEMA_NAME, TABLE_NAME);
 	    		statement.addColumn(
 	    			COLUMN_NAME1,
-	    			DataTypeFactory.getInstance().fromDescription("BIGINT{autoIncrement:true}"),
+	    			DataTypeFactory.getInstance().fromDescription("BIGINT{autoIncrement:true}", database),
 	    			new AutoIncrementConstraint(COLUMN_NAME1, BigInteger.valueOf(2), BigInteger.TEN)
 	    		);
 

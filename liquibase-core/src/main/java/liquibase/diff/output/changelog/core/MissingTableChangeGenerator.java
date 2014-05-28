@@ -62,7 +62,7 @@ public class MissingTableChangeGenerator implements MissingObjectChangeGenerator
         for (Column column : missingTable.getColumns()) {
             ColumnConfig columnConfig = new ColumnConfig();
             columnConfig.setName(column.getName());
-            columnConfig.setType(DataTypeFactory.getInstance().from(column.getType()).toDatabaseDataType(referenceDatabase).toString());
+            columnConfig.setType(DataTypeFactory.getInstance().from(column.getType(), comparisonDatabase).toDatabaseDataType(referenceDatabase).toString());
 
             if (column.isAutoIncrement()) {
                 columnConfig.setAutoIncrement(true);

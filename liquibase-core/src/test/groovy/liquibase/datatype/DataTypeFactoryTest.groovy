@@ -3,7 +3,8 @@ package liquibase.datatype;
 import liquibase.database.core.H2Database
 import liquibase.datatype.core.BigIntType;
 import liquibase.datatype.core.IntType;
-import liquibase.datatype.core.VarcharType;
+import liquibase.datatype.core.VarcharType
+import liquibase.sdk.database.MockDatabase;
 import org.junit.Test
 import spock.lang.Specification
 import spock.lang.Unroll;
@@ -16,7 +17,7 @@ public class DataTypeFactoryTest extends Specification {
     @Unroll("#featureName: #liquibaseString")
     public void parse() throws Exception {
         when:
-        def parsed = DataTypeFactory.getInstance().fromDescription(liquibaseString)
+        def parsed = DataTypeFactory.getInstance().fromDescription(liquibaseString, new MockDatabase())
         if (databaseString == null) {
             databaseString = liquibaseString
         }

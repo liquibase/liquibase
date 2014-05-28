@@ -2,6 +2,7 @@ package liquibase.dbtest.mssql;
 
 import liquibase.CatalogAndSchema;
 import liquibase.Liquibase;
+import liquibase.database.core.MSSQLDatabase;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.diff.DiffResult;
@@ -100,7 +101,7 @@ public class MssqlIntegrationTest extends AbstractMssqlIntegrationTest {
                     expectedType = "nvarchar";
                 }
 
-                String foundTypeDefinition = DataTypeFactory.getInstance().from(column.getType()).toDatabaseDataType(getDatabase()).toString();
+                String foundTypeDefinition = DataTypeFactory.getInstance().from(column.getType(), new MSSQLDatabase()).toDatabaseDataType(getDatabase()).toString();
                 String foundType = foundTypeDefinition.replaceFirst("\\(.*", "");
                 assertEquals("Wrong data type for " + table.getName() + "." + column.getName(), expectedType.toLowerCase(), foundType.toLowerCase());
 
@@ -134,7 +135,7 @@ public class MssqlIntegrationTest extends AbstractMssqlIntegrationTest {
             for (Column column : table.getColumns()) {
                 String expectedType = column.getName().split("_")[0];
 
-                String foundTypeDefinition = DataTypeFactory.getInstance().from(column.getType()).toDatabaseDataType(getDatabase()).toString();
+                String foundTypeDefinition = DataTypeFactory.getInstance().from(column.getType(), new MSSQLDatabase()).toDatabaseDataType(getDatabase()).toString();
 
                 assertFalse("Parameter found in " + table.getName() + "." + column.getName(), foundTypeDefinition.contains("("));
             }

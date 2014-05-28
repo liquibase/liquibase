@@ -321,7 +321,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
         }
         String typeName = columnInfo.getType().getTypeName();
 
-        LiquibaseDataType liquibaseDataType = DataTypeFactory.getInstance().from(columnInfo.getType());
+        LiquibaseDataType liquibaseDataType = DataTypeFactory.getInstance().from(columnInfo.getType(), database);
 
         String stringVal = (String) val;
         if (stringVal.isEmpty()) {
@@ -339,12 +339,12 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
 
             if (liquibaseDataType instanceof DateType || type == Types.DATE) {
                 if (stringVal.endsWith("'HH24:MI:SS')")) {
-                    maybeDate = DataTypeFactory.getInstance().fromDescription("time").sqlToObject(stringVal, database);
+                    maybeDate = DataTypeFactory.getInstance().fromDescription("time", database).sqlToObject(stringVal, database);
                 } else {
-                    maybeDate = DataTypeFactory.getInstance().fromDescription("date").sqlToObject(stringVal, database);
+                    maybeDate = DataTypeFactory.getInstance().fromDescription("date", database).sqlToObject(stringVal, database);
                 }
             } else if (liquibaseDataType instanceof DateTimeType || type == Types.TIMESTAMP) {
-                maybeDate = DataTypeFactory.getInstance().fromDescription("datetime").sqlToObject(stringVal, database);
+                maybeDate = DataTypeFactory.getInstance().fromDescription("datetime", database).sqlToObject(stringVal, database);
             } else {
                 return new DatabaseFunction(stringVal);
             }
@@ -406,7 +406,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
             if (typeName.equalsIgnoreCase("year")) {
                 return stringVal.trim();
             }
-            return DataTypeFactory.getInstance().fromDescription("date").sqlToObject(stringVal, database);
+            return DataTypeFactory.getInstance().fromDescription("date", database).sqlToObject(stringVal, database);
         } else if ((liquibaseDataType instanceof DecimalType || type == Types.DECIMAL)) {
             if (scanner.hasNextBigDecimal()) {
                 return scanner.nextBigDecimal();
@@ -477,9 +477,9 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
         } else if (type == Types.STRUCT) {
             return new DatabaseFunction(stringVal);
         } else if (liquibaseDataType instanceof TimeType || type == Types.TIME) {
-            return DataTypeFactory.getInstance().fromDescription("time").sqlToObject(stringVal, database);
+            return DataTypeFactory.getInstance().fromDescription("time", database).sqlToObject(stringVal, database);
         } else if (liquibaseDataType instanceof DateTimeType || liquibaseDataType instanceof TimestampType || type == Types.TIMESTAMP) {
-            return DataTypeFactory.getInstance().fromDescription("datetime").sqlToObject(stringVal, database);
+            return DataTypeFactory.getInstance().fromDescription("datetime", database).sqlToObject(stringVal, database);
         } else if ((liquibaseDataType instanceof TinyIntType || type == Types.TINYINT)) {
             if (scanner.hasNextInt()) {
                 return scanner.nextInt();

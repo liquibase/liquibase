@@ -69,7 +69,7 @@ public class MissingColumnChangeGenerator implements MissingObjectChangeGenerato
         if (defaultValue != null) {
             String defaultValueString = null;
             try {
-                defaultValueString = DataTypeFactory.getInstance().from(column.getType()).objectToSql(defaultValue, referenceDatabase);
+                defaultValueString = DataTypeFactory.getInstance().from(column.getType(), comparisonDatabase).objectToSql(defaultValue, referenceDatabase);
             } catch (NullPointerException e) {
                 throw e;
             }
