@@ -1,5 +1,6 @@
 package liquibase.sqlgenerator.core;
 
+import liquibase.CatalogAndSchema;
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.exception.ValidationErrors;
@@ -58,23 +59,27 @@ public class DropPrimaryKeyGenerator extends AbstractSqlGenerator<DropPrimaryKey
 			}
         } else if (database instanceof PostgresDatabase) {
 			if (statement.getConstraintName() == null) {
-				StringBuilder query = new StringBuilder();
-				query.append("create or replace function __liquibase_drop_pk(tableName text) returns void as $$");
+                String schemaName = new CatalogAndSchema(null, statement.getSchemaName()).customize(database).getSchemaName();
+
+                StringBuilder query = new StringBuilder();
+				query.append("create or replace function __liquibase_drop_pk(schemaName text, tableName text) returns void as $$");
 				query.append(" declare");
 				query.append(" pkname text;");
 				query.append(" sql text;");
 				query.append(" begin");
 				query.append(" pkname = c.conname");
-				query.append(" from pg_class r, pg_constraint c");
+				query.append(" from pg_class r, pg_constraint c, pg_catalog.pg_namespace n");
 				query.append(" where r.oid = c.conrelid");
 				query.append(" and contype = 'p'");
+                query.append(" and n.oid = r.relnamespace");
+                query.append(" and nspname ilike schemaName");
 				query.append(" and relname ilike tableName;");
-				query.append(" sql = 'alter table ' || tableName || ' drop constraint ' || pkname;");
+				query.append(" sql = 'alter table ' || schemaName || '.' || tableName || ' drop constraint ' || pkname;");
 				query.append(" execute sql;");
 				query.append(" end;");
 				query.append(" $$ language plpgsql;");
-				query.append(" select __liquibase_drop_pk('").append(statement.getTableName()).append("');");
-				query.append(" drop function __liquibase_drop_pk(tableName text);");
+                query.append(" select __liquibase_drop_pk('").append(schemaName).append("', '").append(statement.getTableName()).append("');");
+				query.append(" drop function __liquibase_drop_pk(schemaName text, tableName text);");
 				sql = query.toString();			
 			} else {
 				sql = "ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " DROP CONSTRAINT " + database.escapeConstraintName(statement.getConstraintName());
