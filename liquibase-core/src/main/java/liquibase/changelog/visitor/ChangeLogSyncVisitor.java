@@ -30,6 +30,8 @@ public class ChangeLogSyncVisitor implements ChangeSetVisitor {
     @Override
     public void visit(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database, Set<ChangeSetFilterResult> filterResults) throws LiquibaseException {
         this.database.markChangeSetExecStatus(changeSet, ChangeSet.ExecType.EXECUTED);
-        listener.markedRan(changeSet, databaseChangeLog, database);
+        if(listener != null) {
+            listener.markedRan(changeSet, databaseChangeLog, database);
+        }
     }
 }
