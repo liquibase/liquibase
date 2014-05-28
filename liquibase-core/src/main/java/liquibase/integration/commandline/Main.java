@@ -191,7 +191,7 @@ public class Main {
 		            ((ValidationFailedException)e.getCause()).printDescriptiveError(System.out);
 	            } else {
 	                System.err.println("Unexpected error running Liquibase: " + message + "\n");
-                    LogFactory.getInstance().getLog().severe(message);
+                    LogFactory.getInstance().getLog().severe(message, e);
 		            System.err.println(generateLogLevelWarningMessage());
 	            }
             } catch (Exception e1) {

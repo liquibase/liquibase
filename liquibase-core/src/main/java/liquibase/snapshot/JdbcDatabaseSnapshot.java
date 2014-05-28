@@ -272,9 +272,16 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                     }
                     CatalogAndSchema catalogAndSchema = new CatalogAndSchema(catalogName, schemaName).customize(database);
 
-                    return extract(databaseMetaData.getColumns(((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema), tableName, columnName));
+                    try {
+                        return extract(databaseMetaData.getColumns(((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema), tableName, columnName));
+                    } catch (SQLException e) {
+                        if (shouldReturnEmptyColumns(e)) { //view with table already dropped. Act like it has no columns.
+                            return new ArrayList<CachedRow>();
+                        } else {
+                            throw e;
+                        }
+                    }
                 }
-
 
                 @Override
 				public List<CachedRow> bulkFetchQuery() throws SQLException, DatabaseException {
@@ -284,8 +291,22 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
                     CatalogAndSchema catalogAndSchema = new CatalogAndSchema(catalogName, schemaName).customize(database);
 
-                    return extract(databaseMetaData.getColumns(((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema), null, null));
+                    try {
+                        return extract(databaseMetaData.getColumns(((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema), null, null));
+                    } catch (SQLException e) {
+                        if (shouldReturnEmptyColumns(e)) {
+                            return new ArrayList<CachedRow>();
+                        } else {
+                            throw e;
+                        }
+                    }
                 }
+
+                protected boolean shouldReturnEmptyColumns(SQLException e) {
+                    return e.getMessage().contains("references invalid table"); //view with table already dropped. Act like it has no columns.
+                }
+
+
 
                 protected List<CachedRow> oracleQuery(boolean bulk) throws DatabaseException, SQLException {
                     CatalogAndSchema catalogAndSchema = new CatalogAndSchema(catalogName, schemaName).customize(database);
