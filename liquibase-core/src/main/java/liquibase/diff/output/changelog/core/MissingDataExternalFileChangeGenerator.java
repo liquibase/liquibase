@@ -58,7 +58,7 @@ public class MissingDataExternalFileChangeGenerator extends MissingDataChangeGen
             String sql = "SELECT * FROM " + referenceDatabase.escapeTableName(table.getSchema().getCatalogName(), table.getSchema().getName(), table.getName());
 
             stmt = ((JdbcConnection) referenceDatabase.getConnection()).createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-            stmt.setFetchSize(1000);
+            stmt.setFetchSize(Integer.MIN_VALUE);
             rs = stmt.executeQuery(sql);
 
             List<String> columnNames = new ArrayList<String>();
@@ -88,6 +88,7 @@ public class MissingDataExternalFileChangeGenerator extends MissingDataChangeGen
             }
             outputFile.writeNext(line);
 
+            int rowNum = 0;
             while (rs.next()) {
                 line = new String[columnNames.size()];
 
@@ -115,6 +116,10 @@ public class MissingDataExternalFileChangeGenerator extends MissingDataChangeGen
                     }
                 }
                 outputFile.writeNext(line);
+                rowNum++;
+                if (rowNum % 5000 == 0) {
+                    outputFile.flush();
+                }
             }
             outputFile.flush();
             outputFile.close();
