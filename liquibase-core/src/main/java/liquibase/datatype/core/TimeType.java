@@ -13,7 +13,7 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 
-@DataTypeInfo(name="time", aliases = {"java.sql.Types.TIME", "java.sql.Time"}, minParameters = 0, maxParameters = 0, priority = LiquibaseDataType.PRIORITY_DEFAULT)
+@DataTypeInfo(name="time", aliases = {"java.sql.Types.TIME", "java.sql.Time", "timetz"}, minParameters = 0, maxParameters = 0, priority = LiquibaseDataType.PRIORITY_DEFAULT)
 public class TimeType  extends LiquibaseDataType {
 
     @Override
@@ -49,6 +49,16 @@ public class TimeType  extends LiquibaseDataType {
         if (database instanceof OracleDatabase) {
             return new DatabaseDataType("DATE");
         }
+
+        if (database instanceof PostgresDatabase) {
+            String rawDefinition = getRawDefinition().toLowerCase();
+            if (rawDefinition.contains("tz") || rawDefinition.contains("with time zone")) {
+                return new DatabaseDataType("TIME WITH TIME ZONE");
+            } else {
+                return new DatabaseDataType("TIME WITHOUT TIME ZONE");
+            }
+        }
+
         return new DatabaseDataType(getName());
     }
 
