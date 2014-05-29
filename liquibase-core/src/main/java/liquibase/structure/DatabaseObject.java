@@ -1,18 +1,15 @@
 package liquibase.structure;
 
-import liquibase.CatalogAndSchema;
-import liquibase.database.Database;
 import liquibase.serializer.LiquibaseSerializable;
 import liquibase.structure.core.Schema;
 
 import java.util.Set;
-import java.util.UUID;
 
 public interface DatabaseObject extends Comparable, LiquibaseSerializable {
 
-    public UUID getSnapshotId();
+    public String getSnapshotId();
 
-    public void setSnapshotId(UUID id);
+    public void setSnapshotId(String id);
 
     DatabaseObject[] getContainingObjects();
 
