@@ -123,6 +123,7 @@ public class CDILiquibase implements Extension {
         try {
             c = dataSource.getConnection();
             liquibase = createLiquibase(c);
+            liquibase.getDatabase();
             liquibase.update(config.getContexts());
             updateSuccessful = true;
         } catch (SQLException e) {
@@ -131,7 +132,9 @@ public class CDILiquibase implements Extension {
             updateSuccessful = false;
             throw ex;
         } finally {
-            if (c != null) {
+            if (liquibase != null && liquibase.getDatabase() != null) {
+                liquibase.getDatabase().close();
+            } else if (c != null) {
                 try {
                     c.rollback();
                     c.close();

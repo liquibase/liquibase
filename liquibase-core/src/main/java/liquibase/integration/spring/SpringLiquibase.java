@@ -187,16 +187,18 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 
 	public String getDatabaseProductName() throws DatabaseException {
 		Connection connection = null;
+        Database database = null;
 		String name = "unknown";
 		try {
 			connection = getDataSource().getConnection();
-			Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(
-					new JdbcConnection(dataSource.getConnection()));
+			database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(connection));
 			name = database.getDatabaseProductName();
 		} catch (SQLException e) {
 			throw new DatabaseException(e);
 		} finally {
-			if (connection != null) {
+            if (database != null) {
+                database.close();
+            } else if (connection != null) {
 				try {
 					if (!connection.getAutoCommit()) {
 						connection.rollback();
