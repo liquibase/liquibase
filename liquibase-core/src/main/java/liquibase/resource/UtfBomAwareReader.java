@@ -28,7 +28,7 @@ public class UtfBomAwareReader extends Reader {
 
 	public UtfBomAwareReader(InputStream in) {
 		pis = new PushbackInputStream(in, 4);
-		this.defaultCharsetName = Charset.defaultCharset().name();
+		this.defaultCharsetName = "UTF-8";
 	}
 	
 	public UtfBomAwareReader(InputStream in, String defaultCharsetName) {
