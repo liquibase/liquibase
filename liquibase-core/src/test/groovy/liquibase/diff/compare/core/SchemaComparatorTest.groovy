@@ -57,21 +57,22 @@ class SchemaComparatorTest extends Specification {
 
 
         where:
-        object1 | object2 | defaultSchema | isSameIfSupportsSchemas | isSameIfNotSupportsSchemas
-        new Schema((String) null, null) | new Schema((String) null, null) | null      | true  | true
-        new Schema((String) null, null) | new Schema((String) null, null) | "MySchem" | true  | true
-        new Schema((String) null, null) | null                            | null      | true  | true
-        new Schema((String) null, null) | null                            | "MySchem" | true  | true
-        new Schema("Cat1", null)        | new Schema("Cat1", null)        | null      | true  | true
-        new Schema("Cat1", null)        | new Schema("Cat2", null)        | null      | false | false
-        new Schema("Cat1", "Schem1")    | new Schema("Cat1", "Schem1")    | null      | true  | true
-        new Schema("Cat1", "Schem1")    | new Schema("Cat1", "Schem2")    | null      | false | true
-        new Schema("Cat1", "Schem1")    | new Schema("Cat1", "Schem1")    | "MySchem" | true  | true
-        new Schema("Cat1", "MySchem")   | new Schema("Cat1", null)        | "MySchem" | true  | true
-        //null matches default schema
-        new Schema("Cat1", null) | new Schema("Cat1", "MySchem") | "MySchem" | true | true
-        //null matches default schema
-        new Schema("Cat1", "schem2") | new Schema("Cat1", null) | "MySchem" | false | true
+        object1                                        | object2                                        | defaultSchema | isSameIfSupportsSchemas | isSameIfNotSupportsSchemas
+        new Schema((String) null, null)                | new Schema((String) null, null)                | null          | true                    | true
+        new Schema((String) null, null)                | new Schema((String) null, null)                | "MySchem"     | true                    | true
+        new Schema((String) null, null)                | null                                           | null          | true                    | true
+        new Schema((String) null, null)                | null                                           | "MySchem"     | true                    | true
+        new Schema("Cat1", null)                       | new Schema("Cat1", null)                       | null          | true                    | true
+        new Schema("Cat1", null)                       | new Schema("Cat2", null)                       | null          | false                   | false
+        new Schema("Cat1", "Schem1")                   | new Schema("Cat1", "Schem1")                   | null          | true                    | true
+        new Schema("Cat1", "Schem1")                   | new Schema("Cat1", "Schem2")                   | null          | false                   | true
+        new Schema("Cat1", "Schem1")                   | new Schema("Cat1", "Schem1")                   | "MySchem"     | true                    | true
+        new Schema("Cat1", "MySchem")                  | new Schema("Cat1", null)                       | "MySchem"     | true                    | true
+        new Schema("Cat1", null)                       | new Schema("Cat1", "MySchem")                  | "MySchem"     | true                    | true
+        new Schema("Cat1", "schem2")                   | new Schema("Cat1", null)                       | "MySchem"     | false                   | true
+        new Schema("Cat1", "SCHEM1")                   | new Schema("Cat1", "schem1")                   | null          | true                    | true
+        new Schema("Cat1", "schema1").setDefault(true) | new Schema("Cat1", "schema2").setDefault(true) | null          | true                    | true
+        new Schema("Cat1", null)                       | new Schema("Cat1", "schema2").setDefault(true) | "schema2"     | true                    | true
+        new Schema("Cat1", "schema2")                  | new Schema("Cat1", null).setDefault(true)      | "schema2"     | true                    | true
     }
-
 }

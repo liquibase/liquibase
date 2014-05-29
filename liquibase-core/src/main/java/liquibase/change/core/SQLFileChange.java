@@ -21,7 +21,7 @@ import liquibase.util.StringUtils;
  * @link{#setResourceAccesssor(ResourceAccessor)} before calling setPath otherwise the
  * file will likely not be found.
  */
-@DatabaseChange(name="sqlFile",
+@DatabaseChange(name = "sqlFile",
         description = "The 'sqlFile' tag allows you to specify any sql statements and have it stored external in a file. It is useful for complex changes that are not supported through LiquiBase's automated refactoring tags such as stored procedures.\n" +
                 "\n" +
                 "The sqlFile refactoring finds the file by searching in the following order:\n" +
@@ -102,11 +102,16 @@ public class SQLFileChange extends AbstractSQLChange {
             return null;
         }
 
+        InputStream inputStream = null;
         try {
-            return StreamUtil.openStream(path, isRelativeToChangelogFile(), getChangeSet(), getResourceAccessor());
+            inputStream = StreamUtil.openStream(path, isRelativeToChangelogFile(), getChangeSet(), getResourceAccessor());
         } catch (IOException e) {
-            throw new IOException("<sqlfile path=" + path + "> -Unable to read file", e);
+            throw new IOException("Unable to read file '" + path + "'", e);
         }
+        if (inputStream == null) {
+            throw new IOException("Unable to read file '" + path + "'");
+        }
+        return inputStream;
     }
 
     @Override

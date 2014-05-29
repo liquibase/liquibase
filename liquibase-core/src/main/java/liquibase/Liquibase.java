@@ -669,8 +669,6 @@ public class Liquibase {
                 log.info("Dropping Database Objects in schema: " + schema);
                 checkLiquibaseTables(false, null, new Contexts());
                 getDatabase().dropDatabaseObjects(schema);
-                checkLiquibaseTables(false, null, new Contexts());
-                log.debug("Objects dropped successfully");
             }
         } catch (DatabaseException e) {
             throw e;

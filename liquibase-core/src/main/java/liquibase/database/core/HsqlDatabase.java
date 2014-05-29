@@ -74,8 +74,26 @@ public class HsqlDatabase extends AbstractJdbcDatabase {
     }
 
     @Override
+    public boolean supportsCatalogs() {
+        try {
+            if (getDatabaseMajorVersion() < 2) {
+                return false;
+            } else {
+                return true;
+            }
+        } catch (DatabaseException e) {
+            return true;
+        }
+    }
+
+    @Override
     protected String getConnectionCatalogName() throws DatabaseException {
-        return "PUBLIC";
+        if (supportsCatalogs()) {
+            return "PUBLIC";
+        } else {
+            return null;
+        }
+
     }
 
     @Override

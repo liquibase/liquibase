@@ -27,12 +27,12 @@ public class AddColumnExecutorTest extends AbstractExecuteTest {
     protected List<? extends SqlStatement> setupStatements(Database database) {
         ArrayList<CreateTableStatement> statements = new ArrayList<CreateTableStatement>();
         CreateTableStatement table = new CreateTableStatement(null, null, TABLE_NAME);
-        table.addColumn("id", DataTypeFactory.getInstance().fromDescription("int"), null, new ColumnConstraint[]{ new NotNullConstraint() });
+        table.addColumn("id", DataTypeFactory.getInstance().fromDescription("int", database), null, new ColumnConstraint[]{ new NotNullConstraint() });
         statements.add(table);
 
         if (database.supportsSchemas()) {
             table = new CreateTableStatement(DatabaseTestContext.ALT_CATALOG, DatabaseTestContext.ALT_SCHEMA, TABLE_NAME);
-            table.addColumn("id", DataTypeFactory.getInstance().fromDescription("int"), null, new ColumnConstraint[]{  new NotNullConstraint()});
+            table.addColumn("id", DataTypeFactory.getInstance().fromDescription("int", database), null, new ColumnConstraint[]{  new NotNullConstraint()});
             statements.add(table);
         }
         return statements;

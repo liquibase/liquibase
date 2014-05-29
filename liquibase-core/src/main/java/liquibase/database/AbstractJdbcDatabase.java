@@ -2,6 +2,7 @@ package liquibase.database;
 
 import liquibase.CatalogAndSchema;
 import liquibase.change.Change;
+import liquibase.change.core.DropTableChange;
 import liquibase.changelog.*;
 import liquibase.configuration.ConfigurationProperty;
 import liquibase.configuration.GlobalConfiguration;
@@ -731,6 +732,9 @@ public abstract class AbstractJdbcDatabase implements Database {
             try {
                 for (ChangeSet changeSet : changeSets) {
                     for (Change change : changeSet.getChanges()) {
+                        if (change instanceof DropTableChange) {
+                            ((DropTableChange) change).setCascadeConstraints(true);
+                        }
                         SqlStatement[] sqlStatements = change.generateStatements(this);
                         for (SqlStatement statement : sqlStatements) {
                             ExecutorService.getInstance().getExecutor(this).execute(statement);

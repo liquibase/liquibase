@@ -25,17 +25,17 @@ public class RenameColumnExecuteTest extends AbstractExecuteTest {
         ArrayList<CreateTableStatement> statements = new ArrayList<CreateTableStatement>();
         CreateTableStatement table = new CreateTableStatement(null, null, TABLE_NAME);
         if (database instanceof MySQLDatabase) {
-            table.addPrimaryKeyColumn("id", DataTypeFactory.getInstance().fromDescription("int"), null, "pk_", null);
+            table.addPrimaryKeyColumn("id", DataTypeFactory.getInstance().fromDescription("int", database), null, "pk_", null);
         } else {
-            table.addColumn("id", DataTypeFactory.getInstance().fromDescription("int"), null, new ColumnConstraint[]{  new NotNullConstraint() });
+            table.addColumn("id", DataTypeFactory.getInstance().fromDescription("int", database), null, new ColumnConstraint[]{  new NotNullConstraint() });
         }
-        table.addColumn(COLUMN_NAME, DataTypeFactory.getInstance().fromDescription("int"));
+        table.addColumn(COLUMN_NAME, DataTypeFactory.getInstance().fromDescription("int", database));
         statements.add(table);
 
         if (database.supportsSchemas()) {
             table = new CreateTableStatement(DatabaseTestContext.ALT_CATALOG, DatabaseTestContext.ALT_SCHEMA, TABLE_NAME);
             table
-                    .addColumn("id", DataTypeFactory.getInstance().fromDescription("int"), null, new ColumnConstraint[]{  new NotNullConstraint() });
+                    .addColumn("id", DataTypeFactory.getInstance().fromDescription("int", database), null, new ColumnConstraint[]{  new NotNullConstraint() });
             statements.add(table);
         }
         return statements;

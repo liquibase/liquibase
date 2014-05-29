@@ -33,7 +33,11 @@ public class DateTimeType extends LiquibaseDataType {
             }
         }
         if (database instanceof InformixDatabase) {
-            return new DatabaseDataType("DATETIME YEAR TO FRACTION", 5);
+            int fraction = 5;
+            if (getParameters().length > 0) {
+                fraction = Integer.valueOf(getParameters()[0].toString());
+            }
+            return new DatabaseDataType("DATETIME YEAR TO FRACTION", fraction);
         }
         if (database instanceof PostgresDatabase) {
             return new DatabaseDataType("TIMESTAMP WITH TIME ZONE");

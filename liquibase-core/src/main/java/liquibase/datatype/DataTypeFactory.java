@@ -83,7 +83,11 @@ public class DataTypeFactory {
         return registry;
     }
 
-    public LiquibaseDataType fromDescription(String dataTypeDefinition) {
+//    public LiquibaseDataType fromDescription(String dataTypeDefinition) {
+//        return fromDescription(dataTypeDefinition, null);
+//    }
+
+    public LiquibaseDataType fromDescription(String dataTypeDefinition, Database database) {
         String dataTypeName = dataTypeDefinition;
         if (dataTypeName.matches(".+\\(.*\\).*")) {
             dataTypeName = dataTypeDefinition.replaceFirst("\\s*\\(.*\\)", "");
@@ -98,7 +102,7 @@ public class DataTypeFactory {
         }
 
         String additionalInfo = null;
-        if (dataTypeName.toLowerCase().startsWith("bit varying")) {
+        if (dataTypeName.toLowerCase().startsWith("bit varying") || dataTypeName.toLowerCase().startsWith("character varying")) {
             //not going to do anything. Special case for postgres in our tests, need to better support handling these types of differences
         } else {
             String[] splitTypeName = dataTypeName.split("\\s+", 2);
@@ -119,11 +123,17 @@ public class DataTypeFactory {
             }
         } else {
 
-            try {
-                liquibaseDataType = classes.iterator().next().newInstance();
-            } catch (Exception e) {
-                throw new UnexpectedLiquibaseException(e);
-            }
+            Iterator<Class<? extends LiquibaseDataType>> iterator = classes.iterator();
+            do {
+                try {
+                    liquibaseDataType = iterator.next().newInstance();
+                } catch (Exception e) {
+                    throw new UnexpectedLiquibaseException(e);
+                }
+            } while ((database != null) && !liquibaseDataType.supports(database) && iterator.hasNext());
+        }
+        if ((database != null) && !liquibaseDataType.supports(database)) {
+            throw new UnexpectedLiquibaseException("Could not find type for "+liquibaseDataType.toString()+" for databaes "+database.getShortName());
         }
         if (liquibaseDataType == null) {
             liquibaseDataType = new UnknownType(dataTypeName);
@@ -185,22 +195,22 @@ public class DataTypeFactory {
 
 
     public LiquibaseDataType fromObject(Object object, Database database) {
-        return fromDescription(object.getClass().getName());
+        return fromDescription(object.getClass().getName(), database);
     }
 
-    public LiquibaseDataType from(DataType type) {
-        return fromDescription(type.toString());
+    public LiquibaseDataType from(DataType type, Database database) {
+        return fromDescription(type.toString(), database);
     }
 
-    public LiquibaseDataType from(DatabaseDataType type) {
-        return fromDescription(type.toString());
+    public LiquibaseDataType from(DatabaseDataType type, Database database) {
+        return fromDescription(type.toString(), database);
     }
 
     public String getTrueBooleanValue(Database database) {
-        return fromDescription("boolean").objectToSql(true, database);
+        return fromDescription("boolean", database).objectToSql(true, database);
     }
 
     public String getFalseBooleanValue(Database database) {
-        return fromDescription("boolean").objectToSql(false, database);
+        return fromDescription("boolean", database).objectToSql(false, database);
     }
 }

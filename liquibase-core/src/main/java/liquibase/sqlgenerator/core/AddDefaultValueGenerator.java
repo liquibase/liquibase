@@ -43,7 +43,7 @@ public class AddDefaultValueGenerator extends AbstractSqlGenerator<AddDefaultVal
 
         String columnDataType = addDefaultValueStatement.getColumnDataType();
         if (columnDataType != null) {
-            LiquibaseDataType dataType = DataTypeFactory.getInstance().fromDescription(columnDataType);
+            LiquibaseDataType dataType = DataTypeFactory.getInstance().fromDescription(columnDataType, database);
             boolean typeMismatch = false;
             if (dataType instanceof BooleanType) {
                 if (!(defaultValue instanceof Boolean)) {

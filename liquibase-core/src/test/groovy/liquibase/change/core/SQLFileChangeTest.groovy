@@ -5,22 +5,25 @@ import liquibase.change.ChangeStatus;
 import liquibase.change.StandardChangeTest;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.ChangeSet
+import liquibase.exception.UnexpectedLiquibaseException
 import liquibase.sdk.database.MockDatabase
+import liquibase.sdk.resource.MockResourceAccessor
 import liquibase.statement.SqlStatement
 
 import static org.junit.Assert.assertEquals
 
 public class SQLFileChangeTest extends StandardChangeTest {
 
-    def "generateStatements returns empty array if file does not exist"() throws Exception {
+    def "generateStatements throws Exception if file does not exist"() throws Exception {
         when:
         def change = new SQLFileChange();
         change.setPath("doesnotexist.sql");
         change.finishInitialization();
 
-        then:
-        change.generateStatements(new MockDatabase()) == []
+        change.generateStatements(new MockDatabase())
 
+        then:
+         thrown(UnexpectedLiquibaseException.class)
     }
 
     def "lines from file parse into one or more statements correctly"() throws Exception {
@@ -93,6 +96,19 @@ public class SQLFileChangeTest extends StandardChangeTest {
 
     def isValidForLoad(Change change) {
         return ((SQLFileChange) change).path != null;
+    }
+
+    def "openSqlStream throws exception if file does not exist"() {
+        when:
+        def change = new SQLFileChange()
+        change.path = "non-existing.sql"
+        change.resourceAccessor = new MockResourceAccessor()
+        change.openSqlStream()
+
+        then:
+        def e = thrown(IOException)
+        e.message == "Unable to read file 'non-existing.sql'"
+
     }
 
 }

@@ -124,13 +124,39 @@ public class Main {
             }
 
             File propertiesFile = new File(main.defaultsFile);
-            File localPropertiesFile = new File(main.defaultsFile.replaceFirst("(\\.[^\\.]+)$", ".local$1"));
+            String localDefaultsPathName = main.defaultsFile.replaceFirst("(\\.[^\\.]+)$", ".local$1");
+            File localPropertiesFile = new File(localDefaultsPathName);
 
             if (localPropertiesFile.exists()) {
-                main.parsePropertiesFile(new FileInputStream(localPropertiesFile));
+                FileInputStream stream = new FileInputStream(localPropertiesFile);
+                try {
+                    main.parsePropertiesFile(stream);
+                } finally {
+                    stream.close();
+                }
+            } else {
+                InputStream resourceAsStream = main.getClass().getClassLoader().getResourceAsStream(localDefaultsPathName);
+                if (resourceAsStream != null) {
+                    try {
+                        main.parsePropertiesFile(resourceAsStream);
+                    } finally {
+                        resourceAsStream.close();
+                    }
+                }
             }
             if (propertiesFile.exists()) {
-                main.parsePropertiesFile(new FileInputStream(propertiesFile));
+                FileInputStream stream = new FileInputStream(propertiesFile);
+                main.parsePropertiesFile(stream);
+            } else {
+                InputStream resourceAsStream = main.getClass().getClassLoader().getResourceAsStream(main.defaultsFile);
+                if (resourceAsStream != null) {
+                    try {
+                        main.parsePropertiesFile(resourceAsStream);
+                    } finally {
+                        resourceAsStream.close();
+                    }
+                }
+
             }
 
             List<String> setupMessages = main.checkSetup();
@@ -165,7 +191,7 @@ public class Main {
 		            ((ValidationFailedException)e.getCause()).printDescriptiveError(System.out);
 	            } else {
 	                System.err.println("Unexpected error running Liquibase: " + message + "\n");
-                    LogFactory.getInstance().getLog().severe(message);
+                    LogFactory.getInstance().getLog().severe(message, e);
 		            System.err.println(generateLogLevelWarningMessage());
 	            }
             } catch (Exception e1) {

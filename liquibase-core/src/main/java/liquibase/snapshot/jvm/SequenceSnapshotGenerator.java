@@ -1,5 +1,6 @@
 package liquibase.snapshot.jvm;
 
+import liquibase.CatalogAndSchema;
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.exception.DatabaseException;
@@ -123,7 +124,7 @@ public class SequenceSnapshotGenerator extends JdbcSnapshotGenerator {
                     "  SYS.SYSSEQUENCES seq, " +
                     "  SYS.SYSSCHEMAS sch " +
                     "WHERE " +
-                    "  sch.SCHEMANAME = '" + schema.getName() + "' AND " +
+                    "  sch.SCHEMANAME = '" + new CatalogAndSchema(null, schema.getName()).customize(database).getSchemaName() + "' AND " +
                     "  sch.SCHEMAID = seq.SCHEMAID";
         } else if (database instanceof FirebirdDatabase) {
             return "SELECT RDB$GENERATOR_NAME AS SEQUENCE_NAME FROM RDB$GENERATORS WHERE RDB$SYSTEM_FLAG IS NULL OR RDB$SYSTEM_FLAG = 0";

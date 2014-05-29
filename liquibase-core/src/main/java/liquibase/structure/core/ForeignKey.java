@@ -132,7 +132,7 @@ public class ForeignKey extends AbstractDatabaseObject{
 
 
     public boolean isDeferrable() {
-        return getAttribute("deferrable", Boolean.class, false);
+        return getAttribute("deferrable", false);
     }
 
     public ForeignKey setDeferrable(boolean deferrable) {
@@ -142,7 +142,7 @@ public class ForeignKey extends AbstractDatabaseObject{
 
 
     public boolean isInitiallyDeferred() {
-        return getAttribute("initiallyDeferred", Boolean.class, false);
+        return getAttribute("initiallyDeferred", false);
     }
 
     public ForeignKey setInitiallyDeferred(boolean initiallyDeferred) {

@@ -51,6 +51,13 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
         return true;
     }
 
+
+
+    @Override
+    public boolean generateRollbackStatementsVolatile(Database database) {
+        return true;
+    }
+
     @DatabaseChangeProperty(mustEqualExisting ="table.catalog", since = "3.0")
     public String getCatalogName() {
         return catalogName;
@@ -138,6 +145,10 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
         CSVReader reader = null;
         try {
             reader = getCSVReader();
+
+            if (reader == null) {
+                throw new UnexpectedLiquibaseException("Unable to read file "+this.getFile());
+            }
 
             String[] headers = reader.readNext();
             if (headers == null) {
@@ -231,7 +242,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
 
     @Override
     public boolean generateStatementsVolatile(Database database) {
-        return false;
+        return true;
     }
 
     public CSVReader getCSVReader() throws IOException {
@@ -240,6 +251,9 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
             throw new UnexpectedLiquibaseException("No file resourceAccessor specified for "+getFile());
         }
         InputStream stream = StreamUtil.singleInputStream(getFile(), resourceAccessor);
+        if (stream == null) {
+            return null;
+        }
         Reader streamReader;
         if (getEncoding() == null) {
             streamReader = new UtfBomAwareReader(stream);

@@ -134,16 +134,16 @@ public abstract class AbstractExecuteTest {
         convertedSql = replaceType("datetime", convertedSql, database);
         convertedSql = replaceType("boolean", convertedSql, database);
 
-        convertedSql = convertedSql.replaceAll("FALSE", DataTypeFactory.getInstance().fromDescription("boolean").objectToSql(false, database));
-        convertedSql = convertedSql.replaceAll("TRUE", DataTypeFactory.getInstance().fromDescription("boolean").objectToSql(true, database));
+        convertedSql = convertedSql.replaceAll("FALSE", DataTypeFactory.getInstance().fromDescription("boolean", database).objectToSql(false, database));
+        convertedSql = convertedSql.replaceAll("TRUE", DataTypeFactory.getInstance().fromDescription("boolean", database).objectToSql(true, database));
         convertedSql = convertedSql.replaceAll("NOW\\(\\)", database.getCurrentDateTimeFunction());
 
         return convertedSql;
     }
 
     private String replaceType(String type, String baseString, Database database) {
-        return baseString.replaceAll(" " + type + " ", " " + DataTypeFactory.getInstance().fromDescription(type).toDatabaseDataType(database).toString() + " ")
-                .replaceAll(" " + type + ",", " " + DataTypeFactory.getInstance().fromDescription(type).toDatabaseDataType(database).toString() + ",");
+        return baseString.replaceAll(" " + type + " ", " " + DataTypeFactory.getInstance().fromDescription(type, database).toDatabaseDataType(database).toString() + " ")
+                .replaceAll(" " + type + ",", " " + DataTypeFactory.getInstance().fromDescription(type, database).toDatabaseDataType(database).toString() + ",");
     }
 
     private String replaceDatabaseClauses(String convertedSql, Database database) {

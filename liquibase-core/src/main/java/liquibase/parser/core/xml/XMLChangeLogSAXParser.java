@@ -5,6 +5,8 @@ import java.io.InputStream;
 
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
+import javax.xml.transform.Source;
+import javax.xml.validation.SchemaFactory;
 
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.exception.ChangeLogParseException;
@@ -45,6 +47,10 @@ public class XMLChangeLogSAXParser extends AbstractChangeLogParser {
     @Override
     public boolean supports(String changeLogFile, ResourceAccessor resourceAccessor) {
         return changeLogFile.toLowerCase().endsWith("xml");
+    }
+
+    protected SAXParserFactory getSaxParserFactory() {
+        return saxParserFactory;
     }
 
     @Override

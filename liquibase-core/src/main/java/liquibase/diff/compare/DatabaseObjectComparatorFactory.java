@@ -6,6 +6,7 @@ import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.servicelocator.ServiceLocator;
 import liquibase.structure.AbstractDatabaseObject;
 import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.Catalog;
 import liquibase.structure.core.Schema;
 import liquibase.util.StringUtils;
 
@@ -107,6 +108,13 @@ public class DatabaseObjectComparatorFactory {
             if (object2 == null) {
                 object2 = new Schema();
             }
+        } else if (object1 instanceof Catalog || object2 instanceof Catalog) {
+                if (object1 == null) {
+                    object1 = new Catalog();
+                }
+                if (object2 == null) {
+                    object2 = new Catalog();
+                }
         }
         if (object1 == null || object2 == null) {
             return false;

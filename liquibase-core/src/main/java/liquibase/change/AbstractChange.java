@@ -275,6 +275,9 @@ public abstract class AbstractChange implements Change {
      */
     @Override
     public boolean generateRollbackStatementsVolatile(Database database) {
+        if (generateStatementsVolatile(database)) {
+            return true;
+        }
         SqlStatement[] statements = generateStatements(database);
         if (statements == null) {
             return false;
@@ -358,7 +361,7 @@ public abstract class AbstractChange implements Change {
         String unsupportedWarning = ChangeFactory.getInstance().getChangeMetaData(this).getName() + " is not supported on " + database.getShortName();
         if (!this.supports(database)) {
             changeValidationErrors.addError(unsupportedWarning);
-        } else {
+        } else if (!generateStatementsVolatile(database)) {
             boolean sawUnsupportedError = false;
             SqlStatement[] statements;
             statements = generateStatements(database);

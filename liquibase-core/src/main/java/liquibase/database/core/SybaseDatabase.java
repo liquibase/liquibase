@@ -287,7 +287,7 @@ public class SybaseDatabase extends AbstractJdbcDatabase {
 
     @Override
     public String escapeIndexName(String catalogName,String schemaName, String indexName) {
-        return super.escapeIndexName(null, null, indexName);
+        return indexName;
     }
 
     @Override

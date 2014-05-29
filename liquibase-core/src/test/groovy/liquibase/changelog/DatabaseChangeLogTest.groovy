@@ -189,4 +189,21 @@ create view sql_view as select * from sql_table;'''
         ((RawSQLChange) rootChangeLog.getChangeSet("com/example/test.sql", "includeAll", "raw").changes[0]).sql == testSql
     }
 
+    def "includeAll executes include in alphabetical order"() {
+        when:
+        def resourceAccessor = new MockResourceAccessor([
+                "com/example/children/file2.sql": "file 2",
+                "com/example/children/file3.sql": "file 3",
+                "com/example/children/file1.sql": "file 1",
+                "com/example/not/fileX.sql": "file X",
+        ])
+        def changeLogFile = new DatabaseChangeLog("com/example/root.xml")
+        changeLogFile.includeAll("com/example/children", false, null, changeLogFile.getStandardChangeLogComparator(), resourceAccessor)
+
+        then:
+        changeLogFile.changeSets.collect { it.filePath } == [ "com/example/children/file1.sql",
+                                                              "com/example/children/file2.sql",
+                                                              "com/example/children/file3.sql" ]
+    }
+
 }
