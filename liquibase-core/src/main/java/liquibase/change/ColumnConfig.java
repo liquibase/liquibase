@@ -676,6 +676,9 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
 
 
         value = parsedNode.getChildValue(null, "value", String.class);
+        if (value == null) {
+            value = StringUtils.trimToNull((String) parsedNode.getValue());
+        }
         try {
             valueNumeric = parsedNode.getChildValue(null, "valueNumeric", Double.class);
         } catch (ParsedNodeException e) {
