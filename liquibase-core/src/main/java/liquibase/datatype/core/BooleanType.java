@@ -21,8 +21,6 @@ import liquibase.statement.DatabaseFunction;
 @DataTypeInfo(name = "boolean", aliases = {"java.sql.Types.BOOLEAN", "java.lang.Boolean", "bit"}, minParameters = 0, maxParameters = 0, priority = LiquibaseDataType.PRIORITY_DEFAULT)
 public class BooleanType extends LiquibaseDataType {
 
-    private String originalDefinition;
-
     @Override
     public DatabaseDataType toDatabaseDataType(Database database) {
         if (database instanceof DB2Database || database instanceof FirebirdDatabase) {
@@ -30,7 +28,7 @@ public class BooleanType extends LiquibaseDataType {
         } else if (database instanceof MSSQLDatabase) {
             return new DatabaseDataType("BIT");
         } else if (database instanceof MySQLDatabase) {
-            if (originalDefinition.toLowerCase().startsWith("bit")) {
+            if (getRawDefinition().toLowerCase().startsWith("bit")) {
                 return new DatabaseDataType("BIT", getParameters());
             }
             return new DatabaseDataType("BIT", 1);
@@ -131,11 +129,6 @@ public class BooleanType extends LiquibaseDataType {
             return "'t'";
         }
         return "TRUE";
-    }
-
-    @Override
-    public void finishInitialization(String originalDefinition) {
-        this.originalDefinition = originalDefinition;
     }
 
     //sqllite
