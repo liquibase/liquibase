@@ -67,7 +67,7 @@ public class ServiceLocator {
         instance = newInstance;
     }
 
-    private PackageScanClassResolver defaultClassLoader(){
+    protected PackageScanClassResolver defaultClassLoader(){
         if (WebSpherePackageScanClassResolver.isWebSphereClassLoader(this.getClass().getClassLoader())) {
             logger.debug("Using WebSphere Specific Class Resolver");
             return new WebSpherePackageScanClassResolver("liquibase/parser/core/xml/dbchangelog-2.0.xsd");
