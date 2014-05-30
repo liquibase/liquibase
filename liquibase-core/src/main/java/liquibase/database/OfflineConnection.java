@@ -1,5 +1,6 @@
 package liquibase.database;
 
+import liquibase.changelog.ChangeLogHistoryService;
 import liquibase.changelog.ChangeLogHistoryServiceFactory;
 import liquibase.changelog.OfflineChangeLogHistoryService;
 import liquibase.exception.DatabaseException;
@@ -9,7 +10,6 @@ import liquibase.util.ObjectUtil;
 import liquibase.util.StringUtils;
 
 import java.io.File;
-import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -19,6 +19,7 @@ public class OfflineConnection implements DatabaseConnection {
     private final String url;
     private final String databaseShortName;
     private final Map<String, String> params = new HashMap<String, String>();
+    private Boolean outputChangeLogSql = false;
     private String changeLogFile = "databasechangelog.csv";
     private Boolean caseSensitive = false;
     private String productName;
@@ -68,6 +69,8 @@ public class OfflineConnection implements DatabaseConnection {
                  this.caseSensitive = Boolean.valueOf(paramEntry.getValue());
             } else if (paramEntry.getKey().equals("changeLogFile")) {
                 this.changeLogFile = paramEntry.getValue();
+            } else if (paramEntry.getKey().equals("outputChangeLogSql")) {
+                this.outputChangeLogSql = Boolean.valueOf(paramEntry.getValue());
             } else {
                 this.databaseParams.put(paramEntry.getKey(), paramEntry.getValue());
             }
@@ -93,7 +96,11 @@ public class OfflineConnection implements DatabaseConnection {
             ((AbstractJdbcDatabase) database).setCaseSensitive(this.caseSensitive);
         }
 
-        ChangeLogHistoryServiceFactory.getInstance().register(new OfflineChangeLogHistoryService(database, new File(changeLogFile), false));
+        ChangeLogHistoryServiceFactory.getInstance().register(createChangeLogHistoryService(database));
+    }
+
+    protected ChangeLogHistoryService createChangeLogHistoryService(Database database) {
+        return new OfflineChangeLogHistoryService(database, new File(changeLogFile), outputChangeLogSql);
     }
 
     @Override
