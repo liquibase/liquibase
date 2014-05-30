@@ -57,7 +57,14 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
         return true;
     }
 
+    public void reset() {
+        this.ranChangeSetList = null;
+    }
+
     public boolean hasDatabaseChangeLogTable() throws DatabaseException {
+        if (ranChangeSetList != null) {
+            return true;
+        }
         try {
             return SnapshotGeneratorFactory.getInstance().hasDatabaseChangeLogTable(getDatabase());
         } catch (LiquibaseException e) {
@@ -232,8 +239,7 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
         ExecutorService.getInstance().getExecutor(getDatabase()).execute(new UpdateChangeSetChecksumStatement(changeSet));
 
         getDatabase().commit();
-        ranChangeSetList = null;
-
+        reset();
     }
 
     @Override
