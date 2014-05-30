@@ -389,7 +389,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
 
     private void displayMojoSettings() {
         if (verbose) {
-            getLog().info("Settings----------------------------");
+            getLog().info("Settings\n----------------------------");
             printSettings("    ");
             getLog().info(MavenUtils.LOG_SEPARATOR);
         }
@@ -472,10 +472,7 @@ public abstract class AbstractLiquibaseMojo extends AbstractMojo {
      *                              specified.
      */
     protected void checkRequiredParametersAreSpecified() throws MojoFailureException {
-        if (driver == null) {
-            throw new MojoFailureException("The driver has not been specified either as a "
-                    + "parameter or in a properties file.");
-        } else if (url == null) {
+        if (url == null) {
             throw new MojoFailureException("The database URL has not been specified either as "
                     + "a parameter or in a properties file.");
         }
