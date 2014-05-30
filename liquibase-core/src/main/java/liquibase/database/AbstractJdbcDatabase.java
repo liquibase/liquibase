@@ -1137,6 +1137,7 @@ public abstract class AbstractJdbcDatabase implements Database {
             }
             connection.close();
         }
+        ExecutorService.getInstance().clearExecutor(this);
     }
 
     @Override
