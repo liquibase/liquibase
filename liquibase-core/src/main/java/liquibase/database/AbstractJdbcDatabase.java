@@ -100,6 +100,9 @@ public abstract class AbstractJdbcDatabase implements Database {
     private boolean outputDefaultSchema = true;
     private boolean outputDefaultCatalog = true;
 
+    private boolean defaultCatalogSet = false;
+    private boolean defaultSchemaSet = false;
+
     public String getName() {
         return toString();
     }
@@ -323,11 +326,17 @@ public abstract class AbstractJdbcDatabase implements Database {
     @Override
     public void setDefaultCatalogName(final String defaultCatalogName) {
         this.defaultCatalogName = correctObjectName(defaultCatalogName, Catalog.class);
+        defaultCatalogSet = defaultCatalogName != null;
+
     }
 
     @Override
     public void setDefaultSchemaName(final String schemaName) {
         this.defaultSchemaName = correctObjectName(schemaName, Schema.class);
+        defaultSchemaSet = schemaName != null;
+        if (!supportsSchemas()) {
+            defaultCatalogSet = schemaName != null;
+        }
     }
 
     /**
@@ -878,15 +887,15 @@ public abstract class AbstractJdbcDatabase implements Database {
             if (catalogName == null && schemaName == null) {
                 return escapeObjectName(objectName, objectType);
             } else if (catalogName == null || !this.supportsCatalogInObjectName(objectType)) {
-                if (isDefaultSchema(catalogName, schemaName) && !getOutputDefaultSchema()) {
+                if (!defaultSchemaSet && isDefaultSchema(catalogName, schemaName) && !getOutputDefaultSchema()) {
                     return escapeObjectName(objectName, objectType);
                 } else {
                     return escapeObjectName(schemaName, Schema.class) + "." + escapeObjectName(objectName, objectType);
                 }
             } else {
-                if (isDefaultSchema(catalogName, schemaName) && !getOutputDefaultSchema() && !getOutputDefaultCatalog()) {
+                if (!defaultSchemaSet && isDefaultSchema(catalogName, schemaName) && !getOutputDefaultSchema() && !getOutputDefaultCatalog()) {
                     return escapeObjectName(objectName, objectType);
-                } else if (isDefaultSchema(catalogName, schemaName) && !getOutputDefaultCatalog()) {
+                } else if (!defaultSchemaSet && isDefaultSchema(catalogName, schemaName) && !getOutputDefaultCatalog()) {
                     return escapeObjectName(schemaName, Schema.class) + "." + escapeObjectName(objectName, objectType);
                 } else {
                     return escapeObjectName(catalogName, Catalog.class) + "." + escapeObjectName(schemaName, Schema.class) + "." + escapeObjectName(objectName, objectType);
@@ -900,7 +909,7 @@ public abstract class AbstractJdbcDatabase implements Database {
                 if (getOutputDefaultCatalog()) {
                     return escapeObjectName(catalogName, Catalog.class) + "." + escapeObjectName(objectName, objectType);
                 } else {
-                    if (isDefaultCatalog(catalogName)) {
+                    if (!defaultCatalogSet && isDefaultCatalog(catalogName)) {
                         return escapeObjectName(objectName, objectType);
                     } else {
                         return escapeObjectName(catalogName, Catalog.class) + "." + escapeObjectName(objectName, objectType);
@@ -911,7 +920,7 @@ public abstract class AbstractJdbcDatabase implements Database {
                     if (getOutputDefaultCatalog()) {
                         return escapeObjectName(schemaName, Catalog.class) + "." + escapeObjectName(objectName, objectType);
                     } else {
-                        if (isDefaultCatalog(schemaName)) {
+                        if (!defaultCatalogSet && isDefaultCatalog(schemaName)) {
                             return escapeObjectName(objectName, objectType);
                         } else {
                             return escapeObjectName(schemaName, Catalog.class) + "." + escapeObjectName(objectName, objectType);
@@ -923,7 +932,7 @@ public abstract class AbstractJdbcDatabase implements Database {
                     if (catalogName == null) {
                         return escapeObjectName(objectName, objectType);
                     } else {
-                        if (isDefaultCatalog(catalogName) && getOutputDefaultCatalog()) {
+                        if (defaultCatalogSet || (isDefaultCatalog(catalogName) && getOutputDefaultCatalog())) {
                             return escapeObjectName(catalogName, Catalog.class) + "." + escapeObjectName(objectName, objectType);
                         } else {
                             return escapeObjectName(objectName, objectType);
