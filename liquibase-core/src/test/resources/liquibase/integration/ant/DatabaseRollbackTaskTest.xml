@@ -89,13 +89,39 @@
     </target>
 
     <target name="testRollbackDatabaseByTagOutputToFile">
-        <db:assertRowCountEquals driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"
-                                 table="users" count="1"/>
         <lb:rollbackDatabase rollbacktag="${tag}" outputfile="${temp.dir}/rollback-tag.sql"
                              changelogfile="${liquibase.test.ant.basedir}/changelog/changelog-with-rollback.xml">
             <lb:database driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"/>
         </lb:rollbackDatabase>
         <au:assertFileExists file="${temp.dir}/rollback-tag.sql"/>
+    </target>
+
+    <target name="testRollbackDatabaseByDate">
+        <db:assertRowCountEquals driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"
+                                 table="users" count="1"/>
+        <lb:rollbackDatabase rollbackdate="2014-05-31"
+                             changelogfile="${liquibase.test.ant.basedir}/changelog/changelog-with-rollback.xml">
+            <lb:database driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"/>
+        </lb:rollbackDatabase>
+        <db:assertRowCountEquals driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"
+                                 table="users" count="0"/>
+    </target>
+
+    <target name="testRollbackDatabaseByDateOutputToFile">
+        <lb:rollbackDatabase rollbackdate="2014-05-31" outputfile="${temp.dir}/rollback-date.sql"
+                             changelogfile="${liquibase.test.ant.basedir}/changelog/changelog-with-rollback.xml">
+            <lb:database driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"/>
+        </lb:rollbackDatabase>
+        <au:assertFileExists file="${temp.dir}/rollback-date.sql"/>
+    </target>
+
+    <target name="testRollbackDatabaseByDateBadDateFormat">
+        <au:expectfailure>
+            <lb:rollbackDatabase rollbackdate="05/31/2014"
+                                 changelogfile="${liquibase.test.ant.basedir}/changelog/changelog-with-rollback.xml">
+                <lb:database driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"/>
+            </lb:rollbackDatabase>
+        </au:expectfailure>
     </target>
 
     <target name="testRollbackDatabaseTooManyRollbackAttributes">

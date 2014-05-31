@@ -4,11 +4,13 @@ import liquibase.Liquibase;
 import liquibase.exception.LiquibaseException;
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.types.resources.FileResource;
+import org.apache.tools.ant.util.DateUtils;
 import org.apache.tools.ant.util.FileUtils;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
+import java.text.ParseException;
 import java.util.Date;
 
 /**
@@ -67,11 +69,15 @@ public class DatabaseRollbackTask extends AbstractChangeLogBasedTask {
         return new Date(rollbackDate.getTime());
     }
 
-    public void setRollbackDate(Date rollbackDate) {
+    public void setRollbackDate(String rollbackDateStr) {
         if(rollbackTag != null || rollbackCount != null) {
             throw new BuildException("Unable to rollback database. A tag or count has already been set.");
         }
-        this.rollbackDate = new Date(rollbackDate.getTime());
+        try {
+             this.rollbackDate = DateUtils.parseIso8601DateTimeOrDate(rollbackDateStr);
+        } catch (ParseException e) {
+            throw new BuildException("Unable to parse rollback date/time string into a Date object. Please make sure the date or date/time is in ISO 8601 format (yyyy-MM-dd or yyyy-MM-ddTHH:mm:ss).", e);
+        }
     }
 
     public String getRollbackTag() {
