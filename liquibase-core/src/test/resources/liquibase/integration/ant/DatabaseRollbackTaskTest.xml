@@ -25,6 +25,11 @@
         <propertyset refid="db-propertyset"/>
     </lb:changelogparameters>
 
+    <tstamp>
+        <format property="today.date" pattern="yyyy-MM-dd"/>
+        <format property="today.badformat" pattern="MM/dd/yyyy"/>
+    </tstamp>
+
     <target name="setUp">
         <sql driver="${jdbc.driver}" url="${jdbc.url}" userid="${db.user}" password="${db.password}" encoding="UTF-8"
              src="${liquibase.test.ant.basedir}/sql/h2-setup.sql"/>
@@ -99,7 +104,7 @@
     <target name="testRollbackDatabaseByDate">
         <db:assertRowCountEquals driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"
                                  table="users" count="1"/>
-        <lb:rollbackDatabase rollbackdate="2014-05-31"
+        <lb:rollbackDatabase rollbackdate="${today.date}"
                              changelogfile="${liquibase.test.ant.basedir}/changelog/changelog-with-rollback.xml">
             <lb:database driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"/>
         </lb:rollbackDatabase>
@@ -108,7 +113,7 @@
     </target>
 
     <target name="testRollbackDatabaseByDateOutputToFile">
-        <lb:rollbackDatabase rollbackdate="2014-05-31" outputfile="${temp.dir}/rollback-date.sql"
+        <lb:rollbackDatabase rollbackdate="${today.date}" outputfile="${temp.dir}/rollback-date.sql"
                              changelogfile="${liquibase.test.ant.basedir}/changelog/changelog-with-rollback.xml">
             <lb:database driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"/>
         </lb:rollbackDatabase>
@@ -117,7 +122,7 @@
 
     <target name="testRollbackDatabaseByDateBadDateFormat">
         <au:expectfailure>
-            <lb:rollbackDatabase rollbackdate="05/31/2014"
+            <lb:rollbackDatabase rollbackdate="${today.badformat}"
                                  changelogfile="${liquibase.test.ant.basedir}/changelog/changelog-with-rollback.xml">
                 <lb:database driver="${jdbc.driver}" url="${jdbc.url}" user="${db.user}" password="${db.password}"/>
             </lb:rollbackDatabase>
