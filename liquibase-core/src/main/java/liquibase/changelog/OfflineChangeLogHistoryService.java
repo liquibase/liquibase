@@ -8,6 +8,7 @@ import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.ExecutorService;
 import liquibase.servicelocator.LiquibaseService;
+import liquibase.statement.core.CreateDatabaseChangeLogTableStatement;
 import liquibase.statement.core.MarkChangeSetRanStatement;
 import liquibase.statement.core.RemoveChangeSetRanStatusStatement;
 import liquibase.statement.core.UpdateChangeSetChecksumStatement;
@@ -48,15 +49,6 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
 
         changeLogFile = changeLogFile.getAbsoluteFile();
         this.changeLogFile = changeLogFile;
-        if (!changeLogFile.exists()) {
-            changeLogFile.getParentFile().mkdirs();
-            try {
-                changeLogFile.createNewFile();
-                writeHeader(changeLogFile);
-            } catch (IOException e) {
-                throw new UnexpectedLiquibaseException(e);
-            }
-        }
     }
 
     @Override
@@ -89,7 +81,14 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
             try {
                 changeLogFile.createNewFile();
                 writeHeader(changeLogFile);
-            } catch (IOException e) {
+
+                if (executeAgainstDatabase) {
+                    ExecutorService.getInstance().getExecutor(getDatabase()).execute(new CreateDatabaseChangeLogTableStatement());
+                    getDatabase().commit();
+                }
+
+
+            } catch (Exception e) {
                 throw new UnexpectedLiquibaseException(e);
             }
         }
