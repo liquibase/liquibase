@@ -1,7 +1,5 @@
 package liquibase.logging.core;
 
-import liquibase.changelog.ChangeSet;
-import liquibase.changelog.DatabaseChangeLog;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.logging.LogLevel;
 import liquibase.util.StringUtils;
@@ -10,16 +8,12 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.text.DateFormat;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 public class DefaultLogger extends AbstractLogger {
 
     private String name = "liquibase";
     private PrintStream err = System.err;
-    private String changeLogName = null;
-    private String changeSetName = null;
 
     public DefaultLogger() {
     }
@@ -75,16 +69,7 @@ public class DefaultLogger extends AbstractLogger {
             return;
         }
 
-        List<String> description = new ArrayList<String>();
-        description.add(name);
-        if (changeLogName != null) {
-            description.add(changeLogName);
-        }
-        if (changeSetName != null) {
-            description.add(changeSetName.replace(changeLogName+"::", ""));
-        }
-
-        err.println(logLevel + " " + DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(new Date()) + ":" + StringUtils.join(description, ": ") + ": " + message);
+        err.println(logLevel + " " + DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(new Date()) + ": " + name + ": " + buildMessage(message));
     }
 
     @Override
@@ -139,19 +124,5 @@ public class DefaultLogger extends AbstractLogger {
             e.printStackTrace(err);
         }
 
-    }
-
-    @Override
-    public void setChangeLog(DatabaseChangeLog databaseChangeLog) {
-      if (databaseChangeLog == null) {
-        changeLogName = null;
-      } else {
-        changeLogName  = databaseChangeLog.getFilePath();
-      }
-    }
-
-    @Override
-    public void setChangeSet(ChangeSet changeSet) {
-      changeSetName = (changeSet == null ? null : changeSet.toString(false));
     }
 }
