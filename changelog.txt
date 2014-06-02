@@ -1,6 +1,114 @@
 Liquibase Core Changelog
 ===========================================
 
+Changes in version 3.2.0 (2014.06.02)
+
+- Support for and/or/not logic in context expressions
+- Better matching of default schemas in database comparisons
+- Improvements to resource accessor logic
+- Improved memory usage when diffing data
+- Improved UTF8 usage
+- Better handling if TIMESTAMP [WITH | WITHOUT] TIME ZONE datatypes in pgsql
+- Standardization of parsing logic across XML/YAML and JSON
+- New command line function: snapshot
+- Start of SDK for easier Liquibase extension development and testing:
+--- Database watch command
+--- Standard "sdk workspace"
+--- Beta version of database vagrant configurations
+- Snapshot listener interface
+
+- [CORE-1742] - Standardized system for managing configuration options in core and extensions
+- [CORE-1751] - More detailed API for returning changeSet statuses
+- [CORE-1783] - Command line option: snapshot
+- [CORE-1815] - Liquibase SDK command to easily watch database
+- [CORE-1821] - Snapshot listener interface
+
+- [CORE-1116] - Allow for both "AND" and "OR" specifications of which contexts to run
+- [CORE-1422] - Support changeset comments in formatted SQL
+- [CORE-1536] - Support specifying the referenceDefaultSchemaName for diff operations
+- [CORE-1635] - Generated changelog missing unique constraints should be output before foreign keys
+- [CORE-1682] - More machine-independent handling of filesystem-located resources
+- [CORE-1695] - Better handling of Postgres timestamp with/without time zone
+- [CORE-1706] - Excessive reading from databasechangelog table
+- [CORE-1726] - Added offline parameter to generate insert databasechangelog statements
+- [CORE-1758] - Add outputDefaultSchema flags to ant
+- [CORE-1776] - System-independent checksums
+- [CORE-1823] - Search for liquibase.properties in classpath in additional to local filesystem
+- [CORE-1874] - Improve XML and other parsers for better extensiblity
+- [CORE-1905] - Yaml parser supports .yml extension as well as .yaml
+
+- [CORE-209] - Double Create Database Lock Table using updateSQL
+- [CORE-421] - NPE in MySqlDatabaseSnapshot during diff operation when "enum" or "timestamp" column was removed from table
+- [CORE-461] - Wrong datatypes for timestamps generated with generateChangeLog
+- [CORE-871] - Unable to use changeSetPath in rollback tag to refer to another change log file
+- [CORE-877] - Bug with column type "TIMESTAMP WITHOUT TIME ZONE"
+- [CORE-976] - GenerateChangeLog with data: java heap space error
+- [CORE-1097] - Liquibase adds a semicolon after a stored proc definition making the stored proc unusable
+- [CORE-1108] - Oracle : Unable to create complex primary key for loadUpdateData
+- [CORE-1284] - Memory leak in ExecutorService
+- [CORE-1563] - dropAll does not delete Sequences on Derby
+- [CORE-1572] - Regression: diff generates full schema instead of changes when using liquibase-hibernate4
+- [CORE-1578] - changeset checksum calculates differently on linux and windows
+- [CORE-1601] - updateSql generates SQL with unexpected linefeeds, breaks SQLPlus
+- [CORE-1642] - Special character issue after upgrade
+- [CORE-1643] - DB2: defaultSchemaName and changelogSchemaName are not respected
+- [CORE-1650] - dropAll doesn't work on Informix
+- [CORE-1668] - defaultSchemaName ignored on createTable in H2
+- [CORE-1673] - Empty default value is not recorded for MySQL
+- [CORE-1676] - Colons in changeSet IDs no longer supported
+- [CORE-1688] - The 'valuum' extension seems not to be working under version 3.0.8 of liquibase
+- [CORE-1701] - Oracle: snapshot of default date/time values come back as to_date functions
+- [CORE-1714] - 2->3.1 migration error
+- [CORE-1715] - 2 -> 3.1 migration, 3.1 errors if there are single quotes in comments
+- [CORE-1718] - foreignKeyConstraintExists precondition fails with constraints on unique keys
+- [CORE-1721] - HsqlDatabase.escapeObjectName(...) ignores QUOTE_ALL_OBJECTS
+- [CORE-1727] - Drop default constraint syntax for DB2 not correct
+- [CORE-1728] - Only sequence name is captured by snapshot process and used in generateChangeLog
+- [CORE-1733] - Data in diffChangeLog coming through as one row per changeSet
+- [CORE-1734] - updateSQL is not including content from sqlFile (at least not when ran from Linux)
+- [CORE-1739] - Liquibase ignores Oracle varchar precision
+- [CORE-1743] - Snapshot VARCHAR(MAX) correctly on sqlserver
+- [CORE-1744] - Derby: UpdateSQL not including creating databasechangeloglock table if needed
+- [CORE-1748] - Maven Plugin does not use outputDefaultCatalog property
+- [CORE-1750] - liquibase-modify-column 3.0 broken with liquibase-core 3.1.1
+- [CORE-1752] - Oracle XML Datatype snapshot containing size
+- [CORE-1753] - HSQLDB 1.8 does not support catalogs
+- [CORE-1754] - Default value functions on Oracle snapshoted as "defaultValue"
+- [CORE-1755] - DefaultValueComputed is quoted for Char, Varchar, Clob, MediumInt and SmallInt types
+- [CORE-1756] - Oracle indexes with functions not returned correctly in generateChangeLog
+- [CORE-1765] - Failed to drop a VIEW pointing on not existing table from another schema
+- [CORE-1767] - Oracle snapshot not capturing all indexes
+- [CORE-1772] - Informix cannot drop constraints
+- [CORE-1774] - Autocommit not restored on close in SpringLiquibase
+- [CORE-1775] - Informix error when creating primary key
+- [CORE-1779] - User Defined Types Come back with Unnecessary Size specifier in diff
+- [CORE-1782] - dropALL fails when tables are referenced by other tables in another schema
+- [CORE-1784] - GenerateChangeLog with objects in multiple schemas returns objects from multiple schemas and empty createTable statements
+- [CORE-1788] - dropAll does not work in not default schemas using postgresql
+- [CORE-1794] - Drop index failing for sybase
+- [CORE-1797] - Autoincrement on type Serial8 fails
+- [CORE-1798] - Invalid type syntax in Informix for Int(10) and SMALLINT(5) and FRACTION(3)
+- [CORE-1799] - Attempted recreation of DATABASECHANGELOG in informix
+- [CORE-1817] - Foreign Key Constraints Built on Unique Constraints are not captured in generateChangeLog
+- [CORE-1818] - SQL Server "smalldatetime" converted to "datetime" on update
+- [CORE-1824] - GUID Default values not quoted correctly in MSSQL
+- [CORE-1828] - sqlFile should fail when file does not exists
+- [CORE-1831] - CREATE/DROP INDEX issue: Sybase ASE 15.7.0
+- [CORE-1834] - generateChangeLog creates DOUBLE(22) instead of double in MySql
+- [CORE-1840] - Liquibase fails when run on a computer that can't connect to the internet
+- [CORE-1843] - includeAll does not alphabetize classpath loaded files
+- [CORE-1853] - Liquibase generates invalid SQL for 'character varying' type
+- [CORE-1856] - Ability for Change classes to verify update and rollback succeeded
+- [CORE-1859] - DataTypeFactory doesn't take database into account
+- [CORE-1861] - MSSQLDatabase.isCaseSensitive() provides a wrong information
+- [CORE-1878] - Maven plugin behaviour different than command line with the same parameters
+- [CORE-1881] - Case sensitivity issue with tableExists precondition
+- [CORE-1893] - type="DATETIME" in changelog is converted to TIMESTAMP in MySql
+- [CORE-1899] - Non-existing referenced sql files doesn't report error
+- [CORE-1901] - DropPrimaryKey - Fails in Postgres
+- [CORE-1906] - Diff between objects in different named default schemas doesn't see them as the same object
+- [CORE-1912] - Unit tests fail due to dependency on system time zone
+
 Changes in version 3.1.1 (2014.01.16)
 Bug Fix release. Most critical bug is CORE-1704
 
