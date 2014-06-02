@@ -82,9 +82,8 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
                 changeLogFile.createNewFile();
                 writeHeader(changeLogFile);
 
-                if (executeAgainstDatabase) {
+                if (isExecuteAgainstDatabase()) {
                     ExecutorService.getInstance().getExecutor(getDatabase()).execute(new CreateDatabaseChangeLogTableStatement());
-                    getDatabase().commit();
                 }
 
 
@@ -123,7 +122,7 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
 
     @Override
     protected void replaceChecksum(final ChangeSet changeSet) throws DatabaseException {
-        if (executeAgainstDatabase) {
+        if (isExecuteAgainstDatabase()) {
             ExecutorService.getInstance().getExecutor(getDatabase()).execute(new UpdateChangeSetChecksumStatement(changeSet));
         }
         replaceChangeSet(changeSet, new ReplaceChangeSetLogic() {
@@ -281,7 +280,7 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
 
     @Override
     public void setExecType(final ChangeSet changeSet, final ChangeSet.ExecType execType) throws DatabaseException {
-        if (executeAgainstDatabase) {
+        if (isExecuteAgainstDatabase()) {
             ExecutorService.getInstance().getExecutor(getDatabase()).execute(new MarkChangeSetRanStatement(changeSet, execType));
             getDatabase().commit();
         }
@@ -305,7 +304,7 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
 
     @Override
     public void removeFromHistory(ChangeSet changeSet) throws DatabaseException {
-        if (executeAgainstDatabase) {
+        if (isExecuteAgainstDatabase()) {
             ExecutorService.getInstance().getExecutor(getDatabase()).execute(new RemoveChangeSetRanStatusStatement(changeSet));
             getDatabase().commit();
         }
