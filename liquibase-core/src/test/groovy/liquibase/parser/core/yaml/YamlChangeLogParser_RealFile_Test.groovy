@@ -532,7 +532,7 @@ public class YamlChangeLogParser_RealFile_Test extends Specification {
         ((AddColumnChange) changeLog.getChangeSet(path, "nvoxland", "different object types for column").changes[1]).columns[3].defaultValueComputed.toString() == "average_size()"
 
         ((AddColumnChange) changeLog.getChangeSet(path, "nvoxland", "different object types for column").changes[1]).columns[4].name == "new_col_datetime"
-        new ISODateFormat().format(new java.sql.Timestamp(((AddColumnChange) changeLog.getChangeSet(path, "nvoxland", "different object types for column").changes[1]).columns[4].defaultValueDate.time)) == "2014-12-01T13:15:33.000"
+        new ISODateFormat().format(new java.sql.Timestamp(((AddColumnChange) changeLog.getChangeSet(path, "nvoxland", "different object types for column").changes[1]).columns[4].defaultValueDate.time)).matches(/2014-12-\d+T\d+:15:33.000/) //timezones shift actual value around
 
         ((AddColumnChange) changeLog.getChangeSet(path, "nvoxland", "different object types for column").changes[1]).columns[5].name == "new_col_seq"
         ((AddColumnChange) changeLog.getChangeSet(path, "nvoxland", "different object types for column").changes[1]).columns[5].defaultValueSequenceNext.toString() == "seq_test"

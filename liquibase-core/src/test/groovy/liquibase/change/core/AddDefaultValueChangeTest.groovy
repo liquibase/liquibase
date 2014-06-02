@@ -9,6 +9,7 @@ import liquibase.statement.DatabaseFunction
 import liquibase.statement.SequenceNextValueFunction
 import liquibase.structure.core.Column
 import liquibase.structure.core.Table
+import liquibase.util.ISODateFormat
 import spock.lang.Unroll
 
 public class AddDefaultValueChangeTest extends StandardChangeTest {
@@ -57,21 +58,21 @@ public class AddDefaultValueChangeTest extends StandardChangeTest {
 
         where:
         snapshotDefaultValue | changeDefaultValue | methodName | expectedResult
-        "car"                                      | "car"                                     | "defaultValue"             | ChangeStatus.Status.complete
-        "car"                                      | "boat"                                    | "defaultValue"             | ChangeStatus.Status.incorrect
-        2                                          | 2                                         | "defaultValueNumeric"      | ChangeStatus.Status.complete
-        2.1                                        | 2.1                                       | "defaultValueNumeric"      | ChangeStatus.Status.complete
-        2.1                                        | 8                                         | "defaultValueNumeric"      | ChangeStatus.Status.incorrect
-        new java.sql.Date(3813898913)              | "1970-02-13"                              | "defaultValueDate"         | ChangeStatus.Status.complete
-        new java.sql.Date(3813898913)              | "1870-02-13"                              | "defaultValueDate"         | ChangeStatus.Status.incorrect
-        new java.sql.Timestamp(3813898913)         | "1970-02-13T21:24:58.913"                 | "defaultValueDate"         | ChangeStatus.Status.complete
-        true                                       | true                                      | "defaultValueBoolean"      | ChangeStatus.Status.complete
-        true                                       | false                                     | "defaultValueBoolean"      | ChangeStatus.Status.incorrect
-        false                                      | false                                     | "defaultValueBoolean"      | ChangeStatus.Status.complete
-        false                                      | true                                      | "defaultValueBoolean"      | ChangeStatus.Status.incorrect
-        new DatabaseFunction("now()")              | new DatabaseFunction("now()")             | "defaultValueComputed"     | ChangeStatus.Status.complete
-        new DatabaseFunction("now()")              | new DatabaseFunction("later()")           | "defaultValueComputed"     | ChangeStatus.Status.incorrect
-        new SequenceNextValueFunction("seq_test")  | new SequenceNextValueFunction("seq_test") | "defaultValueSequenceNext" | ChangeStatus.Status.complete
-        new SequenceNextValueFunction("seq_other") | new SequenceNextValueFunction("seq_test") | "defaultValueSequenceNext" | ChangeStatus.Status.incorrect
+        "car"                                                                                  | "car"                                     | "defaultValue"             | ChangeStatus.Status.complete
+        "car"                                                                                  | "boat"                                    | "defaultValue"             | ChangeStatus.Status.incorrect
+        2                                                                                      | 2                                         | "defaultValueNumeric"      | ChangeStatus.Status.complete
+        2.1                                                                                    | 2.1                                       | "defaultValueNumeric"      | ChangeStatus.Status.complete
+        2.1                                                                                    | 8                                         | "defaultValueNumeric"      | ChangeStatus.Status.incorrect
+        new java.sql.Date(new ISODateFormat().parse("1970-02-13T21:24:58.913").getTime())      | "1970-02-13"                              | "defaultValueDate"         | ChangeStatus.Status.complete
+        new java.sql.Date(new ISODateFormat().parse("1970-02-13T21:24:58.913").getTime())      | "1870-02-13"                              | "defaultValueDate"         | ChangeStatus.Status.incorrect
+        new java.sql.Timestamp(new ISODateFormat().parse("1970-02-13T21:24:58.913").getTime()) | "1970-02-13T21:24:58.913"                 | "defaultValueDate"         | ChangeStatus.Status.complete
+        true                                                                                   | true                                      | "defaultValueBoolean"      | ChangeStatus.Status.complete
+        true                                                                                   | false                                     | "defaultValueBoolean"      | ChangeStatus.Status.incorrect
+        false                                                                                  | false                                     | "defaultValueBoolean"      | ChangeStatus.Status.complete
+        false                                                                                  | true                                      | "defaultValueBoolean"      | ChangeStatus.Status.incorrect
+        new DatabaseFunction("now()")                                                          | new DatabaseFunction("now()")             | "defaultValueComputed"     | ChangeStatus.Status.complete
+        new DatabaseFunction("now()")                                                          | new DatabaseFunction("later()")           | "defaultValueComputed"     | ChangeStatus.Status.incorrect
+        new SequenceNextValueFunction("seq_test")                                              | new SequenceNextValueFunction("seq_test") | "defaultValueSequenceNext" | ChangeStatus.Status.complete
+        new SequenceNextValueFunction("seq_other")                                             | new SequenceNextValueFunction("seq_test") | "defaultValueSequenceNext" | ChangeStatus.Status.incorrect
     }
 }
