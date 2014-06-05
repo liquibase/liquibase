@@ -7,6 +7,7 @@ import liquibase.statement.SequenceNextValueFunction;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Locale;
@@ -67,7 +68,7 @@ public class ObjectUtil {
         } catch (IllegalAccessException e) {
             throw new UnexpectedLiquibaseException(e);
         } catch (IllegalArgumentException e) {
-            throw new UnexpectedLiquibaseException("Cannot call "+method.toString()+" with value of type "+finalValue.getClass().getName());
+            throw new UnexpectedLiquibaseException("Cannot call " + method.toString() + " with value of type " + finalValue.getClass().getName());
         } catch (InvocationTargetException e) {
             throw new UnexpectedLiquibaseException(e);
         }
@@ -109,4 +110,96 @@ public class ObjectUtil {
         return methods;
     }
 
+    public static <T> T convert(Object object, Class<T> targetClass) throws IllegalArgumentException {
+        if (object == null) {
+            return null;
+        }
+        if (object.getClass().isAssignableFrom(targetClass)) {
+            return (T) object;
+        }
+
+        try {
+            if (Number.class.isAssignableFrom(targetClass)) {
+                if (object instanceof Number) {
+                    Number number = (Number) object;
+                    if (targetClass.equals(Byte.class)) {
+                        long value = number.longValue();
+                        if (value < Byte.MIN_VALUE || value > Byte.MAX_VALUE) {
+                            raiseOverflowException(number, targetClass);
+                        }
+                        return (T) (Byte) number.byteValue();
+                    } else if (targetClass.equals(Short.class)) {
+                        long value = number.longValue();
+                        if (value < Short.MIN_VALUE || value > Short.MAX_VALUE) {
+                            raiseOverflowException(number, targetClass);
+                        }
+                        return (T) (Short) number.shortValue();
+                    } else if (targetClass.equals(Integer.class)) {
+                        long value = number.longValue();
+                        if (value < Integer.MIN_VALUE || value > Integer.MAX_VALUE) {
+                            raiseOverflowException(number, targetClass);
+                        }
+                        return (T) (Integer) number.intValue();
+                    } else if (targetClass.equals(Long.class)) {
+                        return (T) (Long) number.longValue();
+                    } else if (targetClass.equals(Float.class)) {
+                        return (T) (Float) number.floatValue();
+                    } else if (targetClass.equals(Double.class)) {
+                        return (T) (Double) number.doubleValue();
+                    } else if (targetClass.equals(BigInteger.class)) {
+                        return (T) BigInteger.valueOf(number.longValue());
+                    } else if (targetClass.equals(BigDecimal.class)) {
+                        // using BigDecimal(String) here, to avoid unpredictability of BigDecimal(double)
+                        // (see BigDecimal javadoc for details)
+                        return (T) new BigDecimal(number.toString());
+                    } else {
+                        return raiseUnknownConversionException(object, targetClass);
+                    }
+                } else if (object instanceof String) {
+                    String string = (String) object;
+                    if (string.contains(".")) {
+                        string = string.replaceFirst("\\.0+$", "");
+                    }
+                    if (string.equals("")) {
+                        string = "0";
+                    }
+                    if (targetClass.equals(Byte.class)) {
+                        return (T) Byte.decode(string);
+                    } else if (targetClass.equals(Short.class)) {
+                        return (T) Short.decode(string);
+                    } else if (targetClass.equals(Integer.class)) {
+                        return (T) Integer.decode(string);
+                    } else if (targetClass.equals(Long.class)) {
+                        return (T) Long.decode(string);
+                    } else if (targetClass.equals(Float.class)) {
+                        return (T) Float.valueOf(string);
+                    } else if (targetClass.equals(Double.class)) {
+                        return (T) Double.valueOf(string);
+                    } else if (targetClass.equals(BigInteger.class)) {
+                        return (T) new BigInteger(string);
+                    } else if (targetClass.equals(BigDecimal.class)) {
+                        return (T) new BigDecimal(string);
+                    } else {
+                        return raiseUnknownConversionException(object, targetClass);
+                    }
+                } else {
+                    return raiseUnknownConversionException(object, targetClass);
+                }
+            } else if (targetClass.isAssignableFrom(Boolean.class)) {
+                String lowerCase = object.toString().toLowerCase();
+                return (T) (Boolean) (lowerCase.equals("true") || lowerCase.equals("t") || lowerCase.equals("1") || lowerCase.equals("1.0"));
+            }
+            return (T) object;
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException(e);
+        }
+    }
+
+    protected static <T> T raiseUnknownConversionException(Object object, Class<T> targetClass) {
+        throw new IllegalArgumentException("Could not convert '" + object + "' of type " + object.getClass().getName() + " to unknown target class " + targetClass.getName());
+    }
+
+    private static void raiseOverflowException(Number number, Class targetClass) {
+        throw new IllegalArgumentException("Could not convert '" + number + "' of type " + number.getClass().getName() + " to target class " + targetClass.getName() + ": overflow");
+    }
 }

@@ -9,6 +9,7 @@ import java.sql.SQLException;
 
 import liquibase.util.JdbcUtils;
 import liquibase.util.NumberUtils;
+import liquibase.util.ObjectUtil;
 
 /**
  * RowMapper implementation that converts a single column into
@@ -211,7 +212,7 @@ class SingleColumnRowMapper implements RowMapper {
         } else if (Number.class.isAssignableFrom(this.requiredType)) {
             if (value instanceof Number) {
                 // Convert original Number to target Number class.
-                return NumberUtils.convertNumberToTargetClass(((Number) value), this.requiredType);
+                return ObjectUtil.convert(((Number) value), this.requiredType);
             } else {
                 // Convert stringified value to target Number class.
                 return NumberUtils.parseNumber(value.toString(), this.requiredType);
