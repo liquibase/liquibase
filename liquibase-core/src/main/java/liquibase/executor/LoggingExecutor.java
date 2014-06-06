@@ -57,16 +57,16 @@ public class LoggingExecutor extends AbstractExecutor implements Executor {
     }
 
     @Override
-    public int update(SqlStatement sql) throws DatabaseException {
+    public UpdateResult update(SqlStatement sql) throws DatabaseException {
         if (sql instanceof LockDatabaseChangeLogStatement) {
-            return 1;
+            return new UpdateResult(1);
         } else if (sql instanceof UnlockDatabaseChangeLogStatement) {
-            return 1;
+            return new UpdateResult(1);
         }
 
         outputStatement(sql);
 
-        return 0;
+        return new UpdateResult(0);
     }
 
     @Override
@@ -75,9 +75,9 @@ public class LoggingExecutor extends AbstractExecutor implements Executor {
     }
 
     @Override
-    public int update(SqlStatement sql, List<SqlVisitor> sqlVisitors) throws DatabaseException {
+    public UpdateResult update(SqlStatement sql, List<SqlVisitor> sqlVisitors) throws DatabaseException {
         outputStatement(sql, sqlVisitors);
-        return 0;
+        return new UpdateResult(0);
     }
 
     @Override

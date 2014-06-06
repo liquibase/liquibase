@@ -8,6 +8,7 @@ import liquibase.exception.DatabaseException;
 import liquibase.executor.AbstractExecutor;
 import liquibase.executor.Executor;
 import liquibase.executor.QueryResult;
+import liquibase.executor.UpdateResult;
 import liquibase.logging.LogFactory;
 import liquibase.logging.Logger;
 import liquibase.sql.UnparsedSql;
@@ -163,34 +164,30 @@ public class JdbcExecutor extends AbstractExecutor implements Executor {
 
 
     @Override
-    public int update(final SqlStatement sql) throws DatabaseException {
-        return update(sql, new ArrayList());
+    public UpdateResult update(final SqlStatement sql) throws DatabaseException {
+        return update(sql, null);
     }
 
     @Override
-    public int update(final SqlStatement sql, final List<SqlVisitor> sqlVisitors) throws DatabaseException {
+    public UpdateResult update(SqlStatement sql, List<SqlVisitor> sqlVisitors) throws DatabaseException {
         if (sql instanceof CallableSqlStatement) {
             throw new DatabaseException("Direct update using CallableSqlStatement not currently implemented");
         }
 
-        class UpdateStatementCallback implements StatementCallback {
-            @Override
-            public Object doInStatement(Statement stmt) throws SQLException, DatabaseException {
-                String[] sqlToExecute = applyVisitors(sql, sqlVisitors);
-                if (sqlToExecute.length != 1) {
-                    throw new DatabaseException("Cannot call update on Statement that returns back multiple Sql objects");
-                }
-                log.debug("Executing UPDATE database command: "+sqlToExecute[0]);
-                return stmt.executeUpdate(sqlToExecute[0]);
+        Statement stmt = null;
+        try {
+            stmt = ((JdbcConnection) database.getConnection()).getUnderlyingConnection().createStatement();
+            String[] sqlToExecute = applyVisitors(sql, sqlVisitors);
+            if (sqlToExecute.length != 1) {
+                throw new DatabaseException("Cannot call update on Statement that returns back multiple Sql objects");
             }
-
-
-            @Override
-            public SqlStatement getStatement() {
-                return sql;
-            }
+            log.debug("Executing UPDATE database command: "+sqlToExecute[0]);
+            return new UpdateResult(stmt.executeUpdate(sqlToExecute[0]));
+        } catch (SQLException e) {
+            throw new DatabaseException(e);
+        } finally {
+            JdbcUtils.closeStatement(stmt);
         }
-        return (Integer) execute(new UpdateStatementCallback(), sqlVisitors);
     }
 
     @Override

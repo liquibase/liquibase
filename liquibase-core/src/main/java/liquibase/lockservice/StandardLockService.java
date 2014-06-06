@@ -193,7 +193,7 @@ public class StandardLockService implements LockService {
             } else {
 
                 executor.comment("Lock Database");
-                int rowsUpdated = executor.update(new LockDatabaseChangeLogStatement());
+                long rowsUpdated = executor.update(new LockDatabaseChangeLogStatement()).getRowsUpdated();
                 if (rowsUpdated > 1) {
                     throw new LockException("Did not update change log lock correctly");
                 }
@@ -229,7 +229,7 @@ public class StandardLockService implements LockService {
             if (this.hasDatabaseChangeLogLockTable()) {
                 executor.comment("Release Database Lock");
                 database.rollback();
-                int updatedRows = executor.update(new UnlockDatabaseChangeLogStatement());
+                long updatedRows = executor.update(new UnlockDatabaseChangeLogStatement()).getRowsUpdated();
                 if (updatedRows != 1) {
                     throw new LockException("Did not update change log lock correctly.\n\n" + updatedRows + " rows were updated instead of the expected 1 row using executor " + executor.getClass().getName()+" there are "+executor.query(new RawSqlStatement("select count(*) from "+database.getDatabaseChangeLogLockTableName())).toObject(0)+" rows in the table");
                 }
