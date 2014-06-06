@@ -1,6 +1,8 @@
 package liquibase.database;
 
 import liquibase.exception.DatabaseException;
+import liquibase.executor.ExecutionOptions;
+import liquibase.executor.QueryResult;
 
 /**
  * A liquibase abstraction over the normal Connection that is available in

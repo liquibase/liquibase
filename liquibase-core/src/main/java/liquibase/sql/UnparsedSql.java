@@ -4,7 +4,6 @@ import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.OfflineConnection;
 import liquibase.database.core.MSSQLDatabase;
-import liquibase.database.core.OracleDatabase;
 import liquibase.database.core.SybaseASADatabase;
 import liquibase.database.core.SybaseDatabase;
 import liquibase.database.jvm.JdbcConnection;
@@ -13,17 +12,11 @@ import liquibase.executor.ExecuteResult;
 import liquibase.executor.ExecutionOptions;
 import liquibase.executor.QueryResult;
 import liquibase.executor.UpdateResult;
-import liquibase.logging.LogFactory;
 import liquibase.sql.visitor.SqlVisitor;
 import liquibase.structure.DatabaseObject;
-import liquibase.util.JdbcUtils;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
 
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.*;
 
 public class UnparsedSql implements Sql {
@@ -106,40 +99,48 @@ public class UnparsedSql implements Sql {
     public QueryResult query(ExecutionOptions options) throws DatabaseException {
         Database database = options.getRuntimeEnvironment().getTargetDatabase();
         DatabaseConnection conn = database.getConnection();
+
         if (conn instanceof OfflineConnection) {
             throw new DatabaseException("Cannot execute commands against an offline database");
+        } else if (conn instanceof JdbcConnection) {
+            return ((JdbcConnection) conn).query(toFinalSql(options));
+        } else {
+            throw new DatabaseException("Cannot execute SQL against a "+conn.getClass().getName()+" connection");
         }
+    }
 
-        Statement stmt = null;
-        ResultSet rs = null;
-        try {
-            String finalSql = toFinalSql(options);
+    @Override
+    public ExecuteResult execute(ExecutionOptions options) throws DatabaseException {
+//TODO        if(sql instanceof ExecutablePreparedStatement) {
+//            ((ExecutablePreparedStatement) sql).execute(new PreparedStatementFactory((JdbcConnection)database.getConnection()));
+//            return new ExecuteResult();
+//        }
 
-            LogFactory.getInstance().getLog().debug("Executing QUERY database command: " + finalSql);
+        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+        DatabaseConnection conn = database.getConnection();
+        if (conn instanceof OfflineConnection) {
+            throw new DatabaseException("Cannot execute commands against an offline database");
+        } else if (conn instanceof JdbcConnection) {
+            return ((JdbcConnection) conn).execute(toFinalSql(options));
+        } else {
+            throw new DatabaseException("Cannot execute SQL against a " + conn.getClass().getName() + " connection");
+        }
+    }
 
-            stmt = ((JdbcConnection) database.getConnection()).getUnderlyingConnection().createStatement();
-            rs = stmt.executeQuery(finalSql);
+    @Override
+    public UpdateResult update(ExecutionOptions options) throws DatabaseException {
+//        if (sql instanceof CallableSqlStatement) {
+//            throw new DatabaseException("Direct update using CallableSqlStatement not currently implemented");
+//        }
 
-            List<Map<String, Object>> rows = new ArrayList<Map<String, Object>>();
-            while (rs.next()) {
-                Map<String, Object> row = new HashMap<String, Object>();
-                ResultSetMetaData metaData = rs.getMetaData();
-                int columnCount = metaData.getColumnCount();
-
-                for (int i = 1; i <= columnCount; i++) {
-                    String key = metaData.getColumnLabel(i).toUpperCase();
-                    Object obj = JdbcUtils.getResultSetValue(rs, i);
-                    row.put(key, obj);
-                }
-                rows.add(row);
-            }
-
-            return new QueryResult(rows);
-        } catch (SQLException e) {
-            throw new DatabaseException(e);
-        } finally {
-            JdbcUtils.closeStatement(stmt);
-            JdbcUtils.closeResultSet(rs);
+        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+        DatabaseConnection conn = database.getConnection();
+        if (conn instanceof OfflineConnection) {
+            throw new DatabaseException("Cannot execute commands against an offline database");
+        } else if (conn instanceof JdbcConnection) {
+            return ((JdbcConnection) conn).update(toFinalSql(options));
+        } else {
+            throw new DatabaseException("Cannot execute SQL against a " + conn.getClass().getName() + " connection");
         }
     }
 
@@ -155,65 +156,5 @@ public class UnparsedSql implements Sql {
         return finalSql;
     }
 
-    @Override
-    public ExecuteResult execute(ExecutionOptions options) throws DatabaseException {
-//TODO        if(sql instanceof ExecutablePreparedStatement) {
-//            ((ExecutablePreparedStatement) sql).execute(new PreparedStatementFactory((JdbcConnection)database.getConnection()));
-//            return new ExecuteResult();
-//        }
 
-        Database database = options.getRuntimeEnvironment().getTargetDatabase();
-        Statement stmt = null;
-        try {
-            DatabaseConnection conn = database.getConnection();
-            if (conn instanceof OfflineConnection) {
-                throw new DatabaseException("Cannot execute commands against an offline database");
-            }
-            stmt = ((JdbcConnection) conn).getUnderlyingConnection().createStatement();
-
-            String finalSql = toFinalSql(options);
-
-            if (database instanceof OracleDatabase) {
-                finalSql = finalSql.replaceFirst("/\\s*/\\s*$", ""); //remove duplicated /'s
-            }
-
-            LogFactory.getInstance().getLog().debug("Executing EXECUTE database command: " + finalSql);
-            if (finalSql.contains("?")) {
-                stmt.setEscapeProcessing(false);
-            }
-            stmt.execute(finalSql);
-
-            return new ExecuteResult();
-        } catch (SQLException e) {
-            throw new DatabaseException(e);
-        } finally {
-            JdbcUtils.closeStatement(stmt);
-        }
-    }
-
-    @Override
-    public UpdateResult update(ExecutionOptions options) throws DatabaseException {
-//        if (sql instanceof CallableSqlStatement) {
-//            throw new DatabaseException("Direct update using CallableSqlStatement not currently implemented");
-//        }
-
-        Database database = options.getRuntimeEnvironment().getTargetDatabase();
-        DatabaseConnection conn = database.getConnection();
-        if (conn instanceof OfflineConnection) {
-            throw new DatabaseException("Cannot execute commands against an offline database");
-        }
-
-        Statement stmt = null;
-        try {
-            stmt = ((JdbcConnection) database.getConnection()).getUnderlyingConnection().createStatement();
-            String finalSql = toFinalSql(options);
-
-            LogFactory.getInstance().getLog().debug("Executing UPDATE database command: " + finalSql);
-            return new UpdateResult(stmt.executeUpdate(finalSql));
-        } catch (SQLException e) {
-            throw new DatabaseException(e);
-        } finally {
-            JdbcUtils.closeStatement(stmt);
-        }
-    }
 }
