@@ -27,7 +27,7 @@ import java.util.Map;
  * <b>Note: This class is currently intended for Liquibase-internal use only and may change without notice in the future</b>
  */
 @SuppressWarnings({"unchecked"})
-public class JdbcExecutor extends AbstractExecutor implements Executor {
+public class JdbcExecutor extends AbstractExecutor {
 
     private Logger log = LogFactory.getLogger();
 
@@ -37,16 +37,11 @@ public class JdbcExecutor extends AbstractExecutor implements Executor {
     }
 
     @Override
-    public QueryResult query(SqlStatement sql) throws DatabaseException {
-        return query(sql, null);
-    }
-
-    @Override
-    public QueryResult query(SqlStatement sql, List<SqlVisitor> sqlVisitors) throws DatabaseException {
+    public QueryResult query(SqlStatement sql, ExecutionOptions options) throws DatabaseException {
         Statement stmt = null;
         ResultSet rs = null;
         try {
-            String[] sqlToExecute = applyVisitors(sql, sqlVisitors);
+            String[] sqlToExecute = applyVisitors(sql, options.getSqlVisitors());
 
             if (sqlToExecute.length != 1) {
                 throw new DatabaseException("Can only query with statements that return one sql statement");
@@ -79,14 +74,9 @@ public class JdbcExecutor extends AbstractExecutor implements Executor {
         }
     }
 
-    @Override
-    public ExecuteResult execute(SqlStatement sql) throws DatabaseException {
-        return execute(sql, null);
-    }
-
 
     @Override
-    public ExecuteResult execute(final SqlStatement sql, final List<SqlVisitor> sqlVisitors) throws DatabaseException {
+    public ExecuteResult execute(SqlStatement sql, ExecutionOptions options) throws DatabaseException {
         if(sql instanceof ExecutablePreparedStatement) {
             ((ExecutablePreparedStatement) sql).execute(new PreparedStatementFactory((JdbcConnection)database.getConnection()));
             return new ExecuteResult();
@@ -100,7 +90,7 @@ public class JdbcExecutor extends AbstractExecutor implements Executor {
             }
             stmt = ((JdbcConnection) conn).getUnderlyingConnection().createStatement();
 
-            for (String statement : applyVisitors(sql, sqlVisitors)) {
+            for (String statement : applyVisitors(sql, options.getSqlVisitors())) {
                 if (database instanceof OracleDatabase) {
                     statement = statement.replaceFirst("/\\s*/\\s*$", ""); //remove duplicated /'s
                 }
@@ -121,12 +111,7 @@ public class JdbcExecutor extends AbstractExecutor implements Executor {
 
 
     @Override
-    public UpdateResult update(final SqlStatement sql) throws DatabaseException {
-        return update(sql, null);
-    }
-
-    @Override
-    public UpdateResult update(SqlStatement sql, List<SqlVisitor> sqlVisitors) throws DatabaseException {
+    public UpdateResult update(SqlStatement sql, ExecutionOptions options) throws DatabaseException {
         if (sql instanceof CallableSqlStatement) {
             throw new DatabaseException("Direct update using CallableSqlStatement not currently implemented");
         }
@@ -134,7 +119,7 @@ public class JdbcExecutor extends AbstractExecutor implements Executor {
         Statement stmt = null;
         try {
             stmt = ((JdbcConnection) database.getConnection()).getUnderlyingConnection().createStatement();
-            String[] sqlToExecute = applyVisitors(sql, sqlVisitors);
+            String[] sqlToExecute = applyVisitors(sql, options.getSqlVisitors());
             if (sqlToExecute.length != 1) {
                 throw new DatabaseException("Cannot call update on Statement that returns back multiple Sql objects");
             }
@@ -151,7 +136,4 @@ public class JdbcExecutor extends AbstractExecutor implements Executor {
     public void comment(String message) throws DatabaseException {
         LogFactory.getLogger().debug(message);
     }
-
-
-
 }

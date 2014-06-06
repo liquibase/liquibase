@@ -11,12 +11,47 @@ import liquibase.statement.SqlStatement;
 import java.util.List;
 import java.util.Set;
 
-public abstract class AbstractExecutor {
+/**
+ * Convenience base class for Executor implementations.
+ */
+public abstract class AbstractExecutor implements Executor {
     protected Database database;
 
     public void setDatabase(Database database) {
         this.database = database;
     }
+
+    /**
+     * Default implementation delegates to {@link #query(liquibase.statement.SqlStatement, ExecutionOptions)}
+     */
+    @Override
+    public QueryResult query(SqlStatement sql) throws DatabaseException {
+        return query(sql, createDefaultExecutionOptions());
+    }
+
+    /**
+     * Default implementation delegates to {@link #execute(liquibase.statement.SqlStatement, ExecutionOptions)}
+     */
+    @Override
+    public ExecuteResult execute(SqlStatement sql) throws DatabaseException {
+        return execute(sql, createDefaultExecutionOptions());
+    }
+
+    /**
+     * Default implementation delegates to {@link #update(liquibase.statement.SqlStatement, ExecutionOptions)}
+     */
+    @Override
+    public UpdateResult update(SqlStatement sql) throws DatabaseException {
+        return update(sql, createDefaultExecutionOptions());
+    }
+
+    /**
+     * Create ExecutionOptions to use in single-parameter execute/update/query calls.
+     */
+    protected ExecutionOptions createDefaultExecutionOptions() {
+        return new ExecutionOptions();
+    }
+
 
     protected String[] applyVisitors(SqlStatement statement, List<SqlVisitor> sqlVisitors) throws DatabaseException {
         Sql[] sql = SqlGeneratorFactory.getInstance().generateSql(statement, database);

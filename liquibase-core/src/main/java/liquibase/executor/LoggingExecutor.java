@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.Map;
 
 @LiquibaseService(skip = true)
-public class LoggingExecutor extends AbstractExecutor implements Executor {
+public class LoggingExecutor extends AbstractExecutor {
 
     private Writer output;
     private Executor delegatedReadExecutor;
@@ -36,33 +36,21 @@ public class LoggingExecutor extends AbstractExecutor implements Executor {
     }
 
     @Override
-    public ExecuteResult execute(SqlStatement sql) throws DatabaseException {
-        outputStatement(sql);
+    public ExecuteResult execute(SqlStatement sql, ExecutionOptions options) throws DatabaseException {
+        outputStatement(sql, options);
         return new ExecuteResult();
     }
 
     @Override
-    public UpdateResult update(SqlStatement sql) throws DatabaseException {
+    public UpdateResult update(SqlStatement sql, ExecutionOptions options) throws DatabaseException {
         if (sql instanceof LockDatabaseChangeLogStatement) {
             return new UpdateResult(1);
         } else if (sql instanceof UnlockDatabaseChangeLogStatement) {
             return new UpdateResult(1);
         }
 
-        outputStatement(sql);
+        outputStatement(sql, options);
 
-        return new UpdateResult(0);
-    }
-
-    @Override
-    public ExecuteResult execute(SqlStatement sql, List<SqlVisitor> sqlVisitors) throws DatabaseException {
-        outputStatement(sql, sqlVisitors);
-        return new ExecuteResult();
-    }
-
-    @Override
-    public UpdateResult update(SqlStatement sql, List<SqlVisitor> sqlVisitors) throws DatabaseException {
-        outputStatement(sql, sqlVisitors);
         return new UpdateResult(0);
     }
 
@@ -78,16 +66,12 @@ public class LoggingExecutor extends AbstractExecutor implements Executor {
         }
     }
 
-    private void outputStatement(SqlStatement sql) throws DatabaseException {
-        outputStatement(sql, new ArrayList<SqlVisitor>());
-    }
-
-    private void outputStatement(SqlStatement sql, List<SqlVisitor> sqlVisitors) throws DatabaseException {
+    protected void outputStatement(SqlStatement sql, ExecutionOptions options) throws DatabaseException {
         try {
             if (SqlGeneratorFactory.getInstance().generateStatementsVolatile(sql, database)) {
                 throw new DatabaseException(sql.getClass().getSimpleName()+" requires access to up to date database metadata which is not available in SQL output mode");
             }
-            for (String statement : applyVisitors(sql, sqlVisitors)) {
+            for (String statement : applyVisitors(sql, options.getSqlVisitors())) {
                 if (statement == null) {
                     continue;
                 }
@@ -118,17 +102,12 @@ public class LoggingExecutor extends AbstractExecutor implements Executor {
     }
 
     @Override
-    public QueryResult query(SqlStatement sql) throws DatabaseException {
-        return query(sql, null);
-    }
-
-    @Override
-    public QueryResult query(SqlStatement sql, List<SqlVisitor> sqlVisitors) throws DatabaseException {
+    public QueryResult query(SqlStatement sql, ExecutionOptions options) throws DatabaseException {
         if (sql instanceof SelectFromDatabaseChangeLogLockStatement) {
             return new QueryResult(Boolean.FALSE);
         }
         try {
-            return delegatedReadExecutor.query(sql, sqlVisitors);
+            return delegatedReadExecutor.query(sql, options);
         } catch (DatabaseException e) {
             if (sql instanceof GetNextChangeSetSequenceValueStatement) { //table probably does not exist
                 return new QueryResult(0);

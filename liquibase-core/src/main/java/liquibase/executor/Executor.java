@@ -1,30 +1,45 @@
 package liquibase.executor;
 
-import liquibase.change.Change;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
-import liquibase.sql.visitor.SqlVisitor;
-import liquibase.statement.CallableSqlStatement;
 import liquibase.statement.SqlStatement;
 
-import java.util.List;
-import java.util.Map;
-
+/**
+ * Interface for interacting with the database. Use this class rather than
+ */
 public interface Executor {
 
     void setDatabase(Database database);
 
+    /**
+     * Query the database using default ExecutionOptions.
+     */
     QueryResult query(SqlStatement sql) throws DatabaseException;
 
-    QueryResult query(SqlStatement sql, List<SqlVisitor> sqlVisitors) throws DatabaseException;
+    /**
+     * Perform a query operation against the database
+     */
+    QueryResult query(SqlStatement sql, ExecutionOptions options) throws DatabaseException;
 
+    /**
+     * Execute statement against the database using default ExecutionOptions.
+     */
     ExecuteResult execute(SqlStatement sql) throws DatabaseException;
 
-    ExecuteResult execute(SqlStatement sql, List<SqlVisitor> sqlVisitors) throws DatabaseException;
+    /**
+     * Perform an execute operation against the database
+     */
+    ExecuteResult execute(SqlStatement sql, ExecutionOptions options) throws DatabaseException;
 
+    /**
+     * Update using default ExecutionOptions.
+     */
     UpdateResult update(SqlStatement sql) throws DatabaseException;
 
-    UpdateResult update(SqlStatement sql, List<SqlVisitor> sqlVisitors) throws DatabaseException;
+    /**
+     * Update data in the database
+     */
+    UpdateResult update(SqlStatement sql, ExecutionOptions options) throws DatabaseException;
 
     /**
      * Adds a comment to the database.  Currently does nothing but is over-ridden in the output JDBC template

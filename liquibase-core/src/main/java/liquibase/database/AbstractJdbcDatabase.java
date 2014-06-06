@@ -16,6 +16,7 @@ import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.changelog.DiffToChangeLog;
 import liquibase.exception.*;
+import liquibase.executor.ExecutionOptions;
 import liquibase.executor.ExecutorService;
 import liquibase.lockservice.LockServiceFactory;
 import liquibase.logging.LogFactory;
@@ -1202,7 +1203,7 @@ public abstract class AbstractJdbcDatabase implements Database {
                 continue;
             }
             LogFactory.getLogger().debug("Executing Statement: " + statement.getClass().getName());
-            ExecutorService.getInstance().getExecutor(this).execute(statement, sqlVisitors);
+            ExecutorService.getInstance().getExecutor(this).execute(statement, new ExecutionOptions(sqlVisitors));
         }
     }
 

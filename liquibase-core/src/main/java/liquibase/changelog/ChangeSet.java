@@ -12,6 +12,7 @@ import liquibase.database.Database;
 import liquibase.database.DatabaseList;
 import liquibase.database.ObjectQuotingStrategy;
 import liquibase.exception.*;
+import liquibase.executor.ExecutionOptions;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.logging.LogFactory;
@@ -590,7 +591,7 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
                     }
                     for (SqlStatement statement : statements) {
                         try {
-                            executor.execute(statement, sqlVisitors);
+                            executor.execute(statement, new ExecutionOptions(sqlVisitors));
                         } catch (DatabaseException e) {
                             throw new RollbackFailedException("Error executing custom SQL [" + statement + "]", e);
                         }
