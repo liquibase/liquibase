@@ -14,6 +14,8 @@ import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 
 import static org.junit.Assert.*;
+
+import liquibase.executor.QueryResult;
 import org.junit.Test;
 
 /**
@@ -83,21 +85,12 @@ public class MSSQLDatabaseTest extends AbstractJdbcDatabaseTest {
 		expect(connection.getAutoCommit()).andReturn(getDatabase().getAutoCommitMode()).anyTimes();
 
 		Connection sqlConnection = createMock(Connection.class);
-		Statement statement = createMock(Statement.class);
-		ResultSet resultSet = createMock(ResultSet.class);
-		ResultSetMetaData metadata = createMock(ResultSetMetaData.class);
 
 		expect(connection.getUnderlyingConnection()).andReturn(sqlConnection).anyTimes();
-		expect( sqlConnection.createStatement()).andReturn(statement);
-		expect( statement.executeQuery("SELECT CONVERT(varchar(100), SERVERPROPERTY('COLLATION'))")).andReturn(resultSet);
-		expect( resultSet.next() ).andReturn(true);
-		expect( resultSet.getMetaData() ).andReturn(metadata);
-		expect( metadata.getColumnCount() ).andReturn(1);
-		expect( resultSet.getString(1)).andReturn(collation);
-		expect( resultSet.next() ).andReturn(false);
+		expect( connection.query("SELECT CONVERT(varchar(100), SERVERPROPERTY('COLLATION'))")).andReturn(new QueryResult(collation));
 
 		connection.attached(database);
-		replay(connection, sqlConnection, statement, resultSet, metadata);
+		replay(connection, sqlConnection);
 		database.setConnection(connection);
 		return database;
     }

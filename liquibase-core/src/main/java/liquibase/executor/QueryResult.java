@@ -43,6 +43,9 @@ public class QueryResult {
      * Returns a single object of the given type. Returns the passed defaultValue if the value is null
      */
     public <T> T toObject(T defaultValue) throws IllegalArgumentException {
+        if (defaultValue == null) {
+            return null;
+        }
         T value = (T) getSingleValue(getSingleRow(), defaultValue.getClass());
         if (value == null) {
             return defaultValue;

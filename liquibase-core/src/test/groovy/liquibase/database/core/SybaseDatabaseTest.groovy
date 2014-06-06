@@ -4,6 +4,7 @@ import liquibase.CatalogAndSchema
 import liquibase.database.DatabaseConnection
 import liquibase.executor.Executor
 import liquibase.executor.ExecutorService
+import liquibase.executor.QueryResult
 import liquibase.statement.core.GetViewDefinitionStatement
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -29,7 +30,7 @@ public class SybaseDatabaseTest  extends Specification {
 	def getViewDefinition() throws Exception {
         when:
         def executor = Mock(Executor)
-        executor.queryForList(_ as GetViewDefinitionStatement, String.class) >> viewRows
+        executor.query(_ as GetViewDefinitionStatement) >> new QueryResult(viewRows)
 		SybaseDatabase database = new SybaseDatabase()
         ExecutorService.getInstance().setExecutor(database, executor)
 
@@ -39,8 +40,8 @@ public class SybaseDatabaseTest  extends Specification {
         where:
         viewRows | expected
         [] | ""
-        ["foo"] | "foo"
-        ["foo", " bar", " bat"] | "foo bar bat"
+        [[view: "foo"]] | "foo"
+        [[view: "foo"], [view: " bar"], [view: " bat"]] | "foo bar bat"
 	}
 
 	def testGetDatabaseVersionWhenImplemented() throws Exception {
