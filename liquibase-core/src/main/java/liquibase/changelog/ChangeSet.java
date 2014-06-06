@@ -1,6 +1,7 @@
 package liquibase.changelog;
 
 import liquibase.ContextExpression;
+import liquibase.RuntimeEnvironment;
 import liquibase.change.Change;
 import liquibase.change.ChangeFactory;
 import liquibase.change.CheckSum;
@@ -591,7 +592,7 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
                     }
                     for (SqlStatement statement : statements) {
                         try {
-                            executor.execute(statement, new ExecutionOptions(sqlVisitors));
+                            executor.execute(statement, new ExecutionOptions(sqlVisitors, new RuntimeEnvironment(database, null)));
                         } catch (DatabaseException e) {
                             throw new RollbackFailedException("Error executing custom SQL [" + statement + "]", e);
                         }

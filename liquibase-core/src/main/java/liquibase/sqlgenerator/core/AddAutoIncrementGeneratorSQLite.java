@@ -6,6 +6,7 @@ import liquibase.database.Database;
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.ValidationErrors;
+import liquibase.sql.Executable;
 import liquibase.structure.core.Index;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
@@ -57,7 +58,7 @@ public class AddAutoIncrementGeneratorSQLite extends AddAutoIncrementGenerator {
 
     @Override
     public Sql[] generateSql(final AddAutoIncrementStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-        List<Sql> statements = new ArrayList<Sql>();
+        List<Executable> statements = new ArrayList<Executable>();
 
         // define alter table logic
         SQLiteDatabase.AlterTableVisitor rename_alter_visitor = new SQLiteDatabase.AlterTableVisitor() {
@@ -90,7 +91,7 @@ public class AddAutoIncrementGeneratorSQLite extends AddAutoIncrementGenerator {
         try {
             // alter table
             List<SqlStatement> alterTableStatements = SQLiteDatabase.getAlterTableStatements(rename_alter_visitor, database, statement.getCatalogName(), statement.getSchemaName(), statement.getTableName());
-            statements.addAll(Arrays.asList(SqlGeneratorFactory.getInstance().generateSql(alterTableStatements.toArray(new SqlStatement[alterTableStatements.size()]), database)));
+            statements.addAll( Arrays.asList(SqlGeneratorFactory.getInstance().generateSql(alterTableStatements.toArray(new SqlStatement[alterTableStatements.size()]), database)));
         } catch (DatabaseException e) {
             e.printStackTrace();
         }

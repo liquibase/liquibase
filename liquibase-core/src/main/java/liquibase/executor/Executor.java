@@ -5,7 +5,7 @@ import liquibase.exception.DatabaseException;
 import liquibase.statement.SqlStatement;
 
 /**
- * Interface for interacting with the database. Use this class rather than
+ * Interface for interacting with the database.
  */
 public interface Executor {
 

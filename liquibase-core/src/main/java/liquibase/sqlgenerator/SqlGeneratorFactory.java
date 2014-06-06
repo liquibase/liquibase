@@ -3,6 +3,7 @@ package liquibase.sqlgenerator;
 import liquibase.change.Change;
 import liquibase.database.Database;
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.sql.Executable;
 import liquibase.structure.DatabaseObject;
 import liquibase.exception.ValidationErrors;
 import liquibase.exception.Warnings;
@@ -182,7 +183,7 @@ public class SqlGeneratorFactory {
         return new SqlGeneratorChain(sqlGenerators);
     }
 
-    public Sql[] generateSql(Change change, Database database) {
+    public Executable[] generateSql(Change change, Database database) {
         SqlStatement[] sqlStatements = change.generateStatements(database);
         if (sqlStatements == null) {
             return new Sql[0];
@@ -191,8 +192,8 @@ public class SqlGeneratorFactory {
         }
     }
 
-    public Sql[] generateSql(SqlStatement[] statements, Database database) {
-        List<Sql> returnList = new ArrayList<Sql>();
+    public Executable[] generateSql(SqlStatement[] statements, Database database) {
+        List<Executable> returnList = new ArrayList<Executable>();
         for (SqlStatement statement : statements) {
             returnList.addAll(Arrays.asList(SqlGeneratorFactory.getInstance().generateSql(statement, database)));
         }
@@ -205,7 +206,11 @@ public class SqlGeneratorFactory {
         if (generatorChain == null) {
             throw new IllegalStateException("Cannot find generators for database " + database.getClass() + ", statement: " + statement);
         }
-        return generatorChain.generateSql(statement, database);
+        Sql[] sqls = generatorChain.generateSql(statement, database);
+        if (sqls == null) {
+            return new Sql[0];
+        }
+        return sqls;
     }
 
     /**

@@ -1,5 +1,10 @@
 package liquibase.sql;
 
+import liquibase.exception.DatabaseException;
+import liquibase.executor.ExecuteResult;
+import liquibase.executor.ExecutionOptions;
+import liquibase.executor.QueryResult;
+import liquibase.executor.UpdateResult;
 import liquibase.structure.DatabaseObject;
 
 import java.util.Collection;
@@ -32,6 +37,26 @@ public class SingleLineComment implements Sql {
 
     @Override
     public String toString() {
+        return toSql();
+    }
+
+    @Override
+    public ExecuteResult execute(ExecutionOptions options) throws DatabaseException {
+        return new ExecuteResult();
+    }
+
+    @Override
+    public QueryResult query(ExecutionOptions options) throws DatabaseException {
+        return new QueryResult(null);
+    }
+
+    @Override
+    public UpdateResult update(ExecutionOptions options) throws DatabaseException {
+        return new UpdateResult(0);
+    }
+
+    @Override
+    public String toString(ExecutionOptions options) {
         return toSql();
     }
 }

@@ -4,8 +4,8 @@ import liquibase.change.ColumnConfig;
 import liquibase.database.Database;
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.exception.DatabaseException;
+import liquibase.sql.Executable;
 import liquibase.sql.Sql;
-import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.SqlStatement;
@@ -38,7 +38,7 @@ public class AddColumnGeneratorSQLite extends AddColumnGenerator {
         // For more information see: http://www.sqlite.org/omitted.html.
         // This is a small work around...
 
-        List<Sql> sql = new ArrayList<Sql>();
+        List<Executable> sql = new ArrayList<Executable>();
 
         // define alter table logic
         SQLiteDatabase.AlterTableVisitor rename_alter_visitor =

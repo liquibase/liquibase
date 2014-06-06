@@ -2,13 +2,13 @@ package liquibase.test;
 
 import java.util.Set;
 
+import liquibase.executor.StandardExecutor;
 import org.junit.ComparisonFailure;
 
 import liquibase.database.Database;
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.exception.MigrationFailedException;
 import liquibase.executor.ExecutorService;
-import liquibase.executor.jvm.JdbcExecutor;
 import liquibase.lockservice.LockService;
 import liquibase.lockservice.LockServiceFactory;
 
@@ -26,7 +26,7 @@ public class DatabaseTestTemplate {
             if (database instanceof SQLiteDatabase) {
                 continue; //todo: find how to get tests to run correctly on SQLite
             }
-            JdbcExecutor writeExecutor = new JdbcExecutor();
+            StandardExecutor writeExecutor = new StandardExecutor();
             writeExecutor.setDatabase(database);
             ExecutorService.getInstance().setExecutor(database, writeExecutor);
             LockService lockService = LockServiceFactory.getInstance().getLockService(database);

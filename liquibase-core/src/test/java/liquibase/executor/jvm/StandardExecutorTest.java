@@ -8,7 +8,7 @@ import static org.junit.Assert.*;
 import liquibase.executor.ExecutorService;
 import org.junit.Test;
 
-public class JdbcExecutorTest {
+public class StandardExecutorTest {
 
     @Test
     public void getInstance() {

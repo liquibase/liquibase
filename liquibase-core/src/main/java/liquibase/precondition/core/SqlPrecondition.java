@@ -50,7 +50,7 @@ public class SqlPrecondition extends AbstractPrecondition {
     public void check(Database database, DatabaseChangeLog changeLog, ChangeSet changeSet) throws PreconditionFailedException, PreconditionErrorException {
         DatabaseConnection connection = database.getConnection();
         try {
-            String result = (String) ExecutorService.getInstance().getExecutor(database).query(new RawSqlStatement(getSql().replaceFirst(";$",""))).toObject(String.class);
+            String result = ExecutorService.getInstance().getExecutor(database).query(new RawSqlStatement(getSql().replaceFirst(";$",""))).toObject(String.class);
             if (result == null) {
                 throw new PreconditionFailedException("No rows returned from SQL Precondition", changeLog, this);
             }

@@ -1,6 +1,7 @@
 package liquibase.database;
 
 import liquibase.CatalogAndSchema;
+import liquibase.RuntimeEnvironment;
 import liquibase.change.Change;
 import liquibase.change.core.DropTableChange;
 import liquibase.changelog.*;
@@ -1203,7 +1204,7 @@ public abstract class AbstractJdbcDatabase implements Database {
                 continue;
             }
             LogFactory.getLogger().debug("Executing Statement: " + statement.getClass().getName());
-            ExecutorService.getInstance().getExecutor(this).execute(statement, new ExecutionOptions(sqlVisitors));
+            ExecutorService.getInstance().getExecutor(this).execute(statement, new ExecutionOptions(sqlVisitors, new RuntimeEnvironment(this, null)));
         }
     }
 

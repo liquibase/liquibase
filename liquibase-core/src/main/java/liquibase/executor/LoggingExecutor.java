@@ -1,13 +1,9 @@
 package liquibase.executor;
 
-import liquibase.change.Change;
 import liquibase.database.Database;
-import liquibase.database.core.MSSQLDatabase;
-import liquibase.database.core.SybaseASADatabase;
-import liquibase.database.core.SybaseDatabase;
 import liquibase.exception.DatabaseException;
 import liquibase.servicelocator.LiquibaseService;
-import liquibase.sql.visitor.SqlVisitor;
+import liquibase.sql.Executable;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.*;
@@ -15,9 +11,6 @@ import liquibase.util.StreamUtil;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 
 @LiquibaseService(skip = true)
 public class LoggingExecutor extends AbstractExecutor {
@@ -71,28 +64,12 @@ public class LoggingExecutor extends AbstractExecutor {
             if (SqlGeneratorFactory.getInstance().generateStatementsVolatile(sql, database)) {
                 throw new DatabaseException(sql.getClass().getSimpleName()+" requires access to up to date database metadata which is not available in SQL output mode");
             }
-            for (String statement : applyVisitors(sql, options.getSqlVisitors())) {
-                if (statement == null) {
+            for (Executable executable : generateExecutables(sql)) {
+                if (executable == null) {
                     continue;
                 }
-                output.write(statement);
 
-
-                if (database instanceof MSSQLDatabase || database instanceof SybaseDatabase || database instanceof SybaseASADatabase) {
-                    output.write(StreamUtil.getLineSeparator());
-                    output.write("GO");
-    //            } else if (database instanceof OracleDatabase) {
-    //                output.write(StreamUtil.getLineSeparator());
-    //                output.write("/");
-                } else {
-                    String endDelimiter = ";";
-                    if (sql instanceof RawSqlStatement) {
-                        endDelimiter = ((RawSqlStatement) sql).getEndDelimiter();
-                    }
-                    if (!statement.endsWith(endDelimiter)) {
-                        output.write(endDelimiter);
-                    }
-                }
+                output.write(executable.toString(options));
                 output.write(StreamUtil.getLineSeparator());
                 output.write(StreamUtil.getLineSeparator());
             }

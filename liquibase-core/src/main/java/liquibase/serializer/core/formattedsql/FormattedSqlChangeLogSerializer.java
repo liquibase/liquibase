@@ -9,6 +9,7 @@ import liquibase.database.core.OracleDatabase;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.serializer.ChangeLogSerializer;
 import liquibase.serializer.LiquibaseSerializable;
+import liquibase.sql.Executable;
 import liquibase.sql.Sql;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.SqlStatement;
@@ -44,10 +45,10 @@ public class FormattedSqlChangeLogSerializer  implements ChangeLogSerializer {
 
             builder.append("--changeset ").append(author).append(":").append(changeSet.getId()).append("\n");
             for (Change change : changeSet.getChanges()) {
-                Sql[] sqls = SqlGeneratorFactory.getInstance().generateSql(change.generateStatements(database), database);
+                Executable[] sqls = SqlGeneratorFactory.getInstance().generateSql(change.generateStatements(database), database);
                 if (sqls != null) {
-                    for (Sql sql : sqls) {
-                        builder.append(sql.toSql()).append(sql.getEndDelimiter()).append("\n");
+                    for (Executable sql : sqls) {
+                        builder.append(((Sql) sql).toSql()).append(((Sql) sql).getEndDelimiter()).append("\n");
                     }
                 }
             }

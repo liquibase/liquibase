@@ -4,7 +4,7 @@ import liquibase.structure.DatabaseObject;
 
 import java.util.Collection;
 
-public interface Sql {
+public interface Sql extends ExecutableUpdate, ExecutableQuery, ExecutableExecute {
     public String toSql();
 
     String getEndDelimiter();
