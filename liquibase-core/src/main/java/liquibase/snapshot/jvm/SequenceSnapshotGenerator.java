@@ -39,7 +39,7 @@ public class SequenceSnapshotGenerator extends JdbcSnapshotGenerator {
             }
 
             //noinspection unchecked
-            List<Map<String, ?>> sequenceNames = ExecutorService.getInstance().getExecutor(database).queryForList(new RawSqlStatement(getSelectSequenceSql(schema, database)));
+            List<Map<String, ?>> sequenceNames = ExecutorService.getInstance().getExecutor(database).query(new RawSqlStatement(getSelectSequenceSql(schema, database))).toList();
 
             if (sequenceNames != null) {
                 for (Map<String, ?> sequence : sequenceNames) {
@@ -56,7 +56,7 @@ public class SequenceSnapshotGenerator extends JdbcSnapshotGenerator {
             return null;
         }
 
-        List<Map<String, ?>> sequences = ExecutorService.getInstance().getExecutor(database).queryForList(new RawSqlStatement(getSelectSequenceSql(example.getSchema(), database)));
+        List<Map<String, ?>> sequences = ExecutorService.getInstance().getExecutor(database).query(new RawSqlStatement(getSelectSequenceSql(example.getSchema(), database))).toList();
         for (Map<String, ?> sequenceRow : sequences) {
             String name = cleanNameFromDatabase((String) sequenceRow.get("SEQUENCE_NAME"), database);
             if ((database.isCaseSensitive() && name.equals(example.getName()) || (!database.isCaseSensitive() && name.equalsIgnoreCase(example.getName())))) {

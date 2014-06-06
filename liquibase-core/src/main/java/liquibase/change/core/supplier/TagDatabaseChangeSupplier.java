@@ -48,7 +48,7 @@ public class TagDatabaseChangeSupplier extends AbstractChangeSupplier<TagDatabas
     @Override
     public void checkDiffResult(DiffResult diffResult, TagDatabaseChange change) throws Exception {
         Database database = diffResult.getComparisonSnapshot().getDatabase();
-        int rows = ExecutorService.getInstance().getExecutor(database).queryForInt(new RawSqlStatement("select count(*) from " + database.getDatabaseChangeLogTableName() + " where tag='" + change.getTag() + "'"));
+        int rows = ExecutorService.getInstance().getExecutor(database).query(new RawSqlStatement("select count(*) from " + database.getDatabaseChangeLogTableName() + " where tag='" + change.getTag() + "'")).toObject(0);
         assertTrue(rows > 0);
 
     }

@@ -132,7 +132,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
             return getConnection().getCatalog();
         }
         try {
-            return ExecutorService.getInstance().getExecutor(this).queryForObject(new RawCallStatement("select sys_context( 'userenv', 'current_schema' ) from dual"), String.class);
+            return ExecutorService.getInstance().getExecutor(this).query(new RawCallStatement("select sys_context( 'userenv', 'current_schema' ) from dual")).toObject(String.class);
         } catch (Exception e) {
             LogFactory.getLogger().info("Error getting default schema", e);
         }
@@ -294,7 +294,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
             userDefinedTypes = new HashSet<String>();
             if (getConnection() != null && !(getConnection() instanceof OfflineConnection)) {
                 try {
-                    userDefinedTypes.addAll(ExecutorService.getInstance().getExecutor(this).queryForList(new RawSqlStatement("SELECT TYPE_NAME FROM USER_TYPES"), String.class));
+                    userDefinedTypes.addAll(ExecutorService.getInstance().getExecutor(this).query(new RawSqlStatement("SELECT TYPE_NAME FROM USER_TYPES")).toList(String.class));
                 } catch (DatabaseException e) {
                     //ignore error
                 }

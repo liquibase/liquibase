@@ -2,21 +2,29 @@ package liquibase.executor;
 
 import liquibase.util.ObjectUtil;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Container for query results returned from database. If more complicated or memory-efficient logic is needed, it can be subclassed.
  */
 public class QueryResult {
 
-    private List<Map<String, ?>> resultSet;
+    private List<Map<String, Object>> resultSet;
 
-    public QueryResult(List<Map<String, ?>> resultSet) {
+    public QueryResult(Object singleValue) {
+        if (singleValue == null) {
+            this.resultSet = Collections.unmodifiableList(new ArrayList<Map<String, Object>>());
+        } else {
+            Map<String, Object> map = new HashMap<String, Object>();
+            map.put("value", singleValue);
+
+            this.resultSet = Collections.unmodifiableList(Arrays.asList(map));
+        }
+    }
+
+    public QueryResult(List<Map<String, Object>> resultSet) {
         if (resultSet == null) {
-            this.resultSet = Collections.unmodifiableList(new ArrayList<Map<String, ?>>());
+            this.resultSet = Collections.unmodifiableList(new ArrayList<Map<String, Object>>());
         } else {
             this.resultSet = Collections.unmodifiableList(resultSet);
         }
@@ -32,13 +40,24 @@ public class QueryResult {
     }
 
     /**
+     * Returns a single object of the given type. Returns the passed defaultValue if the value is null
+     */
+    public <T> T toObject(T defaultValue) throws IllegalArgumentException {
+        T value = (T) getSingleValue(getSingleRow(), defaultValue.getClass());
+        if (value == null) {
+            return defaultValue;
+        }
+        return value;
+    }
+
+    /**
      * Return a list of objects of the given type. Throws exception if there is more than one value in the row.
      * Returns an empty if this QueryResult was originally passed a null collection.
      * Will convert the requiredType if needed via {@link liquibase.util.ObjectUtil#convert(Object, Class)}
      */
     public <T> List<T> toList(Class<T> elementType) throws IllegalArgumentException {
         List returnList = new ArrayList();
-        for (Map<String, ?> row : resultSet) {
+        for (Map<String, Object> row : resultSet) {
             returnList.add(getSingleValue(row, elementType));
         }
         return Collections.unmodifiableList(returnList);
@@ -49,14 +68,14 @@ public class QueryResult {
      * Returns an empty collection if this QueryResult was originally passed a null collection.
      */
     public List<Map<String, ?>> toList() throws IllegalArgumentException {
-        return resultSet;
+        return (List<Map<String, ?>>) (List) resultSet;
     }
 
     /**
      * Extract a single row from this QueryResult. Returns null if the original collection was null or empty.
      * Throws exception if there is more than one row.
      */
-    protected Map<String, ?> getSingleRow() throws IllegalArgumentException {
+    protected Map<String, Object> getSingleRow() throws IllegalArgumentException {
         if (resultSet.size() == 0) {
             return null;
         }
@@ -71,7 +90,7 @@ public class QueryResult {
      * Throws an exception if the row has more than one value.
      * Will convert the requiredType if needed via {@link liquibase.util.ObjectUtil#convert(Object, Class)}
      */
-    protected  <T> T getSingleValue(Map <String, ?> row, Class<T> type) throws IllegalArgumentException {
+    protected  <T> T getSingleValue(Map <String, Object> row, Class<T> type) throws IllegalArgumentException {
         if (row == null || row.size() == 0) {
             return null;
         }

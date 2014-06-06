@@ -14,27 +14,9 @@ public interface Executor {
 
     void setDatabase(Database database);
 
-    /** Read methods */
-    <T>  T queryForObject(SqlStatement sql, Class<T> requiredType) throws DatabaseException;
+    QueryResult query(SqlStatement sql) throws DatabaseException;
 
-    <T> T queryForObject(SqlStatement sql, Class<T> requiredType, List<SqlVisitor> sqlVisitors) throws DatabaseException;
-
-    long queryForLong(SqlStatement sql) throws DatabaseException;
-
-    long queryForLong(SqlStatement sql, List<SqlVisitor> sqlVisitors) throws DatabaseException;
-
-    int queryForInt(SqlStatement sql) throws DatabaseException;
-
-    int queryForInt(SqlStatement sql, List<SqlVisitor> sqlVisitors) throws DatabaseException;
-
-    List queryForList(SqlStatement sql, Class elementType) throws DatabaseException;
-
-    List queryForList(SqlStatement sql, Class elementType, List<SqlVisitor> sqlVisitors) throws DatabaseException;
-
-    List<Map<String, ?>> queryForList(SqlStatement sql) throws DatabaseException;
-
-    List<Map<String, ?>> queryForList(SqlStatement sql, List<SqlVisitor> sqlVisitors) throws DatabaseException;
-
+    QueryResult query(SqlStatement sql, List<SqlVisitor> sqlVisitors) throws DatabaseException;
 
     /** Write methods */
     void execute(Change change) throws DatabaseException;

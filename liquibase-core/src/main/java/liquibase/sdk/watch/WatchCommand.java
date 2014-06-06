@@ -168,7 +168,7 @@ public class WatchCommand extends AbstractCommand {
                         List<Map<String, ?>> rows;
                         try {
                             SelectFromDatabaseChangeLogStatement select = new SelectFromDatabaseChangeLogStatement("COUNT(*) AS ROW_COUNT", "MAX(DATEEXECUTED) AS LAST_EXEC");
-                            rows = executor.queryForList(select);
+                            rows = executor.query(select).toList();
                         } finally {
                             lockService.releaseLock();
                         }
@@ -206,7 +206,7 @@ public class WatchCommand extends AbstractCommand {
                 outString += "<tr><th>Id</th><th>Author</th><th>Path</th><th>ExecType</th><th>Tag</th></tr>";
 
                 SelectFromDatabaseChangeLogStatement select = new SelectFromDatabaseChangeLogStatement("FILENAME", "AUTHOR", "ID", "MD5SUM", "DATEEXECUTED", "ORDEREXECUTED", "EXECTYPE", "DESCRIPTION", "COMMENTS", "TAG", "LIQUIBASE").setOrderBy("DATEEXECUTED DESC", "ORDEREXECUTED DESC"); //going in opposite order for easier reading
-                List<Map> ranChangeSets = (List) ExecutorService.getInstance().getExecutor(database).queryForList(select);
+                List<Map> ranChangeSets = (List) ExecutorService.getInstance().getExecutor(database).query(select).toList();
 
                 for (Map row : ranChangeSets) {
                     String id = cleanHtmlId(row.get("ID") + ":" + row.get("AUTHOR") + ":" + row.get("FILENAME"));

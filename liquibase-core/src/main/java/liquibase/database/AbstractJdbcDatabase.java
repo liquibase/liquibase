@@ -59,7 +59,6 @@ public abstract class AbstractJdbcDatabase implements Database {
     private DatabaseConnection connection;
     protected String defaultCatalogName;
     protected String defaultSchemaName;
-
     protected String currentDateTimeFunction;
 
     /**
@@ -315,7 +314,7 @@ public abstract class AbstractJdbcDatabase implements Database {
             return null;
         }
         try {
-            return ExecutorService.getInstance().getExecutor(this).queryForObject(new RawCallStatement("call current_schema"), String.class);
+            return ExecutorService.getInstance().getExecutor(this).query(new RawCallStatement("call current_schema")).toObject(String.class);
 
         } catch (Exception e) {
             LogFactory.getLogger().info("Error getting default schema", e);
@@ -852,7 +851,7 @@ public abstract class AbstractJdbcDatabase implements Database {
     @Override
     public String getViewDefinition(CatalogAndSchema schema, final String viewName) throws DatabaseException {
         schema = schema.customize(this);
-        String definition = (String) ExecutorService.getInstance().getExecutor(this).queryForObject(new GetViewDefinitionStatement(schema.getCatalogName(), schema.getSchemaName(), viewName), String.class);
+        String definition = (String) ExecutorService.getInstance().getExecutor(this).query(new GetViewDefinitionStatement(schema.getCatalogName(), schema.getSchemaName(), viewName)).toObject(String.class);
         if (definition == null) {
             return null;
         }

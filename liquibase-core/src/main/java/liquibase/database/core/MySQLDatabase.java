@@ -179,7 +179,7 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
 
     @Override
     public boolean disableForeignKeyChecks() throws DatabaseException {
-        boolean enabled = ExecutorService.getInstance().getExecutor(this).queryForInt(new RawSqlStatement("SELECT @@FOREIGN_KEY_CHECKS")) == 1;
+        boolean enabled = ExecutorService.getInstance().getExecutor(this).query(new RawSqlStatement("SELECT @@FOREIGN_KEY_CHECKS")).toObject(0) == 1;
         ExecutorService.getInstance().getExecutor(this).execute(new RawSqlStatement("SET FOREIGN_KEY_CHECKS=0"));
         return enabled;
     }

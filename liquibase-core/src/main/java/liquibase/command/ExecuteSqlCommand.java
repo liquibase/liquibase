@@ -68,7 +68,7 @@ public class ExecuteSqlCommand extends AbstractCommand {
         String[] sqlStrings = StringUtils.processMutliLineSQL(sqlText, true, true, ";");
         for (String sql : sqlStrings) {
             if (sql.toLowerCase().matches("\\s*select .*")) {
-                List<Map<String, ?>> rows = executor.queryForList(new RawSqlStatement(sql));
+                List<Map<String, ?>> rows = executor.query(new RawSqlStatement(sql)).toList();
                 out += "Output of "+sql+":\n";
                 if (rows.size() == 0) {
                     out += "-- Empty Resultset --\n";

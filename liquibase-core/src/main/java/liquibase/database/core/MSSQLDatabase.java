@@ -174,7 +174,7 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
             return null;
         }
         try {
-            return ExecutorService.getInstance().getExecutor(this).queryForObject(new RawSqlStatement("select schema_name()"), String.class);
+            return ExecutorService.getInstance().getExecutor(this).query(new RawSqlStatement("select schema_name()")).toObject(String.class);
         } catch (Exception e) {
             LogFactory.getLogger().info("Error getting default schema", e);
         }
@@ -298,7 +298,7 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
     @Override
     public String getViewDefinition(CatalogAndSchema schema, String viewName) throws DatabaseException {
           schema = schema.customize(this);
-        List<String> defLines = (List<String>) ExecutorService.getInstance().getExecutor(this).queryForList(new GetViewDefinitionStatement(schema.getCatalogName(), schema.getSchemaName(), viewName), String.class);
+        List<String> defLines = ExecutorService.getInstance().getExecutor(this).query(new GetViewDefinitionStatement(schema.getCatalogName(), schema.getSchemaName(), viewName)).toList(String.class);
         StringBuffer sb = new StringBuffer();
         for (String defLine : defLines) {
             sb.append(defLine);
@@ -345,7 +345,7 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
         if (caseSensitive == null) {
             try {
                 if (getConnection() != null) {
-                    String collation = ExecutorService.getInstance().getExecutor(this).queryForObject(new RawSqlStatement("SELECT CONVERT(varchar(100), SERVERPROPERTY('COLLATION'))"), String.class);
+                    String collation = ExecutorService.getInstance().getExecutor(this).query(new RawSqlStatement("SELECT CONVERT(varchar(100), SERVERPROPERTY('COLLATION'))")).toObject(String.class);
                     caseSensitive = ! collation.contains("_CI_");
                 }
             } catch (Exception e) {

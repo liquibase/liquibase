@@ -100,7 +100,7 @@ public class StandardLockService implements LockService {
 
         if (executor.updatesDatabase() && database instanceof DerbyDatabase && ((DerbyDatabase) database).supportsBooleanDataType()) { //check if the changelog table is of an old smallint vs. boolean format
             String lockTable = database.escapeTableName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName());
-            Object obj = executor.queryForObject(new RawSqlStatement("select min(locked) as test from " + lockTable + " fetch first row only"), Object.class);
+            Object obj = executor.query(new RawSqlStatement("select min(locked) as test from " + lockTable + " fetch first row only")).toObject(Object.class);
             if (!(obj instanceof Boolean)) { //wrong type, need to recreate table
                 executor.execute(new DropTableStatement(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName(), false));
                 executor.execute(new CreateDatabaseChangeLogLockTableStatement());
@@ -115,7 +115,7 @@ public class StandardLockService implements LockService {
         boolean initialized;
         Executor executor = ExecutorService.getInstance().getExecutor(database);
         try {
-            initialized = executor.queryForInt(new RawSqlStatement("select count(*) from " + database.escapeTableName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName()))) > 0;
+            initialized = executor.query(new RawSqlStatement("select count(*) from " + database.escapeTableName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName()))).toObject(0) > 0;
         } catch (LiquibaseException e) {
             if (executor.updatesDatabase()) {
                 throw new UnexpectedLiquibaseException(e);
@@ -186,7 +186,7 @@ public class StandardLockService implements LockService {
             database.rollback();
             this.init();
 
-            Boolean locked = (Boolean) ExecutorService.getInstance().getExecutor(database).queryForObject(new SelectFromDatabaseChangeLogLockStatement("LOCKED"), Boolean.class);
+            Boolean locked = (Boolean) ExecutorService.getInstance().getExecutor(database).query(new SelectFromDatabaseChangeLogLockStatement("LOCKED")).toObject(Boolean.class);
 
             if (locked) {
                 return false;
@@ -231,7 +231,7 @@ public class StandardLockService implements LockService {
                 database.rollback();
                 int updatedRows = executor.update(new UnlockDatabaseChangeLogStatement());
                 if (updatedRows != 1) {
-                    throw new LockException("Did not update change log lock correctly.\n\n" + updatedRows + " rows were updated instead of the expected 1 row using executor " + executor.getClass().getName()+" there are "+executor.queryForInt(new RawSqlStatement("select count(*) from "+database.getDatabaseChangeLogLockTableName()))+" rows in the table");
+                    throw new LockException("Did not update change log lock correctly.\n\n" + updatedRows + " rows were updated instead of the expected 1 row using executor " + executor.getClass().getName()+" there are "+executor.query(new RawSqlStatement("select count(*) from "+database.getDatabaseChangeLogLockTableName())).toObject(0)+" rows in the table");
                 }
                 database.commit();
             }
@@ -260,7 +260,7 @@ public class StandardLockService implements LockService {
 
             List<DatabaseChangeLogLock> allLocks = new ArrayList<DatabaseChangeLogLock>();
             SqlStatement sqlStatement = new SelectFromDatabaseChangeLogLockStatement("ID", "LOCKED", "LOCKGRANTED", "LOCKEDBY");
-            List<Map<String, ?>> rows = ExecutorService.getInstance().getExecutor(database).queryForList(sqlStatement);
+            List<Map<String, ?>> rows = ExecutorService.getInstance().getExecutor(database).query(sqlStatement).toList();
             for (Map columnMap : rows) {
                 Object lockedValue = columnMap.get("LOCKED");
                 Boolean locked;

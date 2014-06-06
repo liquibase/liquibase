@@ -54,6 +54,17 @@ class QueryResultTest extends Specification {
         new QueryResult([[a: 1L]]).toObject(Long.class) == 1L
     }
 
+    def "toObject with default" () {
+        expect:
+        new QueryResult(null).toObject(5) == 5
+        new QueryResult(null).toObject(null) == null
+        new QueryResult([]).toObject(10) == 10
+        new QueryResult([[a: 1]]).toObject(4) == 1
+        new QueryResult([[a: 1]]).toObject(4L) == 1L
+        new QueryResult([[a: 1L]]).toObject(7L) == 1L
+        new QueryResult([[a: 1L]]).toObject(7) == 1L
+    }
+
     @Unroll
     def "toObject with problems"() {
         when:

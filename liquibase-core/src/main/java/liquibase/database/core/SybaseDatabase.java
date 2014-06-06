@@ -228,7 +228,7 @@ public class SybaseDatabase extends AbstractJdbcDatabase {
             return null;
         }
         try {
-            return ExecutorService.getInstance().getExecutor(this).queryForObject(new RawSqlStatement("select user_name()"), String.class);
+            return ExecutorService.getInstance().getExecutor(this).query(new RawSqlStatement("select user_name()")).toObject(String.class);
         } catch (Exception e) {
             LogFactory.getLogger().info("Error getting default schema", e);
         }
@@ -247,7 +247,7 @@ public class SybaseDatabase extends AbstractJdbcDatabase {
         GetViewDefinitionStatement statement = new GetViewDefinitionStatement(schema.getCatalogName(), schema.getSchemaName(), viewName);
         Executor executor = ExecutorService.getInstance().getExecutor(this);
         @SuppressWarnings("unchecked")
-        List<String> definitionRows = (List<String>) executor.queryForList(statement, String.class);
+        List<String> definitionRows = executor.query(statement).toList(String.class);
         StringBuilder definition = new StringBuilder();
         for (String d : definitionRows) {
         	definition.append(d);

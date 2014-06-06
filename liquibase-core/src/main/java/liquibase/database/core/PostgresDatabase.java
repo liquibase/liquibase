@@ -206,7 +206,7 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
             DatabaseConnection con = getConnection();
 
             if (con != null) {
-                String searchPathResult = (String) ExecutorService.getInstance().getExecutor(this).queryForObject(new RawSqlStatement("SHOW search_path"), String.class);
+                String searchPathResult = ExecutorService.getInstance().getExecutor(this).query(new RawSqlStatement("SHOW search_path")).toObject(String.class);
 
                 if (searchPathResult != null) {
                     String dirtySearchPaths[] = searchPathResult.split("\\,");
@@ -248,8 +248,8 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
     }
 
     private boolean runExistsQuery(String query) throws DatabaseException {
-        Long count = ExecutorService.getInstance().getExecutor(this).queryForLong(new RawSqlStatement(query));
+        Long count = ExecutorService.getInstance().getExecutor(this).query(new RawSqlStatement(query)).toObject(0L);
 
-        return count != null && count > 0;
+        return count > 0;
     }
 }

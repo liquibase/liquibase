@@ -139,7 +139,7 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
                     "JOIN sys.sysconstraints c ON c.constraintid = k.constraintid " +
                     "JOIN sys.systables t ON c.tableid = t.tableid "+
                     "WHERE c.constraintname='"+database.correctObjectName(name, UniqueConstraint.class)+"'";
-            List<Map<String, ?>> rows = ExecutorService.getInstance().getExecutor(database).queryForList(new RawSqlStatement(sql));
+            List<Map<String, ?>> rows = ExecutorService.getInstance().getExecutor(database).query(new RawSqlStatement(sql)).toList();
 
             List<Map<String, ?>> returnList = new ArrayList<Map<String, ?>>();
             if (rows.size() == 0) {
@@ -151,10 +151,10 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
                 String descriptor = rowData.get("DESCRIPTOR").toString();
                 descriptor = descriptor.replaceFirst(".*\\(","").replaceFirst("\\).*","");
                 for (String columnNumber : StringUtils.splitAndTrim(descriptor, ",")) {
-                    String columnName = (String) ExecutorService.getInstance().getExecutor(database).queryForObject(new RawSqlStatement(
+                    String columnName = (String) ExecutorService.getInstance().getExecutor(database).query(new RawSqlStatement(
                             "select c.columnname from sys.syscolumns c " +
                                     "join sys.systables t on t.tableid=c.referenceid " +
-                                    "where t.tablename='"+rowData.get("TABLENAME")+"' and c.columnnumber=" + columnNumber), String.class);
+                                    "where t.tablename='"+rowData.get("TABLENAME")+"' and c.columnnumber=" + columnNumber)).toObject(String.class);
 
                     Map<String, String> row = new HashMap<String, String>();
                     row.put("COLUMN_NAME", columnName);
@@ -192,7 +192,7 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
                 sql += "and constraint_name='" + constraintName + "'";
             }
         }
-        return ExecutorService.getInstance().getExecutor(database).queryForList(new RawSqlStatement(sql));
+        return ExecutorService.getInstance().getExecutor(database).query(new RawSqlStatement(sql)).toList();
     }
 
 

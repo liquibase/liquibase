@@ -132,63 +132,23 @@ public class LoggingExecutor extends AbstractExecutor implements Executor {
     }
 
     @Override
-    public <T> T queryForObject(SqlStatement sql, Class<T> requiredType) throws DatabaseException {
+    public QueryResult query(SqlStatement sql) throws DatabaseException {
+        return query(sql, null);
+    }
+
+    @Override
+    public QueryResult query(SqlStatement sql, List<SqlVisitor> sqlVisitors) throws DatabaseException {
         if (sql instanceof SelectFromDatabaseChangeLogLockStatement) {
-            return (T) Boolean.FALSE;
+            return new QueryResult(Boolean.FALSE);
         }
-        return delegatedReadExecutor.queryForObject(sql, requiredType);
-    }
-
-    @Override
-    public <T> T queryForObject(SqlStatement sql, Class<T> requiredType, List<SqlVisitor> sqlVisitors) throws DatabaseException {
-        return delegatedReadExecutor.queryForObject(sql, requiredType, sqlVisitors);
-    }
-
-    @Override
-    public long queryForLong(SqlStatement sql) throws DatabaseException {
-        return delegatedReadExecutor.queryForLong(sql);
-    }
-
-    @Override
-    public long queryForLong(SqlStatement sql, List<SqlVisitor> sqlVisitors) throws DatabaseException {
-        return delegatedReadExecutor.queryForLong(sql, sqlVisitors);
-    }
-
-    @Override
-    public int queryForInt(SqlStatement sql) throws DatabaseException {
         try {
-            return delegatedReadExecutor.queryForInt(sql);
+            return delegatedReadExecutor.query(sql, sqlVisitors);
         } catch (DatabaseException e) {
             if (sql instanceof GetNextChangeSetSequenceValueStatement) { //table probably does not exist
-                return 0;
+                return new QueryResult(0);
             }
             throw e;
         }
-    }
-
-    @Override
-    public int queryForInt(SqlStatement sql, List<SqlVisitor> sqlVisitors) throws DatabaseException {
-        return delegatedReadExecutor.queryForInt(sql, sqlVisitors);
-    }
-
-    @Override
-    public List queryForList(SqlStatement sql, Class elementType) throws DatabaseException {
-        return delegatedReadExecutor.queryForList(sql, elementType);
-    }
-
-    @Override
-    public List queryForList(SqlStatement sql, Class elementType, List<SqlVisitor> sqlVisitors) throws DatabaseException {
-        return delegatedReadExecutor.queryForList(sql, elementType, sqlVisitors);
-    }
-
-    @Override
-    public List<Map<String, ?>> queryForList(SqlStatement sql) throws DatabaseException {
-        return delegatedReadExecutor.queryForList(sql);
-    }
-
-    @Override
-    public List<Map<String, ?>> queryForList(SqlStatement sql, List<SqlVisitor> sqlVisitors) throws DatabaseException {
-        return delegatedReadExecutor.queryForList(sql, sqlVisitors);
     }
 
     @Override
