@@ -36,24 +36,9 @@ public class LoggingExecutor extends AbstractExecutor implements Executor {
     }
 
     @Override
-    public void execute(Change change) throws DatabaseException {
-        execute(change, new ArrayList<SqlVisitor>());
-    }
-
-    @Override
-    public void execute(Change change, List<SqlVisitor> sqlVisitors) throws DatabaseException {
-        SqlStatement[] sqlStatements = change.generateStatements(database);
-        if (sqlStatements != null) {
-            for (SqlStatement statement : sqlStatements) {
-                execute(statement, sqlVisitors);
-            }
-        }
-
-    }
-
-    @Override
-    public void execute(SqlStatement sql) throws DatabaseException {
+    public ExecuteResult execute(SqlStatement sql) throws DatabaseException {
         outputStatement(sql);
+        return new ExecuteResult();
     }
 
     @Override
@@ -70,8 +55,9 @@ public class LoggingExecutor extends AbstractExecutor implements Executor {
     }
 
     @Override
-    public void execute(SqlStatement sql, List<SqlVisitor> sqlVisitors) throws DatabaseException {
+    public ExecuteResult execute(SqlStatement sql, List<SqlVisitor> sqlVisitors) throws DatabaseException {
         outputStatement(sql, sqlVisitors);
+        return new ExecuteResult();
     }
 
     @Override

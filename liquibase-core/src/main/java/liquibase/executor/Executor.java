@@ -18,14 +18,9 @@ public interface Executor {
 
     QueryResult query(SqlStatement sql, List<SqlVisitor> sqlVisitors) throws DatabaseException;
 
-    /** Write methods */
-    void execute(Change change) throws DatabaseException;
+    ExecuteResult execute(SqlStatement sql) throws DatabaseException;
 
-    void execute(Change change, List<SqlVisitor> sqlVisitors) throws DatabaseException;
-
-    void execute(SqlStatement sql) throws DatabaseException;
-
-    void execute(SqlStatement sql, List<SqlVisitor> sqlVisitors) throws DatabaseException;
+    ExecuteResult execute(SqlStatement sql, List<SqlVisitor> sqlVisitors) throws DatabaseException;
 
     UpdateResult update(SqlStatement sql) throws DatabaseException;
 
