@@ -1184,6 +1184,8 @@
 			<xsd:element ref="dropDefaultValue" maxOccurs="unbounded" />
 			<xsd:element ref="addUniqueConstraint" maxOccurs="unbounded" />
 			<xsd:element ref="dropUniqueConstraint" maxOccurs="unbounded" />
+			<xsd:element ref="addFulltextConstraint" maxOccurs="unbounded" />
+            <xsd:element ref="dropFulltextConstraint" maxOccurs="unbounded" />
 			<xsd:element ref="customChange" maxOccurs="unbounded" />
 			<xsd:element ref="update" maxOccurs="unbounded" />
 			<xsd:element ref="delete" maxOccurs="unbounded" />
