@@ -431,6 +431,27 @@
 		</xsd:complexType>
 	</xsd:element>
 
+    <xsd:element name="addFulltextConstraint">
+        <xsd:complexType>
+            <xsd:attributeGroup ref="tableNameAttribute" />
+            <xsd:attribute name="columnNames" type="xsd:string"
+                                       use="required" />
+            <xsd:attribute name="constraintName" type="xsd:string" />
+            <xsd:attribute name="tablespace" type="xsd:string" />
+            <xsd:attribute name="disabled" type="booleanExp" />
+            <xsd:attribute name="deferrable" type="booleanExp" />
+            <xsd:attribute name="initiallyDeferred" type="booleanExp" />
+        </xsd:complexType>
+    </xsd:element>
+
+    <xsd:element name="dropFulltextConstraint">
+        <xsd:complexType>
+            <xsd:attributeGroup ref="tableNameAttribute" />
+            <xsd:attribute name="constraintName" type="xsd:string" />
+            <xsd:attribute name="uniqueColumns" type="xsd:string" />
+        </xsd:complexType>
+    </xsd:element>
+
 	<xsd:element name="modifyDataType">
 		<xsd:complexType>
             <xsd:attributeGroup ref="tableNameAttribute" />

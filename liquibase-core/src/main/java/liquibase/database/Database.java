@@ -37,6 +37,8 @@ public interface Database extends PrioritizedService {
     DatabaseConnection getConnection();
 
     void setConnection(DatabaseConnection conn);
+    void setExludeTables( String include_string, String exclude_string, String changelog );
+    boolean includeTable( String table );
 
     boolean requiresUsername();
 

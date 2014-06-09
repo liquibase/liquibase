@@ -24,7 +24,8 @@ public class MissingForeignKeyChangeGenerator implements MissingObjectChangeGene
                 Table.class,
                 Column.class,
                 PrimaryKey.class,
-                UniqueConstraint.class
+                UniqueConstraint.class,
+                FulltextConstraint.class
         };
     }
 

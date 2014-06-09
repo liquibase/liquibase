@@ -273,7 +273,31 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                     CatalogAndSchema catalogAndSchema = new CatalogAndSchema(catalogName, schemaName).customize(database);
 
                     try {
-                        return extract(databaseMetaData.getColumns(((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema), tableName, columnName));
+	                    List<CachedRow> general_cache = extract(databaseMetaData.getColumns(((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema), tableName, columnName));
+			            if (database instanceof MySQLDatabase) {
+			                
+			                //DatabaseSnapshot db_snapshot = DatabaseSnapshot( null, database);
+			                
+			                List<CachedRow> mysql_cache = executeAndExtract(createMySQLSql(((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema), tableName, columnName), JdbcDatabaseSnapshot.this.getDatabase());
+			                int index = 0;
+			                for (CachedRow row : general_cache) {
+			                
+			                    if ( mysql_cache.size() > 0 ) {
+
+			                        for ( CachedRow MySQLrow : mysql_cache) {
+			                            if( MySQLrow.getString("TABLE_NAME").equals( row.getString("TABLE_NAME") ) && MySQLrow.getString("COLUMN_NAME").equals( row.getString("COLUMN_NAME") )  ){
+			                                row.set ( "COLUMN_TYPE", MySQLrow.getString("COLUMN_TYPE") );
+			                                general_cache.set(index, row);
+			                            }
+			                        }
+
+			                    }
+			                    index++;
+			                }
+			                
+			           	}
+                    
+                    	return general_cache;
                     } catch (SQLException e) {
                         if (shouldReturnEmptyColumns(e)) { //view with table already dropped. Act like it has no columns.
                             return new ArrayList<CachedRow>();
@@ -292,7 +316,30 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                     CatalogAndSchema catalogAndSchema = new CatalogAndSchema(catalogName, schemaName).customize(database);
 
                     try {
-                        return extract(databaseMetaData.getColumns(((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema), null, null));
+                        List<CachedRow> general_cache = extract(databaseMetaData.getColumns(((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema), null, null));
+		                if (database instanceof MySQLDatabase) {
+		                    
+		                    List<CachedRow> mysql_cache = executeAndExtract(createMySQLSql(((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema), null, null), JdbcDatabaseSnapshot.this.getDatabase());
+		                    int index = 0;
+		                    for (CachedRow row : general_cache) {
+		                    
+		                        if ( mysql_cache.size() > 0 ) {
+
+		                            for ( CachedRow MySQLrow : mysql_cache) {
+		                                if( MySQLrow.getString("TABLE_NAME").equals( row.getString("TABLE_NAME") ) && MySQLrow.getString("COLUMN_NAME").equals( row.getString("COLUMN_NAME") )  ){
+		                                    row.set ( "COLUMN_TYPE", MySQLrow.getString("COLUMN_TYPE") );
+		                                    general_cache.set(index, row);
+		                                }
+		                                
+		                            }
+
+		                        }
+		                        index++;
+		                    }
+		                    
+		               	}
+		                
+		                return general_cache;
                     } catch (SQLException e) {
                         if (shouldReturnEmptyColumns(e)) {
                             return new ArrayList<CachedRow>();
@@ -327,6 +374,36 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
                     return this.executeAndExtract(sql, database);
                 }
+                
+                private String createMySQLSql(String catalogName, String schemaName, String tableName, String columnName) throws SQLException {
+                    CatalogAndSchema catalogAndSchema = new CatalogAndSchema(catalogName, schemaName).customize(database);
+
+                    String jdbcCatalogName = database.correctObjectName(((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema), Catalog.class);
+                    
+                    Database database = JdbcDatabaseSnapshot.this.getDatabase();
+                    String sql = "";
+                    String andTable = "";
+                    String andColumn = "";
+                    
+                    if( tableName != null   ){
+                        andTable = " AND TABLE_NAME = '" + database.correctObjectName(tableName, Table.class) + "' ";
+                    }
+                    
+                    if( columnName != null   ){
+                        andColumn = " AND COLUMN_NAME = '" + columnName + "' ";
+                    }
+                    
+                    if (database instanceof MySQLDatabase) {
+
+                        sql = "SELECT * FROM "
+                                + database.getSystemSchema() + ".COLUMNS WHERE TABLE_SCHEMA='"+ jdbcCatalogName + "'" + andTable + andColumn ;
+
+                    }
+                    
+                    return sql;
+                }
+                
+                
             });
         }
 
@@ -350,13 +427,41 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 				public List<CachedRow> fastFetchQuery() throws SQLException, DatabaseException {
                     CatalogAndSchema catalogAndSchema = new CatalogAndSchema(catalogName, schemaName).customize(database);
 
+					List<CachedRow> table_cache = new ArrayList<CachedRow>();
+                    List<CachedRow> new_cache = new ArrayList<CachedRow>();
+                    String catalog = "";
+                    String schema = "";
+                    
                     if (database instanceof OracleDatabase) {
-                        return queryOracle(catalogAndSchema, null);
-                    }
+                        
+                        table_cache = queryOracle(catalogAndSchema, null);
+                        
+                    }else{
 
-                    String catalog = ((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema);
-                    String schema = ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema);
-                    return extract(databaseMetaData.getTables(catalog, schema, database.correctObjectName(table, Table.class), types));
+                        catalog = ((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema);
+                        schema = ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema);
+
+                        table_cache = extract(databaseMetaData.getTables(catalog, schema, database.correctObjectName(table, Table.class), types));
+                    
+                    }
+                    
+                    if ( table_cache.size() > 0 ) {
+                        for (CachedRow row : table_cache) {
+                            
+                            String tableName = StringUtils.trimToNull( row.getString("TABLE_NAME") );
+                            
+                            if( tableName != null ){
+                                if ( database.includeTable( tableName ) ) {
+                                    new_cache.add(row);
+                                }
+                            }
+                            
+                        }
+                    }
+                    
+                    return new_cache;                    
+
+
                 }
 
 
@@ -364,11 +469,32 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 				public List<CachedRow> bulkFetchQuery() throws SQLException, DatabaseException {
                     CatalogAndSchema catalogAndSchema = new CatalogAndSchema(catalogName, schemaName).customize(database);
 
+                    List<CachedRow> table_cache = new ArrayList<CachedRow>();
+                    List<CachedRow> new_cache = new ArrayList<CachedRow>();
+                    String catalog = "";
+                    String schema = "";
+                    
                     if (database instanceof OracleDatabase) {
-                        return queryOracle(catalogAndSchema, null);
+                        table_cache = queryOracle(catalogAndSchema, null);
+                    }else{
+                        table_cache = extract(databaseMetaData.getTables(((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema), null, types));
+                    }
+                    
+                    if ( table_cache.size() > 0 ) {
+                        for (CachedRow row : table_cache) {
+                            
+                            String tableName = StringUtils.trimToNull( row.getString("TABLE_NAME") );
+                            
+                            if( tableName != null ){
+                                if ( database.includeTable( tableName ) ) {
+                                    new_cache.add(row);
+                                }
+                            }
+                            
+                        }
                     }
 
-                    return extract(databaseMetaData.getTables(((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema), null, types));
+                    return new_cache;
                 }
 
                 private List<CachedRow> queryOracle(CatalogAndSchema catalogAndSchema, String tableName) throws DatabaseException, SQLException {
@@ -564,6 +690,120 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                 }
             });
         }
+
+		public List<CachedRow> getFulltextConstraints(final String catalogName, final String schemaName, final String tableName) throws SQLException, DatabaseException {
+            return getResultSetCache("getFulltextConstraints").get(new ResultSetCache.SingleResultSetExtractor(database) {
+
+                @Override
+                public ResultSetCache.RowData rowKeyParameters(CachedRow row) {
+                    return new ResultSetCache.RowData(row.getString("TABLE_CAT"), row.getString("TABLE_SCHEM"), database, row.getString("TABLE_NAME"));
+                }
+
+                @Override
+                public ResultSetCache.RowData wantedKeyParameters() {
+                    return new ResultSetCache.RowData(catalogName, schemaName, database, tableName);
+                }
+
+                @Override
+                public List<CachedRow> fastFetchQuery() throws SQLException, DatabaseException {
+                    CatalogAndSchema catalogAndSchema = new CatalogAndSchema(catalogName, schemaName).customize(database);
+
+                    return executeAndExtract(createSql(((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema), tableName), JdbcDatabaseSnapshot.this.getDatabase());
+                }
+
+                @Override
+                public List<CachedRow> bulkFetchQuery() throws SQLException, DatabaseException {
+                    CatalogAndSchema catalogAndSchema = new CatalogAndSchema(catalogName, schemaName).customize(database);
+
+                    return executeAndExtract(createSql(((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema), null), JdbcDatabaseSnapshot.this.getDatabase());
+                }
+
+                private String createSql(String catalogName, String schemaName, String tableName) throws SQLException {
+                    CatalogAndSchema catalogAndSchema = new CatalogAndSchema(catalogName, schemaName).customize(database);
+
+                    String jdbcCatalogName = database.correctObjectName(((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema), Catalog.class);
+                    String jdbcSchemaName = database.correctObjectName(((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema), Schema.class);
+
+                    Database database = JdbcDatabaseSnapshot.this.getDatabase();
+                    String sql = "";
+
+                    /* */
+                    if (database instanceof MySQLDatabase) {
+
+                        String andTableName = "";
+                        if (tableName != null) {
+                            andTableName += " AND TABLE_NAME = '" + database.correctObjectName(tableName, Table.class) + "' ";
+                        }
+
+                        sql = "SELECT INDEX_NAME AS CONSTRAINT_NAME, TABLE_NAME FROM     "
+                                + database.getSystemSchema() + ".statistics WHERE    index_type LIKE 'FULLTEXT%' AND TABLE_SCHEMA='"
+                                + jdbcCatalogName + "' " + andTableName;
+
+                    }
+
+                    //System.out.println(sql);
+                    return sql;
+                }
+            });
+
+        }
+        
+        
+        public List<CachedRow> getMySQLTableEngine(final String catalogName, final String schemaName, final String tableName) throws SQLException, DatabaseException {
+            return getResultSetCache("getMySQLTableEngine").get(new ResultSetCache.SingleResultSetExtractor(database) {
+
+                @Override
+                public ResultSetCache.RowData rowKeyParameters(CachedRow row) {
+                    return new ResultSetCache.RowData(row.getString("TABLE_CAT"), row.getString("TABLE_SCHEM"), database, row.getString("TABLE_NAME") );
+                }
+
+                @Override
+                public ResultSetCache.RowData wantedKeyParameters() {
+                    return new ResultSetCache.RowData(catalogName, schemaName, database, tableName);
+                }
+
+                @Override
+                public List<CachedRow> fastFetchQuery() throws SQLException, DatabaseException {
+                    CatalogAndSchema catalogAndSchema = new CatalogAndSchema(catalogName, schemaName).customize(database);
+
+                    return executeAndExtract(createSql(((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema), tableName), JdbcDatabaseSnapshot.this.getDatabase());
+                }
+
+                @Override
+                public List<CachedRow> bulkFetchQuery() throws SQLException, DatabaseException {
+                    CatalogAndSchema catalogAndSchema = new CatalogAndSchema(catalogName, schemaName).customize(database);
+
+                    return executeAndExtract(createSql(((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema), null), JdbcDatabaseSnapshot.this.getDatabase());
+                }
+
+                private String createSql(String catalogName, String schemaName, String tableName) throws SQLException {
+                    CatalogAndSchema catalogAndSchema = new CatalogAndSchema(catalogName, schemaName).customize(database);
+
+                    String jdbcCatalogName = database.correctObjectName(((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema), Catalog.class);
+                   
+                    Database database = JdbcDatabaseSnapshot.this.getDatabase();
+                    String sql = "";
+
+                    /* */
+                    if (database instanceof MySQLDatabase) {
+
+                        String andTableName = "";
+                        if (tableName != null) {
+                            andTableName += " AND TABLE_NAME = '" + database.correctObjectName(tableName, Table.class) + "' ";
+                        }
+                        
+                        sql =   "SELECT * " +
+                                    "FROM "+ database.getSystemSchema() + ".TABLES " +
+                                    "WHERE    TABLE_SCHEMA='"+ jdbcCatalogName + "' " + andTableName;
+
+                    }
+                    
+                    return sql;
+                }
+            });
+
+        }
+
     }
 
 }

@@ -44,7 +44,12 @@ public class MockDatabase implements Database, InternalDatabase {
     private String defaultSchemaName;
     private boolean caseSensitive;
 
-
+    
+    @Override
+    public void setExludeTables( String include_string, String exclude_string, String changelog ){}
+    @Override
+    public boolean includeTable( String table ){ return true; }
+    
     @Override
     public int getPriority() {
         return PRIORITY_DEFAULT;

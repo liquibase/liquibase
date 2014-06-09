@@ -25,6 +25,7 @@ public class ConstraintsConfig extends AbstractLiquibaseSerializable {
     private String referencedColumnNames;
     private Boolean unique;
     private String uniqueConstraintName;
+    private String fulltextConstraintName;
     private String checkConstraint;
     private Boolean deleteCascade;
     private String foreignKeyName;
@@ -143,6 +144,27 @@ public class ConstraintsConfig extends AbstractLiquibaseSerializable {
 
     public ConstraintsConfig setUniqueConstraintName(String uniqueConstraintName) {
         this.uniqueConstraintName = uniqueConstraintName;
+        return this;
+    }
+    
+
+    /**
+     * Returns if the column is part of a unique constraint. Returns null if not specified
+     */
+    public Boolean isFulltext() {
+        return fulltextConstraintName != null;
+    }
+
+
+    /**
+     * Returns the name to use for the unique constraint. Returns null if not specified
+     */
+    public String getFulltextConstraintName() {
+        return fulltextConstraintName;
+    }
+
+    public ConstraintsConfig setFulltextConstraintName(String fulltextConstraintName) {
+        this.fulltextConstraintName = fulltextConstraintName;
         return this;
     }
 

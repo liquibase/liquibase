@@ -9,11 +9,13 @@ import java.util.Set;
 
 public class Table extends Relation {
 
+    private String engine;
 
     public Table() {
         setAttribute("outgoingForeignKeys", new ArrayList<ForeignKey>());
         setAttribute("indexes", new ArrayList<Index>());
         setAttribute("uniqueConstraints", new ArrayList<UniqueConstraint>());
+        setAttribute("fulltextConstraints", new ArrayList<FulltextConstraint>());
     }
 
     public Table(String catalogName, String schemaName, String tableName) {
@@ -29,12 +31,24 @@ public class Table extends Relation {
         this.setAttribute("primaryKey", primaryKey);
     }
 
+    public String getEngine() {
+        return this.engine;
+    }
+
+    public void setEngine( String Engine ) {
+        this.engine = Engine;
+    }
+
     public List<ForeignKey> getOutgoingForeignKeys() {
         return getAttribute("outgoingForeignKeys", List.class);
     }
 
     public List<Index> getIndexes() {
         return getAttribute("indexes", List.class);
+    }
+
+    public List<FulltextConstraint> getFulltextConstraints() {
+        return getAttribute("fulltextConstraints", List.class);
     }
 
     public List<UniqueConstraint> getUniqueConstraints() {

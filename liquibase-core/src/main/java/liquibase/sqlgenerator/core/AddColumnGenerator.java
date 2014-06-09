@@ -2,6 +2,7 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
 import liquibase.statement.core.AddUniqueConstraintStatement;
+import liquibase.statement.core.AddFulltextConstraintStatement;
 import liquibase.structure.core.Schema;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.database.core.*;
@@ -93,6 +94,7 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
         returnSql.add(new UnparsedSql(alterTable, getAffectedColumn(statement)));
 
         addUniqueConstrantStatements(statement, database, returnSql);
+        addFulltextConstrantStatements(statement, database, returnSql);
         addForeignKeyStatements(statement, database, returnSql);
 
         return returnSql.toArray(new Sql[returnSql.size()]);
@@ -107,6 +109,13 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
     protected void addUniqueConstrantStatements(AddColumnStatement statement, Database database, List<Sql> returnSql) {
         if (statement.isUnique()) {
             AddUniqueConstraintStatement addConstraintStmt = new AddUniqueConstraintStatement(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName(), statement.getUniqueStatementName());
+            returnSql.addAll(Arrays.asList(SqlGeneratorFactory.getInstance().generateSql(addConstraintStmt, database)));
+        }
+    }
+    
+    protected void addFulltextConstrantStatements(AddColumnStatement statement, Database database, List<Sql> returnSql) {
+        if (statement.isFulltext()) {
+            AddFulltextConstraintStatement addConstraintStmt = new AddFulltextConstraintStatement(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName(), statement.getFulltextStatementName());
             returnSql.addAll(Arrays.asList(SqlGeneratorFactory.getInstance().generateSql(addConstraintStmt, database)));
         }
     }

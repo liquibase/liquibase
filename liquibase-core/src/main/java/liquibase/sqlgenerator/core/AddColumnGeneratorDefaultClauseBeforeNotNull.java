@@ -85,6 +85,7 @@ public class AddColumnGeneratorDefaultClauseBeforeNotNull extends AddColumnGener
         returnSql.add(new UnparsedSql(alterTable, getAffectedColumn(statement)));
 
         addUniqueConstrantStatements(statement, database, returnSql);
+        addFulltextConstrantStatements(statement, database, returnSql);
         addForeignKeyStatements(statement, database, returnSql);
 
         return returnSql.toArray(new Sql[returnSql.size()]);

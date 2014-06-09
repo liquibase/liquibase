@@ -38,6 +38,9 @@ import java.text.ParseException;
 import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+import java.util.logging.Level;
+import javax.xml.parsers.ParserConfigurationException;
+import liquibase.snapshot.InvalidExampleException;
 
 /**
  * Class for executing Liquibase via the command line.
@@ -57,6 +60,7 @@ public class Main {
 	protected String liquibaseSchemaName;
     protected String defaultCatalogName;
     protected String changeLogFile;
+    protected List<String> changeLogFiles = new ArrayList<String>();
     protected String classpath;
     protected String contexts;
     protected String driverPropertiesFile;
@@ -81,6 +85,9 @@ public class Main {
 
     protected String logLevel;
     protected String logFile;
+    
+    protected String exclude_tables;
+    protected String include_tables;
 
     protected Map<String, Object> changeLogParameters = new HashMap<String, Object>();
 
@@ -246,7 +253,11 @@ public class Main {
             }
 
             if (isChangeLogRequired(command) && changeLogFile == null) {
-                messages.add("--changeLogFile is required");
+                
+                if ( changeLogFiles.isEmpty() ) {
+                    messages.add("--changeLogFiles OR --changeLogFile  is required");
+                }
+                
             }
 
             if (isNoArgCommand(command) && !commandParams.isEmpty()) {
@@ -600,12 +611,13 @@ public class Main {
         stream.println("                                            Change Log expressed as a comma");
         stream.println("                                            separated list from: tables, views,");
         stream.println("                                            columns, indexes, foreignkeys,");
-        stream.println("                                            primarykeys, uniqueconstraints");
-        stream.println("                                            data.");
+        stream.println("                                            primarykeys, uniqueconstraints,");
+        stream.println("                                            fulltextconstraints, data.");
         stream.println("                                            If this is null then the default");
         stream.println("                                            types will be: tables, views,");
         stream.println("                                            columns, indexes, foreignkeys,");
-        stream.println("                                             primarykeys, uniqueconstraints.");
+        stream.println("                                             primarykeys, uniqueconstraints,");
+        stream.println("                                             fulltextconstraints.");
         stream.println("");
         stream.println("Change Log Properties:");
         stream.println(" -D<property.name>=<property.value>         Pass a name/value pair for");
@@ -625,7 +637,7 @@ public class Main {
 
     protected void parseOptions(String[] args) throws CommandLineParsingException {
         args = fixupArgs(args);
-
+        Map<String,List<String>> listmap = new HashMap<String,List<String>>();
         boolean seenCommand = false;
         for (String arg : args) {
             if (isCommand(arg)) {
@@ -670,6 +682,19 @@ public class Main {
                     Field field = getClass().getDeclaredField(attributeName);
                     if (field.getType().equals(Boolean.class)) {
                         field.set(this, Boolean.valueOf(value));
+                        
+                    }else if (field.getType().equals(List.class)) {
+                        
+                        List<String> newlist = new ArrayList<String>();
+                        
+                        if( listmap.containsKey(attributeName) ){
+                            newlist = listmap.get(attributeName);
+                        }
+                        
+                        newlist.add(value);
+                        listmap.put(attributeName, newlist);
+                        field.set(this, newlist);
+                        
                     } else {
                         field.set(this, value);
                     }
@@ -826,6 +851,36 @@ public class Main {
 
         return tempFile;
     }
+    
+    protected void generateChangelog( String changelogFile, Database database, CatalogAndSchema[]  finalSchemas, DiffOutputControl diffOutputControl ){
+        
+        
+        try {
+            
+            File file = new File(changelogFile);
+            if ( file.exists() ) {
+                throw new LiquibaseException("ChangeLogFile " + changelogFile + " already exists!");
+            }
+
+            database.setExludeTables( include_tables, exclude_tables, file.getName() );
+            try {
+                CommandLineUtils.doGenerateChangeLog(changelogFile, database, finalSchemas, StringUtils.trimToNull(diffTypes), StringUtils.trimToNull(changeSetAuthor), StringUtils.trimToNull(changeSetContext), StringUtils.trimToNull(dataOutputDirectory), diffOutputControl);
+            } catch (DatabaseException ex) {
+                java.util.logging.Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (IOException ex) {
+                java.util.logging.Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (ParserConfigurationException ex) {
+                java.util.logging.Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (InvalidExampleException ex) {
+                java.util.logging.Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+            }
+
+        } catch (LiquibaseException ex) {
+            java.util.logging.Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+        
+    }
 
     protected void doMigration() throws Exception {
         if ("help".equalsIgnoreCase(command)) {
@@ -891,13 +946,21 @@ public class Main {
                 // By default the generateChangeLog command is destructive, and
                 // Liquibase's attempt to append doesn't work properly. Just
                 // fail the build if the file already exists.
-                File file = new File(changeLogFile);
-                if ( file.exists() ) {
-                    throw new LiquibaseException("ChangeLogFile " + changeLogFile + " already exists!");
+                
+				if( changeLogFiles.isEmpty() ){ 
+                    
+                    generateChangelog( changeLogFile, database, finalSchemas, diffOutputControl );
+                    
+                }else{
+                    
+                    for( int x=0; x<changeLogFiles.size(); x++ ){
+                        generateChangelog( changeLogFiles.get(x), database, finalSchemas, diffOutputControl );
+                    }
+                    
                 }
-
-	            CommandLineUtils.doGenerateChangeLog(changeLogFile, database, finalSchemas, StringUtils.trimToNull(diffTypes), StringUtils.trimToNull(changeSetAuthor), StringUtils.trimToNull(changeSetContext), StringUtils.trimToNull(dataOutputDirectory), diffOutputControl);
+                
                 return;
+
             } else if ("snapshot".equalsIgnoreCase(command)) {
                 SnapshotCommand command = new SnapshotCommand();
                 command.setDatabase(database);

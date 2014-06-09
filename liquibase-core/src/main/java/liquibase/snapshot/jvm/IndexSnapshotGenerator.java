@@ -153,8 +153,23 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                 rs = databaseMetaData.getIndexInfo(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), table.getName(), null);
                 Map<String, Index> foundIndexes = new HashMap<String, Index>();
                 for (CachedRow row : rs) {
-                    String indexName = row.getString("INDEX_NAME");
+                    String indexName = row.getString("INDEX_NAME");                   
+                    
                     if (indexName == null) {
+                        continue;
+                    }
+                    
+                    List<CachedRow> fulltext_rs = databaseMetaData.getFulltextConstraints(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), table.getName() );
+                   boolean isfulltext = false;
+                    for (CachedRow fulltext_row : fulltext_rs ) {
+                           String fulltextName = fulltext_row.getString("CONSTRAINT_NAME"); 
+                           if( fulltextName.equals(indexName) ){
+                                isfulltext = true;
+                                break;
+                           }
+                    }
+                    
+                    if( isfulltext ){
                         continue;
                     }
 

@@ -21,6 +21,7 @@ public class CreateTableStatement extends AbstractSqlStatement {
     private Set<String> notNullColumns = new HashSet<String>();
     private Set<ForeignKeyConstraint> foreignKeyConstraints = new HashSet<ForeignKeyConstraint>();
     private Set<UniqueConstraint> uniqueConstraints = new HashSet<UniqueConstraint>();
+    private Set<FulltextConstraint> fulltextConstraints = new HashSet<FulltextConstraint>();
 
 
     public CreateTableStatement(String catalogName, String schemaName, String tableName) {
@@ -77,6 +78,10 @@ public class CreateTableStatement extends AbstractSqlStatement {
 
     public Set<UniqueConstraint> getUniqueConstraints() {
         return uniqueConstraints;
+    }
+    
+    public Set<FulltextConstraint> getFulltextConstraints() {
+        return fulltextConstraints;
     }
 
 
@@ -155,7 +160,10 @@ public class CreateTableStatement extends AbstractSqlStatement {
                 } else if (constraint instanceof UniqueConstraint) {
                     ((UniqueConstraint) constraint).addColumns(columnName);
                     getUniqueConstraints().add(((UniqueConstraint) constraint));
-                } else if (constraint instanceof AutoIncrementConstraint) {
+                } else if (constraint instanceof FulltextConstraint) {
+                    ((FulltextConstraint) constraint).addColumns(columnName);
+                    getFulltextConstraints().add(((FulltextConstraint) constraint));
+                }else if (constraint instanceof AutoIncrementConstraint) {
                     autoIncrementConstraints.add((AutoIncrementConstraint) constraint);
                 } else {
                     throw new RuntimeException("Unknown constraint type: " + constraint.getClass().getName());

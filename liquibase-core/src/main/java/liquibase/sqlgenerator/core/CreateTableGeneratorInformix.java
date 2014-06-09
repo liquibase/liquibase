@@ -15,6 +15,7 @@ import liquibase.sqlgenerator.core.AbstractSqlGenerator;
 import liquibase.statement.AutoIncrementConstraint;
 import liquibase.statement.ForeignKeyConstraint;
 import liquibase.statement.UniqueConstraint;
+import liquibase.statement.FulltextConstraint;
 import liquibase.statement.core.CreateTableStatement;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
@@ -164,6 +165,18 @@ public class CreateTableGeneratorInformix extends CreateTableGenerator {
             buffer.append(",");
         }
 
+        for (FulltextConstraint fulltextConstraint : statement.getFulltextConstraints()) {
+            if (fulltextConstraint.getConstraintName() != null && !constraintNameAfterFulltext(database)) {
+                buffer.append(" CONSTRAINT ");
+                buffer.append(database.escapeConstraintName(fulltextConstraint.getConstraintName()));
+            }
+            buffer.append(" FULLTEXT (");
+            buffer.append(database.escapeColumnNameList(StringUtils.join(fulltextConstraint.getColumns(), ", ")));
+            buffer.append(")");
+            
+            buffer.append(",");
+        }
+        
         String sql = buffer.toString().replaceFirst(",\\s*$", "") + ")";
 
         if (statement.getTablespace() != null && database.supportsTablespaces()) {
@@ -174,6 +187,10 @@ public class CreateTableGeneratorInformix extends CreateTableGenerator {
 	}
 
 	private boolean constraintNameAfterUnique(Database database) {
+		return true;
+	}
+
+	private boolean constraintNameAfterFulltext(Database database) {
 		return true;
 	}
 }

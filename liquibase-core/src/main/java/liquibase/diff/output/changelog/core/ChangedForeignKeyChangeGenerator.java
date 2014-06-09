@@ -12,6 +12,7 @@ import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Index;
 import liquibase.structure.core.ForeignKey;
 import liquibase.structure.core.UniqueConstraint;
+import liquibase.structure.core.FulltextConstraint;
 
 public class ChangedForeignKeyChangeGenerator implements ChangedObjectChangeGenerator {
     @Override
@@ -24,7 +25,7 @@ public class ChangedForeignKeyChangeGenerator implements ChangedObjectChangeGene
 
     @Override
     public Class<? extends DatabaseObject>[] runBeforeTypes() {
-        return new Class[] {Index.class, UniqueConstraint.class };
+        return new Class[] {Index.class, UniqueConstraint.class, FulltextConstraint.class };
     }
 
     @Override
