@@ -96,6 +96,16 @@ public class Column extends AbstractDatabaseObject {
         return this;
     }
 
+    public Boolean isFullText() {
+        return getAttribute("fulltext", Boolean.class);
+    }
+
+    public Column setFullText(Boolean fulltext) {
+        setAttribute("fulltext", fulltext);
+
+        return this;
+    }
+
 
     public DataType getType() {
         return getAttribute("type", DataType.class);

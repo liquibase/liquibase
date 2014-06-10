@@ -22,6 +22,7 @@ import liquibase.structure.core.ForeignKey;
 import liquibase.structure.core.PrimaryKey;
 import liquibase.structure.core.Table;
 import liquibase.structure.core.UniqueConstraint;
+import liquibase.structure.core.FulltextConstraint;
 import liquibase.util.ISODateFormat;
 import liquibase.util.StringUtils;
 
@@ -93,6 +94,16 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
             List<UniqueConstraint> uniqueConstraints = table.getUniqueConstraints();
             if (uniqueConstraints != null) {
                 for (UniqueConstraint constraint : uniqueConstraints) {
+                    if (constraint.getColumnNames().contains(getName())) {
+                        constraints.setUnique(true);
+                        constraints.setUniqueConstraintName(constraint.getName());
+                    }
+                }
+            }
+
+            List<FulltextConstraint> fulltextConstraints = table.getFulltextConstraints();
+            if (fulltextConstraints != null) {
+                for (FulltextConstraint constraint : fulltextConstraints) {
                     if (constraint.getColumnNames().contains(getName())) {
                         constraints.setUnique(true);
                         constraints.setUniqueConstraintName(constraint.getName());
@@ -745,6 +756,9 @@ public class ColumnConfig extends AbstractLiquibaseSerializable {
         constraints.setReferencedColumnNames(constraintsNode.getChildValue(null, "referencedColumnNames", String.class));
         constraints.setUnique(constraintsNode.getChildValue(null, "unique", Boolean.class));
         constraints.setUniqueConstraintName(constraintsNode.getChildValue(null, "uniqueConstraintName", String.class));
+        
+        constraints.setFulltextConstraintName(constraintsNode.getChildValue(null, "fulltextConstraintName", String.class));
+        
         constraints.setCheckConstraint(constraintsNode.getChildValue(null, "checkConstraint", String.class));
         constraints.setDeleteCascade(constraintsNode.getChildValue(null, "deleteCascade", Boolean.class));
         constraints.setForeignKeyName(constraintsNode.getChildValue(null, "foreignKeyName", String.class));

@@ -126,6 +126,23 @@ public class AddColumnStatement extends AbstractSqlStatement {
         return null;
     }
 
+    public boolean isFulltext() {
+        for (ColumnConstraint constraint : getConstraints()) {
+            if (constraint instanceof FulltextConstraint) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public String getFulltextStatementName() {
+        for (ColumnConstraint constraint : getConstraints()) {
+            if (constraint instanceof FulltextConstraint) {
+                return ((FulltextConstraint) constraint).getConstraintName();
+            }
+        }
+        return null;
+    }
     public Object getDefaultValue() {
         return defaultValue;
     }

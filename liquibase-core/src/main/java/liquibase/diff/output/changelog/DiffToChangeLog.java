@@ -24,6 +24,15 @@ import liquibase.util.StringUtils;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.*;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import liquibase.change.ChangeFactory;
+import liquibase.change.core.modifySqlChange;
+import liquibase.change.genericConfig;
+import liquibase.database.core.MySQLDatabase;
+import liquibase.parser.core.ParsedNode;
+import liquibase.parser.core.ParsedNodeException;
+import liquibase.resource.ClassLoaderResourceAccessor;
 
 public class DiffToChangeLog {
 
@@ -146,6 +155,28 @@ public class DiffToChangeLog {
                 if (!diffResult.getReferenceSnapshot().getDatabase().isLiquibaseObject(object) && !diffResult.getReferenceSnapshot().getDatabase().isSystemObject(object)) {
                     Change[] changes = changeGeneratorFactory.fixMissing(object, diffOutputControl, diffResult.getReferenceSnapshot().getDatabase(), diffResult.getComparisonSnapshot().getDatabase());
                     addToChangeSets(changes, changeSets, quotingStrategy);
+
+					if( diffResult.getReferenceSnapshot().getDatabase() instanceof MySQLDatabase && object.getSerializedObjectName().equals( "table" ) ){
+                       
+                        if (changes != null) { 
+                            
+                           for( int r=0; r<changes.length; r++ ){   
+                               
+                               modifySqlChange mod = new modifySqlChange();
+                               mod.setdbms("mysql");
+                               genericConfig append = new genericConfig("append");
+                               append.setSerializableField("value");
+                               Table table = (Table) object;
+                               append.setSerializableFieldValue( "value", " engine "+table.getEngine().toLowerCase() );
+                               mod.addappend(append);
+                               changes[r].getChangeSet().addChange(mod);
+                               
+                           }
+                            
+                        }
+                        
+                   }
+
                 }
             }
         }

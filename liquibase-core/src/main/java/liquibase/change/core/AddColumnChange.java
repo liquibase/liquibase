@@ -103,6 +103,9 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
                 if (constraintsConfig.isUnique() != null && constraintsConfig.isUnique()) {
                     constraints.add(new UniqueConstraint());
                 }
+                if (constraintsConfig.isFulltext() != null && constraintsConfig.isFulltext()) {
+                    constraints.add(new FulltextConstraint());
+                }
                 if (constraintsConfig.isPrimaryKey() != null && constraintsConfig.isPrimaryKey()) {
                     constraints.add(new PrimaryKeyConstraint(constraintsConfig.getPrimaryKeyName()));
                 }

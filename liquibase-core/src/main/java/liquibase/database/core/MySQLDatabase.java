@@ -196,11 +196,14 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
 
     @Override
     public String escapeStringForDatabase(String string) {
-        string = super.escapeStringForDatabase(string);
+        
         if (string == null) {
             return null;
         }
-        return string.replace("\\", "\\\\");
+        string = string.replace("\\", "\\\\");
+        string = string.replace("'", "\\'");
+        return string;
+        
     }
 
     @Override

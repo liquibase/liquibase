@@ -24,8 +24,12 @@ import java.sql.*;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
 
@@ -179,6 +183,10 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
 
     protected DataType readDataType(CachedRow columnMetadataResultSet, Column column, Database database) throws SQLException {
 
+        if( database instanceof MySQLDatabase ){
+            return new DataType( StringUtils.trimToNull((String) columnMetadataResultSet.get("COLUMN_TYPE")) );
+        }
+        
         if (database instanceof OracleDatabase) {
             String dataType = columnMetadataResultSet.getString("DATA_TYPE");
             dataType = dataType.replace("VARCHAR2", "VARCHAR");

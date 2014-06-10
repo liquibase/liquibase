@@ -45,6 +45,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.regex.Pattern;
+import org.yaml.snakeyaml.Yaml;
 
 
 /**
@@ -55,6 +56,8 @@ import java.util.regex.Pattern;
 public abstract class AbstractJdbcDatabase implements Database {
 
     private static final Pattern startsWithNumberPattern = Pattern.compile("^[0-9].*");
+    private List<String> exclude_tables = new ArrayList<String>();
+    private List<String> include_tables =  new ArrayList<String>();
 
     private DatabaseConnection connection;
     protected String defaultCatalogName;
@@ -105,6 +108,86 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     public String getName() {
         return toString();
+    }
+    
+    @Override
+    public boolean includeTable( String table ){
+        
+        if( include_tables.size() > 0 ){
+            
+            for( int x=0; x<include_tables.size(); x++ ){
+                if( include_tables.get(x).equals(table)  ){
+                    return true;
+                }
+            }
+            
+            return false;
+            
+        }else if( exclude_tables.size() > 0 ){
+            
+            for( int x=0; x<exclude_tables.size(); x++ ){
+                if( exclude_tables.get(x).equals(table)  ){
+                    return false;
+                }
+            }
+            
+            return true;
+            
+        }
+        
+        return true;
+        
+    }
+    
+    @Override
+    public void setExludeTables( String include_string, String exclude_string, String changelog ){
+        
+        Yaml yaml = new Yaml();
+        
+        Map parsedIncludes;
+        Map parsedExcludes;
+        boolean include = true;
+        List<String> tables = new ArrayList<String>();
+        
+        try {
+            
+            parsedIncludes = yaml.loadAs(include_string, Map.class);
+            parsedExcludes = yaml.loadAs(exclude_string, Map.class);
+            List tableList = null;
+            
+            if( parsedIncludes.containsKey(changelog) ){
+                
+                tableList = (List) parsedIncludes.get(changelog);
+                include = true;
+                
+            }else if( parsedExcludes.containsKey(changelog) ){
+                
+                tableList = (List) parsedExcludes.get(changelog);
+                include = false;
+                
+            }
+            
+            if( tableList != null ){
+                
+                int x=0;
+                 for (Object obj : tableList) {
+                     tables.add(obj.toString());
+                 }
+                 
+                 if( include ){
+                     include_tables = tables;
+                 }else{
+                     exclude_tables = tables;
+                 }
+                
+            }
+            
+            
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+        
+        
     }
 
     @Override
@@ -719,6 +802,7 @@ public abstract class AbstractJdbcDatabase implements Database {
 	            typesToInclude.remove(Index.class);
 	            typesToInclude.remove(PrimaryKey.class);
 	            typesToInclude.remove(UniqueConstraint.class);
+	            typesToInclude.remove(FulltextConstraint.class);
 
 	            if (supportsForeignKeyDisable()) {
 		            //We do not remove ForeignKey because they will be disabled and removed as parts of tables.

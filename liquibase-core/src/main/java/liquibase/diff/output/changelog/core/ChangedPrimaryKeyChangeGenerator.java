@@ -12,6 +12,7 @@ import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Index;
 import liquibase.structure.core.PrimaryKey;
 import liquibase.structure.core.UniqueConstraint;
+import liquibase.structure.core.FulltextConstraint;
 import liquibase.util.StringUtils;
 
 import java.util.Collection;
@@ -27,7 +28,7 @@ public class ChangedPrimaryKeyChangeGenerator  implements ChangedObjectChangeGen
 
     @Override
     public Class<? extends DatabaseObject>[] runBeforeTypes() {
-        return new Class[] {Index.class, UniqueConstraint.class };
+        return new Class[] {Index.class, UniqueConstraint.class, FulltextConstraint.class };
     }
 
     @Override
@@ -68,6 +69,11 @@ public class ChangedPrimaryKeyChangeGenerator  implements ChangedObjectChangeGen
         control.setAlreadyHandledChanged(new UniqueConstraint().setTable(pk.getTable()).setColumns(referenceColumns));
         if (!referenceColumns.equalsIgnoreCase(comparedColumns)) {
             control.setAlreadyHandledChanged(new UniqueConstraint().setTable(pk.getTable()).setColumns(comparedColumns));
+        }
+        
+        control.setAlreadyHandledChanged(new FulltextConstraint().setTable(pk.getTable()).setColumns(referenceColumns));
+        if (!referenceColumns.equalsIgnoreCase(comparedColumns)) {
+            control.setAlreadyHandledChanged(new FulltextConstraint().setTable(pk.getTable()).setColumns(comparedColumns));
         }
 
         return new Change[] { dropPkChange, addPkChange };

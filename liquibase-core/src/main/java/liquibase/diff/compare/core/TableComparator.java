@@ -51,6 +51,7 @@ public class TableComparator  implements DatabaseObjectComparator {
         exclude.add("name");
         exclude.add("outgoingForeignKeys");
         exclude.add("uniqueConstraints");
+        exclude.add("fulltextConstraints");
         exclude.add("primaryKey");
         exclude.add("columns");
 

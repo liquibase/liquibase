@@ -14,6 +14,8 @@ import liquibase.util.StringUtils;
 
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Map;
+import liquibase.database.core.MySQLDatabase;
 
 public class TableSnapshotGenerator extends JdbcSnapshotGenerator {
     public TableSnapshotGenerator() {
@@ -25,15 +27,19 @@ public class TableSnapshotGenerator extends JdbcSnapshotGenerator {
         Database database = snapshot.getDatabase();
         String objectName = example.getName();
         Schema schema = example.getSchema();
-
+        CachedRow mysqlParams = null;
         List<CachedRow> rs = null;
         try {
             JdbcDatabaseSnapshot.CachingDatabaseMetaData metaData = ((JdbcDatabaseSnapshot) snapshot).getMetaData();
             rs = metaData.getTables(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), database.correctObjectName(objectName, Table.class), new String[]{"TABLE"});
 
+            if (database instanceof MySQLDatabase) {
+                    mysqlParams = mysqlMetadataResultSet( example, snapshot );
+            }
+            
             Table table;
             if (rs.size() > 0) {
-                table = readTable(rs.get(0), database);
+                table = readTable(rs.get(0), mysqlParams, database);
             } else {
                 return null;
             }
@@ -43,6 +49,30 @@ public class TableSnapshotGenerator extends JdbcSnapshotGenerator {
             throw new DatabaseException(e);
         }
     }
+    
+    
+    protected CachedRow mysqlMetadataResultSet( DatabaseObject example, DatabaseSnapshot snapshot )throws DatabaseException {
+        Database database = snapshot.getDatabase();
+        String objectName = example.getName();
+        Schema schema = example.getSchema();
+        CachedRow row = null;
+        List<CachedRow> rs = null;
+        try {
+            JdbcDatabaseSnapshot.CachingDatabaseMetaData metaData = ((JdbcDatabaseSnapshot) snapshot).getMetaData();
+            rs = metaData.getMySQLTableEngine(((AbstractJdbcDatabase) database).getJdbcCatalogName(schema), ((AbstractJdbcDatabase) database).getJdbcSchemaName(schema), database.correctObjectName(objectName, Table.class) );
+
+            if (rs.size() > 0) {
+                row = rs.get(0);
+            } else {
+                return null;
+            }
+
+            return row;
+        } catch (SQLException e) {
+            throw new DatabaseException(e);
+        }
+    }
+    
 
     @Override
     protected void addTo(DatabaseObject foundObject, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException {
@@ -72,17 +102,27 @@ public class TableSnapshotGenerator extends JdbcSnapshotGenerator {
 
     }
 
-    protected Table readTable(CachedRow tableMetadataResultSet, Database database) throws SQLException, DatabaseException {
+    protected Table readTable(CachedRow tableMetadataResultSet, CachedRow mysqlParams, Database database) throws SQLException, DatabaseException {
         String rawTableName = tableMetadataResultSet.getString("TABLE_NAME");
         String rawSchemaName = StringUtils.trimToNull(tableMetadataResultSet.getString("TABLE_SCHEM"));
         String rawCatalogName = StringUtils.trimToNull(tableMetadataResultSet.getString("TABLE_CAT"));
         String remarks = StringUtils.trimToNull(tableMetadataResultSet.getString("REMARKS"));
+        String engine = "";
+        String collation = "";
+        
+         if (database instanceof MySQLDatabase) {
+             
+            engine = StringUtils.trimToNull(mysqlParams.getString("ENGINE"));
+            //collation = StringUtils.trimToNull(mysqlParams.getString("TABLE_COLLATION"));
+         }
+        
         if (remarks != null) {
             remarks = remarks.replace("''", "'"); //come back escaped sometimes
         }
 
         Table table = new Table().setName(cleanNameFromDatabase(rawTableName, database));
         table.setRemarks(remarks);
+        table.setEngine(engine);
 
         CatalogAndSchema schemaFromJdbcInfo = ((AbstractJdbcDatabase) database).getSchemaFromJdbcInfo(rawCatalogName, rawSchemaName);
         table.setSchema(new Schema(schemaFromJdbcInfo.getCatalogName(), schemaFromJdbcInfo.getSchemaName()));
