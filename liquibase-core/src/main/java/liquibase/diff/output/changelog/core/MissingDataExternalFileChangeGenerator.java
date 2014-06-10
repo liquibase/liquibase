@@ -61,100 +61,110 @@ public class MissingDataExternalFileChangeGenerator extends MissingDataChangeGen
             stmt = ((JdbcConnection) referenceDatabase.getConnection()).createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
             stmt.setFetchSize(Integer.MIN_VALUE);
             rs = stmt.executeQuery(sql);
+            int rowcount = 0;
+            while (rs.next()) {
+                rowcount++;
+            }
+            
+            if( rowcount > 0 ){
 
-			if( rs.isBeforeFirst() ){
+                    try {
+                        rs.close();
+                    } catch (SQLException ignore) { }
+                
+                    rs = stmt.executeQuery(sql);
+                
+                    List<String> columnNames = new ArrayList<String>();
+                    for (int i=0; i< rs.getMetaData().getColumnCount(); i++) {
+                        columnNames.add(rs.getMetaData().getColumnName(i+1));
+                    }
 
-		        List<String> columnNames = new ArrayList<String>();
-		        for (int i=0; i< rs.getMetaData().getColumnCount(); i++) {
-		            columnNames.add(rs.getMetaData().getColumnName(i+1));
-		        }
+                    String fileName = table.getName().toLowerCase() + ".csv";
+                    if (dataDir != null) {
+                        fileName = dataDir + "/" + fileName;
+                    }
 
-		        String fileName = table.getName().toLowerCase() + ".csv";
-		        if (dataDir != null) {
-		            fileName = dataDir + "/" + fileName;
-		        }
+                    File parentDir = new File(dataDir);
+                    if (!parentDir.exists()) {
+                        parentDir.mkdirs();
+                    }
+                    if (!parentDir.isDirectory()) {
+                        throw new RuntimeException(parentDir
+                                + " is not a directory");
+                    }
 
-		        File parentDir = new File(dataDir);
-		        if (!parentDir.exists()) {
-		            parentDir.mkdirs();
-		        }
-		        if (!parentDir.isDirectory()) {
-		            throw new RuntimeException(parentDir
-		                    + " is not a directory");
-		        }
+                    CSVWriter outputFile = new CSVWriter(new BufferedWriter(new FileWriter(fileName)));
+                    String[] dataTypes = new String[columnNames.size()];
+                    String[] line = new String[columnNames.size()];
+                    for (int i = 0; i < columnNames.size(); i++) {
+                        line[i] = columnNames.get(i);
+                    }
+                    outputFile.writeNext(line);
 
-		        CSVWriter outputFile = new CSVWriter(new BufferedWriter(new FileWriter(fileName)));
-		        String[] dataTypes = new String[columnNames.size()];
-		        String[] line = new String[columnNames.size()];
-		        for (int i = 0; i < columnNames.size(); i++) {
-		            line[i] = columnNames.get(i);
-		        }
-		        outputFile.writeNext(line);
+                    int rowNum = 0;
+                    while (rs.next()) {
+                        line = new String[columnNames.size()];
 
-		        int rowNum = 0;
-		        while (rs.next()) {
-		            line = new String[columnNames.size()];
+                        for (int i = 0; i < columnNames.size(); i++) {
+                            Object value = JdbcUtils.getResultSetValue(rs, i + 1);
+                            if (dataTypes[i] == null && value != null) {
+                                if (value instanceof Number) {
+                                    dataTypes[i] = "NUMERIC";
+                                } else if (value instanceof Boolean) {
+                                    dataTypes[i] = "BOOLEAN";
+                                } else if (value instanceof Date) {
+                                    dataTypes[i] = "DATE";
+                                } else {
+                                    dataTypes[i] = "STRING";
+                                }
+                            }
+                            if (value == null) {
+                                line[i] = "NULL";
+                            } else {
+                                if (value instanceof Date) {
+                                    line[i] = new ISODateFormat().format(((Date) value));
+                                } else {
+                                    line[i] = value.toString();
+                                }
+                            }
+                        }
+                        outputFile.writeNext(line);
+                        rowNum++;
+                        if (rowNum % 5000 == 0) {
+                            outputFile.flush();
+                        }
+                    }
+                    outputFile.flush();
+                    outputFile.close();
 
-		            for (int i = 0; i < columnNames.size(); i++) {
-		                Object value = JdbcUtils.getResultSetValue(rs, i + 1);
-		                if (dataTypes[i] == null && value != null) {
-		                    if (value instanceof Number) {
-		                        dataTypes[i] = "NUMERIC";
-		                    } else if (value instanceof Boolean) {
-		                        dataTypes[i] = "BOOLEAN";
-		                    } else if (value instanceof Date) {
-		                        dataTypes[i] = "DATE";
-		                    } else {
-		                        dataTypes[i] = "STRING";
-		                    }
-		                }
-		                if (value == null) {
-		                    line[i] = "NULL";
-		                } else {
-		                    if (value instanceof Date) {
-		                        line[i] = new ISODateFormat().format(((Date) value));
-		                    } else {
-		                        line[i] = value.toString();
-		                    }
-		                }
-		            }
-		            outputFile.writeNext(line);
-		            rowNum++;
-		            if (rowNum % 5000 == 0) {
-		                outputFile.flush();
-		            }
-		        }
-		        outputFile.flush();
-		        outputFile.close();
+                    LoadDataChange change = new LoadDataChange();
+                    change.setFile(fileName);
+                    change.setEncoding("UTF-8");
+                    if (outputControl.getIncludeCatalog()) {
+                        change.setCatalogName(table.getSchema().getCatalogName());
+                    }
+                    if (outputControl.getIncludeSchema()) {
+                        change.setSchemaName(table.getSchema().getName());
+                    }
+                    change.setTableName(table.getName());
 
-		        LoadDataChange change = new LoadDataChange();
-		        change.setFile(fileName);
-		        change.setEncoding("UTF-8");
-		        if (outputControl.getIncludeCatalog()) {
-		            change.setCatalogName(table.getSchema().getCatalogName());
-		        }
-		        if (outputControl.getIncludeSchema()) {
-		            change.setSchemaName(table.getSchema().getName());
-		        }
-		        change.setTableName(table.getName());
+                    for (int i = 0; i < columnNames.size(); i++) {
+                        String colName = columnNames.get(i);
+                        LoadDataColumnConfig columnConfig = new LoadDataColumnConfig();
+                        columnConfig.setHeader(colName);
+                        columnConfig.setName(colName);
+                        columnConfig.setType(dataTypes[i]);
 
-		        for (int i = 0; i < columnNames.size(); i++) {
-		            String colName = columnNames.get(i);
-		            LoadDataColumnConfig columnConfig = new LoadDataColumnConfig();
-		            columnConfig.setHeader(colName);
-		            columnConfig.setName(colName);
-		            columnConfig.setType(dataTypes[i]);
+                        change.addColumn(columnConfig);
+                    }
 
-		            change.addColumn(columnConfig);
-		        }
+                    return new Change[]{
+                            change
+                    };
 
-		        return new Change[]{
-		                change
-		        };
+                }
 
-			}
-
-			return null;
+                return null;
 
         } catch (Exception e) {
             throw new UnexpectedLiquibaseException(e);
