@@ -84,6 +84,8 @@ public class Main {
 
     protected Map<String, Object> changeLogParameters = new HashMap<String, Object>();
 
+    protected String outputFile;
+
 	public static void main(String args[]) throws CommandLineParsingException, IOException {
 		try {
 			run(args);
@@ -570,6 +572,9 @@ public class Main {
         stream.println("                                            include the catalog name, even if");
         stream.println("                                            it is the default catalog.");
         stream.println("                                            Defaults to true");
+        stream.println(" --outputFile=<file>                        File to write output to for commands");
+        stream.println("                                            that write output, e.g. updateSQL.");
+        stream.println("                                            If not specified, writes to sysout.");
         stream.println(" --help                                     Prints this message");
         stream.println(" --version                                  Prints this version information");
         stream.println("");
@@ -1142,10 +1147,20 @@ public class Main {
 //        return database;
     }
 
-    private Writer getOutputWriter() throws UnsupportedEncodingException {
+    private Writer getOutputWriter() throws UnsupportedEncodingException, IOException {
         String charsetName = LiquibaseConfiguration.getInstance().getConfiguration(GlobalConfiguration.class).getOutputEncoding();
 
-        return new OutputStreamWriter(System.out, charsetName);
+        if (outputFile != null) {
+            try {
+                FileOutputStream fileOut = new FileOutputStream(outputFile, false);
+                return new OutputStreamWriter(fileOut, charsetName);
+            } catch (IOException e) {
+                System.err.printf("Could not create output file %s\n", outputFile);
+                throw e;
+            }
+        } else {
+            return new OutputStreamWriter(System.out, charsetName);
+        }
     }
 
     public boolean isWindows() {
