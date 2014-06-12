@@ -1,5 +1,6 @@
 package liquibase.sqlgenerator;
 
+import liquibase.actiongenerator.ActionGenerator;
 import liquibase.database.Database;
 import liquibase.exception.ValidationErrors;
 import liquibase.exception.Warnings;
@@ -34,22 +35,7 @@ import liquibase.statement.SqlStatement;
  * @see liquibase.statement.SqlStatement
  * @see liquibase.sql.Sql
  */
-public interface SqlGenerator<StatementType extends SqlStatement> extends PrioritizedService {
-
-    public static final int PRIORITY_DEFAULT = 1;
-    public static final int PRIORITY_DATABASE = 5;
-
-    /**
-     * Of all the SqlGenerators that "support" a given SqlStatement/Database, SqlGeneratorFactory will return the one with the highest priority. 
-     * @return
-     */
-    @Override
-    public int getPriority();
-
-    /**
-     * Does this generator support the given statement/database combination? Do not validate the statement with this method, only return if it <i>can</i> suppot it.
-     */
-    public boolean supports(StatementType statement, Database database);
+public interface SqlGenerator<StatementType extends SqlStatement> extends ActionGenerator<StatementType> {
 
     /**
      * Does this change require access to the database metadata?  If true, the change cannot be used in an updateSql-style command.

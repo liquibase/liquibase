@@ -1,5 +1,7 @@
 package liquibase.sqlgenerator;
 
+import liquibase.action.Action;
+import liquibase.actiongenerator.ActionGeneratorChain;
 import liquibase.database.Database;
 import liquibase.exception.ValidationErrors;
 import liquibase.exception.Warnings;
@@ -59,12 +61,27 @@ public class MockSqlGenerator implements SqlGenerator {
     public Warnings warn(SqlStatement sqlStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         return new Warnings();
     }
-    
+
+    @Override
+    public Warnings warn(SqlStatement statement, Database database, ActionGeneratorChain chain) {
+        return warn(statement, database, new SqlGeneratorChain(chain));
+    }
+
     @Override
     public ValidationErrors validate(SqlStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = sqlGeneratorChain.validate(statement, database);
         validationErrors.addAll(errors);
         return validationErrors;
+    }
+
+    @Override
+    public ValidationErrors validate(SqlStatement statement, Database database, ActionGeneratorChain chain) {
+        return validate(statement, database, new SqlGeneratorChain(chain));
+    }
+
+    @Override
+    public Action[] generateActions(SqlStatement statement, Database database, ActionGeneratorChain chain) {
+        return generateSql(statement, database, new SqlGeneratorChain(chain));
     }
 
     @Override

@@ -6,8 +6,8 @@ import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.sdk.Main;
 import liquibase.sdk.TemplateService;
 import liquibase.sdk.exception.UnexpectedLiquibaseSdkException;
-import liquibase.sdk.supplier.database.ConnectionSupplier;
-import liquibase.sdk.supplier.database.ConnectionConfigurationFactory;
+import liquibase.sdk.supplier.database.AbstractDatabaseInstaller;
+import liquibase.sdk.supplier.database.DatabaseInstallerFactory;
 import liquibase.util.StringUtils;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
@@ -103,14 +103,14 @@ public class VagrantCommand extends AbstractCommand {
         mainApp.out(StringUtils.indent("Local Path: " + vagrantInfo.boxDir.getAbsolutePath()));
         mainApp.out(StringUtils.indent("Database Config(s): " + StringUtils.join(databaseConfigs, ", ")));
 
-        Collection<ConnectionSupplier> databases = null;
+        Collection<AbstractDatabaseInstaller> databases = null;
         try {
-            databases = ConnectionConfigurationFactory.getInstance().findConfigurations(databaseConfigs);
-        } catch (ConnectionConfigurationFactory.UnknownDatabaseException e) {
+            databases = DatabaseInstallerFactory.getInstance().findInstallers(databaseConfigs);
+        } catch (DatabaseInstallerFactory.UnknownDatabaseException e) {
             mainApp.fatal(e);
         }
 
-        for (ConnectionSupplier connectionConfig : databases) {
+        for (AbstractDatabaseInstaller connectionConfig : databases) {
             if (vagrantInfo.baseBoxName == null) {
                 vagrantInfo.baseBoxName = connectionConfig.getVagrantBaseBoxName();
             } else {
@@ -139,7 +139,7 @@ public class VagrantCommand extends AbstractCommand {
         mainApp.out("");
 
         int i = 0;
-        for (ConnectionSupplier config : databases) {
+        for (AbstractDatabaseInstaller config : databases) {
             mainApp.out("Database Configuration For '" + config.toString() + "':");
             mainApp.out(StringUtils.indent(config.getDescription()));
             mainApp.out("");
@@ -165,22 +165,22 @@ public class VagrantCommand extends AbstractCommand {
         writeConfigFiles(vagrantInfo, databases);
 
         Set<String> propertiesFiles = new HashSet<String>();
-        for (ConnectionSupplier connectionSupplier : databases) {
+        for (AbstractDatabaseInstaller abstractTestConnection : databases) {
             String fileName;
-            fileName = "liquibase."+vagrantInfo.boxDir.getName()+"-"+connectionSupplier.getDatabaseShortName()+".properties";
+            fileName = "liquibase."+vagrantInfo.boxDir.getName()+"-"+ abstractTestConnection.getDatabaseShortName()+".properties";
 
             String propertiesFile =
                     "### Connection Property File For Vagrant Box '"+ vagrantInfo.boxName+"'\n"+
                     "### Example use: .."+File.separator+".."+File.separator+"liquibase --defaultsFile="+fileName+" update\n\n"+
                     "classpath: changelog\n" +
                     "changeLogFile=com/example/changelog.xml\n" +
-                    "username="+connectionSupplier.getDatabaseUsername()+"\n" +
-                    "password="+connectionSupplier.getDatabaseUsername()+"\n" +
-                    "url="+connectionSupplier.getJdbcUrl()+"\n" +
+                    "username="+ abstractTestConnection.getDatabaseUsername()+"\n" +
+                    "password="+ abstractTestConnection.getDatabaseUsername()+"\n" +
+                    "url="+ abstractTestConnection.getJdbcUrl()+"\n" +
                     "#logLevel=DEBUG\n" +
-                    "#referenceUrl="+connectionSupplier.getJdbcUrl()+"\n" +
-                    "#referenceUsername="+connectionSupplier.getDatabaseUsername()+"\n" +
-                    "#referencePassword="+connectionSupplier.getDatabasePassword()+"\n";
+                    "#referenceUrl="+ abstractTestConnection.getJdbcUrl()+"\n" +
+                    "#referenceUsername="+ abstractTestConnection.getDatabaseUsername()+"\n" +
+                    "#referencePassword="+ abstractTestConnection.getDatabasePassword()+"\n";
 
             fileName = "workspace/" + fileName;
 
@@ -298,7 +298,7 @@ public class VagrantCommand extends AbstractCommand {
 
     }
 
-    private void writePuppetFiles(VagrantInfo vagrantInfo, Collection<ConnectionSupplier> databases) throws Exception {
+    private void writePuppetFiles(VagrantInfo vagrantInfo, Collection<AbstractDatabaseInstaller> databases) throws Exception {
         copyFile("liquibase/sdk/vagrant/shell/bootstrap.sh", new File(vagrantInfo.boxDir, "shell")).setExecutable(true);
         copyFile("liquibase/sdk/vagrant/shell/bootstrap.bat", new File(vagrantInfo.boxDir, "shell")).setExecutable(true);
 
@@ -312,11 +312,11 @@ public class VagrantCommand extends AbstractCommand {
         copyFile("liquibase/sdk/vagrant/modules/my_firewall/manifests/post.pp", new File(modulesDir, "my_firewall/manifests"));
     }
 
-    private void writePuppetFile(VagrantInfo vagrantInfo, Collection<ConnectionSupplier> databases) throws Exception {
+    private void writePuppetFile(VagrantInfo vagrantInfo, Collection<AbstractDatabaseInstaller> databases) throws Exception {
         Set<String> forges = new HashSet<String>();
         Set<String> modules = new HashSet<String>();
 
-        for (ConnectionSupplier config : databases) {
+        for (AbstractDatabaseInstaller config : databases) {
             forges.addAll(config.getPuppetForges(vagrantInfo.boxName));
             modules.addAll(config.getPuppetModules());
         }
@@ -328,17 +328,17 @@ public class VagrantCommand extends AbstractCommand {
         TemplateService.getInstance().write("liquibase/sdk/vagrant/Puppetfile.vm", new File(vagrantInfo.boxDir, "Puppetfile"), context);
     }
 
-    private void writeManifestsInit(VagrantInfo vagrantInfo, Collection<ConnectionSupplier> databases) throws Exception {
+    private void writeManifestsInit(VagrantInfo vagrantInfo, Collection<AbstractDatabaseInstaller> databases) throws Exception {
         File manifestsDir = new File(vagrantInfo.boxDir, "manifests");
         manifestsDir.mkdirs();
 
         Set<String> puppetBlocks = new HashSet<String>();
 
-        for (ConnectionSupplier config : databases) {
+        for (AbstractDatabaseInstaller config : databases) {
             Map<String, Object> context = new HashMap<String, Object>();
             context.put("supplier", config);
 
-            ConnectionSupplier.ConfigTemplate thisInit = config.getPuppetTemplate(context);
+            AbstractDatabaseInstaller.ConfigTemplate thisInit = config.getPuppetTemplate(context);
             if (thisInit != null) {
                 puppetBlocks.add(thisInit.output());
             }
@@ -357,7 +357,7 @@ public class VagrantCommand extends AbstractCommand {
             Set<String> requiredPackages = new HashSet<String>();
             requiredPackages.add("unzip");
 
-            for (ConnectionSupplier config : databases) {
+            for (AbstractDatabaseInstaller config : databases) {
                 requiredPackages.addAll(config.getRequiredPackages(vagrantInfo.boxName));
             }
 
@@ -429,14 +429,14 @@ public class VagrantCommand extends AbstractCommand {
         TemplateService.getInstance().write("liquibase/sdk/vagrant/Vagrantfile.vm", new File(vagrantInfo.boxDir,"Vagrantfile"), context);
     }
 
-    private void writeConfigFiles(VagrantInfo vagrantInfo, Collection<ConnectionSupplier> databases) throws IOException {
+    private void writeConfigFiles(VagrantInfo vagrantInfo, Collection<AbstractDatabaseInstaller> databases) throws IOException {
         Map<String, Object> context = new HashMap<String, Object>();
-        for (ConnectionSupplier config : databases) {
+        for (AbstractDatabaseInstaller config : databases) {
             context.put("supplier", config);
 
-            Set<ConnectionSupplier.ConfigTemplate> configTemplates = config.generateConfigFiles(context);
+            Set<AbstractDatabaseInstaller.ConfigTemplate> configTemplates = config.generateConfigFiles(context);
             if (configTemplates != null) {
-                for (ConnectionSupplier.ConfigTemplate configTemplate : configTemplates) {
+                for (AbstractDatabaseInstaller.ConfigTemplate configTemplate : configTemplates) {
                     File outputFile = new File(vagrantInfo.boxDir+"/modules/conf/" + config.getDatabaseShortName(), configTemplate.getOutputFileName());
                     outputFile.getParentFile().mkdirs();
 

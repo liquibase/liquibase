@@ -14,6 +14,7 @@ import liquibase.database.OfflineConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.ExecutorService;
+import liquibase.logging.LogFactory;
 import liquibase.statement.core.GetViewDefinitionStatement;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
@@ -131,7 +132,7 @@ public class InformixDatabase extends AbstractJdbcDatabase {
                  */
                 ExecutorService.getInstance().getExecutor(this).execute(new RawSqlStatement("EXECUTE PROCEDURE IFX_ALLOW_NEWLINE('T');"));
             } catch (Exception e) {
-                throw new UnexpectedLiquibaseException("Could not allow newline characters in quoted strings with IFX_ALLOW_NEWLINE", e);
+                LogFactory.getInstance().getLog().warning("Could not allow newline characters in quoted strings with IFX_ALLOW_NEWLINE", e);
             }
         }
     }

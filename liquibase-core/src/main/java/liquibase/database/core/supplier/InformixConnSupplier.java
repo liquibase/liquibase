@@ -1,27 +1,20 @@
 package liquibase.database.core.supplier;
 
-import liquibase.sdk.supplier.database.ConnectionSupplier;
+import liquibase.database.Database;
+import liquibase.database.core.InformixDatabase;
+import liquibase.sdk.supplier.database.AbstractTestConnection;
+import liquibase.sdk.supplier.database.JdbcTestConnection;
 
 import java.util.Map;
 
-public class InformixConnSupplier extends ConnectionSupplier {
+public class InformixConnSupplier extends JdbcTestConnection {
     @Override
-    public String getDatabaseShortName() {
-        return "informix";
+    public boolean supports(Database database) {
+        return database instanceof InformixDatabase;
     }
 
     @Override
-    public String getAdminUsername() {
-        return null;
-    }
-
-    @Override
-    public ConfigTemplate getPuppetTemplate(Map<String, Object> context) {
-        return null;
-    }
-
-    @Override
-    public String getJdbcUrl() {
+    protected String getUrl() {
         return "jdbc:informix-sqli://" + getIpAddress() + ":9088/liquibase:informixserver=ol_ids_1150_1";
     }
 }

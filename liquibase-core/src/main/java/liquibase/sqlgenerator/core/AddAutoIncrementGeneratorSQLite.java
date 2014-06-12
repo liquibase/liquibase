@@ -4,12 +4,10 @@ import liquibase.change.ColumnConfig;
 import liquibase.change.ConstraintsConfig;
 import liquibase.database.Database;
 import liquibase.database.core.SQLiteDatabase;
-import liquibase.exception.LiquibaseException;
 import liquibase.exception.ValidationErrors;
-import liquibase.sql.Executable;
+import liquibase.action.Action;
 import liquibase.structure.core.Index;
 import liquibase.exception.DatabaseException;
-import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.sql.Sql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
@@ -58,7 +56,7 @@ public class AddAutoIncrementGeneratorSQLite extends AddAutoIncrementGenerator {
 
     @Override
     public Sql[] generateSql(final AddAutoIncrementStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-        List<Executable> statements = new ArrayList<Executable>();
+        List<Action> statements = new ArrayList<Action>();
 
         // define alter table logic
         SQLiteDatabase.AlterTableVisitor rename_alter_visitor = new SQLiteDatabase.AlterTableVisitor() {

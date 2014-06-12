@@ -2,6 +2,7 @@ package liquibase.util;
 
 import liquibase.database.Database;
 
+import java.lang.reflect.Array;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -292,6 +293,10 @@ public class StringUtils {
         public String toString(Object obj) {
             if (obj == null) {
                 return null;
+            } else if (obj instanceof Object[]) {
+                return "["+StringUtils.join(((Object[]) obj), ", ", this)+"]";
+            } else if (obj instanceof Collection) {
+                return "["+StringUtils.join(((Collection) obj), ", ", this)+"]";
             }
             return obj.toString();
         }

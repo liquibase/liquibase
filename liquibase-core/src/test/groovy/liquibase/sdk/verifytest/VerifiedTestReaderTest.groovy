@@ -6,12 +6,11 @@ class VerifiedTestReaderTest extends Specification {
 
     def "read empty test"() {
         when:
-        def test = new VerifiedTest("com.example.Test", "my test name")
-        def reader = new StringReader(write(test, null))
-        def readTest = new VerifiedTestReader().read(reader)
+        def reader = new StringReader(write([]))
+        def read = new VerifiedTestReader().read(reader)
 
         then:
-        assertTestsSame(test, readTest)
+        assertResultsSame([], read)
 
         cleanup:
         reader.close()
@@ -19,8 +18,8 @@ class VerifiedTestReaderTest extends Specification {
 
     def "read complex test"() {
         when:
-        def test = new VerifiedTestWriterTest().createComplexTest()
-        def testAsString = write(test, null)
+        def permutations = new VerifiedTestWriterTest().createComplexPermutations()
+        def testAsString = write(permutations)
         def reader = new StringReader(testAsString)
         def readTest
         try {
@@ -31,90 +30,39 @@ class VerifiedTestReaderTest extends Specification {
         }
 
         then:
-        assertTestsSame(test, readTest)
+        assertResultsSame(permutations, readTest)
 
         cleanup:
         reader && reader.close()
     }
-
-    def "read complex test with groups"() {
-        when:
-        def test = new VerifiedTestWriterTest().createComplexTest()
-        def testAsStringA = write(test, "Group Param: a")
-        def testAsStringB = write(test, "Group Param: b")
-        def readerA = new StringReader(testAsStringA)
-        def readerB = new StringReader(testAsStringB)
-        def readTest
-        try {
-            readTest = new VerifiedTestReader().read(readerA, readerB)
-        } catch (Throwable e) {
-            println testAsStringA
-            println "---------"
-            println testAsStringB
-            throw e
-        }
-
-        then:
-        assertTestsSame(test, readTest)
-
-        cleanup:
-        readerA && readerA.close()
-        readerB && readerB.close()
-    }
-
 
     def "read complex test with table"() {
         when:
-        def test = new VerifiedTestWriterTest().createComplexTestWithTable()
-        def testAsString = write(test, null)
+        def testPermutations = new VerifiedTestWriterTest().createComplexPermutationsWithTable()
+        def testAsString = write(testPermutations)
         def reader = new StringReader(testAsString)
-        def readTest
+        def readPermutations
         try {
-            readTest = new VerifiedTestReader().read(reader)
+            readPermutations = new VerifiedTestReader().read(reader)
         } catch (Throwable e) {
             println testAsString
             throw e
         }
 
         then:
-        assertTestsSame(test, readTest)
+        assertResultsSame(testPermutations, readPermutations)
 
         cleanup:
         reader && reader.close()
     }
 
-    def "read complex test with table and groups"() {
-        when:
-        def test = new VerifiedTestWriterTest().createComplexTestWithTable()
-        def testAsStringA = write(test, "Group Param: a")
-        def testAsStringB = write(test, "Group Param: b")
-        def readerA = new StringReader(testAsStringA)
-        def readerB = new StringReader(testAsStringB)
-        def readTest
-        try {
-            readTest = new VerifiedTestReader().read(readerA, readerB)
-        } catch (Throwable e) {
-            println testAsStringA
-            println "------"
-            println testAsStringB
-            throw e
-        }
-
-        then:
-        assertTestsSame(test, readTest)
-
-        cleanup:
-        readerA && readerA.close()
-        readerB && readerB.close()
-    }
-
-    def assertTestsSame(expected, actual) {
+    def assertResultsSame(expected, actual) {
         def writer = new VerifiedTestWriter()
         def expectedString = new StringWriter()
         def actualString = new StringWriter()
 
-        writer.write(expected, expectedString, null)
-        writer.write(actual, actualString, null)
+        writer.write("com.example.Test", "assert same", expected, expectedString)
+        writer.write("com.example.Test", "assert same", actual, actualString)
 
         try {
             assert expectedString.toString() == actualString.toString()
@@ -126,9 +74,9 @@ class VerifiedTestReaderTest extends Specification {
         true
     }
 
-    def write(test, group) {
+    def write(permutations) {
         def out = new StringWriter()
-        new VerifiedTestWriter().write(test, out, group)
+        new VerifiedTestWriter().write("com.example.Test", "my test name", permutations, out)
         out.flush()
         out.close()
         return out.toString()

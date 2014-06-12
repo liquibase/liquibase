@@ -1,6 +1,5 @@
 package liquibase.sdk.verifytest;
 
-import liquibase.util.MD5Util;
 import liquibase.util.StringUtils;
 
 import java.io.IOException;
@@ -9,40 +8,38 @@ import java.util.*;
 
 public class VerifiedTestWriter {
 
-    public void write(VerifiedTest test, Writer out, String group) throws IOException {
-        out.append("# Test: ").append(test.getTestClass()).append(" \"").append(test.getTestName()).append("\"");
-        if (group != null) {
-            out.append(" Group \"").append(group).append("\"");
-        }
+    public void write(String testClass, String testName, Collection<TestPermutation> permutations, Writer out) throws IOException {
+        out.append("# Test: ").append(testClass).append(" \"").append(testName).append("\"");
         out.append(" #\n\n");
 
         out.append("NOTE: This output is generated when the test is ran. DO NOT EDIT MANUALLY\n\n");
 
-        printNonTablePermutations(test, out, group);
-        printTablePermutations(test, out, group);
+
+        if (shouldPrintTables(permutations)) {
+            printWithTables(permutations, out);
+        } else {
+            printWithoutTables(permutations, out);
+        }
 
         out.flush();
     }
 
-    protected void printNonTablePermutations(VerifiedTest test, Writer out, String group) throws IOException {
-        List<TestPermutation> permutations = new ArrayList(test.getPermutations());
-        Collections.sort(permutations, new Comparator<TestPermutation>() {
-            @Override
-            public int compare(TestPermutation o1, TestPermutation o2) {
-                return o1.getFullKey().compareTo(o2.getFullKey());
-            }
-        });
+    protected boolean shouldPrintTables(Collection<TestPermutation> permutations) {
+        if (permutations == null || permutations.size() == 0) {
+            return false;
+        }
+
+        TestPermutation permutation = permutations.iterator().next();
+        return permutation.getTableParameters() != null && permutation.getTableParameters().size() > 0;
+
+    }
+
+    protected void printWithoutTables(Collection<TestPermutation> passedPermutations, Writer out) throws IOException {
+        List<TestPermutation> permutations = new ArrayList(passedPermutations);
+        Collections.sort(permutations);
 
         for (TestPermutation permutation : permutations) {
-            if (permutation.getRowDescriptionParameter() != null) {
-                continue;
-            }
-
             if (!permutation.isValid()) {
-                continue;
-            }
-
-            if (group != null && !group.equals(permutation.getGroup())) {
                 continue;
             }
 
@@ -88,17 +85,12 @@ public class VerifiedTestWriter {
         return message;
     }
 
-    protected void printTablePermutations(VerifiedTest test, Writer out, String group) throws IOException {
+    protected void printWithTables(Collection<TestPermutation> passedPermutations, Writer out) throws IOException {
+        List<TestPermutation> permutations = new ArrayList(passedPermutations);
+        Collections.sort(permutations);
+
         SortedMap<String, List<TestPermutation>> permutationsByTable = new TreeMap<String, List<TestPermutation>>();
-        for (TestPermutation permutation : test.getPermutations()) {
-            if (permutation.getRowDescriptionParameter() == null) {
-                continue;
-            }
-
-            if (group != null && !group.equals(permutation.getGroup())) {
-                continue;
-            }
-
+        for (TestPermutation permutation : passedPermutations) {
             String tableKey = permutation.getTableKey();
             if (!permutationsByTable.containsKey(tableKey)) {
                 permutationsByTable.put(tableKey, new ArrayList<TestPermutation>());
@@ -111,21 +103,22 @@ public class VerifiedTestWriter {
         }
 
         for (Map.Entry<String, List<TestPermutation>> entry : permutationsByTable.entrySet()) {
-            String tableKey = entry.getKey();
-            List<TestPermutation> permutations = new ArrayList<TestPermutation>();
+            List<TestPermutation> tablePermutations = new ArrayList<TestPermutation>();
             for (TestPermutation permutation : entry.getValue()) {
                 if (permutation.isValid()) {
-                    permutations.add(permutation);
+                    tablePermutations.add(permutation);
                 }
             }
 
-            if (permutations.size() == 0) {
+            if (tablePermutations.size() == 0) {
                 continue;
             }
 
-            out.append("## Permutation Group for ").append(permutations.get(0).getRowDescriptionParameter()).append(": ").append(MD5Util.computeMD5(tableKey).substring(0, 16)).append(" ##\n\n");
-            for (Map.Entry<String, TestPermutation.Value> descriptionEntry : permutations.get(0).getDescription().entrySet()) {
-                appendMapEntry(descriptionEntry, out);
+            out.append("## Permutations ##\n\n");
+            for (Map.Entry<String, TestPermutation.Value> descriptionEntry : tablePermutations.get(0).getDescription().entrySet()) {
+                if (!tablePermutations.get(0).getTableParameters().contains(descriptionEntry.getKey())) {
+                    appendMapEntry(descriptionEntry, out);
+                }
             }
 
 
@@ -133,7 +126,7 @@ public class VerifiedTestWriter {
             int permutationNameColLength = "Permutation".length();
             int verifiedColLength = "Verified".length();
 
-            for (TestPermutation permutation : permutations) {
+            for (TestPermutation permutation : tablePermutations) {
                 if (permutation.getKey().length() > permutationNameColLength) {
                     permutationNameColLength = permutation.getKey().length();
                 }
@@ -142,17 +135,19 @@ public class VerifiedTestWriter {
                 if (verifiedMessage.length() > verifiedColLength) {
                     verifiedColLength = verifiedMessage.length();
                 }
-                Map<String, TestPermutation.Value> columnMap = permutation.getRowDescription();
-                for (Map.Entry<String, TestPermutation.Value> columnEntry : columnMap.entrySet()) {
-                    Integer oldMax = maxColumnLengths.get(columnEntry.getKey());
+                for (String columnName : permutation.getTableParameters()) {
+                    Integer oldMax = maxColumnLengths.get(columnName);
                     if (oldMax == null) {
-                        oldMax = columnEntry.getKey().length();
-                        maxColumnLengths.put(columnEntry.getKey(), oldMax);
+                        oldMax = columnName.length();
+                        maxColumnLengths.put(columnName, oldMax);
                     }
-                    String value = columnEntry.getValue().serialize();
-                    if (value != null) {
-                        if (oldMax < value.length()) {
-                            maxColumnLengths.put(columnEntry.getKey(), value.length());
+                    TestPermutation.Value storedValue = permutation.getDescription().get(columnName);
+                    if (storedValue != null) {
+                        String value = storedValue.serialize();
+                        if (value != null) {
+                            if (oldMax < value.length()) {
+                                maxColumnLengths.put(columnName, value.length());
+                            }
                         }
                     }
                 }
@@ -167,7 +162,7 @@ public class VerifiedTestWriter {
             out.append(" DETAILS\n");
 
             SortedMap<String, String> permutationRows = new TreeMap<String, String>();
-            for (TestPermutation permutation : permutations) {
+            for (TestPermutation permutation : tablePermutations) {
                 StringBuilder row = new StringBuilder();
                 row.append("| ").append(StringUtils.pad(permutation.getKey(), permutationNameColLength))
                         .append(" | ")
@@ -176,7 +171,7 @@ public class VerifiedTestWriter {
 
                 String rowKey = "";
                 for (Map.Entry<String, Integer> columnAndLength : maxColumnLengths.entrySet()) {
-                    TestPermutation.Value cellValue = permutation.getRowDescription().get(columnAndLength.getKey());
+                    TestPermutation.Value cellValue = permutation.getDescription().get(columnAndLength.getKey());
                     String cellString;
                     if (cellValue == null) {
                         cellString = "";

@@ -1,5 +1,7 @@
 package liquibase.sdk.verifytest;
 
+import junit.framework.AssertionFailedError;
+import liquibase.action.Action;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.sdk.exception.UnexpectedLiquibaseSdkException;
 import liquibase.util.MD5Util;
@@ -7,33 +9,36 @@ import liquibase.util.StringUtils;
 
 import java.util.*;
 
-public class TestPermutation {
+public class TestPermutation implements Comparable<TestPermutation> {
 
     private String notRanMessage;
     private SortedMap<String, Value> data = new TreeMap<String, Value>();
     private SortedMap<String,Value> description = new TreeMap<String, Value>();
-    private String group;
 
-    private TreeMap<String, Value> rowDescription;
-    private String rowDescriptionParameter;
-    private String rowFullKey = "";
     private String key = "";
     private String tableKey = "";
-    private String fullKey = "";
     private SortedMap<String,Value> notes = new TreeMap<String, Value>();
 
-    private List<Setup> setupCommands = new ArrayList<Setup>();
-    private List<Verification> verifications = new ArrayList<Verification>();
-    private List<Cleanup> cleanupCommands = new ArrayList<Cleanup>();
+    private Setup setup;
+    private Verification verification;
+    private Cleanup cleanup;
 
     private boolean valid = true;
     private boolean verified = false;
     private boolean canVerify;
 
     public static OkResult OK = new OkResult();
+    private SortedSet<String> tableParameters;
+    private TestPermutation previousRun;
+    private boolean canSave = false;
 
-    public TestPermutation(VerifiedTest test) {
-        test.addPermutation(this);
+    public TestPermutation(Map<String, Object> parameters) {
+        for (Map.Entry<String, Object> entry : parameters.entrySet()) {
+            if (entry.getValue() != null) {
+                describe(entry.getKey(), entry.getValue());
+            }
+        }
+        recomputeKey();
     }
 
     public String getKey() {
@@ -52,52 +57,31 @@ public class TestPermutation {
         return valid;
     }
 
-    public void setValid(boolean valid) {
+    public TestPermutation setValid(boolean valid) {
         this.valid = valid;
+        return this;
     }
 
     public String getNotRanMessage() {
         return notRanMessage;
     }
 
-    public void setNotRanMessage(String notRanMessage) {
+    public TestPermutation setNotRanMessage(String notRanMessage) {
         this.notRanMessage = notRanMessage;
+        return this;
     }
 
-    public List<Setup> getSetup() {
-        return setupCommands;
+    public SortedSet<String> getTableParameters() {
+        return tableParameters;
     }
 
-    public void addAssertion(Setup setup) {
-        this.setupCommands.add(setup);
-    }
-
-    public void addSetup(Setup setup) {
-        this.setupCommands.add(setup);
+    public TestPermutation setup(Setup setup) {
+        this.setup = setup;
+        return this;
     }
 
     public SortedMap<String, Value> getDescription() {
         return description;
-    }
-
-    public String getGroup() {
-        return group;
-    }
-
-    public String getRowDescriptionParameter() {
-        return rowDescriptionParameter;
-    }
-
-    public Map<String, Value> getRowDescription() {
-        return rowDescription;
-    }
-
-    public String getRowFullKey() {
-        return rowFullKey;
-    }
-
-    public String getFullKey() {
-        return fullKey;
     }
 
     public String getTableKey() {
@@ -118,34 +102,29 @@ public class TestPermutation {
 
     public void describe(String key, Object value, OutputFormat outputFormat) {
         description.put(key, new Value(value, outputFormat));
-        recomputeKey();
-    }
-
-    public void describeAsGroup(String key, Object value) {
-        describeAsGroup(key, value, OutputFormat.DefaultFormat);
-    }
-
-    public void describeAsGroup(String key, Object value, OutputFormat outputFormat) {
-        this.group = key+": "+outputFormat.format(value);
-        describe(key, value);
-    }
-
-    public void describeAsTable(String key, Map value) {
-        describeAsTable(key, value, OutputFormat.DefaultFormat);
-    }
-
-    public void describeAsTable(String key, Map<String, ?> value, OutputFormat outputFormat) {
-        rowDescriptionParameter = key;
-        rowDescription = new TreeMap<String, Value>();
-        for (Map.Entry<String, ?> entry : value.entrySet()) {
-            rowDescription.put(entry.getKey(), new Value(entry.getValue(), outputFormat));
-        }
-
-        recomputeKey();
     }
 
     protected void recomputeKey() {
-        SortedMap<String, Value> fullDescription = new TreeMap<String, Value>(description);
+        if (tableParameters != null && tableParameters.size() > 0) {
+            SortedMap<String, Value> tableDescription = new TreeMap<String, Value>();
+            for (Map.Entry<String, Value> rowEntry : description.entrySet()) {
+                if (!tableParameters.contains(rowEntry.getKey())) {
+                    tableDescription.put(rowEntry.getKey(), rowEntry.getValue());
+                }
+
+            }
+            tableKey = toKey(tableDescription);
+        } else {
+            tableKey = "";
+        }
+        if (description.size() == 0) {
+            key = "";
+        } else {
+            key = toKey(description);
+        }
+    }
+
+    protected String toKey(SortedMap<String, Value> description) {
         StringUtils.StringUtilsFormatter formatter = new StringUtils.StringUtilsFormatter() {
             @Override
             public String toString(Object obj) {
@@ -153,59 +132,62 @@ public class TestPermutation {
             }
         };
 
-        if (rowDescription != null) {
-            for (Map.Entry<String, Value> rowEntry : rowDescription.entrySet()) {
-                fullDescription.put(rowEntry.getKey(), rowEntry.getValue());
-            }
-            rowFullKey = StringUtils.join(rowDescription, ",", formatter);
-        }
-        tableKey = StringUtils.join(description, ",", formatter);
-        fullKey = StringUtils.join(fullDescription, ",", formatter);
-        key = MD5Util.computeMD5(fullKey).substring(0, 16);
+
+        return MD5Util.computeMD5(StringUtils.join(description, ",", formatter)).substring(0, 6);
     }
 
-    public void note(String key, Object value) {
+    public TestPermutation note(String key, Object value) {
         note(key, value, OutputFormat.DefaultFormat);
+        return this;
     }
 
-    public void note(String key, Object value, OutputFormat outputFormat) {
+    public TestPermutation note(String key, Object value, OutputFormat outputFormat) {
         notes.put(key, new Value(value, outputFormat));
+        return this;
     }
 
-    public void data(String key, Object value) {
+    public TestPermutation data(String key, Object value) {
         data(key, value, OutputFormat.DefaultFormat);
+        return this;
     }
 
-    public void data(String key, Object value, OutputFormat outputFormat) {
+    public TestPermutation data(String key, Object value, OutputFormat outputFormat) {
         data.put(key, new Value(value, outputFormat));
+        return this;
     }
 
-    public List<Verification> getVerifications() {
-        return verifications;
+    public TestPermutation cleanup(Cleanup cleanup) {
+        this.cleanup = cleanup;
+        return this;
     }
 
-    public void addVerification(Verification verification) {
-        verifications.add(verification);
-    }
-
-    public List<Cleanup> getCleanup() {
-        return cleanupCommands;
-    }
-
-    public void addCleanup(Cleanup cleanup) {
-        cleanupCommands.add(cleanup);
-    }
-
-    public void test(VerifiedTest test) throws Exception {
-        TestPermutation previousRun = VerifiedTestFactory.getInstance().getSavedRun(test, this);
-
+    public TestPermutation test() throws Exception {
         if (notRanMessage != null) {
-            save(test);
-            return;
+            return this;
+        }
+
+        if (previousRun != null) {
+            if (previousRun.getVerified()) {
+                boolean allEqual = true;
+                if (previousRun.getData().size() == this.getData().size()) {
+                    for (Map.Entry<String, Value> previousData : previousRun.getData().entrySet()) {
+                        if (!previousData.getValue().serialize().equals(this.getData().get(previousData.getKey()).serialize())) {
+                            allEqual = false;
+                            break;
+                        }
+                    }
+                }
+                if (allEqual) {
+                    this.setValid(true);
+                    this.setVerified(true);
+                    canSave = true;
+                    return this;
+                }
+            }
         }
 
         try {
-            for (Setup setup : this.setupCommands) {
+            if (setup != null) {
                 SetupResult result = setup.run();
 
                 if (result == null) {
@@ -215,34 +197,38 @@ public class TestPermutation {
                         valid = false;
                         canVerify = false;
                         notRanMessage = result.getMessage();
-                        break;
                     } else if (!result.canVerify()) {
                         canVerify = false;
                         notRanMessage = result.getMessage();
+                    } else {
+                        valid = true;
+                        canVerify = true;
                     }
                 }
             }
         } catch (Throwable e) {
+            valid = false;
+            canVerify = false;
             SortedMap<String, Value> fullDescription = new TreeMap<String, Value>(description);
-            if (rowDescription != null) {
-                fullDescription.putAll(rowDescription);
-            }
             String message = "Error executing setup\n"+
                     "Description: "+ output(fullDescription)+"\n"+
                     "Notes: "+output(notes)+"\n"+
                     "Data: "+output(data);
-            throw new RuntimeException(message, e);
+            notRanMessage = e.getMessage();
+            throw new UnexpectedLiquibaseException(message, e);
         }
 
         if (!valid || !canVerify) {
-            save(test);
-            return;
+            canSave = true;
+            return this;
         }
 
         Exception cleanupError = null;
         try {
             try {
-                for (Verification verification : this.verifications) {
+                if (this.verification == null) {
+                    throw new UnexpectedLiquibaseSdkException("No expectation set");
+                } else {
                     verification.run();
                 }
             } catch (CannotVerifyException e) {
@@ -250,14 +236,13 @@ public class TestPermutation {
             } catch (Throwable e) {
                 String message = "Error executing verification\n"+
                         "Description: "+ output(description)+"\n"+
-                        (rowDescription == null ? "" : "Row Description: "+output(rowDescription)+"\n")+
                         "Notes: "+output(notes)+"\n"+
                         "Data: "+output(data);
                 throw new RuntimeException(message, e);
             }
             this.verified = true;
         } finally {
-            for (Cleanup cleanup : cleanupCommands) {
+            if (cleanup != null) {
                 try {
                     cleanup.run();
                 } catch (Exception e) {
@@ -270,28 +255,55 @@ public class TestPermutation {
             throw new UnexpectedLiquibaseSdkException("Cleanup error", cleanupError);
         }
 
-        save(test);
+        canSave = true;
+        return this;
     }
 
-    protected void save(VerifiedTest test) throws Exception {
-        VerifiedTestFactory.getInstance().saveRun(test, this);
+    @Override
+    public int compareTo(TestPermutation o) {
+        int i = this.getTableKey().compareTo(o.getTableKey());
+        if (i == 0) {
+            return this.getKey().compareTo(o.getKey());
+        }
+        return i;
     }
 
     private String output(SortedMap<String, Value> map) {
         List<String> out = new ArrayList<String>();
         for (Map.Entry<String, Value> entry : map.entrySet()) {
-            out.add(entry.getKey()+"="+entry.getValue().serialize());
+            out.add(entry.getKey()+"=\""+entry.getValue().serialize()+"\"");
         }
 
         return StringUtils.join(out, ", ");
+    }
+
+    public boolean getCanSave() {
+        return canSave;
     }
 
     public boolean getVerified() {
         return verified;
     }
 
-    public void setVerified(boolean verified) {
+    public TestPermutation setVerified(boolean verified) {
         this.verified = verified;
+        return this;
+    }
+
+    public TestPermutation asTable(Collection<String> tableParameters) {
+        this.tableParameters = new TreeSet<String>(tableParameters);
+        recomputeKey();
+        return this;
+    }
+
+    public TestPermutation setPreviousRun(TestPermutation previousRun) {
+        this.previousRun = previousRun;
+        return this;
+    }
+
+    public TestPermutation expect(Verification logic) {
+        verification = logic;
+        return this;
     }
 
     public static interface SetupResult {
@@ -373,7 +385,7 @@ public class TestPermutation {
 
 
     public static interface Setup {
-        public SetupResult run();
+        public SetupResult run() throws Exception;
     }
 
     public static interface Verification {

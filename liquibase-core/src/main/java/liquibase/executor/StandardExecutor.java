@@ -1,7 +1,9 @@
 package liquibase.executor;
 
+import liquibase.action.Action;
+import liquibase.action.ExecuteAction;
+import liquibase.action.QueryAction;
 import liquibase.exception.DatabaseException;
-import liquibase.executor.*;
 import liquibase.logging.LogFactory;
 import liquibase.logging.Logger;
 import liquibase.sql.*;
@@ -18,32 +20,32 @@ public class StandardExecutor extends AbstractExecutor {
 
     @Override
     public QueryResult query(SqlStatement sql, ExecutionOptions options) throws DatabaseException {
-        Executable[] executables = generateExecutables(sql);
+        Action[] actions = generateActions(sql);
 
-        if (executables.length != 1) {
+        if (actions.length != 1) {
             throw new DatabaseException("Can only query with statements that return one executable");
         }
 
-        Executable executable = executables[0];
+        Action action = actions[0];
 
-        if (!(executable instanceof ExecutableQuery)) {
-            throw new DatabaseException("Cannot query "+executable.getClass().getName());
+        if (!(action instanceof QueryAction)) {
+            throw new DatabaseException("Cannot query "+ action.getClass().getName());
         }
 
-        return ((ExecutableQuery) executable).query(options);
+        return ((QueryAction) action).query(options);
     }
 
 
     @Override
     public ExecuteResult execute(SqlStatement sql, ExecutionOptions options) throws DatabaseException {
-        Executable[] executables = generateExecutables(sql);
-        for (Executable executable : executables) {
-            if (!(executable instanceof ExecutableExecute)) {
-                throw new DatabaseException("Cannot execute "+executable.getClass().getName());
+        Action[] actions = generateActions(sql);
+        for (Action action : actions) {
+            if (!(action instanceof ExecuteAction)) {
+                throw new DatabaseException("Cannot execute "+ action.getClass().getName());
             }
         }
-        for (Executable executable : executables) {
-            ((ExecutableExecute) executable).execute(options);
+        for (Action action : actions) {
+            ((ExecuteAction) action).execute(options);
         }
         return new ExecuteResult();
     }
@@ -51,19 +53,19 @@ public class StandardExecutor extends AbstractExecutor {
 
     @Override
     public UpdateResult update(SqlStatement sql, ExecutionOptions options) throws DatabaseException {
-        Executable[] executables = generateExecutables(sql);
+        Action[] actions = generateActions(sql);
 
-        if (executables.length != 1) {
+        if (actions.length != 1) {
             throw new DatabaseException("Can only update with statements that return one executable");
         }
 
-        Executable executable = executables[0];
+        Action action = actions[0];
 
-        if (!(executable instanceof ExecutableUpdate)) {
-            throw new DatabaseException("Cannot update "+executable.getClass().getName());
+        if (!(action instanceof UpdateAction)) {
+            throw new DatabaseException("Cannot update "+ action.getClass().getName());
         }
 
-        return ((ExecutableUpdate) executable).update(options);
+        return ((UpdateAction) action).update(options);
     }
 
     @Override

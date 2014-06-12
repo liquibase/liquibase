@@ -1,6 +1,8 @@
 package liquibase.sqlgenerator;
 
 import static org.junit.Assert.*;
+
+import liquibase.actiongenerator.ActionGenerator;
 import org.junit.Test;
 
 public class GeneratorLevelTest {
@@ -8,7 +10,7 @@ public class GeneratorLevelTest {
     @SuppressWarnings("unchecked")
 	@Test
     public void checkLevelsAndNaming() {
-        for (SqlGenerator generator : SqlGeneratorFactory.getInstance().getGenerators()) {
+        for (ActionGenerator generator : SqlGeneratorFactory.getInstance().getGenerators()) {
             int specializationlevel = generator.getPriority();
             String className = generator.getClass().getName();
             if (className.contains(".ext.")) {

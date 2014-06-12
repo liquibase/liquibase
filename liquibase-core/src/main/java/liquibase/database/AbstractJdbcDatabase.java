@@ -843,10 +843,14 @@ public abstract class AbstractJdbcDatabase implements Database {
     @Override
     public String toString() {
         if (getConnection() == null) {
-            return getShortName() + " Database";
+            return getShortName() + " database";
         }
 
-        return getConnection().getConnectionUserName() + " @ " + getConnection().getURL() + (getDefaultSchemaName() == null ? "" : " (Default Schema: " + getDefaultSchemaName() + ")");
+        String out = getConnection().getURL();
+        if (getConnection().getConnectionUserName() != null) {
+            out = getConnection().getConnectionUserName() + " @ " + out;
+        }
+        return out;
     }
 
 

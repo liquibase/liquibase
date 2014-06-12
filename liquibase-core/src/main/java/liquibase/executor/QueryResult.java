@@ -14,6 +14,8 @@ public class QueryResult {
     public QueryResult(Object singleValue) {
         if (singleValue == null) {
             this.resultSet = Collections.unmodifiableList(new ArrayList<Map<String, Object>>());
+        } else if (singleValue instanceof List) {
+            this.resultSet = Collections.unmodifiableList((List) singleValue);
         } else {
             Map<String, Object> map = new HashMap<String, Object>();
             map.put("value", singleValue);
@@ -105,6 +107,10 @@ public class QueryResult {
             return null;
         }
         return ObjectUtil.convert(value, type);
+    }
+
+    public int size() {
+        return resultSet.size();
     }
 
 

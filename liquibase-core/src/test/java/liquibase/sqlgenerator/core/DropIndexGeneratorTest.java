@@ -3,6 +3,8 @@ package liquibase.sqlgenerator.core;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import liquibase.actiongenerator.ActionGenerator;
+import liquibase.actiongenerator.ActionGeneratorChain;
 import liquibase.database.Database;
 import liquibase.database.core.PostgresDatabase;
 import liquibase.sql.Sql;
@@ -56,8 +58,8 @@ public class DropIndexGeneratorTest {
 		DropIndexGenerator dropIndexGenerator = new DropIndexGenerator();
 		DropIndexStatement statement = new DropIndexStatement("indexName", "defaultCatalog", "defaultSchema", "aTable", null);
 		Database database = new PostgresDatabase();
-		SortedSet<SqlGenerator> sqlGenerators = new TreeSet<SqlGenerator>();
-		SqlGeneratorChain sqlGenerationChain = new SqlGeneratorChain(sqlGenerators);
+		SortedSet<ActionGenerator> sqlGenerators = new TreeSet<ActionGenerator>();
+		SqlGeneratorChain sqlGenerationChain = new SqlGeneratorChain(new ActionGeneratorChain(sqlGenerators));
 		Sql[] sqls = dropIndexGenerator.generateSql(statement, database, sqlGenerationChain);
 		assertEquals("DROP INDEX \"defaultSchema\".\"indexName\"", sqls[0].toSql());
 

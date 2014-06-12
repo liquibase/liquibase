@@ -1,9 +1,10 @@
 package liquibase.executor;
 
 import liquibase.RuntimeEnvironment;
+import liquibase.actiongenerator.ActionGeneratorFactory;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
-import liquibase.sql.Executable;
+import liquibase.action.Action;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.SqlStatement;
 
@@ -48,7 +49,7 @@ public abstract class AbstractExecutor implements Executor {
         return new ExecutionOptions(new RuntimeEnvironment(database, null));
     }
 
-    protected Executable[] generateExecutables(SqlStatement statement) {
-        return SqlGeneratorFactory.getInstance().generateSql(statement, database);
+    protected Action[] generateActions(SqlStatement statement) throws DatabaseException {
+        return ActionGeneratorFactory.getInstance().generateActions(statement, database);
     }
 }

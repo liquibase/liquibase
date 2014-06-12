@@ -493,7 +493,7 @@ public class JdbcConnection implements DatabaseConnection {
 
             return new ExecuteResult();
         } catch (SQLException e) {
-            throw new DatabaseException(e);
+            throw new DatabaseException("Error executing '"+sql+"': "+e.getMessage(), e);
         } finally {
             JdbcUtils.closeStatement(stmt);
         }

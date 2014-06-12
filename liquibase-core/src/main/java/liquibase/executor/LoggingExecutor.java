@@ -3,7 +3,7 @@ package liquibase.executor;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 import liquibase.servicelocator.LiquibaseService;
-import liquibase.sql.Executable;
+import liquibase.action.Action;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.*;
@@ -64,12 +64,12 @@ public class LoggingExecutor extends AbstractExecutor {
             if (SqlGeneratorFactory.getInstance().generateStatementsVolatile(sql, database)) {
                 throw new DatabaseException(sql.getClass().getSimpleName()+" requires access to up to date database metadata which is not available in SQL output mode");
             }
-            for (Executable executable : generateExecutables(sql)) {
-                if (executable == null) {
+            for (Action action : generateActions(sql)) {
+                if (action == null) {
                     continue;
                 }
 
-                output.write(executable.toString(options));
+                output.write(action.toString(options));
                 output.write(StreamUtil.getLineSeparator());
                 output.write(StreamUtil.getLineSeparator());
             }

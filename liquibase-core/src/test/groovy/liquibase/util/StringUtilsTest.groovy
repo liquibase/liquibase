@@ -124,4 +124,22 @@ class StringUtilsTest extends Specification {
         "abc"   | 5   | "abc  "
         "abc "  | 5   | "abc  "
     }
+
+    @Unroll
+    def "toStringFormatter"() {
+        expect:
+        new StringUtils.ToStringFormatter().toString(obj) == expected
+
+        where:
+        obj                  | expected
+        null                 | null
+        ""                   | ""
+        "x"                  | "x"
+        ["a", "b"]           | "[a, b]"
+        ["a", "b"].toArray() | "[a, b]"
+        [1, 2]               | "[1, 2]"
+        [1, 2].toArray()     | "[1, 2]"
+        ["a", [1,2]].toArray() | "[a, [1, 2]]"
+    }
 }
+
