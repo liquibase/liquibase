@@ -901,7 +901,7 @@ public class Main {
             } else if ("snapshot".equalsIgnoreCase(command)) {
                 SnapshotCommand command = new SnapshotCommand();
                 command.setDatabase(database);
-                command.setSchemas(getCommandParam("schemas", database.getDefaultSchema().toString()));
+                command.setSchemas(getCommandParam("schemas", database.getDefaultSchema().getSchemaName()));
                 System.out.println(command.execute());
                 return;
             } else if ("executeSql".equalsIgnoreCase(command)) {
@@ -915,7 +915,7 @@ public class Main {
                 SnapshotCommand command = new SnapshotCommand();
                 Database referenceDatabase = createReferenceDatabaseFromCommandParams(commandParams);
                 command.setDatabase(referenceDatabase);
-                command.setSchemas(getCommandParam("schemas", referenceDatabase.getDefaultSchema().toString()));
+                command.setSchemas(getCommandParam("schemas", referenceDatabase.getDefaultSchema().getSchemaName()));
                 System.out.println(command.execute());
                 return;
             }
