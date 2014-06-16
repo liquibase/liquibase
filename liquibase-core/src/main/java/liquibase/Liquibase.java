@@ -200,6 +200,7 @@ public class Liquibase {
             } catch (LockException e) {
                 log.severe("Could not release lock", e);
             }
+            resetServices();
         }
     }
 
@@ -253,6 +254,7 @@ public class Liquibase {
         }
 
         ExecutorService.getInstance().setExecutor(database, oldTemplate);
+        resetServices();
     }
 
     public void update(int changesToApply, String contexts) throws LiquibaseException {
@@ -281,6 +283,7 @@ public class Liquibase {
             logIterator.run(createUpdateVisitor(), new RuntimeEnvironment(database, contexts));
         } finally {
             lockService.releaseLock();
+            resetServices();
         }
     }
 
@@ -305,6 +308,7 @@ public class Liquibase {
             throw new LiquibaseException(e);
         }
 
+        resetServices();
         ExecutorService.getInstance().setExecutor(database, oldTemplate);
     }
 
@@ -347,6 +351,7 @@ public class Liquibase {
             throw new LiquibaseException(e);
         }
         ExecutorService.getInstance().setExecutor(database, oldTemplate);
+        resetServices();
     }
 
     public void rollback(int changesToRollback, String contexts) throws LiquibaseException {
@@ -378,6 +383,7 @@ public class Liquibase {
             } catch (LockException e) {
                 log.severe("Error releasing lock", e);
             }
+            resetServices();
         }
     }
 
@@ -401,6 +407,7 @@ public class Liquibase {
             throw new LiquibaseException(e);
         }
         ExecutorService.getInstance().setExecutor(database, oldTemplate);
+        resetServices();
     }
 
     public void rollback(String tagToRollBackTo, String contexts) throws LiquibaseException {
@@ -431,6 +438,7 @@ public class Liquibase {
         } finally {
             lockService.releaseLock();
         }
+        resetServices();
     }
 
     public void rollback(Date dateToRollBackTo, String contexts, Writer output) throws LiquibaseException {
@@ -453,6 +461,7 @@ public class Liquibase {
             throw new LiquibaseException(e);
         }
         ExecutorService.getInstance().setExecutor(database, oldTemplate);
+        resetServices();
     }
 
     public void rollback(Date dateToRollBackTo, String contexts) throws LiquibaseException {
@@ -481,6 +490,7 @@ public class Liquibase {
         } finally {
             lockService.releaseLock();
         }
+        resetServices();
     }
 
     public void changeLogSync(String contexts, Writer output) throws LiquibaseException {
@@ -505,6 +515,7 @@ public class Liquibase {
         }
 
         ExecutorService.getInstance().setExecutor(database, oldTemplate);
+        resetServices();
     }
 
     public void changeLogSync(String contexts) throws LiquibaseException {
@@ -530,6 +541,7 @@ public class Liquibase {
             logIterator.run(new ChangeLogSyncVisitor(database, changeLogSyncListener), new RuntimeEnvironment(database, contexts));
         } finally {
             lockService.releaseLock();
+            resetServices();
         }
     }
 
@@ -556,6 +568,7 @@ public class Liquibase {
         }
 
         ExecutorService.getInstance().setExecutor(database, oldTemplate);
+        resetServices();
     }
 
     public void markNextChangeSetRan(String contexts) throws LiquibaseException {
@@ -582,6 +595,7 @@ public class Liquibase {
             logIterator.run(new ChangeLogSyncVisitor(database), new RuntimeEnvironment(database, contexts));
         } finally {
             lockService.releaseLock();
+            resetServices();
         }
     }
 
@@ -641,9 +655,7 @@ public class Liquibase {
         } finally {
             lockService.releaseLock();
             ExecutorService.getInstance().setExecutor(database, oldTemplate);
-            LockServiceFactory.getInstance().resetAll();
-            ChangeLogHistoryServiceFactory.getInstance().resetAll();
-            ExecutorService.getInstance().reset();
+            resetServices();
         }
 
         try {
@@ -652,6 +664,12 @@ public class Liquibase {
             throw new LiquibaseException(e);
         }
 
+    }
+
+    protected void resetServices() {
+        LockServiceFactory.getInstance().resetAll();
+        ChangeLogHistoryServiceFactory.getInstance().resetAll();
+        ExecutorService.getInstance().reset();
     }
 
     /**
@@ -683,6 +701,7 @@ public class Liquibase {
             } catch (LockException e) {
                 log.severe("Unable to release lock: " + e.getMessage());
             }
+            resetServices();
         }
     }
 
@@ -908,6 +927,7 @@ public class Liquibase {
         } finally {
             lockService.releaseLock();
         }
+        resetServices();
     }
 
     public final CheckSum calculateCheckSum(final String changeSetIdentifier) throws LiquibaseException {
