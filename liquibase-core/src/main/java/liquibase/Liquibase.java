@@ -641,6 +641,9 @@ public class Liquibase {
         } finally {
             lockService.releaseLock();
             ExecutorService.getInstance().setExecutor(database, oldTemplate);
+            LockServiceFactory.getInstance().resetAll();
+            ChangeLogHistoryServiceFactory.getInstance().resetAll();
+            ExecutorService.getInstance().reset();
         }
 
         try {
