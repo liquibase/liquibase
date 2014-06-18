@@ -13,14 +13,12 @@ import liquibase.sdk.supplier.database.DatabaseSupplier
 import liquibase.sdk.verifytest.TestPermutation
 import liquibase.sdk.verifytest.VerifyService
 import liquibase.statement.core.CreateTableStatement
-import liquibase.statement.core.DescribeTablesStatement
-import org.junit.Rule
-import org.junit.rules.TestName
+import liquibase.statement.core.FetchObjectsStatement
 import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.Unroll
 
-class DescribeTablesGeneratorTest extends Specification {
+class FetchTablesSnapshotGeneratorTest extends Specification {
 
     @Shared databaseSupplier = new DatabaseSupplier()
     @Shared connectionSupplier = new ConnectionSupplier()
@@ -32,7 +30,7 @@ class DescribeTablesGeneratorTest extends Specification {
         def schemaName = null
         def catalogName = null
         def tableName = "table_name"
-        def statement = new DescribeTablesStatement(schemaName, catalogName, tableName)
+        def statement = new FetchObjectsStatement(schemaName, catalogName, tableName)
 
         def database = connection.getDatabase();
 
@@ -72,7 +70,7 @@ class DescribeTablesGeneratorTest extends Specification {
         def verifyService = VerifyService.getInstance(this.class.name, "tableExists");
         def schemaName = null
         def catalogName = null
-        def statement = new DescribeTablesStatement(catalogName, schemaName, tableName)
+        def statement = new FetchObjectsStatement(catalogName, schemaName, tableName)
 
         def database = connection.getDatabase();
 

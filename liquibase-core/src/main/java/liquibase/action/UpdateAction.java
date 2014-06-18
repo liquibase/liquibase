@@ -1,4 +1,4 @@
-package liquibase.sql;
+package liquibase.action;
 
 import liquibase.action.Action;
 import liquibase.exception.DatabaseException;

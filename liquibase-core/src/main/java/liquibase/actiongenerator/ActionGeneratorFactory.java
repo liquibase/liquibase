@@ -30,7 +30,6 @@ public class ActionGeneratorFactory {
     //caches for expensive reflection based calls that slow down Liquibase initialization: CORE-1207
     private final Map<Class<?>, Type[]> genericInterfacesCache = new HashMap<Class<?>, Type[]>();
     private final Map<Class<?>, Type> genericSuperClassCache = new HashMap<Class<?>, Type>();
-    private Map<String, SortedSet<ActionGenerator>> generatorsByKey = new HashMap<String, SortedSet<ActionGenerator>>();
 
     private ActionGeneratorFactory() {
         Class[] classes;
@@ -95,10 +94,6 @@ public class ActionGeneratorFactory {
         }
         String key = statement.getClass().getName()+":"+ databaseName;
 
-        if (generatorsByKey.containsKey(key)) {
-            return generatorsByKey.get(key);
-        }
-
         SortedSet<ActionGenerator> validGenerators = new TreeSet<ActionGenerator>(new ActionGeneratorComparator());
 
         for (ActionGenerator generator : getGenerators()) {
@@ -124,7 +119,6 @@ public class ActionGeneratorFactory {
             }
         }
 
-        generatorsByKey.put(key, validGenerators);
         return validGenerators;
     }
 

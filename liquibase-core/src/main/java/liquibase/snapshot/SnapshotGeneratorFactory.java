@@ -1,17 +1,28 @@
 package liquibase.snapshot;
 
 import liquibase.CatalogAndSchema;
+import liquibase.RuntimeEnvironment;
+import liquibase.action.Action;
+import liquibase.action.MetaDataQueryAction;
+import liquibase.action.QueryAction;
+import liquibase.actiongenerator.ActionGeneratorChain;
+import liquibase.actiongenerator.ActionGeneratorFactory;
 import liquibase.database.Database;
 import liquibase.database.OfflineConnection;
 import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.executor.ExecutionOptions;
 import liquibase.servicelocator.ServiceLocator;
+import liquibase.snapshot.core.ColumnSnapshotGenerator;
+import liquibase.snapshot.core.TableSnapshotGenerator;
+import liquibase.statement.SqlStatement;
 import liquibase.structure.DatabaseObject;
+import liquibase.structure.DatabaseObjectCollection;
+import liquibase.structure.core.Column;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
 public class SnapshotGeneratorFactory {
@@ -131,8 +142,75 @@ public class SnapshotGeneratorFactory {
     }
 
     public <T extends DatabaseObject> T createSnapshot(T example, Database database, SnapshotControl snapshotControl) throws DatabaseException, InvalidExampleException {
-        DatabaseSnapshot snapshot = createSnapshot(new DatabaseObject[]{example}, database, snapshotControl);
-        return snapshot.get(example);
+//        QueryResult results = ExecutorService.getInstance().getExecutor(database).query(new FetchObjectsStatement(example), new ExecutionOptions(new RuntimeEnvironment(database, null)));
+//        DatabaseObject result = results.toObject(example.getClass());
+//
+//
+//
+//        return (T) result;
+
+        AbstractSnapshotGenerator generator = new TableSnapshotGenerator();
+        List<SqlStatement> sqlStatements = new ArrayList<SqlStatement>();
+        RuntimeEnvironment runtimeEnvironment = new RuntimeEnvironment(database, null);
+        sqlStatements.add(generator.generateLookupStatement(example, runtimeEnvironment, new ActionGeneratorChain(null)));
+        sqlStatements.addAll(Arrays.asList(generator.generateAddToStatements(example, runtimeEnvironment, new ActionGeneratorChain(null))));
+
+        DatabaseObjectCollection collection = new DatabaseObjectCollection(database);
+        List<Action> actions = new ArrayList<Action>();
+        for (SqlStatement statement : sqlStatements) {
+            if (ActionGeneratorFactory.getInstance().supports(statement, database)) {
+                Action[] actionArray = ActionGeneratorFactory.getInstance().generateActions(statement, database);
+                if (actionArray == null || actionArray.length == 0) {
+                    continue;
+                }
+                if (actionArray.length == 1) {
+                    actions.add(actionArray[0]);
+                }
+                if (actionArray.length > 1) {
+                    throw new UnexpectedLiquibaseException("Too many actions generated from "+statement);
+                }
+            }
+        }
+
+        for (Action action : mergeActions(actions)) {
+            for (DatabaseObject object : ((QueryAction) action).query(new ExecutionOptions(runtimeEnvironment)).toList(DatabaseObject.class)) {
+                collection.add(object);
+            }
+        }
+
+        for (DatabaseObject object : collection.get(Table.class)) {
+            new TableSnapshotGenerator().addTo((Table) object, collection, runtimeEnvironment, new ActionGeneratorChain(null));
+        }
+
+        for (DatabaseObject object : collection.get(Column.class)) {
+            new ColumnSnapshotGenerator().addTo((Column) object, collection, runtimeEnvironment, new ActionGeneratorChain(null));
+        }
+
+        System.out.println(collection);
+
+        return collection.get(example);
+    }
+
+    public List<Action> mergeActions(List<Action> originalList) {
+        if (originalList == null || originalList.size() < 2) {
+            return originalList;
+        }
+
+        List<Action> returnList = new ArrayList<Action>(originalList);
+
+        for (int i=0; i< returnList.size(); i++) {
+            Action baseAction = returnList.get(i);
+            ListIterator<Action> iterator = returnList.listIterator(i + 1);
+            while (iterator.hasNext()) {
+                MetaDataQueryAction compareAction = (MetaDataQueryAction) iterator.next();
+                QueryAction mergedAction = ((MetaDataQueryAction) baseAction).merge(compareAction);
+                if (mergedAction != null) {
+                    iterator.remove();
+                }
+            }
+        }
+
+        return returnList;
     }
 
     public Table getDatabaseChangeLogTable(SnapshotControl snapshotControl, Database database) throws DatabaseException {

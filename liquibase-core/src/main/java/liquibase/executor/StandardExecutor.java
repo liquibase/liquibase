@@ -3,10 +3,10 @@ package liquibase.executor;
 import liquibase.action.Action;
 import liquibase.action.ExecuteAction;
 import liquibase.action.QueryAction;
+import liquibase.action.UpdateAction;
 import liquibase.exception.DatabaseException;
 import liquibase.logging.LogFactory;
 import liquibase.logging.Logger;
-import liquibase.sql.*;
 import liquibase.statement.*;
 
 public class StandardExecutor extends AbstractExecutor {

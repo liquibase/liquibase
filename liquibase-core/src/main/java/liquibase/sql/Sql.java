@@ -2,6 +2,7 @@ package liquibase.sql;
 
 import liquibase.action.ExecuteAction;
 import liquibase.action.QueryAction;
+import liquibase.action.UpdateAction;
 import liquibase.structure.DatabaseObject;
 
 import java.util.Collection;
