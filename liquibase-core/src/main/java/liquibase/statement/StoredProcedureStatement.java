@@ -1,5 +1,7 @@
 package liquibase.statement;
 
+import liquibase.structure.DatabaseObject;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -38,4 +40,8 @@ public class StoredProcedureStatement extends AbstractSqlStatement implements Ca
         return -1;
     }
 
+    @Override
+    protected DatabaseObject[] getBaseAffectedDatabaseObjects() {
+        return null;
+    }
 }

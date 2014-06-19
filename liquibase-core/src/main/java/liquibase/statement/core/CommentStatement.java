@@ -1,6 +1,7 @@
 package liquibase.statement.core;
 
 import liquibase.statement.AbstractSqlStatement;
+import liquibase.structure.DatabaseObject;
 
 public class CommentStatement extends AbstractSqlStatement {
 	final private String text;
@@ -26,4 +27,9 @@ public class CommentStatement extends AbstractSqlStatement {
 	public String getText() {
 		return text;
 	}
+
+    @Override
+    protected DatabaseObject[] getBaseAffectedDatabaseObjects() {
+        return null;
+    }
 }

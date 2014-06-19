@@ -1,6 +1,7 @@
 package liquibase.statement.core;
 
 import liquibase.statement.AbstractSqlStatement;
+import liquibase.structure.DatabaseObject;
 
 public class SelectFromDatabaseChangeLogLockStatement extends AbstractSqlStatement {
 
@@ -12,5 +13,10 @@ public class SelectFromDatabaseChangeLogLockStatement extends AbstractSqlStateme
 
     public String[] getColumnsToSelect() {
         return columnsToSelect;
+    }
+
+    @Override
+    protected DatabaseObject[] getBaseAffectedDatabaseObjects() {
+        return null;
     }
 }

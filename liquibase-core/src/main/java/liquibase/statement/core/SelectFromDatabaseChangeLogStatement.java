@@ -1,6 +1,7 @@
 package liquibase.statement.core;
 
 import liquibase.statement.AbstractSqlStatement;
+import liquibase.structure.DatabaseObject;
 
 public class SelectFromDatabaseChangeLogStatement extends AbstractSqlStatement {
 
@@ -33,6 +34,11 @@ public class SelectFromDatabaseChangeLogStatement extends AbstractSqlStatement {
         this.orderByColumns = columns;
 
         return this;
+    }
+
+    @Override
+    protected DatabaseObject[] getBaseAffectedDatabaseObjects() {
+        return null;
     }
 
     public static interface WhereClause {

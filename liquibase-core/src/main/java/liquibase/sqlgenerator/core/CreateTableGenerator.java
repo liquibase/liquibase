@@ -121,7 +121,7 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
                     if( autoIncrementConstraint.getStartWith() != null ){
 	                    if (database instanceof PostgresDatabase) {
 	                        String sequenceName = statement.getTableName()+"_"+column+"_seq";
-	                        additionalSql.add(new UnparsedSql("alter sequence "+database.escapeSequenceName(statement.getCatalogName(), statement.getSchemaName(), sequenceName)+" start with "+autoIncrementConstraint.getStartWith(), new Sequence().setName(sequenceName).setSchema(statement.getCatalogName(), statement.getSchemaName())));
+	                        additionalSql.add(new UnparsedSql("alter sequence "+database.escapeSequenceName(statement.getCatalogName(), statement.getSchemaName(), sequenceName)+" start with "+autoIncrementConstraint.getStartWith()));
 	                    }else if(database instanceof MySQLDatabase){
 	                    	mysqlTableOptionStartWith = autoIncrementConstraint.getStartWith();
 	                    }
@@ -287,12 +287,8 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
         if( database instanceof MySQLDatabase && statement.getRemarks() != null) {
             sql += " COMMENT='"+database.escapeStringForDatabase(statement.getRemarks())+"' ";
         }
-        additionalSql.add(0, new UnparsedSql(sql, getAffectedTable(statement)));
+        additionalSql.add(0, new UnparsedSql(sql));
         return additionalSql.toArray(new Sql[additionalSql.size()]);
-    }
-
-    protected Relation getAffectedTable(CreateTableStatement statement) {
-        return new Table().setName(statement.getTableName()).setSchema(new Schema(statement.getCatalogName(), statement.getSchemaName()));
     }
 
     private boolean constraintNameAfterUnique(Database database) {

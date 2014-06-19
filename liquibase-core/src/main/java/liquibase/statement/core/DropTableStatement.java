@@ -1,6 +1,9 @@
 package liquibase.statement.core;
 
 import liquibase.statement.AbstractSqlStatement;
+import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.Relation;
+import liquibase.structure.core.Table;
 
 public class DropTableStatement extends AbstractSqlStatement {
 
@@ -30,5 +33,12 @@ public class DropTableStatement extends AbstractSqlStatement {
 
     public boolean isCascadeConstraints() {
         return cascadeConstraints;
+    }
+
+    @Override
+    protected DatabaseObject[] getBaseAffectedDatabaseObjects() {
+        return new DatabaseObject[] {
+            new Table().setName(getTableName()).setSchema(getCatalogName(), getSchemaName())
+        };
     }
 }

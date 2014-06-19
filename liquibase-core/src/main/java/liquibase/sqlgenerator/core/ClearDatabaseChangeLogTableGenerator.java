@@ -24,8 +24,7 @@ public class ClearDatabaseChangeLogTableGenerator extends AbstractSqlGenerator<C
             schemaName = database.getLiquibaseSchemaName();
         }
         return new Sql[] {
-                new UnparsedSql("DELETE FROM " + database.escapeTableName(database.getLiquibaseCatalogName(), schemaName, database.getDatabaseChangeLogTableName()),
-                        getAffectedTable(database, schemaName)) };
+                new UnparsedSql("DELETE FROM " + database.escapeTableName(database.getLiquibaseCatalogName(), schemaName, database.getDatabaseChangeLogTableName())) };
     }
 
     protected Relation getAffectedTable(Database database, String schemaName) {

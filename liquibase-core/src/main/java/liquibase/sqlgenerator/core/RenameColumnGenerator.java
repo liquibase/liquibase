@@ -64,15 +64,7 @@ public class RenameColumnGenerator extends AbstractSqlGenerator<RenameColumnStat
         }
 
         return new Sql[] {
-                new UnparsedSql(sql, getAffectedOldColumn(statement), getAffectedNewColumn(statement))
+                new UnparsedSql(sql)
         };
-    }
-
-    protected Column getAffectedOldColumn(RenameColumnStatement statement) {
-        return new Column().setName(statement.getOldColumnName()).setRelation(new Table().setName(statement.getTableName()).setSchema(statement.getCatalogName(), statement.getSchemaName()));
-    }
-
-    protected Column getAffectedNewColumn(RenameColumnStatement statement) {
-        return new Column().setName(statement.getNewColumnName()).setRelation(new Table().setName(statement.getTableName()).setSchema(statement.getCatalogName(), statement.getSchemaName()));
     }
 }

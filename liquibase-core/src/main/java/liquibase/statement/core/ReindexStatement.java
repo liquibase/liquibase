@@ -1,6 +1,7 @@
 package liquibase.statement.core;
 
 import liquibase.statement.AbstractSqlStatement;
+import liquibase.structure.DatabaseObject;
 
 public class ReindexStatement extends AbstractSqlStatement {
 
@@ -24,5 +25,10 @@ public class ReindexStatement extends AbstractSqlStatement {
 
     public String getTableName() {
         return tableName;
+    }
+
+    @Override
+    protected DatabaseObject[] getBaseAffectedDatabaseObjects() {
+        return null;
     }
 }

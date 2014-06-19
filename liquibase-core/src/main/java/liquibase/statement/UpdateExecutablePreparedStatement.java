@@ -2,6 +2,7 @@ package liquibase.statement;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 import liquibase.change.ColumnConfig;
@@ -9,6 +10,7 @@ import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.resource.ResourceAccessor;
+import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Column;
 
 public class UpdateExecutablePreparedStatement extends ExecutablePreparedStatementBase {
@@ -90,5 +92,10 @@ public class UpdateExecutablePreparedStatement extends ExecutablePreparedStateme
 
     public List<String> getWhereColumnNames() {
         return whereColumnNames;
+    }
+
+    @Override
+    public Collection<? extends DatabaseObject> getAffectedDatabaseObjects() {
+        return null;
     }
 }

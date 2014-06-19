@@ -231,23 +231,4 @@ public class ActionGeneratorFactory {
         //noinspection unchecked
         return createGeneratorChain(statement, database).warn(statement, database);
     }
-
-    public Set<DatabaseObject> getAffectedDatabaseObjects(SqlStatement statement, Database database) {
-        Set<DatabaseObject> affectedObjects = new HashSet<DatabaseObject>();
-
-        ActionGeneratorChain ActionGeneratorChain = createGeneratorChain(statement, database);
-        if (ActionGeneratorChain != null) {
-            //noinspection unchecked
-            Action[] actions = ActionGeneratorChain.generateActions(statement, database);
-            if (actions != null) {
-                for (Action action : actions) {
-                    affectedObjects.addAll(action.getAffectedDatabaseObjects());
-                }
-            }
-        }
-
-        return affectedObjects;
-
-    }
-
 }

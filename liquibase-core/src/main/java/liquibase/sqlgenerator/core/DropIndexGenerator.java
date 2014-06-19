@@ -43,23 +43,16 @@ public class DropIndexGenerator extends AbstractSqlGenerator<DropIndexStatement>
         String schemaName = statement.getTableSchemaName();
         
         if (database instanceof MySQLDatabase) {
-            return new Sql[] {new UnparsedSql("DROP INDEX " + database.escapeIndexName(null, null, statement.getIndexName()) + " ON " + database.escapeTableName(statement.getTableCatalogName(), schemaName, statement.getTableName()), getAffectedIndex(statement)) };
+            return new Sql[] {new UnparsedSql("DROP INDEX " + database.escapeIndexName(null, null, statement.getIndexName()) + " ON " + database.escapeTableName(statement.getTableCatalogName(), schemaName, statement.getTableName())) };
         } else if (database instanceof MSSQLDatabase) {
-            return new Sql[] {new UnparsedSql("DROP INDEX " + database.escapeTableName(null, schemaName, statement.getTableName()) + "." + database.escapeIndexName(null, null, statement.getIndexName()), getAffectedIndex(statement)) };
+            return new Sql[] {new UnparsedSql("DROP INDEX " + database.escapeTableName(null, schemaName, statement.getTableName()) + "." + database.escapeIndexName(null, null, statement.getIndexName()))};
         } else if (database instanceof SybaseDatabase) {
-            return new Sql[]{new UnparsedSql("DROP INDEX " + statement.getTableName() + "." + statement.getIndexName(), getAffectedIndex(statement))};
+            return new Sql[]{new UnparsedSql("DROP INDEX " + statement.getTableName() + "." + statement.getIndexName())};
         } else if (database instanceof PostgresDatabase) {
-			return new Sql[]{new UnparsedSql("DROP INDEX " + database.escapeIndexName(statement.getTableCatalogName(),schemaName, statement.getIndexName()), getAffectedIndex(statement))};
+			return new Sql[]{new UnparsedSql("DROP INDEX " + database.escapeIndexName(statement.getTableCatalogName(),schemaName, statement.getIndexName()))};
 		}
 
-        return new Sql[] {new UnparsedSql("DROP INDEX " + database.escapeIndexName(statement.getTableCatalogName(), schemaName, statement.getIndexName()), getAffectedIndex(statement)) };
+        return new Sql[] {new UnparsedSql("DROP INDEX " + database.escapeIndexName(statement.getTableCatalogName(), schemaName, statement.getIndexName())) };
     }
 
-    protected Index getAffectedIndex(DropIndexStatement statement) {
-        Table table = null;
-        if (statement.getTableName() != null) {
-            table = (Table) new Table().setName(statement.getTableName()).setSchema(statement.getTableCatalogName(), statement.getTableSchemaName());
-        }
-        return new Index().setName(statement.getIndexName()).setTable(table);
-    }
 }

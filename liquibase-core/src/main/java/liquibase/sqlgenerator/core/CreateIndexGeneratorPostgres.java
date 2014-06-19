@@ -75,6 +75,6 @@ public class CreateIndexGeneratorPostgres extends CreateIndexGenerator {
 		    }
 	    }
 
-	    return new Sql[]{new UnparsedSql(buffer.toString(), getAffectedIndex(statement))};
+	    return new Sql[]{new UnparsedSql(buffer.toString())};
     }
 }

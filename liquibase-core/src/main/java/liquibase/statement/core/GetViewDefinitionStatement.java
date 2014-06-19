@@ -1,6 +1,7 @@
 package liquibase.statement.core;
 
 import liquibase.statement.AbstractSqlStatement;
+import liquibase.structure.DatabaseObject;
 
 public class GetViewDefinitionStatement extends AbstractSqlStatement {
     private String catalogName;
@@ -23,5 +24,10 @@ public class GetViewDefinitionStatement extends AbstractSqlStatement {
 
     public String getViewName() {
         return viewName;
+    }
+
+    @Override
+    protected DatabaseObject[] getBaseAffectedDatabaseObjects() {
+        return null;
     }
 }

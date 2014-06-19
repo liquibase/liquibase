@@ -2,6 +2,7 @@ package liquibase.statement.core;
 
 import liquibase.changelog.ChangeSet;
 import liquibase.statement.AbstractSqlStatement;
+import liquibase.structure.DatabaseObject;
 
 public class MarkChangeSetRanStatement extends AbstractSqlStatement {
 
@@ -20,5 +21,10 @@ public class MarkChangeSetRanStatement extends AbstractSqlStatement {
 
     public ChangeSet.ExecType getExecType() {
         return execType;
+    }
+
+    @Override
+    protected DatabaseObject[] getBaseAffectedDatabaseObjects() {
+        return null;
     }
 }

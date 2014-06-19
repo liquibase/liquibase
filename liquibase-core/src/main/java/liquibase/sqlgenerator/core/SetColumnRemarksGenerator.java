@@ -36,10 +36,6 @@ public class SetColumnRemarksGenerator extends AbstractSqlGenerator<SetColumnRem
     public Sql[] generateSql(SetColumnRemarksStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
 		return new Sql[] { new UnparsedSql("COMMENT ON COLUMN " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName())
 				+ "." + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " IS '"
-				+ database.escapeStringForDatabase(statement.getRemarks()) + "'", getAffectedColumn(statement)) };
+				+ database.escapeStringForDatabase(statement.getRemarks()) + "'") };
 	}
-
-    protected Column getAffectedColumn(SetColumnRemarksStatement statement) {
-        return new Column().setName(statement.getColumnName()).setRelation(new Table().setName(statement.getTableName()).setSchema(statement.getCatalogName(), statement.getSchemaName()));
-    }
 }

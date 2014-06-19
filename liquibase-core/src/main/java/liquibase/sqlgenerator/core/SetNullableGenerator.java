@@ -81,7 +81,7 @@ public class SetNullableGenerator extends AbstractSqlGenerator<SetNullableStatem
         }
 
         List<Sql> returnList = new ArrayList<Sql>();
-        returnList.add(new UnparsedSql(sql, getAffectedColumn(statement)));
+        returnList.add(new UnparsedSql(sql));
 
         if (database instanceof DB2Database) {
             Sql[] a = SqlGeneratorFactory.getInstance().generateSql(new ReorganizeTableStatement(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()), database);
@@ -91,9 +91,5 @@ public class SetNullableGenerator extends AbstractSqlGenerator<SetNullableStatem
         }
 
         return returnList.toArray(new Sql[returnList.size()]);
-    }
-
-    protected Column getAffectedColumn(SetNullableStatement statement) {
-        return new Column().setName(statement.getColumnName()).setRelation(new Table().setName(statement.getTableName()).setSchema(statement.getCatalogName(), statement.getSchemaName()));
     }
 }

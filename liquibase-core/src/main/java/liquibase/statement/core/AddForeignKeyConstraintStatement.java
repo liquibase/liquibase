@@ -1,6 +1,9 @@
 package liquibase.statement.core;
 
 import liquibase.statement.AbstractSqlStatement;
+import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.ForeignKey;
+import liquibase.structure.core.Table;
 
 public class AddForeignKeyConstraintStatement extends AbstractSqlStatement {
 
@@ -105,5 +108,12 @@ public class AddForeignKeyConstraintStatement extends AbstractSqlStatement {
     public AddForeignKeyConstraintStatement setOnDelete(String deleteRule) {
         this.onDelete = deleteRule;
         return this;
+    }
+
+    @Override
+    protected DatabaseObject[] getBaseAffectedDatabaseObjects() {
+        return new DatabaseObject[] {
+            new ForeignKey().setName(getConstraintName()).setForeignKeyColumns(getBaseColumnNames()).setForeignKeyTable((Table) new Table().setName(getBaseTableName()).setSchema(getBaseTableCatalogName(), getBaseTableSchemaName()))
+        };
     }
 }

@@ -147,11 +147,7 @@ public abstract class InsertOrUpdateGenerator extends AbstractSqlGenerator<Inser
         completeSql.append(getPostUpdateStatements(database));
 
         return new Sql[]{
-                new UnparsedSql(completeSql.toString(), "", getAffectedTable(insertOrUpdateStatement))
+                new UnparsedSql(completeSql.toString(), "")
         };
-    }
-
-    protected Table getAffectedTable(InsertOrUpdateStatement insertOrUpdateStatement) {
-        return (Table) new Table().setName(insertOrUpdateStatement.getTableName()).setSchema(insertOrUpdateStatement.getCatalogName(), insertOrUpdateStatement.getSchemaName());
     }
 }

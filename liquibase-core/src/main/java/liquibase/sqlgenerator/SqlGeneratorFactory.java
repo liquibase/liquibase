@@ -105,7 +105,4 @@ public class SqlGeneratorFactory {
         return delegate.warn(statement, database);
     }
 
-    public Set<DatabaseObject> getAffectedDatabaseObjects(SqlStatement statement, Database database) {
-        return delegate.getAffectedDatabaseObjects(statement, database);
-    }
 }

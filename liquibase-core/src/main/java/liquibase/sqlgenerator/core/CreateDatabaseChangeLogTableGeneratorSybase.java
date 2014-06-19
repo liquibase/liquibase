@@ -41,12 +41,7 @@ public class CreateDatabaseChangeLogTableGeneratorSybase extends AbstractSqlGene
                 "COMMENTS VARCHAR(255) NULL, " +
                 "TAG VARCHAR(255) NULL, " +
                 "LIQUIBASE VARCHAR(20) NULL, " +
-                "PRIMARY KEY(ID, AUTHOR, FILENAME))",
-                        getAffectedTable(database))
-        };  //To change body of implemented methods use File | Settings | File Templates.
-    }
-
-    protected Relation getAffectedTable(Database database) {
-        return new Table().setName(database.getDatabaseChangeLogTableName()).setSchema(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName());
+                "PRIMARY KEY(ID, AUTHOR, FILENAME))")
+        };
     }
 }

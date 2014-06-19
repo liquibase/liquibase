@@ -54,11 +54,7 @@ public class CopyRowsGenerator extends AbstractSqlGenerator<CopyRowsStatement> {
         }
 
         return new Sql[]{
-                new UnparsedSql(sql.toString(), getAffectedTable(statement))
+                new UnparsedSql(sql.toString())
         };
-    }
-
-    protected Relation getAffectedTable(CopyRowsStatement statement) {
-        return new Table().setName(statement.getTargetTable()).setSchema(null, null);
     }
 }

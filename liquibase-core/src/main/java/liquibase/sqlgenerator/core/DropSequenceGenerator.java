@@ -35,11 +35,7 @@ public class DropSequenceGenerator extends AbstractSqlGenerator<DropSequenceStat
             sql += " RESTRICT";
         }
         return new Sql[] {
-                new UnparsedSql(sql, getAffectedSequence(statement))
+                new UnparsedSql(sql)
         };
-    }
-
-    protected Sequence getAffectedSequence(DropSequenceStatement statement) {
-        return new Sequence().setName(statement.getSequenceName()).setSchema(statement.getCatalogName(), statement.getSchemaName());
     }
 }

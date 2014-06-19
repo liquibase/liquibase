@@ -34,7 +34,7 @@ public class AddPrimaryKeyGeneratorInformix extends AddPrimaryKeyGenerator {
    	    }
 
         return new Sql[] {
-                new UnparsedSql(sql.toString(), getAffectedPrimaryKey(statement))
+                new UnparsedSql(sql.toString())
         };
     }
 }

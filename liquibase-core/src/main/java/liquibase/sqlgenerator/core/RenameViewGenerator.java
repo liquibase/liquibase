@@ -51,18 +51,7 @@ public class RenameViewGenerator extends AbstractSqlGenerator<RenameViewStatemen
         }
 
         return new Sql[]{
-                new UnparsedSql(sql,
-                        getAffectedOldView(statement),
-                        getAffectedNewView(statement)
-                )
+                new UnparsedSql(sql)
         };
-    }
-
-    protected Relation getAffectedNewView(RenameViewStatement statement) {
-        return new View().setName(statement.getNewViewName()).setSchema(statement.getCatalogName(), statement.getSchemaName());
-    }
-
-    protected Relation getAffectedOldView(RenameViewStatement statement) {
-        return new View().setName(statement.getOldViewName()).setSchema(statement.getCatalogName(), statement.getSchemaName());
     }
 }

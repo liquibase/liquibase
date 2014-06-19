@@ -469,7 +469,7 @@ public abstract class AbstractChange implements Change {
     }
 
     /**
-     * Implementation delegates logic to the {@link liquibase.sqlgenerator.SqlGeneratorFactory#getAffectedDatabaseObjects(liquibase.statement.SqlStatement, liquibase.database.Database)}  method on the {@link SqlStatement} objects returned by {@link #generateStatements }
+     * Implementation delegates logic to the {@link liquibase.statement.SqlStatement#getAffectedDatabaseObjects()}  method on the {@link SqlStatement} objects returned by {@link #generateStatements }
      * Returns empty set if change is not supported for the passed database
      */
     @Override
@@ -482,7 +482,7 @@ public abstract class AbstractChange implements Change {
 
         if (statements != null) {
             for (SqlStatement statement : statements) {
-                affectedObjects.addAll(SqlGeneratorFactory.getInstance().getAffectedDatabaseObjects(statement, database));
+                affectedObjects.addAll(statement.getAffectedDatabaseObjects());
             }
         }
 

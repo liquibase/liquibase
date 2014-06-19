@@ -60,11 +60,7 @@ public class AlterSequenceGenerator extends AbstractSqlGenerator<AlterSequenceSt
         }
 
         return new Sql[]{
-                new UnparsedSql(buffer.toString(), getAffectedSequence(statement))
+                new UnparsedSql(buffer.toString())
         };
-    }
-
-    protected Sequence getAffectedSequence(AlterSequenceStatement statement) {
-        return new Sequence().setName(statement.getSequenceName()).setSchema(statement.getCatalogName(), statement.getSchemaName());
     }
 }

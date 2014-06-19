@@ -1,6 +1,7 @@
 package liquibase.statement.core;
 
 import liquibase.statement.AbstractSqlStatement;
+import liquibase.structure.DatabaseObject;
 
 public class CreateProcedureStatement extends AbstractSqlStatement {
 
@@ -36,5 +37,10 @@ public class CreateProcedureStatement extends AbstractSqlStatement {
 
     public String getEndDelimiter() {
         return endDelimiter;
+    }
+
+    @Override
+    protected DatabaseObject[] getBaseAffectedDatabaseObjects() {
+        return null;
     }
 }

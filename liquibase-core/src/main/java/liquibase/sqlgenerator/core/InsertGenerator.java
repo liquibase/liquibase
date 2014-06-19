@@ -74,11 +74,7 @@ public class InsertGenerator extends AbstractSqlGenerator<InsertStatement> {
         sql.append(")");
 
         return new Sql[] {
-                new UnparsedSql(sql.toString(), getAffectedTable(statement))
+                new UnparsedSql(sql.toString())
         };
-    }
-
-    protected Relation getAffectedTable(InsertStatement statement) {
-        return new Table().setName(statement.getTableName()).setSchema(statement.getCatalogName(), statement.getSchemaName());
     }
 }

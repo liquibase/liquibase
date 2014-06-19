@@ -20,4 +20,9 @@ public class FetchObjectsStatement extends AbstractSqlStatement {
     public String toString() {
         return "Fetch "+example.getClass().getSimpleName()+"(s) like '"+example.toString()+"'";
     }
+
+    @Override
+    protected DatabaseObject[] getBaseAffectedDatabaseObjects() {
+        return null;
+    }
 }

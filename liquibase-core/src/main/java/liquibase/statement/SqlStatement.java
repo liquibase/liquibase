@@ -1,5 +1,9 @@
 package liquibase.statement;
 
+import liquibase.structure.DatabaseObject;
+
+import java.util.Collection;
+
 /**
  * The SqlStatement classes correspond to (roughly) a single SQL statement.  SqlStatement instances are created by Change classes,
  * and by Liquibase itself as the primary database-independent abstraction of statments to execute against a database.
@@ -16,5 +20,5 @@ public interface SqlStatement {
 
     boolean skipOnUnsupported();
 
-
+    Collection<? extends DatabaseObject> getAffectedDatabaseObjects();
 }

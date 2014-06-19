@@ -2,6 +2,8 @@ package liquibase.statement.core;
 
 import liquibase.change.ColumnConfig;
 import liquibase.statement.AbstractSqlStatement;
+import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.Table;
 
 import java.util.List;
 
@@ -30,4 +32,11 @@ public class CopyRowsStatement extends AbstractSqlStatement {
 	public List<ColumnConfig> getCopyColumns() {
 		return this.copyColumns;
 	}
+
+    @Override
+    protected DatabaseObject[] getBaseAffectedDatabaseObjects() {
+        return new DatabaseObject[] {
+                new Table().setName(getTargetTable()).setSchema(null, null)
+        };
+    }
 }

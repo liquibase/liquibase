@@ -1,6 +1,9 @@
 package liquibase.statement.core;
 
 import liquibase.statement.AbstractSqlStatement;
+import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.Column;
+import liquibase.structure.core.Table;
 
 public class RenameColumnStatement extends AbstractSqlStatement {
 
@@ -22,7 +25,7 @@ public class RenameColumnStatement extends AbstractSqlStatement {
     }
 
 
-    public RenameColumnStatement(String catalogName, String schemaName, String tableName, String oldColumnName, String newColumnName, String columnDataType,String remarks) {
+    public RenameColumnStatement(String catalogName, String schemaName, String tableName, String oldColumnName, String newColumnName, String columnDataType, String remarks) {
         this(catalogName, schemaName, tableName, oldColumnName, newColumnName, columnDataType);
         this.remarks = remarks;
     }
@@ -77,6 +80,14 @@ public class RenameColumnStatement extends AbstractSqlStatement {
 
     public void setRemarks(String remarks) {
         this.remarks = remarks;
+    }
+
+    @Override
+    protected DatabaseObject[] getBaseAffectedDatabaseObjects() {
+        return new DatabaseObject[]{
+                new Column().setName(getOldColumnName()).setRelation(new Table().setName(getTableName()).setSchema(getCatalogName(), getSchemaName())),
+                new Column().setName(getNewColumnName()).setRelation(new Table().setName(getTableName()).setSchema(getCatalogName(), getSchemaName())),
+        };
     }
 }
 

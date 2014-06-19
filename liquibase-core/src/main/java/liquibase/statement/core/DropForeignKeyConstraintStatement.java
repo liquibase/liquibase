@@ -1,6 +1,9 @@
 package liquibase.statement.core;
 
 import liquibase.statement.AbstractSqlStatement;
+import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.ForeignKey;
+import liquibase.structure.core.Table;
 
 public class DropForeignKeyConstraintStatement extends AbstractSqlStatement {
 
@@ -30,5 +33,12 @@ public class DropForeignKeyConstraintStatement extends AbstractSqlStatement {
 
     public String getConstraintName() {
         return constraintName;
+    }
+
+    @Override
+    protected DatabaseObject[] getBaseAffectedDatabaseObjects() {
+        return new DatabaseObject[] {
+            new ForeignKey().setName(getConstraintName()).setForeignKeyTable((Table) new Table().setName(getBaseTableName()).setSchema(getBaseTableCatalogName(), getBaseTableSchemaName()))
+        };
     }
 }

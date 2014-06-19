@@ -46,11 +46,7 @@ public class AddPrimaryKeyGenerator extends AbstractSqlGenerator<AddPrimaryKeySt
         }
 
         return new Sql[] {
-                new UnparsedSql(sql, getAffectedPrimaryKey(statement))
+                new UnparsedSql(sql)
         };
-    }
-
-    protected PrimaryKey getAffectedPrimaryKey(AddPrimaryKeyStatement statement) {
-        return new PrimaryKey().setTable((Table) new Table().setName(statement.getTableName()).setSchema(statement.getCatalogName(), statement.getSchemaName()));
     }
 }

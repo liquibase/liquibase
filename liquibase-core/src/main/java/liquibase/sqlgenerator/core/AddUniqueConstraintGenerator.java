@@ -76,19 +76,8 @@ public class AddUniqueConstraintGenerator extends AbstractSqlGenerator<AddUnique
         }
 
         return new Sql[] {
-                new UnparsedSql(sql, getAffectedUniqueConstraint(statement))
+                new UnparsedSql(sql)
         };
 
-    }
-
-    protected UniqueConstraint getAffectedUniqueConstraint(AddUniqueConstraintStatement statement) {
-        UniqueConstraint uniqueConstraint = new UniqueConstraint()
-                .setName(statement.getConstraintName())
-                .setTable((Table) new Table().setName(statement.getTableName()).setSchema(statement.getCatalogName(), statement.getSchemaName()));
-        int i = 0;
-        for (String column : StringUtils.splitAndTrim(statement.getColumnNames(), ",")) {
-            uniqueConstraint.addColumn(i++, column);
-        }
-        return uniqueConstraint;
     }
 }

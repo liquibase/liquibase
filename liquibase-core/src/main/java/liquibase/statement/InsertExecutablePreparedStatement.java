@@ -1,12 +1,14 @@
 package liquibase.statement;
 
 
+import java.util.Collection;
 import java.util.List;
 
 import liquibase.change.ColumnConfig;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.resource.ResourceAccessor;
+import liquibase.structure.DatabaseObject;
 
 /**
  * Handles INSERT Execution
@@ -42,4 +44,9 @@ public class InsertExecutablePreparedStatement extends ExecutablePreparedStateme
 	    sql.append(params);
 		return sql.toString();
 	}
+
+    @Override
+    public Collection<? extends DatabaseObject> getAffectedDatabaseObjects() {
+        return null;
+    }
 }

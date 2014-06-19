@@ -53,12 +53,8 @@ public class UpdateGenerator extends AbstractSqlGenerator<UpdateStatement> {
         }
 
         return new Sql[]{
-                new UnparsedSql(sql.toString(), getAffectedTable(statement))
+                new UnparsedSql(sql.toString())
         };
-    }
-
-    protected Relation getAffectedTable(UpdateStatement statement) {
-        return new Table().setName(statement.getTableName()).setSchema(statement.getCatalogName(), statement.getSchemaName());
     }
 
     private String convertToString(Object newValue, Database database) {

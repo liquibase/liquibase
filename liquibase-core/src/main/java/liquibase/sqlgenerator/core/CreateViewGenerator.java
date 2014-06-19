@@ -75,12 +75,8 @@ public class CreateViewGenerator extends AbstractSqlGenerator<CreateViewStatemen
         } else {
             createClause = "CREATE " + (statement.isReplaceIfExists() ? "OR REPLACE " : "") + "VIEW";
         }
-        sql.add(new UnparsedSql(createClause + " " + database.escapeViewName(statement.getCatalogName(), statement.getSchemaName(), statement.getViewName()) + " AS " + statement.getSelectQuery(), getAffectedView(statement)));
+        sql.add(new UnparsedSql(createClause + " " + database.escapeViewName(statement.getCatalogName(), statement.getSchemaName(), statement.getViewName()) + " AS " + statement.getSelectQuery()));
 
         return sql.toArray(new Sql[sql.size()]);
-    }
-
-    protected Relation getAffectedView(CreateViewStatement statement) {
-        return new View().setName(statement.getViewName()).setSchema(statement.getCatalogName(), statement.getSchemaName());
     }
 }

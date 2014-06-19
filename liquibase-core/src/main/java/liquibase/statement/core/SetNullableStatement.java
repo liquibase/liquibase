@@ -1,6 +1,9 @@
 package liquibase.statement.core;
 
 import liquibase.statement.AbstractSqlStatement;
+import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.Column;
+import liquibase.structure.core.Table;
 
 public class SetNullableStatement extends AbstractSqlStatement {
     private String catalogName;
@@ -41,5 +44,12 @@ public class SetNullableStatement extends AbstractSqlStatement {
 
     public boolean isNullable() {
         return nullable;
+    }
+
+    @Override
+    protected DatabaseObject[] getBaseAffectedDatabaseObjects() {
+        return new DatabaseObject[] {
+            new Column().setName(getColumnName()).setRelation(new Table().setName(getTableName()).setSchema(getCatalogName(), getSchemaName()))
+        };
     }
 }

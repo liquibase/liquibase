@@ -31,7 +31,7 @@ public class ReindexGeneratorSQLite extends AbstractSqlGenerator<ReindexStatemen
     @Override
     public Sql[] generateSql(ReindexStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         return new Sql[] {
-                new UnparsedSql("REINDEX "+database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()), new Table().setName(statement.getTableName()).setSchema(statement.getCatalogName(), statement.getSchemaName()))
+                new UnparsedSql("REINDEX "+database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()))
         };
     }
 }

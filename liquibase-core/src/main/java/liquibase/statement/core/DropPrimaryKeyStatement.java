@@ -1,6 +1,9 @@
 package liquibase.statement.core;
 
 import liquibase.statement.AbstractSqlStatement;
+import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.PrimaryKey;
+import liquibase.structure.core.Table;
 
 public class DropPrimaryKeyStatement extends AbstractSqlStatement {
 
@@ -32,4 +35,10 @@ public class DropPrimaryKeyStatement extends AbstractSqlStatement {
         return constraintName;
     }
 
+    @Override
+    protected DatabaseObject[] getBaseAffectedDatabaseObjects() {
+        return new DatabaseObject[]{
+                new PrimaryKey().setName(getConstraintName()).setTable((Table) new Table().setName(getTableName()).setSchema(getCatalogName(), getSchemaName()))
+        };
+    }
 }

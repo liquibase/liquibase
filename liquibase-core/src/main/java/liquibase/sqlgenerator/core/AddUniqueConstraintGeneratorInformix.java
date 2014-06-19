@@ -34,7 +34,7 @@ public class AddUniqueConstraintGeneratorInformix extends AddUniqueConstraintGen
 				new UnparsedSql(String.format(sqlNoContraintNameTemplate 
 						, database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName())
 						, database.escapeColumnNameList(statement.getColumnNames())
-				), getAffectedUniqueConstraint(statement))
+				))
 			};
 		} else {
 			return new Sql[] {
@@ -42,7 +42,7 @@ public class AddUniqueConstraintGeneratorInformix extends AddUniqueConstraintGen
 						, database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName())
 						, database.escapeColumnNameList(statement.getColumnNames())
 						, database.escapeConstraintName(statement.getConstraintName())
-				), getAffectedUniqueConstraint(statement))
+				))
 			};
 		}
 

@@ -170,7 +170,7 @@ public class CreateTableGeneratorInformix extends CreateTableGenerator {
             sql += " IN " + statement.getTablespace();
         }
 
-        return new Sql[] { new UnparsedSql(sql, new Table().setName(statement.getTableName()).setSchema(new Schema(statement.getCatalogName(), statement.getSchemaName()))) };
+        return new Sql[] { new UnparsedSql(sql) };
 	}
 
 	private boolean constraintNameAfterUnique(Database database) {

@@ -58,11 +58,7 @@ public class ModifyDataTypeGenerator extends AbstractSqlGenerator<ModifyDataType
         // add column type
         alterTable += DataTypeFactory.getInstance().fromDescription(statement.getNewDataType(), database).toDatabaseDataType(database);
 
-        return new Sql[]{new UnparsedSql(alterTable, getAffectedTable(statement))};
-    }
-
-    protected Relation getAffectedTable(ModifyDataTypeStatement statement) {
-        return new Table().setName(statement.getTableName()).setSchema(statement.getCatalogName(), statement.getSchemaName());
+        return new Sql[]{new UnparsedSql(alterTable)};
     }
 
     /**

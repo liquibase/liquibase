@@ -1,6 +1,10 @@
 package liquibase.statement.core;
 
 import liquibase.statement.AbstractSqlStatement;
+import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.Table;
+import liquibase.structure.core.UniqueConstraint;
+import liquibase.util.StringUtils;
 
 public class DropUniqueConstraintStatement extends AbstractSqlStatement {
 
@@ -44,12 +48,25 @@ public class DropUniqueConstraintStatement extends AbstractSqlStatement {
         return constraintName;
     }
 
-	public String getUniqueColumns() {
-		return uniqueColumns;
-	}
+    public String getUniqueColumns() {
+        return uniqueColumns;
+    }
 
-	public void setUniqueColumns(String uniqueColumns) {
-		this.uniqueColumns = uniqueColumns;
-	}
+    public void setUniqueColumns(String uniqueColumns) {
+        this.uniqueColumns = uniqueColumns;
+    }
 
+    @Override
+    protected DatabaseObject[] getBaseAffectedDatabaseObjects() {
+        UniqueConstraint constraint = new UniqueConstraint().setName(getConstraintName()).setTable((Table) new Table().setName(getTableName()).setSchema(getCatalogName(), getSchemaName()));
+        if (getUniqueColumns() != null) {
+            int i = 0;
+            for (String column : StringUtils.splitAndTrim(getUniqueColumns(), ",")) {
+                constraint.addColumn(i++, column);
+            }
+        }
+        return new DatabaseObject[]{
+                constraint
+        };
+    }
 }

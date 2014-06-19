@@ -1,6 +1,9 @@
 package liquibase.statement.core;
 
 import liquibase.statement.AbstractSqlStatement;
+import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.Relation;
+import liquibase.structure.core.Table;
 
 public class ModifyDataTypeStatement extends AbstractSqlStatement {
     private String catalogName;
@@ -51,5 +54,12 @@ public class ModifyDataTypeStatement extends AbstractSqlStatement {
 
     public void setNewDataType(String newDataType) {
         this.newDataType = newDataType;
-    }   
+    }
+
+    @Override
+    protected DatabaseObject[] getBaseAffectedDatabaseObjects() {
+        return new DatabaseObject[] {
+            new Table().setName(getTableName()).setSchema(getCatalogName(), getSchemaName())
+        };
+    }
 }

@@ -39,7 +39,7 @@ public class AddUniqueConstraintGeneratorTDS extends AddUniqueConstraintGenerato
 				new UnparsedSql(String.format(sqlNoContraintNameTemplate 
 						, database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName())
 						, database.escapeColumnNameList(statement.getColumnNames())
-				), getAffectedUniqueConstraint(statement))
+				))
 			};
 		} else {
 			return new Sql[] {
@@ -47,7 +47,7 @@ public class AddUniqueConstraintGeneratorTDS extends AddUniqueConstraintGenerato
 						, database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName())
 						, database.escapeConstraintName(statement.getConstraintName())
 						, database.escapeColumnNameList(statement.getColumnNames())
-				), getAffectedUniqueConstraint(statement))
+				))
 			};
 		}
 	}

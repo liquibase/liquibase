@@ -1,6 +1,8 @@
 package liquibase.statement.core;
 
 import liquibase.statement.AbstractSqlStatement;
+import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.Sequence;
 
 public class DropSequenceStatement extends AbstractSqlStatement {
 
@@ -29,5 +31,12 @@ public class DropSequenceStatement extends AbstractSqlStatement {
 
     public String getSequenceName() {
         return sequenceName;
+    }
+
+    @Override
+    protected DatabaseObject[] getBaseAffectedDatabaseObjects() {
+        return new DatabaseObject[] {
+            new Sequence().setName(getSequenceName()).setSchema(getCatalogName(), getSchemaName())
+        };
     }
 }

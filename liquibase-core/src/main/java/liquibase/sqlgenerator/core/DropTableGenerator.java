@@ -36,11 +36,7 @@ public class DropTableGenerator extends AbstractSqlGenerator<DropTableStatement>
         }
 
         return new Sql[]{
-                new UnparsedSql(buffer.toString(), getAffectedTable(statement))
+                new UnparsedSql(buffer.toString())
         };
-    }
-
-    protected Relation getAffectedTable(DropTableStatement statement) {
-        return new Table().setName(statement.getTableName()).setSchema(statement.getCatalogName(), statement.getSchemaName());
     }
 }

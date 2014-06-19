@@ -1,6 +1,9 @@
 package liquibase.statement.core;
 
 import liquibase.statement.AbstractSqlStatement;
+import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.PrimaryKey;
+import liquibase.structure.core.Table;
 
 public class AddPrimaryKeyStatement extends AbstractSqlStatement {
 
@@ -46,5 +49,12 @@ public class AddPrimaryKeyStatement extends AbstractSqlStatement {
 
     public String getConstraintName() {
         return constraintName;
+    }
+
+    @Override
+    protected DatabaseObject[] getBaseAffectedDatabaseObjects() {
+        return new DatabaseObject[] {
+            new PrimaryKey().setTable((Table) new Table().setName(getTableName()).setSchema(getCatalogName(), getSchemaName()))
+        };
     }
 }

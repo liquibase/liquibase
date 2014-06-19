@@ -90,18 +90,12 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
         }
 
         List<Sql> returnSql = new ArrayList<Sql>();
-        returnSql.add(new UnparsedSql(alterTable, getAffectedColumn(statement)));
+        returnSql.add(new UnparsedSql(alterTable));
 
         addUniqueConstrantStatements(statement, database, returnSql);
         addForeignKeyStatements(statement, database, returnSql);
 
         return returnSql.toArray(new Sql[returnSql.size()]);
-    }
-
-    protected Column getAffectedColumn(AddColumnStatement statement) {
-        return new Column()
-                .setRelation(new Table().setName(statement.getTableName()).setSchema(new Schema(statement.getCatalogName(), statement.getSchemaName())))
-                .setName(statement.getColumnName());
     }
 
     protected void addUniqueConstrantStatements(AddColumnStatement statement, Database database, List<Sql> returnSql) {

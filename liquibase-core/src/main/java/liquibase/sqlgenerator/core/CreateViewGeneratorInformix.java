@@ -50,7 +50,7 @@ public class CreateViewGeneratorInformix extends AbstractSqlGenerator<CreateView
         if (statement.isReplaceIfExists()) {
         	return new Sql[] {
     			new UnparsedSql("DROP VIEW IF EXISTS " + viewName),
-                new UnparsedSql(createClause, new View().setName(viewName).setSchema(statement.getCatalogName(), statement.getViewName()))
+                new UnparsedSql(createClause)
             };
         }
         return new Sql[] {

@@ -53,18 +53,7 @@ public class RenameTableGenerator extends AbstractSqlGenerator<RenameTableStatem
         }
 
         return new Sql[]{
-                new UnparsedSql(sql,
-                        getAffectedOldTable(statement),
-                        getAffectedNewTable(statement)
-                )
+                new UnparsedSql(sql)
         };
-    }
-
-    protected Relation getAffectedNewTable(RenameTableStatement statement) {
-        return new Table().setName(statement.getNewTableName()).setSchema(statement.getCatalogName(), statement.getSchemaName());
-    }
-
-    protected Relation getAffectedOldTable(RenameTableStatement statement) {
-        return new Table().setName(statement.getOldTableName()).setSchema(statement.getCatalogName(), statement.getSchemaName());
     }
 }

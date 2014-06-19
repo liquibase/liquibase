@@ -5,6 +5,9 @@ import java.util.Map;
 
 import liquibase.change.ColumnConfig;
 import liquibase.statement.AbstractSqlStatement;
+import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.Relation;
+import liquibase.structure.core.Table;
 
 public class InsertStatement extends AbstractSqlStatement {
     private String catalogName;
@@ -46,5 +49,12 @@ public class InsertStatement extends AbstractSqlStatement {
     
     public InsertStatement addColumn(ColumnConfig columnConfig) {
     	return addColumnValue(columnConfig.getName(), columnConfig.getValueObject());
+    }
+
+    @Override
+    protected DatabaseObject[] getBaseAffectedDatabaseObjects() {
+        return new DatabaseObject[] {
+            new Table().setName(getTableName()).setSchema(getCatalogName(), getSchemaName())
+        };
     }
 }

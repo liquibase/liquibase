@@ -39,10 +39,6 @@ public class DeleteGenerator extends AbstractSqlGenerator<DeleteStatement> {
             sql.append(" ").append(fixedWhereClause);
         }
 
-        return new Sql[]{new UnparsedSql(sql.toString(), getAffectedTable(statement))};
-    }
-
-    protected Relation getAffectedTable(DeleteStatement statement) {
-        return new Table().setName(statement.getTableName()).setSchema(statement.getCatalogName(), statement.getSchemaName());
+        return new Sql[]{new UnparsedSql(sql.toString())};
     }
 }

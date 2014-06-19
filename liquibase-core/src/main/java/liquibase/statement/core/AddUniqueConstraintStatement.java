@@ -1,6 +1,10 @@
 package liquibase.statement.core;
 
 import liquibase.statement.AbstractSqlStatement;
+import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.Table;
+import liquibase.structure.core.UniqueConstraint;
+import liquibase.util.StringUtils;
 
 public class AddUniqueConstraintStatement extends AbstractSqlStatement {
 
@@ -51,6 +55,7 @@ public class AddUniqueConstraintStatement extends AbstractSqlStatement {
         this.tablespace = tablespace;
         return this;
     }
+
     public boolean isDeferrable() {
         return deferrable;
     }
@@ -70,7 +75,7 @@ public class AddUniqueConstraintStatement extends AbstractSqlStatement {
     }
 
     public AddUniqueConstraintStatement setDisabled(boolean disabled) {
-        this.disabled= disabled;
+        this.disabled = disabled;
         return this;
     }
 
@@ -78,4 +83,18 @@ public class AddUniqueConstraintStatement extends AbstractSqlStatement {
         return disabled;
     }
 
+    @Override
+    protected DatabaseObject[] getBaseAffectedDatabaseObjects() {
+        UniqueConstraint uniqueConstraint = new UniqueConstraint()
+                .setName(getConstraintName())
+                .setTable((Table) new Table().setName(getTableName()).setSchema(getCatalogName(), getSchemaName()));
+        int i = 0;
+        for (String column : StringUtils.splitAndTrim(getColumnNames(), ",")) {
+            uniqueConstraint.addColumn(i++, column);
+        }
+
+        return new DatabaseObject[]{
+                uniqueConstraint
+        };
+    }
 }

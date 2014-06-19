@@ -3,6 +3,10 @@ package liquibase.statement.core;
 import java.math.BigInteger;
 
 import liquibase.statement.AbstractSqlStatement;
+import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.Column;
+import liquibase.structure.core.Schema;
+import liquibase.structure.core.Table;
 
 public class AddAutoIncrementStatement extends AbstractSqlStatement {
 
@@ -13,15 +17,15 @@ public class AddAutoIncrementStatement extends AbstractSqlStatement {
     private String columnDataType;
     private BigInteger startWith;
     private BigInteger incrementBy;
-    
+
     public AddAutoIncrementStatement(
             String catalogName,
-    		String schemaName,
-    		String tableName,
-    		String columnName,
-    		String columnDataType,
-    		BigInteger startWith,
-    		BigInteger incrementBy) {
+            String schemaName,
+            String tableName,
+            String columnName,
+            String columnDataType,
+            BigInteger startWith,
+            BigInteger incrementBy) {
         this.catalogName = catalogName;
         this.schemaName = schemaName;
         this.tableName = tableName;
@@ -50,12 +54,21 @@ public class AddAutoIncrementStatement extends AbstractSqlStatement {
     public String getColumnDataType() {
         return columnDataType;
     }
-    
+
     public BigInteger getStartWith() {
-    	return startWith;
+        return startWith;
     }
-    
+
     public BigInteger getIncrementBy() {
-    	return incrementBy;
+        return incrementBy;
+    }
+
+    @Override
+    protected DatabaseObject[] getBaseAffectedDatabaseObjects() {
+        return new DatabaseObject[]{
+                new Column()
+                        .setRelation(new Table().setName(getTableName()).setSchema(new Schema(getCatalogName(), getSchemaName())))
+                        .setName(getColumnName())
+        };
     }
 }

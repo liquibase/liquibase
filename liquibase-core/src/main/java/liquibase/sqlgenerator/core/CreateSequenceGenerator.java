@@ -75,10 +75,6 @@ public class CreateSequenceGenerator extends AbstractSqlGenerator<CreateSequence
             }
         }
 
-        return new Sql[]{new UnparsedSql(buffer.toString(), getAffectedSequence(statement))};
-    }
-
-    protected Sequence getAffectedSequence(CreateSequenceStatement statement) {
-        return new Sequence().setName(statement.getSequenceName()).setSchema(statement.getCatalogName(), statement.getSchemaName());
+        return new Sql[]{new UnparsedSql(buffer.toString())};
     }
 }

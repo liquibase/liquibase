@@ -1,6 +1,9 @@
 package liquibase.statement.core;
 
 import liquibase.statement.AbstractSqlStatement;
+import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.Column;
+import liquibase.structure.core.Table;
 
 public class DropColumnStatement extends AbstractSqlStatement {
 
@@ -32,4 +35,10 @@ public class DropColumnStatement extends AbstractSqlStatement {
         return columnName;
     }
 
+    @Override
+    protected DatabaseObject[] getBaseAffectedDatabaseObjects() {
+        return new DatabaseObject[] {
+            new Column().setName(getColumnName()).setRelation(new Table().setName(getTableName()).setSchema(getCatalogName(), getSchemaName()))
+        };
+    }
 }

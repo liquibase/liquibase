@@ -1,6 +1,9 @@
 package liquibase.statement.core;
 
 import liquibase.statement.AbstractSqlStatement;
+import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.Relation;
+import liquibase.structure.core.View;
 
 public class RenameViewStatement extends AbstractSqlStatement {
 
@@ -31,5 +34,13 @@ public class RenameViewStatement extends AbstractSqlStatement {
 
     public String getNewViewName() {
         return newViewName;
+    }
+
+    @Override
+    protected DatabaseObject[] getBaseAffectedDatabaseObjects() {
+        return new DatabaseObject[] {
+            new View().setName(getNewViewName()).setSchema(getCatalogName(), getSchemaName()),
+            new View().setName(getOldViewName()).setSchema(getCatalogName(), getSchemaName()),
+        };
     }
 }

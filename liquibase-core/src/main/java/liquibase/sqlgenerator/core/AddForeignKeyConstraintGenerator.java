@@ -96,11 +96,7 @@ public class AddForeignKeyConstraintGenerator extends AbstractSqlGenerator<AddFo
 	    }
 
 	    return new Sql[]{
-			    new UnparsedSql(sb.toString(), getAffectedForeignKey(statement))
+			    new UnparsedSql(sb.toString())
 	    };
-    }
-
-    protected ForeignKey getAffectedForeignKey(AddForeignKeyConstraintStatement statement) {
-        return new ForeignKey().setName(statement.getConstraintName()).setForeignKeyColumns(statement.getBaseColumnNames()).setForeignKeyTable((Table) new Table().setName(statement.getBaseTableName()).setSchema(statement.getBaseTableCatalogName(), statement.getBaseTableSchemaName()));
     }
 }

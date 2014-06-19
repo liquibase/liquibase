@@ -2,6 +2,10 @@ package liquibase.statement.core;
 
 import liquibase.datatype.LiquibaseDataType;
 import liquibase.statement.*;
+import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.Relation;
+import liquibase.structure.core.Schema;
+import liquibase.structure.core.Table;
 
 import java.util.*;
 
@@ -209,4 +213,11 @@ public class CreateTableStatement extends AbstractSqlStatement {
 	public void setSchemaName(String schemaName) {
 		this.schemaName = schemaName;
 	}
+
+    @Override
+    protected DatabaseObject[] getBaseAffectedDatabaseObjects() {
+        return new DatabaseObject[] {
+            new Table().setName(getTableName()).setSchema(new Schema(getCatalogName(), getSchemaName()))
+        };
+    }
 }

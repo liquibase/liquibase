@@ -1,6 +1,9 @@
 package liquibase.statement.core;
 
 import liquibase.statement.AbstractSqlStatement;
+import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.Column;
+import liquibase.structure.core.Table;
 
 public class SetColumnRemarksStatement extends AbstractSqlStatement {
 
@@ -36,5 +39,12 @@ public class SetColumnRemarksStatement extends AbstractSqlStatement {
 
     public String getRemarks() {
         return remarks;
+    }
+
+    @Override
+    protected DatabaseObject[] getBaseAffectedDatabaseObjects() {
+        return new DatabaseObject[] {
+            new Column().setName(getColumnName()).setRelation(new Table().setName(getTableName()).setSchema(getCatalogName(), getSchemaName()))
+        };
     }
 }

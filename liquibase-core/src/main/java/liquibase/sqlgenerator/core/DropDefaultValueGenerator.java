@@ -76,11 +76,7 @@ public class DropDefaultValueGenerator extends AbstractSqlGenerator<DropDefaultV
          }
 
         return new Sql[] {
-                new UnparsedSql(sql, getAffectedColumn(statement))
+                new UnparsedSql(sql)
         };
-    }
-
-    protected Column getAffectedColumn(DropDefaultValueStatement statement) {
-        return new Column().setName(statement.getColumnName()).setRelation(new Table().setName(statement.getTableName()).setSchema(statement.getCatalogName(), statement.getSchemaName()));
     }
 }

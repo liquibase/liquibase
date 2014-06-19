@@ -39,7 +39,7 @@ public class AddAutoIncrementGeneratorMySQL extends AddAutoIncrementGenerator {
 	            + " "
 	            + mysqlDatabase.getTableOptionAutoIncrementStartWithClause(statement.getStartWith());
 
-	        sql = concact(sql, new UnparsedSql(alterTableSql, getAffectedTable(statement)));
+	        sql = concact(sql, new UnparsedSql(alterTableSql));
     	}
 
         return sql;

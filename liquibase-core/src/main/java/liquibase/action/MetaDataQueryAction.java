@@ -39,11 +39,6 @@ public abstract class MetaDataQueryAction extends AbstractExtensibleObject imple
         return getClass().getSimpleName()+"("+ StringUtils.join(getAttributeMap(), ", ", new StringUtils.ToStringFormatter())+")";
     }
 
-    @Override
-    public Collection<? extends DatabaseObject> getAffectedDatabaseObjects() {
-        return null;
-    }
-
     public QueryAction merge(QueryAction action) {
         if (action.getClass().equals(this.getClass())) {
             Set<String> attributes = new HashSet<String>(this.getAttributes());

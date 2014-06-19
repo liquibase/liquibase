@@ -83,10 +83,6 @@ public class CreateIndexGenerator extends AbstractSqlGenerator<CreateIndexStatem
 		    }
 	    }
 
-	    return new Sql[]{new UnparsedSql(buffer.toString(), getAffectedIndex(statement))};
-    }
-
-    protected Index getAffectedIndex(CreateIndexStatement statement) {
-        return new Index().setName(statement.getIndexName()).setTable((Table) new Table().setName(statement.getTableName()).setSchema(statement.getTableCatalogName(), statement.getTableSchemaName()));
+	    return new Sql[]{new UnparsedSql(buffer.toString())};
     }
 }

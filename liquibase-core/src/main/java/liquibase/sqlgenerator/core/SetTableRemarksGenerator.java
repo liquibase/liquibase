@@ -43,10 +43,6 @@ public class SetTableRemarksGenerator extends AbstractSqlGenerator<SetTableRemar
 					+ database.escapeStringForDatabase(remarks) + "'";
 		}
 
-		return new Sql[] { new UnparsedSql(sql, getAffectedTable(statement)) };
+		return new Sql[] { new UnparsedSql(sql) };
 	}
-
-    protected Relation getAffectedTable(SetTableRemarksStatement statement) {
-        return new Table().setName(statement.getTableName()).setSchema(statement.getCatalogName(), statement.getSchemaName());
-    }
 }

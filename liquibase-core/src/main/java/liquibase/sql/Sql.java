@@ -12,6 +12,4 @@ public interface Sql extends UpdateAction, QueryAction, ExecuteAction {
 
     String getEndDelimiter();
 
-    Collection<? extends DatabaseObject> getAffectedDatabaseObjects();
-
 }

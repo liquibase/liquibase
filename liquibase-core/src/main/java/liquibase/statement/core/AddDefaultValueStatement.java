@@ -1,6 +1,10 @@
 package liquibase.statement.core;
 
 import liquibase.statement.AbstractSqlStatement;
+import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.Column;
+import liquibase.structure.core.Schema;
+import liquibase.structure.core.Table;
 
 public class AddDefaultValueStatement extends AbstractSqlStatement {
     private String catalogName;
@@ -46,5 +50,14 @@ public class AddDefaultValueStatement extends AbstractSqlStatement {
 
     public Object getDefaultValue() {
         return defaultValue;
+    }
+
+    @Override
+    protected DatabaseObject[] getBaseAffectedDatabaseObjects() {
+        return new DatabaseObject[] {
+                new Column()
+                        .setRelation(new Table().setName(getTableName()).setSchema(new Schema(getCatalogName(), getSchemaName())))
+                        .setName(getColumnName())
+        };
     }
 }

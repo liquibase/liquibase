@@ -54,7 +54,7 @@ public class InsertOrUpdateGeneratorPostgres extends InsertOrUpdateGenerator {
 		generatedSql.append("END;\n");
 		generatedSql.append("$$\n");
 		generatedSql.append("LANGUAGE plpgsql;\n");
-		return new Sql[] { new UnparsedSql(generatedSql.toString(), getAffectedTable(insertOrUpdateStatement)) };
+		return new Sql[] { new UnparsedSql(generatedSql.toString()) };
 	}
 
 	@Override

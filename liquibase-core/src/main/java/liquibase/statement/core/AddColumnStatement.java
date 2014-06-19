@@ -1,6 +1,10 @@
 package liquibase.statement.core;
 
 import liquibase.statement.*;
+import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.Column;
+import liquibase.structure.core.Schema;
+import liquibase.structure.core.Table;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -64,6 +68,16 @@ public class AddColumnStatement extends AbstractSqlStatement {
     public Set<ColumnConstraint> getConstraints() {
         return constraints;
     }
+
+    @Override
+    protected DatabaseObject[] getBaseAffectedDatabaseObjects() {
+        return new DatabaseObject[] {
+                new Column()
+                        .setRelation(new Table().setName(getTableName()).setSchema(new Schema(getCatalogName(), getSchemaName())))
+                        .setName(getColumnName())
+        };
+    }
+
 
     public boolean isAutoIncrement() {
         for (ColumnConstraint constraint : getConstraints()) {

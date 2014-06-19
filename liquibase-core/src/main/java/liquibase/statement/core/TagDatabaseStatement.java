@@ -1,6 +1,7 @@
 package liquibase.statement.core;
 
 import liquibase.statement.AbstractSqlStatement;
+import liquibase.structure.DatabaseObject;
 
 public class TagDatabaseStatement extends AbstractSqlStatement {
 
@@ -12,5 +13,10 @@ public class TagDatabaseStatement extends AbstractSqlStatement {
 
     public String getTag() {
         return tag;
+    }
+
+    @Override
+    protected DatabaseObject[] getBaseAffectedDatabaseObjects() {
+        return null;
     }
 }

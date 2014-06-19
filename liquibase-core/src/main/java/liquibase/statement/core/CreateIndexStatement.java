@@ -1,6 +1,9 @@
 package liquibase.statement.core;
 
 import liquibase.statement.AbstractSqlStatement;
+import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.Index;
+import liquibase.structure.core.Table;
 
 public class CreateIndexStatement extends AbstractSqlStatement {
 
@@ -66,4 +69,11 @@ public class CreateIndexStatement extends AbstractSqlStatement {
 	public void setAssociatedWith(String associatedWith) {
 		this.associatedWith = associatedWith;
 	}
+
+    @Override
+    protected DatabaseObject[] getBaseAffectedDatabaseObjects() {
+        return new DatabaseObject[] {
+            new Index().setName(getIndexName()).setTable((Table) new Table().setName(getTableName()).setSchema(getTableCatalogName(), getTableSchemaName()))
+        };
+    }
 }

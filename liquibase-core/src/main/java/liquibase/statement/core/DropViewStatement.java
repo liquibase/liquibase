@@ -1,6 +1,9 @@
 package liquibase.statement.core;
 
 import liquibase.statement.AbstractSqlStatement;
+import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.Relation;
+import liquibase.structure.core.View;
 
 public class DropViewStatement extends AbstractSqlStatement {
 
@@ -24,5 +27,12 @@ public class DropViewStatement extends AbstractSqlStatement {
 
     public String getViewName() {
         return viewName;
+    }
+
+    @Override
+    protected DatabaseObject[] getBaseAffectedDatabaseObjects() {
+        return new DatabaseObject[] {
+            new View().setName(getViewName()).setSchema(getCatalogName(), getSchemaName())
+        };
     }
 }

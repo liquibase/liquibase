@@ -22,11 +22,7 @@ public class DropViewGenerator extends AbstractSqlGenerator<DropViewStatement> {
     @Override
     public Sql[] generateSql(DropViewStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
         return new Sql[] {
-                new UnparsedSql("DROP VIEW " + database.escapeViewName(statement.getCatalogName(), statement.getSchemaName(), statement.getViewName()), getAffectedView(statement))
+                new UnparsedSql("DROP VIEW " + database.escapeViewName(statement.getCatalogName(), statement.getSchemaName(), statement.getViewName()))
         };
-    }
-
-    protected Relation getAffectedView(DropViewStatement statement) {
-        return new View().setName(statement.getViewName()).setSchema(statement.getCatalogName(), statement.getSchemaName());
     }
 }
