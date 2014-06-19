@@ -1,6 +1,6 @@
 package liquibase.action
 
-import liquibase.action.metadata.FetchTablesAction
+import liquibase.action.core.FetchTablesAction
 import spock.lang.Specification
 import spock.lang.Unroll
 

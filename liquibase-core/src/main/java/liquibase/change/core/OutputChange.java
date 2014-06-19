@@ -9,7 +9,7 @@ import liquibase.exception.ValidationErrors;
 import liquibase.executor.ExecutionOptions;
 import liquibase.logging.LogFactory;
 import liquibase.serializer.LiquibaseSerializable;
-import liquibase.sql.Sql;
+import liquibase.action.Sql;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RuntimeStatement;
 import liquibase.util.StringUtils;

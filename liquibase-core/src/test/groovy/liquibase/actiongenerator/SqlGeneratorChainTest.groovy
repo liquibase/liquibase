@@ -2,18 +2,13 @@ package liquibase.actiongenerator
 
 import liquibase.sdk.database.MockDatabase
 import liquibase.exception.ValidationErrors
-import liquibase.sql.Sql
+import liquibase.action.Sql
 import liquibase.sqlgenerator.MockSqlGenerator
 import liquibase.sqlgenerator.SqlGenerator
 import liquibase.sqlgenerator.SqlGeneratorChain
 import liquibase.statement.core.MockSqlStatement
 import spock.lang.Specification
-
-import static org.junit.Assert.*
 import org.junit.Test
-
-import java.util.SortedSet
-import java.util.TreeSet
 
 public class SqlGeneratorChainTest extends Specification {
 

@@ -10,7 +10,7 @@ import liquibase.executor.ExecutionOptions;
 import liquibase.serializer.ChangeLogSerializer;
 import liquibase.serializer.LiquibaseSerializable;
 import liquibase.action.Action;
-import liquibase.sql.Sql;
+import liquibase.action.Sql;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 
 import java.io.File;

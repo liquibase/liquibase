@@ -112,13 +112,13 @@ public abstract class MetaDataQueryAction extends AbstractExtensibleObject imple
         return false;
     }
 
+    /**
+     * Equals method compares the output of {@link #describe()}
+     */
     @Override
     public boolean equals(Object obj) {
-        if (!this.getClass().equals(obj.getClass())) {
-            return false;
-        }
+        return this.getClass().equals(obj.getClass()) && this.describe().equals(obj.toString());
 
-        return this.describe().equals(obj.toString());
     }
 
     @Override

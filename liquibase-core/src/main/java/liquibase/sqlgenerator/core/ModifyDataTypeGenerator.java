@@ -8,8 +8,8 @@ import liquibase.statement.core.ModifyDataTypeStatement;
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.exception.ValidationErrors;
-import liquibase.sql.Sql;
-import liquibase.sql.UnparsedSql;
+import liquibase.action.Sql;
+import liquibase.action.UnparsedSql;
 
 public class ModifyDataTypeGenerator extends AbstractSqlGenerator<ModifyDataTypeStatement> {
 

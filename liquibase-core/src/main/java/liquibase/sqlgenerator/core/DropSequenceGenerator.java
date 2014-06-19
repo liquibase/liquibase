@@ -5,8 +5,8 @@ import liquibase.database.core.DerbyDatabase;
 import liquibase.database.core.PostgresDatabase;
 import liquibase.exception.ValidationErrors;
 import liquibase.executor.ExecutionOptions;
-import liquibase.sql.Sql;
-import liquibase.sql.UnparsedSql;
+import liquibase.action.Sql;
+import liquibase.action.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.DropSequenceStatement;
 

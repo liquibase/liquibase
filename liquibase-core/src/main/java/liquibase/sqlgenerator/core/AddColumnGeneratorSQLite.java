@@ -5,7 +5,7 @@ import liquibase.database.core.SQLiteDatabase;
 import liquibase.exception.DatabaseException;
 import liquibase.action.Action;
 import liquibase.executor.ExecutionOptions;
-import liquibase.sql.Sql;
+import liquibase.action.Sql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.SqlStatement;

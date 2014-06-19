@@ -4,7 +4,7 @@ import liquibase.RuntimeEnvironment;
 import liquibase.changelog.ChangeSet;
 import liquibase.executor.ExecutionOptions;
 import liquibase.sdk.database.MockDatabase;
-import liquibase.sql.Sql;
+import liquibase.action.Sql;
 import liquibase.sqlgenerator.AbstractSqlGeneratorTest;
 import liquibase.sqlgenerator.MockSqlGeneratorChain;
 import liquibase.statement.core.MarkChangeSetRanStatement;

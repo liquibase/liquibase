@@ -1,22 +1,16 @@
-package liquibase.sql;
+package liquibase.action;
 
+import liquibase.action.Sql;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.OfflineConnection;
-import liquibase.database.core.MSSQLDatabase;
-import liquibase.database.core.SybaseASADatabase;
-import liquibase.database.core.SybaseDatabase;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.ExecuteResult;
 import liquibase.executor.ExecutionOptions;
 import liquibase.executor.QueryResult;
 import liquibase.executor.UpdateResult;
-import liquibase.sql.visitor.SqlVisitor;
-import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
-
-import java.util.*;
 
 public class UnparsedSql implements Sql {
 

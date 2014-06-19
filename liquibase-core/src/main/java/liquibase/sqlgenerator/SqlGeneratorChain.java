@@ -1,11 +1,10 @@
 package liquibase.sqlgenerator;
 
 import liquibase.actiongenerator.ActionGeneratorChain;
-import liquibase.database.Database;
 import liquibase.exception.ValidationErrors;
 import liquibase.exception.Warnings;
 import liquibase.executor.ExecutionOptions;
-import liquibase.sql.Sql;
+import liquibase.action.Sql;
 import liquibase.statement.SqlStatement;
 
 public class SqlGeneratorChain {

@@ -7,8 +7,8 @@ import liquibase.database.core.MySQLDatabase;
 import liquibase.executor.ExecutionOptions;
 import liquibase.structure.core.View;
 import liquibase.exception.ValidationErrors;
-import liquibase.sql.Sql;
-import liquibase.sql.UnparsedSql;
+import liquibase.action.Sql;
+import liquibase.action.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.GetViewDefinitionStatement;
 

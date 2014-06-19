@@ -1,5 +1,6 @@
-package liquibase.sql;
+package liquibase.action;
 
+import liquibase.action.Sql;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.ExecuteResult;
 import liquibase.executor.ExecutionOptions;

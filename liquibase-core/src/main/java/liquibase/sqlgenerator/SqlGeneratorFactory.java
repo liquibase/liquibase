@@ -6,7 +6,7 @@ import liquibase.change.Change;
 import liquibase.exception.ValidationErrors;
 import liquibase.exception.Warnings;
 import liquibase.executor.ExecutionOptions;
-import liquibase.sql.Sql;
+import liquibase.action.Sql;
 import liquibase.statement.SqlStatement;
 
 import java.util.Collection;

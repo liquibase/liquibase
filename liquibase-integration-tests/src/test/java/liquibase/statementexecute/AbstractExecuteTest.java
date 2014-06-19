@@ -26,7 +26,7 @@ import liquibase.database.example.ExampleCustomDatabase;
 import liquibase.sdk.database.MockDatabase;
 import liquibase.database.core.UnsupportedDatabase;
 import liquibase.executor.ExecutorService;
-import liquibase.sql.Sql;
+import liquibase.action.Sql;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.test.TestContext;

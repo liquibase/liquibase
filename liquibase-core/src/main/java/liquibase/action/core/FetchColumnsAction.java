@@ -1,4 +1,4 @@
-package liquibase.action.metadata;
+package liquibase.action.core;
 
 import liquibase.action.MetaDataQueryAction;
 import liquibase.database.jvm.JdbcConnection;

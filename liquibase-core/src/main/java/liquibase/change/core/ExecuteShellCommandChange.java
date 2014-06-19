@@ -15,7 +15,7 @@ import liquibase.logging.LogFactory;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.resource.ResourceAccessor;
-import liquibase.sql.Sql;
+import liquibase.action.Sql;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.CommentStatement;
 import liquibase.statement.core.RuntimeStatement;

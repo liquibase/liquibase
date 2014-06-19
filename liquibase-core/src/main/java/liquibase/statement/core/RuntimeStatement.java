@@ -1,8 +1,7 @@
 package liquibase.statement.core;
 
-import liquibase.database.Database;
 import liquibase.executor.ExecutionOptions;
-import liquibase.sql.Sql;
+import liquibase.action.Sql;
 import liquibase.statement.AbstractSqlStatement;
 import liquibase.structure.DatabaseObject;
 

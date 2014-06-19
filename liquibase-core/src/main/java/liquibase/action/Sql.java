@@ -1,4 +1,4 @@
-package liquibase.sql;
+package liquibase.action;
 
 import liquibase.action.ExecuteAction;
 import liquibase.action.QueryAction;

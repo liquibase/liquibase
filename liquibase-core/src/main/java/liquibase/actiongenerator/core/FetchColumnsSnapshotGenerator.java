@@ -2,7 +2,7 @@ package liquibase.actiongenerator.core;
 
 import liquibase.CatalogAndSchema;
 import liquibase.action.Action;
-import liquibase.action.metadata.FetchColumnsAction;
+import liquibase.action.core.FetchColumnsAction;
 import liquibase.actiongenerator.AbstractActionGenerator;
 import liquibase.actiongenerator.ActionGeneratorChain;
 import liquibase.database.AbstractJdbcDatabase;

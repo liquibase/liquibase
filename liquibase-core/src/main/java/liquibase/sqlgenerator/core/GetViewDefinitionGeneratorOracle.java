@@ -3,8 +3,8 @@ package liquibase.sqlgenerator.core;
 import liquibase.CatalogAndSchema;
 import liquibase.database.core.OracleDatabase;
 import liquibase.executor.ExecutionOptions;
-import liquibase.sql.Sql;
-import liquibase.sql.UnparsedSql;
+import liquibase.action.Sql;
+import liquibase.action.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.GetViewDefinitionStatement;
 

@@ -5,7 +5,7 @@ import static org.junit.Assert.*;
 import liquibase.RuntimeEnvironment;
 import liquibase.database.core.SybaseDatabase;
 import liquibase.executor.ExecutionOptions;
-import liquibase.sql.Sql;
+import liquibase.action.Sql;
 import liquibase.statement.core.GetViewDefinitionStatement;
 
 import org.junit.Test;

@@ -2,8 +2,8 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.database.core.MySQLDatabase;
 import liquibase.executor.ExecutionOptions;
-import liquibase.sql.Sql;
-import liquibase.sql.UnparsedSql;
+import liquibase.action.Sql;
+import liquibase.action.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.AddAutoIncrementStatement;
 import liquibase.structure.DatabaseObject;

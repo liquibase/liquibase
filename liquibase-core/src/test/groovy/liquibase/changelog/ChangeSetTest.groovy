@@ -6,7 +6,7 @@ import liquibase.parser.core.ParsedNode
 import liquibase.parser.core.ParsedNodeException
 import liquibase.precondition.core.RunningAsPrecondition
 import liquibase.sdk.supplier.resource.ResourceSupplier
-import liquibase.sql.visitor.ReplaceSqlVisitor
+import liquibase.action.visitor.core.ReplaceSqlVisitor
 import org.hamcrest.Matchers
 import spock.lang.Shared
 import spock.lang.Specification
@@ -360,22 +360,22 @@ public class ChangeSetTest extends Specification {
         }
 
         then:
-        changeSet.sqlVisitors.size() == 3
-        assert ((ReplaceSqlVisitor) changeSet.sqlVisitors[0]).applyToRollback
-        ((ReplaceSqlVisitor) changeSet.sqlVisitors[0]).applicableDbms == null
-        ((ReplaceSqlVisitor) changeSet.sqlVisitors[0]).contexts == null
-        ((ReplaceSqlVisitor) changeSet.sqlVisitors[0]).replace == "a"
-        ((ReplaceSqlVisitor) changeSet.sqlVisitors[0]).with == "b"
+        changeSet.actionVisitors.size() == 3
+        assert ((ReplaceSqlVisitor) changeSet.actionVisitors[0]).applyToRollback
+        ((ReplaceSqlVisitor) changeSet.actionVisitors[0]).dbms == null
+        ((ReplaceSqlVisitor) changeSet.actionVisitors[0]).contexts == null
+        ((ReplaceSqlVisitor) changeSet.actionVisitors[0]).replace == "a"
+        ((ReplaceSqlVisitor) changeSet.actionVisitors[0]).with == "b"
 
-        that(((ReplaceSqlVisitor) changeSet.sqlVisitors[1]).applicableDbms, Matchers.containsInAnyOrder(["mysql", "oracle"].toArray()))
-        ((ReplaceSqlVisitor) changeSet.sqlVisitors[1]).contexts.toString() == "(live), (test)"
-        ((ReplaceSqlVisitor) changeSet.sqlVisitors[1]).replace == "x1"
-        ((ReplaceSqlVisitor) changeSet.sqlVisitors[1]).with == "y1"
+        that(((ReplaceSqlVisitor) changeSet.actionVisitors[1]).dbms, Matchers.containsInAnyOrder(["mysql", "oracle"].toArray()))
+        ((ReplaceSqlVisitor) changeSet.actionVisitors[1]).contexts.toString() == "(live), (test)"
+        ((ReplaceSqlVisitor) changeSet.actionVisitors[1]).replace == "x1"
+        ((ReplaceSqlVisitor) changeSet.actionVisitors[1]).with == "y1"
 
-        that(((ReplaceSqlVisitor) changeSet.sqlVisitors[2]).applicableDbms, Matchers.containsInAnyOrder(["mysql", "oracle"].toArray()))
-        ((ReplaceSqlVisitor) changeSet.sqlVisitors[2]).contexts.toString() == "(live), (test)"
-        ((ReplaceSqlVisitor) changeSet.sqlVisitors[2]).replace == "x2"
-        ((ReplaceSqlVisitor) changeSet.sqlVisitors[2]).with == "y2"
+        that(((ReplaceSqlVisitor) changeSet.actionVisitors[2]).dbms, Matchers.containsInAnyOrder(["mysql", "oracle"].toArray()))
+        ((ReplaceSqlVisitor) changeSet.actionVisitors[2]).contexts.toString() == "(live), (test)"
+        ((ReplaceSqlVisitor) changeSet.actionVisitors[2]).replace == "x2"
+        ((ReplaceSqlVisitor) changeSet.actionVisitors[2]).with == "y2"
     }
 
     def "load with empty rollback creates an EmptyChange"() {

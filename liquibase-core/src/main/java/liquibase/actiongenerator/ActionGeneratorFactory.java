@@ -9,10 +9,8 @@ import liquibase.exception.ValidationErrors;
 import liquibase.exception.Warnings;
 import liquibase.executor.ExecutionOptions;
 import liquibase.servicelocator.ServiceLocator;
-import liquibase.sql.Sql;
-import liquibase.sql.visitor.SqlVisitor;
+import liquibase.action.Sql;
 import liquibase.statement.SqlStatement;
-import liquibase.structure.DatabaseObject;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -217,7 +215,7 @@ public class ActionGeneratorFactory {
             return new Sql[0];
         }
 
-        List<SqlVisitor> sqlVisitors = options.getSqlVisitors();
+        List<ActionVisitor> sqlVisitors = options.getActionVisitors();
         if (sqlVisitors != null) {
             for (ActionVisitor visitor : sqlVisitors) {
                 for (Action action : actions) {

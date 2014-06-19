@@ -2,10 +2,9 @@ package liquibase.snapshot
 
 import liquibase.action.MockMetaDataAction
 import liquibase.action.QueryAction
-import liquibase.action.metadata.FetchColumnsAction
-import liquibase.action.metadata.FetchTablesAction
+import liquibase.action.core.FetchColumnsAction
+import liquibase.action.core.FetchTablesAction
 import spock.lang.Specification
-import spock.lang.Unroll
 
 class SnapshotGeneratorFactoryTest extends Specification {
 

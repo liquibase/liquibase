@@ -6,7 +6,7 @@ import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 import liquibase.statement.core.InsertOrUpdateStatement;
 import liquibase.database.core.OracleDatabase;
-import liquibase.sql.Sql;
+import liquibase.action.Sql;
 import static junit.framework.Assert.assertTrue;
 
 

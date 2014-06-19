@@ -6,8 +6,8 @@ import liquibase.exception.ValidationErrors;
 import liquibase.exception.Warnings;
 import liquibase.executor.ExecutionOptions;
 import liquibase.servicelocator.LiquibaseService;
-import liquibase.sql.Sql;
-import liquibase.sql.UnparsedSql;
+import liquibase.action.Sql;
+import liquibase.action.UnparsedSql;
 import liquibase.statement.SqlStatement;
 
 import java.util.ArrayList;

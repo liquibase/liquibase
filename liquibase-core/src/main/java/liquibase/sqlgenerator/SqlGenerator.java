@@ -1,12 +1,10 @@
 package liquibase.sqlgenerator;
 
 import liquibase.actiongenerator.ActionGenerator;
-import liquibase.database.Database;
 import liquibase.exception.ValidationErrors;
 import liquibase.exception.Warnings;
 import liquibase.executor.ExecutionOptions;
-import liquibase.servicelocator.PrioritizedService;
-import liquibase.sql.Sql;
+import liquibase.action.Sql;
 import liquibase.statement.SqlStatement;
 
 /**
@@ -34,7 +32,7 @@ import liquibase.statement.SqlStatement;
  *
  * @see SqlGeneratorFactory
  * @see liquibase.statement.SqlStatement
- * @see liquibase.sql.Sql
+ * @see liquibase.action.Sql
  */
 public interface SqlGenerator<StatementType extends SqlStatement> extends ActionGenerator<StatementType> {
 

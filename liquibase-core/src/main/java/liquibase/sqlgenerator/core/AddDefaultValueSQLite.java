@@ -2,7 +2,7 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.executor.ExecutionOptions;
-import liquibase.sql.Sql;
+import liquibase.action.Sql;
 import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.AddDefaultValueStatement;

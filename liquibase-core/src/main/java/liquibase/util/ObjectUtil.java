@@ -1,5 +1,6 @@
 package liquibase.util;
 
+import liquibase.ContextExpression;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.statement.DatabaseFunction;
 import liquibase.statement.SequenceCurrentValueFunction;
@@ -9,9 +10,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 
 public class ObjectUtil {
 
@@ -62,6 +61,10 @@ public class ObjectUtil {
             finalValue = new SequenceCurrentValueFunction(propertyValue);
         } else if (Enum.class.isAssignableFrom(parameterType)) {
             finalValue = Enum.valueOf((Class<Enum>) parameterType, propertyValue);
+        } else if (ContextExpression.class.isAssignableFrom(parameterType)) {
+            finalValue = new ContextExpression(propertyValue);
+        } else if (Set.class.isAssignableFrom(parameterType)) {
+            finalValue = new HashSet(Arrays.asList(propertyValue.split("\\s*,\\s*")));
         }
         try {
             method.invoke(object, finalValue);

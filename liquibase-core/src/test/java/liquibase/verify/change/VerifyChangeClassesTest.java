@@ -11,7 +11,7 @@ import liquibase.exception.ValidationErrors;
 import liquibase.executor.ExecutionOptions;
 import liquibase.serializer.LiquibaseSerializable;
 import liquibase.serializer.core.string.StringChangeLogSerializer;
-import liquibase.sql.Sql;
+import liquibase.action.Sql;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.test.JUnitResourceAccessor;

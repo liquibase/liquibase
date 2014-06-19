@@ -2,8 +2,7 @@ package liquibase.sdk.verifytest;
 
 import liquibase.database.Database;
 import liquibase.serializer.LiquibaseSerializable;
-import liquibase.serializer.core.string.StringChangeLogSerializer;
-import liquibase.sql.Sql;
+import liquibase.action.Sql;
 import liquibase.util.StringUtils;
 
 import java.util.Collection;

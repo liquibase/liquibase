@@ -1,9 +1,9 @@
 package liquibase.changelog.filter;
 
+import liquibase.action.visitor.ActionVisitor;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.database.DatabaseList;
-import liquibase.sql.visitor.SqlVisitor;
 import liquibase.util.StringUtils;
 
 import java.util.ArrayList;
@@ -22,13 +22,13 @@ public class DbmsChangeSetFilter implements ChangeSetFilter {
         if (database == null) {
             return new ChangeSetFilterResult(true, "No database connection, cannot evaluate dbms attribute", this.getClass());
         }
-         List<SqlVisitor> visitorsToRemove = new ArrayList<SqlVisitor>();
-        for (SqlVisitor visitor : changeSet.getSqlVisitors()) {
-            if (!DatabaseList.definitionMatches(visitor.getApplicableDbms(), database, true)) {
+         List<ActionVisitor> visitorsToRemove = new ArrayList<ActionVisitor>();
+        for (ActionVisitor visitor : changeSet.getActionVisitors()) {
+            if (!DatabaseList.definitionMatches(visitor.getDbms(), database, true)) {
                 visitorsToRemove.add(visitor);
             }
         }
-        changeSet.getSqlVisitors().removeAll(visitorsToRemove);
+        changeSet.getActionVisitors().removeAll(visitorsToRemove);
 
         String dbmsList;
         if (changeSet.getDbmsSet() == null || changeSet.getDbmsSet().size() == 0) {

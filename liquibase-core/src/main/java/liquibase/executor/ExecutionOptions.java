@@ -1,7 +1,7 @@
 package liquibase.executor;
 
 import liquibase.RuntimeEnvironment;
-import liquibase.sql.visitor.SqlVisitor;
+import liquibase.action.visitor.ActionVisitor;
 
 import java.util.List;
 
@@ -10,19 +10,19 @@ import java.util.List;
  */
 public class ExecutionOptions {
     private RuntimeEnvironment runtimeEnvironment;
-    private List<SqlVisitor> sqlVisitors;
+    private List<ActionVisitor> actionVisitors;
 
     public ExecutionOptions(RuntimeEnvironment runtimeEnvironment) {
         this.runtimeEnvironment = runtimeEnvironment;
     }
 
-    public ExecutionOptions(List<SqlVisitor> sqlVisitors, RuntimeEnvironment runtimeEnvironment) {
-        this.sqlVisitors = sqlVisitors;
+    public ExecutionOptions(List<ActionVisitor> actionVisitors, RuntimeEnvironment runtimeEnvironment) {
+        this.actionVisitors = actionVisitors;
         this.runtimeEnvironment = runtimeEnvironment;
     }
 
-    public List<SqlVisitor> getSqlVisitors() {
-        return sqlVisitors;
+    public List<ActionVisitor> getActionVisitors() {
+        return actionVisitors;
     }
 
     public RuntimeEnvironment getRuntimeEnvironment() {

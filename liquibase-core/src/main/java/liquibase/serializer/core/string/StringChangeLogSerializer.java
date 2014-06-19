@@ -7,11 +7,7 @@ import liquibase.serializer.LiquibaseSerializable;
 import liquibase.util.StringUtils;
 
 import java.io.File;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import java.util.*;
 import java.io.OutputStream;
 import java.io.IOException;
 
@@ -163,6 +159,18 @@ public class StringChangeLogSerializer implements ChangeLogSerializer {
     public static class FieldFilter {
         public boolean include(Object obj, String field, Object value) {
             return true;
+        }
+    }
+
+    public static class SkipFieldsFilter extends FieldFilter {
+        private Set<String> fieldsToSkip;
+
+        public SkipFieldsFilter(String... fieldsToSkip) {
+            this.fieldsToSkip = new HashSet<String>(Arrays.asList(fieldsToSkip));
+        }
+
+        public boolean include(Object obj, String field, Object value) {
+            return !fieldsToSkip.contains(field);
         }
     }
 }
