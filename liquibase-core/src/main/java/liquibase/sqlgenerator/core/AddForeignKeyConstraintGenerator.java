@@ -6,24 +6,23 @@ import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.database.core.OracleDatabase;
 import liquibase.exception.ValidationErrors;
+import liquibase.executor.ExecutionOptions;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
-import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.AddForeignKeyConstraintStatement;
-import liquibase.structure.core.ForeignKey;
-import liquibase.structure.core.Table;
 
 public class AddForeignKeyConstraintGenerator extends AbstractSqlGenerator<AddForeignKeyConstraintStatement> {
 
     @Override
     @SuppressWarnings({"SimplifiableIfStatement"})
-    public boolean supports(AddForeignKeyConstraintStatement statement, Database database) {
-        return (!(database instanceof SQLiteDatabase));
+    public boolean supports(AddForeignKeyConstraintStatement statement, ExecutionOptions options) {
+        return (!(options.getRuntimeEnvironment().getTargetDatabase() instanceof SQLiteDatabase));
     }
 
     @Override
-    public ValidationErrors validate(AddForeignKeyConstraintStatement addForeignKeyConstraintStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public ValidationErrors validate(AddForeignKeyConstraintStatement addForeignKeyConstraintStatement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
+        Database database = options.getRuntimeEnvironment().getTargetDatabase();
         ValidationErrors validationErrors = new ValidationErrors();
 
         if ((addForeignKeyConstraintStatement.isInitiallyDeferred() || addForeignKeyConstraintStatement.isDeferrable()) && !database.supportsInitiallyDeferrableColumns()) {
@@ -41,7 +40,8 @@ public class AddForeignKeyConstraintGenerator extends AbstractSqlGenerator<AddFo
     }
 
     @Override
-    public Sql[] generateSql(AddForeignKeyConstraintStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public Sql[] generateSql(AddForeignKeyConstraintStatement statement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
+        Database database = options.getRuntimeEnvironment().getTargetDatabase();
 	    StringBuilder sb = new StringBuilder();
 	    sb.append("ALTER TABLE ")
 			    .append(database.escapeTableName(statement.getBaseTableCatalogName(), statement.getBaseTableSchemaName(), statement.getBaseTableName()))

@@ -4,6 +4,7 @@ import liquibase.database.Database;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
+import liquibase.executor.ExecutionOptions;
 import liquibase.sql.Sql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
@@ -16,7 +17,7 @@ import java.sql.Timestamp;
 public class LockDatabaseChangeLogGenerator extends AbstractSqlGenerator<LockDatabaseChangeLogStatement> {
 
     @Override
-    public ValidationErrors validate(LockDatabaseChangeLogStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public ValidationErrors validate(LockDatabaseChangeLogStatement statement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
         return new ValidationErrors();
     }
 
@@ -33,7 +34,9 @@ public class LockDatabaseChangeLogGenerator extends AbstractSqlGenerator<LockDat
     }
 
     @Override
-    public Sql[] generateSql(LockDatabaseChangeLogStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public Sql[] generateSql(LockDatabaseChangeLogStatement statement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
+        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+
     	String liquibaseSchema = database.getLiquibaseSchemaName();
         String liquibaseCatalog = database.getLiquibaseCatalogName();
 
@@ -45,7 +48,7 @@ public class LockDatabaseChangeLogGenerator extends AbstractSqlGenerator<LockDat
         updateStatement.addNewColumnValue("LOCKEDBY", hostname + " (" + hostaddress + ")");
         updateStatement.setWhereClause(database.escapeColumnName(liquibaseCatalog, liquibaseSchema, database.getDatabaseChangeLogTableName(), "ID") + " = 1 AND " + database.escapeColumnName(liquibaseCatalog, liquibaseSchema, database.getDatabaseChangeLogTableName(), "LOCKED") + " = "+ DataTypeFactory.getInstance().fromDescription("boolean", database).objectToSql(false, database));
 
-        return SqlGeneratorFactory.getInstance().generateSql(updateStatement, database);
+        return SqlGeneratorFactory.getInstance().generateSql(updateStatement, options);
 
     }
 }

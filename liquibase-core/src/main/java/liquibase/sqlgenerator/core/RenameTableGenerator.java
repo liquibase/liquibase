@@ -2,7 +2,7 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
 import liquibase.database.core.*;
-import liquibase.structure.core.Relation;
+import liquibase.executor.ExecutionOptions;
 import liquibase.structure.core.Table;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
@@ -13,12 +13,12 @@ import liquibase.statement.core.RenameTableStatement;
 public class RenameTableGenerator extends AbstractSqlGenerator<RenameTableStatement> {
 
     @Override
-    public boolean supports(RenameTableStatement statement, Database database) {
-        return !(database instanceof FirebirdDatabase);
+    public boolean supports(RenameTableStatement statement, ExecutionOptions options) {
+        return !(options.getRuntimeEnvironment().getTargetDatabase() instanceof FirebirdDatabase);
     }
 
     @Override
-    public ValidationErrors validate(RenameTableStatement renameTableStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public ValidationErrors validate(RenameTableStatement renameTableStatement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("newTableName", renameTableStatement.getNewTableName());
         validationErrors.checkRequiredField("oldTableName", renameTableStatement.getOldTableName());
@@ -26,7 +26,9 @@ public class RenameTableGenerator extends AbstractSqlGenerator<RenameTableStatem
     }
 
     @Override
-    public Sql[] generateSql(RenameTableStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public Sql[] generateSql(RenameTableStatement statement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
+        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+
         String sql;
         if (database instanceof MSSQLDatabase) {
             sql = "exec sp_rename '" + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getOldTableName()) + "', '" + statement.getNewTableName() + '\'';

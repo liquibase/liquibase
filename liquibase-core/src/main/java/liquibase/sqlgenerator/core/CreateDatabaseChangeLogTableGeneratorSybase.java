@@ -4,12 +4,11 @@ import liquibase.database.Database;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.database.core.SybaseDatabase;
 import liquibase.exception.ValidationErrors;
+import liquibase.executor.ExecutionOptions;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.CreateDatabaseChangeLogTableStatement;
-import liquibase.structure.core.Relation;
-import liquibase.structure.core.Table;
 
 public class CreateDatabaseChangeLogTableGeneratorSybase extends AbstractSqlGenerator<CreateDatabaseChangeLogTableStatement> {
     @Override
@@ -18,17 +17,19 @@ public class CreateDatabaseChangeLogTableGeneratorSybase extends AbstractSqlGene
     }
 
     @Override
-    public boolean supports(CreateDatabaseChangeLogTableStatement statement, Database database) {
-        return database instanceof SybaseDatabase;
+    public boolean supports(CreateDatabaseChangeLogTableStatement statement, ExecutionOptions options) {
+        return options.getRuntimeEnvironment().getTargetDatabase() instanceof SybaseDatabase;
     }
 
     @Override
-    public ValidationErrors validate(CreateDatabaseChangeLogTableStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public ValidationErrors validate(CreateDatabaseChangeLogTableStatement statement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
         return new ValidationErrors();
     }
 
     @Override
-    public Sql[] generateSql(CreateDatabaseChangeLogTableStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public Sql[] generateSql(CreateDatabaseChangeLogTableStatement statement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
+        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+
         return new Sql[] {
                 new UnparsedSql("CREATE TABLE " + database.escapeTableName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName()) + " (ID VARCHAR(150) NOT NULL, " +
                 "AUTHOR VARCHAR(150) NOT NULL, " +

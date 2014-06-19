@@ -4,6 +4,7 @@ import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.exception.ValidationErrors;
+import liquibase.executor.ExecutionOptions;
 import liquibase.logging.LogFactory;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
@@ -12,9 +13,6 @@ import liquibase.statement.AutoIncrementConstraint;
 import liquibase.statement.ForeignKeyConstraint;
 import liquibase.statement.UniqueConstraint;
 import liquibase.statement.core.CreateTableStatement;
-import liquibase.structure.core.Relation;
-import liquibase.structure.core.Schema;
-import liquibase.structure.core.Sequence;
 import liquibase.structure.core.Table;
 import liquibase.util.StringUtils;
 
@@ -27,7 +25,7 @@ import java.util.List;
 public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatement> {
 
     @Override
-    public ValidationErrors validate(CreateTableStatement createTableStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public ValidationErrors validate(CreateTableStatement createTableStatement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("tableName", createTableStatement.getTableName());
         validationErrors.checkRequiredField("columns", createTableStatement.getColumns());
@@ -35,11 +33,12 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
     }
 
     @Override
-    public Sql[] generateSql(CreateTableStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-    	
-    	if (database instanceof InformixDatabase) {
+    public Sql[] generateSql(CreateTableStatement statement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
+        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+
+        if (database instanceof InformixDatabase) {
     		AbstractSqlGenerator<CreateTableStatement> gen = new CreateTableGeneratorInformix();
-    		return gen.generateSql(statement, database, sqlGeneratorChain);
+    		return gen.generateSql(statement, options, sqlGeneratorChain);
     	}
 
         List<Sql> additionalSql = new ArrayList<Sql>();
@@ -121,7 +120,7 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
                     if( autoIncrementConstraint.getStartWith() != null ){
 	                    if (database instanceof PostgresDatabase) {
 	                        String sequenceName = statement.getTableName()+"_"+column+"_seq";
-	                        additionalSql.add(new UnparsedSql("alter sequence "+database.escapeSequenceName(statement.getCatalogName(), statement.getSchemaName(), sequenceName)+" start with "+autoIncrementConstraint.getStartWith()));
+	                        additionalSql.add(new UnparsedSql("alter sequence "+ database.escapeSequenceName(statement.getCatalogName(), statement.getSchemaName(), sequenceName)+" start with "+autoIncrementConstraint.getStartWith()));
 	                    }else if(database instanceof MySQLDatabase){
 	                    	mysqlTableOptionStartWith = autoIncrementConstraint.getStartWith();
 	                    }
@@ -260,7 +259,7 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
 
         if (database instanceof MySQLDatabase && mysqlTableOptionStartWith != null){
         	LogFactory.getLogger().info("[MySQL] Using last startWith statement ("+mysqlTableOptionStartWith.toString()+") as table option.");
-        	sql += " "+((MySQLDatabase)database).getTableOptionAutoIncrementStartWithClause(mysqlTableOptionStartWith);
+        	sql += " "+((MySQLDatabase) database).getTableOptionAutoIncrementStartWithClause(mysqlTableOptionStartWith);
         }
 
 
@@ -285,7 +284,7 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
         }
 
         if( database instanceof MySQLDatabase && statement.getRemarks() != null) {
-            sql += " COMMENT='"+database.escapeStringForDatabase(statement.getRemarks())+"' ";
+            sql += " COMMENT='"+ database.escapeStringForDatabase(statement.getRemarks())+"' ";
         }
         additionalSql.add(0, new UnparsedSql(sql));
         return additionalSql.toArray(new Sql[additionalSql.size()]);

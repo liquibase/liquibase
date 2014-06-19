@@ -3,24 +3,24 @@ package liquibase.sqlgenerator.core;
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.exception.ValidationErrors;
+import liquibase.executor.ExecutionOptions;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
-import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.CreateSequenceStatement;
-import liquibase.structure.core.Sequence;
 
 public class CreateSequenceGenerator extends AbstractSqlGenerator<CreateSequenceStatement> {
 
     @Override
-    public boolean supports(CreateSequenceStatement statement, Database database) {
-        return database.supportsSequences();
+    public boolean supports(CreateSequenceStatement statement, ExecutionOptions options) {
+        return options.getRuntimeEnvironment().getTargetDatabase().supportsSequences();
     }
 
     @Override
-    public ValidationErrors validate(CreateSequenceStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public ValidationErrors validate(CreateSequenceStatement statement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
 
+        Database database = options.getRuntimeEnvironment().getTargetDatabase();
         validationErrors.checkRequiredField("sequenceName", statement.getSequenceName());
 
         validationErrors.checkDisallowedField("startValue", statement.getStartValue(), database, FirebirdDatabase.class);
@@ -36,7 +36,9 @@ public class CreateSequenceGenerator extends AbstractSqlGenerator<CreateSequence
     }
 
     @Override
-    public Sql[] generateSql(CreateSequenceStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public Sql[] generateSql(CreateSequenceStatement statement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
+        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+
         StringBuffer buffer = new StringBuffer();
         buffer.append("CREATE SEQUENCE ");
         buffer.append(database.escapeSequenceName(statement.getCatalogName(), statement.getSchemaName(), statement.getSequenceName()));

@@ -1,6 +1,8 @@
 package liquibase.statement.core;
 
+import liquibase.RuntimeEnvironment;
 import liquibase.database.Database;
+import liquibase.executor.ExecutionOptions;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.test.TestContext;
@@ -14,7 +16,7 @@ public abstract class AbstractSqStatementTest<SqlStatementUnderTest extends SqlS
     @Test
     public void hasAtLeastOneGenerator() {
         for (Database database : TestContext.getInstance().getAllDatabases()) {
-            if (SqlGeneratorFactory.getInstance().supports(createStatementUnderTest(), database)) {
+            if (SqlGeneratorFactory.getInstance().supports(createStatementUnderTest(), new ExecutionOptions(new RuntimeEnvironment(database)))) {
                 return;
             };
         }

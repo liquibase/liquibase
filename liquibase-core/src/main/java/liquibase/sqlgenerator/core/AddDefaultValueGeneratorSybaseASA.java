@@ -1,11 +1,9 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
-import liquibase.structure.core.Schema;
+import liquibase.executor.ExecutionOptions;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.database.core.SybaseASADatabase;
-import liquibase.structure.core.Column;
-import liquibase.structure.core.Table;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
@@ -18,12 +16,14 @@ public class AddDefaultValueGeneratorSybaseASA extends AddDefaultValueGenerator 
     }
 
     @Override
-    public boolean supports(AddDefaultValueStatement statement, Database database) {
-        return database instanceof SybaseASADatabase;
+    public boolean supports(AddDefaultValueStatement statement, ExecutionOptions options) {
+        return options.getRuntimeEnvironment().getTargetDatabase() instanceof SybaseASADatabase;
     }
 
     @Override
-    public Sql[] generateSql(AddDefaultValueStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public Sql[] generateSql(AddDefaultValueStatement statement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
+        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+
         Object defaultValue = statement.getDefaultValue();
         return new Sql[]{
                 new UnparsedSql("ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " MODIFY " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " DEFAULT " + DataTypeFactory.getInstance().fromObject(defaultValue, database).objectToSql(defaultValue, database))

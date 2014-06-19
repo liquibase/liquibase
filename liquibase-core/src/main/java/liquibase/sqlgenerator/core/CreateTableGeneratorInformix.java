@@ -6,18 +6,15 @@ import java.util.List;
 
 import liquibase.database.Database;
 import liquibase.database.core.InformixDatabase;
-import liquibase.exception.ValidationErrors;
+import liquibase.executor.ExecutionOptions;
 import liquibase.logging.LogFactory;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
-import liquibase.sqlgenerator.core.AbstractSqlGenerator;
 import liquibase.statement.AutoIncrementConstraint;
 import liquibase.statement.ForeignKeyConstraint;
 import liquibase.statement.UniqueConstraint;
 import liquibase.statement.core.CreateTableStatement;
-import liquibase.structure.core.Schema;
-import liquibase.structure.core.Table;
 import liquibase.util.StringUtils;
 
 
@@ -29,8 +26,8 @@ import liquibase.util.StringUtils;
 public class CreateTableGeneratorInformix extends CreateTableGenerator {
 
     @Override
-    public boolean supports(CreateTableStatement statement, Database database) {
-        return database instanceof InformixDatabase;
+    public boolean supports(CreateTableStatement statement, ExecutionOptions options) {
+        return options.getRuntimeEnvironment().getTargetDatabase() instanceof InformixDatabase;
     }
 
     @Override
@@ -39,8 +36,10 @@ public class CreateTableGeneratorInformix extends CreateTableGenerator {
     }
 
 	@Override
-    public Sql[] generateSql(CreateTableStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public Sql[] generateSql(CreateTableStatement statement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
 		StringBuilder buffer = new StringBuilder();
+        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+
 
         buffer.append("CREATE TABLE ").append(database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName())).append(" ");
         buffer.append("(");

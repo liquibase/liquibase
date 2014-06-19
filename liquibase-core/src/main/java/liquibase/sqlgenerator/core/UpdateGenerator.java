@@ -3,21 +3,20 @@ package liquibase.sqlgenerator.core;
 import liquibase.database.Database;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.ValidationErrors;
+import liquibase.executor.ExecutionOptions;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.DatabaseFunction;
 import liquibase.statement.core.UpdateStatement;
 import liquibase.structure.core.Column;
-import liquibase.structure.core.Relation;
-import liquibase.structure.core.Table;
 
 import java.util.Date;
 
 public class UpdateGenerator extends AbstractSqlGenerator<UpdateStatement> {
 
     @Override
-    public ValidationErrors validate(UpdateStatement updateStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public ValidationErrors validate(UpdateStatement updateStatement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("tableName", updateStatement.getTableName());
         validationErrors.checkRequiredField("columns", updateStatement.getNewColumnValues());
@@ -25,7 +24,9 @@ public class UpdateGenerator extends AbstractSqlGenerator<UpdateStatement> {
     }
 
     @Override
-    public Sql[] generateSql(UpdateStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public Sql[] generateSql(UpdateStatement statement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
+        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+
         StringBuffer sql = new StringBuffer("UPDATE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " SET");
         for (String column : statement.getNewColumnValues().keySet()) {
             sql.append(" ").append(database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), column)).append(" = ");

@@ -5,9 +5,7 @@ import liquibase.database.core.DerbyDatabase;
 import liquibase.database.core.H2Database;
 import liquibase.database.core.HsqlDatabase;
 import liquibase.database.core.MSSQLDatabase;
-import liquibase.structure.core.Column;
-import liquibase.structure.core.Schema;
-import liquibase.structure.core.Table;
+import liquibase.executor.ExecutionOptions;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
@@ -23,7 +21,9 @@ public class AddAutoIncrementGenerator extends AbstractSqlGenerator<AddAutoIncre
     }
 
     @Override
-    public boolean supports(AddAutoIncrementStatement statement, Database database) {
+    public boolean supports(AddAutoIncrementStatement statement, ExecutionOptions options) {
+        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+
         return (database.supportsAutoIncrement()
                 && !(database instanceof DerbyDatabase)
                 && !(database instanceof MSSQLDatabase)
@@ -34,7 +34,7 @@ public class AddAutoIncrementGenerator extends AbstractSqlGenerator<AddAutoIncre
     @Override
     public ValidationErrors validate(
     		AddAutoIncrementStatement statement,
-    		Database database,
+    		ExecutionOptions options,
     		SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
 
@@ -49,8 +49,10 @@ public class AddAutoIncrementGenerator extends AbstractSqlGenerator<AddAutoIncre
     @Override
     public Sql[] generateSql(
     		AddAutoIncrementStatement statement,
-    		Database database,
+    		ExecutionOptions options,
     		SqlGeneratorChain sqlGeneratorChain) {
+        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+
         String sql = "ALTER TABLE "
             + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName())
             + " MODIFY "

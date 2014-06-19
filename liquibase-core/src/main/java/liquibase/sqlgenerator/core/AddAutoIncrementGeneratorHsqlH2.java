@@ -4,9 +4,7 @@ import liquibase.database.Database;
 import liquibase.database.core.H2Database;
 import liquibase.database.core.HsqlDatabase;
 import liquibase.datatype.DataTypeFactory;
-import liquibase.structure.core.Column;
-import liquibase.structure.core.Schema;
-import liquibase.structure.core.Table;
+import liquibase.executor.ExecutionOptions;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
@@ -20,15 +18,19 @@ public class AddAutoIncrementGeneratorHsqlH2 extends AddAutoIncrementGenerator {
     }
 
     @Override
-    public boolean supports(AddAutoIncrementStatement statement, Database database) {
+    public boolean supports(AddAutoIncrementStatement statement, ExecutionOptions options) {
+        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+
         return database instanceof HsqlDatabase || database instanceof H2Database;
     }
 
     @Override
     public Sql[] generateSql(
     		AddAutoIncrementStatement statement,
-    		Database database,
+    		ExecutionOptions options,
     		SqlGeneratorChain sqlGeneratorChain) {
+        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+
         return new Sql[]{
             new UnparsedSql(
             	"ALTER TABLE "

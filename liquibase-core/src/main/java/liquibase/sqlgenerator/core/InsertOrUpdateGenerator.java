@@ -5,23 +5,22 @@ import liquibase.database.Database;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.ValidationErrors;
+import liquibase.executor.ExecutionOptions;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.InsertOrUpdateStatement;
 import liquibase.statement.core.UpdateStatement;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
-import liquibase.structure.core.Relation;
-import liquibase.structure.core.Table;
 
 import java.util.HashSet;
 
 public abstract class InsertOrUpdateGenerator extends AbstractSqlGenerator<InsertOrUpdateStatement> {
 
-    protected abstract String getRecordCheck(InsertOrUpdateStatement insertOrUpdateStatement, Database database, String whereClause);
+    protected abstract String getRecordCheck(InsertOrUpdateStatement insertOrUpdateStatement, ExecutionOptions options, String whereClause);
 
-    protected abstract String getElse(Database database);
+    protected abstract String getElse(ExecutionOptions options);
 
-    protected String getPostUpdateStatements(Database database){
+    protected String getPostUpdateStatements(ExecutionOptions options){
         return "";
     }
 
@@ -31,7 +30,7 @@ public abstract class InsertOrUpdateGenerator extends AbstractSqlGenerator<Inser
     }
 
     @Override
-    public ValidationErrors validate(InsertOrUpdateStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public ValidationErrors validate(InsertOrUpdateStatement statement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("tableName", statement.getTableName());
         validationErrors.checkRequiredField("columns", statement.getColumnValues());
@@ -40,7 +39,10 @@ public abstract class InsertOrUpdateGenerator extends AbstractSqlGenerator<Inser
         return validationErrors;
     }
 
-    protected String getWhereClause(InsertOrUpdateStatement insertOrUpdateStatement, Database database) {
+    protected String getWhereClause(InsertOrUpdateStatement insertOrUpdateStatement, ExecutionOptions options) {
+
+        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+
         StringBuffer where = new StringBuffer();
 
         String[] pkColumns = insertOrUpdateStatement.getPrimaryKey().split(",");
@@ -62,10 +64,10 @@ public abstract class InsertOrUpdateGenerator extends AbstractSqlGenerator<Inser
         return where.toString();
     }
 
-    protected String getInsertStatement(InsertOrUpdateStatement insertOrUpdateStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    protected String getInsertStatement(InsertOrUpdateStatement insertOrUpdateStatement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
         StringBuffer insertBuffer = new StringBuffer();
         InsertGenerator insert = new InsertGenerator();
-        Sql[] insertSql = insert.generateSql(insertOrUpdateStatement,database,sqlGeneratorChain);
+        Sql[] insertSql = insert.generateSql(insertOrUpdateStatement,options,sqlGeneratorChain);
 
         for(Sql s:insertSql)
         {
@@ -78,15 +80,7 @@ public abstract class InsertOrUpdateGenerator extends AbstractSqlGenerator<Inser
         return insertBuffer.toString();
     }
 
-    /**
-     * 
-     * @param insertOrUpdateStatement
-     * @param database
-     * @param whereClause
-     * @param sqlGeneratorChain
-     * @return the update statement, if there is nothing to update return null
-     */
-    protected String getUpdateStatement(InsertOrUpdateStatement insertOrUpdateStatement,Database database, String whereClause, SqlGeneratorChain sqlGeneratorChain) throws LiquibaseException {
+    protected String getUpdateStatement(InsertOrUpdateStatement insertOrUpdateStatement,ExecutionOptions options, String whereClause, SqlGeneratorChain sqlGeneratorChain) throws LiquibaseException {
 
         StringBuffer updateSqlString = new StringBuffer();
 
@@ -110,7 +104,7 @@ public abstract class InsertOrUpdateGenerator extends AbstractSqlGenerator<Inser
         	throw new LiquibaseException("No fields to update in set clause");
         }
 
-        Sql[] updateSql = update.generateSql(updateStatement, database, sqlGeneratorChain);
+        Sql[] updateSql = update.generateSql(updateStatement, options, sqlGeneratorChain);
 
         for(Sql s:updateSql)
         {
@@ -126,25 +120,25 @@ public abstract class InsertOrUpdateGenerator extends AbstractSqlGenerator<Inser
     }
 
     @Override
-    public Sql[] generateSql(InsertOrUpdateStatement insertOrUpdateStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public Sql[] generateSql(InsertOrUpdateStatement insertOrUpdateStatement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
         StringBuffer completeSql = new StringBuffer();
-        String whereClause = getWhereClause(insertOrUpdateStatement, database);
+        String whereClause = getWhereClause(insertOrUpdateStatement, options);
 
-        completeSql.append( getRecordCheck(insertOrUpdateStatement, database, whereClause));
+        completeSql.append( getRecordCheck(insertOrUpdateStatement, options, whereClause));
 
-        completeSql.append(getInsertStatement(insertOrUpdateStatement, database, sqlGeneratorChain));
+        completeSql.append(getInsertStatement(insertOrUpdateStatement, options, sqlGeneratorChain));
 
         try {
         	
-            String updateStatement = getUpdateStatement(insertOrUpdateStatement,database,whereClause,sqlGeneratorChain);
+            String updateStatement = getUpdateStatement(insertOrUpdateStatement, options,whereClause,sqlGeneratorChain);
             
-            completeSql.append(getElse(database));
+            completeSql.append(getElse(options));
 
             completeSql.append(updateStatement);
             
         } catch (LiquibaseException e) {}
 
-        completeSql.append(getPostUpdateStatements(database));
+        completeSql.append(getPostUpdateStatements(options));
 
         return new Sql[]{
                 new UnparsedSql(completeSql.toString(), "")

@@ -3,19 +3,19 @@ package liquibase.sqlgenerator.core;
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.exception.ValidationErrors;
+import liquibase.executor.ExecutionOptions;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
-import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.AddUniqueConstraintStatement;
-import liquibase.structure.core.Table;
-import liquibase.structure.core.UniqueConstraint;
 import liquibase.util.StringUtils;
 
 public class AddUniqueConstraintGenerator extends AbstractSqlGenerator<AddUniqueConstraintStatement> {
 
     @Override
-    public boolean supports(AddUniqueConstraintStatement statement, Database database) {
+    public boolean supports(AddUniqueConstraintStatement statement, ExecutionOptions options) {
+        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+
         return !(database instanceof SQLiteDatabase)
         		&& !(database instanceof MSSQLDatabase)
         		&& !(database instanceof SybaseDatabase)
@@ -25,7 +25,7 @@ public class AddUniqueConstraintGenerator extends AbstractSqlGenerator<AddUnique
     }
 
     @Override
-    public ValidationErrors validate(AddUniqueConstraintStatement addUniqueConstraintStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public ValidationErrors validate(AddUniqueConstraintStatement addUniqueConstraintStatement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("columnNames", addUniqueConstraintStatement.getColumnNames());
         validationErrors.checkRequiredField("tableName", addUniqueConstraintStatement.getTableName());
@@ -33,7 +33,8 @@ public class AddUniqueConstraintGenerator extends AbstractSqlGenerator<AddUnique
     }
 
     @Override
-    public Sql[] generateSql(AddUniqueConstraintStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public Sql[] generateSql(AddUniqueConstraintStatement statement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
+        Database database = options.getRuntimeEnvironment().getTargetDatabase();
 
 		String sql = null;
 		if (statement.getConstraintName() == null) {

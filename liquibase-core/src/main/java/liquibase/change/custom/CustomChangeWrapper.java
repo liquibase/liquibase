@@ -4,8 +4,8 @@ import liquibase.change.AbstractChange;
 import liquibase.change.DatabaseChange;
 import liquibase.change.ChangeMetaData;
 import liquibase.change.DatabaseChangeProperty;
-import liquibase.database.Database;
 import liquibase.exception.*;
+import liquibase.executor.ExecutionOptions;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.resource.ResourceAccessor;
@@ -48,7 +48,7 @@ public class CustomChangeWrapper extends AbstractChange {
     private boolean configured = false;
 
     @Override
-    public boolean generateStatementsVolatile(Database database) {
+    public boolean generateStatementsVolatile(ExecutionOptions options) {
         return true;
     }
 
@@ -75,7 +75,7 @@ public class CustomChangeWrapper extends AbstractChange {
     /**
      * Specify the name of the class to use as the CustomChange. This method instantiates the class using {@link #getClassLoader()} or fallback methods
      * and assigns it to {@link #getCustomChange()}.
-     * {@link #setClassLoader(ClassLoader)} must be called before this method. The passed class is constructed, but no parameters are set. They are set in {@link liquibase.change.Change#generateStatements(liquibase.database.Database)}
+     * {@link #setClassLoader(ClassLoader)} must be called before this method. The passed class is constructed, but no parameters are set. They are set in {@link liquibase.change.Change#generateStatements(liquibase.executor.ExecutionOptions)}
      */
     public CustomChangeWrapper setClass(String className) throws CustomChangeException {
         if (classLoader == null) {
@@ -109,7 +109,7 @@ public class CustomChangeWrapper extends AbstractChange {
     }
 
     /**
-     * Specify a parameter on the CustomChange object to set before executing {@link liquibase.change.Change#generateStatements(liquibase.database.Database)}  or {@link #generateRollbackStatements(liquibase.database.Database)} on it.
+     * Specify a parameter on the CustomChange object to set before executing {@link liquibase.change.Change#generateStatements(liquibase.executor.ExecutionOptions)}  or {@link liquibase.change.Change#generateRollbackStatements(liquibase.executor.ExecutionOptions)} on it.
      * The CustomChange class must have a set method for the given parameter. For example, to call setParam("lastName", "X") you must have a method setLastName(String val) on your class.
      */
     public void setParam(String name, String value) {
@@ -134,9 +134,10 @@ public class CustomChangeWrapper extends AbstractChange {
 
     /**
      * Call the {@link CustomChange#validate(liquibase.database.Database)} method and return the result.
+     * @param options
      */
     @Override
-    public ValidationErrors validate(Database database) {
+    public ValidationErrors validate(ExecutionOptions options) {
         if (!configured) {
             try {
                 configureCustomChange();
@@ -146,7 +147,7 @@ public class CustomChangeWrapper extends AbstractChange {
         }
 
         try {
-            return customChange.validate(database);
+            return customChange.validate(options.getRuntimeEnvironment().getTargetDatabase());
         } catch (Throwable e) {
             return new ValidationErrors().addError("Exception thrown calling "+getClassName()+".validate():"+ e.getMessage());
         }
@@ -154,9 +155,10 @@ public class CustomChangeWrapper extends AbstractChange {
 
     /**
      * Required for the Change interface, but not supported by CustomChanges. Returns an empty Warnings object.
+     * @param options
      */
     @Override
-    public Warnings warn(Database database) {
+    public Warnings warn(ExecutionOptions options) {
         //does not support warns
         return new Warnings();
     }
@@ -166,18 +168,19 @@ public class CustomChangeWrapper extends AbstractChange {
      * or {@link CustomTaskChange#execute(liquibase.database.Database)} depending on the CustomChange implementation.
      * <p></p>
      * If the CustomChange returns a null SqlStatement array, this method returns an empty array. If a CustomTaskChange is being used, this method will return an empty array.
+     * @param options
      */
     @Override
-    public SqlStatement[] generateStatements(Database database) {
+    public SqlStatement[] generateStatements(ExecutionOptions options) {
         SqlStatement[] statements = null;
         try {
             if (!configured) {
                 configureCustomChange();
             }
             if (customChange instanceof CustomSqlChange) {
-                statements = ((CustomSqlChange) customChange).generateStatements(database);
+                statements = ((CustomSqlChange) customChange).generateStatements(options.getRuntimeEnvironment().getTargetDatabase());
             } else if (customChange instanceof CustomTaskChange) {
-                ((CustomTaskChange) customChange).execute(database);
+                ((CustomTaskChange) customChange).execute(options.getRuntimeEnvironment().getTargetDatabase());
             } else {
                 throw new UnexpectedLiquibaseException(customChange.getClass().getName() + " does not implement " + CustomSqlChange.class.getName() + " or " + CustomTaskChange.class.getName());
             }
@@ -197,18 +200,19 @@ public class CustomChangeWrapper extends AbstractChange {
      * <p></p>
      * If the CustomChange returns a null SqlStatement array, this method returns an empty array. If a CustomTaskChange is being used, this method will return an empty array.
      * Any {@link RollbackImpossibleException} exceptions thrown by the CustomChange will thrown by this method.
+     * @param options
      */
     @Override
-    public SqlStatement[] generateRollbackStatements(Database database) throws RollbackImpossibleException {
+    public SqlStatement[] generateRollbackStatements(ExecutionOptions options) throws RollbackImpossibleException {
         SqlStatement[] statements = null;
         try {
             if (!configured) {
                 configureCustomChange();
             }
             if (customChange instanceof CustomSqlRollback) {
-                statements = ((CustomSqlRollback) customChange).generateRollbackStatements(database);
+                statements = ((CustomSqlRollback) customChange).generateRollbackStatements(options.getRuntimeEnvironment().getTargetDatabase());
             } else if (customChange instanceof CustomTaskRollback) {
-                ((CustomTaskRollback) customChange).rollback(database);
+                ((CustomTaskRollback) customChange).rollback(options.getRuntimeEnvironment().getTargetDatabase());
             } else {
                 throw new RollbackImpossibleException("Unknown rollback type: "+customChange.getClass().getName());
             }
@@ -226,11 +230,12 @@ public class CustomChangeWrapper extends AbstractChange {
 
     /**
      * Returns true if the customChange supports rolling back.
-     * {@link #generateRollbackStatements} may still trow a {@link RollbackImpossibleException} when it is actually exectued, even if this method returns true.
+     * {@link liquibase.change.Change#generateRollbackStatements(liquibase.executor.ExecutionOptions)} may still trow a {@link RollbackImpossibleException} when it is actually exectued, even if this method returns true.
      * Currently only checks if the customChange implements {@link CustomSqlRollback}
+     * @param options
      */
     @Override
-    public boolean supportsRollback(Database database) {
+    public boolean supportsRollback(ExecutionOptions options) {
         return customChange instanceof CustomSqlRollback || customChange instanceof CustomTaskRollback;
     }
 

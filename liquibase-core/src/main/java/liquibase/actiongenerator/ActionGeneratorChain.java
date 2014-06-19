@@ -4,6 +4,7 @@ import liquibase.action.Action;
 import liquibase.database.Database;
 import liquibase.exception.ValidationErrors;
 import liquibase.exception.Warnings;
+import liquibase.executor.ExecutionOptions;
 import liquibase.sql.Sql;
 import liquibase.actiongenerator.ActionGenerator;
 import liquibase.statement.SqlStatement;
@@ -20,7 +21,7 @@ public class ActionGeneratorChain {
         }
     }
 
-    public Action[] generateActions(SqlStatement statement, Database database) {
+    public Action[] generateActions(SqlStatement statement, ExecutionOptions options) {
         if (actionGenerators == null) {
             return null;
         }
@@ -29,22 +30,22 @@ public class ActionGeneratorChain {
             return new Action[0];
         }
 
-        return actionGenerators.next().generateActions(statement, database, this);
+        return actionGenerators.next().generateActions(statement, options, this);
     }
 
-    public Warnings warn(SqlStatement statement, Database database) {
+    public Warnings warn(SqlStatement statement, ExecutionOptions options) {
         if (actionGenerators == null || !actionGenerators.hasNext()) {
             return new Warnings();
         }
 
-        return actionGenerators.next().warn(statement, database, this);
+        return actionGenerators.next().warn(statement, options, this);
     }
 
-    public ValidationErrors validate(SqlStatement statement, Database database) {
+    public ValidationErrors validate(SqlStatement statement, ExecutionOptions options) {
         if (actionGenerators == null || !actionGenerators.hasNext()) {
             return new ValidationErrors();
         }
 
-        return actionGenerators.next().validate(statement, database, this);
+        return actionGenerators.next().validate(statement, options, this);
     }
 }

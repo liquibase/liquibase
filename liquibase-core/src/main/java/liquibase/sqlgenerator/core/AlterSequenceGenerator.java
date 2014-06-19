@@ -3,22 +3,23 @@ package liquibase.sqlgenerator.core;
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.exception.ValidationErrors;
+import liquibase.executor.ExecutionOptions;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
-import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.AlterSequenceStatement;
-import liquibase.structure.core.Sequence;
 
 public class AlterSequenceGenerator extends AbstractSqlGenerator<AlterSequenceStatement> {
 
     @Override
-    public boolean supports(AlterSequenceStatement statement, Database database) {
-        return database.supportsSequences();
+    public boolean supports(AlterSequenceStatement statement, ExecutionOptions options) {
+        return options.getRuntimeEnvironment().getTargetDatabase().supportsSequences();
     }
 
     @Override
-    public ValidationErrors validate(AlterSequenceStatement alterSequenceStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public ValidationErrors validate(AlterSequenceStatement alterSequenceStatement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
+        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+
         ValidationErrors validationErrors = new ValidationErrors();
 
         validationErrors.checkDisallowedField("incrementBy", alterSequenceStatement.getIncrementBy(), database, HsqlDatabase.class, H2Database.class);
@@ -32,7 +33,9 @@ public class AlterSequenceGenerator extends AbstractSqlGenerator<AlterSequenceSt
     }
 
     @Override
-    public Sql[] generateSql(AlterSequenceStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public Sql[] generateSql(AlterSequenceStatement statement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
+        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+
         StringBuffer buffer = new StringBuffer();
         buffer.append("ALTER SEQUENCE ");
         buffer.append(database.escapeSequenceName(statement.getCatalogName(), statement.getSchemaName(), statement.getSequenceName()));

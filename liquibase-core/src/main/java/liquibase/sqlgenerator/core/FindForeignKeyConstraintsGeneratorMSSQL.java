@@ -1,11 +1,10 @@
 package liquibase.sqlgenerator.core;
 
-import liquibase.database.Database;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.exception.ValidationErrors;
+import liquibase.executor.ExecutionOptions;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
-import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.FindForeignKeyConstraintsStatement;
 
@@ -16,19 +15,19 @@ public class FindForeignKeyConstraintsGeneratorMSSQL extends AbstractSqlGenerato
     }
 
     @Override
-    public boolean supports(FindForeignKeyConstraintsStatement statement, Database database) {
-        return database instanceof MSSQLDatabase;
+    public boolean supports(FindForeignKeyConstraintsStatement statement, ExecutionOptions options) {
+        return options.getRuntimeEnvironment().getTargetDatabase() instanceof MSSQLDatabase;
     }
 
     @Override
-    public ValidationErrors validate(FindForeignKeyConstraintsStatement findForeignKeyConstraintsStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public ValidationErrors validate(FindForeignKeyConstraintsStatement findForeignKeyConstraintsStatement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("baseTableName", findForeignKeyConstraintsStatement.getBaseTableName());
         return validationErrors;
     }
 
     @Override
-    public Sql[] generateSql(FindForeignKeyConstraintsStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public Sql[] generateSql(FindForeignKeyConstraintsStatement statement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
         StringBuilder sb = new StringBuilder();
 
         sb.append("SELECT ");

@@ -1,7 +1,7 @@
 package liquibase.change.core;
 
 import liquibase.change.*;
-import liquibase.database.Database;
+import liquibase.executor.ExecutionOptions;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.resource.ResourceAccessor;
@@ -13,7 +13,7 @@ public class DeleteDataChange extends AbstractModifyDataChange {
 
 
     @Override
-    public SqlStatement[] generateStatements(Database database) {
+    public SqlStatement[] generateStatements(ExecutionOptions options) {
 
         DeleteStatement statement = new DeleteStatement(getCatalogName(), getSchemaName(), getTableName());
 

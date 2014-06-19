@@ -19,7 +19,7 @@ public class SqlGeneratorChainTest extends Specification {
 
     def void generateSql_nullGenerators() {
         when:
-        SqlGeneratorChain chain = new SqlGeneratorChain(null)
+        SqlGeneratorChain chain = new SqlGeneratorChain(new ActionGeneratorChain(null))
 
         then:
         chain.generateSql(new MockSqlStatement(), new MockDatabase()) == null
@@ -28,7 +28,7 @@ public class SqlGeneratorChainTest extends Specification {
     def generateSql_noGenerators() {
         when:
         SortedSet<SqlGenerator> generators = new TreeSet<SqlGenerator>(new ActionGeneratorComparator())
-        SqlGeneratorChain chain = new SqlGeneratorChain(generators)
+        SqlGeneratorChain chain = new SqlGeneratorChain(new ActionGeneratorChain(generators))
 
         then:
         assert chain.generateSql(new MockSqlStatement(), new MockDatabase()).length == 0
@@ -38,7 +38,7 @@ public class SqlGeneratorChainTest extends Specification {
        when:
         SortedSet<SqlGenerator> generators = new TreeSet<SqlGenerator>(new ActionGeneratorComparator())
         generators.add(new MockSqlGenerator(1, "A1", "A2"))
-        SqlGeneratorChain chain = new SqlGeneratorChain(generators)
+        SqlGeneratorChain chain = new SqlGeneratorChain(new ActionGeneratorChain(generators))
 
         Sql[] sql = chain.generateSql(new MockSqlStatement(), new MockDatabase())
        then:
@@ -52,7 +52,7 @@ public class SqlGeneratorChainTest extends Specification {
         SortedSet<SqlGenerator> generators = new TreeSet<SqlGenerator>(new ActionGeneratorComparator())
         generators.add(new MockSqlGenerator(2, "B1", "B2"))
         generators.add(new MockSqlGenerator(1, "A1", "A2"))
-        SqlGeneratorChain chain = new SqlGeneratorChain(generators)
+        SqlGeneratorChain chain = new SqlGeneratorChain(new ActionGeneratorChain(generators))
         Sql[] sql = chain.generateSql(new MockSqlStatement(), new MockDatabase())
         
         then:
@@ -69,7 +69,7 @@ public class SqlGeneratorChainTest extends Specification {
         generators.add(new MockSqlGenerator(2, "B1", "B2"))
         generators.add(new MockSqlGenerator(1, "A1", "A2"))
         generators.add(new MockSqlGenerator(3, "C1", "C2"))
-        SqlGeneratorChain chain = new SqlGeneratorChain(generators)
+        SqlGeneratorChain chain = new SqlGeneratorChain(new ActionGeneratorChain(generators))
         Sql[] sql = chain.generateSql(new MockSqlStatement(), new MockDatabase())
         
         then:
@@ -96,7 +96,7 @@ public class SqlGeneratorChainTest extends Specification {
         SortedSet<SqlGenerator> generators = new TreeSet<SqlGenerator>(new ActionGeneratorComparator())
         generators.add(new MockSqlGenerator(1, "A1", "A2"))
 
-        SqlGeneratorChain chain = new SqlGeneratorChain(generators)
+        SqlGeneratorChain chain = new SqlGeneratorChain(new ActionGeneratorChain(generators))
         ValidationErrors validationErrors = chain.validate(new MockSqlStatement(), new MockDatabase())
         
         then:
@@ -109,7 +109,7 @@ public class SqlGeneratorChainTest extends Specification {
         SortedSet<SqlGenerator> generators = new TreeSet<SqlGenerator>(new ActionGeneratorComparator())
         generators.add(new MockSqlGenerator(1, "A1", "A2").addValidationError("E1"))
 
-        SqlGeneratorChain chain = new SqlGeneratorChain(generators)
+        SqlGeneratorChain chain = new SqlGeneratorChain(new ActionGeneratorChain(generators))
         ValidationErrors validationErrors = chain.validate(new MockSqlStatement(), new MockDatabase())
 
         then:
@@ -122,7 +122,7 @@ public class SqlGeneratorChainTest extends Specification {
         generators.add(new MockSqlGenerator(2, "B1", "B2"))
         generators.add(new MockSqlGenerator(1, "A1", "A2"))
 
-        SqlGeneratorChain chain = new SqlGeneratorChain(generators)
+        SqlGeneratorChain chain = new SqlGeneratorChain(new ActionGeneratorChain(generators))
         ValidationErrors validationErrors = chain.validate(new MockSqlStatement(), new MockDatabase())
 
         then:
@@ -135,7 +135,7 @@ public class SqlGeneratorChainTest extends Specification {
         generators.add(new MockSqlGenerator(2, "B1", "B2").addValidationError("E1"))
         generators.add(new MockSqlGenerator(1, "A1", "A2"))
 
-        SqlGeneratorChain chain = new SqlGeneratorChain(generators)
+        SqlGeneratorChain chain = new SqlGeneratorChain(new ActionGeneratorChain(generators))
         ValidationErrors validationErrors = chain.validate(new MockSqlStatement(), new MockDatabase())
 
         then:
@@ -148,7 +148,7 @@ public class SqlGeneratorChainTest extends Specification {
         generators.add(new MockSqlGenerator(2, "B1", "B2"))
         generators.add(new MockSqlGenerator(1, "A1", "A2").addValidationError("E1"))
 
-        SqlGeneratorChain chain = new SqlGeneratorChain(generators)
+        SqlGeneratorChain chain = new SqlGeneratorChain(new ActionGeneratorChain(generators))
         ValidationErrors validationErrors = chain.validate(new MockSqlStatement(), new MockDatabase())
 
         then:

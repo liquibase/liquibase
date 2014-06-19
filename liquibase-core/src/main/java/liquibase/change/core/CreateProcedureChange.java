@@ -7,9 +7,7 @@ import liquibase.database.core.OracleDatabase;
 import liquibase.database.core.DB2Database;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
-import liquibase.parser.core.ParsedNode;
-import liquibase.parser.core.ParsedNodeException;
-import liquibase.resource.ResourceAccessor;
+import liquibase.executor.ExecutionOptions;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.CreateProcedureStatement;
 import liquibase.util.StreamUtil;
@@ -18,7 +16,6 @@ import liquibase.util.StringUtils;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashMap;
 import java.util.Map;
 import java.io.UnsupportedEncodingException;
 
@@ -38,12 +35,12 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
     private String encoding = null;
 
     @Override
-    public boolean generateStatementsVolatile(Database database) {
+    public boolean generateStatementsVolatile(ExecutionOptions options) {
         return false;
     }
 
     @Override
-    public boolean generateRollbackStatementsVolatile(Database database) {
+    public boolean generateRollbackStatementsVolatile(ExecutionOptions options) {
         return false;
     }
 
@@ -146,7 +143,7 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
     }
 
     @Override
-    public ValidationErrors validate(Database database) {
+    public ValidationErrors validate(ExecutionOptions options) {
         ValidationErrors validate = new ValidationErrors(); //not falling back to default because of path/procedureText option group. Need to specify everything
         if (StringUtils.trimToNull(getProcedureText()) != null && StringUtils.trimToNull(getPath()) != null) {
             validate.addError("Cannot specify both 'path' and a nested procedure text in "+ChangeFactory.getInstance().getChangeMetaData(this).getName());
@@ -209,8 +206,9 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
     }
 
     @Override
-    public SqlStatement[] generateStatements(Database database) {
+    public SqlStatement[] generateStatements(ExecutionOptions options) {
         String endDelimiter = ";";
+        Database database = options.getRuntimeEnvironment().getTargetDatabase();
         if (database instanceof OracleDatabase) {
             endDelimiter = "\n/";
         } else if (database instanceof DB2Database) {
@@ -232,17 +230,17 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
                 throw new UnexpectedLiquibaseException(e);
             }
         }
-        return generateStatements(procedureText, endDelimiter, database);
+        return generateStatements(procedureText, endDelimiter, options);
     }
 
-    protected SqlStatement[] generateStatements(String logicText, String endDelimiter, Database database) {
+    protected SqlStatement[] generateStatements(String logicText, String endDelimiter, ExecutionOptions options) {
         return new SqlStatement[]{
                 new CreateProcedureStatement(getCatalogName(), getSchemaName(), getProcedureName(), logicText, endDelimiter),
         };
     }
 
     @Override
-    public ChangeStatus checkStatus(Database database) {
+    public ChangeStatus checkStatus(ExecutionOptions options) {
         return new ChangeStatus().unknown("Cannot check createProcedure status");
     }
 

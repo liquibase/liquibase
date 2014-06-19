@@ -5,6 +5,7 @@ import liquibase.database.Database;
 import liquibase.database.core.DB2Database;
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.database.core.SQLiteDatabase.AlterTableVisitor;
+import liquibase.executor.ExecutionOptions;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Index;
 import liquibase.statement.SqlStatement;
@@ -84,12 +85,14 @@ public class AddNotNullConstraintChange extends AbstractChange {
     }
 
     @Override
-    public SqlStatement[] generateStatements(Database database) {
+    public SqlStatement[] generateStatements(ExecutionOptions options) {
 
 ////        if (database instanceof SQLiteDatabase) {
 //    		// return special statements for SQLite databases
 //    		return generateStatementsForSQLiteDatabase(database);
 //        }
+
+        Database database = options.getRuntimeEnvironment().getTargetDatabase();
 
     	List<SqlStatement> statements = new ArrayList<SqlStatement>();
 
@@ -107,7 +110,7 @@ public class AddNotNullConstraintChange extends AbstractChange {
         return statements.toArray(new SqlStatement[statements.size()]);
     }
 
-    private SqlStatement[] generateStatementsForSQLiteDatabase(Database database) {
+    private SqlStatement[] generateStatementsForSQLiteDatabase(ExecutionOptions options) {
     	
     	// SQLite does not support this ALTER TABLE operation until now.
 		// For more information see: http://www.sqlite.org/omitted.html.
@@ -167,7 +170,7 @@ public class AddNotNullConstraintChange extends AbstractChange {
     		
 		try {
     		// alter table
-			statements.addAll(SQLiteDatabase.getAlterTableStatements(rename_alter_visitor, database,getCatalogName(), getSchemaName(),getTableName()));
+			statements.addAll(SQLiteDatabase.getAlterTableStatements(rename_alter_visitor, options,getCatalogName(), getSchemaName(),getTableName()));
     	} catch (Exception e) {
 			e.printStackTrace();
 		}

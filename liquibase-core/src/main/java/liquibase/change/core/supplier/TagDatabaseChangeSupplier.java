@@ -7,6 +7,7 @@ import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.database.Database;
 import liquibase.diff.DiffResult;
+import liquibase.executor.ExecutionOptions;
 import liquibase.executor.ExecutorService;
 import liquibase.sdk.supplier.change.AbstractChangeSupplier;
 import liquibase.statement.SqlStatement;
@@ -31,7 +32,7 @@ public class TagDatabaseChangeSupplier extends AbstractChangeSupplier<TagDatabas
             }
 
             @Override
-            public SqlStatement[] generateStatements(Database database) {
+            public SqlStatement[] generateStatements(ExecutionOptions options) {
                 return new SqlStatement[]{
                         new CreateDatabaseChangeLogTableStatement(),
                         new MarkChangeSetRanStatement(new ChangeSet("1", "test", false, false, "com/example/test.xml", null, null, new DatabaseChangeLog("com/example/test.xml")), ChangeSet.ExecType.EXECUTED),

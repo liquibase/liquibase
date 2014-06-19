@@ -2,9 +2,9 @@ package liquibase.sqlgenerator;
 
 import liquibase.action.Action;
 import liquibase.actiongenerator.ActionGeneratorChain;
-import liquibase.database.Database;
 import liquibase.exception.ValidationErrors;
 import liquibase.exception.Warnings;
+import liquibase.executor.ExecutionOptions;
 import liquibase.servicelocator.LiquibaseService;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
@@ -37,17 +37,17 @@ public class MockSqlGenerator implements SqlGenerator {
     }
 
     @Override
-    public boolean supports(SqlStatement statement, Database database) {
+    public boolean supports(SqlStatement statement, ExecutionOptions options) {
         return supports;
     }
 
     @Override
-    public boolean generateStatementsIsVolatile(Database database) {
+    public boolean generateStatementsIsVolatile(ExecutionOptions options) {
         return false;
     }
 
     @Override
-    public boolean generateRollbackStatementsIsVolatile(Database database) {
+    public boolean generateRollbackStatementsIsVolatile(ExecutionOptions options) {
         return false;
     }
 
@@ -58,40 +58,40 @@ public class MockSqlGenerator implements SqlGenerator {
     }
 
     @Override
-    public Warnings warn(SqlStatement sqlStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public Warnings warn(SqlStatement sqlStatement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
         return new Warnings();
     }
 
     @Override
-    public Warnings warn(SqlStatement statement, Database database, ActionGeneratorChain chain) {
-        return warn(statement, database, new SqlGeneratorChain(chain));
+    public Warnings warn(SqlStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
+        return warn(statement, options, new SqlGeneratorChain(chain));
     }
 
     @Override
-    public ValidationErrors validate(SqlStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-        ValidationErrors validationErrors = sqlGeneratorChain.validate(statement, database);
+    public ValidationErrors validate(SqlStatement statement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
+        ValidationErrors validationErrors = sqlGeneratorChain.validate(statement, options);
         validationErrors.addAll(errors);
         return validationErrors;
     }
 
     @Override
-    public ValidationErrors validate(SqlStatement statement, Database database, ActionGeneratorChain chain) {
-        return validate(statement, database, new SqlGeneratorChain(chain));
+    public ValidationErrors validate(SqlStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
+        return validate(statement, options, new SqlGeneratorChain(chain));
     }
 
     @Override
-    public Action[] generateActions(SqlStatement statement, Database database, ActionGeneratorChain chain) {
-        return generateSql(statement, database, new SqlGeneratorChain(chain));
+    public Action[] generateActions(SqlStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
+        return generateSql(statement, options, new SqlGeneratorChain(chain));
     }
 
     @Override
-    public Sql[] generateSql(SqlStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public Sql[] generateSql(SqlStatement statement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
         List<Sql> sql = new ArrayList<Sql>();
         for (String returnSql  : this.returnSql) {
             sql.add(new UnparsedSql(returnSql));
         }
 
-        sql.addAll(Arrays.asList(sqlGeneratorChain.generateSql(statement, database)));
+        sql.addAll(Arrays.asList(sqlGeneratorChain.generateSql(statement, options)));
 
         return sql.toArray(new Sql[sql.size()]);
     }

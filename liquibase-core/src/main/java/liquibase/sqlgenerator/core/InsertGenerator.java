@@ -3,20 +3,19 @@ package liquibase.sqlgenerator.core;
 import liquibase.database.Database;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.ValidationErrors;
+import liquibase.executor.ExecutionOptions;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.DatabaseFunction;
 import liquibase.statement.core.InsertStatement;
-import liquibase.structure.core.Relation;
-import liquibase.structure.core.Table;
 
 import java.util.Date;
 
 public class InsertGenerator extends AbstractSqlGenerator<InsertStatement> {
 
     @Override
-    public ValidationErrors validate(InsertStatement insertStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public ValidationErrors validate(InsertStatement insertStatement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("tableName", insertStatement.getTableName());
         validationErrors.checkRequiredField("columns", insertStatement.getColumnValues());
@@ -29,7 +28,9 @@ public class InsertGenerator extends AbstractSqlGenerator<InsertStatement> {
     }
 
     @Override
-    public Sql[] generateSql(InsertStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public Sql[] generateSql(InsertStatement statement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
+        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+
         StringBuffer sql = new StringBuffer("INSERT INTO " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " (");
         for (String column : statement.getColumnValues().keySet()) {
             sql.append(database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), column)).append(", ");

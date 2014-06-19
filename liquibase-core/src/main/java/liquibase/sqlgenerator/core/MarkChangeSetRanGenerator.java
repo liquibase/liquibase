@@ -10,6 +10,7 @@ import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
+import liquibase.executor.ExecutionOptions;
 import liquibase.sql.Sql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
@@ -24,7 +25,7 @@ import liquibase.util.StringUtils;
 public class MarkChangeSetRanGenerator extends AbstractSqlGenerator<MarkChangeSetRanStatement> {
 
     @Override
-    public ValidationErrors validate(MarkChangeSetRanStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public ValidationErrors validate(MarkChangeSetRanStatement statement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("changeSet", statement.getChangeSet());
 
@@ -32,7 +33,8 @@ public class MarkChangeSetRanGenerator extends AbstractSqlGenerator<MarkChangeSe
     }
 
     @Override
-    public Sql[] generateSql(MarkChangeSetRanStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public Sql[] generateSql(MarkChangeSetRanStatement statement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
+        Database database = options.getRuntimeEnvironment().getTargetDatabase();
         String dateValue = database.getCurrentDateTimeFunction();
 
         ChangeSet changeSet = statement.getChangeSet();
@@ -78,7 +80,7 @@ public class MarkChangeSetRanGenerator extends AbstractSqlGenerator<MarkChangeSe
             throw new UnexpectedLiquibaseException(e);
         }
 
-        return SqlGeneratorFactory.getInstance().generateSql(runStatement, database);
+        return SqlGeneratorFactory.getInstance().generateSql(runStatement, options);
     }
 
     private String limitSize(String string) {

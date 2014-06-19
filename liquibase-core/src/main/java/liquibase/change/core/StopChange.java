@@ -5,6 +5,7 @@ import liquibase.change.DatabaseChange;
 import liquibase.change.ChangeMetaData;
 import liquibase.change.DatabaseChangeProperty;
 import liquibase.database.Database;
+import liquibase.executor.ExecutionOptions;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.resource.ResourceAccessor;
@@ -19,7 +20,7 @@ public class StopChange extends AbstractChange {
     private String message ="Stop command in changelog file";
 
     @Override
-    public boolean generateStatementsVolatile(Database database) {
+    public boolean generateStatementsVolatile(ExecutionOptions options) {
         return true;
     }
 
@@ -33,10 +34,10 @@ public class StopChange extends AbstractChange {
     }
 
     @Override
-    public SqlStatement[] generateStatements(Database database) {
+    public SqlStatement[] generateStatements(ExecutionOptions options) {
         return new SqlStatement[] { new RuntimeStatement() {
             @Override
-            public Sql[] generate(Database database) {
+            public Sql[] generate(ExecutionOptions options) {
                 throw new StopChangeException(getMessage());
             }
         }};

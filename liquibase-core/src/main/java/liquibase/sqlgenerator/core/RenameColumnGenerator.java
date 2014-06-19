@@ -4,28 +4,27 @@ import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.ValidationErrors;
+import liquibase.executor.ExecutionOptions;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.RenameColumnStatement;
-import liquibase.structure.core.Column;
-import liquibase.structure.core.Table;
 
 public class RenameColumnGenerator extends AbstractSqlGenerator<RenameColumnStatement> {
 
     @Override
-    public boolean supports(RenameColumnStatement statement, Database database) {
-        return !(database instanceof SQLiteDatabase);
+    public boolean supports(RenameColumnStatement statement, ExecutionOptions options) {
+        return !(options.getRuntimeEnvironment().getTargetDatabase() instanceof SQLiteDatabase);
     }
 
     @Override
-    public ValidationErrors validate(RenameColumnStatement renameColumnStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public ValidationErrors validate(RenameColumnStatement renameColumnStatement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("tableName", renameColumnStatement.getTableName());
         validationErrors.checkRequiredField("oldColumnName", renameColumnStatement.getOldColumnName());
         validationErrors.checkRequiredField("newColumnName", renameColumnStatement.getNewColumnName());
 
-        if (database instanceof MySQLDatabase) {
+        if (options.getRuntimeEnvironment().getTargetDatabase() instanceof MySQLDatabase) {
             validationErrors.checkRequiredField("columnDataType", renameColumnStatement.getColumnDataType());
         }
 
@@ -33,7 +32,9 @@ public class RenameColumnGenerator extends AbstractSqlGenerator<RenameColumnStat
     }
 
     @Override
-    public Sql[] generateSql(RenameColumnStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public Sql[] generateSql(RenameColumnStatement statement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
+        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+
         String sql;
         if (database instanceof MSSQLDatabase) {
         	// do no escape the new column name. Otherwise it produce "exec sp_rename '[dbo].[person].[usernae]', '[username]'"
@@ -42,7 +43,7 @@ public class RenameColumnGenerator extends AbstractSqlGenerator<RenameColumnStat
             sql ="ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " CHANGE " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getOldColumnName()) + " " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getNewColumnName()) + " " + DataTypeFactory.getInstance().fromDescription(statement.getColumnDataType(), database).toDatabaseDataType(database);
         } else if (database instanceof SybaseDatabase) {
             sql = "exec sp_rename '" + statement.getTableName() + "." + statement.getOldColumnName() + "', '" + statement.getNewColumnName() + "'";
-        } else if (database instanceof HsqlDatabase || database  instanceof H2Database) {
+        } else if (database instanceof HsqlDatabase || database instanceof H2Database) {
             sql ="ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " ALTER COLUMN " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getOldColumnName()) + " RENAME TO " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getNewColumnName());
         } else if (database instanceof FirebirdDatabase) {
             sql = "ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " ALTER COLUMN " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getOldColumnName()) + " TO " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getNewColumnName());

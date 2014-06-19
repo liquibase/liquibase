@@ -1,14 +1,13 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
-import liquibase.database.core.InformixDatabase;
 import liquibase.database.core.SybaseDatabase;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.ValidationErrors;
+import liquibase.executor.ExecutionOptions;
 import liquibase.sql.Sql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
-import liquibase.statement.ColumnConstraint;
 import liquibase.statement.NotNullConstraint;
 import liquibase.statement.core.CreateDatabaseChangeLogTableStatement;
 import liquibase.statement.core.CreateTableStatement;
@@ -16,18 +15,20 @@ import liquibase.statement.core.CreateTableStatement;
 public class CreateDatabaseChangeLogTableGenerator extends AbstractSqlGenerator<CreateDatabaseChangeLogTableStatement> {
 
     @Override
-    public boolean supports(CreateDatabaseChangeLogTableStatement statement, Database database) {
-        return (!(database instanceof SybaseDatabase));
+    public boolean supports(CreateDatabaseChangeLogTableStatement statement, ExecutionOptions options) {
+        return (!(options.getRuntimeEnvironment().getTargetDatabase() instanceof SybaseDatabase));
     }
 
     @Override
-    public ValidationErrors validate(CreateDatabaseChangeLogTableStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public ValidationErrors validate(CreateDatabaseChangeLogTableStatement statement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
         return new ValidationErrors();
     }
 
     @Override
-    public Sql[] generateSql(CreateDatabaseChangeLogTableStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-    	
+    public Sql[] generateSql(CreateDatabaseChangeLogTableStatement statement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
+
+        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+
         CreateTableStatement createTableStatement = new CreateTableStatement(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName())
                 .setTablespace(database.getLiquibaseTablespaceName())
                 .addColumn("ID", DataTypeFactory.getInstance().fromDescription("VARCHAR(" + getIdColumnSize() + ")", database), null, null, null, new NotNullConstraint())
@@ -42,7 +43,7 @@ public class CreateDatabaseChangeLogTableGenerator extends AbstractSqlGenerator<
                 .addColumn("TAG", DataTypeFactory.getInstance().fromDescription("VARCHAR(255)", database))
                 .addColumn("LIQUIBASE", DataTypeFactory.getInstance().fromDescription("VARCHAR(20)", database));
 
-        return SqlGeneratorFactory.getInstance().generateSql(createTableStatement, database);
+        return SqlGeneratorFactory.getInstance().generateSql(createTableStatement, options);
     }
 
     protected String getIdColumnSize() {

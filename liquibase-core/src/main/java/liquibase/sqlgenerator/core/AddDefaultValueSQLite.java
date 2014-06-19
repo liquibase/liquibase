@@ -1,7 +1,7 @@
 package liquibase.sqlgenerator.core;
 
-import liquibase.database.Database;
 import liquibase.database.core.SQLiteDatabase;
+import liquibase.executor.ExecutionOptions;
 import liquibase.sql.Sql;
 import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
@@ -14,12 +14,12 @@ public class AddDefaultValueSQLite extends AddDefaultValueGenerator {
     }
 
     @Override
-    public boolean supports(AddDefaultValueStatement statement, Database database) {
-        return database instanceof SQLiteDatabase;
+    public boolean supports(AddDefaultValueStatement statement, ExecutionOptions options) {
+        return options.getRuntimeEnvironment().getTargetDatabase() instanceof SQLiteDatabase;
     }
 
     @Override
-    public Sql[] generateSql(AddDefaultValueStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public Sql[] generateSql(AddDefaultValueStatement statement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
 //        // SQLite does not support this ALTER TABLE operation until now.
 //		// For more information see: http://www.sqlite.org/omitted.html.
 //		// This is a small work around...

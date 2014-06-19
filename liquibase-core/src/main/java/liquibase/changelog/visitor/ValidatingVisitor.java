@@ -1,5 +1,6 @@
 package liquibase.changelog.visitor;
 
+import liquibase.RuntimeEnvironment;
 import liquibase.change.Change;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
@@ -7,6 +8,7 @@ import liquibase.changelog.RanChangeSet;
 import liquibase.changelog.filter.ChangeSetFilterResult;
 import liquibase.database.Database;
 import liquibase.exception.*;
+import liquibase.executor.ExecutionOptions;
 import liquibase.precondition.ErrorPrecondition;
 import liquibase.precondition.FailedPrecondition;
 import liquibase.precondition.core.PreconditionContainer;
@@ -74,7 +76,7 @@ public class ValidatingVisitor implements ChangeSetVisitor {
     }
 
     @Override
-    public void visit(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database, Set<ChangeSetFilterResult> filterResults) throws LiquibaseException {
+    public void visit(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, RuntimeEnvironment runtimeEnvironment, Set<ChangeSetFilterResult> filterResults) throws LiquibaseException {
         RanChangeSet ranChangeSet = ranIndex.get(changeSet.toString(false));
         boolean ran = ranChangeSet != null;
         boolean shouldValidate = !ran || changeSet.shouldRunOnChange() || changeSet.shouldAlwaysRun();
@@ -87,10 +89,11 @@ public class ValidatingVisitor implements ChangeSetVisitor {
             
             
             if(shouldValidate){
-                warnings.addAll(change.warn(database));
+                ExecutionOptions options = new ExecutionOptions(runtimeEnvironment);
+                warnings.addAll(change.warn(options));
             
                 try {                
-                    ValidationErrors foundErrors = change.validate(database);
+                    ValidationErrors foundErrors = change.validate(options);
 
                     if (foundErrors != null && foundErrors.hasErrors()) {
                         if (changeSet.getOnValidationFail().equals(ChangeSet.ValidationFailOption.MARK_RAN)) {

@@ -1,5 +1,6 @@
 package liquibase.changelog.visitor;
 
+import liquibase.RuntimeEnvironment;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.database.Database;
@@ -28,7 +29,7 @@ public class RollbackVisitorTest {
         replay(database);
 
         RollbackVisitor visitor = new RollbackVisitor(database);
-        visitor.visit(changeSet, new DatabaseChangeLog(), database, null);
+        visitor.visit(changeSet, new DatabaseChangeLog(), new RuntimeEnvironment(database), null);
 
         verify(database);
         verify(changeSet);

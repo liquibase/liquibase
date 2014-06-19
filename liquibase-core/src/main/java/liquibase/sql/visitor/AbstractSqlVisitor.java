@@ -1,17 +1,22 @@
 package liquibase.sql.visitor;
 
 import liquibase.ContextExpression;
+import liquibase.action.Action;
 import liquibase.change.CheckSum;
+import liquibase.database.Database;
 import liquibase.exception.SetupException;
+import liquibase.executor.ExecutionOptions;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.resource.ResourceAccessor;
 import liquibase.serializer.ReflectionSerializer;
 import liquibase.serializer.core.string.StringChangeLogSerializer;
+import liquibase.sql.UnparsedSql;
 import liquibase.util.ObjectUtil;
 import liquibase.util.StringUtils;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 public abstract class AbstractSqlVisitor implements SqlVisitor {
@@ -110,5 +115,25 @@ public abstract class AbstractSqlVisitor implements SqlVisitor {
     public ParsedNode serialize() {
         throw new RuntimeException("TODO");
     }
+
+    @Override
+    public void visit(Action action, ExecutionOptions options) {
+        if (action instanceof UnparsedSql) {
+            ((UnparsedSql) action).setSql(toFinalSql(((UnparsedSql) action).getSql(), options));
+        }
+    }
+
+    protected String toFinalSql(String sql, ExecutionOptions options) {
+        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+        String finalSql = sql;
+        List<SqlVisitor> sqlVisitors = options.getSqlVisitors();
+        if (sqlVisitors != null) {
+            for (SqlVisitor visitor : sqlVisitors) {
+                finalSql = visitor.modifySql(finalSql, database);
+            }
+        }
+        return finalSql;
+    }
+
 
 }

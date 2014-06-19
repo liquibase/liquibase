@@ -1,5 +1,7 @@
 package liquibase.sqlgenerator.core;
 
+import liquibase.RuntimeEnvironment;
+import liquibase.executor.ExecutionOptions;
 import org.junit.Test;
 
 import liquibase.database.core.*;
@@ -35,15 +37,15 @@ public class AddColumnGeneratorTest extends AbstractSqlGeneratorTest<AddColumnSt
         super.isValid();
         AddColumnStatement addPKColumn = new AddColumnStatement(null, null, TABLE_NAME, COLUMN_NAME, COLUMN_TYPE, null, new PrimaryKeyConstraint("pk_name"));
 
-        assertFalse(generatorUnderTest.validate(addPKColumn, new OracleDatabase(), new MockSqlGeneratorChain()).hasErrors());
-        assertTrue(generatorUnderTest.validate(addPKColumn, new H2Database(), new MockSqlGeneratorChain()).getErrorMessages().contains("Cannot add a primary key column"));
-        assertTrue(generatorUnderTest.validate(addPKColumn, new DB2Database(), new MockSqlGeneratorChain()).getErrorMessages().contains("Cannot add a primary key column"));
-        assertTrue(generatorUnderTest.validate(addPKColumn, new DerbyDatabase(), new MockSqlGeneratorChain()).getErrorMessages().contains("Cannot add a primary key column"));
-        assertTrue(generatorUnderTest.validate(addPKColumn, new SQLiteDatabase(), new MockSqlGeneratorChain()).getErrorMessages().contains("Cannot add a primary key column"));
+        assertFalse(generatorUnderTest.validate(addPKColumn, new ExecutionOptions(new RuntimeEnvironment(new OracleDatabase())), new MockSqlGeneratorChain()).hasErrors());
+        assertTrue(generatorUnderTest.validate(addPKColumn, new ExecutionOptions(new RuntimeEnvironment(new H2Database())), new MockSqlGeneratorChain()).getErrorMessages().contains("Cannot add a primary key column"));
+        assertTrue(generatorUnderTest.validate(addPKColumn, new ExecutionOptions(new RuntimeEnvironment(new DB2Database())), new MockSqlGeneratorChain()).getErrorMessages().contains("Cannot add a primary key column"));
+        assertTrue(generatorUnderTest.validate(addPKColumn, new ExecutionOptions(new RuntimeEnvironment(new DerbyDatabase())), new MockSqlGeneratorChain()).getErrorMessages().contains("Cannot add a primary key column"));
+        assertTrue(generatorUnderTest.validate(addPKColumn, new ExecutionOptions(new RuntimeEnvironment(new SQLiteDatabase())), new MockSqlGeneratorChain()).getErrorMessages().contains("Cannot add a primary key column"));
 
-        assertTrue(generatorUnderTest.validate(new AddColumnStatement(null, null, null, null, null, null, new AutoIncrementConstraint()), new MySQLDatabase(), new MockSqlGeneratorChain()).getErrorMessages().contains("Cannot add a non-primary key identity column"));
+        assertTrue(generatorUnderTest.validate(new AddColumnStatement(null, null, null, null, null, null, new AutoIncrementConstraint()), new ExecutionOptions(new RuntimeEnvironment(new MySQLDatabase())), new MockSqlGeneratorChain()).getErrorMessages().contains("Cannot add a non-primary key identity column"));
 
-        assertTrue(generatorUnderTest.validate(new AddColumnStatement(null, null, null, null, null, null, new AutoIncrementConstraint()), new MySQLDatabase(), new MockSqlGeneratorChain()).getErrorMessages().contains("Cannot add a non-primary key identity column"));
+        assertTrue(generatorUnderTest.validate(new AddColumnStatement(null, null, null, null, null, null, new AutoIncrementConstraint()), new ExecutionOptions(new RuntimeEnvironment(new MySQLDatabase())), new MockSqlGeneratorChain()).getErrorMessages().contains("Cannot add a non-primary key identity column"));
     }
 	
 	@Test
@@ -51,6 +53,6 @@ public class AddColumnGeneratorTest extends AbstractSqlGeneratorTest<AddColumnSt
 		AddColumnStatement statement = new AddColumnStatement(null, null, TABLE_NAME, COLUMN_NAME, COLUMN_TYPE, null);
 		statement.setAddAfterColumn("column_after");
 
-		assertFalse(generatorUnderTest.validate(statement, new MySQLDatabase(), new MockSqlGeneratorChain()).hasErrors());
+		assertFalse(generatorUnderTest.validate(statement, new ExecutionOptions(new RuntimeEnvironment(new MySQLDatabase())), new MockSqlGeneratorChain()).hasErrors());
 	}
 }

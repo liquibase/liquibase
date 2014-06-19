@@ -3,9 +3,9 @@ package liquibase.sqlgenerator.core;
 import liquibase.database.Database;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
+import liquibase.executor.ExecutionOptions;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
-import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.SelectFromDatabaseChangeLogStatement;
 import liquibase.util.StringUtils;
@@ -16,7 +16,7 @@ import java.util.List;
 public class SelectFromDatabaseChangeLogGenerator extends AbstractSqlGenerator<SelectFromDatabaseChangeLogStatement> {
 
     @Override
-    public ValidationErrors validate(SelectFromDatabaseChangeLogStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public ValidationErrors validate(SelectFromDatabaseChangeLogStatement statement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors errors = new ValidationErrors();
         errors.checkRequiredField("columnToSelect", statement.getColumnsToSelect());
 
@@ -24,7 +24,9 @@ public class SelectFromDatabaseChangeLogGenerator extends AbstractSqlGenerator<S
     }
 
     @Override
-    public Sql[] generateSql(SelectFromDatabaseChangeLogStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public Sql[] generateSql(SelectFromDatabaseChangeLogStatement statement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
+        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+
         List<String> columnsToSelect = Arrays.asList(statement.getColumnsToSelect());
         for (int i=0; i<columnsToSelect.size(); i++) {
             columnsToSelect.set(i, database.escapeColumnName(null, null, null, columnsToSelect.get(i)));
@@ -35,7 +37,7 @@ public class SelectFromDatabaseChangeLogGenerator extends AbstractSqlGenerator<S
         SelectFromDatabaseChangeLogStatement.WhereClause whereClause = statement.getWhereClause();
         if (whereClause != null) {
             if (whereClause instanceof SelectFromDatabaseChangeLogStatement.ByTag) {
-                sql += " WHERE "+database.escapeColumnName(null, null, null, "TAG")+"='" + ((SelectFromDatabaseChangeLogStatement.ByTag) whereClause).getTagName() + "'";
+                sql += " WHERE "+ database.escapeColumnName(null, null, null, "TAG")+"='" + ((SelectFromDatabaseChangeLogStatement.ByTag) whereClause).getTagName() + "'";
             } else if (whereClause instanceof SelectFromDatabaseChangeLogStatement.ByNotNullCheckSum) {
                     sql += " WHERE MD5SUM IS NOT NULL";
             } else {

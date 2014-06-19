@@ -1,8 +1,10 @@
 package liquibase.sqlgenerator.core;
 
+import liquibase.RuntimeEnvironment;
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.exception.ValidationErrors;
+import liquibase.executor.ExecutionOptions;
 import liquibase.sqlgenerator.MockSqlGeneratorChain;
 import liquibase.statement.AutoIncrementConstraint;
 import liquibase.statement.core.AddColumnStatement;
@@ -16,7 +18,7 @@ public class AddColumnGeneratorDefaultClauseBeforeNotNullTest extends AddColumnG
 
     @Test
     public void validate_noAutoIncrementWithDerby() {
-        ValidationErrors validationErrors = generatorUnderTest.validate(new AddColumnStatement(null, null, "table_name", "column_name", "int", null, new AutoIncrementConstraint("column_name")), new DerbyDatabase(), new MockSqlGeneratorChain());
+        ValidationErrors validationErrors = generatorUnderTest.validate(new AddColumnStatement(null, null, "table_name", "column_name", "int", null, new AutoIncrementConstraint("column_name")), new ExecutionOptions(new RuntimeEnvironment(new DerbyDatabase())), new MockSqlGeneratorChain());
         assertTrue(validationErrors.getErrorMessages().contains("Cannot add an identity column to derby"));
     }
 

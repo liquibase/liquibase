@@ -1,6 +1,5 @@
 package liquibase.sqlgenerator.core;
 
-import liquibase.database.Database;
 import liquibase.database.core.DB2Database;
 import liquibase.database.core.DerbyDatabase;
 import liquibase.database.core.H2Database;
@@ -9,17 +8,17 @@ import liquibase.database.core.InformixDatabase;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.core.SybaseASADatabase;
 import liquibase.exception.ValidationErrors;
+import liquibase.executor.ExecutionOptions;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.CreateViewStatement;
-import liquibase.structure.core.View;
 
 public class CreateViewGeneratorInformix extends AbstractSqlGenerator<CreateViewStatement> {
 
     @Override
-    public boolean supports(CreateViewStatement statement, Database database) {
-        return database instanceof InformixDatabase;
+    public boolean supports(CreateViewStatement statement, ExecutionOptions options) {
+        return options.getRuntimeEnvironment().getTargetDatabase() instanceof InformixDatabase;
     }
 
     @Override
@@ -28,22 +27,22 @@ public class CreateViewGeneratorInformix extends AbstractSqlGenerator<CreateView
     }
 
     @Override
-    public ValidationErrors validate(CreateViewStatement createViewStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public ValidationErrors validate(CreateViewStatement createViewStatement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
 
         validationErrors.checkRequiredField("viewName", createViewStatement.getViewName());
         validationErrors.checkRequiredField("selectQuery", createViewStatement.getSelectQuery());
 
         if (createViewStatement.isReplaceIfExists()) {
-            validationErrors.checkDisallowedField("replaceIfExists", createViewStatement.isReplaceIfExists(), database, HsqlDatabase.class, H2Database.class, DB2Database.class, MSSQLDatabase.class, DerbyDatabase.class, SybaseASADatabase.class, InformixDatabase.class);
+            validationErrors.checkDisallowedField("replaceIfExists", createViewStatement.isReplaceIfExists(), options.getRuntimeEnvironment().getTargetDatabase(), HsqlDatabase.class, H2Database.class, DB2Database.class, MSSQLDatabase.class, DerbyDatabase.class, SybaseASADatabase.class, InformixDatabase.class);
         }
 
         return validationErrors;
     }
 
     @Override
-    public Sql[] generateSql(CreateViewStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-    	String viewName = database.escapeViewName(statement.getCatalogName(), statement.getSchemaName(), statement.getViewName());
+    public Sql[] generateSql(CreateViewStatement statement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
+    	String viewName = options.getRuntimeEnvironment().getTargetDatabase().escapeViewName(statement.getCatalogName(), statement.getSchemaName(), statement.getViewName());
     	        
         String createClause = "CREATE VIEW  " + viewName + " AS SELECT * FROM (" + statement.getSelectQuery() + ") AS v";
         

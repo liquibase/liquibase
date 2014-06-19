@@ -1,7 +1,7 @@
 package liquibase.sqlgenerator.core;
 
-import liquibase.database.Database;
 import liquibase.database.core.MySQLDatabase;
+import liquibase.executor.ExecutionOptions;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
@@ -23,17 +23,17 @@ public class AddAutoIncrementGeneratorMySQL extends AddAutoIncrementGenerator {
     }
 
     @Override
-    public boolean supports(AddAutoIncrementStatement statement, Database database) {
-        return database instanceof MySQLDatabase;
+    public boolean supports(AddAutoIncrementStatement statement, ExecutionOptions options) {
+        return options.getRuntimeEnvironment().getTargetDatabase() instanceof MySQLDatabase;
     }
 
     @Override
-    public Sql[] generateSql(final AddAutoIncrementStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public Sql[] generateSql(final AddAutoIncrementStatement statement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
 
-    	Sql[] sql = super.generateSql(statement, database, sqlGeneratorChain);
+    	Sql[] sql = super.generateSql(statement, options, sqlGeneratorChain);
 
     	if(statement.getStartWith() != null){
-	    	MySQLDatabase mysqlDatabase = (MySQLDatabase)database;
+	    	MySQLDatabase mysqlDatabase = (MySQLDatabase) options.getRuntimeEnvironment().getTargetDatabase();
 	        String alterTableSql = "ALTER TABLE "
 	            + mysqlDatabase.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName())
 	            + " "

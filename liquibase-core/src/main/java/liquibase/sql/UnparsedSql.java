@@ -37,6 +37,14 @@ public class UnparsedSql implements Sql {
         return sql;
     }
 
+    public String getSql() {
+        return sql;
+    }
+
+    public void setSql(String sql) {
+        this.sql = sql;
+    }
+
     @Override
     public String toString() {
         return toSql()+getEndDelimiter();
@@ -44,20 +52,7 @@ public class UnparsedSql implements Sql {
 
     @Override
     public String describe() {
-        StringBuilder out = new StringBuilder(toFinalSql(options));
-
-        Database database = options.getRuntimeEnvironment().getTargetDatabase();
-        if (database instanceof MSSQLDatabase || database instanceof SybaseDatabase || database instanceof SybaseASADatabase) {
-            out.append(StreamUtil.getLineSeparator());
-            out.append("GO");
-        } else {
-            String endDelimiter = getEndDelimiter();
-            if (!out.toString().endsWith(endDelimiter)) {
-                out.append(endDelimiter);
-            }
-        }
-
-        return out.toString();
+        return this.toSql()+getEndDelimiter();
     }
 
     @Override
@@ -73,7 +68,7 @@ public class UnparsedSql implements Sql {
         if (conn instanceof OfflineConnection) {
             throw new DatabaseException("Cannot execute commands against an offline database");
         } else if (conn instanceof JdbcConnection) {
-            return ((JdbcConnection) conn).query(toFinalSql(options));
+            return ((JdbcConnection) conn).query(getSql());
         } else {
             throw new DatabaseException("Cannot execute SQL against a "+conn.getClass().getName()+" connection");
         }
@@ -91,7 +86,7 @@ public class UnparsedSql implements Sql {
         if (conn instanceof OfflineConnection) {
             throw new DatabaseException("Cannot execute commands against an offline database");
         } else if (conn instanceof JdbcConnection) {
-            return ((JdbcConnection) conn).execute(toFinalSql(options));
+            return ((JdbcConnection) conn).execute(getSql());
         } else {
             throw new DatabaseException("Cannot execute SQL against a " + conn.getClass().getName() + " connection");
         }
@@ -108,23 +103,10 @@ public class UnparsedSql implements Sql {
         if (conn instanceof OfflineConnection) {
             throw new DatabaseException("Cannot execute commands against an offline database");
         } else if (conn instanceof JdbcConnection) {
-            return ((JdbcConnection) conn).update(toFinalSql(options));
+            return ((JdbcConnection) conn).update(getSql());
         } else {
             throw new DatabaseException("Cannot execute SQL against a " + conn.getClass().getName() + " connection");
         }
     }
-
-    protected String toFinalSql(ExecutionOptions options) {
-        Database database = options.getRuntimeEnvironment().getTargetDatabase();
-        String finalSql = sql;
-        List<SqlVisitor> sqlVisitors = options.getSqlVisitors();
-        if (sqlVisitors != null) {
-            for (SqlVisitor visitor : sqlVisitors) {
-                finalSql = visitor.modifySql(finalSql, database);
-            }
-        }
-        return finalSql;
-    }
-
 
 }

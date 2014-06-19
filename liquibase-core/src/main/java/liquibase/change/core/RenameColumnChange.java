@@ -4,6 +4,7 @@ import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.database.core.SQLiteDatabase.AlterTableVisitor;
+import liquibase.executor.ExecutionOptions;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Index;
@@ -92,7 +93,7 @@ public class RenameColumnChange extends AbstractChange {
     }
 
     @Override
-    public SqlStatement[] generateStatements(Database database) {
+    public SqlStatement[] generateStatements(ExecutionOptions options) {
 //todo    	if (database instanceof SQLiteDatabase) {
 //    		// return special statements for SQLite databases
 //    		return generateStatementsForSQLiteDatabase(database);
@@ -107,8 +108,10 @@ public class RenameColumnChange extends AbstractChange {
     }
 
     @Override
-    public ChangeStatus checkStatus(Database database) {
+    public ChangeStatus checkStatus(ExecutionOptions options) {
         try {
+            Database database = options.getRuntimeEnvironment().getTargetDatabase();
+
             ChangeStatus changeStatus = new ChangeStatus();
             Column newColumn = SnapshotGeneratorFactory.getInstance().createSnapshot(new Column(Table.class, getCatalogName(), getSchemaName(), getTableName(), getNewColumnName()), database);
             Column oldColumn = SnapshotGeneratorFactory.getInstance().createSnapshot(new Column(Table.class, getCatalogName(), getSchemaName(), getTableName(), getOldColumnName()), database);
@@ -127,7 +130,7 @@ public class RenameColumnChange extends AbstractChange {
         }
     }
 
-    private SqlStatement[] generateStatementsForSQLiteDatabase(Database database) {
+    private SqlStatement[] generateStatementsForSQLiteDatabase(ExecutionOptions options) {
     	
     	// SQLite does not support this ALTER TABLE operation until now.
 		// For more information see: http://www.sqlite.org/omitted.html.
@@ -167,7 +170,7 @@ public class RenameColumnChange extends AbstractChange {
     		// alter table
 			statements.addAll(SQLiteDatabase.getAlterTableStatements(
 					rename_alter_visitor,
-					database,getCatalogName(), getSchemaName(),getTableName()));
+					options,getCatalogName(), getSchemaName(),getTableName()));
 		} catch (Exception e) {
 			System.err.println(e);
 			e.printStackTrace();

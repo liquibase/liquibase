@@ -1,8 +1,8 @@
 package liquibase.actiongenerator;
 
-import liquibase.database.Database;
 import liquibase.exception.ValidationErrors;
 import liquibase.exception.Warnings;
+import liquibase.executor.ExecutionOptions;
 import liquibase.statement.SqlStatement;
 
 public abstract class AbstractActionGenerator<StatementType extends SqlStatement> implements ActionGenerator<StatementType> {
@@ -13,17 +13,17 @@ public abstract class AbstractActionGenerator<StatementType extends SqlStatement
     }
 
     @Override
-    public boolean supports(StatementType statement, Database database) {
+    public boolean supports(StatementType statement, ExecutionOptions options) {
         return true;
     }
 
     @Override
-    public ValidationErrors validate(StatementType statement, Database database, ActionGeneratorChain chain) {
-        return chain.validate(statement, database);
+    public ValidationErrors validate(StatementType statement, ExecutionOptions options, ActionGeneratorChain chain) {
+        return chain.validate(statement, options);
     }
 
     @Override
-    public Warnings warn(StatementType statementType, Database database, ActionGeneratorChain chain) {
-        return chain.warn(statementType, database);
+    public Warnings warn(StatementType statementType, ExecutionOptions options, ActionGeneratorChain chain) {
+        return chain.warn(statementType, options);
     }
 }

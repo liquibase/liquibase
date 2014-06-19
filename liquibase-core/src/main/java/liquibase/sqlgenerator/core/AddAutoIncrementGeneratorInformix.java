@@ -1,11 +1,9 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
-import liquibase.structure.core.Schema;
+import liquibase.executor.ExecutionOptions;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.database.core.InformixDatabase;
-import liquibase.structure.core.Column;
-import liquibase.structure.core.Table;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
@@ -19,17 +17,17 @@ public class AddAutoIncrementGeneratorInformix extends AddAutoIncrementGenerator
     }
 
     @Override
-    public boolean supports(AddAutoIncrementStatement statement, Database database) {
-        return database instanceof InformixDatabase;
+    public boolean supports(AddAutoIncrementStatement statement, ExecutionOptions options) {
+        return options.getRuntimeEnvironment().getTargetDatabase() instanceof InformixDatabase;
     }
 
     @Override
     public ValidationErrors validate(
     		AddAutoIncrementStatement addAutoIncrementStatement,
-    		Database database,
+    		ExecutionOptions options,
     		SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = super.validate(
-        	addAutoIncrementStatement, database, sqlGeneratorChain);
+        	addAutoIncrementStatement, options, sqlGeneratorChain);
 
         validationErrors.checkRequiredField(
         	"columnDataType", addAutoIncrementStatement.getColumnDataType());
@@ -40,8 +38,10 @@ public class AddAutoIncrementGeneratorInformix extends AddAutoIncrementGenerator
     @Override
     public Sql[] generateSql(
     		AddAutoIncrementStatement statement,
-    		Database database,
+    		ExecutionOptions options,
     		SqlGeneratorChain sqlGeneratorChain) {
+        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+
         return new Sql[]{
             new UnparsedSql(
             	"ALTER TABLE "

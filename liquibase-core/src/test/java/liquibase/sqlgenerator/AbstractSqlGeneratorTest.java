@@ -1,7 +1,9 @@
 package liquibase.sqlgenerator;
 
+import liquibase.RuntimeEnvironment;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
+import liquibase.executor.ExecutionOptions;
 import liquibase.executor.ExecutorService;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.CreateTableStatement;
@@ -33,7 +35,7 @@ public abstract class AbstractSqlGeneratorTest<T extends SqlStatement> {
     @Test
     public void isImplementation() throws Exception {
         for (Database database : TestContext.getInstance().getAllDatabases()) {
-            boolean isImpl = generatorUnderTest.supports(createSampleSqlStatement(), database);
+            boolean isImpl = generatorUnderTest.supports(createSampleSqlStatement(), new ExecutionOptions(new RuntimeEnvironment(database)));
             if (shouldBeImplementation(database)) {
                 assertTrue("Unexpected false supports for " + database.getShortName(), isImpl);
             } else {
@@ -45,11 +47,13 @@ public abstract class AbstractSqlGeneratorTest<T extends SqlStatement> {
     @Test
     public void isValid() throws Exception {
         for (Database database : TestContext.getInstance().getAllDatabases()) {
-        	if (shouldBeImplementation(database)) {
+            ExecutionOptions options = new ExecutionOptions(new RuntimeEnvironment(database));
+
+            if (shouldBeImplementation(database)) {
             	if (waitForException(database)) {
-            		assertTrue("The validation should be failed for " + database, generatorUnderTest.validate(createSampleSqlStatement(), database, new MockSqlGeneratorChain()).hasErrors());
+            		assertTrue("The validation should be failed for " + database, generatorUnderTest.validate(createSampleSqlStatement(), options, new MockSqlGeneratorChain()).hasErrors());
             	} else {
-            		assertFalse("isValid failed against " + database, generatorUnderTest.validate(createSampleSqlStatement(), database, new MockSqlGeneratorChain()).hasErrors());
+            		assertFalse("isValid failed against " + database, generatorUnderTest.validate(createSampleSqlStatement(), options, new MockSqlGeneratorChain()).hasErrors());
             	}
             	
         	} 

@@ -81,8 +81,8 @@ class SnapshotGeneratorFactoryTest extends Specification {
         }
 
         @Override
-        QueryAction merge(QueryAction action) {
-            return null;
+        boolean merge(QueryAction action) {
+            return false;
         }
     }
 }

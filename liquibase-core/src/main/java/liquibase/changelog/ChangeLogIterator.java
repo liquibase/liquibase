@@ -67,7 +67,7 @@ public class ChangeLogIterator {
 
                 log.setChangeSet(changeSet);
                 if (shouldVisit) {
-                    visitor.visit(changeSet, databaseChangeLog, env.getTargetDatabase(), reasonsAccepted);
+                    visitor.visit(changeSet, databaseChangeLog, env, reasonsAccepted);
                 } else {
                     if (visitor instanceof SkippedChangeSetVisitor) {
                         ((SkippedChangeSetVisitor) visitor).skipped(changeSet, databaseChangeLog, env.getTargetDatabase(), reasonsDenied);

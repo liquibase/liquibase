@@ -1,14 +1,13 @@
 package liquibase.change.core;
 
 import liquibase.change.*;
-import liquibase.database.Database;
 import liquibase.database.core.DB2Database;
+import liquibase.executor.ExecutionOptions;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.AddPrimaryKeyStatement;
 import liquibase.statement.core.ReorganizeTableStatement;
 import liquibase.structure.core.PrimaryKey;
-import liquibase.structure.core.Table;
 
 /**
  * Creates a primary key out of an existing column or set of columns.
@@ -78,13 +77,13 @@ public class AddPrimaryKeyChange extends AbstractChange {
     }
 
     @Override
-    public SqlStatement[] generateStatements(Database database) {
+    public SqlStatement[] generateStatements(ExecutionOptions options) {
 
 
         AddPrimaryKeyStatement statement = new AddPrimaryKeyStatement(getCatalogName(), getSchemaName(), getTableName(), getColumnNames(), getConstraintName());
         statement.setTablespace(getTablespace());
 
-        if (database instanceof DB2Database) {
+        if (options.getRuntimeEnvironment().getTargetDatabase() instanceof DB2Database) {
             return new SqlStatement[]{
                     statement,
                     new ReorganizeTableStatement(getCatalogName(), getSchemaName(), getTableName())
@@ -100,12 +99,12 @@ public class AddPrimaryKeyChange extends AbstractChange {
     }
 
     @Override
-    public ChangeStatus checkStatus(Database database) {
+    public ChangeStatus checkStatus(ExecutionOptions options) {
         ChangeStatus result = new ChangeStatus();
         try {
             PrimaryKey example = new PrimaryKey(getConstraintName(), getCatalogName(), getSchemaName(), getTableName(), getColumnNames().split("\\s+,\\s+"));
 
-            PrimaryKey snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(example, database);
+            PrimaryKey snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(example, options.getRuntimeEnvironment().getTargetDatabase());
             result.assertComplete(snapshot != null, "Primary key does not exist");
 
             return result;

@@ -48,8 +48,4 @@ public abstract class AbstractExecutor implements Executor {
     protected ExecutionOptions createDefaultExecutionOptions() {
         return new ExecutionOptions(new RuntimeEnvironment(database, null));
     }
-
-    protected Action[] generateActions(SqlStatement statement) throws DatabaseException {
-        return ActionGeneratorFactory.getInstance().generateActions(statement, database);
-    }
 }

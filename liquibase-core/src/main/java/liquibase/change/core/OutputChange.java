@@ -4,9 +4,9 @@ import liquibase.change.AbstractChange;
 import liquibase.change.ChangeMetaData;
 import liquibase.change.DatabaseChange;
 import liquibase.change.DatabaseChangeProperty;
-import liquibase.database.Database;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
+import liquibase.executor.ExecutionOptions;
 import liquibase.logging.LogFactory;
 import liquibase.serializer.LiquibaseSerializable;
 import liquibase.sql.Sql;
@@ -21,8 +21,8 @@ public class OutputChange extends AbstractChange {
     private String target = "";
 
     @Override
-    public ValidationErrors validate(Database database) {
-        ValidationErrors validate = super.validate(database);
+    public ValidationErrors validate(ExecutionOptions options) {
+        ValidationErrors validate = super.validate(options);
         validate.checkRequiredField("message", getMessage());
         return validate;
     }
@@ -50,10 +50,10 @@ public class OutputChange extends AbstractChange {
 
 
     @Override
-    public SqlStatement[] generateStatements(Database database) {
+    public SqlStatement[] generateStatements(ExecutionOptions options) {
         return new SqlStatement[] { new RuntimeStatement() {
             @Override
-            public Sql[] generate(Database database) {
+            public Sql[] generate(ExecutionOptions options) {
                 String target = getTarget();
                 if (target.equalsIgnoreCase("STDOUT")) {
                     System.out.println(getMessage());

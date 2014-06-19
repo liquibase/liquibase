@@ -3,25 +3,23 @@ package liquibase.sqlgenerator.core;
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.exception.ValidationErrors;
+import liquibase.executor.ExecutionOptions;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
-import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.DropUniqueConstraintStatement;
-import liquibase.structure.core.Column;
-import liquibase.structure.core.Table;
-import liquibase.structure.core.UniqueConstraint;
-import liquibase.util.StringUtils;
 
 public class DropUniqueConstraintGenerator extends AbstractSqlGenerator<DropUniqueConstraintStatement> {
 
     @Override
-    public boolean supports(DropUniqueConstraintStatement statement, Database database) {
+    public boolean supports(DropUniqueConstraintStatement statement, ExecutionOptions options) {
+        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+
         return !(database instanceof SQLiteDatabase);
     }
 
     @Override
-    public ValidationErrors validate(DropUniqueConstraintStatement dropUniqueConstraintStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public ValidationErrors validate(DropUniqueConstraintStatement dropUniqueConstraintStatement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("tableName", dropUniqueConstraintStatement.getTableName());
         validationErrors.checkRequiredField("constraintName", dropUniqueConstraintStatement.getConstraintName());
@@ -29,7 +27,9 @@ public class DropUniqueConstraintGenerator extends AbstractSqlGenerator<DropUniq
     }
 
     @Override
-    public Sql[] generateSql(DropUniqueConstraintStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public Sql[] generateSql(DropUniqueConstraintStatement statement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
+        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+
         String sql;
         if (database instanceof MySQLDatabase) {
             sql = "ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " DROP KEY " + database.escapeConstraintName(statement.getConstraintName());

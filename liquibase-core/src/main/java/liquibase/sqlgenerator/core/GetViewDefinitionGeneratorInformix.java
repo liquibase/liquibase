@@ -1,7 +1,7 @@
 package liquibase.sqlgenerator.core;
 
-import liquibase.database.Database;
 import liquibase.database.core.InformixDatabase;
+import liquibase.executor.ExecutionOptions;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
@@ -14,12 +14,12 @@ public class GetViewDefinitionGeneratorInformix extends GetViewDefinitionGenerat
     }
 
     @Override
-    public boolean supports(GetViewDefinitionStatement statement, Database database) {
-        return database instanceof InformixDatabase;
+    public boolean supports(GetViewDefinitionStatement statement, ExecutionOptions options) {
+        return options.getRuntimeEnvironment().getTargetDatabase() instanceof InformixDatabase;
     }
 
     @Override
-    public Sql[] generateSql(GetViewDefinitionStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public Sql[] generateSql(GetViewDefinitionStatement statement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
         // TODO owner is schemaName ?
         // view definition is distributed over multiple rows, each 64 chars
     	// see InformixDatabase.getViewDefinition

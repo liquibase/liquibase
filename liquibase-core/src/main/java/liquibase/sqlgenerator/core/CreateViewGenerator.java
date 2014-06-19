@@ -3,13 +3,12 @@ package liquibase.sqlgenerator.core;
 import liquibase.CatalogAndSchema;
 import liquibase.database.Database;
 import liquibase.database.core.*;
-import liquibase.structure.core.Relation;
+import liquibase.executor.ExecutionOptions;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.CreateViewStatement;
-import liquibase.structure.core.View;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,10 +16,11 @@ import java.util.List;
 public class CreateViewGenerator extends AbstractSqlGenerator<CreateViewStatement> {
 
     @Override
-    public ValidationErrors validate(CreateViewStatement createViewStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-    	
+    public ValidationErrors validate(CreateViewStatement createViewStatement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
+
+        Database database = options.getRuntimeEnvironment().getTargetDatabase();
     	if (database instanceof InformixDatabase) {
-    		return new CreateViewGeneratorInformix().validate(createViewStatement, database, sqlGeneratorChain);
+    		return new CreateViewGeneratorInformix().validate(createViewStatement, options, sqlGeneratorChain);
     	}
     	
         ValidationErrors validationErrors = new ValidationErrors();
@@ -36,10 +36,11 @@ public class CreateViewGenerator extends AbstractSqlGenerator<CreateViewStatemen
     }
 
     @Override
-    public Sql[] generateSql(CreateViewStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-    	
+    public Sql[] generateSql(CreateViewStatement statement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
+
+        Database database = options.getRuntimeEnvironment().getTargetDatabase();
     	if (database instanceof InformixDatabase) {
-    		return new CreateViewGeneratorInformix().generateSql(statement, database, sqlGeneratorChain);
+    		return new CreateViewGeneratorInformix().generateSql(statement, options, sqlGeneratorChain);
     	}
     	
         String createClause;
@@ -69,7 +70,7 @@ public class CreateViewGenerator extends AbstractSqlGenerator<CreateViewStatemen
             }
         } else if (database instanceof PostgresDatabase) {
             if (statement.isReplaceIfExists()) {
-                sql.add(new UnparsedSql("DROP VIEW IF EXISTS "+database.escapeViewName(statement.getCatalogName(), statement.getSchemaName(), statement.getViewName())));
+                sql.add(new UnparsedSql("DROP VIEW IF EXISTS "+ database.escapeViewName(statement.getCatalogName(), statement.getSchemaName(), statement.getViewName())));
             }
             createClause = "CREATE VIEW";
         } else {

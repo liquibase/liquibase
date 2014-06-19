@@ -4,6 +4,7 @@ import liquibase.changelog.ChangeSet
 import liquibase.changelog.DatabaseChangeLog
 import liquibase.database.Database
 import liquibase.database.core.MSSQLDatabase
+import liquibase.executor.ExecutionOptions
 import liquibase.sdk.database.MockDatabase
 import liquibase.exception.RollbackImpossibleException
 import liquibase.exception.UnexpectedLiquibaseException
@@ -28,7 +29,7 @@ public class AbstractChangeTest extends Specification {
             }
 
             @Override
-            public SqlStatement[] generateStatements(Database database) {
+            public SqlStatement[] generateStatements(ExecutionOptions options) {
                 return null;
             }
 
@@ -128,14 +129,14 @@ public class AbstractChangeTest extends Specification {
         expect:
         assert !new ExampleAbstractChange() {
             @Override
-            public SqlStatement[] generateStatements(Database database) {
+            public SqlStatement[] generateStatements(ExecutionOptions options) {
                 return null;
             }
         }.generateStatementsVolatile(new MockDatabase())
 
         assert !new ExampleAbstractChange() {
             @Override
-            public SqlStatement[] generateStatements(Database database) {
+            public SqlStatement[] generateStatements(ExecutionOptions options) {
                 return new SqlStatement[0];
             }
         }.generateStatementsVolatile(new MockDatabase());
@@ -145,14 +146,14 @@ public class AbstractChangeTest extends Specification {
         expect:
         assert !new ExampleAbstractChange() {
             @Override
-            public SqlStatement[] generateStatements(Database database) {
+            public SqlStatement[] generateStatements(ExecutionOptions options) {
                 return null;
             }
         }.generateRollbackStatementsVolatile(new MockDatabase());
 
         assert !new ExampleAbstractChange() {
             @Override
-            public SqlStatement[] generateStatements(Database database) {
+            public SqlStatement[] generateStatements(ExecutionOptions options) {
                 return new SqlStatement[0];
             }
         }.generateRollbackStatementsVolatile(new MockDatabase())
@@ -162,14 +163,14 @@ public class AbstractChangeTest extends Specification {
         expect:
         assert new ExampleAbstractChange() {
             @Override
-            public SqlStatement[] generateStatements(Database database) {
+            public SqlStatement[] generateStatements(ExecutionOptions options) {
                 return null;
             }
         }.supports(new MockDatabase());
 
         assert new ExampleAbstractChange() {
             @Override
-            public SqlStatement[] generateStatements(Database database) {
+            public SqlStatement[] generateStatements(ExecutionOptions options) {
                 return new SqlStatement[0];
             }
         }.supports(new MockDatabase());
@@ -179,14 +180,14 @@ public class AbstractChangeTest extends Specification {
         expect:
         assert !new ExampleAbstractChange() {
             @Override
-            public SqlStatement[] generateStatements(Database database) {
+            public SqlStatement[] generateStatements(ExecutionOptions options) {
                 return null;
             }
         }.warn(new MockDatabase()).hasWarnings();
 
         assert !new ExampleAbstractChange() {
             @Override
-            public SqlStatement[] generateStatements(Database database) {
+            public SqlStatement[] generateStatements(ExecutionOptions options) {
                 return new SqlStatement[0];
             }
         }.warn(new MockDatabase()).hasWarnings();
@@ -196,14 +197,14 @@ public class AbstractChangeTest extends Specification {
         expect:
         assert !new ExampleAbstractChange() {
             @Override
-            public SqlStatement[] generateStatements(Database database) {
+            public SqlStatement[] generateStatements(ExecutionOptions options) {
                 return null;
             }
         }.validate(new MockDatabase()).hasErrors();
 
         assert !new ExampleAbstractChange() {
             @Override
-            public SqlStatement[] generateStatements(Database database) {
+            public SqlStatement[] generateStatements(ExecutionOptions options) {
                 return new SqlStatement[0];
             }
         }.validate(new MockDatabase()).hasErrors();
@@ -272,14 +273,14 @@ public class AbstractChangeTest extends Specification {
         expect:
         new ExampleAbstractChange() {
             @Override
-            public SqlStatement[] generateStatements(Database database) {
+            public SqlStatement[] generateStatements(ExecutionOptions options) {
                 return null;
             }
         }.getAffectedDatabaseObjects(new MockDatabase()).size() == 0;
 
         new ExampleAbstractChange() {
             @Override
-            public SqlStatement[] generateStatements(Database database) {
+            public SqlStatement[] generateStatements(ExecutionOptions options) {
                 return new SqlStatement[0];
             }
         }.getAffectedDatabaseObjects(new MockDatabase()).size() == 0;
@@ -333,7 +334,7 @@ public class AbstractChangeTest extends Specification {
         }
 
         @Override
-        public SqlStatement[] generateStatements(Database database) {
+        public SqlStatement[] generateStatements(ExecutionOptions options) {
             return null;
         }
 

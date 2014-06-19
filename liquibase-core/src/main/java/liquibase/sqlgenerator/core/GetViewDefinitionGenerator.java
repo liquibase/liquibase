@@ -4,6 +4,7 @@ import liquibase.CatalogAndSchema;
 import liquibase.database.Database;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.core.MySQLDatabase;
+import liquibase.executor.ExecutionOptions;
 import liquibase.structure.core.View;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
@@ -14,14 +15,16 @@ import liquibase.statement.core.GetViewDefinitionStatement;
 public class GetViewDefinitionGenerator extends AbstractSqlGenerator<GetViewDefinitionStatement> {
 
     @Override
-    public ValidationErrors validate(GetViewDefinitionStatement getViewDefinitionStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public ValidationErrors validate(GetViewDefinitionStatement getViewDefinitionStatement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("viewName", getViewDefinitionStatement.getViewName());
         return validationErrors;
     }
 
     @Override
-    public Sql[] generateSql(GetViewDefinitionStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public Sql[] generateSql(GetViewDefinitionStatement statement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
+        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+
         CatalogAndSchema schema = new CatalogAndSchema(statement.getCatalogName(), statement.getSchemaName()).customize(database);
 
         String sql;

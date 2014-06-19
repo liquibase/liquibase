@@ -1,7 +1,7 @@
 package liquibase.sqlgenerator.core;
 
-import liquibase.database.Database;
 import liquibase.database.core.SybaseASADatabase;
+import liquibase.executor.ExecutionOptions;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
@@ -14,12 +14,12 @@ public class GetViewDefinitionGeneratorSybaseASA extends GetViewDefinitionGenera
     }
 
     @Override
-    public boolean supports(GetViewDefinitionStatement statement, Database database) {
-        return database instanceof SybaseASADatabase;
+    public boolean supports(GetViewDefinitionStatement statement, ExecutionOptions options) {
+        return options.getRuntimeEnvironment().getTargetDatabase() instanceof SybaseASADatabase;
     }
 
     @Override
-    public Sql[] generateSql(GetViewDefinitionStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public Sql[] generateSql(GetViewDefinitionStatement statement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
         return new Sql[]{
                 new UnparsedSql("select viewtext from sysviews where upper(viewname)='" + statement.getViewName().toUpperCase() + "' and upper(vcreator) = '" + statement.getSchemaName().toUpperCase() + '\'')
         };

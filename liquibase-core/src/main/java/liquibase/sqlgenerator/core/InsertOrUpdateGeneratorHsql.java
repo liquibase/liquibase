@@ -1,12 +1,11 @@
 package liquibase.sqlgenerator.core;
 
-import java.util.Arrays;
 import java.util.Date;
-import java.util.HashSet;
 
 import liquibase.database.Database;
 import liquibase.database.core.HsqlDatabase;
 import liquibase.datatype.DataTypeFactory;
+import liquibase.executor.ExecutionOptions;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.InsertOrUpdateStatement;
 
@@ -15,12 +14,12 @@ import liquibase.statement.core.InsertOrUpdateStatement;
  */
 public class InsertOrUpdateGeneratorHsql extends InsertOrUpdateGenerator {
 	@Override
-	public boolean supports(InsertOrUpdateStatement statement, Database database) {
-		return database instanceof HsqlDatabase;
+	public boolean supports(InsertOrUpdateStatement statement, ExecutionOptions options) {
+		return options.getRuntimeEnvironment().getTargetDatabase() instanceof HsqlDatabase;
 	}
 
 	@Override
-	protected String getRecordCheck(InsertOrUpdateStatement insertOrUpdateStatement, Database database,
+	protected String getRecordCheck(InsertOrUpdateStatement insertOrUpdateStatement, ExecutionOptions options,
 			String whereClause) {
 		StringBuilder sql = new StringBuilder();
 		sql.append("MERGE INTO ");
@@ -32,7 +31,7 @@ public class InsertOrUpdateGeneratorHsql extends InsertOrUpdateGenerator {
 	}
 
 	@Override
-	protected String getInsertStatement(InsertOrUpdateStatement insertOrUpdateStatement, Database database,
+	protected String getInsertStatement(InsertOrUpdateStatement insertOrUpdateStatement, ExecutionOptions options,
 			SqlGeneratorChain sqlGeneratorChain) {
 		StringBuilder columns = new StringBuilder();
 		StringBuilder values = new StringBuilder();
@@ -41,7 +40,7 @@ public class InsertOrUpdateGeneratorHsql extends InsertOrUpdateGenerator {
 			columns.append(",");
 			columns.append(columnKey);
 			values.append(",");
-			values.append(convertToString(insertOrUpdateStatement.getColumnValue(columnKey), database));
+			values.append(convertToString(insertOrUpdateStatement.getColumnValue(columnKey), options.getRuntimeEnvironment().getTargetDatabase()));
 		}
 		columns.deleteCharAt(0);
 		values.deleteCharAt(0);
@@ -49,12 +48,12 @@ public class InsertOrUpdateGeneratorHsql extends InsertOrUpdateGenerator {
 	}
 
 	@Override
-	protected String getElse(Database database) {
+	protected String getElse(ExecutionOptions options) {
 		return " WHEN MATCHED THEN ";
 	}
 
 	@Override
-	protected String getUpdateStatement(InsertOrUpdateStatement insertOrUpdateStatement, Database database,
+	protected String getUpdateStatement(InsertOrUpdateStatement insertOrUpdateStatement, ExecutionOptions options,
 			String whereClause, SqlGeneratorChain sqlGeneratorChain) {
 
 		StringBuilder sql = new StringBuilder("UPDATE SET ");
@@ -64,7 +63,7 @@ public class InsertOrUpdateGeneratorHsql extends InsertOrUpdateGenerator {
 		for (String columnKey : insertOrUpdateStatement.getColumnValues().keySet()) {
 //			if (!hashPkFields.contains(columnKey)) {
 				sql.append(columnKey).append(" = ");
-				sql.append(convertToString(insertOrUpdateStatement.getColumnValue(columnKey), database));
+				sql.append(convertToString(insertOrUpdateStatement.getColumnValue(columnKey), options.getRuntimeEnvironment().getTargetDatabase()));
 				sql.append(",");
 //			}
 		}

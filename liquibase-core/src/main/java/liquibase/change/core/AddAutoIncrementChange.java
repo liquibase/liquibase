@@ -1,9 +1,8 @@
 package liquibase.change.core;
 
 import liquibase.change.*;
-import liquibase.database.Database;
 import liquibase.database.core.PostgresDatabase;
-import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.executor.ExecutionOptions;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.SequenceNextValueFunction;
 import liquibase.statement.SqlStatement;
@@ -14,8 +13,6 @@ import liquibase.statement.core.SetNullableStatement;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Table;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.math.BigInteger;
 
 /**
@@ -101,8 +98,8 @@ public class AddAutoIncrementChange extends AbstractChange {
     }
     
     @Override
-    public SqlStatement[] generateStatements(Database database) {
-        if (database instanceof PostgresDatabase) {
+    public SqlStatement[] generateStatements(ExecutionOptions options) {
+        if (options.getRuntimeEnvironment().getTargetDatabase() instanceof PostgresDatabase) {
             String sequenceName = (getTableName() + "_" + getColumnName() + "_seq").toLowerCase();
             return new SqlStatement[]{
                     new CreateSequenceStatement(catalogName, schemaName, sequenceName),
@@ -120,11 +117,11 @@ public class AddAutoIncrementChange extends AbstractChange {
     }
 
     @Override
-    public ChangeStatus checkStatus(Database database) {
+    public ChangeStatus checkStatus(ExecutionOptions options) {
         ChangeStatus result = new ChangeStatus();
         Column example = new Column(Table.class, getCatalogName(), getSchemaName(), getTableName(), getColumnName());
         try {
-            Column column = SnapshotGeneratorFactory.getInstance().createSnapshot(example, database);
+            Column column = SnapshotGeneratorFactory.getInstance().createSnapshot(example, options.getRuntimeEnvironment().getTargetDatabase());
             if (column == null) return result.unknown("Column does not exist");
 
 

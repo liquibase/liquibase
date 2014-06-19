@@ -2,13 +2,14 @@ package liquibase.sql.visitor;
 
 import liquibase.ContextExpression;
 import liquibase.Contexts;
+import liquibase.action.visitor.ActionVisitor;
 import liquibase.change.CheckSum;
 import liquibase.database.Database;
 import liquibase.serializer.LiquibaseSerializable;
 
 import java.util.Set;
 
-public interface SqlVisitor extends LiquibaseSerializable {
+public interface SqlVisitor extends ActionVisitor, LiquibaseSerializable {
 
     String modifySql(String sql, Database database);
 

@@ -1,8 +1,8 @@
 package liquibase.sqlgenerator.core;
 
-import liquibase.database.Database;
 import liquibase.database.core.HsqlDatabase;
 import liquibase.exception.ValidationErrors;
+import liquibase.executor.ExecutionOptions;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
@@ -15,17 +15,17 @@ public class FindForeignKeyConstraintsGeneratorHsql extends AbstractSqlGenerator
 	}
 
 	@Override
-	public boolean supports(FindForeignKeyConstraintsStatement statement, Database database) {
-		return database instanceof HsqlDatabase;
+	public boolean supports(FindForeignKeyConstraintsStatement statement, ExecutionOptions options) {
+		return options.getRuntimeEnvironment().getTargetDatabase() instanceof HsqlDatabase;
 	}
 
-	public ValidationErrors validate(FindForeignKeyConstraintsStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+	public ValidationErrors validate(FindForeignKeyConstraintsStatement statement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
 		ValidationErrors validationErrors = new ValidationErrors();
 		validationErrors.checkRequiredField("baseTableName", statement.getBaseTableName());
 		return validationErrors;
 	}
 
-	public Sql[] generateSql(FindForeignKeyConstraintsStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+	public Sql[] generateSql(FindForeignKeyConstraintsStatement statement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
 		StringBuilder sb = new StringBuilder();
 
 		sb.append("SELECT ");

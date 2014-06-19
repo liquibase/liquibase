@@ -2,13 +2,13 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
 import liquibase.database.core.*;
+import liquibase.executor.ExecutionOptions;
 import liquibase.structure.core.Index;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.CreateIndexStatement;
-import liquibase.structure.core.Table;
 import liquibase.util.StringUtils;
 
 import java.util.Arrays;
@@ -18,7 +18,9 @@ import java.util.List;
 public class CreateIndexGenerator extends AbstractSqlGenerator<CreateIndexStatement> {
 
     @Override
-    public ValidationErrors validate(CreateIndexStatement createIndexStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public ValidationErrors validate(CreateIndexStatement createIndexStatement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
+        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("tableName", createIndexStatement.getTableName());
         validationErrors.checkRequiredField("columns", createIndexStatement.getColumns());
@@ -29,9 +31,11 @@ public class CreateIndexGenerator extends AbstractSqlGenerator<CreateIndexStatem
     }
 
     @Override
-    public Sql[] generateSql(CreateIndexStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public Sql[] generateSql(CreateIndexStatement statement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
 
-	    if (database instanceof OracleDatabase) {
+        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+
+        if (database instanceof OracleDatabase) {
 		    // Oracle don't create index when creates foreignKey
 		    // It means that all indexes associated with foreignKey should be created manualy
 		    List<String> associatedWith = StringUtils.splitAndTrim(statement.getAssociatedWith(), ",");

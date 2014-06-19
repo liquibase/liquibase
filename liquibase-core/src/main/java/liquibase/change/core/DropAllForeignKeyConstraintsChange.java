@@ -5,6 +5,7 @@ import liquibase.change.DatabaseChange;
 import liquibase.change.ChangeMetaData;
 import liquibase.change.DatabaseChangeProperty;
 import liquibase.database.Database;
+import liquibase.executor.ExecutionOptions;
 import liquibase.structure.core.Table;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
@@ -56,14 +57,14 @@ public class DropAllForeignKeyConstraintsChange extends AbstractChange {
     }
 
     @Override
-    public SqlStatement[] generateStatements(Database database) {
+    public SqlStatement[] generateStatements(ExecutionOptions options) {
         List<SqlStatement> sqlStatements = new ArrayList<SqlStatement>();
 
-        List<DropForeignKeyConstraintChange> childDropChanges = generateChildren(database);
+        List<DropForeignKeyConstraintChange> childDropChanges = generateChildren(options);
 
         if (childDropChanges != null) {
             for (DropForeignKeyConstraintChange change : childDropChanges) {
-                sqlStatements.addAll(Arrays.asList(change.generateStatements(database)));
+                sqlStatements.addAll(Arrays.asList(change.generateStatements(options)));
             }
         }
 
@@ -75,10 +76,11 @@ public class DropAllForeignKeyConstraintsChange extends AbstractChange {
         return "Foreign keys on base table " + getBaseTableName() + " dropped";
     }
 
-    private List<DropForeignKeyConstraintChange> generateChildren(Database database) {
+    private List<DropForeignKeyConstraintChange> generateChildren(ExecutionOptions options) {
         // Make a new list
         List<DropForeignKeyConstraintChange> childDropChanges = new ArrayList<DropForeignKeyConstraintChange>();
 
+        Database database = options.getRuntimeEnvironment().getTargetDatabase();
         Executor executor = ExecutorService.getInstance().getExecutor(database);
 
         FindForeignKeyConstraintsStatement sql = new FindForeignKeyConstraintsStatement(getBaseTableCatalogName(), getBaseTableSchemaName(), getBaseTableName());
@@ -120,7 +122,7 @@ public class DropAllForeignKeyConstraintsChange extends AbstractChange {
     }
 
     @Override
-    public boolean generateStatementsVolatile(Database database) {
+    public boolean generateStatementsVolatile(ExecutionOptions options) {
         return true;
     }
 

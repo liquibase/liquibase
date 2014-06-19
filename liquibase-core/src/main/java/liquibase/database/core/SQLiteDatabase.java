@@ -8,6 +8,7 @@ import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.executor.ExecutionOptions;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.SnapshotControl;
 import liquibase.snapshot.SnapshotGeneratorFactory;
@@ -122,13 +123,14 @@ public class SQLiteDatabase extends AbstractJdbcDatabase {
 
     public static List<SqlStatement> getAlterTableStatements(
             AlterTableVisitor alterTableVisitor,
-            Database database, String catalogName, String schemaName, String tableName)
+            ExecutionOptions options, String catalogName, String schemaName, String tableName)
             throws DatabaseException {
 
         List<SqlStatement> statements = new ArrayList<SqlStatement>();
 
         Table table = null;
         try {
+            Database database = options.getRuntimeEnvironment().getTargetDatabase();
             table = SnapshotGeneratorFactory.getInstance().createSnapshot((Table) new Table().setName(tableName).setSchema(new Schema(new Catalog(null), null)), database);
 
             List<ColumnConfig> createColumns = new ArrayList<ColumnConfig>();
@@ -175,7 +177,7 @@ public class SQLiteDatabase extends AbstractJdbcDatabase {
             for (ColumnConfig column : createColumns) {
                 ct_change_tmp.addColumn(column);
             }
-            statements.addAll(Arrays.asList(ct_change_tmp.generateStatements(database)));
+            statements.addAll(Arrays.asList(ct_change_tmp.generateStatements(options)));
             // copy rows to temporary table
             statements.addAll(Arrays.asList(new CopyRowsStatement(temp_table_name, tableName, copyColumns)));
             // delete original table

@@ -1,8 +1,8 @@
 package liquibase.change.core;
 
 import liquibase.change.*;
-import liquibase.database.Database;
 import liquibase.exception.ValidationErrors;
+import liquibase.executor.ExecutionOptions;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.resource.ResourceAccessor;
@@ -23,8 +23,8 @@ public class UpdateDataChange extends AbstractModifyDataChange implements Change
     }
 
     @Override
-    public ValidationErrors validate(Database database) {
-        ValidationErrors validate = super.validate(database);
+    public ValidationErrors validate(ExecutionOptions options) {
+        ValidationErrors validate = super.validate(options);
         validate.checkRequiredField("columns", getColumns());
         return validate;
     }
@@ -50,7 +50,7 @@ public class UpdateDataChange extends AbstractModifyDataChange implements Change
     }
 
     @Override
-    public SqlStatement[] generateStatements(Database database) {
+    public SqlStatement[] generateStatements(ExecutionOptions options) {
 
     	boolean needsPreparedStatement = false;
         for (ColumnConfig column : getColumns()) {
@@ -63,7 +63,7 @@ public class UpdateDataChange extends AbstractModifyDataChange implements Change
         }
 
         if (needsPreparedStatement) {
-            UpdateExecutablePreparedStatement statement = new UpdateExecutablePreparedStatement(database, catalogName, schemaName, tableName, columns, getChangeSet(), this.getResourceAccessor());
+            UpdateExecutablePreparedStatement statement = new UpdateExecutablePreparedStatement(options, catalogName, schemaName, tableName, columns, getChangeSet(), this.getResourceAccessor());
             
             statement.setWhereClause(where);
             
@@ -100,7 +100,7 @@ public class UpdateDataChange extends AbstractModifyDataChange implements Change
     }
 
     @Override
-    public ChangeStatus checkStatus(Database database) {
+    public ChangeStatus checkStatus(ExecutionOptions options) {
         return new ChangeStatus().unknown("Cannot check updateData status");
     }
 

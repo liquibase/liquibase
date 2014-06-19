@@ -4,29 +4,30 @@ import liquibase.database.Database;
 import liquibase.database.core.DerbyDatabase;
 import liquibase.database.core.PostgresDatabase;
 import liquibase.exception.ValidationErrors;
+import liquibase.executor.ExecutionOptions;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
-import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.DropSequenceStatement;
-import liquibase.structure.core.Sequence;
 
 public class DropSequenceGenerator extends AbstractSqlGenerator<DropSequenceStatement> {
 
     @Override
-    public boolean supports(DropSequenceStatement statement, Database database) {
-        return database.supportsSequences();
+    public boolean supports(DropSequenceStatement statement, ExecutionOptions options) {
+        return options.getRuntimeEnvironment().getTargetDatabase().supportsSequences();
     }
 
     @Override
-    public ValidationErrors validate(DropSequenceStatement dropSequenceStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public ValidationErrors validate(DropSequenceStatement dropSequenceStatement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("sequenceName", dropSequenceStatement.getSequenceName());
         return validationErrors;
     }
 
     @Override
-    public Sql[] generateSql(DropSequenceStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public Sql[] generateSql(DropSequenceStatement statement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
+        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+
         String sql = "DROP SEQUENCE " + database.escapeSequenceName(statement.getCatalogName(), statement.getSchemaName(), statement.getSequenceName());
         if (database instanceof PostgresDatabase) {
             sql += " CASCADE";

@@ -153,13 +153,16 @@ public class SnapshotGeneratorFactory {
         List<SqlStatement> sqlStatements = new ArrayList<SqlStatement>();
         RuntimeEnvironment runtimeEnvironment = new RuntimeEnvironment(database, null);
         sqlStatements.add(generator.generateLookupStatement(example, runtimeEnvironment, new ActionGeneratorChain(null)));
-        sqlStatements.addAll(Arrays.asList(generator.generateAddToStatements(example, runtimeEnvironment, new ActionGeneratorChain(null))));
+        SqlStatement[] addToStatements = generator.generateAddToStatements(example, runtimeEnvironment, new ActionGeneratorChain(null));
+        if (addToStatements != null) {
+            sqlStatements.addAll(Arrays.asList(addToStatements));
+        }
 
         DatabaseObjectCollection collection = new DatabaseObjectCollection(database);
         List<Action> actions = new ArrayList<Action>();
         for (SqlStatement statement : sqlStatements) {
-            if (ActionGeneratorFactory.getInstance().supports(statement, database)) {
-                Action[] actionArray = ActionGeneratorFactory.getInstance().generateActions(statement, database);
+            if (ActionGeneratorFactory.getInstance().supports(statement, new ExecutionOptions(runtimeEnvironment))) {
+                Action[] actionArray = ActionGeneratorFactory.getInstance().generateActions(statement, new ExecutionOptions(null, new RuntimeEnvironment(database, null)));
                 if (actionArray == null || actionArray.length == 0) {
                     continue;
                 }

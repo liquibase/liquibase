@@ -1,8 +1,8 @@
 package liquibase.change.core;
 
 import liquibase.change.*;
-import liquibase.database.Database;
 import liquibase.exception.ValidationErrors;
+import liquibase.executor.ExecutionOptions;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.SequenceNextValueFunction;
 import liquibase.statement.SqlStatement;
@@ -39,7 +39,7 @@ public class AddDefaultValueChange extends AbstractChange {
     private SequenceNextValueFunction defaultValueSequenceNext;
 
     @Override
-    public ValidationErrors validate(Database database) {
+    public ValidationErrors validate(ExecutionOptions options) {
         ValidationErrors validate = new ValidationErrors();
 
         int nonNullValues = 0;
@@ -65,7 +65,7 @@ public class AddDefaultValueChange extends AbstractChange {
         if (nonNullValues > 1) {
             validate.addError("Only one defaultValue* value can be specified");
         } else {
-            validate.addAll(super.validate(database));
+            validate.addAll(super.validate(options));
         }
 
         return validate;
@@ -173,7 +173,7 @@ public class AddDefaultValueChange extends AbstractChange {
     }
 
     @Override
-    public SqlStatement[] generateStatements(Database database) {
+    public SqlStatement[] generateStatements(ExecutionOptions options) {
         Object defaultValue = null;
 
         if (getDefaultValue() != null) {
@@ -227,10 +227,10 @@ public class AddDefaultValueChange extends AbstractChange {
     }
 
     @Override
-    public ChangeStatus checkStatus(Database database) {
+    public ChangeStatus checkStatus(ExecutionOptions options) {
         ChangeStatus result = new ChangeStatus();
         try {
-            Column column = SnapshotGeneratorFactory.getInstance().createSnapshot(new Column(Table.class, getCatalogName(), getSchemaName(), getTableName(), getColumnName()), database);
+            Column column = SnapshotGeneratorFactory.getInstance().createSnapshot(new Column(Table.class, getCatalogName(), getSchemaName(), getTableName(), getColumnName()), options.getRuntimeEnvironment().getTargetDatabase());
             if (column == null) {
                 return result.unknown("Column " + getColumnName() + " does not exist");
             }

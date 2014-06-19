@@ -1,6 +1,6 @@
 package liquibase.change;
 
-import liquibase.database.Database;
+import liquibase.executor.ExecutionOptions;
 import liquibase.statement.SqlStatement;
 
 @DatabaseChange(name = "exampleAbstractChange", description = "Used for the AbstractChangeTest unit test", priority = 1)
@@ -17,7 +17,7 @@ class ExampleAbstractChange extends AbstractChange {
     }
 
     @Override
-    public SqlStatement[] generateStatements(Database database) {
+    public SqlStatement[] generateStatements(ExecutionOptions options) {
         return null;
     }
 

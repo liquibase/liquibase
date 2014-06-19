@@ -13,14 +13,15 @@ import liquibase.database.core.PostgresDatabase;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
+import liquibase.executor.ExecutionOptions;
 import liquibase.statement.core.FetchObjectsStatement;
 import liquibase.structure.core.Table;
 
 public class FetchTablesSnapshotGenerator extends AbstractActionGenerator<FetchObjectsStatement> {
 
     @Override
-    public boolean supports(FetchObjectsStatement statement, Database database) {
-        DatabaseConnection connection = database.getConnection();
+    public boolean supports(FetchObjectsStatement statement, ExecutionOptions options) {
+        DatabaseConnection connection = options.getRuntimeEnvironment().getTargetDatabase().getConnection();
         if (connection == null || connection instanceof JdbcConnection || connection instanceof OfflineConnection) {
             return statement.getExample() instanceof Table;
         } else {
@@ -30,19 +31,21 @@ public class FetchTablesSnapshotGenerator extends AbstractActionGenerator<FetchO
     }
 
     @Override
-    public ValidationErrors validate(FetchObjectsStatement statement, Database database, ActionGeneratorChain chain) {
-        ValidationErrors errors = super.validate(statement, database, chain);
+    public ValidationErrors validate(FetchObjectsStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
+        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+        ValidationErrors errors = super.validate(statement, options, chain);
         Table example = (Table) statement.getExample();
         if (example.getSchema() != null && example.getSchema().getCatalogName() != null && example.getSchema().getName() != null) {
             if (!example.getSchema().getCatalogName().equals(example.getSchema().getName()) && !database.supportsSchemas()) {
-                errors.addError("Database "+database.getShortName()+" does not support separate catalogs and schemas");
+                errors.addError("Database "+ database.getShortName()+" does not support separate catalogs and schemas");
             }
         }
         return errors;
     }
 
     @Override
-    public Action[] generateActions(final FetchObjectsStatement statement, Database database, ActionGeneratorChain chain) {
+    public Action[] generateActions(final FetchObjectsStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
+        Database database = options.getRuntimeEnvironment().getTargetDatabase();
         if (database.getConnection() == null || database.getConnection() instanceof OfflineConnection) {
             throw new UnexpectedLiquibaseException("Cannot read table metadata for an offline database");
         }

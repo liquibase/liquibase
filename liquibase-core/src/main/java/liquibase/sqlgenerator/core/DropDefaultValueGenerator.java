@@ -5,27 +5,26 @@ import liquibase.database.core.*;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
+import liquibase.executor.ExecutionOptions;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.DropDefaultValueStatement;
-import liquibase.structure.core.Column;
-import liquibase.structure.core.Table;
 
 public class DropDefaultValueGenerator extends AbstractSqlGenerator<DropDefaultValueStatement> {
 
     @Override
-    public boolean supports(DropDefaultValueStatement statement, Database database) {
-        return !(database instanceof SQLiteDatabase);
+    public boolean supports(DropDefaultValueStatement statement, ExecutionOptions options) {
+        return !(options.getRuntimeEnvironment().getTargetDatabase() instanceof SQLiteDatabase);
     }
 
     @Override
-    public ValidationErrors validate(DropDefaultValueStatement dropDefaultValueStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public ValidationErrors validate(DropDefaultValueStatement dropDefaultValueStatement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("tableName", dropDefaultValueStatement.getTableName());
         validationErrors.checkRequiredField("columnName", dropDefaultValueStatement.getColumnName());
 
-        if (database instanceof InformixDatabase) {
+        if (options.getRuntimeEnvironment().getTargetDatabase() instanceof InformixDatabase) {
             validationErrors.checkRequiredField("columnDataType", dropDefaultValueStatement.getColumnDataType());
         }
 
@@ -34,7 +33,8 @@ public class DropDefaultValueGenerator extends AbstractSqlGenerator<DropDefaultV
     }
 
     @Override
-    public Sql[] generateSql(DropDefaultValueStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public Sql[] generateSql(DropDefaultValueStatement statement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
+        Database database = options.getRuntimeEnvironment().getTargetDatabase();
         String sql;
         String escapedTableName = database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName());
         if (database instanceof MSSQLDatabase) {

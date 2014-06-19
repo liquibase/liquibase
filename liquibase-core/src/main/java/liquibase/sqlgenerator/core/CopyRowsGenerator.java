@@ -1,26 +1,23 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.change.ColumnConfig;
-import liquibase.database.Database;
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.exception.ValidationErrors;
+import liquibase.executor.ExecutionOptions;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
-import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.CopyRowsStatement;
-import liquibase.structure.core.Relation;
-import liquibase.structure.core.Table;
 
 public class CopyRowsGenerator extends AbstractSqlGenerator<CopyRowsStatement> {
 
     @Override
-    public boolean supports(CopyRowsStatement statement, Database database) {
-        return (database instanceof SQLiteDatabase);
+    public boolean supports(CopyRowsStatement statement, ExecutionOptions options) {
+        return (options.getRuntimeEnvironment().getTargetDatabase() instanceof SQLiteDatabase);
     }
 
     @Override
-    public ValidationErrors validate(CopyRowsStatement copyRowsStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public ValidationErrors validate(CopyRowsStatement copyRowsStatement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("targetTable", copyRowsStatement.getTargetTable());
         validationErrors.checkRequiredField("sourceTable", copyRowsStatement.getSourceTable());
@@ -29,9 +26,9 @@ public class CopyRowsGenerator extends AbstractSqlGenerator<CopyRowsStatement> {
     }
 
     @Override
-    public Sql[] generateSql(CopyRowsStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public Sql[] generateSql(CopyRowsStatement statement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
         StringBuffer sql = new StringBuffer();
-        if (database instanceof SQLiteDatabase) {
+        if (options.getRuntimeEnvironment().getTargetDatabase() instanceof SQLiteDatabase) {
             sql.append("INSERT INTO `").append(statement.getTargetTable()).append("` (");
 
             for (int i = 0; i < statement.getCopyColumns().size(); i++) {

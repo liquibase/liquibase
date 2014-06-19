@@ -4,6 +4,7 @@ import liquibase.actiongenerator.ActionGeneratorChain;
 import liquibase.database.Database;
 import liquibase.exception.ValidationErrors;
 import liquibase.exception.Warnings;
+import liquibase.executor.ExecutionOptions;
 import liquibase.sql.Sql;
 import liquibase.statement.SqlStatement;
 
@@ -15,15 +16,15 @@ public class SqlGeneratorChain {
         this.delegate = actionGeneratorChain;
     }
 
-    public Sql[] generateSql(SqlStatement statement, Database database) {
-        return (Sql[]) delegate.generateActions(statement, database);
+    public Sql[] generateSql(SqlStatement statement, ExecutionOptions options) {
+        return (Sql[]) delegate.generateActions(statement, options);
     }
 
-    public Warnings warn(SqlStatement statement, Database database) {
-        return delegate.warn(statement, database);
+    public Warnings warn(SqlStatement statement, ExecutionOptions options) {
+        return delegate.warn(statement, options);
     }
 
-    public ValidationErrors validate(SqlStatement statement, Database database) {
-        return delegate.validate(statement, database);
+    public ValidationErrors validate(SqlStatement statement, ExecutionOptions options) {
+        return delegate.validate(statement, options);
     }
 }

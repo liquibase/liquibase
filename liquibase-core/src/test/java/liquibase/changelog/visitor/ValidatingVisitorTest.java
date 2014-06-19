@@ -1,10 +1,12 @@
 package liquibase.changelog.visitor;
 
+import liquibase.RuntimeEnvironment;
 import liquibase.change.ColumnConfig;
 import liquibase.change.core.CreateTableChange;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.RanChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
+import liquibase.executor.ExecutionOptions;
 import liquibase.sdk.database.MockDatabase;
 import liquibase.exception.SetupException;
 import static org.junit.Assert.*;
@@ -15,7 +17,6 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.List;
 
-import liquibase.database.Database;
 import liquibase.exception.ValidationErrors;
 
 public class ValidatingVisitorTest {
@@ -50,8 +51,8 @@ public class ValidatingVisitorTest {
         changeSet2.addChange(change2);
 
         ValidatingVisitor handler = new ValidatingVisitor(new ArrayList<RanChangeSet>());
-        handler.visit(changeSet1, new DatabaseChangeLog(), new MockDatabase(), null);
-        handler.visit(changeSet2, new DatabaseChangeLog(), new MockDatabase(), null);
+        handler.visit(changeSet1, new DatabaseChangeLog(), new RuntimeEnvironment(new MockDatabase()), null);
+        handler.visit(changeSet2, new DatabaseChangeLog(), new RuntimeEnvironment(new MockDatabase()), null);
 
         assertTrue(handler.validationPassed());
 
@@ -92,7 +93,7 @@ public class ValidatingVisitorTest {
 
         changeSet1.addChange(new CreateTableChange() {
             @Override
-            public ValidationErrors validate(Database database) {
+            public ValidationErrors validate(ExecutionOptions options) {
                 ValidationErrors changeValidationErrors = new ValidationErrors();
                 changeValidationErrors.addError("Test message");
                 return changeValidationErrors;
@@ -114,7 +115,7 @@ public class ValidatingVisitorTest {
 
         changeSet1.addChange(new CreateTableChange() {
             @Override
-            public ValidationErrors validate(Database database) {
+            public ValidationErrors validate(ExecutionOptions options) {
                 ValidationErrors changeValidationErrors = new ValidationErrors();
                 changeValidationErrors.addError("Test message");
                 return changeValidationErrors;

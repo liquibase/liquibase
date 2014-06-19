@@ -6,6 +6,10 @@ public class RuntimeEnvironment {
     private Database targetDatabase;
     private Contexts contexts;
 
+    public RuntimeEnvironment(Database targetDatabase) {
+        this.targetDatabase = targetDatabase;
+    }
+
     public RuntimeEnvironment(Database targetDatabase, Contexts contexts) {
         this.targetDatabase = targetDatabase;
         this.contexts = contexts;

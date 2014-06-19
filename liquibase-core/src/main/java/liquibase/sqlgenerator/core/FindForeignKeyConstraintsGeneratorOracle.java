@@ -1,9 +1,9 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.CatalogAndSchema;
-import liquibase.database.Database;
 import liquibase.database.core.OracleDatabase;
 import liquibase.exception.ValidationErrors;
+import liquibase.executor.ExecutionOptions;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
@@ -16,20 +16,20 @@ public class FindForeignKeyConstraintsGeneratorOracle extends AbstractSqlGenerat
     }
 
     @Override
-    public boolean supports(FindForeignKeyConstraintsStatement statement, Database database) {
-        return database instanceof OracleDatabase;
+    public boolean supports(FindForeignKeyConstraintsStatement statement, ExecutionOptions options) {
+        return options.getRuntimeEnvironment().getTargetDatabase() instanceof OracleDatabase;
     }
 
     @Override
-    public ValidationErrors validate(FindForeignKeyConstraintsStatement findForeignKeyConstraintsStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public ValidationErrors validate(FindForeignKeyConstraintsStatement findForeignKeyConstraintsStatement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("baseTableName", findForeignKeyConstraintsStatement.getBaseTableName());
         return validationErrors;
     }
 
     @Override
-    public Sql[] generateSql(FindForeignKeyConstraintsStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-        CatalogAndSchema baseTableSchema = new CatalogAndSchema(statement.getBaseTableCatalogName(), statement.getBaseTableSchemaName()).customize(database);
+    public Sql[] generateSql(FindForeignKeyConstraintsStatement statement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
+        CatalogAndSchema baseTableSchema = new CatalogAndSchema(statement.getBaseTableCatalogName(), statement.getBaseTableSchemaName()).customize(options.getRuntimeEnvironment().getTargetDatabase());
 
         StringBuilder sb = new StringBuilder();
 

@@ -1,6 +1,8 @@
 package liquibase.sqlgenerator.core;
 
+import liquibase.RuntimeEnvironment;
 import liquibase.changelog.ChangeSet;
+import liquibase.executor.ExecutionOptions;
 import liquibase.sdk.database.MockDatabase;
 import liquibase.sql.Sql;
 import liquibase.sqlgenerator.AbstractSqlGeneratorTest;
@@ -23,7 +25,7 @@ public class MarkChangeSetRanGeneratorTest extends AbstractSqlGeneratorTest<Mark
 
     @Test
     public void generateSql_markRan() {
-        Sql[] sqls = new MarkChangeSetRanGenerator().generateSql(new MarkChangeSetRanStatement(new ChangeSet("1", "a", false, false, "c", null, null, null), ChangeSet.ExecType.MARK_RAN), new MockDatabase(), new MockSqlGeneratorChain());
+        Sql[] sqls = new MarkChangeSetRanGenerator().generateSql(new MarkChangeSetRanStatement(new ChangeSet("1", "a", false, false, "c", null, null, null), ChangeSet.ExecType.MARK_RAN), new ExecutionOptions(new RuntimeEnvironment(new MockDatabase())), new MockSqlGeneratorChain());
         assertEquals(1, sqls.length);
         assertTrue(sqls[0].toSql(), sqls[0].toSql().contains("MARK_RAN"));
     }

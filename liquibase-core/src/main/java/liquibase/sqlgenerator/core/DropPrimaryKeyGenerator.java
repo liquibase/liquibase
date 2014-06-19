@@ -4,23 +4,25 @@ import liquibase.CatalogAndSchema;
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.exception.ValidationErrors;
+import liquibase.executor.ExecutionOptions;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
-import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.DropPrimaryKeyStatement;
-import liquibase.structure.core.PrimaryKey;
-import liquibase.structure.core.Table;
 
 public class DropPrimaryKeyGenerator extends AbstractSqlGenerator<DropPrimaryKeyStatement> {
 
     @Override
-    public boolean supports(DropPrimaryKeyStatement statement, Database database) {
+    public boolean supports(DropPrimaryKeyStatement statement, ExecutionOptions options) {
+        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+
         return (!(database instanceof SQLiteDatabase));
     }
 
     @Override
-    public ValidationErrors validate(DropPrimaryKeyStatement dropPrimaryKeyStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public ValidationErrors validate(DropPrimaryKeyStatement dropPrimaryKeyStatement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
+        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("tableName", dropPrimaryKeyStatement.getTableName());
 
@@ -32,7 +34,9 @@ public class DropPrimaryKeyGenerator extends AbstractSqlGenerator<DropPrimaryKey
     }
 
     @Override
-    public Sql[] generateSql(DropPrimaryKeyStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public Sql[] generateSql(DropPrimaryKeyStatement statement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
+        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+
         String sql;
 
         if (database instanceof MSSQLDatabase) {

@@ -3,6 +3,7 @@ package liquibase.change.core;
 import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
+import liquibase.executor.ExecutionOptions;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.structure.core.ForeignKey;
 import liquibase.structure.core.ForeignKeyConstraintType;
@@ -217,7 +218,7 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
     }
 
     @Override
-    public SqlStatement[] generateStatements(Database database) {
+    public SqlStatement[] generateStatements(ExecutionOptions options) {
 
         boolean deferrable = false;
         if (getDeferrable() != null) {
@@ -259,7 +260,7 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
     }
 
     @Override
-    public ChangeStatus checkStatus(Database database) {
+    public ChangeStatus checkStatus(ExecutionOptions options) {
         ChangeStatus result = new ChangeStatus();
         try {
             ForeignKey example = new ForeignKey(getConstraintName(), getBaseTableCatalogName(), getBaseTableSchemaName(), getBaseTableName());
@@ -267,7 +268,7 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
             example.setForeignKeyColumns(getBaseColumnNames());
             example.setPrimaryKeyColumns(getReferencedColumnNames());
 
-            ForeignKey snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(example, database);
+            ForeignKey snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(example, options.getRuntimeEnvironment().getTargetDatabase());
             result.assertComplete(snapshot != null, "Foreign key does not exist");
 
             if (snapshot != null) {

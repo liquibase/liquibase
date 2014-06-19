@@ -1,6 +1,7 @@
 package liquibase.changelog;
 
 import liquibase.Contexts;
+import liquibase.RuntimeEnvironment;
 import liquibase.change.CheckSum;
 import liquibase.database.Database;
 import liquibase.database.core.SQLiteDatabase;
@@ -8,6 +9,7 @@ import liquibase.exception.DatabaseException;
 import liquibase.exception.DatabaseHistoryException;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.executor.ExecutionOptions;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.logging.LogFactory;
@@ -168,7 +170,7 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
         }
 
         for (SqlStatement sql : statementsToExecute) {
-            if (SqlGeneratorFactory.getInstance().supports(sql, database)) {
+            if (SqlGeneratorFactory.getInstance().supports(sql, new ExecutionOptions(new RuntimeEnvironment(database, null)))) {
                 executor.execute(sql);
                 getDatabase().commit();
             } else {

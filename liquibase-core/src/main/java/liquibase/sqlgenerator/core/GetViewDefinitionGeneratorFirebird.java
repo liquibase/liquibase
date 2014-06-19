@@ -1,7 +1,7 @@
 package liquibase.sqlgenerator.core;
 
-import liquibase.database.Database;
 import liquibase.database.core.FirebirdDatabase;
+import liquibase.executor.ExecutionOptions;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
@@ -14,12 +14,12 @@ public class GetViewDefinitionGeneratorFirebird extends GetViewDefinitionGenerat
     }
 
     @Override
-    public boolean supports(GetViewDefinitionStatement statement, Database database) {
-        return database instanceof FirebirdDatabase;
+    public boolean supports(GetViewDefinitionStatement statement, ExecutionOptions options) {
+        return options.getRuntimeEnvironment().getTargetDatabase() instanceof FirebirdDatabase;
     }
 
     @Override
-    public Sql[] generateSql(GetViewDefinitionStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public Sql[] generateSql(GetViewDefinitionStatement statement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
         return new Sql[] {
                 new UnparsedSql("select rdb$view_source from rdb$relations where upper(rdb$relation_name)='" + statement.getViewName() + "'")
         };

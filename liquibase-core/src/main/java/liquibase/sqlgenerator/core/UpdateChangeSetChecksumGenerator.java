@@ -1,11 +1,10 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.changelog.ChangeSet;
-import liquibase.changelog.RanChangeSet;
 import liquibase.database.Database;
 import liquibase.exception.ValidationErrors;
+import liquibase.executor.ExecutionOptions;
 import liquibase.sql.Sql;
-import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.SqlStatement;
@@ -14,7 +13,7 @@ import liquibase.statement.core.UpdateStatement;
 
 public class UpdateChangeSetChecksumGenerator extends AbstractSqlGenerator<UpdateChangeSetChecksumStatement> {
     @Override
-    public ValidationErrors validate(UpdateChangeSetChecksumStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public ValidationErrors validate(UpdateChangeSetChecksumStatement statement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("changeSet", statement.getChangeSet());
 
@@ -22,8 +21,9 @@ public class UpdateChangeSetChecksumGenerator extends AbstractSqlGenerator<Updat
     }
 
     @Override
-    public Sql[] generateSql(UpdateChangeSetChecksumStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public Sql[] generateSql(UpdateChangeSetChecksumStatement statement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
         ChangeSet changeSet = statement.getChangeSet();
+        Database database = options.getRuntimeEnvironment().getTargetDatabase();
 
         SqlStatement runStatement = null;
         runStatement = new UpdateStatement(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName())
@@ -31,6 +31,6 @@ public class UpdateChangeSetChecksumGenerator extends AbstractSqlGenerator<Updat
                 .setWhereClause("ID=? AND AUTHOR=? AND FILENAME=?")
                 .addWhereParameters(changeSet.getId(), changeSet.getAuthor(), changeSet.getFilePath());
 
-        return SqlGeneratorFactory.getInstance().generateSql(runStatement, database);
+        return SqlGeneratorFactory.getInstance().generateSql(runStatement, options);
     }
 }

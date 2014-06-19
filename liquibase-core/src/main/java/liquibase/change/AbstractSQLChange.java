@@ -3,6 +3,7 @@ package liquibase.change;
 import liquibase.database.Database;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.exception.*;
+import liquibase.executor.ExecutionOptions;
 import liquibase.logging.LogFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RawSqlStatement;
@@ -50,21 +51,21 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
 
     /**
      * {@inheritDoc}
-     * @param database
+     * @param options
      * @return
      */
     @Override
-    public boolean supports(Database database) {
+    public boolean supports(ExecutionOptions options) {
         return true;
     }
 
     @Override
-    public Warnings warn(Database database) {
+    public Warnings warn(ExecutionOptions options) {
         return new Warnings();
     }
 
     @Override
-    public ValidationErrors validate(Database database) {
+    public ValidationErrors validate(ExecutionOptions options) {
         ValidationErrors validationErrors = new ValidationErrors();
         if (StringUtils.trimToNull(sql) == null) {
             validationErrors.addError("'sql' is required");
@@ -193,9 +194,12 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
      * <p></p>
      * If stripping comments is true then any comments are removed before the splitting is executed.
      * The set SQL is passed through the {@link java.sql.Connection#nativeSQL} method if a connection is available.
+     * @param options
      */
     @Override
-    public SqlStatement[] generateStatements(Database database) {
+    public SqlStatement[] generateStatements(ExecutionOptions options) {
+
+        Database database = options.getRuntimeEnvironment().getTargetDatabase();
 
         List<SqlStatement> returnStatements = new ArrayList<SqlStatement>();
 
@@ -226,17 +230,17 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
     }
 
     @Override
-    public boolean generateStatementsVolatile(Database database) {
+    public boolean generateStatementsVolatile(ExecutionOptions options) {
         return false;
     }
 
     @Override
-    public boolean generateRollbackStatementsVolatile(Database database) {
+    public boolean generateRollbackStatementsVolatile(ExecutionOptions options) {
         return false;
     }
 
     @Override
-    public ChangeStatus checkStatus(Database database) {
+    public ChangeStatus checkStatus(ExecutionOptions options) {
         return new ChangeStatus().unknown("Cannot check raw sql status");
     }
 

@@ -1,12 +1,10 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
+import liquibase.executor.ExecutionOptions;
 import liquibase.statement.core.AddUniqueConstraintStatement;
-import liquibase.structure.core.Schema;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.database.core.*;
-import liquibase.structure.core.Column;
-import liquibase.structure.core.Table;
 import liquibase.exception.ValidationErrors;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.sql.Sql;
@@ -28,7 +26,9 @@ import java.util.regex.Pattern;
 public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement> {
 
     @Override
-    public ValidationErrors validate(AddColumnStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public ValidationErrors validate(AddColumnStatement statement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
+        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+
         ValidationErrors validationErrors = new ValidationErrors();
 
         validationErrors.checkRequiredField("columnName", statement.getColumnName());
@@ -62,8 +62,9 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
     }
 
     @Override
-    public Sql[] generateSql(AddColumnStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public Sql[] generateSql(AddColumnStatement statement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
 
+        Database database = options.getRuntimeEnvironment().getTargetDatabase();
         String alterTable = "ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " ADD " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " " + DataTypeFactory.getInstance().fromDescription(statement.getColumnType() + (statement.isAutoIncrement() ? "{autoIncrement:true}" : ""), database).toDatabaseDataType(database);
 
         if (statement.isAutoIncrement() && database.supportsAutoIncrement()) {
@@ -92,20 +93,20 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
         List<Sql> returnSql = new ArrayList<Sql>();
         returnSql.add(new UnparsedSql(alterTable));
 
-        addUniqueConstrantStatements(statement, database, returnSql);
-        addForeignKeyStatements(statement, database, returnSql);
+        addUniqueConstrantStatements(statement, options, returnSql);
+        addForeignKeyStatements(statement, options, returnSql);
 
         return returnSql.toArray(new Sql[returnSql.size()]);
     }
 
-    protected void addUniqueConstrantStatements(AddColumnStatement statement, Database database, List<Sql> returnSql) {
+    protected void addUniqueConstrantStatements(AddColumnStatement statement, ExecutionOptions options, List<Sql> returnSql) {
         if (statement.isUnique()) {
             AddUniqueConstraintStatement addConstraintStmt = new AddUniqueConstraintStatement(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName(), statement.getUniqueStatementName());
-            returnSql.addAll(Arrays.asList(SqlGeneratorFactory.getInstance().generateSql(addConstraintStmt, database)));
+            returnSql.addAll(Arrays.asList(SqlGeneratorFactory.getInstance().generateSql(addConstraintStmt, options)));
         }
     }
 
-    protected void addForeignKeyStatements(AddColumnStatement statement, Database database, List<Sql> returnSql) {
+    protected void addForeignKeyStatements(AddColumnStatement statement, ExecutionOptions options, List<Sql> returnSql) {
         for (ColumnConstraint constraint : statement.getConstraints()) {
             if (constraint instanceof ForeignKeyConstraint) {
                 ForeignKeyConstraint fkConstraint = (ForeignKeyConstraint) constraint;
@@ -131,7 +132,7 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
 
 
                 AddForeignKeyConstraintStatement addForeignKeyConstraintStatement = new AddForeignKeyConstraintStatement(fkConstraint.getForeignKeyName(), statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName(), null, refSchemaName, refTableName, refColName);
-                returnSql.addAll(Arrays.asList(SqlGeneratorFactory.getInstance().generateSql(addForeignKeyConstraintStatement, database)));
+                returnSql.addAll(Arrays.asList(SqlGeneratorFactory.getInstance().generateSql(addForeignKeyConstraintStatement, options)));
             }
         }
     }

@@ -4,6 +4,7 @@ import liquibase.database.Database;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.core.SybaseASADatabase;
 import liquibase.database.core.SybaseDatabase;
+import liquibase.executor.ExecutionOptions;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
@@ -21,7 +22,9 @@ public class AddUniqueConstraintGeneratorTDS extends AddUniqueConstraintGenerato
     }
 
     @Override
-	public boolean supports(AddUniqueConstraintStatement statement, Database database) {
+	public boolean supports(AddUniqueConstraintStatement statement, ExecutionOptions options) {
+        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+
         return  (database instanceof MSSQLDatabase)
 			|| (database instanceof SybaseDatabase)
 			|| (database instanceof SybaseASADatabase)
@@ -29,9 +32,11 @@ public class AddUniqueConstraintGeneratorTDS extends AddUniqueConstraintGenerato
 	}
 
 	@Override
-	public Sql[] generateSql(AddUniqueConstraintStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+	public Sql[] generateSql(AddUniqueConstraintStatement statement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
 
-		final String sqlTemplate = "ALTER TABLE %s ADD CONSTRAINT %s UNIQUE (%s)";
+        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+
+        final String sqlTemplate = "ALTER TABLE %s ADD CONSTRAINT %s UNIQUE (%s)";
 		final String sqlNoContraintNameTemplate = "ALTER TABLE %s ADD UNIQUE (%s)";
 		
 		if (statement.getConstraintName() == null) {

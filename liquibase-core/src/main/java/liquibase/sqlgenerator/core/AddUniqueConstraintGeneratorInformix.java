@@ -2,6 +2,7 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
 import liquibase.database.core.InformixDatabase;
+import liquibase.executor.ExecutionOptions;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
 import liquibase.sqlgenerator.SqlGenerator;
@@ -20,12 +21,13 @@ public class AddUniqueConstraintGeneratorInformix extends AddUniqueConstraintGen
     }
 
     @Override
-	public boolean supports(AddUniqueConstraintStatement statement, Database database) {
-        return (database instanceof InformixDatabase);
+	public boolean supports(AddUniqueConstraintStatement statement, ExecutionOptions options) {
+        return (options.getRuntimeEnvironment().getTargetDatabase() instanceof InformixDatabase);
 	}
 
 	@Override
-	public Sql[] generateSql(AddUniqueConstraintStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+	public Sql[] generateSql(AddUniqueConstraintStatement statement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
+        Database database = options.getRuntimeEnvironment().getTargetDatabase();
 
 		final String sqlNoContraintNameTemplate = "ALTER TABLE %s ADD CONSTRAINT UNIQUE (%s)";
 		final String sqlTemplate = "ALTER TABLE %s ADD CONSTRAINT UNIQUE (%s) CONSTRAINT %s";

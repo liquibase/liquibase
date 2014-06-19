@@ -3,10 +3,12 @@ package liquibase.sqlgenerator.core;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import liquibase.RuntimeEnvironment;
 import liquibase.actiongenerator.ActionGenerator;
 import liquibase.actiongenerator.ActionGeneratorChain;
 import liquibase.database.Database;
 import liquibase.database.core.PostgresDatabase;
+import liquibase.executor.ExecutionOptions;
 import liquibase.sql.Sql;
 import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
@@ -60,15 +62,18 @@ public class DropIndexGeneratorTest {
 		Database database = new PostgresDatabase();
 		SortedSet<ActionGenerator> sqlGenerators = new TreeSet<ActionGenerator>();
 		SqlGeneratorChain sqlGenerationChain = new SqlGeneratorChain(new ActionGeneratorChain(sqlGenerators));
-		Sql[] sqls = dropIndexGenerator.generateSql(statement, database, sqlGenerationChain);
+
+        ExecutionOptions options = new ExecutionOptions(new RuntimeEnvironment(database));
+
+		Sql[] sqls = dropIndexGenerator.generateSql(statement, options, sqlGenerationChain);
 		assertEquals("DROP INDEX \"defaultSchema\".\"indexName\"", sqls[0].toSql());
 
 		statement = new DropIndexStatement("index_name", "default_catalog", "default_schema", "a_table", null);
-		sqls = dropIndexGenerator.generateSql(statement, database, sqlGenerationChain);
+		sqls = dropIndexGenerator.generateSql(statement, options , sqlGenerationChain);
 		assertEquals("DROP INDEX default_schema.index_name", sqls[0].toSql());
 
 		statement = new DropIndexStatement("index_name", null, null, "a_table", null);
-		sqls = dropIndexGenerator.generateSql(statement, database, sqlGenerationChain);
+		sqls = dropIndexGenerator.generateSql(statement, options, sqlGenerationChain);
 		assertEquals("DROP INDEX index_name", sqls[0].toSql());
 	}
 }

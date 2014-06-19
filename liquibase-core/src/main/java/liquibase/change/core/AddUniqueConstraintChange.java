@@ -1,7 +1,7 @@
 package liquibase.change.core;
 
 import liquibase.change.*;
-import liquibase.database.Database;
+import liquibase.executor.ExecutionOptions;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.AddUniqueConstraintStatement;
@@ -105,7 +105,7 @@ public class AddUniqueConstraintChange extends AbstractChange {
     }
 
     @Override
-    public SqlStatement[] generateStatements(Database database) {
+    public SqlStatement[] generateStatements(ExecutionOptions options) {
 
 //todo    	if (database instanceof SQLiteDatabase) {
 //    		// return special statements for SQLite databases
@@ -137,12 +137,12 @@ public class AddUniqueConstraintChange extends AbstractChange {
 
 
     @Override
-    public ChangeStatus checkStatus(Database database) {
+    public ChangeStatus checkStatus(ExecutionOptions options) {
         ChangeStatus result = new ChangeStatus();
         try {
             UniqueConstraint example = new UniqueConstraint(getConstraintName(), getCatalogName(), getSchemaName(), getTableName(), getColumnNames().split("\\s+,\\s+"));
 
-            UniqueConstraint snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(example, database);
+            UniqueConstraint snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(example, options.getRuntimeEnvironment().getTargetDatabase());
             result.assertComplete(snapshot != null, "Unique constraint does not exist");
 
             return result;

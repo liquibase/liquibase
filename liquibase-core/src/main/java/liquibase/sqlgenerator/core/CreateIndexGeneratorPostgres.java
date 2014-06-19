@@ -10,6 +10,7 @@ import liquibase.database.core.InformixDatabase;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.core.PostgresDatabase;
 import liquibase.database.core.SybaseASADatabase;
+import liquibase.executor.ExecutionOptions;
 import liquibase.structure.core.Index;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
@@ -25,12 +26,14 @@ public class CreateIndexGeneratorPostgres extends CreateIndexGenerator {
     }
 
     @Override
-    public boolean supports(CreateIndexStatement statement, Database database) {
-        return database instanceof PostgresDatabase;
+    public boolean supports(CreateIndexStatement statement, ExecutionOptions options) {
+        return options.getRuntimeEnvironment().getTargetDatabase() instanceof PostgresDatabase;
     }
 
     @Override
-    public Sql[] generateSql(CreateIndexStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public Sql[] generateSql(CreateIndexStatement statement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
+
+        Database database = options.getRuntimeEnvironment().getTargetDatabase();
 
         // Default filter of index creation:
         // creation of all indexes with associations are switched off.

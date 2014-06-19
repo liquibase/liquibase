@@ -1,5 +1,7 @@
 package liquibase.sqlgenerator.core;
 
+import liquibase.RuntimeEnvironment;
+import liquibase.executor.ExecutionOptions;
 import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 import liquibase.statement.core.InsertOrUpdateStatement;
@@ -17,7 +19,7 @@ public class InsertOrUpdateGeneratorOracleTest {
         InsertOrUpdateStatement statement = new InsertOrUpdateStatement("mycatalog", "myschema","mytable","pk_col1");
         statement.addColumnValue("pk_col1","value1");
         statement.addColumnValue("col2","value2");
-        Sql[] sql = generator.generateSql( statement, database,  null);
+        Sql[] sql = generator.generateSql( statement, new ExecutionOptions(new RuntimeEnvironment(database)),  null);
         String theSql = sql[0].toSql();
         assertTrue(theSql.contains("INSERT INTO mycatalog.mytable (pk_col1, col2) VALUES ('value1', 'value2');"));
         assertTrue(theSql.contains("UPDATE mycatalog.mytable"));

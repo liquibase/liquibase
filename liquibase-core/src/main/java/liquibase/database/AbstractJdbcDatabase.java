@@ -745,7 +745,7 @@ public abstract class AbstractJdbcDatabase implements Database {
                         if (change instanceof DropTableChange) {
                             ((DropTableChange) change).setCascadeConstraints(true);
                         }
-                        SqlStatement[] sqlStatements = change.generateStatements(this);
+                        SqlStatement[] sqlStatements = change.generateStatements(new ExecutionOptions(new RuntimeEnvironment(this, null)));
                         for (SqlStatement statement : sqlStatements) {
                             ExecutorService.getInstance().getExecutor(this).execute(statement);
                         }
@@ -1189,7 +1189,7 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     @Override
     public void executeStatements(final Change change, final DatabaseChangeLog changeLog, final List<SqlVisitor> sqlVisitors) throws LiquibaseException {
-        SqlStatement[] statements = change.generateStatements(this);
+        SqlStatement[] statements = change.generateStatements(new ExecutionOptions(sqlVisitors, new RuntimeEnvironment(this, null)));
 
         execute(statements, sqlVisitors);
     }
@@ -1204,7 +1204,7 @@ public abstract class AbstractJdbcDatabase implements Database {
     @Override
     public void execute(final SqlStatement[] statements, final List<SqlVisitor> sqlVisitors) throws LiquibaseException {
         for (SqlStatement statement : statements) {
-            if (statement.skipOnUnsupported() && !SqlGeneratorFactory.getInstance().supports(statement, this)) {
+            if (statement.skipOnUnsupported() && !SqlGeneratorFactory.getInstance().supports(statement, new ExecutionOptions(sqlVisitors, new RuntimeEnvironment(this, null)))) {
                 continue;
             }
             LogFactory.getLogger().debug("Executing Statement: " + statement.getClass().getName());
@@ -1215,9 +1215,9 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     @Override
     public void saveStatements(final Change change, final List<SqlVisitor> sqlVisitors, final Writer writer) throws IOException, StatementNotSupportedOnDatabaseException, LiquibaseException {
-        SqlStatement[] statements = change.generateStatements(this);
+        SqlStatement[] statements = change.generateStatements(new ExecutionOptions(sqlVisitors, new RuntimeEnvironment(this, null)));
         for (SqlStatement statement : statements) {
-            for (Sql sql : SqlGeneratorFactory.getInstance().generateSql(statement, this)) {
+            for (Sql sql : SqlGeneratorFactory.getInstance().generateSql(statement, new ExecutionOptions(sqlVisitors, new RuntimeEnvironment(this, null)))) {
                 writer.append(sql.toSql()).append(sql.getEndDelimiter()).append(StreamUtil.getLineSeparator()).append(StreamUtil.getLineSeparator());
             }
         }
@@ -1225,7 +1225,7 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     @Override
     public void executeRollbackStatements(final Change change, final List<SqlVisitor> sqlVisitors) throws LiquibaseException, RollbackImpossibleException {
-        SqlStatement[] statements = change.generateRollbackStatements(this);
+        SqlStatement[] statements = change.generateRollbackStatements(new ExecutionOptions(sqlVisitors, new RuntimeEnvironment(this, null)));
         List<SqlVisitor> rollbackVisitors = new ArrayList<SqlVisitor>();
         if (sqlVisitors != null) {
             for (SqlVisitor visitor : sqlVisitors) {
@@ -1239,9 +1239,9 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     @Override
     public void saveRollbackStatement(final Change change, final List<SqlVisitor> sqlVisitors, final Writer writer) throws IOException, RollbackImpossibleException, StatementNotSupportedOnDatabaseException, LiquibaseException {
-        SqlStatement[] statements = change.generateRollbackStatements(this);
+        SqlStatement[] statements = change.generateRollbackStatements(new ExecutionOptions(sqlVisitors, new RuntimeEnvironment(this, null)));
         for (SqlStatement statement : statements) {
-            for (Sql sql : SqlGeneratorFactory.getInstance().generateSql(statement, this)) {
+            for (Sql sql : SqlGeneratorFactory.getInstance().generateSql(statement, new ExecutionOptions(sqlVisitors, new RuntimeEnvironment(this, null)))) {
                 writer.append(sql.toSql()).append(sql.getEndDelimiter()).append("\n\n");
             }
         }

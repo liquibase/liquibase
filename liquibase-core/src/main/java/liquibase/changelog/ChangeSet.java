@@ -586,7 +586,7 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
                     if (((rollback instanceof DbmsTargetedChange)) && !DatabaseList.definitionMatches(((DbmsTargetedChange) rollback).getDbms(), database, true)) {
                         continue;
                     }
-                    SqlStatement[] statements = rollback.generateStatements(database);
+                    SqlStatement[] statements = rollback.generateStatements(new ExecutionOptions(new RuntimeEnvironment(database)));
                     if (statements == null) {
                         continue;
                     }
@@ -726,8 +726,9 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
             return true;
         }
 
+        ExecutionOptions options = new ExecutionOptions(new RuntimeEnvironment(database));
         for (Change change : getChanges()) {
-            if (!change.supportsRollback(database)) {
+            if (!change.supportsRollback(options)) {
                 return false;
             }
         }

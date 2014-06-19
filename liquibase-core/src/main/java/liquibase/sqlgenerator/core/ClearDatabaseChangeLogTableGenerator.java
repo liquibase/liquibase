@@ -2,9 +2,9 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
 import liquibase.exception.ValidationErrors;
+import liquibase.executor.ExecutionOptions;
 import liquibase.sql.Sql;
 import liquibase.sql.UnparsedSql;
-import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.ClearDatabaseChangeLogTableStatement;
 import liquibase.structure.core.Relation;
@@ -13,12 +13,14 @@ import liquibase.structure.core.Table;
 public class ClearDatabaseChangeLogTableGenerator extends AbstractSqlGenerator<ClearDatabaseChangeLogTableStatement> {
 
     @Override
-    public ValidationErrors validate(ClearDatabaseChangeLogTableStatement clearDatabaseChangeLogTableStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public ValidationErrors validate(ClearDatabaseChangeLogTableStatement clearDatabaseChangeLogTableStatement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
         return new ValidationErrors();
     }
 
     @Override
-    public Sql[] generateSql(ClearDatabaseChangeLogTableStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public Sql[] generateSql(ClearDatabaseChangeLogTableStatement statement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
+        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+
         String schemaName = statement.getSchemaName();
         if (schemaName == null) {
             schemaName = database.getLiquibaseSchemaName();
