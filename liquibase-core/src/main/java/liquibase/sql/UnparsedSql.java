@@ -13,7 +13,6 @@ import liquibase.executor.ExecutionOptions;
 import liquibase.executor.QueryResult;
 import liquibase.executor.UpdateResult;
 import liquibase.sql.visitor.SqlVisitor;
-import liquibase.structure.DatabaseObject;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
 
@@ -44,7 +43,7 @@ public class UnparsedSql implements Sql {
     }
 
     @Override
-    public String toString(ExecutionOptions options) {
+    public String describe() {
         StringBuilder out = new StringBuilder(toFinalSql(options));
 
         Database database = options.getRuntimeEnvironment().getTargetDatabase();

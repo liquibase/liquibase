@@ -203,8 +203,7 @@ public class SnapshotGeneratorFactory {
             ListIterator<Action> iterator = returnList.listIterator(i + 1);
             while (iterator.hasNext()) {
                 MetaDataQueryAction compareAction = (MetaDataQueryAction) iterator.next();
-                QueryAction mergedAction = ((MetaDataQueryAction) baseAction).merge(compareAction);
-                if (mergedAction != null) {
+                if (((MetaDataQueryAction) baseAction).merge(compareAction)) {
                     iterator.remove();
                 }
             }

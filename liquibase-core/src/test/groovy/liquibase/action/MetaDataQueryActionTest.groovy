@@ -9,7 +9,8 @@ class MetaDataQueryActionTest extends Specification {
     @Unroll
     def "merge that is valid"() {
         expect:
-        new MockMetaDataAction(action1).merge(new MockMetaDataAction(action2)).toString() == expected
+        assert new MockMetaDataAction(action1).merge(new MockMetaDataAction(action2))
+        action1.toString() == expected
 
         where:
         action1                                                                              | action2                                                                            | expected
@@ -26,6 +27,6 @@ class MetaDataQueryActionTest extends Specification {
 
     def "merge that is not valid"() {
         expect:
-        new MockMetaDataAction([tableName: "table_name"]).merge(new FetchTablesAction(null, null, "table_name")) == null
+        assert !new MockMetaDataAction([tableName: "table_name"]).merge(new FetchTablesAction(null, null, "table_name"))
     }
 }

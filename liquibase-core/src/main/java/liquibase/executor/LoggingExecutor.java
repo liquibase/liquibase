@@ -69,7 +69,7 @@ public class LoggingExecutor extends AbstractExecutor {
                     continue;
                 }
 
-                output.write(action.toString(options));
+                output.write(action.describe());
                 output.write(StreamUtil.getLineSeparator());
                 output.write(StreamUtil.getLineSeparator());
             }

@@ -16,12 +16,12 @@ public class MockMetaDataAction extends MetaDataQueryAction {
     }
 
     @Override
-    protected DatabaseObject createObject(Map<String, ?> row) {
+    protected DatabaseObject rawMetaDataToObject(Map<String, ?> row) {
         throw new RuntimeException("Not implemented");
     }
 
     @Override
-    protected QueryResult executeQuery(ExecutionOptions options) throws DatabaseException {
+    protected QueryResult getRawMetaData(ExecutionOptions options) throws DatabaseException {
         throw new RuntimeException("Not implemented");
     }
 }

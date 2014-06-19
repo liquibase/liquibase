@@ -27,12 +27,12 @@ public class FetchColumnsAction extends MetaDataQueryAction {
         this.setAttribute(COLUMN_NAME, columnName);
     }
 
-    protected DatabaseObject createObject(Map<String, ?> row) {
+    protected DatabaseObject rawMetaDataToObject(Map<String, ?> row) {
         return new Column(Table.class, (String) row.get("TABLE_CAT"), (String) row.get("TABLE_SCHEM"), (String) row.get("TABLE_NAME"), (String) row.get("COLUMN_NAME"));
     }
 
     @Override
-    protected QueryResult executeQuery(ExecutionOptions options) throws DatabaseException {
+    protected QueryResult getRawMetaData(ExecutionOptions options) throws DatabaseException {
         DatabaseMetaData metaData = ((JdbcConnection) options.getRuntimeEnvironment().getTargetDatabase().getConnection()).getMetaData();
 
         try {

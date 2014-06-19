@@ -5,10 +5,6 @@ import liquibase.executor.ExecuteResult;
 import liquibase.executor.ExecutionOptions;
 import liquibase.executor.QueryResult;
 import liquibase.executor.UpdateResult;
-import liquibase.structure.DatabaseObject;
-
-import java.util.Collection;
-import java.util.HashSet;
 
 public class SingleLineComment implements Sql {
 
@@ -51,7 +47,7 @@ public class SingleLineComment implements Sql {
     }
 
     @Override
-    public String toString(ExecutionOptions options) {
+    public String describe() {
         return toSql();
     }
 }
