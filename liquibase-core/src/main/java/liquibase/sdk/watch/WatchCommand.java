@@ -116,7 +116,7 @@ public class WatchCommand extends AbstractCommand {
         CompositeResourceAccessor resourceAccessor = new CompositeResourceAccessor(
                 new CommandLineResourceAccessor(new URLClassLoader(jarUrls.toArray(new URL[jarUrls.size()]), this.getClass().getClassLoader()))
         );
-        Database database = DatabaseFactory.getInstance().openDatabase(url, username, password, resourceAccessor);
+        Database database = DatabaseFactory.getInstance().openDatabase(url, username, password, null, resourceAccessor);
 
         ResourceHandler staticHandler = new ResourceHandler();
         staticHandler.setDirectoriesListed(false);
