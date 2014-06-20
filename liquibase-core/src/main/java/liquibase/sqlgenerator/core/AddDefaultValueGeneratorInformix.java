@@ -8,7 +8,6 @@ import liquibase.database.core.InformixDatabase;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.ValidationErrors;
 import liquibase.executor.ExecutionOptions;
-import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.AddDefaultValueStatement;
 
 public class AddDefaultValueGeneratorInformix extends AddDefaultValueGenerator {
@@ -24,8 +23,8 @@ public class AddDefaultValueGeneratorInformix extends AddDefaultValueGenerator {
 
 	@Override
 	public ValidationErrors validate(AddDefaultValueStatement addDefaultValueStatement, ExecutionOptions options,
-			SqlGeneratorChain sqlGeneratorChain) {
-		ValidationErrors validationErrors = super.validate(addDefaultValueStatement, options, sqlGeneratorChain);
+			ActionGeneratorChain chain) {
+		ValidationErrors validationErrors = super.validate(addDefaultValueStatement, options, chain);
 		if (addDefaultValueStatement.getColumnDataType() == null) {
 			validationErrors.checkRequiredField("columnDataType", addDefaultValueStatement.getColumnDataType());
 		}

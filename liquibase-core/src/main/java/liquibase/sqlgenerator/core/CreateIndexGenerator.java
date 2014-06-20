@@ -7,7 +7,6 @@ import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.exception.ValidationErrors;
 import liquibase.executor.ExecutionOptions;
-import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.CreateIndexStatement;
 import liquibase.structure.core.Index;
 import liquibase.util.StringUtils;
@@ -19,7 +18,7 @@ import java.util.List;
 public class CreateIndexGenerator extends AbstractSqlGenerator<CreateIndexStatement> {
 
     @Override
-    public ValidationErrors validate(CreateIndexStatement createIndexStatement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
+    public ValidationErrors validate(CreateIndexStatement createIndexStatement, ExecutionOptions options, ActionGeneratorChain chain) {
         Database database = options.getRuntimeEnvironment().getTargetDatabase();
 
         ValidationErrors validationErrors = new ValidationErrors();

@@ -5,13 +5,12 @@ import liquibase.action.UnparsedSql;
 import liquibase.actiongenerator.ActionGeneratorChain;
 import liquibase.exception.ValidationErrors;
 import liquibase.executor.ExecutionOptions;
-import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.RawSqlStatement;
 
 public class RawSqlGenerator extends AbstractSqlGenerator<RawSqlStatement> {
 
     @Override
-    public ValidationErrors validate(RawSqlStatement rawSqlStatement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
+    public ValidationErrors validate(RawSqlStatement rawSqlStatement, ExecutionOptions options, ActionGeneratorChain chain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("sql", rawSqlStatement.getSql());
         return validationErrors;

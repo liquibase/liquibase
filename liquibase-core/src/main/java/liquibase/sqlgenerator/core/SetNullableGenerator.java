@@ -10,7 +10,6 @@ import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.ValidationErrors;
 import liquibase.executor.ExecutionOptions;
-import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.ReorganizeTableStatement;
 import liquibase.statement.core.SetNullableStatement;
 
@@ -29,7 +28,7 @@ public class SetNullableGenerator extends AbstractSqlGenerator<SetNullableStatem
     }
 
     @Override
-    public ValidationErrors validate(SetNullableStatement setNullableStatement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
+    public ValidationErrors validate(SetNullableStatement setNullableStatement, ExecutionOptions options, ActionGeneratorChain chain) {
         ValidationErrors validationErrors = new ValidationErrors();
         Database database = options.getRuntimeEnvironment().getTargetDatabase();
 

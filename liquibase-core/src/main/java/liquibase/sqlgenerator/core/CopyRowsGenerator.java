@@ -7,7 +7,6 @@ import liquibase.change.ColumnConfig;
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.exception.ValidationErrors;
 import liquibase.executor.ExecutionOptions;
-import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.CopyRowsStatement;
 
 public class CopyRowsGenerator extends AbstractSqlGenerator<CopyRowsStatement> {
@@ -18,7 +17,7 @@ public class CopyRowsGenerator extends AbstractSqlGenerator<CopyRowsStatement> {
     }
 
     @Override
-    public ValidationErrors validate(CopyRowsStatement copyRowsStatement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
+    public ValidationErrors validate(CopyRowsStatement copyRowsStatement, ExecutionOptions options, ActionGeneratorChain chain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("targetTable", copyRowsStatement.getTargetTable());
         validationErrors.checkRequiredField("sourceTable", copyRowsStatement.getSourceTable());

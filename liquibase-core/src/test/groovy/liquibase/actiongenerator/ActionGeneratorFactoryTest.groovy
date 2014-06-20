@@ -1,7 +1,6 @@
 package liquibase.actiongenerator
 
 import liquibase.database.core.H2Database
-import liquibase.sqlgenerator.MockSqlGenerator
 import liquibase.sqlgenerator.SqlGenerator
 import liquibase.sqlgenerator.core.AddAutoIncrementGenerator
 import liquibase.sqlgenerator.core.AddAutoIncrementGeneratorDB2
@@ -31,7 +30,7 @@ public class ActionGeneratorFactoryTest extends Specification {
         ActionGeneratorFactory.getInstance().getGenerators().size() == 0
 
         when:
-        ActionGeneratorFactory.getInstance().register(new MockSqlGenerator(1, "A1"));
+        ActionGeneratorFactory.getInstance().register(new MockActionGenerator(1, "A1"));
         then:
         ActionGeneratorFactory.getInstance().getGenerators().size() == 1
     }

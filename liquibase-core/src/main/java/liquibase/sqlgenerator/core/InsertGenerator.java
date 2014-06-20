@@ -7,7 +7,6 @@ import liquibase.database.Database;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.ValidationErrors;
 import liquibase.executor.ExecutionOptions;
-import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.DatabaseFunction;
 import liquibase.statement.core.InsertStatement;
 
@@ -16,7 +15,7 @@ import java.util.Date;
 public class InsertGenerator extends AbstractSqlGenerator<InsertStatement> {
 
     @Override
-    public ValidationErrors validate(InsertStatement insertStatement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
+    public ValidationErrors validate(InsertStatement insertStatement, ExecutionOptions options, ActionGeneratorChain chain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("tableName", insertStatement.getTableName());
         validationErrors.checkRequiredField("columns", insertStatement.getColumnValues());

@@ -8,7 +8,6 @@ import liquibase.database.core.DerbyDatabase;
 import liquibase.database.core.PostgresDatabase;
 import liquibase.exception.ValidationErrors;
 import liquibase.executor.ExecutionOptions;
-import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.DropSequenceStatement;
 
 public class DropSequenceGenerator extends AbstractSqlGenerator<DropSequenceStatement> {
@@ -19,7 +18,7 @@ public class DropSequenceGenerator extends AbstractSqlGenerator<DropSequenceStat
     }
 
     @Override
-    public ValidationErrors validate(DropSequenceStatement dropSequenceStatement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
+    public ValidationErrors validate(DropSequenceStatement dropSequenceStatement, ExecutionOptions options, ActionGeneratorChain chain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("sequenceName", dropSequenceStatement.getSequenceName());
         return validationErrors;

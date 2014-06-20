@@ -7,14 +7,13 @@ import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.exception.ValidationErrors;
 import liquibase.executor.ExecutionOptions;
-import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.DeleteStatement;
 import liquibase.statement.core.RemoveChangeSetRanStatusStatement;
 
 public class RemoveChangeSetRanStatusGenerator extends AbstractSqlGenerator<RemoveChangeSetRanStatusStatement> {
 
     @Override
-    public ValidationErrors validate(RemoveChangeSetRanStatusStatement statement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
+    public ValidationErrors validate(RemoveChangeSetRanStatusStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
         ValidationErrors errors = new ValidationErrors();
         errors.checkRequiredField("changeSet", statement.getChangeSet());
         return errors;

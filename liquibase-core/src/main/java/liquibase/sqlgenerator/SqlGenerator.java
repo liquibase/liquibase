@@ -35,12 +35,4 @@ import liquibase.statement.SqlStatement;
  */
 public interface SqlGenerator<StatementType extends SqlStatement> extends ActionGenerator<StatementType> {
 
-    /**
-     * Validate the data contained in the SqlStatement.  If there are no errors, return an empty ValidationErrors object, not a null value.
-     * Liquibase will inspect the ValidationErrors result before attempting to call generateSql.
-     */
-    public ValidationErrors validate(StatementType statement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain);
-
-    public Warnings warn(StatementType statementType, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain);
-
 }

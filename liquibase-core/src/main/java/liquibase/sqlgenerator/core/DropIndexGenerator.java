@@ -7,7 +7,6 @@ import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.exception.ValidationErrors;
 import liquibase.executor.ExecutionOptions;
-import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.DropIndexStatement;
 import liquibase.structure.core.Index;
 import liquibase.util.StringUtils;
@@ -17,7 +16,7 @@ import java.util.List;
 public class DropIndexGenerator extends AbstractSqlGenerator<DropIndexStatement> {
 
     @Override
-    public ValidationErrors validate(DropIndexStatement statement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
+    public ValidationErrors validate(DropIndexStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
         Database database = options.getRuntimeEnvironment().getTargetDatabase();
 
         ValidationErrors validationErrors = new ValidationErrors();

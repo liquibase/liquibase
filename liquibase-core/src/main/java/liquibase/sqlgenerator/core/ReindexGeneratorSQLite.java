@@ -6,7 +6,6 @@ import liquibase.actiongenerator.ActionGeneratorChain;
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.exception.ValidationErrors;
 import liquibase.executor.ExecutionOptions;
-import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.ReindexStatement;
 
 public class ReindexGeneratorSQLite extends AbstractSqlGenerator<ReindexStatement> {
@@ -21,7 +20,7 @@ public class ReindexGeneratorSQLite extends AbstractSqlGenerator<ReindexStatemen
     }
 
     @Override
-    public ValidationErrors validate(ReindexStatement reindexStatement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
+    public ValidationErrors validate(ReindexStatement reindexStatement, ExecutionOptions options, ActionGeneratorChain chain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("tableName", reindexStatement.getTableName());
         return validationErrors;

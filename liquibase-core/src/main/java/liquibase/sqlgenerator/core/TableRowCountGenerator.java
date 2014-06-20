@@ -5,7 +5,6 @@ import liquibase.action.UnparsedSql;
 import liquibase.actiongenerator.ActionGeneratorChain;
 import liquibase.exception.ValidationErrors;
 import liquibase.executor.ExecutionOptions;
-import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.TableRowCountStatement;
 
 public class TableRowCountGenerator extends AbstractSqlGenerator<TableRowCountStatement> {
@@ -21,7 +20,7 @@ public class TableRowCountGenerator extends AbstractSqlGenerator<TableRowCountSt
     }
 
     @Override
-    public ValidationErrors validate(TableRowCountStatement dropColumnStatement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
+    public ValidationErrors validate(TableRowCountStatement dropColumnStatement, ExecutionOptions options, ActionGeneratorChain chain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("tableName", dropColumnStatement.getTableName());
         return validationErrors;

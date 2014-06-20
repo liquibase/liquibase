@@ -7,7 +7,6 @@ import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.exception.ValidationErrors;
 import liquibase.executor.ExecutionOptions;
-import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.CreateSequenceStatement;
 
 public class CreateSequenceGenerator extends AbstractSqlGenerator<CreateSequenceStatement> {
@@ -18,7 +17,7 @@ public class CreateSequenceGenerator extends AbstractSqlGenerator<CreateSequence
     }
 
     @Override
-    public ValidationErrors validate(CreateSequenceStatement statement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
+    public ValidationErrors validate(CreateSequenceStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
         ValidationErrors validationErrors = new ValidationErrors();
 
         Database database = options.getRuntimeEnvironment().getTargetDatabase();

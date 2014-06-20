@@ -8,7 +8,6 @@ import liquibase.database.core.DB2Database;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.ValidationErrors;
 import liquibase.executor.ExecutionOptions;
-import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.ReorganizeTableStatement;
 import liquibase.structure.core.Relation;
 import liquibase.structure.core.Table;
@@ -25,7 +24,7 @@ public class ReorganizeTableGeneratorDB2 extends AbstractSqlGenerator<Reorganize
     }
 
     @Override
-    public ValidationErrors validate(ReorganizeTableStatement reorganizeTableStatement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
+    public ValidationErrors validate(ReorganizeTableStatement reorganizeTableStatement, ExecutionOptions options, ActionGeneratorChain chain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("tableName", reorganizeTableStatement.getTableName());
         return validationErrors;

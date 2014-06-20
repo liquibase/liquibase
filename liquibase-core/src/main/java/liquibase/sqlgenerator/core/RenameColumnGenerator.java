@@ -8,7 +8,6 @@ import liquibase.database.core.*;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.ValidationErrors;
 import liquibase.executor.ExecutionOptions;
-import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.RenameColumnStatement;
 
 public class RenameColumnGenerator extends AbstractSqlGenerator<RenameColumnStatement> {
@@ -19,7 +18,7 @@ public class RenameColumnGenerator extends AbstractSqlGenerator<RenameColumnStat
     }
 
     @Override
-    public ValidationErrors validate(RenameColumnStatement renameColumnStatement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
+    public ValidationErrors validate(RenameColumnStatement renameColumnStatement, ExecutionOptions options, ActionGeneratorChain chain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("tableName", renameColumnStatement.getTableName());
         validationErrors.checkRequiredField("oldColumnName", renameColumnStatement.getOldColumnName());

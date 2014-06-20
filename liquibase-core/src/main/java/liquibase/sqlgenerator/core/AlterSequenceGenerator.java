@@ -10,7 +10,6 @@ import liquibase.database.core.H2Database;
 import liquibase.database.core.HsqlDatabase;
 import liquibase.exception.ValidationErrors;
 import liquibase.executor.ExecutionOptions;
-import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.AlterSequenceStatement;
 
 public class AlterSequenceGenerator extends AbstractSqlGenerator<AlterSequenceStatement> {
@@ -21,7 +20,7 @@ public class AlterSequenceGenerator extends AbstractSqlGenerator<AlterSequenceSt
     }
 
     @Override
-    public ValidationErrors validate(AlterSequenceStatement alterSequenceStatement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
+    public ValidationErrors validate(AlterSequenceStatement alterSequenceStatement, ExecutionOptions options, ActionGeneratorChain chain) {
         Database database = options.getRuntimeEnvironment().getTargetDatabase();
 
         ValidationErrors validationErrors = new ValidationErrors();

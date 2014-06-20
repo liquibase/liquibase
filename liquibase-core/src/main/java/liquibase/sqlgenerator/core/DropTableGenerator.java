@@ -8,13 +8,12 @@ import liquibase.database.core.OracleDatabase;
 import liquibase.exception.ValidationErrors;
 import liquibase.executor.ExecutionOptions;
 import liquibase.logging.LogFactory;
-import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.DropTableStatement;
 
 public class DropTableGenerator extends AbstractSqlGenerator<DropTableStatement> {
 
     @Override
-    public ValidationErrors validate(DropTableStatement dropTableStatement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
+    public ValidationErrors validate(DropTableStatement dropTableStatement, ExecutionOptions options, ActionGeneratorChain chain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("tableName", dropTableStatement.getTableName());
         return validationErrors;

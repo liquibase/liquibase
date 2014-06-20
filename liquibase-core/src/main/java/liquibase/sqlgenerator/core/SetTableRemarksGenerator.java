@@ -10,7 +10,6 @@ import liquibase.database.core.OracleDatabase;
 import liquibase.database.core.PostgresDatabase;
 import liquibase.exception.ValidationErrors;
 import liquibase.executor.ExecutionOptions;
-import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.SetTableRemarksStatement;
 
 public class SetTableRemarksGenerator extends AbstractSqlGenerator<SetTableRemarksStatement> {
@@ -24,7 +23,7 @@ public class SetTableRemarksGenerator extends AbstractSqlGenerator<SetTableRemar
 	}
 
 	@Override
-    public ValidationErrors validate(SetTableRemarksStatement setTableRemarksStatement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
+    public ValidationErrors validate(SetTableRemarksStatement setTableRemarksStatement, ExecutionOptions options, ActionGeneratorChain chain) {
 		ValidationErrors validationErrors = new ValidationErrors();
 		validationErrors.checkRequiredField("tableName", setTableRemarksStatement.getTableName());
 		validationErrors.checkRequiredField("remarks", setTableRemarksStatement.getRemarks());

@@ -7,7 +7,6 @@ import liquibase.database.Database;
 import liquibase.database.core.DB2Database;
 import liquibase.exception.ValidationErrors;
 import liquibase.executor.ExecutionOptions;
-import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.AddAutoIncrementStatement;
 
 public class AddAutoIncrementGeneratorDB2 extends AddAutoIncrementGenerator {
@@ -26,7 +25,7 @@ public class AddAutoIncrementGeneratorDB2 extends AddAutoIncrementGenerator {
     public ValidationErrors validate(
             AddAutoIncrementStatement statement,
             ExecutionOptions options,
-            SqlGeneratorChain sqlGeneratorChain) {
+            ActionGeneratorChain chain) {
         ValidationErrors validationErrors = new ValidationErrors();
 
         validationErrors.checkRequiredField("columnName", statement.getColumnName());

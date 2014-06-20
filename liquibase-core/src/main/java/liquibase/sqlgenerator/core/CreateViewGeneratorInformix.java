@@ -6,7 +6,6 @@ import liquibase.actiongenerator.ActionGeneratorChain;
 import liquibase.database.core.*;
 import liquibase.exception.ValidationErrors;
 import liquibase.executor.ExecutionOptions;
-import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.CreateViewStatement;
 
 public class CreateViewGeneratorInformix extends AbstractSqlGenerator<CreateViewStatement> {
@@ -22,7 +21,7 @@ public class CreateViewGeneratorInformix extends AbstractSqlGenerator<CreateView
     }
 
     @Override
-    public ValidationErrors validate(CreateViewStatement createViewStatement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
+    public ValidationErrors validate(CreateViewStatement createViewStatement, ExecutionOptions options, ActionGeneratorChain chain) {
         ValidationErrors validationErrors = new ValidationErrors();
 
         validationErrors.checkRequiredField("viewName", createViewStatement.getViewName());

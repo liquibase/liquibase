@@ -6,7 +6,6 @@ import liquibase.actiongenerator.ActionGeneratorChain;
 import liquibase.database.Database;
 import liquibase.exception.ValidationErrors;
 import liquibase.executor.ExecutionOptions;
-import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.ClearDatabaseChangeLogTableStatement;
 import liquibase.structure.core.Relation;
 import liquibase.structure.core.Table;
@@ -14,7 +13,7 @@ import liquibase.structure.core.Table;
 public class ClearDatabaseChangeLogTableGenerator extends AbstractSqlGenerator<ClearDatabaseChangeLogTableStatement> {
 
     @Override
-    public ValidationErrors validate(ClearDatabaseChangeLogTableStatement clearDatabaseChangeLogTableStatement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
+    public ValidationErrors validate(ClearDatabaseChangeLogTableStatement clearDatabaseChangeLogTableStatement, ExecutionOptions options, ActionGeneratorChain chain) {
         return new ValidationErrors();
     }
 

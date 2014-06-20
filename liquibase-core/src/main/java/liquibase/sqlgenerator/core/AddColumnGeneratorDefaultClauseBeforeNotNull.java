@@ -8,7 +8,6 @@ import liquibase.database.core.*;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.ValidationErrors;
 import liquibase.executor.ExecutionOptions;
-import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.AutoIncrementConstraint;
 import liquibase.statement.core.AddColumnStatement;
 
@@ -37,10 +36,10 @@ public class AddColumnGeneratorDefaultClauseBeforeNotNull extends AddColumnGener
     }
 
     @Override
-    public ValidationErrors validate(AddColumnStatement statement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
+    public ValidationErrors validate(AddColumnStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
         Database database = options.getRuntimeEnvironment().getTargetDatabase();
 
-        ValidationErrors validationErrors = super.validate(statement, options, sqlGeneratorChain);
+        ValidationErrors validationErrors = super.validate(statement, options, chain);
         if (database instanceof DerbyDatabase && statement.isAutoIncrement()) {
             validationErrors.addError("Cannot add an identity column to derby");
         }

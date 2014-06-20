@@ -8,7 +8,6 @@ import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.exception.ValidationErrors;
 import liquibase.executor.ExecutionOptions;
-import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.CreateViewStatement;
 
 import java.util.ArrayList;
@@ -17,11 +16,11 @@ import java.util.List;
 public class CreateViewGenerator extends AbstractSqlGenerator<CreateViewStatement> {
 
     @Override
-    public ValidationErrors validate(CreateViewStatement createViewStatement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
+    public ValidationErrors validate(CreateViewStatement createViewStatement, ExecutionOptions options, ActionGeneratorChain chain) {
 
         Database database = options.getRuntimeEnvironment().getTargetDatabase();
     	if (database instanceof InformixDatabase) {
-    		return new CreateViewGeneratorInformix().validate(createViewStatement, options, sqlGeneratorChain);
+    		return new CreateViewGeneratorInformix().validate(createViewStatement, options, chain);
     	}
     	
         ValidationErrors validationErrors = new ValidationErrors();

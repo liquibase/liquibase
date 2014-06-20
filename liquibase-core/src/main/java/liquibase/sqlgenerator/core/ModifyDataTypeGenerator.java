@@ -9,7 +9,6 @@ import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.ValidationErrors;
 import liquibase.exception.Warnings;
 import liquibase.executor.ExecutionOptions;
-import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.ModifyDataTypeStatement;
 
 public class ModifyDataTypeGenerator extends AbstractSqlGenerator<ModifyDataTypeStatement> {
@@ -25,10 +24,10 @@ public class ModifyDataTypeGenerator extends AbstractSqlGenerator<ModifyDataType
     }
 
     @Override
-    public Warnings warn(ModifyDataTypeStatement modifyDataTypeStatement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
+    public Warnings warn(ModifyDataTypeStatement modifyDataTypeStatement, ExecutionOptions options, ActionGeneratorChain chain) {
         Database database = options.getRuntimeEnvironment().getTargetDatabase();
 
-        Warnings warnings = super.warn(modifyDataTypeStatement, options, sqlGeneratorChain);
+        Warnings warnings = super.warn(modifyDataTypeStatement, options, chain);
 
         if (database instanceof MySQLDatabase && !modifyDataTypeStatement.getNewDataType().toLowerCase().contains("varchar")) {
             warnings.addWarning("modifyDataType will lose primary key/autoincrement/not null settings for mysql.  Use <sql> and re-specify all configuration if this is the case");
@@ -38,7 +37,7 @@ public class ModifyDataTypeGenerator extends AbstractSqlGenerator<ModifyDataType
     }
 
     @Override
-    public ValidationErrors validate(ModifyDataTypeStatement statement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
+    public ValidationErrors validate(ModifyDataTypeStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("tableName", statement.getTableName());
         validationErrors.checkRequiredField("columnName", statement.getColumnName());

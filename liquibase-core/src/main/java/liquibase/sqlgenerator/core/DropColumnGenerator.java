@@ -7,13 +7,12 @@ import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.exception.ValidationErrors;
 import liquibase.executor.ExecutionOptions;
-import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.DropColumnStatement;
 
 public class DropColumnGenerator extends AbstractSqlGenerator<DropColumnStatement> {
 
     @Override
-    public ValidationErrors validate(DropColumnStatement dropColumnStatement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
+    public ValidationErrors validate(DropColumnStatement dropColumnStatement, ExecutionOptions options, ActionGeneratorChain chain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("tableName", dropColumnStatement.getTableName());
         validationErrors.checkRequiredField("columnName", dropColumnStatement.getColumnName());

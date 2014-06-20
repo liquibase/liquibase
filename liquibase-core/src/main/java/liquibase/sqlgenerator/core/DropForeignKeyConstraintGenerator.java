@@ -9,7 +9,6 @@ import liquibase.database.core.SQLiteDatabase;
 import liquibase.database.core.SybaseASADatabase;
 import liquibase.exception.ValidationErrors;
 import liquibase.executor.ExecutionOptions;
-import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.DropForeignKeyConstraintStatement;
 
 public class DropForeignKeyConstraintGenerator extends AbstractSqlGenerator<DropForeignKeyConstraintStatement> {
@@ -20,7 +19,7 @@ public class DropForeignKeyConstraintGenerator extends AbstractSqlGenerator<Drop
     }
 
     @Override
-    public ValidationErrors validate(DropForeignKeyConstraintStatement dropForeignKeyConstraintStatement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
+    public ValidationErrors validate(DropForeignKeyConstraintStatement dropForeignKeyConstraintStatement, ExecutionOptions options, ActionGeneratorChain chain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("baseTableName", dropForeignKeyConstraintStatement.getBaseTableName());
         validationErrors.checkRequiredField("constraintName", dropForeignKeyConstraintStatement.getConstraintName());

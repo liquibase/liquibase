@@ -9,7 +9,6 @@ import liquibase.database.core.SQLiteDatabase;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.ValidationErrors;
 import liquibase.executor.ExecutionOptions;
-import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.AddAutoIncrementStatement;
 import liquibase.structure.core.Index;
@@ -39,7 +38,7 @@ public class AddAutoIncrementGeneratorSQLite extends AddAutoIncrementGenerator {
     public ValidationErrors validate(
             AddAutoIncrementStatement statement,
             ExecutionOptions options,
-            SqlGeneratorChain sqlGeneratorChain) {
+            ActionGeneratorChain chain) {
         ValidationErrors validationErrors = new ValidationErrors();
 
         validationErrors.checkRequiredField("columnName", statement.getColumnName());

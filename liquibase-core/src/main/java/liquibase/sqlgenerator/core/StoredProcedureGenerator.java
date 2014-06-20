@@ -6,13 +6,12 @@ import liquibase.actiongenerator.ActionGeneratorChain;
 import liquibase.database.core.OracleDatabase;
 import liquibase.exception.ValidationErrors;
 import liquibase.executor.ExecutionOptions;
-import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.StoredProcedureStatement;
 
 public class StoredProcedureGenerator extends AbstractSqlGenerator<StoredProcedureStatement> {
 
     @Override
-    public ValidationErrors validate(StoredProcedureStatement storedProcedureStatement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
+    public ValidationErrors validate(StoredProcedureStatement storedProcedureStatement, ExecutionOptions options, ActionGeneratorChain chain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("procedureName", storedProcedureStatement.getProcedureName());
         return validationErrors;

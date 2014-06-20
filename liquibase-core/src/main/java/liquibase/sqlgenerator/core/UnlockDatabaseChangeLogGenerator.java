@@ -6,14 +6,13 @@ import liquibase.actiongenerator.ActionGeneratorFactory;
 import liquibase.database.Database;
 import liquibase.exception.ValidationErrors;
 import liquibase.executor.ExecutionOptions;
-import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.UnlockDatabaseChangeLogStatement;
 import liquibase.statement.core.UpdateStatement;
 
 public class UnlockDatabaseChangeLogGenerator extends AbstractSqlGenerator<UnlockDatabaseChangeLogStatement> {
 
     @Override
-    public ValidationErrors validate(UnlockDatabaseChangeLogStatement statement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
+    public ValidationErrors validate(UnlockDatabaseChangeLogStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
         return new ValidationErrors();
     }
 

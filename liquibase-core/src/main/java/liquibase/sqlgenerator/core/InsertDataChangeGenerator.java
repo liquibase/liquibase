@@ -4,7 +4,6 @@ import liquibase.action.Action;
 import liquibase.actiongenerator.ActionGeneratorChain;
 import liquibase.exception.ValidationErrors;
 import liquibase.executor.ExecutionOptions;
-import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.InsertExecutablePreparedStatement;
 
 /**
@@ -12,7 +11,7 @@ import liquibase.statement.InsertExecutablePreparedStatement;
  */
 public class InsertDataChangeGenerator extends AbstractSqlGenerator<InsertExecutablePreparedStatement> {
     @Override
-    public ValidationErrors validate(InsertExecutablePreparedStatement statement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
+    public ValidationErrors validate(InsertExecutablePreparedStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
         return new ValidationErrors();
     }
 

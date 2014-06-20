@@ -10,7 +10,6 @@ import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
 import liquibase.executor.ExecutionOptions;
-import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.AutoIncrementConstraint;
 import liquibase.statement.ColumnConstraint;
 import liquibase.statement.ForeignKeyConstraint;
@@ -27,7 +26,7 @@ import java.util.regex.Pattern;
 public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement> {
 
     @Override
-    public ValidationErrors validate(AddColumnStatement statement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
+    public ValidationErrors validate(AddColumnStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
         Database database = options.getRuntimeEnvironment().getTargetDatabase();
 
         ValidationErrors validationErrors = new ValidationErrors();

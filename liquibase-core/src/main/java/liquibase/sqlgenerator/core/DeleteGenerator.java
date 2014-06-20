@@ -7,14 +7,13 @@ import liquibase.database.Database;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.ValidationErrors;
 import liquibase.executor.ExecutionOptions;
-import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.DeleteStatement;
 import liquibase.structure.core.Column;
 
 public class DeleteGenerator extends AbstractSqlGenerator<DeleteStatement> {
 
     @Override
-    public ValidationErrors validate(DeleteStatement deleteStatement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
+    public ValidationErrors validate(DeleteStatement deleteStatement, ExecutionOptions options, ActionGeneratorChain chain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("tableName", deleteStatement.getTableName());
         return validationErrors;

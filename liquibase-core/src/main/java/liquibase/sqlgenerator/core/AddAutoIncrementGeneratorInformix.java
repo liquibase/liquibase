@@ -8,7 +8,6 @@ import liquibase.database.core.InformixDatabase;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.ValidationErrors;
 import liquibase.executor.ExecutionOptions;
-import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.AddAutoIncrementStatement;
 
 public class AddAutoIncrementGeneratorInformix extends AddAutoIncrementGenerator {
@@ -26,9 +25,9 @@ public class AddAutoIncrementGeneratorInformix extends AddAutoIncrementGenerator
     public ValidationErrors validate(
     		AddAutoIncrementStatement addAutoIncrementStatement,
     		ExecutionOptions options,
-    		SqlGeneratorChain sqlGeneratorChain) {
+    		ActionGeneratorChain chain) {
         ValidationErrors validationErrors = super.validate(
-        	addAutoIncrementStatement, options, sqlGeneratorChain);
+        	addAutoIncrementStatement, options, chain);
 
         validationErrors.checkRequiredField(
         	"columnDataType", addAutoIncrementStatement.getColumnDataType());

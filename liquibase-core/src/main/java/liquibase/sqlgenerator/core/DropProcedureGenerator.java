@@ -5,13 +5,12 @@ import liquibase.action.UnparsedSql;
 import liquibase.actiongenerator.ActionGeneratorChain;
 import liquibase.exception.ValidationErrors;
 import liquibase.executor.ExecutionOptions;
-import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.DropProcedureStatement;
 import liquibase.structure.core.StoredProcedure;
 
 public class DropProcedureGenerator extends AbstractSqlGenerator<DropProcedureStatement> {
     @Override
-    public ValidationErrors validate(DropProcedureStatement statement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
+    public ValidationErrors validate(DropProcedureStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("procedureName", statement.getProcedureName());
         return validationErrors;

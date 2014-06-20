@@ -11,7 +11,6 @@ import liquibase.database.core.MSSQLDatabase;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.ValidationErrors;
 import liquibase.executor.ExecutionOptions;
-import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.AddAutoIncrementStatement;
 
 public class AddAutoIncrementGenerator extends AbstractSqlGenerator<AddAutoIncrementStatement> {
@@ -36,7 +35,7 @@ public class AddAutoIncrementGenerator extends AbstractSqlGenerator<AddAutoIncre
     public ValidationErrors validate(
     		AddAutoIncrementStatement statement,
     		ExecutionOptions options,
-    		SqlGeneratorChain sqlGeneratorChain) {
+    		ActionGeneratorChain chain) {
         ValidationErrors validationErrors = new ValidationErrors();
 
         validationErrors.checkRequiredField("columnName", statement.getColumnName());
