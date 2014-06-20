@@ -1,8 +1,8 @@
 package liquibase.change.custom;
 
 import liquibase.change.AbstractChange;
-import liquibase.change.DatabaseChange;
 import liquibase.change.ChangeMetaData;
+import liquibase.change.DatabaseChange;
 import liquibase.change.DatabaseChangeProperty;
 import liquibase.exception.*;
 import liquibase.executor.ExecutionOptions;

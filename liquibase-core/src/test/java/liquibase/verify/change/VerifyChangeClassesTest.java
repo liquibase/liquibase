@@ -1,6 +1,8 @@
 package liquibase.verify.change;
 
 import liquibase.RuntimeEnvironment;
+import liquibase.action.Action;
+import liquibase.actiongenerator.ActionGeneratorFactory;
 import liquibase.change.Change;
 import liquibase.change.ChangeFactory;
 import liquibase.change.ChangeMetaData;
@@ -11,8 +13,6 @@ import liquibase.exception.ValidationErrors;
 import liquibase.executor.ExecutionOptions;
 import liquibase.serializer.LiquibaseSerializable;
 import liquibase.serializer.core.string.StringChangeLogSerializer;
-import liquibase.action.Sql;
-import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.test.JUnitResourceAccessor;
 import liquibase.util.StringUtils;
@@ -73,12 +73,12 @@ public class VerifyChangeClassesTest extends AbstractVerifyTest {
 
                 SqlStatement[] sqlStatements = change.generateStatements(options);
                 for (SqlStatement statement : sqlStatements) {
-                    Sql[] sql = SqlGeneratorFactory.getInstance().generateSql(statement, options);
-                    if (sql == null) {
+                    Action[] actions = ActionGeneratorFactory.getInstance().generateActions(statement, options);
+                    if (actions == null) {
                         System.out.println("Null sql for " + statement + " on " + database.getShortName());
                     } else {
-                        for (Sql line : sql) {
-                            String sqlLine = line.toSql();
+                        for (Action line : actions) {
+                            String sqlLine = line.describe();
                             assertFalse("Change "+changeMetaData.getName()+" contains 'null' for "+database.getShortName()+": "+sqlLine, sqlLine.contains(" null "));
 
                             state.addValue(sqlLine + ";");
@@ -209,7 +209,7 @@ public class VerifyChangeClassesTest extends AbstractVerifyTest {
 //
 //                    SqlStatement[] sqlStatements = change.generateStatements(database);
 //                    for (SqlStatement statement : sqlStatements) {
-//                        Sql[] sql = SqlGeneratorFactory.getInstance().generateSql(statement, database);
+//                        Action[] sql = SqlGeneratorFactory.getInstance().generateSql(statement, database);
 //                        if (sql == null) {
 //                            System.out.println("Null sql for "+statement+" on "+database.getShortName());
 //                        } else {

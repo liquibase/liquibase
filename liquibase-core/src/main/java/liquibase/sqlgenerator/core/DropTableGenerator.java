@@ -1,12 +1,13 @@
 package liquibase.sqlgenerator.core;
 
+import liquibase.action.Action;
+import liquibase.action.UnparsedSql;
+import liquibase.actiongenerator.ActionGeneratorChain;
 import liquibase.database.Database;
-import liquibase.database.core.*;
+import liquibase.database.core.OracleDatabase;
 import liquibase.exception.ValidationErrors;
 import liquibase.executor.ExecutionOptions;
 import liquibase.logging.LogFactory;
-import liquibase.action.Sql;
-import liquibase.action.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.DropTableStatement;
 
@@ -20,7 +21,7 @@ public class DropTableGenerator extends AbstractSqlGenerator<DropTableStatement>
     }
 
     @Override
-    public Sql[] generateSql(DropTableStatement statement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
+    public Action[] generateActions(DropTableStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
         Database database = options.getRuntimeEnvironment().getTargetDatabase();
 
         StringBuffer buffer = new StringBuffer();
@@ -35,7 +36,7 @@ public class DropTableGenerator extends AbstractSqlGenerator<DropTableStatement>
             }
         }
 
-        return new Sql[]{
+        return new Action[]{
                 new UnparsedSql(buffer.toString())
         };
     }

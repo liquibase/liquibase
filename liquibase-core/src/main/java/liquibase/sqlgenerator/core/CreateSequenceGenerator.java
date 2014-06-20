@@ -1,11 +1,12 @@
 package liquibase.sqlgenerator.core;
 
+import liquibase.action.Action;
+import liquibase.action.UnparsedSql;
+import liquibase.actiongenerator.ActionGeneratorChain;
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.exception.ValidationErrors;
 import liquibase.executor.ExecutionOptions;
-import liquibase.action.Sql;
-import liquibase.action.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.CreateSequenceStatement;
 
@@ -36,7 +37,7 @@ public class CreateSequenceGenerator extends AbstractSqlGenerator<CreateSequence
     }
 
     @Override
-    public Sql[] generateSql(CreateSequenceStatement statement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
+    public Action[] generateActions(CreateSequenceStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
         Database database = options.getRuntimeEnvironment().getTargetDatabase();
 
         StringBuffer buffer = new StringBuffer();
@@ -77,6 +78,6 @@ public class CreateSequenceGenerator extends AbstractSqlGenerator<CreateSequence
             }
         }
 
-        return new Sql[]{new UnparsedSql(buffer.toString())};
+        return new Action[]{new UnparsedSql(buffer.toString())};
     }
 }

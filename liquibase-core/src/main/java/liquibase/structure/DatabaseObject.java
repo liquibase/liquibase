@@ -4,8 +4,6 @@ import liquibase.ExtensibleObject;
 import liquibase.serializer.LiquibaseSerializable;
 import liquibase.structure.core.Schema;
 
-import java.util.Set;
-
 public interface DatabaseObject extends Comparable, LiquibaseSerializable, ExtensibleObject {
 
     public String getSnapshotId();

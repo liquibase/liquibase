@@ -1,6 +1,8 @@
 package liquibase;
 
-import java.util.*;
+import java.util.Set;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 public abstract class AbstractExtensibleObject implements ExtensibleObject {
 

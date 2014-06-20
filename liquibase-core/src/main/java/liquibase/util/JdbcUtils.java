@@ -2,12 +2,9 @@ package liquibase.util;
 
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
-import liquibase.executor.QueryResult;
-import liquibase.logging.LogFactory;
 import liquibase.structure.core.Column;
 
 import java.sql.*;
-import java.sql.Date;
 import java.util.*;
 
 public abstract class JdbcUtils {

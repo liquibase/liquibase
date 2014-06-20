@@ -1,9 +1,10 @@
 package liquibase.sqlgenerator.core;
 
+import liquibase.action.Action;
+import liquibase.action.UnparsedSql;
+import liquibase.actiongenerator.ActionGeneratorChain;
 import liquibase.exception.ValidationErrors;
 import liquibase.executor.ExecutionOptions;
-import liquibase.action.Sql;
-import liquibase.action.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.CreateProcedureStatement;
 
@@ -16,8 +17,8 @@ public class CreateProcedureGenerator extends AbstractSqlGenerator<CreateProcedu
     }
 
     @Override
-    public Sql[] generateSql(CreateProcedureStatement statement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
-        return new Sql[] {
+    public Action[] generateActions(CreateProcedureStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
+        return new Action[] {
                 new UnparsedSql(statement.getProcedureText(), statement.getEndDelimiter()
 //todo: procedureName is not yet set or required                        new StoredProcedure().setName(statement.getProcedureName()).setSchema(new Schema(statement.getCatalogName(), statement.getSchemaName()))
                 )};

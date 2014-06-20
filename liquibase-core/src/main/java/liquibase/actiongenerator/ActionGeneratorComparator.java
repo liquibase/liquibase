@@ -1,7 +1,5 @@
 package liquibase.actiongenerator;
 
-import liquibase.sqlgenerator.SqlGenerator;
-
 import java.util.Comparator;
 
 public class ActionGeneratorComparator implements Comparator<ActionGenerator> {

@@ -1,11 +1,12 @@
 package liquibase.sqlgenerator.core;
 
+import liquibase.action.Action;
+import liquibase.action.UnparsedSql;
+import liquibase.actiongenerator.ActionGeneratorChain;
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.exception.ValidationErrors;
 import liquibase.executor.ExecutionOptions;
-import liquibase.action.Sql;
-import liquibase.action.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.AddPrimaryKeyStatement;
 import liquibase.util.StringUtils;
@@ -28,7 +29,7 @@ public class AddPrimaryKeyGenerator extends AbstractSqlGenerator<AddPrimaryKeySt
     }
 
     @Override
-    public Sql[] generateSql(AddPrimaryKeyStatement statement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
+    public Action[] generateActions(AddPrimaryKeyStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
         Database database = options.getRuntimeEnvironment().getTargetDatabase();
 
         String sql;
@@ -48,7 +49,7 @@ public class AddPrimaryKeyGenerator extends AbstractSqlGenerator<AddPrimaryKeySt
             }
         }
 
-        return new Sql[] {
+        return new Action[] {
                 new UnparsedSql(sql)
         };
     }

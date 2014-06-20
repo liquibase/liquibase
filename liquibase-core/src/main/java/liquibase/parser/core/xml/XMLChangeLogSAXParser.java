@@ -1,29 +1,19 @@
 package liquibase.parser.core.xml;
 
-import java.io.IOException;
-import java.io.InputStream;
-
-import javax.xml.parsers.SAXParser;
-import javax.xml.parsers.SAXParserFactory;
-import javax.xml.transform.Source;
-import javax.xml.validation.SchemaFactory;
-
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.exception.ChangeLogParseException;
 import liquibase.logging.LogFactory;
 import liquibase.parser.core.ParsedNode;
-import liquibase.resource.UtfBomStripperInputStream;
 import liquibase.resource.ResourceAccessor;
+import liquibase.resource.UtfBomStripperInputStream;
 import liquibase.util.StreamUtil;
 import liquibase.util.file.FilenameUtils;
+import org.xml.sax.*;
 
-import org.xml.sax.ErrorHandler;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
-import org.xml.sax.SAXNotRecognizedException;
-import org.xml.sax.SAXNotSupportedException;
-import org.xml.sax.SAXParseException;
-import org.xml.sax.XMLReader;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
+import java.io.IOException;
+import java.io.InputStream;
 
 public class XMLChangeLogSAXParser extends AbstractChangeLogParser {
 

@@ -2,6 +2,7 @@ package liquibase.changelog;
 
 import liquibase.Contexts;
 import liquibase.RuntimeEnvironment;
+import liquibase.actiongenerator.ActionGeneratorFactory;
 import liquibase.change.CheckSum;
 import liquibase.database.Database;
 import liquibase.database.core.SQLiteDatabase;
@@ -16,7 +17,6 @@ import liquibase.logging.LogFactory;
 import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.SnapshotControl;
 import liquibase.snapshot.SnapshotGeneratorFactory;
-import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.*;
 import liquibase.structure.core.Column;
@@ -170,7 +170,7 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
         }
 
         for (SqlStatement sql : statementsToExecute) {
-            if (SqlGeneratorFactory.getInstance().supports(sql, new ExecutionOptions(new RuntimeEnvironment(database, null)))) {
+            if (ActionGeneratorFactory.getInstance().supports(sql, new ExecutionOptions(new RuntimeEnvironment(database, null)))) {
                 executor.execute(sql);
                 getDatabase().commit();
             } else {

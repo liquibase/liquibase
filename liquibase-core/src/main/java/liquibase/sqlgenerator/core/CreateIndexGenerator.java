@@ -1,14 +1,15 @@
 package liquibase.sqlgenerator.core;
 
+import liquibase.action.Action;
+import liquibase.action.UnparsedSql;
+import liquibase.actiongenerator.ActionGeneratorChain;
 import liquibase.database.Database;
 import liquibase.database.core.*;
-import liquibase.executor.ExecutionOptions;
-import liquibase.structure.core.Index;
 import liquibase.exception.ValidationErrors;
-import liquibase.action.Sql;
-import liquibase.action.UnparsedSql;
+import liquibase.executor.ExecutionOptions;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.CreateIndexStatement;
+import liquibase.structure.core.Index;
 import liquibase.util.StringUtils;
 
 import java.util.Arrays;
@@ -31,7 +32,7 @@ public class CreateIndexGenerator extends AbstractSqlGenerator<CreateIndexStatem
     }
 
     @Override
-    public Sql[] generateSql(CreateIndexStatement statement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
+    public Action[] generateActions(CreateIndexStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
 
         Database database = options.getRuntimeEnvironment().getTargetDatabase();
 
@@ -40,7 +41,7 @@ public class CreateIndexGenerator extends AbstractSqlGenerator<CreateIndexStatem
 		    // It means that all indexes associated with foreignKey should be created manualy
 		    List<String> associatedWith = StringUtils.splitAndTrim(statement.getAssociatedWith(), ",");
 		    if (associatedWith != null && (associatedWith.contains(Index.MARK_PRIMARY_KEY) || associatedWith.contains(Index.MARK_UNIQUE_CONSTRAINT))) {
-			    return new Sql[0];
+			    return new Action[0];
 		    }
 	    } else {
 		    // Default filter of index creation:
@@ -49,7 +50,7 @@ public class CreateIndexGenerator extends AbstractSqlGenerator<CreateIndexStatem
 		    if (associatedWith != null && (associatedWith.contains(Index.MARK_PRIMARY_KEY) ||
 		        associatedWith.contains(Index.MARK_UNIQUE_CONSTRAINT) ||
 				associatedWith.contains(Index.MARK_FOREIGN_KEY))) {
-			    return new Sql[0];
+			    return new Action[0];
 		    }
 	    }
 
@@ -87,6 +88,6 @@ public class CreateIndexGenerator extends AbstractSqlGenerator<CreateIndexStatem
 		    }
 	    }
 
-	    return new Sql[]{new UnparsedSql(buffer.toString())};
+	    return new Action[]{new UnparsedSql(buffer.toString())};
     }
 }

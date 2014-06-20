@@ -1,13 +1,14 @@
 package liquibase.sqlgenerator.core;
 
+import liquibase.action.Action;
+import liquibase.actiongenerator.ActionGeneratorChain;
+import liquibase.actiongenerator.ActionGeneratorFactory;
 import liquibase.database.Database;
 import liquibase.database.core.SybaseDatabase;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.ValidationErrors;
 import liquibase.executor.ExecutionOptions;
-import liquibase.action.Sql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
-import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.NotNullConstraint;
 import liquibase.statement.core.CreateDatabaseChangeLogTableStatement;
 import liquibase.statement.core.CreateTableStatement;
@@ -25,7 +26,7 @@ public class CreateDatabaseChangeLogTableGenerator extends AbstractSqlGenerator<
     }
 
     @Override
-    public Sql[] generateSql(CreateDatabaseChangeLogTableStatement statement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
+    public Action[] generateActions(CreateDatabaseChangeLogTableStatement statement, ExecutionOptions options, ActionGeneratorChain actionGeneratorChain) {
 
         Database database = options.getRuntimeEnvironment().getTargetDatabase();
 
@@ -43,7 +44,7 @@ public class CreateDatabaseChangeLogTableGenerator extends AbstractSqlGenerator<
                 .addColumn("TAG", DataTypeFactory.getInstance().fromDescription("VARCHAR(255)", database))
                 .addColumn("LIQUIBASE", DataTypeFactory.getInstance().fromDescription("VARCHAR(20)", database));
 
-        return SqlGeneratorFactory.getInstance().generateSql(createTableStatement, options);
+        return ActionGeneratorFactory.getInstance().generateActions(createTableStatement, options);
     }
 
     protected String getIdColumnSize() {

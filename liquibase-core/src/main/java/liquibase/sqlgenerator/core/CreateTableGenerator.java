@@ -1,13 +1,14 @@
 package liquibase.sqlgenerator.core;
 
+import liquibase.action.Action;
+import liquibase.action.UnparsedSql;
+import liquibase.actiongenerator.ActionGeneratorChain;
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.exception.ValidationErrors;
 import liquibase.executor.ExecutionOptions;
 import liquibase.logging.LogFactory;
-import liquibase.action.Sql;
-import liquibase.action.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.AutoIncrementConstraint;
 import liquibase.statement.ForeignKeyConstraint;
@@ -33,15 +34,15 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
     }
 
     @Override
-    public Sql[] generateSql(CreateTableStatement statement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
+    public Action[] generateActions(CreateTableStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
         Database database = options.getRuntimeEnvironment().getTargetDatabase();
 
         if (database instanceof InformixDatabase) {
     		AbstractSqlGenerator<CreateTableStatement> gen = new CreateTableGeneratorInformix();
-    		return gen.generateSql(statement, options, sqlGeneratorChain);
+    		return gen.generateActions(statement, options, chain);
     	}
 
-        List<Sql> additionalSql = new ArrayList<Sql>();
+        List<Action> additionalSql = new ArrayList<Action>();
     	
         StringBuffer buffer = new StringBuffer();
         buffer.append("CREATE TABLE ").append(database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName())).append(" ");
@@ -287,7 +288,7 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
             sql += " COMMENT='"+ database.escapeStringForDatabase(statement.getRemarks())+"' ";
         }
         additionalSql.add(0, new UnparsedSql(sql));
-        return additionalSql.toArray(new Sql[additionalSql.size()]);
+        return additionalSql.toArray(new Action[additionalSql.size()]);
     }
 
     private boolean constraintNameAfterUnique(Database database) {

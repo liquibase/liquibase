@@ -1,13 +1,14 @@
 package liquibase.sqlgenerator.core;
 
+import liquibase.action.Action;
+import liquibase.action.UnparsedSql;
+import liquibase.actiongenerator.ActionGeneratorChain;
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
 import liquibase.executor.ExecutionOptions;
-import liquibase.action.Sql;
-import liquibase.action.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.DropDefaultValueStatement;
 
@@ -33,7 +34,7 @@ public class DropDefaultValueGenerator extends AbstractSqlGenerator<DropDefaultV
     }
 
     @Override
-    public Sql[] generateSql(DropDefaultValueStatement statement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
+    public Action[] generateActions(DropDefaultValueStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
         Database database = options.getRuntimeEnvironment().getTargetDatabase();
         String sql;
         String escapedTableName = database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName());
@@ -75,7 +76,7 @@ public class DropDefaultValueGenerator extends AbstractSqlGenerator<DropDefaultV
             sql = "ALTER TABLE " + escapedTableName + " ALTER COLUMN  " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " SET DEFAULT NULL";
          }
 
-        return new Sql[] {
+        return new Action[] {
                 new UnparsedSql(sql)
         };
     }

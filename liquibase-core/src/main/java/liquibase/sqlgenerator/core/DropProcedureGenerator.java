@@ -1,9 +1,10 @@
 package liquibase.sqlgenerator.core;
 
+import liquibase.action.Action;
+import liquibase.action.UnparsedSql;
+import liquibase.actiongenerator.ActionGeneratorChain;
 import liquibase.exception.ValidationErrors;
 import liquibase.executor.ExecutionOptions;
-import liquibase.action.Sql;
-import liquibase.action.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.DropProcedureStatement;
 import liquibase.structure.core.StoredProcedure;
@@ -17,8 +18,8 @@ public class DropProcedureGenerator extends AbstractSqlGenerator<DropProcedureSt
     }
 
     @Override
-    public Sql[] generateSql(DropProcedureStatement statement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
-        return new Sql[] {
+    public Action[] generateActions(DropProcedureStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
+        return new Action[] {
                 new UnparsedSql("DROP PROCEDURE "+ options.getRuntimeEnvironment().getTargetDatabase().escapeObjectName(statement.getCatalogName(), statement.getSchemaName(), statement.getProcedureName(), StoredProcedure.class))
         };
     }

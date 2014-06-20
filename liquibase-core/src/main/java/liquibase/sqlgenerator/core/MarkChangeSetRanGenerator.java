@@ -1,7 +1,8 @@
 package liquibase.sqlgenerator.core;
 
-import java.util.List;
-
+import liquibase.action.Action;
+import liquibase.actiongenerator.ActionGeneratorChain;
+import liquibase.actiongenerator.ActionGeneratorFactory;
 import liquibase.change.Change;
 import liquibase.change.core.TagDatabaseChange;
 import liquibase.changelog.ChangeLogHistoryServiceFactory;
@@ -11,9 +12,7 @@ import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
 import liquibase.executor.ExecutionOptions;
-import liquibase.action.Sql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
-import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.DatabaseFunction;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.InsertStatement;
@@ -21,6 +20,8 @@ import liquibase.statement.core.MarkChangeSetRanStatement;
 import liquibase.statement.core.UpdateStatement;
 import liquibase.util.LiquibaseUtil;
 import liquibase.util.StringUtils;
+
+import java.util.List;
 
 public class MarkChangeSetRanGenerator extends AbstractSqlGenerator<MarkChangeSetRanStatement> {
 
@@ -33,7 +34,7 @@ public class MarkChangeSetRanGenerator extends AbstractSqlGenerator<MarkChangeSe
     }
 
     @Override
-    public Sql[] generateSql(MarkChangeSetRanStatement statement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
+    public Action[] generateActions(MarkChangeSetRanStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
         Database database = options.getRuntimeEnvironment().getTargetDatabase();
         String dateValue = database.getCurrentDateTimeFunction();
 
@@ -42,7 +43,7 @@ public class MarkChangeSetRanGenerator extends AbstractSqlGenerator<MarkChangeSe
         SqlStatement runStatement;
         try {
             if (statement.getExecType().equals(ChangeSet.ExecType.FAILED) || statement.getExecType().equals(ChangeSet.ExecType.SKIPPED)) {
-                return new Sql[0]; //don't mark
+                return new Action[0]; //don't mark
             } else  if (statement.getExecType().ranBefore) {
                 runStatement = new UpdateStatement(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName())
                         .addNewColumnValue("DATEEXECUTED", new DatabaseFunction(dateValue))
@@ -80,7 +81,7 @@ public class MarkChangeSetRanGenerator extends AbstractSqlGenerator<MarkChangeSe
             throw new UnexpectedLiquibaseException(e);
         }
 
-        return SqlGeneratorFactory.getInstance().generateSql(runStatement, options);
+        return ActionGeneratorFactory.getInstance().generateActions(runStatement, options);
     }
 
     private String limitSize(String string) {

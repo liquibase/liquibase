@@ -1,15 +1,16 @@
 package liquibase.sqlgenerator.core;
 
+import liquibase.action.Action;
+import liquibase.action.UnparsedSql;
+import liquibase.actiongenerator.ActionGeneratorChain;
 import liquibase.database.Database;
 import liquibase.database.core.DerbyDatabase;
 import liquibase.database.core.H2Database;
 import liquibase.database.core.HsqlDatabase;
 import liquibase.database.core.MSSQLDatabase;
-import liquibase.executor.ExecutionOptions;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.ValidationErrors;
-import liquibase.action.Sql;
-import liquibase.action.UnparsedSql;
+import liquibase.executor.ExecutionOptions;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.AddAutoIncrementStatement;
 
@@ -47,10 +48,7 @@ public class AddAutoIncrementGenerator extends AbstractSqlGenerator<AddAutoIncre
     }
 
     @Override
-    public Sql[] generateSql(
-    		AddAutoIncrementStatement statement,
-    		ExecutionOptions options,
-    		SqlGeneratorChain sqlGeneratorChain) {
+    public Action[] generateActions(AddAutoIncrementStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
         Database database = options.getRuntimeEnvironment().getTargetDatabase();
 
         String sql = "ALTER TABLE "
@@ -62,7 +60,7 @@ public class AddAutoIncrementGenerator extends AbstractSqlGenerator<AddAutoIncre
             + " " 
             + database.getAutoIncrementClause(statement.getStartWith(), statement.getIncrementBy());
 
-        return new Sql[]{
+        return new Action[]{
             new UnparsedSql(sql)
         };
     }

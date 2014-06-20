@@ -1,15 +1,16 @@
 package liquibase.sqlgenerator.core;
 
+import liquibase.action.Action;
+import liquibase.action.UnparsedSql;
+import liquibase.actiongenerator.ActionGeneratorChain;
+import liquibase.database.Database;
+import liquibase.database.core.*;
 import liquibase.datatype.DataTypeFactory;
+import liquibase.exception.ValidationErrors;
 import liquibase.exception.Warnings;
 import liquibase.executor.ExecutionOptions;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.ModifyDataTypeStatement;
-import liquibase.database.Database;
-import liquibase.database.core.*;
-import liquibase.exception.ValidationErrors;
-import liquibase.action.Sql;
-import liquibase.action.UnparsedSql;
 
 public class ModifyDataTypeGenerator extends AbstractSqlGenerator<ModifyDataTypeStatement> {
 
@@ -47,7 +48,7 @@ public class ModifyDataTypeGenerator extends AbstractSqlGenerator<ModifyDataType
     }
 
     @Override
-    public Sql[] generateSql(ModifyDataTypeStatement statement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
+    public Action[] generateActions(ModifyDataTypeStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
         Database database = options.getRuntimeEnvironment().getTargetDatabase();
 
         String alterTable = "ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName());
@@ -63,7 +64,7 @@ public class ModifyDataTypeGenerator extends AbstractSqlGenerator<ModifyDataType
         // add column type
         alterTable += DataTypeFactory.getInstance().fromDescription(statement.getNewDataType(), database).toDatabaseDataType(database);
 
-        return new Sql[]{new UnparsedSql(alterTable)};
+        return new Action[]{new UnparsedSql(alterTable)};
     }
 
     /**

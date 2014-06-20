@@ -1,11 +1,10 @@
 package liquibase.sqlgenerator.core;
 
+import liquibase.actiongenerator.ActionGeneratorChain;
 import liquibase.database.Database;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.exception.LiquibaseException;
 import liquibase.executor.ExecutionOptions;
-import liquibase.action.Sql;
-import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.InsertOrUpdateStatement;
 
 public class InsertOrUpdateGeneratorMSSQL extends InsertOrUpdateGenerator {
@@ -33,12 +32,12 @@ public class InsertOrUpdateGeneratorMSSQL extends InsertOrUpdateGenerator {
     }
 
     @Override
-    protected String getInsertStatement(InsertOrUpdateStatement insertOrUpdateStatement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
+    protected String getInsertStatement(InsertOrUpdateStatement insertOrUpdateStatement, ExecutionOptions options, ActionGeneratorChain chain) {
         Database database = options.getRuntimeEnvironment().getTargetDatabase();
 
         StringBuffer insertBlock = new StringBuffer();
         insertBlock.append("BEGIN\n");
-        insertBlock.append(super.getInsertStatement(insertOrUpdateStatement, options, sqlGeneratorChain));
+        insertBlock.append(super.getInsertStatement(insertOrUpdateStatement, options, chain));
         insertBlock.append("END\n");
 
         return insertBlock.toString(); 
@@ -50,16 +49,11 @@ public class InsertOrUpdateGeneratorMSSQL extends InsertOrUpdateGenerator {
     }
 
     @Override
-    protected String getUpdateStatement(InsertOrUpdateStatement insertOrUpdateStatement, ExecutionOptions options, String whereClause, SqlGeneratorChain sqlGeneratorChain) throws LiquibaseException {
+    protected String getUpdateStatement(InsertOrUpdateStatement insertOrUpdateStatement, ExecutionOptions options, String whereClause, ActionGeneratorChain chain) throws LiquibaseException {
         StringBuffer updateBlock = new StringBuffer();
         updateBlock.append("BEGIN\n");
-        updateBlock.append(super.getUpdateStatement(insertOrUpdateStatement, options, whereClause, sqlGeneratorChain));
+        updateBlock.append(super.getUpdateStatement(insertOrUpdateStatement, options, whereClause, chain));
         updateBlock.append("END\n");
         return updateBlock.toString();
-    }
-
-    @Override
-    public Sql[] generateSql(InsertOrUpdateStatement insertOrUpdateStatement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
-        return super.generateSql(insertOrUpdateStatement, options, sqlGeneratorChain);    //To change body of overridden methods use File | Settings | File Templates.
     }
 }

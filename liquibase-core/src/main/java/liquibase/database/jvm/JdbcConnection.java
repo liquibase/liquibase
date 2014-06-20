@@ -2,12 +2,10 @@ package liquibase.database.jvm;
 
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
-import liquibase.database.OfflineConnection;
 import liquibase.database.core.OracleDatabase;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.ExecuteResult;
-import liquibase.executor.ExecutionOptions;
 import liquibase.executor.QueryResult;
 import liquibase.executor.UpdateResult;
 import liquibase.logging.LogFactory;

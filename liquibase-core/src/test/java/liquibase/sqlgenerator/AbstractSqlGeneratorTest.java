@@ -1,6 +1,7 @@
 package liquibase.sqlgenerator;
 
 import liquibase.RuntimeEnvironment;
+import liquibase.actiongenerator.ActionGeneratorChain;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.ExecutionOptions;
@@ -8,10 +9,11 @@ import liquibase.executor.ExecutorService;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.CreateTableStatement;
 import liquibase.test.TestContext;
-import static org.junit.Assert.*;
 import org.junit.Test;
 
 import java.sql.SQLException;
+
+import static org.junit.Assert.*;
 
 public abstract class AbstractSqlGeneratorTest<T extends SqlStatement> {
 
@@ -51,9 +53,9 @@ public abstract class AbstractSqlGeneratorTest<T extends SqlStatement> {
 
             if (shouldBeImplementation(database)) {
             	if (waitForException(database)) {
-            		assertTrue("The validation should be failed for " + database, generatorUnderTest.validate(createSampleSqlStatement(), options, new MockSqlGeneratorChain()).hasErrors());
+            		assertTrue("The validation should be failed for " + database, generatorUnderTest.validate(createSampleSqlStatement(), options, new ActionGeneratorChain(null)).hasErrors());
             	} else {
-            		assertFalse("isValid failed against " + database, generatorUnderTest.validate(createSampleSqlStatement(), options, new MockSqlGeneratorChain()).hasErrors());
+            		assertFalse("isValid failed against " + database, generatorUnderTest.validate(createSampleSqlStatement(), options, new ActionGeneratorChain(null)).hasErrors());
             	}
             	
         	} 

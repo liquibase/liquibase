@@ -6,7 +6,6 @@ import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.filter.ChangeSetFilterResult;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
-import liquibase.executor.ExecutionOptions;
 import org.junit.Before;
 import org.junit.Test;
 

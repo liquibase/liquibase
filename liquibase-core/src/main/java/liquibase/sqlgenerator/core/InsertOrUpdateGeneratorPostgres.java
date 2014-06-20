@@ -1,13 +1,13 @@
 package liquibase.sqlgenerator.core;
 
+import liquibase.action.Action;
+import liquibase.action.UnparsedSql;
+import liquibase.actiongenerator.ActionGeneratorChain;
 import liquibase.database.Database;
 import liquibase.database.core.PostgresDatabase;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
 import liquibase.executor.ExecutionOptions;
-import liquibase.action.Sql;
-import liquibase.action.UnparsedSql;
-import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.InsertOrUpdateStatement;
 
 public class InsertOrUpdateGeneratorPostgres extends InsertOrUpdateGenerator {
@@ -25,9 +25,8 @@ public class InsertOrUpdateGeneratorPostgres extends InsertOrUpdateGenerator {
         return false;
 	}
 
-	@Override
-	public Sql[] generateSql(InsertOrUpdateStatement insertOrUpdateStatement,
-			ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
+    @Override
+    public Action[] generateActions(InsertOrUpdateStatement insertOrUpdateStatement, ExecutionOptions options, ActionGeneratorChain chain) {
         Database database = options.getRuntimeEnvironment().getTargetDatabase();
 
         StringBuilder generatedSql = new StringBuilder();
@@ -37,7 +36,7 @@ public class InsertOrUpdateGeneratorPostgres extends InsertOrUpdateGenerator {
 		try {
 			generatedSql.append(getUpdateStatement(insertOrUpdateStatement,
                     options, getWhereClause(insertOrUpdateStatement, options),
-					sqlGeneratorChain));
+					chain));
 		} catch (LiquibaseException e) {
 			// do a select statement instead
 			/*
@@ -54,12 +53,12 @@ public class InsertOrUpdateGeneratorPostgres extends InsertOrUpdateGenerator {
 		}
 		generatedSql.append("IF not found THEN\n");
 		generatedSql.append(getInsertStatement(insertOrUpdateStatement,
-                options, sqlGeneratorChain));
+                options, chain));
 		generatedSql.append("END IF;\n");
 		generatedSql.append("END;\n");
 		generatedSql.append("$$\n");
 		generatedSql.append("LANGUAGE plpgsql;\n");
-		return new Sql[] { new UnparsedSql(generatedSql.toString()) };
+		return new Action[] { new UnparsedSql(generatedSql.toString()) };
 	}
 
 	@Override

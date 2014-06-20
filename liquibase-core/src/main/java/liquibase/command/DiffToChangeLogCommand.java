@@ -1,6 +1,5 @@
 package liquibase.command;
 
-import liquibase.CatalogAndSchema;
 import liquibase.diff.DiffResult;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.changelog.DiffToChangeLog;

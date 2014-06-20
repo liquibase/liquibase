@@ -3,9 +3,7 @@ package liquibase.structure.core;
 import liquibase.util.StringUtils;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 public class Table extends Relation {
 

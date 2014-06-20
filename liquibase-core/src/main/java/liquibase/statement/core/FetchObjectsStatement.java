@@ -1,7 +1,6 @@
 package liquibase.statement.core;
 
 import liquibase.statement.AbstractSqlStatement;
-import liquibase.statement.SqlStatement;
 import liquibase.structure.DatabaseObject;
 
 public class FetchObjectsStatement extends AbstractSqlStatement {

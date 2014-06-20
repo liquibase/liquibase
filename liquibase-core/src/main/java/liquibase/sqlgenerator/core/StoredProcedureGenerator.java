@@ -1,10 +1,11 @@
 package liquibase.sqlgenerator.core;
 
+import liquibase.action.Action;
+import liquibase.action.UnparsedSql;
+import liquibase.actiongenerator.ActionGeneratorChain;
 import liquibase.database.core.OracleDatabase;
 import liquibase.exception.ValidationErrors;
 import liquibase.executor.ExecutionOptions;
-import liquibase.action.Sql;
-import liquibase.action.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.StoredProcedureStatement;
 
@@ -18,7 +19,7 @@ public class StoredProcedureGenerator extends AbstractSqlGenerator<StoredProcedu
     }
 
     @Override
-    public Sql[] generateSql(StoredProcedureStatement statement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
+    public Action[] generateActions(StoredProcedureStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
         StringBuilder string = new StringBuilder();
         string.append("exec ").append(statement.getProcedureName()).append("(");
         for (String param : statement.getParameters()) {
@@ -29,7 +30,7 @@ public class StoredProcedureGenerator extends AbstractSqlGenerator<StoredProcedu
         if (options.getRuntimeEnvironment().getTargetDatabase() instanceof OracleDatabase) {
             sql = sql.replaceFirst("exec ", "BEGIN ").replaceFirst("\\)$", "); END;");
         }
-        return new Sql[] { new UnparsedSql(sql)};
+        return new Action[] { new UnparsedSql(sql)};
 
     }
 }

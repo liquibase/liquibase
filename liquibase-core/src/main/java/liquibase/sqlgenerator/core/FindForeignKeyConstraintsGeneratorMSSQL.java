@@ -1,10 +1,11 @@
 package liquibase.sqlgenerator.core;
 
+import liquibase.action.Action;
+import liquibase.action.UnparsedSql;
+import liquibase.actiongenerator.ActionGeneratorChain;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.exception.ValidationErrors;
 import liquibase.executor.ExecutionOptions;
-import liquibase.action.Sql;
-import liquibase.action.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.FindForeignKeyConstraintsStatement;
 
@@ -27,7 +28,7 @@ public class FindForeignKeyConstraintsGeneratorMSSQL extends AbstractSqlGenerato
     }
 
     @Override
-    public Sql[] generateSql(FindForeignKeyConstraintsStatement statement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
+    public Action[] generateActions(FindForeignKeyConstraintsStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
         StringBuilder sb = new StringBuilder();
 
         sb.append("SELECT ");
@@ -41,7 +42,7 @@ public class FindForeignKeyConstraintsGeneratorMSSQL extends AbstractSqlGenerato
         sb.append("ON f.OBJECT_ID = fc.constraint_object_id ");
         sb.append("WHERE OBJECT_NAME(f.parent_object_id) = '").append(statement.getBaseTableName()).append("'");
 
-        return new Sql[]{
+        return new Action[]{
                 new UnparsedSql(sb.toString())
         };
     }

@@ -1,7 +1,6 @@
 package liquibase.change.core;
 
 import liquibase.change.*;
-import liquibase.database.Database;
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.executor.ExecutionOptions;
 import liquibase.parser.core.ParsedNode;

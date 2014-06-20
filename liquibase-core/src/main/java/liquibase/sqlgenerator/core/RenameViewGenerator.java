@@ -1,11 +1,12 @@
 package liquibase.sqlgenerator.core;
 
+import liquibase.action.Action;
+import liquibase.action.UnparsedSql;
+import liquibase.actiongenerator.ActionGeneratorChain;
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.exception.ValidationErrors;
 import liquibase.executor.ExecutionOptions;
-import liquibase.action.Sql;
-import liquibase.action.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.RenameViewStatement;
 import liquibase.structure.core.View;
@@ -36,7 +37,7 @@ public class RenameViewGenerator extends AbstractSqlGenerator<RenameViewStatemen
     }
 
     @Override
-    public Sql[] generateSql(RenameViewStatement statement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
+    public Action[] generateActions(RenameViewStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
         String sql;
         Database database = options.getRuntimeEnvironment().getTargetDatabase();
 
@@ -52,7 +53,7 @@ public class RenameViewGenerator extends AbstractSqlGenerator<RenameViewStatemen
             sql = "RENAME " + database.escapeViewName(statement.getCatalogName(), statement.getSchemaName(), statement.getOldViewName()) + " TO " + database.escapeObjectName(statement.getNewViewName(), View.class);
         }
 
-        return new Sql[]{
+        return new Action[]{
                 new UnparsedSql(sql)
         };
     }

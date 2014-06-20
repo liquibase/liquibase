@@ -2,7 +2,9 @@ package liquibase.database;
 
 import liquibase.CatalogAndSchema;
 import liquibase.RuntimeEnvironment;
+import liquibase.action.Action;
 import liquibase.action.visitor.ActionVisitor;
+import liquibase.actiongenerator.ActionGeneratorFactory;
 import liquibase.change.Change;
 import liquibase.change.core.DropTableChange;
 import liquibase.changelog.*;
@@ -26,13 +28,12 @@ import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.EmptyDatabaseSnapshot;
 import liquibase.snapshot.SnapshotControl;
 import liquibase.snapshot.SnapshotGeneratorFactory;
-import liquibase.action.Sql;
-import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.DatabaseFunction;
 import liquibase.statement.SequenceCurrentValueFunction;
 import liquibase.statement.SequenceNextValueFunction;
 import liquibase.statement.SqlStatement;
-import liquibase.statement.core.*;
+import liquibase.statement.core.GetViewDefinitionStatement;
+import liquibase.statement.core.RawCallStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
 import liquibase.util.ISODateFormat;
@@ -1204,7 +1205,7 @@ public abstract class AbstractJdbcDatabase implements Database {
     @Override
     public void execute(final SqlStatement[] statements, final List<ActionVisitor> actionVisitors) throws LiquibaseException {
         for (SqlStatement statement : statements) {
-            if (statement.skipOnUnsupported() && !SqlGeneratorFactory.getInstance().supports(statement, new ExecutionOptions(actionVisitors, new RuntimeEnvironment(this, null)))) {
+            if (statement.skipOnUnsupported() && !ActionGeneratorFactory.getInstance().supports(statement, new ExecutionOptions(actionVisitors, new RuntimeEnvironment(this, null)))) {
                 continue;
             }
             LogFactory.getLogger().debug("Executing Statement: " + statement.getClass().getName());
@@ -1217,8 +1218,8 @@ public abstract class AbstractJdbcDatabase implements Database {
     public void saveStatements(final Change change, final List<ActionVisitor> actionVisitors, final Writer writer) throws IOException, StatementNotSupportedOnDatabaseException, LiquibaseException {
         SqlStatement[] statements = change.generateStatements(new ExecutionOptions(actionVisitors, new RuntimeEnvironment(this, null)));
         for (SqlStatement statement : statements) {
-            for (Sql sql : SqlGeneratorFactory.getInstance().generateSql(statement, new ExecutionOptions(actionVisitors, new RuntimeEnvironment(this, null)))) {
-                writer.append(sql.toSql()).append(sql.getEndDelimiter()).append(StreamUtil.getLineSeparator()).append(StreamUtil.getLineSeparator());
+            for (Action action : ActionGeneratorFactory.getInstance().generateActions(statement, new ExecutionOptions(actionVisitors, new RuntimeEnvironment(this, null)))) {
+                writer.append(action.describe()).append(StreamUtil.getLineSeparator()).append(StreamUtil.getLineSeparator());
             }
         }
     }
@@ -1241,8 +1242,8 @@ public abstract class AbstractJdbcDatabase implements Database {
     public void saveRollbackStatement(final Change change, final List<ActionVisitor> actionVisitors, final Writer writer) throws IOException, RollbackImpossibleException, StatementNotSupportedOnDatabaseException, LiquibaseException {
         SqlStatement[] statements = change.generateRollbackStatements(new ExecutionOptions(actionVisitors, new RuntimeEnvironment(this, null)));
         for (SqlStatement statement : statements) {
-            for (Sql sql : SqlGeneratorFactory.getInstance().generateSql(statement, new ExecutionOptions(actionVisitors, new RuntimeEnvironment(this, null)))) {
-                writer.append(sql.toSql()).append(sql.getEndDelimiter()).append("\n\n");
+            for (Action action : ActionGeneratorFactory.getInstance().generateActions(statement, new ExecutionOptions(actionVisitors, new RuntimeEnvironment(this, null)))) {
+                writer.append(action.describe()).append("\n\n");
             }
         }
     }

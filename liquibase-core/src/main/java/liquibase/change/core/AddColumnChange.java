@@ -1,16 +1,11 @@
 package liquibase.change.core;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
+import liquibase.actiongenerator.ActionGeneratorFactory;
 import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.executor.ExecutionOptions;
 import liquibase.snapshot.SnapshotGeneratorFactory;
-import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.*;
 import liquibase.statement.core.AddColumnStatement;
 import liquibase.statement.core.ReorganizeTableStatement;
@@ -20,6 +15,11 @@ import liquibase.structure.core.Column;
 import liquibase.structure.core.PrimaryKey;
 import liquibase.structure.core.Table;
 import liquibase.util.StringUtils;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Adds a column to an existing table.
@@ -154,7 +154,7 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
           String columnRemarks = StringUtils.trimToNull(column.getRemarks());
           if (columnRemarks != null) {
               SetColumnRemarksStatement remarksStatement = new SetColumnRemarksStatement(catalogName, schemaName, tableName, column.getName(), columnRemarks);
-              if (SqlGeneratorFactory.getInstance().supports(remarksStatement, options)) {
+              if (ActionGeneratorFactory.getInstance().supports(remarksStatement, options)) {
                   sql.add(remarksStatement);
               }
           }

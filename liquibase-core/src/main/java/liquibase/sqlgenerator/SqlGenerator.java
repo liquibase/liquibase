@@ -4,7 +4,6 @@ import liquibase.actiongenerator.ActionGenerator;
 import liquibase.exception.ValidationErrors;
 import liquibase.exception.Warnings;
 import liquibase.executor.ExecutionOptions;
-import liquibase.action.Sql;
 import liquibase.statement.SqlStatement;
 
 /**
@@ -37,13 +36,6 @@ import liquibase.statement.SqlStatement;
 public interface SqlGenerator<StatementType extends SqlStatement> extends ActionGenerator<StatementType> {
 
     /**
-     * Does this change require access to the database metadata?  If true, the change cannot be used in an updateSql-style command.
-     * @param options
-     */
-    public boolean generateStatementsIsVolatile(ExecutionOptions options);
-
-    public boolean generateRollbackStatementsIsVolatile(ExecutionOptions options);
-    /**
      * Validate the data contained in the SqlStatement.  If there are no errors, return an empty ValidationErrors object, not a null value.
      * Liquibase will inspect the ValidationErrors result before attempting to call generateSql.
      */
@@ -51,8 +43,4 @@ public interface SqlGenerator<StatementType extends SqlStatement> extends Action
 
     public Warnings warn(StatementType statementType, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain);
 
-    /**
-     * Generate the actual Sql for the given statement and database.
-     */
-    public Sql[] generateSql(StatementType statement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain);
 }

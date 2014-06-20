@@ -2,7 +2,6 @@ package liquibase.statement.core;
 
 import liquibase.statement.AbstractSqlStatement;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.core.Relation;
 import liquibase.structure.core.View;
 
 public class RenameViewStatement extends AbstractSqlStatement {

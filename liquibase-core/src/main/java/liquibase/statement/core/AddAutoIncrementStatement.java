@@ -1,12 +1,12 @@
 package liquibase.statement.core;
 
-import java.math.BigInteger;
-
 import liquibase.statement.AbstractSqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
+
+import java.math.BigInteger;
 
 public class AddAutoIncrementStatement extends AbstractSqlStatement {
 

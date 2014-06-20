@@ -1,7 +1,7 @@
 package liquibase.parser.core.xml;
 
 import liquibase.action.visitor.ActionVisitorFactory;
-import liquibase.change.*;
+import liquibase.change.ChangeFactory;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.logging.LogFactory;
@@ -19,7 +19,9 @@ import org.xml.sax.helpers.DefaultHandler;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.*;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Stack;
 
 class XMLChangeLogSAXHandler extends DefaultHandler {
 

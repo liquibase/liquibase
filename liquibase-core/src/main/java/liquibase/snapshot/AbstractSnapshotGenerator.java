@@ -2,15 +2,11 @@ package liquibase.snapshot;
 
 import liquibase.RuntimeEnvironment;
 import liquibase.actiongenerator.ActionGeneratorChain;
-import liquibase.actiongenerator.core.FetchTablesSnapshotGenerator;
-import liquibase.executor.ExecutionOptions;
-import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.FetchObjectsStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.DatabaseObjectCollection;
 import liquibase.structure.core.Schema;
-import liquibase.structure.core.Table;
 
 public abstract class AbstractSnapshotGenerator<T extends DatabaseObject> {
 

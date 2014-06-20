@@ -1,6 +1,5 @@
 package liquibase.serializer;
 
-import liquibase.exception.SetupException;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.resource.ResourceAccessor;

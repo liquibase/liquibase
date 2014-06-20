@@ -1,12 +1,5 @@
 package liquibase;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintStream;
-import java.io.Writer;
-import java.text.DateFormat;
-import java.util.*;
-
 import liquibase.change.CheckSum;
 import liquibase.changelog.*;
 import liquibase.changelog.filter.*;
@@ -48,6 +41,12 @@ import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
 
 import javax.xml.parsers.ParserConfigurationException;
+import java.io.File;
+import java.io.IOException;
+import java.io.PrintStream;
+import java.io.Writer;
+import java.text.DateFormat;
+import java.util.*;
 
 /**
  * Primary facade class for interacting with Liquibase.

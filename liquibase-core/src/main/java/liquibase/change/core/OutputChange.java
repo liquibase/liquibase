@@ -1,5 +1,6 @@
 package liquibase.change.core;
 
+import liquibase.action.Action;
 import liquibase.change.AbstractChange;
 import liquibase.change.ChangeMetaData;
 import liquibase.change.DatabaseChange;
@@ -9,7 +10,6 @@ import liquibase.exception.ValidationErrors;
 import liquibase.executor.ExecutionOptions;
 import liquibase.logging.LogFactory;
 import liquibase.serializer.LiquibaseSerializable;
-import liquibase.action.Sql;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RuntimeStatement;
 import liquibase.util.StringUtils;
@@ -53,7 +53,7 @@ public class OutputChange extends AbstractChange {
     public SqlStatement[] generateStatements(ExecutionOptions options) {
         return new SqlStatement[] { new RuntimeStatement() {
             @Override
-            public Sql[] generate(ExecutionOptions options) {
+            public Action[] generate(ExecutionOptions options) {
                 String target = getTarget();
                 if (target.equalsIgnoreCase("STDOUT")) {
                     System.out.println(getMessage());

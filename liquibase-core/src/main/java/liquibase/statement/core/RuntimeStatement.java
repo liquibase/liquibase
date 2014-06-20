@@ -1,13 +1,13 @@
 package liquibase.statement.core;
 
+import liquibase.action.Action;
 import liquibase.executor.ExecutionOptions;
-import liquibase.action.Sql;
 import liquibase.statement.AbstractSqlStatement;
 import liquibase.structure.DatabaseObject;
 
 public class RuntimeStatement extends AbstractSqlStatement {
-    public Sql[] generate(ExecutionOptions options) {
-        return new Sql[0];
+    public Action[] generate(ExecutionOptions options) {
+        return new Action[0];
     }
 
     @Override

@@ -6,11 +6,11 @@ import liquibase.change.Change;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.RanChangeSet;
-import liquibase.structure.DatabaseObject;
 import liquibase.exception.*;
 import liquibase.servicelocator.PrioritizedService;
-import liquibase.statement.SqlStatement;
 import liquibase.statement.DatabaseFunction;
+import liquibase.statement.SqlStatement;
+import liquibase.structure.DatabaseObject;
 
 import java.io.IOException;
 import java.io.Writer;

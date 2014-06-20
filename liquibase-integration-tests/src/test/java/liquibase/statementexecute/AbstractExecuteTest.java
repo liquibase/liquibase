@@ -12,6 +12,8 @@ import java.util.Set;
 
 import liquibase.CatalogAndSchema;
 import liquibase.RuntimeEnvironment;
+import liquibase.action.Action;
+import liquibase.actiongenerator.ActionGeneratorFactory;
 import liquibase.changelog.ChangeLogHistoryServiceFactory;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
@@ -26,8 +28,6 @@ import liquibase.database.example.ExampleCustomDatabase;
 import liquibase.sdk.database.MockDatabase;
 import liquibase.database.core.UnsupportedDatabase;
 import liquibase.executor.ExecutorService;
-import liquibase.action.Sql;
-import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.test.TestContext;
 import liquibase.test.DatabaseTestContext;
@@ -97,10 +97,10 @@ public abstract class AbstractExecuteTest {
                         LockServiceFactory.getInstance().getLockService(database).init();
                     }
 
-                    Sql[] sql = SqlGeneratorFactory.getInstance().generateSql(statementUnderTest, new ExecutionOptions(new RuntimeEnvironment(database)));
+                    Action[] actions = ActionGeneratorFactory.getInstance().generateActions(statementUnderTest, new ExecutionOptions(new RuntimeEnvironment(database)));
 
-                    assertNotNull("Null SQL for " + database, sql);
-                    assertEquals("Unexpected number of  SQL statements for " + database, expectedSql.length, sql.length);
+                    assertNotNull("Null SQL for " + database, actions);
+                    assertEquals("Unexpected number of  SQL statements for " + database, expectedSql.length, actions.length);
 
                     int index = 0;
                     for (String convertedSql : expectedSql) {
@@ -108,7 +108,7 @@ public abstract class AbstractExecuteTest {
                         convertedSql = replaceDatabaseClauses(convertedSql, database);
                         convertedSql = replaceStandardTypes(convertedSql, database);
 
-                        assertEquals("Incorrect SQL for " + database.getClass().getName(), convertedSql.toLowerCase().trim(), sql[index].toSql().toLowerCase());
+                        assertEquals("Incorrect SQL for " + database.getClass().getName(), convertedSql.toLowerCase().trim(), actions[index].describe().toLowerCase());
                         index++;
                     }
                 }
@@ -119,7 +119,7 @@ public abstract class AbstractExecuteTest {
         for (Database availableDatabase : DatabaseTestContext.getInstance().getAvailableDatabases()) {
             Statement statement = ((JdbcConnection) availableDatabase.getConnection()).getUnderlyingConnection().createStatement();
             if (shouldTestDatabase(availableDatabase, includeDatabases, excludeDatabases)) {
-                String sqlToRun = SqlGeneratorFactory.getInstance().generateSql(statementUnderTest, new ExecutionOptions(new RuntimeEnvironment(availableDatabase)))[0].toSql();
+                String sqlToRun = ActionGeneratorFactory.getInstance().generateActions(statementUnderTest, new ExecutionOptions(new RuntimeEnvironment(availableDatabase)))[0].describe();
                 try {
                     statement.execute(sqlToRun);
                 } catch (Exception e) {
@@ -156,8 +156,8 @@ public abstract class AbstractExecuteTest {
         if (database instanceof MockDatabase || database instanceof ExampleCustomDatabase || database instanceof UnsupportedDatabase) {
             return false;
         }
-        if (!SqlGeneratorFactory.getInstance().supports(statementUnderTest, new ExecutionOptions(new RuntimeEnvironment(database)))
-                || SqlGeneratorFactory.getInstance().validate(statementUnderTest, new ExecutionOptions(new RuntimeEnvironment(database))).hasErrors()) {
+        if (!ActionGeneratorFactory.getInstance().supports(statementUnderTest, new ExecutionOptions(new RuntimeEnvironment(database)))
+                || ActionGeneratorFactory.getInstance().validate(statementUnderTest, new ExecutionOptions(new RuntimeEnvironment(database))).hasErrors()) {
             return false;
         }
 

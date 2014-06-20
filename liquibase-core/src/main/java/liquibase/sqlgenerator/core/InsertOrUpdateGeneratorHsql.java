@@ -1,13 +1,13 @@
 package liquibase.sqlgenerator.core;
 
-import java.util.Date;
-
+import liquibase.actiongenerator.ActionGeneratorChain;
 import liquibase.database.Database;
 import liquibase.database.core.HsqlDatabase;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.executor.ExecutionOptions;
-import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.InsertOrUpdateStatement;
+
+import java.util.Date;
 
 /**
  * @author Andrew Muraco
@@ -32,7 +32,7 @@ public class InsertOrUpdateGeneratorHsql extends InsertOrUpdateGenerator {
 
 	@Override
 	protected String getInsertStatement(InsertOrUpdateStatement insertOrUpdateStatement, ExecutionOptions options,
-			SqlGeneratorChain sqlGeneratorChain) {
+			ActionGeneratorChain chain) {
 		StringBuilder columns = new StringBuilder();
 		StringBuilder values = new StringBuilder();
 
@@ -54,7 +54,7 @@ public class InsertOrUpdateGeneratorHsql extends InsertOrUpdateGenerator {
 
 	@Override
 	protected String getUpdateStatement(InsertOrUpdateStatement insertOrUpdateStatement, ExecutionOptions options,
-			String whereClause, SqlGeneratorChain sqlGeneratorChain) {
+			String whereClause, ActionGeneratorChain chain) {
 
 		StringBuilder sql = new StringBuilder("UPDATE SET ");
 

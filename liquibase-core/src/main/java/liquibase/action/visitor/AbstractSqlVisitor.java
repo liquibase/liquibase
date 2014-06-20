@@ -1,11 +1,8 @@
 package liquibase.action.visitor;
 
 import liquibase.action.Action;
-import liquibase.database.Database;
-import liquibase.executor.ExecutionOptions;
 import liquibase.action.UnparsedSql;
-
-import java.util.List;
+import liquibase.executor.ExecutionOptions;
 
 /**
  * Convenience subclass of AbstractActionVisitor for dealing with {@link liquibase.action.UnparsedSql} actions.

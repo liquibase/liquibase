@@ -1,10 +1,11 @@
 package liquibase.sqlgenerator.core;
 
+import liquibase.action.Action;
+import liquibase.action.UnparsedSql;
+import liquibase.actiongenerator.ActionGeneratorChain;
 import liquibase.database.core.PostgresDatabase;
 import liquibase.exception.ValidationErrors;
 import liquibase.executor.ExecutionOptions;
-import liquibase.action.Sql;
-import liquibase.action.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.FindForeignKeyConstraintsStatement;
 
@@ -27,7 +28,7 @@ public class FindForeignKeyConstraintsGeneratorPostgres extends AbstractSqlGener
     }
 
     @Override
-    public Sql[] generateSql(FindForeignKeyConstraintsStatement statement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
+    public Action[] generateActions(FindForeignKeyConstraintsStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
          StringBuilder sb = new StringBuilder();
 
             sb.append("SELECT ");
@@ -48,7 +49,7 @@ public class FindForeignKeyConstraintsGeneratorPostgres extends AbstractSqlGener
             sb.append(") PT ON PT.TABLE_NAME = PK.TABLE_NAME ");
             sb.append("WHERE      lower(FK.TABLE_NAME)='").append(statement.getBaseTableName().toLowerCase()).append("'");
 
-        return new Sql[] {
+        return new Action[] {
                 new UnparsedSql(sb.toString())
         };
     }

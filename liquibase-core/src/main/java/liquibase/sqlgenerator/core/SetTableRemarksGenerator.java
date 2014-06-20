@@ -1,5 +1,8 @@
 package liquibase.sqlgenerator.core;
 
+import liquibase.action.Action;
+import liquibase.action.UnparsedSql;
+import liquibase.actiongenerator.ActionGeneratorChain;
 import liquibase.database.Database;
 import liquibase.database.core.DB2Database;
 import liquibase.database.core.MySQLDatabase;
@@ -7,8 +10,6 @@ import liquibase.database.core.OracleDatabase;
 import liquibase.database.core.PostgresDatabase;
 import liquibase.exception.ValidationErrors;
 import liquibase.executor.ExecutionOptions;
-import liquibase.action.Sql;
-import liquibase.action.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.SetTableRemarksStatement;
 
@@ -30,8 +31,8 @@ public class SetTableRemarksGenerator extends AbstractSqlGenerator<SetTableRemar
 		return validationErrors;
 	}
 
-	@Override
-    public Sql[] generateSql(SetTableRemarksStatement statement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
+    @Override
+    public Action[] generateActions(SetTableRemarksStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
         Database database = options.getRuntimeEnvironment().getTargetDatabase();
 		String sql;
 		String remarks = database.escapeStringForDatabase(statement.getRemarks());
@@ -45,6 +46,6 @@ public class SetTableRemarksGenerator extends AbstractSqlGenerator<SetTableRemar
 					+ database.escapeStringForDatabase(remarks) + "'";
 		}
 
-		return new Sql[] { new UnparsedSql(sql) };
+		return new Action[] { new UnparsedSql(sql) };
 	}
 }

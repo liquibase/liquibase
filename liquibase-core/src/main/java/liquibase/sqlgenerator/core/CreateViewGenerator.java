@@ -1,12 +1,13 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.CatalogAndSchema;
+import liquibase.action.Action;
+import liquibase.action.UnparsedSql;
+import liquibase.actiongenerator.ActionGeneratorChain;
 import liquibase.database.Database;
 import liquibase.database.core.*;
-import liquibase.executor.ExecutionOptions;
 import liquibase.exception.ValidationErrors;
-import liquibase.action.Sql;
-import liquibase.action.UnparsedSql;
+import liquibase.executor.ExecutionOptions;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.CreateViewStatement;
 
@@ -36,16 +37,15 @@ public class CreateViewGenerator extends AbstractSqlGenerator<CreateViewStatemen
     }
 
     @Override
-    public Sql[] generateSql(CreateViewStatement statement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
-
+    public Action[] generateActions(CreateViewStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
         Database database = options.getRuntimeEnvironment().getTargetDatabase();
     	if (database instanceof InformixDatabase) {
-    		return new CreateViewGeneratorInformix().generateSql(statement, options, sqlGeneratorChain);
+    		return new CreateViewGeneratorInformix().generateActions(statement, options, chain);
     	}
     	
         String createClause;
 
-        List<Sql> sql = new ArrayList<Sql>();
+        List<Action> sql = new ArrayList<Action>();
 
         if (database instanceof FirebirdDatabase) {
             if (statement.isReplaceIfExists()) {
@@ -55,7 +55,7 @@ public class CreateViewGenerator extends AbstractSqlGenerator<CreateViewStatemen
             }
         } else if (database instanceof SybaseASADatabase && statement.getSelectQuery().toLowerCase().startsWith("create view")) {
             // Sybase ASA saves view definitions with header.
-            return new Sql[]{
+            return new Action[]{
                     new UnparsedSql(statement.getSelectQuery())
             };
         } else if (database instanceof MSSQLDatabase) {
@@ -78,6 +78,6 @@ public class CreateViewGenerator extends AbstractSqlGenerator<CreateViewStatemen
         }
         sql.add(new UnparsedSql(createClause + " " + database.escapeViewName(statement.getCatalogName(), statement.getSchemaName(), statement.getViewName()) + " AS " + statement.getSelectQuery()));
 
-        return sql.toArray(new Sql[sql.size()]);
+        return sql.toArray(new Action[sql.size()]);
     }
 }

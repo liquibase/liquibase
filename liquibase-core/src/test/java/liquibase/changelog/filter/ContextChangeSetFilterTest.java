@@ -2,14 +2,12 @@ package liquibase.changelog.filter;
 
 import liquibase.ContextExpression;
 import liquibase.Contexts;
-import liquibase.changelog.ChangeSet;
-
-import static org.junit.Assert.*;
-
-import liquibase.database.Database;
 import liquibase.action.visitor.AbstractSqlVisitor;
+import liquibase.changelog.ChangeSet;
 import liquibase.executor.ExecutionOptions;
 import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 public class ContextChangeSetFilterTest {
 

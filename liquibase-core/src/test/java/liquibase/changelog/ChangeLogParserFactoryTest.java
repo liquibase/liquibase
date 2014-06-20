@@ -6,13 +6,13 @@ import liquibase.parser.ChangeLogParserFactory;
 import liquibase.parser.core.sql.SqlChangeLogParser;
 import liquibase.parser.core.xml.XMLChangeLogSAXParser;
 import liquibase.resource.ResourceAccessor;
-import static org.junit.Assert.*;
-
 import liquibase.test.JUnitResourceAccessor;
 import org.junit.After;
 import org.junit.Test;
 
 import java.util.List;
+
+import static org.junit.Assert.*;
 
 public class ChangeLogParserFactoryTest {
     @After

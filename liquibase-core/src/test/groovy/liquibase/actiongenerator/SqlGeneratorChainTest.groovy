@@ -1,8 +1,8 @@
 package liquibase.actiongenerator
 
+import liquibase.action.Action
 import liquibase.sdk.database.MockDatabase
 import liquibase.exception.ValidationErrors
-import liquibase.action.Sql
 import liquibase.sqlgenerator.MockSqlGenerator
 import liquibase.sqlgenerator.SqlGenerator
 import liquibase.sqlgenerator.SqlGeneratorChain
@@ -35,11 +35,11 @@ public class SqlGeneratorChainTest extends Specification {
         generators.add(new MockSqlGenerator(1, "A1", "A2"))
         SqlGeneratorChain chain = new SqlGeneratorChain(new ActionGeneratorChain(generators))
 
-        Sql[] sql = chain.generateSql(new MockSqlStatement(), new MockDatabase())
+        Action[] actions = chain.generateSql(new MockSqlStatement(), new MockDatabase())
        then:
-        assert sql.length == 2
-        assert sql[0].toSql() == "A1"
-        assert sql[1].toSql() == "A2"
+        assert actions.length == 2
+        assert actions[0].toSql() == "A1"
+        assert actions[1].toSql() == "A2"
     }
 
     def void generateSql_twoGenerators() {
@@ -48,14 +48,14 @@ public class SqlGeneratorChainTest extends Specification {
         generators.add(new MockSqlGenerator(2, "B1", "B2"))
         generators.add(new MockSqlGenerator(1, "A1", "A2"))
         SqlGeneratorChain chain = new SqlGeneratorChain(new ActionGeneratorChain(generators))
-        Sql[] sql = chain.generateSql(new MockSqlStatement(), new MockDatabase())
+        Action[] actions = chain.generateSql(new MockSqlStatement(), new MockDatabase())
         
         then:
-        assert sql.length == 4
-        assert sql[0].toSql() == "B1"
-        assert sql[1].toSql() == "B2"
-        assert sql[2].toSql() == "A1"
-        assert sql[3].toSql() == "A2"
+        assert actions.length == 4
+        assert actions[0].toSql() == "B1"
+        assert actions[1].toSql() == "B2"
+        assert actions[2].toSql() == "A1"
+        assert actions[3].toSql() == "A2"
     }
 
     def void generateSql_threeGenerators() {
@@ -65,16 +65,16 @@ public class SqlGeneratorChainTest extends Specification {
         generators.add(new MockSqlGenerator(1, "A1", "A2"))
         generators.add(new MockSqlGenerator(3, "C1", "C2"))
         SqlGeneratorChain chain = new SqlGeneratorChain(new ActionGeneratorChain(generators))
-        Sql[] sql = chain.generateSql(new MockSqlStatement(), new MockDatabase())
+        Action[] actions = chain.generateSql(new MockSqlStatement(), new MockDatabase())
         
         then:
-        assert sql.length == 6
-        assert sql[0].toSql() == "C1"
-        assert sql[1].toSql() == "C2"
-        assert sql[2].toSql() == "B1"
-        assert sql[3].toSql() == "B2"
-        assert sql[4].toSql() == "A1"
-        assert sql[5].toSql() == "A2"
+        assert actions.length == 6
+        assert actions[0].toSql() == "C1"
+        assert actions[1].toSql() == "C2"
+        assert actions[2].toSql() == "B1"
+        assert actions[3].toSql() == "B2"
+        assert actions[4].toSql() == "A1"
+        assert actions[5].toSql() == "A2"
     }
 
     def validate_nullGenerators() {

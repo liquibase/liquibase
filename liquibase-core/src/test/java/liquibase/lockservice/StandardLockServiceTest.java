@@ -1,14 +1,16 @@
 package liquibase.lockservice;
 
 import liquibase.database.Database;
-
-import static org.easymock.classextension.EasyMock.*;
 import org.junit.After;
-import static org.junit.Assert.*;
-import org.junit.Test;
 import org.junit.Before;
+import org.junit.Test;
 
 import java.lang.reflect.Field;
+
+import static org.easymock.classextension.EasyMock.createMock;
+import static org.easymock.classextension.EasyMock.replay;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 @SuppressWarnings({"EqualsWhichDoesntCheckParameterClass"})
 public class StandardLockServiceTest {

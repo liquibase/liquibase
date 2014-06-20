@@ -1,11 +1,12 @@
 package liquibase.sqlgenerator.core;
 
+import liquibase.action.Action;
+import liquibase.action.Sql;
+import liquibase.action.UnparsedSql;
+import liquibase.actiongenerator.ActionGeneratorChain;
 import liquibase.database.Database;
 import liquibase.database.core.PostgresDatabase;
 import liquibase.executor.ExecutionOptions;
-import liquibase.action.Sql;
-import liquibase.action.UnparsedSql;
-import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.SequenceNextValueFunction;
 import liquibase.statement.core.AddDefaultValueStatement;
 import liquibase.structure.core.Column;
@@ -32,16 +33,14 @@ public class AddDefaultValueGeneratorPostgres extends AddDefaultValueGenerator {
     }
 
     @Override
-    public Sql[] generateSql(final AddDefaultValueStatement statement, final ExecutionOptions options,
-                             final SqlGeneratorChain sqlGeneratorChain) {
-
+    public Action[] generateActions(AddDefaultValueStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
         Database database = options.getRuntimeEnvironment().getTargetDatabase();
 
         if (!(statement.getDefaultValue() instanceof SequenceNextValueFunction)) {
-            return super.generateSql(statement, options, sqlGeneratorChain);
+            return super.generateActions(statement, options, chain);
         }
 
-        List<Sql> commands = new ArrayList<Sql>(Arrays.asList(super.generateSql(statement, options, sqlGeneratorChain)));
+        List<Action> commands = new ArrayList<Action>(Arrays.asList(super.generateActions(statement, options, chain)));
         // for postgres, we need to also set the sequence to be owned by this table for true serial like functionality.
         // this will allow a drop table cascade to remove the sequence as well.
         SequenceNextValueFunction sequenceFunction = (SequenceNextValueFunction) statement.getDefaultValue();
@@ -51,6 +50,6 @@ public class AddDefaultValueGeneratorPostgres extends AddDefaultValueGenerator {
                 database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + "."
                 + database.escapeObjectName(statement.getColumnName(), Column.class));
         commands.add(alterSequenceOwner);
-        return commands.toArray(new Sql[commands.size()]);
+        return commands.toArray(new Action[commands.size()]);
     }
 }

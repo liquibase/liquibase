@@ -1,9 +1,10 @@
 package liquibase.sqlgenerator.core;
 
+import liquibase.action.Action;
+import liquibase.action.UnparsedSql;
+import liquibase.actiongenerator.ActionGeneratorChain;
 import liquibase.exception.ValidationErrors;
 import liquibase.executor.ExecutionOptions;
-import liquibase.action.Sql;
-import liquibase.action.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.DropViewStatement;
 
@@ -17,8 +18,8 @@ public class DropViewGenerator extends AbstractSqlGenerator<DropViewStatement> {
     }
 
     @Override
-    public Sql[] generateSql(DropViewStatement statement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
-        return new Sql[] {
+    public Action[] generateActions(DropViewStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
+        return new Action[] {
                 new UnparsedSql("DROP VIEW " + options.getRuntimeEnvironment().getTargetDatabase().escapeViewName(statement.getCatalogName(), statement.getSchemaName(), statement.getViewName()))
         };
     }

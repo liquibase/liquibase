@@ -1,26 +1,19 @@
 package liquibase.sqlgenerator.core;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import liquibase.action.Action;
+import liquibase.action.UnparsedSql;
+import liquibase.actiongenerator.ActionGeneratorChain;
 import liquibase.database.Database;
-import liquibase.database.core.DB2Database;
-import liquibase.database.core.DerbyDatabase;
-import liquibase.database.core.FirebirdDatabase;
-import liquibase.database.core.H2Database;
-import liquibase.database.core.HsqlDatabase;
-import liquibase.database.core.InformixDatabase;
-import liquibase.database.core.OracleDatabase;
-import liquibase.database.core.SybaseASADatabase;
-import liquibase.database.core.SybaseDatabase;
-import liquibase.executor.ExecutionOptions;
+import liquibase.database.core.*;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.ValidationErrors;
-import liquibase.action.Sql;
-import liquibase.action.UnparsedSql;
+import liquibase.executor.ExecutionOptions;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.AutoIncrementConstraint;
 import liquibase.statement.core.AddColumnStatement;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class AddColumnGeneratorDefaultClauseBeforeNotNull extends AddColumnGenerator {
     @Override
@@ -55,7 +48,7 @@ public class AddColumnGeneratorDefaultClauseBeforeNotNull extends AddColumnGener
     }
 
     @Override
-    public Sql[] generateSql(AddColumnStatement statement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
+    public Action[] generateActions(AddColumnStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
         Database database = options.getRuntimeEnvironment().getTargetDatabase();
 
         String alterTable = "ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " ADD " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " " + DataTypeFactory.getInstance().fromDescription(statement.getColumnType() + (statement.isAutoIncrement() ? "{autoIncrement:true}" : ""), database).toDatabaseDataType(database);
@@ -85,13 +78,13 @@ public class AddColumnGeneratorDefaultClauseBeforeNotNull extends AddColumnGener
             }
         }
 
-        List<Sql> returnSql = new ArrayList<Sql>();
+        List<Action> returnSql = new ArrayList<Action>();
         returnSql.add(new UnparsedSql(alterTable));
 
         addUniqueConstrantStatements(statement, options, returnSql);
         addForeignKeyStatements(statement, options, returnSql);
 
-        return returnSql.toArray(new Sql[returnSql.size()]);
+        return returnSql.toArray(new Action[returnSql.size()]);
     }
 
 

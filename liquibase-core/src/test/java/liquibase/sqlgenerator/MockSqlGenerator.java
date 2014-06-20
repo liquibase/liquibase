@@ -1,13 +1,12 @@
 package liquibase.sqlgenerator;
 
 import liquibase.action.Action;
+import liquibase.action.UnparsedSql;
 import liquibase.actiongenerator.ActionGeneratorChain;
 import liquibase.exception.ValidationErrors;
 import liquibase.exception.Warnings;
 import liquibase.executor.ExecutionOptions;
 import liquibase.servicelocator.LiquibaseService;
-import liquibase.action.Sql;
-import liquibase.action.UnparsedSql;
 import liquibase.statement.SqlStatement;
 
 import java.util.ArrayList;
@@ -81,18 +80,13 @@ public class MockSqlGenerator implements SqlGenerator {
 
     @Override
     public Action[] generateActions(SqlStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
-        return generateSql(statement, options, new SqlGeneratorChain(chain));
-    }
-
-    @Override
-    public Sql[] generateSql(SqlStatement statement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
-        List<Sql> sql = new ArrayList<Sql>();
+        List<Action> actions = new ArrayList<Action>();
         for (String returnSql  : this.returnSql) {
-            sql.add(new UnparsedSql(returnSql));
+            actions.add(new UnparsedSql(returnSql));
         }
 
-        sql.addAll(Arrays.asList(sqlGeneratorChain.generateSql(statement, options)));
+        actions.addAll(Arrays.asList(chain.generateActions(statement, options)));
 
-        return sql.toArray(new Sql[sql.size()]);
+        return actions.toArray(new Action[actions.size()]);
     }
 }

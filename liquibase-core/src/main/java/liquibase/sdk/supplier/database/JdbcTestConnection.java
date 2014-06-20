@@ -12,9 +12,10 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.Driver;
 import java.util.Enumeration;
-import java.util.Map;
 import java.util.Properties;
 
 public abstract class JdbcTestConnection extends AbstractTestConnection {

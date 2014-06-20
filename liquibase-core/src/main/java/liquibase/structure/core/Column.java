@@ -2,13 +2,10 @@ package liquibase.structure.core;
 
 import liquibase.change.ColumnConfig;
 import liquibase.change.ConstraintsConfig;
-import liquibase.database.Database;
-import liquibase.datatype.DataTypeFactory;
 import liquibase.structure.AbstractDatabaseObject;
 import liquibase.structure.DatabaseObject;
 
 import java.math.BigInteger;
-import java.util.List;
 
 public class Column extends AbstractDatabaseObject {
 

@@ -3,7 +3,6 @@ package liquibase;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.util.StringUtils;
 
-import java.text.ParseException;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

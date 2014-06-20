@@ -5,11 +5,7 @@ import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.resource.ResourceAccessor;
 import liquibase.serializer.AbstractLiquibaseSerializable;
-import liquibase.serializer.LiquibaseSerializable;
-import liquibase.serializer.ReflectionSerializer;
 import liquibase.util.StringUtils;
-
-import java.util.Set;
 
 /**
  * The standard configuration used by Change classes to represent a constraints on a column.

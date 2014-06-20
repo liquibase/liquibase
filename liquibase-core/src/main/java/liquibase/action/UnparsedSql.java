@@ -1,6 +1,5 @@
 package liquibase.action;
 
-import liquibase.action.Sql;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.OfflineConnection;

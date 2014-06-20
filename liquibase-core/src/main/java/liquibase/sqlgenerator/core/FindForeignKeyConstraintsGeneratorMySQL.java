@@ -1,11 +1,12 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.CatalogAndSchema;
+import liquibase.action.Action;
+import liquibase.action.UnparsedSql;
+import liquibase.actiongenerator.ActionGeneratorChain;
 import liquibase.database.core.MySQLDatabase;
 import liquibase.exception.ValidationErrors;
 import liquibase.executor.ExecutionOptions;
-import liquibase.action.Sql;
-import liquibase.action.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.FindForeignKeyConstraintsStatement;
 
@@ -28,7 +29,7 @@ public class FindForeignKeyConstraintsGeneratorMySQL extends AbstractSqlGenerato
     }
 
     @Override
-    public Sql[] generateSql(FindForeignKeyConstraintsStatement statement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
+    public Action[] generateActions(FindForeignKeyConstraintsStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
         CatalogAndSchema schema = new CatalogAndSchema(statement.getBaseTableCatalogName(), statement.getBaseTableSchemaName()).customize(options.getRuntimeEnvironment().getTargetDatabase());
 
         StringBuilder sb = new StringBuilder();
@@ -47,7 +48,7 @@ public class FindForeignKeyConstraintsGeneratorMySQL extends AbstractSqlGenerato
         sb.append("AND RC.TABLE_NAME = '").append(statement.getBaseTableName()).append("' ");
         sb.append("AND RC.CONSTRAINT_SCHEMA = '").append(schema.getCatalogName()).append("'");
         sb.append("AND KCU.TABLE_SCHEMA = '").append(schema.getCatalogName()).append("'");
-        return new Sql[]{
+        return new Action[]{
                 new UnparsedSql(sb.toString())
         };
     }

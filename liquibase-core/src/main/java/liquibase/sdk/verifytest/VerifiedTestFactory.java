@@ -1,17 +1,5 @@
 package liquibase.sdk.verifytest;
 
-import liquibase.exception.UnexpectedLiquibaseException;
-
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.net.URL;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-
 public class VerifiedTestFactory {
 
     private static final VerifiedTestFactory instance = new VerifiedTestFactory();

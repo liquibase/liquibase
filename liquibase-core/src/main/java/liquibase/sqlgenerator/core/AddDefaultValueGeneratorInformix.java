@@ -1,12 +1,13 @@
 package liquibase.sqlgenerator.core;
 
+import liquibase.action.Action;
+import liquibase.action.UnparsedSql;
+import liquibase.actiongenerator.ActionGeneratorChain;
 import liquibase.database.Database;
 import liquibase.database.core.InformixDatabase;
-import liquibase.executor.ExecutionOptions;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.ValidationErrors;
-import liquibase.action.Sql;
-import liquibase.action.UnparsedSql;
+import liquibase.executor.ExecutionOptions;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.AddDefaultValueStatement;
 
@@ -31,8 +32,8 @@ public class AddDefaultValueGeneratorInformix extends AddDefaultValueGenerator {
 		return validationErrors;
 	}
 
-	@Override
-	public Sql[] generateSql(AddDefaultValueStatement statement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
+    @Override
+    public Action[] generateActions(AddDefaultValueStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
         Database database = options.getRuntimeEnvironment().getTargetDatabase();
 
         Object defaultValue = statement.getDefaultValue();
@@ -48,6 +49,6 @@ public class AddDefaultValueGeneratorInformix extends AddDefaultValueGenerator {
 				.objectToSql(defaultValue, database));
 		sql.append(")");
 		UnparsedSql unparsedSql = new UnparsedSql(sql.toString());
-		return new Sql[] { unparsedSql };
+		return new Action[] { unparsedSql };
 	}
 }

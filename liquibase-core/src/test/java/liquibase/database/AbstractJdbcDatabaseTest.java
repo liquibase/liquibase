@@ -1,10 +1,11 @@
 package liquibase.database;
 
-import static org.easymock.EasyMock.*;
-import static org.junit.Assert.*;
-
 import liquibase.structure.core.Table;
 import org.junit.Test;
+
+import static org.easymock.EasyMock.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Base test class for database-specific tests

@@ -1,13 +1,12 @@
 package liquibase.sqlgenerator.core;
 
+import liquibase.action.Action;
+import liquibase.actiongenerator.ActionGeneratorChain;
+import liquibase.actiongenerator.ActionGeneratorFactory;
 import liquibase.change.ColumnConfig;
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.exception.DatabaseException;
-import liquibase.action.Action;
 import liquibase.executor.ExecutionOptions;
-import liquibase.action.Sql;
-import liquibase.sqlgenerator.SqlGeneratorChain;
-import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.AddColumnStatement;
 import liquibase.structure.core.Index;
@@ -33,7 +32,7 @@ public class AddColumnGeneratorSQLite extends AddColumnGenerator {
     }
 
     @Override
-    public Sql[] generateSql(final AddColumnStatement statement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
+    public Action[] generateActions(final AddColumnStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
         // SQLite does not support this ALTER TABLE operation until now.
         // For more information see: http://www.sqlite.org/omitted.html.
         // This is a small work around...
@@ -65,12 +64,12 @@ public class AddColumnGeneratorSQLite extends AddColumnGenerator {
         try {
             // alter table
             List<SqlStatement> alterTableStatements = SQLiteDatabase.getAlterTableStatements(rename_alter_visitor, options, statement.getCatalogName(), statement.getSchemaName(), statement.getTableName());
-            sql.addAll(Arrays.asList(SqlGeneratorFactory.getInstance().generateSql(alterTableStatements.toArray(new SqlStatement[alterTableStatements.size()]), options)));
+            sql.addAll(Arrays.asList(ActionGeneratorFactory.getInstance().generateActions(alterTableStatements.toArray(new SqlStatement[alterTableStatements.size()]), options)));
         } catch (DatabaseException e) {
             System.err.println(e);
             e.printStackTrace();
         }
 
-        return sql.toArray(new Sql[sql.size()]);
+        return sql.toArray(new Action[sql.size()]);
     }
 }

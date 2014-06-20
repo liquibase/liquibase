@@ -1,16 +1,17 @@
 package liquibase.sqlgenerator;
 
-import static org.junit.Assert.*;
-
 import liquibase.actiongenerator.ActionGenerator;
+import liquibase.actiongenerator.ActionGeneratorFactory;
 import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
 
 public class GeneratorLevelTest {
 
     @SuppressWarnings("unchecked")
 	@Test
     public void checkLevelsAndNaming() {
-        for (ActionGenerator generator : SqlGeneratorFactory.getInstance().getGenerators()) {
+        for (ActionGenerator generator : ActionGeneratorFactory.getInstance().getGenerators()) {
             int specializationlevel = generator.getPriority();
             String className = generator.getClass().getName();
             if (className.contains(".ext.")) {

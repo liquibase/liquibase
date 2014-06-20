@@ -1,10 +1,11 @@
 package liquibase.sqlgenerator.core;
 
+import liquibase.action.Action;
+import liquibase.action.UnparsedSql;
+import liquibase.actiongenerator.ActionGeneratorChain;
 import liquibase.database.core.DB2Database;
 import liquibase.exception.ValidationErrors;
 import liquibase.executor.ExecutionOptions;
-import liquibase.action.Sql;
-import liquibase.action.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.FindForeignKeyConstraintsStatement;
 
@@ -27,7 +28,7 @@ public class FindForeignKeyConstraintsGeneratorDB2 extends AbstractSqlGenerator<
     }
 
     @Override
-    public Sql[] generateSql(FindForeignKeyConstraintsStatement statement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
+    public Action[] generateActions(FindForeignKeyConstraintsStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
         StringBuilder sb = new StringBuilder();
 
         sb.append("SELECT ");
@@ -39,7 +40,7 @@ public class FindForeignKeyConstraintsGeneratorDB2 extends AbstractSqlGenerator<
         sb.append("FROM SYSCAT.REFERENCES ");
         sb.append("WHERE TABNAME='").append(statement.getBaseTableName()).append("'");
 
-        return new Sql[]{
+        return new Action[]{
                 new UnparsedSql(sb.toString())
         };
     }

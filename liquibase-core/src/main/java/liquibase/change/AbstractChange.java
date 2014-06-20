@@ -1,25 +1,24 @@
 package liquibase.change;
 
-import java.lang.reflect.Type;
-import java.util.*;
-
+import liquibase.actiongenerator.ActionGeneratorFactory;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
+import liquibase.exception.*;
 import liquibase.executor.ExecutionOptions;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
-import liquibase.serializer.LiquibaseSerializable;
-import liquibase.structure.DatabaseObject;
-import liquibase.exception.*;
 import liquibase.resource.ResourceAccessor;
+import liquibase.serializer.LiquibaseSerializable;
 import liquibase.serializer.core.string.StringChangeLogSerializer;
-import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.SqlStatement;
+import liquibase.structure.DatabaseObject;
 import liquibase.util.StringUtils;
 
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
+import java.lang.reflect.Type;
+import java.util.*;
 
 /**
  * Standard superclass to simplify {@link Change } implementations. You can implement Change directly, this class is purely for convenience but recommended.
@@ -264,7 +263,7 @@ public abstract class AbstractChange implements Change {
             return false;
         }
         for (SqlStatement statement : statements) {
-            if (SqlGeneratorFactory.getInstance().generateStatementsVolatile(statement, options)) {
+            if (ActionGeneratorFactory.getInstance().generateStatementsVolatile(statement, options)) {
                 return true;
             }
         }
@@ -286,7 +285,7 @@ public abstract class AbstractChange implements Change {
             return false;
         }
         for (SqlStatement statement : statements) {
-            if (SqlGeneratorFactory.getInstance().generateRollbackStatementsVolatile(statement, options)) {
+            if (ActionGeneratorFactory.getInstance().generateRollbackStatementsVolatile(statement, options)) {
                 return true;
             }
         }
@@ -309,7 +308,7 @@ public abstract class AbstractChange implements Change {
             return true;
         }
         for (SqlStatement statement : statements) {
-            if (!SqlGeneratorFactory.getInstance().supports(statement, options)) {
+            if (!ActionGeneratorFactory.getInstance().supports(statement, options)) {
                 return false;
             }
         }
@@ -334,8 +333,8 @@ public abstract class AbstractChange implements Change {
             return warnings;
         }
         for (SqlStatement statement : statements) {
-            if (SqlGeneratorFactory.getInstance().supports(statement, options)) {
-                warnings.addAll(SqlGeneratorFactory.getInstance().warn(statement, options));
+            if (ActionGeneratorFactory.getInstance().supports(statement, options)) {
+                warnings.addAll(ActionGeneratorFactory.getInstance().warn(statement, options));
             } else if (statement.skipOnUnsupported()) {
                 warnings.addWarning(statement.getClass().getName() + " is not supported on " + options.getRuntimeEnvironment().getTargetDatabase().getShortName() + ", but " + ChangeFactory.getInstance().getChangeMetaData(this).getName() + " will still execute");
             }
@@ -375,14 +374,14 @@ public abstract class AbstractChange implements Change {
             statements = generateStatements(options);
             if (statements != null) {
                 for (SqlStatement statement : statements) {
-                    boolean supported = SqlGeneratorFactory.getInstance().supports(statement, options);
+                    boolean supported = ActionGeneratorFactory.getInstance().supports(statement, options);
                     if (!supported && !sawUnsupportedError) {
                         if (!statement.skipOnUnsupported()) {
                             changeValidationErrors.addError(unsupportedWarning);
                             sawUnsupportedError = true;
                         }
                     } else {
-                        changeValidationErrors.addAll(SqlGeneratorFactory.getInstance().validate(statement, options));
+                        changeValidationErrors.addAll(ActionGeneratorFactory.getInstance().validate(statement, options));
                     }
                 }
             }

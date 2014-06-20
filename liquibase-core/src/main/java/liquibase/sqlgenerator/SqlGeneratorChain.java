@@ -1,10 +1,10 @@
 package liquibase.sqlgenerator;
 
+import liquibase.action.Action;
 import liquibase.actiongenerator.ActionGeneratorChain;
 import liquibase.exception.ValidationErrors;
 import liquibase.exception.Warnings;
 import liquibase.executor.ExecutionOptions;
-import liquibase.action.Sql;
 import liquibase.statement.SqlStatement;
 
 public class SqlGeneratorChain {
@@ -15,8 +15,8 @@ public class SqlGeneratorChain {
         this.delegate = actionGeneratorChain;
     }
 
-    public Sql[] generateSql(SqlStatement statement, ExecutionOptions options) {
-        return (Sql[]) delegate.generateActions(statement, options);
+    public Action[] generateSql(SqlStatement statement, ExecutionOptions options) {
+        return delegate.generateActions(statement, options);
     }
 
     public Warnings warn(SqlStatement statement, ExecutionOptions options) {

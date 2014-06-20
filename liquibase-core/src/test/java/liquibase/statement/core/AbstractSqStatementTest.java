@@ -1,13 +1,14 @@
 package liquibase.statement.core;
 
 import liquibase.RuntimeEnvironment;
+import liquibase.actiongenerator.ActionGeneratorFactory;
 import liquibase.database.Database;
 import liquibase.executor.ExecutionOptions;
-import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.test.TestContext;
-import static org.junit.Assert.*;
 import org.junit.Test;
+
+import static org.junit.Assert.fail;
 
 public abstract class AbstractSqStatementTest<SqlStatementUnderTest extends SqlStatement> {
 
@@ -16,7 +17,7 @@ public abstract class AbstractSqStatementTest<SqlStatementUnderTest extends SqlS
     @Test
     public void hasAtLeastOneGenerator() {
         for (Database database : TestContext.getInstance().getAllDatabases()) {
-            if (SqlGeneratorFactory.getInstance().supports(createStatementUnderTest(), new ExecutionOptions(new RuntimeEnvironment(database)))) {
+            if (ActionGeneratorFactory.getInstance().supports(createStatementUnderTest(), new ExecutionOptions(new RuntimeEnvironment(database)))) {
                 return;
             };
         }

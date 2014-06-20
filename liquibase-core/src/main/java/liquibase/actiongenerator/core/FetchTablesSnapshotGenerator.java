@@ -73,4 +73,14 @@ public class FetchTablesSnapshotGenerator extends AbstractActionGenerator<FetchO
         };
     }
 
+
+    @Override
+    public boolean generateStatementsIsVolatile(ExecutionOptions options) {
+        return false;
+    }
+
+    @Override
+    public boolean generateRollbackStatementsIsVolatile(ExecutionOptions options) {
+        return false;
+    }
 }

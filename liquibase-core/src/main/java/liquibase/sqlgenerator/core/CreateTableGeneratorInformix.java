@@ -1,21 +1,21 @@
 package liquibase.sqlgenerator.core;
 
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-
+import liquibase.action.Action;
+import liquibase.action.UnparsedSql;
+import liquibase.actiongenerator.ActionGeneratorChain;
 import liquibase.database.Database;
 import liquibase.database.core.InformixDatabase;
 import liquibase.executor.ExecutionOptions;
 import liquibase.logging.LogFactory;
-import liquibase.action.Sql;
-import liquibase.action.UnparsedSql;
-import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.AutoIncrementConstraint;
 import liquibase.statement.ForeignKeyConstraint;
 import liquibase.statement.UniqueConstraint;
 import liquibase.statement.core.CreateTableStatement;
 import liquibase.util.StringUtils;
+
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 
 
 /**
@@ -35,8 +35,8 @@ public class CreateTableGeneratorInformix extends CreateTableGenerator {
         return PRIORITY_DATABASE;
     }
 
-	@Override
-    public Sql[] generateSql(CreateTableStatement statement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
+    @Override
+    public Action[] generateActions(CreateTableStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
 		StringBuilder buffer = new StringBuilder();
         Database database = options.getRuntimeEnvironment().getTargetDatabase();
 
@@ -169,7 +169,7 @@ public class CreateTableGeneratorInformix extends CreateTableGenerator {
             sql += " IN " + statement.getTablespace();
         }
 
-        return new Sql[] { new UnparsedSql(sql) };
+        return new Action[] { new UnparsedSql(sql) };
 	}
 
 	private boolean constraintNameAfterUnique(Database database) {

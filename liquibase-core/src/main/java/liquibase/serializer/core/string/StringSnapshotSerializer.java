@@ -1,17 +1,14 @@
 package liquibase.serializer.core.string;
 
-import liquibase.changelog.ChangeSet;
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.serializer.ChangeLogSerializer;
 import liquibase.serializer.LiquibaseSerializable;
 import liquibase.serializer.SnapshotSerializer;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.util.StringUtils;
 
-import java.io.File;
-import java.util.*;
-import java.io.OutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.util.*;
 
 public class StringSnapshotSerializer implements SnapshotSerializer {
 

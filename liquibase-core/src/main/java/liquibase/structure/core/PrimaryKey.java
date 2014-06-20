@@ -4,7 +4,6 @@ import liquibase.structure.AbstractDatabaseObject;
 import liquibase.structure.DatabaseObject;
 import liquibase.util.StringUtils;
 
-import javax.swing.text.TableView;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;

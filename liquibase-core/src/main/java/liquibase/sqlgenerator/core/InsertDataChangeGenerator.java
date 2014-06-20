@@ -1,8 +1,9 @@
 package liquibase.sqlgenerator.core;
 
+import liquibase.action.Action;
+import liquibase.actiongenerator.ActionGeneratorChain;
 import liquibase.exception.ValidationErrors;
 import liquibase.executor.ExecutionOptions;
-import liquibase.action.Sql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.InsertExecutablePreparedStatement;
 
@@ -16,7 +17,7 @@ public class InsertDataChangeGenerator extends AbstractSqlGenerator<InsertExecut
     }
 
     @Override
-    public Sql[] generateSql(InsertExecutablePreparedStatement statement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
-        return new Sql[0];
+    public Action[] generateActions(InsertExecutablePreparedStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
+        return new Action[0];
     }
 }

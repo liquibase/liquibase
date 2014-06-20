@@ -12,11 +12,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 
 import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertSame;
 import static liquibase.test.Assert.assertSetsEqual;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
 
 public class ChangeMetaDataTest {

@@ -8,9 +8,8 @@ import liquibase.statement.SqlStatement;
 import liquibase.statement.core.FetchObjectsStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.DatabaseObjectCollection;
-import liquibase.structure.core.*;
-
-import java.util.Set;
+import liquibase.structure.core.Schema;
+import liquibase.structure.core.Table;
 
 public class TableSnapshotGenerator extends AbstractSnapshotGenerator<Table> {
 

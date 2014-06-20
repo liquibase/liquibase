@@ -4,7 +4,8 @@ import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.*;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * A @{link ResourceAccessor} implementation which finds Files in the File System.

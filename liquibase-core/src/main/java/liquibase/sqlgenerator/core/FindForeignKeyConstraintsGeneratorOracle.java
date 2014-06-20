@@ -1,11 +1,12 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.CatalogAndSchema;
+import liquibase.action.Action;
+import liquibase.action.UnparsedSql;
+import liquibase.actiongenerator.ActionGeneratorChain;
 import liquibase.database.core.OracleDatabase;
 import liquibase.exception.ValidationErrors;
 import liquibase.executor.ExecutionOptions;
-import liquibase.action.Sql;
-import liquibase.action.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.FindForeignKeyConstraintsStatement;
 
@@ -28,7 +29,7 @@ public class FindForeignKeyConstraintsGeneratorOracle extends AbstractSqlGenerat
     }
 
     @Override
-    public Sql[] generateSql(FindForeignKeyConstraintsStatement statement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
+    public Action[] generateActions(FindForeignKeyConstraintsStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
         CatalogAndSchema baseTableSchema = new CatalogAndSchema(statement.getBaseTableCatalogName(), statement.getBaseTableSchemaName()).customize(options.getRuntimeEnvironment().getTargetDatabase());
 
         StringBuilder sb = new StringBuilder();
@@ -53,7 +54,7 @@ public class FindForeignKeyConstraintsGeneratorOracle extends AbstractSqlGenerat
         sb.append("AND BASE.CONSTRAINT_TYPE = 'R' ");
         sb.append("AND BASE.OWNER = '").append(baseTableSchema.getSchemaName()).append("'");
 
-        return new Sql[]{
+        return new Action[]{
                 new UnparsedSql(sb.toString())
         };
     }

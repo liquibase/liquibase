@@ -9,7 +9,8 @@ import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.JdbcDatabaseSnapshot;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.core.*;
+import liquibase.structure.core.Schema;
+import liquibase.structure.core.Table;
 import liquibase.util.StringUtils;
 
 import java.sql.SQLException;

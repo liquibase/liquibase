@@ -1,10 +1,10 @@
 package liquibase.sqlgenerator.core;
 
+import liquibase.action.Action;
+import liquibase.action.UnparsedSql;
+import liquibase.actiongenerator.ActionGeneratorChain;
 import liquibase.database.core.MySQLDatabase;
 import liquibase.executor.ExecutionOptions;
-import liquibase.action.Sql;
-import liquibase.action.UnparsedSql;
-import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.AddAutoIncrementStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Schema;
@@ -28,9 +28,9 @@ public class AddAutoIncrementGeneratorMySQL extends AddAutoIncrementGenerator {
     }
 
     @Override
-    public Sql[] generateSql(final AddAutoIncrementStatement statement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
+    public Action[] generateActions(AddAutoIncrementStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
 
-    	Sql[] sql = super.generateSql(statement, options, sqlGeneratorChain);
+    	Action[] actions = super.generateActions(statement, options, chain);
 
     	if(statement.getStartWith() != null){
 	    	MySQLDatabase mysqlDatabase = (MySQLDatabase) options.getRuntimeEnvironment().getTargetDatabase();
@@ -39,14 +39,14 @@ public class AddAutoIncrementGeneratorMySQL extends AddAutoIncrementGenerator {
 	            + " "
 	            + mysqlDatabase.getTableOptionAutoIncrementStartWithClause(statement.getStartWith());
 
-	        sql = concact(sql, new UnparsedSql(alterTableSql));
+	        actions = concact(actions, new UnparsedSql(alterTableSql));
     	}
 
-        return sql;
+        return actions;
     }
 
-	private Sql[] concact(Sql[] origSql, UnparsedSql unparsedSql) {
-		Sql[] changedSql = new Sql[origSql.length+1];
+	private Action[] concact(Action[] origSql, UnparsedSql unparsedSql) {
+		Action[] changedSql = new Action[origSql.length+1];
 		System.arraycopy(origSql, 0, changedSql, 0, origSql.length);
 		changedSql[origSql.length] = unparsedSql;
 

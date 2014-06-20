@@ -9,7 +9,6 @@ import liquibase.exception.ValidationErrors;
 import liquibase.exception.Warnings;
 import liquibase.executor.ExecutionOptions;
 import liquibase.servicelocator.ServiceLocator;
-import liquibase.action.Sql;
 import liquibase.statement.SqlStatement;
 
 import java.lang.reflect.ParameterizedType;
@@ -182,7 +181,7 @@ public class ActionGeneratorFactory {
     public Action[] generateActions(Change change, ExecutionOptions options) {
         SqlStatement[] sqlStatements = change.generateStatements(options);
         if (sqlStatements == null) {
-            return new Sql[0];
+            return new Action[0];
         } else {
             return generateActions(sqlStatements, options);
         }
@@ -194,7 +193,7 @@ public class ActionGeneratorFactory {
             returnList.addAll(Arrays.asList(ActionGeneratorFactory.getInstance().generateActions(statement, options)));
         }
 
-        return returnList.toArray(new Sql[returnList.size()]);
+        return returnList.toArray(new Action[returnList.size()]);
     }
 
     public Action[] generateActions(SqlStatement statement, ExecutionOptions options) {
@@ -212,7 +211,7 @@ public class ActionGeneratorFactory {
         }
         Action[] actions = generatorChain.generateActions(statement, options);
         if (actions == null) {
-            return new Sql[0];
+            return new Action[0];
         }
 
         List<ActionVisitor> sqlVisitors = options.getActionVisitors();
@@ -242,5 +241,27 @@ public class ActionGeneratorFactory {
     public Warnings warn(SqlStatement statement, ExecutionOptions options) {
         //noinspection unchecked
         return createGeneratorChain(statement, options).warn(statement, options);
+    }
+
+    /**
+     * Return true if the SqlStatement class queries the database in any way to determine Statements to execute.
+     * If the statement queries the database, it cannot be used in updateSql type operations
+     */
+    public boolean generateStatementsVolatile(SqlStatement statement, ExecutionOptions options) {
+        for (ActionGenerator generator : getGenerators(statement, options)) {
+            if (generator.generateStatementsIsVolatile(options)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean generateRollbackStatementsVolatile(SqlStatement statement, ExecutionOptions options) {
+        for (ActionGenerator generator : getGenerators(statement, options)) {
+            if (generator.generateRollbackStatementsIsVolatile(options)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

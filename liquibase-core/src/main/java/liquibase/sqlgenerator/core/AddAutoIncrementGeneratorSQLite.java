@@ -1,18 +1,18 @@
 package liquibase.sqlgenerator.core;
 
+import liquibase.action.Action;
+import liquibase.actiongenerator.ActionGeneratorChain;
+import liquibase.actiongenerator.ActionGeneratorFactory;
 import liquibase.change.ColumnConfig;
 import liquibase.change.ConstraintsConfig;
 import liquibase.database.core.SQLiteDatabase;
-import liquibase.exception.ValidationErrors;
-import liquibase.action.Action;
-import liquibase.executor.ExecutionOptions;
-import liquibase.structure.core.Index;
 import liquibase.exception.DatabaseException;
-import liquibase.action.Sql;
+import liquibase.exception.ValidationErrors;
+import liquibase.executor.ExecutionOptions;
 import liquibase.sqlgenerator.SqlGeneratorChain;
-import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.AddAutoIncrementStatement;
+import liquibase.structure.core.Index;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -55,7 +55,7 @@ public class AddAutoIncrementGeneratorSQLite extends AddAutoIncrementGenerator {
     }
 
     @Override
-    public Sql[] generateSql(final AddAutoIncrementStatement statement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
+    public Action[] generateActions(final AddAutoIncrementStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
         List<Action> statements = new ArrayList<Action>();
 
         // define alter table logic
@@ -89,11 +89,11 @@ public class AddAutoIncrementGeneratorSQLite extends AddAutoIncrementGenerator {
         try {
             // alter table
             List<SqlStatement> alterTableStatements = SQLiteDatabase.getAlterTableStatements(rename_alter_visitor, options, statement.getCatalogName(), statement.getSchemaName(), statement.getTableName());
-            statements.addAll( Arrays.asList(SqlGeneratorFactory.getInstance().generateSql(alterTableStatements.toArray(new SqlStatement[alterTableStatements.size()]), options)));
+            statements.addAll( Arrays.asList(ActionGeneratorFactory.getInstance().generateActions(alterTableStatements.toArray(new SqlStatement[alterTableStatements.size()]), options)));
         } catch (DatabaseException e) {
             e.printStackTrace();
         }
 
-        return statements.toArray(new Sql[statements.size()]);
+        return statements.toArray(new Action[statements.size()]);
     }
 }

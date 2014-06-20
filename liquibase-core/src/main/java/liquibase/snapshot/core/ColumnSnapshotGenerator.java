@@ -2,15 +2,12 @@ package liquibase.snapshot.core;
 
 import liquibase.RuntimeEnvironment;
 import liquibase.actiongenerator.ActionGeneratorChain;
-import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.snapshot.AbstractSnapshotGenerator;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.FetchObjectsStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.DatabaseObjectCollection;
 import liquibase.structure.core.Column;
-import liquibase.structure.core.ForeignKey;
-import liquibase.structure.core.Index;
 import liquibase.structure.core.Table;
 
 public class ColumnSnapshotGenerator extends AbstractSnapshotGenerator<Column> {

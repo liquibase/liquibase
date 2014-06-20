@@ -1,7 +1,6 @@
 package liquibase.database.core.supplier;
 
 import liquibase.sdk.supplier.database.AbstractDatabaseInstaller;
-import liquibase.sdk.supplier.database.JdbcTestConnection;
 
 import java.io.IOException;
 import java.util.Arrays;

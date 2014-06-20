@@ -1,12 +1,13 @@
 package liquibase.sqlgenerator.core;
 
-import liquibase.database.Database;
-import liquibase.executor.ExecutionOptions;
-import liquibase.datatype.DataTypeFactory;
-import liquibase.database.core.InformixDatabase;
-import liquibase.exception.ValidationErrors;
-import liquibase.action.Sql;
+import liquibase.action.Action;
 import liquibase.action.UnparsedSql;
+import liquibase.actiongenerator.ActionGeneratorChain;
+import liquibase.database.Database;
+import liquibase.database.core.InformixDatabase;
+import liquibase.datatype.DataTypeFactory;
+import liquibase.exception.ValidationErrors;
+import liquibase.executor.ExecutionOptions;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.AddAutoIncrementStatement;
 
@@ -36,13 +37,10 @@ public class AddAutoIncrementGeneratorInformix extends AddAutoIncrementGenerator
     }
 
     @Override
-    public Sql[] generateSql(
-    		AddAutoIncrementStatement statement,
-    		ExecutionOptions options,
-    		SqlGeneratorChain sqlGeneratorChain) {
+    public Action[] generateActions(AddAutoIncrementStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
         Database database = options.getRuntimeEnvironment().getTargetDatabase();
 
-        return new Sql[]{
+        return new Action[]{
             new UnparsedSql(
             	"ALTER TABLE "
             		+ database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName())

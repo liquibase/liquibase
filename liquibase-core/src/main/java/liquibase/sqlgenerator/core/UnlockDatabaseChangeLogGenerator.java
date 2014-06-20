@@ -1,11 +1,12 @@
 package liquibase.sqlgenerator.core;
 
+import liquibase.action.Action;
+import liquibase.actiongenerator.ActionGeneratorChain;
+import liquibase.actiongenerator.ActionGeneratorFactory;
 import liquibase.database.Database;
 import liquibase.exception.ValidationErrors;
 import liquibase.executor.ExecutionOptions;
-import liquibase.action.Sql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
-import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.core.UnlockDatabaseChangeLogStatement;
 import liquibase.statement.core.UpdateStatement;
 
@@ -17,7 +18,7 @@ public class UnlockDatabaseChangeLogGenerator extends AbstractSqlGenerator<Unloc
     }
 
     @Override
-    public Sql[] generateSql(UnlockDatabaseChangeLogStatement statement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
+    public Action[] generateActions(UnlockDatabaseChangeLogStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
         Database database = options.getRuntimeEnvironment().getTargetDatabase();
     	String liquibaseSchema = database.getLiquibaseSchemaName();
 
@@ -27,6 +28,6 @@ public class UnlockDatabaseChangeLogGenerator extends AbstractSqlGenerator<Unloc
         releaseStatement.addNewColumnValue("LOCKEDBY", null);
         releaseStatement.setWhereClause(database.escapeColumnName(database.getLiquibaseCatalogName(), liquibaseSchema, database.getDatabaseChangeLogTableName(), "ID")+" = 1");
 
-        return SqlGeneratorFactory.getInstance().generateSql(releaseStatement, options);
+        return ActionGeneratorFactory.getInstance().generateActions(releaseStatement, options);
     }
 }

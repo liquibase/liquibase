@@ -44,6 +44,16 @@ public class FetchColumnsSnapshotGenerator extends AbstractActionGenerator<Fetch
     }
 
     @Override
+    public boolean generateStatementsIsVolatile(ExecutionOptions options) {
+        return false;
+    }
+
+    @Override
+    public boolean generateRollbackStatementsIsVolatile(ExecutionOptions options) {
+        return false;
+    }
+
+    @Override
     public Action[] generateActions(final FetchObjectsStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
         Database database = options.getRuntimeEnvironment().getTargetDatabase();
 

@@ -10,12 +10,9 @@ import liquibase.exception.DatabaseException;
 import liquibase.snapshot.*;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.DatabaseObjectFactory;
-import liquibase.structure.core.Schema;
 import liquibase.util.StringUtils;
 
 import java.io.PrintStream;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Set;
 
 public class DiffCommand extends AbstractCommand {

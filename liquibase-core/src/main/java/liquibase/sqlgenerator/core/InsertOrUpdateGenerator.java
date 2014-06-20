@@ -1,6 +1,9 @@
 package liquibase.sqlgenerator.core;
 
-import java.util.Arrays;
+import liquibase.action.Action;
+import liquibase.action.Sql;
+import liquibase.action.UnparsedSql;
+import liquibase.actiongenerator.ActionGeneratorChain;
 import liquibase.database.Database;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.LiquibaseException;
@@ -9,9 +12,8 @@ import liquibase.executor.ExecutionOptions;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.InsertOrUpdateStatement;
 import liquibase.statement.core.UpdateStatement;
-import liquibase.action.Sql;
-import liquibase.action.UnparsedSql;
 
+import java.util.Arrays;
 import java.util.HashSet;
 
 public abstract class InsertOrUpdateGenerator extends AbstractSqlGenerator<InsertOrUpdateStatement> {
@@ -60,18 +62,17 @@ public abstract class InsertOrUpdateGenerator extends AbstractSqlGenerator<Inser
             where.append(" AND ");
         }
 
-        where.delete(where.lastIndexOf(" AND "),where.lastIndexOf(" AND ") + " AND ".length());
+        where.delete(where.lastIndexOf(" AND "), where.lastIndexOf(" AND ") + " AND ".length());
         return where.toString();
     }
 
-    protected String getInsertStatement(InsertOrUpdateStatement insertOrUpdateStatement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
+    protected String getInsertStatement(InsertOrUpdateStatement insertOrUpdateStatement, ExecutionOptions options, ActionGeneratorChain chain) {
         StringBuffer insertBuffer = new StringBuffer();
         InsertGenerator insert = new InsertGenerator();
-        Sql[] insertSql = insert.generateSql(insertOrUpdateStatement,options,sqlGeneratorChain);
+        Action[] insertSql = insert.generateActions(insertOrUpdateStatement, options, chain);
 
-        for(Sql s:insertSql)
-        {
-            insertBuffer.append(s.toSql());
+        for(Action s:insertSql) {
+            insertBuffer.append(((Sql) s).toSql());
             insertBuffer.append(";");
         }
 
@@ -80,7 +81,7 @@ public abstract class InsertOrUpdateGenerator extends AbstractSqlGenerator<Inser
         return insertBuffer.toString();
     }
 
-    protected String getUpdateStatement(InsertOrUpdateStatement insertOrUpdateStatement,ExecutionOptions options, String whereClause, SqlGeneratorChain sqlGeneratorChain) throws LiquibaseException {
+    protected String getUpdateStatement(InsertOrUpdateStatement insertOrUpdateStatement,ExecutionOptions options, String whereClause, ActionGeneratorChain chain) throws LiquibaseException {
 
         StringBuffer updateSqlString = new StringBuffer();
 
@@ -104,11 +105,11 @@ public abstract class InsertOrUpdateGenerator extends AbstractSqlGenerator<Inser
         	throw new LiquibaseException("No fields to update in set clause");
         }
 
-        Sql[] updateSql = update.generateSql(updateStatement, options, sqlGeneratorChain);
+        Action[] updateSql = update.generateActions(updateStatement, options, chain);
 
-        for(Sql s:updateSql)
+        for(Action s:updateSql)
         {
-            updateSqlString.append(s.toSql());
+            updateSqlString.append(s.describe());
             updateSqlString.append(";");
         }
 
@@ -120,17 +121,17 @@ public abstract class InsertOrUpdateGenerator extends AbstractSqlGenerator<Inser
     }
 
     @Override
-    public Sql[] generateSql(InsertOrUpdateStatement insertOrUpdateStatement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
+    public Action[] generateActions(InsertOrUpdateStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
         StringBuffer completeSql = new StringBuffer();
-        String whereClause = getWhereClause(insertOrUpdateStatement, options);
+        String whereClause = getWhereClause(statement, options);
 
-        completeSql.append( getRecordCheck(insertOrUpdateStatement, options, whereClause));
+        completeSql.append( getRecordCheck(statement, options, whereClause));
 
-        completeSql.append(getInsertStatement(insertOrUpdateStatement, options, sqlGeneratorChain));
+        completeSql.append(getInsertStatement(statement, options, chain));
 
         try {
         	
-            String updateStatement = getUpdateStatement(insertOrUpdateStatement, options,whereClause,sqlGeneratorChain);
+            String updateStatement = getUpdateStatement(statement, options,whereClause,chain);
             
             completeSql.append(getElse(options));
 
@@ -140,7 +141,7 @@ public abstract class InsertOrUpdateGenerator extends AbstractSqlGenerator<Inser
 
         completeSql.append(getPostUpdateStatements(options));
 
-        return new Sql[]{
+        return new Action[]{
                 new UnparsedSql(completeSql.toString(), "")
         };
     }

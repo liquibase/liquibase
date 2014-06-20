@@ -1,12 +1,12 @@
 package liquibase.sqlgenerator.core;
 
-import liquibase.database.Database;
-import liquibase.executor.ExecutionOptions;
-import liquibase.datatype.DataTypeFactory;
-import liquibase.database.core.DerbyDatabase;
-import liquibase.action.Sql;
+import liquibase.action.Action;
 import liquibase.action.UnparsedSql;
-import liquibase.sqlgenerator.SqlGeneratorChain;
+import liquibase.actiongenerator.ActionGeneratorChain;
+import liquibase.database.Database;
+import liquibase.database.core.DerbyDatabase;
+import liquibase.datatype.DataTypeFactory;
+import liquibase.executor.ExecutionOptions;
 import liquibase.statement.core.AddDefaultValueStatement;
 
 public class AddDefaultValueGeneratorDerby extends AddDefaultValueGenerator {
@@ -21,10 +21,10 @@ public class AddDefaultValueGeneratorDerby extends AddDefaultValueGenerator {
     }
 
     @Override
-    public Sql[] generateSql(AddDefaultValueStatement statement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
+    public Action[] generateActions(AddDefaultValueStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
         Database database = options.getRuntimeEnvironment().getTargetDatabase();
         Object defaultValue = statement.getDefaultValue();
-        return new Sql[]{
+        return new Action[]{
                 new UnparsedSql("ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " ALTER COLUMN  " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " WITH DEFAULT " + DataTypeFactory.getInstance().fromObject(defaultValue, database).objectToSql(defaultValue, database))
         };
     }

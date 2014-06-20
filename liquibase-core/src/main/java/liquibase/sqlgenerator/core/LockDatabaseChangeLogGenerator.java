@@ -1,13 +1,14 @@
 package liquibase.sqlgenerator.core;
 
+import liquibase.action.Action;
+import liquibase.actiongenerator.ActionGeneratorChain;
+import liquibase.actiongenerator.ActionGeneratorFactory;
 import liquibase.database.Database;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
 import liquibase.executor.ExecutionOptions;
-import liquibase.action.Sql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
-import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.core.LockDatabaseChangeLogStatement;
 import liquibase.statement.core.UpdateStatement;
 import liquibase.util.NetUtil;
@@ -34,7 +35,7 @@ public class LockDatabaseChangeLogGenerator extends AbstractSqlGenerator<LockDat
     }
 
     @Override
-    public Sql[] generateSql(LockDatabaseChangeLogStatement statement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
+    public Action[] generateActions(LockDatabaseChangeLogStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
         Database database = options.getRuntimeEnvironment().getTargetDatabase();
 
     	String liquibaseSchema = database.getLiquibaseSchemaName();
@@ -48,7 +49,7 @@ public class LockDatabaseChangeLogGenerator extends AbstractSqlGenerator<LockDat
         updateStatement.addNewColumnValue("LOCKEDBY", hostname + " (" + hostaddress + ")");
         updateStatement.setWhereClause(database.escapeColumnName(liquibaseCatalog, liquibaseSchema, database.getDatabaseChangeLogTableName(), "ID") + " = 1 AND " + database.escapeColumnName(liquibaseCatalog, liquibaseSchema, database.getDatabaseChangeLogTableName(), "LOCKED") + " = "+ DataTypeFactory.getInstance().fromDescription("boolean", database).objectToSql(false, database));
 
-        return SqlGeneratorFactory.getInstance().generateSql(updateStatement, options);
+        return ActionGeneratorFactory.getInstance().generateActions(updateStatement, options);
 
     }
 }

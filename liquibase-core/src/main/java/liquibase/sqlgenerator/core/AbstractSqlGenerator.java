@@ -1,6 +1,5 @@
 package liquibase.sqlgenerator.core;
 
-import liquibase.action.Action;
 import liquibase.actiongenerator.ActionGeneratorChain;
 import liquibase.database.Database;
 import liquibase.exception.ValidationErrors;
@@ -49,10 +48,5 @@ public abstract class AbstractSqlGenerator<StatementType extends SqlStatement> i
     @Override
     public final Warnings warn(StatementType statementType, ExecutionOptions options, ActionGeneratorChain chain) {
         return this.warn(statementType, options, new SqlGeneratorChain(chain));
-    }
-
-    @Override
-    public Action[] generateActions(StatementType statement, ExecutionOptions options, ActionGeneratorChain chain) {
-        return generateSql(statement, options, new SqlGeneratorChain(chain));
     }
 }

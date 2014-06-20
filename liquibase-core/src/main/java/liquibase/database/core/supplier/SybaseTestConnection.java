@@ -2,10 +2,7 @@ package liquibase.database.core.supplier;
 
 import liquibase.database.Database;
 import liquibase.database.core.SybaseDatabase;
-import liquibase.sdk.supplier.database.AbstractTestConnection;
 import liquibase.sdk.supplier.database.JdbcTestConnection;
-
-import java.util.Map;
 
 public class SybaseTestConnection extends JdbcTestConnection {
 

@@ -1,6 +1,9 @@
 package liquibase.serializer.core.formattedsql;
 
 import liquibase.RuntimeEnvironment;
+import liquibase.action.Action;
+import liquibase.action.Sql;
+import liquibase.actiongenerator.ActionGeneratorFactory;
 import liquibase.change.Change;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
@@ -9,9 +12,6 @@ import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.ExecutionOptions;
 import liquibase.serializer.ChangeLogSerializer;
 import liquibase.serializer.LiquibaseSerializable;
-import liquibase.action.Action;
-import liquibase.action.Sql;
-import liquibase.sqlgenerator.SqlGeneratorFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -45,9 +45,9 @@ public class FormattedSqlChangeLogSerializer  implements ChangeLogSerializer {
             builder.append("--changeset ").append(author).append(":").append(changeSet.getId()).append("\n");
             for (Change change : changeSet.getChanges()) {
                 ExecutionOptions options = new ExecutionOptions(null, new RuntimeEnvironment(database, null));
-                Action[] sqls = SqlGeneratorFactory.getInstance().generateSql(change.generateStatements(options), options);
-                if (sqls != null) {
-                    for (Action sql : sqls) {
+                Action[] actions = ActionGeneratorFactory.getInstance().generateActions(change.generateStatements(options), options);
+                if (actions != null) {
+                    for (Action sql : actions) {
                         builder.append(((Sql) sql).toSql()).append(((Sql) sql).getEndDelimiter()).append("\n");
                     }
                 }

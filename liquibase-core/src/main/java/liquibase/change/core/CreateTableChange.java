@@ -1,14 +1,15 @@
 package liquibase.change.core;
 
+import liquibase.actiongenerator.ActionGeneratorFactory;
 import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.database.core.MySQLDatabase;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.datatype.LiquibaseDataType;
-import liquibase.exception.*;
+import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.exception.ValidationErrors;
 import liquibase.executor.ExecutionOptions;
 import liquibase.snapshot.SnapshotGeneratorFactory;
-import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.*;
 import liquibase.statement.core.CreateTableStatement;
 import liquibase.statement.core.SetColumnRemarksStatement;
@@ -118,7 +119,7 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
 
         if (StringUtils.trimToNull(remarks) != null) {
             SetTableRemarksStatement remarksStatement = new SetTableRemarksStatement(catalogName, schemaName, tableName, remarks);
-            if (SqlGeneratorFactory.getInstance().supports(remarksStatement, options)) {
+            if (ActionGeneratorFactory.getInstance().supports(remarksStatement, options)) {
                 statements.add(remarksStatement);
             }
         }
@@ -127,7 +128,7 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
             String columnRemarks = StringUtils.trimToNull(column.getRemarks());
             if (columnRemarks != null) {
                 SetColumnRemarksStatement remarksStatement = new SetColumnRemarksStatement(catalogName, schemaName, tableName, column.getName(), columnRemarks);
-                if (!(database instanceof MySQLDatabase) && SqlGeneratorFactory.getInstance().supports(remarksStatement, options)) {
+                if (!(database instanceof MySQLDatabase) && ActionGeneratorFactory.getInstance().supports(remarksStatement, options)) {
                     statements.add(remarksStatement);
                 }
             }

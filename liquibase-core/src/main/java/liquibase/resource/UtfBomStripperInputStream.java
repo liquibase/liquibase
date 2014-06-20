@@ -1,6 +1,8 @@
 package liquibase.resource;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.PushbackInputStream;
 
 /**
  * Read up to 4 bytes to determine the BOM. Extra bytes, of if no BOM is

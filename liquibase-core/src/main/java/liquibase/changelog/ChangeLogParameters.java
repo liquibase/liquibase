@@ -3,10 +3,10 @@ package liquibase.changelog;
 import liquibase.ContextExpression;
 import liquibase.Contexts;
 import liquibase.configuration.LiquibaseConfiguration;
-import liquibase.parser.ChangeLogParserCofiguration;
 import liquibase.database.Database;
 import liquibase.database.DatabaseList;
 import liquibase.exception.DatabaseException;
+import liquibase.parser.ChangeLogParserCofiguration;
 import liquibase.util.StringUtils;
 
 import java.util.ArrayList;

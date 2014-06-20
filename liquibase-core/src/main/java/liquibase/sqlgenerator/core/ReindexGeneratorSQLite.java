@@ -1,10 +1,11 @@
 package liquibase.sqlgenerator.core;
 
+import liquibase.action.Action;
+import liquibase.action.UnparsedSql;
+import liquibase.actiongenerator.ActionGeneratorChain;
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.exception.ValidationErrors;
 import liquibase.executor.ExecutionOptions;
-import liquibase.action.Sql;
-import liquibase.action.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.ReindexStatement;
 
@@ -27,8 +28,8 @@ public class ReindexGeneratorSQLite extends AbstractSqlGenerator<ReindexStatemen
     }
 
     @Override
-    public Sql[] generateSql(ReindexStatement statement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
-        return new Sql[] {
+    public Action[] generateActions(ReindexStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
+        return new Action[] {
                 new UnparsedSql("REINDEX "+ options.getRuntimeEnvironment().getTargetDatabase().escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()))
         };
     }

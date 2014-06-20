@@ -1,10 +1,11 @@
 package liquibase.sqlgenerator.core;
 
+import liquibase.action.Action;
+import liquibase.action.UnparsedSql;
+import liquibase.actiongenerator.ActionGeneratorChain;
 import liquibase.database.core.HsqlDatabase;
 import liquibase.exception.ValidationErrors;
 import liquibase.executor.ExecutionOptions;
-import liquibase.action.Sql;
-import liquibase.action.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.FindForeignKeyConstraintsStatement;
 
@@ -19,13 +20,24 @@ public class FindForeignKeyConstraintsGeneratorHsql extends AbstractSqlGenerator
 		return options.getRuntimeEnvironment().getTargetDatabase() instanceof HsqlDatabase;
 	}
 
-	public ValidationErrors validate(FindForeignKeyConstraintsStatement statement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
+    @Override
+    public boolean generateStatementsIsVolatile(ExecutionOptions options) {
+        return false;
+    }
+
+    @Override
+    public boolean generateRollbackStatementsIsVolatile(ExecutionOptions options) {
+        return false;
+    }
+
+    public ValidationErrors validate(FindForeignKeyConstraintsStatement statement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
 		ValidationErrors validationErrors = new ValidationErrors();
 		validationErrors.checkRequiredField("baseTableName", statement.getBaseTableName());
 		return validationErrors;
 	}
 
-	public Sql[] generateSql(FindForeignKeyConstraintsStatement statement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
+    @Override
+    public Action[] generateActions(FindForeignKeyConstraintsStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
 		StringBuilder sb = new StringBuilder();
 
 		sb.append("SELECT ");
@@ -37,6 +49,6 @@ public class FindForeignKeyConstraintsGeneratorHsql extends AbstractSqlGenerator
 		sb.append("FROM INFORMATION_SCHEMA.SYSTEM_CROSSREFERENCE ");
 		sb.append("WHERE FKTABLE_NAME = '").append(statement.getBaseTableName().toUpperCase()).append("'");
 
-		return new Sql[] { new UnparsedSql(sb.toString()) };
+		return new Action[] { new UnparsedSql(sb.toString()) };
 	}
 }

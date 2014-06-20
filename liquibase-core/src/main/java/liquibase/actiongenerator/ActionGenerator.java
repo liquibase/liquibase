@@ -1,7 +1,6 @@
 package liquibase.actiongenerator;
 
 import liquibase.action.Action;
-import liquibase.database.Database;
 import liquibase.exception.ValidationErrors;
 import liquibase.exception.Warnings;
 import liquibase.executor.ExecutionOptions;
@@ -27,4 +26,13 @@ public interface ActionGenerator <StatementType extends SqlStatement> extends Pr
      * Generate the actual Sql for the given statement and database.
      */
     public Action[] generateActions(StatementType statement, ExecutionOptions options, ActionGeneratorChain chain);
+
+    /**
+     * Does this change require access to the database metadata?  If true, the change cannot be used in an updateSql-style command.
+     * @param options
+     */
+    public boolean generateStatementsIsVolatile(ExecutionOptions options);
+
+    public boolean generateRollbackStatementsIsVolatile(ExecutionOptions options);
+
 }

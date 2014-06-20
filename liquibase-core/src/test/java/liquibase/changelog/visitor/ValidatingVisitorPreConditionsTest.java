@@ -2,12 +2,6 @@ package liquibase.changelog.visitor;
 
 import liquibase.change.ColumnConfig;
 import liquibase.change.core.CreateTableChange;
-import liquibase.database.Database;
-import liquibase.exception.ValidationErrors;
-import java.util.ArrayList;
-import java.math.BigInteger;
-import java.util.List;
-import liquibase.change.core.CreateSequenceChange;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.RanChangeSet;
@@ -17,14 +11,16 @@ import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.PreconditionErrorException;
 import liquibase.exception.PreconditionFailedException;
-import liquibase.exception.Warnings;
-import liquibase.precondition.Precondition;
 import liquibase.precondition.core.DBMSPrecondition;
 import liquibase.precondition.core.PreconditionContainer;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  *

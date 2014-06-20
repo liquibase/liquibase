@@ -8,7 +8,7 @@ import liquibase.actiongenerator.ActionGeneratorFactory;
 import liquibase.exception.DatabaseException;
 import liquibase.logging.LogFactory;
 import liquibase.logging.Logger;
-import liquibase.statement.*;
+import liquibase.statement.SqlStatement;
 
 public class StandardExecutor extends AbstractExecutor {
 

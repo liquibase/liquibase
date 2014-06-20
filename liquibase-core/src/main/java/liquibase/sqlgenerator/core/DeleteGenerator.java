@@ -1,11 +1,12 @@
 package liquibase.sqlgenerator.core;
 
+import liquibase.action.Action;
+import liquibase.action.UnparsedSql;
+import liquibase.actiongenerator.ActionGeneratorChain;
 import liquibase.database.Database;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.ValidationErrors;
 import liquibase.executor.ExecutionOptions;
-import liquibase.action.Sql;
-import liquibase.action.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.DeleteStatement;
 import liquibase.structure.core.Column;
@@ -20,7 +21,7 @@ public class DeleteGenerator extends AbstractSqlGenerator<DeleteStatement> {
     }
 
     @Override
-    public Sql[] generateSql(DeleteStatement statement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
+    public Action[] generateActions(DeleteStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
         Database database = options.getRuntimeEnvironment().getTargetDatabase();
 
         StringBuffer sql = new StringBuffer("DELETE FROM " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()));
@@ -40,6 +41,6 @@ public class DeleteGenerator extends AbstractSqlGenerator<DeleteStatement> {
             sql.append(" ").append(fixedWhereClause);
         }
 
-        return new Sql[]{new UnparsedSql(sql.toString())};
+        return new Action[]{new UnparsedSql(sql.toString())};
     }
 }

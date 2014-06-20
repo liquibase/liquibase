@@ -1,12 +1,13 @@
 package liquibase.sqlgenerator.core;
 
+import liquibase.action.Action;
+import liquibase.actiongenerator.ActionGeneratorChain;
+import liquibase.actiongenerator.ActionGeneratorFactory;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.exception.ValidationErrors;
 import liquibase.executor.ExecutionOptions;
-import liquibase.action.Sql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
-import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.core.DeleteStatement;
 import liquibase.statement.core.RemoveChangeSetRanStatusStatement;
 
@@ -20,11 +21,11 @@ public class RemoveChangeSetRanStatusGenerator extends AbstractSqlGenerator<Remo
     }
 
     @Override
-    public Sql[] generateSql(RemoveChangeSetRanStatusStatement statement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
+    public Action[] generateActions(RemoveChangeSetRanStatusStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
         ChangeSet changeSet = statement.getChangeSet();
 
         Database database = options.getRuntimeEnvironment().getTargetDatabase();
-        return SqlGeneratorFactory.getInstance().generateSql(new DeleteStatement(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName())
+        return ActionGeneratorFactory.getInstance().generateActions(new DeleteStatement(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName())
                 .setWhereClause("ID=? AND AUTHOR=? AND FILENAME=?")
                 .addWhereParameters(changeSet.getId(), changeSet.getAuthor(), changeSet.getFilePath())
                 , options);

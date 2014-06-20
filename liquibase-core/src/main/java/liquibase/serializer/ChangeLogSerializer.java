@@ -3,8 +3,8 @@ package liquibase.serializer;
 import liquibase.changelog.ChangeSet;
 
 import java.io.File;
-import java.io.OutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.List;
 
 public interface ChangeLogSerializer extends LiquibaseSerializer {

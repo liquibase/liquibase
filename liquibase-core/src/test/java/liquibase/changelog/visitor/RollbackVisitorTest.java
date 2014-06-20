@@ -4,9 +4,10 @@ import liquibase.RuntimeEnvironment;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.database.Database;
+import org.junit.Test;
+
 import static org.easymock.EasyMock.expectLastCall;
 import static org.easymock.classextension.EasyMock.*;
-import org.junit.Test;
 
 public class RollbackVisitorTest {
     @Test

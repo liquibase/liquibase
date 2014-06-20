@@ -1,12 +1,13 @@
 package liquibase.sqlgenerator.core;
 
+import liquibase.action.Action;
+import liquibase.action.UnparsedSql;
+import liquibase.actiongenerator.ActionGeneratorChain;
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.ValidationErrors;
 import liquibase.executor.ExecutionOptions;
-import liquibase.action.Sql;
-import liquibase.action.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.RenameColumnStatement;
 
@@ -32,7 +33,7 @@ public class RenameColumnGenerator extends AbstractSqlGenerator<RenameColumnStat
     }
 
     @Override
-    public Sql[] generateSql(RenameColumnStatement statement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
+    public Action[] generateActions(RenameColumnStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
         Database database = options.getRuntimeEnvironment().getTargetDatabase();
 
         String sql;
@@ -64,7 +65,7 @@ public class RenameColumnGenerator extends AbstractSqlGenerator<RenameColumnStat
             sql += " COMMENT '" + statement.getRemarks() +"' ";
         }
 
-        return new Sql[] {
+        return new Action[] {
                 new UnparsedSql(sql)
         };
     }

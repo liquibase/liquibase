@@ -1,7 +1,5 @@
 package liquibase.sdk.verifytest;
 
-import junit.framework.AssertionFailedError;
-import liquibase.action.Action;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.sdk.exception.UnexpectedLiquibaseSdkException;
 import liquibase.util.MD5Util;

@@ -1,10 +1,11 @@
 package liquibase.serializer;
 
-import liquibase.change.DatabaseChangeProperty;
 import liquibase.exception.UnexpectedLiquibaseException;
 
 import java.lang.reflect.Field;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 public class ReflectionSerializer {
 

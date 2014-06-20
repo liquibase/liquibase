@@ -1,12 +1,13 @@
 package liquibase.sqlgenerator.core;
 
+import liquibase.action.Action;
+import liquibase.action.UnparsedSql;
+import liquibase.actiongenerator.ActionGeneratorChain;
 import liquibase.database.Database;
 import liquibase.database.core.DerbyDatabase;
 import liquibase.database.core.PostgresDatabase;
 import liquibase.exception.ValidationErrors;
 import liquibase.executor.ExecutionOptions;
-import liquibase.action.Sql;
-import liquibase.action.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.DropSequenceStatement;
 
@@ -25,7 +26,7 @@ public class DropSequenceGenerator extends AbstractSqlGenerator<DropSequenceStat
     }
 
     @Override
-    public Sql[] generateSql(DropSequenceStatement statement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
+    public Action[] generateActions(DropSequenceStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
         Database database = options.getRuntimeEnvironment().getTargetDatabase();
 
         String sql = "DROP SEQUENCE " + database.escapeSequenceName(statement.getCatalogName(), statement.getSchemaName(), statement.getSequenceName());
@@ -35,7 +36,7 @@ public class DropSequenceGenerator extends AbstractSqlGenerator<DropSequenceStat
         if (database instanceof DerbyDatabase) {
             sql += " RESTRICT";
         }
-        return new Sql[] {
+        return new Action[] {
                 new UnparsedSql(sql)
         };
     }

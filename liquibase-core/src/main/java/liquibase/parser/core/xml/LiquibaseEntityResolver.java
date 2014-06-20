@@ -1,20 +1,20 @@
 package liquibase.parser.core.xml;
 
+import liquibase.logging.LogFactory;
+import liquibase.logging.Logger;
 import liquibase.parser.LiquibaseParser;
 import liquibase.parser.NamespaceDetails;
 import liquibase.parser.NamespaceDetailsFactory;
+import liquibase.resource.ResourceAccessor;
 import liquibase.serializer.LiquibaseSerializer;
 import liquibase.util.StreamUtil;
+import liquibase.util.file.FilenameUtils;
 import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+import org.xml.sax.ext.EntityResolver2;
 
 import java.io.IOException;
 import java.io.InputStream;
-import liquibase.logging.LogFactory;
-import liquibase.logging.Logger;
-import liquibase.resource.ResourceAccessor;
-import liquibase.util.file.FilenameUtils;
-import org.xml.sax.SAXException;
-import org.xml.sax.ext.EntityResolver2;
 
 /**
  * Finds the Liquibase schema from the classpath rather than fetching it over the Internet.

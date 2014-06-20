@@ -1,13 +1,13 @@
 package liquibase.change.core;
 
+import liquibase.change.ChangeMetaData;
 import liquibase.change.ChangeStatus;
 import liquibase.change.DatabaseChange;
-import liquibase.change.ChangeMetaData;
 import liquibase.change.DatabaseChangeProperty;
 import liquibase.database.Database;
 import liquibase.datatype.DataTypeFactory;
-import liquibase.exception.RollbackImpossibleException;
 import liquibase.exception.LiquibaseException;
+import liquibase.exception.RollbackImpossibleException;
 import liquibase.executor.ExecutionOptions;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.DeleteStatement;

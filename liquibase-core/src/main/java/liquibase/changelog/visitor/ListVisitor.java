@@ -6,7 +6,9 @@ import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.filter.ChangeSetFilterResult;
 import liquibase.exception.LiquibaseException;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
 public class ListVisitor implements ChangeSetVisitor {
 

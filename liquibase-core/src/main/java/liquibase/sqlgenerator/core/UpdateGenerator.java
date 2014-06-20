@@ -1,11 +1,12 @@
 package liquibase.sqlgenerator.core;
 
+import liquibase.action.Action;
+import liquibase.action.UnparsedSql;
+import liquibase.actiongenerator.ActionGeneratorChain;
 import liquibase.database.Database;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.ValidationErrors;
 import liquibase.executor.ExecutionOptions;
-import liquibase.action.Sql;
-import liquibase.action.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.DatabaseFunction;
 import liquibase.statement.core.UpdateStatement;
@@ -24,7 +25,7 @@ public class UpdateGenerator extends AbstractSqlGenerator<UpdateStatement> {
     }
 
     @Override
-    public Sql[] generateSql(UpdateStatement statement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
+    public Action[] generateActions(UpdateStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
         Database database = options.getRuntimeEnvironment().getTargetDatabase();
 
         StringBuffer sql = new StringBuffer("UPDATE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " SET");
@@ -53,7 +54,7 @@ public class UpdateGenerator extends AbstractSqlGenerator<UpdateStatement> {
             sql.append(" ").append(fixedWhereClause);
         }
 
-        return new Sql[]{
+        return new Action[]{
                 new UnparsedSql(sql.toString())
         };
     }

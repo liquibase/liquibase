@@ -1,8 +1,9 @@
 package liquibase.change.core;
 
+import liquibase.action.Action;
 import liquibase.change.AbstractChange;
-import liquibase.change.DatabaseChange;
 import liquibase.change.ChangeMetaData;
+import liquibase.change.DatabaseChange;
 import liquibase.change.DatabaseChangeProperty;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
@@ -15,7 +16,6 @@ import liquibase.logging.LogFactory;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.resource.ResourceAccessor;
-import liquibase.action.Sql;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.CommentStatement;
 import liquibase.statement.core.RuntimeStatement;
@@ -111,7 +111,7 @@ public class ExecuteShellCommandChange extends AbstractChange {
             return new SqlStatement[]{new RuntimeStatement() {
 
                 @Override
-                public Sql[] generate(ExecutionOptions options) {
+                public Action[] generate(ExecutionOptions options) {
                     List<String> commandArray = new ArrayList<String>();
                     commandArray.add(executable);
                     commandArray.addAll(getArgs());

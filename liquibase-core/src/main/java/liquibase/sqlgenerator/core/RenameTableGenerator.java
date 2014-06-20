@@ -1,14 +1,15 @@
 package liquibase.sqlgenerator.core;
 
+import liquibase.action.Action;
+import liquibase.action.UnparsedSql;
+import liquibase.actiongenerator.ActionGeneratorChain;
 import liquibase.database.Database;
 import liquibase.database.core.*;
-import liquibase.executor.ExecutionOptions;
-import liquibase.structure.core.Table;
 import liquibase.exception.ValidationErrors;
-import liquibase.action.Sql;
-import liquibase.action.UnparsedSql;
+import liquibase.executor.ExecutionOptions;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.RenameTableStatement;
+import liquibase.structure.core.Table;
 
 public class RenameTableGenerator extends AbstractSqlGenerator<RenameTableStatement> {
 
@@ -26,7 +27,7 @@ public class RenameTableGenerator extends AbstractSqlGenerator<RenameTableStatem
     }
 
     @Override
-    public Sql[] generateSql(RenameTableStatement statement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
+    public Action[] generateActions(RenameTableStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
         Database database = options.getRuntimeEnvironment().getTargetDatabase();
 
         String sql;
@@ -54,7 +55,7 @@ public class RenameTableGenerator extends AbstractSqlGenerator<RenameTableStatem
             sql = "RENAME " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getOldTableName()) + " TO " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getNewTableName());
         }
 
-        return new Sql[]{
+        return new Action[]{
                 new UnparsedSql(sql)
         };
     }

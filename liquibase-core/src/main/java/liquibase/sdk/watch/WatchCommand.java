@@ -1,8 +1,5 @@
 package liquibase.sdk.watch;
 
-import com.sun.org.apache.xpath.internal.SourceTree;
-import liquibase.changelog.ChangeLogHistoryServiceFactory;
-import liquibase.changelog.StandardChangeLogHistoryService;
 import liquibase.command.AbstractCommand;
 import liquibase.command.CommandValidationErrors;
 import liquibase.database.Database;

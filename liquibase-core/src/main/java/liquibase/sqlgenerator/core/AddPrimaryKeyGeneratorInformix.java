@@ -1,12 +1,12 @@
 package liquibase.sqlgenerator.core;
 
+import liquibase.action.Action;
+import liquibase.action.UnparsedSql;
+import liquibase.actiongenerator.ActionGeneratorChain;
 import liquibase.database.Database;
 import liquibase.database.core.InformixDatabase;
 import liquibase.executor.ExecutionOptions;
-import liquibase.action.Sql;
-import liquibase.action.UnparsedSql;
 import liquibase.sqlgenerator.SqlGenerator;
-import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.AddPrimaryKeyStatement;
 
 public class AddPrimaryKeyGeneratorInformix extends AddPrimaryKeyGenerator {
@@ -22,9 +22,9 @@ public class AddPrimaryKeyGeneratorInformix extends AddPrimaryKeyGenerator {
 
         return (database instanceof InformixDatabase);
     }
-    
+
     @Override
-    public Sql[] generateSql(AddPrimaryKeyStatement statement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
+    public Action[] generateActions(AddPrimaryKeyStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
         Database database = options.getRuntimeEnvironment().getTargetDatabase();
 
         StringBuilder sql = new StringBuilder();
@@ -38,7 +38,7 @@ public class AddPrimaryKeyGeneratorInformix extends AddPrimaryKeyGenerator {
    	        sql.append(database.escapeConstraintName(statement.getConstraintName()));
    	    }
 
-        return new Sql[] {
+        return new Action[] {
                 new UnparsedSql(sql.toString())
         };
     }

@@ -1,14 +1,15 @@
 package liquibase.sqlgenerator.core;
 
+import liquibase.action.Action;
+import liquibase.action.UnparsedSql;
+import liquibase.actiongenerator.ActionGeneratorChain;
 import liquibase.database.Database;
 import liquibase.database.core.InformixDatabase;
 import liquibase.database.core.MSSQLDatabase;
-import liquibase.database.core.SQLiteDatabase;
 import liquibase.database.core.OracleDatabase;
+import liquibase.database.core.SQLiteDatabase;
 import liquibase.exception.ValidationErrors;
 import liquibase.executor.ExecutionOptions;
-import liquibase.action.Sql;
-import liquibase.action.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.AddForeignKeyConstraintStatement;
 
@@ -40,7 +41,7 @@ public class AddForeignKeyConstraintGenerator extends AbstractSqlGenerator<AddFo
     }
 
     @Override
-    public Sql[] generateSql(AddForeignKeyConstraintStatement statement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
+    public Action[] generateActions(AddForeignKeyConstraintStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
         Database database = options.getRuntimeEnvironment().getTargetDatabase();
 	    StringBuilder sb = new StringBuilder();
 	    sb.append("ALTER TABLE ")
@@ -95,7 +96,7 @@ public class AddForeignKeyConstraintGenerator extends AbstractSqlGenerator<AddFo
 		    sb.append(database.escapeConstraintName(statement.getConstraintName()));
 	    }
 
-	    return new Sql[]{
+	    return new Action[]{
 			    new UnparsedSql(sb.toString())
 	    };
     }

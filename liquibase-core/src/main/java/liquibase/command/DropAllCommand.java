@@ -1,7 +1,6 @@
 package liquibase.command;
 
 import liquibase.CatalogAndSchema;
-import liquibase.Contexts;
 import liquibase.changelog.ChangeLogHistoryService;
 import liquibase.changelog.ChangeLogHistoryServiceFactory;
 import liquibase.database.Database;

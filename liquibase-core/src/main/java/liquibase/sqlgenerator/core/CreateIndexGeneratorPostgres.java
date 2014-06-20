@@ -1,22 +1,18 @@
 package liquibase.sqlgenerator.core;
 
+import liquibase.action.Action;
+import liquibase.action.UnparsedSql;
+import liquibase.actiongenerator.ActionGeneratorChain;
+import liquibase.database.Database;
+import liquibase.database.core.*;
+import liquibase.executor.ExecutionOptions;
+import liquibase.statement.core.CreateIndexStatement;
+import liquibase.structure.core.Index;
+import liquibase.util.StringUtils;
+
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-
-import liquibase.database.Database;
-import liquibase.database.core.DB2Database;
-import liquibase.database.core.InformixDatabase;
-import liquibase.database.core.MSSQLDatabase;
-import liquibase.database.core.PostgresDatabase;
-import liquibase.database.core.SybaseASADatabase;
-import liquibase.executor.ExecutionOptions;
-import liquibase.structure.core.Index;
-import liquibase.action.Sql;
-import liquibase.action.UnparsedSql;
-import liquibase.sqlgenerator.SqlGeneratorChain;
-import liquibase.statement.core.CreateIndexStatement;
-import liquibase.util.StringUtils;
 
 public class CreateIndexGeneratorPostgres extends CreateIndexGenerator {
 
@@ -31,7 +27,7 @@ public class CreateIndexGeneratorPostgres extends CreateIndexGenerator {
     }
 
     @Override
-    public Sql[] generateSql(CreateIndexStatement statement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
+    public Action[] generateActions(CreateIndexStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
 
         Database database = options.getRuntimeEnvironment().getTargetDatabase();
 
@@ -41,7 +37,7 @@ public class CreateIndexGeneratorPostgres extends CreateIndexGenerator {
         if (associatedWith != null && (associatedWith.contains(Index.MARK_PRIMARY_KEY) ||
             associatedWith.contains(Index.MARK_UNIQUE_CONSTRAINT) ||
             associatedWith.contains(Index.MARK_FOREIGN_KEY))) {
-            return new Sql[0];
+            return new Action[0];
         }
 
 	    StringBuilder buffer = new StringBuilder();
@@ -78,6 +74,6 @@ public class CreateIndexGeneratorPostgres extends CreateIndexGenerator {
 		    }
 	    }
 
-	    return new Sql[]{new UnparsedSql(buffer.toString())};
+	    return new Action[]{new UnparsedSql(buffer.toString())};
     }
 }

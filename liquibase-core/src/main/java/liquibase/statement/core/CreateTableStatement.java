@@ -3,7 +3,6 @@ package liquibase.statement.core;
 import liquibase.datatype.LiquibaseDataType;
 import liquibase.statement.*;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.core.Relation;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
 

@@ -7,9 +7,9 @@ import liquibase.serializer.LiquibaseSerializable;
 import liquibase.util.StringUtils;
 
 import java.io.File;
-import java.util.*;
-import java.io.OutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.util.*;
 
 public class StringChangeLogSerializer implements ChangeLogSerializer {
 

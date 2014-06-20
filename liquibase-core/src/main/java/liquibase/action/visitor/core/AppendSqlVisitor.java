@@ -1,9 +1,7 @@
 package liquibase.action.visitor.core;
 
 import liquibase.action.visitor.AbstractSqlVisitor;
-import liquibase.database.Database;
 import liquibase.executor.ExecutionOptions;
-import liquibase.util.StringUtils;
 
 /**
  * ActionVisitor that appends the given value to SQL in an Action.

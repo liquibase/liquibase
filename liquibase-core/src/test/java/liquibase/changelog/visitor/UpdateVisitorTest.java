@@ -4,15 +4,11 @@ import liquibase.RuntimeEnvironment;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.ChangeSet.RunStatus;
 import liquibase.changelog.DatabaseChangeLog;
-import liquibase.changelog.filter.ChangeSetFilterResult;
 import liquibase.database.Database;
-import static org.easymock.classextension.EasyMock.*;
-
 import liquibase.database.ObjectQuotingStrategy;
-import liquibase.executor.ExecutionOptions;
 import org.junit.Test;
 
-import java.util.HashSet;
+import static org.easymock.classextension.EasyMock.*;
 
 public class UpdateVisitorTest {
 

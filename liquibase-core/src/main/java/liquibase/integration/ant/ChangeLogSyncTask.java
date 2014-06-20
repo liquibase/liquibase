@@ -1,7 +1,6 @@
 package liquibase.integration.ant;
 
 import liquibase.Liquibase;
-import org.apache.tools.ant.AntClassLoader;
 import org.apache.tools.ant.BuildException;
 
 import java.io.Writer;

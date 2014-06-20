@@ -1,11 +1,12 @@
 package liquibase.sqlgenerator.core;
 
+import liquibase.action.Action;
+import liquibase.action.UnparsedSql;
+import liquibase.actiongenerator.ActionGeneratorChain;
 import liquibase.change.ColumnConfig;
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.exception.ValidationErrors;
 import liquibase.executor.ExecutionOptions;
-import liquibase.action.Sql;
-import liquibase.action.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.CopyRowsStatement;
 
@@ -26,7 +27,7 @@ public class CopyRowsGenerator extends AbstractSqlGenerator<CopyRowsStatement> {
     }
 
     @Override
-    public Sql[] generateSql(CopyRowsStatement statement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
+    public Action[] generateActions(CopyRowsStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
         StringBuffer sql = new StringBuffer();
         if (options.getRuntimeEnvironment().getTargetDatabase() instanceof SQLiteDatabase) {
             sql.append("INSERT INTO `").append(statement.getTargetTable()).append("` (");
@@ -50,7 +51,7 @@ public class CopyRowsGenerator extends AbstractSqlGenerator<CopyRowsStatement> {
             sql.append(" FROM `").append(statement.getSourceTable()).append("`");
         }
 
-        return new Sql[]{
+        return new Action[]{
                 new UnparsedSql(sql.toString())
         };
     }

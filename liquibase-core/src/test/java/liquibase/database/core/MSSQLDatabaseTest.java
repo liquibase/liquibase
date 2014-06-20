@@ -1,22 +1,17 @@
 package liquibase.database.core;
 
-import static org.easymock.classextension.EasyMock.*;
-
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
-import java.sql.Statement;
-
 import liquibase.database.AbstractJdbcDatabaseTest;
 import liquibase.database.Database;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
-
-import static org.junit.Assert.*;
-
 import liquibase.executor.QueryResult;
 import org.junit.Test;
+
+import java.sql.Connection;
+import java.sql.SQLException;
+
+import static org.easymock.classextension.EasyMock.*;
+import static org.junit.Assert.*;
 
 /**
  * Tests for {@link MSSQLDatabase}

@@ -1,11 +1,12 @@
 package liquibase.sqlgenerator.core;
 
+import liquibase.action.Action;
+import liquibase.action.UnparsedSql;
+import liquibase.actiongenerator.ActionGeneratorChain;
 import liquibase.database.Database;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.ValidationErrors;
 import liquibase.executor.ExecutionOptions;
-import liquibase.action.Sql;
-import liquibase.action.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.DatabaseFunction;
 import liquibase.statement.core.InsertStatement;
@@ -28,7 +29,7 @@ public class InsertGenerator extends AbstractSqlGenerator<InsertStatement> {
     }
 
     @Override
-    public Sql[] generateSql(InsertStatement statement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
+    public Action[] generateActions(InsertStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
         Database database = options.getRuntimeEnvironment().getTargetDatabase();
 
         StringBuffer sql = new StringBuffer("INSERT INTO " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " (");
@@ -74,7 +75,7 @@ public class InsertGenerator extends AbstractSqlGenerator<InsertStatement> {
 
         sql.append(")");
 
-        return new Sql[] {
+        return new Action[] {
                 new UnparsedSql(sql.toString())
         };
     }

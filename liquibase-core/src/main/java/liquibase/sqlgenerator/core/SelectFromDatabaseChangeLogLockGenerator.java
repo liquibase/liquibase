@@ -1,11 +1,12 @@
 package liquibase.sqlgenerator.core;
 
+import liquibase.action.Action;
+import liquibase.action.UnparsedSql;
+import liquibase.actiongenerator.ActionGeneratorChain;
 import liquibase.database.Database;
 import liquibase.database.core.OracleDatabase;
 import liquibase.exception.ValidationErrors;
 import liquibase.executor.ExecutionOptions;
-import liquibase.action.Sql;
-import liquibase.action.UnparsedSql;
 import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.SelectFromDatabaseChangeLogLockStatement;
 import liquibase.util.StringUtils;
@@ -21,7 +22,7 @@ public class SelectFromDatabaseChangeLogLockGenerator extends AbstractSqlGenerat
     }
 
     @Override
-    public Sql[] generateSql(SelectFromDatabaseChangeLogLockStatement statement, ExecutionOptions options, SqlGeneratorChain sqlGeneratorChain) {
+    public Action[] generateActions(SelectFromDatabaseChangeLogLockStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
         Database database = options.getRuntimeEnvironment().getTargetDatabase();
     	String liquibaseSchema;
    		liquibaseSchema = database.getLiquibaseSchemaName();
@@ -40,7 +41,7 @@ public class SelectFromDatabaseChangeLogLockGenerator extends AbstractSqlGenerat
         if (database instanceof OracleDatabase) {
             sql += " FOR UPDATE";
         }
-        return new Sql[] {
+        return new Action[] {
                 new UnparsedSql(sql)
         };
     }

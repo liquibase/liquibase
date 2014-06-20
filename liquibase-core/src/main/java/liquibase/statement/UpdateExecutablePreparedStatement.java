@@ -1,18 +1,17 @@
 package liquibase.statement;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-
 import liquibase.change.ColumnConfig;
 import liquibase.changelog.ChangeSet;
-import liquibase.database.Database;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.executor.ExecutionOptions;
 import liquibase.resource.ResourceAccessor;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Column;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
 
 public class UpdateExecutablePreparedStatement extends ExecutablePreparedStatementBase {
 

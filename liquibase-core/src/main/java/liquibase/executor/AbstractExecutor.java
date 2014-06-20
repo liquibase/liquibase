@@ -1,11 +1,8 @@
 package liquibase.executor;
 
 import liquibase.RuntimeEnvironment;
-import liquibase.actiongenerator.ActionGeneratorFactory;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
-import liquibase.action.Action;
-import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.SqlStatement;
 
 /**

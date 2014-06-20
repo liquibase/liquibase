@@ -1,7 +1,10 @@
 package liquibase.integration.servlet;
 
 import liquibase.Liquibase;
-import liquibase.configuration.*;
+import liquibase.configuration.ConfigurationProperty;
+import liquibase.configuration.ConfigurationValueProvider;
+import liquibase.configuration.GlobalConfiguration;
+import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.database.jvm.JdbcConnection;
