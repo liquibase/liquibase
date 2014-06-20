@@ -1,7 +1,7 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.action.Action;
-import liquibase.action.UnparsedSql;
+import liquibase.action.core.UnparsedSql;
 import liquibase.actiongenerator.ActionGeneratorChain;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.exception.ValidationErrors;

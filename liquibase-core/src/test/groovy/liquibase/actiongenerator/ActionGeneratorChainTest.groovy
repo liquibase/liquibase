@@ -37,8 +37,8 @@ public class ActionGeneratorChainTest extends Specification {
         Action[] actions = chain.generateActions(new MockSqlStatement(), new ExecutionOptions(new RuntimeEnvironment(new MockDatabase())))
        then:
         assert actions.length == 2
-        assert actions[0].toSql() == "A1"
-        assert actions[1].toSql() == "A2"
+        assert actions[0].describe() == "A1"
+        assert actions[1].describe() == "A2"
     }
 
     def void generateActions_twoGenerators() {
@@ -51,10 +51,10 @@ public class ActionGeneratorChainTest extends Specification {
         
         then:
         assert actions.length == 4
-        assert actions[0].toSql() == "B1"
-        assert actions[1].toSql() == "B2"
-        assert actions[2].toSql() == "A1"
-        assert actions[3].toSql() == "A2"
+        assert actions[0].describe() == "B1"
+        assert actions[1].describe() == "B2"
+        assert actions[2].describe() == "A1"
+        assert actions[3].describe() == "A2"
     }
 
     def void generateActions_threeGenerators() {
@@ -68,12 +68,12 @@ public class ActionGeneratorChainTest extends Specification {
         
         then:
         assert actions.length == 6
-        assert actions[0].toSql() == "C1"
-        assert actions[1].toSql() == "C2"
-        assert actions[2].toSql() == "B1"
-        assert actions[3].toSql() == "B2"
-        assert actions[4].toSql() == "A1"
-        assert actions[5].toSql() == "A2"
+        assert actions[0].describe() == "C1"
+        assert actions[1].describe() == "C2"
+        assert actions[2].describe() == "B1"
+        assert actions[3].describe() == "B2"
+        assert actions[4].describe() == "A1"
+        assert actions[5].describe() == "A2"
     }
 
     def validate_nullGenerators() {

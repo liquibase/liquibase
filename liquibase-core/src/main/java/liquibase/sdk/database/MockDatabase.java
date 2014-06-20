@@ -37,6 +37,7 @@ public class MockDatabase implements Database, InternalDatabase {
     private String defaultCatalogName;
     private String defaultSchemaName;
     private boolean caseSensitive;
+    private DatabaseConnection connection;
 
 
     @Override
@@ -98,14 +99,12 @@ public class MockDatabase implements Database, InternalDatabase {
 
     @Override
     public DatabaseConnection getConnection() {
-        return null;
-    }
-
-    public void setConnection(final Connection conn) {
+        return connection;
     }
 
     @Override
     public void setConnection(final DatabaseConnection conn) {
+        this.connection = conn;
     }
 
     @Override

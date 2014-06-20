@@ -1,5 +1,7 @@
 package liquibase.action;
 
+import liquibase.RuntimeEnvironment;
+
 /**
  * Base interface for all actions to perform against the outside environment.
  * See {@link liquibase.action.QueryAction}, {@link liquibase.action.ExecuteAction}, and {@link liquibase.action.UpdateAction} for types of Actions to implement.

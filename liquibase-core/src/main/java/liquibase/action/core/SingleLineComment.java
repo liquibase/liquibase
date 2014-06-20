@@ -1,35 +1,28 @@
 package liquibase.action.core;
 
-import liquibase.action.Sql;
+import liquibase.action.*;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.ExecuteResult;
 import liquibase.executor.ExecutionOptions;
 import liquibase.executor.QueryResult;
 import liquibase.executor.UpdateResult;
 
-public class SingleLineComment implements Sql {
+/**
+ * Action that is a no-op for execute, query and update operations, but is able to provide a message in the {@link liquibase.action.Action#describe()} method.
+ */
+public class SingleLineComment implements QueryAction, ExecuteAction, UpdateAction {
 
-	final private String sql;
+	final private String message;
 	final private String lineCommentToken;
 	
-	public SingleLineComment(String sql, String lineCommentToken) {
-		this.sql = sql;
+	public SingleLineComment(String message, String lineCommentToken) {
+		this.message = message;
 		this.lineCommentToken = lineCommentToken;
 	}
 	
-	@Override
-    public String getEndDelimiter() {
-		return "\n";
-	}
-
-	@Override
-    public String toSql() {
-		return lineCommentToken + ' ' + sql;
-	}
-
     @Override
     public String toString() {
-        return toSql();
+        return describe();
     }
 
     @Override
@@ -49,6 +42,22 @@ public class SingleLineComment implements Sql {
 
     @Override
     public String describe() {
-        return toSql();
+        String message = this.message;
+        String commentToken = this.lineCommentToken;
+
+        if (commentToken == null) {
+            commentToken = "";
+        } else {
+            if (message == null) {
+                return commentToken;
+            }
+            commentToken = commentToken + " ";
+        }
+
+        if (message == null) {
+            message = "";
+        }
+
+        return commentToken + message;
     }
 }

@@ -9,8 +9,6 @@ import java.math.BigInteger;
 
 public class Column extends AbstractDatabaseObject {
 
-    private String name;
-
     public Column() {
     }
 
@@ -72,12 +70,11 @@ public class Column extends AbstractDatabaseObject {
 
     @Override
     public String getName() {
-        return name;
+        return getAttribute("name", String.class);
     }
 
     @Override
     public Column setName(String name) {
-        this.name = name;
         setAttribute("name", name);
 
         return this;
@@ -124,6 +121,15 @@ public class Column extends AbstractDatabaseObject {
 
     public void setAutoIncrementInformation(AutoIncrementInformation autoIncrementInformation) {
         setAttribute("autoIncrementInformation", autoIncrementInformation);
+    }
+
+    public Integer getPosition() {
+        return getAttribute("position", Integer.class);
+    }
+
+    public Column setPosition(Integer position) {
+        setAttribute("position", position);
+        return this;
     }
 
     @Override

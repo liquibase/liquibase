@@ -1,12 +1,11 @@
 package liquibase.actiongenerator;
 
 import liquibase.action.Action;
-import liquibase.action.UnparsedSql;
+import liquibase.action.core.UnparsedSql;
 import liquibase.exception.ValidationErrors;
 import liquibase.exception.Warnings;
 import liquibase.executor.ExecutionOptions;
 import liquibase.servicelocator.LiquibaseService;
-import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.statement.SqlStatement;
 
 import java.util.ArrayList;

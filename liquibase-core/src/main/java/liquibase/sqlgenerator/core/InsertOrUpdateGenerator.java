@@ -2,7 +2,7 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.action.Action;
 import liquibase.action.Sql;
-import liquibase.action.UnparsedSql;
+import liquibase.action.core.UnparsedSql;
 import liquibase.actiongenerator.ActionGeneratorChain;
 import liquibase.database.Database;
 import liquibase.datatype.DataTypeFactory;
@@ -70,8 +70,9 @@ public abstract class InsertOrUpdateGenerator extends AbstractSqlGenerator<Inser
         InsertGenerator insert = new InsertGenerator();
         Action[] insertSql = insert.generateActions(insertOrUpdateStatement, options, chain);
 
-        for(Action s:insertSql) {
-            insertBuffer.append(((Sql) s).toSql());
+        for(Action action:insertSql) {
+            insertBuffer.append(action
+                    .describe());
             insertBuffer.append(";");
         }
 

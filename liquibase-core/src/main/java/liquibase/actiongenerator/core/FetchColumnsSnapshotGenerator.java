@@ -2,7 +2,7 @@ package liquibase.actiongenerator.core;
 
 import liquibase.CatalogAndSchema;
 import liquibase.action.Action;
-import liquibase.action.core.FetchColumnsAction;
+import liquibase.action.core.ColumnsMetaDataQueryAction;
 import liquibase.actiongenerator.AbstractActionGenerator;
 import liquibase.actiongenerator.ActionGeneratorChain;
 import liquibase.database.AbstractJdbcDatabase;
@@ -89,7 +89,7 @@ public class FetchColumnsSnapshotGenerator extends AbstractActionGenerator<Fetch
         schemaName = ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema);
 
         return new Action[] {
-                new FetchColumnsAction(catalogName, schemaName, tableName, columnName)
+                new ColumnsMetaDataQueryAction(catalogName, schemaName, tableName, columnName)
         };
     }
 }

@@ -1,5 +1,6 @@
-package liquibase.action;
+package liquibase.action.core;
 
+import liquibase.action.Sql;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.OfflineConnection;
@@ -11,6 +12,10 @@ import liquibase.executor.QueryResult;
 import liquibase.executor.UpdateResult;
 import liquibase.util.StringUtils;
 
+/**
+ * Action implementation for executing a SQL statement. No attempt is made to parse the passed SQL, it is simply sent on directly to the database.
+ * Requires a database with a JDBCConnection.
+ */
 public class UnparsedSql implements Sql {
 
     private String sql;
@@ -25,11 +30,6 @@ public class UnparsedSql implements Sql {
         this.endDelimiter = endDelimiter;
     }
 
-    @Override
-    public String toSql() {
-        return sql;
-    }
-
     public String getSql() {
         return sql;
     }
@@ -40,12 +40,16 @@ public class UnparsedSql implements Sql {
 
     @Override
     public String toString() {
-        return toSql()+getEndDelimiter();
+        return describe();
     }
 
     @Override
     public String describe() {
-        return this.toSql()+getEndDelimiter();
+        String delimiter = getEndDelimiter();
+        if (delimiter == null) {
+            delimiter = "";
+        }
+        return getSql()+ delimiter;
     }
 
     @Override
@@ -58,9 +62,7 @@ public class UnparsedSql implements Sql {
         Database database = options.getRuntimeEnvironment().getTargetDatabase();
         DatabaseConnection conn = database.getConnection();
 
-        if (conn instanceof OfflineConnection) {
-            throw new DatabaseException("Cannot execute commands against an offline database");
-        } else if (conn instanceof JdbcConnection) {
+        if (conn instanceof JdbcConnection) {
             return ((JdbcConnection) conn).query(getSql());
         } else {
             throw new DatabaseException("Cannot execute SQL against a "+conn.getClass().getName()+" connection");
@@ -76,9 +78,7 @@ public class UnparsedSql implements Sql {
 
         Database database = options.getRuntimeEnvironment().getTargetDatabase();
         DatabaseConnection conn = database.getConnection();
-        if (conn instanceof OfflineConnection) {
-            throw new DatabaseException("Cannot execute commands against an offline database");
-        } else if (conn instanceof JdbcConnection) {
+        if (conn instanceof JdbcConnection) {
             return ((JdbcConnection) conn).execute(getSql());
         } else {
             throw new DatabaseException("Cannot execute SQL against a " + conn.getClass().getName() + " connection");
@@ -93,9 +93,7 @@ public class UnparsedSql implements Sql {
 
         Database database = options.getRuntimeEnvironment().getTargetDatabase();
         DatabaseConnection conn = database.getConnection();
-        if (conn instanceof OfflineConnection) {
-            throw new DatabaseException("Cannot execute commands against an offline database");
-        } else if (conn instanceof JdbcConnection) {
+        if (conn instanceof JdbcConnection) {
             return ((JdbcConnection) conn).update(getSql());
         } else {
             throw new DatabaseException("Cannot execute SQL against a " + conn.getClass().getName() + " connection");

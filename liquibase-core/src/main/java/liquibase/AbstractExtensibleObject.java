@@ -4,7 +4,7 @@ import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-public abstract class AbstractExtensibleObject implements ExtensibleObject {
+public class AbstractExtensibleObject implements ExtensibleObject {
 
     private SortedMap<String, Object> attributes = new TreeMap<String, Object>();
 
@@ -38,7 +38,7 @@ public abstract class AbstractExtensibleObject implements ExtensibleObject {
         return this;
     }
 
-    protected SortedMap<String, Object> getAttributeMap() {
+    public SortedMap<String, Object> getAttributeMap() {
         return attributes;
     }
 

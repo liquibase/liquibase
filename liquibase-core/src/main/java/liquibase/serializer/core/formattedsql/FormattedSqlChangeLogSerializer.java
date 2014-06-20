@@ -47,8 +47,8 @@ public class FormattedSqlChangeLogSerializer  implements ChangeLogSerializer {
                 ExecutionOptions options = new ExecutionOptions(null, new RuntimeEnvironment(database, null));
                 Action[] actions = ActionGeneratorFactory.getInstance().generateActions(change.generateStatements(options), options);
                 if (actions != null) {
-                    for (Action sql : actions) {
-                        builder.append(((Sql) sql).toSql()).append(((Sql) sql).getEndDelimiter()).append("\n");
+                    for (Action action : actions) {
+                        builder.append(action.describe()).append("\n");
                     }
                 }
             }

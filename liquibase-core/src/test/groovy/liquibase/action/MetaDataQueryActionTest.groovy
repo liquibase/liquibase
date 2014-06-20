@@ -1,6 +1,6 @@
 package liquibase.action
 
-import liquibase.action.core.FetchTablesAction
+import liquibase.action.core.TablesMetaDataQueryAction
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -27,6 +27,6 @@ class MetaDataQueryActionTest extends Specification {
 
     def "merge that is not valid"() {
         expect:
-        assert !new MockMetaDataAction([tableName: "table_name"]).merge(new FetchTablesAction(null, null, "table_name"))
+        assert !new MockMetaDataAction([tableName: "table_name"]).merge(new TablesMetaDataQueryAction(null, null, "table_name"))
     }
 }

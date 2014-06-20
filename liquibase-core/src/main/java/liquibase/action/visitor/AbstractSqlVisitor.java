@@ -1,11 +1,11 @@
 package liquibase.action.visitor;
 
 import liquibase.action.Action;
-import liquibase.action.UnparsedSql;
+import liquibase.action.core.UnparsedSql;
 import liquibase.executor.ExecutionOptions;
 
 /**
- * Convenience subclass of AbstractActionVisitor for dealing with {@link liquibase.action.UnparsedSql} actions.
+ * Convenience subclass of AbstractActionVisitor for dealing with {@link liquibase.action.core.UnparsedSql} actions.
  */
 public abstract class AbstractSqlVisitor extends AbstractActionVisitor {
 
@@ -15,7 +15,7 @@ public abstract class AbstractSqlVisitor extends AbstractActionVisitor {
     protected abstract String modifySql(String sql, ExecutionOptions options);
 
     /**
-     * Default implementation calls {@link #modifySql(String, liquibase.executor.ExecutionOptions)} only if the passed Action object is an {@link liquibase.action.UnparsedSql}
+     * Default implementation calls {@link #modifySql(String, liquibase.executor.ExecutionOptions)} only if the passed Action object is an {@link liquibase.action.core.UnparsedSql}
      */
     @Override
     public void visit(Action action, ExecutionOptions options) {
