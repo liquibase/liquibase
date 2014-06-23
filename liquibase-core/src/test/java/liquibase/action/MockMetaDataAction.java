@@ -3,6 +3,7 @@ package liquibase.action;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.ExecutionOptions;
 import liquibase.executor.QueryResult;
+import liquibase.executor.Row;
 import liquibase.structure.DatabaseObject;
 
 import java.util.Map;
@@ -16,7 +17,7 @@ public class MockMetaDataAction extends MetaDataQueryAction {
     }
 
     @Override
-    protected DatabaseObject rawMetaDataToObject(Map<String, ?> row) {
+    protected DatabaseObject rawMetaDataToObject(Row row, ExecutionOptions options) {
         throw new RuntimeException("Not implemented");
     }
 

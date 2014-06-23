@@ -6,6 +6,7 @@ import liquibase.database.DatabaseConnection;
 import liquibase.database.OfflineConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.ExecutorService;
+import liquibase.executor.Row;
 import liquibase.logging.LogFactory;
 import liquibase.statement.core.GetViewDefinitionStatement;
 import liquibase.statement.core.RawSqlStatement;
@@ -171,11 +172,11 @@ public class InformixDatabase extends AbstractJdbcDatabase {
 	@Override
 	public String getViewDefinition(CatalogAndSchema schema, final String viewName) throws DatabaseException {
         schema = schema.customize(this);
-		List<Map<String, ?>> retList = ExecutorService.getInstance().getExecutor(this).query(new GetViewDefinitionStatement(schema.getCatalogName(), schema.getSchemaName(), viewName)).toList();
+		List<Row> retList = ExecutorService.getInstance().getExecutor(this).query(new GetViewDefinitionStatement(schema.getCatalogName(), schema.getSchemaName(), viewName)).toList();
 		// building the view definition from the multiple rows
 		StringBuilder sb = new StringBuilder();
-		for (Map rowMap : retList) {
-			String s = (String) rowMap.get("VIEWTEXT");
+		for (Row rowMap : retList) {
+			String s = rowMap.get("VIEWTEXT", String.class);
 			sb.append(s);
 		}
 		return CREATE_VIEW_AS_PATTERN.matcher(sb.toString()).replaceFirst("");

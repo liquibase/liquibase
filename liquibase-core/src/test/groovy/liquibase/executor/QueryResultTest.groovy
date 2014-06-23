@@ -8,7 +8,7 @@ class QueryResultTest extends Specification {
     @Unroll
     def "toList of map values"() {
         expect:
-        new QueryResult(resultSet).toList() == resultSet
+        new QueryResult(resultSet).toList() == resultSet.collect({ new Row(it)})
         new QueryResult(null).toList() == []
 
         where:

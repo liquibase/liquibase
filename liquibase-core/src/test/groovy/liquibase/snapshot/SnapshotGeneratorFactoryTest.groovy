@@ -2,8 +2,8 @@ package liquibase.snapshot
 
 import liquibase.action.MockMetaDataAction
 import liquibase.action.QueryAction
-import liquibase.action.core.ColumnsMetaDataQueryAction
-import liquibase.action.core.TablesMetaDataQueryAction
+import liquibase.action.core.ColumnsJdbcMetaDataQueryAction
+import liquibase.action.core.TablesJdbcMetaDataQueryAction
 import spock.lang.Specification
 
 class SnapshotGeneratorFactoryTest extends Specification {
@@ -27,17 +27,17 @@ class SnapshotGeneratorFactoryTest extends Specification {
                 new MockMetaDataAction([tableName: "table_name1", schemaName: "schema_name"]),
                 new MockMetaDataAction([tableName: "table_name2", schemaName: "schema_name"]),
                 new MockMetaDataAction([tableName: "table_name3", schemaName: "schema_name"]),
-                new TablesMetaDataQueryAction(null, "schema_name", "table_1"),
-                new TablesMetaDataQueryAction(null, "schema_name", "table_2"),
-                new TablesMetaDataQueryAction(null, "schema_name", "table_3"),
-                new ColumnsMetaDataQueryAction(null, "schema_name", "table_1", "column_1"),
-                new ColumnsMetaDataQueryAction(null, "schema_name", "table_1", "column_2"),
-                new ColumnsMetaDataQueryAction(null, "schema_name", "table_1", "column_3"),
+                new TablesJdbcMetaDataQueryAction(null, "schema_name", "table_1"),
+                new TablesJdbcMetaDataQueryAction(null, "schema_name", "table_2"),
+                new TablesJdbcMetaDataQueryAction(null, "schema_name", "table_3"),
+                new ColumnsJdbcMetaDataQueryAction(null, "schema_name", "table_1", "column_1"),
+                new ColumnsJdbcMetaDataQueryAction(null, "schema_name", "table_1", "column_2"),
+                new ColumnsJdbcMetaDataQueryAction(null, "schema_name", "table_1", "column_3"),
         ]
         def expected = [
                 new MockMetaDataAction([schemaName: "schema_name"]),
-                new TablesMetaDataQueryAction(null, "schema_name", null),
-                new ColumnsMetaDataQueryAction(null, "schema_name", "table_1", null),
+                new TablesJdbcMetaDataQueryAction(null, "schema_name", null),
+                new ColumnsJdbcMetaDataQueryAction(null, "schema_name", "table_1", null),
         ]
 
         then:
@@ -53,20 +53,20 @@ class SnapshotGeneratorFactoryTest extends Specification {
                 new MockMetaDataAction([tableName: "table_name2", schemaName: "schema_name"]),
                 new MockMetaDataAction([tableName: "table_name3", schemaName: "schema_name"]),
                 new NonMergingAction([tableName: "table_nameZ", schemaName: "schema_name"]),
-                new TablesMetaDataQueryAction(null, "schema_name", "table_2"),
-                new TablesMetaDataQueryAction(null, "schema_name", "table_3"),
-                new ColumnsMetaDataQueryAction(null, "schema_name", "table_1", "column_1"),
+                new TablesJdbcMetaDataQueryAction(null, "schema_name", "table_2"),
+                new TablesJdbcMetaDataQueryAction(null, "schema_name", "table_3"),
+                new ColumnsJdbcMetaDataQueryAction(null, "schema_name", "table_1", "column_1"),
                 new NonMergingAction([tableName: "table_nameA", schemaName: "schema_name"]),
-                new ColumnsMetaDataQueryAction(null, "schema_name", "table_1", "column_2"),
-                new ColumnsMetaDataQueryAction(null, "schema_name", "table_1", "column_3"),
+                new ColumnsJdbcMetaDataQueryAction(null, "schema_name", "table_1", "column_2"),
+                new ColumnsJdbcMetaDataQueryAction(null, "schema_name", "table_1", "column_3"),
         ]
         def expected = [
                 new NonMergingAction([tableName: "table_nameX", schemaName: "schema_name"]),
                 new MockMetaDataAction([schemaName: "schema_name"]),
                 new NonMergingAction([tableName: "table_nameY", schemaName: "schema_name"]),
                 new NonMergingAction([tableName: "table_nameZ", schemaName: "schema_name"]),
-                new TablesMetaDataQueryAction(null, "schema_name", null),
-                new ColumnsMetaDataQueryAction(null, "schema_name", "table_1", null),
+                new TablesJdbcMetaDataQueryAction(null, "schema_name", null),
+                new ColumnsJdbcMetaDataQueryAction(null, "schema_name", "table_1", null),
                 new NonMergingAction([tableName: "table_nameA", schemaName: "schema_name"]),
         ]
 

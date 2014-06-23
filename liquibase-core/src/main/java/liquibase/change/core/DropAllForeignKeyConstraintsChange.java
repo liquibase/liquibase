@@ -11,6 +11,7 @@ import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.ExecutionOptions;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
+import liquibase.executor.Row;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.FindForeignKeyConstraintsStatement;
 import liquibase.structure.core.Table;
@@ -81,15 +82,13 @@ public class DropAllForeignKeyConstraintsChange extends AbstractChange {
         FindForeignKeyConstraintsStatement sql = new FindForeignKeyConstraintsStatement(getBaseTableCatalogName(), getBaseTableSchemaName(), getBaseTableName());
 
         try {
-            List<Map<String, ?>> results = executor.query(sql).toList();
+            List<Row> results = executor.query(sql).toList();
             Set<String> handledConstraints = new HashSet<String>();
 
             if (results != null && results.size() > 0) {
-                for (Map result : results) {
-                    String baseTableName =
-                            (String) result.get(FindForeignKeyConstraintsStatement.RESULT_COLUMN_BASE_TABLE_NAME);
-                    String constraintName =
-                            (String) result.get(FindForeignKeyConstraintsStatement.RESULT_COLUMN_CONSTRAINT_NAME);
+                for (Row result : results) {
+                    String baseTableName = result.get(FindForeignKeyConstraintsStatement.RESULT_COLUMN_BASE_TABLE_NAME, String.class);
+                    String constraintName = result.get(FindForeignKeyConstraintsStatement.RESULT_COLUMN_CONSTRAINT_NAME, String.class);
                     if (DatabaseObjectComparatorFactory.getInstance().isSameObject(new Table().setName(getBaseTableName()), new Table().setName(baseTableName), database)) {
                         if( !handledConstraints.contains(constraintName)) {
                             DropForeignKeyConstraintChange dropForeignKeyConstraintChange =

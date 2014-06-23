@@ -4,7 +4,7 @@ import liquibase.RuntimeEnvironment;
 import liquibase.actiongenerator.ActionGeneratorChain;
 import liquibase.snapshot.AbstractSnapshotGenerator;
 import liquibase.statement.SqlStatement;
-import liquibase.statement.core.FetchObjectsStatement;
+import liquibase.statement.core.MetaDataQueryStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.DatabaseObjectCollection;
 import liquibase.structure.core.Column;
@@ -16,7 +16,7 @@ public class ColumnSnapshotGenerator extends AbstractSnapshotGenerator<Column> {
     public SqlStatement[] generateAddToStatements(DatabaseObject example, RuntimeEnvironment runtimeEnvironment, ActionGeneratorChain chain) {
         if (example instanceof Table) {
             return new SqlStatement[] {
-                    new FetchObjectsStatement(new Column(Table.class, getCatalogName(example.getSchema()), getSchemaName(example.getSchema()), example.getName(), null)),
+                    new MetaDataQueryStatement(new Column(Table.class, getCatalogName(example.getSchema()), getSchemaName(example.getSchema()), example.getName(), null)),
             };
         }
         return null;

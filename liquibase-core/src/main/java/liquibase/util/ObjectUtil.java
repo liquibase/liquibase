@@ -190,7 +190,9 @@ public class ObjectUtil {
                 }
             } else if (targetClass.isAssignableFrom(Boolean.class)) {
                 String lowerCase = object.toString().toLowerCase();
-                return (T) (Boolean) (lowerCase.equals("true") || lowerCase.equals("t") || lowerCase.equals("1") || lowerCase.equals("1.0"));
+                return (T) (Boolean) (lowerCase.equals("true") || lowerCase.equals("t") || lowerCase.equals("1") || lowerCase.equals("1.0") || lowerCase.equals("yes"));
+            } else if (targetClass.isAssignableFrom(String.class)) {
+                return (T) object.toString();
             }
             return (T) object;
         } catch (NumberFormatException e) {

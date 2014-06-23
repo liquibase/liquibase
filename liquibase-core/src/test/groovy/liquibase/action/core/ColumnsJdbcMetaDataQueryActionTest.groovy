@@ -11,12 +11,12 @@ import spock.lang.Unroll
 
 import java.sql.DatabaseMetaData
 
-class ColumnsMetaDataQueryActionTest extends Specification {
+class ColumnsJdbcMetaDataQueryActionTest extends Specification {
 
     @Unroll
     def "getRawMetaData"() {
         when:
-        def action = new ColumnsMetaDataQueryAction(catalogName, schemaName, tableName, columnName)
+        def action = new ColumnsJdbcMetaDataQueryAction(catalogName, schemaName, tableName, columnName)
         def database = new MockDatabase()
         def connection = Mock(JdbcConnection)
         def metaData = Mock(DatabaseMetaData)
@@ -38,7 +38,7 @@ class ColumnsMetaDataQueryActionTest extends Specification {
 
     def "rawMetaDataToObject autoincrement int from mysql"() {
         when:
-        def action = new ColumnsMetaDataQueryAction(null, null, null, null)
+        def action = new ColumnsJdbcMetaDataQueryAction(null, null, null, null)
         def Column column = action.rawMetaDataToObject([
                 TABLE_NAME        : "account",
                 COLUMN_DEF        : "null",
@@ -64,7 +64,7 @@ class ColumnsMetaDataQueryActionTest extends Specification {
                 DECIMAL_DIGITS    : 0,
                 DATA_TYPE         : 4,
                 IS_GENERATEDCOLUMN: ""
-        ])
+        ], options)
 
         then:
         column.getName() == "id"
@@ -78,7 +78,7 @@ class ColumnsMetaDataQueryActionTest extends Specification {
 
     def "rawMetaDataToObject varchar from mysql"() {
         when:
-        def action = new ColumnsMetaDataQueryAction(null, null, null, null)
+        def action = new ColumnsJdbcMetaDataQueryAction(null, null, null, null)
         def Column column = action.rawMetaDataToObject([
                 TABLE_NAME        : "account",
                 COLUMN_DEF        : null,
@@ -104,7 +104,7 @@ class ColumnsMetaDataQueryActionTest extends Specification {
                 DECIMAL_DIGITS    : null,
                 DATA_TYPE         : 12,
                 IS_GENERATEDCOLUMN: ""
-        ])
+        ], options)
 
         then:
         column.getName() == "username"
@@ -115,5 +115,7 @@ class ColumnsMetaDataQueryActionTest extends Specification {
         assert column.isNullable()
         assert !column.isAutoIncrement()
     }
+
+
 
 }

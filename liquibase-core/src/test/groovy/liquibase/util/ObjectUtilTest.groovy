@@ -88,7 +88,7 @@ class ObjectUtilTest extends Specification {
         "1"      | Long    | 1L
         1L       | Integer | 1
         "1.5"    | Float   | 1.5F
-        "1.05"   | Double   | 1.05D
+        "1.05"   | Double  | 1.05D
         true     | Boolean | true
         false    | Boolean | false
         1        | Boolean | true
@@ -105,6 +105,13 @@ class ObjectUtilTest extends Specification {
         "f"      | Boolean | false
         "TRUE"   | Boolean | true
         "FALSE"  | Boolean | false
+        "yes"    | Boolean | true
+        "YES"    | Boolean | true
+        "no"     | Boolean | false
+        "NO"     | Boolean | false
+        1        | String  | "1"
+        1.3      | String  | "1.3"
+        null     | String  | null
 
     }
 }

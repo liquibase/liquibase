@@ -4,6 +4,7 @@ import liquibase.AbstractExtensibleObject;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.ExecutionOptions;
 import liquibase.executor.QueryResult;
+import liquibase.executor.Row;
 import liquibase.structure.DatabaseObject;
 import liquibase.util.StringUtils;
 
@@ -20,15 +21,15 @@ public abstract class MetaDataQueryAction extends AbstractExtensibleObject imple
 
     /**
      * Return a QueryResult with a single column in each row with the key of "object" and value of a {@link liquibase.structure.DatabaseObject} implementation.
-     * Subclasses will normally not override this method, but instead override {@link #getRawMetaData(liquibase.executor.ExecutionOptions)} and {@link #rawMetaDataToObject(java.util.Map)}
+     * Subclasses will normally not override this method, but instead override {@link #getRawMetaData(liquibase.executor.ExecutionOptions)} and {@link #rawMetaDataToObject(liquibase.executor.Row, liquibase.executor.ExecutionOptions)}
      */
     @Override
     public QueryResult query(ExecutionOptions options) throws DatabaseException {
         QueryResult queryResult = getRawMetaData(options);
 
         List<Map<String, Object>> finalResult = new ArrayList<Map<String, Object>>();
-        for (Map<String, ?> row : queryResult.toList()) {
-            DatabaseObject object = rawMetaDataToObject(row);
+        for (Row row : queryResult.toList()) {
+            DatabaseObject object = rawMetaDataToObject(row, options);
             Map tableMap = new HashMap();
             tableMap.put("object", object);
             finalResult.add(tableMap);
@@ -37,14 +38,14 @@ public abstract class MetaDataQueryAction extends AbstractExtensibleObject imple
     }
 
     /**
-     * Used by {@link #query(liquibase.executor.ExecutionOptions)} read the metadata stored in the database. Returns a QueryResult that can be consumed by {@link #rawMetaDataToObject(java.util.Map)} into the value returned on the final QueryResult.
+     * Used by {@link #query(liquibase.executor.ExecutionOptions)} read the metadata stored in the database. Returns a QueryResult that can be consumed by {@link #rawMetaDataToObject(liquibase.executor.Row, liquibase.executor.ExecutionOptions)} into the value returned on the final QueryResult.
      */
     protected abstract QueryResult getRawMetaData(ExecutionOptions options) throws DatabaseException;
 
     /**
      * Used by {@link #query(liquibase.executor.ExecutionOptions)} to convert each row returned by {@link #getRawMetaData(liquibase.executor.ExecutionOptions)} into the value returned on the final QueryResult.
      */
-    protected abstract DatabaseObject rawMetaDataToObject(Map<String, ?> row);
+    protected abstract DatabaseObject rawMetaDataToObject(Row row, ExecutionOptions options);
 
 
     @Override

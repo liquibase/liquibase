@@ -5,7 +5,7 @@ import liquibase.actiongenerator.ActionGeneratorChain;
 import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.snapshot.AbstractSnapshotGenerator;
 import liquibase.statement.SqlStatement;
-import liquibase.statement.core.FetchObjectsStatement;
+import liquibase.statement.core.MetaDataQueryStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.DatabaseObjectCollection;
 import liquibase.structure.core.Schema;
@@ -17,7 +17,7 @@ public class TableSnapshotGenerator extends AbstractSnapshotGenerator<Table> {
     public SqlStatement[] generateAddToStatements(DatabaseObject example, RuntimeEnvironment runtimeEnvironment, ActionGeneratorChain chain) {
         if (example instanceof Schema) {
             return new SqlStatement[]{
-                    new FetchObjectsStatement(new Table(getCatalogName((Schema) example), getSchemaName(((Schema) example)), null)),
+                    new MetaDataQueryStatement(new Table(getCatalogName((Schema) example), getSchemaName(((Schema) example)), null)),
             };
         }
         return null;

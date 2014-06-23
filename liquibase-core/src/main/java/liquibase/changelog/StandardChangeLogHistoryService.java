@@ -10,9 +10,7 @@ import liquibase.exception.DatabaseException;
 import liquibase.exception.DatabaseHistoryException;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.executor.ExecutionOptions;
-import liquibase.executor.Executor;
-import liquibase.executor.ExecutorService;
+import liquibase.executor.*;
 import liquibase.logging.LogFactory;
 import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.SnapshotControl;
@@ -145,9 +143,9 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
                 statementsToExecute.add(new SetNullableStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "EXECTYPE", "VARCHAR(10)", false));
             }
 
-            List<Map<String, ?>> md5sumRS = ExecutorService.getInstance().getExecutor(database).query(new SelectFromDatabaseChangeLogStatement(new SelectFromDatabaseChangeLogStatement.ByNotNullCheckSum(), "MD5SUM")).toList();
+            List<Row> md5sumRS = ExecutorService.getInstance().getExecutor(database).query(new SelectFromDatabaseChangeLogStatement(new SelectFromDatabaseChangeLogStatement.ByNotNullCheckSum(), "MD5SUM")).toList();
             if (md5sumRS.size() > 0) {
-                String md5sum = md5sumRS.get(0).get("MD5SUM").toString();
+                String md5sum = md5sumRS.get(0).get("MD5SUM", String.class);
                 if (!md5sum.startsWith(CheckSum.getCurrentVersion() + ":")) {
                     executor.comment("DatabaseChangeLog checksums are an incompatible version.  Setting them to null so they will be updated on next database update");
                     statementsToExecute.add(new RawSqlStatement("UPDATE " + getDatabase().escapeTableName(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName()) + " SET MD5SUM=null"));
@@ -195,15 +193,15 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
             List<RanChangeSet> ranChangeSetList = new ArrayList<RanChangeSet>();
             if (hasDatabaseChangeLogTable()) {
                 LogFactory.getLogger().info("Reading from " + databaseChangeLogTableName);
-                List<Map<String, ?>> results = queryDatabaseChangeLogTable(database);
-                for (Map rs : results) {
-                    String fileName = rs.get("FILENAME").toString();
-                    String author = rs.get("AUTHOR").toString();
-                    String id = rs.get("ID").toString();
-                    String md5sum = rs.get("MD5SUM") == null ? null : rs.get("MD5SUM").toString();
-                    String description = rs.get("DESCRIPTION") == null ? null : rs.get("DESCRIPTION").toString();
-                    String comments = rs.get("COMMENTS") == null ? null : rs.get("COMMENTS").toString();
-                    Object tmpDateExecuted = rs.get("DATEEXECUTED");
+                List<Row> results = queryDatabaseChangeLogTable(database);
+                for (Row rs : results) {
+                    String fileName = rs.get("FILENAME", String.class);
+                    String author = rs.get("AUTHOR", String.class);
+                    String id = rs.get("ID", String.class);
+                    String md5sum = rs.get("MD5SUM", String.class) == null ? null : rs.get("MD5SUM", String.class);
+                    String description = rs.get("DESCRIPTION", String.class) == null ? null : rs.get("DESCRIPTION", String.class);
+                    String comments = rs.get("COMMENTS", String.class) == null ? null : rs.get("COMMENTS", String.class);
+                    Object tmpDateExecuted = rs.get("DATEEXECUTED", String.class);
                     Date dateExecuted = null;
                     if (tmpDateExecuted instanceof Date) {
                         dateExecuted = (Date) tmpDateExecuted;
@@ -214,8 +212,8 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
                         } catch (ParseException e) {
                         }
                     }
-                    String tag = rs.get("TAG") == null ? null : rs.get("TAG").toString();
-                    String execType = rs.get("EXECTYPE") == null ? null : rs.get("EXECTYPE").toString();
+                    String tag = rs.get("TAG", String.class) == null ? null : rs.get("TAG", String.class);
+                    String execType = rs.get("EXECTYPE", String.class) == null ? null : rs.get("EXECTYPE", String.class);
                     try {
                         RanChangeSet ranChangeSet = new RanChangeSet(fileName, id, author, CheckSum.parse(md5sum), dateExecuted, tag, ChangeSet.ExecType.valueOf(execType), description, comments);
                         ranChangeSetList.add(ranChangeSet);
@@ -231,7 +229,7 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
         return Collections.unmodifiableList(ranChangeSetList);
     }
 
-    public List<Map<String, ?>> queryDatabaseChangeLogTable(Database database) throws DatabaseException {
+    public List<Row> queryDatabaseChangeLogTable(Database database) throws DatabaseException {
         SelectFromDatabaseChangeLogStatement select = new SelectFromDatabaseChangeLogStatement("FILENAME", "AUTHOR", "ID", "MD5SUM", "DATEEXECUTED", "ORDEREXECUTED", "EXECTYPE", "DESCRIPTION", "COMMENTS", "TAG", "LIQUIBASE").setOrderBy("DATEEXECUTED ASC", "ORDEREXECUTED ASC");
         return ExecutorService.getInstance().getExecutor(database).query(select).toList();
     }

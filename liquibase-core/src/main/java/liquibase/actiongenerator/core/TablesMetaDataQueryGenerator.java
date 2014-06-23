@@ -2,7 +2,7 @@ package liquibase.actiongenerator.core;
 
 import liquibase.CatalogAndSchema;
 import liquibase.action.Action;
-import liquibase.action.core.TablesMetaDataQueryAction;
+import liquibase.action.core.TablesJdbcMetaDataQueryAction;
 import liquibase.actiongenerator.AbstractActionGenerator;
 import liquibase.actiongenerator.ActionGeneratorChain;
 import liquibase.database.AbstractJdbcDatabase;
@@ -14,13 +14,13 @@ import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
 import liquibase.executor.ExecutionOptions;
-import liquibase.statement.core.FetchObjectsStatement;
+import liquibase.statement.core.MetaDataQueryStatement;
 import liquibase.structure.core.Table;
 
-public class FetchTablesSnapshotGenerator extends AbstractActionGenerator<FetchObjectsStatement> {
+public class TablesMetaDataQueryGenerator extends AbstractActionGenerator<MetaDataQueryStatement> {
 
     @Override
-    public boolean supports(FetchObjectsStatement statement, ExecutionOptions options) {
+    public boolean supports(MetaDataQueryStatement statement, ExecutionOptions options) {
         DatabaseConnection connection = options.getRuntimeEnvironment().getTargetDatabase().getConnection();
         if (connection == null || connection instanceof JdbcConnection || connection instanceof OfflineConnection) {
             return statement.getExample() instanceof Table;
@@ -31,7 +31,7 @@ public class FetchTablesSnapshotGenerator extends AbstractActionGenerator<FetchO
     }
 
     @Override
-    public ValidationErrors validate(FetchObjectsStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
+    public ValidationErrors validate(MetaDataQueryStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
         Database database = options.getRuntimeEnvironment().getTargetDatabase();
         ValidationErrors errors = super.validate(statement, options, chain);
         Table example = (Table) statement.getExample();
@@ -44,7 +44,7 @@ public class FetchTablesSnapshotGenerator extends AbstractActionGenerator<FetchO
     }
 
     @Override
-    public Action[] generateActions(final FetchObjectsStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
+    public Action[] generateActions(final MetaDataQueryStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
         Database database = options.getRuntimeEnvironment().getTargetDatabase();
         if (database.getConnection() == null || database.getConnection() instanceof OfflineConnection) {
             throw new UnexpectedLiquibaseException("Cannot read table metadata for an offline database");
@@ -69,7 +69,7 @@ public class FetchTablesSnapshotGenerator extends AbstractActionGenerator<FetchO
         schemaName = ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema);
 
         return new Action[] {
-                new TablesMetaDataQueryAction(catalogName, schemaName, tableName)
+                new TablesJdbcMetaDataQueryAction(catalogName, schemaName, tableName)
         };
     }
 

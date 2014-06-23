@@ -3,22 +3,26 @@ package liquibase.actiongenerator.core
 import liquibase.RuntimeEnvironment
 import liquibase.action.QueryAction
 import liquibase.actiongenerator.ActionGeneratorFactory
+import liquibase.changelog.ChangeLogHistoryService
+import liquibase.changelog.ChangeLogHistoryServiceFactory
 import liquibase.command.DropAllCommand
 import liquibase.database.OfflineConnection
 import liquibase.datatype.core.IntType
 import liquibase.executor.ExecutionOptions
 import liquibase.executor.ExecutorService
+import liquibase.lockservice.LockServiceFactory
 import liquibase.sdk.supplier.database.ConnectionSupplier
 import liquibase.sdk.supplier.database.DatabaseSupplier
 import liquibase.sdk.verifytest.TestPermutation
 import liquibase.sdk.verifytest.VerifyService
 import liquibase.statement.core.CreateTableStatement
-import liquibase.statement.core.FetchObjectsStatement
+import liquibase.statement.core.MetaDataQueryStatement
+import liquibase.structure.core.Table
 import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.Unroll
 
-class FetchTablesSnapshotGeneratorTest extends Specification {
+class TablesMetaDataQueryGeneratorTest extends Specification {
 
     @Shared databaseSupplier = new DatabaseSupplier()
     @Shared connectionSupplier = new ConnectionSupplier()
@@ -30,11 +34,11 @@ class FetchTablesSnapshotGeneratorTest extends Specification {
         def schemaName = null
         def catalogName = null
         def tableName = "table_name"
-        def statement = new FetchObjectsStatement(schemaName, catalogName, tableName)
+        def statement = new MetaDataQueryStatement(new Table(schemaName, catalogName, tableName))
 
         def database = connection.getDatabase();
 
-        def actions = ActionGeneratorFactory.instance.generateActions(statement, database)
+        def actions = ActionGeneratorFactory.instance.generateActions(statement, new ExecutionOptions(new RuntimeEnvironment(database)))
         def options = new ExecutionOptions(new RuntimeEnvironment(database, null))
 
         then:
@@ -42,7 +46,7 @@ class FetchTablesSnapshotGeneratorTest extends Specification {
         def action = actions[0]
 
         verifyService.permutation([schemaName: schemaName, catalogName: catalogName, tableName: tableName, database: database, connection: connection])
-                .asTable(["schemaName", "catalogName", "tableName"])
+                .asTable(["database", "connection", "schemaName", "catalogName", "tableName"])
                 .data("action", action)
                 .setup({
             if (!connection.connectionIsAvailable()) {
@@ -70,13 +74,14 @@ class FetchTablesSnapshotGeneratorTest extends Specification {
         def verifyService = VerifyService.getInstance(this.class.name, "tableExists");
         def schemaName = null
         def catalogName = null
-        def statement = new FetchObjectsStatement(catalogName, schemaName, tableName)
+        def statement = new MetaDataQueryStatement(new Table(catalogName, schemaName, tableName))
 
         def database = connection.getDatabase();
 
-        def actions = ActionGeneratorFactory.instance.generateActions(statement, database)
+        def actions = ActionGeneratorFactory.instance.generateActions(statement, new ExecutionOptions(new RuntimeEnvironment(database)))
         def options = new ExecutionOptions(new RuntimeEnvironment(database, null))
 
+        LockServiceFactory.instance.resetAll()
 
         then:
         actions.size() == 1

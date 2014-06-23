@@ -10,6 +10,7 @@ import liquibase.exception.LockException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
+import liquibase.executor.Row;
 import liquibase.logging.LogFactory;
 import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.SnapshotGeneratorFactory;
@@ -260,17 +261,11 @@ public class StandardLockService implements LockService {
 
             List<DatabaseChangeLogLock> allLocks = new ArrayList<DatabaseChangeLogLock>();
             SqlStatement sqlStatement = new SelectFromDatabaseChangeLogLockStatement("ID", "LOCKED", "LOCKGRANTED", "LOCKEDBY");
-            List<Map<String, ?>> rows = ExecutorService.getInstance().getExecutor(database).query(sqlStatement).toList();
-            for (Map columnMap : rows) {
-                Object lockedValue = columnMap.get("LOCKED");
-                Boolean locked;
-                if (lockedValue instanceof Number) {
-                    locked = ((Number) lockedValue).intValue() == 1;
-                } else {
-                    locked = (Boolean) lockedValue;
-                }
+            List<Row> rows = ExecutorService.getInstance().getExecutor(database).query(sqlStatement).toList();
+            for (Row columnMap : rows) {
+                Boolean locked = columnMap.get("LOCKED", Boolean.class);
                 if (locked != null && locked) {
-                    allLocks.add(new DatabaseChangeLogLock(((Number) columnMap.get("ID")).intValue(), (Date) columnMap.get("LOCKGRANTED"), (String) columnMap.get("LOCKEDBY")));
+                    allLocks.add(new DatabaseChangeLogLock(columnMap.get("ID", Integer.class), columnMap.get("LOCKGRANTED", Date.class), columnMap.get("LOCKEDBY", String.class)));
                 }
             }
             return allLocks.toArray(new DatabaseChangeLogLock[allLocks.size()]);

@@ -5,6 +5,7 @@ import liquibase.database.core.*;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.ExecutorService;
+import liquibase.executor.Row;
 import liquibase.snapshot.CachedRow;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.InvalidExampleException;
@@ -42,7 +43,7 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
         UniqueConstraint exampleConstraint = (UniqueConstraint) example;
         Table table = exampleConstraint.getTable();
 
-        List<Map<String, ?>> metadata = listColumns(exampleConstraint, database);
+        List<Row> metadata = listColumns(exampleConstraint, database);
 
         if (metadata.size() == 0) {
             return null;
@@ -50,8 +51,8 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
         UniqueConstraint constraint = new UniqueConstraint();
         constraint.setTable(table);
         constraint.setName(example.getName());
-        for (Map<String, ?> col : metadata) {
-            constraint.getColumns().add((String) col.get("COLUMN_NAME"));
+        for (Row col : metadata) {
+            constraint.getColumns().add(col.get("COLUMN_NAME", String.class));
         }
 
         return constraint;
@@ -94,7 +95,7 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
         return ((JdbcDatabaseSnapshot) snapshot).getMetaData().getUniqueConstraints(schema.getCatalogName(), schema.getName(), table.getName());
     }
 
-    protected List<Map<String, ?>> listColumns(UniqueConstraint example, Database database) throws DatabaseException {
+    protected List<Row> listColumns(UniqueConstraint example, Database database) throws DatabaseException {
         Table table = example.getTable();
         Schema schema = table.getSchema();
         String name = example.getName();
@@ -145,26 +146,26 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
                     "JOIN sys.sysconstraints c ON c.constraintid = k.constraintid " +
                     "JOIN sys.systables t ON c.tableid = t.tableid "+
                     "WHERE c.constraintname='"+database.correctObjectName(name, UniqueConstraint.class)+"'";
-            List<Map<String, ?>> rows = ExecutorService.getInstance().getExecutor(database).query(new RawSqlStatement(sql)).toList();
+            List<Row> rows = ExecutorService.getInstance().getExecutor(database).query(new RawSqlStatement(sql)).toList();
 
-            List<Map<String, ?>> returnList = new ArrayList<Map<String, ?>>();
+            List<Row> returnList = new ArrayList<Row>();
             if (rows.size() == 0) {
                 return returnList;
             } else if (rows.size() > 1) {
                 throw new UnexpectedLiquibaseException("Got multiple rows back querying unique constraints");
             } else {
-                Map rowData = rows.get(0);
-                String descriptor = rowData.get("DESCRIPTOR").toString();
+                Row rowData = rows.get(0);
+                String descriptor = rowData.get("DESCRIPTOR", String.class);
                 descriptor = descriptor.replaceFirst(".*\\(","").replaceFirst("\\).*","");
                 for (String columnNumber : StringUtils.splitAndTrim(descriptor, ",")) {
-                    String columnName = (String) ExecutorService.getInstance().getExecutor(database).query(new RawSqlStatement(
+                    String columnName = ExecutorService.getInstance().getExecutor(database).query(new RawSqlStatement(
                             "select c.columnname from sys.syscolumns c " +
                                     "join sys.systables t on t.tableid=c.referenceid " +
-                                    "where t.tablename='"+rowData.get("TABLENAME")+"' and c.columnnumber=" + columnNumber)).toObject(String.class);
+                                    "where t.tablename='" + rowData.get("TABLENAME", String.class) + "' and c.columnnumber=" + columnNumber)).toObject(String.class);
 
                     Map<String, String> row = new HashMap<String, String>();
                     row.put("COLUMN_NAME", columnName);
-                    returnList.add(row);
+                    returnList.add(new Row(row));
                 }
                 return returnList;
             }

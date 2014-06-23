@@ -153,7 +153,13 @@ public class SnapshotGeneratorFactory {
         List<SqlStatement> sqlStatements = new ArrayList<SqlStatement>();
         RuntimeEnvironment runtimeEnvironment = new RuntimeEnvironment(database, null);
         sqlStatements.add(generator.generateLookupStatement(example, runtimeEnvironment, new ActionGeneratorChain(null)));
-        SqlStatement[] addToStatements = generator.generateAddToStatements(example, runtimeEnvironment, new ActionGeneratorChain(null));
+
+
+        SqlStatement[] addToStatements = new TableSnapshotGenerator().generateAddToStatements(example, runtimeEnvironment, new ActionGeneratorChain(null));
+        if (addToStatements != null) {
+            sqlStatements.addAll(Arrays.asList(addToStatements));
+        }
+        addToStatements = new ColumnSnapshotGenerator().generateAddToStatements(example, runtimeEnvironment, new ActionGeneratorChain(null));
         if (addToStatements != null) {
             sqlStatements.addAll(Arrays.asList(addToStatements));
         }
@@ -182,11 +188,11 @@ public class SnapshotGeneratorFactory {
         }
 
         for (DatabaseObject object : collection.get(Table.class)) {
-            new TableSnapshotGenerator().addTo((Table) object, collection, runtimeEnvironment, new ActionGeneratorChain(null));
+            new ColumnSnapshotGenerator().addTo((Table) object, collection, runtimeEnvironment, new ActionGeneratorChain(null));
         }
 
-        for (DatabaseObject object : collection.get(Column.class)) {
-            new ColumnSnapshotGenerator().addTo((Column) object, collection, runtimeEnvironment, new ActionGeneratorChain(null));
+        for (DatabaseObject object : collection.get(Schema.class)) {
+            new TableSnapshotGenerator().addTo((Table) object, collection, runtimeEnvironment, new ActionGeneratorChain(null));
         }
 
         System.out.println(collection);

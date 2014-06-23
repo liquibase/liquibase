@@ -8,6 +8,7 @@ import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
+import liquibase.executor.Row;
 import liquibase.integration.commandline.CommandLineResourceAccessor;
 import liquibase.lockservice.LockService;
 import liquibase.lockservice.LockServiceFactory;
@@ -162,7 +163,7 @@ public class WatchCommand extends AbstractCommand {
                     if (SnapshotGeneratorFactory.getInstance().hasDatabaseChangeLogTable(database)) {
                         LockService lockService = LockServiceFactory.getInstance().getLockService(database);
                         lockService.waitForLock();
-                        List<Map<String, ?>> rows;
+                        List<Row> rows;
                         try {
                             SelectFromDatabaseChangeLogStatement select = new SelectFromDatabaseChangeLogStatement("COUNT(*) AS ROW_COUNT", "MAX(DATEEXECUTED) AS LAST_EXEC");
                             rows = executor.query(select).toList();
@@ -176,8 +177,8 @@ public class WatchCommand extends AbstractCommand {
                         if (rows.size() == 0) {
                             writer.print("{\"count\": 0}");
                         } else {
-                            Map<String, ?> row = rows.iterator().next();
-                            writer.print("{\"count\":" + row.get("ROW_COUNT") + ", \"lastExec\": \"" + new ISODateFormat().format((Date) row.get("LAST_EXEC")) + "\"}");
+                            Row row = rows.iterator().next();
+                            writer.print("{\"count\":" + row.get("ROW_COUNT", Integer.class) + ", \"lastExec\": \"" + new ISODateFormat().format(row.get("LAST_EXEC", Date.class)) + "\"}");
                         }
                         request.setHandled(true);
                     } else {

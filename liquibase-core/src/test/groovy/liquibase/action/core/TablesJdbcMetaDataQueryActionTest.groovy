@@ -11,12 +11,12 @@ import spock.lang.Unroll
 
 import java.sql.DatabaseMetaData
 
-class TablesMetaDataQueryActionTest extends Specification {
+class TablesJdbcMetaDataQueryActionTest extends Specification {
 
     @Unroll
     def "getRawMetaData"() {
         when:
-        def action = new TablesMetaDataQueryAction(catalogName, schemaName, tableName)
+        def action = new TablesJdbcMetaDataQueryAction(catalogName, schemaName, tableName)
         def database = new MockDatabase()
         def connection = Mock(JdbcConnection)
         def metaData = Mock(DatabaseMetaData)
@@ -36,7 +36,7 @@ class TablesMetaDataQueryActionTest extends Specification {
 
     def "rawMetaDataToObject from mysql"() {
         when:
-        def action = new TablesMetaDataQueryAction(null, null, null)
+        def action = new TablesJdbcMetaDataQueryAction(null, null, null)
         def Table table = action.rawMetaDataToObject([
                 REF_GENERATION           : null,
                 TYPE_NAME                : null,
@@ -48,7 +48,7 @@ class TablesMetaDataQueryActionTest extends Specification {
                 TABLE_SCHEM              : null,
                 TABLE_CAT                : "lbcat",
                 SELF_REFERENCING_COL_NAME: null,
-        ])
+        ], options)
 
         then:
         table.getName() == "cart_item"
@@ -58,7 +58,7 @@ class TablesMetaDataQueryActionTest extends Specification {
 
     def "rawMetaDataToObject with remarks from mysql"() {
         when:
-        def action = new TablesMetaDataQueryAction(null, null, null)
+        def action = new TablesJdbcMetaDataQueryAction(null, null, null)
         def Table table = action.rawMetaDataToObject([
                 REF_GENERATION           : null,
                 TYPE_NAME                : null,
@@ -70,7 +70,7 @@ class TablesMetaDataQueryActionTest extends Specification {
                 TABLE_SCHEM              : null,
                 TABLE_CAT                : "lbcat",
                 SELF_REFERENCING_COL_NAME: null,
-        ])
+        ], options)
 
         then:
         table.getName() == "cart_item"
