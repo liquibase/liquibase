@@ -1,6 +1,7 @@
 package liquibase.parser.core.yaml;
 
 import liquibase.ContextExpression;
+import liquibase.Labels;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.exception.ChangeLogParseException;
@@ -63,12 +64,13 @@ public class YamlChangeLogParser implements ChangeLogParser {
                 if (obj instanceof Map && ((Map) obj).containsKey("property")) {
                     Map property = (Map) ((Map) obj).get("property");
                     ContextExpression context = new ContextExpression((String) property.get("context"));
+                    Labels labels = new Labels((String) property.get("labels"));
                     if (property.containsKey("name")) {
                         Object value = property.get("value");
                         if (value != null) {
                             value = value.toString();
                         }
-                        changeLogParameters.set((String) property.get("name"), (String) value, context, (String) property.get("dbms"));
+                        changeLogParameters.set((String) property.get("name"), (String) value, context, labels, (String) property.get("dbms"));
                     } else if (property.containsKey("file")) {
                         Properties props = new Properties();
                         InputStream propertiesStream = StreamUtil.singleInputStream((String) property.get("file"), resourceAccessor);
@@ -78,7 +80,7 @@ public class YamlChangeLogParser implements ChangeLogParser {
                             props.load(propertiesStream);
 
                             for (Map.Entry entry : props.entrySet()) {
-                                changeLogParameters.set(entry.getKey().toString(), entry.getValue().toString(), context, (String) property.get("dbms"));
+                                changeLogParameters.set(entry.getKey().toString(), entry.getValue().toString(), context, labels, (String) property.get("dbms"));
                             }
                         }
                     }

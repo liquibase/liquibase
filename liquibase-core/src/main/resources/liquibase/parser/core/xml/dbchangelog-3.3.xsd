@@ -92,6 +92,7 @@
 						<xsd:attribute name="value" type="xsd:string" />
 						<xsd:attribute name="dbms" type="xsd:string" />
 						<xsd:attribute name="context" type="xsd:string" />
+                        <xsd:attribute name="labels" type="xsd:string" />
 					</xsd:complexType>
 				</xsd:element>
 
@@ -161,6 +162,7 @@
 										</xsd:choice>
 										<xsd:attribute name="dbms" type="xsd:string" />
 										<xsd:attribute name="context" type="xsd:string" />
+                                        <xsd:attribute name="labels" type="xsd:string" />
 										<xsd:attribute name="applyToRollback" type="booleanExp" />
 									</xsd:complexType>
 								</xsd:element>
@@ -245,6 +247,7 @@
 		<xsd:attribute name="id" type="xsd:string" use="required" />
 		<xsd:attribute name="author" type="xsd:string" use="required" />
 		<xsd:attribute name="context" type="xsd:string" />
+        <xsd:attribute name="labels" type="xsd:string" />
 		<xsd:attribute name="dbms" type="xsd:string" />
 		<xsd:attribute name="runOnChange" type="booleanExp" />
 		<xsd:attribute name="runAlways" type="booleanExp" />
