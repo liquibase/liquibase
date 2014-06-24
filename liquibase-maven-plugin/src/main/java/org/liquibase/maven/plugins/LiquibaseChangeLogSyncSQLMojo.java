@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Writer;
 
+import liquibase.Contexts;
+import liquibase.LabelExpression;
 import org.apache.maven.plugin.MojoExecutionException;
 
 import liquibase.Liquibase;
@@ -36,7 +38,7 @@ public class LiquibaseChangeLogSyncSQLMojo extends
 	@Override
 	protected void performLiquibaseTask(Liquibase liquibase)
 			throws LiquibaseException {
-		liquibase.changeLogSync(contexts, outputWriter);
+		liquibase.changeLogSync(new Contexts(contexts), new LabelExpression(labels), outputWriter);
 	}
 
 	@Override

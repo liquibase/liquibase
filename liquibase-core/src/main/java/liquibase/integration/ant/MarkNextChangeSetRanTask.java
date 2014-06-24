@@ -1,5 +1,7 @@
 package liquibase.integration.ant;
 
+import liquibase.Contexts;
+import liquibase.LabelExpression;
 import liquibase.Liquibase;
 import org.apache.tools.ant.BuildException;
 
@@ -20,9 +22,9 @@ public class MarkNextChangeSetRanTask extends BaseLiquibaseTask {
 
             Writer writer = createOutputWriter();
             if (writer == null) {
-                liquibase.markNextChangeSetRan(getContexts());
+                liquibase.markNextChangeSetRan(new Contexts(getContexts()), new LabelExpression(getLabels()));
             } else {
-                liquibase.markNextChangeSetRan(getContexts(), writer);
+                liquibase.markNextChangeSetRan(new Contexts(getContexts()), new LabelExpression(getLabels()), writer);
                 writer.flush();
                 writer.close();
             }

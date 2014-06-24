@@ -45,6 +45,7 @@ public abstract class BaseLiquibaseTask extends Task {
     private boolean promptOnNonLocalDatabase = false;
     private String currentDateTimeFunction;
     private String contexts;
+    private String labels;
     private String outputFile;
     private String defaultCatalogName;
     private String defaultSchemaName;
@@ -290,6 +291,13 @@ public abstract class BaseLiquibaseTask extends Task {
         this.contexts = cntx.trim();
     }
 
+    public String getLabels() {
+        return labels;
+    }
+
+    public void setLabels(String labels) {
+        this.labels = labels;
+    }
 
     /**
      * Redirector of logs from java.util.logging to ANT's loggging
