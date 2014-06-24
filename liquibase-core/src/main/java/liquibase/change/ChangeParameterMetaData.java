@@ -91,7 +91,7 @@ public class ChangeParameterMetaData {
         if (supportedDatabases.length == 1 && StringUtils.join(supportedDatabases, ",").equals(ChangeParameterMetaData.COMPUTE)) {
             int validDatabases = 0;
             for (Database database : DatabaseFactory.getInstance().getImplementedDatabases()) {
-                ExecutionOptions options = new ExecutionOptions(new RuntimeEnvironment(database, null));
+                ExecutionOptions options = new ExecutionOptions(new RuntimeEnvironment(database, null, null));
                 if (database.getShortName() == null || database.getShortName().equals("unsupported")) {
                     continue;
                 }
@@ -138,7 +138,7 @@ public class ChangeParameterMetaData {
         if (requiredDatabases.length == 1 && StringUtils.join(requiredDatabases, ",").equals(ChangeParameterMetaData.COMPUTE)) {
             int validDatabases = 0;
             for (Database database : DatabaseFactory.getInstance().getImplementedDatabases()) {
-                ExecutionOptions options = new ExecutionOptions(new RuntimeEnvironment(database, null));
+                ExecutionOptions options = new ExecutionOptions(new RuntimeEnvironment(database, null, null));
                 try {
                     if (!change.generateStatementsVolatile(options)) {
                         Change testChange = change.getClass().newInstance();

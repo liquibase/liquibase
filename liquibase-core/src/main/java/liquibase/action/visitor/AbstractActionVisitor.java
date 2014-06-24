@@ -1,6 +1,7 @@
 package liquibase.action.visitor;
 
 import liquibase.ContextExpression;
+import liquibase.Labels;
 import liquibase.change.CheckSum;
 import liquibase.serializer.AbstractLiquibaseSerializable;
 import liquibase.serializer.ReflectionSerializer;
@@ -18,6 +19,7 @@ public abstract class AbstractActionVisitor extends AbstractLiquibaseSerializabl
     private boolean applyToUpdate = true;
     private boolean applyToRollback = false;
     private ContextExpression contexts;
+    private Labels labels;
 
     /**
      * Default return value is null.
@@ -69,6 +71,16 @@ public abstract class AbstractActionVisitor extends AbstractLiquibaseSerializabl
     @Override
     public void setContexts(ContextExpression contexts) {
         this.contexts = contexts;
+    }
+
+    @Override
+    public Labels getLabels() {
+        return labels;
+    }
+
+    @Override
+    public void setLabels(Labels labels) {
+        this.labels = labels;
     }
 
     @Override

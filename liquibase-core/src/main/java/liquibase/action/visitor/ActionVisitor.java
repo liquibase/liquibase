@@ -1,6 +1,7 @@
 package liquibase.action.visitor;
 
 import liquibase.ContextExpression;
+import liquibase.Labels;
 import liquibase.action.Action;
 import liquibase.change.CheckSum;
 import liquibase.executor.ExecutionOptions;
@@ -74,5 +75,8 @@ public interface ActionVisitor extends LiquibaseSerializable {
      * This should not need to take contexts or dbms into account.
      */
     CheckSum generateCheckSum();
+
+    Labels getLabels();
+    void setLabels(Labels labels);
 
 }

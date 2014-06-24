@@ -322,9 +322,9 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
                     if (dbms.size() > 0) {
                         actionVisitor.setDbms(dbms);
                     }
-                    sqlVisitor.setContexts(context);
-                    sqlVisitor.setLabels(labels);
-                    sqlVisitor.load(node, resourceAccessor);
+                    actionVisitor.setContexts(context);
+                    actionVisitor.setLabels(labels);
+                    actionVisitor.load(node, resourceAccessor);
 
                     addSqlVisitor(actionVisitor);
                 }
@@ -607,7 +607,7 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
                     }
                     for (SqlStatement statement : statements) {
                         try {
-                            executor.execute(statement, new ExecutionOptions(actionVisitors, new RuntimeEnvironment(database, null)));
+                            executor.execute(statement, new ExecutionOptions(actionVisitors, new RuntimeEnvironment(database, null, null)));
                         } catch (DatabaseException e) {
                             throw new RollbackFailedException("Error executing custom SQL [" + statement + "]", e);
                         }

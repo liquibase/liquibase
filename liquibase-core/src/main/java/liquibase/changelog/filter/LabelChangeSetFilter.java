@@ -2,8 +2,8 @@ package liquibase.changelog.filter;
 
 import liquibase.Contexts;
 import liquibase.LabelExpression;
+import liquibase.action.visitor.ActionVisitor;
 import liquibase.changelog.ChangeSet;
-import liquibase.sql.visitor.SqlVisitor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,13 +21,13 @@ public class LabelChangeSetFilter implements ChangeSetFilter {
 
     @Override
     public ChangeSetFilterResult accepts(ChangeSet changeSet) {
-        List<SqlVisitor> visitorsToRemove = new ArrayList<SqlVisitor>();
-        for (SqlVisitor visitor : changeSet.getSqlVisitors()) {
+        List<ActionVisitor> visitorsToRemove = new ArrayList<ActionVisitor>();
+        for (ActionVisitor visitor : changeSet.getActionVisitors()) {
             if (visitor.getLabels() != null && !labelExpression.matches(visitor.getLabels())) {
                 visitorsToRemove.add(visitor);
             }
         }
-        changeSet.getSqlVisitors().removeAll(visitorsToRemove);
+        changeSet.getActionVisitors().removeAll(visitorsToRemove);
 
         if (labelExpression == null || labelExpression.isEmpty()) {
             return new ChangeSetFilterResult(true, "No runtime labels specified, all labels will run", this.getClass());

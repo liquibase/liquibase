@@ -169,7 +169,7 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
         }
 
         for (SqlStatement sql : statementsToExecute) {
-            if (ActionGeneratorFactory.getInstance().supports(sql, new ExecutionOptions(new RuntimeEnvironment(database, null)))) {
+            if (ActionGeneratorFactory.getInstance().supports(sql, new ExecutionOptions(new RuntimeEnvironment(database, null, null)))) {
                 executor.execute(sql);
                 getDatabase().commit();
             } else {

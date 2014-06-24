@@ -5,7 +5,7 @@ import liquibase.database.Database;
 public class RuntimeEnvironment {
     private Database targetDatabase;
     private Contexts contexts;
-    private final LabelExpression labels;
+    private LabelExpression labels;
 
     public RuntimeEnvironment(Database targetDatabase) {
         this.targetDatabase = targetDatabase;

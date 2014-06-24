@@ -43,6 +43,6 @@ public abstract class AbstractExecutor implements Executor {
      * Create ExecutionOptions to use in single-parameter execute/update/query calls.
      */
     protected ExecutionOptions createDefaultExecutionOptions() {
-        return new ExecutionOptions(new RuntimeEnvironment(database, null));
+        return new ExecutionOptions(new RuntimeEnvironment(database, null, null));
     }
 }
