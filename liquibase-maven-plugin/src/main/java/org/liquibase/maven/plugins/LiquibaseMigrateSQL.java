@@ -3,6 +3,9 @@
 package org.liquibase.maven.plugins;
 
 import java.io.*;
+
+import liquibase.Contexts;
+import liquibase.LabelExpression;
 import liquibase.resource.ResourceAccessor;
 import liquibase.Liquibase;
 import liquibase.database.Database;
@@ -49,9 +52,9 @@ public class LiquibaseMigrateSQL extends AbstractLiquibaseUpdateMojo {
   @Override
   protected void doUpdate(Liquibase liquibase) throws LiquibaseException {
     if (changesToApply > 0) {
-      liquibase.update(changesToApply, contexts, outputWriter);
+      liquibase.update(changesToApply, new Contexts(contexts), new LabelExpression(labels), outputWriter);
     } else {
-      liquibase.update(contexts, outputWriter);
+      liquibase.update(new Contexts(contexts), new LabelExpression(labels), outputWriter);
     }
   }
 

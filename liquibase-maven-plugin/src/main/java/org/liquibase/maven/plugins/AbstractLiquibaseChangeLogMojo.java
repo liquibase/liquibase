@@ -33,6 +33,13 @@ public abstract class AbstractLiquibaseChangeLogMojo extends AbstractLiquibaseMo
    */
   protected String contexts;
 
+    /**
+     * The Liquibase labels to execute, which can be "," separated if multiple labels
+     * are required or a more complex expression. If no label is specified then ALL all will be executed.
+     * @parameter expression="${liquibase.labels}" default-value=""
+     */
+  protected String labels;
+
   @Override
   protected void checkRequiredParametersAreSpecified() throws MojoFailureException {
     super.checkRequiredParametersAreSpecified();
@@ -57,6 +64,7 @@ public abstract class AbstractLiquibaseChangeLogMojo extends AbstractLiquibaseMo
     super.printSettings(indent);
     getLog().info(indent + "changeLogFile: " + changeLogFile);
     getLog().info(indent + "context(s): " + contexts);
+      getLog().info(indent + "label(s): " + labels);
   }
 
   @Override

@@ -1,5 +1,6 @@
 package liquibase.parser.core.formattedsql;
 
+import liquibase.Labels;
 import liquibase.change.core.EmptyChange;
 import liquibase.change.core.RawSQLChange;
 import liquibase.changelog.ChangeLogParameters;
@@ -86,6 +87,7 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
             Pattern runOnChangePattern = Pattern.compile(".*runOnChange:(\\w+).*", Pattern.CASE_INSENSITIVE);
             Pattern runAlwaysPattern = Pattern.compile(".*runAlways:(\\w+).*", Pattern.CASE_INSENSITIVE);
             Pattern contextPattern = Pattern.compile(".*context:(\\S*).*", Pattern.CASE_INSENSITIVE);
+            Pattern labelsPattern = Pattern.compile(".*labels:(\\S*).*", Pattern.CASE_INSENSITIVE);
             Pattern runInTransactionPattern = Pattern.compile(".*runInTransaction:(\\w+).*", Pattern.CASE_INSENSITIVE);
             Pattern dbmsPattern = Pattern.compile(".*dbms:([^,][\\w!,]+).*", Pattern.CASE_INSENSITIVE);
             Pattern failOnErrorPattern = Pattern.compile(".*failOnError:(\\w+).*", Pattern.CASE_INSENSITIVE);
@@ -124,6 +126,7 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                     Matcher runOnChangePatternMatcher = runOnChangePattern.matcher(line);
                     Matcher runAlwaysPatternMatcher = runAlwaysPattern.matcher(line);
                     Matcher contextPatternMatcher = contextPattern.matcher(line);
+                    Matcher labelsPatternMatcher = labelsPattern.matcher(line);
                     Matcher runInTransactionPatternMatcher = runInTransactionPattern.matcher(line);
                     Matcher dbmsPatternMatcher = dbmsPattern.matcher(line);
                     Matcher failOnErrorPatternMatcher = failOnErrorPattern.matcher(line);
@@ -137,9 +140,11 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
 
                     String endDelimiter = parseString(endDelimiterPatternMatcher);
                     String context = parseString(contextPatternMatcher);
+                    String labels = parseString(labelsPatternMatcher);
                     String dbms = parseString(dbmsPatternMatcher);
 
                     changeSet = new ChangeSet(changeSetPatternMatcher.group(2), changeSetPatternMatcher.group(1), runAlways, runOnChange, physicalChangeLogLocation, context, dbms, runInTransaction, changeLog.getObjectQuotingStrategy(), changeLog);
+                    changeSet.setLabels(new Labels(labels));
                     changeSet.setFailOnError(failOnError);
                     changeLog.addChangeSet(changeSet);
 

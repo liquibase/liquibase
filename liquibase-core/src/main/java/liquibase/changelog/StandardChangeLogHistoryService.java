@@ -3,6 +3,7 @@ package liquibase.changelog;
 import liquibase.Contexts;
 import liquibase.RuntimeEnvironment;
 import liquibase.actiongenerator.ActionGeneratorFactory;
+import liquibase.LabelExpression;
 import liquibase.change.CheckSum;
 import liquibase.database.Database;
 import liquibase.database.core.SQLiteDatabase;
@@ -178,8 +179,8 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
 
     }
 
-    public void upgradeChecksums(final DatabaseChangeLog databaseChangeLog, final Contexts contexts) throws DatabaseException {
-        super.upgradeChecksums(databaseChangeLog, contexts);
+    public void upgradeChecksums(final DatabaseChangeLog databaseChangeLog, final Contexts contexts, LabelExpression labels) throws DatabaseException {
+        super.upgradeChecksums(databaseChangeLog, contexts, labels);
         getDatabase().commit();
     }
 

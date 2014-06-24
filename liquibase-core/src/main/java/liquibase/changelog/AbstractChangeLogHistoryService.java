@@ -1,6 +1,7 @@
 package liquibase.changelog;
 
 import liquibase.Contexts;
+import liquibase.LabelExpression;
 import liquibase.changelog.filter.ContextChangeSetFilter;
 import liquibase.changelog.filter.DbmsChangeSetFilter;
 import liquibase.database.Database;
@@ -58,7 +59,7 @@ public abstract class AbstractChangeLogHistoryService implements ChangeLogHistor
         }
     }
 
-    public void upgradeChecksums(final DatabaseChangeLog databaseChangeLog, final Contexts contexts) throws DatabaseException {
+    public void upgradeChecksums(final DatabaseChangeLog databaseChangeLog, final Contexts contexts, LabelExpression labels) throws DatabaseException {
         for (RanChangeSet ranChangeSet : this.getRanChangeSets()) {
             if (ranChangeSet.getLastCheckSum() == null) {
                 ChangeSet changeSet = databaseChangeLog.getChangeSet(ranChangeSet);

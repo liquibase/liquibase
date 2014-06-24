@@ -1,5 +1,7 @@
 package org.liquibase.maven.plugins;
 
+import liquibase.Contexts;
+import liquibase.LabelExpression;
 import liquibase.exception.LiquibaseException;
 import liquibase.Liquibase;
 import liquibase.resource.ResourceAccessor;
@@ -27,9 +29,9 @@ public class LiquibaseMigrate extends AbstractLiquibaseUpdateMojo {
   @Override
   protected void doUpdate(Liquibase liquibase) throws LiquibaseException {
     if (changesToApply > 0) {
-      liquibase.update(changesToApply, contexts);
+      liquibase.update(changesToApply, new Contexts(contexts), new LabelExpression(labels));
     } else {
-      liquibase.update(contexts);
+      liquibase.update(new Contexts(contexts), new LabelExpression(labels));
     }
   }
 }

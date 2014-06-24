@@ -81,9 +81,10 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
             if (localName.equals("property")) {
                 String context = changeLogParameters.expandExpressions(StringUtils.trimToNull(attributes.getValue("context")));
                 String dbms = changeLogParameters.expandExpressions(StringUtils.trimToNull(attributes.getValue("dbms")));
+                String labels = changeLogParameters.expandExpressions(StringUtils.trimToNull(attributes.getValue("labels")));
 
                 if (StringUtils.trimToNull(attributes.getValue("file")) == null) {
-                    this.changeLogParameters.set(attributes.getValue("name"), changeLogParameters.expandExpressions(attributes.getValue("value")), context, dbms);
+                    this.changeLogParameters.set(attributes.getValue("name"), changeLogParameters.expandExpressions(attributes.getValue("value")), context, labels, dbms);
                 } else {
                     Properties props = new Properties();
                     InputStream propertiesStream = StreamUtil.singleInputStream(attributes.getValue("file"), resourceAccessor);
@@ -93,7 +94,7 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
                         props.load(propertiesStream);
 
                         for (Map.Entry entry : props.entrySet()) {
-                            this.changeLogParameters.set(entry.getKey().toString(), entry.getValue().toString(), context, dbms);
+                            this.changeLogParameters.set(entry.getKey().toString(), entry.getValue().toString(), context, labels, dbms);
                         }
                     }
                 }

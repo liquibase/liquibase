@@ -57,6 +57,8 @@ public class MultiTenantSpringLiquibase implements InitializingBean, ResourceLoa
 
     private String contexts;
 
+    private String labels;
+
     private Map<String, String> parameters;
 
     private String defaultSchema;
@@ -143,6 +145,7 @@ public class MultiTenantSpringLiquibase implements InitializingBean, ResourceLoa
 		liquibase.setChangeLog(changeLog);
 		liquibase.setChangeLogParameters(parameters);
 		liquibase.setContexts(contexts);
+        liquibase.setLabels(labels);
 		liquibase.setDropFirst(dropFirst);
 		liquibase.setShouldRun(shouldRun);
 		liquibase.setRollbackFile(rollbackFile);
@@ -177,7 +180,15 @@ public class MultiTenantSpringLiquibase implements InitializingBean, ResourceLoa
 		this.contexts = contexts;
 	}
 
-	public Map<String, String> getParameters() {
+    public String getLabels() {
+        return labels;
+    }
+
+    public void setLabels(String labels) {
+        this.labels = labels;
+    }
+
+    public Map<String, String> getParameters() {
 		return parameters;
 	}
 

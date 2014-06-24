@@ -1,5 +1,7 @@
 package org.liquibase.maven.plugins;
 
+import liquibase.Contexts;
+import liquibase.LabelExpression;
 import liquibase.Liquibase;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
@@ -88,6 +90,6 @@ public class LiquibaseFutureRollbackSQL extends LiquibaseRollback {
 
     @Override
     protected void performLiquibaseTask(Liquibase liquibase) throws LiquibaseException {
-        liquibase.futureRollbackSQL(contexts, outputWriter);
+        liquibase.futureRollbackSQL(null, new Contexts(contexts), new LabelExpression(labels), outputWriter);
     }
 }

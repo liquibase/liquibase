@@ -1,5 +1,7 @@
 package org.liquibase.maven.plugins;
 
+import liquibase.Contexts;
+import liquibase.LabelExpression;
 import liquibase.exception.LiquibaseException;
 import liquibase.Liquibase;
 
@@ -14,6 +16,6 @@ public class LiquibaseUpdateTestingRollback extends AbstractLiquibaseUpdateMojo 
 
     @Override
     protected void doUpdate(Liquibase liquibase) throws LiquibaseException {
-        liquibase.updateTestingRollback(contexts);
+        liquibase.updateTestingRollback(new Contexts(contexts), new LabelExpression(labels));
     }
 }
