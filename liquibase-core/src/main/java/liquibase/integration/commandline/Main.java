@@ -541,7 +541,7 @@ public class Main {
         stream.println(" --driver=<jdbc.driver.ClassName>           Database driver class name");
         stream.println(" --databaseClass=<database.ClassName>       custom liquibase.database.Database");
         stream.println("                                            implementation to use");
-        stream.println(" --propertyProviderClass=<properties.ClassName  customer Properties");
+        stream.println(" --propertyProviderClass=<properties.ClassName>  custom Properties");
         stream.println("                                            implementation to use");
         stream.println(" --defaultSchemaName=<name>                 Default database schema to use");
         stream.println(" --contexts=<value>                         ChangeSet contexts to execute");
