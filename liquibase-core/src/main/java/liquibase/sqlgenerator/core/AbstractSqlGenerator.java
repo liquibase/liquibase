@@ -1,11 +1,10 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.ExecutionEnvironment;
-import liquibase.actiongenerator.ActionGeneratorChain;
+import liquibase.statementlogic.StatementLogicChain;
 import liquibase.database.Database;
 import liquibase.exception.ValidationErrors;
 import liquibase.exception.Warnings;
-import  liquibase.ExecutionEnvironment;
 import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.statement.SqlStatement;
 
@@ -32,12 +31,12 @@ public abstract class AbstractSqlGenerator<StatementType extends SqlStatement> i
     }
 
     @Override
-    public Warnings warn(StatementType statementType, ExecutionEnvironment env, ActionGeneratorChain chain) {
+    public Warnings warn(StatementType statementType, ExecutionEnvironment env, StatementLogicChain chain) {
         return chain.warn(statementType, env);
     }
 
     @Override
-    public ValidationErrors validate(StatementType statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+    public ValidationErrors validate(StatementType statement, ExecutionEnvironment env, StatementLogicChain chain) {
         return chain.validate(statement, env);
     }
 

@@ -1,8 +1,8 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.action.Action;
-import liquibase.actiongenerator.ActionGeneratorChain;
-import liquibase.actiongenerator.ActionGeneratorFactory;
+import liquibase.statementlogic.StatementLogicChain;
+import liquibase.statementlogic.StatementLogicFactory;
 import liquibase.change.ColumnConfig;
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.exception.DatabaseException;
@@ -32,7 +32,7 @@ public class AddColumnGeneratorSQLite extends AddColumnGenerator {
     }
 
     @Override
-    public Action[] generateActions(final AddColumnStatement statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+    public Action[] generateActions(final AddColumnStatement statement, ExecutionEnvironment env, StatementLogicChain chain) {
         // SQLite does not support this ALTER TABLE operation until now.
         // For more information see: http://www.sqlite.org/omitted.html.
         // This is a small work around...
@@ -64,7 +64,7 @@ public class AddColumnGeneratorSQLite extends AddColumnGenerator {
         try {
             // alter table
             List<SqlStatement> alterTableStatements = SQLiteDatabase.getAlterTableStatements(rename_alter_visitor, env, statement.getCatalogName(), statement.getSchemaName(), statement.getTableName());
-            sql.addAll(Arrays.asList(ActionGeneratorFactory.getInstance().generateActions(alterTableStatements.toArray(new SqlStatement[alterTableStatements.size()]), env)));
+            sql.addAll(Arrays.asList(StatementLogicFactory.getInstance().generateActions(alterTableStatements.toArray(new SqlStatement[alterTableStatements.size()]), env)));
         } catch (DatabaseException e) {
             System.err.println(e);
             e.printStackTrace();

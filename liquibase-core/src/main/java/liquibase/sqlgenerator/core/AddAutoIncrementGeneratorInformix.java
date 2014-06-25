@@ -2,7 +2,7 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.action.Action;
 import liquibase.action.core.UnparsedSql;
-import liquibase.actiongenerator.ActionGeneratorChain;
+import liquibase.statementlogic.StatementLogicChain;
 import liquibase.database.Database;
 import liquibase.database.core.InformixDatabase;
 import liquibase.datatype.DataTypeFactory;
@@ -25,7 +25,7 @@ public class AddAutoIncrementGeneratorInformix extends AddAutoIncrementGenerator
     public ValidationErrors validate(
     		AddAutoIncrementStatement addAutoIncrementStatement,
     		ExecutionEnvironment env,
-    		ActionGeneratorChain chain) {
+    		StatementLogicChain chain) {
         ValidationErrors validationErrors = super.validate(
         	addAutoIncrementStatement, env, chain);
 
@@ -36,7 +36,7 @@ public class AddAutoIncrementGeneratorInformix extends AddAutoIncrementGenerator
     }
 
     @Override
-    public Action[] generateActions(AddAutoIncrementStatement statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+    public Action[] generateActions(AddAutoIncrementStatement statement, ExecutionEnvironment env, StatementLogicChain chain) {
         Database database = env.getTargetDatabase();
 
         return new Action[]{

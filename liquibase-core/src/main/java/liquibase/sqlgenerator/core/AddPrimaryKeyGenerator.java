@@ -2,7 +2,7 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.action.Action;
 import liquibase.action.core.UnparsedSql;
-import liquibase.actiongenerator.ActionGeneratorChain;
+import liquibase.statementlogic.StatementLogicChain;
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.exception.ValidationErrors;
@@ -20,7 +20,7 @@ public class AddPrimaryKeyGenerator extends AbstractSqlGenerator<AddPrimaryKeySt
     }
 
     @Override
-    public ValidationErrors validate(AddPrimaryKeyStatement addPrimaryKeyStatement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+    public ValidationErrors validate(AddPrimaryKeyStatement addPrimaryKeyStatement, ExecutionEnvironment env, StatementLogicChain chain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("columnNames", addPrimaryKeyStatement.getColumnNames());
         validationErrors.checkRequiredField("tableName", addPrimaryKeyStatement.getTableName());
@@ -28,7 +28,7 @@ public class AddPrimaryKeyGenerator extends AbstractSqlGenerator<AddPrimaryKeySt
     }
 
     @Override
-    public Action[] generateActions(AddPrimaryKeyStatement statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+    public Action[] generateActions(AddPrimaryKeyStatement statement, ExecutionEnvironment env, StatementLogicChain chain) {
         Database database = env.getTargetDatabase();
 
         String sql;

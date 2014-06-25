@@ -2,7 +2,7 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.action.Action;
 import liquibase.action.core.UnparsedSql;
-import liquibase.actiongenerator.ActionGeneratorChain;
+import liquibase.statementlogic.StatementLogicChain;
 import liquibase.database.Database;
 import liquibase.database.core.OracleDatabase;
 import liquibase.exception.ValidationErrors;
@@ -13,14 +13,14 @@ import liquibase.statement.core.DropTableStatement;
 public class DropTableGenerator extends AbstractSqlGenerator<DropTableStatement> {
 
     @Override
-    public ValidationErrors validate(DropTableStatement dropTableStatement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+    public ValidationErrors validate(DropTableStatement dropTableStatement, ExecutionEnvironment env, StatementLogicChain chain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("tableName", dropTableStatement.getTableName());
         return validationErrors;
     }
 
     @Override
-    public Action[] generateActions(DropTableStatement statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+    public Action[] generateActions(DropTableStatement statement, ExecutionEnvironment env, StatementLogicChain chain) {
         Database database = env.getTargetDatabase();
 
         StringBuffer buffer = new StringBuffer();

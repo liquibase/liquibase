@@ -1,11 +1,10 @@
 package liquibase.change;
 
 import liquibase.ExecutionEnvironment;
-import liquibase.actiongenerator.ActionGeneratorFactory;
+import liquibase.statementlogic.StatementLogicFactory;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.exception.*;
-import  liquibase.ExecutionEnvironment;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.resource.ResourceAccessor;
@@ -263,7 +262,7 @@ public abstract class AbstractChange implements Change {
             return false;
         }
         for (SqlStatement statement : statements) {
-            if (ActionGeneratorFactory.getInstance().generateStatementsVolatile(statement, env)) {
+            if (StatementLogicFactory.getInstance().generateStatementsVolatile(statement, env)) {
                 return true;
             }
         }
@@ -284,7 +283,7 @@ public abstract class AbstractChange implements Change {
             return false;
         }
         for (SqlStatement statement : statements) {
-            if (ActionGeneratorFactory.getInstance().generateRollbackStatementsVolatile(statement, env)) {
+            if (StatementLogicFactory.getInstance().generateRollbackStatementsVolatile(statement, env)) {
                 return true;
             }
         }
@@ -292,7 +291,7 @@ public abstract class AbstractChange implements Change {
     }
 
     /**
-     * Implementation delegates logic to the {@link liquibase.actiongenerator.ActionGenerator#supports(liquibase.statement.SqlStatement, liquibase.ExecutionEnvironment)} method on the {@link SqlStatement} objects returned by {@link #generateStatements }.
+     * Implementation delegates logic to the {@link liquibase.statementlogic.StatementLogic#supports(liquibase.statement.SqlStatement, liquibase.ExecutionEnvironment)} method on the {@link SqlStatement} objects returned by {@link #generateStatements }.
      * If no or null SqlStatements are returned by generateStatements then this method returns true.
      * If {@link Change#generateStatementsVolatile(liquibase.ExecutionEnvironment)} returns true, we cannot call generateStatements and so assume true.
      */
@@ -306,7 +305,7 @@ public abstract class AbstractChange implements Change {
             return true;
         }
         for (SqlStatement statement : statements) {
-            if (!ActionGeneratorFactory.getInstance().supports(statement, env)) {
+            if (!StatementLogicFactory.getInstance().supports(statement, env)) {
                 return false;
             }
         }
@@ -314,7 +313,7 @@ public abstract class AbstractChange implements Change {
     }
 
     /**
-     * Implementation delegates logic to the {@link liquibase.actiongenerator.ActionGenerator#warn(liquibase.statement.SqlStatement, liquibase.ExecutionEnvironment, liquibase.actiongenerator.ActionGeneratorChain)} method on the {@link SqlStatement} objects returned by {@link #generateStatements }.
+     * Implementation delegates logic to the {@link liquibase.statementlogic.StatementLogic#warn(liquibase.statement.SqlStatement, liquibase.ExecutionEnvironment, liquibase.statementlogic.StatementLogicChain)} method on the {@link SqlStatement} objects returned by {@link #generateStatements }.
      * If a generated statement is not supported for the given database, no warning will be added since that is a validation error.
      * If no or null SqlStatements are returned by generateStatements then this method returns no warnings.
      */
@@ -330,8 +329,8 @@ public abstract class AbstractChange implements Change {
             return warnings;
         }
         for (SqlStatement statement : statements) {
-            if (ActionGeneratorFactory.getInstance().supports(statement, env)) {
-                warnings.addAll(ActionGeneratorFactory.getInstance().warn(statement, env));
+            if (StatementLogicFactory.getInstance().supports(statement, env)) {
+                warnings.addAll(StatementLogicFactory.getInstance().warn(statement, env));
             } else if (statement.skipOnUnsupported()) {
                 warnings.addWarning(statement.getClass().getName() + " is not supported on " + env.getTargetDatabase().getShortName() + ", but " + ChangeFactory.getInstance().getChangeMetaData(this).getName() + " will still execute");
             }
@@ -342,7 +341,7 @@ public abstract class AbstractChange implements Change {
 
     /**
      * Implementation checks the ChangeParameterMetaData for declared required fields
-     * and also delegates logic to the {@link liquibase.actiongenerator.ActionGenerator#validate(liquibase.statement.SqlStatement, liquibase.ExecutionEnvironment, liquibase.actiongenerator.ActionGeneratorChain)}  method on the {@link SqlStatement} objects returned by {@link #generateStatements }.
+     * and also delegates logic to the {@link liquibase.statementlogic.StatementLogic#validate(liquibase.statement.SqlStatement, liquibase.ExecutionEnvironment, liquibase.statementlogic.StatementLogicChain)}  method on the {@link SqlStatement} objects returned by {@link #generateStatements }.
      * If no or null SqlStatements are returned by generateStatements then this method returns no errors.
      * If there are no parameters than this method returns no errors
      */
@@ -370,14 +369,14 @@ public abstract class AbstractChange implements Change {
             statements = generateStatements(env);
             if (statements != null) {
                 for (SqlStatement statement : statements) {
-                    boolean supported = ActionGeneratorFactory.getInstance().supports(statement, env);
+                    boolean supported = StatementLogicFactory.getInstance().supports(statement, env);
                     if (!supported && !sawUnsupportedError) {
                         if (!statement.skipOnUnsupported()) {
                             changeValidationErrors.addError(unsupportedWarning);
                             sawUnsupportedError = true;
                         }
                     } else {
-                        changeValidationErrors.addAll(ActionGeneratorFactory.getInstance().validate(statement, env));
+                        changeValidationErrors.addAll(StatementLogicFactory.getInstance().validate(statement, env));
                     }
                 }
             }

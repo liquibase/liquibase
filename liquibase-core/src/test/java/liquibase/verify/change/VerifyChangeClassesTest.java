@@ -2,7 +2,7 @@ package liquibase.verify.change;
 
 import liquibase.ExecutionEnvironment;
 import liquibase.action.Action;
-import liquibase.actiongenerator.ActionGeneratorFactory;
+import liquibase.statementlogic.StatementLogicFactory;
 import liquibase.change.Change;
 import liquibase.change.ChangeFactory;
 import liquibase.change.ChangeMetaData;
@@ -10,7 +10,6 @@ import liquibase.change.ChangeParameterMetaData;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.exception.ValidationErrors;
-import  liquibase.ExecutionEnvironment;
 import liquibase.serializer.LiquibaseSerializable;
 import liquibase.serializer.core.string.StringChangeLogSerializer;
 import liquibase.statement.SqlStatement;
@@ -73,7 +72,7 @@ public class VerifyChangeClassesTest extends AbstractVerifyTest {
 
                 SqlStatement[] sqlStatements = change.generateStatements(env);
                 for (SqlStatement statement : sqlStatements) {
-                    Action[] actions = ActionGeneratorFactory.getInstance().generateActions(statement, env);
+                    Action[] actions = StatementLogicFactory.getInstance().generateActions(statement, env);
                     if (actions == null) {
                         System.out.println("Null sql for " + statement + " on " + database.getShortName());
                     } else {

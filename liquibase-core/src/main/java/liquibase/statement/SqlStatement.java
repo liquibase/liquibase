@@ -14,7 +14,7 @@ import java.util.Collection;
  *
  * @see liquibase.change.Change
  * @see liquibase.sqlgenerator.SqlGenerator
- * @see liquibase.actiongenerator.ActionGeneratorFactory
+ * @see liquibase.statementlogic.StatementLogicFactory
  */
 public interface SqlStatement {
 

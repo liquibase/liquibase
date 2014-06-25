@@ -2,7 +2,7 @@ package liquibase.executor;
 
 import liquibase.ExecutionEnvironment;
 import liquibase.action.Action;
-import liquibase.actiongenerator.ActionGeneratorFactory;
+import liquibase.statementlogic.StatementLogicFactory;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 import liquibase.servicelocator.LiquibaseService;
@@ -65,10 +65,10 @@ public class LoggingExecutor extends AbstractExecutor {
 
     protected void outputStatement(SqlStatement sql, ExecutionEnvironment env) throws DatabaseException {
         try {
-            if (ActionGeneratorFactory.getInstance().generateStatementsVolatile(sql, env)) {
+            if (StatementLogicFactory.getInstance().generateStatementsVolatile(sql, env)) {
                 throw new DatabaseException(sql.getClass().getSimpleName()+" requires access to up to date database metadata which is not available in SQL output mode");
             }
-            for (Action action : ActionGeneratorFactory.getInstance().generateActions(sql, env)) {
+            for (Action action : StatementLogicFactory.getInstance().generateActions(sql, env)) {
                 if (action == null) {
                     continue;
                 }

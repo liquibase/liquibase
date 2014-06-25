@@ -1,6 +1,6 @@
 package liquibase.sqlgenerator.core;
 
-import liquibase.actiongenerator.ActionGeneratorChain;
+import liquibase.statementlogic.StatementLogicChain;
 import liquibase.database.Database;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.exception.LiquibaseException;
@@ -32,7 +32,7 @@ public class InsertOrUpdateGeneratorMSSQL extends InsertOrUpdateGenerator {
     }
 
     @Override
-    protected String getInsertStatement(InsertOrUpdateStatement insertOrUpdateStatement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+    protected String getInsertStatement(InsertOrUpdateStatement insertOrUpdateStatement, ExecutionEnvironment env, StatementLogicChain chain) {
         Database database = env.getTargetDatabase();
 
         StringBuffer insertBlock = new StringBuffer();
@@ -49,7 +49,7 @@ public class InsertOrUpdateGeneratorMSSQL extends InsertOrUpdateGenerator {
     }
 
     @Override
-    protected String getUpdateStatement(InsertOrUpdateStatement insertOrUpdateStatement, ExecutionEnvironment env, String whereClause, ActionGeneratorChain chain) throws LiquibaseException {
+    protected String getUpdateStatement(InsertOrUpdateStatement insertOrUpdateStatement, ExecutionEnvironment env, String whereClause, StatementLogicChain chain) throws LiquibaseException {
         StringBuffer updateBlock = new StringBuffer();
         updateBlock.append("BEGIN\n");
         updateBlock.append(super.getUpdateStatement(insertOrUpdateStatement, env, whereClause, chain));

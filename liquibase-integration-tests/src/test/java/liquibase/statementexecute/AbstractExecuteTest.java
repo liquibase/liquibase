@@ -13,13 +13,12 @@ import java.util.Set;
 import liquibase.CatalogAndSchema;
 import liquibase.ExecutionEnvironment;
 import liquibase.action.Action;
-import liquibase.actiongenerator.ActionGeneratorFactory;
+import liquibase.statementlogic.StatementLogicFactory;
 import liquibase.changelog.ChangeLogHistoryServiceFactory;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.UnexpectedLiquibaseException;
-import  liquibase.ExecutionEnvironment;
 import liquibase.lockservice.LockServiceFactory;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.structure.core.Table;
@@ -97,7 +96,7 @@ public abstract class AbstractExecuteTest {
                         LockServiceFactory.getInstance().getLockService(database).init();
                     }
 
-                    Action[] actions = ActionGeneratorFactory.getInstance().generateActions(statementUnderTest, new ExecutionEnvironment(database));
+                    Action[] actions = StatementLogicFactory.getInstance().generateActions(statementUnderTest, new ExecutionEnvironment(database));
 
                     assertNotNull("Null SQL for " + database, actions);
                     assertEquals("Unexpected number of  SQL statements for " + database, expectedSql.length, actions.length);
@@ -119,7 +118,7 @@ public abstract class AbstractExecuteTest {
         for (Database availableDatabase : DatabaseTestContext.getInstance().getAvailableDatabases()) {
             Statement statement = ((JdbcConnection) availableDatabase.getConnection()).getUnderlyingConnection().createStatement();
             if (shouldTestDatabase(availableDatabase, includeDatabases, excludeDatabases)) {
-                String sqlToRun = ActionGeneratorFactory.getInstance().generateActions(statementUnderTest, new ExecutionEnvironment(availableDatabase))[0].describe();
+                String sqlToRun = StatementLogicFactory.getInstance().generateActions(statementUnderTest, new ExecutionEnvironment(availableDatabase))[0].describe();
                 try {
                     statement.execute(sqlToRun);
                 } catch (Exception e) {
@@ -156,8 +155,8 @@ public abstract class AbstractExecuteTest {
         if (database instanceof MockDatabase || database instanceof ExampleCustomDatabase || database instanceof UnsupportedDatabase) {
             return false;
         }
-        if (!ActionGeneratorFactory.getInstance().supports(statementUnderTest, new ExecutionEnvironment(database))
-                || ActionGeneratorFactory.getInstance().validate(statementUnderTest, new ExecutionEnvironment(database)).hasErrors()) {
+        if (!StatementLogicFactory.getInstance().supports(statementUnderTest, new ExecutionEnvironment(database))
+                || StatementLogicFactory.getInstance().validate(statementUnderTest, new ExecutionEnvironment(database)).hasErrors()) {
             return false;
         }
 

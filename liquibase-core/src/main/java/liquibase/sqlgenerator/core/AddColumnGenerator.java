@@ -2,8 +2,8 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.action.Action;
 import liquibase.action.core.UnparsedSql;
-import liquibase.actiongenerator.ActionGeneratorChain;
-import liquibase.actiongenerator.ActionGeneratorFactory;
+import liquibase.statementlogic.StatementLogicChain;
+import liquibase.statementlogic.StatementLogicFactory;
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.datatype.DataTypeFactory;
@@ -26,7 +26,7 @@ import java.util.regex.Pattern;
 public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement> {
 
     @Override
-    public ValidationErrors validate(AddColumnStatement statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+    public ValidationErrors validate(AddColumnStatement statement, ExecutionEnvironment env, StatementLogicChain chain) {
         Database database = env.getTargetDatabase();
 
         ValidationErrors validationErrors = new ValidationErrors();
@@ -62,7 +62,7 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
     }
 
     @Override
-    public Action[] generateActions(AddColumnStatement statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+    public Action[] generateActions(AddColumnStatement statement, ExecutionEnvironment env, StatementLogicChain chain) {
 
         Database database = env.getTargetDatabase();
         String alterTable = "ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " ADD " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " " + DataTypeFactory.getInstance().fromDescription(statement.getColumnType() + (statement.isAutoIncrement() ? "{autoIncrement:true}" : ""), database).toDatabaseDataType(database);
@@ -102,7 +102,7 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
     protected void addUniqueConstrantStatements(AddColumnStatement statement, ExecutionEnvironment env, List<Action> returnSql) {
         if (statement.isUnique()) {
             AddUniqueConstraintStatement addConstraintStmt = new AddUniqueConstraintStatement(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName(), statement.getUniqueStatementName());
-            returnSql.addAll(Arrays.asList(ActionGeneratorFactory.getInstance().generateActions(addConstraintStmt, env)));
+            returnSql.addAll(Arrays.asList(StatementLogicFactory.getInstance().generateActions(addConstraintStmt, env)));
         }
     }
 
@@ -132,7 +132,7 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
 
 
                 AddForeignKeyConstraintStatement addForeignKeyConstraintStatement = new AddForeignKeyConstraintStatement(fkConstraint.getForeignKeyName(), statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName(), null, refSchemaName, refTableName, refColName);
-                returnSql.addAll(Arrays.asList(ActionGeneratorFactory.getInstance().generateActions(addForeignKeyConstraintStatement, env)));
+                returnSql.addAll(Arrays.asList(StatementLogicFactory.getInstance().generateActions(addForeignKeyConstraintStatement, env)));
             }
         }
     }

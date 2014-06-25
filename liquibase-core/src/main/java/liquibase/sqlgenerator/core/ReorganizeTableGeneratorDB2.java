@@ -2,7 +2,7 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.action.Action;
 import liquibase.action.core.UnparsedSql;
-import liquibase.actiongenerator.ActionGeneratorChain;
+import liquibase.statementlogic.StatementLogicChain;
 import liquibase.database.Database;
 import liquibase.database.core.DB2Database;
 import liquibase.exception.DatabaseException;
@@ -24,14 +24,14 @@ public class ReorganizeTableGeneratorDB2 extends AbstractSqlGenerator<Reorganize
     }
 
     @Override
-    public ValidationErrors validate(ReorganizeTableStatement reorganizeTableStatement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+    public ValidationErrors validate(ReorganizeTableStatement reorganizeTableStatement, ExecutionEnvironment env, StatementLogicChain chain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("tableName", reorganizeTableStatement.getTableName());
         return validationErrors;
     }
 
     @Override
-    public Action[] generateActions(ReorganizeTableStatement statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+    public Action[] generateActions(ReorganizeTableStatement statement, ExecutionEnvironment env, StatementLogicChain chain) {
         Database database = env.getTargetDatabase();
         try {
             if (database.getDatabaseMajorVersion() >= 9) {

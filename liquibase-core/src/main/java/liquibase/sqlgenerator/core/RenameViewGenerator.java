@@ -2,7 +2,7 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.action.Action;
 import liquibase.action.core.UnparsedSql;
-import liquibase.actiongenerator.ActionGeneratorChain;
+import liquibase.statementlogic.StatementLogicChain;
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.exception.ValidationErrors;
@@ -25,7 +25,7 @@ public class RenameViewGenerator extends AbstractSqlGenerator<RenameViewStatemen
     }
 
     @Override
-    public ValidationErrors validate(RenameViewStatement renameViewStatement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+    public ValidationErrors validate(RenameViewStatement renameViewStatement, ExecutionEnvironment env, StatementLogicChain chain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("oldViewName", renameViewStatement.getOldViewName());
         validationErrors.checkRequiredField("newViewName", renameViewStatement.getNewViewName());
@@ -36,7 +36,7 @@ public class RenameViewGenerator extends AbstractSqlGenerator<RenameViewStatemen
     }
 
     @Override
-    public Action[] generateActions(RenameViewStatement statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+    public Action[] generateActions(RenameViewStatement statement, ExecutionEnvironment env, StatementLogicChain chain) {
         String sql;
         Database database = env.getTargetDatabase();
 

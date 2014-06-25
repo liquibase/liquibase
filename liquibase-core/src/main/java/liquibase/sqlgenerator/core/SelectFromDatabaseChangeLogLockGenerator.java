@@ -2,7 +2,7 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.action.Action;
 import liquibase.action.core.UnparsedSql;
-import liquibase.actiongenerator.ActionGeneratorChain;
+import liquibase.statementlogic.StatementLogicChain;
 import liquibase.database.Database;
 import liquibase.database.core.OracleDatabase;
 import liquibase.exception.ValidationErrors;
@@ -13,7 +13,7 @@ import liquibase.util.StringUtils;
 public class SelectFromDatabaseChangeLogLockGenerator extends AbstractSqlGenerator<SelectFromDatabaseChangeLogLockStatement> {
 
     @Override
-    public ValidationErrors validate(SelectFromDatabaseChangeLogLockStatement statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+    public ValidationErrors validate(SelectFromDatabaseChangeLogLockStatement statement, ExecutionEnvironment env, StatementLogicChain chain) {
         ValidationErrors errors = new ValidationErrors();
         errors.checkRequiredField("columnToSelect", statement.getColumnsToSelect());
 
@@ -21,7 +21,7 @@ public class SelectFromDatabaseChangeLogLockGenerator extends AbstractSqlGenerat
     }
 
     @Override
-    public Action[] generateActions(SelectFromDatabaseChangeLogLockStatement statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+    public Action[] generateActions(SelectFromDatabaseChangeLogLockStatement statement, ExecutionEnvironment env, StatementLogicChain chain) {
         Database database = env.getTargetDatabase();
     	String liquibaseSchema;
    		liquibaseSchema = database.getLiquibaseSchemaName();

@@ -2,7 +2,7 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.action.Action;
 import liquibase.action.core.UnparsedSql;
-import liquibase.actiongenerator.ActionGeneratorChain;
+import liquibase.statementlogic.StatementLogicChain;
 import liquibase.database.Database;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.ValidationErrors;
@@ -16,7 +16,7 @@ import java.util.Date;
 public class UpdateGenerator extends AbstractSqlGenerator<UpdateStatement> {
 
     @Override
-    public ValidationErrors validate(UpdateStatement updateStatement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+    public ValidationErrors validate(UpdateStatement updateStatement, ExecutionEnvironment env, StatementLogicChain chain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("tableName", updateStatement.getTableName());
         validationErrors.checkRequiredField("columns", updateStatement.getNewColumnValues());
@@ -24,7 +24,7 @@ public class UpdateGenerator extends AbstractSqlGenerator<UpdateStatement> {
     }
 
     @Override
-    public Action[] generateActions(UpdateStatement statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+    public Action[] generateActions(UpdateStatement statement, ExecutionEnvironment env, StatementLogicChain chain) {
         Database database = env.getTargetDatabase();
 
         StringBuffer sql = new StringBuffer("UPDATE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " SET");

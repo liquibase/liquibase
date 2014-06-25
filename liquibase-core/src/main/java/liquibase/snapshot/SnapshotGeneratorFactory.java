@@ -5,14 +5,13 @@ import liquibase.ExecutionEnvironment;
 import liquibase.action.Action;
 import liquibase.action.MetaDataQueryAction;
 import liquibase.action.QueryAction;
-import liquibase.actiongenerator.ActionGeneratorChain;
-import liquibase.actiongenerator.ActionGeneratorFactory;
+import liquibase.statementlogic.StatementLogicChain;
+import liquibase.statementlogic.StatementLogicFactory;
 import liquibase.database.Database;
 import liquibase.database.OfflineConnection;
 import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
-import  liquibase.ExecutionEnvironment;
 import liquibase.servicelocator.ServiceLocator;
 import liquibase.snapshot.core.ColumnSnapshotGenerator;
 import liquibase.snapshot.core.TableSnapshotGenerator;
@@ -151,14 +150,14 @@ public class SnapshotGeneratorFactory {
         AbstractSnapshotGenerator generator = new TableSnapshotGenerator();
         List<SqlStatement> sqlStatements = new ArrayList<SqlStatement>();
         ExecutionEnvironment executionEnvironment = new ExecutionEnvironment(database);
-        sqlStatements.add(generator.generateLookupStatement(example, executionEnvironment, new ActionGeneratorChain(null)));
+        sqlStatements.add(generator.generateLookupStatement(example, executionEnvironment, new StatementLogicChain(null)));
 
 
-        SqlStatement[] addToStatements = new TableSnapshotGenerator().generateAddToStatements(example, executionEnvironment, new ActionGeneratorChain(null));
+        SqlStatement[] addToStatements = new TableSnapshotGenerator().generateAddToStatements(example, executionEnvironment, new StatementLogicChain(null));
         if (addToStatements != null) {
             sqlStatements.addAll(Arrays.asList(addToStatements));
         }
-        addToStatements = new ColumnSnapshotGenerator().generateAddToStatements(example, executionEnvironment, new ActionGeneratorChain(null));
+        addToStatements = new ColumnSnapshotGenerator().generateAddToStatements(example, executionEnvironment, new StatementLogicChain(null));
         if (addToStatements != null) {
             sqlStatements.addAll(Arrays.asList(addToStatements));
         }
@@ -166,8 +165,8 @@ public class SnapshotGeneratorFactory {
         DatabaseObjectCollection collection = new DatabaseObjectCollection(database);
         List<Action> actions = new ArrayList<Action>();
         for (SqlStatement statement : sqlStatements) {
-            if (ActionGeneratorFactory.getInstance().supports(statement, executionEnvironment)) {
-                Action[] actionArray = ActionGeneratorFactory.getInstance().generateActions(statement, new ExecutionEnvironment(database));
+            if (StatementLogicFactory.getInstance().supports(statement, executionEnvironment)) {
+                Action[] actionArray = StatementLogicFactory.getInstance().generateActions(statement, new ExecutionEnvironment(database));
                 if (actionArray == null || actionArray.length == 0) {
                     continue;
                 }
@@ -187,11 +186,11 @@ public class SnapshotGeneratorFactory {
         }
 
         for (DatabaseObject object : collection.get(Table.class)) {
-            new ColumnSnapshotGenerator().addTo((Table) object, collection, executionEnvironment, new ActionGeneratorChain(null));
+            new ColumnSnapshotGenerator().addTo((Table) object, collection, executionEnvironment, new StatementLogicChain(null));
         }
 
         for (DatabaseObject object : collection.get(Schema.class)) {
-            new TableSnapshotGenerator().addTo((Table) object, collection, executionEnvironment, new ActionGeneratorChain(null));
+            new TableSnapshotGenerator().addTo((Table) object, collection, executionEnvironment, new StatementLogicChain(null));
         }
 
         System.out.println(collection);

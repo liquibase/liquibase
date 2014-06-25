@@ -1,8 +1,8 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.action.Action;
-import liquibase.actiongenerator.ActionGeneratorChain;
-import liquibase.actiongenerator.ActionGeneratorFactory;
+import liquibase.statementlogic.StatementLogicChain;
+import liquibase.statementlogic.StatementLogicFactory;
 import liquibase.change.ColumnConfig;
 import liquibase.change.ConstraintsConfig;
 import liquibase.database.core.SQLiteDatabase;
@@ -38,7 +38,7 @@ public class AddAutoIncrementGeneratorSQLite extends AddAutoIncrementGenerator {
     public ValidationErrors validate(
             AddAutoIncrementStatement statement,
             ExecutionEnvironment env,
-            ActionGeneratorChain chain) {
+            StatementLogicChain chain) {
         ValidationErrors validationErrors = new ValidationErrors();
 
         validationErrors.checkRequiredField("columnName", statement.getColumnName());
@@ -54,7 +54,7 @@ public class AddAutoIncrementGeneratorSQLite extends AddAutoIncrementGenerator {
     }
 
     @Override
-    public Action[] generateActions(final AddAutoIncrementStatement statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+    public Action[] generateActions(final AddAutoIncrementStatement statement, ExecutionEnvironment env, StatementLogicChain chain) {
         List<Action> statements = new ArrayList<Action>();
 
         // define alter table logic
@@ -88,7 +88,7 @@ public class AddAutoIncrementGeneratorSQLite extends AddAutoIncrementGenerator {
         try {
             // alter table
             List<SqlStatement> alterTableStatements = SQLiteDatabase.getAlterTableStatements(rename_alter_visitor, env, statement.getCatalogName(), statement.getSchemaName(), statement.getTableName());
-            statements.addAll( Arrays.asList(ActionGeneratorFactory.getInstance().generateActions(alterTableStatements.toArray(new SqlStatement[alterTableStatements.size()]), env)));
+            statements.addAll( Arrays.asList(StatementLogicFactory.getInstance().generateActions(alterTableStatements.toArray(new SqlStatement[alterTableStatements.size()]), env)));
         } catch (DatabaseException e) {
             e.printStackTrace();
         }

@@ -2,7 +2,7 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.action.Action;
 import liquibase.action.core.UnparsedSql;
-import liquibase.actiongenerator.ActionGeneratorChain;
+import liquibase.statementlogic.StatementLogicChain;
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.datatype.DataTypeFactory;
@@ -18,7 +18,7 @@ public class RenameColumnGenerator extends AbstractSqlGenerator<RenameColumnStat
     }
 
     @Override
-    public ValidationErrors validate(RenameColumnStatement renameColumnStatement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+    public ValidationErrors validate(RenameColumnStatement renameColumnStatement, ExecutionEnvironment env, StatementLogicChain chain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("tableName", renameColumnStatement.getTableName());
         validationErrors.checkRequiredField("oldColumnName", renameColumnStatement.getOldColumnName());
@@ -32,7 +32,7 @@ public class RenameColumnGenerator extends AbstractSqlGenerator<RenameColumnStat
     }
 
     @Override
-    public Action[] generateActions(RenameColumnStatement statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+    public Action[] generateActions(RenameColumnStatement statement, ExecutionEnvironment env, StatementLogicChain chain) {
         Database database = env.getTargetDatabase();
 
         String sql;

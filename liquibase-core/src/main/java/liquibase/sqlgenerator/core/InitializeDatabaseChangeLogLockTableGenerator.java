@@ -1,8 +1,8 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.action.Action;
-import liquibase.actiongenerator.ActionGeneratorChain;
-import liquibase.actiongenerator.ActionGeneratorFactory;
+import liquibase.statementlogic.StatementLogicChain;
+import liquibase.statementlogic.StatementLogicFactory;
 import liquibase.database.Database;
 import liquibase.exception.ValidationErrors;
 import  liquibase.ExecutionEnvironment;
@@ -17,12 +17,12 @@ import java.util.List;
 public class InitializeDatabaseChangeLogLockTableGenerator extends AbstractSqlGenerator<InitializeDatabaseChangeLogLockTableStatement> {
 
     @Override
-    public ValidationErrors validate(InitializeDatabaseChangeLogLockTableStatement initializeDatabaseChangeLogLockTableStatement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+    public ValidationErrors validate(InitializeDatabaseChangeLogLockTableStatement initializeDatabaseChangeLogLockTableStatement, ExecutionEnvironment env, StatementLogicChain chain) {
         return new ValidationErrors();
     }
 
     @Override
-    public Action[] generateActions(InitializeDatabaseChangeLogLockTableStatement statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+    public Action[] generateActions(InitializeDatabaseChangeLogLockTableStatement statement, ExecutionEnvironment env, StatementLogicChain chain) {
         Database database = env.getTargetDatabase();
 
         DeleteStatement deleteStatement = new DeleteStatement(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName());
@@ -32,8 +32,8 @@ public class InitializeDatabaseChangeLogLockTableGenerator extends AbstractSqlGe
 
         List<Action> actions = new ArrayList<Action>();
 
-        actions.addAll(Arrays.asList(ActionGeneratorFactory.getInstance().generateActions(deleteStatement, env)));
-        actions.addAll(Arrays.asList(ActionGeneratorFactory.getInstance().generateActions(insertStatement, env)));
+        actions.addAll(Arrays.asList(StatementLogicFactory.getInstance().generateActions(deleteStatement, env)));
+        actions.addAll(Arrays.asList(StatementLogicFactory.getInstance().generateActions(insertStatement, env)));
 
         return actions.toArray(new Action[actions.size()]);
     }

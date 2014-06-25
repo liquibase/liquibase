@@ -2,7 +2,7 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.action.Action;
 import liquibase.action.core.UnparsedSql;
-import liquibase.actiongenerator.ActionGeneratorChain;
+import liquibase.statementlogic.StatementLogicChain;
 import liquibase.database.Database;
 import liquibase.database.core.InformixDatabase;
 import liquibase.datatype.DataTypeFactory;
@@ -23,7 +23,7 @@ public class AddDefaultValueGeneratorInformix extends AddDefaultValueGenerator {
 
 	@Override
 	public ValidationErrors validate(AddDefaultValueStatement addDefaultValueStatement, ExecutionEnvironment env,
-			ActionGeneratorChain chain) {
+			StatementLogicChain chain) {
 		ValidationErrors validationErrors = super.validate(addDefaultValueStatement, env, chain);
 		if (addDefaultValueStatement.getColumnDataType() == null) {
 			validationErrors.checkRequiredField("columnDataType", addDefaultValueStatement.getColumnDataType());
@@ -32,7 +32,7 @@ public class AddDefaultValueGeneratorInformix extends AddDefaultValueGenerator {
 	}
 
     @Override
-    public Action[] generateActions(AddDefaultValueStatement statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+    public Action[] generateActions(AddDefaultValueStatement statement, ExecutionEnvironment env, StatementLogicChain chain) {
         Database database = env.getTargetDatabase();
 
         Object defaultValue = statement.getDefaultValue();

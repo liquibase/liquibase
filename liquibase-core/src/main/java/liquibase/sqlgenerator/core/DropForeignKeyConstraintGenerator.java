@@ -2,7 +2,7 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.action.Action;
 import liquibase.action.core.UnparsedSql;
-import liquibase.actiongenerator.ActionGeneratorChain;
+import liquibase.statementlogic.StatementLogicChain;
 import liquibase.database.Database;
 import liquibase.database.core.MySQLDatabase;
 import liquibase.database.core.SQLiteDatabase;
@@ -19,7 +19,7 @@ public class DropForeignKeyConstraintGenerator extends AbstractSqlGenerator<Drop
     }
 
     @Override
-    public ValidationErrors validate(DropForeignKeyConstraintStatement dropForeignKeyConstraintStatement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+    public ValidationErrors validate(DropForeignKeyConstraintStatement dropForeignKeyConstraintStatement, ExecutionEnvironment env, StatementLogicChain chain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("baseTableName", dropForeignKeyConstraintStatement.getBaseTableName());
         validationErrors.checkRequiredField("constraintName", dropForeignKeyConstraintStatement.getConstraintName());
@@ -27,7 +27,7 @@ public class DropForeignKeyConstraintGenerator extends AbstractSqlGenerator<Drop
     }
 
     @Override
-    public Action[] generateActions(DropForeignKeyConstraintStatement statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+    public Action[] generateActions(DropForeignKeyConstraintStatement statement, ExecutionEnvironment env, StatementLogicChain chain) {
         Database database = env.getTargetDatabase();
         if (database instanceof MySQLDatabase || database instanceof SybaseASADatabase) {
             return new Action[] { new UnparsedSql("ALTER TABLE " + database.escapeTableName(statement.getBaseTableCatalogName(), statement.getBaseTableSchemaName(), statement.getBaseTableName()) + " DROP FOREIGN KEY " + database.escapeConstraintName(statement.getConstraintName())) };

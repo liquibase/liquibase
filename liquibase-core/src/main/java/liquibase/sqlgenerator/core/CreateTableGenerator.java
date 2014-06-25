@@ -2,7 +2,7 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.action.Action;
 import liquibase.action.core.UnparsedSql;
-import liquibase.actiongenerator.ActionGeneratorChain;
+import liquibase.statementlogic.StatementLogicChain;
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.datatype.DatabaseDataType;
@@ -25,7 +25,7 @@ import java.util.List;
 public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatement> {
 
     @Override
-    public ValidationErrors validate(CreateTableStatement createTableStatement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+    public ValidationErrors validate(CreateTableStatement createTableStatement, ExecutionEnvironment env, StatementLogicChain chain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("tableName", createTableStatement.getTableName());
         validationErrors.checkRequiredField("columns", createTableStatement.getColumns());
@@ -33,7 +33,7 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
     }
 
     @Override
-    public Action[] generateActions(CreateTableStatement statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+    public Action[] generateActions(CreateTableStatement statement, ExecutionEnvironment env, StatementLogicChain chain) {
         Database database = env.getTargetDatabase();
 
         if (database instanceof InformixDatabase) {

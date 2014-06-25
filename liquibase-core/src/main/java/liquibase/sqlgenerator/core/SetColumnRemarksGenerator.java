@@ -2,7 +2,7 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.action.Action;
 import liquibase.action.core.UnparsedSql;
-import liquibase.actiongenerator.ActionGeneratorChain;
+import liquibase.statementlogic.StatementLogicChain;
 import liquibase.database.Database;
 import liquibase.database.core.DB2Database;
 import liquibase.database.core.OracleDatabase;
@@ -25,7 +25,7 @@ public class SetColumnRemarksGenerator extends AbstractSqlGenerator<SetColumnRem
 	}
 
 	@Override
-    public ValidationErrors validate(SetColumnRemarksStatement setColumnRemarksStatement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+    public ValidationErrors validate(SetColumnRemarksStatement setColumnRemarksStatement, ExecutionEnvironment env, StatementLogicChain chain) {
 		ValidationErrors validationErrors = new ValidationErrors();
 		validationErrors.checkRequiredField("tableName", setColumnRemarksStatement.getTableName());
 		validationErrors.checkRequiredField("columnName", setColumnRemarksStatement.getColumnName());
@@ -34,7 +34,7 @@ public class SetColumnRemarksGenerator extends AbstractSqlGenerator<SetColumnRem
 	}
 
     @Override
-    public Action[] generateActions(SetColumnRemarksStatement statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+    public Action[] generateActions(SetColumnRemarksStatement statement, ExecutionEnvironment env, StatementLogicChain chain) {
         Database database = env.getTargetDatabase();
 
         return new Action[] { new UnparsedSql("COMMENT ON COLUMN " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName())

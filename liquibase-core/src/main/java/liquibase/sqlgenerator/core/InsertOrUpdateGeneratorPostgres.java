@@ -3,12 +3,11 @@ package liquibase.sqlgenerator.core;
 import liquibase.ExecutionEnvironment;
 import liquibase.action.Action;
 import liquibase.action.core.UnparsedSql;
-import liquibase.actiongenerator.ActionGeneratorChain;
+import liquibase.statementlogic.StatementLogicChain;
 import liquibase.database.Database;
 import liquibase.database.core.PostgresDatabase;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
-import  liquibase.ExecutionEnvironment;
 import liquibase.statement.core.InsertOrUpdateStatement;
 
 public class InsertOrUpdateGeneratorPostgres extends InsertOrUpdateGenerator {
@@ -27,7 +26,7 @@ public class InsertOrUpdateGeneratorPostgres extends InsertOrUpdateGenerator {
 	}
 
     @Override
-    public Action[] generateActions(InsertOrUpdateStatement insertOrUpdateStatement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+    public Action[] generateActions(InsertOrUpdateStatement insertOrUpdateStatement, ExecutionEnvironment env, StatementLogicChain chain) {
         Database database = env.getTargetDatabase();
 
         StringBuilder generatedSql = new StringBuilder();

@@ -2,7 +2,7 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.action.Action;
 import liquibase.action.core.UnparsedSql;
-import liquibase.actiongenerator.ActionGeneratorChain;
+import liquibase.statementlogic.StatementLogicChain;
 import liquibase.change.ColumnConfig;
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.exception.ValidationErrors;
@@ -17,7 +17,7 @@ public class CopyRowsGenerator extends AbstractSqlGenerator<CopyRowsStatement> {
     }
 
     @Override
-    public ValidationErrors validate(CopyRowsStatement copyRowsStatement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+    public ValidationErrors validate(CopyRowsStatement copyRowsStatement, ExecutionEnvironment env, StatementLogicChain chain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("targetTable", copyRowsStatement.getTargetTable());
         validationErrors.checkRequiredField("sourceTable", copyRowsStatement.getSourceTable());
@@ -26,7 +26,7 @@ public class CopyRowsGenerator extends AbstractSqlGenerator<CopyRowsStatement> {
     }
 
     @Override
-    public Action[] generateActions(CopyRowsStatement statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+    public Action[] generateActions(CopyRowsStatement statement, ExecutionEnvironment env, StatementLogicChain chain) {
         StringBuffer sql = new StringBuffer();
         if (env.getTargetDatabase() instanceof SQLiteDatabase) {
             sql.append("INSERT INTO `").append(statement.getTargetTable()).append("` (");

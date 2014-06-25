@@ -5,7 +5,7 @@ import liquibase.action.Action;
 import liquibase.action.ExecuteAction;
 import liquibase.action.QueryAction;
 import liquibase.action.UpdateAction;
-import liquibase.actiongenerator.ActionGeneratorFactory;
+import liquibase.statementlogic.StatementLogicFactory;
 import liquibase.exception.DatabaseException;
 import liquibase.logging.LogFactory;
 import liquibase.logging.Logger;
@@ -22,7 +22,7 @@ public class StandardExecutor extends AbstractExecutor {
 
     @Override
     public QueryResult query(SqlStatement sql, ExecutionEnvironment env) throws DatabaseException {
-        Action[] actions = ActionGeneratorFactory.getInstance().generateActions(sql, env);
+        Action[] actions = StatementLogicFactory.getInstance().generateActions(sql, env);
 
         if (actions.length != 1) {
             throw new DatabaseException("Can only query with statements that return one executable");
@@ -40,7 +40,7 @@ public class StandardExecutor extends AbstractExecutor {
 
     @Override
     public ExecuteResult execute(SqlStatement sql, ExecutionEnvironment env) throws DatabaseException {
-        Action[] actions = ActionGeneratorFactory.getInstance().generateActions(sql, env);
+        Action[] actions = StatementLogicFactory.getInstance().generateActions(sql, env);
         for (Action action : actions) {
             if (!(action instanceof ExecuteAction)) {
                 throw new DatabaseException("Cannot execute "+ action.getClass().getName());
@@ -55,7 +55,7 @@ public class StandardExecutor extends AbstractExecutor {
 
     @Override
     public UpdateResult update(SqlStatement sql, ExecutionEnvironment env) throws DatabaseException {
-        Action[] actions = ActionGeneratorFactory.getInstance().generateActions(sql, env);
+        Action[] actions = StatementLogicFactory.getInstance().generateActions(sql, env);
 
         if (actions.length != 1) {
             throw new DatabaseException("Can only update with statements that return one executable");

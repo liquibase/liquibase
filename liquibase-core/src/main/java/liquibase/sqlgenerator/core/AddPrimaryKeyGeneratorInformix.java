@@ -2,7 +2,7 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.action.Action;
 import liquibase.action.core.UnparsedSql;
-import liquibase.actiongenerator.ActionGeneratorChain;
+import liquibase.statementlogic.StatementLogicChain;
 import liquibase.database.Database;
 import liquibase.database.core.InformixDatabase;
 import  liquibase.ExecutionEnvironment;
@@ -24,7 +24,7 @@ public class AddPrimaryKeyGeneratorInformix extends AddPrimaryKeyGenerator {
     }
 
     @Override
-    public Action[] generateActions(AddPrimaryKeyStatement statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+    public Action[] generateActions(AddPrimaryKeyStatement statement, ExecutionEnvironment env, StatementLogicChain chain) {
         Database database = env.getTargetDatabase();
 
         StringBuilder sql = new StringBuilder();

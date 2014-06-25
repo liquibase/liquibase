@@ -2,7 +2,7 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.action.Action;
 import liquibase.action.core.UnparsedSql;
-import liquibase.actiongenerator.ActionGeneratorChain;
+import liquibase.statementlogic.StatementLogicChain;
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.exception.ValidationErrors;
@@ -25,7 +25,7 @@ public class AddUniqueConstraintGenerator extends AbstractSqlGenerator<AddUnique
     }
 
     @Override
-    public ValidationErrors validate(AddUniqueConstraintStatement addUniqueConstraintStatement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+    public ValidationErrors validate(AddUniqueConstraintStatement addUniqueConstraintStatement, ExecutionEnvironment env, StatementLogicChain chain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("columnNames", addUniqueConstraintStatement.getColumnNames());
         validationErrors.checkRequiredField("tableName", addUniqueConstraintStatement.getTableName());
@@ -33,7 +33,7 @@ public class AddUniqueConstraintGenerator extends AbstractSqlGenerator<AddUnique
     }
 
     @Override
-    public Action[] generateActions(AddUniqueConstraintStatement statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+    public Action[] generateActions(AddUniqueConstraintStatement statement, ExecutionEnvironment env, StatementLogicChain chain) {
         Database database = env.getTargetDatabase();
 
 		String sql = null;

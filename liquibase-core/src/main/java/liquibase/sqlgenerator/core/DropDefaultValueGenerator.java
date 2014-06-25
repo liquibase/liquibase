@@ -2,7 +2,7 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.action.Action;
 import liquibase.action.core.UnparsedSql;
-import liquibase.actiongenerator.ActionGeneratorChain;
+import liquibase.statementlogic.StatementLogicChain;
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.exception.DatabaseException;
@@ -19,7 +19,7 @@ public class DropDefaultValueGenerator extends AbstractSqlGenerator<DropDefaultV
     }
 
     @Override
-    public ValidationErrors validate(DropDefaultValueStatement dropDefaultValueStatement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+    public ValidationErrors validate(DropDefaultValueStatement dropDefaultValueStatement, ExecutionEnvironment env, StatementLogicChain chain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("tableName", dropDefaultValueStatement.getTableName());
         validationErrors.checkRequiredField("columnName", dropDefaultValueStatement.getColumnName());
@@ -33,7 +33,7 @@ public class DropDefaultValueGenerator extends AbstractSqlGenerator<DropDefaultV
     }
 
     @Override
-    public Action[] generateActions(DropDefaultValueStatement statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+    public Action[] generateActions(DropDefaultValueStatement statement, ExecutionEnvironment env, StatementLogicChain chain) {
         Database database = env.getTargetDatabase();
         String sql;
         String escapedTableName = database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName());

@@ -2,7 +2,7 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.action.Action;
 import liquibase.action.core.UnparsedSql;
-import liquibase.actiongenerator.ActionGeneratorChain;
+import liquibase.statementlogic.StatementLogicChain;
 import liquibase.database.Database;
 import liquibase.database.core.DerbyDatabase;
 import liquibase.database.core.PostgresDatabase;
@@ -18,14 +18,14 @@ public class DropSequenceGenerator extends AbstractSqlGenerator<DropSequenceStat
     }
 
     @Override
-    public ValidationErrors validate(DropSequenceStatement dropSequenceStatement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+    public ValidationErrors validate(DropSequenceStatement dropSequenceStatement, ExecutionEnvironment env, StatementLogicChain chain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("sequenceName", dropSequenceStatement.getSequenceName());
         return validationErrors;
     }
 
     @Override
-    public Action[] generateActions(DropSequenceStatement statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+    public Action[] generateActions(DropSequenceStatement statement, ExecutionEnvironment env, StatementLogicChain chain) {
         Database database = env.getTargetDatabase();
 
         String sql = "DROP SEQUENCE " + database.escapeSequenceName(statement.getCatalogName(), statement.getSchemaName(), statement.getSequenceName());

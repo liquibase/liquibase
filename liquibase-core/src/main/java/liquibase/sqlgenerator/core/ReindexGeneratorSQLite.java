@@ -2,7 +2,7 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.action.Action;
 import liquibase.action.core.UnparsedSql;
-import liquibase.actiongenerator.ActionGeneratorChain;
+import liquibase.statementlogic.StatementLogicChain;
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.exception.ValidationErrors;
 import  liquibase.ExecutionEnvironment;
@@ -20,14 +20,14 @@ public class ReindexGeneratorSQLite extends AbstractSqlGenerator<ReindexStatemen
     }
 
     @Override
-    public ValidationErrors validate(ReindexStatement reindexStatement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+    public ValidationErrors validate(ReindexStatement reindexStatement, ExecutionEnvironment env, StatementLogicChain chain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("tableName", reindexStatement.getTableName());
         return validationErrors;
     }
 
     @Override
-    public Action[] generateActions(ReindexStatement statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+    public Action[] generateActions(ReindexStatement statement, ExecutionEnvironment env, StatementLogicChain chain) {
         return new Action[] {
                 new UnparsedSql("REINDEX "+ env.getTargetDatabase().escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()))
         };

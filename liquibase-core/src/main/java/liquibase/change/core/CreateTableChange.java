@@ -1,6 +1,6 @@
 package liquibase.change.core;
 
-import liquibase.actiongenerator.ActionGeneratorFactory;
+import liquibase.statementlogic.StatementLogicFactory;
 import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.database.core.MySQLDatabase;
@@ -119,7 +119,7 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
 
         if (StringUtils.trimToNull(remarks) != null) {
             SetTableRemarksStatement remarksStatement = new SetTableRemarksStatement(catalogName, schemaName, tableName, remarks);
-            if (ActionGeneratorFactory.getInstance().supports(remarksStatement, env)) {
+            if (StatementLogicFactory.getInstance().supports(remarksStatement, env)) {
                 statements.add(remarksStatement);
             }
         }
@@ -128,7 +128,7 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
             String columnRemarks = StringUtils.trimToNull(column.getRemarks());
             if (columnRemarks != null) {
                 SetColumnRemarksStatement remarksStatement = new SetColumnRemarksStatement(catalogName, schemaName, tableName, column.getName(), columnRemarks);
-                if (!(database instanceof MySQLDatabase) && ActionGeneratorFactory.getInstance().supports(remarksStatement, env)) {
+                if (!(database instanceof MySQLDatabase) && StatementLogicFactory.getInstance().supports(remarksStatement, env)) {
                     statements.add(remarksStatement);
                 }
             }

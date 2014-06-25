@@ -2,7 +2,7 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.action.Action;
 import liquibase.action.core.UnparsedSql;
-import liquibase.actiongenerator.ActionGeneratorChain;
+import liquibase.statementlogic.StatementLogicChain;
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import  liquibase.ExecutionEnvironment;
@@ -27,7 +27,7 @@ public class CreateIndexGeneratorPostgres extends CreateIndexGenerator {
     }
 
     @Override
-    public Action[] generateActions(CreateIndexStatement statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+    public Action[] generateActions(CreateIndexStatement statement, ExecutionEnvironment env, StatementLogicChain chain) {
 
         Database database = env.getTargetDatabase();
 

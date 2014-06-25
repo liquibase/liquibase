@@ -1,4 +1,4 @@
-package liquibase.actiongenerator;
+package liquibase.statementlogic;
 
 import liquibase.action.Action;
 import liquibase.action.core.UnparsedSql;
@@ -13,17 +13,17 @@ import java.util.Arrays;
 import java.util.List;
 
 @LiquibaseService(skip = true)
-public class MockActionGenerator implements ActionGenerator {
+public class MockStatementLogic implements StatementLogic {
     private int priority;
     private boolean supports;
     private ValidationErrors errors = new ValidationErrors();
     private String[] returnSql;
 
-    public MockActionGenerator(int priority, String... returnSql) {
+    public MockStatementLogic(int priority, String... returnSql) {
         this(priority, true, returnSql);
     }
 
-    public MockActionGenerator(int priority, boolean supports, String... returnSql) {
+    public MockStatementLogic(int priority, boolean supports, String... returnSql) {
         this.priority = priority;
         this.supports = supports;
         this.returnSql = returnSql;
@@ -49,26 +49,26 @@ public class MockActionGenerator implements ActionGenerator {
         return false;
     }
 
-    public MockActionGenerator addValidationError(String message) {
+    public MockStatementLogic addValidationError(String message) {
         errors.addError(message);
 
         return this;
     }
 
     @Override
-    public Warnings warn(SqlStatement statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+    public Warnings warn(SqlStatement statement, ExecutionEnvironment env, StatementLogicChain chain) {
         return new Warnings();
     }
 
     @Override
-    public ValidationErrors validate(SqlStatement statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+    public ValidationErrors validate(SqlStatement statement, ExecutionEnvironment env, StatementLogicChain chain) {
         ValidationErrors validationErrors = chain.validate(statement, env);
         validationErrors.addAll(errors);
         return validationErrors;
     }
 
     @Override
-    public Action[] generateActions(SqlStatement statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+    public Action[] generateActions(SqlStatement statement, ExecutionEnvironment env, StatementLogicChain chain) {
         List<Action> actions = new ArrayList<Action>();
         for (String returnSql  : this.returnSql) {
             actions.add(new UnparsedSql(returnSql));

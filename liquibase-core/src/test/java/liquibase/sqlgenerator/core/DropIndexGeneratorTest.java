@@ -2,11 +2,10 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.ExecutionEnvironment;
 import liquibase.action.Action;
-import liquibase.actiongenerator.ActionGenerator;
-import liquibase.actiongenerator.ActionGeneratorChain;
+import liquibase.statementlogic.StatementLogic;
+import liquibase.statementlogic.StatementLogicChain;
 import liquibase.database.Database;
 import liquibase.database.core.PostgresDatabase;
-import  liquibase.ExecutionEnvironment;
 import liquibase.statement.core.DropIndexStatement;
 import org.junit.Test;
 
@@ -57,8 +56,8 @@ public class DropIndexGeneratorTest {
 		DropIndexGenerator dropIndexGenerator = new DropIndexGenerator();
 		DropIndexStatement statement = new DropIndexStatement("indexName", "defaultCatalog", "defaultSchema", "aTable", null);
 		Database database = new PostgresDatabase();
-		SortedSet<ActionGenerator> sqlGenerators = new TreeSet<ActionGenerator>();
-		ActionGeneratorChain chain = new ActionGeneratorChain(sqlGenerators);
+		SortedSet<StatementLogic> sqlGenerators = new TreeSet<StatementLogic>();
+		StatementLogicChain chain = new StatementLogicChain(sqlGenerators);
 
         ExecutionEnvironment env = new ExecutionEnvironment(database);
 

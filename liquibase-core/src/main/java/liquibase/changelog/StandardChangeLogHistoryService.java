@@ -2,7 +2,7 @@ package liquibase.changelog;
 
 import liquibase.Contexts;
 import liquibase.ExecutionEnvironment;
-import liquibase.actiongenerator.ActionGeneratorFactory;
+import liquibase.statementlogic.StatementLogicFactory;
 import liquibase.LabelExpression;
 import liquibase.change.CheckSum;
 import liquibase.database.Database;
@@ -169,7 +169,7 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
         }
 
         for (SqlStatement sql : statementsToExecute) {
-            if (ActionGeneratorFactory.getInstance().supports(sql, new ExecutionEnvironment(database))) {
+            if (StatementLogicFactory.getInstance().supports(sql, new ExecutionEnvironment(database))) {
                 executor.execute(sql);
                 getDatabase().commit();
             } else {

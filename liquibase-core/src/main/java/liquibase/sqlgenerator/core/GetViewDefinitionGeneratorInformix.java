@@ -2,7 +2,7 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.action.Action;
 import liquibase.action.core.UnparsedSql;
-import liquibase.actiongenerator.ActionGeneratorChain;
+import liquibase.statementlogic.StatementLogicChain;
 import liquibase.database.core.InformixDatabase;
 import  liquibase.ExecutionEnvironment;
 import liquibase.statement.core.GetViewDefinitionStatement;
@@ -19,7 +19,7 @@ public class GetViewDefinitionGeneratorInformix extends GetViewDefinitionGenerat
     }
 
     @Override
-    public Action[] generateActions(GetViewDefinitionStatement statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+    public Action[] generateActions(GetViewDefinitionStatement statement, ExecutionEnvironment env, StatementLogicChain chain) {
         // TODO owner is schemaName ?
         // view definition is distributed over multiple rows, each 64 chars
     	// see InformixDatabase.getViewDefinition

@@ -1,11 +1,11 @@
-package liquibase.actiongenerator;
+package liquibase.statementlogic;
 
 import liquibase.exception.ValidationErrors;
 import liquibase.exception.Warnings;
 import  liquibase.ExecutionEnvironment;
 import liquibase.statement.SqlStatement;
 
-public abstract class AbstractActionGenerator<StatementType extends SqlStatement> implements ActionGenerator<StatementType> {
+public abstract class AbstractStatementLogic<StatementType extends SqlStatement> implements StatementLogic<StatementType> {
 
     @Override
     public int getPriority() {
@@ -18,12 +18,12 @@ public abstract class AbstractActionGenerator<StatementType extends SqlStatement
     }
 
     @Override
-    public ValidationErrors validate(StatementType statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+    public ValidationErrors validate(StatementType statement, ExecutionEnvironment env, StatementLogicChain chain) {
         return chain.validate(statement, env);
     }
 
     @Override
-    public Warnings warn(StatementType statementType, ExecutionEnvironment env, ActionGeneratorChain chain) {
+    public Warnings warn(StatementType statementType, ExecutionEnvironment env, StatementLogicChain chain) {
         return chain.warn(statementType, env);
     }
 }

@@ -1,9 +1,6 @@
 package liquibase.sqlgenerator;
 
-import liquibase.actiongenerator.ActionGenerator;
-import liquibase.exception.ValidationErrors;
-import liquibase.exception.Warnings;
-import  liquibase.ExecutionEnvironment;
+import liquibase.statementlogic.StatementLogic;
 import liquibase.statement.SqlStatement;
 
 /**
@@ -33,6 +30,6 @@ import liquibase.statement.SqlStatement;
  * @see liquibase.statement.SqlStatement
  * @see liquibase.action.Sql
  */
-public interface SqlGenerator<StatementType extends SqlStatement> extends ActionGenerator<StatementType> {
+public interface SqlGenerator<StatementType extends SqlStatement> extends StatementLogic<StatementType> {
 
 }

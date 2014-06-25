@@ -1,4 +1,4 @@
-package liquibase.actiongenerator;
+package liquibase.statementlogic;
 
 import liquibase.ExecutionEnvironment;
 import liquibase.action.Action;
@@ -17,27 +17,27 @@ import java.lang.reflect.TypeVariable;
 import java.util.*;
 
 /**
- * ActionGeneratorFactory is a singleton registry of ActionGenerators.
- * Use the register(ActionGenerator) method to add custom ActionGenerators,
- * and the getBestGenerator() method to retrieve the ActionGenerator that should be used for a given SqlStatement.
+ * StatementLogicFactory is a singleton registry of StatementLogic instances.
+ * Use the {@link #register(StatementLogic)} method to add custom StatementLogic implementations,
+ * and the getBestGenerator() method to retrieve the StatementLogic that should be used for a given SqlStatement.
  */
-public class ActionGeneratorFactory {
+public class StatementLogicFactory {
 
-    private static ActionGeneratorFactory instance;
+    private static StatementLogicFactory instance;
 
-    private List<ActionGenerator> generators = new ArrayList<ActionGenerator>();
+    private List<StatementLogic> generators = new ArrayList<StatementLogic>();
 
     //caches for expensive reflection based calls that slow down Liquibase initialization: CORE-1207
     private final Map<Class<?>, Type[]> genericInterfacesCache = new HashMap<Class<?>, Type[]>();
     private final Map<Class<?>, Type> genericSuperClassCache = new HashMap<Class<?>, Type>();
 
-    private ActionGeneratorFactory() {
+    private StatementLogicFactory() {
         Class[] classes;
         try {
-            classes = ServiceLocator.getInstance().findClasses(ActionGenerator.class);
+            classes = ServiceLocator.getInstance().findClasses(StatementLogic.class);
 
             for (Class clazz : classes) {
-                register((ActionGenerator) clazz.getConstructor().newInstance());
+                register((StatementLogic) clazz.getConstructor().newInstance());
             }
 
         } catch (Exception e) {
@@ -47,31 +47,31 @@ public class ActionGeneratorFactory {
     }
 
     /**
-     * Return singleton ActionGeneratorFactory
+     * Return singleton StatementLogicFactory
      */
-    public static ActionGeneratorFactory getInstance() {
+    public static StatementLogicFactory getInstance() {
         if (instance == null) {
-            instance = new ActionGeneratorFactory();
+            instance = new StatementLogicFactory();
         }
         return instance;
     }
 
     public static void reset() {
-        instance = new ActionGeneratorFactory();
+        instance = new StatementLogicFactory();
     }
 
 
-    public void register(ActionGenerator generator) {
+    public void register(StatementLogic generator) {
         generators.add(generator);
     }
 
-    public void unregister(ActionGenerator generator) {
+    public void unregister(StatementLogic generator) {
         generators.remove(generator);
     }
 
     public void unregister(Class generatorClass) {
-        ActionGenerator toRemove = null;
-        for (ActionGenerator existingGenerator : generators) {
+        StatementLogic toRemove = null;
+        for (StatementLogic existingGenerator : generators) {
             if (existingGenerator.getClass().equals(generatorClass)) {
                 toRemove = existingGenerator;
             }
@@ -81,11 +81,11 @@ public class ActionGeneratorFactory {
     }
 
 
-    public Collection<ActionGenerator> getGenerators() {
+    public Collection<StatementLogic> getGenerators() {
         return generators;
     }
 
-    public SortedSet<ActionGenerator> getGenerators(SqlStatement statement, ExecutionEnvironment env) {
+    public SortedSet<StatementLogic> getGenerators(SqlStatement statement, ExecutionEnvironment env) {
         Database database = env.getTargetDatabase();
         String databaseName = null;
         if (database == null) {
@@ -95,9 +95,9 @@ public class ActionGeneratorFactory {
         }
         String key = statement.getClass().getName()+":"+ databaseName;
 
-        SortedSet<ActionGenerator> validGenerators = new TreeSet<ActionGenerator>(new ActionGeneratorComparator());
+        SortedSet<StatementLogic> validGenerators = new TreeSet<StatementLogic>(new StatementLogicComparator());
 
-        for (ActionGenerator generator : getGenerators()) {
+        for (StatementLogic generator : getGenerators()) {
             Class clazz = generator.getClass();
             Type classType = null;
             while (clazz != null) {
@@ -108,7 +108,7 @@ public class ActionGeneratorFactory {
                 for (Type type : getGenericInterfaces(clazz)) {
                     if (type instanceof ParameterizedType) {
                         checkType(type, statement, generator, env, validGenerators);
-                    } else if (isTypeEqual(type, ActionGenerator.class)) {
+                    } else if (isTypeEqual(type, StatementLogic.class)) {
                         //noinspection unchecked
                         if (generator.supports(statement, env)) {
                             validGenerators.add(generator);
@@ -150,7 +150,7 @@ public class ActionGeneratorFactory {
         return aType.equals(aClass);
     }
 
-    private void checkType(Type type, SqlStatement statement, ActionGenerator generator, ExecutionEnvironment env, SortedSet<ActionGenerator> validGenerators) {
+    private void checkType(Type type, SqlStatement statement, StatementLogic generator, ExecutionEnvironment env, SortedSet<StatementLogic> validGenerators) {
         for (Type typeClass : ((ParameterizedType) type).getActualTypeArguments()) {
             if (typeClass instanceof TypeVariable) {
                 typeClass = ((TypeVariable) typeClass).getBounds()[0];
@@ -169,13 +169,13 @@ public class ActionGeneratorFactory {
 
     }
 
-    private ActionGeneratorChain createGeneratorChain(SqlStatement statement, ExecutionEnvironment env) {
-        SortedSet<ActionGenerator> ActionGenerators = getGenerators(statement, env);
-        if (ActionGenerators == null || ActionGenerators.size() == 0) {
+    private StatementLogicChain createGeneratorChain(SqlStatement statement, ExecutionEnvironment env) {
+        SortedSet<StatementLogic> statementLogic = getGenerators(statement, env);
+        if (statementLogic == null || statementLogic.size() == 0) {
             return null;
         }
         //noinspection unchecked
-        return new ActionGeneratorChain(ActionGenerators);
+        return new StatementLogicChain(statementLogic);
     }
 
     public Action[] generateActions(Change change, ExecutionEnvironment env) {
@@ -190,7 +190,7 @@ public class ActionGeneratorFactory {
     public Action[] generateActions(SqlStatement[] statements, ExecutionEnvironment env) {
         List<Action> returnList = new ArrayList<Action>();
         for (SqlStatement statement : statements) {
-            returnList.addAll(Arrays.asList(ActionGeneratorFactory.getInstance().generateActions(statement, env)));
+            returnList.addAll(Arrays.asList(StatementLogicFactory.getInstance().generateActions(statement, env)));
         }
 
         return returnList.toArray(new Action[returnList.size()]);
@@ -205,7 +205,7 @@ public class ActionGeneratorFactory {
         if (validate.hasErrors()) {
             throw new UnexpectedLiquibaseException("Validation failed: "+validate.toString());
         }
-        ActionGeneratorChain generatorChain = createGeneratorChain(statement, env);
+        StatementLogicChain generatorChain = createGeneratorChain(statement, env);
         if (generatorChain == null) {
             throw new IllegalStateException("Cannot find "+statement.getClass().getName()+" generators for "+database.toString());
         }
@@ -233,7 +233,7 @@ public class ActionGeneratorFactory {
 
     public ValidationErrors validate(SqlStatement statement, ExecutionEnvironment env) {
         //noinspection unchecked
-        ActionGeneratorChain generatorChain = createGeneratorChain(statement, env);
+        StatementLogicChain generatorChain = createGeneratorChain(statement, env);
         if (generatorChain == null) {
             throw new UnexpectedLiquibaseException("Unable to create generator chain for "+statement.getClass().getName()+" on "+env.getTargetDatabase().getShortName());
         }
@@ -250,7 +250,7 @@ public class ActionGeneratorFactory {
      * If the statement queries the database, it cannot be used in updateSql type operations
      */
     public boolean generateStatementsVolatile(SqlStatement statement, ExecutionEnvironment env) {
-        for (ActionGenerator generator : getGenerators(statement, env)) {
+        for (StatementLogic generator : getGenerators(statement, env)) {
             if (generator.generateStatementsIsVolatile(env)) {
                 return true;
             }
@@ -259,7 +259,7 @@ public class ActionGeneratorFactory {
     }
 
     public boolean generateRollbackStatementsVolatile(SqlStatement statement, ExecutionEnvironment env) {
-        for (ActionGenerator generator : getGenerators(statement, env)) {
+        for (StatementLogic generator : getGenerators(statement, env)) {
             if (generator.generateRollbackStatementsIsVolatile(env)) {
                 return true;
             }

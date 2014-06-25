@@ -2,7 +2,7 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.action.Action;
 import liquibase.action.core.UnparsedSql;
-import liquibase.actiongenerator.ActionGeneratorChain;
+import liquibase.statementlogic.StatementLogicChain;
 import liquibase.database.Database;
 import liquibase.database.core.DB2Database;
 import liquibase.database.core.MySQLDatabase;
@@ -23,7 +23,7 @@ public class SetTableRemarksGenerator extends AbstractSqlGenerator<SetTableRemar
 	}
 
 	@Override
-    public ValidationErrors validate(SetTableRemarksStatement setTableRemarksStatement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+    public ValidationErrors validate(SetTableRemarksStatement setTableRemarksStatement, ExecutionEnvironment env, StatementLogicChain chain) {
 		ValidationErrors validationErrors = new ValidationErrors();
 		validationErrors.checkRequiredField("tableName", setTableRemarksStatement.getTableName());
 		validationErrors.checkRequiredField("remarks", setTableRemarksStatement.getRemarks());
@@ -31,7 +31,7 @@ public class SetTableRemarksGenerator extends AbstractSqlGenerator<SetTableRemar
 	}
 
     @Override
-    public Action[] generateActions(SetTableRemarksStatement statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+    public Action[] generateActions(SetTableRemarksStatement statement, ExecutionEnvironment env, StatementLogicChain chain) {
         Database database = env.getTargetDatabase();
 		String sql;
 		String remarks = database.escapeStringForDatabase(statement.getRemarks());

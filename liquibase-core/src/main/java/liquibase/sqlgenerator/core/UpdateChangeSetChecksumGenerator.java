@@ -1,8 +1,8 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.action.Action;
-import liquibase.actiongenerator.ActionGeneratorChain;
-import liquibase.actiongenerator.ActionGeneratorFactory;
+import liquibase.statementlogic.StatementLogicChain;
+import liquibase.statementlogic.StatementLogicFactory;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.exception.ValidationErrors;
@@ -13,7 +13,7 @@ import liquibase.statement.core.UpdateStatement;
 
 public class UpdateChangeSetChecksumGenerator extends AbstractSqlGenerator<UpdateChangeSetChecksumStatement> {
     @Override
-    public ValidationErrors validate(UpdateChangeSetChecksumStatement statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+    public ValidationErrors validate(UpdateChangeSetChecksumStatement statement, ExecutionEnvironment env, StatementLogicChain chain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("changeSet", statement.getChangeSet());
 
@@ -21,7 +21,7 @@ public class UpdateChangeSetChecksumGenerator extends AbstractSqlGenerator<Updat
     }
 
     @Override
-    public Action[] generateActions(UpdateChangeSetChecksumStatement statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+    public Action[] generateActions(UpdateChangeSetChecksumStatement statement, ExecutionEnvironment env, StatementLogicChain chain) {
         ChangeSet changeSet = statement.getChangeSet();
         Database database = env.getTargetDatabase();
 
@@ -31,6 +31,6 @@ public class UpdateChangeSetChecksumGenerator extends AbstractSqlGenerator<Updat
                 .setWhereClause("ID=? AND AUTHOR=? AND FILENAME=?")
                 .addWhereParameters(changeSet.getId(), changeSet.getAuthor(), changeSet.getFilePath());
 
-        return ActionGeneratorFactory.getInstance().generateActions(runStatement, env);
+        return StatementLogicFactory.getInstance().generateActions(runStatement, env);
     }
 }

@@ -2,7 +2,7 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.action.Action;
 import liquibase.action.core.UnparsedSql;
-import liquibase.actiongenerator.ActionGeneratorChain;
+import liquibase.statementlogic.StatementLogicChain;
 import liquibase.database.Database;
 import liquibase.database.core.HsqlDatabase;
 import liquibase.datatype.DataTypeFactory;
@@ -18,7 +18,7 @@ import liquibase.statement.core.AddDefaultValueStatement;
 public class AddDefaultValueGenerator extends AbstractSqlGenerator<AddDefaultValueStatement> {
 
     @Override
-    public ValidationErrors validate(AddDefaultValueStatement addDefaultValueStatement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+    public ValidationErrors validate(AddDefaultValueStatement addDefaultValueStatement, ExecutionEnvironment env, StatementLogicChain chain) {
         Database database = env.getTargetDatabase();
 
         Object defaultValue = addDefaultValueStatement.getDefaultValue();
@@ -61,7 +61,7 @@ public class AddDefaultValueGenerator extends AbstractSqlGenerator<AddDefaultVal
     }
 
     @Override
-    public Action[] generateActions(AddDefaultValueStatement statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+    public Action[] generateActions(AddDefaultValueStatement statement, ExecutionEnvironment env, StatementLogicChain chain) {
         Database database = env.getTargetDatabase();
 
         Object defaultValue = statement.getDefaultValue();

@@ -1,10 +1,10 @@
-package liquibase.actiongenerator.core;
+package liquibase.statementlogic.core;
 
 import liquibase.CatalogAndSchema;
 import liquibase.action.Action;
 import liquibase.action.core.TablesJdbcMetaDataQueryAction;
-import liquibase.actiongenerator.AbstractActionGenerator;
-import liquibase.actiongenerator.ActionGeneratorChain;
+import liquibase.statementlogic.AbstractStatementLogic;
+import liquibase.statementlogic.StatementLogicChain;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
@@ -17,7 +17,7 @@ import  liquibase.ExecutionEnvironment;
 import liquibase.statement.core.MetaDataQueryStatement;
 import liquibase.structure.core.Table;
 
-public class TablesMetaDataQueryGenerator extends AbstractActionGenerator<MetaDataQueryStatement> {
+public class TablesMetaDataQueryGenerator extends AbstractStatementLogic<MetaDataQueryStatement> {
 
     @Override
     public boolean supports(MetaDataQueryStatement statement, ExecutionEnvironment env) {
@@ -31,7 +31,7 @@ public class TablesMetaDataQueryGenerator extends AbstractActionGenerator<MetaDa
     }
 
     @Override
-    public ValidationErrors validate(MetaDataQueryStatement statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+    public ValidationErrors validate(MetaDataQueryStatement statement, ExecutionEnvironment env, StatementLogicChain chain) {
         Database database = env.getTargetDatabase();
         ValidationErrors errors = super.validate(statement, env, chain);
         Table example = (Table) statement.getExample();
@@ -44,7 +44,7 @@ public class TablesMetaDataQueryGenerator extends AbstractActionGenerator<MetaDa
     }
 
     @Override
-    public Action[] generateActions(final MetaDataQueryStatement statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+    public Action[] generateActions(final MetaDataQueryStatement statement, ExecutionEnvironment env, StatementLogicChain chain) {
         Database database = env.getTargetDatabase();
         if (database.getConnection() == null || database.getConnection() instanceof OfflineConnection) {
             throw new UnexpectedLiquibaseException("Cannot read table metadata for an offline database");

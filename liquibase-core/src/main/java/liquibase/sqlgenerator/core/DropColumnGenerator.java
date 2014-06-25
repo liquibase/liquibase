@@ -2,7 +2,7 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.action.Action;
 import liquibase.action.core.UnparsedSql;
-import liquibase.actiongenerator.ActionGeneratorChain;
+import liquibase.statementlogic.StatementLogicChain;
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.exception.ValidationErrors;
@@ -12,7 +12,7 @@ import liquibase.statement.core.DropColumnStatement;
 public class DropColumnGenerator extends AbstractSqlGenerator<DropColumnStatement> {
 
     @Override
-    public ValidationErrors validate(DropColumnStatement dropColumnStatement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+    public ValidationErrors validate(DropColumnStatement dropColumnStatement, ExecutionEnvironment env, StatementLogicChain chain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("tableName", dropColumnStatement.getTableName());
         validationErrors.checkRequiredField("columnName", dropColumnStatement.getColumnName());
@@ -20,7 +20,7 @@ public class DropColumnGenerator extends AbstractSqlGenerator<DropColumnStatemen
     }
 
     @Override
-    public Action[] generateActions(DropColumnStatement statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+    public Action[] generateActions(DropColumnStatement statement, ExecutionEnvironment env, StatementLogicChain chain) {
         Database database = env.getTargetDatabase();
 
         if (database instanceof DB2Database) {

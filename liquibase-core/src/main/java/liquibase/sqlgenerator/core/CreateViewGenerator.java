@@ -3,7 +3,7 @@ package liquibase.sqlgenerator.core;
 import liquibase.CatalogAndSchema;
 import liquibase.action.Action;
 import liquibase.action.core.UnparsedSql;
-import liquibase.actiongenerator.ActionGeneratorChain;
+import liquibase.statementlogic.StatementLogicChain;
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.exception.ValidationErrors;
@@ -16,7 +16,7 @@ import java.util.List;
 public class CreateViewGenerator extends AbstractSqlGenerator<CreateViewStatement> {
 
     @Override
-    public ValidationErrors validate(CreateViewStatement createViewStatement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+    public ValidationErrors validate(CreateViewStatement createViewStatement, ExecutionEnvironment env, StatementLogicChain chain) {
 
         Database database = env.getTargetDatabase();
     	if (database instanceof InformixDatabase) {
@@ -36,7 +36,7 @@ public class CreateViewGenerator extends AbstractSqlGenerator<CreateViewStatemen
     }
 
     @Override
-    public Action[] generateActions(CreateViewStatement statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+    public Action[] generateActions(CreateViewStatement statement, ExecutionEnvironment env, StatementLogicChain chain) {
         Database database = env.getTargetDatabase();
     	if (database instanceof InformixDatabase) {
     		return new CreateViewGeneratorInformix().generateActions(statement, env, chain);

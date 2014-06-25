@@ -2,8 +2,8 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.action.Action;
 import liquibase.action.core.UnparsedSql;
-import liquibase.actiongenerator.ActionGeneratorChain;
-import liquibase.actiongenerator.ActionGeneratorFactory;
+import liquibase.statementlogic.StatementLogicChain;
+import liquibase.statementlogic.StatementLogicFactory;
 import liquibase.database.Database;
 import liquibase.database.core.InformixDatabase;
 import liquibase.database.core.MySQLDatabase;
@@ -15,14 +15,14 @@ import liquibase.statement.core.UpdateStatement;
 public class TagDatabaseGenerator extends AbstractSqlGenerator<TagDatabaseStatement> {
 
     @Override
-    public ValidationErrors validate(TagDatabaseStatement tagDatabaseStatement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+    public ValidationErrors validate(TagDatabaseStatement tagDatabaseStatement, ExecutionEnvironment env, StatementLogicChain chain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("tag", tagDatabaseStatement.getTag());
         return validationErrors;
     }
 
     @Override
-    public Action[] generateActions(TagDatabaseStatement statement, ExecutionEnvironment env, ActionGeneratorChain sqlGeneratorChain) {
+    public Action[] generateActions(TagDatabaseStatement statement, ExecutionEnvironment env, StatementLogicChain sqlGeneratorChain) {
     	String liquibaseSchema = null;
         Database database = env.getTargetDatabase();
    		liquibaseSchema = database.getLiquibaseSchemaName();
@@ -52,7 +52,7 @@ public class TagDatabaseGenerator extends AbstractSqlGenerator<TagDatabaseStatem
             updateStatement.setWhereClause("DATEEXECUTED = (SELECT MAX(DATEEXECUTED) FROM " + database.escapeTableName(database.getLiquibaseCatalogName(), liquibaseSchema, database.getDatabaseChangeLogTableName()) + ")");
         }
 
-        return ActionGeneratorFactory.getInstance().generateActions(updateStatement, env);
+        return StatementLogicFactory.getInstance().generateActions(updateStatement, env);
 
     }
 }

@@ -2,14 +2,12 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.ExecutionEnvironment;
 import liquibase.action.Action;
-import liquibase.action.Sql;
 import liquibase.action.core.UnparsedSql;
-import liquibase.actiongenerator.ActionGeneratorChain;
+import liquibase.statementlogic.StatementLogicChain;
 import liquibase.database.Database;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.ValidationErrors;
-import  liquibase.ExecutionEnvironment;
 import liquibase.statement.core.InsertOrUpdateStatement;
 import liquibase.statement.core.UpdateStatement;
 
@@ -32,7 +30,7 @@ public abstract class InsertOrUpdateGenerator extends AbstractSqlGenerator<Inser
     }
 
     @Override
-    public ValidationErrors validate(InsertOrUpdateStatement statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+    public ValidationErrors validate(InsertOrUpdateStatement statement, ExecutionEnvironment env, StatementLogicChain chain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("tableName", statement.getTableName());
         validationErrors.checkRequiredField("columns", statement.getColumnValues());
@@ -66,7 +64,7 @@ public abstract class InsertOrUpdateGenerator extends AbstractSqlGenerator<Inser
         return where.toString();
     }
 
-    protected String getInsertStatement(InsertOrUpdateStatement insertOrUpdateStatement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+    protected String getInsertStatement(InsertOrUpdateStatement insertOrUpdateStatement, ExecutionEnvironment env, StatementLogicChain chain) {
         StringBuffer insertBuffer = new StringBuffer();
         InsertGenerator insert = new InsertGenerator();
         Action[] insertSql = insert.generateActions(insertOrUpdateStatement, env, chain);
@@ -82,7 +80,7 @@ public abstract class InsertOrUpdateGenerator extends AbstractSqlGenerator<Inser
         return insertBuffer.toString();
     }
 
-    protected String getUpdateStatement(InsertOrUpdateStatement insertOrUpdateStatement,ExecutionEnvironment env, String whereClause, ActionGeneratorChain chain) throws LiquibaseException {
+    protected String getUpdateStatement(InsertOrUpdateStatement insertOrUpdateStatement,ExecutionEnvironment env, String whereClause, StatementLogicChain chain) throws LiquibaseException {
 
         StringBuffer updateSqlString = new StringBuffer();
 
@@ -122,7 +120,7 @@ public abstract class InsertOrUpdateGenerator extends AbstractSqlGenerator<Inser
     }
 
     @Override
-    public Action[] generateActions(InsertOrUpdateStatement statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+    public Action[] generateActions(InsertOrUpdateStatement statement, ExecutionEnvironment env, StatementLogicChain chain) {
         StringBuffer completeSql = new StringBuffer();
         String whereClause = getWhereClause(statement, env);
 

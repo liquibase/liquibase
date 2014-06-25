@@ -2,7 +2,7 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.action.Action;
 import liquibase.action.core.UnparsedSql;
-import liquibase.actiongenerator.ActionGeneratorChain;
+import liquibase.statementlogic.StatementLogicChain;
 import liquibase.database.Database;
 import liquibase.database.core.InformixDatabase;
 import liquibase.database.core.MSSQLDatabase;
@@ -21,7 +21,7 @@ public class AddForeignKeyConstraintGenerator extends AbstractSqlGenerator<AddFo
     }
 
     @Override
-    public ValidationErrors validate(AddForeignKeyConstraintStatement addForeignKeyConstraintStatement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+    public ValidationErrors validate(AddForeignKeyConstraintStatement addForeignKeyConstraintStatement, ExecutionEnvironment env, StatementLogicChain chain) {
         Database database = env.getTargetDatabase();
         ValidationErrors validationErrors = new ValidationErrors();
 
@@ -40,7 +40,7 @@ public class AddForeignKeyConstraintGenerator extends AbstractSqlGenerator<AddFo
     }
 
     @Override
-    public Action[] generateActions(AddForeignKeyConstraintStatement statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+    public Action[] generateActions(AddForeignKeyConstraintStatement statement, ExecutionEnvironment env, StatementLogicChain chain) {
         Database database = env.getTargetDatabase();
 	    StringBuilder sb = new StringBuilder();
 	    sb.append("ALTER TABLE ")

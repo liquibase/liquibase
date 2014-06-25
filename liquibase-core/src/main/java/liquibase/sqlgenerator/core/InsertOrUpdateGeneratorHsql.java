@@ -1,6 +1,6 @@
 package liquibase.sqlgenerator.core;
 
-import liquibase.actiongenerator.ActionGeneratorChain;
+import liquibase.statementlogic.StatementLogicChain;
 import liquibase.database.Database;
 import liquibase.database.core.HsqlDatabase;
 import liquibase.datatype.DataTypeFactory;
@@ -32,7 +32,7 @@ public class InsertOrUpdateGeneratorHsql extends InsertOrUpdateGenerator {
 
 	@Override
 	protected String getInsertStatement(InsertOrUpdateStatement insertOrUpdateStatement, ExecutionEnvironment env,
-			ActionGeneratorChain chain) {
+			StatementLogicChain chain) {
 		StringBuilder columns = new StringBuilder();
 		StringBuilder values = new StringBuilder();
 
@@ -54,7 +54,7 @@ public class InsertOrUpdateGeneratorHsql extends InsertOrUpdateGenerator {
 
 	@Override
 	protected String getUpdateStatement(InsertOrUpdateStatement insertOrUpdateStatement, ExecutionEnvironment env,
-			String whereClause, ActionGeneratorChain chain) {
+			String whereClause, StatementLogicChain chain) {
 
 		StringBuilder sql = new StringBuilder("UPDATE SET ");
 

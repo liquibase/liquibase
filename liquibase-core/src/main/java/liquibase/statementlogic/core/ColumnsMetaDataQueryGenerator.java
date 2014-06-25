@@ -1,10 +1,10 @@
-package liquibase.actiongenerator.core;
+package liquibase.statementlogic.core;
 
 import liquibase.CatalogAndSchema;
 import liquibase.action.Action;
 import liquibase.action.core.ColumnsJdbcMetaDataQueryAction;
-import liquibase.actiongenerator.AbstractActionGenerator;
-import liquibase.actiongenerator.ActionGeneratorChain;
+import liquibase.statementlogic.AbstractStatementLogic;
+import liquibase.statementlogic.StatementLogicChain;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
@@ -17,7 +17,7 @@ import  liquibase.ExecutionEnvironment;
 import liquibase.statement.core.MetaDataQueryStatement;
 import liquibase.structure.core.Column;
 
-public class ColumnsMetaDataQueryGenerator extends AbstractActionGenerator<MetaDataQueryStatement> {
+public class ColumnsMetaDataQueryGenerator extends AbstractStatementLogic<MetaDataQueryStatement> {
 
     @Override
     public boolean supports(MetaDataQueryStatement statement, ExecutionEnvironment env) {
@@ -31,7 +31,7 @@ public class ColumnsMetaDataQueryGenerator extends AbstractActionGenerator<MetaD
     }
 
     @Override
-    public ValidationErrors validate(MetaDataQueryStatement statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+    public ValidationErrors validate(MetaDataQueryStatement statement, ExecutionEnvironment env, StatementLogicChain chain) {
         Database database = env.getTargetDatabase();
         ValidationErrors errors = super.validate(statement, env, chain);
         Column example = (Column) statement.getExample();
@@ -54,7 +54,7 @@ public class ColumnsMetaDataQueryGenerator extends AbstractActionGenerator<MetaD
     }
 
     @Override
-    public Action[] generateActions(final MetaDataQueryStatement statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+    public Action[] generateActions(final MetaDataQueryStatement statement, ExecutionEnvironment env, StatementLogicChain chain) {
         Database database = env.getTargetDatabase();
 
         if (database.getConnection() == null || database.getConnection() instanceof OfflineConnection) {

@@ -2,8 +2,8 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.action.Action;
 import liquibase.action.core.UnparsedSql;
-import liquibase.actiongenerator.ActionGeneratorChain;
-import liquibase.actiongenerator.ActionGeneratorFactory;
+import liquibase.statementlogic.StatementLogicChain;
+import liquibase.statementlogic.StatementLogicFactory;
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.datatype.DataTypeFactory;
@@ -28,7 +28,7 @@ public class SetNullableGenerator extends AbstractSqlGenerator<SetNullableStatem
     }
 
     @Override
-    public ValidationErrors validate(SetNullableStatement setNullableStatement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+    public ValidationErrors validate(SetNullableStatement setNullableStatement, ExecutionEnvironment env, StatementLogicChain chain) {
         ValidationErrors validationErrors = new ValidationErrors();
         Database database = env.getTargetDatabase();
 
@@ -50,7 +50,7 @@ public class SetNullableGenerator extends AbstractSqlGenerator<SetNullableStatem
     }
 
     @Override
-    public Action[] generateActions(SetNullableStatement statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+    public Action[] generateActions(SetNullableStatement statement, ExecutionEnvironment env, StatementLogicChain chain) {
         Database database = env.getTargetDatabase();
 
         String sql;
@@ -88,7 +88,7 @@ public class SetNullableGenerator extends AbstractSqlGenerator<SetNullableStatem
         returnList.add(new UnparsedSql(sql));
 
         if (database instanceof DB2Database) {
-            Action[] a = ActionGeneratorFactory.getInstance().generateActions(new ReorganizeTableStatement(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()), env);
+            Action[] a = StatementLogicFactory.getInstance().generateActions(new ReorganizeTableStatement(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()), env);
             if (a != null) {
                 returnList.addAll(Arrays.asList(a));
             }

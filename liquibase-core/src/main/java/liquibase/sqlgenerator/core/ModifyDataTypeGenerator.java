@@ -2,7 +2,7 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.action.Action;
 import liquibase.action.core.UnparsedSql;
-import liquibase.actiongenerator.ActionGeneratorChain;
+import liquibase.statementlogic.StatementLogicChain;
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.datatype.DataTypeFactory;
@@ -24,7 +24,7 @@ public class ModifyDataTypeGenerator extends AbstractSqlGenerator<ModifyDataType
     }
 
     @Override
-    public Warnings warn(ModifyDataTypeStatement modifyDataTypeStatement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+    public Warnings warn(ModifyDataTypeStatement modifyDataTypeStatement, ExecutionEnvironment env, StatementLogicChain chain) {
         Database database = env.getTargetDatabase();
 
         Warnings warnings = super.warn(modifyDataTypeStatement, env, chain);
@@ -37,7 +37,7 @@ public class ModifyDataTypeGenerator extends AbstractSqlGenerator<ModifyDataType
     }
 
     @Override
-    public ValidationErrors validate(ModifyDataTypeStatement statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+    public ValidationErrors validate(ModifyDataTypeStatement statement, ExecutionEnvironment env, StatementLogicChain chain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("tableName", statement.getTableName());
         validationErrors.checkRequiredField("columnName", statement.getColumnName());
@@ -47,7 +47,7 @@ public class ModifyDataTypeGenerator extends AbstractSqlGenerator<ModifyDataType
     }
 
     @Override
-    public Action[] generateActions(ModifyDataTypeStatement statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+    public Action[] generateActions(ModifyDataTypeStatement statement, ExecutionEnvironment env, StatementLogicChain chain) {
         Database database = env.getTargetDatabase();
 
         String alterTable = "ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName());

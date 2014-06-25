@@ -1,7 +1,7 @@
 package liquibase.snapshot.core;
 
 import liquibase.ExecutionEnvironment;
-import liquibase.actiongenerator.ActionGeneratorChain;
+import liquibase.statementlogic.StatementLogicChain;
 import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.snapshot.AbstractSnapshotGenerator;
 import liquibase.statement.SqlStatement;
@@ -14,7 +14,7 @@ import liquibase.structure.core.Table;
 public class TableSnapshotGenerator extends AbstractSnapshotGenerator<Table> {
 
     @Override
-    public SqlStatement[] generateAddToStatements(DatabaseObject example, ExecutionEnvironment env, ActionGeneratorChain chain) {
+    public SqlStatement[] generateAddToStatements(DatabaseObject example, ExecutionEnvironment env, StatementLogicChain chain) {
         if (example instanceof Schema) {
             return new SqlStatement[]{
                     new MetaDataQueryStatement(new Table(getCatalogName((Schema) example), getSchemaName(((Schema) example)), null)),
@@ -24,7 +24,7 @@ public class TableSnapshotGenerator extends AbstractSnapshotGenerator<Table> {
     }
 
     @Override
-    public void addTo(DatabaseObject object, DatabaseObjectCollection collection, ExecutionEnvironment env, ActionGeneratorChain chain) {
+    public void addTo(DatabaseObject object, DatabaseObjectCollection collection, ExecutionEnvironment env, StatementLogicChain chain) {
         if (object instanceof Schema) {
             for (Table table : collection.get(Table.class)) {
                 if (DatabaseObjectComparatorFactory.getInstance().isSameObject(table.getSchema(), ((Schema) object), env.getTargetDatabase())) {

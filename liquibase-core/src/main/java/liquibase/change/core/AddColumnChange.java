@@ -1,6 +1,6 @@
 package liquibase.change.core;
 
-import liquibase.actiongenerator.ActionGeneratorFactory;
+import liquibase.statementlogic.StatementLogicFactory;
 import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.database.core.*;
@@ -154,7 +154,7 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
           String columnRemarks = StringUtils.trimToNull(column.getRemarks());
           if (columnRemarks != null) {
               SetColumnRemarksStatement remarksStatement = new SetColumnRemarksStatement(catalogName, schemaName, tableName, column.getName(), columnRemarks);
-              if (ActionGeneratorFactory.getInstance().supports(remarksStatement, env)) {
+              if (StatementLogicFactory.getInstance().supports(remarksStatement, env)) {
                   sql.add(remarksStatement);
               }
           }

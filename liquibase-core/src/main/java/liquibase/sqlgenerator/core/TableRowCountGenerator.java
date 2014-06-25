@@ -2,7 +2,7 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.action.Action;
 import liquibase.action.core.UnparsedSql;
-import liquibase.actiongenerator.ActionGeneratorChain;
+import liquibase.statementlogic.StatementLogicChain;
 import liquibase.exception.ValidationErrors;
 import  liquibase.ExecutionEnvironment;
 import liquibase.statement.core.TableRowCountStatement;
@@ -20,7 +20,7 @@ public class TableRowCountGenerator extends AbstractSqlGenerator<TableRowCountSt
     }
 
     @Override
-    public ValidationErrors validate(TableRowCountStatement dropColumnStatement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+    public ValidationErrors validate(TableRowCountStatement dropColumnStatement, ExecutionEnvironment env, StatementLogicChain chain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("tableName", dropColumnStatement.getTableName());
         return validationErrors;
@@ -31,7 +31,7 @@ public class TableRowCountGenerator extends AbstractSqlGenerator<TableRowCountSt
     }
 
     @Override
-    public Action[] generateActions(TableRowCountStatement statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+    public Action[] generateActions(TableRowCountStatement statement, ExecutionEnvironment env, StatementLogicChain chain) {
         return new Action[] { new UnparsedSql(generateCountSql(statement, env)) };
     }
 

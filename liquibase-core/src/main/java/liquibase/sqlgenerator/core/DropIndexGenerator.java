@@ -2,7 +2,7 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.action.Action;
 import liquibase.action.core.UnparsedSql;
-import liquibase.actiongenerator.ActionGeneratorChain;
+import liquibase.statementlogic.StatementLogicChain;
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.exception.ValidationErrors;
@@ -16,7 +16,7 @@ import java.util.List;
 public class DropIndexGenerator extends AbstractSqlGenerator<DropIndexStatement> {
 
     @Override
-    public ValidationErrors validate(DropIndexStatement statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+    public ValidationErrors validate(DropIndexStatement statement, ExecutionEnvironment env, StatementLogicChain chain) {
         Database database = env.getTargetDatabase();
 
         ValidationErrors validationErrors = new ValidationErrors();
@@ -30,7 +30,7 @@ public class DropIndexGenerator extends AbstractSqlGenerator<DropIndexStatement>
     }
 
     @Override
-    public Action[] generateActions(DropIndexStatement statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+    public Action[] generateActions(DropIndexStatement statement, ExecutionEnvironment env, StatementLogicChain chain) {
         Database database = env.getTargetDatabase();
 
         List<String> associatedWith = StringUtils.splitAndTrim(statement.getAssociatedWith(), ",");

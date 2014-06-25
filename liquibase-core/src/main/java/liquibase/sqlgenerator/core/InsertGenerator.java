@@ -2,7 +2,7 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.action.Action;
 import liquibase.action.core.UnparsedSql;
-import liquibase.actiongenerator.ActionGeneratorChain;
+import liquibase.statementlogic.StatementLogicChain;
 import liquibase.database.Database;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.ValidationErrors;
@@ -15,7 +15,7 @@ import java.util.Date;
 public class InsertGenerator extends AbstractSqlGenerator<InsertStatement> {
 
     @Override
-    public ValidationErrors validate(InsertStatement insertStatement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+    public ValidationErrors validate(InsertStatement insertStatement, ExecutionEnvironment env, StatementLogicChain chain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("tableName", insertStatement.getTableName());
         validationErrors.checkRequiredField("columns", insertStatement.getColumnValues());
@@ -28,7 +28,7 @@ public class InsertGenerator extends AbstractSqlGenerator<InsertStatement> {
     }
 
     @Override
-    public Action[] generateActions(InsertStatement statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+    public Action[] generateActions(InsertStatement statement, ExecutionEnvironment env, StatementLogicChain chain) {
         Database database = env.getTargetDatabase();
 
         StringBuffer sql = new StringBuffer("INSERT INTO " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " (");

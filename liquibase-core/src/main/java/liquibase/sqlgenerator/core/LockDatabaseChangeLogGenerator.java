@@ -1,8 +1,8 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.action.Action;
-import liquibase.actiongenerator.ActionGeneratorChain;
-import liquibase.actiongenerator.ActionGeneratorFactory;
+import liquibase.statementlogic.StatementLogicChain;
+import liquibase.statementlogic.StatementLogicFactory;
 import liquibase.database.Database;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.UnexpectedLiquibaseException;
@@ -17,7 +17,7 @@ import java.sql.Timestamp;
 public class LockDatabaseChangeLogGenerator extends AbstractSqlGenerator<LockDatabaseChangeLogStatement> {
 
     @Override
-    public ValidationErrors validate(LockDatabaseChangeLogStatement statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+    public ValidationErrors validate(LockDatabaseChangeLogStatement statement, ExecutionEnvironment env, StatementLogicChain chain) {
         return new ValidationErrors();
     }
 
@@ -34,7 +34,7 @@ public class LockDatabaseChangeLogGenerator extends AbstractSqlGenerator<LockDat
     }
 
     @Override
-    public Action[] generateActions(LockDatabaseChangeLogStatement statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+    public Action[] generateActions(LockDatabaseChangeLogStatement statement, ExecutionEnvironment env, StatementLogicChain chain) {
         Database database = env.getTargetDatabase();
 
     	String liquibaseSchema = database.getLiquibaseSchemaName();
@@ -48,7 +48,7 @@ public class LockDatabaseChangeLogGenerator extends AbstractSqlGenerator<LockDat
         updateStatement.addNewColumnValue("LOCKEDBY", hostname + " (" + hostaddress + ")");
         updateStatement.setWhereClause(database.escapeColumnName(liquibaseCatalog, liquibaseSchema, database.getDatabaseChangeLogTableName(), "ID") + " = 1 AND " + database.escapeColumnName(liquibaseCatalog, liquibaseSchema, database.getDatabaseChangeLogTableName(), "LOCKED") + " = "+ DataTypeFactory.getInstance().fromDescription("boolean", database).objectToSql(false, database));
 
-        return ActionGeneratorFactory.getInstance().generateActions(updateStatement, env);
+        return StatementLogicFactory.getInstance().generateActions(updateStatement, env);
 
     }
 }

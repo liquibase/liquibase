@@ -1,8 +1,8 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.action.Action;
-import liquibase.actiongenerator.ActionGeneratorChain;
-import liquibase.actiongenerator.ActionGeneratorFactory;
+import liquibase.statementlogic.StatementLogicChain;
+import liquibase.statementlogic.StatementLogicFactory;
 import liquibase.change.Change;
 import liquibase.change.core.TagDatabaseChange;
 import liquibase.changelog.ChangeLogHistoryServiceFactory;
@@ -25,7 +25,7 @@ import java.util.List;
 public class MarkChangeSetRanGenerator extends AbstractSqlGenerator<MarkChangeSetRanStatement> {
 
     @Override
-    public ValidationErrors validate(MarkChangeSetRanStatement statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+    public ValidationErrors validate(MarkChangeSetRanStatement statement, ExecutionEnvironment env, StatementLogicChain chain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("changeSet", statement.getChangeSet());
 
@@ -33,7 +33,7 @@ public class MarkChangeSetRanGenerator extends AbstractSqlGenerator<MarkChangeSe
     }
 
     @Override
-    public Action[] generateActions(MarkChangeSetRanStatement statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+    public Action[] generateActions(MarkChangeSetRanStatement statement, ExecutionEnvironment env, StatementLogicChain chain) {
         Database database = env.getTargetDatabase();
         String dateValue = database.getCurrentDateTimeFunction();
 
@@ -80,7 +80,7 @@ public class MarkChangeSetRanGenerator extends AbstractSqlGenerator<MarkChangeSe
             throw new UnexpectedLiquibaseException(e);
         }
 
-        return ActionGeneratorFactory.getInstance().generateActions(runStatement, env);
+        return StatementLogicFactory.getInstance().generateActions(runStatement, env);
     }
 
     private String limitSize(String string) {

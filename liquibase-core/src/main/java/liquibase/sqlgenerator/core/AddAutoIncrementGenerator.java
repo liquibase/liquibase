@@ -2,7 +2,7 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.action.Action;
 import liquibase.action.core.UnparsedSql;
-import liquibase.actiongenerator.ActionGeneratorChain;
+import liquibase.statementlogic.StatementLogicChain;
 import liquibase.database.Database;
 import liquibase.database.core.DerbyDatabase;
 import liquibase.database.core.H2Database;
@@ -35,7 +35,7 @@ public class AddAutoIncrementGenerator extends AbstractSqlGenerator<AddAutoIncre
     public ValidationErrors validate(
     		AddAutoIncrementStatement statement,
     		ExecutionEnvironment env,
-    		ActionGeneratorChain chain) {
+    		StatementLogicChain chain) {
         ValidationErrors validationErrors = new ValidationErrors();
 
         validationErrors.checkRequiredField("columnName", statement.getColumnName());
@@ -47,7 +47,7 @@ public class AddAutoIncrementGenerator extends AbstractSqlGenerator<AddAutoIncre
     }
 
     @Override
-    public Action[] generateActions(AddAutoIncrementStatement statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+    public Action[] generateActions(AddAutoIncrementStatement statement, ExecutionEnvironment env, StatementLogicChain chain) {
         Database database = env.getTargetDatabase();
 
         String sql = "ALTER TABLE "

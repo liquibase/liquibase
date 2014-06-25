@@ -2,7 +2,7 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.action.Action;
 import liquibase.action.core.UnparsedSql;
-import liquibase.actiongenerator.ActionGeneratorChain;
+import liquibase.statementlogic.StatementLogicChain;
 import liquibase.database.Database;
 import liquibase.database.core.DB2Database;
 import liquibase.database.core.FirebirdDatabase;
@@ -20,7 +20,7 @@ public class AlterSequenceGenerator extends AbstractSqlGenerator<AlterSequenceSt
     }
 
     @Override
-    public ValidationErrors validate(AlterSequenceStatement alterSequenceStatement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+    public ValidationErrors validate(AlterSequenceStatement alterSequenceStatement, ExecutionEnvironment env, StatementLogicChain chain) {
         Database database = env.getTargetDatabase();
 
         ValidationErrors validationErrors = new ValidationErrors();
@@ -36,7 +36,7 @@ public class AlterSequenceGenerator extends AbstractSqlGenerator<AlterSequenceSt
     }
 
     @Override
-    public Action[] generateActions(AlterSequenceStatement statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+    public Action[] generateActions(AlterSequenceStatement statement, ExecutionEnvironment env, StatementLogicChain chain) {
         Database database = env.getTargetDatabase();
 
         StringBuffer buffer = new StringBuffer();

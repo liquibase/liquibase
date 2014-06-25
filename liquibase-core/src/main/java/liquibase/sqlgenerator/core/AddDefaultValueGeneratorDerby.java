@@ -2,7 +2,7 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.action.Action;
 import liquibase.action.core.UnparsedSql;
-import liquibase.actiongenerator.ActionGeneratorChain;
+import liquibase.statementlogic.StatementLogicChain;
 import liquibase.database.Database;
 import liquibase.database.core.DerbyDatabase;
 import liquibase.datatype.DataTypeFactory;
@@ -21,7 +21,7 @@ public class AddDefaultValueGeneratorDerby extends AddDefaultValueGenerator {
     }
 
     @Override
-    public Action[] generateActions(AddDefaultValueStatement statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+    public Action[] generateActions(AddDefaultValueStatement statement, ExecutionEnvironment env, StatementLogicChain chain) {
         Database database = env.getTargetDatabase();
         Object defaultValue = statement.getDefaultValue();
         return new Action[]{

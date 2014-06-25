@@ -1,8 +1,6 @@
-package liquibase.actiongenerator.core
+package liquibase.statementlogic.core
 
-import liquibase.ExecutionEnvironment
 import liquibase.action.QueryAction
-import liquibase.actiongenerator.ActionGeneratorFactory
 import liquibase.command.DropAllCommand
 import liquibase.database.OfflineConnection
 import liquibase.datatype.core.IntType
@@ -15,6 +13,7 @@ import liquibase.sdk.verifytest.TestPermutation
 import liquibase.sdk.verifytest.VerifyService
 import liquibase.statement.core.CreateTableStatement
 import liquibase.statement.core.MetaDataQueryStatement
+import liquibase.statementlogic.StatementLogicFactory
 import liquibase.structure.core.Table
 import spock.lang.Shared
 import spock.lang.Specification
@@ -36,7 +35,7 @@ class TablesMetaDataQueryGeneratorTest extends Specification {
 
         def database = connection.getDatabase();
 
-        def actions = ActionGeneratorFactory.instance.generateActions(statement, new ExecutionEnvironment(database))
+        def actions = StatementLogicFactory.instance.generateActions(statement, new ExecutionEnvironment(database))
         def options = new ExecutionEnvironment(database)
 
         then:
@@ -76,7 +75,7 @@ class TablesMetaDataQueryGeneratorTest extends Specification {
 
         def database = connection.getDatabase();
 
-        def actions = ActionGeneratorFactory.instance.generateActions(statement, new ExecutionEnvironment(database))
+        def actions = StatementLogicFactory.instance.generateActions(statement, new ExecutionEnvironment(database))
         def options = new ExecutionEnvironment(database, null)
 
         LockServiceFactory.instance.resetAll()

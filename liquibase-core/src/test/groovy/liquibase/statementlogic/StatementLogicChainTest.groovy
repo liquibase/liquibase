@@ -1,6 +1,5 @@
-package liquibase.actiongenerator
+package liquibase.statementlogic
 
-import liquibase.ExecutionEnvironment
 import liquibase.action.Action
 import  liquibase.ExecutionEnvironment
 import liquibase.sdk.database.MockDatabase
@@ -9,11 +8,11 @@ import liquibase.statement.core.MockSqlStatement
 import spock.lang.Specification
 import org.junit.Test
 
-public class ActionGeneratorChainTest extends Specification {
+public class StatementLogicChainTest extends Specification {
 
     def void generateActions_nullGenerators() {
         when:
-        ActionGeneratorChain chain = new ActionGeneratorChain(null)
+        StatementLogicChain chain = new StatementLogicChain(null)
 
         then:
         chain.generateActions(new MockSqlStatement(), new ExecutionEnvironment(new MockDatabase())) == null
@@ -21,8 +20,8 @@ public class ActionGeneratorChainTest extends Specification {
 
     def generateActions_noGenerators() {
         when:
-        SortedSet<ActionGenerator> generators = new TreeSet<ActionGenerator>(new ActionGeneratorComparator())
-        ActionGeneratorChain chain =new ActionGeneratorChain(generators)
+        SortedSet<StatementLogic> generators = new TreeSet<StatementLogic>(new StatementLogicComparator())
+        StatementLogicChain chain =new StatementLogicChain(generators)
 
         then:
         assert chain.generateActions(new MockSqlStatement(), new ExecutionEnvironment(new MockDatabase())).length == 0
@@ -30,9 +29,9 @@ public class ActionGeneratorChainTest extends Specification {
 
    def generateActions_oneGenerators() {
        when:
-        SortedSet<ActionGenerator> generators = new TreeSet<ActionGenerator>(new ActionGeneratorComparator())
-        generators.add(new MockActionGenerator(1, "A1", "A2"))
-        ActionGeneratorChain chain =new ActionGeneratorChain(generators)
+        SortedSet<StatementLogic> generators = new TreeSet<StatementLogic>(new StatementLogicComparator())
+        generators.add(new MockStatementLogic(1, "A1", "A2"))
+        StatementLogicChain chain =new StatementLogicChain(generators)
 
         Action[] actions = chain.generateActions(new MockSqlStatement(), new ExecutionEnvironment(new MockDatabase()))
        then:
@@ -43,10 +42,10 @@ public class ActionGeneratorChainTest extends Specification {
 
     def void generateActions_twoGenerators() {
         when:
-        SortedSet<ActionGenerator> generators = new TreeSet<ActionGenerator>(new ActionGeneratorComparator())
-        generators.add(new MockActionGenerator(2, "B1", "B2"))
-        generators.add(new MockActionGenerator(1, "A1", "A2"))
-        ActionGeneratorChain chain =new ActionGeneratorChain(generators)
+        SortedSet<StatementLogic> generators = new TreeSet<StatementLogic>(new StatementLogicComparator())
+        generators.add(new MockStatementLogic(2, "B1", "B2"))
+        generators.add(new MockStatementLogic(1, "A1", "A2"))
+        StatementLogicChain chain =new StatementLogicChain(generators)
         Action[] actions = chain.generateActions(new MockSqlStatement(), new ExecutionEnvironment(new MockDatabase()))
         
         then:
@@ -59,11 +58,11 @@ public class ActionGeneratorChainTest extends Specification {
 
     def void generateActions_threeGenerators() {
         when:
-        SortedSet<ActionGenerator> generators = new TreeSet<ActionGenerator>(new ActionGeneratorComparator())
-        generators.add(new MockActionGenerator(2, "B1", "B2"))
-        generators.add(new MockActionGenerator(1, "A1", "A2"))
-        generators.add(new MockActionGenerator(3, "C1", "C2"))
-        ActionGeneratorChain chain =new ActionGeneratorChain(generators)
+        SortedSet<StatementLogic> generators = new TreeSet<StatementLogic>(new StatementLogicComparator())
+        generators.add(new MockStatementLogic(2, "B1", "B2"))
+        generators.add(new MockStatementLogic(1, "A1", "A2"))
+        generators.add(new MockStatementLogic(3, "C1", "C2"))
+        StatementLogicChain chain =new StatementLogicChain(generators)
         Action[] actions = chain.generateActions(new MockSqlStatement(), new ExecutionEnvironment(new MockDatabase()))
         
         then:
@@ -78,7 +77,7 @@ public class ActionGeneratorChainTest extends Specification {
 
     def validate_nullGenerators() {
         when:
-        ActionGeneratorChain chain = new ActionGeneratorChain(null)
+        StatementLogicChain chain = new StatementLogicChain(null)
         ValidationErrors validationErrors = chain.validate(new MockSqlStatement(), new ExecutionEnvironment(new MockDatabase()))
         
         then:
@@ -87,10 +86,10 @@ public class ActionGeneratorChainTest extends Specification {
 
     def validate_oneGenerators_noErrors() {
         when:
-        SortedSet<ActionGenerator> generators = new TreeSet<ActionGenerator>(new ActionGeneratorComparator())
-        generators.add(new MockActionGenerator(1, "A1", "A2"))
+        SortedSet<StatementLogic> generators = new TreeSet<StatementLogic>(new StatementLogicComparator())
+        generators.add(new MockStatementLogic(1, "A1", "A2"))
 
-        ActionGeneratorChain chain =new ActionGeneratorChain(generators)
+        StatementLogicChain chain =new StatementLogicChain(generators)
         ValidationErrors validationErrors = chain.validate(new MockSqlStatement(), new ExecutionEnvironment(new MockDatabase()))
         
         then:
@@ -100,10 +99,10 @@ public class ActionGeneratorChainTest extends Specification {
     @Test
     public void validate_oneGenerators_hasErrors() {
         when:
-        SortedSet<ActionGenerator> generators = new TreeSet<ActionGenerator>(new ActionGeneratorComparator())
-        generators.add(new MockActionGenerator(1, "A1", "A2").addValidationError("E1"))
+        SortedSet<StatementLogic> generators = new TreeSet<StatementLogic>(new StatementLogicComparator())
+        generators.add(new MockStatementLogic(1, "A1", "A2").addValidationError("E1"))
 
-        ActionGeneratorChain chain =new ActionGeneratorChain(generators)
+        StatementLogicChain chain =new StatementLogicChain(generators)
         ValidationErrors validationErrors = chain.validate(new MockSqlStatement(), new ExecutionEnvironment(new MockDatabase()))
 
         then:
@@ -112,11 +111,11 @@ public class ActionGeneratorChainTest extends Specification {
 
     def validate_twoGenerators_noErrors() {
         when:
-        SortedSet<ActionGenerator> generators = new TreeSet<ActionGenerator>(new ActionGeneratorComparator())
-        generators.add(new MockActionGenerator(2, "B1", "B2"))
-        generators.add(new MockActionGenerator(1, "A1", "A2"))
+        SortedSet<StatementLogic> generators = new TreeSet<StatementLogic>(new StatementLogicComparator())
+        generators.add(new MockStatementLogic(2, "B1", "B2"))
+        generators.add(new MockStatementLogic(1, "A1", "A2"))
 
-        ActionGeneratorChain chain =new ActionGeneratorChain(generators)
+        StatementLogicChain chain =new StatementLogicChain(generators)
         ValidationErrors validationErrors = chain.validate(new MockSqlStatement(), new ExecutionEnvironment(new MockDatabase()))
 
         then:
@@ -125,11 +124,11 @@ public class ActionGeneratorChainTest extends Specification {
 
     def validate_twoGenerators_firstHasErrors() {
         when:
-        SortedSet<ActionGenerator> generators = new TreeSet<ActionGenerator>(new ActionGeneratorComparator())
-        generators.add(new MockActionGenerator(2, "B1", "B2").addValidationError("E1"))
-        generators.add(new MockActionGenerator(1, "A1", "A2"))
+        SortedSet<StatementLogic> generators = new TreeSet<StatementLogic>(new StatementLogicComparator())
+        generators.add(new MockStatementLogic(2, "B1", "B2").addValidationError("E1"))
+        generators.add(new MockStatementLogic(1, "A1", "A2"))
 
-        ActionGeneratorChain chain =new ActionGeneratorChain(generators)
+        StatementLogicChain chain =new StatementLogicChain(generators)
         ValidationErrors validationErrors = chain.validate(new MockSqlStatement(), new ExecutionEnvironment(new MockDatabase()))
 
         then:
@@ -138,11 +137,11 @@ public class ActionGeneratorChainTest extends Specification {
 
     def validate_twoGenerators_secondHasErrors() {
         when:
-        SortedSet<ActionGenerator> generators = new TreeSet<ActionGenerator>(new ActionGeneratorComparator())
-        generators.add(new MockActionGenerator(2, "B1", "B2"))
-        generators.add(new MockActionGenerator(1, "A1", "A2").addValidationError("E1"))
+        SortedSet<StatementLogic> generators = new TreeSet<StatementLogic>(new StatementLogicComparator())
+        generators.add(new MockStatementLogic(2, "B1", "B2"))
+        generators.add(new MockStatementLogic(1, "A1", "A2").addValidationError("E1"))
 
-        ActionGeneratorChain chain =new ActionGeneratorChain(generators)
+        StatementLogicChain chain =new StatementLogicChain(generators)
         ValidationErrors validationErrors = chain.validate(new MockSqlStatement(), new ExecutionEnvironment(new MockDatabase()))
 
         then:
