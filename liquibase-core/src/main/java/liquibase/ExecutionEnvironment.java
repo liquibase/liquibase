@@ -2,55 +2,50 @@ package liquibase;
 
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
-import  liquibase.ExecutionEnvironment;
 
-public class ExecutionEnvironment {
+public class ExecutionEnvironment extends AbstractExtensibleObject {
 
-    private Database targetDatabase;
-    private Contexts contexts;
-    private LabelExpression labelExpression;
-    private ChangeSet changeSet;
+    private static String TARGET_DATABASE = "targetDatabase";
+    private static String CONTEXTS = "contexts";
+    private static String LABEL_EXPRESSION = "labelExpression";
+    private static String CHANGE_SET = "changeSet";
 
     public ExecutionEnvironment() {
     }
 
     public ExecutionEnvironment(Database targetDatabase) {
-        this.targetDatabase = targetDatabase;
+        setTargetDatabase(targetDatabase);
     }
 
     public Database getTargetDatabase() {
-        return targetDatabase;
+        return getAttribute(TARGET_DATABASE, Database.class);
     }
 
     public ExecutionEnvironment setTargetDatabase(Database targetDatabase) {
-        this.targetDatabase = targetDatabase;
-        return this;
+        return (ExecutionEnvironment) setAttribute(TARGET_DATABASE, targetDatabase);
     }
 
     public Contexts getContexts() {
-        return contexts;
+        return getAttribute(CONTEXTS, Contexts.class);
     }
 
     public ExecutionEnvironment setContexts(Contexts contexts) {
-        this.contexts = contexts;
-        return this;
+        return (ExecutionEnvironment) setAttribute(CONTEXTS, contexts);
     }
 
     public LabelExpression getLabelExpression() {
-        return labelExpression;
+        return getAttribute(LABEL_EXPRESSION, LabelExpression.class);
     }
 
     public ExecutionEnvironment setLabelExpression(LabelExpression labelExpression) {
-        this.labelExpression = labelExpression;
-        return this;
+        return (ExecutionEnvironment) setAttribute(LABEL_EXPRESSION, labelExpression);
     }
 
     public ChangeSet getCurrentChangeSet() {
-        return changeSet;
+        return getAttribute(CHANGE_SET, ChangeSet.class);
     }
 
     public ExecutionEnvironment setChangeSet(ChangeSet changeSet) {
-        this.changeSet = changeSet;
-        return this;
+        return (ExecutionEnvironment) setAttribute(CHANGE_SET, changeSet);
     }
 }
