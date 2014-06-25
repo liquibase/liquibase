@@ -1,10 +1,10 @@
 package liquibase.statement.core;
 
-import liquibase.statement.AbstractSqlStatement;
+import liquibase.statement.AbstractStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Sequence;
 
-public class DropSequenceStatement extends AbstractSqlStatement {
+public class DropSequenceStatement extends AbstractStatement {
 
     private String catalogName;
     private String schemaName;

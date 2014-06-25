@@ -9,7 +9,7 @@ import  liquibase.ExecutionEnvironment;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.resource.ResourceAccessor;
-import liquibase.statement.SqlStatement;
+import liquibase.statement.Statement;
 import liquibase.util.ObjectUtil;
 
 import java.util.*;
@@ -171,8 +171,8 @@ public class CustomChangeWrapper extends AbstractChange {
      * @param options
      */
     @Override
-    public SqlStatement[] generateStatements(ExecutionEnvironment env) {
-        SqlStatement[] statements = null;
+    public Statement[] generateStatements(ExecutionEnvironment env) {
+        Statement[] statements = null;
         try {
             if (!configured) {
                 configureCustomChange();
@@ -189,7 +189,7 @@ public class CustomChangeWrapper extends AbstractChange {
         }
 
         if (statements == null) {
-            statements = new SqlStatement[0];
+            statements = new Statement[0];
         }
         return statements;
     }
@@ -203,8 +203,8 @@ public class CustomChangeWrapper extends AbstractChange {
      * @param options
      */
     @Override
-    public SqlStatement[] generateRollbackStatements(ExecutionEnvironment env) throws RollbackImpossibleException {
-        SqlStatement[] statements = null;
+    public Statement[] generateRollbackStatements(ExecutionEnvironment env) throws RollbackImpossibleException {
+        Statement[] statements = null;
         try {
             if (!configured) {
                 configureCustomChange();
@@ -221,7 +221,7 @@ public class CustomChangeWrapper extends AbstractChange {
         }
 
         if (statements == null) {
-            statements = new SqlStatement[0];
+            statements = new Statement[0];
         }
         return statements;
 

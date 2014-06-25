@@ -2,6 +2,7 @@ package liquibase.verify.change;
 
 import liquibase.ExecutionEnvironment;
 import liquibase.action.Action;
+import liquibase.statement.Statement;
 import liquibase.statementlogic.StatementLogicFactory;
 import liquibase.change.Change;
 import liquibase.change.ChangeFactory;
@@ -12,7 +13,6 @@ import liquibase.database.DatabaseFactory;
 import liquibase.exception.ValidationErrors;
 import liquibase.serializer.LiquibaseSerializable;
 import liquibase.serializer.core.string.StringChangeLogSerializer;
-import liquibase.statement.SqlStatement;
 import liquibase.test.JUnitResourceAccessor;
 import liquibase.util.StringUtils;
 import liquibase.verify.AbstractVerifyTest;
@@ -70,8 +70,8 @@ public class VerifyChangeClassesTest extends AbstractVerifyTest {
                 ValidationErrors errors = change.validate(env);
                 assertFalse("Validation errors for " + changeMetaData.getName() + " on " + database.getShortName() + ": " + errors.toString(), errors.hasErrors());
 
-                SqlStatement[] sqlStatements = change.generateStatements(env);
-                for (SqlStatement statement : sqlStatements) {
+                Statement[] statements = change.generateStatements(env);
+                for (Statement statement : statements) {
                     Action[] actions = StatementLogicFactory.getInstance().generateActions(statement, env);
                     if (actions == null) {
                         System.out.println("Null sql for " + statement + " on " + database.getShortName());

@@ -20,12 +20,7 @@ public class FindForeignKeyConstraintsGeneratorHsql extends AbstractSqlGenerator
 	}
 
     @Override
-    public boolean generateStatementsIsVolatile(ExecutionEnvironment env) {
-        return false;
-    }
-
-    @Override
-    public boolean generateRollbackStatementsIsVolatile(ExecutionEnvironment env) {
+    public boolean generateActionsIsVolatile(ExecutionEnvironment env) {
         return false;
     }
 

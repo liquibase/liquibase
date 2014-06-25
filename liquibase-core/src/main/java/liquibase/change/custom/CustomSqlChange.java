@@ -2,7 +2,7 @@ package liquibase.change.custom;
 
 import liquibase.database.Database;
 import liquibase.exception.CustomChangeException;
-import liquibase.statement.SqlStatement;
+import liquibase.statement.Statement;
 
 /**
  * Interface to implement when creating a custom change that generates SQL.  When updating a database,
@@ -19,9 +19,9 @@ public interface CustomSqlChange extends CustomChange {
      * Generates the SQL statements required to run the change
      *
      * @param database the target {@link liquibase.database.Database} associated to this change's statements
-     * @return an array of {@link SqlStatement}s with the statements
+     * @return an array of {@link liquibase.statement.Statement}s with the statements
      * @throws liquibase.exception.CustomChangeException if an exception occurs while processing this change
      */
-    public SqlStatement[] generateStatements(Database database) throws CustomChangeException;
+    public Statement[] generateStatements(Database database) throws CustomChangeException;
 
 }

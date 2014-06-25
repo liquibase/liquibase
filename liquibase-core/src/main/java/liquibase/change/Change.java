@@ -7,10 +7,9 @@ import liquibase.exception.RollbackImpossibleException;
 import liquibase.exception.SetupException;
 import liquibase.exception.ValidationErrors;
 import liquibase.exception.Warnings;
-import  liquibase.ExecutionEnvironment;
 import liquibase.resource.ResourceAccessor;
 import liquibase.serializer.LiquibaseSerializable;
-import liquibase.statement.SqlStatement;
+import liquibase.statement.Statement;
 import liquibase.structure.DatabaseObject;
 
 import java.util.Set;
@@ -86,17 +85,17 @@ public interface Change extends LiquibaseSerializable {
     public String getConfirmationMessage();
 
     /**
-     * Generates the {@link SqlStatement} objects required to run the change for the given database.
+     * Generates the {@link liquibase.statement.Statement} objects required to run the change for the given database.
      * <p></p>
      * NOTE: This method may be called multiple times throughout the changelog execution process and may be called in documentation generation and other integration points as well.
      * <p></p>
      * <b>If this method reads from the current database state or uses any other logic that will be affected by whether previous changeSets have ran or not, you must return true from {@link #generateStatementsVolatile}.</b>
      */
-    public SqlStatement[] generateStatements(ExecutionEnvironment env);
+    public Statement[] generateStatements(ExecutionEnvironment env);
 
     /**
      * Returns true if this change reads data from the database or other sources that would change during the course of an update in the {@link #generateStatements(liquibase.ExecutionEnvironment) } method.
-     * If true, this change cannot be used in an updateSql-style commands because Liquibase cannot know the {@link SqlStatement} objects until all changeSets prior have been actually executed.
+     * If true, this change cannot be used in an updateSql-style commands because Liquibase cannot know the {@link liquibase.statement.Statement} objects until all changeSets prior have been actually executed.
      */
     public boolean generateStatementsVolatile(ExecutionEnvironment env);
 
@@ -107,7 +106,7 @@ public interface Change extends LiquibaseSerializable {
     public boolean supportsRollback(ExecutionEnvironment env);
 
     /**
-     * Generates the {@link SqlStatement} objects that would roll back the change.
+     * Generates the {@link liquibase.statement.Statement} objects that would roll back the change.
      * <p></p>
      * NOTE: This method may be called multiple times throughout the changelog execution process and may be called in documentation generation and other integration points as well.
      * <p></p>
@@ -115,11 +114,11 @@ public interface Change extends LiquibaseSerializable {
      *
      * @throws RollbackImpossibleException if rollback is not supported for this change
      */
-    public SqlStatement[] generateRollbackStatements(ExecutionEnvironment env) throws RollbackImpossibleException;
+    public Statement[] generateRollbackStatements(ExecutionEnvironment env) throws RollbackImpossibleException;
 
     /**
      * Returns true if this change reads data from the database or other sources that would change during the course of an update in the {@link #generateRollbackStatements(liquibase.ExecutionEnvironment) } method.
-     * If true, this change cannot be used in an updateSql-style commands because Liquibase cannot know the {@link SqlStatement} objects until all changeSets prior have been actually executed.
+     * If true, this change cannot be used in an updateSql-style commands because Liquibase cannot know the {@link liquibase.statement.Statement} objects until all changeSets prior have been actually executed.
      */
     public boolean generateRollbackStatementsVolatile(ExecutionEnvironment env);
 

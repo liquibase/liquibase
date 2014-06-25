@@ -1,9 +1,9 @@
 package liquibase.statement.core;
 
-import liquibase.statement.AbstractSqlStatement;
+import liquibase.statement.AbstractStatement;
 import liquibase.structure.DatabaseObject;
 
-public class TagDatabaseStatement extends AbstractSqlStatement {
+public class TagDatabaseStatement extends AbstractStatement {
 
     private String tag;
 

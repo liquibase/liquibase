@@ -14,7 +14,7 @@ import liquibase.executor.Row;
 import liquibase.logging.LogFactory;
 import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.SnapshotGeneratorFactory;
-import liquibase.statement.SqlStatement;
+import liquibase.statement.Statement;
 import liquibase.statement.core.*;
 import liquibase.structure.core.Table;
 
@@ -22,7 +22,6 @@ import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 public class StandardLockService implements LockService {
 
@@ -260,8 +259,8 @@ public class StandardLockService implements LockService {
             }
 
             List<DatabaseChangeLogLock> allLocks = new ArrayList<DatabaseChangeLogLock>();
-            SqlStatement sqlStatement = new SelectFromDatabaseChangeLogLockStatement("ID", "LOCKED", "LOCKGRANTED", "LOCKEDBY");
-            List<Row> rows = ExecutorService.getInstance().getExecutor(database).query(sqlStatement).toList();
+            Statement statement = new SelectFromDatabaseChangeLogLockStatement("ID", "LOCKED", "LOCKGRANTED", "LOCKEDBY");
+            List<Row> rows = ExecutorService.getInstance().getExecutor(database).query(statement).toList();
             for (Row columnMap : rows) {
                 Boolean locked = columnMap.get("LOCKED", Boolean.class);
                 if (locked != null && locked) {

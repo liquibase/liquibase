@@ -16,7 +16,7 @@ import liquibase.logging.LogFactory;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.resource.ResourceAccessor;
-import liquibase.statement.SqlStatement;
+import liquibase.statement.Statement;
 import liquibase.statement.core.CommentStatement;
 import liquibase.statement.core.RuntimeStatement;
 import liquibase.util.StreamUtil;
@@ -88,7 +88,7 @@ public class ExecuteShellCommandChange extends AbstractChange {
     }
 
     @Override
-    public SqlStatement[] generateStatements(final ExecutionEnvironment env) {
+    public Statement[] generateStatements(final ExecutionEnvironment env) {
         boolean shouldRun = true;
         if (os != null && os.size() > 0) {
             String currentOS = System.getProperty("os.name");
@@ -108,7 +108,7 @@ public class ExecuteShellCommandChange extends AbstractChange {
         if (shouldRun && !nonExecutedMode) {
 
 
-            return new SqlStatement[]{new RuntimeStatement() {
+            return new Statement[]{new RuntimeStatement() {
 
                 @Override
                 public Action[] generate(ExecutionEnvironment env) {
@@ -148,12 +148,12 @@ public class ExecuteShellCommandChange extends AbstractChange {
         }
         
         if (nonExecutedMode) {
-        	return new SqlStatement[] {
+        	return new Statement[] {
         			new CommentStatement(getCommandString())
         	};
         }
         
-        return new SqlStatement[0];
+        return new Statement[0];
     }
 
     @Override

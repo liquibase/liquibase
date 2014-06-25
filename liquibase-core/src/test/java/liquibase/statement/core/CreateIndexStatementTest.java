@@ -1,11 +1,11 @@
 package liquibase.statement.core;
 
-import liquibase.statement.SqlStatement;
+import liquibase.statement.Statement;
 
-public class CreateIndexStatementTest extends AbstractSqStatementTest<SqlStatement> {
+public class CreateIndexStatementTest extends AbstractSqStatementTest<Statement> {
 
     @Override
-    protected SqlStatement createStatementUnderTest() {
+    protected Statement createStatementUnderTest() {
         return new CreateIndexStatement(null, null, null, null, null, null);
     }
 

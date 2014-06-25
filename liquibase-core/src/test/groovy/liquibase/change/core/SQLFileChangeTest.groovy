@@ -8,7 +8,7 @@ import liquibase.changelog.ChangeSet
 import liquibase.exception.UnexpectedLiquibaseException
 import liquibase.sdk.database.MockDatabase
 import liquibase.sdk.resource.MockResourceAccessor
-import liquibase.statement.SqlStatement
+import liquibase.statement.Statement
 
 import static org.junit.Assert.assertEquals
 
@@ -31,7 +31,7 @@ public class SQLFileChangeTest extends StandardChangeTest {
         SQLFileChange change2 = new SQLFileChange();
         change2.setSql(fileContents);
         MockDatabase database = new MockDatabase();
-        SqlStatement[] statements = change2.generateStatements(database);
+        Statement[] statements = change2.generateStatements(database);
 
         then:
         statements.length == expectedStatements.size();

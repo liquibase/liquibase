@@ -1,9 +1,9 @@
 package liquibase.statement.core;
 
-import liquibase.statement.AbstractSqlStatement;
+import liquibase.statement.AbstractStatement;
 import liquibase.structure.DatabaseObject;
 
-public class RawSqlStatement extends AbstractSqlStatement {
+public class RawSqlStatement extends AbstractStatement {
 
     private String sql;
     private String endDelimiter  = ";";

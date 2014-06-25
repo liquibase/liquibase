@@ -6,7 +6,7 @@ import liquibase.snapshot.SnapshotGeneratorFactory
 import liquibase.change.StandardChangeTest;
 import liquibase.sdk.database.MockDatabase
 import liquibase.resource.ClassLoaderResourceAccessor;
-import liquibase.statement.SqlStatement
+import liquibase.statement.Statement
 import liquibase.statement.core.InsertOrUpdateStatement;
 import static org.junit.Assert.*
 
@@ -34,7 +34,7 @@ public class LoadUpdateDataChangeTest extends StandardChangeTest {
         change.setFile("liquibase/change/core/sample.data1.csv");
         change.setResourceAccessor(new ClassLoaderResourceAccessor());
 
-        SqlStatement[] statements = change.generateStatements(database);
+        Statement[] statements = change.generateStatements(database);
 
         then:
         assert statements != null

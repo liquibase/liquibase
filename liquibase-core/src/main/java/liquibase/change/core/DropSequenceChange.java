@@ -3,7 +3,7 @@ package liquibase.change.core;
 import liquibase.change.*;
 import  liquibase.ExecutionEnvironment;
 import liquibase.snapshot.SnapshotGeneratorFactory;
-import liquibase.statement.SqlStatement;
+import liquibase.statement.Statement;
 import liquibase.statement.core.DropSequenceStatement;
 import liquibase.structure.core.Sequence;
 
@@ -45,8 +45,8 @@ public class DropSequenceChange extends AbstractChange {
     }
 
     @Override
-    public SqlStatement[] generateStatements(ExecutionEnvironment env) {
-        return new SqlStatement[]{new DropSequenceStatement(getCatalogName(), getSchemaName(), getSequenceName())};
+    public Statement[] generateStatements(ExecutionEnvironment env) {
+        return new Statement[]{new DropSequenceStatement(getCatalogName(), getSchemaName(), getSequenceName())};
     }
 
     @Override

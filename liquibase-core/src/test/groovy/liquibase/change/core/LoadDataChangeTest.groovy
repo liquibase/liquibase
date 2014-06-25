@@ -7,7 +7,7 @@ import liquibase.parser.core.ParsedNodeException;
 import liquibase.resource.ClassLoaderResourceAccessor
 import liquibase.snapshot.MockSnapshotGeneratorFactory
 import liquibase.snapshot.SnapshotGeneratorFactory;
-import liquibase.statement.SqlStatement;
+import liquibase.statement.Statement;
 import liquibase.statement.core.InsertStatement
 import spock.lang.Unroll
 import liquibase.test.JUnitResourceAccessor
@@ -25,7 +25,7 @@ public class LoadDataChangeTest extends StandardChangeTest {
 
         refactoring.setResourceAccessor(new JUnitResourceAccessor());
 
-        SqlStatement[] sqlStatements = refactoring.generateStatements(new MockDatabase());
+        Statement[] sqlStatements = refactoring.generateStatements(new MockDatabase());
 
         then:
         sqlStatements.length == 0
@@ -47,7 +47,7 @@ public class LoadDataChangeTest extends StandardChangeTest {
 
         refactoring.setResourceAccessor(new ClassLoaderResourceAccessor());
 
-        SqlStatement[] sqlStatements = refactoring.generateStatements(new MockDatabase());
+        Statement[] sqlStatements = refactoring.generateStatements(new MockDatabase());
 
         then:
         sqlStatements.length == 2
@@ -91,7 +91,7 @@ public class LoadDataChangeTest extends StandardChangeTest {
         activeConfig.setType("BOOLEAN");
         refactoring.addColumn(activeConfig);
 
-        SqlStatement[] sqlStatements = refactoring.generateStatements(new MockDatabase());
+        Statement[] sqlStatements = refactoring.generateStatements(new MockDatabase());
 
         then:
         sqlStatements.length == 2

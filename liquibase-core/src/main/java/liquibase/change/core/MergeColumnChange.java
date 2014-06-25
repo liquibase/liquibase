@@ -6,7 +6,7 @@ import liquibase.database.core.DerbyDatabase;
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.database.core.SQLiteDatabase.AlterTableVisitor;
 import  liquibase.ExecutionEnvironment;
-import liquibase.statement.SqlStatement;
+import liquibase.statement.Statement;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Index;
@@ -114,10 +114,10 @@ public class MergeColumnChange extends AbstractChange {
     }
 
     @Override
-    public SqlStatement[] generateStatements(ExecutionEnvironment env) {
+    public Statement[] generateStatements(ExecutionEnvironment env) {
         Database database = env.getTargetDatabase();
 
-        List<SqlStatement> statements = new ArrayList<SqlStatement>();
+        List<Statement> statements = new ArrayList<Statement>();
 
         AddColumnChange addNewColumnChange = new AddColumnChange();
         addNewColumnChange.setSchemaName(schemaName);
@@ -193,7 +193,7 @@ public class MergeColumnChange extends AbstractChange {
 	        statements.addAll(Arrays.asList(dropColumn2Change.generateStatements(env)));
         
         }
-        return statements.toArray(new SqlStatement[statements.size()]);
+        return statements.toArray(new Statement[statements.size()]);
 
     }
 

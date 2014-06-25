@@ -6,7 +6,7 @@ import  liquibase.ExecutionEnvironment;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.DatabaseFunction;
 import liquibase.statement.SequenceNextValueFunction;
-import liquibase.statement.SqlStatement;
+import liquibase.statement.Statement;
 import liquibase.statement.core.AddDefaultValueStatement;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Table;
@@ -173,7 +173,7 @@ public class AddDefaultValueChange extends AbstractChange {
     }
 
     @Override
-    public SqlStatement[] generateStatements(ExecutionEnvironment env) {
+    public Statement[] generateStatements(ExecutionEnvironment env) {
         Object defaultValue = null;
 
         if (getDefaultValue() != null) {
@@ -198,7 +198,7 @@ public class AddDefaultValueChange extends AbstractChange {
             defaultValue = getDefaultValueSequenceNext();
         }
 
-        return new SqlStatement[]{
+        return new Statement[]{
                 new AddDefaultValueStatement(getCatalogName(), getSchemaName(), getTableName(), getColumnName(), getColumnDataType(), defaultValue)
         };
     }

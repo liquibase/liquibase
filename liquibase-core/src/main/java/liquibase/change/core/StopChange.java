@@ -9,7 +9,7 @@ import  liquibase.ExecutionEnvironment;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.resource.ResourceAccessor;
-import liquibase.statement.SqlStatement;
+import liquibase.statement.Statement;
 import liquibase.statement.core.RuntimeStatement;
 import liquibase.util.StringUtils;
 
@@ -33,8 +33,8 @@ public class StopChange extends AbstractChange {
     }
 
     @Override
-    public SqlStatement[] generateStatements(ExecutionEnvironment env) {
-        return new SqlStatement[] { new RuntimeStatement() {
+    public Statement[] generateStatements(ExecutionEnvironment env) {
+        return new Statement[] { new RuntimeStatement() {
             @Override
             public Action[] generate(ExecutionEnvironment env) {
                 throw new StopChangeException(getMessage());

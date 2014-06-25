@@ -1,9 +1,9 @@
 package liquibase.statement.core;
 
-import liquibase.statement.AbstractSqlStatement;
+import liquibase.statement.AbstractStatement;
 import liquibase.structure.DatabaseObject;
 
-public class GetViewDefinitionStatement extends AbstractSqlStatement {
+public class GetViewDefinitionStatement extends AbstractStatement {
     private String catalogName;
     private String schemaName;
     private String viewName;

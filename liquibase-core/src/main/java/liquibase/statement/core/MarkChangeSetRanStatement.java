@@ -1,10 +1,10 @@
 package liquibase.statement.core;
 
 import liquibase.changelog.ChangeSet;
-import liquibase.statement.AbstractSqlStatement;
+import liquibase.statement.AbstractStatement;
 import liquibase.structure.DatabaseObject;
 
-public class MarkChangeSetRanStatement extends AbstractSqlStatement {
+public class MarkChangeSetRanStatement extends AbstractStatement {
 
     private ChangeSet changeSet;
 

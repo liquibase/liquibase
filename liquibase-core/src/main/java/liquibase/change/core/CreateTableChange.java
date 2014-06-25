@@ -59,7 +59,7 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
     }
 
     @Override
-    public SqlStatement[] generateStatements(ExecutionEnvironment env) {
+    public Statement[] generateStatements(ExecutionEnvironment env) {
 
         Database database = env.getTargetDatabase();
 
@@ -114,7 +114,7 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
 
         statement.setTablespace(StringUtils.trimToNull(getTablespace()));
 
-        List<SqlStatement> statements = new ArrayList<SqlStatement>();
+        List<Statement> statements = new ArrayList<Statement>();
         statements.add(statement);
 
         if (StringUtils.trimToNull(remarks) != null) {
@@ -134,7 +134,7 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
             }
         }
 
-        return statements.toArray(new SqlStatement[statements.size()]);
+        return statements.toArray(new Statement[statements.size()]);
     }
 
     protected CreateTableStatement generateCreateTableStatement() {

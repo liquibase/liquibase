@@ -4,7 +4,7 @@ import liquibase.change.*;
 import liquibase.database.core.DB2Database;
 import  liquibase.ExecutionEnvironment;
 import liquibase.snapshot.SnapshotGeneratorFactory;
-import liquibase.statement.SqlStatement;
+import liquibase.statement.Statement;
 import liquibase.statement.core.AddPrimaryKeyStatement;
 import liquibase.statement.core.ReorganizeTableStatement;
 import liquibase.structure.core.PrimaryKey;
@@ -77,14 +77,14 @@ public class AddPrimaryKeyChange extends AbstractChange {
     }
 
     @Override
-    public SqlStatement[] generateStatements(ExecutionEnvironment env) {
+    public Statement[] generateStatements(ExecutionEnvironment env) {
 
 
         AddPrimaryKeyStatement statement = new AddPrimaryKeyStatement(getCatalogName(), getSchemaName(), getTableName(), getColumnNames(), getConstraintName());
         statement.setTablespace(getTablespace());
 
         if (env.getTargetDatabase() instanceof DB2Database) {
-            return new SqlStatement[]{
+            return new Statement[]{
                     statement,
                     new ReorganizeTableStatement(getCatalogName(), getSchemaName(), getTableName())
             };
@@ -93,7 +93,7 @@ public class AddPrimaryKeyChange extends AbstractChange {
 //            return generateStatementsForSQLiteDatabase(database);
         }
 
-        return new SqlStatement[]{
+        return new Statement[]{
                 statement
         };
     }

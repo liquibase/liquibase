@@ -1,10 +1,10 @@
 package liquibase.statement.core;
 
-import liquibase.statement.AbstractSqlStatement;
+import liquibase.statement.AbstractStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.View;
 
-public class CreateViewStatement extends AbstractSqlStatement {
+public class CreateViewStatement extends AbstractStatement {
 
     private String catalogName;
     private String schemaName;

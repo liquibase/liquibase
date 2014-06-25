@@ -10,7 +10,7 @@ import liquibase.logging.LogFactory;
 import liquibase.logging.Logger;
 import liquibase.resource.ResourceAccessor;
 import liquibase.resource.UtfBomAwareReader;
-import liquibase.statement.SqlStatement;
+import liquibase.statement.Statement;
 import liquibase.statement.core.InsertStatement;
 import liquibase.structure.core.Column;
 import liquibase.util.StreamUtil;
@@ -143,7 +143,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
     }
 
     @Override
-    public SqlStatement[] generateStatements(ExecutionEnvironment env) {
+    public Statement[] generateStatements(ExecutionEnvironment env) {
         CSVReader reader = null;
         Database database = env.getTargetDatabase();
         try {
@@ -158,7 +158,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
                 throw new UnexpectedLiquibaseException("Data file "+getFile()+" was empty");
             }
 
-            List<SqlStatement> statements = new ArrayList<SqlStatement>();
+            List<Statement> statements = new ArrayList<Statement>();
             String[] line;
             int lineNumber = 0;
 
@@ -221,14 +221,14 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
                 statements.add(insertStatement);
             }
 
-            return statements.toArray(new SqlStatement[statements.size()]);
+            return statements.toArray(new Statement[statements.size()]);
         } catch (IOException e) {
             throw new RuntimeException(e);
         } catch (UnexpectedLiquibaseException ule) {
                 if (getChangeSet() != null && getChangeSet().getFailOnError() != null && !getChangeSet().getFailOnError()) {
                     Logger log = LogFactory.getLogger();
                     log.info("Change set " + getChangeSet().toString(false) + " failed, but failOnError was false.  Error: " + ule.getMessage());        
-                    return new SqlStatement[0];
+                    return new Statement[0];
                 } else {
                     throw ule;
                 }

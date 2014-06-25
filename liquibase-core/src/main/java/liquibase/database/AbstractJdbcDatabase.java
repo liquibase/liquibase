@@ -4,6 +4,7 @@ import liquibase.CatalogAndSchema;
 import liquibase.ExecutionEnvironment;
 import liquibase.action.Action;
 import liquibase.action.visitor.ActionVisitor;
+import liquibase.statement.Statement;
 import liquibase.statementlogic.StatementLogicFactory;
 import liquibase.change.Change;
 import liquibase.change.core.DropTableChange;
@@ -30,7 +31,6 @@ import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.DatabaseFunction;
 import liquibase.statement.SequenceCurrentValueFunction;
 import liquibase.statement.SequenceNextValueFunction;
-import liquibase.statement.SqlStatement;
 import liquibase.statement.core.GetViewDefinitionStatement;
 import liquibase.statement.core.RawCallStatement;
 import liquibase.structure.DatabaseObject;
@@ -745,8 +745,8 @@ public abstract class AbstractJdbcDatabase implements Database {
                         if (change instanceof DropTableChange) {
                             ((DropTableChange) change).setCascadeConstraints(true);
                         }
-                        SqlStatement[] sqlStatements = change.generateStatements(new ExecutionEnvironment(this));
-                        for (SqlStatement statement : sqlStatements) {
+                        Statement[] statements = change.generateStatements(new ExecutionEnvironment(this));
+                        for (Statement statement : statements) {
                             ExecutorService.getInstance().getExecutor(this).execute(statement);
                         }
 
@@ -1189,7 +1189,7 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     @Override
     public void executeStatements(final Change change, final DatabaseChangeLog changeLog, final List<ActionVisitor> actionVisitors) throws LiquibaseException {
-        SqlStatement[] statements = change.generateStatements(new ExecutionEnvironment(this));
+        Statement[] statements = change.generateStatements(new ExecutionEnvironment(this));
 
         execute(statements, actionVisitors);
     }
@@ -1202,8 +1202,8 @@ public abstract class AbstractJdbcDatabase implements Database {
      * @throws DatabaseException if there were problems issuing the statements
      */
     @Override
-    public void execute(final SqlStatement[] statements, final List<ActionVisitor> actionVisitors) throws LiquibaseException {
-        for (SqlStatement statement : statements) {
+    public void execute(final Statement[] statements, final List<ActionVisitor> actionVisitors) throws LiquibaseException {
+        for (Statement statement : statements) {
             if (statement.skipOnUnsupported() && !StatementLogicFactory.getInstance().supports(statement, new ExecutionEnvironment(this))) {
                 continue;
             }
@@ -1215,8 +1215,8 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     @Override
     public void saveStatements(final Change change, final List<ActionVisitor> actionVisitors, final Writer writer) throws IOException, StatementNotSupportedOnDatabaseException, LiquibaseException {
-        SqlStatement[] statements = change.generateStatements(new ExecutionEnvironment(this));
-        for (SqlStatement statement : statements) {
+        Statement[] statements = change.generateStatements(new ExecutionEnvironment(this));
+        for (Statement statement : statements) {
             for (Action action : StatementLogicFactory.getInstance().generateActions(statement, new ExecutionEnvironment(this))) {
                 writer.append(action.describe()).append(StreamUtil.getLineSeparator()).append(StreamUtil.getLineSeparator());
             }
@@ -1225,7 +1225,7 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     @Override
     public void executeRollbackStatements(final Change change, final List<ActionVisitor> actionVisitors) throws LiquibaseException, RollbackImpossibleException {
-        SqlStatement[] statements = change.generateRollbackStatements(new ExecutionEnvironment(this));
+        Statement[] statements = change.generateRollbackStatements(new ExecutionEnvironment(this));
         List<ActionVisitor> rollbackVisitors = new ArrayList<ActionVisitor>();
         if (actionVisitors != null) {
             for (ActionVisitor visitor : actionVisitors) {
@@ -1239,8 +1239,8 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     @Override
     public void saveRollbackStatement(final Change change, final List<ActionVisitor> actionVisitors, final Writer writer) throws IOException, RollbackImpossibleException, StatementNotSupportedOnDatabaseException, LiquibaseException {
-        SqlStatement[] statements = change.generateRollbackStatements(new ExecutionEnvironment(this));
-        for (SqlStatement statement : statements) {
+        Statement[] statements = change.generateRollbackStatements(new ExecutionEnvironment(this));
+        for (Statement statement : statements) {
             for (Action action : StatementLogicFactory.getInstance().generateActions(statement, new ExecutionEnvironment(this))) {
                 writer.append(action.describe()).append("\n\n");
             }

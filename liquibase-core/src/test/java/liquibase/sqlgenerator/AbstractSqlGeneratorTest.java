@@ -1,11 +1,11 @@
 package liquibase.sqlgenerator;
 
 import liquibase.ExecutionEnvironment;
+import liquibase.statement.Statement;
 import liquibase.statementlogic.StatementLogicChain;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.ExecutorService;
-import liquibase.statement.SqlStatement;
 import liquibase.statement.core.CreateTableStatement;
 import liquibase.test.TestContext;
 import org.junit.Test;
@@ -14,7 +14,7 @@ import java.sql.SQLException;
 
 import static org.junit.Assert.*;
 
-public abstract class AbstractSqlGeneratorTest<T extends SqlStatement> {
+public abstract class AbstractSqlGeneratorTest<T extends Statement> {
 
     protected SqlGenerator<T> generatorUnderTest;
 

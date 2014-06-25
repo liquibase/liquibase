@@ -1,13 +1,13 @@
 package liquibase.statement.core;
 
 import liquibase.change.ColumnConfig;
-import liquibase.statement.AbstractSqlStatement;
+import liquibase.statement.AbstractStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Table;
 
 import java.util.List;
 
-public class CopyRowsStatement extends AbstractSqlStatement {
+public class CopyRowsStatement extends AbstractStatement {
 
 	private String sourceTable;
 	private String targetTable;

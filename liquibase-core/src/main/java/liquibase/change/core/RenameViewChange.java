@@ -4,7 +4,7 @@ import liquibase.change.*;
 import liquibase.database.Database;
 import  liquibase.ExecutionEnvironment;
 import liquibase.snapshot.SnapshotGeneratorFactory;
-import liquibase.statement.SqlStatement;
+import liquibase.statement.Statement;
 import liquibase.statement.core.RenameViewStatement;
 import liquibase.structure.core.View;
 
@@ -55,8 +55,8 @@ public class RenameViewChange extends AbstractChange {
     }
 
     @Override
-    public SqlStatement[] generateStatements(ExecutionEnvironment env) {
-        return new SqlStatement[]{new RenameViewStatement(getCatalogName(), getSchemaName(), getOldViewName(), getNewViewName())};
+    public Statement[] generateStatements(ExecutionEnvironment env) {
+        return new Statement[]{new RenameViewStatement(getCatalogName(), getSchemaName(), getOldViewName(), getNewViewName())};
     }
 
     @Override

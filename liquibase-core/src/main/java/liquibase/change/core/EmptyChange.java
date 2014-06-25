@@ -4,14 +4,14 @@ import liquibase.change.AbstractChange;
 import liquibase.change.ChangeMetaData;
 import liquibase.change.DatabaseChange;
 import  liquibase.ExecutionEnvironment;
-import liquibase.statement.SqlStatement;
+import liquibase.statement.Statement;
 
 @DatabaseChange(name="empty", description = "empty", priority = ChangeMetaData.PRIORITY_DEFAULT)
 public class EmptyChange extends AbstractChange {
 
     @Override
-    public SqlStatement[] generateStatements(ExecutionEnvironment env) {
-        return new SqlStatement[0];
+    public Statement[] generateStatements(ExecutionEnvironment env) {
+        return new Statement[0];
     }
 
     @Override

@@ -8,7 +8,7 @@ import liquibase.database.core.OracleDatabase;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
 import  liquibase.ExecutionEnvironment;
-import liquibase.statement.SqlStatement;
+import liquibase.statement.Statement;
 import liquibase.statement.core.CreateProcedureStatement;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
@@ -206,7 +206,7 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
     }
 
     @Override
-    public SqlStatement[] generateStatements(ExecutionEnvironment env) {
+    public Statement[] generateStatements(ExecutionEnvironment env) {
         String endDelimiter = ";";
         Database database = env.getTargetDatabase();
         if (database instanceof OracleDatabase) {
@@ -233,8 +233,8 @@ public class CreateProcedureChange extends AbstractChange implements DbmsTargete
         return generateStatements(procedureText, endDelimiter, env);
     }
 
-    protected SqlStatement[] generateStatements(String logicText, String endDelimiter, ExecutionEnvironment env) {
-        return new SqlStatement[]{
+    protected Statement[] generateStatements(String logicText, String endDelimiter, ExecutionEnvironment env) {
+        return new Statement[]{
                 new CreateProcedureStatement(getCatalogName(), getSchemaName(), getProcedureName(), logicText, endDelimiter),
         };
     }

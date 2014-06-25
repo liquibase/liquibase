@@ -1,11 +1,11 @@
 package liquibase.statement.core;
 
-import liquibase.statement.AbstractSqlStatement;
+import liquibase.statement.AbstractStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Table;
 
-public class SetNullableStatement extends AbstractSqlStatement {
+public class SetNullableStatement extends AbstractStatement {
     private String catalogName;
     private String schemaName;
     private String tableName;

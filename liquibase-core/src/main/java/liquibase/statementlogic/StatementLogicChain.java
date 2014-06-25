@@ -4,11 +4,16 @@ import liquibase.ExecutionEnvironment;
 import liquibase.action.Action;
 import liquibase.exception.ValidationErrors;
 import liquibase.exception.Warnings;
-import liquibase.statement.SqlStatement;
+import liquibase.statement.Statement;
 
 import java.util.Iterator;
 import java.util.SortedSet;
 
+/**
+ * Implementation of chain pattern for {@link liquibase.statementlogic.StatementLogic} implementations.
+ *
+ * @see liquibase.statementlogic.StatementLogicFactory
+ */
 public class StatementLogicChain {
     private Iterator<StatementLogic> statementLogicIterator;
 
@@ -18,7 +23,11 @@ public class StatementLogicChain {
         }
     }
 
-    public Action[] generateActions(SqlStatement statement, ExecutionEnvironment env) {
+    /**
+     * Generate Actions for the given statement using the defined collection of StatementLogic implementations.
+     * If an empty or null collection was configured, returns an empty Action array.
+     */
+    public Action[] generateActions(Statement statement, ExecutionEnvironment env) {
         if (statementLogicIterator == null) {
             return null;
         }
@@ -30,7 +39,11 @@ public class StatementLogicChain {
         return statementLogicIterator.next().generateActions(statement, env, this);
     }
 
-    public Warnings warn(SqlStatement statement, ExecutionEnvironment env) {
+    /**
+     * Generate warnings for the given statement using the defined collection of StatementLogic implementations.
+     * If an empty or null collection was configured, returns an empty Warnings object.
+     */
+    public Warnings warn(Statement statement, ExecutionEnvironment env) {
         if (statementLogicIterator == null || !statementLogicIterator.hasNext()) {
             return new Warnings();
         }
@@ -38,11 +51,24 @@ public class StatementLogicChain {
         return statementLogicIterator.next().warn(statement, env, this);
     }
 
-    public ValidationErrors validate(SqlStatement statement, ExecutionEnvironment env) {
+    /**
+     * Validate the given statement using the defined collection of StatementLogic implementations.
+     * If an empty or null collection was configured, returns an empty ValidationErrors object.
+     */
+    public ValidationErrors validate(Statement statement, ExecutionEnvironment env) {
         if (statementLogicIterator == null || !statementLogicIterator.hasNext()) {
             return new ValidationErrors();
         }
 
         return statementLogicIterator.next().validate(statement, env, this);
+    }
+
+    /**
+     * Mark a particular StatementLogic class as blocked in the chain.
+     * If/when the chain reaches a StatementLogic implementation exactly equal to the passed class, it will skip it and move on to the next.
+     * It will only block exact class matches. Subclasses need to be blocked on their own.
+     */
+    public void block(Class<? extends StatementLogic> logicClass) {
+
     }
 }

@@ -2,6 +2,7 @@ package liquibase.changelog;
 
 import liquibase.Contexts;
 import liquibase.ExecutionEnvironment;
+import liquibase.statement.Statement;
 import liquibase.statementlogic.StatementLogicFactory;
 import liquibase.LabelExpression;
 import liquibase.change.CheckSum;
@@ -16,7 +17,6 @@ import liquibase.logging.LogFactory;
 import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.SnapshotControl;
 import liquibase.snapshot.SnapshotGeneratorFactory;
-import liquibase.statement.SqlStatement;
 import liquibase.statement.core.*;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Table;
@@ -84,7 +84,7 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
             throw new UnexpectedLiquibaseException(e);
         }
 
-        List<SqlStatement> statementsToExecute = new ArrayList<SqlStatement>();
+        List<Statement> statementsToExecute = new ArrayList<Statement>();
 
         boolean changeLogCreateAttempted = false;
         if (changeLogTable != null) {
@@ -156,7 +156,7 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
 
         } else if (!changeLogCreateAttempted) {
             executor.comment("Create Database Change Log Table");
-            SqlStatement createTableStatement = new CreateDatabaseChangeLogTableStatement();
+            Statement createTableStatement = new CreateDatabaseChangeLogTableStatement();
             if (!canCreateChangeLogTable()) {
                 throw new DatabaseException("Cannot create " + getDatabase().escapeTableName(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName()) + " table for your getDatabase().\n\n" +
                         "Please construct it manually using the following SQL as a base and re-run Liquibase:\n\n" +
@@ -168,7 +168,7 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
 //                }
         }
 
-        for (SqlStatement sql : statementsToExecute) {
+        for (Statement sql : statementsToExecute) {
             if (StatementLogicFactory.getInstance().supports(sql, new ExecutionEnvironment(database))) {
                 executor.execute(sql);
                 getDatabase().commit();

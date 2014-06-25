@@ -8,7 +8,7 @@ import liquibase.structure.core.Table;
 
 import java.util.*;
 
-public class CreateTableStatement extends AbstractSqlStatement {
+public class CreateTableStatement extends AbstractStatement {
     private String catalogName;
     private String schemaName;
     private String tableName;

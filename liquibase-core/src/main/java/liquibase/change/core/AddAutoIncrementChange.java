@@ -5,7 +5,7 @@ import liquibase.database.core.PostgresDatabase;
 import  liquibase.ExecutionEnvironment;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.SequenceNextValueFunction;
-import liquibase.statement.SqlStatement;
+import liquibase.statement.Statement;
 import liquibase.statement.core.AddAutoIncrementStatement;
 import liquibase.statement.core.AddDefaultValueStatement;
 import liquibase.statement.core.CreateSequenceStatement;
@@ -98,17 +98,17 @@ public class AddAutoIncrementChange extends AbstractChange {
     }
     
     @Override
-    public SqlStatement[] generateStatements(ExecutionEnvironment env) {
+    public Statement[] generateStatements(ExecutionEnvironment env) {
         if (env.getTargetDatabase() instanceof PostgresDatabase) {
             String sequenceName = (getTableName() + "_" + getColumnName() + "_seq").toLowerCase();
-            return new SqlStatement[]{
+            return new Statement[]{
                     new CreateSequenceStatement(catalogName, schemaName, sequenceName),
                     new SetNullableStatement(catalogName, schemaName, getTableName(), getColumnName(), null, false),
                     new AddDefaultValueStatement(catalogName, schemaName, getTableName(), getColumnName(), getColumnDataType(), new SequenceNextValueFunction(sequenceName)),
             };
         }
 
-        return new SqlStatement[]{new AddAutoIncrementStatement(getCatalogName(), getSchemaName(), getTableName(), getColumnName(), getColumnDataType(), getStartWith(), getIncrementBy())};
+        return new Statement[]{new AddAutoIncrementStatement(getCatalogName(), getSchemaName(), getTableName(), getColumnName(), getColumnDataType(), getStartWith(), getIncrementBy())};
     }
 
     @Override

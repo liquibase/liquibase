@@ -1,12 +1,12 @@
 package liquibase.statement.core;
 
-import liquibase.statement.AbstractSqlStatement;
+import liquibase.statement.AbstractStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
 
-public class AddDefaultValueStatement extends AbstractSqlStatement {
+public class AddDefaultValueStatement extends AbstractStatement {
     private String catalogName;
     private String schemaName;
     private String tableName;

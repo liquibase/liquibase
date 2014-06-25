@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class StoredProcedureStatement extends AbstractSqlStatement implements CallableSqlStatement {
+public class StoredProcedureStatement extends AbstractStatement implements CallableStatement {
 
     private String procedureName;
     private List<String> parameters = new ArrayList<String>();

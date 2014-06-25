@@ -1,6 +1,6 @@
 package liquibase.statement.core;
 
-import liquibase.statement.AbstractSqlStatement;
+import liquibase.statement.AbstractStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Table;
 
@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class DeleteStatement extends AbstractSqlStatement {
+public class DeleteStatement extends AbstractStatement {
     private String catalogName;
     private String schemaName;
     private String tableName;

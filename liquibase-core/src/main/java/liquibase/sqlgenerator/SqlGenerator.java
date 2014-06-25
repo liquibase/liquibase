@@ -1,7 +1,7 @@
 package liquibase.sqlgenerator;
 
+import liquibase.statement.Statement;
 import liquibase.statementlogic.StatementLogic;
-import liquibase.statement.SqlStatement;
 
 /**
  * SqlGenerator implementations take a database-independent SqlStatement interface and create a database-specific Sql object.
@@ -27,9 +27,9 @@ import liquibase.statement.SqlStatement;
  * If it supports multiple SqlStatement types, pass SqlStatement.  The SqlGeneratorFactory will use this paramter to augment the response from the supports() method
  *
  * @see SqlGeneratorFactory
- * @see liquibase.statement.SqlStatement
+ * @see liquibase.statement.Statement
  * @see liquibase.action.Sql
  */
-public interface SqlGenerator<StatementType extends SqlStatement> extends StatementLogic<StatementType> {
+public interface SqlGenerator<StatementType extends Statement> extends StatementLogic<StatementType> {
 
 }

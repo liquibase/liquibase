@@ -1,9 +1,9 @@
 package liquibase.snapshot.core;
 
 import liquibase.ExecutionEnvironment;
+import liquibase.statement.Statement;
 import liquibase.statementlogic.StatementLogicChain;
 import liquibase.snapshot.AbstractSnapshotGenerator;
-import liquibase.statement.SqlStatement;
 import liquibase.statement.core.MetaDataQueryStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.DatabaseObjectCollection;
@@ -13,9 +13,9 @@ import liquibase.structure.core.Table;
 public class ColumnSnapshotGenerator extends AbstractSnapshotGenerator<Column> {
 
     @Override
-    public SqlStatement[] generateAddToStatements(DatabaseObject example, ExecutionEnvironment env, StatementLogicChain chain) {
+    public Statement[] generateAddToStatements(DatabaseObject example, ExecutionEnvironment env, StatementLogicChain chain) {
         if (example instanceof Table) {
-            return new SqlStatement[] {
+            return new Statement[] {
                     new MetaDataQueryStatement(new Column(Table.class, getCatalogName(example.getSchema()), getSchemaName(example.getSchema()), example.getName(), null)),
             };
         }

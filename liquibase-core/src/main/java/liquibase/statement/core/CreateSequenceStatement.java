@@ -1,12 +1,12 @@
 package liquibase.statement.core;
 
-import liquibase.statement.AbstractSqlStatement;
+import liquibase.statement.AbstractStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Sequence;
 
 import java.math.BigInteger;
 
-public class CreateSequenceStatement extends AbstractSqlStatement {
+public class CreateSequenceStatement extends AbstractStatement {
 
     private String catalogName;
     private String schemaName;

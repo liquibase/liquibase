@@ -3,7 +3,7 @@ package liquibase.executor;
 import liquibase.ExecutionEnvironment;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
-import liquibase.statement.SqlStatement;
+import liquibase.statement.Statement;
 
 /**
  * Convenience base class for Executor implementations.
@@ -16,26 +16,26 @@ public abstract class AbstractExecutor implements Executor {
     }
 
     /**
-     * Default implementation delegates to {@link #query(liquibase.statement.SqlStatement, liquibase.ExecutionEnvironment)}
+     * Default implementation delegates to {@link #query(liquibase.statement.Statement, liquibase.ExecutionEnvironment)}
      */
     @Override
-    public QueryResult query(SqlStatement sql) throws DatabaseException {
+    public QueryResult query(Statement sql) throws DatabaseException {
         return query(sql, createDefaultExecutionOptions());
     }
 
     /**
-     * Default implementation delegates to {@link #execute(liquibase.statement.SqlStatement, liquibase.ExecutionEnvironment)}
+     * Default implementation delegates to {@link #execute(liquibase.statement.Statement, liquibase.ExecutionEnvironment)}
      */
     @Override
-    public ExecuteResult execute(SqlStatement sql) throws DatabaseException {
+    public ExecuteResult execute(Statement sql) throws DatabaseException {
         return execute(sql, createDefaultExecutionOptions());
     }
 
     /**
-     * Default implementation delegates to {@link #update(liquibase.statement.SqlStatement, liquibase.ExecutionEnvironment)}
+     * Default implementation delegates to {@link #update(liquibase.statement.Statement, liquibase.ExecutionEnvironment)}
      */
     @Override
-    public UpdateResult update(SqlStatement sql) throws DatabaseException {
+    public UpdateResult update(Statement sql) throws DatabaseException {
         return update(sql, createDefaultExecutionOptions());
     }
 

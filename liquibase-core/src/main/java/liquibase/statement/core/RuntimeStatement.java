@@ -2,10 +2,10 @@ package liquibase.statement.core;
 
 import liquibase.action.Action;
 import  liquibase.ExecutionEnvironment;
-import liquibase.statement.AbstractSqlStatement;
+import liquibase.statement.AbstractStatement;
 import liquibase.structure.DatabaseObject;
 
-public class RuntimeStatement extends AbstractSqlStatement {
+public class RuntimeStatement extends AbstractStatement {
     public Action[] generate(ExecutionEnvironment env) {
         return new Action[0];
     }

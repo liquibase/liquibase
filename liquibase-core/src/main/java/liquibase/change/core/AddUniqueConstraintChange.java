@@ -3,7 +3,7 @@ package liquibase.change.core;
 import liquibase.change.*;
 import  liquibase.ExecutionEnvironment;
 import liquibase.snapshot.SnapshotGeneratorFactory;
-import liquibase.statement.SqlStatement;
+import liquibase.statement.Statement;
 import liquibase.statement.core.AddUniqueConstraintStatement;
 import liquibase.structure.core.UniqueConstraint;
 
@@ -105,7 +105,7 @@ public class AddUniqueConstraintChange extends AbstractChange {
     }
 
     @Override
-    public SqlStatement[] generateStatements(ExecutionEnvironment env) {
+    public Statement[] generateStatements(ExecutionEnvironment env) {
 
 //todo    	if (database instanceof SQLiteDatabase) {
 //    		// return special statements for SQLite databases
@@ -132,7 +132,7 @@ public class AddUniqueConstraintChange extends AbstractChange {
                         .setInitiallyDeferred(initiallyDeferred)
                         .setDisabled(disabled);
 
-        return new SqlStatement[] { statement };
+        return new Statement[] { statement };
     }
 
 

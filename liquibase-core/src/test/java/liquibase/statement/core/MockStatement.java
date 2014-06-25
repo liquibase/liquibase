@@ -1,11 +1,11 @@
 package liquibase.statement.core;
 
-import liquibase.statement.SqlStatement;
+import liquibase.statement.Statement;
 import liquibase.structure.DatabaseObject;
 
 import java.util.Collection;
 
-public class MockSqlStatement implements SqlStatement {
+public class MockStatement implements Statement {
     @Override
     public boolean skipOnUnsupported() {
         return false;

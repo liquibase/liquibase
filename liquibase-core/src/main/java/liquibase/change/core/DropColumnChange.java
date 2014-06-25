@@ -7,7 +7,7 @@ import liquibase.database.core.SQLiteDatabase;
 import liquibase.exception.ValidationErrors;
 import  liquibase.ExecutionEnvironment;
 import liquibase.snapshot.SnapshotGeneratorFactory;
-import liquibase.statement.SqlStatement;
+import liquibase.statement.Statement;
 import liquibase.statement.core.DropColumnStatement;
 import liquibase.statement.core.ReorganizeTableStatement;
 import liquibase.structure.core.Column;
@@ -94,7 +94,7 @@ public class DropColumnChange extends AbstractChange {
     }
 
     @Override
-    public SqlStatement[] generateStatements(ExecutionEnvironment env) {
+    public Statement[] generateStatements(ExecutionEnvironment env) {
 
         Database database = env.getTargetDatabase();
 
@@ -103,14 +103,14 @@ public class DropColumnChange extends AbstractChange {
             return generateStatementsForSQLiteDatabase(env);
         }
 
-        List<SqlStatement> statements = new ArrayList<SqlStatement>();
+        List<Statement> statements = new ArrayList<Statement>();
 
         statements.add(new DropColumnStatement(getCatalogName(), getSchemaName(), getTableName(), getColumnName()));
         if (database instanceof DB2Database) {
             statements.add(new ReorganizeTableStatement(getCatalogName(), getSchemaName(), getTableName()));
         }
 
-        return statements.toArray(new SqlStatement[statements.size()]);
+        return statements.toArray(new Statement[statements.size()]);
     }
 
     @Override
@@ -123,13 +123,13 @@ public class DropColumnChange extends AbstractChange {
 
     }
 
-    private SqlStatement[] generateStatementsForSQLiteDatabase(ExecutionEnvironment env) {
+    private Statement[] generateStatementsForSQLiteDatabase(ExecutionEnvironment env) {
 
         // SQLite does not support this ALTER TABLE operation until now.
         // For more information see: http://www.sqlite.org/omitted.html.
         // This is a small work around...
 
-        List<SqlStatement> statements = new ArrayList<SqlStatement>();
+        List<Statement> statements = new ArrayList<Statement>();
 
         // define alter table logic
         SQLiteDatabase.AlterTableVisitor rename_alter_visitor = new SQLiteDatabase.AlterTableVisitor() {
@@ -159,7 +159,7 @@ public class DropColumnChange extends AbstractChange {
             e.printStackTrace();
         }
 
-        return statements.toArray(new SqlStatement[statements.size()]);
+        return statements.toArray(new Statement[statements.size()]);
     }
 
     @Override

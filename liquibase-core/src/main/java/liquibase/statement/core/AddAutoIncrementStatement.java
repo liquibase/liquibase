@@ -1,6 +1,6 @@
 package liquibase.statement.core;
 
-import liquibase.statement.AbstractSqlStatement;
+import liquibase.statement.AbstractStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Schema;
@@ -8,7 +8,7 @@ import liquibase.structure.core.Table;
 
 import java.math.BigInteger;
 
-public class AddAutoIncrementStatement extends AbstractSqlStatement {
+public class AddAutoIncrementStatement extends AbstractStatement {
 
     private String catalogName;
     private String schemaName;

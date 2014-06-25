@@ -28,7 +28,7 @@ import liquibase.precondition.FailedPrecondition;
 import liquibase.precondition.core.PreconditionContainer;
 import liquibase.resource.ResourceAccessor;
 import liquibase.serializer.LiquibaseSerializable;
-import liquibase.statement.SqlStatement;
+import liquibase.statement.Statement;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
 
@@ -600,11 +600,11 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
                     if (((rollback instanceof DbmsTargetedChange)) && !DatabaseList.definitionMatches(((DbmsTargetedChange) rollback).getDbms(), database, true)) {
                         continue;
                     }
-                    SqlStatement[] statements = rollback.generateStatements(new ExecutionEnvironment(database));
+                    Statement[] statements = rollback.generateStatements(new ExecutionEnvironment(database));
                     if (statements == null) {
                         continue;
                     }
-                    for (SqlStatement statement : statements) {
+                    for (Statement statement : statements) {
                         try {
                             executor.execute(statement, new ExecutionEnvironment(database).setChangeSet(this));
                         } catch (DatabaseException e) {

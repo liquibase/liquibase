@@ -6,7 +6,7 @@ import liquibase.database.core.DB2Database;
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.database.core.SQLiteDatabase.AlterTableVisitor;
 import  liquibase.ExecutionEnvironment;
-import liquibase.statement.SqlStatement;
+import liquibase.statement.Statement;
 import liquibase.statement.core.ReorganizeTableStatement;
 import liquibase.statement.core.SetNullableStatement;
 import liquibase.statement.core.UpdateStatement;
@@ -85,7 +85,7 @@ public class AddNotNullConstraintChange extends AbstractChange {
     }
 
     @Override
-    public SqlStatement[] generateStatements(ExecutionEnvironment env) {
+    public Statement[] generateStatements(ExecutionEnvironment env) {
 
 ////        if (database instanceof SQLiteDatabase) {
 //    		// return special statements for SQLite databases
@@ -94,7 +94,7 @@ public class AddNotNullConstraintChange extends AbstractChange {
 
         Database database = env.getTargetDatabase();
 
-    	List<SqlStatement> statements = new ArrayList<SqlStatement>();
+    	List<Statement> statements = new ArrayList<Statement>();
 
         if (defaultNullValue != null) {
             statements.add(new UpdateStatement(getCatalogName(), getSchemaName(), getTableName())
@@ -107,16 +107,16 @@ public class AddNotNullConstraintChange extends AbstractChange {
             statements.add(new ReorganizeTableStatement(getCatalogName(), getSchemaName(), getTableName()));
         }           
         
-        return statements.toArray(new SqlStatement[statements.size()]);
+        return statements.toArray(new Statement[statements.size()]);
     }
 
-    private SqlStatement[] generateStatementsForSQLiteDatabase(ExecutionEnvironment env) {
+    private Statement[] generateStatementsForSQLiteDatabase(ExecutionEnvironment env) {
     	
     	// SQLite does not support this ALTER TABLE operation until now.
 		// For more information see: http://www.sqlite.org/omitted.html.
 		// This is a small work around...
     	
-    	List<SqlStatement> statements = new ArrayList<SqlStatement>();
+    	List<Statement> statements = new ArrayList<Statement>();
     	
         if (defaultNullValue != null) {
             statements.add(new UpdateStatement(getCatalogName(), getSchemaName(), getTableName())
@@ -175,7 +175,7 @@ public class AddNotNullConstraintChange extends AbstractChange {
 			e.printStackTrace();
 		}
     	
-    	return statements.toArray(new SqlStatement[statements.size()]);
+    	return statements.toArray(new Statement[statements.size()]);
     }
 
     @Override

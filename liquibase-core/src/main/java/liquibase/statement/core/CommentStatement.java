@@ -1,9 +1,9 @@
 package liquibase.statement.core;
 
-import liquibase.statement.AbstractSqlStatement;
+import liquibase.statement.AbstractStatement;
 import liquibase.structure.DatabaseObject;
 
-public class CommentStatement extends AbstractSqlStatement {
+public class CommentStatement extends AbstractStatement {
 	final private String text;
 	final private int MAX_LENGTH = 80;
 	

@@ -5,7 +5,7 @@ import liquibase.database.core.*;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.statement.ColumnConstraint;
 import liquibase.statement.NotNullConstraint;
-import liquibase.statement.SqlStatement;
+import liquibase.statement.Statement;
 import liquibase.statement.core.CreateTableStatement;
 import liquibase.statement.core.RenameColumnStatement;
 import liquibase.test.DatabaseTestContext;
@@ -21,7 +21,7 @@ public class RenameColumnExecuteTest extends AbstractExecuteTest {
 
 
     @Override
-    protected List<? extends SqlStatement> setupStatements(Database database) {
+    protected List<? extends Statement> setupStatements(Database database) {
         ArrayList<CreateTableStatement> statements = new ArrayList<CreateTableStatement>();
         CreateTableStatement table = new CreateTableStatement(null, null, TABLE_NAME);
         if (database instanceof MySQLDatabase) {

@@ -1,9 +1,9 @@
 package liquibase.statement.core;
 
-import liquibase.statement.AbstractSqlStatement;
+import liquibase.statement.AbstractStatement;
 import liquibase.structure.DatabaseObject;
 
-public class SelectFromDatabaseChangeLogLockStatement extends AbstractSqlStatement {
+public class SelectFromDatabaseChangeLogLockStatement extends AbstractStatement {
 
     private String[] columnsToSelect;
 

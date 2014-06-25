@@ -12,7 +12,7 @@ import  liquibase.ExecutionEnvironment;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.executor.Row;
-import liquibase.statement.SqlStatement;
+import liquibase.statement.Statement;
 import liquibase.statement.core.FindForeignKeyConstraintsStatement;
 import liquibase.structure.core.Table;
 
@@ -53,18 +53,18 @@ public class DropAllForeignKeyConstraintsChange extends AbstractChange {
     }
 
     @Override
-    public SqlStatement[] generateStatements(ExecutionEnvironment env) {
-        List<SqlStatement> sqlStatements = new ArrayList<SqlStatement>();
+    public Statement[] generateStatements(ExecutionEnvironment env) {
+        List<Statement> statements = new ArrayList<Statement>();
 
         List<DropForeignKeyConstraintChange> childDropChanges = generateChildren(env);
 
         if (childDropChanges != null) {
             for (DropForeignKeyConstraintChange change : childDropChanges) {
-                sqlStatements.addAll(Arrays.asList(change.generateStatements(env)));
+                statements.addAll(Arrays.asList(change.generateStatements(env)));
             }
         }
 
-        return sqlStatements.toArray(new SqlStatement[sqlStatements.size()]);
+        return statements.toArray(new Statement[statements.size()]);
     }
 
     @Override

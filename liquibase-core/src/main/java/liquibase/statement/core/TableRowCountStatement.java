@@ -1,9 +1,9 @@
 package liquibase.statement.core;
 
-import liquibase.statement.AbstractSqlStatement;
+import liquibase.statement.AbstractStatement;
 import liquibase.structure.DatabaseObject;
 
-public class TableRowCountStatement extends AbstractSqlStatement {
+public class TableRowCountStatement extends AbstractStatement {
 
     private String catalogName;
     private String schemaName;

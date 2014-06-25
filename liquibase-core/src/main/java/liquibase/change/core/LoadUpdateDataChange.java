@@ -9,7 +9,7 @@ import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.RollbackImpossibleException;
 import  liquibase.ExecutionEnvironment;
-import liquibase.statement.SqlStatement;
+import liquibase.statement.Statement;
 import liquibase.statement.core.DeleteStatement;
 import liquibase.statement.core.InsertOrUpdateStatement;
 import liquibase.statement.core.InsertStatement;
@@ -46,18 +46,18 @@ public class LoadUpdateDataChange extends LoadDataChange {
     }
 
     @Override
-    public SqlStatement[] generateRollbackStatements(ExecutionEnvironment env) throws RollbackImpossibleException {
-        List<SqlStatement> statements = new ArrayList<SqlStatement>();
-        SqlStatement[] forward = this.generateStatements(env);
+    public Statement[] generateRollbackStatements(ExecutionEnvironment env) throws RollbackImpossibleException {
+        List<Statement> statements = new ArrayList<Statement>();
+        Statement[] forward = this.generateStatements(env);
 
-        for(SqlStatement thisForward: forward){
+        for(Statement thisForward: forward){
             InsertOrUpdateStatement thisInsert = (InsertOrUpdateStatement)thisForward;
             DeleteStatement delete = new DeleteStatement(getCatalogName(), getSchemaName(),getTableName());
             delete.setWhere(getWhere(thisInsert, env.getTargetDatabase()));
             statements.add(delete);
         }
 
-        return statements.toArray(new SqlStatement[statements.size()]);
+        return statements.toArray(new Statement[statements.size()]);
     }
 
     private String getWhere(InsertOrUpdateStatement insertOrUpdateStatement, Database database) {

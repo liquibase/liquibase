@@ -14,14 +14,13 @@ import liquibase.database.ObjectQuotingStrategy;
 import liquibase.exception.*;
 import liquibase.lockservice.DatabaseChangeLogLock;
 import liquibase.statement.DatabaseFunction;
-import liquibase.statement.SqlStatement;
+import liquibase.statement.Statement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Schema;
 
 import java.io.IOException;
 import java.io.Writer;
 import java.math.BigInteger;
-import java.sql.Connection;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.Collection;
@@ -257,7 +256,7 @@ public class MockDatabase implements Database, InternalDatabase {
     		    + incrementBy != null ? (" " + incrementBy) : "";
     }
 
-    public SqlStatement getCommitSQL() {
+    public Statement getCommitSQL() {
         return null;
     }
 
@@ -471,7 +470,7 @@ public class MockDatabase implements Database, InternalDatabase {
         ;
     }
 
-    public SqlStatement getSelectChangeLogLockSQL() throws DatabaseException {
+    public Statement getSelectChangeLogLockSQL() throws DatabaseException {
         return null;
     }
 
@@ -516,7 +515,7 @@ public class MockDatabase implements Database, InternalDatabase {
     }
 
     @Override
-    public void execute(final SqlStatement[] statements, final List<ActionVisitor> actionVisitors) throws LiquibaseException {
+    public void execute(final Statement[] statements, final List<ActionVisitor> actionVisitors) throws LiquibaseException {
         ;
     }
 

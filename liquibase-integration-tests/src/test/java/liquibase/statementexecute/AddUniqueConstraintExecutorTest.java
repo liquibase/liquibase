@@ -4,8 +4,8 @@ import liquibase.database.*;
 import liquibase.database.core.*;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.statement.ColumnConstraint;
+import liquibase.statement.Statement;
 import liquibase.test.DatabaseTestContext;
-import liquibase.statement.SqlStatement;
 import liquibase.statement.core.CreateTableStatement;
 import liquibase.statement.NotNullConstraint;
 import liquibase.statement.core.AddUniqueConstraintStatement;
@@ -23,7 +23,7 @@ public class AddUniqueConstraintExecutorTest extends AbstractExecuteTest {
     protected static final String TABLESPACE_NAME = "LB_TABLESPACE";
 
     @Override
-    protected List<? extends SqlStatement> setupStatements(Database database) {
+    protected List<? extends Statement> setupStatements(Database database) {
         List<CreateTableStatement> statements = new ArrayList<CreateTableStatement>();
         CreateTableStatement table = new CreateTableStatement(null, null, TABLE_NAME);
         table

@@ -1,11 +1,11 @@
 package liquibase.statement.core;
 
-import liquibase.statement.AbstractSqlStatement;
+import liquibase.statement.AbstractStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.ForeignKey;
 import liquibase.structure.core.Table;
 
-public class DropForeignKeyConstraintStatement extends AbstractSqlStatement {
+public class DropForeignKeyConstraintStatement extends AbstractStatement {
 
     private String baseTableCatalogName;
     private String baseTableSchemaName;

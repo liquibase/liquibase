@@ -4,7 +4,7 @@ import liquibase.change.*;
 import liquibase.changelog.ChangeLogHistoryServiceFactory;
 import liquibase.exception.DatabaseException;
 import  liquibase.ExecutionEnvironment;
-import liquibase.statement.SqlStatement;
+import liquibase.statement.Statement;
 import liquibase.statement.core.TagDatabaseStatement;
 
 @DatabaseChange(name="tagDatabase", description = "Applies a tag to the database for future rollback", priority = ChangeMetaData.PRIORITY_DEFAULT, since = "1.6")
@@ -22,8 +22,8 @@ public class TagDatabaseChange extends AbstractChange {
     }
 
     @Override
-    public SqlStatement[] generateStatements(ExecutionEnvironment env) {
-        return new SqlStatement[] {
+    public Statement[] generateStatements(ExecutionEnvironment env) {
+        return new Statement[] {
                 new TagDatabaseStatement(tag)
         };
     }

@@ -3,7 +3,7 @@ package liquibase.change.core;
 import liquibase.change.*;
 import  liquibase.ExecutionEnvironment;
 import liquibase.snapshot.SnapshotGeneratorFactory;
-import liquibase.statement.SqlStatement;
+import liquibase.statement.Statement;
 import liquibase.statement.core.DropViewStatement;
 import liquibase.structure.core.View;
 
@@ -45,8 +45,8 @@ public class DropViewChange extends AbstractChange {
     }
 
     @Override
-    public SqlStatement[] generateStatements(ExecutionEnvironment env) {
-        return new SqlStatement[]{
+    public Statement[] generateStatements(ExecutionEnvironment env) {
+        return new Statement[]{
                 new DropViewStatement(getCatalogName(), getSchemaName(), getViewName()),
         };
     }

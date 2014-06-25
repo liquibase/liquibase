@@ -1,9 +1,9 @@
 package liquibase.statement.core;
 
-import liquibase.statement.AbstractSqlStatement;
+import liquibase.statement.AbstractStatement;
 import liquibase.structure.DatabaseObject;
 
-public class ReindexStatement extends AbstractSqlStatement {
+public class ReindexStatement extends AbstractStatement {
 
     private String catalogName;
 	private String schemaName;

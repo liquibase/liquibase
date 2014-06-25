@@ -1,6 +1,7 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.action.Action;
+import liquibase.statement.Statement;
 import liquibase.statementlogic.StatementLogicChain;
 import liquibase.statementlogic.StatementLogicFactory;
 import liquibase.change.ColumnConfig;
@@ -9,7 +10,6 @@ import liquibase.database.core.SQLiteDatabase;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.ValidationErrors;
 import  liquibase.ExecutionEnvironment;
-import liquibase.statement.SqlStatement;
 import liquibase.statement.core.AddAutoIncrementStatement;
 import liquibase.structure.core.Index;
 
@@ -49,7 +49,7 @@ public class AddAutoIncrementGeneratorSQLite extends AddAutoIncrementGenerator {
     }
 
     @Override
-    public boolean generateStatementsIsVolatile(ExecutionEnvironment env) {
+    public boolean generateActionsIsVolatile(ExecutionEnvironment env) {
         return true;
     }
 
@@ -87,8 +87,8 @@ public class AddAutoIncrementGeneratorSQLite extends AddAutoIncrementGenerator {
 
         try {
             // alter table
-            List<SqlStatement> alterTableStatements = SQLiteDatabase.getAlterTableStatements(rename_alter_visitor, env, statement.getCatalogName(), statement.getSchemaName(), statement.getTableName());
-            statements.addAll( Arrays.asList(StatementLogicFactory.getInstance().generateActions(alterTableStatements.toArray(new SqlStatement[alterTableStatements.size()]), env)));
+            List<Statement> alterTableStatements = SQLiteDatabase.getAlterTableStatements(rename_alter_visitor, env, statement.getCatalogName(), statement.getSchemaName(), statement.getTableName());
+            statements.addAll( Arrays.asList(StatementLogicFactory.getInstance().generateActions(alterTableStatements.toArray(new Statement[alterTableStatements.size()]), env)));
         } catch (DatabaseException e) {
             e.printStackTrace();
         }

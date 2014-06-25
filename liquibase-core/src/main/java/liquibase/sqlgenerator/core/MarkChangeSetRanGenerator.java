@@ -1,6 +1,7 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.action.Action;
+import liquibase.statement.Statement;
 import liquibase.statementlogic.StatementLogicChain;
 import liquibase.statementlogic.StatementLogicFactory;
 import liquibase.change.Change;
@@ -13,7 +14,6 @@ import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
 import  liquibase.ExecutionEnvironment;
 import liquibase.statement.DatabaseFunction;
-import liquibase.statement.SqlStatement;
 import liquibase.statement.core.InsertStatement;
 import liquibase.statement.core.MarkChangeSetRanStatement;
 import liquibase.statement.core.UpdateStatement;
@@ -39,7 +39,7 @@ public class MarkChangeSetRanGenerator extends AbstractSqlGenerator<MarkChangeSe
 
         ChangeSet changeSet = statement.getChangeSet();
 
-        SqlStatement runStatement;
+        Statement runStatement;
         try {
             if (statement.getExecType().equals(ChangeSet.ExecType.FAILED) || statement.getExecType().equals(ChangeSet.ExecType.SKIPPED)) {
                 return new Action[0]; //don't mark

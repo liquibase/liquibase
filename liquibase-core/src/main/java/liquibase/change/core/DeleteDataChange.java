@@ -7,7 +7,7 @@ import  liquibase.ExecutionEnvironment;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.resource.ResourceAccessor;
-import liquibase.statement.SqlStatement;
+import liquibase.statement.Statement;
 import liquibase.statement.core.DeleteStatement;
 
 @DatabaseChange(name="delete", description = "Deletes data from an existing table", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "table")
@@ -15,7 +15,7 @@ public class DeleteDataChange extends AbstractModifyDataChange {
 
 
     @Override
-    public SqlStatement[] generateStatements(ExecutionEnvironment env) {
+    public Statement[] generateStatements(ExecutionEnvironment env) {
 
         DeleteStatement statement = new DeleteStatement(getCatalogName(), getSchemaName(), getTableName());
 
@@ -28,7 +28,7 @@ public class DeleteDataChange extends AbstractModifyDataChange {
             statement.addWhereParameter(whereParam.getValueObject());
         }
 
-        return new SqlStatement[]{
+        return new Statement[]{
                 statement
         };
     }

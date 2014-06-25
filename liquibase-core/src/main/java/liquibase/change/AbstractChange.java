@@ -1,6 +1,7 @@
 package liquibase.change;
 
 import liquibase.ExecutionEnvironment;
+import liquibase.statement.Statement;
 import liquibase.statementlogic.StatementLogicFactory;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
@@ -10,7 +11,6 @@ import liquibase.parser.core.ParsedNodeException;
 import liquibase.resource.ResourceAccessor;
 import liquibase.serializer.LiquibaseSerializable;
 import liquibase.serializer.core.string.StringChangeLogSerializer;
-import liquibase.statement.SqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.util.StringUtils;
 
@@ -252,17 +252,17 @@ public abstract class AbstractChange implements Change {
     }
 
     /**
-     * Implementation delegates logic to the {@link liquibase.sqlgenerator.SqlGenerator#generateStatementsIsVolatile(liquibase.ExecutionEnvironment) } method on the {@link SqlStatement} objects returned by {@link #generateStatements }.
+     * Implementation delegates logic to the {@link liquibase.sqlgenerator.SqlGenerator#generateActionsIsVolatile(liquibase.ExecutionEnvironment) } method on the {@link liquibase.statement.Statement} objects returned by {@link #generateStatements }.
      * If zero or null SqlStatements are returned by generateStatements then this method returns false.
      */
     @Override
     public boolean generateStatementsVolatile(ExecutionEnvironment env) {
-        SqlStatement[] statements = generateStatements(env);
+        Statement[] statements = generateStatements(env);
         if (statements == null) {
             return false;
         }
-        for (SqlStatement statement : statements) {
-            if (StatementLogicFactory.getInstance().generateStatementsVolatile(statement, env)) {
+        for (Statement statement : statements) {
+            if (StatementLogicFactory.getInstance().generateActionsIsVolatile(statement, env)) {
                 return true;
             }
         }
@@ -270,7 +270,7 @@ public abstract class AbstractChange implements Change {
     }
 
     /**
-     * Implementation delegates logic to the {@link liquibase.sqlgenerator.SqlGenerator#generateRollbackStatementsIsVolatile(liquibase.ExecutionEnvironment) } method on the {@link SqlStatement} objects returned by {@link #generateStatements }
+     * Implementation delegates logic to the {@link liquibase.sqlgenerator.SqlGenerator#generateActionsIsVolatile(liquibase.ExecutionEnvironment) } method on the {@link liquibase.statement.Statement} objects returned by {@link #generateStatements }
      * If no or null SqlStatements are returned by generateRollbackStatements then this method returns false.
      */
     @Override
@@ -278,20 +278,24 @@ public abstract class AbstractChange implements Change {
         if (generateStatementsVolatile(env)) {
             return true;
         }
-        SqlStatement[] statements = generateStatements(env);
-        if (statements == null) {
-            return false;
-        }
-        for (SqlStatement statement : statements) {
-            if (StatementLogicFactory.getInstance().generateRollbackStatementsVolatile(statement, env)) {
-                return true;
+        try {
+            Statement[] statements = generateRollbackStatements(env);
+            if (statements == null) {
+                return false;
             }
+            for (Statement statement : statements) {
+                if (StatementLogicFactory.getInstance().generateActionsIsVolatile(statement, env)) {
+                    return true;
+                }
+            }
+            return false;
+        } catch (RollbackImpossibleException e) {
+            throw new UnexpectedLiquibaseException(e);
         }
-        return false;
     }
 
     /**
-     * Implementation delegates logic to the {@link liquibase.statementlogic.StatementLogic#supports(liquibase.statement.SqlStatement, liquibase.ExecutionEnvironment)} method on the {@link SqlStatement} objects returned by {@link #generateStatements }.
+     * Implementation delegates logic to the {@link liquibase.statementlogic.StatementLogic#supports(liquibase.statement.Statement, liquibase.ExecutionEnvironment)} method on the {@link liquibase.statement.Statement} objects returned by {@link #generateStatements }.
      * If no or null SqlStatements are returned by generateStatements then this method returns true.
      * If {@link Change#generateStatementsVolatile(liquibase.ExecutionEnvironment)} returns true, we cannot call generateStatements and so assume true.
      */
@@ -300,11 +304,11 @@ public abstract class AbstractChange implements Change {
         if (generateStatementsVolatile(env)) {
             return true;
         }
-        SqlStatement[] statements = generateStatements(env);
+        Statement[] statements = generateStatements(env);
         if (statements == null) {
             return true;
         }
-        for (SqlStatement statement : statements) {
+        for (Statement statement : statements) {
             if (!StatementLogicFactory.getInstance().supports(statement, env)) {
                 return false;
             }
@@ -313,7 +317,7 @@ public abstract class AbstractChange implements Change {
     }
 
     /**
-     * Implementation delegates logic to the {@link liquibase.statementlogic.StatementLogic#warn(liquibase.statement.SqlStatement, liquibase.ExecutionEnvironment, liquibase.statementlogic.StatementLogicChain)} method on the {@link SqlStatement} objects returned by {@link #generateStatements }.
+     * Implementation delegates logic to the {@link liquibase.statementlogic.StatementLogic#warn(liquibase.statement.Statement, liquibase.ExecutionEnvironment, liquibase.statementlogic.StatementLogicChain)} method on the {@link liquibase.statement.Statement} objects returned by {@link #generateStatements }.
      * If a generated statement is not supported for the given database, no warning will be added since that is a validation error.
      * If no or null SqlStatements are returned by generateStatements then this method returns no warnings.
      */
@@ -324,11 +328,11 @@ public abstract class AbstractChange implements Change {
             return warnings;
         }
 
-        SqlStatement[] statements = generateStatements(env);
+        Statement[] statements = generateStatements(env);
         if (statements == null) {
             return warnings;
         }
-        for (SqlStatement statement : statements) {
+        for (Statement statement : statements) {
             if (StatementLogicFactory.getInstance().supports(statement, env)) {
                 warnings.addAll(StatementLogicFactory.getInstance().warn(statement, env));
             } else if (statement.skipOnUnsupported()) {
@@ -341,7 +345,7 @@ public abstract class AbstractChange implements Change {
 
     /**
      * Implementation checks the ChangeParameterMetaData for declared required fields
-     * and also delegates logic to the {@link liquibase.statementlogic.StatementLogic#validate(liquibase.statement.SqlStatement, liquibase.ExecutionEnvironment, liquibase.statementlogic.StatementLogicChain)}  method on the {@link SqlStatement} objects returned by {@link #generateStatements }.
+     * and also delegates logic to the {@link liquibase.statementlogic.StatementLogic#validate(liquibase.statement.Statement, liquibase.ExecutionEnvironment, liquibase.statementlogic.StatementLogicChain)}  method on the {@link liquibase.statement.Statement} objects returned by {@link #generateStatements }.
      * If no or null SqlStatements are returned by generateStatements then this method returns no errors.
      * If there are no parameters than this method returns no errors
      */
@@ -365,10 +369,10 @@ public abstract class AbstractChange implements Change {
             changeValidationErrors.addError(unsupportedWarning);
         } else if (!generateStatementsVolatile(env)) {
             boolean sawUnsupportedError = false;
-            SqlStatement[] statements;
+            Statement[] statements;
             statements = generateStatements(env);
             if (statements != null) {
-                for (SqlStatement statement : statements) {
+                for (Statement statement : statements) {
                     boolean supported = StatementLogicFactory.getInstance().supports(statement, env);
                     if (!supported && !sawUnsupportedError) {
                         if (!statement.skipOnUnsupported()) {
@@ -394,7 +398,7 @@ public abstract class AbstractChange implements Change {
      * Implementation relies on value returned from {@link #createInverses()}.
      */
     @Override
-    public SqlStatement[] generateRollbackStatements(ExecutionEnvironment env) throws RollbackImpossibleException {
+    public Statement[] generateRollbackStatements(ExecutionEnvironment env) throws RollbackImpossibleException {
         return generateRollbackStatementsFromInverse(env);
     }
 
@@ -419,13 +423,13 @@ public abstract class AbstractChange implements Change {
      * Throws RollbackImpossibleException if the changes created by createInverses() is not supported for the passed database.
      *
      */
-    private SqlStatement[] generateRollbackStatementsFromInverse(ExecutionEnvironment env) throws RollbackImpossibleException {
+    private Statement[] generateRollbackStatementsFromInverse(ExecutionEnvironment env) throws RollbackImpossibleException {
         Change[] inverses = createInverses();
         if (inverses == null) {
             throw new RollbackImpossibleException("No inverse to " + getClass().getName() + " created");
         }
 
-        List<SqlStatement> statements = new ArrayList<SqlStatement>();
+        List<Statement> statements = new ArrayList<Statement>();
 
         try {
             for (Change inverse : inverses) {
@@ -438,7 +442,7 @@ public abstract class AbstractChange implements Change {
             throw new RollbackImpossibleException(e);
         }
 
-        return statements.toArray(new SqlStatement[statements.size()]);
+        return statements.toArray(new Statement[statements.size()]);
     }
 
     /**
@@ -471,7 +475,7 @@ public abstract class AbstractChange implements Change {
     }
 
     /**
-     * Implementation delegates logic to the {@link liquibase.statement.SqlStatement#getAffectedDatabaseObjects()}  method on the {@link SqlStatement} objects returned by {@link #generateStatements }
+     * Implementation delegates logic to the {@link liquibase.statement.Statement#getAffectedDatabaseObjects()}  method on the {@link liquibase.statement.Statement} objects returned by {@link #generateStatements }
      * Returns empty set if change is not supported for the passed database
      */
     @Override
@@ -480,10 +484,10 @@ public abstract class AbstractChange implements Change {
             return new HashSet<DatabaseObject>();
         }
         Set<DatabaseObject> affectedObjects = new HashSet<DatabaseObject>();
-        SqlStatement[] statements = generateStatements(env);
+        Statement[] statements = generateStatements(env);
 
         if (statements != null) {
-            for (SqlStatement statement : statements) {
+            for (Statement statement : statements) {
                 affectedObjects.addAll(statement.getAffectedDatabaseObjects());
             }
         }

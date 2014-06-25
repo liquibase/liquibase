@@ -1,14 +1,14 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.ExecutionEnvironment;
+import liquibase.statement.Statement;
 import liquibase.statementlogic.StatementLogicChain;
 import liquibase.database.Database;
 import liquibase.exception.ValidationErrors;
 import liquibase.exception.Warnings;
 import liquibase.sqlgenerator.SqlGenerator;
-import liquibase.statement.SqlStatement;
 
-public abstract class AbstractSqlGenerator<StatementType extends SqlStatement> implements SqlGenerator<StatementType> {
+public abstract class AbstractSqlGenerator<StatementType extends Statement> implements SqlGenerator<StatementType> {
 
     @Override
     public int getPriority() {
@@ -16,12 +16,7 @@ public abstract class AbstractSqlGenerator<StatementType extends SqlStatement> i
     }
 
     @Override
-    public boolean generateStatementsIsVolatile(ExecutionEnvironment env) {
-        return false;
-    }
-
-    @Override
-    public boolean generateRollbackStatementsIsVolatile(ExecutionEnvironment env) {
+    public boolean generateActionsIsVolatile(ExecutionEnvironment env) {
         return false;
     }
 

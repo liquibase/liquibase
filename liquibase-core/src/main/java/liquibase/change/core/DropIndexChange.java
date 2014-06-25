@@ -3,7 +3,7 @@ package liquibase.change.core;
 import liquibase.change.*;
 import  liquibase.ExecutionEnvironment;
 import liquibase.snapshot.SnapshotGeneratorFactory;
-import liquibase.statement.SqlStatement;
+import liquibase.statement.Statement;
 import liquibase.statement.core.DropIndexStatement;
 import liquibase.structure.core.Index;
 
@@ -48,8 +48,8 @@ public class DropIndexChange extends AbstractChange {
     }
 
     @Override
-    public SqlStatement[] generateStatements(ExecutionEnvironment env) {
-        return new SqlStatement[] {
+    public Statement[] generateStatements(ExecutionEnvironment env) {
+        return new Statement[] {
             new DropIndexStatement(getIndexName(), getCatalogName(), getSchemaName(), getTableName(), getAssociatedWith())
         };
     }

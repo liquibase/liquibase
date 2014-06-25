@@ -1,10 +1,10 @@
 package liquibase.statement.core;
 
-import liquibase.statement.AbstractSqlStatement;
+import liquibase.statement.AbstractStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Table;
 
-public class SetTableRemarksStatement extends AbstractSqlStatement {
+public class SetTableRemarksStatement extends AbstractStatement {
 
     private String catalogName;
     private String schemaName;

@@ -3,7 +3,7 @@ package liquibase.change.core;
 import liquibase.change.*;
 import  liquibase.ExecutionEnvironment;
 import liquibase.snapshot.SnapshotGeneratorFactory;
-import liquibase.statement.SqlStatement;
+import liquibase.statement.Statement;
 import liquibase.statement.core.AlterSequenceStatement;
 import liquibase.structure.core.Sequence;
 
@@ -88,8 +88,8 @@ public class AlterSequenceChange extends AbstractChange {
     }
 
     @Override
-    public SqlStatement[] generateStatements(ExecutionEnvironment env) {
-        return new SqlStatement[] {
+    public Statement[] generateStatements(ExecutionEnvironment env) {
+        return new Statement[] {
                 new AlterSequenceStatement(getCatalogName(), getSchemaName(), getSequenceName())
                 .setIncrementBy(getIncrementBy())
                 .setMaxValue(getMaxValue())

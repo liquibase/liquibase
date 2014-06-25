@@ -10,7 +10,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-public class AddColumnStatement extends AbstractSqlStatement {
+public class AddColumnStatement extends AbstractStatement {
 
     private String catalogName;
     private String schemaName;

@@ -6,7 +6,7 @@ import  liquibase.ExecutionEnvironment;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.resource.ResourceAccessor;
-import liquibase.statement.SqlStatement;
+import liquibase.statement.Statement;
 import liquibase.statement.UpdateExecutablePreparedStatement;
 import liquibase.statement.core.UpdateStatement;
 
@@ -50,7 +50,7 @@ public class UpdateDataChange extends AbstractModifyDataChange implements Change
     }
 
     @Override
-    public SqlStatement[] generateStatements(ExecutionEnvironment env) {
+    public Statement[] generateStatements(ExecutionEnvironment env) {
 
     	boolean needsPreparedStatement = false;
         for (ColumnConfig column : getColumns()) {
@@ -74,7 +74,7 @@ public class UpdateDataChange extends AbstractModifyDataChange implements Change
                 statement.addWhereParameter(whereParam.getValueObject());
             }
             
-            return new SqlStatement[] {
+            return new Statement[] {
                     statement
             };
         }
@@ -94,7 +94,7 @@ public class UpdateDataChange extends AbstractModifyDataChange implements Change
             statement.addWhereParameter(whereParam.getValueObject());
         }
 
-        return new SqlStatement[]{
+        return new Statement[]{
                 statement
         };
     }

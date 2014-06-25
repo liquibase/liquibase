@@ -6,7 +6,7 @@ import liquibase.database.core.SQLiteDatabase;
 import liquibase.database.core.SQLiteDatabase.AlterTableVisitor;
 import  liquibase.ExecutionEnvironment;
 import liquibase.snapshot.SnapshotGeneratorFactory;
-import liquibase.statement.SqlStatement;
+import liquibase.statement.Statement;
 import liquibase.statement.core.DropPrimaryKeyStatement;
 import liquibase.structure.core.Index;
 import liquibase.structure.core.PrimaryKey;
@@ -69,7 +69,7 @@ public class DropPrimaryKeyChange extends AbstractChange {
     }
 
     @Override
-    public SqlStatement[] generateStatements(ExecutionEnvironment env) {
+    public Statement[] generateStatements(ExecutionEnvironment env) {
 
         Database database = env.getTargetDatabase();
         if (database instanceof SQLiteDatabase) {
@@ -77,7 +77,7 @@ public class DropPrimaryKeyChange extends AbstractChange {
     		return generateStatementsForSQLiteDatabase(env);
         }
     	
-        return new SqlStatement[]{
+        return new Statement[]{
                 new DropPrimaryKeyStatement(getCatalogName(), getSchemaName(), getTableName(), getConstraintName()),
         };
     }
@@ -92,7 +92,7 @@ public class DropPrimaryKeyChange extends AbstractChange {
 
     }
     
-    private SqlStatement[] generateStatementsForSQLiteDatabase(ExecutionEnvironment env) {
+    private Statement[] generateStatementsForSQLiteDatabase(ExecutionEnvironment env) {
     	
     	// SQLite does not support this ALTER TABLE operation until now.
 		// For more information see: http://www.sqlite.org/omitted.html.
@@ -101,7 +101,7 @@ public class DropPrimaryKeyChange extends AbstractChange {
     	// Note: The attribute "constraintName" is used to pass the column 
     	// name instead of the constraint name.
 		
-    	List<SqlStatement> statements = new ArrayList<SqlStatement>();
+    	List<Statement> statements = new ArrayList<Statement>();
     	
 		// define alter table logic
 		AlterTableVisitor rename_alter_visitor = new AlterTableVisitor() {
@@ -135,7 +135,7 @@ public class DropPrimaryKeyChange extends AbstractChange {
 			e.printStackTrace();
 		}
 		
-		return statements.toArray(new SqlStatement[statements.size()]);
+		return statements.toArray(new Statement[statements.size()]);
     }
 
     @Override

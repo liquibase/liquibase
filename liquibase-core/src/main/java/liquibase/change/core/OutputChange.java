@@ -10,7 +10,7 @@ import liquibase.exception.ValidationErrors;
 import  liquibase.ExecutionEnvironment;
 import liquibase.logging.LogFactory;
 import liquibase.serializer.LiquibaseSerializable;
-import liquibase.statement.SqlStatement;
+import liquibase.statement.Statement;
 import liquibase.statement.core.RuntimeStatement;
 import liquibase.util.StringUtils;
 
@@ -50,8 +50,8 @@ public class OutputChange extends AbstractChange {
 
 
     @Override
-    public SqlStatement[] generateStatements(ExecutionEnvironment env) {
-        return new SqlStatement[] { new RuntimeStatement() {
+    public Statement[] generateStatements(ExecutionEnvironment env) {
+        return new Statement[] { new RuntimeStatement() {
             @Override
             public Action[] generate(ExecutionEnvironment env) {
                 String target = getTarget();

@@ -1,14 +1,14 @@
 package liquibase.statement.core;
 
 import liquibase.change.ColumnConfig;
-import liquibase.statement.AbstractSqlStatement;
+import liquibase.statement.AbstractStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Table;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class InsertStatement extends AbstractSqlStatement {
+public class InsertStatement extends AbstractStatement {
     private String catalogName;
     private String schemaName;
     private String tableName;

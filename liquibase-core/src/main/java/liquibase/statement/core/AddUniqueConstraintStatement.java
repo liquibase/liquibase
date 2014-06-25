@@ -1,12 +1,12 @@
 package liquibase.statement.core;
 
-import liquibase.statement.AbstractSqlStatement;
+import liquibase.statement.AbstractStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Table;
 import liquibase.structure.core.UniqueConstraint;
 import liquibase.util.StringUtils;
 
-public class AddUniqueConstraintStatement extends AbstractSqlStatement {
+public class AddUniqueConstraintStatement extends AbstractStatement {
 
     private String catalogName;
     private String schemaName;

@@ -8,7 +8,7 @@ import liquibase.exception.ValidationErrors;
 import liquibase.exception.Warnings;
 import  liquibase.ExecutionEnvironment;
 import liquibase.logging.LogFactory;
-import liquibase.statement.SqlStatement;
+import liquibase.statement.Statement;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.util.StringUtils;
 
@@ -203,15 +203,15 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
      * The set SQL is passed through the {@link java.sql.Connection#nativeSQL} method if a connection is available.
      */
     @Override
-    public SqlStatement[] generateStatements(ExecutionEnvironment env) {
+    public Statement[] generateStatements(ExecutionEnvironment env) {
 
         Database database = env.getTargetDatabase();
 
-        List<SqlStatement> returnStatements = new ArrayList<SqlStatement>();
+        List<Statement> returnStatements = new ArrayList<Statement>();
 
         String sql = StringUtils.trimToNull(getSql());
         if (sql == null) {
-            return new SqlStatement[0];
+            return new Statement[0];
         }
 
         String processedSQL = normalizeLineEndings(sql);
@@ -232,7 +232,7 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
             returnStatements.add(new RawSqlStatement(escapedStatement, getEndDelimiter()));
         }
 
-        return returnStatements.toArray(new SqlStatement[returnStatements.size()]);
+        return returnStatements.toArray(new Statement[returnStatements.size()]);
     }
 
     @Override

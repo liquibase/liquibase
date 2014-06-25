@@ -4,7 +4,7 @@ import liquibase.change.*;
 import liquibase.database.core.SybaseASADatabase;
 import  liquibase.ExecutionEnvironment;
 import liquibase.snapshot.SnapshotGeneratorFactory;
-import liquibase.statement.SqlStatement;
+import liquibase.statement.Statement;
 import liquibase.statement.core.DropUniqueConstraintStatement;
 import liquibase.structure.core.UniqueConstraint;
 
@@ -68,7 +68,7 @@ public class DropUniqueConstraintChange extends AbstractChange {
 	}
 
     @Override
-    public SqlStatement[] generateStatements(ExecutionEnvironment env) {
+    public Statement[] generateStatements(ExecutionEnvironment env) {
         
 //todo    	if (database instanceof SQLiteDatabase) {
 //    		// return special statements for SQLite databases
@@ -78,7 +78,7 @@ public class DropUniqueConstraintChange extends AbstractChange {
     	if (env.getTargetDatabase() instanceof SybaseASADatabase) {
     		statement.setUniqueColumns(uniqueColumns);
     	}
-    	return new SqlStatement[]{
+    	return new Statement[]{
 			statement
         };
     }

@@ -1,15 +1,15 @@
 package liquibase.statement.core;
 
 import liquibase.ExecutionEnvironment;
+import liquibase.statement.Statement;
 import liquibase.statementlogic.StatementLogicFactory;
 import liquibase.database.Database;
-import liquibase.statement.SqlStatement;
 import liquibase.test.TestContext;
 import org.junit.Test;
 
 import static org.junit.Assert.fail;
 
-public abstract class AbstractSqStatementTest<SqlStatementUnderTest extends SqlStatement> {
+public abstract class AbstractSqStatementTest<SqlStatementUnderTest extends Statement> {
 
     protected abstract SqlStatementUnderTest createStatementUnderTest();
 

@@ -1,6 +1,7 @@
 package liquibase.change;
 
 import liquibase.ExecutionEnvironment;
+import liquibase.statement.Statement;
 import liquibase.statementlogic.StatementLogicFactory;
 import liquibase.change.core.LoadDataColumnConfig;
 import liquibase.database.Database;
@@ -11,7 +12,6 @@ import liquibase.exception.ValidationErrors;
 import liquibase.serializer.LiquibaseSerializable;
 import liquibase.statement.DatabaseFunction;
 import liquibase.statement.SequenceNextValueFunction;
-import liquibase.statement.SqlStatement;
 import liquibase.util.StringUtils;
 
 import java.beans.Introspector;
@@ -170,8 +170,8 @@ public class ChangeParameterMetaData {
 
     private ValidationErrors getStatementErrors(Change testChange, ExecutionEnvironment env) {
         ValidationErrors errors = new ValidationErrors();
-        SqlStatement[] statements = testChange.generateStatements(env);
-        for (SqlStatement statement : statements) {
+        Statement[] statements = testChange.generateStatements(env);
+        for (Statement statement : statements) {
             errors.addAll(StatementLogicFactory.getInstance().validate(statement, env));
         }
         return errors;

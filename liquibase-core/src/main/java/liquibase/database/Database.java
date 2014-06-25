@@ -9,7 +9,7 @@ import liquibase.changelog.RanChangeSet;
 import liquibase.exception.*;
 import liquibase.servicelocator.PrioritizedService;
 import liquibase.statement.DatabaseFunction;
-import liquibase.statement.SqlStatement;
+import liquibase.statement.Statement;
 import liquibase.structure.DatabaseObject;
 
 import java.io.IOException;
@@ -241,7 +241,7 @@ public interface Database extends PrioritizedService {
      * @param database the target {@link Database}
      * @throws DatabaseException if there were problems issuing the statements
      */
-    void execute(SqlStatement[] statements, List<ActionVisitor> actionVisitors) throws LiquibaseException;
+    void execute(Statement[] statements, List<ActionVisitor> actionVisitors) throws LiquibaseException;
 
     void saveStatements(Change change, List<ActionVisitor> actionVisitors, Writer writer) throws IOException, StatementNotSupportedOnDatabaseException, LiquibaseException;
 

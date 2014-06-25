@@ -6,7 +6,7 @@ import liquibase.exception.*
 import liquibase.parser.core.ParsedNode
 import liquibase.parser.core.ParsedNodeException
 import liquibase.sdk.supplier.resource.ResourceSupplier
-import liquibase.statement.SqlStatement
+import liquibase.statement.Statement
 import spock.lang.Shared
 import spock.lang.Specification
 
@@ -161,7 +161,7 @@ public class CustomChangeWrapperTest extends Specification {
     def generateStatements_sqlStatementsReturned() throws Exception {
         when:
         def database = new MockDatabase()
-        SqlStatement[] statements = new SqlStatement[0];
+        Statement[] statements = new Statement[0];
         CustomChangeWrapper changeWrapper = new CustomChangeWrapper();
         changeWrapper.customChange = Mock(CustomSqlChange.class);
         ((CustomSqlChange) changeWrapper.customChange).generateStatements(database) >> statements;

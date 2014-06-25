@@ -5,7 +5,7 @@ import liquibase.database.Database;
 import liquibase.database.core.DB2Database;
 import  liquibase.ExecutionEnvironment;
 import liquibase.snapshot.SnapshotGeneratorFactory;
-import liquibase.statement.SqlStatement;
+import liquibase.statement.Statement;
 import liquibase.statement.core.RenameTableStatement;
 import liquibase.statement.core.ReorganizeTableStatement;
 import liquibase.structure.core.Table;
@@ -65,14 +65,14 @@ public class RenameTableChange extends AbstractChange {
     }
 
     @Override
-    public SqlStatement[] generateStatements(ExecutionEnvironment env) {
-        List<SqlStatement> statements = new ArrayList<SqlStatement>();
+    public Statement[] generateStatements(ExecutionEnvironment env) {
+        List<Statement> statements = new ArrayList<Statement>();
         statements.add(new RenameTableStatement(getCatalogName(), getSchemaName(), getOldTableName(), getNewTableName()));
         if (env.getTargetDatabase() instanceof DB2Database) {
             statements.add(new ReorganizeTableStatement(getCatalogName(), getSchemaName(), getNewTableName()));
         }
 
-        return statements.toArray(new SqlStatement[statements.size()]);
+        return statements.toArray(new Statement[statements.size()]);
     }
 
     @Override

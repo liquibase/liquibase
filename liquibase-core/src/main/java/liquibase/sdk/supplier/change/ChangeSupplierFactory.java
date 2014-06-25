@@ -5,11 +5,10 @@ import liquibase.change.Change;
 import liquibase.change.ChangeFactory;
 import liquibase.database.Database;
 import liquibase.exception.UnexpectedLiquibaseException;
-import  liquibase.ExecutionEnvironment;
 import liquibase.executor.ExecutorService;
 import liquibase.sdk.exception.UnexpectedLiquibaseSdkException;
 import liquibase.servicelocator.ServiceLocator;
-import liquibase.statement.SqlStatement;
+import liquibase.statement.Statement;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -45,7 +44,7 @@ public class ChangeSupplierFactory {
             Change[] changes = supplier.prepareDatabase(change);
             if (changes != null) {
                 for (Change prepareChange : changes) {
-                    for (SqlStatement statement : prepareChange.generateStatements(new ExecutionEnvironment(database))) {
+                    for (Statement statement : prepareChange.generateStatements(new ExecutionEnvironment(database))) {
                         ExecutorService.getInstance().getExecutor(database).execute(statement);
                     }
                 }
@@ -62,7 +61,7 @@ public class ChangeSupplierFactory {
             Change[] changes = supplier.revertDatabase(change);
             if (changes != null) {
                 for (Change revertChange : changes) {
-                    for (SqlStatement statement : revertChange.generateStatements(new ExecutionEnvironment(database))) {
+                    for (Statement statement : revertChange.generateStatements(new ExecutionEnvironment(database))) {
                         ExecutorService.getInstance().getExecutor(database).execute(statement);
                     }
                 }

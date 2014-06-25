@@ -6,7 +6,7 @@ import liquibase.database.DatabaseFactory;
 import liquibase.exception.UnexpectedLiquibaseException;
 import  liquibase.ExecutionEnvironment;
 import liquibase.snapshot.SnapshotGeneratorFactory;
-import liquibase.statement.SqlStatement;
+import liquibase.statement.Statement;
 import liquibase.statement.core.AddForeignKeyConstraintStatement;
 import liquibase.structure.core.ForeignKey;
 import liquibase.structure.core.ForeignKeyConstraintType;
@@ -218,7 +218,7 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
     }
 
     @Override
-    public SqlStatement[] generateStatements(ExecutionEnvironment env) {
+    public Statement[] generateStatements(ExecutionEnvironment env) {
 
         boolean deferrable = false;
         if (getDeferrable() != null) {
@@ -230,7 +230,7 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
             initiallyDeferred = getInitiallyDeferred();
         }
 
-        return new SqlStatement[]{
+        return new Statement[]{
                 new AddForeignKeyConstraintStatement(getConstraintName(),
                         getBaseTableCatalogName(),
                         getBaseTableSchemaName(),

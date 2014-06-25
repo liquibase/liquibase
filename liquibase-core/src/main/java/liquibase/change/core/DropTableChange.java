@@ -3,7 +3,7 @@ package liquibase.change.core;
 import liquibase.change.*;
 import  liquibase.ExecutionEnvironment;
 import liquibase.snapshot.SnapshotGeneratorFactory;
-import liquibase.statement.SqlStatement;
+import liquibase.statement.Statement;
 import liquibase.statement.core.DropTableStatement;
 import liquibase.structure.core.Table;
 
@@ -54,13 +54,13 @@ public class DropTableChange extends AbstractChange {
     }
 
     @Override
-    public SqlStatement[] generateStatements(ExecutionEnvironment env) {
+    public Statement[] generateStatements(ExecutionEnvironment env) {
         boolean constraints = false;
         if (isCascadeConstraints() != null) {
             constraints = isCascadeConstraints();
         }
         
-        return new SqlStatement[]{
+        return new Statement[]{
                 new DropTableStatement(getCatalogName(), getSchemaName(), getTableName(), constraints)
         };
     }

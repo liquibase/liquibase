@@ -84,13 +84,13 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
     }
 
     @Override
-    public SqlStatement[] generateStatements(ExecutionEnvironment env) {
+    public Statement[] generateStatements(ExecutionEnvironment env) {
 
         Database database = env.getTargetDatabase();
-        List<SqlStatement> sql = new ArrayList<SqlStatement>();
+        List<Statement> sql = new ArrayList<Statement>();
 
         if (getColumns().size() == 0) {
-            return new SqlStatement[] {
+            return new Statement[] {
                     new AddColumnStatement(catalogName, schemaName, tableName, null, null, null)
             };
         }
@@ -160,7 +160,7 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
           }
       }
 
-      return sql.toArray(new SqlStatement[sql.size()]);
+      return sql.toArray(new Statement[sql.size()]);
     }
 
     @Override

@@ -16,7 +16,7 @@ import java.util.Collection;
  * @see liquibase.sqlgenerator.SqlGenerator
  * @see liquibase.statementlogic.StatementLogicFactory
  */
-public interface SqlStatement {
+public interface Statement {
 
     boolean skipOnUnsupported();
 

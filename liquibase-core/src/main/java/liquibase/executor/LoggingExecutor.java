@@ -2,11 +2,11 @@ package liquibase.executor;
 
 import liquibase.ExecutionEnvironment;
 import liquibase.action.Action;
+import liquibase.statement.Statement;
 import liquibase.statementlogic.StatementLogicFactory;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 import liquibase.servicelocator.LiquibaseService;
-import liquibase.statement.SqlStatement;
 import liquibase.statement.core.GetNextChangeSetSequenceValueStatement;
 import liquibase.statement.core.LockDatabaseChangeLogStatement;
 import liquibase.statement.core.SelectFromDatabaseChangeLogLockStatement;
@@ -33,13 +33,13 @@ public class LoggingExecutor extends AbstractExecutor {
     }
 
     @Override
-    public ExecuteResult execute(SqlStatement sql, ExecutionEnvironment env) throws DatabaseException {
+    public ExecuteResult execute(Statement sql, ExecutionEnvironment env) throws DatabaseException {
         outputStatement(sql, env);
         return new ExecuteResult();
     }
 
     @Override
-    public UpdateResult update(SqlStatement sql, ExecutionEnvironment env) throws DatabaseException {
+    public UpdateResult update(Statement sql, ExecutionEnvironment env) throws DatabaseException {
         if (sql instanceof LockDatabaseChangeLogStatement) {
             return new UpdateResult(1);
         } else if (sql instanceof UnlockDatabaseChangeLogStatement) {
@@ -63,9 +63,9 @@ public class LoggingExecutor extends AbstractExecutor {
         }
     }
 
-    protected void outputStatement(SqlStatement sql, ExecutionEnvironment env) throws DatabaseException {
+    protected void outputStatement(Statement sql, ExecutionEnvironment env) throws DatabaseException {
         try {
-            if (StatementLogicFactory.getInstance().generateStatementsVolatile(sql, env)) {
+            if (StatementLogicFactory.getInstance().generateActionsIsVolatile(sql, env)) {
                 throw new DatabaseException(sql.getClass().getSimpleName()+" requires access to up to date database metadata which is not available in SQL output mode");
             }
             for (Action action : StatementLogicFactory.getInstance().generateActions(sql, env)) {
@@ -83,7 +83,7 @@ public class LoggingExecutor extends AbstractExecutor {
     }
 
     @Override
-    public QueryResult query(SqlStatement sql, ExecutionEnvironment env) throws DatabaseException {
+    public QueryResult query(Statement sql, ExecutionEnvironment env) throws DatabaseException {
         if (sql instanceof SelectFromDatabaseChangeLogLockStatement) {
             return new QueryResult(Boolean.FALSE);
         }

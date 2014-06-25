@@ -1,11 +1,11 @@
 package liquibase.statement.core;
 
-import liquibase.statement.AbstractSqlStatement;
+import liquibase.statement.AbstractStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Index;
 import liquibase.structure.core.Table;
 
-public class DropIndexStatement extends AbstractSqlStatement {
+public class DropIndexStatement extends AbstractStatement {
 
     private String indexName;
     private String tableCatalogName;

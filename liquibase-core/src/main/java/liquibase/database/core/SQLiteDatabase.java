@@ -9,11 +9,10 @@ import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
-import  liquibase.ExecutionEnvironment;
 import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.SnapshotControl;
 import liquibase.snapshot.SnapshotGeneratorFactory;
-import liquibase.statement.SqlStatement;
+import liquibase.statement.Statement;
 import liquibase.statement.core.*;
 import liquibase.structure.core.*;
 import liquibase.util.ISODateFormat;
@@ -119,12 +118,12 @@ public class SQLiteDatabase extends AbstractJdbcDatabase {
         return false;
     }
 
-    public static List<SqlStatement> getAlterTableStatements(
+    public static List<Statement> getAlterTableStatements(
             AlterTableVisitor alterTableVisitor,
             ExecutionEnvironment env, String catalogName, String schemaName, String tableName)
             throws DatabaseException {
 
-        List<SqlStatement> statements = new ArrayList<SqlStatement>();
+        List<Statement> statements = new ArrayList<Statement>();
 
         Table table = null;
         try {

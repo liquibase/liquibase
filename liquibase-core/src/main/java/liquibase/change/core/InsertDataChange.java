@@ -4,7 +4,7 @@ import liquibase.change.*;
 import liquibase.exception.ValidationErrors;
 import  liquibase.ExecutionEnvironment;
 import liquibase.statement.InsertExecutablePreparedStatement;
-import liquibase.statement.SqlStatement;
+import liquibase.statement.Statement;
 import liquibase.statement.core.InsertStatement;
 
 import java.util.ArrayList;
@@ -81,7 +81,7 @@ public class InsertDataChange extends AbstractChange implements ChangeWithColumn
     }
 
     @Override
-    public SqlStatement[] generateStatements(ExecutionEnvironment env) {
+    public Statement[] generateStatements(ExecutionEnvironment env) {
 
         boolean needsPreparedStatement = false;
         for (ColumnConfig column : columns) {
@@ -97,7 +97,7 @@ public class InsertDataChange extends AbstractChange implements ChangeWithColumn
         }
 
         if (needsPreparedStatement) {
-            return new SqlStatement[] {
+            return new Statement[] {
                     new InsertExecutablePreparedStatement(env, catalogName, schemaName, tableName, columns, getChangeSet(), this.getResourceAccessor())
             };
         }
@@ -115,7 +115,7 @@ public class InsertDataChange extends AbstractChange implements ChangeWithColumn
 
             statement.addColumnValue(column.getName(), column.getValueObject());
         }
-        return new SqlStatement[]{
+        return new Statement[]{
                 statement
         };
     }

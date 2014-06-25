@@ -1,11 +1,11 @@
 package liquibase.statement.core;
 
-import liquibase.statement.SqlStatement;
+import liquibase.statement.Statement;
 
 public class DropColumnStatementTest extends AbstractSqStatementTest {
 
     @Override
-    protected SqlStatement createStatementUnderTest() {
+    protected Statement createStatementUnderTest() {
         return new DropColumnStatement(null, null, null, null);
     }
 

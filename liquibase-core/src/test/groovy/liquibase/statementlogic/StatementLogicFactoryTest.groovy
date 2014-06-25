@@ -26,23 +26,23 @@ public class StatementLogicFactoryTest extends Specification {
 
     def register() {
         when:
-        StatementLogicFactory.getInstance().getGenerators().clear();
+        StatementLogicFactory.getInstance().getRegistry().clear();
         then:
-        StatementLogicFactory.getInstance().getGenerators().size() == 0
+        StatementLogicFactory.getInstance().getRegistry().size() == 0
 
         when:
         StatementLogicFactory.getInstance().register(new MockStatementLogic(1, "A1"));
         then:
-        StatementLogicFactory.getInstance().getGenerators().size() == 1
+        StatementLogicFactory.getInstance().getRegistry().size() == 1
     }
 
     def unregister_instance() {
         when:
         StatementLogicFactory factory = StatementLogicFactory.getInstance();
-        factory.getGenerators().clear();
+        factory.getRegistry().clear();
 
         then:
-        factory.getGenerators().size() == 0
+        factory.getRegistry().size() == 0
 
         when:
         AddAutoIncrementGeneratorHsqlH2 sqlGenerator = new AddAutoIncrementGeneratorHsqlH2();
@@ -52,22 +52,22 @@ public class StatementLogicFactoryTest extends Specification {
         factory.register(new AddAutoIncrementGeneratorDB2());
 
         then:
-        factory.getGenerators().size() == 3
+        factory.getRegistry().size() == 3
 
         when:
         factory.unregister(sqlGenerator);
         then:
-        factory.getGenerators().size() == 2
+        factory.getRegistry().size() == 2
     }
 
     def unregister_class() {
         when:
         StatementLogicFactory factory = StatementLogicFactory.getInstance();
 
-        factory.getGenerators().clear();
+        factory.getRegistry().clear();
 
         then:
-        factory.getGenerators().size() == 0
+        factory.getRegistry().size() == 0
 
         when:
         AddAutoIncrementGeneratorHsqlH2 sqlGenerator = new AddAutoIncrementGeneratorHsqlH2();
@@ -76,22 +76,22 @@ public class StatementLogicFactoryTest extends Specification {
         factory.register(sqlGenerator);
         factory.register(new AddAutoIncrementGeneratorDB2());
         then:
-        factory.getGenerators().size() == 3
+        factory.getRegistry().size() == 3
 
         when:
         factory.unregister(AddAutoIncrementGeneratorHsqlH2.class);
         then:
-        factory.getGenerators().size() == 2
+        factory.getRegistry().size() == 2
     }
 
      def unregister_class_doesNotExist() {
          when:
         StatementLogicFactory factory = StatementLogicFactory.getInstance();
 
-        factory.getGenerators().clear();
+        factory.getRegistry().clear();
 
          then:
-        factory.getGenerators().size() == 0
+        factory.getRegistry().size() == 0
 
          when:
         factory.register(new AddAutoIncrementGenerator());
@@ -99,12 +99,12 @@ public class StatementLogicFactoryTest extends Specification {
         factory.register(new AddAutoIncrementGeneratorDB2());
 
          then:
-        factory.getGenerators().size() == 3
+        factory.getRegistry().size() == 3
 
          when:
         factory.unregister(AddColumnGenerator.class);
          then:
-        factory.getGenerators().size() == 3
+        factory.getRegistry().size() == 3
     }
 
    def void reset() {
@@ -117,12 +117,12 @@ public class StatementLogicFactoryTest extends Specification {
 
     def builtInGeneratorsAreFound() {
         expect:
-        StatementLogicFactory.getInstance().getGenerators().size() > 10
+        StatementLogicFactory.getInstance().getRegistry().size() > 10
     }
 
     def getGenerators() {
         when:
-        SortedSet<SqlGenerator> allGenerators = StatementLogicFactory.getInstance().getGenerators(new AddAutoIncrementStatement(null, null, "person", "name", "varchar(255)", null, null), new ExecutionEnvironment(new H2Database()));
+        SortedSet<SqlGenerator> allGenerators = StatementLogicFactory.getInstance().getStatementLogic(new AddAutoIncrementStatement(null, null, "person", "name", "varchar(255)", null, null), new ExecutionEnvironment(new H2Database()));
 
         then:
         allGenerators != null

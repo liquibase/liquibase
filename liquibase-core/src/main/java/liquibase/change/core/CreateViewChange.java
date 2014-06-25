@@ -7,7 +7,7 @@ import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.resource.ResourceAccessor;
 import liquibase.snapshot.SnapshotGeneratorFactory;
-import liquibase.statement.SqlStatement;
+import liquibase.statement.Statement;
 import liquibase.statement.core.CreateViewStatement;
 import liquibase.statement.core.DropViewStatement;
 import liquibase.structure.core.View;
@@ -73,8 +73,8 @@ public class CreateViewChange extends AbstractChange {
 	}
 
 	@Override
-    public SqlStatement[] generateStatements(ExecutionEnvironment env) {
-        List<SqlStatement> statements = new ArrayList<SqlStatement>();
+    public Statement[] generateStatements(ExecutionEnvironment env) {
+        List<Statement> statements = new ArrayList<Statement>();
 
 		boolean replaceIfExists = false;
 		if (getReplaceIfExists() != null && getReplaceIfExists()) {
@@ -90,7 +90,7 @@ public class CreateViewChange extends AbstractChange {
 					getCatalogName(), getSchemaName(), getViewName(), getSelectQuery(), replaceIfExists));
 		}
 
-		return statements.toArray(new SqlStatement[statements.size()]);
+		return statements.toArray(new Statement[statements.size()]);
 	}
 
 	@Override

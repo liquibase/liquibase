@@ -1,9 +1,9 @@
 package liquibase.statement.core;
 
-import liquibase.statement.AbstractSqlStatement;
+import liquibase.statement.AbstractStatement;
 import liquibase.structure.DatabaseObject;
 
-public class FindForeignKeyConstraintsStatement extends AbstractSqlStatement {
+public class FindForeignKeyConstraintsStatement extends AbstractStatement {
 
     public static final String RESULT_COLUMN_BASE_TABLE_NAME        = "TABLE_NAME";
     public static final String RESULT_COLUMN_BASE_TABLE_COLUMN_NAME = "COLUMN_NAME";

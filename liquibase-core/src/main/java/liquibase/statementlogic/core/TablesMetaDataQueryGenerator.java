@@ -75,12 +75,8 @@ public class TablesMetaDataQueryGenerator extends AbstractStatementLogic<MetaDat
 
 
     @Override
-    public boolean generateStatementsIsVolatile(ExecutionEnvironment env) {
+    public boolean generateActionsIsVolatile(ExecutionEnvironment env) {
         return false;
     }
 
-    @Override
-    public boolean generateRollbackStatementsIsVolatile(ExecutionEnvironment env) {
-        return false;
-    }
 }
