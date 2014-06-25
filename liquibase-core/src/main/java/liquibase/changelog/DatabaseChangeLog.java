@@ -167,6 +167,13 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         this.validate(database, new Contexts(contexts), new LabelExpression());
     }
 
+    /**
+     * @deprecated Use LabelExpression version
+     */
+    public void validate(Database database, Contexts contexts) throws LiquibaseException {
+        this.validate(database, contexts, new LabelExpression());
+    }
+
     public void validate(Database database, Contexts contexts, LabelExpression labelExpression) throws LiquibaseException {
 
         ChangeLogIterator logIterator = new ChangeLogIterator(this, new DbmsChangeSetFilter(database), new ContextChangeSetFilter(contexts), new LabelChangeSetFilter(labelExpression));
