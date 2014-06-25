@@ -6,21 +6,21 @@ import liquibase.actiongenerator.ActionGeneratorChain;
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.exception.ValidationErrors;
-import liquibase.executor.ExecutionOptions;
+import  liquibase.ExecutionEnvironment;
 import liquibase.statement.core.CreateSequenceStatement;
 
 public class CreateSequenceGenerator extends AbstractSqlGenerator<CreateSequenceStatement> {
 
     @Override
-    public boolean supports(CreateSequenceStatement statement, ExecutionOptions options) {
-        return options.getRuntimeEnvironment().getTargetDatabase().supportsSequences();
+    public boolean supports(CreateSequenceStatement statement, ExecutionEnvironment env) {
+        return env.getTargetDatabase().supportsSequences();
     }
 
     @Override
-    public ValidationErrors validate(CreateSequenceStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
+    public ValidationErrors validate(CreateSequenceStatement statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
         ValidationErrors validationErrors = new ValidationErrors();
 
-        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+        Database database = env.getTargetDatabase();
         validationErrors.checkRequiredField("sequenceName", statement.getSequenceName());
 
         validationErrors.checkDisallowedField("startValue", statement.getStartValue(), database, FirebirdDatabase.class);
@@ -36,8 +36,8 @@ public class CreateSequenceGenerator extends AbstractSqlGenerator<CreateSequence
     }
 
     @Override
-    public Action[] generateActions(CreateSequenceStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
-        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+    public Action[] generateActions(CreateSequenceStatement statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+        Database database = env.getTargetDatabase();
 
         StringBuffer buffer = new StringBuffer();
         buffer.append("CREATE SEQUENCE ");

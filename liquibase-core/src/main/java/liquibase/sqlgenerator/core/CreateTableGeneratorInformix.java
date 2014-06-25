@@ -5,7 +5,7 @@ import liquibase.action.core.UnparsedSql;
 import liquibase.actiongenerator.ActionGeneratorChain;
 import liquibase.database.Database;
 import liquibase.database.core.InformixDatabase;
-import liquibase.executor.ExecutionOptions;
+import  liquibase.ExecutionEnvironment;
 import liquibase.logging.LogFactory;
 import liquibase.statement.AutoIncrementConstraint;
 import liquibase.statement.ForeignKeyConstraint;
@@ -26,8 +26,8 @@ import java.util.List;
 public class CreateTableGeneratorInformix extends CreateTableGenerator {
 
     @Override
-    public boolean supports(CreateTableStatement statement, ExecutionOptions options) {
-        return options.getRuntimeEnvironment().getTargetDatabase() instanceof InformixDatabase;
+    public boolean supports(CreateTableStatement statement, ExecutionEnvironment env) {
+        return env.getTargetDatabase() instanceof InformixDatabase;
     }
 
     @Override
@@ -36,9 +36,9 @@ public class CreateTableGeneratorInformix extends CreateTableGenerator {
     }
 
     @Override
-    public Action[] generateActions(CreateTableStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
+    public Action[] generateActions(CreateTableStatement statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
 		StringBuilder buffer = new StringBuilder();
-        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+        Database database = env.getTargetDatabase();
 
 
         buffer.append("CREATE TABLE ").append(database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName())).append(" ");

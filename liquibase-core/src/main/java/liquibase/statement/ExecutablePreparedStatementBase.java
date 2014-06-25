@@ -5,7 +5,7 @@ import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
 import liquibase.database.PreparedStatementFactory;
 import liquibase.exception.DatabaseException;
-import liquibase.executor.ExecutionOptions;
+import  liquibase.ExecutionEnvironment;
 import liquibase.resource.ResourceAccessor;
 import liquibase.resource.UtfBomAwareReader;
 import liquibase.util.JdbcUtils;
@@ -36,8 +36,8 @@ public abstract class ExecutablePreparedStatementBase implements ExecutablePrepa
 	
 	private ResourceAccessor resourceAccessor;
 
-	protected ExecutablePreparedStatementBase(ExecutionOptions options, String catalogName, String schemaName, String tableName, List<ColumnConfig> columns, ChangeSet changeSet, ResourceAccessor resourceAccessor) {
-		this.database = options.getRuntimeEnvironment().getTargetDatabase();
+	protected ExecutablePreparedStatementBase(ExecutionEnvironment env, String catalogName, String schemaName, String tableName, List<ColumnConfig> columns, ChangeSet changeSet, ResourceAccessor resourceAccessor) {
+		this.database = env.getTargetDatabase();
 		this.changeSet = changeSet;
 		this.catalogName = catalogName;
 		this.schemaName = schemaName;

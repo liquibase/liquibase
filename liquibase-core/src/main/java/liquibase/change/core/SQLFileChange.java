@@ -8,7 +8,7 @@ import liquibase.changelog.ChangeLogParameters;
 import liquibase.exception.SetupException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
-import liquibase.executor.ExecutionOptions;
+import  liquibase.ExecutionEnvironment;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
 
@@ -44,12 +44,12 @@ public class SQLFileChange extends AbstractSQLChange {
     private Boolean relativeToChangelogFile;
 
     @Override
-    public boolean generateStatementsVolatile(ExecutionOptions options) {
+    public boolean generateStatementsVolatile(ExecutionEnvironment env) {
         return false;
     }
 
     @Override
-    public boolean generateRollbackStatementsVolatile(ExecutionOptions options) {
+    public boolean generateRollbackStatementsVolatile(ExecutionEnvironment env) {
         return false;
     }
 
@@ -118,7 +118,7 @@ public class SQLFileChange extends AbstractSQLChange {
     }
 
     @Override
-    public ValidationErrors validate(ExecutionOptions options) {
+    public ValidationErrors validate(ExecutionEnvironment env) {
         ValidationErrors validationErrors = new ValidationErrors();
         if (StringUtils.trimToNull(getPath()) == null) {
             validationErrors.addError("'path' is required");

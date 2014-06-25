@@ -2,7 +2,7 @@ package liquibase.change.core;
 
 import liquibase.change.*;
 import liquibase.database.core.PostgresDatabase;
-import liquibase.executor.ExecutionOptions;
+import  liquibase.ExecutionEnvironment;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.SequenceNextValueFunction;
 import liquibase.statement.SqlStatement;
@@ -98,8 +98,8 @@ public class AddAutoIncrementChange extends AbstractChange {
     }
     
     @Override
-    public SqlStatement[] generateStatements(ExecutionOptions options) {
-        if (options.getRuntimeEnvironment().getTargetDatabase() instanceof PostgresDatabase) {
+    public SqlStatement[] generateStatements(ExecutionEnvironment env) {
+        if (env.getTargetDatabase() instanceof PostgresDatabase) {
             String sequenceName = (getTableName() + "_" + getColumnName() + "_seq").toLowerCase();
             return new SqlStatement[]{
                     new CreateSequenceStatement(catalogName, schemaName, sequenceName),
@@ -117,11 +117,11 @@ public class AddAutoIncrementChange extends AbstractChange {
     }
 
     @Override
-    public ChangeStatus checkStatus(ExecutionOptions options) {
+    public ChangeStatus checkStatus(ExecutionEnvironment env) {
         ChangeStatus result = new ChangeStatus();
         Column example = new Column(Table.class, getCatalogName(), getSchemaName(), getTableName(), getColumnName());
         try {
-            Column column = SnapshotGeneratorFactory.getInstance().createSnapshot(example, options.getRuntimeEnvironment().getTargetDatabase());
+            Column column = SnapshotGeneratorFactory.getInstance().createSnapshot(example, env.getTargetDatabase());
             if (column == null) return result.unknown("Column does not exist");
 
 

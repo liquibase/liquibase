@@ -6,7 +6,7 @@ import liquibase.actiongenerator.ActionGeneratorChain;
 import liquibase.database.Database;
 import liquibase.database.core.SybaseDatabase;
 import liquibase.datatype.DataTypeFactory;
-import liquibase.executor.ExecutionOptions;
+import  liquibase.ExecutionEnvironment;
 import liquibase.statement.core.AddDefaultValueStatement;
 
 public class AddDefaultValueGeneratorSybase extends AddDefaultValueGenerator {
@@ -16,13 +16,13 @@ public class AddDefaultValueGeneratorSybase extends AddDefaultValueGenerator {
     }
 
     @Override
-    public boolean supports(AddDefaultValueStatement statement, ExecutionOptions options) {
-        return options.getRuntimeEnvironment().getTargetDatabase() instanceof SybaseDatabase;
+    public boolean supports(AddDefaultValueStatement statement, ExecutionEnvironment env) {
+        return env.getTargetDatabase() instanceof SybaseDatabase;
     }
 
     @Override
-    public Action[] generateActions(AddDefaultValueStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
-        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+    public Action[] generateActions(AddDefaultValueStatement statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+        Database database = env.getTargetDatabase();
 
         Object defaultValue = statement.getDefaultValue();
         return new Action[]{

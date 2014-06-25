@@ -6,7 +6,7 @@ import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
 import liquibase.exception.Warnings;
-import liquibase.executor.ExecutionOptions;
+import  liquibase.ExecutionEnvironment;
 import liquibase.logging.LogFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RawSqlStatement;
@@ -62,17 +62,17 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
      * @return
      */
     @Override
-    public boolean supports(ExecutionOptions options) {
+    public boolean supports(ExecutionEnvironment env) {
         return true;
     }
 
     @Override
-    public Warnings warn(ExecutionOptions options) {
+    public Warnings warn(ExecutionEnvironment env) {
         return new Warnings();
     }
 
     @Override
-    public ValidationErrors validate(ExecutionOptions options) {
+    public ValidationErrors validate(ExecutionEnvironment env) {
         ValidationErrors validationErrors = new ValidationErrors();
         if (StringUtils.trimToNull(sql) == null) {
             validationErrors.addError("'sql' is required");
@@ -201,12 +201,11 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
      * <p></p>
      * If stripping comments is true then any comments are removed before the splitting is executed.
      * The set SQL is passed through the {@link java.sql.Connection#nativeSQL} method if a connection is available.
-     * @param options
      */
     @Override
-    public SqlStatement[] generateStatements(ExecutionOptions options) {
+    public SqlStatement[] generateStatements(ExecutionEnvironment env) {
 
-        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+        Database database = env.getTargetDatabase();
 
         List<SqlStatement> returnStatements = new ArrayList<SqlStatement>();
 
@@ -237,17 +236,17 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
     }
 
     @Override
-    public boolean generateStatementsVolatile(ExecutionOptions options) {
+    public boolean generateStatementsVolatile(ExecutionEnvironment env) {
         return false;
     }
 
     @Override
-    public boolean generateRollbackStatementsVolatile(ExecutionOptions options) {
+    public boolean generateRollbackStatementsVolatile(ExecutionEnvironment env) {
         return false;
     }
 
     @Override
-    public ChangeStatus checkStatus(ExecutionOptions options) {
+    public ChangeStatus checkStatus(ExecutionEnvironment env) {
         return new ChangeStatus().unknown("Cannot check raw sql status");
     }
 

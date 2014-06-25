@@ -6,7 +6,7 @@ import liquibase.actiongenerator.ActionGeneratorChain;
 import liquibase.database.Database;
 import liquibase.database.core.DB2Database;
 import liquibase.exception.ValidationErrors;
-import liquibase.executor.ExecutionOptions;
+import  liquibase.ExecutionEnvironment;
 import liquibase.statement.core.AddAutoIncrementStatement;
 
 public class AddAutoIncrementGeneratorDB2 extends AddAutoIncrementGenerator {
@@ -17,14 +17,14 @@ public class AddAutoIncrementGeneratorDB2 extends AddAutoIncrementGenerator {
     }
 
     @Override
-    public boolean supports(AddAutoIncrementStatement statement, ExecutionOptions options) {
-        return options.getRuntimeEnvironment().getTargetDatabase() instanceof DB2Database;
+    public boolean supports(AddAutoIncrementStatement statement, ExecutionEnvironment env) {
+        return env.getTargetDatabase() instanceof DB2Database;
     }
 
     @Override
     public ValidationErrors validate(
             AddAutoIncrementStatement statement,
-            ExecutionOptions options,
+            ExecutionEnvironment env,
             ActionGeneratorChain chain) {
         ValidationErrors validationErrors = new ValidationErrors();
 
@@ -35,8 +35,8 @@ public class AddAutoIncrementGeneratorDB2 extends AddAutoIncrementGenerator {
     }
 
     @Override
-    public Action[] generateActions(AddAutoIncrementStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
-        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+    public Action[] generateActions(AddAutoIncrementStatement statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+        Database database = env.getTargetDatabase();
 
         return new Action[]{
             new UnparsedSql(

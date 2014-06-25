@@ -1,14 +1,12 @@
 package liquibase.actiongenerator.core
 
-import liquibase.RuntimeEnvironment
+import liquibase.ExecutionEnvironment
 import liquibase.action.QueryAction
 import liquibase.actiongenerator.ActionGeneratorFactory
-import liquibase.changelog.ChangeLogHistoryService
-import liquibase.changelog.ChangeLogHistoryServiceFactory
 import liquibase.command.DropAllCommand
 import liquibase.database.OfflineConnection
 import liquibase.datatype.core.IntType
-import liquibase.executor.ExecutionOptions
+import  liquibase.ExecutionEnvironment
 import liquibase.executor.ExecutorService
 import liquibase.lockservice.LockServiceFactory
 import liquibase.sdk.supplier.database.ConnectionSupplier
@@ -38,8 +36,8 @@ class TablesMetaDataQueryGeneratorTest extends Specification {
 
         def database = connection.getDatabase();
 
-        def actions = ActionGeneratorFactory.instance.generateActions(statement, new ExecutionOptions(new RuntimeEnvironment(database)))
-        def options = new ExecutionOptions(new RuntimeEnvironment(database, null))
+        def actions = ActionGeneratorFactory.instance.generateActions(statement, new ExecutionEnvironment(database))
+        def options = new ExecutionEnvironment(database)
 
         then:
         actions.size() == 1
@@ -78,8 +76,8 @@ class TablesMetaDataQueryGeneratorTest extends Specification {
 
         def database = connection.getDatabase();
 
-        def actions = ActionGeneratorFactory.instance.generateActions(statement, new ExecutionOptions(new RuntimeEnvironment(database)))
-        def options = new ExecutionOptions(new RuntimeEnvironment(database, null))
+        def actions = ActionGeneratorFactory.instance.generateActions(statement, new ExecutionEnvironment(database))
+        def options = new ExecutionEnvironment(database, null)
 
         LockServiceFactory.instance.resetAll()
 

@@ -1,7 +1,7 @@
 package liquibase.change.core;
 
 import liquibase.change.*;
-import liquibase.executor.ExecutionOptions;
+import  liquibase.ExecutionEnvironment;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.SetNullableStatement;
@@ -66,7 +66,7 @@ public class DropNotNullConstraintChange extends AbstractChange {
     }
 
     @Override
-    public SqlStatement[] generateStatements(ExecutionOptions options) {
+    public SqlStatement[] generateStatements(ExecutionEnvironment env) {
 
 //todo    	if (database instanceof SQLiteDatabase) {
 //    		// return special statements for SQLite databases
@@ -81,9 +81,9 @@ public class DropNotNullConstraintChange extends AbstractChange {
     }
 
     @Override
-    public ChangeStatus checkStatus(ExecutionOptions options) {
+    public ChangeStatus checkStatus(ExecutionEnvironment env) {
         try {
-            Column snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(new Column(Table.class, getCatalogName(), getSchemaName(), getTableName(), getColumnName()), options.getRuntimeEnvironment().getTargetDatabase());
+            Column snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(new Column(Table.class, getCatalogName(), getSchemaName(), getTableName(), getColumnName()), env.getTargetDatabase());
             Boolean nullable = snapshot.isNullable();
             return new ChangeStatus().assertComplete(nullable == null || nullable, "Column is not null");
         } catch (Exception e) {

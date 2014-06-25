@@ -1,12 +1,12 @@
 package liquibase.sqlgenerator.core;
 
-import liquibase.RuntimeEnvironment;
+import liquibase.ExecutionEnvironment;
 import liquibase.action.Action;
 import liquibase.actiongenerator.ActionGenerator;
 import liquibase.actiongenerator.ActionGeneratorChain;
 import liquibase.database.Database;
 import liquibase.database.core.PostgresDatabase;
-import liquibase.executor.ExecutionOptions;
+import  liquibase.ExecutionEnvironment;
 import liquibase.statement.core.DropIndexStatement;
 import org.junit.Test;
 
@@ -60,17 +60,17 @@ public class DropIndexGeneratorTest {
 		SortedSet<ActionGenerator> sqlGenerators = new TreeSet<ActionGenerator>();
 		ActionGeneratorChain chain = new ActionGeneratorChain(sqlGenerators);
 
-        ExecutionOptions options = new ExecutionOptions(new RuntimeEnvironment(database));
+        ExecutionEnvironment env = new ExecutionEnvironment(database);
 
-		Action[] actions = dropIndexGenerator.generateActions(statement, options, chain);
+		Action[] actions = dropIndexGenerator.generateActions(statement, env, chain);
 		assertEquals("DROP INDEX \"defaultSchema\".\"indexName\"", actions[0].describe());
 
 		statement = new DropIndexStatement("index_name", "default_catalog", "default_schema", "a_table", null);
-		actions = dropIndexGenerator.generateActions(statement, options, chain);
+		actions = dropIndexGenerator.generateActions(statement, env, chain);
 		assertEquals("DROP INDEX default_schema.index_name", actions[0].describe());
 
 		statement = new DropIndexStatement("index_name", null, null, "a_table", null);
-		actions = dropIndexGenerator.generateActions(statement, options, chain);
+		actions = dropIndexGenerator.generateActions(statement, env, chain);
 		assertEquals("DROP INDEX index_name", actions[0].describe());
 	}
 }

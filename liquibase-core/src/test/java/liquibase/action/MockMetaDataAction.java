@@ -1,7 +1,7 @@
 package liquibase.action;
 
 import liquibase.exception.DatabaseException;
-import liquibase.executor.ExecutionOptions;
+import  liquibase.ExecutionEnvironment;
 import liquibase.executor.QueryResult;
 import liquibase.executor.Row;
 import liquibase.structure.DatabaseObject;
@@ -17,12 +17,12 @@ public class MockMetaDataAction extends MetaDataQueryAction {
     }
 
     @Override
-    protected DatabaseObject rawMetaDataToObject(Row row, ExecutionOptions options) {
+    protected DatabaseObject rawMetaDataToObject(Row row, ExecutionEnvironment env) {
         throw new RuntimeException("Not implemented");
     }
 
     @Override
-    protected QueryResult getRawMetaData(ExecutionOptions options) throws DatabaseException {
+    protected QueryResult getRawMetaData(ExecutionEnvironment env) throws DatabaseException {
         throw new RuntimeException("Not implemented");
     }
 }

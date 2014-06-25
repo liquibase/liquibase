@@ -6,13 +6,13 @@ import liquibase.actiongenerator.ActionGeneratorChain;
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.exception.ValidationErrors;
-import liquibase.executor.ExecutionOptions;
+import  liquibase.ExecutionEnvironment;
 import liquibase.statement.core.DropColumnStatement;
 
 public class DropColumnGenerator extends AbstractSqlGenerator<DropColumnStatement> {
 
     @Override
-    public ValidationErrors validate(DropColumnStatement dropColumnStatement, ExecutionOptions options, ActionGeneratorChain chain) {
+    public ValidationErrors validate(DropColumnStatement dropColumnStatement, ExecutionEnvironment env, ActionGeneratorChain chain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("tableName", dropColumnStatement.getTableName());
         validationErrors.checkRequiredField("columnName", dropColumnStatement.getColumnName());
@@ -20,8 +20,8 @@ public class DropColumnGenerator extends AbstractSqlGenerator<DropColumnStatemen
     }
 
     @Override
-    public Action[] generateActions(DropColumnStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
-        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+    public Action[] generateActions(DropColumnStatement statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+        Database database = env.getTargetDatabase();
 
         if (database instanceof DB2Database) {
             return new Action[] { new UnparsedSql("ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " DROP COLUMN " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName())) };

@@ -1,11 +1,11 @@
 package liquibase.sdk.supplier.change;
 
-import liquibase.RuntimeEnvironment;
+import liquibase.ExecutionEnvironment;
 import liquibase.change.*;
 import liquibase.change.core.supplier.AddColumnConfigSupplier;
 import liquibase.database.Database;
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.executor.ExecutionOptions;
+import  liquibase.ExecutionEnvironment;
 import liquibase.util.CollectionUtil;
 
 import java.util.*;
@@ -79,6 +79,6 @@ public abstract class AbstractChangeSupplier<T extends Change> implements Change
 
     @Override
     public boolean isValid(Change change, Database database) {
-        return !change.validate(new ExecutionOptions(new RuntimeEnvironment(database))).hasErrors();
+        return !change.validate(new ExecutionEnvironment(database)).hasErrors();
     }
 }

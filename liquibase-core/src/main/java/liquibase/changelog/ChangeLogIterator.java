@@ -1,6 +1,6 @@
 package liquibase.changelog;
 
-import liquibase.RuntimeEnvironment;
+import liquibase.ExecutionEnvironment;
 import liquibase.changelog.filter.ChangeSetFilter;
 import liquibase.changelog.filter.ChangeSetFilterResult;
 import liquibase.changelog.visitor.ChangeSetVisitor;
@@ -38,9 +38,8 @@ public class ChangeLogIterator {
         this.changeSetFilters = Arrays.asList(changeSetFilters);
     }
 
-    public void run(ChangeSetVisitor visitor, RuntimeEnvironment env) throws LiquibaseException {
+    public void run(ChangeSetVisitor visitor, ExecutionEnvironment env) throws LiquibaseException {
       Logger log = LogFactory.getLogger();
-      databaseChangeLog.setRuntimeEnvironment(env);
       log.setChangeLog(databaseChangeLog);
         try {
             List<ChangeSet> changeSetList = new ArrayList<ChangeSet>(databaseChangeLog.getChangeSets());
@@ -77,7 +76,6 @@ public class ChangeLogIterator {
             }
         } finally {
             log.setChangeLog(null);
-            databaseChangeLog.setRuntimeEnvironment(null);
         }
     }
 

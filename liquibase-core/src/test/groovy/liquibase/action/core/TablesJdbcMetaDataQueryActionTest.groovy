@@ -1,8 +1,9 @@
 package liquibase.action.core
 
-import liquibase.RuntimeEnvironment
+import liquibase.ExecutionEnvironment
 import liquibase.database.jvm.JdbcConnection
-import liquibase.executor.ExecutionOptions
+import  liquibase.ExecutionEnvironment
+import liquibase.executor.Row
 import liquibase.sdk.database.MockDatabase
 import liquibase.sdk.database.MockResultSet
 import liquibase.structure.core.Table
@@ -26,7 +27,7 @@ class TablesJdbcMetaDataQueryActionTest extends Specification {
         database.setConnection(connection)
 
         then:
-        action.getRawMetaData(new ExecutionOptions(new RuntimeEnvironment(database)))
+        action.getRawMetaData(new ExecutionEnvironment(database))
 
         where:
         catalogName | schemaName    | tableName
@@ -37,7 +38,7 @@ class TablesJdbcMetaDataQueryActionTest extends Specification {
     def "rawMetaDataToObject from mysql"() {
         when:
         def action = new TablesJdbcMetaDataQueryAction(null, null, null)
-        def Table table = action.rawMetaDataToObject([
+        def Table table = action.rawMetaDataToObject(new Row([
                 REF_GENERATION           : null,
                 TYPE_NAME                : null,
                 TABLE_NAME               : "cart_item",
@@ -48,7 +49,7 @@ class TablesJdbcMetaDataQueryActionTest extends Specification {
                 TABLE_SCHEM              : null,
                 TABLE_CAT                : "lbcat",
                 SELF_REFERENCING_COL_NAME: null,
-        ], options)
+        ]), new ExecutionEnvironment(new MockDatabase()))
 
         then:
         table.getName() == "cart_item"
@@ -59,7 +60,7 @@ class TablesJdbcMetaDataQueryActionTest extends Specification {
     def "rawMetaDataToObject with remarks from mysql"() {
         when:
         def action = new TablesJdbcMetaDataQueryAction(null, null, null)
-        def Table table = action.rawMetaDataToObject([
+        def Table table = action.rawMetaDataToObject(new Row([
                 REF_GENERATION           : null,
                 TYPE_NAME                : null,
                 TABLE_NAME               : "cart_item",
@@ -70,7 +71,7 @@ class TablesJdbcMetaDataQueryActionTest extends Specification {
                 TABLE_SCHEM              : null,
                 TABLE_CAT                : "lbcat",
                 SELF_REFERENCING_COL_NAME: null,
-        ], options)
+        ]), new ExecutionEnvironment(new MockDatabase()))
 
         then:
         table.getName() == "cart_item"

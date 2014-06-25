@@ -5,7 +5,7 @@ import liquibase.database.Database;
 import liquibase.database.core.DB2Database;
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.database.core.SQLiteDatabase.AlterTableVisitor;
-import liquibase.executor.ExecutionOptions;
+import  liquibase.ExecutionEnvironment;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.ReorganizeTableStatement;
 import liquibase.statement.core.SetNullableStatement;
@@ -85,14 +85,14 @@ public class AddNotNullConstraintChange extends AbstractChange {
     }
 
     @Override
-    public SqlStatement[] generateStatements(ExecutionOptions options) {
+    public SqlStatement[] generateStatements(ExecutionEnvironment env) {
 
 ////        if (database instanceof SQLiteDatabase) {
 //    		// return special statements for SQLite databases
 //    		return generateStatementsForSQLiteDatabase(database);
 //        }
 
-        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+        Database database = env.getTargetDatabase();
 
     	List<SqlStatement> statements = new ArrayList<SqlStatement>();
 
@@ -110,7 +110,7 @@ public class AddNotNullConstraintChange extends AbstractChange {
         return statements.toArray(new SqlStatement[statements.size()]);
     }
 
-    private SqlStatement[] generateStatementsForSQLiteDatabase(ExecutionOptions options) {
+    private SqlStatement[] generateStatementsForSQLiteDatabase(ExecutionEnvironment env) {
     	
     	// SQLite does not support this ALTER TABLE operation until now.
 		// For more information see: http://www.sqlite.org/omitted.html.
@@ -170,7 +170,7 @@ public class AddNotNullConstraintChange extends AbstractChange {
     		
 		try {
     		// alter table
-			statements.addAll(SQLiteDatabase.getAlterTableStatements(rename_alter_visitor, options,getCatalogName(), getSchemaName(),getTableName()));
+			statements.addAll(SQLiteDatabase.getAlterTableStatements(rename_alter_visitor, env,getCatalogName(), getSchemaName(),getTableName()));
     	} catch (Exception e) {
 			e.printStackTrace();
 		}

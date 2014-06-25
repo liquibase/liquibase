@@ -1,6 +1,6 @@
 package liquibase.verify.change;
 
-import liquibase.RuntimeEnvironment;
+import liquibase.ExecutionEnvironment;
 import liquibase.action.Action;
 import liquibase.actiongenerator.ActionGeneratorFactory;
 import liquibase.change.Change;
@@ -10,7 +10,7 @@ import liquibase.change.ChangeParameterMetaData;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.exception.ValidationErrors;
-import liquibase.executor.ExecutionOptions;
+import  liquibase.ExecutionEnvironment;
 import liquibase.serializer.LiquibaseSerializable;
 import liquibase.serializer.core.string.StringChangeLogSerializer;
 import liquibase.statement.SqlStatement;
@@ -46,13 +46,13 @@ public class VerifyChangeClassesTest extends AbstractVerifyTest {
                 TestState state = new TestState(name.getMethodName(), changeName, database.getShortName(), TestState.Type.SQL);
                 state.addComment("Database: " + database.getShortName());
 
-                ExecutionOptions options = new ExecutionOptions(new RuntimeEnvironment(database));
+                ExecutionEnvironment env = new ExecutionEnvironment(database);
 
                 Change change = changeFactory.create(changeName);
-                if (!change.supports(options)) {
+                if (!change.supports(env)) {
                     continue;
                 }
-                if (change.generateStatementsVolatile(options)) {
+                if (change.generateStatementsVolatile(env)) {
                     continue;
                 }
                 ChangeMetaData changeMetaData = ChangeFactory.getInstance().getChangeMetaData(change);
@@ -68,12 +68,12 @@ public class VerifyChangeClassesTest extends AbstractVerifyTest {
                     param.setValue(change, paramValue);
                 }
 
-                ValidationErrors errors = change.validate(options);
+                ValidationErrors errors = change.validate(env);
                 assertFalse("Validation errors for " + changeMetaData.getName() + " on " + database.getShortName() + ": " + errors.toString(), errors.hasErrors());
 
-                SqlStatement[] sqlStatements = change.generateStatements(options);
+                SqlStatement[] sqlStatements = change.generateStatements(env);
                 for (SqlStatement statement : sqlStatements) {
-                    Action[] actions = ActionGeneratorFactory.getInstance().generateActions(statement, options);
+                    Action[] actions = ActionGeneratorFactory.getInstance().generateActions(statement, env);
                     if (actions == null) {
                         System.out.println("Null sql for " + statement + " on " + database.getShortName());
                     } else {
@@ -99,14 +99,14 @@ public class VerifyChangeClassesTest extends AbstractVerifyTest {
                     continue;
                 }
 
-                ExecutionOptions options = new ExecutionOptions(new RuntimeEnvironment(database));
+                ExecutionEnvironment env = new ExecutionEnvironment(database);
 
 
                 Change change = changeFactory.create(changeName);
-                if (!change.supports(options)) {
+                if (!change.supports(env)) {
                     continue;
                 }
-                if (change.generateStatementsVolatile(options)) {
+                if (change.generateStatementsVolatile(env)) {
                     continue;
                 }
                 ChangeMetaData changeMetaData = ChangeFactory.getInstance().getChangeMetaData(change);
@@ -126,7 +126,7 @@ public class VerifyChangeClassesTest extends AbstractVerifyTest {
                     Object currentValue = paramToRemoveMetadata.getCurrentValue(change);
                     paramToRemoveMetadata.setValue(change, null);
 
-                    assertTrue("No errors even with "+changeMetaData.getName()+" with a null "+paramToRemove+" on "+database.getShortName(), change.validate(options).hasErrors());
+                    assertTrue("No errors even with "+changeMetaData.getName()+" with a null "+paramToRemove+" on "+database.getShortName(), change.validate(env).hasErrors());
                     paramToRemoveMetadata.setValue(change, currentValue);
                 }
             }
@@ -155,12 +155,12 @@ public class VerifyChangeClassesTest extends AbstractVerifyTest {
                 state.addComment("Database: " + database.getShortName());
 
                 Change baseChange = changeFactory.create(changeName);
-                ExecutionOptions options = new ExecutionOptions(new RuntimeEnvironment(database));
+                ExecutionEnvironment env = new ExecutionEnvironment(database);
 
-                if (!baseChange.supports(options)) {
+                if (!baseChange.supports(env)) {
                     continue;
                 }
-                if (baseChange.generateStatementsVolatile(options)) {
+                if (baseChange.generateStatementsVolatile(env)) {
                     continue;
                 }
                 ChangeMetaData changeMetaData = ChangeFactory.getInstance().getChangeMetaData(baseChange);
@@ -204,7 +204,7 @@ public class VerifyChangeClassesTest extends AbstractVerifyTest {
 
                     }
 
-                    ValidationErrors errors = change.validate(options);
+                    ValidationErrors errors = change.validate(env);
                     assertFalse("Validation errors for " + changeMetaData.getName() + " on "+database.getShortName()+": " +errors.toString(), errors.hasErrors());
 //
 //                    SqlStatement[] sqlStatements = change.generateStatements(database);

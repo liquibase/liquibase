@@ -1,6 +1,6 @@
 package liquibase.changelog.visitor;
 
-import liquibase.RuntimeEnvironment;
+import liquibase.ExecutionEnvironment;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.ChangeSet.ExecType;
 import liquibase.changelog.ChangeSet.RunStatus;
@@ -37,15 +37,15 @@ public class UpdateVisitor implements ChangeSetVisitor {
     }
 
     @Override
-    public void visit(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, RuntimeEnvironment runtimeEnvironment, Set<ChangeSetFilterResult> filterResults) throws LiquibaseException {
+    public void visit(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, ExecutionEnvironment env, Set<ChangeSetFilterResult> filterResults) throws LiquibaseException {
         ChangeSet.RunStatus runStatus = this.database.getRunStatus(changeSet);
         log.debug("Running Changeset:" + changeSet);
-        fireWillRun(changeSet, databaseChangeLog, runtimeEnvironment, runStatus);
+        fireWillRun(changeSet, databaseChangeLog, env, runStatus);
         ChangeSet.ExecType execType = changeSet.execute(databaseChangeLog, execListener, this.database);
         if (!runStatus.equals(ChangeSet.RunStatus.NOT_RAN)) {
             execType = ChangeSet.ExecType.RERAN;
         }
-        fireRan(changeSet, databaseChangeLog, runtimeEnvironment, execType);
+        fireRan(changeSet, databaseChangeLog, env, execType);
         // reset object quoting strategy after running changeset
         this.database.setObjectQuotingStrategy(ObjectQuotingStrategy.LEGACY);
         this.database.markChangeSetExecStatus(changeSet, execType);
@@ -53,13 +53,13 @@ public class UpdateVisitor implements ChangeSetVisitor {
         this.database.commit();
     }
 
-    private void fireWillRun(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, RuntimeEnvironment runtimeEnvironment, RunStatus runStatus) {
+    private void fireWillRun(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, ExecutionEnvironment env, RunStatus runStatus) {
       if (execListener != null) {
         execListener.willRun(changeSet, databaseChangeLog, database, runStatus);
       }      
     }
 
-    private void fireRan(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, RuntimeEnvironment runtimeEnvironment, ExecType execType) {
+    private void fireRan(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, ExecutionEnvironment env, ExecType execType) {
       if (execListener != null) {
         execListener.ran(changeSet, databaseChangeLog, database, execType);
       }

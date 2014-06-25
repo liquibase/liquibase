@@ -6,21 +6,21 @@ import liquibase.actiongenerator.ActionGeneratorChain;
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.exception.ValidationErrors;
-import liquibase.executor.ExecutionOptions;
+import  liquibase.ExecutionEnvironment;
 import liquibase.statement.core.AddPrimaryKeyStatement;
 import liquibase.util.StringUtils;
 
 public class AddPrimaryKeyGenerator extends AbstractSqlGenerator<AddPrimaryKeyStatement> {
 
     @Override
-    public boolean supports(AddPrimaryKeyStatement statement, ExecutionOptions options) {
-        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+    public boolean supports(AddPrimaryKeyStatement statement, ExecutionEnvironment env) {
+        Database database = env.getTargetDatabase();
 
         return (!(database instanceof SQLiteDatabase));
     }
 
     @Override
-    public ValidationErrors validate(AddPrimaryKeyStatement addPrimaryKeyStatement, ExecutionOptions options, ActionGeneratorChain chain) {
+    public ValidationErrors validate(AddPrimaryKeyStatement addPrimaryKeyStatement, ExecutionEnvironment env, ActionGeneratorChain chain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("columnNames", addPrimaryKeyStatement.getColumnNames());
         validationErrors.checkRequiredField("tableName", addPrimaryKeyStatement.getTableName());
@@ -28,8 +28,8 @@ public class AddPrimaryKeyGenerator extends AbstractSqlGenerator<AddPrimaryKeySt
     }
 
     @Override
-    public Action[] generateActions(AddPrimaryKeyStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
-        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+    public Action[] generateActions(AddPrimaryKeyStatement statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+        Database database = env.getTargetDatabase();
 
         String sql;
         if (statement.getConstraintName() == null  || database instanceof MySQLDatabase || database instanceof SybaseASADatabase) {

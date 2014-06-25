@@ -2,7 +2,7 @@ package liquibase.change.core;
 
 import liquibase.change.*;
 import liquibase.database.Database;
-import liquibase.executor.ExecutionOptions;
+import  liquibase.ExecutionEnvironment;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RenameViewStatement;
@@ -55,7 +55,7 @@ public class RenameViewChange extends AbstractChange {
     }
 
     @Override
-    public SqlStatement[] generateStatements(ExecutionOptions options) {
+    public SqlStatement[] generateStatements(ExecutionEnvironment env) {
         return new SqlStatement[]{new RenameViewStatement(getCatalogName(), getSchemaName(), getOldViewName(), getNewViewName())};
     }
 
@@ -71,10 +71,10 @@ public class RenameViewChange extends AbstractChange {
     }
 
     @Override
-    public ChangeStatus checkStatus(ExecutionOptions options) {
+    public ChangeStatus checkStatus(ExecutionEnvironment env) {
         try {
             ChangeStatus changeStatus = new ChangeStatus();
-            Database database = options.getRuntimeEnvironment().getTargetDatabase();
+            Database database = env.getTargetDatabase();
             View newView = SnapshotGeneratorFactory.getInstance().createSnapshot(new View(getCatalogName(), getSchemaName(), getNewViewName()), database);
             View oldView = SnapshotGeneratorFactory.getInstance().createSnapshot(new View(getCatalogName(), getSchemaName(), getOldViewName()), database);
 

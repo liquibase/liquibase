@@ -6,7 +6,7 @@ import liquibase.actiongenerator.ActionGeneratorChain;
 import liquibase.database.Database;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.ValidationErrors;
-import liquibase.executor.ExecutionOptions;
+import  liquibase.ExecutionEnvironment;
 import liquibase.statement.DatabaseFunction;
 import liquibase.statement.core.UpdateStatement;
 import liquibase.structure.core.Column;
@@ -16,7 +16,7 @@ import java.util.Date;
 public class UpdateGenerator extends AbstractSqlGenerator<UpdateStatement> {
 
     @Override
-    public ValidationErrors validate(UpdateStatement updateStatement, ExecutionOptions options, ActionGeneratorChain chain) {
+    public ValidationErrors validate(UpdateStatement updateStatement, ExecutionEnvironment env, ActionGeneratorChain chain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("tableName", updateStatement.getTableName());
         validationErrors.checkRequiredField("columns", updateStatement.getNewColumnValues());
@@ -24,8 +24,8 @@ public class UpdateGenerator extends AbstractSqlGenerator<UpdateStatement> {
     }
 
     @Override
-    public Action[] generateActions(UpdateStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
-        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+    public Action[] generateActions(UpdateStatement statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+        Database database = env.getTargetDatabase();
 
         StringBuffer sql = new StringBuffer("UPDATE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " SET");
         for (String column : statement.getNewColumnValues().keySet()) {

@@ -5,7 +5,7 @@ import liquibase.action.core.UnparsedSql;
 import liquibase.actiongenerator.ActionGeneratorChain;
 import liquibase.database.Database;
 import liquibase.database.core.*;
-import liquibase.executor.ExecutionOptions;
+import  liquibase.ExecutionEnvironment;
 import liquibase.statement.core.CreateIndexStatement;
 import liquibase.structure.core.Index;
 import liquibase.util.StringUtils;
@@ -22,14 +22,14 @@ public class CreateIndexGeneratorPostgres extends CreateIndexGenerator {
     }
 
     @Override
-    public boolean supports(CreateIndexStatement statement, ExecutionOptions options) {
-        return options.getRuntimeEnvironment().getTargetDatabase() instanceof PostgresDatabase;
+    public boolean supports(CreateIndexStatement statement, ExecutionEnvironment env) {
+        return env.getTargetDatabase() instanceof PostgresDatabase;
     }
 
     @Override
-    public Action[] generateActions(CreateIndexStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
+    public Action[] generateActions(CreateIndexStatement statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
 
-        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+        Database database = env.getTargetDatabase();
 
         // Default filter of index creation:
         // creation of all indexes with associations are switched off.

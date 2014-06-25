@@ -1,10 +1,9 @@
 package liquibase.action.visitor.core
 
-import liquibase.RuntimeEnvironment
-import liquibase.executor.ExecutionOptions
+import liquibase.ExecutionEnvironment
+import  liquibase.ExecutionEnvironment
 import liquibase.sdk.database.MockDatabase
 import liquibase.sql.visitor.StandardActionVisitorTest
-import spock.lang.Specification
 import spock.lang.Unroll
 
 class ReplaceSqlVisitorTest extends StandardActionVisitorTest {
@@ -16,7 +15,7 @@ class ReplaceSqlVisitorTest extends StandardActionVisitorTest {
         def visitor = new ReplaceSqlVisitor()
         visitor.setReplace(replace)
         visitor.setWith(with)
-        def finalSql = visitor.modifySql(originalSql, new ExecutionOptions(new RuntimeEnvironment(new MockDatabase())))
+        def finalSql = visitor.modifySql(originalSql, new ExecutionEnvironment(new MockDatabase()))
 
         then:
         finalSql == expected

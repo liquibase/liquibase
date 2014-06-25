@@ -3,7 +3,7 @@ package liquibase.sqlgenerator;
 import liquibase.actiongenerator.ActionGenerator;
 import liquibase.exception.ValidationErrors;
 import liquibase.exception.Warnings;
-import liquibase.executor.ExecutionOptions;
+import  liquibase.ExecutionEnvironment;
 import liquibase.statement.SqlStatement;
 
 /**

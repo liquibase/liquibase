@@ -1,6 +1,6 @@
 package liquibase.changelog.visitor;
 
-import liquibase.RuntimeEnvironment;
+import liquibase.ExecutionEnvironment;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.filter.ChangeSetFilterResult;
@@ -24,7 +24,7 @@ public class ListVisitor implements ChangeSetVisitor {
     }
 
     @Override
-    public void visit(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, RuntimeEnvironment runtimeEnvironment, Set<ChangeSetFilterResult> filterResults) throws LiquibaseException {
+    public void visit(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, ExecutionEnvironment env, Set<ChangeSetFilterResult> filterResults) throws LiquibaseException {
         seenChangeSets.add(changeSet);
     }
 }

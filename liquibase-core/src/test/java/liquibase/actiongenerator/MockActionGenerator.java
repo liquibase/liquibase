@@ -4,7 +4,7 @@ import liquibase.action.Action;
 import liquibase.action.core.UnparsedSql;
 import liquibase.exception.ValidationErrors;
 import liquibase.exception.Warnings;
-import liquibase.executor.ExecutionOptions;
+import  liquibase.ExecutionEnvironment;
 import liquibase.servicelocator.LiquibaseService;
 import liquibase.statement.SqlStatement;
 
@@ -35,17 +35,17 @@ public class MockActionGenerator implements ActionGenerator {
     }
 
     @Override
-    public boolean supports(SqlStatement statement, ExecutionOptions options) {
+    public boolean supports(SqlStatement statement, ExecutionEnvironment env) {
         return supports;
     }
 
     @Override
-    public boolean generateStatementsIsVolatile(ExecutionOptions options) {
+    public boolean generateStatementsIsVolatile(ExecutionEnvironment env) {
         return false;
     }
 
     @Override
-    public boolean generateRollbackStatementsIsVolatile(ExecutionOptions options) {
+    public boolean generateRollbackStatementsIsVolatile(ExecutionEnvironment env) {
         return false;
     }
 
@@ -56,25 +56,25 @@ public class MockActionGenerator implements ActionGenerator {
     }
 
     @Override
-    public Warnings warn(SqlStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
+    public Warnings warn(SqlStatement statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
         return new Warnings();
     }
 
     @Override
-    public ValidationErrors validate(SqlStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
-        ValidationErrors validationErrors = chain.validate(statement, options);
+    public ValidationErrors validate(SqlStatement statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+        ValidationErrors validationErrors = chain.validate(statement, env);
         validationErrors.addAll(errors);
         return validationErrors;
     }
 
     @Override
-    public Action[] generateActions(SqlStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
+    public Action[] generateActions(SqlStatement statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
         List<Action> actions = new ArrayList<Action>();
         for (String returnSql  : this.returnSql) {
             actions.add(new UnparsedSql(returnSql));
         }
 
-        actions.addAll(Arrays.asList(chain.generateActions(statement, options)));
+        actions.addAll(Arrays.asList(chain.generateActions(statement, env)));
 
         return actions.toArray(new Action[actions.size()]);
     }

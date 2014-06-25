@@ -1,10 +1,11 @@
 package liquibase.action.visitor;
 
 import liquibase.ContextExpression;
+import liquibase.ExecutionEnvironment;
 import liquibase.Labels;
 import liquibase.action.Action;
 import liquibase.change.CheckSum;
-import liquibase.executor.ExecutionOptions;
+import  liquibase.ExecutionEnvironment;
 import liquibase.serializer.LiquibaseSerializable;
 
 import java.util.Set;
@@ -25,7 +26,7 @@ public interface ActionVisitor extends LiquibaseSerializable {
      * Method called to modify a given Action. If this visitor should not modify the action, do nothing.
      * The visit method does not need to check the dbms or contexts, it only be called if the visitor applies to the active database and contexts
      */
-    public void visit(Action action, ExecutionOptions options);
+    public void visit(Action action, ExecutionEnvironment env);
 
     /**
      * Returns the shortName of databases this visitor applies to.

@@ -1,6 +1,6 @@
 package liquibase.snapshot.core;
 
-import liquibase.RuntimeEnvironment;
+import liquibase.ExecutionEnvironment;
 import liquibase.actiongenerator.ActionGeneratorChain;
 import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.snapshot.AbstractSnapshotGenerator;
@@ -14,7 +14,7 @@ import liquibase.structure.core.Table;
 public class TableSnapshotGenerator extends AbstractSnapshotGenerator<Table> {
 
     @Override
-    public SqlStatement[] generateAddToStatements(DatabaseObject example, RuntimeEnvironment runtimeEnvironment, ActionGeneratorChain chain) {
+    public SqlStatement[] generateAddToStatements(DatabaseObject example, ExecutionEnvironment env, ActionGeneratorChain chain) {
         if (example instanceof Schema) {
             return new SqlStatement[]{
                     new MetaDataQueryStatement(new Table(getCatalogName((Schema) example), getSchemaName(((Schema) example)), null)),
@@ -24,10 +24,10 @@ public class TableSnapshotGenerator extends AbstractSnapshotGenerator<Table> {
     }
 
     @Override
-    public void addTo(DatabaseObject object, DatabaseObjectCollection collection, RuntimeEnvironment runtimeEnvironment, ActionGeneratorChain chain) {
+    public void addTo(DatabaseObject object, DatabaseObjectCollection collection, ExecutionEnvironment env, ActionGeneratorChain chain) {
         if (object instanceof Schema) {
             for (Table table : collection.get(Table.class)) {
-                if (DatabaseObjectComparatorFactory.getInstance().isSameObject(table.getSchema(), ((Schema) object), runtimeEnvironment.getTargetDatabase())) {
+                if (DatabaseObjectComparatorFactory.getInstance().isSameObject(table.getSchema(), ((Schema) object), env.getTargetDatabase())) {
                     ((Schema) object).addDatabaseObject(table);
                 }
             }

@@ -6,19 +6,19 @@ import liquibase.actiongenerator.ActionGeneratorChain;
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.exception.ValidationErrors;
-import liquibase.executor.ExecutionOptions;
+import  liquibase.ExecutionEnvironment;
 import liquibase.statement.core.RenameTableStatement;
 import liquibase.structure.core.Table;
 
 public class RenameTableGenerator extends AbstractSqlGenerator<RenameTableStatement> {
 
     @Override
-    public boolean supports(RenameTableStatement statement, ExecutionOptions options) {
-        return !(options.getRuntimeEnvironment().getTargetDatabase() instanceof FirebirdDatabase);
+    public boolean supports(RenameTableStatement statement, ExecutionEnvironment env) {
+        return !(env.getTargetDatabase() instanceof FirebirdDatabase);
     }
 
     @Override
-    public ValidationErrors validate(RenameTableStatement renameTableStatement, ExecutionOptions options, ActionGeneratorChain chain) {
+    public ValidationErrors validate(RenameTableStatement renameTableStatement, ExecutionEnvironment env, ActionGeneratorChain chain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("newTableName", renameTableStatement.getNewTableName());
         validationErrors.checkRequiredField("oldTableName", renameTableStatement.getOldTableName());
@@ -26,8 +26,8 @@ public class RenameTableGenerator extends AbstractSqlGenerator<RenameTableStatem
     }
 
     @Override
-    public Action[] generateActions(RenameTableStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
-        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+    public Action[] generateActions(RenameTableStatement statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+        Database database = env.getTargetDatabase();
 
         String sql;
         if (database instanceof MSSQLDatabase) {

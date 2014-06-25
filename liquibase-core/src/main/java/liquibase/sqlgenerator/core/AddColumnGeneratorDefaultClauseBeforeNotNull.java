@@ -7,7 +7,7 @@ import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.ValidationErrors;
-import liquibase.executor.ExecutionOptions;
+import  liquibase.ExecutionEnvironment;
 import liquibase.statement.AutoIncrementConstraint;
 import liquibase.statement.core.AddColumnStatement;
 
@@ -21,8 +21,8 @@ public class AddColumnGeneratorDefaultClauseBeforeNotNull extends AddColumnGener
     }
 
     @Override
-    public boolean supports(AddColumnStatement statement, ExecutionOptions options) {
-        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+    public boolean supports(AddColumnStatement statement, ExecutionEnvironment env) {
+        Database database = env.getTargetDatabase();
 
         return database instanceof OracleDatabase
                 || database instanceof HsqlDatabase
@@ -36,10 +36,10 @@ public class AddColumnGeneratorDefaultClauseBeforeNotNull extends AddColumnGener
     }
 
     @Override
-    public ValidationErrors validate(AddColumnStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
-        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+    public ValidationErrors validate(AddColumnStatement statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+        Database database = env.getTargetDatabase();
 
-        ValidationErrors validationErrors = super.validate(statement, options, chain);
+        ValidationErrors validationErrors = super.validate(statement, env, chain);
         if (database instanceof DerbyDatabase && statement.isAutoIncrement()) {
             validationErrors.addError("Cannot add an identity column to derby");
         }
@@ -47,14 +47,14 @@ public class AddColumnGeneratorDefaultClauseBeforeNotNull extends AddColumnGener
     }
 
     @Override
-    public Action[] generateActions(AddColumnStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
-        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+    public Action[] generateActions(AddColumnStatement statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+        Database database = env.getTargetDatabase();
 
         String alterTable = "ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " ADD " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " " + DataTypeFactory.getInstance().fromDescription(statement.getColumnType() + (statement.isAutoIncrement() ? "{autoIncrement:true}" : ""), database).toDatabaseDataType(database);
 
-        alterTable += getDefaultClause(statement, options);
+        alterTable += getDefaultClause(statement, env);
 
-        if (primaryKeyBeforeNotNull(options)) {
+        if (primaryKeyBeforeNotNull(env)) {
             if (statement.isPrimaryKey()) {
                 alterTable += " PRIMARY KEY";
             }
@@ -71,7 +71,7 @@ public class AddColumnGeneratorDefaultClauseBeforeNotNull extends AddColumnGener
             alterTable += " NULL";
         }
 
-        if (!primaryKeyBeforeNotNull(options)) {
+        if (!primaryKeyBeforeNotNull(env)) {
             if (statement.isPrimaryKey()) {
                 alterTable += " PRIMARY KEY";
             }
@@ -80,15 +80,15 @@ public class AddColumnGeneratorDefaultClauseBeforeNotNull extends AddColumnGener
         List<Action> returnSql = new ArrayList<Action>();
         returnSql.add(new UnparsedSql(alterTable));
 
-        addUniqueConstrantStatements(statement, options, returnSql);
-        addForeignKeyStatements(statement, options, returnSql);
+        addUniqueConstrantStatements(statement, env, returnSql);
+        addForeignKeyStatements(statement, env, returnSql);
 
         return returnSql.toArray(new Action[returnSql.size()]);
     }
 
 
-    private String getDefaultClause(AddColumnStatement statement, ExecutionOptions options) {
-        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+    private String getDefaultClause(AddColumnStatement statement, ExecutionEnvironment env) {
+        Database database = env.getTargetDatabase();
         String clause = "";
         Object defaultValue = statement.getDefaultValue();
         if (defaultValue != null) {
@@ -97,8 +97,8 @@ public class AddColumnGeneratorDefaultClauseBeforeNotNull extends AddColumnGener
         return clause;
     }
 
-    private boolean primaryKeyBeforeNotNull(ExecutionOptions options) {
-        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+    private boolean primaryKeyBeforeNotNull(ExecutionEnvironment env) {
+        Database database = env.getTargetDatabase();
 
         return !(database instanceof HsqlDatabase || database instanceof H2Database);
     }

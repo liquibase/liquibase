@@ -6,7 +6,7 @@ import liquibase.actiongenerator.ActionGeneratorChain;
 import liquibase.database.Database;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
-import liquibase.executor.ExecutionOptions;
+import  liquibase.ExecutionEnvironment;
 import liquibase.statement.core.SelectFromDatabaseChangeLogStatement;
 import liquibase.util.StringUtils;
 
@@ -16,7 +16,7 @@ import java.util.List;
 public class SelectFromDatabaseChangeLogGenerator extends AbstractSqlGenerator<SelectFromDatabaseChangeLogStatement> {
 
     @Override
-    public ValidationErrors validate(SelectFromDatabaseChangeLogStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
+    public ValidationErrors validate(SelectFromDatabaseChangeLogStatement statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
         ValidationErrors errors = new ValidationErrors();
         errors.checkRequiredField("columnToSelect", statement.getColumnsToSelect());
 
@@ -24,8 +24,8 @@ public class SelectFromDatabaseChangeLogGenerator extends AbstractSqlGenerator<S
     }
 
     @Override
-    public Action[] generateActions(SelectFromDatabaseChangeLogStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
-        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+    public Action[] generateActions(SelectFromDatabaseChangeLogStatement statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+        Database database = env.getTargetDatabase();
 
         List<String> columnsToSelect = Arrays.asList(statement.getColumnsToSelect());
         for (int i=0; i<columnsToSelect.size(); i++) {

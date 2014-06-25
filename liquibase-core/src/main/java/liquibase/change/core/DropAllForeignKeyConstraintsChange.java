@@ -8,7 +8,7 @@ import liquibase.database.Database;
 import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.executor.ExecutionOptions;
+import  liquibase.ExecutionEnvironment;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.executor.Row;
@@ -53,14 +53,14 @@ public class DropAllForeignKeyConstraintsChange extends AbstractChange {
     }
 
     @Override
-    public SqlStatement[] generateStatements(ExecutionOptions options) {
+    public SqlStatement[] generateStatements(ExecutionEnvironment env) {
         List<SqlStatement> sqlStatements = new ArrayList<SqlStatement>();
 
-        List<DropForeignKeyConstraintChange> childDropChanges = generateChildren(options);
+        List<DropForeignKeyConstraintChange> childDropChanges = generateChildren(env);
 
         if (childDropChanges != null) {
             for (DropForeignKeyConstraintChange change : childDropChanges) {
-                sqlStatements.addAll(Arrays.asList(change.generateStatements(options)));
+                sqlStatements.addAll(Arrays.asList(change.generateStatements(env)));
             }
         }
 
@@ -72,11 +72,11 @@ public class DropAllForeignKeyConstraintsChange extends AbstractChange {
         return "Foreign keys on base table " + getBaseTableName() + " dropped";
     }
 
-    private List<DropForeignKeyConstraintChange> generateChildren(ExecutionOptions options) {
+    private List<DropForeignKeyConstraintChange> generateChildren(ExecutionEnvironment env) {
         // Make a new list
         List<DropForeignKeyConstraintChange> childDropChanges = new ArrayList<DropForeignKeyConstraintChange>();
 
-        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+        Database database = env.getTargetDatabase();
         Executor executor = ExecutorService.getInstance().getExecutor(database);
 
         FindForeignKeyConstraintsStatement sql = new FindForeignKeyConstraintsStatement(getBaseTableCatalogName(), getBaseTableSchemaName(), getBaseTableName());
@@ -116,7 +116,7 @@ public class DropAllForeignKeyConstraintsChange extends AbstractChange {
     }
 
     @Override
-    public boolean generateStatementsVolatile(ExecutionOptions options) {
+    public boolean generateStatementsVolatile(ExecutionEnvironment env) {
         return true;
     }
 

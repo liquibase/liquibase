@@ -2,7 +2,7 @@ package liquibase.change.core;
 
 import liquibase.change.*;
 import liquibase.exception.ValidationErrors;
-import liquibase.executor.ExecutionOptions;
+import  liquibase.ExecutionEnvironment;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.DatabaseFunction;
 import liquibase.statement.SequenceNextValueFunction;
@@ -39,7 +39,7 @@ public class AddDefaultValueChange extends AbstractChange {
     private SequenceNextValueFunction defaultValueSequenceNext;
 
     @Override
-    public ValidationErrors validate(ExecutionOptions options) {
+    public ValidationErrors validate(ExecutionEnvironment env) {
         ValidationErrors validate = new ValidationErrors();
 
         int nonNullValues = 0;
@@ -65,7 +65,7 @@ public class AddDefaultValueChange extends AbstractChange {
         if (nonNullValues > 1) {
             validate.addError("Only one defaultValue* value can be specified");
         } else {
-            validate.addAll(super.validate(options));
+            validate.addAll(super.validate(env));
         }
 
         return validate;
@@ -173,7 +173,7 @@ public class AddDefaultValueChange extends AbstractChange {
     }
 
     @Override
-    public SqlStatement[] generateStatements(ExecutionOptions options) {
+    public SqlStatement[] generateStatements(ExecutionEnvironment env) {
         Object defaultValue = null;
 
         if (getDefaultValue() != null) {
@@ -227,10 +227,10 @@ public class AddDefaultValueChange extends AbstractChange {
     }
 
     @Override
-    public ChangeStatus checkStatus(ExecutionOptions options) {
+    public ChangeStatus checkStatus(ExecutionEnvironment env) {
         ChangeStatus result = new ChangeStatus();
         try {
-            Column column = SnapshotGeneratorFactory.getInstance().createSnapshot(new Column(Table.class, getCatalogName(), getSchemaName(), getTableName(), getColumnName()), options.getRuntimeEnvironment().getTargetDatabase());
+            Column column = SnapshotGeneratorFactory.getInstance().createSnapshot(new Column(Table.class, getCatalogName(), getSchemaName(), getTableName(), getColumnName()), env.getTargetDatabase());
             if (column == null) {
                 return result.unknown("Column " + getColumnName() + " does not exist");
             }

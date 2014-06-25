@@ -1,7 +1,7 @@
 package liquibase.changelog;
 
 import liquibase.ContextExpression;
-import liquibase.RuntimeEnvironment;
+import liquibase.ExecutionEnvironment;
 import liquibase.action.visitor.ActionVisitor;
 import liquibase.action.visitor.ActionVisitorFactory;
 import liquibase.Labels;
@@ -16,7 +16,6 @@ import liquibase.database.Database;
 import liquibase.database.DatabaseList;
 import liquibase.database.ObjectQuotingStrategy;
 import liquibase.exception.*;
-import liquibase.executor.ExecutionOptions;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.logging.LogFactory;
@@ -601,13 +600,13 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
                     if (((rollback instanceof DbmsTargetedChange)) && !DatabaseList.definitionMatches(((DbmsTargetedChange) rollback).getDbms(), database, true)) {
                         continue;
                     }
-                    SqlStatement[] statements = rollback.generateStatements(new ExecutionOptions(new RuntimeEnvironment(database)));
+                    SqlStatement[] statements = rollback.generateStatements(new ExecutionEnvironment(database));
                     if (statements == null) {
                         continue;
                     }
                     for (SqlStatement statement : statements) {
                         try {
-                            executor.execute(statement, new ExecutionOptions(actionVisitors, new RuntimeEnvironment(database, null, null)));
+                            executor.execute(statement, new ExecutionEnvironment(database).setChangeSet(this));
                         } catch (DatabaseException e) {
                             throw new RollbackFailedException("Error executing custom SQL [" + statement + "]", e);
                         }
@@ -749,9 +748,9 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
             return true;
         }
 
-        ExecutionOptions options = new ExecutionOptions(new RuntimeEnvironment(database));
+        ExecutionEnvironment env = new ExecutionEnvironment(database);
         for (Change change : getChanges()) {
-            if (!change.supportsRollback(options)) {
+            if (!change.supportsRollback(env)) {
                 return false;
             }
         }

@@ -1,5 +1,6 @@
 package liquibase.action.core;
 
+import liquibase.ExecutionEnvironment;
 import liquibase.action.MetaDataQueryAction;
 import liquibase.database.Database;
 import liquibase.database.core.DB2Database;
@@ -7,7 +8,7 @@ import liquibase.database.core.FirebirdDatabase;
 import liquibase.database.core.OracleDatabase;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
-import liquibase.executor.ExecutionOptions;
+import  liquibase.ExecutionEnvironment;
 import liquibase.executor.QueryResult;
 import liquibase.executor.Row;
 import liquibase.structure.DatabaseObject;
@@ -56,7 +57,7 @@ public class ColumnsJdbcMetaDataQueryAction extends MetaDataQueryAction {
         return getAttribute(CATALOG_NAME, String.class);
     }
 
-    protected DatabaseObject rawMetaDataToObject(Row row, ExecutionOptions options) {
+    protected DatabaseObject rawMetaDataToObject(Row row, ExecutionEnvironment env) {
         Column column = new Column(Table.class, row.get("TABLE_CAT", String.class), row.get("TABLE_SCHEM", String.class), row.get("TABLE_NAME", String.class), row.get("COLUMN_NAME", String.class))
                 .setPosition(row.get("ORDINAL_POSITION", Integer.class))
                 .setRemarks(StringUtils.trimToNull(row.get("REMARKS", String.class)))
@@ -64,14 +65,14 @@ public class ColumnsJdbcMetaDataQueryAction extends MetaDataQueryAction {
         if (row.get("IS_AUTOINCREMENT", false)) {
             column.setAutoIncrementInformation(new Column.AutoIncrementInformation());
         }
-        column.setType(readDataType(row, options));
+        column.setType(readDataType(row, env));
 
         return column;
     }
 
     @Override
-    protected QueryResult getRawMetaData(ExecutionOptions options) throws DatabaseException {
-        DatabaseMetaData metaData = ((JdbcConnection) options.getRuntimeEnvironment().getTargetDatabase().getConnection()).getMetaData();
+    protected QueryResult getRawMetaData(ExecutionEnvironment env) throws DatabaseException {
+        DatabaseMetaData metaData = ((JdbcConnection) env.getTargetDatabase().getConnection()).getMetaData();
 
         try {
             return new QueryResult(JdbcUtils.extract(metaData.getColumns(
@@ -84,8 +85,8 @@ public class ColumnsJdbcMetaDataQueryAction extends MetaDataQueryAction {
         }
     }
 
-    protected DataType readDataType(Row row, ExecutionOptions options) {
-        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+    protected DataType readDataType(Row row, ExecutionEnvironment env) {
+        Database database = env.getTargetDatabase();
 
         if (database instanceof OracleDatabase) {
             String dataType = row.get("DATA_TYPE", String.class);

@@ -9,19 +9,19 @@ import liquibase.database.core.FirebirdDatabase;
 import liquibase.database.core.H2Database;
 import liquibase.database.core.HsqlDatabase;
 import liquibase.exception.ValidationErrors;
-import liquibase.executor.ExecutionOptions;
+import  liquibase.ExecutionEnvironment;
 import liquibase.statement.core.AlterSequenceStatement;
 
 public class AlterSequenceGenerator extends AbstractSqlGenerator<AlterSequenceStatement> {
 
     @Override
-    public boolean supports(AlterSequenceStatement statement, ExecutionOptions options) {
-        return options.getRuntimeEnvironment().getTargetDatabase().supportsSequences();
+    public boolean supports(AlterSequenceStatement statement, ExecutionEnvironment env) {
+        return env.getTargetDatabase().supportsSequences();
     }
 
     @Override
-    public ValidationErrors validate(AlterSequenceStatement alterSequenceStatement, ExecutionOptions options, ActionGeneratorChain chain) {
-        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+    public ValidationErrors validate(AlterSequenceStatement alterSequenceStatement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+        Database database = env.getTargetDatabase();
 
         ValidationErrors validationErrors = new ValidationErrors();
 
@@ -36,8 +36,8 @@ public class AlterSequenceGenerator extends AbstractSqlGenerator<AlterSequenceSt
     }
 
     @Override
-    public Action[] generateActions(AlterSequenceStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
-        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+    public Action[] generateActions(AlterSequenceStatement statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+        Database database = env.getTargetDatabase();
 
         StringBuffer buffer = new StringBuffer();
         buffer.append("ALTER SEQUENCE ");

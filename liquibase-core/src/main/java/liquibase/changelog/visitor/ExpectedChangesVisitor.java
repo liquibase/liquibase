@@ -1,6 +1,6 @@
 package liquibase.changelog.visitor;
 
-import liquibase.RuntimeEnvironment;
+import liquibase.ExecutionEnvironment;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.RanChangeSet;
@@ -22,7 +22,7 @@ public class ExpectedChangesVisitor implements ChangeSetVisitor {
     }
 
     @Override
-    public void visit(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, RuntimeEnvironment runtimeEnvironment, Set<ChangeSetFilterResult> filterResults) throws LiquibaseException {
+    public void visit(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, ExecutionEnvironment env, Set<ChangeSetFilterResult> filterResults) throws LiquibaseException {
         for (Iterator<RanChangeSet> i = unexpectedChangeSets.iterator(); i.hasNext(); ) {
             RanChangeSet ranChangeSet = i.next();
             if (ranChangeSet.isSameAs(changeSet)) {

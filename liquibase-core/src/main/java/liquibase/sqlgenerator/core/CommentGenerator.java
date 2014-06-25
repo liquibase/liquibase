@@ -4,21 +4,21 @@ import liquibase.action.Action;
 import liquibase.action.core.SingleLineComment;
 import liquibase.actiongenerator.ActionGeneratorChain;
 import liquibase.exception.ValidationErrors;
-import liquibase.executor.ExecutionOptions;
+import  liquibase.ExecutionEnvironment;
 import liquibase.statement.core.CommentStatement;
 
 public class CommentGenerator extends AbstractSqlGenerator<CommentStatement> {
 
     @Override
-    public Action[] generateActions(CommentStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
+    public Action[] generateActions(CommentStatement statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
         return new Action[] {
-                new SingleLineComment(statement.getText(), options.getRuntimeEnvironment().getTargetDatabase().getLineComment())
+                new SingleLineComment(statement.getText(), env.getTargetDatabase().getLineComment())
 		};
 	}
 
 	@Override
     public ValidationErrors validate(CommentStatement comment,
-                                     ExecutionOptions options, ActionGeneratorChain chain) {
+                                     ExecutionEnvironment env, ActionGeneratorChain chain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("text", comment.getText());
         return validationErrors;

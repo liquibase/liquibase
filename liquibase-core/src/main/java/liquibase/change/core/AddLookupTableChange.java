@@ -3,7 +3,7 @@ package liquibase.change.core;
 import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.database.core.*;
-import liquibase.executor.ExecutionOptions;
+import  liquibase.ExecutionEnvironment;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RawSqlStatement;
@@ -135,11 +135,11 @@ public class AddLookupTableChange extends AbstractChange {
     }
 
     @Override
-    public boolean supports(ExecutionOptions options) {
-        if (options.getRuntimeEnvironment().getTargetDatabase() instanceof HsqlDatabase) {
+    public boolean supports(ExecutionEnvironment env) {
+        if (env.getTargetDatabase() instanceof HsqlDatabase) {
             return false;
         }
-        return super.supports(options);
+        return super.supports(env);
     }
 
     @Override
@@ -160,8 +160,8 @@ public class AddLookupTableChange extends AbstractChange {
     }
 
     @Override
-    public SqlStatement[] generateStatements(ExecutionOptions options) {
-        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+    public SqlStatement[] generateStatements(ExecutionEnvironment env) {
+        Database database = env.getTargetDatabase();
         List<SqlStatement> statements = new ArrayList<SqlStatement>();
 
         String newTableCatalogName = getNewTableCatalogName();
@@ -195,7 +195,7 @@ public class AddLookupTableChange extends AbstractChange {
             addNotNullChange.setTableName(getNewTableName());
             addNotNullChange.setColumnName(getNewColumnName());
             addNotNullChange.setColumnDataType(getNewColumnDataType());
-            statements.addAll(Arrays.asList(addNotNullChange.generateStatements(options)));
+            statements.addAll(Arrays.asList(addNotNullChange.generateStatements(env)));
         }
 
         if (database instanceof DB2Database) {
@@ -206,7 +206,7 @@ public class AddLookupTableChange extends AbstractChange {
         addPKChange.setSchemaName(newTableSchemaName);
         addPKChange.setTableName(getNewTableName());
         addPKChange.setColumnNames(getNewColumnName());
-        statements.addAll(Arrays.asList(addPKChange.generateStatements(options)));
+        statements.addAll(Arrays.asList(addPKChange.generateStatements(env)));
 
         if (database instanceof DB2Database) {
             statements.add(new ReorganizeTableStatement(newTableCatalogName,newTableSchemaName, getNewTableName()));
@@ -221,14 +221,14 @@ public class AddLookupTableChange extends AbstractChange {
         addFKChange.setReferencedColumnNames(getNewColumnName());
 
         addFKChange.setConstraintName(getFinalConstraintName());
-        statements.addAll(Arrays.asList(addFKChange.generateStatements(options)));
+        statements.addAll(Arrays.asList(addFKChange.generateStatements(env)));
 
         return statements.toArray(new SqlStatement[statements.size()]);
     }
 
     @Override
-    public ChangeStatus checkStatus(ExecutionOptions options) {
-        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+    public ChangeStatus checkStatus(ExecutionEnvironment env) {
+        Database database = env.getTargetDatabase();
         ChangeStatus result = new ChangeStatus();
         try {
             Table newTableExample = new Table(getNewTableCatalogName(), getNewTableSchemaName(), getNewTableName());

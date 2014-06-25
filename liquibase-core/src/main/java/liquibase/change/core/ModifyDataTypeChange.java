@@ -5,7 +5,7 @@ import liquibase.change.ChangeMetaData;
 import liquibase.change.DatabaseChange;
 import liquibase.change.DatabaseChangeProperty;
 import liquibase.database.core.DB2Database;
-import liquibase.executor.ExecutionOptions;
+import  liquibase.ExecutionEnvironment;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.ModifyDataTypeStatement;
 import liquibase.statement.core.ReorganizeTableStatement;
@@ -25,9 +25,9 @@ public class ModifyDataTypeChange extends AbstractChange {
     }
 
     @Override
-    public SqlStatement[] generateStatements(ExecutionOptions options) {
+    public SqlStatement[] generateStatements(ExecutionEnvironment env) {
         ModifyDataTypeStatement modifyDataTypeStatement = new ModifyDataTypeStatement(getCatalogName(), getSchemaName(), getTableName(), getColumnName(), getNewDataType());
-        if (options.getRuntimeEnvironment().getTargetDatabase() instanceof DB2Database) {
+        if (env.getTargetDatabase() instanceof DB2Database) {
             return new SqlStatement[] {
                     modifyDataTypeStatement,
                     new ReorganizeTableStatement(getCatalogName(), getSchemaName(), getTableName())

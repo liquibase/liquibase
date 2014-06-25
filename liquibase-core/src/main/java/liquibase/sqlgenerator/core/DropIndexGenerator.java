@@ -6,7 +6,7 @@ import liquibase.actiongenerator.ActionGeneratorChain;
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.exception.ValidationErrors;
-import liquibase.executor.ExecutionOptions;
+import  liquibase.ExecutionEnvironment;
 import liquibase.statement.core.DropIndexStatement;
 import liquibase.structure.core.Index;
 import liquibase.util.StringUtils;
@@ -16,8 +16,8 @@ import java.util.List;
 public class DropIndexGenerator extends AbstractSqlGenerator<DropIndexStatement> {
 
     @Override
-    public ValidationErrors validate(DropIndexStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
-        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+    public ValidationErrors validate(DropIndexStatement statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+        Database database = env.getTargetDatabase();
 
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("indexName", statement.getIndexName());
@@ -30,8 +30,8 @@ public class DropIndexGenerator extends AbstractSqlGenerator<DropIndexStatement>
     }
 
     @Override
-    public Action[] generateActions(DropIndexStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
-        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+    public Action[] generateActions(DropIndexStatement statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+        Database database = env.getTargetDatabase();
 
         List<String> associatedWith = StringUtils.splitAndTrim(statement.getAssociatedWith(), ",");
         if (associatedWith != null) {

@@ -1,7 +1,7 @@
 package liquibase.action.visitor.core;
 
 import liquibase.action.visitor.AbstractSqlVisitor;
-import liquibase.executor.ExecutionOptions;
+import  liquibase.ExecutionEnvironment;
 
 /**
  * ActionVisitor that replaces the SQL in an Action with the result of a regular expression replacement.
@@ -42,7 +42,7 @@ public class RegExpReplaceSqlVisitor extends AbstractSqlVisitor {
     }
 
     @Override
-    public String modifySql(String sql, ExecutionOptions options) {
+    public String modifySql(String sql, ExecutionEnvironment env) {
         if (getReplace() == null || getWith() == null) {
             return sql;
         } else {

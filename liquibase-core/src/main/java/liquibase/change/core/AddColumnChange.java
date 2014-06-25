@@ -4,7 +4,7 @@ import liquibase.actiongenerator.ActionGeneratorFactory;
 import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.database.core.*;
-import liquibase.executor.ExecutionOptions;
+import  liquibase.ExecutionEnvironment;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.*;
 import liquibase.statement.core.AddColumnStatement;
@@ -84,9 +84,9 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
     }
 
     @Override
-    public SqlStatement[] generateStatements(ExecutionOptions options) {
+    public SqlStatement[] generateStatements(ExecutionEnvironment env) {
 
-        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+        Database database = env.getTargetDatabase();
         List<SqlStatement> sql = new ArrayList<SqlStatement>();
 
         if (getColumns().size() == 0) {
@@ -154,7 +154,7 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
           String columnRemarks = StringUtils.trimToNull(column.getRemarks());
           if (columnRemarks != null) {
               SetColumnRemarksStatement remarksStatement = new SetColumnRemarksStatement(catalogName, schemaName, tableName, column.getName(), columnRemarks);
-              if (ActionGeneratorFactory.getInstance().supports(remarksStatement, options)) {
+              if (ActionGeneratorFactory.getInstance().supports(remarksStatement, env)) {
                   sql.add(remarksStatement);
               }
           }
@@ -189,11 +189,11 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
     }
 
     @Override
-    public ChangeStatus checkStatus(ExecutionOptions options) {
+    public ChangeStatus checkStatus(ExecutionEnvironment env) {
         ChangeStatus result = new ChangeStatus();
         try {
             for (AddColumnConfig column : getColumns()) {
-                Column snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(new Column(Table.class, getCatalogName(), getSchemaName(), getTableName(), column.getName()), options.getRuntimeEnvironment().getTargetDatabase());
+                Column snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(new Column(Table.class, getCatalogName(), getSchemaName(), getTableName(), column.getName()), env.getTargetDatabase());
                 result.assertComplete(snapshot != null, "Column "+column.getName()+" does not exist");
 
                 if (snapshot != null) {

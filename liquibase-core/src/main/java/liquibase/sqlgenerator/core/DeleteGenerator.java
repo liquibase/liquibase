@@ -6,22 +6,22 @@ import liquibase.actiongenerator.ActionGeneratorChain;
 import liquibase.database.Database;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.ValidationErrors;
-import liquibase.executor.ExecutionOptions;
+import  liquibase.ExecutionEnvironment;
 import liquibase.statement.core.DeleteStatement;
 import liquibase.structure.core.Column;
 
 public class DeleteGenerator extends AbstractSqlGenerator<DeleteStatement> {
 
     @Override
-    public ValidationErrors validate(DeleteStatement deleteStatement, ExecutionOptions options, ActionGeneratorChain chain) {
+    public ValidationErrors validate(DeleteStatement deleteStatement, ExecutionEnvironment env, ActionGeneratorChain chain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("tableName", deleteStatement.getTableName());
         return validationErrors;
     }
 
     @Override
-    public Action[] generateActions(DeleteStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
-        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+    public Action[] generateActions(DeleteStatement statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+        Database database = env.getTargetDatabase();
 
         StringBuffer sql = new StringBuffer("DELETE FROM " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()));
 

@@ -5,7 +5,7 @@ import liquibase.action.core.UnparsedSql;
 import liquibase.actiongenerator.ActionGeneratorChain;
 import liquibase.database.Database;
 import liquibase.database.core.InformixDatabase;
-import liquibase.executor.ExecutionOptions;
+import  liquibase.ExecutionEnvironment;
 import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.statement.core.AddPrimaryKeyStatement;
 
@@ -17,15 +17,15 @@ public class AddPrimaryKeyGeneratorInformix extends AddPrimaryKeyGenerator {
     }
 
     @Override
-    public boolean supports(AddPrimaryKeyStatement statement, ExecutionOptions options) {
-        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+    public boolean supports(AddPrimaryKeyStatement statement, ExecutionEnvironment env) {
+        Database database = env.getTargetDatabase();
 
         return (database instanceof InformixDatabase);
     }
 
     @Override
-    public Action[] generateActions(AddPrimaryKeyStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
-        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+    public Action[] generateActions(AddPrimaryKeyStatement statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+        Database database = env.getTargetDatabase();
 
         StringBuilder sql = new StringBuilder();
         sql.append("ALTER TABLE ");

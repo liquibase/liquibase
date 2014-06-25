@@ -8,7 +8,7 @@ import liquibase.database.core.DB2Database;
 import liquibase.database.core.OracleDatabase;
 import liquibase.database.core.PostgresDatabase;
 import liquibase.exception.ValidationErrors;
-import liquibase.executor.ExecutionOptions;
+import  liquibase.ExecutionEnvironment;
 import liquibase.statement.core.SetColumnRemarksStatement;
 
 public class SetColumnRemarksGenerator extends AbstractSqlGenerator<SetColumnRemarksStatement> {
@@ -18,14 +18,14 @@ public class SetColumnRemarksGenerator extends AbstractSqlGenerator<SetColumnRem
 	}
 
 	@Override
-	public boolean supports(SetColumnRemarksStatement statement, ExecutionOptions options) {
-        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+	public boolean supports(SetColumnRemarksStatement statement, ExecutionEnvironment env) {
+        Database database = env.getTargetDatabase();
 
         return database instanceof OracleDatabase || database instanceof PostgresDatabase || database instanceof DB2Database;
 	}
 
 	@Override
-    public ValidationErrors validate(SetColumnRemarksStatement setColumnRemarksStatement, ExecutionOptions options, ActionGeneratorChain chain) {
+    public ValidationErrors validate(SetColumnRemarksStatement setColumnRemarksStatement, ExecutionEnvironment env, ActionGeneratorChain chain) {
 		ValidationErrors validationErrors = new ValidationErrors();
 		validationErrors.checkRequiredField("tableName", setColumnRemarksStatement.getTableName());
 		validationErrors.checkRequiredField("columnName", setColumnRemarksStatement.getColumnName());
@@ -34,8 +34,8 @@ public class SetColumnRemarksGenerator extends AbstractSqlGenerator<SetColumnRem
 	}
 
     @Override
-    public Action[] generateActions(SetColumnRemarksStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
-        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+    public Action[] generateActions(SetColumnRemarksStatement statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+        Database database = env.getTargetDatabase();
 
         return new Action[] { new UnparsedSql("COMMENT ON COLUMN " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName())
 				+ "." + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " IS '"

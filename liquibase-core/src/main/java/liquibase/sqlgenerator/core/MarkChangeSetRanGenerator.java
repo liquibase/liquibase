@@ -11,7 +11,7 @@ import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
-import liquibase.executor.ExecutionOptions;
+import  liquibase.ExecutionEnvironment;
 import liquibase.statement.DatabaseFunction;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.InsertStatement;
@@ -25,7 +25,7 @@ import java.util.List;
 public class MarkChangeSetRanGenerator extends AbstractSqlGenerator<MarkChangeSetRanStatement> {
 
     @Override
-    public ValidationErrors validate(MarkChangeSetRanStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
+    public ValidationErrors validate(MarkChangeSetRanStatement statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("changeSet", statement.getChangeSet());
 
@@ -33,8 +33,8 @@ public class MarkChangeSetRanGenerator extends AbstractSqlGenerator<MarkChangeSe
     }
 
     @Override
-    public Action[] generateActions(MarkChangeSetRanStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
-        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+    public Action[] generateActions(MarkChangeSetRanStatement statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+        Database database = env.getTargetDatabase();
         String dateValue = database.getCurrentDateTimeFunction();
 
         ChangeSet changeSet = statement.getChangeSet();
@@ -80,7 +80,7 @@ public class MarkChangeSetRanGenerator extends AbstractSqlGenerator<MarkChangeSe
             throw new UnexpectedLiquibaseException(e);
         }
 
-        return ActionGeneratorFactory.getInstance().generateActions(runStatement, options);
+        return ActionGeneratorFactory.getInstance().generateActions(runStatement, env);
     }
 
     private String limitSize(String string) {

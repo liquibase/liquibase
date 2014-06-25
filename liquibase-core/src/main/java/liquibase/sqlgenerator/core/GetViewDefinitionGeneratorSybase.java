@@ -6,7 +6,7 @@ import liquibase.action.core.UnparsedSql;
 import liquibase.actiongenerator.ActionGeneratorChain;
 import liquibase.database.Database;
 import liquibase.database.core.SybaseDatabase;
-import liquibase.executor.ExecutionOptions;
+import  liquibase.ExecutionEnvironment;
 import liquibase.statement.core.GetViewDefinitionStatement;
 
 public class GetViewDefinitionGeneratorSybase extends GetViewDefinitionGenerator {
@@ -16,13 +16,13 @@ public class GetViewDefinitionGeneratorSybase extends GetViewDefinitionGenerator
     }
 
     @Override
-    public boolean supports(GetViewDefinitionStatement statement, ExecutionOptions options) {
-        return options.getRuntimeEnvironment().getTargetDatabase() instanceof SybaseDatabase;
+    public boolean supports(GetViewDefinitionStatement statement, ExecutionEnvironment env) {
+        return env.getTargetDatabase() instanceof SybaseDatabase;
     }
 
     @Override
-    public Action[] generateActions(GetViewDefinitionStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
-        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+    public Action[] generateActions(GetViewDefinitionStatement statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+        Database database = env.getTargetDatabase();
 
         CatalogAndSchema schema = new CatalogAndSchema(statement.getCatalogName(), statement.getSchemaName()).customize(database);
 

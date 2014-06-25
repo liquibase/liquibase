@@ -1,5 +1,6 @@
 package liquibase.sqlgenerator.core;
 
+import liquibase.ExecutionEnvironment;
 import liquibase.action.Action;
 import liquibase.action.core.UnparsedSql;
 import liquibase.actiongenerator.ActionGeneratorChain;
@@ -7,13 +8,13 @@ import liquibase.database.Database;
 import liquibase.database.core.PostgresDatabase;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
-import liquibase.executor.ExecutionOptions;
+import  liquibase.ExecutionEnvironment;
 import liquibase.statement.core.InsertOrUpdateStatement;
 
 public class InsertOrUpdateGeneratorPostgres extends InsertOrUpdateGenerator {
 	@Override
-    public boolean supports(InsertOrUpdateStatement statement, ExecutionOptions options) {
-        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+    public boolean supports(InsertOrUpdateStatement statement, ExecutionEnvironment env) {
+        Database database = env.getTargetDatabase();
 
         if (database instanceof PostgresDatabase) {
             try {
@@ -26,8 +27,8 @@ public class InsertOrUpdateGeneratorPostgres extends InsertOrUpdateGenerator {
 	}
 
     @Override
-    public Action[] generateActions(InsertOrUpdateStatement insertOrUpdateStatement, ExecutionOptions options, ActionGeneratorChain chain) {
-        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+    public Action[] generateActions(InsertOrUpdateStatement insertOrUpdateStatement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+        Database database = env.getTargetDatabase();
 
         StringBuilder generatedSql = new StringBuilder();
 		generatedSql.append("DO\n");
@@ -35,7 +36,7 @@ public class InsertOrUpdateGeneratorPostgres extends InsertOrUpdateGenerator {
 		generatedSql.append("BEGIN\n");
 		try {
 			generatedSql.append(getUpdateStatement(insertOrUpdateStatement,
-                    options, getWhereClause(insertOrUpdateStatement, options),
+                    env, getWhereClause(insertOrUpdateStatement, env),
 					chain));
 		} catch (LiquibaseException e) {
 			// do a select statement instead
@@ -49,11 +50,10 @@ public class InsertOrUpdateGeneratorPostgres extends InsertOrUpdateGenerator {
 			// Additionally the statement is not being terminated correctly, it is missing a semi-colon.
 			generatedSql.append("perform * from "
 					+ database.escapeTableName(insertOrUpdateStatement.getCatalogName(), insertOrUpdateStatement.getSchemaName(),
-							insertOrUpdateStatement.getTableName()) + " WHERE " + getWhereClause(insertOrUpdateStatement, options) + ";\n");
+							insertOrUpdateStatement.getTableName()) + " WHERE " + getWhereClause(insertOrUpdateStatement, env) + ";\n");
 		}
 		generatedSql.append("IF not found THEN\n");
-		generatedSql.append(getInsertStatement(insertOrUpdateStatement,
-                options, chain));
+		generatedSql.append(getInsertStatement(insertOrUpdateStatement, env, chain));
 		generatedSql.append("END IF;\n");
 		generatedSql.append("END;\n");
 		generatedSql.append("$$\n");
@@ -62,13 +62,13 @@ public class InsertOrUpdateGeneratorPostgres extends InsertOrUpdateGenerator {
 	}
 
 	@Override
-	protected String getElse(ExecutionOptions arg0) {
+	protected String getElse(ExecutionEnvironment env) {
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	protected String getRecordCheck(InsertOrUpdateStatement arg0,
-			ExecutionOptions arg1, String arg2) {
+                                    ExecutionEnvironment env, String arg2) {
 		throw new UnsupportedOperationException();
 	}
 }

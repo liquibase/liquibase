@@ -7,7 +7,7 @@ import liquibase.actiongenerator.ActionGeneratorChain;
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.exception.ValidationErrors;
-import liquibase.executor.ExecutionOptions;
+import  liquibase.ExecutionEnvironment;
 import liquibase.statement.core.CreateViewStatement;
 
 import java.util.ArrayList;
@@ -16,11 +16,11 @@ import java.util.List;
 public class CreateViewGenerator extends AbstractSqlGenerator<CreateViewStatement> {
 
     @Override
-    public ValidationErrors validate(CreateViewStatement createViewStatement, ExecutionOptions options, ActionGeneratorChain chain) {
+    public ValidationErrors validate(CreateViewStatement createViewStatement, ExecutionEnvironment env, ActionGeneratorChain chain) {
 
-        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+        Database database = env.getTargetDatabase();
     	if (database instanceof InformixDatabase) {
-    		return new CreateViewGeneratorInformix().validate(createViewStatement, options, chain);
+    		return new CreateViewGeneratorInformix().validate(createViewStatement, env, chain);
     	}
     	
         ValidationErrors validationErrors = new ValidationErrors();
@@ -36,10 +36,10 @@ public class CreateViewGenerator extends AbstractSqlGenerator<CreateViewStatemen
     }
 
     @Override
-    public Action[] generateActions(CreateViewStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
-        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+    public Action[] generateActions(CreateViewStatement statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+        Database database = env.getTargetDatabase();
     	if (database instanceof InformixDatabase) {
-    		return new CreateViewGeneratorInformix().generateActions(statement, options, chain);
+    		return new CreateViewGeneratorInformix().generateActions(statement, env, chain);
     	}
     	
         String createClause;

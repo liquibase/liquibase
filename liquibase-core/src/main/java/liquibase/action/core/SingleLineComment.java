@@ -3,7 +3,7 @@ package liquibase.action.core;
 import liquibase.action.*;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.ExecuteResult;
-import liquibase.executor.ExecutionOptions;
+import  liquibase.ExecutionEnvironment;
 import liquibase.executor.QueryResult;
 import liquibase.executor.UpdateResult;
 
@@ -26,17 +26,17 @@ public class SingleLineComment implements QueryAction, ExecuteAction, UpdateActi
     }
 
     @Override
-    public ExecuteResult execute(ExecutionOptions options) throws DatabaseException {
+    public ExecuteResult execute(ExecutionEnvironment env) throws DatabaseException {
         return new ExecuteResult();
     }
 
     @Override
-    public QueryResult query(ExecutionOptions options) throws DatabaseException {
+    public QueryResult query(ExecutionEnvironment env) throws DatabaseException {
         return new QueryResult(null);
     }
 
     @Override
-    public UpdateResult update(ExecutionOptions options) throws DatabaseException {
+    public UpdateResult update(ExecutionEnvironment env) throws DatabaseException {
         return new UpdateResult(0);
     }
 

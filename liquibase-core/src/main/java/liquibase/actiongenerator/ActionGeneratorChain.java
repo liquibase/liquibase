@@ -1,9 +1,10 @@
 package liquibase.actiongenerator;
 
+import liquibase.ExecutionEnvironment;
 import liquibase.action.Action;
 import liquibase.exception.ValidationErrors;
 import liquibase.exception.Warnings;
-import liquibase.executor.ExecutionOptions;
+import  liquibase.ExecutionEnvironment;
 import liquibase.statement.SqlStatement;
 
 import java.util.Iterator;
@@ -18,7 +19,7 @@ public class ActionGeneratorChain {
         }
     }
 
-    public Action[] generateActions(SqlStatement statement, ExecutionOptions options) {
+    public Action[] generateActions(SqlStatement statement, ExecutionEnvironment env) {
         if (actionGenerators == null) {
             return null;
         }
@@ -27,22 +28,22 @@ public class ActionGeneratorChain {
             return new Action[0];
         }
 
-        return actionGenerators.next().generateActions(statement, options, this);
+        return actionGenerators.next().generateActions(statement, env, this);
     }
 
-    public Warnings warn(SqlStatement statement, ExecutionOptions options) {
+    public Warnings warn(SqlStatement statement, ExecutionEnvironment env) {
         if (actionGenerators == null || !actionGenerators.hasNext()) {
             return new Warnings();
         }
 
-        return actionGenerators.next().warn(statement, options, this);
+        return actionGenerators.next().warn(statement, env, this);
     }
 
-    public ValidationErrors validate(SqlStatement statement, ExecutionOptions options) {
+    public ValidationErrors validate(SqlStatement statement, ExecutionEnvironment env) {
         if (actionGenerators == null || !actionGenerators.hasNext()) {
             return new ValidationErrors();
         }
 
-        return actionGenerators.next().validate(statement, options, this);
+        return actionGenerators.next().validate(statement, env, this);
     }
 }

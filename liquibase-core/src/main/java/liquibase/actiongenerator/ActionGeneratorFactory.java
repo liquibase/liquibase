@@ -1,5 +1,6 @@
 package liquibase.actiongenerator;
 
+import liquibase.ExecutionEnvironment;
 import liquibase.action.Action;
 import liquibase.action.visitor.ActionVisitor;
 import liquibase.change.Change;
@@ -7,7 +8,6 @@ import liquibase.database.Database;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
 import liquibase.exception.Warnings;
-import liquibase.executor.ExecutionOptions;
 import liquibase.servicelocator.ServiceLocator;
 import liquibase.statement.SqlStatement;
 
@@ -85,8 +85,8 @@ public class ActionGeneratorFactory {
         return generators;
     }
 
-    public SortedSet<ActionGenerator> getGenerators(SqlStatement statement, ExecutionOptions options) {
-        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+    public SortedSet<ActionGenerator> getGenerators(SqlStatement statement, ExecutionEnvironment env) {
+        Database database = env.getTargetDatabase();
         String databaseName = null;
         if (database == null) {
             databaseName = "NULL";
@@ -102,15 +102,15 @@ public class ActionGeneratorFactory {
             Type classType = null;
             while (clazz != null) {
                 if (classType instanceof ParameterizedType) {
-                    checkType(classType, statement, generator, options, validGenerators);
+                    checkType(classType, statement, generator, env, validGenerators);
                 }
 
                 for (Type type : getGenericInterfaces(clazz)) {
                     if (type instanceof ParameterizedType) {
-                        checkType(type, statement, generator, options, validGenerators);
+                        checkType(type, statement, generator, env, validGenerators);
                     } else if (isTypeEqual(type, ActionGenerator.class)) {
                         //noinspection unchecked
-                        if (generator.supports(statement, options)) {
+                        if (generator.supports(statement, env)) {
                             validGenerators.add(generator);
                         }
                     }
@@ -150,7 +150,7 @@ public class ActionGeneratorFactory {
         return aType.equals(aClass);
     }
 
-    private void checkType(Type type, SqlStatement statement, ActionGenerator generator, ExecutionOptions options, SortedSet<ActionGenerator> validGenerators) {
+    private void checkType(Type type, SqlStatement statement, ActionGenerator generator, ExecutionEnvironment env, SortedSet<ActionGenerator> validGenerators) {
         for (Type typeClass : ((ParameterizedType) type).getActualTypeArguments()) {
             if (typeClass instanceof TypeVariable) {
                 typeClass = ((TypeVariable) typeClass).getBounds()[0];
@@ -161,7 +161,7 @@ public class ActionGeneratorFactory {
             }
 
             if (((Class) typeClass).isAssignableFrom(statement.getClass())) {
-                if (generator.supports(statement, options)) {
+                if (generator.supports(statement, env)) {
                     validGenerators.add(generator);
                 }
             }
@@ -169,8 +169,8 @@ public class ActionGeneratorFactory {
 
     }
 
-    private ActionGeneratorChain createGeneratorChain(SqlStatement statement, ExecutionOptions options) {
-        SortedSet<ActionGenerator> ActionGenerators = getGenerators(statement, options);
+    private ActionGeneratorChain createGeneratorChain(SqlStatement statement, ExecutionEnvironment env) {
+        SortedSet<ActionGenerator> ActionGenerators = getGenerators(statement, env);
         if (ActionGenerators == null || ActionGenerators.size() == 0) {
             return null;
         }
@@ -178,87 +178,89 @@ public class ActionGeneratorFactory {
         return new ActionGeneratorChain(ActionGenerators);
     }
 
-    public Action[] generateActions(Change change, ExecutionOptions options) {
-        SqlStatement[] sqlStatements = change.generateStatements(options);
+    public Action[] generateActions(Change change, ExecutionEnvironment env) {
+        SqlStatement[] sqlStatements = change.generateStatements(env);
         if (sqlStatements == null) {
             return new Action[0];
         } else {
-            return generateActions(sqlStatements, options);
+            return generateActions(sqlStatements, env);
         }
     }
 
-    public Action[] generateActions(SqlStatement[] statements, ExecutionOptions options) {
+    public Action[] generateActions(SqlStatement[] statements, ExecutionEnvironment env) {
         List<Action> returnList = new ArrayList<Action>();
         for (SqlStatement statement : statements) {
-            returnList.addAll(Arrays.asList(ActionGeneratorFactory.getInstance().generateActions(statement, options)));
+            returnList.addAll(Arrays.asList(ActionGeneratorFactory.getInstance().generateActions(statement, env)));
         }
 
         return returnList.toArray(new Action[returnList.size()]);
     }
 
-    public Action[] generateActions(SqlStatement statement, ExecutionOptions options) {
-        Database database = options.getRuntimeEnvironment().getTargetDatabase();
-        if (!supports(statement, options)) {
+    public Action[] generateActions(SqlStatement statement, ExecutionEnvironment env) {
+        Database database = env.getTargetDatabase();
+        if (!supports(statement, env)) {
             throw new UnexpectedLiquibaseException("Unsupported database for "+statement.toString()+": "+database.getShortName());
         }
-        ValidationErrors validate = validate(statement, options);
+        ValidationErrors validate = validate(statement, env);
         if (validate.hasErrors()) {
             throw new UnexpectedLiquibaseException("Validation failed: "+validate.toString());
         }
-        ActionGeneratorChain generatorChain = createGeneratorChain(statement, options);
+        ActionGeneratorChain generatorChain = createGeneratorChain(statement, env);
         if (generatorChain == null) {
             throw new IllegalStateException("Cannot find "+statement.getClass().getName()+" generators for "+database.toString());
         }
-        Action[] actions = generatorChain.generateActions(statement, options);
+        Action[] actions = generatorChain.generateActions(statement, env);
         if (actions == null) {
             return new Action[0];
         }
 
-        List<ActionVisitor> sqlVisitors = options.getActionVisitors();
-        if (sqlVisitors != null) {
-            for (ActionVisitor visitor : sqlVisitors) {
-                for (Action action : actions) {
-                    visitor.visit(action, options);
+        if (env.getCurrentChangeSet() != null) {
+            List<ActionVisitor> sqlVisitors = env.getCurrentChangeSet().getActionVisitors();
+            if (sqlVisitors != null) {
+                for (ActionVisitor visitor : sqlVisitors) {
+                    for (Action action : actions) {
+                        visitor.visit(action, env);
+                    }
                 }
             }
         }
         return actions;
     }
 
-    public boolean supports(SqlStatement statement, ExecutionOptions options) {
-        return getGenerators(statement, options).size() > 0;
+    public boolean supports(SqlStatement statement, ExecutionEnvironment env) {
+        return getGenerators(statement, env).size() > 0;
     }
 
-    public ValidationErrors validate(SqlStatement statement, ExecutionOptions options) {
+    public ValidationErrors validate(SqlStatement statement, ExecutionEnvironment env) {
         //noinspection unchecked
-        ActionGeneratorChain generatorChain = createGeneratorChain(statement, options);
+        ActionGeneratorChain generatorChain = createGeneratorChain(statement, env);
         if (generatorChain == null) {
-            throw new UnexpectedLiquibaseException("Unable to create generator chain for "+statement.getClass().getName()+" on "+options.getRuntimeEnvironment().getTargetDatabase().getShortName());
+            throw new UnexpectedLiquibaseException("Unable to create generator chain for "+statement.getClass().getName()+" on "+env.getTargetDatabase().getShortName());
         }
-        return generatorChain.validate(statement, options);
+        return generatorChain.validate(statement, env);
     }
 
-    public Warnings warn(SqlStatement statement, ExecutionOptions options) {
+    public Warnings warn(SqlStatement statement, ExecutionEnvironment env) {
         //noinspection unchecked
-        return createGeneratorChain(statement, options).warn(statement, options);
+        return createGeneratorChain(statement, env).warn(statement, env);
     }
 
     /**
      * Return true if the SqlStatement class queries the database in any way to determine Statements to execute.
      * If the statement queries the database, it cannot be used in updateSql type operations
      */
-    public boolean generateStatementsVolatile(SqlStatement statement, ExecutionOptions options) {
-        for (ActionGenerator generator : getGenerators(statement, options)) {
-            if (generator.generateStatementsIsVolatile(options)) {
+    public boolean generateStatementsVolatile(SqlStatement statement, ExecutionEnvironment env) {
+        for (ActionGenerator generator : getGenerators(statement, env)) {
+            if (generator.generateStatementsIsVolatile(env)) {
                 return true;
             }
         }
         return false;
     }
 
-    public boolean generateRollbackStatementsVolatile(SqlStatement statement, ExecutionOptions options) {
-        for (ActionGenerator generator : getGenerators(statement, options)) {
-            if (generator.generateRollbackStatementsIsVolatile(options)) {
+    public boolean generateRollbackStatementsVolatile(SqlStatement statement, ExecutionEnvironment env) {
+        for (ActionGenerator generator : getGenerators(statement, env)) {
+            if (generator.generateRollbackStatementsIsVolatile(env)) {
                 return true;
             }
         }

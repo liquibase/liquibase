@@ -1,5 +1,6 @@
 package liquibase.executor;
 
+import liquibase.ExecutionEnvironment;
 import liquibase.action.Action;
 import liquibase.action.ExecuteAction;
 import liquibase.action.QueryAction;
@@ -20,8 +21,8 @@ public class StandardExecutor extends AbstractExecutor {
     }
 
     @Override
-    public QueryResult query(SqlStatement sql, ExecutionOptions options) throws DatabaseException {
-        Action[] actions = ActionGeneratorFactory.getInstance().generateActions(sql, options);
+    public QueryResult query(SqlStatement sql, ExecutionEnvironment env) throws DatabaseException {
+        Action[] actions = ActionGeneratorFactory.getInstance().generateActions(sql, env);
 
         if (actions.length != 1) {
             throw new DatabaseException("Can only query with statements that return one executable");
@@ -33,28 +34,28 @@ public class StandardExecutor extends AbstractExecutor {
             throw new DatabaseException("Cannot query "+ action.getClass().getName());
         }
 
-        return ((QueryAction) action).query(options);
+        return ((QueryAction) action).query(env);
     }
 
 
     @Override
-    public ExecuteResult execute(SqlStatement sql, ExecutionOptions options) throws DatabaseException {
-        Action[] actions = ActionGeneratorFactory.getInstance().generateActions(sql, options);
+    public ExecuteResult execute(SqlStatement sql, ExecutionEnvironment env) throws DatabaseException {
+        Action[] actions = ActionGeneratorFactory.getInstance().generateActions(sql, env);
         for (Action action : actions) {
             if (!(action instanceof ExecuteAction)) {
                 throw new DatabaseException("Cannot execute "+ action.getClass().getName());
             }
         }
         for (Action action : actions) {
-            ((ExecuteAction) action).execute(options);
+            ((ExecuteAction) action).execute(env);
         }
         return new ExecuteResult();
     }
 
 
     @Override
-    public UpdateResult update(SqlStatement sql, ExecutionOptions options) throws DatabaseException {
-        Action[] actions = ActionGeneratorFactory.getInstance().generateActions(sql, options);
+    public UpdateResult update(SqlStatement sql, ExecutionEnvironment env) throws DatabaseException {
+        Action[] actions = ActionGeneratorFactory.getInstance().generateActions(sql, env);
 
         if (actions.length != 1) {
             throw new DatabaseException("Can only update with statements that return one executable");
@@ -66,7 +67,7 @@ public class StandardExecutor extends AbstractExecutor {
             throw new DatabaseException("Cannot update "+ action.getClass().getName());
         }
 
-        return ((UpdateAction) action).update(options);
+        return ((UpdateAction) action).update(env);
     }
 
     @Override

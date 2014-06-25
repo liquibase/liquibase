@@ -5,7 +5,7 @@ import liquibase.action.Action;
 import liquibase.action.core.UnparsedSql;
 import liquibase.actiongenerator.ActionGeneratorChain;
 import liquibase.database.core.DB2Database;
-import liquibase.executor.ExecutionOptions;
+import  liquibase.ExecutionEnvironment;
 import liquibase.sqlgenerator.SqlGenerator;
 import liquibase.statement.core.GetViewDefinitionStatement;
 
@@ -16,13 +16,13 @@ public class GetViewDefinitionGeneratorDB2 extends GetViewDefinitionGenerator {
     }
 
     @Override
-    public boolean supports(GetViewDefinitionStatement statement, ExecutionOptions options) {
-        return options.getRuntimeEnvironment().getTargetDatabase() instanceof DB2Database;
+    public boolean supports(GetViewDefinitionStatement statement, ExecutionEnvironment env) {
+        return env.getTargetDatabase() instanceof DB2Database;
     }
 
     @Override
-    public Action[] generateActions(GetViewDefinitionStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
-        CatalogAndSchema schema = new CatalogAndSchema(statement.getCatalogName(), statement.getSchemaName()).customize(options.getRuntimeEnvironment().getTargetDatabase());
+    public Action[] generateActions(GetViewDefinitionStatement statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+        CatalogAndSchema schema = new CatalogAndSchema(statement.getCatalogName(), statement.getSchemaName()).customize(env.getTargetDatabase());
 
         return new Action[] {
                     new UnparsedSql("select view_definition from SYSIBM.VIEWS where TABLE_NAME='" + statement.getViewName() + "' and TABLE_SCHEMA='" + schema.getSchemaName() + "'")

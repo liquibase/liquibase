@@ -5,7 +5,7 @@ import liquibase.action.Action;
 import liquibase.action.core.UnparsedSql;
 import liquibase.actiongenerator.ActionGeneratorChain;
 import liquibase.database.core.MSSQLDatabase;
-import liquibase.executor.ExecutionOptions;
+import  liquibase.ExecutionEnvironment;
 import liquibase.statement.core.GetViewDefinitionStatement;
 
 public class GetViewDefinitionGeneratorMSSQL extends GetViewDefinitionGenerator {
@@ -15,13 +15,13 @@ public class GetViewDefinitionGeneratorMSSQL extends GetViewDefinitionGenerator 
     }
 
     @Override
-    public boolean supports(GetViewDefinitionStatement statement, ExecutionOptions options) {
-        return options.getRuntimeEnvironment().getTargetDatabase() instanceof MSSQLDatabase;
+    public boolean supports(GetViewDefinitionStatement statement, ExecutionEnvironment env) {
+        return env.getTargetDatabase() instanceof MSSQLDatabase;
     }
 
     @Override
-    public Action[] generateActions(GetViewDefinitionStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
-        CatalogAndSchema schema = new CatalogAndSchema(statement.getCatalogName(), statement.getSchemaName()).customize(options.getRuntimeEnvironment().getTargetDatabase());
+    public Action[] generateActions(GetViewDefinitionStatement statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+        CatalogAndSchema schema = new CatalogAndSchema(statement.getCatalogName(), statement.getSchemaName()).customize(env.getTargetDatabase());
 
         String sql = "exec sp_helptext '" + schema.getSchemaName() + "."+ statement.getViewName() + "'";
             return new Action[]{new UnparsedSql(sql) };

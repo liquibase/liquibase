@@ -1,8 +1,9 @@
 package liquibase.action.core
 
-import liquibase.RuntimeEnvironment
+import liquibase.ExecutionEnvironment
 import liquibase.database.jvm.JdbcConnection
-import liquibase.executor.ExecutionOptions
+import  liquibase.ExecutionEnvironment
+import liquibase.executor.Row
 import liquibase.sdk.database.MockDatabase
 import liquibase.sdk.database.MockResultSet
 import liquibase.structure.core.Column
@@ -26,7 +27,7 @@ class ColumnsJdbcMetaDataQueryActionTest extends Specification {
         database.setConnection(connection)
 
         then:
-        action.getRawMetaData(new ExecutionOptions(new RuntimeEnvironment(database)))
+        action.getRawMetaData(new ExecutionEnvironment(database))
 
         where:
         catalogName | schemaName    | tableName    | columnName
@@ -39,14 +40,14 @@ class ColumnsJdbcMetaDataQueryActionTest extends Specification {
     def "rawMetaDataToObject autoincrement int from mysql"() {
         when:
         def action = new ColumnsJdbcMetaDataQueryAction(null, null, null, null)
-        def Column column = action.rawMetaDataToObject([
+        def Column column = action.rawMetaDataToObject(new Row([
                 TABLE_NAME        : "account",
-                COLUMN_DEF        : "null",
-                CHAR_OCTET_LENGTH : "null",
+                COLUMN_DEF        : null,
+                CHAR_OCTET_LENGTH : null,
                 SQL_DATETIME_SUB  : 0,
                 REMARKS           : "",
-                SCOPE_SCHEMA      : "null",
-                TABLE_SCHEM       : "null",
+                SCOPE_SCHEMA      : null,
+                TABLE_SCHEM       : null,
                 BUFFER_LENGTH     : 65535,
                 NULLABLE          : 0,
                 IS_NULLABLE       : "NO",
@@ -57,14 +58,14 @@ class ColumnsJdbcMetaDataQueryActionTest extends Specification {
                 TYPE_NAME         : "INT",
                 IS_AUTOINCREMENT  : "YES",
                 COLUMN_NAME       : "id",
-                SCOPE_CATALOG     : "null",
+                SCOPE_CATALOG     : null,
                 ORDINAL_POSITION  : 1,
-                SCOPE_TABLE       : "null",
-                SOURCE_DATA_TYPE  : "null",
+                SCOPE_TABLE       : null,
+                SOURCE_DATA_TYPE  : null,
                 DECIMAL_DIGITS    : 0,
                 DATA_TYPE         : 4,
                 IS_GENERATEDCOLUMN: ""
-        ], options)
+        ]), new ExecutionEnvironment(new MockDatabase()))
 
         then:
         column.getName() == "id"
@@ -79,7 +80,7 @@ class ColumnsJdbcMetaDataQueryActionTest extends Specification {
     def "rawMetaDataToObject varchar from mysql"() {
         when:
         def action = new ColumnsJdbcMetaDataQueryAction(null, null, null, null)
-        def Column column = action.rawMetaDataToObject([
+        def Column column = action.rawMetaDataToObject(new Row([
                 TABLE_NAME        : "account",
                 COLUMN_DEF        : null,
                 CHAR_OCTET_LENGTH : 20,
@@ -104,7 +105,7 @@ class ColumnsJdbcMetaDataQueryActionTest extends Specification {
                 DECIMAL_DIGITS    : null,
                 DATA_TYPE         : 12,
                 IS_GENERATEDCOLUMN: ""
-        ], options)
+        ]), new ExecutionEnvironment(new MockDatabase()))
 
         then:
         column.getName() == "username"

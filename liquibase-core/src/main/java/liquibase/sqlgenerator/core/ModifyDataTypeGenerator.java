@@ -8,26 +8,26 @@ import liquibase.database.core.*;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.ValidationErrors;
 import liquibase.exception.Warnings;
-import liquibase.executor.ExecutionOptions;
+import  liquibase.ExecutionEnvironment;
 import liquibase.statement.core.ModifyDataTypeStatement;
 
 public class ModifyDataTypeGenerator extends AbstractSqlGenerator<ModifyDataTypeStatement> {
 
     @Override
-    public boolean supports(ModifyDataTypeStatement statement, ExecutionOptions options) {
-        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+    public boolean supports(ModifyDataTypeStatement statement, ExecutionEnvironment env) {
+        Database database = env.getTargetDatabase();
 
         if (database instanceof SQLiteDatabase) {
             return false;
         }
-        return super.supports(statement, options);
+        return super.supports(statement, env);
     }
 
     @Override
-    public Warnings warn(ModifyDataTypeStatement modifyDataTypeStatement, ExecutionOptions options, ActionGeneratorChain chain) {
-        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+    public Warnings warn(ModifyDataTypeStatement modifyDataTypeStatement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+        Database database = env.getTargetDatabase();
 
-        Warnings warnings = super.warn(modifyDataTypeStatement, options, chain);
+        Warnings warnings = super.warn(modifyDataTypeStatement, env, chain);
 
         if (database instanceof MySQLDatabase && !modifyDataTypeStatement.getNewDataType().toLowerCase().contains("varchar")) {
             warnings.addWarning("modifyDataType will lose primary key/autoincrement/not null settings for mysql.  Use <sql> and re-specify all configuration if this is the case");
@@ -37,7 +37,7 @@ public class ModifyDataTypeGenerator extends AbstractSqlGenerator<ModifyDataType
     }
 
     @Override
-    public ValidationErrors validate(ModifyDataTypeStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
+    public ValidationErrors validate(ModifyDataTypeStatement statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("tableName", statement.getTableName());
         validationErrors.checkRequiredField("columnName", statement.getColumnName());
@@ -47,8 +47,8 @@ public class ModifyDataTypeGenerator extends AbstractSqlGenerator<ModifyDataType
     }
 
     @Override
-    public Action[] generateActions(ModifyDataTypeStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
-        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+    public Action[] generateActions(ModifyDataTypeStatement statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+        Database database = env.getTargetDatabase();
 
         String alterTable = "ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName());
 

@@ -2,7 +2,7 @@ package liquibase.change.core;
 
 import liquibase.change.*;
 import liquibase.database.core.SybaseASADatabase;
-import liquibase.executor.ExecutionOptions;
+import  liquibase.ExecutionEnvironment;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.DropUniqueConstraintStatement;
@@ -68,14 +68,14 @@ public class DropUniqueConstraintChange extends AbstractChange {
 	}
 
     @Override
-    public SqlStatement[] generateStatements(ExecutionOptions options) {
+    public SqlStatement[] generateStatements(ExecutionEnvironment env) {
         
 //todo    	if (database instanceof SQLiteDatabase) {
 //    		// return special statements for SQLite databases
 //    		return generateStatementsForSQLiteDatabase(database);
 //        }
         DropUniqueConstraintStatement statement = new DropUniqueConstraintStatement(getCatalogName(), getSchemaName(), getTableName(), getConstraintName());
-    	if (options.getRuntimeEnvironment().getTargetDatabase() instanceof SybaseASADatabase) {
+    	if (env.getTargetDatabase() instanceof SybaseASADatabase) {
     		statement.setUniqueColumns(uniqueColumns);
     	}
     	return new SqlStatement[]{
@@ -84,7 +84,7 @@ public class DropUniqueConstraintChange extends AbstractChange {
     }
 
     @Override
-    public ChangeStatus checkStatus(ExecutionOptions options) {
+    public ChangeStatus checkStatus(ExecutionEnvironment env) {
         try {
             UniqueConstraint example = new UniqueConstraint(getConstraintName(), getCatalogName(), getSchemaName(), getTableName());
             if (getUniqueColumns() != null) {
@@ -92,7 +92,7 @@ public class DropUniqueConstraintChange extends AbstractChange {
                     example.addColumn(example.getColumns().size(), column);
                 }
             }
-            return new ChangeStatus().assertComplete(!SnapshotGeneratorFactory.getInstance().has(example, options.getRuntimeEnvironment().getTargetDatabase()), "Unique constraint exists");
+            return new ChangeStatus().assertComplete(!SnapshotGeneratorFactory.getInstance().has(example, env.getTargetDatabase()), "Unique constraint exists");
         } catch (Exception e) {
             return new ChangeStatus().unknown(e);
         }

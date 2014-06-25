@@ -7,21 +7,21 @@ import liquibase.actiongenerator.ActionGeneratorChain;
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.exception.ValidationErrors;
-import liquibase.executor.ExecutionOptions;
+import  liquibase.ExecutionEnvironment;
 import liquibase.statement.core.DropPrimaryKeyStatement;
 
 public class DropPrimaryKeyGenerator extends AbstractSqlGenerator<DropPrimaryKeyStatement> {
 
     @Override
-    public boolean supports(DropPrimaryKeyStatement statement, ExecutionOptions options) {
-        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+    public boolean supports(DropPrimaryKeyStatement statement, ExecutionEnvironment env) {
+        Database database = env.getTargetDatabase();
 
         return (!(database instanceof SQLiteDatabase));
     }
 
     @Override
-    public ValidationErrors validate(DropPrimaryKeyStatement dropPrimaryKeyStatement, ExecutionOptions options, ActionGeneratorChain chain) {
-        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+    public ValidationErrors validate(DropPrimaryKeyStatement dropPrimaryKeyStatement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+        Database database = env.getTargetDatabase();
 
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("tableName", dropPrimaryKeyStatement.getTableName());
@@ -34,8 +34,8 @@ public class DropPrimaryKeyGenerator extends AbstractSqlGenerator<DropPrimaryKey
     }
 
     @Override
-    public Action[] generateActions(DropPrimaryKeyStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
-        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+    public Action[] generateActions(DropPrimaryKeyStatement statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+        Database database = env.getTargetDatabase();
 
         String sql;
 

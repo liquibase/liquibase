@@ -1,6 +1,6 @@
 package liquibase.changelog.visitor;
 
-import liquibase.RuntimeEnvironment;
+import liquibase.ExecutionEnvironment;
 import liquibase.changelog.*;
 import liquibase.changelog.filter.ChangeSetFilterResult;
 import liquibase.changelog.filter.NotInChangeLogChangeSetFilter;
@@ -28,8 +28,8 @@ public class StatusVisitor implements ChangeSetVisitor, SkippedChangeSetVisitor 
     }
 
     @Override
-    public void visit(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, RuntimeEnvironment runtimeEnvironment, Set<ChangeSetFilterResult> filterResults) throws LiquibaseException {
-        ChangeSetStatus status = addStatus(changeSet, databaseChangeLog, runtimeEnvironment.getTargetDatabase());
+    public void visit(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, ExecutionEnvironment env, Set<ChangeSetFilterResult> filterResults) throws LiquibaseException {
+        ChangeSetStatus status = addStatus(changeSet, databaseChangeLog, env.getTargetDatabase());
         status.setWillRun(true);
         status.setFilterResults(filterResults);
     }

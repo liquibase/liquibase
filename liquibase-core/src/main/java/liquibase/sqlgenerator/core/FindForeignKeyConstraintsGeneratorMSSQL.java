@@ -5,7 +5,7 @@ import liquibase.action.core.UnparsedSql;
 import liquibase.actiongenerator.ActionGeneratorChain;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.exception.ValidationErrors;
-import liquibase.executor.ExecutionOptions;
+import  liquibase.ExecutionEnvironment;
 import liquibase.statement.core.FindForeignKeyConstraintsStatement;
 
 public class FindForeignKeyConstraintsGeneratorMSSQL extends AbstractSqlGenerator<FindForeignKeyConstraintsStatement> {
@@ -15,19 +15,19 @@ public class FindForeignKeyConstraintsGeneratorMSSQL extends AbstractSqlGenerato
     }
 
     @Override
-    public boolean supports(FindForeignKeyConstraintsStatement statement, ExecutionOptions options) {
-        return options.getRuntimeEnvironment().getTargetDatabase() instanceof MSSQLDatabase;
+    public boolean supports(FindForeignKeyConstraintsStatement statement, ExecutionEnvironment env) {
+        return env.getTargetDatabase() instanceof MSSQLDatabase;
     }
 
     @Override
-    public ValidationErrors validate(FindForeignKeyConstraintsStatement findForeignKeyConstraintsStatement, ExecutionOptions options, ActionGeneratorChain chain) {
+    public ValidationErrors validate(FindForeignKeyConstraintsStatement findForeignKeyConstraintsStatement, ExecutionEnvironment env, ActionGeneratorChain chain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("baseTableName", findForeignKeyConstraintsStatement.getBaseTableName());
         return validationErrors;
     }
 
     @Override
-    public Action[] generateActions(FindForeignKeyConstraintsStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
+    public Action[] generateActions(FindForeignKeyConstraintsStatement statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
         StringBuilder sb = new StringBuilder();
 
         sb.append("SELECT ");

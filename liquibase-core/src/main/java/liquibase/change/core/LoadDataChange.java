@@ -5,7 +5,7 @@ import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.Warnings;
-import liquibase.executor.ExecutionOptions;
+import  liquibase.ExecutionEnvironment;
 import liquibase.logging.LogFactory;
 import liquibase.logging.Logger;
 import liquibase.resource.ResourceAccessor;
@@ -49,14 +49,14 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
     private List<LoadDataColumnConfig> columns = new ArrayList<LoadDataColumnConfig>();
 
     @Override
-    public boolean supports(ExecutionOptions options) {
+    public boolean supports(ExecutionEnvironment env) {
         return true;
     }
 
 
 
     @Override
-    public boolean generateRollbackStatementsVolatile(ExecutionOptions options) {
+    public boolean generateRollbackStatementsVolatile(ExecutionEnvironment env) {
         return true;
     }
 
@@ -143,9 +143,9 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
     }
 
     @Override
-    public SqlStatement[] generateStatements(ExecutionOptions options) {
+    public SqlStatement[] generateStatements(ExecutionEnvironment env) {
         CSVReader reader = null;
-        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+        Database database = env.getTargetDatabase();
         try {
             reader = getCSVReader();
 
@@ -244,7 +244,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
     }
 
     @Override
-    public boolean generateStatementsVolatile(ExecutionOptions options) {
+    public boolean generateStatementsVolatile(ExecutionEnvironment env) {
         return true;
     }
 
@@ -300,7 +300,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
     }
 
     @Override
-    public ChangeStatus checkStatus(ExecutionOptions options) {
+    public ChangeStatus checkStatus(ExecutionEnvironment env) {
         return new ChangeStatus().unknown("Cannot check loadData status");
     }
 
@@ -331,7 +331,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
     }
 
     @Override
-    public Warnings warn(ExecutionOptions options) {
+    public Warnings warn(ExecutionEnvironment env) {
         return null;
     }
 

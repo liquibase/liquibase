@@ -7,7 +7,7 @@ import liquibase.database.Database;
 import liquibase.database.core.SybaseDatabase;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.ValidationErrors;
-import liquibase.executor.ExecutionOptions;
+import  liquibase.ExecutionEnvironment;
 import liquibase.statement.NotNullConstraint;
 import liquibase.statement.core.CreateDatabaseChangeLogTableStatement;
 import liquibase.statement.core.CreateTableStatement;
@@ -15,19 +15,19 @@ import liquibase.statement.core.CreateTableStatement;
 public class CreateDatabaseChangeLogTableGenerator extends AbstractSqlGenerator<CreateDatabaseChangeLogTableStatement> {
 
     @Override
-    public boolean supports(CreateDatabaseChangeLogTableStatement statement, ExecutionOptions options) {
-        return (!(options.getRuntimeEnvironment().getTargetDatabase() instanceof SybaseDatabase));
+    public boolean supports(CreateDatabaseChangeLogTableStatement statement, ExecutionEnvironment env) {
+        return (!(env.getTargetDatabase() instanceof SybaseDatabase));
     }
 
     @Override
-    public ValidationErrors validate(CreateDatabaseChangeLogTableStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
+    public ValidationErrors validate(CreateDatabaseChangeLogTableStatement statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
         return new ValidationErrors();
     }
 
     @Override
-    public Action[] generateActions(CreateDatabaseChangeLogTableStatement statement, ExecutionOptions options, ActionGeneratorChain actionGeneratorChain) {
+    public Action[] generateActions(CreateDatabaseChangeLogTableStatement statement, ExecutionEnvironment env, ActionGeneratorChain actionGeneratorChain) {
 
-        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+        Database database = env.getTargetDatabase();
 
         CreateTableStatement createTableStatement = new CreateTableStatement(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName())
                 .setTablespace(database.getLiquibaseTablespaceName())
@@ -43,7 +43,7 @@ public class CreateDatabaseChangeLogTableGenerator extends AbstractSqlGenerator<
                 .addColumn("TAG", DataTypeFactory.getInstance().fromDescription("VARCHAR(255)", database))
                 .addColumn("LIQUIBASE", DataTypeFactory.getInstance().fromDescription("VARCHAR(20)", database));
 
-        return ActionGeneratorFactory.getInstance().generateActions(createTableStatement, options);
+        return ActionGeneratorFactory.getInstance().generateActions(createTableStatement, env);
     }
 
     protected String getIdColumnSize() {

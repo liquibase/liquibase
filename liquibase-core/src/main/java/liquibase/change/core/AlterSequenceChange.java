@@ -1,7 +1,7 @@
 package liquibase.change.core;
 
 import liquibase.change.*;
-import liquibase.executor.ExecutionOptions;
+import  liquibase.ExecutionEnvironment;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.AlterSequenceStatement;
@@ -88,7 +88,7 @@ public class AlterSequenceChange extends AbstractChange {
     }
 
     @Override
-    public SqlStatement[] generateStatements(ExecutionOptions options) {
+    public SqlStatement[] generateStatements(ExecutionEnvironment env) {
         return new SqlStatement[] {
                 new AlterSequenceStatement(getCatalogName(), getSchemaName(), getSequenceName())
                 .setIncrementBy(getIncrementBy())
@@ -99,10 +99,10 @@ public class AlterSequenceChange extends AbstractChange {
     }
 
     @Override
-    public ChangeStatus checkStatus(ExecutionOptions options) {
+    public ChangeStatus checkStatus(ExecutionEnvironment env) {
         ChangeStatus result = new ChangeStatus();
         try {
-            Sequence sequence = SnapshotGeneratorFactory.getInstance().createSnapshot(new Sequence(getCatalogName(), getSchemaName(), getSequenceName()), options.getRuntimeEnvironment().getTargetDatabase());
+            Sequence sequence = SnapshotGeneratorFactory.getInstance().createSnapshot(new Sequence(getCatalogName(), getSchemaName(), getSequenceName()), env.getTargetDatabase());
             if (sequence == null) {
                 return result.unknown("Sequence " + getSequenceName() + " does not exist");
             }

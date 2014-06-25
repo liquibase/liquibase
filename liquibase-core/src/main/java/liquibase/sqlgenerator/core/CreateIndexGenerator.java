@@ -6,7 +6,7 @@ import liquibase.actiongenerator.ActionGeneratorChain;
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.exception.ValidationErrors;
-import liquibase.executor.ExecutionOptions;
+import  liquibase.ExecutionEnvironment;
 import liquibase.statement.core.CreateIndexStatement;
 import liquibase.structure.core.Index;
 import liquibase.util.StringUtils;
@@ -18,8 +18,8 @@ import java.util.List;
 public class CreateIndexGenerator extends AbstractSqlGenerator<CreateIndexStatement> {
 
     @Override
-    public ValidationErrors validate(CreateIndexStatement createIndexStatement, ExecutionOptions options, ActionGeneratorChain chain) {
-        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+    public ValidationErrors validate(CreateIndexStatement createIndexStatement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+        Database database = env.getTargetDatabase();
 
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("tableName", createIndexStatement.getTableName());
@@ -31,9 +31,9 @@ public class CreateIndexGenerator extends AbstractSqlGenerator<CreateIndexStatem
     }
 
     @Override
-    public Action[] generateActions(CreateIndexStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
+    public Action[] generateActions(CreateIndexStatement statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
 
-        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+        Database database = env.getTargetDatabase();
 
         if (database instanceof OracleDatabase) {
 		    // Oracle don't create index when creates foreignKey

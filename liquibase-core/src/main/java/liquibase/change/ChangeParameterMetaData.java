@@ -1,6 +1,6 @@
 package liquibase.change;
 
-import liquibase.RuntimeEnvironment;
+import liquibase.ExecutionEnvironment;
 import liquibase.actiongenerator.ActionGeneratorFactory;
 import liquibase.change.core.LoadDataColumnConfig;
 import liquibase.database.Database;
@@ -8,7 +8,7 @@ import liquibase.database.DatabaseFactory;
 import liquibase.database.DatabaseList;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
-import liquibase.executor.ExecutionOptions;
+import  liquibase.ExecutionEnvironment;
 import liquibase.serializer.LiquibaseSerializable;
 import liquibase.statement.DatabaseFunction;
 import liquibase.statement.SequenceNextValueFunction;
@@ -91,19 +91,19 @@ public class ChangeParameterMetaData {
         if (supportedDatabases.length == 1 && StringUtils.join(supportedDatabases, ",").equals(ChangeParameterMetaData.COMPUTE)) {
             int validDatabases = 0;
             for (Database database : DatabaseFactory.getInstance().getImplementedDatabases()) {
-                ExecutionOptions options = new ExecutionOptions(new RuntimeEnvironment(database, null, null));
+                ExecutionEnvironment env = new ExecutionEnvironment(database);
                 if (database.getShortName() == null || database.getShortName().equals("unsupported")) {
                     continue;
                 }
-                if (!change.supports(options)) {
+                if (!change.supports(env)) {
                     continue;
                 }
                 try {
-                    if (!change.generateStatementsVolatile(options)) {
+                    if (!change.generateStatementsVolatile(env)) {
                         Change testChange = change.getClass().newInstance();
-                        ValidationErrors originalErrors = getStatementErrors(testChange, options);
+                        ValidationErrors originalErrors = getStatementErrors(testChange, env);
                         this.setValue(testChange, this.getExampleValue(database));
-                        ValidationErrors finalErrors = getStatementErrors(testChange, options);
+                        ValidationErrors finalErrors = getStatementErrors(testChange, env);
                         if (finalErrors.getUnsupportedErrorMessages().size() == 0 || finalErrors.getUnsupportedErrorMessages().size() == originalErrors.getUnsupportedErrorMessages().size()) {
                             computedDatabases.add(database.getShortName());
                         }
@@ -138,13 +138,13 @@ public class ChangeParameterMetaData {
         if (requiredDatabases.length == 1 && StringUtils.join(requiredDatabases, ",").equals(ChangeParameterMetaData.COMPUTE)) {
             int validDatabases = 0;
             for (Database database : DatabaseFactory.getInstance().getImplementedDatabases()) {
-                ExecutionOptions options = new ExecutionOptions(new RuntimeEnvironment(database, null, null));
+                ExecutionEnvironment env = new  ExecutionEnvironment(database);
                 try {
-                    if (!change.generateStatementsVolatile(options)) {
+                    if (!change.generateStatementsVolatile(env)) {
                         Change testChange = change.getClass().newInstance();
-                        ValidationErrors originalErrors = getStatementErrors(testChange, options);
+                        ValidationErrors originalErrors = getStatementErrors(testChange, env);
                         this.setValue(testChange, this.getExampleValue(database));
-                        ValidationErrors finalErrors = getStatementErrors(testChange, options);
+                        ValidationErrors finalErrors = getStatementErrors(testChange, env);
                         if (originalErrors.getRequiredErrorMessages().size() > 0 && finalErrors.getRequiredErrorMessages().size() < originalErrors.getRequiredErrorMessages().size()) {
                             computedDatabases.add(database.getShortName());
                         }
@@ -169,11 +169,11 @@ public class ChangeParameterMetaData {
         return computedDatabases;
     }
 
-    private ValidationErrors getStatementErrors(Change testChange, ExecutionOptions options) {
+    private ValidationErrors getStatementErrors(Change testChange, ExecutionEnvironment env) {
         ValidationErrors errors = new ValidationErrors();
-        SqlStatement[] statements = testChange.generateStatements(options);
+        SqlStatement[] statements = testChange.generateStatements(env);
         for (SqlStatement statement : statements) {
-            errors.addAll(ActionGeneratorFactory.getInstance().validate(statement, options));
+            errors.addAll(ActionGeneratorFactory.getInstance().validate(statement, env));
         }
         return errors;
     }

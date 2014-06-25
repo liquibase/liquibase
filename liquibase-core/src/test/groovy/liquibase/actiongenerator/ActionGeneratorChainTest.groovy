@@ -1,8 +1,8 @@
 package liquibase.actiongenerator
 
-import liquibase.RuntimeEnvironment
+import liquibase.ExecutionEnvironment
 import liquibase.action.Action
-import liquibase.executor.ExecutionOptions
+import  liquibase.ExecutionEnvironment
 import liquibase.sdk.database.MockDatabase
 import liquibase.exception.ValidationErrors
 import liquibase.statement.core.MockSqlStatement
@@ -16,7 +16,7 @@ public class ActionGeneratorChainTest extends Specification {
         ActionGeneratorChain chain = new ActionGeneratorChain(null)
 
         then:
-        chain.generateActions(new MockSqlStatement(), new ExecutionOptions(new RuntimeEnvironment(new MockDatabase()))) == null
+        chain.generateActions(new MockSqlStatement(), new ExecutionEnvironment(new MockDatabase())) == null
     }
 
     def generateActions_noGenerators() {
@@ -25,7 +25,7 @@ public class ActionGeneratorChainTest extends Specification {
         ActionGeneratorChain chain =new ActionGeneratorChain(generators)
 
         then:
-        assert chain.generateActions(new MockSqlStatement(), new ExecutionOptions(new RuntimeEnvironment(new MockDatabase()))).length == 0
+        assert chain.generateActions(new MockSqlStatement(), new ExecutionEnvironment(new MockDatabase())).length == 0
     }
 
    def generateActions_oneGenerators() {
@@ -34,11 +34,11 @@ public class ActionGeneratorChainTest extends Specification {
         generators.add(new MockActionGenerator(1, "A1", "A2"))
         ActionGeneratorChain chain =new ActionGeneratorChain(generators)
 
-        Action[] actions = chain.generateActions(new MockSqlStatement(), new ExecutionOptions(new RuntimeEnvironment(new MockDatabase())))
+        Action[] actions = chain.generateActions(new MockSqlStatement(), new ExecutionEnvironment(new MockDatabase()))
        then:
         assert actions.length == 2
-        assert actions[0].describe() == "A1"
-        assert actions[1].describe() == "A2"
+        assert actions[0].describe() == "A1;"
+        assert actions[1].describe() == "A2;"
     }
 
     def void generateActions_twoGenerators() {
@@ -47,14 +47,14 @@ public class ActionGeneratorChainTest extends Specification {
         generators.add(new MockActionGenerator(2, "B1", "B2"))
         generators.add(new MockActionGenerator(1, "A1", "A2"))
         ActionGeneratorChain chain =new ActionGeneratorChain(generators)
-        Action[] actions = chain.generateActions(new MockSqlStatement(), new ExecutionOptions(new RuntimeEnvironment(new MockDatabase())))
+        Action[] actions = chain.generateActions(new MockSqlStatement(), new ExecutionEnvironment(new MockDatabase()))
         
         then:
         assert actions.length == 4
-        assert actions[0].describe() == "B1"
-        assert actions[1].describe() == "B2"
-        assert actions[2].describe() == "A1"
-        assert actions[3].describe() == "A2"
+        assert actions[0].describe() == "B1;"
+        assert actions[1].describe() == "B2;"
+        assert actions[2].describe() == "A1;"
+        assert actions[3].describe() == "A2;"
     }
 
     def void generateActions_threeGenerators() {
@@ -64,22 +64,22 @@ public class ActionGeneratorChainTest extends Specification {
         generators.add(new MockActionGenerator(1, "A1", "A2"))
         generators.add(new MockActionGenerator(3, "C1", "C2"))
         ActionGeneratorChain chain =new ActionGeneratorChain(generators)
-        Action[] actions = chain.generateActions(new MockSqlStatement(), new ExecutionOptions(new RuntimeEnvironment(new MockDatabase())))
+        Action[] actions = chain.generateActions(new MockSqlStatement(), new ExecutionEnvironment(new MockDatabase()))
         
         then:
         assert actions.length == 6
-        assert actions[0].describe() == "C1"
-        assert actions[1].describe() == "C2"
-        assert actions[2].describe() == "B1"
-        assert actions[3].describe() == "B2"
-        assert actions[4].describe() == "A1"
-        assert actions[5].describe() == "A2"
+        assert actions[0].describe() == "C1;"
+        assert actions[1].describe() == "C2;"
+        assert actions[2].describe() == "B1;"
+        assert actions[3].describe() == "B2;"
+        assert actions[4].describe() == "A1;"
+        assert actions[5].describe() == "A2;"
     }
 
     def validate_nullGenerators() {
         when:
         ActionGeneratorChain chain = new ActionGeneratorChain(null)
-        ValidationErrors validationErrors = chain.validate(new MockSqlStatement(), new ExecutionOptions(new RuntimeEnvironment(new MockDatabase())))
+        ValidationErrors validationErrors = chain.validate(new MockSqlStatement(), new ExecutionEnvironment(new MockDatabase()))
         
         then:
         assert !validationErrors.hasErrors()
@@ -91,7 +91,7 @@ public class ActionGeneratorChainTest extends Specification {
         generators.add(new MockActionGenerator(1, "A1", "A2"))
 
         ActionGeneratorChain chain =new ActionGeneratorChain(generators)
-        ValidationErrors validationErrors = chain.validate(new MockSqlStatement(), new ExecutionOptions(new RuntimeEnvironment(new MockDatabase())))
+        ValidationErrors validationErrors = chain.validate(new MockSqlStatement(), new ExecutionEnvironment(new MockDatabase()))
         
         then:
         assert !validationErrors.hasErrors()
@@ -104,7 +104,7 @@ public class ActionGeneratorChainTest extends Specification {
         generators.add(new MockActionGenerator(1, "A1", "A2").addValidationError("E1"))
 
         ActionGeneratorChain chain =new ActionGeneratorChain(generators)
-        ValidationErrors validationErrors = chain.validate(new MockSqlStatement(), new ExecutionOptions(new RuntimeEnvironment(new MockDatabase())))
+        ValidationErrors validationErrors = chain.validate(new MockSqlStatement(), new ExecutionEnvironment(new MockDatabase()))
 
         then:
         assert validationErrors.hasErrors()
@@ -117,7 +117,7 @@ public class ActionGeneratorChainTest extends Specification {
         generators.add(new MockActionGenerator(1, "A1", "A2"))
 
         ActionGeneratorChain chain =new ActionGeneratorChain(generators)
-        ValidationErrors validationErrors = chain.validate(new MockSqlStatement(), new ExecutionOptions(new RuntimeEnvironment(new MockDatabase())))
+        ValidationErrors validationErrors = chain.validate(new MockSqlStatement(), new ExecutionEnvironment(new MockDatabase()))
 
         then:
         assert !validationErrors.hasErrors()
@@ -130,7 +130,7 @@ public class ActionGeneratorChainTest extends Specification {
         generators.add(new MockActionGenerator(1, "A1", "A2"))
 
         ActionGeneratorChain chain =new ActionGeneratorChain(generators)
-        ValidationErrors validationErrors = chain.validate(new MockSqlStatement(), new ExecutionOptions(new RuntimeEnvironment(new MockDatabase())))
+        ValidationErrors validationErrors = chain.validate(new MockSqlStatement(), new ExecutionEnvironment(new MockDatabase()))
 
         then:
         assert validationErrors.hasErrors()
@@ -143,7 +143,7 @@ public class ActionGeneratorChainTest extends Specification {
         generators.add(new MockActionGenerator(1, "A1", "A2").addValidationError("E1"))
 
         ActionGeneratorChain chain =new ActionGeneratorChain(generators)
-        ValidationErrors validationErrors = chain.validate(new MockSqlStatement(), new ExecutionOptions(new RuntimeEnvironment(new MockDatabase())))
+        ValidationErrors validationErrors = chain.validate(new MockSqlStatement(), new ExecutionEnvironment(new MockDatabase()))
 
         then:
         assert validationErrors.hasErrors()

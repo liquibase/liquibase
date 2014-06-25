@@ -3,7 +3,7 @@ package liquibase.change.core;
 import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.database.core.DB2Database;
-import liquibase.executor.ExecutionOptions;
+import  liquibase.ExecutionEnvironment;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RenameTableStatement;
@@ -65,10 +65,10 @@ public class RenameTableChange extends AbstractChange {
     }
 
     @Override
-    public SqlStatement[] generateStatements(ExecutionOptions options) {
+    public SqlStatement[] generateStatements(ExecutionEnvironment env) {
         List<SqlStatement> statements = new ArrayList<SqlStatement>();
         statements.add(new RenameTableStatement(getCatalogName(), getSchemaName(), getOldTableName(), getNewTableName()));
-        if (options.getRuntimeEnvironment().getTargetDatabase() instanceof DB2Database) {
+        if (env.getTargetDatabase() instanceof DB2Database) {
             statements.add(new ReorganizeTableStatement(getCatalogName(), getSchemaName(), getNewTableName()));
         }
 
@@ -76,9 +76,9 @@ public class RenameTableChange extends AbstractChange {
     }
 
     @Override
-    public ChangeStatus checkStatus(ExecutionOptions options) {
+    public ChangeStatus checkStatus(ExecutionEnvironment env) {
         try {
-            Database database = options.getRuntimeEnvironment().getTargetDatabase();
+            Database database = env.getTargetDatabase();
             ChangeStatus changeStatus = new ChangeStatus();
             Table newTable = SnapshotGeneratorFactory.getInstance().createSnapshot(new Table(getCatalogName(), getSchemaName(), getNewTableName()), database);
             Table oldTable = SnapshotGeneratorFactory.getInstance().createSnapshot(new Table(getCatalogName(), getSchemaName(), getOldTableName()), database);

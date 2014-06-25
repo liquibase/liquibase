@@ -196,7 +196,7 @@ public class Liquibase {
 
             ChangeLogIterator changeLogIterator = getStandardChangelogIterator(contexts, labelExpression, changeLog);
 
-            changeLogIterator.run(createUpdateVisitor(), new RuntimeEnvironment(database, contexts, labelExpression));
+            changeLogIterator.run(createUpdateVisitor(), new ExecutionEnvironment(database).setContexts(contexts).setLabelExpression(labelExpression));
         } finally {
             database.setObjectQuotingStrategy(ObjectQuotingStrategy.LEGACY);
             try {
@@ -292,7 +292,7 @@ public class Liquibase {
                     new DbmsChangeSetFilter(database),
                     new CountChangeSetFilter(changesToApply));
 
-            logIterator.run(createUpdateVisitor(), new RuntimeEnvironment(database, contexts, labelExpression));
+            logIterator.run(createUpdateVisitor(), new ExecutionEnvironment(database).setContexts(contexts).setLabelExpression(labelExpression));
         } finally {
             lockService.releaseLock();
             resetServices();
@@ -395,7 +395,7 @@ public class Liquibase {
                     new DbmsChangeSetFilter(database),
                     new CountChangeSetFilter(changesToRollback));
 
-            logIterator.run(new RollbackVisitor(database), new RuntimeEnvironment(database, contexts, labelExpression));
+            logIterator.run(new RollbackVisitor(database), new ExecutionEnvironment(database).setContexts(contexts).setLabelExpression(labelExpression));
         } finally {
             try {
                 lockService.releaseLock();
@@ -463,7 +463,7 @@ public class Liquibase {
                     new LabelChangeSetFilter(labelExpression),
                     new DbmsChangeSetFilter(database));
 
-            logIterator.run(new RollbackVisitor(database), new RuntimeEnvironment(database, contexts, labelExpression));
+            logIterator.run(new RollbackVisitor(database), new ExecutionEnvironment(database).setContexts(contexts).setLabelExpression(labelExpression));
         } finally {
             lockService.releaseLock();
         }
@@ -518,7 +518,7 @@ public class Liquibase {
                     new LabelChangeSetFilter(labelExpression),
                     new DbmsChangeSetFilter(database));
 
-            logIterator.run(new RollbackVisitor(database), new RuntimeEnvironment(database, contexts, labelExpression));
+            logIterator.run(new RollbackVisitor(database), new ExecutionEnvironment(database).setContexts(contexts).setLabelExpression(labelExpression));
         } finally {
             lockService.releaseLock();
         }
@@ -573,7 +573,7 @@ public class Liquibase {
                     new LabelChangeSetFilter(labelExpression),
                     new DbmsChangeSetFilter(database));
 
-            logIterator.run(new ChangeLogSyncVisitor(database, changeLogSyncListener), new RuntimeEnvironment(database, contexts, labelExpression));
+            logIterator.run(new ChangeLogSyncVisitor(database, changeLogSyncListener), new ExecutionEnvironment(database).setContexts(contexts).setLabelExpression(labelExpression));
         } finally {
             lockService.releaseLock();
             resetServices();
@@ -630,7 +630,7 @@ public class Liquibase {
                     new DbmsChangeSetFilter(database),
                     new CountChangeSetFilter(1));
 
-            logIterator.run(new ChangeLogSyncVisitor(database), new RuntimeEnvironment(database, contexts, labelExpression));
+            logIterator.run(new ChangeLogSyncVisitor(database), new ExecutionEnvironment(database).setContexts(contexts).setLabelExpression(labelExpression));
         } finally {
             lockService.releaseLock();
             resetServices();
@@ -678,7 +678,7 @@ public class Liquibase {
                         new DbmsChangeSetFilter(database),
                         new CountChangeSetFilter(count));
                 final ListVisitor listVisitor = new ListVisitor();
-                forwardIterator.run(listVisitor, new RuntimeEnvironment(database, contexts, labelExpression));
+                forwardIterator.run(listVisitor, new ExecutionEnvironment(database).setContexts(contexts).setLabelExpression(labelExpression));
 
                 logIterator = new ChangeLogIterator(changeLog,
                         new NotRanChangeSetFilter(database.getRanChangeSetList()),
@@ -693,7 +693,7 @@ public class Liquibase {
                         });
             }
 
-            logIterator.run(new RollbackVisitor(database), new RuntimeEnvironment(database, contexts, labelExpression));
+            logIterator.run(new RollbackVisitor(database), new ExecutionEnvironment(database).setContexts(contexts).setLabelExpression(labelExpression));
         } finally {
             lockService.releaseLock();
             ExecutorService.getInstance().setExecutor(database, oldTemplate);
@@ -835,7 +835,7 @@ public class Liquibase {
         ChangeLogIterator logIterator = getStandardChangelogIterator(contexts, labels, changeLog);
 
         ListVisitor visitor = new ListVisitor();
-        logIterator.run(visitor, new RuntimeEnvironment(database, contexts, labels));
+        logIterator.run(visitor, new ExecutionEnvironment(database).setContexts(contexts).setLabelExpression(labels));
         return visitor.getSeenChangeSets();
     }
 
@@ -855,7 +855,7 @@ public class Liquibase {
         ChangeLogIterator logIterator = getStandardChangelogIterator(contexts, labelExpression, changeLog);
 
         StatusVisitor visitor = new StatusVisitor(database);
-        logIterator.run(visitor, new RuntimeEnvironment(database, contexts, labelExpression));
+        logIterator.run(visitor, new ExecutionEnvironment(database).setContexts(contexts).setLabelExpression(labelExpression));
         return visitor.getStatuses();
     }
 
@@ -916,7 +916,7 @@ public class Liquibase {
                 new LabelChangeSetFilter(labelExpression),
                 new DbmsChangeSetFilter(database));
         ExpectedChangesVisitor visitor = new ExpectedChangesVisitor(database.getRanChangeSetList());
-        logIterator.run(visitor, new RuntimeEnvironment(database, contexts, labelExpression));
+        logIterator.run(visitor, new ExecutionEnvironment(database).setContexts(contexts).setLabelExpression(labelExpression));
         return visitor.getUnexpectedChangeSets();
     }
 
@@ -1032,7 +1032,7 @@ public class Liquibase {
                     new DbmsChangeSetFilter(database));
 
             DBDocVisitor visitor = new DBDocVisitor(database);
-            logIterator.run(visitor, new RuntimeEnvironment(database, contexts, labelExpression));
+            logIterator.run(visitor, new ExecutionEnvironment(database).setContexts(contexts).setLabelExpression(labelExpression));
 
             visitor.writeHTML(new File(outputDirectory), resourceAccessor);
         } catch (IOException e) {

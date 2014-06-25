@@ -8,23 +8,23 @@ import liquibase.database.Database;
 import liquibase.database.core.InformixDatabase;
 import liquibase.database.core.MySQLDatabase;
 import liquibase.exception.ValidationErrors;
-import liquibase.executor.ExecutionOptions;
+import  liquibase.ExecutionEnvironment;
 import liquibase.statement.core.TagDatabaseStatement;
 import liquibase.statement.core.UpdateStatement;
 
 public class TagDatabaseGenerator extends AbstractSqlGenerator<TagDatabaseStatement> {
 
     @Override
-    public ValidationErrors validate(TagDatabaseStatement tagDatabaseStatement, ExecutionOptions options, ActionGeneratorChain chain) {
+    public ValidationErrors validate(TagDatabaseStatement tagDatabaseStatement, ExecutionEnvironment env, ActionGeneratorChain chain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("tag", tagDatabaseStatement.getTag());
         return validationErrors;
     }
 
     @Override
-    public Action[] generateActions(TagDatabaseStatement statement, ExecutionOptions options, ActionGeneratorChain sqlGeneratorChain) {
+    public Action[] generateActions(TagDatabaseStatement statement, ExecutionEnvironment env, ActionGeneratorChain sqlGeneratorChain) {
     	String liquibaseSchema = null;
-        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+        Database database = env.getTargetDatabase();
    		liquibaseSchema = database.getLiquibaseSchemaName();
         UpdateStatement updateStatement = new UpdateStatement(database.getLiquibaseCatalogName(), liquibaseSchema, database.getDatabaseChangeLogTableName());
         updateStatement.addNewColumnValue("TAG", statement.getTag());
@@ -52,7 +52,7 @@ public class TagDatabaseGenerator extends AbstractSqlGenerator<TagDatabaseStatem
             updateStatement.setWhereClause("DATEEXECUTED = (SELECT MAX(DATEEXECUTED) FROM " + database.escapeTableName(database.getLiquibaseCatalogName(), liquibaseSchema, database.getDatabaseChangeLogTableName()) + ")");
         }
 
-        return ActionGeneratorFactory.getInstance().generateActions(updateStatement, options);
+        return ActionGeneratorFactory.getInstance().generateActions(updateStatement, env);
 
     }
 }

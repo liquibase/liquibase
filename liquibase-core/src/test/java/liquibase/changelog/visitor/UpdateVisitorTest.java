@@ -1,6 +1,6 @@
 package liquibase.changelog.visitor;
 
-import liquibase.RuntimeEnvironment;
+import liquibase.ExecutionEnvironment;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.ChangeSet.RunStatus;
 import liquibase.changelog.DatabaseChangeLog;
@@ -42,7 +42,7 @@ public class UpdateVisitorTest {
         replay(listener);
 
         UpdateVisitor visitor = new UpdateVisitor(database, listener);
-        visitor.visit(changeSet, databaseChangeLog, new RuntimeEnvironment(database), null);
+        visitor.visit(changeSet, databaseChangeLog, new ExecutionEnvironment(database), null);
 
         verify(database);
         verify(changeSet);

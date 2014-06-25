@@ -1,6 +1,7 @@
 package liquibase.database.core;
 
 import liquibase.CatalogAndSchema;
+import liquibase.ExecutionEnvironment;
 import liquibase.change.ColumnConfig;
 import liquibase.change.core.CreateTableChange;
 import liquibase.database.AbstractJdbcDatabase;
@@ -8,7 +9,7 @@ import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.executor.ExecutionOptions;
+import  liquibase.ExecutionEnvironment;
 import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.SnapshotControl;
 import liquibase.snapshot.SnapshotGeneratorFactory;
@@ -120,14 +121,14 @@ public class SQLiteDatabase extends AbstractJdbcDatabase {
 
     public static List<SqlStatement> getAlterTableStatements(
             AlterTableVisitor alterTableVisitor,
-            ExecutionOptions options, String catalogName, String schemaName, String tableName)
+            ExecutionEnvironment env, String catalogName, String schemaName, String tableName)
             throws DatabaseException {
 
         List<SqlStatement> statements = new ArrayList<SqlStatement>();
 
         Table table = null;
         try {
-            Database database = options.getRuntimeEnvironment().getTargetDatabase();
+            Database database = env.getTargetDatabase();
             table = SnapshotGeneratorFactory.getInstance().createSnapshot((Table) new Table().setName(tableName).setSchema(new Schema(new Catalog(null), null)), database);
 
             List<ColumnConfig> createColumns = new ArrayList<ColumnConfig>();
@@ -174,7 +175,7 @@ public class SQLiteDatabase extends AbstractJdbcDatabase {
             for (ColumnConfig column : createColumns) {
                 ct_change_tmp.addColumn(column);
             }
-            statements.addAll(Arrays.asList(ct_change_tmp.generateStatements(options)));
+            statements.addAll(Arrays.asList(ct_change_tmp.generateStatements(env)));
             // copy rows to temporary table
             statements.addAll(Arrays.asList(new CopyRowsStatement(temp_table_name, tableName, copyColumns)));
             // delete original table

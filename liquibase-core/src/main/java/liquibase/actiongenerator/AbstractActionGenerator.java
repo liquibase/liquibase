@@ -2,7 +2,7 @@ package liquibase.actiongenerator;
 
 import liquibase.exception.ValidationErrors;
 import liquibase.exception.Warnings;
-import liquibase.executor.ExecutionOptions;
+import  liquibase.ExecutionEnvironment;
 import liquibase.statement.SqlStatement;
 
 public abstract class AbstractActionGenerator<StatementType extends SqlStatement> implements ActionGenerator<StatementType> {
@@ -13,17 +13,17 @@ public abstract class AbstractActionGenerator<StatementType extends SqlStatement
     }
 
     @Override
-    public boolean supports(StatementType statement, ExecutionOptions options) {
+    public boolean supports(StatementType statement, ExecutionEnvironment env) {
         return true;
     }
 
     @Override
-    public ValidationErrors validate(StatementType statement, ExecutionOptions options, ActionGeneratorChain chain) {
-        return chain.validate(statement, options);
+    public ValidationErrors validate(StatementType statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+        return chain.validate(statement, env);
     }
 
     @Override
-    public Warnings warn(StatementType statementType, ExecutionOptions options, ActionGeneratorChain chain) {
-        return chain.warn(statementType, options);
+    public Warnings warn(StatementType statementType, ExecutionEnvironment env, ActionGeneratorChain chain) {
+        return chain.warn(statementType, env);
     }
 }

@@ -4,7 +4,7 @@ import liquibase.change.AbstractChange;
 import liquibase.change.ChangeMetaData;
 import liquibase.change.DatabaseChange;
 import liquibase.change.DatabaseChangeProperty;
-import liquibase.executor.ExecutionOptions;
+import  liquibase.ExecutionEnvironment;
 import liquibase.serializer.LiquibaseSerializable;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.DropProcedureStatement;
@@ -49,7 +49,7 @@ public class DropProcedureChange extends AbstractChange {
     }
 
     @Override
-    public SqlStatement[] generateStatements(ExecutionOptions options) {
+    public SqlStatement[] generateStatements(ExecutionEnvironment env) {
         return new SqlStatement[]{
                 new DropProcedureStatement(getCatalogName(), getSchemaName(), getProcedureName())
         };

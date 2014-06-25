@@ -13,15 +13,15 @@ import liquibase.database.core.PostgresDatabase;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
-import liquibase.executor.ExecutionOptions;
+import  liquibase.ExecutionEnvironment;
 import liquibase.statement.core.MetaDataQueryStatement;
 import liquibase.structure.core.Table;
 
 public class TablesMetaDataQueryGenerator extends AbstractActionGenerator<MetaDataQueryStatement> {
 
     @Override
-    public boolean supports(MetaDataQueryStatement statement, ExecutionOptions options) {
-        DatabaseConnection connection = options.getRuntimeEnvironment().getTargetDatabase().getConnection();
+    public boolean supports(MetaDataQueryStatement statement, ExecutionEnvironment env) {
+        DatabaseConnection connection = env.getTargetDatabase().getConnection();
         if (connection == null || connection instanceof JdbcConnection || connection instanceof OfflineConnection) {
             return statement.getExample() instanceof Table;
         } else {
@@ -31,9 +31,9 @@ public class TablesMetaDataQueryGenerator extends AbstractActionGenerator<MetaDa
     }
 
     @Override
-    public ValidationErrors validate(MetaDataQueryStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
-        Database database = options.getRuntimeEnvironment().getTargetDatabase();
-        ValidationErrors errors = super.validate(statement, options, chain);
+    public ValidationErrors validate(MetaDataQueryStatement statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+        Database database = env.getTargetDatabase();
+        ValidationErrors errors = super.validate(statement, env, chain);
         Table example = (Table) statement.getExample();
         if (example.getSchema() != null && example.getSchema().getCatalogName() != null && example.getSchema().getName() != null) {
             if (!example.getSchema().getCatalogName().equals(example.getSchema().getName()) && !database.supportsSchemas()) {
@@ -44,8 +44,8 @@ public class TablesMetaDataQueryGenerator extends AbstractActionGenerator<MetaDa
     }
 
     @Override
-    public Action[] generateActions(final MetaDataQueryStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
-        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+    public Action[] generateActions(final MetaDataQueryStatement statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+        Database database = env.getTargetDatabase();
         if (database.getConnection() == null || database.getConnection() instanceof OfflineConnection) {
             throw new UnexpectedLiquibaseException("Cannot read table metadata for an offline database");
         }
@@ -75,12 +75,12 @@ public class TablesMetaDataQueryGenerator extends AbstractActionGenerator<MetaDa
 
 
     @Override
-    public boolean generateStatementsIsVolatile(ExecutionOptions options) {
+    public boolean generateStatementsIsVolatile(ExecutionEnvironment env) {
         return false;
     }
 
     @Override
-    public boolean generateRollbackStatementsIsVolatile(ExecutionOptions options) {
+    public boolean generateRollbackStatementsIsVolatile(ExecutionEnvironment env) {
         return false;
     }
 }

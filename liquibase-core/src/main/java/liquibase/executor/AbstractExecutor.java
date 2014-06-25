@@ -1,6 +1,6 @@
 package liquibase.executor;
 
-import liquibase.RuntimeEnvironment;
+import liquibase.ExecutionEnvironment;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 import liquibase.statement.SqlStatement;
@@ -16,7 +16,7 @@ public abstract class AbstractExecutor implements Executor {
     }
 
     /**
-     * Default implementation delegates to {@link #query(liquibase.statement.SqlStatement, ExecutionOptions)}
+     * Default implementation delegates to {@link #query(liquibase.statement.SqlStatement, liquibase.ExecutionEnvironment)}
      */
     @Override
     public QueryResult query(SqlStatement sql) throws DatabaseException {
@@ -24,7 +24,7 @@ public abstract class AbstractExecutor implements Executor {
     }
 
     /**
-     * Default implementation delegates to {@link #execute(liquibase.statement.SqlStatement, ExecutionOptions)}
+     * Default implementation delegates to {@link #execute(liquibase.statement.SqlStatement, liquibase.ExecutionEnvironment)}
      */
     @Override
     public ExecuteResult execute(SqlStatement sql) throws DatabaseException {
@@ -32,7 +32,7 @@ public abstract class AbstractExecutor implements Executor {
     }
 
     /**
-     * Default implementation delegates to {@link #update(liquibase.statement.SqlStatement, ExecutionOptions)}
+     * Default implementation delegates to {@link #update(liquibase.statement.SqlStatement, liquibase.ExecutionEnvironment)}
      */
     @Override
     public UpdateResult update(SqlStatement sql) throws DatabaseException {
@@ -42,7 +42,7 @@ public abstract class AbstractExecutor implements Executor {
     /**
      * Create ExecutionOptions to use in single-parameter execute/update/query calls.
      */
-    protected ExecutionOptions createDefaultExecutionOptions() {
-        return new ExecutionOptions(new RuntimeEnvironment(database, null, null));
+    protected ExecutionEnvironment createDefaultExecutionOptions() {
+        return new ExecutionEnvironment(database);
     }
 }

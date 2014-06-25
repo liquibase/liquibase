@@ -3,7 +3,7 @@ package liquibase.change.core;
 import liquibase.change.ChangeMetaData;
 import liquibase.change.ColumnConfig;
 import liquibase.change.DatabaseChange;
-import liquibase.executor.ExecutionOptions;
+import  liquibase.ExecutionEnvironment;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.resource.ResourceAccessor;
@@ -15,7 +15,7 @@ public class DeleteDataChange extends AbstractModifyDataChange {
 
 
     @Override
-    public SqlStatement[] generateStatements(ExecutionOptions options) {
+    public SqlStatement[] generateStatements(ExecutionEnvironment env) {
 
         DeleteStatement statement = new DeleteStatement(getCatalogName(), getSchemaName(), getTableName());
 

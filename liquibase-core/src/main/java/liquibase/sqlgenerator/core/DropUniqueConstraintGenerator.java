@@ -9,20 +9,20 @@ import liquibase.database.core.OracleDatabase;
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.database.core.SybaseASADatabase;
 import liquibase.exception.ValidationErrors;
-import liquibase.executor.ExecutionOptions;
+import  liquibase.ExecutionEnvironment;
 import liquibase.statement.core.DropUniqueConstraintStatement;
 
 public class DropUniqueConstraintGenerator extends AbstractSqlGenerator<DropUniqueConstraintStatement> {
 
     @Override
-    public boolean supports(DropUniqueConstraintStatement statement, ExecutionOptions options) {
-        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+    public boolean supports(DropUniqueConstraintStatement statement, ExecutionEnvironment env) {
+        Database database = env.getTargetDatabase();
 
         return !(database instanceof SQLiteDatabase);
     }
 
     @Override
-    public ValidationErrors validate(DropUniqueConstraintStatement dropUniqueConstraintStatement, ExecutionOptions options, ActionGeneratorChain chain) {
+    public ValidationErrors validate(DropUniqueConstraintStatement dropUniqueConstraintStatement, ExecutionEnvironment env, ActionGeneratorChain chain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("tableName", dropUniqueConstraintStatement.getTableName());
         validationErrors.checkRequiredField("constraintName", dropUniqueConstraintStatement.getConstraintName());
@@ -30,8 +30,8 @@ public class DropUniqueConstraintGenerator extends AbstractSqlGenerator<DropUniq
     }
 
     @Override
-    public Action[] generateActions(DropUniqueConstraintStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
-        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+    public Action[] generateActions(DropUniqueConstraintStatement statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+        Database database = env.getTargetDatabase();
 
         String sql;
         if (database instanceof MySQLDatabase) {

@@ -3,7 +3,7 @@ package liquibase.action.core;
 import liquibase.action.MetaDataQueryAction;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
-import liquibase.executor.ExecutionOptions;
+import  liquibase.ExecutionEnvironment;
 import liquibase.executor.QueryResult;
 import liquibase.executor.Row;
 import liquibase.structure.DatabaseObject;
@@ -32,14 +32,14 @@ public class TablesJdbcMetaDataQueryAction extends MetaDataQueryAction {
         this.setAttribute(TABLE_NAME, tableName);
     }
 
-    protected DatabaseObject rawMetaDataToObject(Row row, ExecutionOptions options) {
+    protected DatabaseObject rawMetaDataToObject(Row row, ExecutionEnvironment env) {
         return new Table(row.get("TABLE_CAT", String.class), row.get("TABLE_SCHEM", String.class), row.get("TABLE_NAME", String.class))
                 .setRemarks(StringUtils.trimToNull(row.get("REMARKS", String.class)));
     }
 
     @Override
-    protected QueryResult getRawMetaData(ExecutionOptions options) throws DatabaseException {
-        DatabaseMetaData metaData = ((JdbcConnection) options.getRuntimeEnvironment().getTargetDatabase().getConnection()).getMetaData();
+    protected QueryResult getRawMetaData(ExecutionEnvironment env) throws DatabaseException {
+        DatabaseMetaData metaData = ((JdbcConnection) env.getTargetDatabase().getConnection()).getMetaData();
 
         try {
             return new QueryResult(JdbcUtils.extract(metaData.getTables(

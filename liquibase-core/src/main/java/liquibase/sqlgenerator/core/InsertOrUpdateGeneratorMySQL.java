@@ -4,7 +4,7 @@ import liquibase.actiongenerator.ActionGeneratorChain;
 import liquibase.database.Database;
 import liquibase.database.core.MySQLDatabase;
 import liquibase.datatype.DataTypeFactory;
-import liquibase.executor.ExecutionOptions;
+import  liquibase.ExecutionEnvironment;
 import liquibase.statement.core.InsertOrUpdateStatement;
 
 import java.util.Arrays;
@@ -16,17 +16,17 @@ import java.util.HashSet;
  */
 public class InsertOrUpdateGeneratorMySQL extends InsertOrUpdateGenerator {
     @Override
-    public boolean supports(InsertOrUpdateStatement statement, ExecutionOptions options) {
-        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+    public boolean supports(InsertOrUpdateStatement statement, ExecutionEnvironment env) {
+        Database database = env.getTargetDatabase();
 
         return database instanceof MySQLDatabase;
     }
 
     @Override
-    protected String getInsertStatement(InsertOrUpdateStatement insertOrUpdateStatement, ExecutionOptions options, ActionGeneratorChain chain) {
-        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+    protected String getInsertStatement(InsertOrUpdateStatement insertOrUpdateStatement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+        Database database = env.getTargetDatabase();
 
-        StringBuffer sql = new StringBuffer(super.getInsertStatement(insertOrUpdateStatement, options, chain));
+        StringBuffer sql = new StringBuffer(super.getInsertStatement(insertOrUpdateStatement, env, chain));
         
         sql.deleteCharAt(sql.lastIndexOf(";"));
         
@@ -58,17 +58,17 @@ public class InsertOrUpdateGeneratorMySQL extends InsertOrUpdateGenerator {
     }
 
     @Override
-    protected String getUpdateStatement(InsertOrUpdateStatement insertOrUpdateStatement, ExecutionOptions options, String whereClause, ActionGeneratorChain chain) {
+    protected String getUpdateStatement(InsertOrUpdateStatement insertOrUpdateStatement, ExecutionEnvironment env, String whereClause, ActionGeneratorChain chain) {
         return "";
     }
 
     @Override
-    protected String getRecordCheck(InsertOrUpdateStatement insertOrUpdateStatement, ExecutionOptions options, String whereClause) {
+    protected String getRecordCheck(InsertOrUpdateStatement insertOrUpdateStatement, ExecutionEnvironment env, String whereClause) {
         return "";
     }
 
     @Override
-    protected String getElse(ExecutionOptions options) {
+    protected String getElse(ExecutionEnvironment env) {
         return "";
     }
 }

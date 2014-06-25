@@ -2,7 +2,7 @@ package liquibase.change.core;
 
 import liquibase.change.*;
 import liquibase.database.core.DB2Database;
-import liquibase.executor.ExecutionOptions;
+import  liquibase.ExecutionEnvironment;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.AddPrimaryKeyStatement;
@@ -77,13 +77,13 @@ public class AddPrimaryKeyChange extends AbstractChange {
     }
 
     @Override
-    public SqlStatement[] generateStatements(ExecutionOptions options) {
+    public SqlStatement[] generateStatements(ExecutionEnvironment env) {
 
 
         AddPrimaryKeyStatement statement = new AddPrimaryKeyStatement(getCatalogName(), getSchemaName(), getTableName(), getColumnNames(), getConstraintName());
         statement.setTablespace(getTablespace());
 
-        if (options.getRuntimeEnvironment().getTargetDatabase() instanceof DB2Database) {
+        if (env.getTargetDatabase() instanceof DB2Database) {
             return new SqlStatement[]{
                     statement,
                     new ReorganizeTableStatement(getCatalogName(), getSchemaName(), getTableName())
@@ -99,12 +99,12 @@ public class AddPrimaryKeyChange extends AbstractChange {
     }
 
     @Override
-    public ChangeStatus checkStatus(ExecutionOptions options) {
+    public ChangeStatus checkStatus(ExecutionEnvironment env) {
         ChangeStatus result = new ChangeStatus();
         try {
             PrimaryKey example = new PrimaryKey(getConstraintName(), getCatalogName(), getSchemaName(), getTableName(), getColumnNames().split("\\s+,\\s+"));
 
-            PrimaryKey snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(example, options.getRuntimeEnvironment().getTargetDatabase());
+            PrimaryKey snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(example, env.getTargetDatabase());
             result.assertComplete(snapshot != null, "Primary key does not exist");
 
             return result;

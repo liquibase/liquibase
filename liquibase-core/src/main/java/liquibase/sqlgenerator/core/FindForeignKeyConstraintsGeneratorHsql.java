@@ -5,7 +5,7 @@ import liquibase.action.core.UnparsedSql;
 import liquibase.actiongenerator.ActionGeneratorChain;
 import liquibase.database.core.HsqlDatabase;
 import liquibase.exception.ValidationErrors;
-import liquibase.executor.ExecutionOptions;
+import  liquibase.ExecutionEnvironment;
 import liquibase.statement.core.FindForeignKeyConstraintsStatement;
 
 public class FindForeignKeyConstraintsGeneratorHsql extends AbstractSqlGenerator<FindForeignKeyConstraintsStatement> {
@@ -15,28 +15,28 @@ public class FindForeignKeyConstraintsGeneratorHsql extends AbstractSqlGenerator
 	}
 
 	@Override
-	public boolean supports(FindForeignKeyConstraintsStatement statement, ExecutionOptions options) {
-		return options.getRuntimeEnvironment().getTargetDatabase() instanceof HsqlDatabase;
+	public boolean supports(FindForeignKeyConstraintsStatement statement, ExecutionEnvironment env) {
+		return env.getTargetDatabase() instanceof HsqlDatabase;
 	}
 
     @Override
-    public boolean generateStatementsIsVolatile(ExecutionOptions options) {
+    public boolean generateStatementsIsVolatile(ExecutionEnvironment env) {
         return false;
     }
 
     @Override
-    public boolean generateRollbackStatementsIsVolatile(ExecutionOptions options) {
+    public boolean generateRollbackStatementsIsVolatile(ExecutionEnvironment env) {
         return false;
     }
 
-    public ValidationErrors validate(FindForeignKeyConstraintsStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
+    public ValidationErrors validate(FindForeignKeyConstraintsStatement statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
 		ValidationErrors validationErrors = new ValidationErrors();
 		validationErrors.checkRequiredField("baseTableName", statement.getBaseTableName());
 		return validationErrors;
 	}
 
     @Override
-    public Action[] generateActions(FindForeignKeyConstraintsStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
+    public Action[] generateActions(FindForeignKeyConstraintsStatement statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
 		StringBuilder sb = new StringBuilder();
 
 		sb.append("SELECT ");

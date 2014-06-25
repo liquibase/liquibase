@@ -6,7 +6,7 @@ import liquibase.action.core.UnparsedSql;
 import liquibase.actiongenerator.ActionGeneratorChain;
 import liquibase.database.core.MySQLDatabase;
 import liquibase.exception.ValidationErrors;
-import liquibase.executor.ExecutionOptions;
+import  liquibase.ExecutionEnvironment;
 import liquibase.statement.core.FindForeignKeyConstraintsStatement;
 
 public class FindForeignKeyConstraintsGeneratorMySQL extends AbstractSqlGenerator<FindForeignKeyConstraintsStatement> {
@@ -16,20 +16,20 @@ public class FindForeignKeyConstraintsGeneratorMySQL extends AbstractSqlGenerato
     }
 
     @Override
-    public boolean supports(FindForeignKeyConstraintsStatement statement, ExecutionOptions options) {
-        return options.getRuntimeEnvironment().getTargetDatabase() instanceof MySQLDatabase;
+    public boolean supports(FindForeignKeyConstraintsStatement statement, ExecutionEnvironment env) {
+        return env.getTargetDatabase() instanceof MySQLDatabase;
     }
 
     @Override
-    public ValidationErrors validate(FindForeignKeyConstraintsStatement findForeignKeyConstraintsStatement, ExecutionOptions options, ActionGeneratorChain chain) {
+    public ValidationErrors validate(FindForeignKeyConstraintsStatement findForeignKeyConstraintsStatement, ExecutionEnvironment env, ActionGeneratorChain chain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("baseTableName", findForeignKeyConstraintsStatement.getBaseTableName());
         return validationErrors;
     }
 
     @Override
-    public Action[] generateActions(FindForeignKeyConstraintsStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
-        CatalogAndSchema schema = new CatalogAndSchema(statement.getBaseTableCatalogName(), statement.getBaseTableSchemaName()).customize(options.getRuntimeEnvironment().getTargetDatabase());
+    public Action[] generateActions(FindForeignKeyConstraintsStatement statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+        CatalogAndSchema schema = new CatalogAndSchema(statement.getBaseTableCatalogName(), statement.getBaseTableSchemaName()).customize(env.getTargetDatabase());
 
         StringBuilder sb = new StringBuilder();
 

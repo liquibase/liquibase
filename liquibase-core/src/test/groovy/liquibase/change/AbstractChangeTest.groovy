@@ -4,7 +4,7 @@ import liquibase.changelog.ChangeSet
 import liquibase.changelog.DatabaseChangeLog
 import liquibase.database.Database
 import liquibase.database.core.MSSQLDatabase
-import liquibase.executor.ExecutionOptions
+import  liquibase.ExecutionEnvironment
 import liquibase.sdk.database.MockDatabase
 import liquibase.exception.RollbackImpossibleException
 import liquibase.exception.UnexpectedLiquibaseException
@@ -29,7 +29,7 @@ public class AbstractChangeTest extends Specification {
             }
 
             @Override
-            public SqlStatement[] generateStatements(ExecutionOptions options) {
+            public SqlStatement[] generateStatements(ExecutionEnvironment env) {
                 return null;
             }
 
@@ -129,96 +129,96 @@ public class AbstractChangeTest extends Specification {
         expect:
         assert !new ExampleAbstractChange() {
             @Override
-            public SqlStatement[] generateStatements(ExecutionOptions options) {
+            public SqlStatement[] generateStatements(ExecutionEnvironment env) {
                 return null;
             }
-        }.generateStatementsVolatile(new MockDatabase())
+        }.generateStatementsVolatile(new ExecutionEnvironment(new MockDatabase()))
 
         assert !new ExampleAbstractChange() {
             @Override
-            public SqlStatement[] generateStatements(ExecutionOptions options) {
+            public SqlStatement[] generateStatements(ExecutionEnvironment env) {
                 return new SqlStatement[0];
             }
-        }.generateStatementsVolatile(new MockDatabase());
+        }.generateStatementsVolatile(new ExecutionEnvironment(new MockDatabase()));
     }
 
     def generateRollbackStatementsVolatile_noStatements() throws Exception {
         expect:
         assert !new ExampleAbstractChange() {
             @Override
-            public SqlStatement[] generateStatements(ExecutionOptions options) {
+            public SqlStatement[] generateStatements(ExecutionEnvironment env) {
                 return null;
             }
-        }.generateRollbackStatementsVolatile(new MockDatabase());
+        }.generateRollbackStatementsVolatile(new ExecutionEnvironment(new MockDatabase()));
 
         assert !new ExampleAbstractChange() {
             @Override
-            public SqlStatement[] generateStatements(ExecutionOptions options) {
+            public SqlStatement[] generateStatements(ExecutionEnvironment env) {
                 return new SqlStatement[0];
             }
-        }.generateRollbackStatementsVolatile(new MockDatabase())
+        }.generateRollbackStatementsVolatile(new ExecutionEnvironment(new MockDatabase()))
     }
 
     public void supports_noStatements() throws Exception {
         expect:
         assert new ExampleAbstractChange() {
             @Override
-            public SqlStatement[] generateStatements(ExecutionOptions options) {
+            public SqlStatement[] generateStatements(ExecutionEnvironment env) {
                 return null;
             }
-        }.supports(new MockDatabase());
+        }.supports(new ExecutionEnvironment(new MockDatabase()));
 
         assert new ExampleAbstractChange() {
             @Override
-            public SqlStatement[] generateStatements(ExecutionOptions options) {
+            public SqlStatement[] generateStatements(ExecutionEnvironment env) {
                 return new SqlStatement[0];
             }
-        }.supports(new MockDatabase());
+        }.supports(new ExecutionEnvironment(new MockDatabase()));
     }
 
     def warn_noStatements() throws Exception {
         expect:
         assert !new ExampleAbstractChange() {
             @Override
-            public SqlStatement[] generateStatements(ExecutionOptions options) {
+            public SqlStatement[] generateStatements(ExecutionEnvironment env) {
                 return null;
             }
-        }.warn(new MockDatabase()).hasWarnings();
+        }.warn(new ExecutionEnvironment(new MockDatabase())).hasWarnings();
 
         assert !new ExampleAbstractChange() {
             @Override
-            public SqlStatement[] generateStatements(ExecutionOptions options) {
+            public SqlStatement[] generateStatements(ExecutionEnvironment env) {
                 return new SqlStatement[0];
             }
-        }.warn(new MockDatabase()).hasWarnings();
+        }.warn(new ExecutionEnvironment(new MockDatabase())).hasWarnings();
     }
 
     def validate_noStatements() throws Exception {
         expect:
         assert !new ExampleAbstractChange() {
             @Override
-            public SqlStatement[] generateStatements(ExecutionOptions options) {
+            public SqlStatement[] generateStatements(ExecutionEnvironment env) {
                 return null;
             }
-        }.validate(new MockDatabase()).hasErrors();
+        }.validate(new ExecutionEnvironment(new MockDatabase())).hasErrors();
 
         assert !new ExampleAbstractChange() {
             @Override
-            public SqlStatement[] generateStatements(ExecutionOptions options) {
+            public SqlStatement[] generateStatements(ExecutionEnvironment env) {
                 return new SqlStatement[0];
             }
-        }.validate(new MockDatabase()).hasErrors();
+        }.validate(new ExecutionEnvironment(new MockDatabase())).hasErrors();
     }
 
     def validate_noParameters() throws Exception {
         expect:
-        assert !new ExampleParamlessAbstractChange().validate(new MockDatabase()).hasErrors()
+        assert !new ExampleParamlessAbstractChange().validate(new ExecutionEnvironment(new MockDatabase())).hasErrors()
     }
 
     def validate_missingRequiredValue() throws Exception {
         when:
         ExampleAbstractChange change = new ExampleAbstractChange();
-        ValidationErrors errors = change.validate(new MSSQLDatabase());
+        ValidationErrors errors = change.validate(new ExecutionEnvironment(new MSSQLDatabase()));
         then:
 
         errors.getErrorMessages().size() == 1
@@ -231,7 +231,7 @@ public class AbstractChangeTest extends Specification {
         change.setParamTwo(3);
 
         then:
-        ValidationErrors errors = change.validate(new MSSQLDatabase());
+        ValidationErrors errors = change.validate(new ExecutionEnvironment(new MSSQLDatabase()));
         assert !errors.hasErrors();
     }
 
@@ -243,7 +243,7 @@ public class AbstractChangeTest extends Specification {
             protected Change[] createInverses() {
                 return null;
             }
-        }.generateRollbackStatements(database);
+        }.generateRollbackStatements(new ExecutionEnvironment(database));
 
         then:
         thrown(RollbackImpossibleException)
@@ -258,7 +258,7 @@ public class AbstractChangeTest extends Specification {
             protected Change[] createInverses() {
                 return new Change[0];
             }
-        }.generateRollbackStatements(database);
+        }.generateRollbackStatements(new ExecutionEnvironment(database));
 
         then:
         rollbackStatements.length == 0
@@ -273,17 +273,17 @@ public class AbstractChangeTest extends Specification {
         expect:
         new ExampleAbstractChange() {
             @Override
-            public SqlStatement[] generateStatements(ExecutionOptions options) {
+            public SqlStatement[] generateStatements(ExecutionEnvironment env) {
                 return null;
             }
-        }.getAffectedDatabaseObjects(new MockDatabase()).size() == 0;
+        }.getAffectedDatabaseObjects(new ExecutionEnvironment(new MockDatabase())).size() == 0;
 
         new ExampleAbstractChange() {
             @Override
-            public SqlStatement[] generateStatements(ExecutionOptions options) {
+            public SqlStatement[] generateStatements(ExecutionEnvironment env) {
                 return new SqlStatement[0];
             }
-        }.getAffectedDatabaseObjects(new MockDatabase()).size() == 0;
+        }.getAffectedDatabaseObjects(new ExecutionEnvironment(new MockDatabase())).size() == 0;
     }
 
     def getSerializableFieldType() {
@@ -334,7 +334,7 @@ public class AbstractChangeTest extends Specification {
         }
 
         @Override
-        public SqlStatement[] generateStatements(ExecutionOptions options) {
+        public SqlStatement[] generateStatements(ExecutionEnvironment env) {
             return null;
         }
 

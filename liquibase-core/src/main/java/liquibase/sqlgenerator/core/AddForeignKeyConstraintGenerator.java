@@ -9,20 +9,20 @@ import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.core.OracleDatabase;
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.exception.ValidationErrors;
-import liquibase.executor.ExecutionOptions;
+import  liquibase.ExecutionEnvironment;
 import liquibase.statement.core.AddForeignKeyConstraintStatement;
 
 public class AddForeignKeyConstraintGenerator extends AbstractSqlGenerator<AddForeignKeyConstraintStatement> {
 
     @Override
     @SuppressWarnings({"SimplifiableIfStatement"})
-    public boolean supports(AddForeignKeyConstraintStatement statement, ExecutionOptions options) {
-        return (!(options.getRuntimeEnvironment().getTargetDatabase() instanceof SQLiteDatabase));
+    public boolean supports(AddForeignKeyConstraintStatement statement, ExecutionEnvironment env) {
+        return (!(env.getTargetDatabase() instanceof SQLiteDatabase));
     }
 
     @Override
-    public ValidationErrors validate(AddForeignKeyConstraintStatement addForeignKeyConstraintStatement, ExecutionOptions options, ActionGeneratorChain chain) {
-        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+    public ValidationErrors validate(AddForeignKeyConstraintStatement addForeignKeyConstraintStatement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+        Database database = env.getTargetDatabase();
         ValidationErrors validationErrors = new ValidationErrors();
 
         if ((addForeignKeyConstraintStatement.isInitiallyDeferred() || addForeignKeyConstraintStatement.isDeferrable()) && !database.supportsInitiallyDeferrableColumns()) {
@@ -40,8 +40,8 @@ public class AddForeignKeyConstraintGenerator extends AbstractSqlGenerator<AddFo
     }
 
     @Override
-    public Action[] generateActions(AddForeignKeyConstraintStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
-        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+    public Action[] generateActions(AddForeignKeyConstraintStatement statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+        Database database = env.getTargetDatabase();
 	    StringBuilder sb = new StringBuilder();
 	    sb.append("ALTER TABLE ")
 			    .append(database.escapeTableName(statement.getBaseTableCatalogName(), statement.getBaseTableSchemaName(), statement.getBaseTableName()))

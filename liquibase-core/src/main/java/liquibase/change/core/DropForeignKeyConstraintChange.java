@@ -2,7 +2,7 @@ package liquibase.change.core;
 
 import liquibase.change.*;
 import liquibase.database.core.SQLiteDatabase;
-import liquibase.executor.ExecutionOptions;
+import  liquibase.ExecutionEnvironment;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.DropForeignKeyConstraintStatement;
@@ -55,9 +55,9 @@ public class DropForeignKeyConstraintChange extends AbstractChange {
     }
 
     @Override
-    public SqlStatement[] generateStatements(ExecutionOptions options) {
+    public SqlStatement[] generateStatements(ExecutionEnvironment env) {
 
-        if (options.getRuntimeEnvironment().getTargetDatabase() instanceof SQLiteDatabase) {
+        if (env.getTargetDatabase() instanceof SQLiteDatabase) {
     		// return special statements for SQLite databases
     		return generateStatementsForSQLiteDatabase();
     	} 
@@ -72,9 +72,9 @@ public class DropForeignKeyConstraintChange extends AbstractChange {
     }
 
     @Override
-    public ChangeStatus checkStatus(ExecutionOptions options) {
+    public ChangeStatus checkStatus(ExecutionEnvironment env) {
         try {
-            return new ChangeStatus().assertComplete(!SnapshotGeneratorFactory.getInstance().has(new ForeignKey(getConstraintName(), getBaseTableCatalogName(), getBaseTableSchemaName(), getBaseTableCatalogName()), options.getRuntimeEnvironment().getTargetDatabase()), "Foreign key exists");
+            return new ChangeStatus().assertComplete(!SnapshotGeneratorFactory.getInstance().has(new ForeignKey(getConstraintName(), getBaseTableCatalogName(), getBaseTableSchemaName(), getBaseTableCatalogName()), env.getTargetDatabase()), "Foreign key exists");
         } catch (Exception e) {
             return new ChangeStatus().unknown(e);
         }

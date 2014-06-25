@@ -7,7 +7,7 @@ import liquibase.database.Database;
 import liquibase.database.core.SybaseDatabase;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.ValidationErrors;
-import liquibase.executor.ExecutionOptions;
+import  liquibase.ExecutionEnvironment;
 import liquibase.statement.core.CreateDatabaseChangeLogTableStatement;
 
 public class CreateDatabaseChangeLogTableGeneratorSybase extends AbstractSqlGenerator<CreateDatabaseChangeLogTableStatement> {
@@ -17,18 +17,18 @@ public class CreateDatabaseChangeLogTableGeneratorSybase extends AbstractSqlGene
     }
 
     @Override
-    public boolean supports(CreateDatabaseChangeLogTableStatement statement, ExecutionOptions options) {
-        return options.getRuntimeEnvironment().getTargetDatabase() instanceof SybaseDatabase;
+    public boolean supports(CreateDatabaseChangeLogTableStatement statement, ExecutionEnvironment env) {
+        return env.getTargetDatabase() instanceof SybaseDatabase;
     }
 
     @Override
-    public ValidationErrors validate(CreateDatabaseChangeLogTableStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
+    public ValidationErrors validate(CreateDatabaseChangeLogTableStatement statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
         return new ValidationErrors();
     }
 
     @Override
-    public Action[] generateActions(CreateDatabaseChangeLogTableStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
-        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+    public Action[] generateActions(CreateDatabaseChangeLogTableStatement statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+        Database database = env.getTargetDatabase();
 
         return new Action[] {
                 new UnparsedSql("CREATE TABLE " + database.escapeTableName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName()) + " (ID VARCHAR(150) NOT NULL, " +

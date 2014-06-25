@@ -1,11 +1,11 @@
 package liquibase.action.core
 
-import liquibase.RuntimeEnvironment
+import liquibase.ExecutionEnvironment
 import liquibase.database.OfflineConnection
 import liquibase.database.jvm.JdbcConnection
 import liquibase.exception.DatabaseException
 import liquibase.executor.ExecuteResult
-import liquibase.executor.ExecutionOptions
+import  liquibase.ExecutionEnvironment
 import liquibase.executor.QueryResult
 import liquibase.executor.UpdateResult
 import liquibase.sdk.database.MockDatabase
@@ -22,7 +22,7 @@ class UnparsedSqlTest extends Specification {
         database.setConnection(connection)
 
         then:
-        unparsedSql.query(new ExecutionOptions(new RuntimeEnvironment(database))) != null
+        unparsedSql.query(new ExecutionEnvironment(database)) != null
     }
 
     def "execute"() {
@@ -34,7 +34,7 @@ class UnparsedSqlTest extends Specification {
         database.setConnection(connection)
 
         then:
-        unparsedSql.execute(new ExecutionOptions(new RuntimeEnvironment(database))) != null
+        unparsedSql.execute(new ExecutionEnvironment(database)) != null
     }
 
     def "update"() {
@@ -46,7 +46,7 @@ class UnparsedSqlTest extends Specification {
         database.setConnection(connection)
 
         then:
-        unparsedSql.update(new ExecutionOptions(new RuntimeEnvironment(database))) != null
+        unparsedSql.update(new ExecutionEnvironment(database)) != null
     }
 
     def "cannot call with non-JdbcConnection"() {
@@ -56,19 +56,19 @@ class UnparsedSqlTest extends Specification {
         database.setConnection(new OfflineConnection("offline:mock"))
 
         and:
-        unparsedSql.update(new ExecutionOptions(new RuntimeEnvironment(database)))
+        unparsedSql.update(new ExecutionEnvironment(database))
         then:
         def e = thrown(DatabaseException)
         e.message == "Cannot execute SQL against a liquibase.database.OfflineConnection connection"
 
         when:
-        unparsedSql.query(new ExecutionOptions(new RuntimeEnvironment(database)))
+        unparsedSql.query(new ExecutionEnvironment(database))
         then:
         e = thrown(DatabaseException)
         e.message == "Cannot execute SQL against a liquibase.database.OfflineConnection connection"
 
         when:
-        unparsedSql.execute(new ExecutionOptions(new RuntimeEnvironment(database)))
+        unparsedSql.execute(new ExecutionEnvironment(database))
         then:
         e = thrown(DatabaseException)
         e.message == "Cannot execute SQL against a liquibase.database.OfflineConnection connection"

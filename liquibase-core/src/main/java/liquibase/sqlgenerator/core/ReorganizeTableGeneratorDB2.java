@@ -7,7 +7,7 @@ import liquibase.database.Database;
 import liquibase.database.core.DB2Database;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.ValidationErrors;
-import liquibase.executor.ExecutionOptions;
+import  liquibase.ExecutionEnvironment;
 import liquibase.statement.core.ReorganizeTableStatement;
 import liquibase.structure.core.Relation;
 import liquibase.structure.core.Table;
@@ -19,20 +19,20 @@ public class ReorganizeTableGeneratorDB2 extends AbstractSqlGenerator<Reorganize
     }
 
     @Override
-    public boolean supports(ReorganizeTableStatement statement, ExecutionOptions options) {
-        return options.getRuntimeEnvironment().getTargetDatabase() instanceof DB2Database;
+    public boolean supports(ReorganizeTableStatement statement, ExecutionEnvironment env) {
+        return env.getTargetDatabase() instanceof DB2Database;
     }
 
     @Override
-    public ValidationErrors validate(ReorganizeTableStatement reorganizeTableStatement, ExecutionOptions options, ActionGeneratorChain chain) {
+    public ValidationErrors validate(ReorganizeTableStatement reorganizeTableStatement, ExecutionEnvironment env, ActionGeneratorChain chain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("tableName", reorganizeTableStatement.getTableName());
         return validationErrors;
     }
 
     @Override
-    public Action[] generateActions(ReorganizeTableStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
-        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+    public Action[] generateActions(ReorganizeTableStatement statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+        Database database = env.getTargetDatabase();
         try {
             if (database.getDatabaseMajorVersion() >= 9) {
                 return new Action[]{

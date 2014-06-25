@@ -1,7 +1,7 @@
 package liquibase.change.core;
 
 import liquibase.change.*;
-import liquibase.executor.ExecutionOptions;
+import  liquibase.ExecutionEnvironment;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.DropIndexStatement;
@@ -48,16 +48,16 @@ public class DropIndexChange extends AbstractChange {
     }
 
     @Override
-    public SqlStatement[] generateStatements(ExecutionOptions options) {
+    public SqlStatement[] generateStatements(ExecutionEnvironment env) {
         return new SqlStatement[] {
             new DropIndexStatement(getIndexName(), getCatalogName(), getSchemaName(), getTableName(), getAssociatedWith())
         };
     }
 
     @Override
-    public ChangeStatus checkStatus(ExecutionOptions options) {
+    public ChangeStatus checkStatus(ExecutionEnvironment env) {
         try {
-            return new ChangeStatus().assertComplete(!SnapshotGeneratorFactory.getInstance().has(new Index(getIndexName(), getCatalogName(), getSchemaName(), getTableName()), options.getRuntimeEnvironment().getTargetDatabase()), "Index exists");
+            return new ChangeStatus().assertComplete(!SnapshotGeneratorFactory.getInstance().has(new Index(getIndexName(), getCatalogName(), getSchemaName(), getTableName()), env.getTargetDatabase()), "Index exists");
         } catch (Exception e) {
             return new ChangeStatus().unknown(e);
         }

@@ -4,7 +4,7 @@ import liquibase.ContextExpression;
 import liquibase.Contexts;
 import liquibase.action.visitor.AbstractSqlVisitor;
 import liquibase.changelog.ChangeSet;
-import liquibase.executor.ExecutionOptions;
+import  liquibase.ExecutionEnvironment;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -19,7 +19,7 @@ public class ContextChangeSetFilterTest {
         }
 
         @Override
-        public String modifySql(String sql, ExecutionOptions options) {
+        public String modifySql(String sql, ExecutionEnvironment env) {
             throw new UnsupportedOperationException("modifySql has not been implemented");
         }
 

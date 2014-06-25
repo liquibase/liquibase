@@ -7,7 +7,7 @@ import liquibase.database.Database;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
-import liquibase.executor.ExecutionOptions;
+import  liquibase.ExecutionEnvironment;
 import liquibase.statement.core.LockDatabaseChangeLogStatement;
 import liquibase.statement.core.UpdateStatement;
 import liquibase.util.NetUtil;
@@ -17,7 +17,7 @@ import java.sql.Timestamp;
 public class LockDatabaseChangeLogGenerator extends AbstractSqlGenerator<LockDatabaseChangeLogStatement> {
 
     @Override
-    public ValidationErrors validate(LockDatabaseChangeLogStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
+    public ValidationErrors validate(LockDatabaseChangeLogStatement statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
         return new ValidationErrors();
     }
 
@@ -34,8 +34,8 @@ public class LockDatabaseChangeLogGenerator extends AbstractSqlGenerator<LockDat
     }
 
     @Override
-    public Action[] generateActions(LockDatabaseChangeLogStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
-        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+    public Action[] generateActions(LockDatabaseChangeLogStatement statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+        Database database = env.getTargetDatabase();
 
     	String liquibaseSchema = database.getLiquibaseSchemaName();
         String liquibaseCatalog = database.getLiquibaseCatalogName();
@@ -48,7 +48,7 @@ public class LockDatabaseChangeLogGenerator extends AbstractSqlGenerator<LockDat
         updateStatement.addNewColumnValue("LOCKEDBY", hostname + " (" + hostaddress + ")");
         updateStatement.setWhereClause(database.escapeColumnName(liquibaseCatalog, liquibaseSchema, database.getDatabaseChangeLogTableName(), "ID") + " = 1 AND " + database.escapeColumnName(liquibaseCatalog, liquibaseSchema, database.getDatabaseChangeLogTableName(), "LOCKED") + " = "+ DataTypeFactory.getInstance().fromDescription("boolean", database).objectToSql(false, database));
 
-        return ActionGeneratorFactory.getInstance().generateActions(updateStatement, options);
+        return ActionGeneratorFactory.getInstance().generateActions(updateStatement, env);
 
     }
 }

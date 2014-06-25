@@ -8,7 +8,7 @@ import liquibase.change.DatabaseChangeProperty;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
 import liquibase.exception.Warnings;
-import liquibase.executor.ExecutionOptions;
+import  liquibase.ExecutionEnvironment;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.executor.LoggingExecutor;
@@ -41,12 +41,12 @@ public class ExecuteShellCommandChange extends AbstractChange {
     private List<String> args = new ArrayList<String>();
 
     @Override
-    public boolean generateStatementsVolatile(ExecutionOptions options) {
+    public boolean generateStatementsVolatile(ExecutionEnvironment env) {
         return true;
     }
 
     @Override
-    public boolean generateRollbackStatementsVolatile(ExecutionOptions options) {
+    public boolean generateRollbackStatementsVolatile(ExecutionEnvironment env) {
         return true;
     }
 
@@ -77,18 +77,18 @@ public class ExecuteShellCommandChange extends AbstractChange {
     }
 
     @Override
-    public ValidationErrors validate(ExecutionOptions options) {
+    public ValidationErrors validate(ExecutionEnvironment env) {
         return new ValidationErrors();
     }
 
 
     @Override
-    public Warnings warn(ExecutionOptions options) {
+    public Warnings warn(ExecutionEnvironment env) {
         return new Warnings();
     }
 
     @Override
-    public SqlStatement[] generateStatements(final ExecutionOptions options) {
+    public SqlStatement[] generateStatements(final ExecutionEnvironment env) {
         boolean shouldRun = true;
         if (os != null && os.size() > 0) {
             String currentOS = System.getProperty("os.name");
@@ -100,7 +100,7 @@ public class ExecuteShellCommandChange extends AbstractChange {
 
     	// check if running under not-executed mode (logging output)
         boolean nonExecutedMode = false;
-        Executor executor = ExecutorService.getInstance().getExecutor(options.getRuntimeEnvironment().getTargetDatabase());
+        Executor executor = ExecutorService.getInstance().getExecutor(env.getTargetDatabase());
         if (executor instanceof LoggingExecutor) {
             nonExecutedMode = true;
         }
@@ -111,7 +111,7 @@ public class ExecuteShellCommandChange extends AbstractChange {
             return new SqlStatement[]{new RuntimeStatement() {
 
                 @Override
-                public Action[] generate(ExecutionOptions options) {
+                public Action[] generate(ExecutionEnvironment env) {
                     List<String> commandArray = new ArrayList<String>();
                     commandArray.add(executable);
                     commandArray.addAll(getArgs());

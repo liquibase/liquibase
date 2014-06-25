@@ -4,7 +4,7 @@ import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.executor.ExecutionOptions;
+import  liquibase.ExecutionEnvironment;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.AddForeignKeyConstraintStatement;
@@ -218,7 +218,7 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
     }
 
     @Override
-    public SqlStatement[] generateStatements(ExecutionOptions options) {
+    public SqlStatement[] generateStatements(ExecutionEnvironment env) {
 
         boolean deferrable = false;
         if (getDeferrable() != null) {
@@ -260,7 +260,7 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
     }
 
     @Override
-    public ChangeStatus checkStatus(ExecutionOptions options) {
+    public ChangeStatus checkStatus(ExecutionEnvironment env) {
         ChangeStatus result = new ChangeStatus();
         try {
             ForeignKey example = new ForeignKey(getConstraintName(), getBaseTableCatalogName(), getBaseTableSchemaName(), getBaseTableName());
@@ -268,7 +268,7 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
             example.setForeignKeyColumns(getBaseColumnNames());
             example.setPrimaryKeyColumns(getReferencedColumnNames());
 
-            ForeignKey snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(example, options.getRuntimeEnvironment().getTargetDatabase());
+            ForeignKey snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(example, env.getTargetDatabase());
             result.assertComplete(snapshot != null, "Foreign key does not exist");
 
             if (snapshot != null) {

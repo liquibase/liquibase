@@ -9,7 +9,7 @@ import liquibase.database.core.*;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.ValidationErrors;
-import liquibase.executor.ExecutionOptions;
+import  liquibase.ExecutionEnvironment;
 import liquibase.statement.core.ReorganizeTableStatement;
 import liquibase.statement.core.SetNullableStatement;
 
@@ -20,17 +20,17 @@ import java.util.List;
 public class SetNullableGenerator extends AbstractSqlGenerator<SetNullableStatement> {
 
     @Override
-    public boolean supports(SetNullableStatement statement, ExecutionOptions options) {
-        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+    public boolean supports(SetNullableStatement statement, ExecutionEnvironment env) {
+        Database database = env.getTargetDatabase();
 
         return !(database instanceof FirebirdDatabase ||
                 database instanceof SQLiteDatabase);
     }
 
     @Override
-    public ValidationErrors validate(SetNullableStatement setNullableStatement, ExecutionOptions options, ActionGeneratorChain chain) {
+    public ValidationErrors validate(SetNullableStatement setNullableStatement, ExecutionEnvironment env, ActionGeneratorChain chain) {
         ValidationErrors validationErrors = new ValidationErrors();
-        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+        Database database = env.getTargetDatabase();
 
         validationErrors.checkRequiredField("tableName", setNullableStatement.getTableName());
         validationErrors.checkRequiredField("columnName", setNullableStatement.getColumnName());
@@ -50,8 +50,8 @@ public class SetNullableGenerator extends AbstractSqlGenerator<SetNullableStatem
     }
 
     @Override
-    public Action[] generateActions(SetNullableStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
-        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+    public Action[] generateActions(SetNullableStatement statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+        Database database = env.getTargetDatabase();
 
         String sql;
 
@@ -88,7 +88,7 @@ public class SetNullableGenerator extends AbstractSqlGenerator<SetNullableStatem
         returnList.add(new UnparsedSql(sql));
 
         if (database instanceof DB2Database) {
-            Action[] a = ActionGeneratorFactory.getInstance().generateActions(new ReorganizeTableStatement(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()), options);
+            Action[] a = ActionGeneratorFactory.getInstance().generateActions(new ReorganizeTableStatement(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()), env);
             if (a != null) {
                 returnList.addAll(Arrays.asList(a));
             }

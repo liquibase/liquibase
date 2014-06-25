@@ -6,15 +6,15 @@ import liquibase.actiongenerator.ActionGeneratorChain;
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.exception.ValidationErrors;
-import liquibase.executor.ExecutionOptions;
+import  liquibase.ExecutionEnvironment;
 import liquibase.statement.core.RenameViewStatement;
 import liquibase.structure.core.View;
 
 public class RenameViewGenerator extends AbstractSqlGenerator<RenameViewStatement> {
 
     @Override
-    public boolean supports(RenameViewStatement statement, ExecutionOptions options) {
-        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+    public boolean supports(RenameViewStatement statement, ExecutionEnvironment env) {
+        Database database = env.getTargetDatabase();
         return !(database instanceof DerbyDatabase
                 || database instanceof HsqlDatabase
                 || database instanceof H2Database
@@ -25,20 +25,20 @@ public class RenameViewGenerator extends AbstractSqlGenerator<RenameViewStatemen
     }
 
     @Override
-    public ValidationErrors validate(RenameViewStatement renameViewStatement, ExecutionOptions options, ActionGeneratorChain chain) {
+    public ValidationErrors validate(RenameViewStatement renameViewStatement, ExecutionEnvironment env, ActionGeneratorChain chain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("oldViewName", renameViewStatement.getOldViewName());
         validationErrors.checkRequiredField("newViewName", renameViewStatement.getNewViewName());
 
-        validationErrors.checkDisallowedField("schemaName", renameViewStatement.getSchemaName(), options.getRuntimeEnvironment().getTargetDatabase(), OracleDatabase.class);
+        validationErrors.checkDisallowedField("schemaName", renameViewStatement.getSchemaName(), env.getTargetDatabase(), OracleDatabase.class);
 
         return validationErrors;
     }
 
     @Override
-    public Action[] generateActions(RenameViewStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
+    public Action[] generateActions(RenameViewStatement statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
         String sql;
-        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+        Database database = env.getTargetDatabase();
 
         if (database instanceof MSSQLDatabase) {
             sql = "exec sp_rename '" + database.escapeViewName(statement.getCatalogName(), statement.getSchemaName(), statement.getOldViewName()) + "', '" + statement.getNewViewName() + '\'';

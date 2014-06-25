@@ -4,7 +4,7 @@ import liquibase.action.Action;
 import liquibase.action.core.UnparsedSql;
 import liquibase.actiongenerator.ActionGeneratorChain;
 import liquibase.database.core.MySQLDatabase;
-import liquibase.executor.ExecutionOptions;
+import  liquibase.ExecutionEnvironment;
 import liquibase.statement.core.AddAutoIncrementStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Schema;
@@ -23,17 +23,17 @@ public class AddAutoIncrementGeneratorMySQL extends AddAutoIncrementGenerator {
     }
 
     @Override
-    public boolean supports(AddAutoIncrementStatement statement, ExecutionOptions options) {
-        return options.getRuntimeEnvironment().getTargetDatabase() instanceof MySQLDatabase;
+    public boolean supports(AddAutoIncrementStatement statement, ExecutionEnvironment env) {
+        return env.getTargetDatabase() instanceof MySQLDatabase;
     }
 
     @Override
-    public Action[] generateActions(AddAutoIncrementStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
+    public Action[] generateActions(AddAutoIncrementStatement statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
 
-    	Action[] actions = super.generateActions(statement, options, chain);
+    	Action[] actions = super.generateActions(statement, env, chain);
 
     	if(statement.getStartWith() != null){
-	    	MySQLDatabase mysqlDatabase = (MySQLDatabase) options.getRuntimeEnvironment().getTargetDatabase();
+	    	MySQLDatabase mysqlDatabase = (MySQLDatabase) env.getTargetDatabase();
 	        String alterTableSql = "ALTER TABLE "
 	            + mysqlDatabase.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName())
 	            + " "

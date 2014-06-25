@@ -8,22 +8,22 @@ import liquibase.database.Database;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.core.MySQLDatabase;
 import liquibase.exception.ValidationErrors;
-import liquibase.executor.ExecutionOptions;
+import  liquibase.ExecutionEnvironment;
 import liquibase.statement.core.GetViewDefinitionStatement;
 import liquibase.structure.core.View;
 
 public class GetViewDefinitionGenerator extends AbstractSqlGenerator<GetViewDefinitionStatement> {
 
     @Override
-    public ValidationErrors validate(GetViewDefinitionStatement getViewDefinitionStatement, ExecutionOptions options, ActionGeneratorChain chain) {
+    public ValidationErrors validate(GetViewDefinitionStatement getViewDefinitionStatement, ExecutionEnvironment env, ActionGeneratorChain chain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("viewName", getViewDefinitionStatement.getViewName());
         return validationErrors;
     }
 
     @Override
-    public Action[] generateActions(GetViewDefinitionStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
-        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+    public Action[] generateActions(GetViewDefinitionStatement statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+        Database database = env.getTargetDatabase();
 
         CatalogAndSchema schema = new CatalogAndSchema(statement.getCatalogName(), statement.getSchemaName()).customize(database);
 

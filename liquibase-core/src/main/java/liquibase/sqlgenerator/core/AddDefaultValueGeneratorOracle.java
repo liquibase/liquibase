@@ -6,7 +6,7 @@ import liquibase.actiongenerator.ActionGeneratorChain;
 import liquibase.database.Database;
 import liquibase.database.core.OracleDatabase;
 import liquibase.datatype.DataTypeFactory;
-import liquibase.executor.ExecutionOptions;
+import  liquibase.ExecutionEnvironment;
 import liquibase.statement.core.AddDefaultValueStatement;
 
 public class AddDefaultValueGeneratorOracle extends AddDefaultValueGenerator {
@@ -16,13 +16,13 @@ public class AddDefaultValueGeneratorOracle extends AddDefaultValueGenerator {
     }
 
     @Override
-    public boolean supports(AddDefaultValueStatement statement, ExecutionOptions options) {
-        return options.getRuntimeEnvironment().getTargetDatabase() instanceof OracleDatabase;
+    public boolean supports(AddDefaultValueStatement statement, ExecutionEnvironment env) {
+        return env.getTargetDatabase() instanceof OracleDatabase;
     }
 
     @Override
-    public Action[] generateActions(AddDefaultValueStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
-        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+    public Action[] generateActions(AddDefaultValueStatement statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+        Database database = env.getTargetDatabase();
         Object defaultValue = statement.getDefaultValue();
         return new Action[]{
                 new UnparsedSql("ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " MODIFY " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " DEFAULT " + DataTypeFactory.getInstance().fromObject(defaultValue, database).objectToSql(defaultValue, database))

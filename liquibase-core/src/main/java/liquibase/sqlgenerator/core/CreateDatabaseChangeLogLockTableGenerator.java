@@ -6,7 +6,7 @@ import liquibase.actiongenerator.ActionGeneratorFactory;
 import liquibase.database.Database;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.ValidationErrors;
-import liquibase.executor.ExecutionOptions;
+import  liquibase.ExecutionEnvironment;
 import liquibase.statement.ColumnConstraint;
 import liquibase.statement.NotNullConstraint;
 import liquibase.statement.core.CreateDatabaseChangeLogLockTableStatement;
@@ -19,13 +19,13 @@ import java.util.List;
 public class CreateDatabaseChangeLogLockTableGenerator extends AbstractSqlGenerator<CreateDatabaseChangeLogLockTableStatement> {
 
     @Override
-    public ValidationErrors validate(CreateDatabaseChangeLogLockTableStatement createDatabaseChangeLogLockTableStatement, ExecutionOptions options, ActionGeneratorChain chain) {
+    public ValidationErrors validate(CreateDatabaseChangeLogLockTableStatement createDatabaseChangeLogLockTableStatement, ExecutionEnvironment env, ActionGeneratorChain chain) {
         return new ValidationErrors();
     }
 
     @Override
-    public Action[] generateActions(CreateDatabaseChangeLogLockTableStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
-        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+    public Action[] generateActions(CreateDatabaseChangeLogLockTableStatement statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+        Database database = env.getTargetDatabase();
         CreateTableStatement createTableStatement = new CreateTableStatement(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName())
                 .setTablespace(database.getLiquibaseTablespaceName())
                 .addPrimaryKeyColumn("ID", DataTypeFactory.getInstance().fromDescription("INT", database), null, null, null, new NotNullConstraint())
@@ -34,7 +34,7 @@ public class CreateDatabaseChangeLogLockTableGenerator extends AbstractSqlGenera
                 .addColumn("LOCKEDBY", DataTypeFactory.getInstance().fromDescription("VARCHAR(255)", database));
         List<Action> actions = new ArrayList<Action>();
 
-        actions.addAll(Arrays.asList(ActionGeneratorFactory.getInstance().generateActions(createTableStatement, options)));
+        actions.addAll(Arrays.asList(ActionGeneratorFactory.getInstance().generateActions(createTableStatement, env)));
 
         return actions.toArray(new Action[actions.size()]);
     }

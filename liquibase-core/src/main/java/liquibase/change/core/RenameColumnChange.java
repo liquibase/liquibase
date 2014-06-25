@@ -1,10 +1,11 @@
 package liquibase.change.core;
 
+import liquibase.ExecutionEnvironment;
 import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.database.core.SQLiteDatabase.AlterTableVisitor;
-import liquibase.executor.ExecutionOptions;
+import  liquibase.ExecutionEnvironment;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.RenameColumnStatement;
@@ -93,7 +94,7 @@ public class RenameColumnChange extends AbstractChange {
     }
 
     @Override
-    public SqlStatement[] generateStatements(ExecutionOptions options) {
+    public SqlStatement[] generateStatements(ExecutionEnvironment env) {
 //todo    	if (database instanceof SQLiteDatabase) {
 //    		// return special statements for SQLite databases
 //    		return generateStatementsForSQLiteDatabase(database);
@@ -108,9 +109,9 @@ public class RenameColumnChange extends AbstractChange {
     }
 
     @Override
-    public ChangeStatus checkStatus(ExecutionOptions options) {
+    public ChangeStatus checkStatus(ExecutionEnvironment env) {
         try {
-            Database database = options.getRuntimeEnvironment().getTargetDatabase();
+            Database database = env.getTargetDatabase();
 
             ChangeStatus changeStatus = new ChangeStatus();
             Column newColumn = SnapshotGeneratorFactory.getInstance().createSnapshot(new Column(Table.class, getCatalogName(), getSchemaName(), getTableName(), getNewColumnName()), database);
@@ -130,7 +131,7 @@ public class RenameColumnChange extends AbstractChange {
         }
     }
 
-    private SqlStatement[] generateStatementsForSQLiteDatabase(ExecutionOptions options) {
+    private SqlStatement[] generateStatementsForSQLiteDatabase(ExecutionEnvironment env) {
     	
     	// SQLite does not support this ALTER TABLE operation until now.
 		// For more information see: http://www.sqlite.org/omitted.html.
@@ -170,7 +171,7 @@ public class RenameColumnChange extends AbstractChange {
     		// alter table
 			statements.addAll(SQLiteDatabase.getAlterTableStatements(
 					rename_alter_visitor,
-					options,getCatalogName(), getSchemaName(),getTableName()));
+					env,getCatalogName(), getSchemaName(),getTableName()));
 		} catch (Exception e) {
 			System.err.println(e);
 			e.printStackTrace();

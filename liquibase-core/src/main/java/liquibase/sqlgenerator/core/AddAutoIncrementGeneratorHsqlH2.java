@@ -7,7 +7,7 @@ import liquibase.database.Database;
 import liquibase.database.core.H2Database;
 import liquibase.database.core.HsqlDatabase;
 import liquibase.datatype.DataTypeFactory;
-import liquibase.executor.ExecutionOptions;
+import  liquibase.ExecutionEnvironment;
 import liquibase.statement.core.AddAutoIncrementStatement;
 
 public class AddAutoIncrementGeneratorHsqlH2 extends AddAutoIncrementGenerator {
@@ -18,15 +18,15 @@ public class AddAutoIncrementGeneratorHsqlH2 extends AddAutoIncrementGenerator {
     }
 
     @Override
-    public boolean supports(AddAutoIncrementStatement statement, ExecutionOptions options) {
-        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+    public boolean supports(AddAutoIncrementStatement statement, ExecutionEnvironment env) {
+        Database database = env.getTargetDatabase();
 
         return database instanceof HsqlDatabase || database instanceof H2Database;
     }
 
     @Override
-    public Action[] generateActions(AddAutoIncrementStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
-        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+    public Action[] generateActions(AddAutoIncrementStatement statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+        Database database = env.getTargetDatabase();
 
         return new Action[]{
             new UnparsedSql(

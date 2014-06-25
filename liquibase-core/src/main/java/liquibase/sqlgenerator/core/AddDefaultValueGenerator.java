@@ -10,7 +10,7 @@ import liquibase.datatype.LiquibaseDataType;
 import liquibase.datatype.core.BooleanType;
 import liquibase.datatype.core.CharType;
 import liquibase.exception.ValidationErrors;
-import liquibase.executor.ExecutionOptions;
+import  liquibase.ExecutionEnvironment;
 import liquibase.statement.DatabaseFunction;
 import liquibase.statement.SequenceNextValueFunction;
 import liquibase.statement.core.AddDefaultValueStatement;
@@ -18,8 +18,8 @@ import liquibase.statement.core.AddDefaultValueStatement;
 public class AddDefaultValueGenerator extends AbstractSqlGenerator<AddDefaultValueStatement> {
 
     @Override
-    public ValidationErrors validate(AddDefaultValueStatement addDefaultValueStatement, ExecutionOptions options, ActionGeneratorChain chain) {
-        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+    public ValidationErrors validate(AddDefaultValueStatement addDefaultValueStatement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+        Database database = env.getTargetDatabase();
 
         Object defaultValue = addDefaultValueStatement.getDefaultValue();
 
@@ -61,8 +61,8 @@ public class AddDefaultValueGenerator extends AbstractSqlGenerator<AddDefaultVal
     }
 
     @Override
-    public Action[] generateActions(AddDefaultValueStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
-        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+    public Action[] generateActions(AddDefaultValueStatement statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+        Database database = env.getTargetDatabase();
 
         Object defaultValue = statement.getDefaultValue();
         return new Action[]{

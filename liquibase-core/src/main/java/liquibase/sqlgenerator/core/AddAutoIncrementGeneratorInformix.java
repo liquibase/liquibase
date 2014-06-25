@@ -7,7 +7,7 @@ import liquibase.database.Database;
 import liquibase.database.core.InformixDatabase;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.ValidationErrors;
-import liquibase.executor.ExecutionOptions;
+import  liquibase.ExecutionEnvironment;
 import liquibase.statement.core.AddAutoIncrementStatement;
 
 public class AddAutoIncrementGeneratorInformix extends AddAutoIncrementGenerator {
@@ -17,17 +17,17 @@ public class AddAutoIncrementGeneratorInformix extends AddAutoIncrementGenerator
     }
 
     @Override
-    public boolean supports(AddAutoIncrementStatement statement, ExecutionOptions options) {
-        return options.getRuntimeEnvironment().getTargetDatabase() instanceof InformixDatabase;
+    public boolean supports(AddAutoIncrementStatement statement, ExecutionEnvironment env) {
+        return env.getTargetDatabase() instanceof InformixDatabase;
     }
 
     @Override
     public ValidationErrors validate(
     		AddAutoIncrementStatement addAutoIncrementStatement,
-    		ExecutionOptions options,
+    		ExecutionEnvironment env,
     		ActionGeneratorChain chain) {
         ValidationErrors validationErrors = super.validate(
-        	addAutoIncrementStatement, options, chain);
+        	addAutoIncrementStatement, env, chain);
 
         validationErrors.checkRequiredField(
         	"columnDataType", addAutoIncrementStatement.getColumnDataType());
@@ -36,8 +36,8 @@ public class AddAutoIncrementGeneratorInformix extends AddAutoIncrementGenerator
     }
 
     @Override
-    public Action[] generateActions(AddAutoIncrementStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
-        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+    public Action[] generateActions(AddAutoIncrementStatement statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+        Database database = env.getTargetDatabase();
 
         return new Action[]{
             new UnparsedSql(

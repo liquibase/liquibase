@@ -8,7 +8,7 @@ import liquibase.change.ConstraintsConfig;
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.ValidationErrors;
-import liquibase.executor.ExecutionOptions;
+import  liquibase.ExecutionEnvironment;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.AddAutoIncrementStatement;
 import liquibase.structure.core.Index;
@@ -30,14 +30,14 @@ public class AddAutoIncrementGeneratorSQLite extends AddAutoIncrementGenerator {
     }
 
     @Override
-    public boolean supports(AddAutoIncrementStatement statement, ExecutionOptions options) {
-        return options.getRuntimeEnvironment().getTargetDatabase() instanceof SQLiteDatabase;
+    public boolean supports(AddAutoIncrementStatement statement, ExecutionEnvironment env) {
+        return env.getTargetDatabase() instanceof SQLiteDatabase;
     }
 
     @Override
     public ValidationErrors validate(
             AddAutoIncrementStatement statement,
-            ExecutionOptions options,
+            ExecutionEnvironment env,
             ActionGeneratorChain chain) {
         ValidationErrors validationErrors = new ValidationErrors();
 
@@ -49,12 +49,12 @@ public class AddAutoIncrementGeneratorSQLite extends AddAutoIncrementGenerator {
     }
 
     @Override
-    public boolean generateStatementsIsVolatile(ExecutionOptions options) {
+    public boolean generateStatementsIsVolatile(ExecutionEnvironment env) {
         return true;
     }
 
     @Override
-    public Action[] generateActions(final AddAutoIncrementStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
+    public Action[] generateActions(final AddAutoIncrementStatement statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
         List<Action> statements = new ArrayList<Action>();
 
         // define alter table logic
@@ -87,8 +87,8 @@ public class AddAutoIncrementGeneratorSQLite extends AddAutoIncrementGenerator {
 
         try {
             // alter table
-            List<SqlStatement> alterTableStatements = SQLiteDatabase.getAlterTableStatements(rename_alter_visitor, options, statement.getCatalogName(), statement.getSchemaName(), statement.getTableName());
-            statements.addAll( Arrays.asList(ActionGeneratorFactory.getInstance().generateActions(alterTableStatements.toArray(new SqlStatement[alterTableStatements.size()]), options)));
+            List<SqlStatement> alterTableStatements = SQLiteDatabase.getAlterTableStatements(rename_alter_visitor, env, statement.getCatalogName(), statement.getSchemaName(), statement.getTableName());
+            statements.addAll( Arrays.asList(ActionGeneratorFactory.getInstance().generateActions(alterTableStatements.toArray(new SqlStatement[alterTableStatements.size()]), env)));
         } catch (DatabaseException e) {
             e.printStackTrace();
         }

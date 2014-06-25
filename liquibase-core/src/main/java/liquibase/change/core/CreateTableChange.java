@@ -8,7 +8,7 @@ import liquibase.datatype.DataTypeFactory;
 import liquibase.datatype.LiquibaseDataType;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
-import liquibase.executor.ExecutionOptions;
+import  liquibase.ExecutionEnvironment;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.*;
 import liquibase.statement.core.CreateTableStatement;
@@ -41,9 +41,9 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
     }
 
     @Override
-    public ValidationErrors validate(ExecutionOptions options) {
+    public ValidationErrors validate(ExecutionEnvironment env) {
         ValidationErrors validationErrors = new ValidationErrors();
-        validationErrors.addAll(super.validate(options));
+        validationErrors.addAll(super.validate(env));
 
         if (columns != null) {
             for (ColumnConfig columnConfig : columns) {
@@ -59,9 +59,9 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
     }
 
     @Override
-    public SqlStatement[] generateStatements(ExecutionOptions options) {
+    public SqlStatement[] generateStatements(ExecutionEnvironment env) {
 
-        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+        Database database = env.getTargetDatabase();
 
         CreateTableStatement statement = generateCreateTableStatement();
         for (ColumnConfig column : getColumns()) {
@@ -119,7 +119,7 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
 
         if (StringUtils.trimToNull(remarks) != null) {
             SetTableRemarksStatement remarksStatement = new SetTableRemarksStatement(catalogName, schemaName, tableName, remarks);
-            if (ActionGeneratorFactory.getInstance().supports(remarksStatement, options)) {
+            if (ActionGeneratorFactory.getInstance().supports(remarksStatement, env)) {
                 statements.add(remarksStatement);
             }
         }
@@ -128,7 +128,7 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
             String columnRemarks = StringUtils.trimToNull(column.getRemarks());
             if (columnRemarks != null) {
                 SetColumnRemarksStatement remarksStatement = new SetColumnRemarksStatement(catalogName, schemaName, tableName, column.getName(), columnRemarks);
-                if (!(database instanceof MySQLDatabase) && ActionGeneratorFactory.getInstance().supports(remarksStatement, options)) {
+                if (!(database instanceof MySQLDatabase) && ActionGeneratorFactory.getInstance().supports(remarksStatement, env)) {
                     statements.add(remarksStatement);
                 }
             }
@@ -154,9 +154,9 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
     }
 
     @Override
-    public ChangeStatus checkStatus(ExecutionOptions options) {
+    public ChangeStatus checkStatus(ExecutionEnvironment env) {
         try {
-            Database database = options.getRuntimeEnvironment().getTargetDatabase();
+            Database database = env.getTargetDatabase();
 
             Table example = (Table) new Table().setName(getTableName()).setSchema(getCatalogName(), getSchemaName());
             ChangeStatus status = new ChangeStatus();

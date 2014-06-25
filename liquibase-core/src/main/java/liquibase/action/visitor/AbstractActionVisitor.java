@@ -3,6 +3,9 @@ package liquibase.action.visitor;
 import liquibase.ContextExpression;
 import liquibase.Labels;
 import liquibase.change.CheckSum;
+import liquibase.parser.core.ParsedNode;
+import liquibase.parser.core.ParsedNodeException;
+import liquibase.resource.ResourceAccessor;
 import liquibase.serializer.AbstractLiquibaseSerializable;
 import liquibase.serializer.ReflectionSerializer;
 import liquibase.serializer.core.string.StringChangeLogSerializer;
@@ -85,7 +88,7 @@ public abstract class AbstractActionVisitor extends AbstractLiquibaseSerializabl
 
     @Override
     public CheckSum generateCheckSum() {
-        return CheckSum.compute(new StringChangeLogSerializer(new StringChangeLogSerializer.SkipFieldsFilter("contexts", "dbms", "applyToUpdate", "applyToRollback")).serialize(this, false));
+        return CheckSum.compute(new StringChangeLogSerializer(new StringChangeLogSerializer.SkipFieldsFilter("contexts", "labels", "dbms", "applyToUpdate", "applyToRollback")).serialize(this, false));
     }
 
     @Override
@@ -109,5 +112,20 @@ public abstract class AbstractActionVisitor extends AbstractLiquibaseSerializabl
     @Override
     public String getSerializedObjectNamespace() {
         return GENERIC_CHANGELOG_EXTENSION_NAMESPACE;
+    }
+
+    @Override
+    protected boolean shouldAutoLoad(ParsedNode node) {
+        return !node.getName().equals("labels");
+    }
+
+    @Override
+    public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException {
+        super.load(parsedNode, resourceAccessor);
+
+        String labels = parsedNode.getChildValue(null, "labels", String.class);
+        if (labels != null) {
+            this.labels = new Labels(labels);
+        }
     }
 }

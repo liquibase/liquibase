@@ -10,7 +10,7 @@ import liquibase.database.core.HsqlDatabase;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.ValidationErrors;
-import liquibase.executor.ExecutionOptions;
+import  liquibase.ExecutionEnvironment;
 import liquibase.statement.core.AddAutoIncrementStatement;
 
 public class AddAutoIncrementGenerator extends AbstractSqlGenerator<AddAutoIncrementStatement> {
@@ -21,8 +21,8 @@ public class AddAutoIncrementGenerator extends AbstractSqlGenerator<AddAutoIncre
     }
 
     @Override
-    public boolean supports(AddAutoIncrementStatement statement, ExecutionOptions options) {
-        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+    public boolean supports(AddAutoIncrementStatement statement, ExecutionEnvironment env) {
+        Database database = env.getTargetDatabase();
 
         return (database.supportsAutoIncrement()
                 && !(database instanceof DerbyDatabase)
@@ -34,7 +34,7 @@ public class AddAutoIncrementGenerator extends AbstractSqlGenerator<AddAutoIncre
     @Override
     public ValidationErrors validate(
     		AddAutoIncrementStatement statement,
-    		ExecutionOptions options,
+    		ExecutionEnvironment env,
     		ActionGeneratorChain chain) {
         ValidationErrors validationErrors = new ValidationErrors();
 
@@ -47,8 +47,8 @@ public class AddAutoIncrementGenerator extends AbstractSqlGenerator<AddAutoIncre
     }
 
     @Override
-    public Action[] generateActions(AddAutoIncrementStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
-        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+    public Action[] generateActions(AddAutoIncrementStatement statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+        Database database = env.getTargetDatabase();
 
         String sql = "ALTER TABLE "
             + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName())

@@ -7,7 +7,7 @@ import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.exception.ValidationErrors;
-import liquibase.executor.ExecutionOptions;
+import  liquibase.ExecutionEnvironment;
 import liquibase.logging.LogFactory;
 import liquibase.statement.AutoIncrementConstraint;
 import liquibase.statement.ForeignKeyConstraint;
@@ -25,7 +25,7 @@ import java.util.List;
 public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatement> {
 
     @Override
-    public ValidationErrors validate(CreateTableStatement createTableStatement, ExecutionOptions options, ActionGeneratorChain chain) {
+    public ValidationErrors validate(CreateTableStatement createTableStatement, ExecutionEnvironment env, ActionGeneratorChain chain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("tableName", createTableStatement.getTableName());
         validationErrors.checkRequiredField("columns", createTableStatement.getColumns());
@@ -33,12 +33,12 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
     }
 
     @Override
-    public Action[] generateActions(CreateTableStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
-        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+    public Action[] generateActions(CreateTableStatement statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+        Database database = env.getTargetDatabase();
 
         if (database instanceof InformixDatabase) {
     		AbstractSqlGenerator<CreateTableStatement> gen = new CreateTableGeneratorInformix();
-    		return gen.generateActions(statement, options, chain);
+    		return gen.generateActions(statement, env, chain);
     	}
 
         List<Action> additionalSql = new ArrayList<Action>();

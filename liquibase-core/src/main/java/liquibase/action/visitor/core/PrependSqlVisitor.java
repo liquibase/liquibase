@@ -1,7 +1,7 @@
 package liquibase.action.visitor.core;
 
 import liquibase.action.visitor.AbstractSqlVisitor;
-import liquibase.executor.ExecutionOptions;
+import  liquibase.ExecutionEnvironment;
 
 /**
  * ActionVisitor that prepends the given value to the SQL in an Action.
@@ -30,7 +30,7 @@ public class PrependSqlVisitor extends AbstractSqlVisitor {
     }
 
     @Override
-    protected String modifySql(String sql, ExecutionOptions options) {
+    protected String modifySql(String sql, ExecutionEnvironment env) {
         if (value == null) {
             return sql;
         } else {

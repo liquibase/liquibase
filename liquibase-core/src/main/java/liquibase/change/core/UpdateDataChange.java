@@ -2,7 +2,7 @@ package liquibase.change.core;
 
 import liquibase.change.*;
 import liquibase.exception.ValidationErrors;
-import liquibase.executor.ExecutionOptions;
+import  liquibase.ExecutionEnvironment;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.resource.ResourceAccessor;
@@ -23,8 +23,8 @@ public class UpdateDataChange extends AbstractModifyDataChange implements Change
     }
 
     @Override
-    public ValidationErrors validate(ExecutionOptions options) {
-        ValidationErrors validate = super.validate(options);
+    public ValidationErrors validate(ExecutionEnvironment env) {
+        ValidationErrors validate = super.validate(env);
         validate.checkRequiredField("columns", getColumns());
         return validate;
     }
@@ -50,7 +50,7 @@ public class UpdateDataChange extends AbstractModifyDataChange implements Change
     }
 
     @Override
-    public SqlStatement[] generateStatements(ExecutionOptions options) {
+    public SqlStatement[] generateStatements(ExecutionEnvironment env) {
 
     	boolean needsPreparedStatement = false;
         for (ColumnConfig column : getColumns()) {
@@ -63,7 +63,7 @@ public class UpdateDataChange extends AbstractModifyDataChange implements Change
         }
 
         if (needsPreparedStatement) {
-            UpdateExecutablePreparedStatement statement = new UpdateExecutablePreparedStatement(options, catalogName, schemaName, tableName, columns, getChangeSet(), this.getResourceAccessor());
+            UpdateExecutablePreparedStatement statement = new UpdateExecutablePreparedStatement(env, catalogName, schemaName, tableName, columns, getChangeSet(), this.getResourceAccessor());
             
             statement.setWhereClause(where);
             
@@ -100,7 +100,7 @@ public class UpdateDataChange extends AbstractModifyDataChange implements Change
     }
 
     @Override
-    public ChangeStatus checkStatus(ExecutionOptions options) {
+    public ChangeStatus checkStatus(ExecutionEnvironment env) {
         return new ChangeStatus().unknown("Cannot check updateData status");
     }
 

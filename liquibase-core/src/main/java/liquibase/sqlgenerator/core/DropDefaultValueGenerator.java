@@ -8,23 +8,23 @@ import liquibase.database.core.*;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
-import liquibase.executor.ExecutionOptions;
+import  liquibase.ExecutionEnvironment;
 import liquibase.statement.core.DropDefaultValueStatement;
 
 public class DropDefaultValueGenerator extends AbstractSqlGenerator<DropDefaultValueStatement> {
 
     @Override
-    public boolean supports(DropDefaultValueStatement statement, ExecutionOptions options) {
-        return !(options.getRuntimeEnvironment().getTargetDatabase() instanceof SQLiteDatabase);
+    public boolean supports(DropDefaultValueStatement statement, ExecutionEnvironment env) {
+        return !(env.getTargetDatabase() instanceof SQLiteDatabase);
     }
 
     @Override
-    public ValidationErrors validate(DropDefaultValueStatement dropDefaultValueStatement, ExecutionOptions options, ActionGeneratorChain chain) {
+    public ValidationErrors validate(DropDefaultValueStatement dropDefaultValueStatement, ExecutionEnvironment env, ActionGeneratorChain chain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("tableName", dropDefaultValueStatement.getTableName());
         validationErrors.checkRequiredField("columnName", dropDefaultValueStatement.getColumnName());
 
-        if (options.getRuntimeEnvironment().getTargetDatabase() instanceof InformixDatabase) {
+        if (env.getTargetDatabase() instanceof InformixDatabase) {
             validationErrors.checkRequiredField("columnDataType", dropDefaultValueStatement.getColumnDataType());
         }
 
@@ -33,8 +33,8 @@ public class DropDefaultValueGenerator extends AbstractSqlGenerator<DropDefaultV
     }
 
     @Override
-    public Action[] generateActions(DropDefaultValueStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
-        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+    public Action[] generateActions(DropDefaultValueStatement statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+        Database database = env.getTargetDatabase();
         String sql;
         String escapedTableName = database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName());
         if (database instanceof MSSQLDatabase) {

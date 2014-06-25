@@ -2,7 +2,7 @@ package liquibase.change.core;
 
 import liquibase.change.*;
 import liquibase.database.core.SQLiteDatabase;
-import liquibase.executor.ExecutionOptions;
+import  liquibase.ExecutionEnvironment;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.resource.ResourceAccessor;
@@ -73,7 +73,7 @@ public class CreateViewChange extends AbstractChange {
 	}
 
 	@Override
-    public SqlStatement[] generateStatements(ExecutionOptions options) {
+    public SqlStatement[] generateStatements(ExecutionEnvironment env) {
         List<SqlStatement> statements = new ArrayList<SqlStatement>();
 
 		boolean replaceIfExists = false;
@@ -81,7 +81,7 @@ public class CreateViewChange extends AbstractChange {
 			replaceIfExists = true;
 		}
 
-		if (!supportsReplaceIfExistsOption(options) && replaceIfExists) {
+		if (!supportsReplaceIfExistsOption(env) && replaceIfExists) {
 			statements.add(new DropViewStatement(getCatalogName(), getSchemaName(), getViewName()));
 			statements.add(new CreateViewStatement(getCatalogName(), getSchemaName(), getViewName(), getSelectQuery(),
 					false));
@@ -108,12 +108,12 @@ public class CreateViewChange extends AbstractChange {
 	}
 
     @Override
-    public ChangeStatus checkStatus(ExecutionOptions options) {
+    public ChangeStatus checkStatus(ExecutionEnvironment env) {
         ChangeStatus result = new ChangeStatus();
         try {
             View example = new View(getCatalogName(), getSchemaName(), getViewName());
 
-            View snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(example, options.getRuntimeEnvironment().getTargetDatabase());
+            View snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(example, env.getTargetDatabase());
             result.assertComplete(snapshot != null, "View does not exist");
 
             return result;
@@ -123,8 +123,8 @@ public class CreateViewChange extends AbstractChange {
         }
     }
 
-	private boolean supportsReplaceIfExistsOption(ExecutionOptions options) {
-		return !(options.getRuntimeEnvironment().getTargetDatabase() instanceof SQLiteDatabase);
+	private boolean supportsReplaceIfExistsOption(ExecutionEnvironment env) {
+		return !(env.getTargetDatabase() instanceof SQLiteDatabase);
 	}
 
     @Override

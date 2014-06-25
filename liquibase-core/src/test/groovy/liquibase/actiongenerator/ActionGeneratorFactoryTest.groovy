@@ -1,5 +1,6 @@
 package liquibase.actiongenerator
 
+import liquibase.ExecutionEnvironment
 import liquibase.database.core.H2Database
 import liquibase.sqlgenerator.SqlGenerator
 import liquibase.sqlgenerator.core.AddAutoIncrementGenerator
@@ -121,7 +122,7 @@ public class ActionGeneratorFactoryTest extends Specification {
 
     def getGenerators() {
         when:
-        SortedSet<SqlGenerator> allGenerators = ActionGeneratorFactory.getInstance().getGenerators(new AddAutoIncrementStatement(null, null, "person", "name", "varchar(255)", null, null), new H2Database());
+        SortedSet<SqlGenerator> allGenerators = ActionGeneratorFactory.getInstance().getGenerators(new AddAutoIncrementStatement(null, null, "person", "name", "varchar(255)", null, null), new ExecutionEnvironment(new H2Database()));
 
         then:
         allGenerators != null

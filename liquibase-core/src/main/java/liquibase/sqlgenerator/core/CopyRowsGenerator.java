@@ -6,18 +6,18 @@ import liquibase.actiongenerator.ActionGeneratorChain;
 import liquibase.change.ColumnConfig;
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.exception.ValidationErrors;
-import liquibase.executor.ExecutionOptions;
+import  liquibase.ExecutionEnvironment;
 import liquibase.statement.core.CopyRowsStatement;
 
 public class CopyRowsGenerator extends AbstractSqlGenerator<CopyRowsStatement> {
 
     @Override
-    public boolean supports(CopyRowsStatement statement, ExecutionOptions options) {
-        return (options.getRuntimeEnvironment().getTargetDatabase() instanceof SQLiteDatabase);
+    public boolean supports(CopyRowsStatement statement, ExecutionEnvironment env) {
+        return (env.getTargetDatabase() instanceof SQLiteDatabase);
     }
 
     @Override
-    public ValidationErrors validate(CopyRowsStatement copyRowsStatement, ExecutionOptions options, ActionGeneratorChain chain) {
+    public ValidationErrors validate(CopyRowsStatement copyRowsStatement, ExecutionEnvironment env, ActionGeneratorChain chain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("targetTable", copyRowsStatement.getTargetTable());
         validationErrors.checkRequiredField("sourceTable", copyRowsStatement.getSourceTable());
@@ -26,9 +26,9 @@ public class CopyRowsGenerator extends AbstractSqlGenerator<CopyRowsStatement> {
     }
 
     @Override
-    public Action[] generateActions(CopyRowsStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
+    public Action[] generateActions(CopyRowsStatement statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
         StringBuffer sql = new StringBuffer();
-        if (options.getRuntimeEnvironment().getTargetDatabase() instanceof SQLiteDatabase) {
+        if (env.getTargetDatabase() instanceof SQLiteDatabase) {
             sql.append("INSERT INTO `").append(statement.getTargetTable()).append("` (");
 
             for (int i = 0; i < statement.getCopyColumns().size(); i++) {

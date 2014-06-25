@@ -5,7 +5,7 @@ import liquibase.action.Action;
 import liquibase.action.core.UnparsedSql;
 import liquibase.actiongenerator.ActionGeneratorChain;
 import liquibase.database.core.PostgresDatabase;
-import liquibase.executor.ExecutionOptions;
+import  liquibase.ExecutionEnvironment;
 import liquibase.statement.core.GetViewDefinitionStatement;
 
 public class GetViewDefinitionGeneratorPostgres extends GetViewDefinitionGenerator {
@@ -15,13 +15,13 @@ public class GetViewDefinitionGeneratorPostgres extends GetViewDefinitionGenerat
     }
 
     @Override
-    public boolean supports(GetViewDefinitionStatement statement, ExecutionOptions options) {
-        return options.getRuntimeEnvironment().getTargetDatabase() instanceof PostgresDatabase;
+    public boolean supports(GetViewDefinitionStatement statement, ExecutionEnvironment env) {
+        return env.getTargetDatabase() instanceof PostgresDatabase;
     }
 
     @Override
-    public Action[] generateActions(GetViewDefinitionStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
-        CatalogAndSchema schema = new CatalogAndSchema(statement.getCatalogName(), statement.getSchemaName()).customize(options.getRuntimeEnvironment().getTargetDatabase());
+    public Action[] generateActions(GetViewDefinitionStatement statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+        CatalogAndSchema schema = new CatalogAndSchema(statement.getCatalogName(), statement.getSchemaName()).customize(env.getTargetDatabase());
 
         return new Action[] {
                     new UnparsedSql("select definition from pg_views where viewname='" + statement.getViewName() + "' AND schemaname='" + schema.getSchemaName() + "'" )

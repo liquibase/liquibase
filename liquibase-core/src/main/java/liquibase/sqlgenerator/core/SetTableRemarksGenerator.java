@@ -9,21 +9,21 @@ import liquibase.database.core.MySQLDatabase;
 import liquibase.database.core.OracleDatabase;
 import liquibase.database.core.PostgresDatabase;
 import liquibase.exception.ValidationErrors;
-import liquibase.executor.ExecutionOptions;
+import  liquibase.ExecutionEnvironment;
 import liquibase.statement.core.SetTableRemarksStatement;
 
 public class SetTableRemarksGenerator extends AbstractSqlGenerator<SetTableRemarksStatement> {
 
 	@Override
-	public boolean supports(SetTableRemarksStatement statement, ExecutionOptions options) {
-        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+	public boolean supports(SetTableRemarksStatement statement, ExecutionEnvironment env) {
+        Database database = env.getTargetDatabase();
 
 		return database instanceof MySQLDatabase || database instanceof OracleDatabase || database instanceof PostgresDatabase
 				|| database instanceof DB2Database;
 	}
 
 	@Override
-    public ValidationErrors validate(SetTableRemarksStatement setTableRemarksStatement, ExecutionOptions options, ActionGeneratorChain chain) {
+    public ValidationErrors validate(SetTableRemarksStatement setTableRemarksStatement, ExecutionEnvironment env, ActionGeneratorChain chain) {
 		ValidationErrors validationErrors = new ValidationErrors();
 		validationErrors.checkRequiredField("tableName", setTableRemarksStatement.getTableName());
 		validationErrors.checkRequiredField("remarks", setTableRemarksStatement.getRemarks());
@@ -31,8 +31,8 @@ public class SetTableRemarksGenerator extends AbstractSqlGenerator<SetTableRemar
 	}
 
     @Override
-    public Action[] generateActions(SetTableRemarksStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
-        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+    public Action[] generateActions(SetTableRemarksStatement statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+        Database database = env.getTargetDatabase();
 		String sql;
 		String remarks = database.escapeStringForDatabase(statement.getRemarks());
 		if (database instanceof MySQLDatabase) {

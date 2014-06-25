@@ -8,7 +8,7 @@ import liquibase.database.Database;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.RollbackImpossibleException;
-import liquibase.executor.ExecutionOptions;
+import  liquibase.ExecutionEnvironment;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.DeleteStatement;
 import liquibase.statement.core.InsertOrUpdateStatement;
@@ -46,14 +46,14 @@ public class LoadUpdateDataChange extends LoadDataChange {
     }
 
     @Override
-    public SqlStatement[] generateRollbackStatements(ExecutionOptions options) throws RollbackImpossibleException {
+    public SqlStatement[] generateRollbackStatements(ExecutionEnvironment env) throws RollbackImpossibleException {
         List<SqlStatement> statements = new ArrayList<SqlStatement>();
-        SqlStatement[] forward = this.generateStatements(options);
+        SqlStatement[] forward = this.generateStatements(env);
 
         for(SqlStatement thisForward: forward){
             InsertOrUpdateStatement thisInsert = (InsertOrUpdateStatement)thisForward;
             DeleteStatement delete = new DeleteStatement(getCatalogName(), getSchemaName(),getTableName());
-            delete.setWhere(getWhere(thisInsert, options.getRuntimeEnvironment().getTargetDatabase()));
+            delete.setWhere(getWhere(thisInsert, env.getTargetDatabase()));
             statements.add(delete);
         }
 
@@ -84,7 +84,7 @@ public class LoadUpdateDataChange extends LoadDataChange {
     }
 
     @Override
-    public ChangeStatus checkStatus(ExecutionOptions options) {
+    public ChangeStatus checkStatus(ExecutionEnvironment env) {
         return new ChangeStatus().unknown("Cannot check loadUpdateData status");
     }
 }

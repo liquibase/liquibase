@@ -7,7 +7,7 @@ import liquibase.database.OfflineConnection;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.ExecuteResult;
-import liquibase.executor.ExecutionOptions;
+import  liquibase.ExecutionEnvironment;
 import liquibase.executor.QueryResult;
 import liquibase.executor.UpdateResult;
 import liquibase.util.StringUtils;
@@ -58,8 +58,8 @@ public class UnparsedSql implements Sql {
     }
 
     @Override
-    public QueryResult query(ExecutionOptions options) throws DatabaseException {
-        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+    public QueryResult query(ExecutionEnvironment env) throws DatabaseException {
+        Database database = env.getTargetDatabase();
         DatabaseConnection conn = database.getConnection();
 
         if (conn instanceof JdbcConnection) {
@@ -70,13 +70,13 @@ public class UnparsedSql implements Sql {
     }
 
     @Override
-    public ExecuteResult execute(ExecutionOptions options) throws DatabaseException {
+    public ExecuteResult execute(ExecutionEnvironment env) throws DatabaseException {
 //TODO        if(sql instanceof ExecutablePreparedStatement) {
 //            ((ExecutablePreparedStatement) sql).execute(new PreparedStatementFactory((JdbcConnection)database.getConnection()));
 //            return new ExecuteResult();
 //        }
 
-        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+        Database database = env.getTargetDatabase();
         DatabaseConnection conn = database.getConnection();
         if (conn instanceof JdbcConnection) {
             return ((JdbcConnection) conn).execute(getSql());
@@ -86,12 +86,12 @@ public class UnparsedSql implements Sql {
     }
 
     @Override
-    public UpdateResult update(ExecutionOptions options) throws DatabaseException {
+    public UpdateResult update(ExecutionEnvironment env) throws DatabaseException {
 //        if (sql instanceof CallableSqlStatement) {
 //            throw new DatabaseException("Direct update using CallableSqlStatement not currently implemented");
 //        }
 
-        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+        Database database = env.getTargetDatabase();
         DatabaseConnection conn = database.getConnection();
         if (conn instanceof JdbcConnection) {
             return ((JdbcConnection) conn).update(getSql());

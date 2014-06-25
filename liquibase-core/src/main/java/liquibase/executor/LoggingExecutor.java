@@ -1,5 +1,6 @@
 package liquibase.executor;
 
+import liquibase.ExecutionEnvironment;
 import liquibase.action.Action;
 import liquibase.actiongenerator.ActionGeneratorFactory;
 import liquibase.database.Database;
@@ -32,20 +33,20 @@ public class LoggingExecutor extends AbstractExecutor {
     }
 
     @Override
-    public ExecuteResult execute(SqlStatement sql, ExecutionOptions options) throws DatabaseException {
-        outputStatement(sql, options);
+    public ExecuteResult execute(SqlStatement sql, ExecutionEnvironment env) throws DatabaseException {
+        outputStatement(sql, env);
         return new ExecuteResult();
     }
 
     @Override
-    public UpdateResult update(SqlStatement sql, ExecutionOptions options) throws DatabaseException {
+    public UpdateResult update(SqlStatement sql, ExecutionEnvironment env) throws DatabaseException {
         if (sql instanceof LockDatabaseChangeLogStatement) {
             return new UpdateResult(1);
         } else if (sql instanceof UnlockDatabaseChangeLogStatement) {
             return new UpdateResult(1);
         }
 
-        outputStatement(sql, options);
+        outputStatement(sql, env);
 
         return new UpdateResult(0);
     }
@@ -62,12 +63,12 @@ public class LoggingExecutor extends AbstractExecutor {
         }
     }
 
-    protected void outputStatement(SqlStatement sql, ExecutionOptions options) throws DatabaseException {
+    protected void outputStatement(SqlStatement sql, ExecutionEnvironment env) throws DatabaseException {
         try {
-            if (ActionGeneratorFactory.getInstance().generateStatementsVolatile(sql, options)) {
+            if (ActionGeneratorFactory.getInstance().generateStatementsVolatile(sql, env)) {
                 throw new DatabaseException(sql.getClass().getSimpleName()+" requires access to up to date database metadata which is not available in SQL output mode");
             }
-            for (Action action : ActionGeneratorFactory.getInstance().generateActions(sql, options)) {
+            for (Action action : ActionGeneratorFactory.getInstance().generateActions(sql, env)) {
                 if (action == null) {
                     continue;
                 }
@@ -82,12 +83,12 @@ public class LoggingExecutor extends AbstractExecutor {
     }
 
     @Override
-    public QueryResult query(SqlStatement sql, ExecutionOptions options) throws DatabaseException {
+    public QueryResult query(SqlStatement sql, ExecutionEnvironment env) throws DatabaseException {
         if (sql instanceof SelectFromDatabaseChangeLogLockStatement) {
             return new QueryResult(Boolean.FALSE);
         }
         try {
-            return delegatedReadExecutor.query(sql, options);
+            return delegatedReadExecutor.query(sql, env);
         } catch (DatabaseException e) {
             if (sql instanceof GetNextChangeSetSequenceValueStatement) { //table probably does not exist
                 return new QueryResult(0);

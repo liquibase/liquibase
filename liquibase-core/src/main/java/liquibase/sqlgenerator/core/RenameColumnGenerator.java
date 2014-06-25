@@ -7,24 +7,24 @@ import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.ValidationErrors;
-import liquibase.executor.ExecutionOptions;
+import  liquibase.ExecutionEnvironment;
 import liquibase.statement.core.RenameColumnStatement;
 
 public class RenameColumnGenerator extends AbstractSqlGenerator<RenameColumnStatement> {
 
     @Override
-    public boolean supports(RenameColumnStatement statement, ExecutionOptions options) {
-        return !(options.getRuntimeEnvironment().getTargetDatabase() instanceof SQLiteDatabase);
+    public boolean supports(RenameColumnStatement statement, ExecutionEnvironment env) {
+        return !(env.getTargetDatabase() instanceof SQLiteDatabase);
     }
 
     @Override
-    public ValidationErrors validate(RenameColumnStatement renameColumnStatement, ExecutionOptions options, ActionGeneratorChain chain) {
+    public ValidationErrors validate(RenameColumnStatement renameColumnStatement, ExecutionEnvironment env, ActionGeneratorChain chain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("tableName", renameColumnStatement.getTableName());
         validationErrors.checkRequiredField("oldColumnName", renameColumnStatement.getOldColumnName());
         validationErrors.checkRequiredField("newColumnName", renameColumnStatement.getNewColumnName());
 
-        if (options.getRuntimeEnvironment().getTargetDatabase() instanceof MySQLDatabase) {
+        if (env.getTargetDatabase() instanceof MySQLDatabase) {
             validationErrors.checkRequiredField("columnDataType", renameColumnStatement.getColumnDataType());
         }
 
@@ -32,8 +32,8 @@ public class RenameColumnGenerator extends AbstractSqlGenerator<RenameColumnStat
     }
 
     @Override
-    public Action[] generateActions(RenameColumnStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
-        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+    public Action[] generateActions(RenameColumnStatement statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+        Database database = env.getTargetDatabase();
 
         String sql;
         if (database instanceof MSSQLDatabase) {

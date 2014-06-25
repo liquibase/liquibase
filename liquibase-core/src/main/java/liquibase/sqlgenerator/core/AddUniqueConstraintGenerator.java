@@ -6,15 +6,15 @@ import liquibase.actiongenerator.ActionGeneratorChain;
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.exception.ValidationErrors;
-import liquibase.executor.ExecutionOptions;
+import  liquibase.ExecutionEnvironment;
 import liquibase.statement.core.AddUniqueConstraintStatement;
 import liquibase.util.StringUtils;
 
 public class AddUniqueConstraintGenerator extends AbstractSqlGenerator<AddUniqueConstraintStatement> {
 
     @Override
-    public boolean supports(AddUniqueConstraintStatement statement, ExecutionOptions options) {
-        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+    public boolean supports(AddUniqueConstraintStatement statement, ExecutionEnvironment env) {
+        Database database = env.getTargetDatabase();
 
         return !(database instanceof SQLiteDatabase)
         		&& !(database instanceof MSSQLDatabase)
@@ -25,7 +25,7 @@ public class AddUniqueConstraintGenerator extends AbstractSqlGenerator<AddUnique
     }
 
     @Override
-    public ValidationErrors validate(AddUniqueConstraintStatement addUniqueConstraintStatement, ExecutionOptions options, ActionGeneratorChain chain) {
+    public ValidationErrors validate(AddUniqueConstraintStatement addUniqueConstraintStatement, ExecutionEnvironment env, ActionGeneratorChain chain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("columnNames", addUniqueConstraintStatement.getColumnNames());
         validationErrors.checkRequiredField("tableName", addUniqueConstraintStatement.getTableName());
@@ -33,8 +33,8 @@ public class AddUniqueConstraintGenerator extends AbstractSqlGenerator<AddUnique
     }
 
     @Override
-    public Action[] generateActions(AddUniqueConstraintStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
-        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+    public Action[] generateActions(AddUniqueConstraintStatement statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+        Database database = env.getTargetDatabase();
 
 		String sql = null;
 		if (statement.getConstraintName() == null) {

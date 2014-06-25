@@ -1,5 +1,6 @@
 package liquibase.executor;
 
+import liquibase.ExecutionEnvironment;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
 import liquibase.statement.SqlStatement;
@@ -19,7 +20,7 @@ public interface Executor {
     /**
      * Perform a query operation against the database
      */
-    QueryResult query(SqlStatement sql, ExecutionOptions options) throws DatabaseException;
+    QueryResult query(SqlStatement sql, ExecutionEnvironment env) throws DatabaseException;
 
     /**
      * Execute statement against the database using default ExecutionOptions.
@@ -29,7 +30,7 @@ public interface Executor {
     /**
      * Perform an execute operation against the database
      */
-    ExecuteResult execute(SqlStatement sql, ExecutionOptions options) throws DatabaseException;
+    ExecuteResult execute(SqlStatement sql, ExecutionEnvironment env) throws DatabaseException;
 
     /**
      * Update using default ExecutionOptions.
@@ -39,7 +40,7 @@ public interface Executor {
     /**
      * Update data in the database
      */
-    UpdateResult update(SqlStatement sql, ExecutionOptions options) throws DatabaseException;
+    UpdateResult update(SqlStatement sql, ExecutionEnvironment env) throws DatabaseException;
 
     /**
      * Adds a comment to the database.  Currently does nothing but is over-ridden in the output JDBC template

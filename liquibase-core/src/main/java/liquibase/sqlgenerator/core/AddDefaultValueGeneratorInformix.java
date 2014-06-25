@@ -7,7 +7,7 @@ import liquibase.database.Database;
 import liquibase.database.core.InformixDatabase;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.ValidationErrors;
-import liquibase.executor.ExecutionOptions;
+import  liquibase.ExecutionEnvironment;
 import liquibase.statement.core.AddDefaultValueStatement;
 
 public class AddDefaultValueGeneratorInformix extends AddDefaultValueGenerator {
@@ -17,14 +17,14 @@ public class AddDefaultValueGeneratorInformix extends AddDefaultValueGenerator {
 	}
 
 	@Override
-	public boolean supports(AddDefaultValueStatement statement, ExecutionOptions options) {
-		return options.getRuntimeEnvironment().getTargetDatabase() instanceof InformixDatabase;
+	public boolean supports(AddDefaultValueStatement statement, ExecutionEnvironment env) {
+		return env.getTargetDatabase() instanceof InformixDatabase;
 	}
 
 	@Override
-	public ValidationErrors validate(AddDefaultValueStatement addDefaultValueStatement, ExecutionOptions options,
+	public ValidationErrors validate(AddDefaultValueStatement addDefaultValueStatement, ExecutionEnvironment env,
 			ActionGeneratorChain chain) {
-		ValidationErrors validationErrors = super.validate(addDefaultValueStatement, options, chain);
+		ValidationErrors validationErrors = super.validate(addDefaultValueStatement, env, chain);
 		if (addDefaultValueStatement.getColumnDataType() == null) {
 			validationErrors.checkRequiredField("columnDataType", addDefaultValueStatement.getColumnDataType());
 		}
@@ -32,8 +32,8 @@ public class AddDefaultValueGeneratorInformix extends AddDefaultValueGenerator {
 	}
 
     @Override
-    public Action[] generateActions(AddDefaultValueStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
-        Database database = options.getRuntimeEnvironment().getTargetDatabase();
+    public Action[] generateActions(AddDefaultValueStatement statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
+        Database database = env.getTargetDatabase();
 
         Object defaultValue = statement.getDefaultValue();
 		StringBuffer sql = new StringBuffer("ALTER TABLE ");

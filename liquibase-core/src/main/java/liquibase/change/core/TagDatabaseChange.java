@@ -3,7 +3,7 @@ package liquibase.change.core;
 import liquibase.change.*;
 import liquibase.changelog.ChangeLogHistoryServiceFactory;
 import liquibase.exception.DatabaseException;
-import liquibase.executor.ExecutionOptions;
+import  liquibase.ExecutionEnvironment;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.TagDatabaseStatement;
 
@@ -22,16 +22,16 @@ public class TagDatabaseChange extends AbstractChange {
     }
 
     @Override
-    public SqlStatement[] generateStatements(ExecutionOptions options) {
+    public SqlStatement[] generateStatements(ExecutionEnvironment env) {
         return new SqlStatement[] {
                 new TagDatabaseStatement(tag)
         };
     }
 
     @Override
-    public ChangeStatus checkStatus(ExecutionOptions options) {
+    public ChangeStatus checkStatus(ExecutionEnvironment env) {
         try {
-            return new ChangeStatus().assertComplete(ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(options.getRuntimeEnvironment().getTargetDatabase()).tagExists(getTag()), "Database not tagged");
+            return new ChangeStatus().assertComplete(ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(env.getTargetDatabase()).tagExists(getTag()), "Database not tagged");
         } catch (DatabaseException e) {
             return new ChangeStatus().unknown(e);
         }

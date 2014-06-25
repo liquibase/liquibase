@@ -6,7 +6,7 @@ import liquibase.actiongenerator.ActionGeneratorFactory;
 import liquibase.change.ColumnConfig;
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.exception.DatabaseException;
-import liquibase.executor.ExecutionOptions;
+import  liquibase.ExecutionEnvironment;
 import liquibase.statement.SqlStatement;
 import liquibase.statement.core.AddColumnStatement;
 import liquibase.structure.core.Index;
@@ -22,17 +22,17 @@ public class AddColumnGeneratorSQLite extends AddColumnGenerator {
     }
 
     @Override
-    public boolean supports(AddColumnStatement statement, ExecutionOptions options) {
-        return options.getRuntimeEnvironment().getTargetDatabase() instanceof SQLiteDatabase;
+    public boolean supports(AddColumnStatement statement, ExecutionEnvironment env) {
+        return env.getTargetDatabase() instanceof SQLiteDatabase;
     }
 
     @Override
-    public boolean generateStatementsIsVolatile(ExecutionOptions options) {
+    public boolean generateStatementsIsVolatile(ExecutionEnvironment env) {
         return true;
     }
 
     @Override
-    public Action[] generateActions(final AddColumnStatement statement, ExecutionOptions options, ActionGeneratorChain chain) {
+    public Action[] generateActions(final AddColumnStatement statement, ExecutionEnvironment env, ActionGeneratorChain chain) {
         // SQLite does not support this ALTER TABLE operation until now.
         // For more information see: http://www.sqlite.org/omitted.html.
         // This is a small work around...
@@ -63,8 +63,8 @@ public class AddColumnGeneratorSQLite extends AddColumnGenerator {
 
         try {
             // alter table
-            List<SqlStatement> alterTableStatements = SQLiteDatabase.getAlterTableStatements(rename_alter_visitor, options, statement.getCatalogName(), statement.getSchemaName(), statement.getTableName());
-            sql.addAll(Arrays.asList(ActionGeneratorFactory.getInstance().generateActions(alterTableStatements.toArray(new SqlStatement[alterTableStatements.size()]), options)));
+            List<SqlStatement> alterTableStatements = SQLiteDatabase.getAlterTableStatements(rename_alter_visitor, env, statement.getCatalogName(), statement.getSchemaName(), statement.getTableName());
+            sql.addAll(Arrays.asList(ActionGeneratorFactory.getInstance().generateActions(alterTableStatements.toArray(new SqlStatement[alterTableStatements.size()]), env)));
         } catch (DatabaseException e) {
             System.err.println(e);
             e.printStackTrace();
