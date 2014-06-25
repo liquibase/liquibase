@@ -9,8 +9,9 @@ class MetaDataQueryActionTest extends Specification {
     @Unroll
     def "merge that is valid"() {
         expect:
-        assert new MockMetaDataAction(action1).merge(new MockMetaDataAction(action2))
-        action1.toString() == expected
+        def baseAction = new MockMetaDataAction(action1)
+        assert baseAction.merge(new MockMetaDataAction(action2))
+        baseAction.toString() == expected
 
         where:
         action1                                                                              | action2                                                                            | expected
