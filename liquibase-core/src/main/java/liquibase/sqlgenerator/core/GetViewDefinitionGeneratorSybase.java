@@ -3,6 +3,7 @@ package liquibase.sqlgenerator.core;
 import liquibase.CatalogAndSchema;
 import liquibase.action.Action;
 import liquibase.action.core.UnparsedSql;
+import liquibase.exception.UnsupportedException;
 import liquibase.statementlogic.StatementLogicChain;
 import liquibase.database.Database;
 import liquibase.database.core.SybaseDatabase;
@@ -21,7 +22,7 @@ public class GetViewDefinitionGeneratorSybase extends GetViewDefinitionGenerator
     }
 
     @Override
-    public Action[] generateActions(GetViewDefinitionStatement statement, ExecutionEnvironment env, StatementLogicChain chain) {
+    public Action[] generateActions(GetViewDefinitionStatement statement, ExecutionEnvironment env, StatementLogicChain chain) throws UnsupportedException {
         Database database = env.getTargetDatabase();
 
         CatalogAndSchema schema = new CatalogAndSchema(statement.getCatalogName(), statement.getSchemaName()).customize(database);

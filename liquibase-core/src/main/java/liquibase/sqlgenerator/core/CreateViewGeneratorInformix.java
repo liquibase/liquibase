@@ -2,6 +2,7 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.action.Action;
 import liquibase.action.core.UnparsedSql;
+import liquibase.exception.UnsupportedException;
 import liquibase.statementlogic.StatementLogicChain;
 import liquibase.database.core.*;
 import liquibase.exception.ValidationErrors;
@@ -35,8 +36,8 @@ public class CreateViewGeneratorInformix extends AbstractSqlGenerator<CreateView
     }
 
     @Override
-    public Action[] generateActions(CreateViewStatement statement, ExecutionEnvironment env, StatementLogicChain chain) {
-    	String viewName = env.getTargetDatabase().escapeViewName(statement.getCatalogName(), statement.getSchemaName(), statement.getViewName());
+    public Action[] generateActions(CreateViewStatement statement, ExecutionEnvironment env, StatementLogicChain chain) throws UnsupportedException {
+        String viewName = env.getTargetDatabase().escapeViewName(statement.getCatalogName(), statement.getSchemaName(), statement.getViewName());
     	        
         String createClause = "CREATE VIEW  " + viewName + " AS SELECT * FROM (" + statement.getSelectQuery() + ") AS v";
         

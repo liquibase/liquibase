@@ -2,6 +2,7 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.action.Action;
 import liquibase.action.core.UnparsedSql;
+import liquibase.exception.UnsupportedException;
 import liquibase.statementlogic.StatementLogicChain;
 import liquibase.database.Database;
 import liquibase.database.core.MySQLDatabase;
@@ -27,7 +28,7 @@ public class DropForeignKeyConstraintGenerator extends AbstractSqlGenerator<Drop
     }
 
     @Override
-    public Action[] generateActions(DropForeignKeyConstraintStatement statement, ExecutionEnvironment env, StatementLogicChain chain) {
+    public Action[] generateActions(DropForeignKeyConstraintStatement statement, ExecutionEnvironment env, StatementLogicChain chain) throws UnsupportedException {
         Database database = env.getTargetDatabase();
         if (database instanceof MySQLDatabase || database instanceof SybaseASADatabase) {
             return new Action[] { new UnparsedSql("ALTER TABLE " + database.escapeTableName(statement.getBaseTableCatalogName(), statement.getBaseTableSchemaName(), statement.getBaseTableName()) + " DROP FOREIGN KEY " + database.escapeConstraintName(statement.getConstraintName())) };

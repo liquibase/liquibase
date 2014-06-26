@@ -5,9 +5,9 @@ import liquibase.action.Action;
 import liquibase.action.ExecuteAction;
 import liquibase.action.QueryAction;
 import liquibase.action.UpdateAction;
+import liquibase.exception.*;
 import liquibase.statement.Statement;
 import liquibase.statementlogic.StatementLogicFactory;
-import liquibase.exception.DatabaseException;
 import liquibase.logging.LogFactory;
 import liquibase.logging.Logger;
 
@@ -21,7 +21,7 @@ public class StandardExecutor extends AbstractExecutor {
     }
 
     @Override
-    public QueryResult query(Statement sql, ExecutionEnvironment env) throws DatabaseException {
+    public QueryResult query(Statement sql, ExecutionEnvironment env) throws DatabaseException, UnsupportedException {
         Action[] actions = StatementLogicFactory.getInstance().generateActions(sql, env);
 
         if (actions.length != 1) {
@@ -39,7 +39,7 @@ public class StandardExecutor extends AbstractExecutor {
 
 
     @Override
-    public ExecuteResult execute(Statement sql, ExecutionEnvironment env) throws DatabaseException {
+    public ExecuteResult execute(Statement sql, ExecutionEnvironment env) throws DatabaseException, UnsupportedException {
         Action[] actions = StatementLogicFactory.getInstance().generateActions(sql, env);
         for (Action action : actions) {
             if (!(action instanceof ExecuteAction)) {
@@ -54,7 +54,7 @@ public class StandardExecutor extends AbstractExecutor {
 
 
     @Override
-    public UpdateResult update(Statement sql, ExecutionEnvironment env) throws DatabaseException {
+    public UpdateResult update(Statement sql, ExecutionEnvironment env) throws DatabaseException, UnsupportedException {
         Action[] actions = StatementLogicFactory.getInstance().generateActions(sql, env);
 
         if (actions.length != 1) {

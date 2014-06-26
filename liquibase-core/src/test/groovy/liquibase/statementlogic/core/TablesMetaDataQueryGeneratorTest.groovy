@@ -76,7 +76,7 @@ class TablesMetaDataQueryGeneratorTest extends Specification {
         def database = connection.getDatabase();
 
         def actions = StatementLogicFactory.instance.generateActions(statement, new ExecutionEnvironment(database))
-        def options = new ExecutionEnvironment(database, null)
+        def options = new ExecutionEnvironment(database)
 
         LockServiceFactory.instance.resetAll()
 

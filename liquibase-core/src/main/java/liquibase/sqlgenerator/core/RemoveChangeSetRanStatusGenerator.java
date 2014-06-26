@@ -1,6 +1,7 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.action.Action;
+import liquibase.exception.UnsupportedException;
 import liquibase.statementlogic.StatementLogicChain;
 import liquibase.statementlogic.StatementLogicFactory;
 import liquibase.changelog.ChangeSet;
@@ -20,7 +21,7 @@ public class RemoveChangeSetRanStatusGenerator extends AbstractSqlGenerator<Remo
     }
 
     @Override
-    public Action[] generateActions(RemoveChangeSetRanStatusStatement statement, ExecutionEnvironment env, StatementLogicChain chain) {
+    public Action[] generateActions(RemoveChangeSetRanStatusStatement statement, ExecutionEnvironment env, StatementLogicChain chain) throws UnsupportedException {
         ChangeSet changeSet = statement.getChangeSet();
 
         Database database = env.getTargetDatabase();

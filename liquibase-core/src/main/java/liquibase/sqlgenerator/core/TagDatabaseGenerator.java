@@ -2,6 +2,7 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.action.Action;
 import liquibase.action.core.UnparsedSql;
+import liquibase.exception.UnsupportedException;
 import liquibase.statementlogic.StatementLogicChain;
 import liquibase.statementlogic.StatementLogicFactory;
 import liquibase.database.Database;
@@ -22,8 +23,8 @@ public class TagDatabaseGenerator extends AbstractSqlGenerator<TagDatabaseStatem
     }
 
     @Override
-    public Action[] generateActions(TagDatabaseStatement statement, ExecutionEnvironment env, StatementLogicChain sqlGeneratorChain) {
-    	String liquibaseSchema = null;
+    public Action[] generateActions(TagDatabaseStatement statement, ExecutionEnvironment env, StatementLogicChain sqlGeneratorChain) throws UnsupportedException {
+        String liquibaseSchema = null;
         Database database = env.getTargetDatabase();
    		liquibaseSchema = database.getLiquibaseSchemaName();
         UpdateStatement updateStatement = new UpdateStatement(database.getLiquibaseCatalogName(), liquibaseSchema, database.getDatabaseChangeLogTableName());

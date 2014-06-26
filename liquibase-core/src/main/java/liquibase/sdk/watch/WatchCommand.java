@@ -6,6 +6,7 @@ import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.exception.UnsupportedException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.executor.Row;
@@ -204,7 +205,12 @@ public class WatchCommand extends AbstractCommand {
                 outString += "<tr><th>Id</th><th>Author</th><th>Path</th><th>ExecType</th><th>Tag</th></tr>";
 
                 SelectFromDatabaseChangeLogStatement select = new SelectFromDatabaseChangeLogStatement("FILENAME", "AUTHOR", "ID", "MD5SUM", "DATEEXECUTED", "ORDEREXECUTED", "EXECTYPE", "DESCRIPTION", "COMMENTS", "TAG", "LIQUIBASE").setOrderBy("DATEEXECUTED DESC", "ORDEREXECUTED DESC"); //going in opposite order for easier reading
-                List<Map> ranChangeSets = (List) ExecutorService.getInstance().getExecutor(database).query(select).toList();
+                List<Map> ranChangeSets = null;
+                try {
+                    ranChangeSets = (List) ExecutorService.getInstance().getExecutor(database).query(select).toList();
+                } catch (UnsupportedException e) {
+                    throw new DatabaseException(e);
+                }
 
                 for (Map row : ranChangeSets) {
                     String id = cleanHtmlId(row.get("ID") + ":" + row.get("AUTHOR") + ":" + row.get("FILENAME"));

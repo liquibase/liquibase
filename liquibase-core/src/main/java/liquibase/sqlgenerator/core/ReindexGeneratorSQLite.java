@@ -2,6 +2,7 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.action.Action;
 import liquibase.action.core.UnparsedSql;
+import liquibase.exception.UnsupportedException;
 import liquibase.statementlogic.StatementLogicChain;
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.exception.ValidationErrors;
@@ -27,7 +28,7 @@ public class ReindexGeneratorSQLite extends AbstractSqlGenerator<ReindexStatemen
     }
 
     @Override
-    public Action[] generateActions(ReindexStatement statement, ExecutionEnvironment env, StatementLogicChain chain) {
+    public Action[] generateActions(ReindexStatement statement, ExecutionEnvironment env, StatementLogicChain chain) throws UnsupportedException {
         return new Action[] {
                 new UnparsedSql("REINDEX "+ env.getTargetDatabase().escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()))
         };

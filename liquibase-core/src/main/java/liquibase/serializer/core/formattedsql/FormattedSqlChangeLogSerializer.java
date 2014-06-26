@@ -2,6 +2,7 @@ package liquibase.serializer.core.formattedsql;
 
 import liquibase.ExecutionEnvironment;
 import liquibase.action.Action;
+import liquibase.exception.UnsupportedException;
 import liquibase.statementlogic.StatementLogicFactory;
 import liquibase.change.Change;
 import liquibase.changelog.ChangeSet;
@@ -43,11 +44,15 @@ public class FormattedSqlChangeLogSerializer  implements ChangeLogSerializer {
             builder.append("--changeset ").append(author).append(":").append(changeSet.getId()).append("\n");
             for (Change change : changeSet.getChanges()) {
                 ExecutionEnvironment env = new ExecutionEnvironment(database);
-                Action[] actions = StatementLogicFactory.getInstance().generateActions(change.generateStatements(env), env);
+                try {
+                    Action[] actions = StatementLogicFactory.getInstance().generateActions(change.generateStatements(env), env);
                 if (actions != null) {
                     for (Action action : actions) {
                         builder.append(action.describe()).append("\n");
                     }
+                }
+                } catch (UnsupportedException e) {
+                    throw new UnexpectedLiquibaseException(e);
                 }
             }
 

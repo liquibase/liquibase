@@ -5,6 +5,7 @@ import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.OfflineConnection;
 import liquibase.exception.DatabaseException;
+import liquibase.exception.UnsupportedException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.logging.LogFactory;
@@ -247,7 +248,12 @@ public class SybaseDatabase extends AbstractJdbcDatabase {
         GetViewDefinitionStatement statement = new GetViewDefinitionStatement(schema.getCatalogName(), schema.getSchemaName(), viewName);
         Executor executor = ExecutorService.getInstance().getExecutor(this);
         @SuppressWarnings("unchecked")
-        List<String> definitionRows = executor.query(statement).toList(String.class);
+        List<String> definitionRows = null;
+        try {
+            definitionRows = executor.query(statement).toList(String.class);
+        } catch (UnsupportedException e) {
+            throw new DatabaseException(e);
+        }
         StringBuilder definition = new StringBuilder();
         for (String d : definitionRows) {
         	definition.append(d);

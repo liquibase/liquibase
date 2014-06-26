@@ -23,7 +23,7 @@ public class MarkChangeSetRanGeneratorTest extends AbstractSqlGeneratorTest<Mark
     }
 
     @Test
-    public void generateSql_markRan() {
+    public void generateSql_markRan() throws Exception {
         Action[] actions = new MarkChangeSetRanGenerator().generateActions(new MarkChangeSetRanStatement(new ChangeSet("1", "a", false, false, "c", null, null, null), ChangeSet.ExecType.MARK_RAN), new ExecutionEnvironment(new MockDatabase()), new StatementLogicChain(null));
         assertEquals(1, actions.length);
         assertTrue(actions[0].describe(), actions[0].describe().contains("MARK_RAN"));

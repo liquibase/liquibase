@@ -4,6 +4,7 @@ import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.exception.UnsupportedException;
 import liquibase.executor.ExecutorService;
 import liquibase.executor.Row;
 import liquibase.snapshot.CachedRow;
@@ -38,7 +39,7 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
 
 
     @Override
-    protected DatabaseObject snapshotObject(DatabaseObject example, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException {
+    protected DatabaseObject snapshotObject(DatabaseObject example, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException, UnsupportedException {
         Database database = snapshot.getDatabase();
         UniqueConstraint exampleConstraint = (UniqueConstraint) example;
         Table table = exampleConstraint.getTable();
@@ -60,7 +61,7 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
 
 
     @Override
-    protected void addTo(DatabaseObject foundObject, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException {
+    protected void addTo(DatabaseObject foundObject, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException, UnsupportedException {
 
         if (!snapshot.getSnapshotControl().shouldInclude(UniqueConstraint.class)) {
             return;
@@ -95,7 +96,7 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
         return ((JdbcDatabaseSnapshot) snapshot).getMetaData().getUniqueConstraints(schema.getCatalogName(), schema.getName(), table.getName());
     }
 
-    protected List<Row> listColumns(UniqueConstraint example, Database database) throws DatabaseException {
+    protected List<Row> listColumns(UniqueConstraint example, Database database) throws DatabaseException, UnsupportedException {
         Table table = example.getTable();
         Schema schema = table.getSchema();
         String name = example.getName();

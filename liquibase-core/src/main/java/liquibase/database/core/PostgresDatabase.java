@@ -4,6 +4,7 @@ import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.ObjectQuotingStrategy;
 import liquibase.exception.DatabaseException;
+import liquibase.exception.UnsupportedException;
 import liquibase.executor.ExecutorService;
 import liquibase.logging.LogFactory;
 import liquibase.statement.core.RawSqlStatement;
@@ -245,8 +246,12 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
     }
 
     private boolean runExistsQuery(String query) throws DatabaseException {
-        Long count = ExecutorService.getInstance().getExecutor(this).query(new RawSqlStatement(query)).toObject(0L);
+        try {
+            Long count = ExecutorService.getInstance().getExecutor(this).query(new RawSqlStatement(query)).toObject(0L);
 
-        return count > 0;
+            return count > 0;
+        } catch (UnsupportedException e) {
+            throw new DatabaseException(e);
+        }
     }
 }

@@ -2,6 +2,7 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.action.Action;
 import liquibase.action.core.UnparsedSql;
+import liquibase.exception.UnsupportedException;
 import liquibase.statementlogic.StatementLogicChain;
 import liquibase.database.Database;
 import liquibase.database.core.InformixDatabase;
@@ -32,11 +33,11 @@ public class AddDefaultValueGeneratorInformix extends AddDefaultValueGenerator {
 	}
 
     @Override
-    public Action[] generateActions(AddDefaultValueStatement statement, ExecutionEnvironment env, StatementLogicChain chain) {
+    public Action[] generateActions(AddDefaultValueStatement statement, ExecutionEnvironment env, StatementLogicChain chain) throws UnsupportedException {
         Database database = env.getTargetDatabase();
 
         Object defaultValue = statement.getDefaultValue();
-		StringBuffer sql = new StringBuffer("ALTER TABLE ");
+        StringBuffer sql = new StringBuffer("ALTER TABLE ");
 		sql.append(database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()));
 		sql.append(" MODIFY (");
 		sql.append(database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(),

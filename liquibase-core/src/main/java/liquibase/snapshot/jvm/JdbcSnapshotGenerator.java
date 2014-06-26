@@ -5,6 +5,7 @@ import liquibase.database.Database;
 import liquibase.database.core.PostgresDatabase;
 import liquibase.diff.DiffStatusListener;
 import liquibase.exception.DatabaseException;
+import liquibase.exception.UnsupportedException;
 import liquibase.logging.LogFactory;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.InvalidExampleException;
@@ -55,27 +56,31 @@ public abstract class JdbcSnapshotGenerator implements SnapshotGenerator {
 
     @Override
     public DatabaseObject snapshot(DatabaseObject example, DatabaseSnapshot snapshot, SnapshotGeneratorChain chain) throws DatabaseException, InvalidExampleException {
-        if (defaultFor != null && defaultFor.isAssignableFrom(example.getClass())) {
-            return snapshotObject(example, snapshot);
-        }
+        try {
+            if (defaultFor != null && defaultFor.isAssignableFrom(example.getClass())) {
+                return snapshotObject(example, snapshot);
+            }
 
-        DatabaseObject chainResponse = chain.snapshot(example, snapshot);
-        if (chainResponse == null) {
-            return null;
-        }
+            DatabaseObject chainResponse = chain.snapshot(example, snapshot);
+            if (chainResponse == null) {
+                return null;
+            }
 
-        if (shouldAddTo(example.getClass(), snapshot)) {
-            if (addsTo() != null) {
-                for (Class<? extends DatabaseObject> addType : addsTo()) {
-                    if (addType.isAssignableFrom(example.getClass())) {
-                        if (chainResponse != null) {
-                            addTo(chainResponse, snapshot);
+            if (shouldAddTo(example.getClass(), snapshot)) {
+                if (addsTo() != null) {
+                    for (Class<? extends DatabaseObject> addType : addsTo()) {
+                        if (addType.isAssignableFrom(example.getClass())) {
+                            if (chainResponse != null) {
+                                addTo(chainResponse, snapshot);
+                            }
                         }
                     }
                 }
             }
+            return chainResponse;
+        } catch (UnsupportedException e) {
+            throw new DatabaseException(e);
         }
-        return chainResponse;
 
     }
 
@@ -88,9 +93,9 @@ public abstract class JdbcSnapshotGenerator implements SnapshotGenerator {
         return null;
     }
 
-    protected abstract DatabaseObject snapshotObject(DatabaseObject example, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException;
+    protected abstract DatabaseObject snapshotObject(DatabaseObject example, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException, UnsupportedException;
 
-    protected abstract void addTo(DatabaseObject foundObject, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException;
+    protected abstract void addTo(DatabaseObject foundObject, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException, UnsupportedException;
 
 //    public Boolean has(DatabaseObject example, DatabaseSnapshot snapshot, SnapshotGeneratorChain chain) throws DatabaseException {
 //        return null;  //To change body of implemented methods use File | Settings | File Templates.

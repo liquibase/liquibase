@@ -2,6 +2,7 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.action.Action;
 import liquibase.action.core.UnparsedSql;
+import liquibase.exception.UnsupportedException;
 import liquibase.statementlogic.StatementLogicChain;
 import liquibase.database.Database;
 import liquibase.datatype.DataTypeFactory;
@@ -24,7 +25,7 @@ public class UpdateGenerator extends AbstractSqlGenerator<UpdateStatement> {
     }
 
     @Override
-    public Action[] generateActions(UpdateStatement statement, ExecutionEnvironment env, StatementLogicChain chain) {
+    public Action[] generateActions(UpdateStatement statement, ExecutionEnvironment env, StatementLogicChain chain) throws UnsupportedException {
         Database database = env.getTargetDatabase();
 
         StringBuffer sql = new StringBuffer("UPDATE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " SET");

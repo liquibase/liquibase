@@ -1,5 +1,6 @@
 package liquibase.sqlgenerator.core;
 
+import liquibase.exception.UnsupportedException;
 import liquibase.statementlogic.StatementLogicChain;
 import liquibase.database.core.H2Database;
 import  liquibase.ExecutionEnvironment;
@@ -14,7 +15,7 @@ public class InsertOrUpdateGeneratorH2 extends InsertOrUpdateGenerator {
     }
 
     @Override
-    protected String getInsertStatement(InsertOrUpdateStatement insertOrUpdateStatement, ExecutionEnvironment env, StatementLogicChain chain) {
+    protected String getInsertStatement(InsertOrUpdateStatement insertOrUpdateStatement, ExecutionEnvironment env, StatementLogicChain chain) throws UnsupportedException {
         String insertStatement = super.getInsertStatement(insertOrUpdateStatement, env, chain);
         return insertStatement.replaceAll("(?i)insert into (.+) (values .+)", "MERGE INTO $1 KEY(" + Matcher.quoteReplacement(insertOrUpdateStatement.getPrimaryKey()) + ") $2");
     }

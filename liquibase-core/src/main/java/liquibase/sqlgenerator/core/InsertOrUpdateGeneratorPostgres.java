@@ -3,6 +3,7 @@ package liquibase.sqlgenerator.core;
 import liquibase.ExecutionEnvironment;
 import liquibase.action.Action;
 import liquibase.action.core.UnparsedSql;
+import liquibase.exception.UnsupportedException;
 import liquibase.statementlogic.StatementLogicChain;
 import liquibase.database.Database;
 import liquibase.database.core.PostgresDatabase;
@@ -26,11 +27,11 @@ public class InsertOrUpdateGeneratorPostgres extends InsertOrUpdateGenerator {
 	}
 
     @Override
-    public Action[] generateActions(InsertOrUpdateStatement insertOrUpdateStatement, ExecutionEnvironment env, StatementLogicChain chain) {
+    public Action[] generateActions(InsertOrUpdateStatement insertOrUpdateStatement, ExecutionEnvironment env, StatementLogicChain chain) throws UnsupportedException {
         Database database = env.getTargetDatabase();
 
         StringBuilder generatedSql = new StringBuilder();
-		generatedSql.append("DO\n");
+        generatedSql.append("DO\n");
 		generatedSql.append("$$\n");
 		generatedSql.append("BEGIN\n");
 		try {

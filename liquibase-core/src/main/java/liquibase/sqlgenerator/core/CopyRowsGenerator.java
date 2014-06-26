@@ -2,6 +2,7 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.action.Action;
 import liquibase.action.core.UnparsedSql;
+import liquibase.exception.UnsupportedException;
 import liquibase.statementlogic.StatementLogicChain;
 import liquibase.change.ColumnConfig;
 import liquibase.database.core.SQLiteDatabase;
@@ -26,7 +27,7 @@ public class CopyRowsGenerator extends AbstractSqlGenerator<CopyRowsStatement> {
     }
 
     @Override
-    public Action[] generateActions(CopyRowsStatement statement, ExecutionEnvironment env, StatementLogicChain chain) {
+    public Action[] generateActions(CopyRowsStatement statement, ExecutionEnvironment env, StatementLogicChain chain) throws UnsupportedException {
         StringBuffer sql = new StringBuffer();
         if (env.getTargetDatabase() instanceof SQLiteDatabase) {
             sql.append("INSERT INTO `").append(statement.getTargetTable()).append("` (");

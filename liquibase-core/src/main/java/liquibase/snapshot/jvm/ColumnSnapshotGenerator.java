@@ -9,6 +9,7 @@ import liquibase.datatype.LiquibaseDataType;
 import liquibase.datatype.core.*;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.exception.UnsupportedException;
 import liquibase.executor.ExecutorService;
 import liquibase.logging.LogFactory;
 import liquibase.snapshot.CachedRow;
@@ -33,7 +34,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
     }
 
     @Override
-    protected DatabaseObject snapshotObject(DatabaseObject example, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException {
+    protected DatabaseObject snapshotObject(DatabaseObject example, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException, UnsupportedException {
         Database database = snapshot.getDatabase();
         Relation relation = ((Column) example).getRelation();
         Schema schema = relation.getSchema();
@@ -57,7 +58,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
     }
 
     @Override
-    protected void addTo(DatabaseObject foundObject, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException {
+    protected void addTo(DatabaseObject foundObject, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException, UnsupportedException {
         if (!snapshot.getSnapshotControl().shouldInclude(Column.class)) {
             return;
         }
@@ -250,6 +251,8 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                 enumClause = enumClause.replaceFirst(", $", "");
                 return new DataType(columnTypeName + "("+enumClause+")");
             } catch (DatabaseException e) {
+                LogFactory.getLogger().warning("Error fetching enum values", e);
+            } catch (liquibase.exception.UnsupportedException e) {
                 LogFactory.getLogger().warning("Error fetching enum values", e);
             }
         }

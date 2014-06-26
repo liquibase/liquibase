@@ -2,6 +2,7 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.action.Action;
 import liquibase.action.core.UnparsedSql;
+import liquibase.exception.UnsupportedException;
 import liquibase.statementlogic.StatementLogicChain;
 import liquibase.database.Database;
 import liquibase.database.core.InformixDatabase;
@@ -24,7 +25,7 @@ public class AddPrimaryKeyGeneratorInformix extends AddPrimaryKeyGenerator {
     }
 
     @Override
-    public Action[] generateActions(AddPrimaryKeyStatement statement, ExecutionEnvironment env, StatementLogicChain chain) {
+    public Action[] generateActions(AddPrimaryKeyStatement statement, ExecutionEnvironment env, StatementLogicChain chain) throws UnsupportedException {
         Database database = env.getTargetDatabase();
 
         StringBuilder sql = new StringBuilder();
@@ -33,7 +34,7 @@ public class AddPrimaryKeyGeneratorInformix extends AddPrimaryKeyGenerator {
         sql.append(" ADD CONSTRAINT PRIMARY KEY (");
         sql.append(database.escapeColumnNameList(statement.getColumnNames()));
         sql.append(")");
-   	    if (statement.getConstraintName() != null) {
+        if (statement.getConstraintName() != null) {
    	        sql.append(" CONSTRAINT ");
    	        sql.append(database.escapeConstraintName(statement.getConstraintName()));
    	    }

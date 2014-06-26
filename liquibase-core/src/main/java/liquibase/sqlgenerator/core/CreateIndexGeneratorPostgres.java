@@ -2,6 +2,7 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.action.Action;
 import liquibase.action.core.UnparsedSql;
+import liquibase.exception.UnsupportedException;
 import liquibase.statementlogic.StatementLogicChain;
 import liquibase.database.Database;
 import liquibase.database.core.*;
@@ -27,7 +28,7 @@ public class CreateIndexGeneratorPostgres extends CreateIndexGenerator {
     }
 
     @Override
-    public Action[] generateActions(CreateIndexStatement statement, ExecutionEnvironment env, StatementLogicChain chain) {
+    public Action[] generateActions(CreateIndexStatement statement, ExecutionEnvironment env, StatementLogicChain chain) throws UnsupportedException {
 
         Database database = env.getTargetDatabase();
 
@@ -43,7 +44,7 @@ public class CreateIndexGeneratorPostgres extends CreateIndexGenerator {
 	    StringBuilder buffer = new StringBuilder();
 
 	    buffer.append("CREATE ");
-	    if (statement.isUnique() != null && statement.isUnique()) {
+        if (statement.isUnique() != null && statement.isUnique()) {
 		    buffer.append("UNIQUE ");
 	    }
 	    buffer.append("INDEX ");

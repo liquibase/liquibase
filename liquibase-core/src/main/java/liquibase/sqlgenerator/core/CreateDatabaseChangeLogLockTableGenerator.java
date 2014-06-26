@@ -1,6 +1,7 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.action.Action;
+import liquibase.exception.UnsupportedException;
 import liquibase.statementlogic.StatementLogicChain;
 import liquibase.statementlogic.StatementLogicFactory;
 import liquibase.database.Database;
@@ -24,7 +25,7 @@ public class CreateDatabaseChangeLogLockTableGenerator extends AbstractSqlGenera
     }
 
     @Override
-    public Action[] generateActions(CreateDatabaseChangeLogLockTableStatement statement, ExecutionEnvironment env, StatementLogicChain chain) {
+    public Action[] generateActions(CreateDatabaseChangeLogLockTableStatement statement, ExecutionEnvironment env, StatementLogicChain chain) throws UnsupportedException {
         Database database = env.getTargetDatabase();
         CreateTableStatement createTableStatement = new CreateTableStatement(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName())
                 .setTablespace(database.getLiquibaseTablespaceName())

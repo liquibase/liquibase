@@ -2,6 +2,7 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.action.Action;
 import liquibase.action.core.UnparsedSql;
+import liquibase.exception.UnsupportedException;
 import liquibase.statementlogic.StatementLogicChain;
 import liquibase.database.Database;
 import liquibase.database.core.*;
@@ -33,7 +34,7 @@ public class DropDefaultValueGenerator extends AbstractSqlGenerator<DropDefaultV
     }
 
     @Override
-    public Action[] generateActions(DropDefaultValueStatement statement, ExecutionEnvironment env, StatementLogicChain chain) {
+    public Action[] generateActions(DropDefaultValueStatement statement, ExecutionEnvironment env, StatementLogicChain chain) throws UnsupportedException {
         Database database = env.getTargetDatabase();
         String sql;
         String escapedTableName = database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName());
@@ -52,7 +53,7 @@ public class DropDefaultValueGenerator extends AbstractSqlGenerator<DropDefaultV
                 // System.out.println("DROP QUERY : " + query);
                 sql = query;
              } else {
-        		// FIXME this syntax does not supported by MSSQL 2000
+                 // FIXME this syntax does not supported by MSSQL 2000
         		sql = "ALTER TABLE " + escapedTableName + " DROP CONSTRAINT select d.name from syscolumns c,sysobjects d, sysobjects t where c.id=t.id AND d.parent_obj=t.id AND d.type='D' AND t.type='U' AND c.name='"+statement.getColumnName()+"' AND t.name='"+statement.getTableName()+"'";
              }
         } else if (database instanceof MySQLDatabase) {

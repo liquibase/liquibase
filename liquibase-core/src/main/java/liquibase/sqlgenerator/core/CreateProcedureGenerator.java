@@ -2,6 +2,7 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.action.Action;
 import liquibase.action.core.UnparsedSql;
+import liquibase.exception.UnsupportedException;
 import liquibase.statementlogic.StatementLogicChain;
 import liquibase.exception.ValidationErrors;
 import  liquibase.ExecutionEnvironment;
@@ -16,7 +17,7 @@ public class CreateProcedureGenerator extends AbstractSqlGenerator<CreateProcedu
     }
 
     @Override
-    public Action[] generateActions(CreateProcedureStatement statement, ExecutionEnvironment env, StatementLogicChain chain) {
+    public Action[] generateActions(CreateProcedureStatement statement, ExecutionEnvironment env, StatementLogicChain chain) throws UnsupportedException {
         return new Action[] {
                 new UnparsedSql(statement.getProcedureText(), statement.getEndDelimiter()
 //todo: procedureName is not yet set or required                        new StoredProcedure().setName(statement.getProcedureName()).setSchema(new Schema(statement.getCatalogName(), statement.getSchemaName()))

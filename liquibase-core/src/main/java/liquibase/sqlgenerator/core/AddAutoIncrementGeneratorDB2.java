@@ -2,6 +2,7 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.action.Action;
 import liquibase.action.core.UnparsedSql;
+import liquibase.exception.UnsupportedException;
 import liquibase.statementlogic.StatementLogicChain;
 import liquibase.database.Database;
 import liquibase.database.core.DB2Database;
@@ -35,12 +36,12 @@ public class AddAutoIncrementGeneratorDB2 extends AddAutoIncrementGenerator {
     }
 
     @Override
-    public Action[] generateActions(AddAutoIncrementStatement statement, ExecutionEnvironment env, StatementLogicChain chain) {
+    public Action[] generateActions(AddAutoIncrementStatement statement, ExecutionEnvironment env, StatementLogicChain chain) throws UnsupportedException {
         Database database = env.getTargetDatabase();
 
         return new Action[]{
             new UnparsedSql(
-            	"ALTER TABLE "
+                    "ALTER TABLE "
             		+ database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName())
             		+ " ALTER COLUMN "
             		+ database.escapeColumnName(

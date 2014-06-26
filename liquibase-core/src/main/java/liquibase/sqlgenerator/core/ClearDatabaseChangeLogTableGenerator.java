@@ -2,6 +2,7 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.action.Action;
 import liquibase.action.core.UnparsedSql;
+import liquibase.exception.UnsupportedException;
 import liquibase.statementlogic.StatementLogicChain;
 import liquibase.database.Database;
 import liquibase.exception.ValidationErrors;
@@ -18,7 +19,7 @@ public class ClearDatabaseChangeLogTableGenerator extends AbstractSqlGenerator<C
     }
 
     @Override
-    public Action[] generateActions(ClearDatabaseChangeLogTableStatement statement, ExecutionEnvironment env, StatementLogicChain chain) {
+    public Action[] generateActions(ClearDatabaseChangeLogTableStatement statement, ExecutionEnvironment env, StatementLogicChain chain) throws UnsupportedException {
         Database database = env.getTargetDatabase();
 
         String schemaName = statement.getSchemaName();

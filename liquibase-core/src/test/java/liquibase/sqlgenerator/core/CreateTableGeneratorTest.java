@@ -7,7 +7,6 @@ import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.datatype.core.IntType;
-import  liquibase.ExecutionEnvironment;
 import liquibase.sqlgenerator.AbstractSqlGeneratorTest;
 import liquibase.statement.AutoIncrementConstraint;
 import liquibase.statement.ForeignKeyConstraint;
@@ -39,7 +38,7 @@ public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTab
     }
 
     @Test
-    public void testWithColumnWithDefaultValue() {
+    public void testWithColumnWithDefaultValue() throws Exception {
         for (Database database : TestContext.getInstance().getAllDatabases()) {
             if (database instanceof OracleDatabase) {
                 CreateTableStatement statement = new CreateTableStatement(CATALOG_NAME, SCHEMA_NAME, TABLE_NAME);

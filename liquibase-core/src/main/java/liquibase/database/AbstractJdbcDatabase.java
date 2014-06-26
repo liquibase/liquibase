@@ -857,7 +857,12 @@ public abstract class AbstractJdbcDatabase implements Database {
     @Override
     public String getViewDefinition(CatalogAndSchema schema, final String viewName) throws DatabaseException {
         schema = schema.customize(this);
-        String definition = (String) ExecutorService.getInstance().getExecutor(this).query(new GetViewDefinitionStatement(schema.getCatalogName(), schema.getSchemaName(), viewName)).toObject(String.class);
+        String definition = null;
+        try {
+            definition = ExecutorService.getInstance().getExecutor(this).query(new GetViewDefinitionStatement(schema.getCatalogName(), schema.getSchemaName(), viewName)).toObject(String.class);
+        } catch (UnsupportedException e) {
+            throw new DatabaseException(e);
+        }
         if (definition == null) {
             return null;
         }

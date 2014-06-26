@@ -3,7 +3,6 @@ package liquibase.sqlgenerator.core;
 import liquibase.ExecutionEnvironment;
 import liquibase.action.Action;
 import liquibase.database.core.SybaseDatabase;
-import  liquibase.ExecutionEnvironment;
 import liquibase.statement.core.GetViewDefinitionStatement;
 import org.junit.Test;
 
@@ -12,7 +11,7 @@ import static org.junit.Assert.assertEquals;
 public class GetViewDefinitionGeneratorSybaseTest {
 
 	@Test
-	public void testGenerateSqlForDefaultSchema() {
+	public void testGenerateSqlForDefaultSchema() throws Exception {
 		GetViewDefinitionGeneratorSybase generator = new GetViewDefinitionGeneratorSybase();
 		GetViewDefinitionStatement statement = new GetViewDefinitionStatement(null, null, "view_name");
 		Action[] actions = generator.generateActions(statement, new ExecutionEnvironment(new SybaseDatabase()), null);
@@ -21,7 +20,7 @@ public class GetViewDefinitionGeneratorSybaseTest {
 	}
 	
 	@Test
-	public void testGenerateSqlForNamedSchema() {
+	public void testGenerateSqlForNamedSchema() throws Exception {
 		GetViewDefinitionGeneratorSybase generator = new GetViewDefinitionGeneratorSybase();
 		GetViewDefinitionStatement statement = new GetViewDefinitionStatement(null, "owner", "view_name");
 		Action[] actions = generator.generateActions(statement, new ExecutionEnvironment(new SybaseDatabase()), null);

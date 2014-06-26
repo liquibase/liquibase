@@ -3,6 +3,7 @@ package liquibase.sqlgenerator.core;
 import liquibase.CatalogAndSchema;
 import liquibase.action.Action;
 import liquibase.action.core.UnparsedSql;
+import liquibase.exception.UnsupportedException;
 import liquibase.statementlogic.StatementLogicChain;
 import liquibase.database.Database;
 import liquibase.database.core.*;
@@ -36,9 +37,9 @@ public class CreateViewGenerator extends AbstractSqlGenerator<CreateViewStatemen
     }
 
     @Override
-    public Action[] generateActions(CreateViewStatement statement, ExecutionEnvironment env, StatementLogicChain chain) {
+    public Action[] generateActions(CreateViewStatement statement, ExecutionEnvironment env, StatementLogicChain chain) throws UnsupportedException {
         Database database = env.getTargetDatabase();
-    	if (database instanceof InformixDatabase) {
+        if (database instanceof InformixDatabase) {
     		return new CreateViewGeneratorInformix().generateActions(statement, env, chain);
     	}
     	

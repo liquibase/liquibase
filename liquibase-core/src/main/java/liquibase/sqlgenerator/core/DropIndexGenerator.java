@@ -2,6 +2,7 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.action.Action;
 import liquibase.action.core.UnparsedSql;
+import liquibase.exception.UnsupportedException;
 import liquibase.statementlogic.StatementLogicChain;
 import liquibase.database.Database;
 import liquibase.database.core.*;
@@ -30,7 +31,7 @@ public class DropIndexGenerator extends AbstractSqlGenerator<DropIndexStatement>
     }
 
     @Override
-    public Action[] generateActions(DropIndexStatement statement, ExecutionEnvironment env, StatementLogicChain chain) {
+    public Action[] generateActions(DropIndexStatement statement, ExecutionEnvironment env, StatementLogicChain chain) throws UnsupportedException {
         Database database = env.getTargetDatabase();
 
         List<String> associatedWith = StringUtils.splitAndTrim(statement.getAssociatedWith(), ",");
@@ -53,7 +54,7 @@ public class DropIndexGenerator extends AbstractSqlGenerator<DropIndexStatement>
         } else if (database instanceof SybaseDatabase) {
             return new Action[]{new UnparsedSql("DROP INDEX " + statement.getTableName() + "." + statement.getIndexName())};
         } else if (database instanceof PostgresDatabase) {
-			return new Action[]{new UnparsedSql("DROP INDEX " + database.escapeIndexName(statement.getTableCatalogName(),schemaName, statement.getIndexName()))};
+            return new Action[]{new UnparsedSql("DROP INDEX " + database.escapeIndexName(statement.getTableCatalogName(),schemaName, statement.getIndexName()))};
 		}
 
         return new Action[] {new UnparsedSql("DROP INDEX " + database.escapeIndexName(statement.getTableCatalogName(), schemaName, statement.getIndexName())) };

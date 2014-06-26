@@ -2,6 +2,7 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.action.Action;
 import liquibase.action.core.UnparsedSql;
+import liquibase.exception.UnsupportedException;
 import liquibase.statementlogic.StatementLogicChain;
 import liquibase.database.Database;
 import liquibase.database.core.*;
@@ -33,11 +34,11 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
     }
 
     @Override
-    public Action[] generateActions(CreateTableStatement statement, ExecutionEnvironment env, StatementLogicChain chain) {
+    public Action[] generateActions(CreateTableStatement statement, ExecutionEnvironment env, StatementLogicChain chain) throws UnsupportedException {
         Database database = env.getTargetDatabase();
 
         if (database instanceof InformixDatabase) {
-    		AbstractSqlGenerator<CreateTableStatement> gen = new CreateTableGeneratorInformix();
+            AbstractSqlGenerator<CreateTableStatement> gen = new CreateTableGeneratorInformix();
     		return gen.generateActions(statement, env, chain);
     	}
 

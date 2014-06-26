@@ -1,6 +1,7 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.action.Action;
+import liquibase.exception.UnsupportedException;
 import liquibase.statementlogic.StatementLogicChain;
 import liquibase.exception.ValidationErrors;
 import  liquibase.ExecutionEnvironment;
@@ -16,7 +17,7 @@ public class UpdateDataChangeGenerator extends AbstractSqlGenerator<UpdateExecut
     }
 
     @Override
-    public Action[] generateActions(UpdateExecutablePreparedStatement statement, ExecutionEnvironment env, StatementLogicChain chain) {
+    public Action[] generateActions(UpdateExecutablePreparedStatement statement, ExecutionEnvironment env, StatementLogicChain chain) throws UnsupportedException {
         return new Action[0];
     }
 }

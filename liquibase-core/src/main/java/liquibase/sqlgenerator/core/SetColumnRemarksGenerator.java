@@ -2,6 +2,7 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.action.Action;
 import liquibase.action.core.UnparsedSql;
+import liquibase.exception.UnsupportedException;
 import liquibase.statementlogic.StatementLogicChain;
 import liquibase.database.Database;
 import liquibase.database.core.DB2Database;
@@ -34,11 +35,11 @@ public class SetColumnRemarksGenerator extends AbstractSqlGenerator<SetColumnRem
 	}
 
     @Override
-    public Action[] generateActions(SetColumnRemarksStatement statement, ExecutionEnvironment env, StatementLogicChain chain) {
+    public Action[] generateActions(SetColumnRemarksStatement statement, ExecutionEnvironment env, StatementLogicChain chain) throws UnsupportedException {
         Database database = env.getTargetDatabase();
 
         return new Action[] { new UnparsedSql("COMMENT ON COLUMN " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName())
-				+ "." + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " IS '"
+                + "." + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " IS '"
 				+ database.escapeStringForDatabase(statement.getRemarks()) + "'") };
 	}
 }

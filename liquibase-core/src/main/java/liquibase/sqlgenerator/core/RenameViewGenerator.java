@@ -2,6 +2,7 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.action.Action;
 import liquibase.action.core.UnparsedSql;
+import liquibase.exception.UnsupportedException;
 import liquibase.statementlogic.StatementLogicChain;
 import liquibase.database.Database;
 import liquibase.database.core.*;
@@ -36,7 +37,7 @@ public class RenameViewGenerator extends AbstractSqlGenerator<RenameViewStatemen
     }
 
     @Override
-    public Action[] generateActions(RenameViewStatement statement, ExecutionEnvironment env, StatementLogicChain chain) {
+    public Action[] generateActions(RenameViewStatement statement, ExecutionEnvironment env, StatementLogicChain chain) throws UnsupportedException {
         String sql;
         Database database = env.getTargetDatabase();
 

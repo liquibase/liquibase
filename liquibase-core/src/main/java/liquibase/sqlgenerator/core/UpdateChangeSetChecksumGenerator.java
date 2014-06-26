@@ -1,6 +1,7 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.action.Action;
+import liquibase.exception.UnsupportedException;
 import liquibase.statement.Statement;
 import liquibase.statementlogic.StatementLogicChain;
 import liquibase.statementlogic.StatementLogicFactory;
@@ -21,7 +22,7 @@ public class UpdateChangeSetChecksumGenerator extends AbstractSqlGenerator<Updat
     }
 
     @Override
-    public Action[] generateActions(UpdateChangeSetChecksumStatement statement, ExecutionEnvironment env, StatementLogicChain chain) {
+    public Action[] generateActions(UpdateChangeSetChecksumStatement statement, ExecutionEnvironment env, StatementLogicChain chain) throws UnsupportedException {
         ChangeSet changeSet = statement.getChangeSet();
         Database database = env.getTargetDatabase();
 

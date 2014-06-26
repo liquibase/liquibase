@@ -2,6 +2,7 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.action.Action;
 import liquibase.action.core.UnparsedSql;
+import liquibase.exception.UnsupportedException;
 import liquibase.statementlogic.StatementLogicChain;
 import liquibase.database.Database;
 import liquibase.datatype.DataTypeFactory;
@@ -20,7 +21,7 @@ public class DeleteGenerator extends AbstractSqlGenerator<DeleteStatement> {
     }
 
     @Override
-    public Action[] generateActions(DeleteStatement statement, ExecutionEnvironment env, StatementLogicChain chain) {
+    public Action[] generateActions(DeleteStatement statement, ExecutionEnvironment env, StatementLogicChain chain) throws UnsupportedException {
         Database database = env.getTargetDatabase();
 
         StringBuffer sql = new StringBuffer("DELETE FROM " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()));

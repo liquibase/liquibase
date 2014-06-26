@@ -2,6 +2,7 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.action.Action;
 import liquibase.action.core.UnparsedSql;
+import liquibase.exception.UnsupportedException;
 import liquibase.statementlogic.StatementLogicChain;
 import liquibase.database.Database;
 import liquibase.database.core.MSSQLDatabase;
@@ -32,11 +33,11 @@ public class AddUniqueConstraintGeneratorTDS extends AddUniqueConstraintGenerato
 	}
 
     @Override
-    public Action[] generateActions(AddUniqueConstraintStatement statement, ExecutionEnvironment env, StatementLogicChain chain) {
+    public Action[] generateActions(AddUniqueConstraintStatement statement, ExecutionEnvironment env, StatementLogicChain chain) throws UnsupportedException {
         Database database = env.getTargetDatabase();
 
         final String sqlTemplate = "ALTER TABLE %s ADD CONSTRAINT %s UNIQUE (%s)";
-		final String sqlNoContraintNameTemplate = "ALTER TABLE %s ADD UNIQUE (%s)";
+        final String sqlNoContraintNameTemplate = "ALTER TABLE %s ADD UNIQUE (%s)";
 		
 		if (statement.getConstraintName() == null) {
 			return new Action[] {

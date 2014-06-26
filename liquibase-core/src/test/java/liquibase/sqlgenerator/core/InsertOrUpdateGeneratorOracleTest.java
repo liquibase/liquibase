@@ -3,7 +3,6 @@ package liquibase.sqlgenerator.core;
 import liquibase.ExecutionEnvironment;
 import liquibase.action.Action;
 import liquibase.database.core.OracleDatabase;
-import  liquibase.ExecutionEnvironment;
 import liquibase.statement.core.InsertOrUpdateStatement;
 import org.junit.Test;
 
@@ -14,7 +13,7 @@ import static org.junit.Assert.assertEquals;
 public class InsertOrUpdateGeneratorOracleTest {
 
     @Test
-    public void ContainsInsertStatement(){
+    public void ContainsInsertStatement() throws Exception {
         OracleDatabase database = new OracleDatabase();
         InsertOrUpdateGeneratorOracle generator = new InsertOrUpdateGeneratorOracle();
         InsertOrUpdateStatement statement = new InsertOrUpdateStatement("mycatalog", "myschema","mytable","pk_col1");

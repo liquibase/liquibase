@@ -2,6 +2,7 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.action.Action;
 import liquibase.action.core.UnparsedSql;
+import liquibase.exception.UnsupportedException;
 import liquibase.statementlogic.StatementLogicChain;
 import liquibase.database.core.MySQLDatabase;
 import  liquibase.ExecutionEnvironment;
@@ -28,12 +29,12 @@ public class AddAutoIncrementGeneratorMySQL extends AddAutoIncrementGenerator {
     }
 
     @Override
-    public Action[] generateActions(AddAutoIncrementStatement statement, ExecutionEnvironment env, StatementLogicChain chain) {
+    public Action[] generateActions(AddAutoIncrementStatement statement, ExecutionEnvironment env, StatementLogicChain chain) throws UnsupportedException {
 
     	Action[] actions = super.generateActions(statement, env, chain);
 
     	if(statement.getStartWith() != null){
-	    	MySQLDatabase mysqlDatabase = (MySQLDatabase) env.getTargetDatabase();
+            MySQLDatabase mysqlDatabase = (MySQLDatabase) env.getTargetDatabase();
 	        String alterTableSql = "ALTER TABLE "
 	            + mysqlDatabase.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName())
 	            + " "

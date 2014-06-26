@@ -3,6 +3,7 @@ package liquibase.sqlgenerator.core;
 import liquibase.ExecutionEnvironment;
 import liquibase.action.Action;
 import liquibase.action.core.UnparsedSql;
+import liquibase.exception.UnsupportedException;
 import liquibase.statementlogic.StatementLogicChain;
 import liquibase.database.Database;
 import liquibase.datatype.DataTypeFactory;
@@ -64,7 +65,7 @@ public abstract class InsertOrUpdateGenerator extends AbstractSqlGenerator<Inser
         return where.toString();
     }
 
-    protected String getInsertStatement(InsertOrUpdateStatement insertOrUpdateStatement, ExecutionEnvironment env, StatementLogicChain chain) {
+    protected String getInsertStatement(InsertOrUpdateStatement insertOrUpdateStatement, ExecutionEnvironment env, StatementLogicChain chain) throws UnsupportedException {
         StringBuffer insertBuffer = new StringBuffer();
         InsertGenerator insert = new InsertGenerator();
         Action[] insertSql = insert.generateActions(insertOrUpdateStatement, env, chain);
@@ -120,7 +121,7 @@ public abstract class InsertOrUpdateGenerator extends AbstractSqlGenerator<Inser
     }
 
     @Override
-    public Action[] generateActions(InsertOrUpdateStatement statement, ExecutionEnvironment env, StatementLogicChain chain) {
+    public Action[] generateActions(InsertOrUpdateStatement statement, ExecutionEnvironment env, StatementLogicChain chain) throws UnsupportedException {
         StringBuffer completeSql = new StringBuffer();
         String whereClause = getWhereClause(statement, env);
 
@@ -129,7 +130,7 @@ public abstract class InsertOrUpdateGenerator extends AbstractSqlGenerator<Inser
         completeSql.append(getInsertStatement(statement, env, chain));
 
         try {
-        	
+
             String updateStatement = getUpdateStatement(statement, env,whereClause,chain);
             
             completeSql.append(getElse(env));

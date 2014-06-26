@@ -1,6 +1,7 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.action.Action;
+import liquibase.exception.UnsupportedException;
 import liquibase.statement.Statement;
 import liquibase.statementlogic.StatementLogicChain;
 import liquibase.statementlogic.StatementLogicFactory;
@@ -33,7 +34,7 @@ public class MarkChangeSetRanGenerator extends AbstractSqlGenerator<MarkChangeSe
     }
 
     @Override
-    public Action[] generateActions(MarkChangeSetRanStatement statement, ExecutionEnvironment env, StatementLogicChain chain) {
+    public Action[] generateActions(MarkChangeSetRanStatement statement, ExecutionEnvironment env, StatementLogicChain chain) throws UnsupportedException {
         Database database = env.getTargetDatabase();
         String dateValue = database.getCurrentDateTimeFunction();
 

@@ -5,6 +5,7 @@ import liquibase.ExecutionEnvironment;
 import liquibase.action.Action;
 import liquibase.action.MetaDataQueryAction;
 import liquibase.action.QueryAction;
+import liquibase.exception.UnsupportedException;
 import liquibase.statement.Statement;
 import liquibase.statementlogic.StatementLogicChain;
 import liquibase.statementlogic.StatementLogicFactory;
@@ -166,15 +167,19 @@ public class SnapshotGeneratorFactory {
         List<Action> actions = new ArrayList<Action>();
         for (Statement statement : statements) {
             if (StatementLogicFactory.getInstance().supports(statement, executionEnvironment)) {
-                Action[] actionArray = StatementLogicFactory.getInstance().generateActions(statement, new ExecutionEnvironment(database));
-                if (actionArray == null || actionArray.length == 0) {
-                    continue;
-                }
-                if (actionArray.length == 1) {
-                    actions.add(actionArray[0]);
-                }
-                if (actionArray.length > 1) {
-                    throw new UnexpectedLiquibaseException("Too many actions generated from "+statement);
+                try {
+                    Action[] actionArray = StatementLogicFactory.getInstance().generateActions(statement, new ExecutionEnvironment(database));
+                    if (actionArray == null || actionArray.length == 0) {
+                        continue;
+                    }
+                    if (actionArray.length == 1) {
+                        actions.add(actionArray[0]);
+                    }
+                    if (actionArray.length > 1) {
+                        throw new UnexpectedLiquibaseException("Too many actions generated from "+statement);
+                    }
+                } catch (UnsupportedException e) {
+                    throw new DatabaseException(e);
                 }
             }
         }

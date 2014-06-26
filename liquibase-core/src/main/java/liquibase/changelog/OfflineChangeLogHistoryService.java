@@ -6,6 +6,7 @@ import liquibase.database.OfflineConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.exception.UnsupportedException;
 import liquibase.executor.ExecutorService;
 import liquibase.servicelocator.LiquibaseService;
 import liquibase.statement.core.CreateDatabaseChangeLogTableStatement;
@@ -123,7 +124,11 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
     @Override
     protected void replaceChecksum(final ChangeSet changeSet) throws DatabaseException {
         if (isExecuteAgainstDatabase()) {
-            ExecutorService.getInstance().getExecutor(getDatabase()).execute(new UpdateChangeSetChecksumStatement(changeSet));
+            try {
+                ExecutorService.getInstance().getExecutor(getDatabase()).execute(new UpdateChangeSetChecksumStatement(changeSet));
+            } catch (UnsupportedException e) {
+                throw new DatabaseException(e);
+            }
         }
         replaceChangeSet(changeSet, new ReplaceChangeSetLogic() {
             @Override
@@ -281,7 +286,11 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
     @Override
     public void setExecType(final ChangeSet changeSet, final ChangeSet.ExecType execType) throws DatabaseException {
         if (isExecuteAgainstDatabase()) {
-            ExecutorService.getInstance().getExecutor(getDatabase()).execute(new MarkChangeSetRanStatement(changeSet, execType));
+            try {
+                ExecutorService.getInstance().getExecutor(getDatabase()).execute(new MarkChangeSetRanStatement(changeSet, execType));
+            } catch (liquibase.exception.UnsupportedException e) {
+                throw new DatabaseException(e);
+            }
             getDatabase().commit();
         }
 
@@ -305,7 +314,11 @@ public class OfflineChangeLogHistoryService extends AbstractChangeLogHistoryServ
     @Override
     public void removeFromHistory(ChangeSet changeSet) throws DatabaseException {
         if (isExecuteAgainstDatabase()) {
-            ExecutorService.getInstance().getExecutor(getDatabase()).execute(new RemoveChangeSetRanStatusStatement(changeSet));
+            try {
+                ExecutorService.getInstance().getExecutor(getDatabase()).execute(new RemoveChangeSetRanStatusStatement(changeSet));
+            } catch (liquibase.exception.UnsupportedException e) {
+                throw new DatabaseException(e);
+            }
             getDatabase().commit();
         }
 

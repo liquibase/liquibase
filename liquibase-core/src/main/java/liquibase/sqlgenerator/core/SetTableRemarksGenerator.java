@@ -2,6 +2,7 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.action.Action;
 import liquibase.action.core.UnparsedSql;
+import liquibase.exception.UnsupportedException;
 import liquibase.statementlogic.StatementLogicChain;
 import liquibase.database.Database;
 import liquibase.database.core.DB2Database;
@@ -31,9 +32,9 @@ public class SetTableRemarksGenerator extends AbstractSqlGenerator<SetTableRemar
 	}
 
     @Override
-    public Action[] generateActions(SetTableRemarksStatement statement, ExecutionEnvironment env, StatementLogicChain chain) {
+    public Action[] generateActions(SetTableRemarksStatement statement, ExecutionEnvironment env, StatementLogicChain chain) throws UnsupportedException {
         Database database = env.getTargetDatabase();
-		String sql;
+        String sql;
 		String remarks = database.escapeStringForDatabase(statement.getRemarks());
 		if (database instanceof MySQLDatabase) {
 			sql = "ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " COMMENT = '" + remarks

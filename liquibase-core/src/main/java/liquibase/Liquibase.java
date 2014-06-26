@@ -13,10 +13,7 @@ import liquibase.diff.DiffGeneratorFactory;
 import liquibase.diff.DiffResult;
 import liquibase.diff.compare.CompareControl;
 import liquibase.diff.output.changelog.DiffToChangeLog;
-import liquibase.exception.DatabaseException;
-import liquibase.exception.LiquibaseException;
-import liquibase.exception.LockException;
-import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.exception.*;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.executor.LoggingExecutor;
@@ -325,7 +322,7 @@ public class Liquibase {
         ExecutorService.getInstance().setExecutor(database, oldTemplate);
     }
 
-    private void outputHeader(String message) throws DatabaseException {
+    private void outputHeader(String message) throws DatabaseException, UnsupportedException {
         Executor executor = ExecutorService.getInstance().getExecutor(database);
         executor.comment("*********************************************************************");
         executor.comment(message);

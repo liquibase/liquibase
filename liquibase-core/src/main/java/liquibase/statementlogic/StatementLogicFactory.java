@@ -5,9 +5,8 @@ import liquibase.action.Action;
 import liquibase.action.visitor.ActionVisitor;
 import liquibase.change.Change;
 import liquibase.database.Database;
-import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.exception.ValidationErrors;
-import liquibase.exception.Warnings;
+import liquibase.exception.*;
+import liquibase.exception.UnsupportedException;
 import liquibase.servicelocator.ServiceLocator;
 import liquibase.statement.Statement;
 
@@ -20,9 +19,6 @@ import java.util.*;
  * StatementLogicFactory is a singleton registry of StatementLogic instances, used to convert {@link liquibase.statement.Statement} instances to {@link liquibase.action.Action} instances.
  * <p>
  * The Statement to Action conversion is designed to be extensible, with StatementLogic implementations being found dynamically and able to control their priority and work together via a {@link liquibase.statementlogic.StatementLogicChain}.
- * <p>
- * Use the {@link #register(StatementLogic)} method to add custom StatementLogic implementations,
- * and the getBestGenerator() method to retrieve the StatementLogic that should be used for a given SqlStatement.
  */
 public class StatementLogicFactory {
 
@@ -66,19 +62,24 @@ public class StatementLogicFactory {
         instance = new StatementLogicFactory();
     }
 
-
     /**
      * Register a new StatementLogic implementation. Will be included in future calls to {@link #generateActions(liquibase.statement.Statement, liquibase.ExecutionEnvironment)}
      */
     public void register(StatementLogic logic) {
+        if (logic == null) {
+            return;
+        }
         registry.add(logic);
     }
 
     /**
      * Unregister a StatementLogic implementation. Will no longer be included in future calls to {@link #generateActions(liquibase.statement.Statement, liquibase.ExecutionEnvironment)}
      */
-    public void unregister(StatementLogic generator) {
-        registry.remove(generator);
+    public void unregister(StatementLogic logic) {
+        if (logic == null) {
+            return;
+        }
+        registry.remove(logic);
     }
 
     /**
@@ -86,46 +87,54 @@ public class StatementLogicFactory {
      *
      * @see #unregister(StatementLogic)
      */
-    public void unregister(Class generatorClass) {
-        StatementLogic toRemove = null;
-        for (StatementLogic existingGenerator : registry) {
-            if (existingGenerator.getClass().equals(generatorClass)) {
-                toRemove = existingGenerator;
-            }
+    public void unregister(Class<? extends StatementLogic> logicClass) {
+        if (logicClass == null) {
+            return;
         }
 
-        unregister(toRemove);
+        for (StatementLogic existingLogic : registry) {
+            if (existingLogic.getClass().equals(logicClass)) {
+                unregister(existingLogic);
+                return;
+            }
+        }
     }
 
-
     /**
-     * Returns an unmodifiable collection of all the StatementLogic instances in this factory.
+     * Returns an unmodifiable collection of all the StatementLogic instances in this factory. Mainly used for testing.
      */
     protected Collection<StatementLogic> getRegistry() {
         return Collections.unmodifiableCollection(registry);
     }
 
     /**
+     *  Clears all entries from the registry. Mainly used for testing.
+     */
+    public void clearRegistry() {
+        registry.clear();
+    }
+
+    /**
      * Returns the StatementLogic implementations that support the given statement. SortedSet is ordered by execution order.
      */
     protected SortedSet<StatementLogic> getStatementLogic(Statement statement, ExecutionEnvironment env) {
-        SortedSet<StatementLogic> validGenerators = new TreeSet<StatementLogic>(new StatementLogicComparator());
+        SortedSet<StatementLogic> validLogic = new TreeSet<StatementLogic>(new StatementLogicComparator());
 
-        for (StatementLogic generator : getRegistry()) {
-            Class clazz = generator.getClass();
+        for (StatementLogic logic : getRegistry()) {
+            Class clazz = logic.getClass();
             Type classType = null;
             while (clazz != null) {
                 if (classType instanceof ParameterizedType) {
-                    checkType(classType, statement, generator, env, validGenerators);
+                    checkType(classType, statement, logic, env, validLogic);
                 }
 
                 for (Type type : getGenericInterfaces(clazz)) {
                     if (type instanceof ParameterizedType) {
-                        checkType(type, statement, generator, env, validGenerators);
+                        checkType(type, statement, logic, env, validLogic);
                     } else if (isTypeEqual(type, StatementLogic.class)) {
                         //noinspection unchecked
-                        if (generator.supports(statement, env)) {
-                            validGenerators.add(generator);
+                        if (logic.supports(statement, env)) {
+                            validLogic.add(logic);
                         }
                     }
                 }
@@ -134,7 +143,7 @@ public class StatementLogicFactory {
             }
         }
 
-        return validGenerators;
+        return validLogic;
     }
 
     private Type[] getGenericInterfaces(Class<?> clazz) {
@@ -164,7 +173,7 @@ public class StatementLogicFactory {
         return aType.equals(aClass);
     }
 
-    private void checkType(Type type, Statement statement, StatementLogic generator, ExecutionEnvironment env, Collection<StatementLogic> validGenerators) {
+    private void checkType(Type type, Statement statement, StatementLogic logic, ExecutionEnvironment env, Collection<StatementLogic> validLogic) {
         for (Type typeClass : ((ParameterizedType) type).getActualTypeArguments()) {
             if (typeClass instanceof TypeVariable) {
                 typeClass = ((TypeVariable) typeClass).getBounds()[0];
@@ -175,8 +184,8 @@ public class StatementLogicFactory {
             }
 
             if (((Class) typeClass).isAssignableFrom(statement.getClass())) {
-                if (generator.supports(statement, env)) {
-                    validGenerators.add(generator);
+                if (logic.supports(statement, env)) {
+                    validLogic.add(logic);
                 }
             }
         }
@@ -186,7 +195,7 @@ public class StatementLogicFactory {
     /**
      * Create a StatementLogicChain for the given statement. Return null if there are no StatementLogic implementations that support the Statement.
      */
-    protected StatementLogicChain createGeneratorChain(Statement statement, ExecutionEnvironment env) {
+    protected StatementLogicChain createStatementLogicChain(Statement statement, ExecutionEnvironment env) {
         SortedSet<StatementLogic> statementLogic = getStatementLogic(statement, env);
         if (statementLogic == null || statementLogic.size() == 0) {
             return null;
@@ -197,8 +206,9 @@ public class StatementLogicFactory {
 
     /**
      * Convenience method to generate Actions based on the passed Change.
+     * @throws liquibase.exception.UnsupportedException if the change is not supported for the ExecutionEnvironment
      */
-    public Action[] generateActions(Change change, ExecutionEnvironment env) {
+    public Action[] generateActions(Change change, ExecutionEnvironment env) throws UnsupportedException {
         Statement[] statements = change.generateStatements(env);
         if (statements == null) {
             return new Action[0];
@@ -209,11 +219,15 @@ public class StatementLogicFactory {
 
     /**
      * Convenience method to generate a single array of Actions based on the array of Statements passed.
+     *
+     * @throws liquibase.exception.UnsupportedException if any of the statements are not supported for the ExecutionEnvironment
      */
-    public Action[] generateActions(Statement[] statements, ExecutionEnvironment env) {
+    public Action[] generateActions(Statement[] statements, ExecutionEnvironment env) throws UnsupportedException {
         List<Action> returnList = new ArrayList<Action>();
-        for (Statement statement : statements) {
-            returnList.addAll(Arrays.asList(StatementLogicFactory.getInstance().generateActions(statement, env)));
+        if (statements != null) {
+            for (Statement statement : statements) {
+                returnList.addAll(Arrays.asList(StatementLogicFactory.getInstance().generateActions(statement, env)));
+            }
         }
 
         return returnList.toArray(new Action[returnList.size()]);
@@ -221,21 +235,26 @@ public class StatementLogicFactory {
 
     /**
      * Converts the given Statement to Action instances based on the StatementLogic implementations configured in this factory.
+     *
+     * @throws liquibase.exception.UnsupportedException if the statement is not supported for the ExecutionEnvironment
      */
-    public Action[] generateActions(Statement statement, ExecutionEnvironment env) {
+    public Action[] generateActions(Statement statement, ExecutionEnvironment env) throws UnsupportedException {
+        if (statement == null) {
+            return new Action[0];
+        }
         Database database = env.getTargetDatabase();
         if (!supports(statement, env)) {
-            throw new UnexpectedLiquibaseException("Unsupported database for "+statement.toString()+": "+database.getShortName());
+            throw new UnsupportedException("Unsupported database for "+statement.toString()+": "+database.getShortName());
         }
         ValidationErrors validate = validate(statement, env);
         if (validate.hasErrors()) {
-            throw new UnexpectedLiquibaseException("Validation failed: "+validate.toString());
+            throw new UnsupportedException("Validation failed: "+validate.toString());
         }
-        StatementLogicChain generatorChain = createGeneratorChain(statement, env);
-        if (generatorChain == null) {
-            throw new IllegalStateException("Cannot find "+statement.getClass().getName()+" generators for "+database.toString());
+        StatementLogicChain statementLogicChain = createStatementLogicChain(statement, env);
+        if (statementLogicChain == null) {
+            throw new UnsupportedException("Cannot find "+statement.getClass().getName()+" StatementLogic implementation(s) for "+database.toString());
         }
-        Action[] actions = generatorChain.generateActions(statement, env);
+        Action[] actions = statementLogicChain.generateActions(statement, env);
         if (actions == null) {
             return new Action[0];
         }
@@ -255,8 +274,12 @@ public class StatementLogicFactory {
 
     /**
      * Returns true if the given statement can be converted to Actions in the given ExecutionEnvironment.
+     * A null statement returns true.
      */
     public boolean supports(Statement statement, ExecutionEnvironment env) {
+        if (statement == null) {
+            return true;
+        }
         return getStatementLogic(statement, env).size() > 0;
     }
 
@@ -267,11 +290,11 @@ public class StatementLogicFactory {
      */
     public ValidationErrors validate(Statement statement, ExecutionEnvironment env) {
         //noinspection unchecked
-        StatementLogicChain generatorChain = createGeneratorChain(statement, env);
-        if (generatorChain == null) {
-            throw new UnexpectedLiquibaseException("Unable to create generator chain for "+statement.getClass().getName()+" on "+env.getTargetDatabase().getShortName());
+        StatementLogicChain statementLogicChain = createStatementLogicChain(statement, env);
+        if (statementLogicChain == null) {
+            throw new UnexpectedLiquibaseException("Unable to create statement logic chain for "+statement.getClass().getName()+" on "+env.getTargetDatabase().getShortName());
         }
-        return generatorChain.validate(statement, env);
+        return statementLogicChain.validate(statement, env);
     }
 
     /**
@@ -281,7 +304,7 @@ public class StatementLogicFactory {
      */
     public Warnings warn(Statement statement, ExecutionEnvironment env) {
         //noinspection unchecked
-        return createGeneratorChain(statement, env).warn(statement, env);
+        return createStatementLogicChain(statement, env).warn(statement, env);
     }
 
     /**
@@ -291,8 +314,8 @@ public class StatementLogicFactory {
      * If a logic implementation returns different Action objects depending on the time of day, this should return true.
      */
     public boolean generateActionsIsVolatile(Statement statement, ExecutionEnvironment env) {
-        for (StatementLogic generator : getStatementLogic(statement, env)) {
-            if (generator.generateActionsIsVolatile(env)) {
+        for (StatementLogic logic : getStatementLogic(statement, env)) {
+            if (logic.generateActionsIsVolatile(env)) {
                 return true;
             }
         }

@@ -2,8 +2,9 @@ package liquibase.snapshot.jvm
 
 import liquibase.database.Database
 import liquibase.exception.DatabaseException
+import liquibase.exception.UnsupportedException
 import liquibase.sdk.database.MockDatabase
-import liquibase.snapshot.MockDatabaseSnapshot
+import liquibase.snapshot.InvalidExampleException
 import liquibase.structure.core.Catalog
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -24,7 +25,8 @@ class CatalogSnapshotGeneratorTest extends Specification {
 
         def database = new MockDatabase()
         database.setDefaultCatalogName("def_catalog")
-        Catalog snapshot = (Catalog) generator.snapshotObject(example, new MockDatabaseSnapshot(null, null, database, null))
+        Catalog snapshot = (Catalog)
+        generator.snapshotObject(example, new liquibase.snapshot.MockDatabaseSnapshot(null, null, database, null))
 
         then:
         snapshot.getName() == expectedName

@@ -5,6 +5,7 @@ import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.exception.UnsupportedException;
 import liquibase.executor.ExecutorService;
 import liquibase.executor.Row;
 import liquibase.snapshot.DatabaseSnapshot;
@@ -16,7 +17,6 @@ import liquibase.structure.core.Sequence;
 
 import java.math.BigInteger;
 import java.util.List;
-import java.util.Map;
 
 public class SequenceSnapshotGenerator extends JdbcSnapshotGenerator {
 
@@ -25,7 +25,7 @@ public class SequenceSnapshotGenerator extends JdbcSnapshotGenerator {
     }
 
     @Override
-    protected void addTo(DatabaseObject foundObject, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException {
+    protected void addTo(DatabaseObject foundObject, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException, UnsupportedException {
         if (!snapshot.getDatabase().supportsSequences()) {
             return;
         }
@@ -48,7 +48,7 @@ public class SequenceSnapshotGenerator extends JdbcSnapshotGenerator {
     }
 
     @Override
-    protected DatabaseObject snapshotObject(DatabaseObject example, DatabaseSnapshot snapshot) throws DatabaseException {
+    protected DatabaseObject snapshotObject(DatabaseObject example, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException, UnsupportedException {
         Database database = snapshot.getDatabase();
         if (!database.supportsSequences()) {
             return null;

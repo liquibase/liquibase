@@ -2,6 +2,7 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.action.Action;
 import liquibase.action.core.UnparsedSql;
+import liquibase.exception.UnsupportedException;
 import liquibase.statementlogic.StatementLogicChain;
 import liquibase.exception.ValidationErrors;
 import  liquibase.ExecutionEnvironment;
@@ -31,7 +32,7 @@ public class TableRowCountGenerator extends AbstractSqlGenerator<TableRowCountSt
     }
 
     @Override
-    public Action[] generateActions(TableRowCountStatement statement, ExecutionEnvironment env, StatementLogicChain chain) {
+    public Action[] generateActions(TableRowCountStatement statement, ExecutionEnvironment env, StatementLogicChain chain) throws UnsupportedException {
         return new Action[] { new UnparsedSql(generateCountSql(statement, env)) };
     }
 

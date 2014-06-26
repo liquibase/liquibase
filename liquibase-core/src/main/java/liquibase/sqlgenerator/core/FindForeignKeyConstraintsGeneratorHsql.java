@@ -2,6 +2,7 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.action.Action;
 import liquibase.action.core.UnparsedSql;
+import liquibase.exception.UnsupportedException;
 import liquibase.statementlogic.StatementLogicChain;
 import liquibase.database.core.HsqlDatabase;
 import liquibase.exception.ValidationErrors;
@@ -31,8 +32,8 @@ public class FindForeignKeyConstraintsGeneratorHsql extends AbstractSqlGenerator
 	}
 
     @Override
-    public Action[] generateActions(FindForeignKeyConstraintsStatement statement, ExecutionEnvironment env, StatementLogicChain chain) {
-		StringBuilder sb = new StringBuilder();
+    public Action[] generateActions(FindForeignKeyConstraintsStatement statement, ExecutionEnvironment env, StatementLogicChain chain) throws UnsupportedException {
+        StringBuilder sb = new StringBuilder();
 
 		sb.append("SELECT ");
 		sb.append("FKTABLE_NAME as ").append(FindForeignKeyConstraintsStatement.RESULT_COLUMN_BASE_TABLE_NAME).append(", ");

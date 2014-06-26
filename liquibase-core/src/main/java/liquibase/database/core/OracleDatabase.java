@@ -295,6 +295,8 @@ public class OracleDatabase extends AbstractJdbcDatabase {
                     userDefinedTypes.addAll(ExecutorService.getInstance().getExecutor(this).query(new RawSqlStatement("SELECT TYPE_NAME FROM USER_TYPES")).toList(String.class));
                 } catch (DatabaseException e) {
                     //ignore error
+                } catch (liquibase.exception.UnsupportedException e) {
+                  //ignore the error
                 }
             }
         }

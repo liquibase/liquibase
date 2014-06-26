@@ -1,6 +1,7 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.action.Action;
+import liquibase.exception.UnsupportedException;
 import liquibase.statementlogic.StatementLogicChain;
 import liquibase.statementlogic.StatementLogicFactory;
 import liquibase.database.Database;
@@ -17,9 +18,9 @@ public class UnlockDatabaseChangeLogGenerator extends AbstractSqlGenerator<Unloc
     }
 
     @Override
-    public Action[] generateActions(UnlockDatabaseChangeLogStatement statement, ExecutionEnvironment env, StatementLogicChain chain) {
+    public Action[] generateActions(UnlockDatabaseChangeLogStatement statement, ExecutionEnvironment env, StatementLogicChain chain) throws UnsupportedException {
         Database database = env.getTargetDatabase();
-    	String liquibaseSchema = database.getLiquibaseSchemaName();
+        String liquibaseSchema = database.getLiquibaseSchemaName();
 
         UpdateStatement releaseStatement = new UpdateStatement(database.getLiquibaseCatalogName(), liquibaseSchema, database.getDatabaseChangeLogLockTableName());
         releaseStatement.addNewColumnValue("LOCKED", false);

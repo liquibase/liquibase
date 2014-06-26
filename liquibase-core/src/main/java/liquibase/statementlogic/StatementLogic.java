@@ -2,6 +2,7 @@ package liquibase.statementlogic;
 
 import liquibase.ExecutionEnvironment;
 import liquibase.action.Action;
+import liquibase.exception.UnsupportedException;
 import liquibase.exception.ValidationErrors;
 import liquibase.exception.Warnings;
 import liquibase.servicelocator.PrioritizedService;
@@ -53,8 +54,10 @@ public interface StatementLogic<StatementType extends Statement> extends Priorit
      * This method uses a chain pattern to allow multiple StatementLogic implementations to work together. If this implementation wants to modify add an additional Action, it should call {@link liquibase.statementlogic.StatementLogicChain#generateActions(liquibase.statement.Statement, liquibase.ExecutionEnvironment)} and then modify the returned result.
      * If this method wants to block the lower-priority methods from ever executing, do not call chain.generateActions.
      * If you want to continue the chain logic but selectively block a lower-priority StatementLogic from executing, call {@link liquibase.statementlogic.StatementLogicChain#block(Class)}
+     *
+     * @throws liquibase.exception.UnsupportedException if the statement and/or environment is not supported.
      */
-    public Action[] generateActions(StatementType statement, ExecutionEnvironment env, StatementLogicChain chain);
+    public Action[] generateActions(StatementType statement, ExecutionEnvironment env, StatementLogicChain chain) throws UnsupportedException;
 
     /**
      * Returns true if this StatementLogic implementation <b>may</b> require interacting with the outside environment in {@link #generateActions(liquibase.statement.Statement, liquibase.ExecutionEnvironment, StatementLogicChain)}.

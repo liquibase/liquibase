@@ -3,6 +3,7 @@ package liquibase.statementlogic.core;
 import liquibase.CatalogAndSchema;
 import liquibase.action.Action;
 import liquibase.action.core.TablesJdbcMetaDataQueryAction;
+import liquibase.exception.UnsupportedException;
 import liquibase.statementlogic.AbstractStatementLogic;
 import liquibase.statementlogic.StatementLogicChain;
 import liquibase.database.AbstractJdbcDatabase;
@@ -44,7 +45,7 @@ public class TablesMetaDataQueryGenerator extends AbstractStatementLogic<MetaDat
     }
 
     @Override
-    public Action[] generateActions(final MetaDataQueryStatement statement, ExecutionEnvironment env, StatementLogicChain chain) {
+    public Action[] generateActions(final MetaDataQueryStatement statement, ExecutionEnvironment env, StatementLogicChain chain) throws UnsupportedException {
         Database database = env.getTargetDatabase();
         if (database.getConnection() == null || database.getConnection() instanceof OfflineConnection) {
             throw new UnexpectedLiquibaseException("Cannot read table metadata for an offline database");

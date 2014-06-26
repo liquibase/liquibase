@@ -3,6 +3,7 @@ package liquibase.executor;
 import liquibase.ExecutionEnvironment;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
+import liquibase.exception.UnsupportedException;
 import liquibase.statement.Statement;
 
 /**
@@ -19,7 +20,7 @@ public abstract class AbstractExecutor implements Executor {
      * Default implementation delegates to {@link #query(liquibase.statement.Statement, liquibase.ExecutionEnvironment)}
      */
     @Override
-    public QueryResult query(Statement sql) throws DatabaseException {
+    public QueryResult query(Statement sql) throws DatabaseException, UnsupportedException {
         return query(sql, createDefaultExecutionOptions());
     }
 
@@ -27,7 +28,7 @@ public abstract class AbstractExecutor implements Executor {
      * Default implementation delegates to {@link #execute(liquibase.statement.Statement, liquibase.ExecutionEnvironment)}
      */
     @Override
-    public ExecuteResult execute(Statement sql) throws DatabaseException {
+    public ExecuteResult execute(Statement sql) throws DatabaseException, UnsupportedException {
         return execute(sql, createDefaultExecutionOptions());
     }
 
@@ -35,7 +36,7 @@ public abstract class AbstractExecutor implements Executor {
      * Default implementation delegates to {@link #update(liquibase.statement.Statement, liquibase.ExecutionEnvironment)}
      */
     @Override
-    public UpdateResult update(Statement sql) throws DatabaseException {
+    public UpdateResult update(Statement sql) throws DatabaseException, UnsupportedException {
         return update(sql, createDefaultExecutionOptions());
     }
 

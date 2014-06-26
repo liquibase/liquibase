@@ -2,6 +2,7 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.action.Action;
 import liquibase.action.core.UnparsedSql;
+import liquibase.exception.UnsupportedException;
 import liquibase.statementlogic.StatementLogicChain;
 import liquibase.database.core.OracleDatabase;
 import liquibase.exception.ValidationErrors;
@@ -18,7 +19,7 @@ public class StoredProcedureGenerator extends AbstractSqlGenerator<StoredProcedu
     }
 
     @Override
-    public Action[] generateActions(StoredProcedureStatement statement, ExecutionEnvironment env, StatementLogicChain chain) {
+    public Action[] generateActions(StoredProcedureStatement statement, ExecutionEnvironment env, StatementLogicChain chain) throws UnsupportedException {
         StringBuilder string = new StringBuilder();
         string.append("exec ").append(statement.getProcedureName()).append("(");
         for (String param : statement.getParameters()) {

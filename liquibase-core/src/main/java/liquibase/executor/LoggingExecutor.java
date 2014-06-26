@@ -2,6 +2,7 @@ package liquibase.executor;
 
 import liquibase.ExecutionEnvironment;
 import liquibase.action.Action;
+import liquibase.exception.UnsupportedException;
 import liquibase.statement.Statement;
 import liquibase.statementlogic.StatementLogicFactory;
 import liquibase.database.Database;
@@ -33,13 +34,13 @@ public class LoggingExecutor extends AbstractExecutor {
     }
 
     @Override
-    public ExecuteResult execute(Statement sql, ExecutionEnvironment env) throws DatabaseException {
+    public ExecuteResult execute(Statement sql, ExecutionEnvironment env) throws DatabaseException, UnsupportedException {
         outputStatement(sql, env);
         return new ExecuteResult();
     }
 
     @Override
-    public UpdateResult update(Statement sql, ExecutionEnvironment env) throws DatabaseException {
+    public UpdateResult update(Statement sql, ExecutionEnvironment env) throws DatabaseException, UnsupportedException {
         if (sql instanceof LockDatabaseChangeLogStatement) {
             return new UpdateResult(1);
         } else if (sql instanceof UnlockDatabaseChangeLogStatement) {
@@ -79,11 +80,13 @@ public class LoggingExecutor extends AbstractExecutor {
             }
         } catch (IOException e) {
             throw new DatabaseException(e);
+        } catch (UnsupportedException e) {
+            throw new DatabaseException(e);
         }
     }
 
     @Override
-    public QueryResult query(Statement sql, ExecutionEnvironment env) throws DatabaseException {
+    public QueryResult query(Statement sql, ExecutionEnvironment env) throws DatabaseException, UnsupportedException {
         if (sql instanceof SelectFromDatabaseChangeLogLockStatement) {
             return new QueryResult(Boolean.FALSE);
         }

@@ -2,6 +2,7 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.action.Action;
 import liquibase.action.core.UnparsedSql;
+import liquibase.exception.UnsupportedException;
 import liquibase.statementlogic.StatementLogicChain;
 import liquibase.database.core.InformixDatabase;
 import  liquibase.ExecutionEnvironment;
@@ -19,10 +20,10 @@ public class GetViewDefinitionGeneratorInformix extends GetViewDefinitionGenerat
     }
 
     @Override
-    public Action[] generateActions(GetViewDefinitionStatement statement, ExecutionEnvironment env, StatementLogicChain chain) {
+    public Action[] generateActions(GetViewDefinitionStatement statement, ExecutionEnvironment env, StatementLogicChain chain) throws UnsupportedException {
         // TODO owner is schemaName ?
         // view definition is distributed over multiple rows, each 64 chars
-    	// see InformixDatabase.getViewDefinition
+        // see InformixDatabase.getViewDefinition
         return new Action[]{
                 new UnparsedSql("select v.viewtext from sysviews v, systables t where t.tabname = '" + statement.getViewName() + "' and v.tabid = t.tabid and t.tabtype = 'V' order by v.seqno")
         };

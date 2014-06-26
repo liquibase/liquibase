@@ -57,6 +57,8 @@ public class SqlPrecondition extends AbstractPrecondition {
 
         } catch (DatabaseException e) {
             throw new PreconditionErrorException(e, changeLog, this);
+        } catch (UnsupportedException e) {
+            throw new PreconditionErrorException(e, changeLog, this);
         }
     }
 

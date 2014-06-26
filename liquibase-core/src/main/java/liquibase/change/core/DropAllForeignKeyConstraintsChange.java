@@ -9,6 +9,7 @@ import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import  liquibase.ExecutionEnvironment;
+import liquibase.exception.UnsupportedException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.executor.Row;
@@ -112,6 +113,8 @@ public class DropAllForeignKeyConstraintsChange extends AbstractChange {
 
         } catch (DatabaseException e) {
             throw new UnexpectedLiquibaseException("Failed to find foreign keys for table: " + getBaseTableName(), e);
+        } catch (UnsupportedException e) {
+            throw new UnexpectedLiquibaseException(e);
         }
     }
 

@@ -1,6 +1,7 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.action.Action;
+import liquibase.exception.UnsupportedException;
 import liquibase.statement.Statement;
 import liquibase.statementlogic.StatementLogicChain;
 import liquibase.statementlogic.StatementLogicFactory;
@@ -54,7 +55,7 @@ public class AddAutoIncrementGeneratorSQLite extends AddAutoIncrementGenerator {
     }
 
     @Override
-    public Action[] generateActions(final AddAutoIncrementStatement statement, ExecutionEnvironment env, StatementLogicChain chain) {
+    public Action[] generateActions(final AddAutoIncrementStatement statement, ExecutionEnvironment env, StatementLogicChain chain) throws UnsupportedException {
         List<Action> statements = new ArrayList<Action>();
 
         // define alter table logic

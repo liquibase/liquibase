@@ -3,8 +3,9 @@ package liquibase.snapshot.jvm
 import liquibase.CatalogAndSchema
 import liquibase.database.Database
 import liquibase.exception.DatabaseException
+import liquibase.exception.UnsupportedException
 import liquibase.sdk.database.MockDatabase
-import liquibase.snapshot.MockDatabaseSnapshot
+import liquibase.snapshot.InvalidExampleException
 import liquibase.structure.core.Schema
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -31,7 +32,8 @@ class SchemaSnapshotGeneratorTest extends Specification {
 
         def database = new MockDatabase()
         database.setDefaultSchemaName("def_schema")
-        Schema snapshot = (Schema) generator.snapshotObject(example, new MockDatabaseSnapshot(null, null, database, null))
+        Schema snapshot = (Schema)
+        generator.snapshotObject(example, new liquibase.snapshot.MockDatabaseSnapshot(null, null, database, null))
 
         then:
         snapshot.getName() == expectedName
