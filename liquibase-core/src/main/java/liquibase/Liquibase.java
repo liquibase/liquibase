@@ -552,6 +552,13 @@ public class Liquibase {
         changeLogSync(new Contexts(contexts), new LabelExpression());
     }
 
+    /**
+     * @deprecated use version with LabelExpression
+     */
+    public void changeLogSync(Contexts contexts) throws LiquibaseException {
+        changeLogSync(contexts, new LabelExpression());
+    }
+
     public void changeLogSync(Contexts contexts, LabelExpression labelExpression) throws LiquibaseException {
         changeLogParameters.setContexts(contexts);
         changeLogParameters.setLabels(labelExpression);
@@ -819,6 +826,13 @@ public class Liquibase {
         LockServiceFactory.getInstance().getLockService(database).forceReleaseLock();
     }
 
+    /**
+     * @deprecated use version with LabelExpression
+     */
+    public List<ChangeSet> listUnrunChangeSets(Contexts contexts) throws LiquibaseException {
+        return listUnrunChangeSets(contexts, new LabelExpression());
+    }
+
     public List<ChangeSet> listUnrunChangeSets(Contexts contexts, LabelExpression labels) throws LiquibaseException {
         changeLogParameters.setContexts(contexts);
         changeLogParameters.setLabels(labels);
@@ -834,6 +848,13 @@ public class Liquibase {
         ListVisitor visitor = new ListVisitor();
         logIterator.run(visitor, new ExecutionEnvironment(database).setContexts(contexts).setLabelExpression(labels));
         return visitor.getSeenChangeSets();
+    }
+
+    /**
+     * @deprecated use version with LabelExpression
+     */
+    public List<ChangeSetStatus> getChangeSetStatuses(Contexts contexts) throws LiquibaseException {
+        return getChangeSetStatuses(contexts, new LabelExpression());
     }
 
     /**
