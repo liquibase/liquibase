@@ -194,7 +194,8 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                                 if (name != null) {
                                     String body = preconditionMatcher.group(2).trim();
                                     if ("sql-check".equals(name)) {
-                                        changeSet.getPreconditions().addNestedPrecondition(parseSqlCheckCondition(body));
+                                        String replaced = changeLogParameters.expandExpressions(StringUtils.trimToNull(body));
+                                        changeSet.getPreconditions().addNestedPrecondition(parseSqlCheckCondition(replaced));
                                     } else {
                                         throw new ChangeLogParseException("The '" + name + "' precondition type is not supported.");
                                     }
