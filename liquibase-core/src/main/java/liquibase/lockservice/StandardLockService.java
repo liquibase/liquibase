@@ -1,5 +1,13 @@
 package liquibase.lockservice;
 
+import java.text.DateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+
 import liquibase.configuration.GlobalConfiguration;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.database.Database;
@@ -14,14 +22,14 @@ import liquibase.logging.LogFactory;
 import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.SqlStatement;
-import liquibase.statement.core.*;
+import liquibase.statement.core.CreateDatabaseChangeLogLockTableStatement;
+import liquibase.statement.core.DropTableStatement;
+import liquibase.statement.core.InitializeDatabaseChangeLogLockTableStatement;
+import liquibase.statement.core.LockDatabaseChangeLogStatement;
+import liquibase.statement.core.RawSqlStatement;
+import liquibase.statement.core.SelectFromDatabaseChangeLogLockStatement;
+import liquibase.statement.core.UnlockDatabaseChangeLogStatement;
 import liquibase.structure.core.Table;
-
-import java.text.DateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
 
 public class StandardLockService implements LockService {
 
@@ -87,7 +95,7 @@ public class StandardLockService implements LockService {
             executor.comment("Create Database Lock Table");
             executor.execute(new CreateDatabaseChangeLogLockTableStatement());
             database.commit();
-            LogFactory.getLogger().debug("Created database lock table with name: " + database.escapeTableName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName()));
+            LogFactory.getInstance().getLog().debug("Created database lock table with name: " + database.escapeTableName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName()));
             this.hasDatabaseChangeLogLockTable = true;
             createdTable = true;
         }
@@ -152,7 +160,7 @@ public class StandardLockService implements LockService {
         while (!locked && new Date().getTime() < timeToGiveUp) {
             locked = acquireLock();
             if (!locked) {
-                LogFactory.getLogger().info("Waiting for changelog lock....");
+                LogFactory.getInstance().getLog().info("Waiting for changelog lock....");
                 try {
                     Thread.sleep(getChangeLogLockRecheckTime() * 1000);
                 } catch (InterruptedException e) {
@@ -203,7 +211,8 @@ public class StandardLockService implements LockService {
                     return false;
                 }
                 database.commit();
-                LogFactory.getLogger().info("Successfully acquired change log lock");
+                LogFactory.getInstance().getLog().info("Successfully acquired change log lock");
+                TimeElapsed.start();
 
                 hasChangeLogLock = true;
 
@@ -228,6 +237,7 @@ public class StandardLockService implements LockService {
         try {
             if (this.hasDatabaseChangeLogLockTable()) {
                 executor.comment("Release Database Lock");
+                TimeElapsed.stop();
                 database.rollback();
                 int updatedRows = executor.update(new UnlockDatabaseChangeLogStatement());
                 if (updatedRows != 1) {
@@ -240,10 +250,11 @@ public class StandardLockService implements LockService {
         } finally {
             try {
                 hasChangeLogLock = false;
-
                 database.setCanCacheLiquibaseTableInfo(false);
 
-                LogFactory.getLogger().info("Successfully released change log lock");
+                LogFactory.getInstance().getLog().info("Successfully released change log lock");
+                executor.comment(TimeElapsed.getMessage());
+                LogFactory.getInstance().getLog().info(TimeElapsed.getMessage());
                 database.rollback();
             } catch (DatabaseException e) {
                 ;
@@ -287,7 +298,7 @@ public class StandardLockService implements LockService {
             releaseLock();
         } catch (LockException e) {
             // ignore ?
-            LogFactory.getLogger().info("Ignored exception in forceReleaseLock: " + e.getMessage());
+            LogFactory.getInstance().getLog().info("Ignored exception in forceReleaseLock: " + e.getMessage());
         }*/
     }
 
@@ -306,5 +317,52 @@ public class StandardLockService implements LockService {
             throw new UnexpectedLiquibaseException(e);
         }
 
+    }
+    
+    private static class TimeElapsed {
+
+        private static Date START_TIME;
+
+        private static Date COMPLETIOM_TIME;
+
+        public static void start() {
+            START_TIME = Calendar.getInstance().getTime();
+        }
+
+        public static void stop() {
+            COMPLETIOM_TIME = Calendar.getInstance().getTime();
+        }
+
+        private static long elapsedTime() {
+            long duration = COMPLETIOM_TIME.getTime() - START_TIME.getTime();
+            return duration;
+
+        }
+
+        public static String getMessage() {
+            long millis = elapsedTime();
+            if (millis < 0) {
+                throw new IllegalArgumentException("Duration must be greater than zero!");
+            }
+
+            long days = TimeUnit.MILLISECONDS.toDays(millis);
+            millis -= TimeUnit.DAYS.toMillis(days);
+            long hours = TimeUnit.MILLISECONDS.toHours(millis);
+            millis -= TimeUnit.HOURS.toMillis(hours);
+            long minutes = TimeUnit.MILLISECONDS.toMinutes(millis);
+            millis -= TimeUnit.MINUTES.toMillis(minutes);
+            long seconds = TimeUnit.MILLISECONDS.toSeconds(millis);
+
+            StringBuilder sb = new StringBuilder(64);
+            sb.append("Completed in ");
+            sb.append(hours);
+            sb.append(" Hours ");
+            sb.append(minutes);
+            sb.append(" Minutes ");
+            sb.append(seconds);
+            sb.append(" Seconds");
+
+            return (sb.toString());
+        }
     }
 }

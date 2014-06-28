@@ -24,7 +24,7 @@ public class GetViewDefinitionGeneratorOracle extends GetViewDefinitionGenerator
         CatalogAndSchema schema = new CatalogAndSchema(statement.getCatalogName(), statement.getSchemaName()).customize(database);
 
         return new Sql[]{
-                new UnparsedSql("SELECT TEXT FROM ALL_VIEWS WHERE upper(VIEW_NAME)='" + statement.getViewName().toUpperCase() + "' AND OWNER='" + schema.getSchemaName() + "'")
+                new UnparsedSql("SELECT TEXT FROM USER_VIEWS WHERE upper(VIEW_NAME)='" + statement.getViewName().toUpperCase() + "'")
         };
     }
 }

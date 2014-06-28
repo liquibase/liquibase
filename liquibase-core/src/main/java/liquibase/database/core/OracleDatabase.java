@@ -1,5 +1,11 @@
 package liquibase.database.core;
 
+import java.lang.reflect.Method;
+import java.sql.Connection;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+
 import liquibase.CatalogAndSchema;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
@@ -13,14 +19,6 @@ import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Catalog;
 import liquibase.structure.core.Schema;
-import liquibase.structure.core.Table;
-
-import java.lang.reflect.Method;
-import java.sql.Connection;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 /**
  * Encapsulates Oracle database support.
@@ -61,7 +59,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
             reservedWords.addAll(Arrays.asList(sqlConn.getMetaData().getSQLKeywords().toUpperCase().split(",\\s*")));
             reservedWords.addAll(Arrays.asList("GROUP", "USER", "SESSION","PASSWORD", "RESOURCE", "START", "SIZE", "UID")); //more reserved words not returned by driver
         } catch (Exception e) {
-            LogFactory.getLogger().info("Could not set remarks reporting on OracleDatabase: " + e.getMessage());
+            LogFactory.getInstance().getLog().info("Could not set remarks reporting on OracleDatabase: " + e.getMessage());
             ; //cannot set it. That is OK
         }
         super.setConnection(conn);
@@ -134,7 +132,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
         try {
             return ExecutorService.getInstance().getExecutor(this).queryForObject(new RawCallStatement("select sys_context( 'userenv', 'current_schema' ) from dual"), String.class);
         } catch (Exception e) {
-            LogFactory.getLogger().info("Error getting default schema", e);
+            LogFactory.getInstance().getLog().info("Error getting default schema", e);
         }
         return null;
     }
@@ -246,27 +244,6 @@ public class OracleDatabase extends AbstractJdbcDatabase {
     public boolean supportsAutoIncrement() {
         return false;
     }
-
-
-//    public Set<UniqueConstraint> findUniqueConstraints(String schema) throws DatabaseException {
-//        Set<UniqueConstraint> returnSet = new HashSet<UniqueConstraint>();
-//
-//        List<Map> maps = new Executor(this).queryForList(new RawSqlStatement("SELECT UC.CONSTRAINT_NAME, UCC.TABLE_NAME, UCC.COLUMN_NAME FROM USER_CONSTRAINTS UC, USER_CONS_COLUMNS UCC WHERE UC.CONSTRAINT_NAME=UCC.CONSTRAINT_NAME AND CONSTRAINT_TYPE='U' ORDER BY UC.CONSTRAINT_NAME"));
-//
-//        UniqueConstraint constraint = null;
-//        for (Map map : maps) {
-//            if (constraint == null || !constraint.getName().equals(constraint.getName())) {
-//                returnSet.add(constraint);
-//                Table table = new Table((String) map.get("TABLE_NAME"));
-//                constraint = new UniqueConstraint(map.get("CONSTRAINT_NAME").toString(), table);
-//            }
-//        }
-//        if (constraint != null) {
-//            returnSet.add(constraint);
-//        }
-//
-//        return returnSet;
-//    }
 
     @Override
     public boolean supportsRestrictForeignKeys() {
