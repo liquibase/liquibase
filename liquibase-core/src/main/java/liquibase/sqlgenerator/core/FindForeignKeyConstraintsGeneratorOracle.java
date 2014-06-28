@@ -32,17 +32,19 @@ public class FindForeignKeyConstraintsGeneratorOracle extends AbstractSqlGenerat
         CatalogAndSchema baseTableSchema = new CatalogAndSchema(statement.getBaseTableCatalogName(), statement.getBaseTableSchemaName()).customize(database);
 
         StringBuilder sb = new StringBuilder();
-
+        // --#
+        // @author John Jonathan (aoshibr at gmail.com) in 20/06/2014
+        // --#
         sb.append("SELECT ");
         sb.append("BASE.TABLE_NAME as ").append(FindForeignKeyConstraintsStatement.RESULT_COLUMN_BASE_TABLE_NAME).append(", ");
         sb.append("BCOLS.COLUMN_NAME as ").append(FindForeignKeyConstraintsStatement.RESULT_COLUMN_BASE_TABLE_COLUMN_NAME).append(", ");
         sb.append("FRGN.TABLE_NAME ").append(FindForeignKeyConstraintsStatement.RESULT_COLUMN_FOREIGN_TABLE_NAME).append(", ");
         sb.append("FCOLS.COLUMN_NAME as ").append(FindForeignKeyConstraintsStatement.RESULT_COLUMN_FOREIGN_COLUMN_NAME).append(", ");
         sb.append("BASE.CONSTRAINT_NAME as ").append(FindForeignKeyConstraintsStatement.RESULT_COLUMN_CONSTRAINT_NAME).append(" ");
-        sb.append("FROM ALL_CONSTRAINTS BASE,");
-        sb.append("     ALL_CONSTRAINTS FRGN,");
-        sb.append("     ALL_CONS_COLUMNS BCOLS,");
-        sb.append("     ALL_CONS_COLUMNS FCOLS ");
+        sb.append("FROM USER_CONSTRAINTS BASE,");
+        sb.append("     USER_CONSTRAINTS FRGN,");
+        sb.append("     USER_CONS_COLUMNS BCOLS,");
+        sb.append("     USER_CONS_COLUMNS FCOLS ");
         sb.append("WHERE BASE.R_OWNER = FRGN.OWNER ");
         sb.append("AND BASE.R_CONSTRAINT_NAME = FRGN.CONSTRAINT_NAME ");
         sb.append("AND BASE.OWNER = BCOLS.OWNER ");
@@ -52,7 +54,7 @@ public class FindForeignKeyConstraintsGeneratorOracle extends AbstractSqlGenerat
         sb.append("AND BASE.TABLE_NAME =  '").append(statement.getBaseTableName().toUpperCase()).append("' ");
         sb.append("AND BASE.CONSTRAINT_TYPE = 'R' ");
         sb.append("AND BASE.OWNER = '").append(baseTableSchema.getSchemaName()).append("'");
-
+        // --#
         return new Sql[]{
                 new UnparsedSql(sb.toString())
         };
