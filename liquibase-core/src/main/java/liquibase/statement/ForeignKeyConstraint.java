@@ -1,77 +1,98 @@
 package liquibase.statement;
 
-public class ForeignKeyConstraint implements ColumnConstraint {
-    private String foreignKeyName;
-    private String column;
-    private String references;
-    private String referencedTableName;
-    private String referencedColumnNames;
-    private boolean deleteCascade = false;
-    private boolean initiallyDeferred = false;
-    private boolean deferrable = false;
+import liquibase.AbstractExtensibleObject;
+
+/**
+ * Describes the foreign key constraints on a column, used in {@link liquibase.statement.Statement} objects.
+ */
+public class ForeignKeyConstraint extends AbstractExtensibleObject implements ColumnConstraint {
+
+    private static final String FOREIGN_KEY_NAME = "foreignKeyName";
+    private static final String COLUMN_NAME = "columnName";
+    private static final String REFERENCES = "references";
+    private static final String REFERENCED_TABLE_NAME = "referencedTableName";
+    private static final String REFERENCED_COLUMN_NAMES = "referencedColumnNames";
+    private static final String DELETE_CASCADE = "deleteCascade";
+    private static final String INITIALLY_DEFERRED = "initiallyDeferred";
+    private static final String DEFERRABLE = "deferrable";
+
+    public ForeignKeyConstraint() {
+    }
 
     public ForeignKeyConstraint(String foreignKeyName,String references) {
-        this.foreignKeyName = foreignKeyName;
-        this.references = references;
+        setAttribute(FOREIGN_KEY_NAME, foreignKeyName);
+        setAttribute(REFERENCES, references);
     }
 
     public ForeignKeyConstraint(String foreignKeyName,String references, String referencedTableName, String referencedColumnNames) {
-        this.foreignKeyName = foreignKeyName;
-        this.references = references;
-        this.referencedTableName = referencedTableName;
-        this.referencedColumnNames = referencedColumnNames;
+        setAttribute(FOREIGN_KEY_NAME, foreignKeyName);
+        setAttribute(REFERENCES, references);
+        setAttribute(REFERENCED_TABLE_NAME, referencedTableName);
+        setAttribute(REFERENCED_COLUMN_NAMES, referencedColumnNames);
     }
 
     public String getForeignKeyName() {
-        return foreignKeyName;
+        return getAttribute(FOREIGN_KEY_NAME, String.class);
     }
 
-    public String getColumn() {
-        return column;
+    public ForeignKeyConstraint setForeignKeyName(String foreignKeyName) {
+        return (ForeignKeyConstraint) setAttribute(FOREIGN_KEY_NAME, foreignKeyName);
     }
 
-    public ForeignKeyConstraint setColumn(String column) {
-        this.column = column;
-        return this;
+    public String getColumnName() {
+        return getAttribute(COLUMN_NAME, String.class);
     }
 
+    public ForeignKeyConstraint setColumnName(String column) {
+        return (ForeignKeyConstraint) setAttribute(COLUMN_NAME, column);
+    }
 
     public String getReferences() {
-        return references;
+        return getAttribute(REFERENCES, String.class);
     }
 
-    public boolean isDeleteCascade() {
-        return deleteCascade;
+    public ForeignKeyConstraint setReferences(String references) {
+        return (ForeignKeyConstraint) setAttribute(REFERENCES, references);
+    }
+
+    public boolean getDeleteCascade() {
+        return getAttribute(DELETE_CASCADE, false);
     }
 
     public String getReferencedTableName() {
-        return referencedTableName;
+        return getAttribute(REFERENCED_TABLE_NAME, String.class);
     }
 
+    public ForeignKeyConstraint setReferencedTableName(String referencedTableName) {
+        return (ForeignKeyConstraint) setAttribute(REFERENCED_TABLE_NAME, referencedTableName);
+    }
+
+
     public String getReferencedColumnNames() {
-        return referencedColumnNames;
+        return getAttribute(REFERENCED_COLUMN_NAMES, String.class);
+    }
+
+    public ForeignKeyConstraint setReferencedColumnNames(String referencedColumnNames) {
+        return (ForeignKeyConstraint) setAttribute(REFERENCED_COLUMN_NAMES, referencedColumnNames);
     }
 
     public ForeignKeyConstraint setDeleteCascade(boolean deleteCascade) {
-        this.deleteCascade = deleteCascade;
-        return this;
+        return (ForeignKeyConstraint) setAttribute(DELETE_CASCADE, deleteCascade);
     }
 
-    public boolean isInitiallyDeferred() {
-        return initiallyDeferred;
+    public boolean getInitiallyDeferred() {
+        return getAttribute(INITIALLY_DEFERRED, false);
     }
 
     public ForeignKeyConstraint setInitiallyDeferred(boolean initiallyDeferred) {
-        this.initiallyDeferred = initiallyDeferred;
-        return this;
+        return (ForeignKeyConstraint) setAttribute(INITIALLY_DEFERRED, initiallyDeferred);
     }
 
-    public boolean isDeferrable() {
-        return deferrable;
+    public boolean getDeferrable() {
+        return getAttribute(DEFERRABLE, false);
     }
 
     public ForeignKeyConstraint setDeferrable(boolean deferrable) {
-        this.deferrable = deferrable;
-        return this;
+        return (ForeignKeyConstraint) setAttribute(DEFERRABLE, deferrable);
     }
 }

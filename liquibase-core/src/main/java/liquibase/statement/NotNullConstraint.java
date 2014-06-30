@@ -1,23 +1,27 @@
 package liquibase.statement;
 
-public class NotNullConstraint implements ColumnConstraint {
-    private String columnName;
+import liquibase.AbstractExtensibleObject;
 
+/**
+ * Describes that a column is not null, used in {@link liquibase.statement.Statement} objects.
+ */
+public class NotNullConstraint extends AbstractExtensibleObject implements ColumnConstraint {
+
+    private static final String COLUMN_NAME = "columnName";
 
     public NotNullConstraint() {
     }
 
     public NotNullConstraint(String columnName) {
-        setColumnName(columnName);
+        setAttribute(COLUMN_NAME, columnName);
     }
 
 
     public String getColumnName() {
-        return columnName;
+        return getAttribute(COLUMN_NAME, String.class);
     }
 
     public NotNullConstraint setColumnName(String columnName) {
-        this.columnName = columnName;
-        return this;
+        return (NotNullConstraint) setAttribute(COLUMN_NAME, columnName);
     }
 }

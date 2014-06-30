@@ -1,9 +1,14 @@
 package liquibase;
 
+import liquibase.util.ObjectUtil;
+
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
+/**
+ * Convenience class implementing ExtensibleObject. It is usually easiest to extend this class rather than implement all of ExtensibleObject yourself.
+ */
 public class AbstractExtensibleObject implements ExtensibleObject {
 
     private SortedMap<String, Object> attributes = new TreeMap<String, Object>();
@@ -15,16 +20,23 @@ public class AbstractExtensibleObject implements ExtensibleObject {
 
     @Override
     public <T> T getAttribute(String attribute, Class<T> type) {
-        return (T) attributes.get(attribute);
+        return (T) ObjectUtil.convert(attributes.get(attribute), type);
     }
 
     @Override
     public <T> T getAttribute(String attribute, T defaultValue) {
-        T value = (T) attributes.get(attribute);
+        Class type;
+        if (defaultValue == null) {
+            type = Object.class;
+        } else {
+            type = defaultValue.getClass();
+        }
+        Object value = getAttribute(attribute, type);
+
         if (value == null) {
             return defaultValue;
         }
-        return value;
+        return (T) value;
     }
 
     @Override
@@ -37,10 +49,4 @@ public class AbstractExtensibleObject implements ExtensibleObject {
 
         return this;
     }
-
-    public SortedMap<String, Object> getAttributeMap() {
-        return attributes;
-    }
-
-
 }

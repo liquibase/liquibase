@@ -1,11 +1,17 @@
 package liquibase.statement;
 
+import liquibase.AbstractExtensibleObject;
+
 import java.math.BigInteger;
 
-public class AutoIncrementConstraint implements ColumnConstraint {
-    private String columnName;
-    private BigInteger startWith;
-    private BigInteger incrementBy;
+/**
+ * Describes auto-increment capabilities of a column, used in {@link liquibase.statement.Statement} objects.
+ */
+public class AutoIncrementConstraint extends AbstractExtensibleObject implements ColumnConstraint {
+
+    private static final String COLUMN_NAME = "columnName";
+    private static final String START_WITH = "startWith";
+    private static final String INCREMENT_BY = "incrementBy";
     
     public AutoIncrementConstraint() {
     }
@@ -22,29 +28,26 @@ public class AutoIncrementConstraint implements ColumnConstraint {
     }
 
     public String getColumnName() {
-        return columnName;
+        return getAttribute(COLUMN_NAME, String.class);
     }
 
     public AutoIncrementConstraint setColumnName(String columnName) {
-        this.columnName = columnName;
-        return this;
+        return (AutoIncrementConstraint) setAttribute(COLUMN_NAME, columnName);
     }
 
     public BigInteger getStartWith() {
-    	return startWith;
+    	return getAttribute(START_WITH, BigInteger.class);
     }
     
     public AutoIncrementConstraint setStartWith(BigInteger startWith) {
-    	this.startWith = startWith;
-    	return this;
+    	return (AutoIncrementConstraint) setAttribute(START_WITH, startWith);
     }
     
     public BigInteger getIncrementBy() {
-    	return incrementBy;
+    	return getAttribute(INCREMENT_BY, BigInteger.class);
     }
     
     public AutoIncrementConstraint setIncrementBy(BigInteger incrementBy) {
-    	this.incrementBy = incrementBy;
-    	return this;
+    	return (AutoIncrementConstraint) setAttribute(INCREMENT_BY, incrementBy);
     }
 }

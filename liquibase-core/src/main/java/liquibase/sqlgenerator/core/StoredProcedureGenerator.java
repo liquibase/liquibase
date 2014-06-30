@@ -7,7 +7,7 @@ import liquibase.statementlogic.StatementLogicChain;
 import liquibase.database.core.OracleDatabase;
 import liquibase.exception.ValidationErrors;
 import  liquibase.ExecutionEnvironment;
-import liquibase.statement.StoredProcedureStatement;
+import liquibase.statement.core.StoredProcedureStatement;
 
 public class StoredProcedureGenerator extends AbstractSqlGenerator<StoredProcedureStatement> {
 

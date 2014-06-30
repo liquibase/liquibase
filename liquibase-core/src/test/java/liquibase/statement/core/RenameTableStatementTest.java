@@ -1,9 +1,11 @@
 package liquibase.statement.core;
 
-public class RenameTableStatementTest extends AbstractSqStatementTest<RenameTableStatement> {
+import liquibase.statement.AbstractStatementTest;
+
+public class RenameTableStatementTest extends AbstractStatementTest<RenameTableStatement> {
 
     @Override
-    protected RenameTableStatement createStatementUnderTest() {
+    protected RenameTableStatement createObject() {
         return new RenameTableStatement(null, null, null, null);
     }
 

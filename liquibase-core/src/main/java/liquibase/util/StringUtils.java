@@ -1,5 +1,7 @@
 package liquibase.util;
 
+import liquibase.ExtensibleObject;
+
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -144,6 +146,18 @@ public class StringUtils {
 
     public static String join(Map map, String delimiter) {
         return join(map, delimiter, new ToStringFormatter());
+    }
+
+    public static String join(ExtensibleObject object, String delimiter, StringUtilsFormatter formatter) {
+        SortedMap map = new TreeMap();
+        for (String attribute : object.getAttributes()) {
+            Object value = object.getAttribute(attribute, Object.class);
+            if (value != null) {
+                map.put(attribute, value);
+            }
+        }
+        return join(map, delimiter, formatter);
+
     }
 
     public static String join(Map map, String delimiter, StringUtilsFormatter formatter) {

@@ -1,46 +1,52 @@
 package liquibase.statement;
 
+import liquibase.AbstractExtensibleObject;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-public class PrimaryKeyConstraint implements ColumnConstraint {
+public class PrimaryKeyConstraint extends AbstractExtensibleObject implements ColumnConstraint {
 
-    private String constraintName;
-
-	// used for PK's index configuration
-	private String tablespace;
-    
-    private List<String> columns = new ArrayList<String>();
+    private static final String CONSTRAINT_NAME = "constraintName";
+	private static final String TABLESPACE = "tablespace";
+    private static final String COLUMNS = "columns";
 
     public PrimaryKeyConstraint() {
+        setAttribute(COLUMNS, new ArrayList<String>());
     }
 
     public PrimaryKeyConstraint(String constraintName) {
-        this.constraintName = constraintName;
+        this();
+        setAttribute(CONSTRAINT_NAME, constraintName);
     }
 
 
     public String getConstraintName() {
-        return constraintName;
+        return getAttribute(CONSTRAINT_NAME, String.class);
+    }
+
+    public PrimaryKeyConstraint setConstraintName(String constraintName) {
+        return (PrimaryKeyConstraint) setAttribute(CONSTRAINT_NAME, constraintName);
     }
 
 	public String getTablespace() {
-		return tablespace;
+		return getAttribute(TABLESPACE, String.class);
 	}
 
-	public void setTablespace(String tablespace) {
-		this.tablespace = tablespace;
+	public PrimaryKeyConstraint setTablespace(String tablespace) {
+		return (PrimaryKeyConstraint) setAttribute(TABLESPACE, tablespace);
 	}
 
 	public List<String> getColumns() {
-        return Collections.unmodifiableList(columns);
+        return Collections.unmodifiableList(getAttribute(COLUMNS, List.class));
     }
 
     public PrimaryKeyConstraint addColumns(String... columns) {
-        this.columns.addAll(Arrays.asList(columns));
-
+        if (columns != null) {
+            getAttribute(COLUMNS, List.class).addAll(Arrays.asList(columns));
+        }
         return this;
     }
 }

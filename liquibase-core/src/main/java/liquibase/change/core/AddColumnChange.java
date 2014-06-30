@@ -125,8 +125,8 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
                     column.getName(),
                     column.getType(),
                     column.getDefaultValueObject(),
-                    column.getRemarks(),
-                    constraints.toArray(new ColumnConstraint[constraints.size()]));
+                    constraints.toArray(new ColumnConstraint[constraints.size()]))
+                    .setRemarks(column.getRemarks());
 
             if ((database instanceof MySQLDatabase) && (column.getAfterColumn() != null)) {
                 addColumnStatement.setAddAfterColumn(column.getAfterColumn());

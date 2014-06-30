@@ -6,7 +6,7 @@ import liquibase.exception.SetupException;
 import liquibase.exception.ValidationErrors;
 import liquibase.resource.ResourceAccessor;
 import liquibase.statement.Statement;
-import liquibase.statement.StoredProcedureStatement;
+import liquibase.statement.core.StoredProcedureStatement;
 
 public class ExampleCustomProcCallChange implements CustomSqlChange {
 

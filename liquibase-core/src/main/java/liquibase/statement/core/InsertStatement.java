@@ -13,6 +13,7 @@ public class InsertStatement extends AbstractStatement {
     private String schemaName;
     private String tableName;
     private Map<String, Object> columnValues = new LinkedHashMap<String, Object>();
+    private boolean needsPreparedStatement;
 
     public InsertStatement(String catalogName, String schemaName, String tableName) {
         this.catalogName = catalogName;
@@ -55,5 +56,13 @@ public class InsertStatement extends AbstractStatement {
         return new DatabaseObject[] {
             new Table().setName(getTableName()).setSchema(getCatalogName(), getSchemaName())
         };
+    }
+
+    public void setNeedsPreparedStatement(boolean needsPreparedStatement) {
+        this.needsPreparedStatement = needsPreparedStatement;
+    }
+
+    public boolean getNeedsPreparedStatement() {
+        return needsPreparedStatement;
     }
 }

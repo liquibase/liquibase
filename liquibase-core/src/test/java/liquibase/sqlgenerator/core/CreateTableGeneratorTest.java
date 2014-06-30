@@ -909,7 +909,7 @@ public class CreateTableGeneratorTest extends AbstractSqlGeneratorTest<CreateTab
         database.setOutputDefaultSchema(true);
         database.setDefaultSchemaName("my-schema");
         CreateTableStatement statement = new CreateTableStatement(CATALOG_NAME, SCHEMA_NAME, TABLE_NAME);
-        statement.addColumnConstraint(new ForeignKeyConstraint("fk_test_parent", TABLE_NAME + "(id)").setColumn("id"));
+        statement.addColumnConstraint(new ForeignKeyConstraint("fk_test_parent", TABLE_NAME + "(id)").setColumnName("id"));
         Action[] generatedSql = this.generatorUnderTest.generateActions(statement, new ExecutionEnvironment(database), null);
         assertEquals("CREATE TABLE SCHEMA_NAME.TABLE_NAME (, CONSTRAINT fk_test_parent FOREIGN KEY (id) REFERENCES my-schema.TABLE_NAME(id))", generatedSql[0].describe());
     }

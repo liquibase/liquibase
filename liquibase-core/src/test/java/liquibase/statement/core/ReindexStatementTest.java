@@ -1,13 +1,15 @@
 package liquibase.statement.core;
 
-public class ReindexStatementTest extends AbstractSqStatementTest<ReindexStatement> {
+import liquibase.statement.AbstractStatementTest;
+
+public class ReindexStatementTest extends AbstractStatementTest<ReindexStatement> {
     @Override
-    protected ReindexStatement createStatementUnderTest() {
+    protected ReindexStatement createObject() {
         return new ReindexStatement(null, null, null);
     }
 
-    @Override
-    public void hasAtLeastOneGenerator() {
-        //todo: remove override once SQLite is back in TestContext.AllDatabases
-    }
+//    @Override
+//    public void hasAtLeastOneGenerator() {
+//        //todo: remove override once SQLite is back in TestContext.AllDatabases
+//    }
 }

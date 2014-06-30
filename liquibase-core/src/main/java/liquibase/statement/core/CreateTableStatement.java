@@ -153,7 +153,7 @@ public class CreateTableStatement extends AbstractStatement {
                     ((NotNullConstraint) constraint).setColumnName(columnName);
                     getNotNullColumns().add(columnName);
                 } else if (constraint instanceof ForeignKeyConstraint) {
-                    ((ForeignKeyConstraint) constraint).setColumn(columnName);
+                    ((ForeignKeyConstraint) constraint).setColumnName(columnName);
                     getForeignKeyConstraints().add(((ForeignKeyConstraint) constraint));
                 } else if (constraint instanceof UniqueConstraint) {
                     ((UniqueConstraint) constraint).addColumns(columnName);

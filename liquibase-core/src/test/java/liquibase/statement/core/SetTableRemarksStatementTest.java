@@ -1,8 +1,10 @@
 package liquibase.statement.core;
 
-public class SetTableRemarksStatementTest extends AbstractSqStatementTest<SetTableRemarksStatement> {
+import liquibase.statement.AbstractStatementTest;
+
+public class SetTableRemarksStatementTest extends AbstractStatementTest<SetTableRemarksStatement> {
     @Override
-    protected SetTableRemarksStatement createStatementUnderTest() {
+    protected SetTableRemarksStatement createObject() {
         return new SetTableRemarksStatement(null, null, null, null);
     }
 }

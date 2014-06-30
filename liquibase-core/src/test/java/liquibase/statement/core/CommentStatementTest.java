@@ -1,9 +1,11 @@
 package liquibase.statement.core;
 
-public class CommentStatementTest extends AbstractSqStatementTest<CommentStatement> {
+import liquibase.statement.AbstractStatementTest;
+
+public class CommentStatementTest extends AbstractStatementTest<CommentStatement> {
 
     @Override
-    protected CommentStatement createStatementUnderTest() {
+    protected CommentStatement createObject() {
         return new CommentStatement(null);
     }
 

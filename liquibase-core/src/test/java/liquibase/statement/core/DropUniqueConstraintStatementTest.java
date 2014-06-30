@@ -1,10 +1,12 @@
 package liquibase.statement.core;
 
-public class DropUniqueConstraintStatementTest extends AbstractSqStatementTest<DropUniqueConstraintStatement> {
+import liquibase.statement.AbstractStatementTest;
+
+public class DropUniqueConstraintStatementTest extends AbstractStatementTest<DropUniqueConstraintStatement> {
 
 
     @Override
-    protected DropUniqueConstraintStatement createStatementUnderTest() {
+    protected DropUniqueConstraintStatement createObject() {
         return new DropUniqueConstraintStatement(null, null, null, null);
     }
 

@@ -5,6 +5,7 @@ import liquibase.ExecutionEnvironment;
 import liquibase.action.Action;
 import liquibase.action.visitor.ActionVisitor;
 import liquibase.statement.Statement;
+import liquibase.statement.core.RawDatabaseCommandStatement;
 import liquibase.statementlogic.StatementLogicFactory;
 import liquibase.change.Change;
 import liquibase.change.core.DropTableChange;
@@ -32,7 +33,6 @@ import liquibase.statement.DatabaseFunction;
 import liquibase.statement.SequenceCurrentValueFunction;
 import liquibase.statement.SequenceNextValueFunction;
 import liquibase.statement.core.GetViewDefinitionStatement;
-import liquibase.statement.core.RawCallStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
 import liquibase.util.ISODateFormat;
@@ -316,7 +316,7 @@ public abstract class AbstractJdbcDatabase implements Database {
             return null;
         }
         try {
-            return ExecutorService.getInstance().getExecutor(this).query(new RawCallStatement("call current_schema")).toObject(String.class);
+            return ExecutorService.getInstance().getExecutor(this).query(new RawDatabaseCommandStatement("call current_schema")).toObject(String.class);
 
         } catch (Exception e) {
             LogFactory.getLogger().info("Error getting default schema", e);
@@ -1346,25 +1346,25 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     @Override
     public String generateDatabaseFunctionValue(final DatabaseFunction databaseFunction) {
-        if (databaseFunction.getValue() == null) {
+        if (databaseFunction.getText() == null) {
             return null;
         }
-        if (isCurrentTimeFunction(databaseFunction.getValue().toLowerCase())) {
+        if (isCurrentTimeFunction(databaseFunction.getText().toLowerCase())) {
             return getCurrentDateTimeFunction();
         } else if (databaseFunction instanceof SequenceNextValueFunction) {
             if (sequenceNextValueFunction == null) {
                 throw new RuntimeException(String.format("next value function for a sequence is not configured for database %s",
                         getDefaultDatabaseProductName()));
             }
-            return String.format(sequenceNextValueFunction, escapeObjectName(databaseFunction.getValue(), Sequence.class));
+            return String.format(sequenceNextValueFunction, escapeObjectName(databaseFunction.getText(), Sequence.class));
         } else if (databaseFunction instanceof SequenceCurrentValueFunction) {
             if (sequenceCurrentValueFunction == null) {
                 throw new RuntimeException(String.format("current value function for a sequence is not configured for database %s",
                         getDefaultDatabaseProductName()));
             }
-            return String.format(sequenceCurrentValueFunction, escapeObjectName(databaseFunction.getValue(), Sequence.class));
+            return String.format(sequenceCurrentValueFunction, escapeObjectName(databaseFunction.getText(), Sequence.class));
         } else {
-            return databaseFunction.getValue();
+            return databaseFunction.getText();
         }
     }
 

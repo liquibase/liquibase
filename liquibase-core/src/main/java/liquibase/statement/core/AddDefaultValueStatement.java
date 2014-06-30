@@ -6,50 +6,37 @@ import liquibase.structure.core.Column;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
 
-public class AddDefaultValueStatement extends AbstractStatement {
-    private String catalogName;
-    private String schemaName;
-    private String tableName;
-    private String columnName;
-    private String columnDataType;
-    private Object defaultValue;
+public class AddDefaultValueStatement extends AbstractColumnStatement {
+    private static final String COLUMN_DATA_TYPE = "columnDataType";
+    private static final String DEFAULT_VALUE = "defaultValue";
 
+    public AddDefaultValueStatement() {
+    }
 
     public AddDefaultValueStatement(String catalogName, String schemaName, String tableName, String columnName, String columnDataType) {
         this(catalogName, schemaName, tableName, columnName, columnDataType, null);
     }
 
     public AddDefaultValueStatement(String catalogName, String schemaName, String tableName, String columnName, String columnDataType, Object defaultValue) {
-        this.catalogName = catalogName;
-        this.schemaName = schemaName;
-        this.tableName = tableName;
-        this.columnName = columnName;
-        this.columnDataType = columnDataType;
-        this.defaultValue = defaultValue;
+        super(catalogName, schemaName, tableName, columnName);
+        setColumnDataType(columnDataType);
+        setDefaultValue(defaultValue);
     }
 
-    public String getColumnName() {
-        return columnName;
-    }
-    
     public String getColumnDataType() {
-		return columnDataType;
+		return getAttribute(COLUMN_DATA_TYPE, String.class);
 	}
 
-    public String getCatalogName() {
-        return catalogName;
-    }
-
-    public String getSchemaName() {
-        return schemaName;
-    }
-
-    public String getTableName() {
-        return tableName;
+    public AddDefaultValueStatement setColumnDataType(String dataType) {
+        return (AddDefaultValueStatement) setAttribute(COLUMN_DATA_TYPE, dataType);
     }
 
     public Object getDefaultValue() {
-        return defaultValue;
+        return getAttribute(DEFAULT_VALUE, Object.class);
+    }
+
+    public AddDefaultValueStatement setDefaultValue(Object defaultValue) {
+        return (AddDefaultValueStatement) setAttribute(DEFAULT_VALUE, defaultValue);
     }
 
     @Override

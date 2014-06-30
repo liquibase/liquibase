@@ -65,7 +65,7 @@ public class MySQLIntegrationTest extends AbstractIntegrationTest {
         Object defaultValue = createdColumn.getDefaultValue();
         assertNotNull(defaultValue);
         assertTrue(defaultValue instanceof DatabaseFunction);
-        assertEquals("0000-00-00 00:00:00", ((DatabaseFunction) defaultValue).getValue());
+        assertEquals("0000-00-00 00:00:00", ((DatabaseFunction) defaultValue).getText());
     }
 
 }

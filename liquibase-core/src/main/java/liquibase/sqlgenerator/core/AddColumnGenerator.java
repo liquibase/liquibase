@@ -102,7 +102,7 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
 
     protected void addUniqueConstrantStatements(AddColumnStatement statement, ExecutionEnvironment env, List<Action> returnSql) throws UnsupportedException {
         if (statement.isUnique()) {
-            AddUniqueConstraintStatement addConstraintStmt = new AddUniqueConstraintStatement(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName(), statement.getUniqueStatementName());
+            AddUniqueConstraintStatement addConstraintStmt = new AddUniqueConstraintStatement(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName(), statement.getUniqueConstraintName());
             returnSql.addAll(Arrays.asList(StatementLogicFactory.getInstance().generateActions(addConstraintStmt, env)));
         }
     }

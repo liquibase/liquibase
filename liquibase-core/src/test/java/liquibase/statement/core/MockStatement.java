@@ -1,11 +1,12 @@
 package liquibase.statement.core;
 
+import liquibase.AbstractExtensibleObject;
 import liquibase.statement.Statement;
 import liquibase.structure.DatabaseObject;
 
 import java.util.Collection;
 
-public class MockStatement implements Statement {
+public class MockStatement extends AbstractExtensibleObject implements Statement {
 
     private String id;
 

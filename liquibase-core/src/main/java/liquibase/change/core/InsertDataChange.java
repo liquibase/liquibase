@@ -3,7 +3,6 @@ package liquibase.change.core;
 import liquibase.change.*;
 import liquibase.exception.ValidationErrors;
 import  liquibase.ExecutionEnvironment;
-import liquibase.statement.InsertExecutablePreparedStatement;
 import liquibase.statement.Statement;
 import liquibase.statement.core.InsertStatement;
 
@@ -96,14 +95,11 @@ public class InsertDataChange extends AbstractChange implements ChangeWithColumn
 //            }
         }
 
-        if (needsPreparedStatement) {
-            return new Statement[] {
-                    new InsertExecutablePreparedStatement(env, catalogName, schemaName, tableName, columns, getChangeSet(), this.getResourceAccessor())
-            };
-        }
-
-
         InsertStatement statement = new InsertStatement(getCatalogName(), getSchemaName(), getTableName());
+
+        if (needsPreparedStatement) {
+            statement.setNeedsPreparedStatement(true);
+        }
 
         for (ColumnConfig column : columns) {
 

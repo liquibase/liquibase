@@ -15,6 +15,7 @@ public class UpdateStatement extends AbstractStatement {
 
     private List<String> whereColumnNames = new ArrayList<String>();
     private List<Object> whereParameters = new ArrayList<Object>();
+    private boolean needsPreparedStatement;
 
 
     public UpdateStatement(String catalogName, String schemaName, String tableName) {
@@ -87,5 +88,13 @@ public class UpdateStatement extends AbstractStatement {
         return new DatabaseObject[] {
             new Table().setName(getTableName()).setSchema(getCatalogName(), getSchemaName())
         };
+    }
+
+    public void setNeedsPreparedStatement(boolean needsPreparedStatement) {
+        this.needsPreparedStatement = needsPreparedStatement;
+    }
+
+    public boolean getNeedsPreparedStatement() {
+        return needsPreparedStatement;
     }
 }

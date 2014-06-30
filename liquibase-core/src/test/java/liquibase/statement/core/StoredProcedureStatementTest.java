@@ -1,10 +1,10 @@
 package liquibase.statement.core;
 
-import liquibase.statement.StoredProcedureStatement;
+import liquibase.statement.AbstractStatementTest;
 
-public class StoredProcedureStatementTest extends AbstractSqStatementTest<StoredProcedureStatement> {
+public class StoredProcedureStatementTest extends AbstractStatementTest<StoredProcedureStatement> {
     @Override
-    protected StoredProcedureStatement createStatementUnderTest() {
+    protected StoredProcedureStatement createObject() {
         return new StoredProcedureStatement(null);
     }
 }

@@ -1,9 +1,11 @@
 package liquibase.statement.core;
 
-public class FindForeignKeyConstraintsStatementTest extends AbstractSqStatementTest<FindForeignKeyConstraintsStatement> {
+import liquibase.statement.AbstractStatementTest;
+
+public class FindForeignKeyConstraintsStatementTest extends AbstractStatementTest<FindForeignKeyConstraintsStatement> {
 
     @Override
-    protected FindForeignKeyConstraintsStatement createStatementUnderTest() {
+    protected FindForeignKeyConstraintsStatement createObject() {
         return new FindForeignKeyConstraintsStatement(null, null, null);
     }
 

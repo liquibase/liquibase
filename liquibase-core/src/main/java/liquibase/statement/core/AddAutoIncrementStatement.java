@@ -8,15 +8,17 @@ import liquibase.structure.core.Table;
 
 import java.math.BigInteger;
 
-public class AddAutoIncrementStatement extends AbstractStatement {
+/**
+ * Marks an existing column as auto-increment.
+ */
+public class AddAutoIncrementStatement extends AbstractColumnStatement {
 
-    private String catalogName;
-    private String schemaName;
-    private String tableName;
-    private String columnName;
-    private String columnDataType;
-    private BigInteger startWith;
-    private BigInteger incrementBy;
+    private final String COLUMN_DATA_TYPE = "columnDataType";
+    private final String STARTS_WITH = "startWith";
+    private final String INCREMENT_BY = "incrementBy";
+
+    public AddAutoIncrementStatement() {
+    }
 
     public AddAutoIncrementStatement(
             String catalogName,
@@ -26,42 +28,38 @@ public class AddAutoIncrementStatement extends AbstractStatement {
             String columnDataType,
             BigInteger startWith,
             BigInteger incrementBy) {
-        this.catalogName = catalogName;
-        this.schemaName = schemaName;
-        this.tableName = tableName;
-        this.columnName = columnName;
-        this.columnDataType = columnDataType;
-        this.startWith = startWith;
-        this.incrementBy = incrementBy;
-    }
-
-    public String getCatalogName() {
-        return catalogName;
-    }
-
-    public String getSchemaName() {
-        return schemaName;
-    }
-
-    public String getTableName() {
-        return tableName;
-    }
-
-    public String getColumnName() {
-        return columnName;
+        super(catalogName, schemaName, tableName, columnName);
+        setColumnDataType(columnDataType);
+        setStartWith(startWith);
+        setIncrementBy(incrementBy);
     }
 
     public String getColumnDataType() {
-        return columnDataType;
+        return getAttribute(COLUMN_DATA_TYPE, String.class);
     }
+
+    public AddAutoIncrementStatement setColumnDataType(String columnDataType) {
+        return (AddAutoIncrementStatement) setAttribute(COLUMN_DATA_TYPE, columnDataType);
+    }
+
 
     public BigInteger getStartWith() {
-        return startWith;
+        return getAttribute(STARTS_WITH, BigInteger.class);
     }
 
-    public BigInteger getIncrementBy() {
-        return incrementBy;
+    public AddAutoIncrementStatement setStartWith(BigInteger startWith) {
+        return (AddAutoIncrementStatement) setAttribute(STARTS_WITH, startWith);
     }
+
+
+    public BigInteger getIncrementBy() {
+        return getAttribute(INCREMENT_BY, BigInteger.class);
+    }
+
+    public AddAutoIncrementStatement setIncrementBy(BigInteger incrementBy) {
+        return (AddAutoIncrementStatement) setAttribute(INCREMENT_BY, incrementBy);
+    }
+
 
     @Override
     protected DatabaseObject[] getBaseAffectedDatabaseObjects() {

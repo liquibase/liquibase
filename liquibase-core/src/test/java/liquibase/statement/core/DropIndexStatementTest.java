@@ -1,9 +1,11 @@
 package liquibase.statement.core;
 
-public class DropIndexStatementTest extends AbstractSqStatementTest<DropIndexStatement> {
+import liquibase.statement.AbstractStatementTest;
+
+public class DropIndexStatementTest extends AbstractStatementTest<DropIndexStatement> {
 
     @Override
-    protected DropIndexStatement createStatementUnderTest() {
+    protected DropIndexStatement createObject() {
         return new DropIndexStatement(null, null, null, null, null);
     }
 

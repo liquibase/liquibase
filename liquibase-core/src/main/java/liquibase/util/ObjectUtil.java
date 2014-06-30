@@ -117,7 +117,7 @@ public class ObjectUtil {
         if (object == null) {
             return null;
         }
-        if (object.getClass().isAssignableFrom(targetClass)) {
+        if (targetClass.isAssignableFrom(object.getClass())) {
             return (T) object;
         }
 

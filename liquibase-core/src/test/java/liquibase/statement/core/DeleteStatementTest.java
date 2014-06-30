@@ -1,8 +1,10 @@
 package liquibase.statement.core;
 
-public class DeleteStatementTest extends AbstractSqStatementTest<DeleteStatement>{
+import liquibase.statement.AbstractStatementTest;
+
+public class DeleteStatementTest extends AbstractStatementTest<DeleteStatement> {
     @Override
-    protected DeleteStatement createStatementUnderTest() {
+    protected DeleteStatement createObject() {
         return new DeleteStatement(null, null, null);
     }
 }

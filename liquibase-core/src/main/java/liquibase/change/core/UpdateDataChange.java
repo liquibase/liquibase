@@ -7,7 +7,6 @@ import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.resource.ResourceAccessor;
 import liquibase.statement.Statement;
-import liquibase.statement.UpdateExecutablePreparedStatement;
 import liquibase.statement.core.UpdateStatement;
 
 import java.util.ArrayList;
@@ -62,24 +61,10 @@ public class UpdateDataChange extends AbstractModifyDataChange implements Change
             }
         }
 
-        if (needsPreparedStatement) {
-            UpdateExecutablePreparedStatement statement = new UpdateExecutablePreparedStatement(env, catalogName, schemaName, tableName, columns, getChangeSet(), this.getResourceAccessor());
-            
-            statement.setWhereClause(where);
-            
-            for (ColumnConfig whereParam : whereParams) {
-                if (whereParam.getName() != null) {
-                    statement.addWhereColumnName(whereParam.getName());
-                }
-                statement.addWhereParameter(whereParam.getValueObject());
-            }
-            
-            return new Statement[] {
-                    statement
-            };
-        }
-    	
         UpdateStatement statement = new UpdateStatement(getCatalogName(), getSchemaName(), getTableName());
+        if (needsPreparedStatement) {
+            statement.setNeedsPreparedStatement(true);
+        }
 
         for (ColumnConfig column : getColumns()) {
             statement.addNewColumnValue(column.getName(), column.getValueObject());

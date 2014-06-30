@@ -51,7 +51,7 @@ public abstract class MetaDataQueryAction extends AbstractExtensibleObject imple
 
     @Override
     public String describe() {
-        return getClass().getSimpleName()+"("+ StringUtils.join(getAttributeMap(), ", ", new StringUtils.ToStringFormatter())+")";
+        return getClass().getSimpleName()+"("+ StringUtils.join(this, ", ", new StringUtils.ToStringFormatter())+")";
     }
 
     @Override

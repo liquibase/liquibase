@@ -1,8 +1,10 @@
 package liquibase.statement.core;
 
-public class CreateDatabaseChangeLogLockTableStatementTest extends AbstractSqStatementTest<CreateDatabaseChangeLogLockTableStatement> {
+import liquibase.statement.AbstractStatementTest;
+
+public class CreateDatabaseChangeLogLockTableStatementTest extends AbstractStatementTest<CreateDatabaseChangeLogLockTableStatement> {
     @Override
-    protected CreateDatabaseChangeLogLockTableStatement createStatementUnderTest() {
+    protected CreateDatabaseChangeLogLockTableStatement createObject() {
         return new CreateDatabaseChangeLogLockTableStatement();
     }
 }

@@ -1,9 +1,11 @@
 package liquibase.statement.core;
 
-public class AlterSequenceStatementTest extends AbstractSqStatementTest<AlterSequenceStatement> {
+import liquibase.statement.AbstractStatementTest;
+
+public class AlterSequenceStatementTest extends AbstractStatementTest<AlterSequenceStatement> {
 
     @Override
-    protected AlterSequenceStatement createStatementUnderTest() {
+    protected AlterSequenceStatement createObject() {
         return new AlterSequenceStatement(null, null, null);
     }
 

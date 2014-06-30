@@ -1,5 +1,6 @@
 package liquibase.statement;
 
+import liquibase.AbstractExtensibleObject;
 import liquibase.structure.DatabaseObject;
 
 import java.util.ArrayList;
@@ -7,13 +8,23 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-public abstract class AbstractStatement implements Statement {
+/**
+ * Convenience method for {@link liquibase.statement.Statement} implementations. Normally classes should extend this class vs. implementing Statement directly.
+ */
+public abstract class AbstractStatement extends AbstractExtensibleObject implements Statement {
 
+    /**
+     * Default implementation returns false
+     */
     @Override
     public boolean skipOnUnsupported() {
         return false;
     }
 
+    /**
+     * Default implementation calls {@link #getBaseAffectedDatabaseObjects()} and then uses the {@link liquibase.structure.DatabaseObject#getContainingObjects()} method to find
+     * other objects to add to the return collection.
+     */
     @Override
     public Collection<? extends DatabaseObject> getAffectedDatabaseObjects() {
         List<DatabaseObject> affectedDatabaseObjects = new ArrayList<DatabaseObject>();
@@ -45,5 +56,10 @@ public abstract class AbstractStatement implements Statement {
         return affectedDatabaseObjects;
     }
 
+    /**
+     * Implementations should return "examples" of the objects directly affected by this Statement.
+     * Used by {@link liquibase.statement.AbstractStatement#getAffectedDatabaseObjects()}
+     */
     protected abstract DatabaseObject[] getBaseAffectedDatabaseObjects();
+
 }

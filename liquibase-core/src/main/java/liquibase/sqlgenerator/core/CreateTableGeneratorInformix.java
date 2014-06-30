@@ -129,21 +129,21 @@ public class CreateTableGeneratorInformix extends CreateTableGenerator {
                 referencesString = database.getDefaultSchemaName()+"."+referencesString;
             }
             buffer.append(" FOREIGN KEY (")
-                .append(database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), fkConstraint.getColumn()))
+                .append(database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), fkConstraint.getColumnName()))
                 .append(") REFERENCES ")
                 .append(referencesString);
 
-            if (fkConstraint.isDeleteCascade()) {
+            if (fkConstraint.getDeleteCascade()) {
                 buffer.append(" ON DELETE CASCADE");
             }
 
             buffer.append(" CONSTRAINT ");
             buffer.append(database.escapeConstraintName(fkConstraint.getForeignKeyName()));
 
-            if (fkConstraint.isInitiallyDeferred()) {
+            if (fkConstraint.getInitiallyDeferred()) {
                 buffer.append(" INITIALLY DEFERRED");
             }
-            if (fkConstraint.isDeferrable()) {
+            if (fkConstraint.getDeferrable()) {
                 buffer.append(" DEFERRABLE");
             }
             buffer.append(",");

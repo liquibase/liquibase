@@ -1,9 +1,11 @@
 package liquibase.statement.core;
 
-public class TagDatabaseStatementTest extends AbstractSqStatementTest<TagDatabaseStatement> {
+import liquibase.statement.AbstractStatementTest;
+
+public class TagDatabaseStatementTest extends AbstractStatementTest<TagDatabaseStatement> {
 
     @Override
-    protected TagDatabaseStatement createStatementUnderTest() {
+    protected TagDatabaseStatement createObject() {
         return new TagDatabaseStatement(null);
     }
 

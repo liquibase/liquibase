@@ -1,9 +1,11 @@
 package liquibase.statement.core;
 
-public class UpdateStatementTest extends AbstractSqStatementTest<UpdateStatement> {
+import liquibase.statement.AbstractStatementTest;
+
+public class UpdateStatementTest extends AbstractStatementTest<UpdateStatement> {
 
     @Override
-    protected UpdateStatement createStatementUnderTest() {
+    protected UpdateStatement createObject() {
         return new UpdateStatement(null, null, null);
     }
 

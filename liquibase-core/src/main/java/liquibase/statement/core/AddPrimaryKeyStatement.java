@@ -5,50 +5,43 @@ import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.PrimaryKey;
 import liquibase.structure.core.Table;
 
-public class AddPrimaryKeyStatement extends AbstractStatement {
+public class AddPrimaryKeyStatement extends AbstractTableStatement {
 
-    private String catalogName;
-    private String schemaName;
-    private String tableName;
-    private String tablespace;
-    private String columnNames;
-    private String constraintName;
+    private static final String TABLESPACE = "tablespace";
+    private static final String COLUMN_NAMES = "columnNames";
+    private static final String CONSTRAINT_NAME = "constraintName";
+
+    public AddPrimaryKeyStatement() {
+    }
 
     public AddPrimaryKeyStatement(String catalogName, String schemaName, String tableName, String columnNames, String constraintName) {
-        this.catalogName = catalogName;
-        this.schemaName = schemaName;
-        this.tableName = tableName;
-        this.columnNames = columnNames;
-        this.constraintName = constraintName;
-    }
-
-    public String getCatalogName() {
-        return catalogName;
-    }
-
-    public String getSchemaName() {
-        return schemaName;
-    }
-
-    public String getTableName() {
-        return tableName;
+        super(catalogName, schemaName, tableName);
+        setColumnNames(columnNames);
+        setConstraintName(constraintName);
     }
 
     public String getTablespace() {
-        return tablespace;
+        return getAttribute(TABLESPACE, String.class);
     }
 
     public AddPrimaryKeyStatement setTablespace(String tablespace) {
-        this.tablespace = tablespace;
-        return this;
+        return (AddPrimaryKeyStatement) setAttribute(TABLESPACE, tablespace);
     }
 
     public String getColumnNames() {
-        return columnNames;
+        return getAttribute(COLUMN_NAMES, String.class);
+    }
+
+    public AddPrimaryKeyStatement setColumnNames(String columnNames) {
+        return (AddPrimaryKeyStatement) setAttribute(COLUMN_NAMES, columnNames);
     }
 
     public String getConstraintName() {
-        return constraintName;
+        return getAttribute(CONSTRAINT_NAME, String.class);
+    }
+
+    public AddPrimaryKeyStatement setConstraintName(String constraintName) {
+        return (AddPrimaryKeyStatement) setAttribute(CONSTRAINT_NAME, constraintName);
     }
 
     @Override

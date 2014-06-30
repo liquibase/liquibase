@@ -1,9 +1,11 @@
 package liquibase.statement.core;
 
-public class SetNullableStatementTest extends AbstractSqStatementTest<SetNullableStatement> {
+import liquibase.statement.AbstractStatementTest;
+
+public class SetNullableStatementTest extends AbstractStatementTest<SetNullableStatement> {
 
     @Override
-    protected SetNullableStatement createStatementUnderTest() {
+    protected SetNullableStatement createObject() {
         return new SetNullableStatement(null, null, null, null, null, true);
     }
 

@@ -23,7 +23,7 @@ public class H2ColumnSnapshotGenerator extends ColumnSnapshotGenerator {
     @Override
     protected Object readDefaultValue(CachedRow columnMetadataResultSet, Column columnInfo, Database database) throws SQLException, DatabaseException {
         Object defaultValue = super.readDefaultValue(columnMetadataResultSet, columnInfo, database);
-        if (defaultValue != null && defaultValue instanceof DatabaseFunction && ((DatabaseFunction) defaultValue).getValue().startsWith("NEXT VALUE FOR ")) {
+        if (defaultValue != null && defaultValue instanceof DatabaseFunction && ((DatabaseFunction) defaultValue).getText().startsWith("NEXT VALUE FOR ")) {
             columnInfo.setAutoIncrementInformation(new Column.AutoIncrementInformation());
             return null;
         }

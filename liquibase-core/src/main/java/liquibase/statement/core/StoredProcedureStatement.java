@@ -1,12 +1,13 @@
-package liquibase.statement;
+package liquibase.statement.core;
 
+import liquibase.statement.AbstractStatement;
 import liquibase.structure.DatabaseObject;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class StoredProcedureStatement extends AbstractStatement implements CallableStatement {
+public class StoredProcedureStatement extends AbstractStatement {
 
     private String procedureName;
     private List<String> parameters = new ArrayList<String>();

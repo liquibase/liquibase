@@ -1,9 +1,11 @@
 package liquibase.statement.core;
 
-public class ReorganizeTableStatementTest extends AbstractSqStatementTest<ReorganizeTableStatement> {
+import liquibase.statement.AbstractStatementTest;
+
+public class ReorganizeTableStatementTest extends AbstractStatementTest<ReorganizeTableStatement> {
 
     @Override
-    protected ReorganizeTableStatement createStatementUnderTest() {
+    protected ReorganizeTableStatement createObject() {
         return new ReorganizeTableStatement(null, null, null);
     }
 

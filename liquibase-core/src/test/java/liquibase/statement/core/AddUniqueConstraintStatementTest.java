@@ -1,9 +1,11 @@
 package liquibase.statement.core;
 
-public class AddUniqueConstraintStatementTest extends AbstractSqStatementTest<AddUniqueConstraintStatement> {
+import liquibase.statement.AbstractStatementTest;
+
+public class AddUniqueConstraintStatementTest extends AbstractStatementTest<AddUniqueConstraintStatement> {
 
     @Override
-    protected AddUniqueConstraintStatement createStatementUnderTest() {
+    protected AddUniqueConstraintStatement createObject() {
         return new AddUniqueConstraintStatement(null, null, null, null, null);
     }
 

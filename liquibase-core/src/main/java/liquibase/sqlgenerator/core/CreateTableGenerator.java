@@ -201,7 +201,7 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
             String referencesString = fkConstraint.getReferences();
 
             buffer.append(" FOREIGN KEY (")
-                    .append(database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), fkConstraint.getColumn()))
+                    .append(database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), fkConstraint.getColumnName()))
                     .append(") REFERENCES ");
             if (referencesString != null) {
                 if (!referencesString.contains(".") && database.getDefaultSchemaName() != null && database.getOutputDefaultSchema()) {
@@ -217,7 +217,7 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
             }
 
 
-            if (fkConstraint.isDeleteCascade()) {
+            if (fkConstraint.getDeleteCascade()) {
                 buffer.append(" ON DELETE CASCADE");
             }
 
@@ -226,10 +226,10 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
                 buffer.append(database.escapeConstraintName(fkConstraint.getForeignKeyName()));
             }
 
-            if (fkConstraint.isInitiallyDeferred()) {
+            if (fkConstraint.getInitiallyDeferred()) {
                 buffer.append(" INITIALLY DEFERRED");
             }
-            if (fkConstraint.isDeferrable()) {
+            if (fkConstraint.getDeferrable()) {
                 buffer.append(" DEFERRABLE");
             }
             buffer.append(",");

@@ -57,7 +57,7 @@ public class MssqlIntegrationTest extends AbstractMssqlIntegrationTest {
                     assertNotNull("Null default value for " + table.getName() + "." + column.getName(), defaultValue);
                     if (column.getName().toLowerCase().contains("date") || column.getName().toLowerCase().contains("time")) {
                         if (defaultValue instanceof DatabaseFunction) {
-                            ((DatabaseFunction) defaultValue).getValue().contains("type datetimeoffset");
+                            ((DatabaseFunction) defaultValue).getText().contains("type datetimeoffset");
                         } else {
                             assertTrue("Unexpected default type "+defaultValue.getClass().getName()+" for " + table.getName() + "." + column.getName(), defaultValue instanceof Date);
                             Calendar calendar = Calendar.getInstance();

@@ -1,9 +1,11 @@
 package liquibase.statement.core;
 
-public class DropTableStatementTest extends AbstractSqStatementTest<DropTableStatement> {
+import liquibase.statement.AbstractStatementTest;
+
+public class DropTableStatementTest extends AbstractStatementTest<DropTableStatement> {
 
     @Override
-    protected DropTableStatement createStatementUnderTest() {
+    protected DropTableStatement createObject() {
         return new DropTableStatement(null, null, null, true);
     }
 

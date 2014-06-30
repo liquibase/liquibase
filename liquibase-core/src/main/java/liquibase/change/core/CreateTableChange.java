@@ -95,7 +95,7 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
                     }
                     ForeignKeyConstraint fkConstraint = new ForeignKeyConstraint(constraints.getForeignKeyName(),
                             constraints.getReferences(), constraints.getReferencedTableName(), constraints.getReferencedColumnNames());
-                    fkConstraint.setColumn(column.getName());
+                    fkConstraint.setColumnName(column.getName());
                     fkConstraint.setDeleteCascade(constraints.isDeleteCascade() != null && constraints.isDeleteCascade());
                     fkConstraint.setInitiallyDeferred(constraints.isInitiallyDeferred() != null && constraints.isInitiallyDeferred());
                     fkConstraint.setDeferrable(constraints.isDeferrable() != null && constraints.isDeferrable());

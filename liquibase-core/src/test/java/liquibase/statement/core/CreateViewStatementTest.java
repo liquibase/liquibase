@@ -1,9 +1,11 @@
 package liquibase.statement.core;
 
-public class CreateViewStatementTest extends AbstractSqStatementTest<CreateViewStatement> {
+import liquibase.statement.AbstractStatementTest;
+
+public class CreateViewStatementTest extends AbstractStatementTest<CreateViewStatement> {
 
     @Override
-    protected CreateViewStatement createStatementUnderTest() {
+    protected CreateViewStatement createObject() {
         return new CreateViewStatement(null, null, null, null, false);
     }
 
