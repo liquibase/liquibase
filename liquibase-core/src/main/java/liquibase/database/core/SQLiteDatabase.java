@@ -176,7 +176,7 @@ public class SQLiteDatabase extends AbstractJdbcDatabase {
             }
             statements.addAll(Arrays.asList(ct_change_tmp.generateStatements(env)));
             // copy rows to temporary table
-            statements.addAll(Arrays.asList(new CopyRowsStatement(temp_table_name, tableName, copyColumns)));
+            statements.addAll(Arrays.asList(new CopyDataStatement().setSourceTableCatalogName(temp_table_name).setTargetTableName(tableName).setSourceColumns(copyColumns)));
             // delete original table
             statements.addAll(Arrays.asList(new DropTableStatement(catalogName, schemaName, temp_table_name, false)));
             // validate indices

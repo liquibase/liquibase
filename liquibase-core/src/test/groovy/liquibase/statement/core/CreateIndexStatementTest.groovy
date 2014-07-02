@@ -7,8 +7,10 @@ import liquibase.statement.Statement;
 public class CreateIndexStatementTest extends AbstractStatementTest<Statement> {
 
     @Override
-    protected AbstractExtensibleObject createObject() {
-        return new CreateIndexStatement(null, null, null, null, null, null);
+    protected Object getTestPropertyValue(String propertyName) {
+        if (propertyName == "columnNames") {
+            return ["column_1", "column_2"] as String[]
+        }
+        return super.getTestPropertyValue(propertyName)
     }
-
 }

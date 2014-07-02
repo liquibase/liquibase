@@ -27,9 +27,9 @@ public class AddColumnStatement extends AbstractColumnStatement {
 
     }
 
-    public AddColumnStatement(String catalogName, String schemaName, String tableName, String columnName, String columnType, Object defaultValue, ColumnConstraint... constraints) {
+    public AddColumnStatement(String catalogName, String schemaName, String tableName, String columnName, String columnType, Object defaultValue, Constraint... constraints) {
         super(catalogName, schemaName, tableName, columnName);
-        setAttribute(CONSTRAINTS, new HashSet<ColumnConstraint>());
+        setAttribute(CONSTRAINTS, new HashSet<Constraint>());
         setColumnType(columnType);
         setDefaultValue(defaultValue);
         if (constraints != null) {
@@ -55,11 +55,11 @@ public class AddColumnStatement extends AbstractColumnStatement {
     }
 
 
-    public Set<ColumnConstraint> getConstraints() {
-        return (Set<ColumnConstraint>) getAttribute(CONSTRAINTS, Set.class);
+    public Set<Constraint> getConstraints() {
+        return (Set<Constraint>) getAttribute(CONSTRAINTS, Set.class);
     }
 
-    public AddColumnStatement addConstraint(ColumnConstraint constraint) {
+    public AddColumnStatement addConstraint(Constraint constraint) {
         getConstraints().add(constraint);
         return this;
     }
@@ -79,7 +79,7 @@ public class AddColumnStatement extends AbstractColumnStatement {
      * Convenience method to search the defined constraints for an {@link liquibase.statement.AutoIncrementConstraint}
      */
     public boolean isAutoIncrement() {
-        for (ColumnConstraint constraint : getConstraints()) {
+        for (Constraint constraint : getConstraints()) {
             if (constraint instanceof AutoIncrementConstraint) {
                 return true;
             }
@@ -93,7 +93,7 @@ public class AddColumnStatement extends AbstractColumnStatement {
     public AutoIncrementConstraint getAutoIncrementConstraint() {
         AutoIncrementConstraint autoIncrementConstraint = null;
         
-        for (ColumnConstraint constraint : getConstraints()) {
+        for (Constraint constraint : getConstraints()) {
             if (constraint instanceof AutoIncrementConstraint) {
                 autoIncrementConstraint = (AutoIncrementConstraint) constraint;
                 break;
@@ -107,7 +107,7 @@ public class AddColumnStatement extends AbstractColumnStatement {
      * Convenience method to search the defined constraints for a {@link liquibase.statement.PrimaryKeyConstraint}
      */
     public boolean isPrimaryKey() {
-        for (ColumnConstraint constraint : getConstraints()) {
+        for (Constraint constraint : getConstraints()) {
             if (constraint instanceof PrimaryKeyConstraint) {
                 return true;
             }
@@ -122,7 +122,7 @@ public class AddColumnStatement extends AbstractColumnStatement {
         if (isPrimaryKey()) {
             return false;
         }
-        for (ColumnConstraint constraint : getConstraints()) {
+        for (Constraint constraint : getConstraints()) {
             if (constraint instanceof NotNullConstraint) {
                 return false;
             }
@@ -134,7 +134,7 @@ public class AddColumnStatement extends AbstractColumnStatement {
      * Convenience method to search the defined constraints for an {@link liquibase.statement.UniqueConstraint}
      */
     public boolean isUnique() {
-        for (ColumnConstraint constraint : getConstraints()) {
+        for (Constraint constraint : getConstraints()) {
             if (constraint instanceof UniqueConstraint) {
                 return true;
             }
@@ -147,7 +147,7 @@ public class AddColumnStatement extends AbstractColumnStatement {
      * Returns null if no unique constraint was defined.
      */
     public String getUniqueConstraintName() {
-        for (ColumnConstraint constraint : getConstraints()) {
+        for (Constraint constraint : getConstraints()) {
             if (constraint instanceof UniqueConstraint) {
                 return ((UniqueConstraint) constraint).getConstraintName();
             }

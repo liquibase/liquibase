@@ -1,10 +1,12 @@
 package liquibase.statement.core;
 
-import liquibase.statement.AbstractStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.PrimaryKey;
 import liquibase.structure.core.Table;
 
+/**
+ * Adds a primary key to an existing table.
+ */
 public class AddPrimaryKeyStatement extends AbstractTableStatement {
 
     private static final String TABLESPACE = "tablespace";

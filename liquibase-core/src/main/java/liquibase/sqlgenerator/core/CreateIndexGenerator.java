@@ -24,7 +24,7 @@ public class CreateIndexGenerator extends AbstractSqlGenerator<CreateIndexStatem
 
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("tableName", createIndexStatement.getTableName());
-        validationErrors.checkRequiredField("columns", createIndexStatement.getColumns());
+        validationErrors.checkRequiredField("columnNames", createIndexStatement.getColumnNames());
         if (database instanceof HsqlDatabase) {
             validationErrors.checkRequiredField("name", createIndexStatement.getIndexName());
         }
@@ -68,7 +68,7 @@ public class CreateIndexGenerator extends AbstractSqlGenerator<CreateIndexStatem
 	    }
 	    buffer.append("ON ");
 	    buffer.append(database.escapeTableName(statement.getTableCatalogName(), statement.getTableSchemaName(), statement.getTableName())).append("(");
-	    Iterator<String> iterator = Arrays.asList(statement.getColumns()).iterator();
+	    Iterator<String> iterator = Arrays.asList(statement.getColumnNames()).iterator();
 	    while (iterator.hasNext()) {
 		    String column = iterator.next();
 		    buffer.append(database.escapeColumnName(statement.getTableCatalogName(), statement.getTableSchemaName(), statement.getTableName(), column));

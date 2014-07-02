@@ -6,6 +6,8 @@ import liquibase.util.StringUtils
 import spock.lang.Specification
 import spock.lang.Unroll
 
+import java.lang.reflect.Array
+
 /**
  * Abstract test class to extend from when testing AbstractExtensibleObjects.
  */
@@ -13,6 +15,10 @@ abstract class AbstractExtensibleObjectTest extends Specification {
 
     @Unroll("#featureName: #propertyName")
     def "convenience get/set methods work correctly"() {
+        if (propertyName == "NONE") {
+            return;
+        }
+
         expect:
         def defaultValue = getDefaultPropertyValue(propertyName)
         def newValue = getTestPropertyValue(propertyName)
@@ -50,6 +56,10 @@ abstract class AbstractExtensibleObjectTest extends Specification {
 
     @Unroll("#featureName: #propertyName")
     def "convenience set method return 'this'"() {
+        if (propertyName == "NONE") {
+            return;
+        }
+
         when:
         def obj = createObject()
         def type = obj.getMetaClass().getMetaProperty(propertyName).type
@@ -99,7 +109,8 @@ abstract class AbstractExtensibleObjectTest extends Specification {
     }
 
     /**
-     * Returns a list of standard properties. Standard properties have get/set methods and are backed by attributes
+     * Returns a list of standard properties. Standard properties have get/set methods and are backed by attributes.
+     * If none, return array with "NONE" as only element
      */
     protected List<String> getStandardProperties() {
         def list = createObject().getMetaClass().getProperties().collect({it.name})
@@ -125,7 +136,7 @@ abstract class AbstractExtensibleObjectTest extends Specification {
         } else if (type == Object.class) {
             return "Some type of object"
         } else {
-            throw new UnexpectedLiquibaseException("No default testPropertyValue for $propertyName of type ${type.simpleName}")
+            throw new UnexpectedLiquibaseException("No standard testPropertyValue for $propertyName of type ${type.simpleName}. You probably need to override ${this.class.name}.getTestPropertyValue(propertyName).")
         }
     }
 

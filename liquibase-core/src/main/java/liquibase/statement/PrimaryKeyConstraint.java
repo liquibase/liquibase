@@ -7,7 +7,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-public class PrimaryKeyConstraint extends AbstractExtensibleObject implements ColumnConstraint {
+public class PrimaryKeyConstraint extends AbstractExtensibleObject implements Constraint {
 
     private static final String CONSTRAINT_NAME = "constraintName";
 	private static final String TABLESPACE = "tablespace";

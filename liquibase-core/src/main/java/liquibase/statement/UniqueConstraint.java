@@ -11,12 +11,12 @@ import java.util.List;
 /**
  * Describes unique constraint settings of a table, used in {@link liquibase.statement.Statement} objects.
  */
-public class UniqueConstraint extends AbstractExtensibleObject implements ColumnConstraint {
+public class UniqueConstraint extends AbstractExtensibleObject implements Constraint {
     private static final String CONSTRAINT_NAME = "constraintName";
-    private static final String COLUMNS = "columns";
+    private static final String COLUMN_NAMES = "columnNames";
 
     public UniqueConstraint() {
-        setAttribute(COLUMNS, new ArrayList<String>());
+        setAttribute(COLUMN_NAMES, new ArrayList<String>());
     }
 
     public UniqueConstraint(String constraintName) {
@@ -26,7 +26,7 @@ public class UniqueConstraint extends AbstractExtensibleObject implements Column
 
     public UniqueConstraint addColumns(String... columns) {
         if (columns != null) {
-            getAttribute(COLUMNS, List.class).addAll(Arrays.asList(columns));
+            getAttribute(COLUMN_NAMES, List.class).addAll(Arrays.asList(columns));
         }
 
         return this;
@@ -40,7 +40,7 @@ public class UniqueConstraint extends AbstractExtensibleObject implements Column
         return (UniqueConstraint) setAttribute(CONSTRAINT_NAME, constraintName);
     }
 
-    public List<String> getColumns() {
-        return Collections.unmodifiableList(getAttribute(COLUMNS, List.class));
+    public List<String> getColumnNames() {
+        return Collections.unmodifiableList(getAttribute(COLUMN_NAMES, List.class));
     }
 }

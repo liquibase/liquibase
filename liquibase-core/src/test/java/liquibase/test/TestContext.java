@@ -37,8 +37,7 @@ public class TestContext {
 
             List<Database> toRemove = new ArrayList<Database>();
             for (Database database : allDatabases) {
-                if (database instanceof SQLiteDatabase //todo: re-enable sqlite testing
-                        || database instanceof MockDatabase) {
+                if (database instanceof MockDatabase) {
                     toRemove.add(database);
                 }
 

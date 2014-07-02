@@ -96,7 +96,7 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
         }
 
         for (AddColumnConfig column : getColumns()) {
-            Set<ColumnConstraint> constraints = new HashSet<ColumnConstraint>();
+            Set<Constraint> constraints = new HashSet<Constraint>();
             ConstraintsConfig constraintsConfig =column.getConstraints();
             if (constraintsConfig != null) {
                 if (constraintsConfig.isNullable() != null && !constraintsConfig.isNullable()) {

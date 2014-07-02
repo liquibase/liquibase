@@ -29,7 +29,7 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
     public ValidationErrors validate(CreateTableStatement createTableStatement, ExecutionEnvironment env, StatementLogicChain chain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("tableName", createTableStatement.getTableName());
-        validationErrors.checkRequiredField("columns", createTableStatement.getColumns());
+        validationErrors.checkRequiredField("columns", createTableStatement.getColumnNames());
         return validationErrors;
     }
 
@@ -53,14 +53,14 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
         
         boolean isPrimaryKeyAutoIncrement = false;
         
-        Iterator<String> columnIterator = statement.getColumns().iterator();
+        Iterator<String> columnIterator = statement.getColumnNames().iterator();
         List<String> primaryKeyColumns = new LinkedList<String>();
 
         BigInteger mysqlTableOptionStartWith = null;
 
         while (columnIterator.hasNext()) {
             String column = columnIterator.next();
-            DatabaseDataType columnType = statement.getColumnTypes().get(column).toDatabaseDataType(database);
+            DatabaseDataType columnType = statement.getColumnType(column).toDatabaseDataType(database);
             buffer.append(database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), column));
 
             buffer.append(" ").append(columnType);
@@ -106,7 +106,7 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
                     buffer.append(" CONSTRAINT ").append(((MSSQLDatabase) database).generateDefaultConstraintName(statement.getTableName(), column));
                 }
                 buffer.append(" DEFAULT ");
-                buffer.append(statement.getColumnTypes().get(column).objectToSql(defaultValue, database));
+                buffer.append(statement.getColumnType(column).objectToSql(defaultValue, database));
             }
 
             if (isAutoIncrementColumn) {
@@ -131,7 +131,7 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
                 }
             }
 
-            if (statement.getNotNullColumns().contains(column)) {
+            if (statement.getNotNullConstraint(column) != null) {
                 buffer.append(" NOT NULL");
             } else {
                 if (database instanceof SybaseDatabase || database instanceof SybaseASADatabase || database instanceof MySQLDatabase) {
@@ -201,7 +201,7 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
             String referencesString = fkConstraint.getReferences();
 
             buffer.append(" FOREIGN KEY (")
-                    .append(database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), fkConstraint.getColumnName()))
+                    .append(StringUtils.join(fkConstraint.getColumnNames(), ", "))
                     .append(") REFERENCES ");
             if (referencesString != null) {
                 if (!referencesString.contains(".") && database.getDefaultSchemaName() != null && database.getOutputDefaultSchema()) {
@@ -241,7 +241,7 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
                 buffer.append(database.escapeConstraintName(uniqueConstraint.getConstraintName()));
             }
             buffer.append(" UNIQUE (");
-            buffer.append(database.escapeColumnNameList(StringUtils.join(uniqueConstraint.getColumns(), ", ")));
+            buffer.append(database.escapeColumnNameList(StringUtils.join(uniqueConstraint.getColumnNames(), ", ")));
             buffer.append(")");
             if (uniqueConstraint.getConstraintName() != null && constraintNameAfterUnique(database)) {
                 buffer.append(" CONSTRAINT ");

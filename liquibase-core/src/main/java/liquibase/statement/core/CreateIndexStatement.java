@@ -5,69 +5,98 @@ import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Index;
 import liquibase.structure.core.Table;
 
+/**
+ * Creates an index on an existing table
+ */
 public class CreateIndexStatement extends AbstractStatement {
 
-    private String tableCatalogName;
-    private String tableSchemaName;
-    private String indexName;
-    private String tableName;
-    private String[] columns;
-    private String tablespace;
-    private Boolean unique;
-	// Contain associations of index
-	// for example: foreignKey, primaryKey or uniqueConstraint
-	private String associatedWith;
+    private static final String TABLE_CATALOG_NAME = "tableCatalogName";
+    private static final String TABLE_SCHEMA_NAME = "tableSchemaName";
+    private static final String INDEX_NAME = "indexName";
+    private static final String TABLE_NAME = "tableName";
+    private static final String COLUMN_NAMES ="columnNames";
+    private static final String TABLESPACE = "tablespace";
+    private static final String UNIQUE = "unique";
+	private static final String ASSOCIATED_WITH = "associatedWith";
+
+    public CreateIndexStatement() {
+    }
 
     public CreateIndexStatement(String indexName, String tableCatalogName, String tableSchemaName, String tableName, Boolean isUnique, String associatedWith, String... columns) {
-        this.indexName = indexName;
-        this.tableCatalogName = tableCatalogName;
-        this.tableSchemaName = tableSchemaName;
-        this.tableName = tableName;
-        this.columns = columns;
-        this.unique = isUnique;
-	    this.associatedWith = associatedWith;
+        setIndexName(indexName);
+        setTableCatalogName(tableCatalogName);
+        setTableSchemaName(tableSchemaName);
+        setTableName(tableName);
+        setColumnNames(columns);
+        setUnique(isUnique);
+	    setAssociatedWith(associatedWith);
     }
 
     public String getTableCatalogName() {
-        return tableCatalogName;
+        return getAttribute(TABLE_CATALOG_NAME, String.class);
     }
+
+    public CreateIndexStatement setTableCatalogName(String tableCatalogName) {
+        return (CreateIndexStatement) setAttribute(TABLE_CATALOG_NAME, tableCatalogName);
+    }
+
 
     public String getTableSchemaName() {
-        return tableSchemaName;
+        return getAttribute(TABLE_SCHEMA_NAME, String.class);
     }
 
+    public CreateIndexStatement setTableSchemaName(String tableSchemaName) {
+        return (CreateIndexStatement) setAttribute(TABLE_SCHEMA_NAME, tableSchemaName);
+    }
+
+
     public String getIndexName() {
-        return indexName;
+        return getAttribute(INDEX_NAME, String.class);
+    }
+
+    public CreateIndexStatement setIndexName(String indexName) {
+        return (CreateIndexStatement) setAttribute(INDEX_NAME, indexName);
     }
 
     public String getTableName() {
-        return tableName;
+        return getAttribute(TABLE_NAME, String.class);
     }
 
-    public String[] getColumns() {
-        return columns;
+    public CreateIndexStatement setTableName(String tableName) {
+        return (CreateIndexStatement) setAttribute(TABLE_NAME, tableName);
+    }
+
+    public String[] getColumnNames() {
+        return getAttribute(COLUMN_NAMES, String[].class);
+    }
+
+    public CreateIndexStatement setColumnNames(String[] columns) {
+        return (CreateIndexStatement) setAttribute(COLUMN_NAMES, columns);
     }
 
     public String getTablespace() {
-        return tablespace;
+        return getAttribute(TABLESPACE, String.class);
     }
 
     public CreateIndexStatement setTablespace(String tablespace) {
-        this.tablespace = tablespace;
-
-        return this;
+        return (CreateIndexStatement) setAttribute(TABLESPACE, tablespace);
     }
 
     public Boolean isUnique() {
-        return unique;
+        return getAttribute(UNIQUE, Boolean.class);
     }
 
-	public String getAssociatedWith() {
-		return associatedWith;
+    public CreateIndexStatement setUnique(Boolean unique) {
+        return (CreateIndexStatement) setAttribute(UNIQUE, unique);
+    }
+
+
+    public String getAssociatedWith() {
+        return getAttribute(ASSOCIATED_WITH, String.class);
 	}
 
-	public void setAssociatedWith(String associatedWith) {
-		this.associatedWith = associatedWith;
+	public CreateIndexStatement setAssociatedWith(String associatedWith) {
+		return (CreateIndexStatement) setAttribute(ASSOCIATED_WITH, associatedWith);
 	}
 
     @Override

@@ -2,13 +2,17 @@ package liquibase.statement;
 
 import liquibase.AbstractExtensibleObject;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 /**
  * Describes the foreign key constraints on a column, used in {@link liquibase.statement.Statement} objects.
  */
-public class ForeignKeyConstraint extends AbstractExtensibleObject implements ColumnConstraint {
+public class ForeignKeyConstraint extends AbstractExtensibleObject implements Constraint {
 
     private static final String FOREIGN_KEY_NAME = "foreignKeyName";
-    private static final String COLUMN_NAME = "columnName";
+    private static final String COLUMN_NAMES = "columnNames";
     private static final String REFERENCES = "references";
     private static final String REFERENCED_TABLE_NAME = "referencedTableName";
     private static final String REFERENCED_COLUMN_NAMES = "referencedColumnNames";
@@ -39,12 +43,16 @@ public class ForeignKeyConstraint extends AbstractExtensibleObject implements Co
         return (ForeignKeyConstraint) setAttribute(FOREIGN_KEY_NAME, foreignKeyName);
     }
 
-    public String getColumnName() {
-        return getAttribute(COLUMN_NAME, String.class);
+    public List<String> getColumnNames() {
+        return Collections.unmodifiableList(getAttribute(COLUMN_NAMES, List.class));
     }
 
-    public ForeignKeyConstraint setColumnName(String column) {
-        return (ForeignKeyConstraint) setAttribute(COLUMN_NAME, column);
+    public ForeignKeyConstraint addColumns(String... columns) {
+        if (columns != null) {
+            getAttribute(COLUMN_NAMES, List.class).addAll(Arrays.asList(columns));
+        }
+
+        return this;
     }
 
     public String getReferences() {

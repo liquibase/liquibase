@@ -1,11 +1,13 @@
 package liquibase.statement.core;
 
-import liquibase.statement.AbstractStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
 
+/**
+ * Adds a default value to an existing column.
+ */
 public class AddDefaultValueStatement extends AbstractColumnStatement {
     private static final String COLUMN_DATA_TYPE = "columnDataType";
     private static final String DEFAULT_VALUE = "defaultValue";

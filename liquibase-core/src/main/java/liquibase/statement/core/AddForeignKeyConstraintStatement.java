@@ -5,6 +5,9 @@ import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.ForeignKey;
 import liquibase.structure.core.Table;
 
+/**
+ * Adds a foreign key constraint to an existing column
+ */
 public class AddForeignKeyConstraintStatement extends AbstractStatement {
 
     private static final String BASE_TABLE_CATALOG_NAME = "baseTableCatalogName";

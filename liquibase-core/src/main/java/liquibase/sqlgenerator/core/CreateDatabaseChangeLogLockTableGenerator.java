@@ -1,7 +1,9 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.action.Action;
+import liquibase.change.ColumnConfig;
 import liquibase.exception.UnsupportedException;
+import liquibase.statement.PrimaryKeyConstraint;
 import liquibase.statementlogic.StatementLogicChain;
 import liquibase.statementlogic.StatementLogicFactory;
 import liquibase.database.Database;

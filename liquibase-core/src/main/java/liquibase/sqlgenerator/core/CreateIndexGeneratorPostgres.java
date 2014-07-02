@@ -55,7 +55,7 @@ public class CreateIndexGeneratorPostgres extends CreateIndexGenerator {
 	    }
 	    buffer.append("ON ");
 	    buffer.append(database.escapeTableName(statement.getTableCatalogName(), statement.getTableSchemaName(), statement.getTableName())).append("(");
-	    Iterator<String> iterator = Arrays.asList(statement.getColumns()).iterator();
+	    Iterator<String> iterator = Arrays.asList(statement.getColumnNames()).iterator();
 	    while (iterator.hasNext()) {
 		    String column = iterator.next();
 		    buffer.append(database.escapeColumnName(statement.getTableCatalogName(), statement.getTableSchemaName(), statement.getTableName(), column));

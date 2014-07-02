@@ -2,22 +2,24 @@ package liquibase.statement.core;
 
 import liquibase.statement.AbstractStatement;
 import liquibase.statement.Statement;
-import liquibase.structure.DatabaseObject;
 
 /**
- * Removes all objects from an database. DANGER!!!
+ * Convenience base class for Statements that work on a sequence.
  */
-public class ClearDatabaseChangeLogTableStatement extends AbstractStatement {
+abstract class AbstractSequenceStatement extends AbstractStatement {
 
     private final String CATALOG_NAME = "catalogName";
     private final String SCHEMA_NAME = "schemaName";
+    private final String SEQUENCE_NAME = "sequenceName";
 
-    public ClearDatabaseChangeLogTableStatement() {
+    protected AbstractSequenceStatement() {
     }
 
-    public ClearDatabaseChangeLogTableStatement(String catalogName, String schemaName) {
+    public AbstractSequenceStatement(String catalogName, String schemaName, String sequenceName) {
         setCatalogName(catalogName);
-        setSchemaName(schemaName);    }
+        setSchemaName(schemaName);
+        setSequenceName(sequenceName);
+    }
 
     public String getCatalogName() {
         return getAttribute(CATALOG_NAME, String.class);
@@ -35,8 +37,11 @@ public class ClearDatabaseChangeLogTableStatement extends AbstractStatement {
         return (Statement) setAttribute(SCHEMA_NAME, schemaName);
     }
 
-    @Override
-    protected DatabaseObject[] getBaseAffectedDatabaseObjects() {
-        return null;
+    public String getSequenceName() {
+        return getAttribute(SEQUENCE_NAME, String.class);
+    }
+
+    public Statement setSequenceName(String sequenceName) {
+        return (Statement) setAttribute(SEQUENCE_NAME, sequenceName);
     }
 }

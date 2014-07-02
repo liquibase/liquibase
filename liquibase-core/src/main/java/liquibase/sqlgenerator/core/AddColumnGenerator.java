@@ -3,6 +3,7 @@ package liquibase.sqlgenerator.core;
 import liquibase.action.Action;
 import liquibase.action.core.UnparsedSql;
 import liquibase.exception.UnsupportedException;
+import liquibase.statement.Constraint;
 import liquibase.statementlogic.StatementLogicChain;
 import liquibase.statementlogic.StatementLogicFactory;
 import liquibase.database.Database;
@@ -12,7 +13,6 @@ import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
 import  liquibase.ExecutionEnvironment;
 import liquibase.statement.AutoIncrementConstraint;
-import liquibase.statement.ColumnConstraint;
 import liquibase.statement.ForeignKeyConstraint;
 import liquibase.statement.core.AddColumnStatement;
 import liquibase.statement.core.AddForeignKeyConstraintStatement;
@@ -108,7 +108,7 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
     }
 
     protected void addForeignKeyStatements(AddColumnStatement statement, ExecutionEnvironment env, List<Action> returnSql) throws UnsupportedException {
-        for (ColumnConstraint constraint : statement.getConstraints()) {
+        for (Constraint constraint : statement.getConstraints()) {
             if (constraint instanceof ForeignKeyConstraint) {
                 ForeignKeyConstraint fkConstraint = (ForeignKeyConstraint) constraint;
                 String refSchemaName = null;

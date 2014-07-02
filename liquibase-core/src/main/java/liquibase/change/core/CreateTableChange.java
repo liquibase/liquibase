@@ -85,7 +85,7 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
 
             if (constraints != null) {
                 if (constraints.isNullable() != null && !constraints.isNullable()) {
-                    statement.addColumnConstraint(new NotNullConstraint(column.getName()));
+                    statement.addConstraint(new NotNullConstraint(column.getName()));
                 }
 
                 if (constraints.getReferences() != null ||
@@ -95,20 +95,20 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
                     }
                     ForeignKeyConstraint fkConstraint = new ForeignKeyConstraint(constraints.getForeignKeyName(),
                             constraints.getReferences(), constraints.getReferencedTableName(), constraints.getReferencedColumnNames());
-                    fkConstraint.setColumnName(column.getName());
+                    fkConstraint.addColumns(column.getName());
                     fkConstraint.setDeleteCascade(constraints.isDeleteCascade() != null && constraints.isDeleteCascade());
                     fkConstraint.setInitiallyDeferred(constraints.isInitiallyDeferred() != null && constraints.isInitiallyDeferred());
                     fkConstraint.setDeferrable(constraints.isDeferrable() != null && constraints.isDeferrable());
-                    statement.addColumnConstraint(fkConstraint);
+                    statement.addConstraint(fkConstraint);
                 }
 
                 if (constraints.isUnique() != null && constraints.isUnique()) {
-                    statement.addColumnConstraint(new UniqueConstraint(constraints.getUniqueConstraintName()).addColumns(column.getName()));
+                    statement.addConstraint(new UniqueConstraint(constraints.getUniqueConstraintName()).addColumns(column.getName()));
                 }
             }
 
             if (isAutoIncrement) {
-                statement.addColumnConstraint(new AutoIncrementConstraint(column.getName(), column.getStartWith(), column.getIncrementBy()));
+                statement.addConstraint(new AutoIncrementConstraint(column.getName(), column.getStartWith(), column.getIncrementBy()));
             }
         }
 
@@ -138,7 +138,7 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
     }
 
     protected CreateTableStatement generateCreateTableStatement() {
-        return new CreateTableStatement(getCatalogName(), getSchemaName(), getTableName(),getRemarks());
+        return new CreateTableStatement(getCatalogName(), getSchemaName(), getTableName()).setRemarks(getRemarks());
     }
 
     @Override
