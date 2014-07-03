@@ -31,6 +31,11 @@ public abstract class AbstractStatementTest<StatementUnderTest extends Statement
         def properties = super.getStandardProperties()
         properties.remove("baseAffectedDatabaseObjects")
         properties.remove("affectedDatabaseObjects")
+
+        if (properties.size() == 0) {
+            properties.add("NONE")
+        }
+
         return properties
     }
 }

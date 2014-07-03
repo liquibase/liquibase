@@ -16,6 +16,13 @@ import java.util.Collection;
  * <p></p>
  * Statements should correspond to relatively simple. More complex operations should be handled by a {@link liquibase.change.Change} which can compose multiple Statements together.
  * Often times a Statement corresponds to a single SQL statement, but they can be any high level/abstract representation of a command.
+ * <p></p>
+ * For consistency:
+ * <ul>
+ * <li>Statements should have a no-arg constructor in addition to any convenience constructors that take normally required values.</li>
+ * <li>Any "set" style methods should return "this" to allow builder-style syntax.</li>
+ * <li>Names of attributes should be exposed as public static final Strings. </li>
+ * </ul>
  *
  * @see liquibase.statement.AbstractStatement for easier implementations
  */

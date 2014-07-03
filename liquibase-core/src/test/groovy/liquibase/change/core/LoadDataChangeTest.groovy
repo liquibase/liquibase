@@ -7,8 +7,8 @@ import liquibase.parser.core.ParsedNodeException;
 import liquibase.resource.ClassLoaderResourceAccessor
 import liquibase.snapshot.MockSnapshotGeneratorFactory
 import liquibase.snapshot.SnapshotGeneratorFactory;
-import liquibase.statement.Statement;
-import liquibase.statement.core.InsertStatement
+import liquibase.statement.Statement
+import liquibase.statement.core.InsertDataStatement
 import spock.lang.Unroll
 import liquibase.test.JUnitResourceAccessor
 
@@ -51,18 +51,18 @@ public class LoadDataChangeTest extends StandardChangeTest {
 
         then:
         sqlStatements.length == 2
-        assert sqlStatements[0] instanceof InsertStatement
-        assert sqlStatements[1] instanceof InsertStatement
+        assert sqlStatements[0] instanceof InsertDataStatement
+        assert sqlStatements[1] instanceof InsertDataStatement
 
-        "SCHEMA_NAME" == ((InsertStatement) sqlStatements[0]).getSchemaName()
-        "TABLE_NAME" == ((InsertStatement) sqlStatements[0]).getTableName()
-        "Bob Johnson" == ((InsertStatement) sqlStatements[0]).getColumnValue("name")
-        "bjohnson" == ((InsertStatement) sqlStatements[0]).getColumnValue("username")
+        "SCHEMA_NAME" == ((InsertDataStatement) sqlStatements[0]).getSchemaName()
+        "TABLE_NAME" == ((InsertDataStatement) sqlStatements[0]).getTableName()
+        "Bob Johnson" == ((InsertDataStatement) sqlStatements[0]).getColumnValue("name")
+        "bjohnson" == ((InsertDataStatement) sqlStatements[0]).getColumnValue("username")
 
-        "SCHEMA_NAME" == ((InsertStatement) sqlStatements[1]).getSchemaName()
-        "TABLE_NAME" == ((InsertStatement) sqlStatements[1]).getTableName()
-        "John Doe" == ((InsertStatement) sqlStatements[1]).getColumnValue("name")
-        "jdoe" == ((InsertStatement) sqlStatements[1]).getColumnValue("username")
+        "SCHEMA_NAME" == ((InsertDataStatement) sqlStatements[1]).getSchemaName()
+        "TABLE_NAME" == ((InsertDataStatement) sqlStatements[1]).getTableName()
+        "John Doe" == ((InsertDataStatement) sqlStatements[1]).getColumnValue("name")
+        "jdoe" == ((InsertDataStatement) sqlStatements[1]).getColumnValue("username")
 
         where:
         fileName | separator | quotChar
@@ -95,22 +95,22 @@ public class LoadDataChangeTest extends StandardChangeTest {
 
         then:
         sqlStatements.length == 2
-        assert sqlStatements[0] instanceof InsertStatement
-        assert sqlStatements[1] instanceof InsertStatement
+        assert sqlStatements[0] instanceof InsertDataStatement
+        assert sqlStatements[1] instanceof InsertDataStatement
 
-        "SCHEMA_NAME" == ((InsertStatement) sqlStatements[0]).getSchemaName()
-        "TABLE_NAME" == ((InsertStatement) sqlStatements[0]).getTableName()
-        "Bob Johnson" == ((InsertStatement) sqlStatements[0]).getColumnValue("name")
-        "bjohnson" == ((InsertStatement) sqlStatements[0]).getColumnValue("username")
-        "15" == ((InsertStatement) sqlStatements[0]).getColumnValue("age").toString()
-        Boolean.TRUE == ((InsertStatement) sqlStatements[0]).getColumnValue("active")
+        "SCHEMA_NAME" == ((InsertDataStatement) sqlStatements[0]).getSchemaName()
+        "TABLE_NAME" == ((InsertDataStatement) sqlStatements[0]).getTableName()
+        "Bob Johnson" == ((InsertDataStatement) sqlStatements[0]).getColumnValue("name")
+        "bjohnson" == ((InsertDataStatement) sqlStatements[0]).getColumnValue("username")
+        "15" == ((InsertDataStatement) sqlStatements[0]).getColumnValue("age").toString()
+        Boolean.TRUE == ((InsertDataStatement) sqlStatements[0]).getColumnValue("active")
 
-        "SCHEMA_NAME" == ((InsertStatement) sqlStatements[1]).getSchemaName()
-        "TABLE_NAME" == ((InsertStatement) sqlStatements[1]).getTableName()
-        "John Doe" == ((InsertStatement) sqlStatements[1]).getColumnValue("name")
-        "jdoe" == ((InsertStatement) sqlStatements[1]).getColumnValue("username")
-        "21" == ((InsertStatement) sqlStatements[1]).getColumnValue("age").toString()
-        Boolean.FALSE == ((InsertStatement) sqlStatements[1]).getColumnValue("active")
+        "SCHEMA_NAME" == ((InsertDataStatement) sqlStatements[1]).getSchemaName()
+        "TABLE_NAME" == ((InsertDataStatement) sqlStatements[1]).getTableName()
+        "John Doe" == ((InsertDataStatement) sqlStatements[1]).getColumnValue("name")
+        "jdoe" == ((InsertDataStatement) sqlStatements[1]).getColumnValue("username")
+        "21" == ((InsertDataStatement) sqlStatements[1]).getColumnValue("age").toString()
+        Boolean.FALSE == ((InsertDataStatement) sqlStatements[1]).getColumnValue("active")
     }
 
     def getConfirmationMessage() throws Exception {

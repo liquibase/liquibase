@@ -5,11 +5,10 @@ import liquibase.structure.core.Table;
 import liquibase.structure.core.UniqueConstraint;
 import liquibase.util.StringUtils;
 
-public class AddUniqueConstraintStatement extends AbstractTableStatement {
+public class AddUniqueConstraintStatement extends AbstractUniqueConstraintStatement {
 
     private static final String TABLESPACE = "tablespace";
     private static final String COLUMN_NAMES = "columnNames";
-    private static final String CONSTRAINT_NAME = "constraintName";
 
     private static final String DEFERRABLE = "deferrable";
     private static final String INITIALLY_DEFERRED = "initiallyDeferred";
@@ -18,10 +17,9 @@ public class AddUniqueConstraintStatement extends AbstractTableStatement {
     public AddUniqueConstraintStatement() {
     }
 
-    public AddUniqueConstraintStatement(String catalogName, String schemaName, String tableName, String columnNames, String constraintName) {
-        super(catalogName, schemaName, tableName);
+    public AddUniqueConstraintStatement(String constraintName, String catalogName, String schemaName, String tableName, String columnNames) {
+        super(constraintName, catalogName, schemaName, tableName);
         setColumnNames(columnNames);
-        setConstraintName(constraintName);
     }
 
     public String getTablespace() {
@@ -38,14 +36,6 @@ public class AddUniqueConstraintStatement extends AbstractTableStatement {
 
     public AddUniqueConstraintStatement setColumnNames(String columnNames) {
         return (AddUniqueConstraintStatement) setAttribute(COLUMN_NAMES, columnNames);
-    }
-
-    public String getConstraintName() {
-        return getAttribute(CONSTRAINT_NAME, String.class);
-    }
-
-    public AddUniqueConstraintStatement setConstraintName(String constraintName) {
-        return (AddUniqueConstraintStatement) setAttribute(CONSTRAINT_NAME, constraintName);
     }
 
     public boolean isDeferrable() {

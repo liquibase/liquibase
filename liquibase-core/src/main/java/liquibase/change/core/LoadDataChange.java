@@ -11,7 +11,7 @@ import liquibase.logging.Logger;
 import liquibase.resource.ResourceAccessor;
 import liquibase.resource.UtfBomAwareReader;
 import liquibase.statement.Statement;
-import liquibase.statement.core.InsertStatement;
+import liquibase.statement.core.InsertDataStatement;
 import liquibase.structure.core.Column;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
@@ -168,7 +168,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
                 if (line.length == 0 || (line.length == 1 && StringUtils.trimToNull(line[0]) == null)) {
                     continue; //nothing on this line
                 }
-                InsertStatement insertStatement = this.createStatement(getCatalogName(), getSchemaName(), getTableName());
+                InsertDataStatement insertDataStatement = this.createStatement(getCatalogName(), getSchemaName(), getTableName());
                 for (int i=0; i<headers.length; i++) {
                     String columnName = null;
                     if( i >= line.length ) {
@@ -216,9 +216,9 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
                     }
 
 
-                    insertStatement.addColumnValue(columnName, value);
+                    insertDataStatement.addColumnValue(columnName, value);
                 }
-                statements.add(insertStatement);
+                statements.add(insertDataStatement);
             }
 
             return statements.toArray(new Statement[statements.size()]);
@@ -279,8 +279,8 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
         return new CSVReader(streamReader, separator.charAt(0), quotchar );
     }
 
-    protected InsertStatement createStatement(String catalogName, String schemaName, String tableName){
-        return new InsertStatement(catalogName, schemaName,tableName);
+    protected InsertDataStatement createStatement(String catalogName, String schemaName, String tableName){
+        return new InsertDataStatement(catalogName, schemaName,tableName);
     }
 
     protected ColumnConfig getColumnConfig(int index, String header) {

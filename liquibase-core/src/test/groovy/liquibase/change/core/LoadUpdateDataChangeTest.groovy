@@ -7,7 +7,7 @@ import liquibase.change.StandardChangeTest;
 import liquibase.sdk.database.MockDatabase
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.statement.Statement
-import liquibase.statement.core.InsertOrUpdateStatement;
+import liquibase.statement.core.InsertOrUpdateDataStatement;
 import static org.junit.Assert.*
 
 public class LoadUpdateDataChangeTest extends StandardChangeTest {
@@ -38,7 +38,7 @@ public class LoadUpdateDataChangeTest extends StandardChangeTest {
 
         then:
         assert statements != null
-        assert statements[0] instanceof InsertOrUpdateStatement
+        assert statements[0] instanceof InsertOrUpdateDataStatement
     }
 
     @Override

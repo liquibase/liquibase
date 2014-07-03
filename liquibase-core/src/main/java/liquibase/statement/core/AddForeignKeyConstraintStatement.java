@@ -8,19 +8,14 @@ import liquibase.structure.core.Table;
 /**
  * Adds a foreign key constraint to an existing column
  */
-public class AddForeignKeyConstraintStatement extends AbstractStatement {
+public class AddForeignKeyConstraintStatement extends AbstractForeignKeyStatement {
 
-    private static final String BASE_TABLE_CATALOG_NAME = "baseTableCatalogName";
-    private static final String BASE_TABLE_SCHEMA_NAME = "baseTableSchemaName";
-    private static final String BASE_TABLE_NAME = "baseTableName";
     private static final String BASE_COLUMN_NAMES = "baseColumnNames";
 
     private static final String REFERENCED_TABLE_CATALOG_NAME = "referencedTableCatalogName";
     private static final String REFERENCED_TABLE_SCHEMA_NAME = "referencedTableSchemaName";
     private static final String REFERENCED_TABLE_NAME = "referencedTableName";
     private static final String REFERENCED_COLUMN_NAMES = "referencedColumnNames";
-
-    private static final String CONSTRAINT_NAME = "constraintName";
 
     private static final String DEFERRABLE = "deferrable";
     private static final String INITIALLY_DEFERRED = "initiallyDeferred";
@@ -32,43 +27,15 @@ public class AddForeignKeyConstraintStatement extends AbstractStatement {
     }
 
     public AddForeignKeyConstraintStatement(String constraintName, String baseTableCatalogName, String baseTableSchemaName, String baseTableName, String baseColumnNames, String referencedTableCatalogName, String referencedTableSchemaName, String referencedTableName, String referencedColumnNames) {
-        setBaseTableCatalogName(baseTableCatalogName);
-        setBaseTableSchemaName(baseTableSchemaName);
-        setBaseTableName(baseTableName);
+        super(constraintName, baseTableCatalogName, baseTableSchemaName, baseTableName);
+
         setBaseColumnNames(baseColumnNames);
 
         setReferencedTableCatalogName(referencedTableCatalogName);
         setReferencedTableSchemaName(referencedTableSchemaName);
         setReferencedTableName(referencedTableName);
         setReferencedColumnNames(referencedColumnNames);
-        setConstraintName(constraintName);
     }
-
-    public String getBaseTableCatalogName() {
-        return getAttribute(BASE_TABLE_CATALOG_NAME, String.class);
-    }
-
-    public AddForeignKeyConstraintStatement setBaseTableCatalogName(String baseTableCatalogName) {
-        return (AddForeignKeyConstraintStatement) setAttribute(BASE_TABLE_CATALOG_NAME, baseTableCatalogName);
-    }
-
-    public String getBaseTableSchemaName() {
-        return getAttribute(BASE_TABLE_SCHEMA_NAME, String.class);
-    }
-
-    public AddForeignKeyConstraintStatement setBaseTableSchemaName(String baseTableSchemaName) {
-        return (AddForeignKeyConstraintStatement) setAttribute(BASE_TABLE_SCHEMA_NAME, baseTableSchemaName);
-    }
-
-
-    public String getBaseTableName() {
-        return getAttribute(BASE_TABLE_NAME, String.class);
-    }
-
-    public AddForeignKeyConstraintStatement setBaseTableName(String baseTableName) {
-        return (AddForeignKeyConstraintStatement) setAttribute(BASE_TABLE_NAME, baseTableName);
-    }
-
 
     public String getBaseColumnNames() {
         return getAttribute(BASE_COLUMN_NAMES, String.class);
@@ -77,7 +44,6 @@ public class AddForeignKeyConstraintStatement extends AbstractStatement {
     public AddForeignKeyConstraintStatement setBaseColumnNames(String baseColumnNames) {
         return (AddForeignKeyConstraintStatement) setAttribute(BASE_COLUMN_NAMES, baseColumnNames);
     }
-
 
     public String getReferencedTableCatalogName() {
         return getAttribute(REFERENCED_TABLE_CATALOG_NAME, String.class);
@@ -113,16 +79,6 @@ public class AddForeignKeyConstraintStatement extends AbstractStatement {
     public AddForeignKeyConstraintStatement setReferencedColumnNames(String referencedColumnNames) {
         return (AddForeignKeyConstraintStatement) setAttribute(REFERENCED_COLUMN_NAMES, referencedColumnNames);
     }
-
-
-    public String getConstraintName() {
-        return getAttribute(CONSTRAINT_NAME, String.class);
-    }
-
-    public AddForeignKeyConstraintStatement setConstraintName(String constraintName) {
-        return (AddForeignKeyConstraintStatement) setAttribute(CONSTRAINT_NAME, constraintName);
-    }
-
 
     public boolean isDeferrable() {
         return getAttribute(DEFERRABLE, false);

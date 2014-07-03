@@ -3,6 +3,7 @@ package liquibase.sqlgenerator.core;
 import liquibase.action.Action;
 import liquibase.exception.UnsupportedException;
 import liquibase.statement.Statement;
+import liquibase.statement.core.InsertDataStatement;
 import liquibase.statementlogic.StatementLogicChain;
 import liquibase.statementlogic.StatementLogicFactory;
 import liquibase.change.Change;
@@ -15,7 +16,6 @@ import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
 import  liquibase.ExecutionEnvironment;
 import liquibase.statement.DatabaseFunction;
-import liquibase.statement.core.InsertStatement;
 import liquibase.statement.core.MarkChangeSetRanStatement;
 import liquibase.statement.core.UpdateStatement;
 import liquibase.util.LiquibaseUtil;
@@ -52,7 +52,7 @@ public class MarkChangeSetRanGenerator extends AbstractSqlGenerator<MarkChangeSe
                         .setWhereClause("ID=? AND AUTHOR=? AND FILENAME=?")
                         .addWhereParameters(changeSet.getId(), changeSet.getAuthor(), changeSet.getFilePath());
             } else {
-                runStatement = new InsertStatement(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName())
+                runStatement = new InsertDataStatement(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName())
                         .addColumnValue("ID", changeSet.getId())
                         .addColumnValue("AUTHOR", changeSet.getAuthor())
                         .addColumnValue("FILENAME", changeSet.getFilePath())
@@ -74,7 +74,7 @@ public class MarkChangeSetRanGenerator extends AbstractSqlGenerator<MarkChangeSe
                     }
                 }
                 if (tag != null) {
-                    ((InsertStatement) runStatement).addColumnValue("TAG", tag);
+                    ((InsertDataStatement) runStatement).addColumnValue("TAG", tag);
                 }
             }
         } catch (LiquibaseException e) {

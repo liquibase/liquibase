@@ -2,7 +2,7 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.database.core.DB2Database;
 import  liquibase.ExecutionEnvironment;
-import liquibase.statement.core.InsertOrUpdateStatement;
+import liquibase.statement.core.InsertOrUpdateDataStatement;
 
 public class InsertOrUpdateGeneratorDB2 extends InsertOrUpdateGenerator {
 
@@ -13,13 +13,13 @@ public class InsertOrUpdateGeneratorDB2 extends InsertOrUpdateGenerator {
 
 	@Override
 	protected String getRecordCheck(
-			InsertOrUpdateStatement insertOrUpdateStatement, ExecutionEnvironment env,
+			InsertOrUpdateDataStatement insertOrUpdateDataStatement, ExecutionEnvironment env,
 			String whereClause) {
         StringBuffer recordCheckSql = new StringBuffer();
 
         recordCheckSql.append("BEGIN ATOMIC\n");
         recordCheckSql.append("\tDECLARE v_reccount INTEGER;\n");
-        recordCheckSql.append("\tSET v_reccount = (SELECT COUNT(*) FROM " + env.getTargetDatabase().escapeTableName(insertOrUpdateStatement.getCatalogName(), insertOrUpdateStatement.getSchemaName(), insertOrUpdateStatement.getTableName()) + " WHERE ");
+        recordCheckSql.append("\tSET v_reccount = (SELECT COUNT(*) FROM " + env.getTargetDatabase().escapeTableName(insertOrUpdateDataStatement.getCatalogName(), insertOrUpdateDataStatement.getSchemaName(), insertOrUpdateDataStatement.getTableName()) + " WHERE ");
 
         recordCheckSql.append(whereClause);
         recordCheckSql.append(");\n");
@@ -30,7 +30,7 @@ public class InsertOrUpdateGeneratorDB2 extends InsertOrUpdateGenerator {
 	}
 	
 	@Override
-	public boolean supports(InsertOrUpdateStatement statement, ExecutionEnvironment env) {
+	public boolean supports(InsertOrUpdateDataStatement statement, ExecutionEnvironment env) {
 		return env.getTargetDatabase() instanceof DB2Database;
 	}
 	

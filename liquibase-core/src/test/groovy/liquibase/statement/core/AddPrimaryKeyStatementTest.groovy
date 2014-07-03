@@ -6,7 +6,7 @@ public class AddPrimaryKeyStatementTest extends AbstractStatementTest<AddPrimary
 
     def "constructor"() {
         when:
-        def obj = new AddPrimaryKeyStatement("CAT_NAME", "SCHEMA_NAME", "TABLE_NAME", "COLUMN1, COLUMN2", "CONST_NAME")
+        def obj = new AddPrimaryKeyStatement("CONST_NAME", "CAT_NAME", "SCHEMA_NAME", "TABLE_NAME", "COLUMN1, COLUMN2")
 
         then:
         obj.getCatalogName() == "CAT_NAME"

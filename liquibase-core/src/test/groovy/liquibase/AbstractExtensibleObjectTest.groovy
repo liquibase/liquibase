@@ -7,6 +7,8 @@ import spock.lang.Specification
 import spock.lang.Unroll
 
 import java.lang.reflect.Array
+import java.lang.reflect.Field
+import java.lang.reflect.Modifier
 
 /**
  * Abstract test class to extend from when testing AbstractExtensibleObjects.
@@ -35,7 +37,7 @@ abstract class AbstractExtensibleObjectTest extends Specification {
             }
         }
 
-        obj."$getMethod"() == defaultValue
+        assert obj."$getMethod"() == defaultValue : " obj.$getMethod() does not return the expected default value of $defaultValue. It returns ${obj."$getMethod"()}. You may need to override ${this.class.name}.getDefaultPropertyValue()."
 
 
         def returnFromSet = obj."set$upperCasePropertyName"(newValue)
@@ -63,9 +65,12 @@ abstract class AbstractExtensibleObjectTest extends Specification {
         when:
         def obj = createObject()
         def type = obj.getMetaClass().getMetaProperty(propertyName).type
-        def setMethod = obj.getMetaClass().getMetaMethod("set${StringUtils.upperCaseFirst(propertyName)}", type)
+
+        def methodName = "set${StringUtils.upperCaseFirst(propertyName)}"
+        def setMethod = obj.getMetaClass().getMetaMethod(methodName, type)
 
         then:
+        assert setMethod != null : "No set method ${methodName} found. Should this property be removed in an overriden ${this.class.name}.getStandardProperties() method?"
         setMethod.returnType.isAssignableFrom(obj.class)
 
         where:
@@ -99,6 +104,40 @@ abstract class AbstractExtensibleObjectTest extends Specification {
 
         then:
         obj.getAttribute(TEST_ATTRIBUTE_NAME, Object.class) == null
+    }
+
+    @Unroll("#featureName: #field.name")
+    def "attribute constants are public static final"() {
+        if (field == null) {
+            return
+        }
+        expect:
+        Modifier.isPublic(field.getModifiers())
+        Modifier.isStatic(field.getModifiers())
+        Modifier.isFinal(field.getModifiers())
+
+        where:
+        field << getAllDeclaredFields().findAll { it == null || StringUtils.isUpperCase(it.name)}
+    }
+
+    /**
+     * Return declared fields for this class and all superclasses. If none, returns array with single null value.
+     * @return
+     */
+    protected List<Field> getAllDeclaredFields() {
+        List<Field> returnList = new ArrayList<Field>()
+
+        def classToSearch = createObject().class
+        while (classToSearch != Object) {
+            returnList.addAll(classToSearch.getDeclaredFields())
+            classToSearch = classToSearch.getSuperclass()
+        }
+
+        if (returnList.size() == 0) {
+            returnList.add(null);
+        }
+
+        return returnList
     }
 
     /**

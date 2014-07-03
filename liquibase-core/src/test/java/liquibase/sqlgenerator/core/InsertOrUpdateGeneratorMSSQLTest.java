@@ -2,7 +2,7 @@ package liquibase.sqlgenerator.core;
 
 import junit.framework.Assert;
 import liquibase.database.core.MSSQLDatabase;
-import liquibase.statement.core.InsertOrUpdateStatement;
+import liquibase.statement.core.InsertOrUpdateDataStatement;
 import org.junit.Test;
 
 import java.lang.reflect.InvocationTargetException;
@@ -20,7 +20,7 @@ public class InsertOrUpdateGeneratorMSSQLTest {
         InsertOrUpdateGeneratorMSSQL generator = new InsertOrUpdateGeneratorMSSQL();
         MSSQLDatabase database = new MSSQLDatabase();
 
-        InsertOrUpdateStatement statement = new InsertOrUpdateStatement("mycatalog", "myschema","mytable","pk_col1");
+        InsertOrUpdateDataStatement statement = new InsertOrUpdateDataStatement("mycatalog", "myschema","mytable","pk_col1");
         statement.addColumnValue("pk_col1","value1");
         statement.addColumnValue("col2","value2");
 
@@ -43,7 +43,7 @@ public class InsertOrUpdateGeneratorMSSQLTest {
         InsertOrUpdateGeneratorMSSQL generator = new InsertOrUpdateGeneratorMSSQL();
         MSSQLDatabase database = new MSSQLDatabase();
 
-        InsertOrUpdateStatement statement = new InsertOrUpdateStatement("mycatalog", "myschema","mytable","pk_col1");
+        InsertOrUpdateDataStatement statement = new InsertOrUpdateDataStatement("mycatalog", "myschema","mytable","pk_col1");
         statement.addColumnValue("pk_col1","value1");
         statement.addColumnValue("col2","value2");
 
@@ -67,7 +67,7 @@ public class InsertOrUpdateGeneratorMSSQLTest {
         InsertOrUpdateGeneratorMSSQL generator = new InsertOrUpdateGeneratorMSSQL();
         MSSQLDatabase database = new MSSQLDatabase();
 
-        InsertOrUpdateStatement statement = new InsertOrUpdateStatement("mycatalog", "myschema","mytable","pk_col1");
+        InsertOrUpdateDataStatement statement = new InsertOrUpdateDataStatement("mycatalog", "myschema","mytable","pk_col1");
         statement.addColumnValue("pk_col1","value1");
         statement.addColumnValue("col2","value2");
 
@@ -87,7 +87,7 @@ public class InsertOrUpdateGeneratorMSSQLTest {
          InsertOrUpdateGeneratorMSSQL generator = new InsertOrUpdateGeneratorMSSQL();
          MSSQLDatabase database = new MSSQLDatabase();
 
-         InsertOrUpdateStatement statement = new InsertOrUpdateStatement("mycatalog", "myschema","mytable","pk_col1");
+         InsertOrUpdateDataStatement statement = new InsertOrUpdateDataStatement("mycatalog", "myschema","mytable","pk_col1");
          statement.addColumnValue("col2","value2");
 
          String where = "1 = 1";

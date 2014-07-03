@@ -5,28 +5,13 @@ import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.StoredProcedure;
 
-public class DropProcedureStatement extends AbstractStatement {
+public class DropProcedureStatement extends AbstractProcedureStatement {
 
-    private String catalogName;
-    private String schemaName;
-    private String procedureName;
+    public DropProcedureStatement() {
+    }
 
     public DropProcedureStatement(String catalogName, String schemaName, String procedureName) {
-        this.catalogName = catalogName;
-        this.schemaName = schemaName;
-        this.procedureName = procedureName;
-    }
-
-    public String getCatalogName() {
-        return catalogName;
-    }
-
-    public String getSchemaName() {
-        return schemaName;
-    }
-
-    public String getProcedureName() {
-        return procedureName;
+        super(catalogName, schemaName, procedureName);
     }
 
     @Override

@@ -27,12 +27,10 @@ public class CreateTableStatement extends AbstractTableStatement {
     private static final String CONSTRAINTS = "constraints";
 
     public CreateTableStatement() {
-        init();
     }
 
     public CreateTableStatement(String catalogName, String schemaName, String tableName) {
         super(catalogName, schemaName, tableName);
-        init();
     }
 
     protected void init() {

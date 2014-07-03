@@ -13,6 +13,17 @@ import java.util.List;
  */
 public abstract class AbstractStatement extends AbstractExtensibleObject implements Statement {
 
+    protected AbstractStatement() {
+        init();
+    }
+
+    /**
+     * Called by the constructor for initialization that should occur in all constructors.
+     */
+    protected void init() {
+
+    }
+
     /**
      * Default implementation returns false
      */

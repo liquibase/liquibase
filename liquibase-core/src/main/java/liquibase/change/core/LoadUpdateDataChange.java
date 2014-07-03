@@ -10,9 +10,9 @@ import liquibase.exception.LiquibaseException;
 import liquibase.exception.RollbackImpossibleException;
 import  liquibase.ExecutionEnvironment;
 import liquibase.statement.Statement;
-import liquibase.statement.core.DeleteStatement;
-import liquibase.statement.core.InsertOrUpdateStatement;
-import liquibase.statement.core.InsertStatement;
+import liquibase.statement.core.DeleteDataStatement;
+import liquibase.statement.core.InsertDataStatement;
+import liquibase.statement.core.InsertOrUpdateDataStatement;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,8 +41,8 @@ public class LoadUpdateDataChange extends LoadDataChange {
     }
 
     @Override
-    protected InsertStatement createStatement(String catalogName, String schemaName, String tableName) {
-        return new InsertOrUpdateStatement(catalogName, schemaName, tableName, this.primaryKey);
+    protected InsertDataStatement createStatement(String catalogName, String schemaName, String tableName) {
+        return new InsertOrUpdateDataStatement(catalogName, schemaName, tableName, this.primaryKey);
     }
 
     @Override
@@ -51,8 +51,8 @@ public class LoadUpdateDataChange extends LoadDataChange {
         Statement[] forward = this.generateStatements(env);
 
         for(Statement thisForward: forward){
-            InsertOrUpdateStatement thisInsert = (InsertOrUpdateStatement)thisForward;
-            DeleteStatement delete = new DeleteStatement(getCatalogName(), getSchemaName(),getTableName());
+            InsertOrUpdateDataStatement thisInsert = (InsertOrUpdateDataStatement)thisForward;
+            DeleteDataStatement delete = new DeleteDataStatement(getCatalogName(), getSchemaName(),getTableName());
             delete.setWhere(getWhere(thisInsert, env.getTargetDatabase()));
             statements.add(delete);
         }
@@ -60,15 +60,15 @@ public class LoadUpdateDataChange extends LoadDataChange {
         return statements.toArray(new Statement[statements.size()]);
     }
 
-    private String getWhere(InsertOrUpdateStatement insertOrUpdateStatement, Database database) {
+    private String getWhere(InsertOrUpdateDataStatement insertOrUpdateDataStatement, Database database) {
         StringBuilder where = new StringBuilder();
 
-        String[] pkColumns = insertOrUpdateStatement.getPrimaryKey().split(",");
+        String[] pkColumns = insertOrUpdateDataStatement.getPrimaryKey().split(",");
 
         for(String thisPkColumn:pkColumns)
         {
-            where.append(database.escapeColumnName(insertOrUpdateStatement.getCatalogName(), insertOrUpdateStatement.getSchemaName(), insertOrUpdateStatement.getTableName(), thisPkColumn)).append(" = ");
-            Object newValue = insertOrUpdateStatement.getColumnValues().get(thisPkColumn);
+            where.append(database.escapeColumnName(insertOrUpdateDataStatement.getCatalogName(), insertOrUpdateDataStatement.getSchemaName(), insertOrUpdateDataStatement.getTableName(), thisPkColumn)).append(" = ");
+            Object newValue = insertOrUpdateDataStatement.getColumnValue(thisPkColumn);
             where.append(DataTypeFactory.getInstance().fromObject(newValue, database).objectToSql(newValue, database));
 
             where.append(" AND ");

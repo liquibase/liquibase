@@ -12,6 +12,7 @@ public class StringUtils {
     private static final Pattern commentPattern = Pattern.compile("/\\*.*?\\*/", Pattern.DOTALL);
     private static final Pattern upperCasePattern = Pattern.compile(".*[A-Z].*");
     private static final Pattern lowerCasePattern = Pattern.compile(".*[a-z].*");
+    private static final Pattern allUpperCasePattern = Pattern.compile("[^a-z]*");
 
 
     /**
@@ -241,6 +242,14 @@ public class StringUtils {
 
     public static boolean hasUpperCase(String string) {
         return upperCasePattern.matcher(string).matches();
+    }
+
+    /**
+     * Returns if all letters in the string are upper case. Numbers and symbols are not included in the check.
+     * Passing null returns true.
+     */
+    public static boolean isUpperCase(String string) {
+        return string == null || allUpperCasePattern.matcher(string).matches();
     }
 
     public static boolean hasLowerCase(String string) {

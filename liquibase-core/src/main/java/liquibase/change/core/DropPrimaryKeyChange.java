@@ -78,7 +78,7 @@ public class DropPrimaryKeyChange extends AbstractChange {
         }
     	
         return new Statement[]{
-                new DropPrimaryKeyStatement(getCatalogName(), getSchemaName(), getTableName(), getConstraintName()),
+                new DropPrimaryKeyStatement(getConstraintName(), getCatalogName(), getSchemaName(), getTableName()),
         };
     }
 

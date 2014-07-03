@@ -23,7 +23,7 @@ public class AddUniqueConstraintGeneratorTest extends AbstractSqlGeneratorTest<A
 
     @Override
     protected AddUniqueConstraintStatement createSampleSqlStatement() {
-        return new AddUniqueConstraintStatement(null, null, TABLE_NAME, COLUMN_NAME, null);
+        return new AddUniqueConstraintStatement(null, null, null, TABLE_NAME, COLUMN_NAME);
     }
 
     @Override

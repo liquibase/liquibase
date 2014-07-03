@@ -76,7 +76,7 @@ public class DropUniqueConstraintChange extends AbstractChange {
 //        }
         DropUniqueConstraintStatement statement = new DropUniqueConstraintStatement(getCatalogName(), getSchemaName(), getTableName(), getConstraintName());
     	if (env.getTargetDatabase() instanceof SybaseASADatabase) {
-    		statement.setUniqueColumns(uniqueColumns);
+    		statement.setColumnNames(uniqueColumns);
     	}
     	return new Statement[]{
 			statement

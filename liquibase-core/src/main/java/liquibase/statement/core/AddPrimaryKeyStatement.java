@@ -7,19 +7,17 @@ import liquibase.structure.core.Table;
 /**
  * Adds a primary key to an existing table.
  */
-public class AddPrimaryKeyStatement extends AbstractTableStatement {
+public class AddPrimaryKeyStatement extends AbstractPrimaryKeyStatement {
 
     private static final String TABLESPACE = "tablespace";
     private static final String COLUMN_NAMES = "columnNames";
-    private static final String CONSTRAINT_NAME = "constraintName";
 
     public AddPrimaryKeyStatement() {
     }
 
     public AddPrimaryKeyStatement(String catalogName, String schemaName, String tableName, String columnNames, String constraintName) {
-        super(catalogName, schemaName, tableName);
+        super(constraintName, catalogName, schemaName, tableName);
         setColumnNames(columnNames);
-        setConstraintName(constraintName);
     }
 
     public String getTablespace() {
@@ -36,14 +34,6 @@ public class AddPrimaryKeyStatement extends AbstractTableStatement {
 
     public AddPrimaryKeyStatement setColumnNames(String columnNames) {
         return (AddPrimaryKeyStatement) setAttribute(COLUMN_NAMES, columnNames);
-    }
-
-    public String getConstraintName() {
-        return getAttribute(CONSTRAINT_NAME, String.class);
-    }
-
-    public AddPrimaryKeyStatement setConstraintName(String constraintName) {
-        return (AddPrimaryKeyStatement) setAttribute(CONSTRAINT_NAME, constraintName);
     }
 
     @Override

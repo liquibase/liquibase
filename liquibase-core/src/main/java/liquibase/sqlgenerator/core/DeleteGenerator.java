@@ -3,31 +3,31 @@ package liquibase.sqlgenerator.core;
 import liquibase.action.Action;
 import liquibase.action.core.UnparsedSql;
 import liquibase.exception.UnsupportedException;
+import liquibase.statement.core.DeleteDataStatement;
 import liquibase.statementlogic.StatementLogicChain;
 import liquibase.database.Database;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.ValidationErrors;
 import  liquibase.ExecutionEnvironment;
-import liquibase.statement.core.DeleteStatement;
 import liquibase.structure.core.Column;
 
-public class DeleteGenerator extends AbstractSqlGenerator<DeleteStatement> {
+public class DeleteGenerator extends AbstractSqlGenerator<DeleteDataStatement> {
 
     @Override
-    public ValidationErrors validate(DeleteStatement deleteStatement, ExecutionEnvironment env, StatementLogicChain chain) {
+    public ValidationErrors validate(DeleteDataStatement deleteDataStatement, ExecutionEnvironment env, StatementLogicChain chain) {
         ValidationErrors validationErrors = new ValidationErrors();
-        validationErrors.checkRequiredField("tableName", deleteStatement.getTableName());
+        validationErrors.checkRequiredField("tableName", deleteDataStatement.getTableName());
         return validationErrors;
     }
 
     @Override
-    public Action[] generateActions(DeleteStatement statement, ExecutionEnvironment env, StatementLogicChain chain) throws UnsupportedException {
+    public Action[] generateActions(DeleteDataStatement statement, ExecutionEnvironment env, StatementLogicChain chain) throws UnsupportedException {
         Database database = env.getTargetDatabase();
 
         StringBuffer sql = new StringBuffer("DELETE FROM " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()));
 
-        if (statement.getWhereClause() != null) {
-            String fixedWhereClause = " WHERE " + statement.getWhereClause();
+        if (statement.getWhere() != null) {
+            String fixedWhereClause = " WHERE " + statement.getWhere();
             for (String columnName : statement.getWhereColumnNames()) {
                 if (columnName == null) {
                     continue;

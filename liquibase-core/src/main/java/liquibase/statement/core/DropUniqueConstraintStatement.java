@@ -6,62 +6,31 @@ import liquibase.structure.core.Table;
 import liquibase.structure.core.UniqueConstraint;
 import liquibase.util.StringUtils;
 
-public class DropUniqueConstraintStatement extends AbstractStatement {
+public class DropUniqueConstraintStatement extends AbstractUniqueConstraintStatement {
 
-    private String catalogName;
-    private String schemaName;
-    private String tableName;
-    private String constraintName;
-    /**
-     * Sybase ASA does drop unique constraint not by name, but using list of the columns in unique clause.
-     */
-    private String uniqueColumns;
+    public static final String COLUMN_NAMES = "columnNames";
 
-    public DropUniqueConstraintStatement(String catalogName, String schemaName, String tableName, String constraintName) {
-        this.catalogName = catalogName;
-        this.schemaName = schemaName;
-        this.tableName = tableName;
-        this.constraintName = constraintName;
+    public DropUniqueConstraintStatement() {
     }
 
-    public DropUniqueConstraintStatement(String catalogName, String schemaName, String tableName, String constraintName, String uniqueColumns) {
-        this.catalogName = catalogName;
-        this.schemaName = schemaName;
-        this.tableName = tableName;
-        this.constraintName = constraintName;
-        this.uniqueColumns = uniqueColumns;
+    public DropUniqueConstraintStatement(String constraintName, String catalogName, String schemaName, String tableName) {
+        super(constraintName, catalogName, schemaName, tableName);
     }
 
-    public String getCatalogName() {
-        return catalogName;
+    public String getColumnNames() {
+        return getAttribute(COLUMN_NAMES, String.class);
     }
 
-    public String getSchemaName() {
-        return schemaName;
-    }
-
-    public String getTableName() {
-        return tableName;
-    }
-
-    public String getConstraintName() {
-        return constraintName;
-    }
-
-    public String getUniqueColumns() {
-        return uniqueColumns;
-    }
-
-    public void setUniqueColumns(String uniqueColumns) {
-        this.uniqueColumns = uniqueColumns;
+    public DropUniqueConstraintStatement setColumnNames(String uniqueColumns) {
+        return (DropUniqueConstraintStatement) setAttribute(COLUMN_NAMES, uniqueColumns);
     }
 
     @Override
     protected DatabaseObject[] getBaseAffectedDatabaseObjects() {
         UniqueConstraint constraint = new UniqueConstraint().setName(getConstraintName()).setTable((Table) new Table().setName(getTableName()).setSchema(getCatalogName(), getSchemaName()));
-        if (getUniqueColumns() != null) {
+        if (getColumnNames() != null) {
             int i = 0;
-            for (String column : StringUtils.splitAndTrim(getUniqueColumns(), ",")) {
+            for (String column : StringUtils.splitAndTrim(getColumnNames(), ",")) {
                 constraint.addColumn(i++, column);
             }
         }

@@ -5,44 +5,24 @@ import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Index;
 import liquibase.structure.core.Table;
 
-public class DropIndexStatement extends AbstractStatement {
+public class DropIndexStatement extends AbstractIndexStatement {
 
-    private String indexName;
-    private String tableCatalogName;
-    private String tableSchemaName;
-    private String tableName;
-    private String associatedWith;
+    public static final String ASSOCIATED_WITH = "associatedWith";
+
+    public DropIndexStatement() {
+    }
 
     public DropIndexStatement(String indexName, String tableCatalogName, String tableSchemaName, String tableName, String associatedWith) {
-        this.tableCatalogName = tableCatalogName;
-        this.tableSchemaName = tableSchemaName;
-        this.indexName = indexName;
-        this.tableName = tableName;
-        this.associatedWith = associatedWith;
-    }
-
-    public String getTableCatalogName() {
-        return tableCatalogName;
-    }
-
-    public String getTableSchemaName() {
-        return tableSchemaName;
-    }
-
-    public String getIndexName() {
-        return indexName;
-    }
-
-    public String getTableName() {
-        return tableName;
+        super(indexName, tableCatalogName, tableSchemaName, tableName);
+        setAssociatedWith(associatedWith);
     }
 
     public String getAssociatedWith() {
-        return associatedWith;
+        return getAttribute(ASSOCIATED_WITH, String.class);
     }
 
-    public void setAssociatedWith(String associatedWith) {
-        this.associatedWith = associatedWith;
+    public DropIndexStatement setAssociatedWith(String associatedWith) {
+        return (DropIndexStatement) setAttribute(ASSOCIATED_WITH, associatedWith);
     }
 
     @Override

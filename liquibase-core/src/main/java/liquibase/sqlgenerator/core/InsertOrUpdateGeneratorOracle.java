@@ -5,18 +5,18 @@ import liquibase.database.core.OracleDatabase;
 import  liquibase.ExecutionEnvironment;
 import liquibase.executor.ExecutorService;
 import liquibase.executor.LoggingExecutor;
-import liquibase.statement.core.InsertOrUpdateStatement;
+import liquibase.statement.core.InsertOrUpdateDataStatement;
 
 public class InsertOrUpdateGeneratorOracle extends InsertOrUpdateGenerator {
 
 
     @Override
-    public boolean supports(InsertOrUpdateStatement statement, ExecutionEnvironment env) {
+    public boolean supports(InsertOrUpdateDataStatement statement, ExecutionEnvironment env) {
         return env.getTargetDatabase() instanceof OracleDatabase;
     }
 
     @Override
-    protected String getRecordCheck(InsertOrUpdateStatement insertOrUpdateStatement, ExecutionEnvironment env, String whereClause) {
+    protected String getRecordCheck(InsertOrUpdateDataStatement insertOrUpdateDataStatement, ExecutionEnvironment env, String whereClause) {
 
         StringBuffer recordCheckSql = new StringBuffer();
 
@@ -24,7 +24,7 @@ public class InsertOrUpdateGeneratorOracle extends InsertOrUpdateGenerator {
         recordCheckSql.append("\tv_reccount NUMBER := 0;\n");
         recordCheckSql.append("BEGIN\n");
         Database database = env.getTargetDatabase();
-        recordCheckSql.append("\tSELECT COUNT(*) INTO v_reccount FROM " + database.escapeTableName(insertOrUpdateStatement.getCatalogName(), insertOrUpdateStatement.getSchemaName(), insertOrUpdateStatement.getTableName()) + " WHERE ");
+        recordCheckSql.append("\tSELECT COUNT(*) INTO v_reccount FROM " + database.escapeTableName(insertOrUpdateDataStatement.getCatalogName(), insertOrUpdateDataStatement.getSchemaName(), insertOrUpdateDataStatement.getTableName()) + " WHERE ");
 
         recordCheckSql.append(whereClause);
         recordCheckSql.append(";\n");

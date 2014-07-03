@@ -5,9 +5,5 @@ import liquibase.statement.AbstractStatementTest
 
 public class DropColumnStatementTest extends AbstractStatementTest {
 
-    @Override
-    protected AbstractExtensibleObject createObject() {
-        return new DropColumnStatement(null, null, null, null);
-    }
 
 }

@@ -4,7 +4,7 @@ import liquibase.change.*;
 import liquibase.exception.ValidationErrors;
 import  liquibase.ExecutionEnvironment;
 import liquibase.statement.Statement;
-import liquibase.statement.core.InsertStatement;
+import liquibase.statement.core.InsertDataStatement;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -95,7 +95,7 @@ public class InsertDataChange extends AbstractChange implements ChangeWithColumn
 //            }
         }
 
-        InsertStatement statement = new InsertStatement(getCatalogName(), getSchemaName(), getTableName());
+        InsertDataStatement statement = new InsertDataStatement(getCatalogName(), getSchemaName(), getTableName());
 
         if (needsPreparedStatement) {
             statement.setNeedsPreparedStatement(true);

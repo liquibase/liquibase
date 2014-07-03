@@ -3,23 +3,23 @@ package liquibase.sqlgenerator.core;
 import liquibase.action.Action;
 import liquibase.action.core.UnparsedSql;
 import liquibase.exception.UnsupportedException;
+import liquibase.statement.core.InsertDataStatement;
 import liquibase.statementlogic.StatementLogicChain;
 import liquibase.database.Database;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.ValidationErrors;
 import  liquibase.ExecutionEnvironment;
 import liquibase.statement.DatabaseFunction;
-import liquibase.statement.core.InsertStatement;
 
 import java.util.Date;
 
-public class InsertGenerator extends AbstractSqlGenerator<InsertStatement> {
+public class InsertGenerator extends AbstractSqlGenerator<InsertDataStatement> {
 
     @Override
-    public ValidationErrors validate(InsertStatement insertStatement, ExecutionEnvironment env, StatementLogicChain chain) {
+    public ValidationErrors validate(InsertDataStatement insertDataStatement, ExecutionEnvironment env, StatementLogicChain chain) {
         ValidationErrors validationErrors = new ValidationErrors();
-        validationErrors.checkRequiredField("tableName", insertStatement.getTableName());
-        validationErrors.checkRequiredField("columns", insertStatement.getColumnValues());
+        validationErrors.checkRequiredField("tableName", insertDataStatement.getTableName());
+        validationErrors.checkRequiredField("columns", insertDataStatement.getColumnNames());
 
 //        if (insertStatement.getSchemaName() != null && !database.supportsSchemas()) {
 //           validationErrors.addError("Database does not support schemas");
@@ -29,11 +29,11 @@ public class InsertGenerator extends AbstractSqlGenerator<InsertStatement> {
     }
 
     @Override
-    public Action[] generateActions(InsertStatement statement, ExecutionEnvironment env, StatementLogicChain chain) throws UnsupportedException {
+    public Action[] generateActions(InsertDataStatement statement, ExecutionEnvironment env, StatementLogicChain chain) throws UnsupportedException {
         Database database = env.getTargetDatabase();
 
         StringBuffer sql = new StringBuffer("INSERT INTO " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " (");
-        for (String column : statement.getColumnValues().keySet()) {
+        for (String column : statement.getColumnNames()) {
             sql.append(database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), column)).append(", ");
         }
         sql.deleteCharAt(sql.lastIndexOf(" "));
@@ -44,8 +44,8 @@ public class InsertGenerator extends AbstractSqlGenerator<InsertStatement> {
 
         sql.append(") VALUES (");
 
-        for (String column : statement.getColumnValues().keySet()) {
-            Object newValue = statement.getColumnValues().get(column);
+        for (String column : statement.getColumnNames()) {
+            Object newValue = statement.getColumnValue(column);
             if (newValue == null || newValue.toString().equalsIgnoreCase("NULL")) {
                 sql.append("NULL");
             } else if (newValue instanceof String && !looksLikeFunctionCall(((String) newValue), database)) {

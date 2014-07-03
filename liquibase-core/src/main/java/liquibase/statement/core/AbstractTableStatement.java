@@ -8,9 +8,9 @@ import liquibase.statement.Statement;
  */
 abstract class AbstractTableStatement extends AbstractStatement {
 
-    private final String CATALOG_NAME = "catalogName";
-    private final String SCHEMA_NAME = "schemaName";
-    private final String TABLE_NAME = "tableName";
+    public static final String CATALOG_NAME = "catalogName";
+    public static final String SCHEMA_NAME = "schemaName";
+    public static final String TABLE_NAME = "tableName";
 
     protected AbstractTableStatement() {
     }

@@ -64,10 +64,12 @@ public class DropForeignKeyConstraintChange extends AbstractChange {
     	
         return new Statement[]{
                 new DropForeignKeyConstraintStatement(
+                        getConstraintName(),
                         getBaseTableCatalogName(),
                         getBaseTableSchemaName(),
-                        getBaseTableName(),
-                        getConstraintName()),
+                        getBaseTableName()
+                )
+
         };    	
     }
 

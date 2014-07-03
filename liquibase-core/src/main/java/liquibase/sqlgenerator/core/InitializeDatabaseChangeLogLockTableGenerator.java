@@ -2,14 +2,14 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.action.Action;
 import liquibase.exception.UnsupportedException;
+import liquibase.statement.core.DeleteDataStatement;
+import liquibase.statement.core.InsertDataStatement;
 import liquibase.statementlogic.StatementLogicChain;
 import liquibase.statementlogic.StatementLogicFactory;
 import liquibase.database.Database;
 import liquibase.exception.ValidationErrors;
 import  liquibase.ExecutionEnvironment;
-import liquibase.statement.core.DeleteStatement;
 import liquibase.statement.core.InitializeDatabaseChangeLogLockTableStatement;
-import liquibase.statement.core.InsertStatement;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -26,15 +26,15 @@ public class InitializeDatabaseChangeLogLockTableGenerator extends AbstractSqlGe
     public Action[] generateActions(InitializeDatabaseChangeLogLockTableStatement statement, ExecutionEnvironment env, StatementLogicChain chain) throws UnsupportedException {
         Database database = env.getTargetDatabase();
 
-        DeleteStatement deleteStatement = new DeleteStatement(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName());
-        InsertStatement insertStatement = new InsertStatement(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName())
+        DeleteDataStatement deleteDataStatement = new DeleteDataStatement(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName());
+        InsertDataStatement insertDataStatement = new InsertDataStatement(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogLockTableName())
                 .addColumnValue("ID", 1)
                 .addColumnValue("LOCKED", Boolean.FALSE);
 
         List<Action> actions = new ArrayList<Action>();
 
-        actions.addAll(Arrays.asList(StatementLogicFactory.getInstance().generateActions(deleteStatement, env)));
-        actions.addAll(Arrays.asList(StatementLogicFactory.getInstance().generateActions(insertStatement, env)));
+        actions.addAll(Arrays.asList(StatementLogicFactory.getInstance().generateActions(deleteDataStatement, env)));
+        actions.addAll(Arrays.asList(StatementLogicFactory.getInstance().generateActions(insertDataStatement, env)));
 
         return actions.toArray(new Action[actions.size()]);
     }

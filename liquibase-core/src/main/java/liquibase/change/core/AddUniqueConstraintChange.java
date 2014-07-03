@@ -126,7 +126,7 @@ public class AddUniqueConstraintChange extends AbstractChange {
             disabled = getDisabled();
         }
 
-    	AddUniqueConstraintStatement statement = new AddUniqueConstraintStatement(getCatalogName(), getSchemaName(), getTableName(), getColumnNames(), getConstraintName());
+    	AddUniqueConstraintStatement statement = new AddUniqueConstraintStatement(getConstraintName(), getCatalogName(), getSchemaName(), getTableName(), getColumnNames());
         statement.setTablespace(getTablespace())
                         .setDeferrable(deferrable)
                         .setInitiallyDeferred(initiallyDeferred)

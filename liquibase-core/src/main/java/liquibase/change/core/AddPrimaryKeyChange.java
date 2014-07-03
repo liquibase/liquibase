@@ -80,7 +80,7 @@ public class AddPrimaryKeyChange extends AbstractChange {
     public Statement[] generateStatements(ExecutionEnvironment env) {
 
 
-        AddPrimaryKeyStatement statement = new AddPrimaryKeyStatement(getCatalogName(), getSchemaName(), getTableName(), getColumnNames(), getConstraintName());
+        AddPrimaryKeyStatement statement = new AddPrimaryKeyStatement(getConstraintName(), getCatalogName(), getSchemaName(), getTableName(), getColumnNames());
         statement.setTablespace(getTablespace());
 
         if (env.getTargetDatabase() instanceof DB2Database) {
