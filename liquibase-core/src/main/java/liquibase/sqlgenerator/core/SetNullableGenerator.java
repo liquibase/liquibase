@@ -3,6 +3,7 @@ package liquibase.sqlgenerator.core;
 import liquibase.action.Action;
 import liquibase.action.core.UnparsedSql;
 import liquibase.exception.UnsupportedException;
+import liquibase.statement.core.ReindexStatement;
 import liquibase.statementlogic.StatementLogicChain;
 import liquibase.statementlogic.StatementLogicFactory;
 import liquibase.database.Database;
@@ -11,7 +12,6 @@ import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.ValidationErrors;
 import  liquibase.ExecutionEnvironment;
-import liquibase.statement.core.ReorganizeTableStatement;
 import liquibase.statement.core.SetNullableStatement;
 
 import java.util.ArrayList;
@@ -89,7 +89,7 @@ public class SetNullableGenerator extends AbstractSqlGenerator<SetNullableStatem
         returnList.add(new UnparsedSql(sql));
 
         if (database instanceof DB2Database) {
-            Action[] a = StatementLogicFactory.getInstance().generateActions(new ReorganizeTableStatement(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()), env);
+            Action[] a = StatementLogicFactory.getInstance().generateActions(new ReindexStatement(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()), env);
             if (a != null) {
                 returnList.addAll(Arrays.asList(a));
             }

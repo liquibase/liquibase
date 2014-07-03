@@ -3,11 +3,11 @@ package liquibase.statement.core;
 import liquibase.statement.AbstractStatement;
 import liquibase.structure.DatabaseObject;
 
-public class MetaDataQueryStatement extends AbstractStatement {
+public class SelectMetaDataStatement extends AbstractStatement {
 
     private DatabaseObject example;
 
-    public MetaDataQueryStatement(DatabaseObject example) {
+    public SelectMetaDataStatement(DatabaseObject example) {
         this.example = example;
     }
 

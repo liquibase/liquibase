@@ -4,55 +4,26 @@ import liquibase.statement.AbstractStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Table;
 
-public class ModifyDataTypeStatement extends AbstractStatement {
-    private String catalogName;
-    private String schemaName;
-    private String tableName;
-    private String columnName;
-    private String newDataType;
+/**
+ * Change the data type of an existing column
+ */
+public class ModifyDataTypeStatement extends AbstractColumnStatement {
+    public static final String NEW_DATA_TYPE = "newDataType";
+
+    public ModifyDataTypeStatement() {
+    }
 
     public ModifyDataTypeStatement(String catalogName, String schemaName, String tableName, String columnName, String newDataType) {
-        this.catalogName = catalogName;
-        this.schemaName = schemaName;
-        this.tableName = tableName;
-        this.columnName = columnName;
-        this.newDataType = newDataType;
-    }
-
-    public String getCatalogName() {
-        return catalogName;
-    }
-
-    public String getSchemaName() {
-        return schemaName;
-    }
-
-    public void setSchemaName(String schemaName) {
-        this.schemaName = schemaName;
-    }
-
-    public String getTableName() {
-        return tableName;
-    }
-
-    public void setTableName(String tableName) {
-        this.tableName = tableName;
-    }
-
-    public String getColumnName() {
-        return columnName;
-    }
-
-    public void setColumnName(String columnName) {
-        this.columnName = columnName;
+        super(catalogName, schemaName, tableName, columnName);
+        setNewDataType(newDataType);
     }
 
     public String getNewDataType() {
-        return newDataType;
+        return getAttribute(NEW_DATA_TYPE, String.class);
     }
 
-    public void setNewDataType(String newDataType) {
-        this.newDataType = newDataType;
+    public ModifyDataTypeStatement setNewDataType(String newDataType) {
+        return (ModifyDataTypeStatement) setAttribute(NEW_DATA_TYPE, newDataType);
     }
 
     @Override

@@ -1,5 +1,6 @@
 package liquibase.change.core;
 
+import liquibase.statement.core.*;
 import liquibase.statementlogic.StatementLogicFactory;
 import liquibase.change.*;
 import liquibase.database.Database;
@@ -7,10 +8,6 @@ import liquibase.database.core.*;
 import  liquibase.ExecutionEnvironment;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.*;
-import liquibase.statement.core.AddColumnStatement;
-import liquibase.statement.core.ReorganizeTableStatement;
-import liquibase.statement.core.SetColumnRemarksStatement;
-import liquibase.statement.core.UpdateStatement;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.PrimaryKey;
 import liquibase.structure.core.Table;
@@ -140,7 +137,7 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
             sql.add(addColumnStatement);
 
             if (database instanceof DB2Database) {
-                sql.add(new ReorganizeTableStatement(getCatalogName(), getSchemaName(), getTableName()));
+                sql.add(new ReindexStatement(getCatalogName(), getSchemaName(), getTableName()));
             }            
 
             if (column.getValueObject() != null) {

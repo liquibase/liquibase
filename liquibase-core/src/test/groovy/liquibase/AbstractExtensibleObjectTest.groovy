@@ -6,7 +6,6 @@ import liquibase.util.StringUtils
 import spock.lang.Specification
 import spock.lang.Unroll
 
-import java.lang.reflect.Array
 import java.lang.reflect.Field
 import java.lang.reflect.Modifier
 
@@ -117,19 +116,19 @@ abstract class AbstractExtensibleObjectTest extends Specification {
         Modifier.isFinal(field.getModifiers())
 
         where:
-        field << getAllDeclaredFields().findAll { it == null || StringUtils.isUpperCase(it.name)}
+        field << getAllConstantLookingFields()
     }
 
     /**
      * Return declared fields for this class and all superclasses. If none, returns array with single null value.
      * @return
      */
-    protected List<Field> getAllDeclaredFields() {
+    protected List<Field> getAllConstantLookingFields() {
         List<Field> returnList = new ArrayList<Field>()
 
         def classToSearch = createObject().class
         while (classToSearch != Object) {
-            returnList.addAll(classToSearch.getDeclaredFields())
+            returnList.addAll(classToSearch.getDeclaredFields().findAll({StringUtils.isUpperCase(it.name)}))
             classToSearch = classToSearch.getSuperclass()
         }
 

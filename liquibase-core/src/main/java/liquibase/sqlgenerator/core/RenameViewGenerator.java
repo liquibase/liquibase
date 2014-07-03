@@ -28,7 +28,7 @@ public class RenameViewGenerator extends AbstractSqlGenerator<RenameViewStatemen
     @Override
     public ValidationErrors validate(RenameViewStatement renameViewStatement, ExecutionEnvironment env, StatementLogicChain chain) {
         ValidationErrors validationErrors = new ValidationErrors();
-        validationErrors.checkRequiredField("oldViewName", renameViewStatement.getOldViewName());
+        validationErrors.checkRequiredField("oldViewName", renameViewStatement.getViewName());
         validationErrors.checkRequiredField("newViewName", renameViewStatement.getNewViewName());
 
         validationErrors.checkDisallowedField("schemaName", renameViewStatement.getSchemaName(), env.getTargetDatabase(), OracleDatabase.class);
@@ -42,15 +42,15 @@ public class RenameViewGenerator extends AbstractSqlGenerator<RenameViewStatemen
         Database database = env.getTargetDatabase();
 
         if (database instanceof MSSQLDatabase) {
-            sql = "exec sp_rename '" + database.escapeViewName(statement.getCatalogName(), statement.getSchemaName(), statement.getOldViewName()) + "', '" + statement.getNewViewName() + '\'';
+            sql = "exec sp_rename '" + database.escapeViewName(statement.getCatalogName(), statement.getSchemaName(), statement.getViewName()) + "', '" + statement.getNewViewName() + '\'';
         } else if (database instanceof MySQLDatabase) {
-            sql = "RENAME TABLE " + database.escapeViewName(statement.getCatalogName(), statement.getSchemaName(), statement.getOldViewName()) + " TO " + database.escapeViewName(statement.getCatalogName(), statement.getSchemaName(), statement.getNewViewName());
+            sql = "RENAME TABLE " + database.escapeViewName(statement.getCatalogName(), statement.getSchemaName(), statement.getViewName()) + " TO " + database.escapeViewName(statement.getCatalogName(), statement.getSchemaName(), statement.getNewViewName());
         } else if (database instanceof PostgresDatabase) {
-            sql = "ALTER TABLE " + database.escapeViewName(statement.getCatalogName(), statement.getSchemaName(), statement.getOldViewName()) + " RENAME TO " + database.escapeObjectName(statement.getNewViewName(), View.class);
+            sql = "ALTER TABLE " + database.escapeViewName(statement.getCatalogName(), statement.getSchemaName(), statement.getViewName()) + " RENAME TO " + database.escapeObjectName(statement.getNewViewName(), View.class);
         } else if (database instanceof OracleDatabase) {
-            sql = "RENAME " + database.escapeObjectName(statement.getOldViewName(), View.class) + " TO " + database.escapeObjectName(statement.getNewViewName(), View.class);
+            sql = "RENAME " + database.escapeObjectName(statement.getViewName(), View.class) + " TO " + database.escapeObjectName(statement.getNewViewName(), View.class);
         } else {
-            sql = "RENAME " + database.escapeViewName(statement.getCatalogName(), statement.getSchemaName(), statement.getOldViewName()) + " TO " + database.escapeObjectName(statement.getNewViewName(), View.class);
+            sql = "RENAME " + database.escapeViewName(statement.getCatalogName(), statement.getSchemaName(), statement.getViewName()) + " TO " + database.escapeObjectName(statement.getNewViewName(), View.class);
         }
 
         return new Action[]{

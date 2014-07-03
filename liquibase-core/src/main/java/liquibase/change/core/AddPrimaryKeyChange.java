@@ -6,7 +6,7 @@ import  liquibase.ExecutionEnvironment;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.Statement;
 import liquibase.statement.core.AddPrimaryKeyStatement;
-import liquibase.statement.core.ReorganizeTableStatement;
+import liquibase.statement.core.ReindexStatement;
 import liquibase.structure.core.PrimaryKey;
 
 /**
@@ -86,7 +86,7 @@ public class AddPrimaryKeyChange extends AbstractChange {
         if (env.getTargetDatabase() instanceof DB2Database) {
             return new Statement[]{
                     statement,
-                    new ReorganizeTableStatement(getCatalogName(), getSchemaName(), getTableName())
+                    new ReindexStatement(getCatalogName(), getSchemaName(), getTableName())
             };
 //todo        } else if (database instanceof SQLiteDatabase) {
 //            // return special statements for SQLite databases

@@ -103,7 +103,8 @@ public class RenameColumnChange extends AbstractChange {
                 getCatalogName(),
                 getSchemaName(),
     			getTableName(), getOldColumnName(), getNewColumnName(), 
-    			getColumnDataType(),getRemarks())
+    			getColumnDataType())
+                .setRemarks(getRemarks())
         };
     }
 

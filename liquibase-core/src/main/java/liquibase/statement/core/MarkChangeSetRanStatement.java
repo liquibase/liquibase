@@ -6,22 +6,33 @@ import liquibase.structure.DatabaseObject;
 
 public class MarkChangeSetRanStatement extends AbstractStatement {
 
-    private ChangeSet changeSet;
+    public static final String CHANGE_SET = "changeSet";
+    public static final String EXEC_TYPE = "execType";
 
-    private ChangeSet.ExecType execType;
+    public MarkChangeSetRanStatement() {
+    }
 
     public MarkChangeSetRanStatement(ChangeSet changeSet, ChangeSet.ExecType execType) {
-        this.changeSet = changeSet;
-        this.execType = execType;
+        setChangeSet(changeSet);
+        setExecType(execType);
     }
 
     public ChangeSet getChangeSet() {
-        return changeSet;
+        return getAttribute(CHANGE_SET, ChangeSet.class);
+    }
+
+    public MarkChangeSetRanStatement setChangeSet(ChangeSet changeSet) {
+        return (MarkChangeSetRanStatement) setAttribute(CHANGE_SET, changeSet);
     }
 
     public ChangeSet.ExecType getExecType() {
-        return execType;
+        return getAttribute(EXEC_TYPE, ChangeSet.ExecType.class);
     }
+
+    public MarkChangeSetRanStatement setExecType(ChangeSet.ExecType execType) {
+        return (MarkChangeSetRanStatement) setAttribute(EXEC_TYPE, execType);
+    }
+
 
     @Override
     protected DatabaseObject[] getBaseAffectedDatabaseObjects() {

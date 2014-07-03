@@ -9,7 +9,7 @@ import  liquibase.ExecutionEnvironment;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.Statement;
 import liquibase.statement.core.DropColumnStatement;
-import liquibase.statement.core.ReorganizeTableStatement;
+import liquibase.statement.core.ReindexStatement;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Index;
 import liquibase.structure.core.Table;
@@ -107,7 +107,7 @@ public class DropColumnChange extends AbstractChange {
 
         statements.add(new DropColumnStatement(getCatalogName(), getSchemaName(), getTableName(), getColumnName()));
         if (database instanceof DB2Database) {
-            statements.add(new ReorganizeTableStatement(getCatalogName(), getSchemaName(), getTableName()));
+            statements.add(new ReindexStatement(getCatalogName(), getSchemaName(), getTableName()));
         }
 
         return statements.toArray(new Statement[statements.size()]);

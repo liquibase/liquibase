@@ -7,7 +7,7 @@ import liquibase.database.core.SQLiteDatabase;
 import liquibase.database.core.SQLiteDatabase.AlterTableVisitor;
 import  liquibase.ExecutionEnvironment;
 import liquibase.statement.Statement;
-import liquibase.statement.core.ReorganizeTableStatement;
+import liquibase.statement.core.ReindexStatement;
 import liquibase.statement.core.SetNullableStatement;
 import liquibase.statement.core.UpdateStatement;
 import liquibase.structure.core.Column;
@@ -104,7 +104,7 @@ public class AddNotNullConstraintChange extends AbstractChange {
         
     	statements.add(new SetNullableStatement(getCatalogName(), getSchemaName(), getTableName(), getColumnName(), getColumnDataType(), false));
         if (database instanceof DB2Database) {
-            statements.add(new ReorganizeTableStatement(getCatalogName(), getSchemaName(), getTableName()));
+            statements.add(new ReindexStatement(getCatalogName(), getSchemaName(), getTableName()));
         }           
         
         return statements.toArray(new Statement[statements.size()]);

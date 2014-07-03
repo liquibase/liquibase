@@ -8,7 +8,7 @@ import liquibase.database.core.DB2Database;
 import  liquibase.ExecutionEnvironment;
 import liquibase.statement.Statement;
 import liquibase.statement.core.ModifyDataTypeStatement;
-import liquibase.statement.core.ReorganizeTableStatement;
+import liquibase.statement.core.ReindexStatement;
 
 @DatabaseChange(name="modifyDataType", description = "Modify data type", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "column")
 public class ModifyDataTypeChange extends AbstractChange {
@@ -30,7 +30,7 @@ public class ModifyDataTypeChange extends AbstractChange {
         if (env.getTargetDatabase() instanceof DB2Database) {
             return new Statement[] {
                     modifyDataTypeStatement,
-                    new ReorganizeTableStatement(getCatalogName(), getSchemaName(), getTableName())
+                    new ReindexStatement(getCatalogName(), getSchemaName(), getTableName())
             };
         } else {
             return new Statement[] {

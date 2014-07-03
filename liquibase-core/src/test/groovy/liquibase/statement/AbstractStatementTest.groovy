@@ -18,12 +18,23 @@ public abstract class AbstractStatementTest<StatementUnderTest extends Statement
     def hasAtLeastOneGenerator() {
         expect:
 
+        if (!expectAtLeastOneGenerator()) {
+            return;
+        }
+
         for (Database database : TestContext.getInstance().getAllDatabases()) {
             if (StatementLogicFactory.getInstance().supports(createObject(), new ExecutionEnvironment(database))) {
                 return;
             };
         }
         fail("did not find a generator");
+    }
+
+    /**
+     * Used by {@link #hasAtLeastOneGenerator()} to determine if test should run.
+     */
+    protected boolean expectAtLeastOneGenerator() {
+        return true;
     }
 
     @Override

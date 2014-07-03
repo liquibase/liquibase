@@ -5,87 +5,53 @@ import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Table;
 
-public class RenameColumnStatement extends AbstractStatement {
+/**
+ * Renames an existing column. Includes attributes for {@link #getColumnDataType()} and {@link #getRemarks()} because some databases require data type to rename and/or lose remarks in the rename process.
+ */
+public class RenameColumnStatement extends AbstractColumnStatement {
 
-    private String catalogName;
-    private String schemaName;
-    private String tableName;
-    private String oldColumnName;
-    private String newColumnName;
-    private String columnDataType;
-    private String remarks;
+    public static final String NEW_COLUMN_NAME = "newColumnName";
+    public static final String COLUMN_DATA_TYPE = "columnDataType";
+    public static final String REMARKS = "remarks";
+
+    public RenameColumnStatement() {
+    }
 
     public RenameColumnStatement(String catalogName, String schemaName, String tableName, String oldColumnName, String newColumnName, String columnDataType) {
-        this.catalogName = catalogName;
-        this.schemaName = schemaName;
-        this.tableName = tableName;
-        this.oldColumnName = oldColumnName;
-        this.newColumnName = newColumnName;
-        this.columnDataType = columnDataType;
+        super(catalogName, schemaName, tableName, oldColumnName);
+        setNewColumnName(newColumnName);
+        setColumnDataType(columnDataType);
     }
 
-
-    public RenameColumnStatement(String catalogName, String schemaName, String tableName, String oldColumnName, String newColumnName, String columnDataType, String remarks) {
-        this(catalogName, schemaName, tableName, oldColumnName, newColumnName, columnDataType);
-        this.remarks = remarks;
-    }
-
-    public String getCatalogName() {
-        return catalogName;
-    }
-
-    public String getSchemaName() {
-        return schemaName;
-    }
-
-    public void setSchemaName(String schemaName) {
-        this.schemaName = schemaName;
-    }
-
-    public String getTableName() {
-        return tableName;
-    }
-
-    public void setTableName(String tableName) {
-        this.tableName = tableName;
-    }
-
-    public String getOldColumnName() {
-        return oldColumnName;
-    }
-
-    public void setOldColumnName(String oldColumnName) {
-        this.oldColumnName = oldColumnName;
-    }
 
     public String getNewColumnName() {
-        return newColumnName;
+        return getAttribute(NEW_COLUMN_NAME, String.class);
     }
 
-    public void setNewColumnName(String newColumnName) {
-        this.newColumnName = newColumnName;
+    public RenameColumnStatement setNewColumnName(String newColumnName) {
+        return (RenameColumnStatement) setAttribute(NEW_COLUMN_NAME, newColumnName);
     }
 
     public String getColumnDataType() {
-        return columnDataType;
+        return getAttribute(COLUMN_DATA_TYPE, String.class);
     }
 
-    public void setColumnDataType(String columnDataType) {
-        this.columnDataType = columnDataType;
+    public RenameColumnStatement setColumnDataType(String columnDataType) {
+        return (RenameColumnStatement) setAttribute(COLUMN_DATA_TYPE, columnDataType);
     }
 
     public String getRemarks() {
-        return remarks;
+        return getAttribute(REMARKS, String.class);
     }
 
-    public void setRemarks(String remarks) {
-        this.remarks = remarks;
+    public RenameColumnStatement setRemarks(String remarks) {
+        return (RenameColumnStatement) setAttribute(REMARKS, remarks);
     }
 
     @Override
     protected DatabaseObject[] getBaseAffectedDatabaseObjects() {
         return new DatabaseObject[]{
-                new Column().setName(getOldColumnName()).setRelation(new Table().setName(getTableName()).setSchema(getCatalogName(), getSchemaName())),
+                new Column().setName(getColumnName()).setRelation(new Table().setName(getTableName()).setSchema(getCatalogName(), getSchemaName())),
                 new Column().setName(getNewColumnName()).setRelation(new Table().setName(getTableName()).setSchema(getCatalogName(), getSchemaName())),
         };
     }

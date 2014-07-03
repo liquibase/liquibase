@@ -7,7 +7,7 @@ import  liquibase.ExecutionEnvironment;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.Statement;
 import liquibase.statement.core.RawSqlStatement;
-import liquibase.statement.core.ReorganizeTableStatement;
+import liquibase.statement.core.ReindexStatement;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.ForeignKey;
 import liquibase.structure.core.Table;
@@ -199,7 +199,7 @@ public class AddLookupTableChange extends AbstractChange {
         }
 
         if (database instanceof DB2Database) {
-            statements.add(new ReorganizeTableStatement(newTableCatalogName, newTableSchemaName, getNewTableName()));
+            statements.add(new ReindexStatement(newTableCatalogName, newTableSchemaName, getNewTableName()));
         }
 
         AddPrimaryKeyChange addPKChange = new AddPrimaryKeyChange();
@@ -209,7 +209,7 @@ public class AddLookupTableChange extends AbstractChange {
         statements.addAll(Arrays.asList(addPKChange.generateStatements(env)));
 
         if (database instanceof DB2Database) {
-            statements.add(new ReorganizeTableStatement(newTableCatalogName,newTableSchemaName, getNewTableName()));
+            statements.add(new ReindexStatement(newTableCatalogName,newTableSchemaName, getNewTableName()));
         }
 
         AddForeignKeyConstraintChange addFKChange = new AddForeignKeyConstraintChange();

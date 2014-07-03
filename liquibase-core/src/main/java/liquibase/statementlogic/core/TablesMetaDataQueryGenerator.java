@@ -4,6 +4,7 @@ import liquibase.CatalogAndSchema;
 import liquibase.action.Action;
 import liquibase.action.core.TablesJdbcMetaDataQueryAction;
 import liquibase.exception.UnsupportedException;
+import liquibase.statement.core.SelectMetaDataStatement;
 import liquibase.statementlogic.AbstractStatementLogic;
 import liquibase.statementlogic.StatementLogicChain;
 import liquibase.database.AbstractJdbcDatabase;
@@ -15,13 +16,12 @@ import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
 import  liquibase.ExecutionEnvironment;
-import liquibase.statement.core.MetaDataQueryStatement;
 import liquibase.structure.core.Table;
 
-public class TablesMetaDataQueryGenerator extends AbstractStatementLogic<MetaDataQueryStatement> {
+public class TablesMetaDataQueryGenerator extends AbstractStatementLogic<SelectMetaDataStatement> {
 
     @Override
-    public boolean supports(MetaDataQueryStatement statement, ExecutionEnvironment env) {
+    public boolean supports(SelectMetaDataStatement statement, ExecutionEnvironment env) {
         DatabaseConnection connection = env.getTargetDatabase().getConnection();
         if (connection == null || connection instanceof JdbcConnection || connection instanceof OfflineConnection) {
             return statement.getExample() instanceof Table;
@@ -32,7 +32,7 @@ public class TablesMetaDataQueryGenerator extends AbstractStatementLogic<MetaDat
     }
 
     @Override
-    public ValidationErrors validate(MetaDataQueryStatement statement, ExecutionEnvironment env, StatementLogicChain chain) {
+    public ValidationErrors validate(SelectMetaDataStatement statement, ExecutionEnvironment env, StatementLogicChain chain) {
         Database database = env.getTargetDatabase();
         ValidationErrors errors = super.validate(statement, env, chain);
         Table example = (Table) statement.getExample();
@@ -45,7 +45,7 @@ public class TablesMetaDataQueryGenerator extends AbstractStatementLogic<MetaDat
     }
 
     @Override
-    public Action[] generateActions(final MetaDataQueryStatement statement, ExecutionEnvironment env, StatementLogicChain chain) throws UnsupportedException {
+    public Action[] generateActions(final SelectMetaDataStatement statement, ExecutionEnvironment env, StatementLogicChain chain) throws UnsupportedException {
         Database database = env.getTargetDatabase();
         if (database.getConnection() == null || database.getConnection() instanceof OfflineConnection) {
             throw new UnexpectedLiquibaseException("Cannot read table metadata for an offline database");

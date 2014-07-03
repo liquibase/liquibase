@@ -2,10 +2,10 @@ package liquibase.snapshot.core;
 
 import liquibase.ExecutionEnvironment;
 import liquibase.statement.Statement;
+import liquibase.statement.core.SelectMetaDataStatement;
 import liquibase.statementlogic.StatementLogicChain;
 import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.snapshot.AbstractSnapshotGenerator;
-import liquibase.statement.core.MetaDataQueryStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.DatabaseObjectCollection;
 import liquibase.structure.core.Schema;
@@ -17,7 +17,7 @@ public class TableSnapshotGenerator extends AbstractSnapshotGenerator<Table> {
     public Statement[] generateAddToStatements(DatabaseObject example, ExecutionEnvironment env, StatementLogicChain chain) {
         if (example instanceof Schema) {
             return new Statement[]{
-                    new MetaDataQueryStatement(new Table(getCatalogName((Schema) example), getSchemaName(((Schema) example)), null)),
+                    new SelectMetaDataStatement(new Table(getCatalogName((Schema) example), getSchemaName(((Schema) example)), null)),
             };
         }
         return null;

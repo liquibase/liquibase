@@ -12,7 +12,7 @@ import liquibase.sdk.supplier.database.DatabaseSupplier
 import liquibase.sdk.verifytest.TestPermutation
 import liquibase.sdk.verifytest.VerifyService
 import liquibase.statement.core.CreateTableStatement
-import liquibase.statement.core.MetaDataQueryStatement
+import liquibase.statement.core.SelectMetaDataStatement
 import liquibase.statementlogic.StatementLogicFactory
 import liquibase.structure.core.Table
 import spock.lang.Shared
@@ -31,7 +31,7 @@ class TablesMetaDataQueryGeneratorTest extends Specification {
         def schemaName = null
         def catalogName = null
         def tableName = "table_name"
-        def statement = new MetaDataQueryStatement(new Table(schemaName, catalogName, tableName))
+        def statement = new SelectMetaDataStatement(new Table(schemaName, catalogName, tableName))
 
         def database = connection.getDatabase();
 
@@ -71,7 +71,7 @@ class TablesMetaDataQueryGeneratorTest extends Specification {
         def verifyService = VerifyService.getInstance(this.class.name, "tableExists");
         def schemaName = null
         def catalogName = null
-        def statement = new MetaDataQueryStatement(new Table(catalogName, schemaName, tableName))
+        def statement = new SelectMetaDataStatement(new Table(catalogName, schemaName, tableName))
 
         def database = connection.getDatabase();
 
