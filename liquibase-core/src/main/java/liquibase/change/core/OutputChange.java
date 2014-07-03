@@ -9,6 +9,8 @@ import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
 import  liquibase.ExecutionEnvironment;
 import liquibase.logging.LogFactory;
+import liquibase.parser.core.ParsedNode;
+import liquibase.parser.core.ParsedNodeException;
 import liquibase.serializer.LiquibaseSerializable;
 import liquibase.statement.Statement;
 import liquibase.statement.core.RuntimeStatement;
@@ -85,4 +87,12 @@ public class OutputChange extends AbstractChange {
         return STANDARD_CHANGELOG_NAMESPACE;
     }
 
+    @Override
+    public Object getSerializableFieldValue(String field) {
+        Object value = super.getSerializableFieldValue(field);
+        if (field.equals("target") && value.equals("")) {
+            return null;
+        }
+        return value;
+    }
 }
