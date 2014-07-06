@@ -5,6 +5,7 @@ import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.filter.ContextChangeSetFilter;
 import liquibase.changelog.filter.DbmsChangeSetFilter;
+import liquibase.changelog.filter.LabelChangeSetFilter;
 import liquibase.changelog.filter.ShouldRunChangeSetFilter;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
@@ -287,9 +288,10 @@ public class LiquibaseTest {
 
     @Test
     public void getStandardChangelogIterator() throws LiquibaseException {
-        ChangeLogIterator iterator = new Liquibase("com/example/changelog.xml", mockResourceAccessor, mockDatabase).getStandardChangelogIterator(new Contexts("a", "b"), mockChangeLog);
+        ChangeLogIterator iterator = new Liquibase("com/example/changelog.xml", mockResourceAccessor, mockDatabase).getStandardChangelogIterator(new Contexts("a", "b"), new LabelExpression("x", "y"), mockChangeLog);
         assertListsEqual(new Class[] {ShouldRunChangeSetFilter.class,
                 ContextChangeSetFilter.class,
+                LabelChangeSetFilter.class,
                 DbmsChangeSetFilter.class},
                 iterator.getChangeSetFilters(), new Assert.AssertFunction() {
             @Override

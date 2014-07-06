@@ -1,15 +1,17 @@
 package liquibase.database;
 
+import liquibase.changelog.ChangeLogHistoryService;
 import liquibase.changelog.ChangeLogHistoryServiceFactory;
 import liquibase.changelog.OfflineChangeLogHistoryService;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.lockservice.LockService;
+import liquibase.lockservice.LockServiceFactory;
 import liquibase.logging.LogFactory;
 import liquibase.util.ObjectUtil;
 import liquibase.util.StringUtils;
 
 import java.io.File;
-import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -19,6 +21,7 @@ public class OfflineConnection implements DatabaseConnection {
     private final String url;
     private final String databaseShortName;
     private final Map<String, String> params = new HashMap<String, String>();
+    private boolean outputLiquibaseSql = false;
     private String changeLogFile = "databasechangelog.csv";
     private Boolean caseSensitive = false;
     private String productName;
@@ -68,11 +71,11 @@ public class OfflineConnection implements DatabaseConnection {
                  this.caseSensitive = Boolean.valueOf(paramEntry.getValue());
             } else if (paramEntry.getKey().equals("changeLogFile")) {
                 this.changeLogFile = paramEntry.getValue();
+            } else if (paramEntry.getKey().equals("outputLiquibaseSql")) {
+                this.outputLiquibaseSql = Boolean.valueOf(paramEntry.getValue());
             } else {
                 this.databaseParams.put(paramEntry.getKey(), paramEntry.getValue());
             }
-
-
         }
     }
 
@@ -93,7 +96,11 @@ public class OfflineConnection implements DatabaseConnection {
             ((AbstractJdbcDatabase) database).setCaseSensitive(this.caseSensitive);
         }
 
-        ChangeLogHistoryServiceFactory.getInstance().register(new OfflineChangeLogHistoryService(database, new File(changeLogFile), false));
+        ChangeLogHistoryServiceFactory.getInstance().register(createChangeLogHistoryService(database));
+    }
+
+    protected ChangeLogHistoryService createChangeLogHistoryService(Database database) {
+        return new OfflineChangeLogHistoryService(database, new File(changeLogFile), outputLiquibaseSql);
     }
 
     @Override
@@ -164,5 +171,13 @@ public class OfflineConnection implements DatabaseConnection {
     @Override
     public boolean isClosed() throws DatabaseException {
         return false;
+    }
+
+    public boolean getOutputLiquibaseSql() {
+        return outputLiquibaseSql;
+    }
+
+    public void setOutputLiquibaseSql(Boolean outputLiquibaseSql) {
+        this.outputLiquibaseSql = outputLiquibaseSql;
     }
 }

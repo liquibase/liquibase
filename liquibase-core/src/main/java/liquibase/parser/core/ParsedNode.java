@@ -176,6 +176,17 @@ public class ParsedNode {
         return returnNode;
     }
 
+    public ParsedNode removeChild(String namespace, String name) throws ParsedNodeException {
+        ListIterator<ParsedNode> iterator = children.listIterator();
+        while (iterator.hasNext()) {
+            ParsedNode node = iterator.next();
+            if (nodeMatches(node, namespace, name)) {
+                iterator.remove();
+            }
+        }
+        return this;
+    }
+
     protected boolean nodeMatches(ParsedNode node, String namespace, String nodename) {
         return namespaceMatches(node, namespace) && node.getName().equals(nodename);
     }

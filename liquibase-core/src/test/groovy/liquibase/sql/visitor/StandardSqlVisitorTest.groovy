@@ -31,7 +31,7 @@ abstract class StandardSqlVisitorTest extends Specification {
         visitor[field] == fieldValue
 
         where:
-        field << createClass().getSerializableFields().findAll({ !(it in ["applyToRollback", "applicableDbms", "contexts"])})
+        field << createClass().getSerializableFields().findAll({ !(it in ["applyToRollback", "applicableDbms", "contexts", "labels"])})
     }
 
     def SqlVisitor createClass() {

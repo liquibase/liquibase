@@ -11,8 +11,6 @@ import liquibase.util.StringUtils;
 @DataTypeInfo(name="clob", aliases = {"longvarchar", "text", "longtext", "java.sql.Types.LONGVARCHAR", "java.sql.Types.CLOB"}, minParameters = 0, maxParameters = 0, priority = LiquibaseDataType.PRIORITY_DEFAULT)
 public class ClobType extends LiquibaseDataType {
 
-    private String originalDefinition;
-
     @Override
     public String objectToSql(Object value, Database database) {
         if (value == null || value.toString().equalsIgnoreCase("null")) {
@@ -35,7 +33,7 @@ public class ClobType extends LiquibaseDataType {
 
     @Override
     public DatabaseDataType toDatabaseDataType(Database database) {
-        String originalDefinition = StringUtils.trimToEmpty(this.originalDefinition);
+        String originalDefinition = StringUtils.trimToEmpty(getRawDefinition());
 
         if (database instanceof FirebirdDatabase) {
             return new DatabaseDataType("BLOB SUB_TYPE TEXT");
@@ -61,12 +59,6 @@ public class ClobType extends LiquibaseDataType {
             return new DatabaseDataType("CLOB");
         }
         return super.toDatabaseDataType(database);
-    }
-
-    @Override
-    public void finishInitialization(String originalDefinition) {
-        super.finishInitialization(originalDefinition);
-        this.originalDefinition = originalDefinition;
     }
 
     //sqlite

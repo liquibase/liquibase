@@ -8,6 +8,8 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 
+import liquibase.Contexts;
+import liquibase.LabelExpression;
 import liquibase.Liquibase;
 import liquibase.database.Database;
 import liquibase.exception.LiquibaseException;
@@ -98,13 +100,13 @@ public class LiquibaseRollbackSQL extends LiquibaseRollback {
 			throws LiquibaseException {
 		switch (type) {
 		case COUNT: {
-			liquibase.rollback(rollbackCount, contexts, outputWriter);
+			liquibase.rollback(rollbackCount, new Contexts(contexts), new LabelExpression(labels), outputWriter);
 			break;
 		}
 		case DATE: {
 			DateFormat format = DateFormat.getDateInstance();
 			try {
-				liquibase.rollback(format.parse(rollbackDate), contexts,
+				liquibase.rollback(format.parse(rollbackDate), new Contexts(contexts), new LabelExpression(labels),
 						outputWriter);
 			} catch (ParseException e) {
 				String message = "Error parsing rollbackDate: "
@@ -118,7 +120,7 @@ public class LiquibaseRollbackSQL extends LiquibaseRollback {
 			break;
 		}
 		case TAG: {
-			liquibase.rollback(rollbackTag, contexts, outputWriter);
+			liquibase.rollback(rollbackTag, new Contexts(contexts), new LabelExpression(labels), outputWriter);
 			break;
 		}
 		default: {

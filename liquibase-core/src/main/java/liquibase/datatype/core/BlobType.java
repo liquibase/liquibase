@@ -9,11 +9,10 @@ import liquibase.util.StringUtils;
 
 @DataTypeInfo(name="blob", aliases = {"longblob", "longvarbinary", "java.sql.Types.BLOB", "java.sql.Types.LONGBLOB", "java.sql.Types.LONGVARBINARY", "java.sql.Types.VARBINARY", "java.sql.Types.BINARY", "varbinary"}, minParameters = 0, maxParameters = 1, priority = LiquibaseDataType.PRIORITY_DEFAULT)
 public class BlobType extends LiquibaseDataType {
-    private String originalDefinition;
 
     @Override
     public DatabaseDataType toDatabaseDataType(Database database) {
-        String originalDefinition = StringUtils.trimToEmpty(this.originalDefinition);
+        String originalDefinition = StringUtils.trimToEmpty(getRawDefinition());
 
         if (database instanceof H2Database || database instanceof HsqlDatabase) {
             if (originalDefinition.toLowerCase().startsWith("longvarbinary") || originalDefinition.startsWith("java.sql.Types.LONGVARBINARY")) {
@@ -59,12 +58,6 @@ public class BlobType extends LiquibaseDataType {
             return new DatabaseDataType("BLOB");
         }
         return super.toDatabaseDataType(database);
-    }
-
-    @Override
-    public void finishInitialization(String originalDefinition) {
-        super.finishInitialization(originalDefinition);
-        this.originalDefinition = originalDefinition;
     }
 
     //sqlite

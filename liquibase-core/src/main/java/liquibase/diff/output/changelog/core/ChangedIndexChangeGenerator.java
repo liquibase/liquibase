@@ -44,7 +44,8 @@ public class ChangedIndexChangeGenerator implements ChangedObjectChangeGenerator
 
         DropIndexChange dropIndexChange = new DropIndexChange();
         dropIndexChange.setTableName(index.getTable().getName());
-
+        dropIndexChange.setIndexName(index.getName());
+        
         CreateIndexChange addIndexChange = new CreateIndexChange();
         addIndexChange.setTableName(index.getTable().getName());
         List<AddColumnConfig> columns = new ArrayList<AddColumnConfig>();

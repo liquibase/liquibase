@@ -1,5 +1,7 @@
 package org.liquibase.maven.plugins;
 
+import liquibase.Contexts;
+import liquibase.LabelExpression;
 import liquibase.Liquibase;
 import liquibase.exception.LiquibaseException;
 
@@ -14,7 +16,7 @@ public class LiquibaseChangeLogSyncMojo extends AbstractLiquibaseChangeLogMojo {
 	@Override
 	protected void performLiquibaseTask(Liquibase liquibase)
 			throws LiquibaseException {
-		liquibase.changeLogSync(contexts);
+		liquibase.changeLogSync(new Contexts(contexts), new LabelExpression(labels));
 	}
 
 }

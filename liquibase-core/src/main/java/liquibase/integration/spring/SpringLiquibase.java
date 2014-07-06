@@ -1,5 +1,7 @@
 package liquibase.integration.spring;
 
+import liquibase.Contexts;
+import liquibase.LabelExpression;
 import liquibase.Liquibase;
 import liquibase.configuration.ConfigurationProperty;
 import liquibase.configuration.LiquibaseConfiguration;
@@ -125,6 +127,8 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 
 	private String contexts;
 
+    private String labels;
+
 	private Map<String, String> parameters;
 
 	private String defaultSchema;
@@ -187,16 +191,18 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 
 	public String getDatabaseProductName() throws DatabaseException {
 		Connection connection = null;
+        Database database = null;
 		String name = "unknown";
 		try {
 			connection = getDataSource().getConnection();
-			Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(
-					new JdbcConnection(dataSource.getConnection()));
+			database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(connection));
 			name = database.getDatabaseProductName();
 		} catch (SQLException e) {
 			throw new DatabaseException(e);
 		} finally {
-			if (connection != null) {
+            if (database != null) {
+                database.close();
+            } else if (connection != null) {
 				try {
 					if (!connection.getAutoCommit()) {
 						connection.rollback();
@@ -252,7 +258,15 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
 		this.contexts = contexts;
 	}
 
-	public String getDefaultSchema() {
+    public String getLabels() {
+        return labels;
+    }
+
+    public void setLabels(String labels) {
+        this.labels = labels;
+    }
+
+    public String getDefaultSchema() {
 		return defaultSchema;
 	}
 
@@ -309,7 +323,7 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
             FileWriter output = null;
             try {
                 output = new FileWriter(rollbackFile);
-                liquibase.futureRollbackSQL(getContexts(), output);
+                liquibase.futureRollbackSQL(null, new Contexts(getContexts()), new LabelExpression(getLabels()), output);
             } catch (IOException e) {
                 throw new LiquibaseException("Unable to generate rollback file.", e);
             } finally {
@@ -325,7 +339,7 @@ public class SpringLiquibase implements InitializingBean, BeanNameAware, Resourc
     }
 
 	protected void performUpdate(Liquibase liquibase) throws LiquibaseException {
-		liquibase.update(getContexts());
+		liquibase.update(new Contexts(getContexts()), new LabelExpression(getLabels()));
 	}
 
 	protected Liquibase createLiquibase(Connection c) throws LiquibaseException {

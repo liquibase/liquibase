@@ -19,7 +19,7 @@ public class StatusVisitor implements ChangeSetVisitor, SkippedChangeSetVisitor 
     private final List<RanChangeSet> ranChangeSets;
 
     public StatusVisitor(Database database) throws LiquibaseException {
-        ranChangeSets = ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database).getRanChangeSets();
+        ranChangeSets = new ArrayList<RanChangeSet>(ChangeLogHistoryServiceFactory.getInstance().getChangeLogService(database).getRanChangeSets());
     }
 
     @Override

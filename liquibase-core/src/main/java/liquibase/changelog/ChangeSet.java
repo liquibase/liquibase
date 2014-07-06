@@ -1,6 +1,7 @@
 package liquibase.changelog;
 
 import liquibase.ContextExpression;
+import liquibase.Labels;
 import liquibase.change.Change;
 import liquibase.change.ChangeFactory;
 import liquibase.change.CheckSum;
@@ -113,6 +114,11 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
      * Runtime contexts in which the changeSet will be executed.  If null or empty, will execute regardless of contexts set
      */
     private ContextExpression contexts;
+
+    /**
+     * "Labels" associated with this changeSet.  If null or empty, will execute regardless of contexts set
+     */
+    private Labels labels;
 
     /**
      * Databases for which this changeset should run.  The string values should match the value returned from Database.getShortName()
@@ -245,6 +251,7 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
         this.alwaysRun  = node.getChildValue(null, "runAlways", node.getChildValue(null, "alwaysRun", false));
         this.runOnChange  = node.getChildValue(null, "runOnChange", false);
         this.contexts = new ContextExpression(node.getChildValue(null, "context", String.class));
+        this.labels = new Labels(StringUtils.trimToNull(node.getChildValue(null, "labels", String.class)));
         setDbms(node.getChildValue(null, "dbms", String.class));
         this.runInTransaction  = node.getChildValue(null, "runInTransaction", true);
         this.comments = node.getChildValue(null, "comment", String.class);
@@ -287,6 +294,7 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
         } else if (child.getName().equals("modifySql")) {
             String dbmsString = StringUtils.trimToNull(child.getChildValue(null, "dbms", String.class));
             String contextString = StringUtils.trimToNull(child.getChildValue(null, "context", String.class));
+            String labelsString = StringUtils.trimToNull(child.getChildValue(null, "labels", String.class));
             boolean applyToRollback = child.getChildValue(null, "applyToRollback", false);
 
             Set<String> dbms = new HashSet<String>();
@@ -298,6 +306,12 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
                 context = new ContextExpression(contextString);
             }
 
+            Labels labels = null;
+            if (labelsString != null) {
+                labels = new Labels(labelsString);
+            }
+
+
             List<ParsedNode> potentialVisitors = child.getChildren();
             for (ParsedNode node : potentialVisitors) {
                 SqlVisitor sqlVisitor = SqlVisitorFactory.getInstance().create(node.getName());
@@ -307,6 +321,7 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
                         sqlVisitor.setApplicableDbms(dbms);
                     }
                     sqlVisitor.setContexts(context);
+                    sqlVisitor.setLabels(labels);
                     sqlVisitor.load(node, resourceAccessor);
 
                     addSqlVisitor(sqlVisitor);
@@ -657,6 +672,14 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
         return contexts;
     }
 
+    public Labels getLabels() {
+        return labels;
+    }
+
+    public void setLabels(Labels labels) {
+        this.labels = labels;
+    }
+
     public Set<String> getDbmsSet() {
         return dbmsSet;
     }
@@ -903,6 +926,14 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
         if (field.equals("context")) {
             if (!this.getContexts().isEmpty()) {
                 return this.getContexts().toString();
+            } else {
+                return null;
+            }
+        }
+
+        if (field.equals("labels")) {
+            if (this.getLabels() != null && !this.getLabels().isEmpty()) {
+                return StringUtils.join(this.getLabels().getLabels(), ", ");
             } else {
                 return null;
             }

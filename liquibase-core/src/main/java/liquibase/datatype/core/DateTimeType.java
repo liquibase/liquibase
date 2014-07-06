@@ -40,7 +40,12 @@ public class DateTimeType extends LiquibaseDataType {
             return new DatabaseDataType("DATETIME YEAR TO FRACTION", fraction);
         }
         if (database instanceof PostgresDatabase) {
-            return new DatabaseDataType("TIMESTAMP WITH TIME ZONE");
+            String rawDefinition = getRawDefinition().toLowerCase();
+            if (rawDefinition.contains("tz") || rawDefinition.contains("with time zone")) {
+                return new DatabaseDataType("TIMESTAMP WITH TIME ZONE");
+            } else {
+                return new DatabaseDataType("TIMESTAMP WITHOUT TIME ZONE");
+            }
         }
         if (database instanceof SQLiteDatabase) {
             return new DatabaseDataType("TEXT");

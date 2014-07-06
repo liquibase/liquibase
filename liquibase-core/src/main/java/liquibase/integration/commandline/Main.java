@@ -1,6 +1,8 @@
 package liquibase.integration.commandline;
 
 import liquibase.CatalogAndSchema;
+import liquibase.Contexts;
+import liquibase.LabelExpression;
 import liquibase.Liquibase;
 import liquibase.change.CheckSum;
 import liquibase.command.ExecuteSqlCommand;
@@ -59,6 +61,7 @@ public class Main {
     protected String changeLogFile;
     protected String classpath;
     protected String contexts;
+    protected String labels;
     protected String driverPropertiesFile;
     protected Boolean promptForNonLocalDatabase = null;
     protected Boolean includeSystemClasspath;
@@ -542,6 +545,8 @@ public class Main {
         stream.println("                                            implementation to use");
         stream.println(" --defaultSchemaName=<name>                 Default database schema to use");
         stream.println(" --contexts=<value>                         ChangeSet contexts to execute");
+        stream.println(" --labels=<expression>                      Expression defining labeled");
+        stream.println("                                            ChangeSet to execute");
         stream.println(" --defaultsFile=</path/to/file.properties>  File with default option values");
         stream.println("                                            (default: ./liquibase.properties)");
         stream.println(" --driverPropertiesFile=</path/to/file.properties>  File with custom properties");
@@ -901,7 +906,7 @@ public class Main {
             } else if ("snapshot".equalsIgnoreCase(command)) {
                 SnapshotCommand command = new SnapshotCommand();
                 command.setDatabase(database);
-                command.setSchemas(getCommandParam("schemas", database.getDefaultSchema().toString()));
+                command.setSchemas(getCommandParam("schemas", database.getDefaultSchema().getSchemaName()));
                 System.out.println(command.execute());
                 return;
             } else if ("executeSql".equalsIgnoreCase(command)) {
@@ -915,7 +920,7 @@ public class Main {
                 SnapshotCommand command = new SnapshotCommand();
                 Database referenceDatabase = createReferenceDatabaseFromCommandParams(commandParams);
                 command.setDatabase(referenceDatabase);
-                command.setSchemas(getCommandParam("schemas", referenceDatabase.getDefaultSchema().toString()));
+                command.setSchemas(getCommandParam("schemas", referenceDatabase.getDefaultSchema().getSchemaName()));
                 System.out.println(command.execute());
                 return;
             }
@@ -949,7 +954,7 @@ public class Main {
                 if (commandParams.contains("--verbose")) {
                     runVerbose = true;
                 }
-                liquibase.reportStatus(runVerbose, contexts, getOutputWriter());
+                liquibase.reportStatus(runVerbose, new Contexts(contexts), new LabelExpression(labels), getOutputWriter());
                 return;
             } else if ("unexpectedChangeSets".equalsIgnoreCase(command)) {
                 boolean runVerbose = false;
@@ -989,60 +994,60 @@ public class Main {
 
             try {
                 if ("update".equalsIgnoreCase(command)) {
-                    liquibase.update(contexts);
+                    liquibase.update(new Contexts(contexts), new LabelExpression(labels));
                 } else if ("changelogSync".equalsIgnoreCase(command)) {
-                    liquibase.changeLogSync(contexts);
+                    liquibase.changeLogSync(new Contexts(contexts), new LabelExpression(labels));
                 } else if ("changelogSyncSQL".equalsIgnoreCase(command)) {
-                    liquibase.changeLogSync(contexts, getOutputWriter());
+                    liquibase.changeLogSync(new Contexts(contexts), new LabelExpression(labels), getOutputWriter());
                 } else if ("markNextChangeSetRan".equalsIgnoreCase(command)) {
-                    liquibase.markNextChangeSetRan(contexts);
+                    liquibase.markNextChangeSetRan(new Contexts(contexts), new LabelExpression(labels));
                 } else if ("markNextChangeSetRanSQL".equalsIgnoreCase(command)) {
-                    liquibase.markNextChangeSetRan(contexts, getOutputWriter());
+                    liquibase.markNextChangeSetRan(new Contexts(contexts), new LabelExpression(labels), getOutputWriter());
                 } else if ("updateCount".equalsIgnoreCase(command)) {
-                    liquibase.update(Integer.parseInt(commandParams.iterator().next()), contexts);
+                    liquibase.update(Integer.parseInt(commandParams.iterator().next()), new Contexts(contexts), new LabelExpression(labels));
                 } else if ("updateCountSQL".equalsIgnoreCase(command)) {
-                    liquibase.update(Integer.parseInt(commandParams.iterator().next()), contexts, getOutputWriter());
+                    liquibase.update(Integer.parseInt(commandParams.iterator().next()), new Contexts(contexts), new LabelExpression(labels), getOutputWriter());
                 } else if ("updateSQL".equalsIgnoreCase(command)) {
-                    liquibase.update(contexts, getOutputWriter());
+                    liquibase.update(new Contexts(contexts), new LabelExpression(labels), getOutputWriter());
                 } else if ("rollback".equalsIgnoreCase(command)) {
                     if (commandParams == null || commandParams.size() == 0) {
                         throw new CommandLineParsingException("rollback requires a rollback tag");
                     }
-                    liquibase.rollback(commandParams.iterator().next(), contexts);
+                    liquibase.rollback(commandParams.iterator().next(), new Contexts(contexts), new LabelExpression(labels));
                 } else if ("rollbackToDate".equalsIgnoreCase(command)) {
                     if (commandParams == null || commandParams.size() == 0) {
                         throw new CommandLineParsingException("rollback requires a rollback date");
                     }
-                    liquibase.rollback(new ISODateFormat().parse(commandParams.iterator().next()), contexts);
+                    liquibase.rollback(new ISODateFormat().parse(commandParams.iterator().next()), new Contexts(contexts), new LabelExpression(labels));
                 } else if ("rollbackCount".equalsIgnoreCase(command)) {
-                    liquibase.rollback(Integer.parseInt(commandParams.iterator().next()), contexts);
+                    liquibase.rollback(Integer.parseInt(commandParams.iterator().next()), new Contexts(contexts), new LabelExpression(labels));
 
                 } else if ("rollbackSQL".equalsIgnoreCase(command)) {
                     if (commandParams == null || commandParams.size() == 0) {
                         throw new CommandLineParsingException("rollbackSQL requires a rollback tag");
                     }
-                    liquibase.rollback(commandParams.iterator().next(), contexts, getOutputWriter());
+                    liquibase.rollback(commandParams.iterator().next(), new Contexts(contexts), new LabelExpression(labels), getOutputWriter());
                 } else if ("rollbackToDateSQL".equalsIgnoreCase(command)) {
                     if (commandParams == null || commandParams.size() == 0) {
                         throw new CommandLineParsingException("rollbackToDateSQL requires a rollback date");
                     }
-                    liquibase.rollback(new ISODateFormat().parse(commandParams.iterator().next()), contexts, getOutputWriter());
+                    liquibase.rollback(new ISODateFormat().parse(commandParams.iterator().next()), new Contexts(contexts), new LabelExpression(labels), getOutputWriter());
                 } else if ("rollbackCountSQL".equalsIgnoreCase(command)) {
                     if (commandParams == null || commandParams.size() == 0) {
                         throw new CommandLineParsingException("rollbackCountSQL requires a rollback tag");
                     }
 
-                    liquibase.rollback(Integer.parseInt(commandParams.iterator().next()), contexts, getOutputWriter());
+                    liquibase.rollback(Integer.parseInt(commandParams.iterator().next()), new Contexts(contexts), new LabelExpression(labels), getOutputWriter());
                 } else if ("futureRollbackSQL".equalsIgnoreCase(command)) {
-                    liquibase.futureRollbackSQL(contexts, getOutputWriter());
+                    liquibase.futureRollbackSQL(null, new Contexts(contexts), new LabelExpression(labels), getOutputWriter());
                 } else if ("futureRollbackCountSQL".equalsIgnoreCase(command)) {
                     if (commandParams == null || commandParams.size() == 0) {
                         throw new CommandLineParsingException("futureRollbackCountSQL requires a rollback count");
                     }
 
-                    liquibase.futureRollbackSQL(Integer.parseInt(commandParams.iterator().next()), contexts, getOutputWriter());
+                    liquibase.futureRollbackSQL(Integer.parseInt(commandParams.iterator().next()), new Contexts(contexts), new LabelExpression(labels), getOutputWriter());
                 } else if ("updateTestingRollback".equalsIgnoreCase(command)) {
-                    liquibase.updateTestingRollback(contexts);
+                    liquibase.updateTestingRollback(new Contexts(contexts), new LabelExpression(labels));
                 } else {
                     throw new CommandLineParsingException("Unknown command: " + command);
                 }

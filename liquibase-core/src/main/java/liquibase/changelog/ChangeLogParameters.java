@@ -2,6 +2,8 @@ package liquibase.changelog;
 
 import liquibase.ContextExpression;
 import liquibase.Contexts;
+import liquibase.LabelExpression;
+import liquibase.Labels;
 import liquibase.configuration.LiquibaseConfiguration;
 import liquibase.parser.ChangeLogParserCofiguration;
 import liquibase.database.Database;
@@ -21,6 +23,7 @@ public class ChangeLogParameters {
     private ExpressionExpander expressionExpander;
     private Database currentDatabase;
     private Contexts currentContexts;
+    private LabelExpression currentLabelExpression;
 
     public ChangeLogParameters() {
         this(null);
@@ -73,6 +76,7 @@ public class ChangeLogParameters {
         this.expressionExpander = new ExpressionExpander(this);
         this.currentDatabase = database;
         this.currentContexts = new Contexts();
+        this.currentLabelExpression = new LabelExpression();
     }
 
     public void setContexts(Contexts contexts) {
@@ -87,11 +91,11 @@ public class ChangeLogParameters {
         changeLogParameters.add(new ChangeLogParameter(paramter, value));
     }
 
-    public void set(String key, String value, String contexts, String databases) {
-        set(key, value, new ContextExpression(contexts), databases);
+    public void set(String key, String value, String contexts, String labels, String databases) {
+        set(key, value, new ContextExpression(contexts), new Labels(labels), databases);
     }
-    public void set(String key, String value, ContextExpression contexts, String databases) {
-        changeLogParameters.add(new ChangeLogParameter(key, value, contexts, databases));
+    public void set(String key, String value, ContextExpression contexts, Labels labels, String databases) {
+        changeLogParameters.add(new ChangeLogParameter(key, value, contexts, labels, databases));
     }
 
     /**
@@ -123,10 +127,19 @@ public class ChangeLogParameters {
         return expressionExpander.expandExpressions(string);
     }
 
+    public void setLabels(LabelExpression labels) {
+        this.currentLabelExpression = labels;
+    }
+
+    public LabelExpression getLabels() {
+        return currentLabelExpression;
+    }
+
     private class ChangeLogParameter {
         private String key;
         private Object value;
         private ContextExpression validContexts;
+        private Labels labels;
         private List<String> validDatabases;
 
         public ChangeLogParameter(String key, Object value) {
@@ -134,18 +147,19 @@ public class ChangeLogParameters {
             this.value = value;
         }
 
-        public ChangeLogParameter(String key, Object value, String validContexts, String validDatabases) {
-            this(key, value, new ContextExpression(validContexts), StringUtils.splitAndTrim(validDatabases, ","));
+        public ChangeLogParameter(String key, Object value, String validContexts, String labels, String validDatabases) {
+            this(key, value, new ContextExpression(validContexts), new Labels(labels), StringUtils.splitAndTrim(validDatabases, ","));
         }
 
-        private ChangeLogParameter(String key, Object value, ContextExpression validContexts, String validDatabases) {
-            this(key, value, validContexts, StringUtils.splitAndTrim(validDatabases, ","));
+        private ChangeLogParameter(String key, Object value, ContextExpression validContexts, Labels labels, String validDatabases) {
+            this(key, value, validContexts, labels, StringUtils.splitAndTrim(validDatabases, ","));
         }
 
-        public ChangeLogParameter(String key, Object value, ContextExpression validContexts, List<String> validDatabases) {
+        public ChangeLogParameter(String key, Object value, ContextExpression validContexts, Labels labels, List<String> validDatabases) {
             this.key = key;
             this.value = value;
             this.validContexts = validContexts;
+            this.labels = labels;
             this.validDatabases = validDatabases;
         }
 
@@ -165,6 +179,10 @@ public class ChangeLogParameters {
             return validContexts;
         }
 
+        public Labels getLabels() {
+            return labels;
+        }
+
         @Override
         public String toString() {
             return getValue().toString();
@@ -172,6 +190,10 @@ public class ChangeLogParameters {
 
         public boolean isValid() {
             boolean isValid = validContexts == null || validContexts.matches(ChangeLogParameters.this.currentContexts);
+
+            if (isValid) {
+                isValid = labels == null || currentLabelExpression.matches(labels);
+            }
 
             if (isValid) {
                 isValid = DatabaseList.definitionMatches(validDatabases, currentDatabase, true);

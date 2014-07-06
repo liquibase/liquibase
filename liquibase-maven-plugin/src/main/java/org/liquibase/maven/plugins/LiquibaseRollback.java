@@ -3,6 +3,9 @@
 package org.liquibase.maven.plugins;
 
 import java.text.*;
+
+import liquibase.Contexts;
+import liquibase.LabelExpression;
 import liquibase.exception.LiquibaseException;
 import liquibase.Liquibase;
 import org.apache.maven.plugin.MojoFailureException;
@@ -90,13 +93,13 @@ public class LiquibaseRollback extends AbstractLiquibaseChangeLogMojo {
   protected void performLiquibaseTask(Liquibase liquibase) throws LiquibaseException {
     switch (type) {
       case COUNT: {
-        liquibase.rollback(rollbackCount, contexts);
+        liquibase.rollback(rollbackCount, new Contexts(contexts), new LabelExpression(labels));
         break;
       }
       case DATE: {
         DateFormat format = DateFormat.getDateInstance();
         try {
-          liquibase.rollback(format.parse(rollbackDate), contexts);
+          liquibase.rollback(format.parse(rollbackDate), new Contexts(contexts), new LabelExpression(labels));
         }
         catch (ParseException e) {
           String message = "Error parsing rollbackDate: " + e.getMessage();
@@ -108,7 +111,7 @@ public class LiquibaseRollback extends AbstractLiquibaseChangeLogMojo {
         break;
       }
       case TAG: {
-        liquibase.rollback(rollbackTag, contexts);
+        liquibase.rollback(rollbackTag, new Contexts(contexts), new LabelExpression(labels));
         break;
       }
       default: {

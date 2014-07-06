@@ -11,8 +11,11 @@ public class SnapshotGeneratorChain {
     private Iterator<SnapshotGenerator> snapshotGenerators;
 
     private Set<Class<? extends SnapshotGenerator>> replacedGenerators = new HashSet<Class<? extends SnapshotGenerator>>();
+    private SnapshotIdService snapshotIdService;
 
     public SnapshotGeneratorChain(SortedSet<SnapshotGenerator> snapshotGenerators) {
+        snapshotIdService = SnapshotIdService.getInstance();
+
         if (snapshotGenerators != null) {
             this.snapshotGenerators = snapshotGenerators.iterator();
         }
@@ -46,7 +49,7 @@ public class SnapshotGeneratorChain {
 
         T obj = next.snapshot(example, snapshot, this);
         if (obj != null && obj.getSnapshotId() == null) {
-            obj.setSnapshotId(UUID.randomUUID());
+            obj.setSnapshotId(snapshotIdService.generateId());
         }
         return obj;
     }

@@ -120,8 +120,8 @@ public class DatabaseObjectComparatorFactory {
             return false;
         }
 
-        UUID snapshotId1 = object1.getSnapshotId();
-        UUID snapshotId2 = object2.getSnapshotId();
+        String snapshotId1 = object1.getSnapshotId();
+        String snapshotId2 = object2.getSnapshotId();
         if (snapshotId1 != null && snapshotId2 != null) {
             if (snapshotId1.equals(snapshotId2)) {
                 return true;

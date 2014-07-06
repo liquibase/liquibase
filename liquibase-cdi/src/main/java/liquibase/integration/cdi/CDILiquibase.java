@@ -1,5 +1,7 @@
 package liquibase.integration.cdi;
 
+import liquibase.Contexts;
+import liquibase.LabelExpression;
 import liquibase.Liquibase;
 import liquibase.configuration.GlobalConfiguration;
 import liquibase.configuration.LiquibaseConfiguration;
@@ -123,7 +125,8 @@ public class CDILiquibase implements Extension {
         try {
             c = dataSource.getConnection();
             liquibase = createLiquibase(c);
-            liquibase.update(config.getContexts());
+            liquibase.getDatabase();
+            liquibase.update(new Contexts(config.getContexts()), new LabelExpression(config.getLabels()));
             updateSuccessful = true;
         } catch (SQLException e) {
             throw new DatabaseException(e);
@@ -131,7 +134,9 @@ public class CDILiquibase implements Extension {
             updateSuccessful = false;
             throw ex;
         } finally {
-            if (c != null) {
+            if (liquibase != null && liquibase.getDatabase() != null) {
+                liquibase.getDatabase().close();
+            } else if (c != null) {
                 try {
                     c.rollback();
                     c.close();

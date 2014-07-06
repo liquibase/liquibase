@@ -1,5 +1,7 @@
 package liquibase.integration.servlet;
 
+import liquibase.Contexts;
+import liquibase.LabelExpression;
 import liquibase.Liquibase;
 import liquibase.configuration.*;
 import liquibase.database.Database;
@@ -37,6 +39,7 @@ public class LiquibaseServletListener implements ServletContextListener {
     private static final String JAVA_COMP_ENV = "java:comp/env";
     private static final String LIQUIBASE_CHANGELOG = "liquibase.changelog";
     private static final String LIQUIBASE_CONTEXTS = "liquibase.contexts";
+    private static final String LIQUIBASE_LABELS = "liquibase.labels";
     private static final String LIQUIBASE_DATASOURCE = "liquibase.datasource";
     private static final String LIQUIBASE_HOST_EXCLUDES = "liquibase.host.excludes";
     private static final String LIQUIBASE_HOST_INCLUDES = "liquibase.host.includes";
@@ -47,6 +50,7 @@ public class LiquibaseServletListener implements ServletContextListener {
     private String changeLogFile;
     private String dataSourceName;
     private String contexts;
+    private String labels;
     private String defaultSchema;
     private String hostName;
     private ServletValueContainer servletValueContainer; //temporarily saved separately until all lookup moves to liquibaseConfiguration
@@ -61,6 +65,14 @@ public class LiquibaseServletListener implements ServletContextListener {
 
     public String getContexts() {
         return contexts;
+    }
+
+    public String getLabels() {
+        return labels;
+    }
+
+    public void setLabels(String labels) {
+        this.labels = labels;
     }
 
     public void setChangeLogFile(String changeLogFile) {
@@ -191,9 +203,11 @@ public class LiquibaseServletListener implements ServletContextListener {
         }
 
         setContexts((String) servletValueContainer.getValue(LIQUIBASE_CONTEXTS));
+        setLabels((String) servletValueContainer.getValue(LIQUIBASE_LABELS));
         this.defaultSchema = StringUtils.trimToNull((String) servletValueContainer.getValue(LIQUIBASE_SCHEMA_DEFAULT));
 
         Connection connection = null;
+        Database database = null;
         try {
             DataSource dataSource = (DataSource) ic.lookup(this.dataSourceName);
 
@@ -207,7 +221,7 @@ public class LiquibaseServletListener implements ServletContextListener {
             ResourceAccessor fsFO = new FileSystemResourceAccessor();
 
 
-            Database database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(connection));
+            database = DatabaseFactory.getInstance().findCorrectDatabaseImplementation(new JdbcConnection(connection));
             database.setDefaultSchemaName(getDefaultSchema());
             Liquibase liquibase = new Liquibase(getChangeLogFile(), new CompositeResourceAccessor(clFO, fsFO, threadClFO), database);
 
@@ -220,10 +234,12 @@ public class LiquibaseServletListener implements ServletContextListener {
                 }
             }
 
-            liquibase.update(getContexts());
+            liquibase.update(new Contexts(getContexts()), new LabelExpression(getLabels()));
         }
         finally {
-            if (connection != null) {
+            if (database != null) {
+                database.close();
+            } else if (connection != null) {
                 connection.close();
             }
         }

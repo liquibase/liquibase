@@ -7,13 +7,16 @@ import liquibase.resource.ResourceAccessor;
 import liquibase.serializer.LiquibaseSerializable;
 import liquibase.util.StringUtils;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
 public abstract class AbstractDatabaseObject implements DatabaseObject {
 
     private Map<String, Object> attributes = new HashMap<String, Object>();
 
-    private UUID snapshotId;
+    private String snapshotId;
 
     @Override
     public String getObjectTypeName() {
@@ -21,14 +24,14 @@ public abstract class AbstractDatabaseObject implements DatabaseObject {
     }
 
     @Override
-    public UUID getSnapshotId() {
+    public String getSnapshotId() {
         return snapshotId;
     }
 
     @Override
-    public void setSnapshotId(UUID snapshotId) {
+    public void setSnapshotId(String snapshotId) {
         if (snapshotId == null) {
-            throw new UnexpectedLiquibaseException("Must be a non null uuid");
+            throw new UnexpectedLiquibaseException("Must be a non null snapshot id");
         }
         if (this.snapshotId != null) {
             throw new UnexpectedLiquibaseException("snapshotId already set");

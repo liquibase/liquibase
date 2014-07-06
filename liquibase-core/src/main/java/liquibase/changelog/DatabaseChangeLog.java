@@ -1,9 +1,11 @@
 package liquibase.changelog;
 
 import liquibase.Contexts;
+import liquibase.LabelExpression;
 import liquibase.RuntimeEnvironment;
 import liquibase.changelog.filter.ContextChangeSetFilter;
 import liquibase.changelog.filter.DbmsChangeSetFilter;
+import liquibase.changelog.filter.LabelChangeSetFilter;
 import liquibase.changelog.visitor.ValidatingVisitor;
 import liquibase.database.Database;
 import liquibase.database.ObjectQuotingStrategy;
@@ -162,16 +164,23 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
     }
 
     public void validate(Database database, String... contexts) throws LiquibaseException {
-        this.validate(database, new Contexts(contexts));
+        this.validate(database, new Contexts(contexts), new LabelExpression());
     }
 
+    /**
+     * @deprecated Use LabelExpression version
+     */
     public void validate(Database database, Contexts contexts) throws LiquibaseException {
+        this.validate(database, contexts, new LabelExpression());
+    }
 
-        ChangeLogIterator logIterator = new ChangeLogIterator(this, new DbmsChangeSetFilter(database), new ContextChangeSetFilter(contexts));
+    public void validate(Database database, Contexts contexts, LabelExpression labelExpression) throws LiquibaseException {
+
+        ChangeLogIterator logIterator = new ChangeLogIterator(this, new DbmsChangeSetFilter(database), new ContextChangeSetFilter(contexts), new LabelChangeSetFilter(labelExpression));
 
         ValidatingVisitor validatingVisitor = new ValidatingVisitor(database.getRanChangeSetList());
         validatingVisitor.validate(database, this);
-        logIterator.run(validatingVisitor, new RuntimeEnvironment(database, contexts));
+        logIterator.run(validatingVisitor, new RuntimeEnvironment(database, contexts, labelExpression));
 
         for (String message : validatingVisitor.getWarnings().getMessages()) {
             LogFactory.getLogger().warning(message);

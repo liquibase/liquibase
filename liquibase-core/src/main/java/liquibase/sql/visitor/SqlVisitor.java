@@ -2,6 +2,7 @@ package liquibase.sql.visitor;
 
 import liquibase.ContextExpression;
 import liquibase.Contexts;
+import liquibase.Labels;
 import liquibase.change.CheckSum;
 import liquibase.database.Database;
 import liquibase.serializer.LiquibaseSerializable;
@@ -25,6 +26,9 @@ public interface SqlVisitor extends LiquibaseSerializable {
     ContextExpression getContexts();
 
     void setContexts(ContextExpression contexts);
+
+    Labels getLabels();
+    void setLabels(Labels labels);
 
     CheckSum generateCheckSum();
 

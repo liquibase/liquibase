@@ -12,6 +12,7 @@ import java.util.Map;
 public class CDILiquibaseConfig {
 
     private String contexts;
+    private String labels;
     private String changeLog;
     private Map<String,String> parameters;
     private boolean dropFirst = false;
@@ -23,6 +24,14 @@ public class CDILiquibaseConfig {
 
     public void setContexts(String contexts) {
         this.contexts = contexts;
+    }
+
+    public String getLabels() {
+        return labels;
+    }
+
+    public void setLabels(String labels) {
+        this.labels = labels;
     }
 
     public String getChangeLog() {
