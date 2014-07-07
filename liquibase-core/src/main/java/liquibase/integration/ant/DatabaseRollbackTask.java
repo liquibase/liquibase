@@ -1,5 +1,7 @@
 package liquibase.integration.ant;
 
+import liquibase.Contexts;
+import liquibase.LabelExpression;
 import liquibase.Liquibase;
 import liquibase.exception.LiquibaseException;
 import org.apache.tools.ant.BuildException;
@@ -30,23 +32,23 @@ public class DatabaseRollbackTask extends AbstractChangeLogBasedTask {
             if(rollbackCount != null) {
                 if(outputFile != null) {
                     writer = getOutputFileWriter();
-                    liquibase.rollback(rollbackCount, getContexts(), writer);
+                    liquibase.rollback(rollbackCount, new Contexts(getContexts()), getLabels(), writer);
                 } else {
-                    liquibase.rollback(rollbackCount, getContexts());
+                    liquibase.rollback(rollbackCount, new Contexts(getContexts()), getLabels());
                 }
             } else if(rollbackTag != null) {
                 if(outputFile != null) {
                     writer = getOutputFileWriter();
-                    liquibase.rollback(rollbackTag, getContexts(), writer);
+                    liquibase.rollback(rollbackTag, new Contexts(getContexts()), getLabels(), writer);
                 } else {
-                    liquibase.rollback(rollbackTag, getContexts());
+                    liquibase.rollback(rollbackTag, new Contexts(getContexts()), getLabels());
                 }
             } else if(rollbackDate != null) {
                 if(outputFile != null) {
                     writer = getOutputFileWriter();
-                    liquibase.rollback(rollbackDate, getContexts(), writer);
+                    liquibase.rollback(rollbackDate, new Contexts(getContexts()), getLabels(), writer);
                 } else {
-                    liquibase.rollback(rollbackDate, getContexts());
+                    liquibase.rollback(rollbackDate, new Contexts(getContexts()), getLabels());
                 }
             } else {
                 throw new BuildException("Unable to rollback database. No count, tag, or date set.");

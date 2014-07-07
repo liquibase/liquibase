@@ -1,5 +1,7 @@
 package liquibase.integration.ant;
 
+import liquibase.Contexts;
+import liquibase.LabelExpression;
 import liquibase.Liquibase;
 import liquibase.exception.LiquibaseException;
 import org.apache.tools.ant.BuildException;
@@ -24,12 +26,12 @@ public class DatabaseUpdateTask extends AbstractChangeLogBasedTask {
             FileResource outputFile = getOutputFile();
             if(outputFile != null) {
                 writer = getOutputFileWriter();
-                liquibase.update(getContexts(), writer);
+                liquibase.update(new Contexts(getContexts()), getLabels(), writer);
             } else {
                 if(dropFirst) {
                     liquibase.dropAll();
                 }
-                liquibase.update(getContexts());
+                liquibase.update(new Contexts(getContexts()), getLabels());
             }
         } catch (LiquibaseException e) {
             throw new BuildException("Unable to update database.", e);

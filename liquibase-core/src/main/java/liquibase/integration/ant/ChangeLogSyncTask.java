@@ -1,5 +1,7 @@
 package liquibase.integration.ant;
 
+import liquibase.Contexts;
+import liquibase.LabelExpression;
 import liquibase.Liquibase;
 import liquibase.exception.LiquibaseException;
 import org.apache.tools.ant.BuildException;
@@ -19,9 +21,9 @@ public class ChangeLogSyncTask extends AbstractChangeLogBasedTask {
             FileResource outputFile = getOutputFile();
             if (outputFile != null) {
                 writer = new OutputStreamWriter(outputFile.getOutputStream(), getOutputEncoding());
-                liquibase.changeLogSync(getContexts(), writer);
+                liquibase.changeLogSync(new Contexts(getContexts()), getLabels(), writer);
             } else {
-                liquibase.changeLogSync(getContexts());
+                liquibase.changeLogSync(new Contexts(getContexts()), getLabels());
             }
         } catch (UnsupportedEncodingException e) {
             throw new BuildException("Unable to generate sync SQL. Encoding [" + getOutputEncoding() + "] is not supported.", e);

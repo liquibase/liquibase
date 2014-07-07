@@ -1,5 +1,6 @@
 package liquibase.integration.ant;
 
+import liquibase.LabelExpression;
 import liquibase.util.StringUtils;
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.types.resources.FileResource;
@@ -11,6 +12,7 @@ import java.io.Writer;
 public abstract class AbstractChangeLogBasedTask extends BaseLiquibaseTask {
     private FileResource changeLogFile;
     private String contexts;
+    private LabelExpression labels;
     private FileResource outputFile;
     private String outputEncoding;
 
@@ -46,6 +48,14 @@ public abstract class AbstractChangeLogBasedTask extends BaseLiquibaseTask {
 
     public void setContexts(String contexts) {
         this.contexts = contexts;
+    }
+
+    public LabelExpression getLabels() {
+        return labels;
+    }
+
+    public void setLabels(String labels) {
+        this.labels = new LabelExpression(labels);
     }
 
     public FileResource getOutputFile() {

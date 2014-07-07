@@ -1,7 +1,5 @@
 package liquibase.integration.ant.logging;
 
-import liquibase.changelog.ChangeSet;
-import liquibase.changelog.DatabaseChangeLog;
 import liquibase.logging.core.AbstractLogger;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.Task;
@@ -16,8 +14,6 @@ public final class AntTaskLogger extends AbstractLogger {
     public static final int PRIORITY = Integer.MIN_VALUE;
 
     private final Task task;
-    private String changeLogName = null;
-    private String changeSetName = null;
 
     public AntTaskLogger(Task task) {
         this.task = task;
@@ -74,29 +70,7 @@ public final class AntTaskLogger extends AbstractLogger {
     }
 
     @Override
-    public void setChangeLog(DatabaseChangeLog databaseChangeLog) {
-        changeLogName = (databaseChangeLog == null) ? null : databaseChangeLog.getFilePath();
-    }
-
-    @Override
-    public void setChangeSet(ChangeSet changeSet) {
-        changeSetName = (changeSet == null ? null : changeSet.toString(false));
-    }
-
-    @Override
     public int getPriority() {
         return PRIORITY;
-    }
-
-    private String buildMessage(String message) {
-        StringBuilder msg = new StringBuilder();
-        if(changeLogName != null) {
-            msg.append(changeLogName).append(": ");
-        }
-        if(changeSetName != null) {
-            msg.append(changeSetName.replace(changeLogName + "::", "")).append(": ");
-        }
-        msg.append(message);
-        return msg.toString();
     }
 }
