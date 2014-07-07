@@ -3,23 +3,23 @@ package liquibase.sqlgenerator.core;
 import liquibase.action.Action;
 import liquibase.action.core.UnparsedSql;
 import liquibase.exception.UnsupportedException;
+import liquibase.statement.core.ExecuteStoredProcedureStatement;
 import liquibase.statementlogic.StatementLogicChain;
 import liquibase.database.core.OracleDatabase;
 import liquibase.exception.ValidationErrors;
 import  liquibase.ExecutionEnvironment;
-import liquibase.statement.core.StoredProcedureStatement;
 
-public class StoredProcedureGenerator extends AbstractSqlGenerator<StoredProcedureStatement> {
+public class StoredProcedureGenerator extends AbstractSqlGenerator<ExecuteStoredProcedureStatement> {
 
     @Override
-    public ValidationErrors validate(StoredProcedureStatement storedProcedureStatement, ExecutionEnvironment env, StatementLogicChain chain) {
+    public ValidationErrors validate(ExecuteStoredProcedureStatement executeStoredProcedureStatement, ExecutionEnvironment env, StatementLogicChain chain) {
         ValidationErrors validationErrors = new ValidationErrors();
-        validationErrors.checkRequiredField("procedureName", storedProcedureStatement.getProcedureName());
+        validationErrors.checkRequiredField("procedureName", executeStoredProcedureStatement.getProcedureName());
         return validationErrors;
     }
 
     @Override
-    public Action[] generateActions(StoredProcedureStatement statement, ExecutionEnvironment env, StatementLogicChain chain) throws UnsupportedException {
+    public Action[] generateActions(ExecuteStoredProcedureStatement statement, ExecutionEnvironment env, StatementLogicChain chain) throws UnsupportedException {
         StringBuilder string = new StringBuilder();
         string.append("exec ").append(statement.getProcedureName()).append("(");
         for (String param : statement.getParameters()) {

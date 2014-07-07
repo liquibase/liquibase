@@ -12,15 +12,15 @@ import java.util.List;
  */
 public class CopyDataStatement extends AbstractStatement {
 
-    private static final String SOURCE_TABLE_CATALOG_NAME = "sourceTableCatalogName";
-    private static final String SOURCE_TABLE_SCHEMA_NAME = "sourceTableSchemaName";
-	private static final String SOURCE_TABLE_NAME = "sourceTableName";
+    public static final String SOURCE_TABLE_CATALOG_NAME = "sourceTableCatalogName";
+    public static final String SOURCE_TABLE_SCHEMA_NAME = "sourceTableSchemaName";
+	public static final String SOURCE_TABLE_NAME = "sourceTableName";
 
-    private static final String TARGET_TABLE_CATALOG_NAME = "targetTableCatalogName";
-    private static final String TARGET_TABLE_SCHEMA_NAME = "targetTableSchemaName";
-    private static final String TARGET_TABLE_NAME = "targetTableName";
+    public static final String TARGET_TABLE_CATALOG_NAME = "targetTableCatalogName";
+    public static final String TARGET_TABLE_SCHEMA_NAME = "targetTableSchemaName";
+    public static final String TARGET_TABLE_NAME = "targetTableName";
 
-	private static final String SOURCE_COLUMNS = "sourceColumns";
+	public static final String SOURCE_COLUMNS = "sourceColumns";
 	
 	
 	public CopyDataStatement() {

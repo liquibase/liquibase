@@ -46,8 +46,8 @@ public class SelectFromDatabaseChangeLogGenerator extends AbstractSqlGenerator<S
             }
         }
 
-        if (statement.getOrderByColumns() != null && statement.getOrderByColumns().length > 0) {
-            sql += " ORDER BY "+StringUtils.join(statement.getOrderByColumns(), ", ").toUpperCase();
+        if (statement.getOrderBy() != null && statement.getOrderBy().length > 0) {
+            sql += " ORDER BY "+StringUtils.join(statement.getOrderBy(), ", ").toUpperCase();
         }
 
         return new Action[]{

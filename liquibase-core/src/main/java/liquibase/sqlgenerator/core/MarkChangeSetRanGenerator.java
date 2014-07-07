@@ -4,6 +4,7 @@ import liquibase.action.Action;
 import liquibase.exception.UnsupportedException;
 import liquibase.statement.Statement;
 import liquibase.statement.core.InsertDataStatement;
+import liquibase.statement.core.UpdateDataStatement;
 import liquibase.statementlogic.StatementLogicChain;
 import liquibase.statementlogic.StatementLogicFactory;
 import liquibase.change.Change;
@@ -17,7 +18,6 @@ import liquibase.exception.ValidationErrors;
 import  liquibase.ExecutionEnvironment;
 import liquibase.statement.DatabaseFunction;
 import liquibase.statement.core.MarkChangeSetRanStatement;
-import liquibase.statement.core.UpdateStatement;
 import liquibase.util.LiquibaseUtil;
 import liquibase.util.StringUtils;
 
@@ -45,11 +45,11 @@ public class MarkChangeSetRanGenerator extends AbstractSqlGenerator<MarkChangeSe
             if (statement.getExecType().equals(ChangeSet.ExecType.FAILED) || statement.getExecType().equals(ChangeSet.ExecType.SKIPPED)) {
                 return new Action[0]; //don't mark
             } else  if (statement.getExecType().ranBefore) {
-                runStatement = new UpdateStatement(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName())
+                runStatement = new UpdateDataStatement(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName())
                         .addNewColumnValue("DATEEXECUTED", new DatabaseFunction(dateValue))
                         .addNewColumnValue("MD5SUM", changeSet.generateCheckSum().toString())
                         .addNewColumnValue("EXECTYPE", statement.getExecType().value)
-                        .setWhereClause("ID=? AND AUTHOR=? AND FILENAME=?")
+                        .setWhere("ID=? AND AUTHOR=? AND FILENAME=?")
                         .addWhereParameters(changeSet.getId(), changeSet.getAuthor(), changeSet.getFilePath());
             } else {
                 runStatement = new InsertDataStatement(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName())

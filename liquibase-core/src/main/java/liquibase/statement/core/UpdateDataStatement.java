@@ -3,28 +3,62 @@ package liquibase.statement.core;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Table;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
-/**
- * Deletes data from an existing table.
- */
-public class DeleteDataStatement extends AbstractTableStatement {
+public class UpdateDataStatement extends AbstractTableStatement {
+
+    public static final String NEW_COLUMN_VALUES = "newColumnValues";
+
     public static final String WHERE = "where";
     public static final String WHERE_PARAMETERS = "whereParameters";
     public static final String WHERE_COLUMN_NAMES = "whereColumnNames";
 
-    public DeleteDataStatement() {
+    public static final String NEEDS_PREPARED_STATEMENT = "needsPreparedStatement";
+
+    public UpdateDataStatement() {
     }
 
-    public DeleteDataStatement(String catalogName, String schemaName, String tableName) {
+    public UpdateDataStatement(String catalogName, String schemaName, String tableName) {
         super(catalogName, schemaName, tableName);
     }
 
     protected void init() {
+        setAttribute(NEW_COLUMN_VALUES, new TreeMap());
         setAttribute(WHERE_PARAMETERS, new ArrayList());
         setAttribute(WHERE_COLUMN_NAMES, new ArrayList());
+    }
+
+    public SortedSet<String> getColumnNames() {
+        return (SortedSet) getAttribute(NEW_COLUMN_VALUES, Map.class).keySet();
+    }
+
+    public Object getNewColumnValue(String columnName) {
+        return getAttribute(NEW_COLUMN_VALUES, Map.class).get(columnName);
+    }
+
+    public UpdateDataStatement addNewColumnValue(String columnName, Object newValue) {
+        getAttribute(NEW_COLUMN_VALUES, Map.class).put(columnName, newValue);
+
+        return this;
+    }
+
+    public UpdateDataStatement removeNewColumnValue(String columnName) {
+        getAttribute(NEW_COLUMN_VALUES, Map.class).remove(columnName);
+
+        return this;
+    }
+
+
+    /**
+     * Returns whether this update statement requires use of a prepared statement.
+     * Default value is false.
+     */
+    public boolean getNeedsPreparedStatement() {
+        return getAttribute(NEEDS_PREPARED_STATEMENT, false);
+    }
+
+    public UpdateDataStatement setNeedsPreparedStatement(boolean needsPreparedStatement) {
+        return (UpdateDataStatement) setAttribute(NEEDS_PREPARED_STATEMENT, needsPreparedStatement);
     }
 
     /**
@@ -36,8 +70,8 @@ public class DeleteDataStatement extends AbstractTableStatement {
         return getAttribute(WHERE, String.class);
     }
 
-    public DeleteDataStatement setWhere(String where) {
-        return (DeleteDataStatement) setAttribute(WHERE, where);
+    public UpdateDataStatement setWhere(String whereClause) {
+        return (UpdateDataStatement) setAttribute(WHERE, whereClause);
     }
 
     /**
@@ -48,7 +82,7 @@ public class DeleteDataStatement extends AbstractTableStatement {
         return getAttribute(WHERE_PARAMETERS, List.class);
     }
 
-    public DeleteDataStatement addWhereParameters(Object... value) {
+    public UpdateDataStatement addWhereParameters(Object... value) {
         if (value != null) {
             getWhereParameters().addAll(Arrays.asList(value));
         }
@@ -64,7 +98,7 @@ public class DeleteDataStatement extends AbstractTableStatement {
     }
 
 
-    public DeleteDataStatement addWhereColumnNames(String... name) {
+    public UpdateDataStatement addWhereColumnNames(String... name) {
         if (name != null) {
             getWhereColumnNames().addAll(Arrays.asList(name));
         }

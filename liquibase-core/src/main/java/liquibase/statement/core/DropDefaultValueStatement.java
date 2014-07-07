@@ -10,7 +10,7 @@ import liquibase.structure.core.Table;
  */
 public class DropDefaultValueStatement extends AbstractColumnStatement {
 
-    private static final String COLUMN_DATA_TYPE = "columnDataType";
+    public static final String COLUMN_DATA_TYPE = "columnDataType";
 
     public DropDefaultValueStatement() {
     }

@@ -9,13 +9,13 @@ import liquibase.structure.core.Table;
  */
 public class AddPrimaryKeyStatement extends AbstractPrimaryKeyStatement {
 
-    private static final String TABLESPACE = "tablespace";
-    private static final String COLUMN_NAMES = "columnNames";
+    public static final String TABLESPACE = "tablespace";
+    public static final String COLUMN_NAMES = "columnNames";
 
     public AddPrimaryKeyStatement() {
     }
 
-    public AddPrimaryKeyStatement(String catalogName, String schemaName, String tableName, String columnNames, String constraintName) {
+    public AddPrimaryKeyStatement(String constraintName, String catalogName, String schemaName, String tableName, String columnNames) {
         super(constraintName, catalogName, schemaName, tableName);
         setColumnNames(columnNames);
     }

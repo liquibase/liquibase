@@ -8,7 +8,7 @@ import liquibase.exception.DatabaseException
 import liquibase.executor.Executor
 import liquibase.executor.ExecutorService
 import liquibase.executor.UpdateResult
-import liquibase.statement.core.UpdateStatement
+import liquibase.statement.core.UpdateDataStatement
 import spock.lang.Specification
 
 public class ShouldRunChangeSetFilterTest extends Specification {
@@ -90,7 +90,7 @@ public class ShouldRunChangeSetFilterTest extends Specification {
         database.getDefaultSchemaName() >> null
 
         def template = Mock(Executor)
-        template.update(UpdateStatement) >> new UpdateResult(1)
+        template.update(UpdateDataStatement) >> new UpdateResult(1)
 
         ExecutorService.getInstance().setExecutor(database, template)
         return database

@@ -10,10 +10,10 @@ import liquibase.structure.core.Table;
  */
 public class CreateIndexStatement extends AbstractIndexStatement {
 
-    private static final String COLUMN_NAMES ="columnNames";
-    private static final String TABLESPACE = "tablespace";
-    private static final String UNIQUE = "unique";
-	private static final String ASSOCIATED_WITH = "associatedWith";
+    public static final String COLUMN_NAMES ="columnNames";
+    public static final String TABLESPACE = "tablespace";
+    public static final String UNIQUE = "unique";
+	public static final String ASSOCIATED_WITH = "associatedWith";
 
     public CreateIndexStatement() {
     }

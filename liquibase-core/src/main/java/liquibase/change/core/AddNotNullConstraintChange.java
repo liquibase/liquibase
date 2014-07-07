@@ -9,7 +9,7 @@ import  liquibase.ExecutionEnvironment;
 import liquibase.statement.Statement;
 import liquibase.statement.core.ReindexStatement;
 import liquibase.statement.core.SetNullableStatement;
-import liquibase.statement.core.UpdateStatement;
+import liquibase.statement.core.UpdateDataStatement;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Index;
 
@@ -97,9 +97,9 @@ public class AddNotNullConstraintChange extends AbstractChange {
     	List<Statement> statements = new ArrayList<Statement>();
 
         if (defaultNullValue != null) {
-            statements.add(new UpdateStatement(getCatalogName(), getSchemaName(), getTableName())
+            statements.add(new UpdateDataStatement(getCatalogName(), getSchemaName(), getTableName())
                     .addNewColumnValue(getColumnName(), defaultNullValue)
-                    .setWhereClause(database.escapeObjectName(getColumnName(), Column.class) + " IS NULL"));
+                    .setWhere(database.escapeObjectName(getColumnName(), Column.class) + " IS NULL"));
         }
         
     	statements.add(new SetNullableStatement(getCatalogName(), getSchemaName(), getTableName(), getColumnName(), getColumnDataType(), false));
@@ -119,9 +119,9 @@ public class AddNotNullConstraintChange extends AbstractChange {
     	List<Statement> statements = new ArrayList<Statement>();
     	
         if (defaultNullValue != null) {
-            statements.add(new UpdateStatement(getCatalogName(), getSchemaName(), getTableName())
+            statements.add(new UpdateDataStatement(getCatalogName(), getSchemaName(), getTableName())
                     .addNewColumnValue(getColumnName(), getDefaultNullValue())
-                    .setWhereClause(getColumnName() + " IS NULL"));
+                    .setWhere(getColumnName() + " IS NULL"));
         }
 
 //		// ... test if column contains NULL values

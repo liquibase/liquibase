@@ -31,7 +31,7 @@ import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.SnapshotControl;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.core.RawSqlStatement;
-import liquibase.statement.core.UpdateStatement;
+import liquibase.statement.core.UpdateDataStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.util.LiquibaseUtil;
 import liquibase.util.StreamUtil;
@@ -987,9 +987,9 @@ public class Liquibase {
         try {
             checkLiquibaseTables(false, null, new Contexts(), new LabelExpression());
 
-            UpdateStatement updateStatement = new UpdateStatement(getDatabase().getLiquibaseCatalogName(), getDatabase().getLiquibaseSchemaName(), getDatabase().getDatabaseChangeLogTableName());
-            updateStatement.addNewColumnValue("MD5SUM", null);
-            ExecutorService.getInstance().getExecutor(database).execute(updateStatement);
+            UpdateDataStatement updateDataStatement = new UpdateDataStatement(getDatabase().getLiquibaseCatalogName(), getDatabase().getLiquibaseSchemaName(), getDatabase().getDatabaseChangeLogTableName());
+            updateDataStatement.addNewColumnValue("MD5SUM", null);
+            ExecutorService.getInstance().getExecutor(database).execute(updateDataStatement);
             getDatabase().commit();
         } finally {
             lockService.releaseLock();

@@ -1,39 +1,52 @@
 package liquibase.statement.core;
 
+import liquibase.AbstractExtensibleObject;
 import liquibase.statement.AbstractStatement;
 import liquibase.structure.DatabaseObject;
 
 public class SelectFromDatabaseChangeLogStatement extends AbstractStatement {
 
-    private String[] columnsToSelect;
-    private WhereClause whereClause;
-    private String[] orderByColumns;
+    public static final String COLUMNS_TO_SELECT = "columnsToSelect";
+    public static final String ORDER_BY=  "orderBy";
+    public static final String WHERE_CLAUSE = "whereClause";
 
     public SelectFromDatabaseChangeLogStatement(String... columnsToSelect) {
         this(null, columnsToSelect);
     }
 
     public SelectFromDatabaseChangeLogStatement(WhereClause whereClause, String... columnsToSelect) {
-        this.columnsToSelect = columnsToSelect;
-        this.whereClause = whereClause;
+        setColumnsToSelect(columnsToSelect);
+        setWhereClause(whereClause);
     }
 
     public String[] getColumnsToSelect() {
-        return columnsToSelect;
+        return getAttribute(COLUMNS_TO_SELECT, String[].class);
+    }
+
+    public SelectFromDatabaseChangeLogStatement setColumnsToSelect(String... columnsToSelect) {
+        if (columnsToSelect != null && columnsToSelect.length == 0) {
+            columnsToSelect = null;
+        }
+        return (SelectFromDatabaseChangeLogStatement) setAttribute(COLUMNS_TO_SELECT, columnsToSelect);
     }
 
     public WhereClause getWhereClause() {
-        return whereClause;
+        return getAttribute(WHERE_CLAUSE, WhereClause.class);
     }
 
-    public String[] getOrderByColumns() {
-        return orderByColumns;
+    public SelectFromDatabaseChangeLogStatement setWhereClause(WhereClause whereClause) {
+        return (SelectFromDatabaseChangeLogStatement) setAttribute(WHERE_CLAUSE, whereClause);
     }
 
-    public SelectFromDatabaseChangeLogStatement setOrderBy(String... columns) {
-        this.orderByColumns = columns;
+    public String[] getOrderBy() {
+        return getAttribute(ORDER_BY, String[].class);
+    }
 
-        return this;
+    public SelectFromDatabaseChangeLogStatement setOrderBy(String... orderByColumns) {
+        if (orderByColumns != null && orderByColumns.length == 0) {
+            orderByColumns = null;
+        }
+        return (SelectFromDatabaseChangeLogStatement) setAttribute(ORDER_BY, orderByColumns);
     }
 
     @Override
@@ -45,21 +58,27 @@ public class SelectFromDatabaseChangeLogStatement extends AbstractStatement {
 
     }
 
-    public static class ByNotNullCheckSum implements WhereClause {
+    public static class ByNotNullCheckSum extends AbstractExtensibleObject implements WhereClause {
 
     }
 
-    public static class ByTag implements WhereClause {
+    public static class ByTag extends AbstractExtensibleObject implements WhereClause {
 
-        private String tagName;
+        public static final String TAG_NAME = "tagName";
 
         public ByTag(String tagName) {
-            this.tagName = tagName;
+            setTagName(tagName);
         }
 
         public String getTagName() {
-            return tagName;
+            return getAttribute(TAG_NAME, String.class);
         }
+
+        public ByTag setTagName(String tagName) {
+            return (ByTag) setAttribute(TAG_NAME, tagName);
+        }
+
+
     }
 
 }

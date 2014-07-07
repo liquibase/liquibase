@@ -9,8 +9,8 @@ import liquibase.structure.core.View;
  */
 public class CreateViewStatement extends AbstractViewStatement {
 
-    private static final String SELECT_QUERY = "selectQuery";
-    private static final String REPLACE_IF_EXISTS = "replaceIfExists";
+    public static final String SELECT_QUERY = "selectQuery";
+    public static final String REPLACE_IF_EXISTS = "replaceIfExists";
 
     public CreateViewStatement() {
     }

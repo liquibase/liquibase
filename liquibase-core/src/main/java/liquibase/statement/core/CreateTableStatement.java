@@ -16,15 +16,15 @@ import java.util.*;
  */
 public class CreateTableStatement extends AbstractTableStatement {
 
-    private static final String TABLESPACE = "tablespace";
-    private static final String REMARKS = "remarks";
-    private static final String COLUMN_NAMES = "columnNames";
-    private static final String AUTO_INCREMENT_CONSTRAINTS = "autoIncrementConstraints";
-    private static final String COLUMN_TYPES = "columnTypes";
-    private static final String DEFAULT_VALUES = "defaultValues";
-    private static final String COLUMN_REMARKS = "columnRemarks";
+    public static final String TABLESPACE = "tablespace";
+    public static final String REMARKS = "remarks";
+    public static final String COLUMN_NAMES = "columnNames";
+    public static final String AUTO_INCREMENT_CONSTRAINTS = "autoIncrementConstraints";
+    public static final String COLUMN_TYPES = "columnTypes";
+    public static final String DEFAULT_VALUES = "defaultValues";
+    public static final String COLUMN_REMARKS = "columnRemarks";
 
-    private static final String CONSTRAINTS = "constraints";
+    public static final String CONSTRAINTS = "constraints";
 
     public CreateTableStatement() {
     }

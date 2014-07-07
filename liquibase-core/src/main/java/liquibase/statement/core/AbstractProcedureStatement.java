@@ -4,9 +4,9 @@ import liquibase.statement.AbstractStatement;
 import liquibase.statement.Statement;
 
 public abstract class AbstractProcedureStatement extends AbstractStatement {
-    private final static String CATALOG_NAME = "catalogName";
-    private final static String SCHEMA_NAME = "schemaName";
-    private final static String PROCEDURE_NAME = "procedureName";
+    public final static String CATALOG_NAME = "catalogName";
+    public final static String SCHEMA_NAME = "schemaName";
+    public final static String PROCEDURE_NAME = "procedureName";
 
     protected AbstractProcedureStatement() {
     }

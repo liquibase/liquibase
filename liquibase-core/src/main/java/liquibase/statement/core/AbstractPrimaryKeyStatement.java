@@ -2,7 +2,7 @@ package liquibase.statement.core;
 
 public abstract class AbstractPrimaryKeyStatement extends AbstractTableStatement {
 
-    private static final String CONSTRAINT_NAME = "constraintName";
+    public static final String CONSTRAINT_NAME = "constraintName";
 
     protected AbstractPrimaryKeyStatement() {
     }

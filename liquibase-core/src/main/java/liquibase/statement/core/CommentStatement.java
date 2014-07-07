@@ -7,7 +7,7 @@ import liquibase.structure.DatabaseObject;
  * Outputs a comment.
  */
 public class CommentStatement extends AbstractStatement {
-	private static final String TEXT = "text";
+	public static final String TEXT = "text";
 
 	public CommentStatement(String text) {
 		setText(text);

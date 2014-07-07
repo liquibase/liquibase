@@ -3,10 +3,10 @@ package liquibase.statement.core;
 import liquibase.statement.AbstractStatement;
 
 public abstract class AbstractIndexStatement extends AbstractStatement {
-    private static final String TABLE_CATALOG_NAME = "tableCatalogName";
-    private static final String TABLE_SCHEMA_NAME = "tableSchemaName";
-    private static final String INDEX_NAME = "indexName";
-    private static final String TABLE_NAME = "tableName";
+    public static final String TABLE_CATALOG_NAME = "tableCatalogName";
+    public static final String TABLE_SCHEMA_NAME = "tableSchemaName";
+    public static final String INDEX_NAME = "indexName";
+    public static final String TABLE_NAME = "tableName";
 
     protected AbstractIndexStatement() {
     }

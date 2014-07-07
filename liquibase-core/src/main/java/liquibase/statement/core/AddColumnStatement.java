@@ -15,13 +15,13 @@ import java.util.Set;
  */
 public class AddColumnStatement extends AbstractColumnStatement {
 
-    private final String COLUMN_TYPE = "columnType";
-    private final String DEFAULT_VALUE = "defaultValue";
-    private final String REMARKS = "remarks";
-    private final String ADD_AFTER_COLUMN = "addAfterColumn";
-    private final String ADD_BEFORE_COLUMN = "addBeforeColumn";
-    private final String ADD_AT_POSITION = "addAtPosition";
-    private final String CONSTRAINTS = "constraints";
+    public static final String COLUMN_TYPE = "columnType";
+    public static final String DEFAULT_VALUE = "defaultValue";
+    public static final String REMARKS = "remarks";
+    public static final String ADD_AFTER_COLUMN = "addAfterColumn";
+    public static final String ADD_BEFORE_COLUMN = "addBeforeColumn";
+    public static final String ADD_AT_POSITION = "addAtPosition";
+    public static final String CONSTRAINTS = "constraints";
 
     public AddColumnStatement() {
 
@@ -29,12 +29,17 @@ public class AddColumnStatement extends AbstractColumnStatement {
 
     public AddColumnStatement(String catalogName, String schemaName, String tableName, String columnName, String columnType, Object defaultValue, Constraint... constraints) {
         super(catalogName, schemaName, tableName, columnName);
-        setAttribute(CONSTRAINTS, new HashSet<Constraint>());
         setColumnType(columnType);
         setDefaultValue(defaultValue);
         if (constraints != null) {
             getConstraints().addAll(Arrays.asList(constraints));
         }
+    }
+
+    @Override
+    protected void init() {
+        super.init();
+        setAttribute(CONSTRAINTS, new HashSet<Constraint>());
     }
 
     public String getColumnType() {

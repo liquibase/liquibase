@@ -1,14 +1,17 @@
 package liquibase.change.core;
 
 import liquibase.action.Action;
+import liquibase.action.ExecuteAction;
 import liquibase.change.AbstractChange;
 import liquibase.change.ChangeMetaData;
 import liquibase.change.DatabaseChange;
 import liquibase.change.DatabaseChangeProperty;
+import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
 import liquibase.exception.Warnings;
 import  liquibase.ExecutionEnvironment;
+import liquibase.executor.ExecuteResult;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.executor.LoggingExecutor;
@@ -18,7 +21,7 @@ import liquibase.parser.core.ParsedNodeException;
 import liquibase.resource.ResourceAccessor;
 import liquibase.statement.Statement;
 import liquibase.statement.core.CommentStatement;
-import liquibase.statement.core.RuntimeStatement;
+import liquibase.statement.core.RawActionStatement;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
 
@@ -107,11 +110,9 @@ public class ExecuteShellCommandChange extends AbstractChange {
         
         if (shouldRun && !nonExecutedMode) {
 
-
-            return new Statement[]{new RuntimeStatement() {
-
+            Action action = new ExecuteAction() {
                 @Override
-                public Action[] generate(ExecutionEnvironment env) {
+                public ExecuteResult execute(ExecutionEnvironment env) throws DatabaseException {
                     List<String> commandArray = new ArrayList<String>();
                     commandArray.add(executable);
                     commandArray.addAll(getArgs());
@@ -138,13 +139,20 @@ public class ExecuteShellCommandChange extends AbstractChange {
                         if (returnCode != 0) {
                             throw new RuntimeException(getCommandString() + " returned an code of " + returnCode);
                         }
+
+                        return new ExecuteResult();
                     } catch (IOException e) {
                         throw new UnexpectedLiquibaseException("Error executing command: " + e);
                     }
-
-                    return null;
                 }
-            }};
+
+                @Override
+                public String describe() {
+                    return executable+" "+StringUtils.join(getArgs(), " ");
+                }
+            };
+
+            return new Statement[] {new RawActionStatement(action)};
         }
         
         if (nonExecutedMode) {

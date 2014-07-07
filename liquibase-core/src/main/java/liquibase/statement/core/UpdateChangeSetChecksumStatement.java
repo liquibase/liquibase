@@ -4,16 +4,26 @@ import liquibase.changelog.ChangeSet;
 import liquibase.statement.AbstractStatement;
 import liquibase.structure.DatabaseObject;
 
+/**
+ * Update the liquibase checksum for the given changeSet.
+ */
 public class UpdateChangeSetChecksumStatement extends AbstractStatement {
 
-    private ChangeSet changeSet;
+    public static final String CHANGE_SET = "changeSet";
+
+    public UpdateChangeSetChecksumStatement() {
+    }
 
     public UpdateChangeSetChecksumStatement(ChangeSet changeSet) {
-        this.changeSet = changeSet;
+        setAttribute(CHANGE_SET, changeSet);
     }
 
     public ChangeSet getChangeSet() {
-        return changeSet;
+        return getAttribute(CHANGE_SET, ChangeSet.class);
+    }
+
+    public UpdateChangeSetChecksumStatement setChangeSet(ChangeSet changeSet) {
+        return (UpdateChangeSetChecksumStatement) setAttribute(CHANGE_SET, changeSet);
     }
 
     @Override

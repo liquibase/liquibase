@@ -7,12 +7,12 @@ import liquibase.util.StringUtils;
 
 public class AddUniqueConstraintStatement extends AbstractUniqueConstraintStatement {
 
-    private static final String TABLESPACE = "tablespace";
-    private static final String COLUMN_NAMES = "columnNames";
+    public static final String TABLESPACE = "tablespace";
+    public static final String COLUMN_NAMES = "columnNames";
 
-    private static final String DEFERRABLE = "deferrable";
-    private static final String INITIALLY_DEFERRED = "initiallyDeferred";
-    private static final String DISABLED = "disabled";
+    public static final String DEFERRABLE = "deferrable";
+    public static final String INITIALLY_DEFERRED = "initiallyDeferred";
+    public static final String DISABLED = "disabled";
 
     public AddUniqueConstraintStatement() {
     }

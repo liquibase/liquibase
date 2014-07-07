@@ -1,16 +1,19 @@
 package liquibase.change.core;
 
 import liquibase.action.Action;
+import liquibase.action.ExecuteAction;
 import liquibase.change.AbstractChange;
 import liquibase.change.ChangeMetaData;
 import liquibase.change.DatabaseChange;
 import liquibase.change.DatabaseChangeProperty;
 import  liquibase.ExecutionEnvironment;
+import liquibase.exception.DatabaseException;
+import liquibase.executor.ExecuteResult;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.resource.ResourceAccessor;
 import liquibase.statement.Statement;
-import liquibase.statement.core.RuntimeStatement;
+import liquibase.statement.core.RawActionStatement;
 import liquibase.util.StringUtils;
 
 @DatabaseChange(name="stop", description = "Stops Liquibase execution with a message. Mainly useful for debugging and stepping through a changelog", priority = ChangeMetaData.PRIORITY_DEFAULT, since = "1.9")
@@ -34,13 +37,19 @@ public class StopChange extends AbstractChange {
 
     @Override
     public Statement[] generateStatements(ExecutionEnvironment env) {
-        return new Statement[] { new RuntimeStatement() {
+        Action action = new ExecuteAction() {
             @Override
-            public Action[] generate(ExecutionEnvironment env) {
+            public ExecuteResult execute(ExecutionEnvironment env) throws DatabaseException {
                 throw new StopChangeException(getMessage());
             }
-        }};
 
+            @Override
+            public String describe() {
+                return "Stop Execution";
+            }
+        };
+
+        return new Statement[] { new RawActionStatement(action)};
     }
 
     @Override

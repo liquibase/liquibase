@@ -13,9 +13,9 @@ import java.math.BigInteger;
  */
 public class AddAutoIncrementStatement extends AbstractColumnStatement {
 
-    private final String COLUMN_DATA_TYPE = "columnDataType";
-    private final String STARTS_WITH = "startWith";
-    private final String INCREMENT_BY = "incrementBy";
+    public static final String COLUMN_DATA_TYPE = "columnDataType";
+    public static final String STARTS_WITH = "startWith";
+    public static final String INCREMENT_BY = "incrementBy";
 
     public AddAutoIncrementStatement() {
     }

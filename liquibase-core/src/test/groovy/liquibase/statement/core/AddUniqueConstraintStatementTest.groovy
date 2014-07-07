@@ -6,7 +6,7 @@ public class AddUniqueConstraintStatementTest extends AbstractStatementTest<AddU
 
     def "constructor"() {
         when:
-        def obj = new AddUniqueConstraintStatement("CAT_NAME", "SCHEMA_NAME", "TABLE_NAME", "COLUMN1, COLUMN2", "CONST_NAME")
+        def obj = new AddUniqueConstraintStatement("CONST_NAME", "CAT_NAME", "SCHEMA_NAME", "TABLE_NAME", "COLUMN1, COLUMN2")
 
         then:
         obj.getCatalogName() == "CAT_NAME"

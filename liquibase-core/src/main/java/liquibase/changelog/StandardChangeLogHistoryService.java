@@ -122,7 +122,7 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
                 if (!hasOrderExecuted) {
                     executor.comment("Adding missing databasechangelog.orderexecuted column");
                     statementsToExecute.add(new AddColumnStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "ORDEREXECUTED", "INT", null));
-                    statementsToExecute.add(new UpdateStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName()).addNewColumnValue("ORDEREXECUTED", -1));
+                    statementsToExecute.add(new UpdateDataStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName()).addNewColumnValue("ORDEREXECUTED", -1));
                     statementsToExecute.add(new SetNullableStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "ORDEREXECUTED", "INT", false));
                 }
                 if (checksumNotRightSize) {
@@ -138,7 +138,7 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
                 if (!hasExecTypeColumn) {
                     executor.comment("Adding missing databasechangelog.exectype column");
                     statementsToExecute.add(new AddColumnStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "EXECTYPE", "VARCHAR(10)", null));
-                    statementsToExecute.add(new UpdateStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName()).addNewColumnValue("EXECTYPE", "EXECUTED"));
+                    statementsToExecute.add(new UpdateDataStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName()).addNewColumnValue("EXECTYPE", "EXECUTED"));
                     statementsToExecute.add(new SetNullableStatement(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName(), "EXECTYPE", "VARCHAR(10)", false));
                 }
 
@@ -338,9 +338,9 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
     @Override
     public void clearAllCheckSums() throws LiquibaseException {
         Database database = getDatabase();
-        UpdateStatement updateStatement = new UpdateStatement(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName());
-        updateStatement.addNewColumnValue("MD5SUM", null);
-        ExecutorService.getInstance().getExecutor(database).execute(updateStatement);
+        UpdateDataStatement updateDataStatement = new UpdateDataStatement(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName());
+        updateDataStatement.addNewColumnValue("MD5SUM", null);
+        ExecutorService.getInstance().getExecutor(database).execute(updateDataStatement);
         database.commit();
     }
 

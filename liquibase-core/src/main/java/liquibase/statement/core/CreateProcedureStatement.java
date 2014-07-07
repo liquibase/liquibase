@@ -6,8 +6,8 @@ import liquibase.structure.DatabaseObject;
 
 public class CreateProcedureStatement extends AbstractProcedureStatement {
 
-    private final static String PROCEDURE_TEXT = "procedureText";
-    private final static String END_DELIMITER = "endDelimiter";
+    public final static String PROCEDURE_TEXT = "procedureText";
+    public final static String END_DELIMITER = "endDelimiter";
 
     public CreateProcedureStatement() {
     }

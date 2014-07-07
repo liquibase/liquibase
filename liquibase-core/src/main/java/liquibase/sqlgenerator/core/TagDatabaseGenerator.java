@@ -3,6 +3,7 @@ package liquibase.sqlgenerator.core;
 import liquibase.action.Action;
 import liquibase.action.core.UnparsedSql;
 import liquibase.exception.UnsupportedException;
+import liquibase.statement.core.UpdateDataStatement;
 import liquibase.statementlogic.StatementLogicChain;
 import liquibase.statementlogic.StatementLogicFactory;
 import liquibase.database.Database;
@@ -11,7 +12,6 @@ import liquibase.database.core.MySQLDatabase;
 import liquibase.exception.ValidationErrors;
 import  liquibase.ExecutionEnvironment;
 import liquibase.statement.core.TagDatabaseStatement;
-import liquibase.statement.core.UpdateStatement;
 
 public class TagDatabaseGenerator extends AbstractSqlGenerator<TagDatabaseStatement> {
 
@@ -27,8 +27,8 @@ public class TagDatabaseGenerator extends AbstractSqlGenerator<TagDatabaseStatem
         String liquibaseSchema = null;
         Database database = env.getTargetDatabase();
    		liquibaseSchema = database.getLiquibaseSchemaName();
-        UpdateStatement updateStatement = new UpdateStatement(database.getLiquibaseCatalogName(), liquibaseSchema, database.getDatabaseChangeLogTableName());
-        updateStatement.addNewColumnValue("TAG", statement.getTag());
+        UpdateDataStatement updateDataStatement = new UpdateDataStatement(database.getLiquibaseCatalogName(), liquibaseSchema, database.getDatabaseChangeLogTableName());
+        updateDataStatement.addNewColumnValue("TAG", statement.getTag());
         if (database instanceof MySQLDatabase) {
             try {
                 long version = Long.parseLong(database.getDatabaseProductVersion().substring(0, 1));
@@ -42,7 +42,7 @@ public class TagDatabaseGenerator extends AbstractSqlGenerator<TagDatabaseStatem
             } catch (Throwable e) {
                 ; //assume it is version 5
             }
-            updateStatement.setWhereClause("DATEEXECUTED = (SELECT MAX(DATEEXECUTED) FROM (SELECT DATEEXECUTED FROM " + database.escapeTableName(database.getLiquibaseCatalogName(), liquibaseSchema, database.getDatabaseChangeLogTableName()) + ") AS X)");
+            updateDataStatement.setWhere("DATEEXECUTED = (SELECT MAX(DATEEXECUTED) FROM (SELECT DATEEXECUTED FROM " + database.escapeTableName(database.getLiquibaseCatalogName(), liquibaseSchema, database.getDatabaseChangeLogTableName()) + ") AS X)");
         } else if (database instanceof InformixDatabase) {
             return new Action[]{
                     new UnparsedSql("SELECT MAX(dateexecuted) max_date FROM " + database.escapeTableName(database.getLiquibaseCatalogName(), liquibaseSchema, database.getDatabaseChangeLogTableName()) + " INTO TEMP max_date_temp WITH NO LOG"),
@@ -50,10 +50,10 @@ public class TagDatabaseGenerator extends AbstractSqlGenerator<TagDatabaseStatem
                     new UnparsedSql("DROP TABLE max_date_temp;")
             };
         } else {
-            updateStatement.setWhereClause("DATEEXECUTED = (SELECT MAX(DATEEXECUTED) FROM " + database.escapeTableName(database.getLiquibaseCatalogName(), liquibaseSchema, database.getDatabaseChangeLogTableName()) + ")");
+            updateDataStatement.setWhere("DATEEXECUTED = (SELECT MAX(DATEEXECUTED) FROM " + database.escapeTableName(database.getLiquibaseCatalogName(), liquibaseSchema, database.getDatabaseChangeLogTableName()) + ")");
         }
 
-        return StatementLogicFactory.getInstance().generateActions(updateStatement, env);
+        return StatementLogicFactory.getInstance().generateActions(updateDataStatement, env);
 
     }
 }

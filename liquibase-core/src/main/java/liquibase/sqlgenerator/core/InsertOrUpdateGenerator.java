@@ -4,13 +4,13 @@ import liquibase.ExecutionEnvironment;
 import liquibase.action.Action;
 import liquibase.action.core.UnparsedSql;
 import liquibase.exception.UnsupportedException;
+import liquibase.statement.core.UpdateDataStatement;
 import liquibase.statementlogic.StatementLogicChain;
 import liquibase.database.Database;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.ValidationErrors;
 import liquibase.statement.core.InsertOrUpdateDataStatement;
-import liquibase.statement.core.UpdateStatement;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -86,26 +86,26 @@ public abstract class InsertOrUpdateGenerator extends AbstractSqlGenerator<Inser
         StringBuffer updateSqlString = new StringBuffer();
 
         UpdateGenerator update = new UpdateGenerator();
-        UpdateStatement updateStatement = new UpdateStatement(
+        UpdateDataStatement updateDataStatement = new UpdateDataStatement(
         		insertOrUpdateDataStatement.getCatalogName(),
         		insertOrUpdateDataStatement.getSchemaName(),
         		insertOrUpdateDataStatement.getTableName());
-        updateStatement.setWhereClause(whereClause + ";\n");
+        updateDataStatement.setWhere(whereClause + ";\n");
 
         String[] pkFields= insertOrUpdateDataStatement.getPrimaryKey().split(",");
         HashSet<String> hashPkFields = new HashSet<String>(Arrays.asList(pkFields));
         for(String columnKey: insertOrUpdateDataStatement.getColumnNames())
         {
             if (!hashPkFields.contains(columnKey)) {
-                updateStatement.addNewColumnValue(columnKey, insertOrUpdateDataStatement.getColumnValue(columnKey));
+                updateDataStatement.addNewColumnValue(columnKey, insertOrUpdateDataStatement.getColumnValue(columnKey));
             }
         }
         // this isn't very elegant but the code fails above without any columns to update
-        if(updateStatement.getNewColumnValues().isEmpty()) {
+        if(updateDataStatement.getColumnNames().isEmpty()) {
         	throw new LiquibaseException("No fields to update in set clause");
         }
 
-        Action[] updateSql = update.generateActions(updateStatement, env, chain);
+        Action[] updateSql = update.generateActions(updateDataStatement, env, chain);
 
         for(Action s:updateSql)
         {

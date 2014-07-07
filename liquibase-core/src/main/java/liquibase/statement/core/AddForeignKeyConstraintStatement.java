@@ -10,18 +10,18 @@ import liquibase.structure.core.Table;
  */
 public class AddForeignKeyConstraintStatement extends AbstractForeignKeyStatement {
 
-    private static final String BASE_COLUMN_NAMES = "baseColumnNames";
+    public static final String BASE_COLUMN_NAMES = "baseColumnNames";
 
-    private static final String REFERENCED_TABLE_CATALOG_NAME = "referencedTableCatalogName";
-    private static final String REFERENCED_TABLE_SCHEMA_NAME = "referencedTableSchemaName";
-    private static final String REFERENCED_TABLE_NAME = "referencedTableName";
-    private static final String REFERENCED_COLUMN_NAMES = "referencedColumnNames";
+    public static final String REFERENCED_TABLE_CATALOG_NAME = "referencedTableCatalogName";
+    public static final String REFERENCED_TABLE_SCHEMA_NAME = "referencedTableSchemaName";
+    public static final String REFERENCED_TABLE_NAME = "referencedTableName";
+    public static final String REFERENCED_COLUMN_NAMES = "referencedColumnNames";
 
-    private static final String DEFERRABLE = "deferrable";
-    private static final String INITIALLY_DEFERRED = "initiallyDeferred";
+    public static final String DEFERRABLE = "deferrable";
+    public static final String INITIALLY_DEFERRED = "initiallyDeferred";
 
-    private static final String ON_DELETE = "onDelete";
-    private static final String ON_UPDATE = "onUpdate";
+    public static final String ON_DELETE = "onDelete";
+    public static final String ON_UPDATE = "onUpdate";
 
     public AddForeignKeyConstraintStatement() {
     }

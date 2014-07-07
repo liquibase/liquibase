@@ -141,9 +141,9 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
             }            
 
             if (column.getValueObject() != null) {
-                UpdateStatement updateStatement = new UpdateStatement(getCatalogName(), getSchemaName(), getTableName());
-                updateStatement.addNewColumnValue(column.getName(), column.getValueObject());
-                sql.add(updateStatement);
+                UpdateDataStatement updateDataStatement = new UpdateDataStatement(getCatalogName(), getSchemaName(), getTableName());
+                updateDataStatement.addNewColumnValue(column.getName(), column.getValueObject());
+                sql.add(updateDataStatement);
             }
         }
 

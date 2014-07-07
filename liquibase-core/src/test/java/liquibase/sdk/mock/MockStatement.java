@@ -1,4 +1,4 @@
-package liquibase.statement.core;
+package liquibase.sdk.mock;
 
 import liquibase.AbstractExtensibleObject;
 import liquibase.statement.Statement;

@@ -8,14 +8,14 @@ import java.math.BigInteger;
 
 public class CreateSequenceStatement extends AbstractSequenceStatement {
 
-    private static final String INCREMENT_BY = "incrementBy";
-    private static final String MAX_VALUE = "maxValue";
-    private static final String MIN_VALUE = "minValue";
-    private static final String ORDERED = "ordered";
+    public static final String INCREMENT_BY = "incrementBy";
+    public static final String MAX_VALUE = "maxValue";
+    public static final String MIN_VALUE = "minValue";
+    public static final String ORDERED = "ordered";
 
-    private static final String START_VALUE = "startValue";
-    private static final String CYCLE = "cycle";
-    private static final String CACHE_SIZE = "cacheSize";
+    public static final String START_VALUE = "startValue";
+    public static final String CYCLE = "cycle";
+    public static final String CACHE_SIZE = "cacheSize";
 
     public CreateSequenceStatement() {
     }

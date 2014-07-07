@@ -9,8 +9,8 @@ import liquibase.structure.DatabaseObject;
  */
 public class ClearDatabaseChangeLogTableStatement extends AbstractStatement {
 
-    private final String CATALOG_NAME = "catalogName";
-    private final String SCHEMA_NAME = "schemaName";
+    public static final String CATALOG_NAME = "catalogName";
+    public static final String SCHEMA_NAME = "schemaName";
 
     public ClearDatabaseChangeLogTableStatement() {
     }

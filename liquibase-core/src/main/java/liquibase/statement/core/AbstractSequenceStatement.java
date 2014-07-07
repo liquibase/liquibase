@@ -8,9 +8,9 @@ import liquibase.statement.Statement;
  */
 abstract class AbstractSequenceStatement extends AbstractStatement {
 
-    private final String CATALOG_NAME = "catalogName";
-    private final String SCHEMA_NAME = "schemaName";
-    private final String SEQUENCE_NAME = "sequenceName";
+    public static final String CATALOG_NAME = "catalogName";
+    public static final String SCHEMA_NAME = "schemaName";
+    public static final String SEQUENCE_NAME = "sequenceName";
 
     protected AbstractSequenceStatement() {
     }

@@ -4,11 +4,11 @@ import liquibase.statement.AbstractStatement;
 
 public abstract class AbstractForeignKeyStatement extends AbstractStatement {
 
-    private static final String BASE_TABLE_CATALOG_NAME = "baseTableCatalogName";
-    private static final String BASE_TABLE_SCHEMA_NAME = "baseTableSchemaName";
-    private static final String BASE_TABLE_NAME = "baseTableName";
+    public static final String BASE_TABLE_CATALOG_NAME = "baseTableCatalogName";
+    public static final String BASE_TABLE_SCHEMA_NAME = "baseTableSchemaName";
+    public static final String BASE_TABLE_NAME = "baseTableName";
 
-    private static final String CONSTRAINT_NAME = "constraintName";
+    public static final String CONSTRAINT_NAME = "constraintName";
 
     protected AbstractForeignKeyStatement() {
     }

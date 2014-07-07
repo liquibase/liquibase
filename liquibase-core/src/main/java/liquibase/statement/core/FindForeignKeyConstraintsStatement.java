@@ -11,9 +11,9 @@ public class FindForeignKeyConstraintsStatement extends AbstractStatement {
     public static final String RESULT_COLUMN_FOREIGN_COLUMN_NAME    = "REFERENCED_COLUMN_NAME";
     public static final String RESULT_COLUMN_CONSTRAINT_NAME        = "CONSTRAINT_NAME";
 
-    private String baseTableCatalogName;
-    private String baseTableSchemaName;
-    private String baseTableName;
+    public String baseTableCatalogName;
+    public String baseTableSchemaName;
+    public String baseTableName;
 
     public FindForeignKeyConstraintsStatement(String baseTableCatalogName, String baseTableSchemaName, String baseTableName) {
         this.baseTableCatalogName = baseTableCatalogName;

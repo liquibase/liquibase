@@ -7,7 +7,7 @@ import liquibase.exception.Warnings
 import liquibase.sdk.database.MockDatabase
 import liquibase.exception.ValidationErrors
 import liquibase.statement.Statement
-import liquibase.statement.core.MockStatement
+import liquibase.sdk.mock.MockStatement
 import liquibase.util.StringUtils
 import spock.lang.Specification
 import spock.lang.Unroll

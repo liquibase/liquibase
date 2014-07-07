@@ -10,7 +10,7 @@ import liquibase.sqlgenerator.core.*
 import liquibase.statement.Statement
 import liquibase.statement.core.AddAutoIncrementStatement
 import liquibase.statement.core.CreateTableStatement
-import liquibase.statement.core.MockStatement
+import liquibase.sdk.mock.MockStatement
 import org.hamcrest.Matchers
 import spock.lang.Specification
 import spock.lang.Unroll

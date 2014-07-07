@@ -8,7 +8,7 @@ import liquibase.exception.Warnings;
 import  liquibase.ExecutionEnvironment;
 import liquibase.servicelocator.LiquibaseService;
 import liquibase.statement.Statement;
-import liquibase.statement.core.MockStatement;
+import liquibase.sdk.mock.MockStatement;
 
 import java.util.ArrayList;
 import java.util.Arrays;
