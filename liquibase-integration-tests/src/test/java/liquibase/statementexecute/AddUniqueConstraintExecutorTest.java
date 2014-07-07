@@ -94,7 +94,7 @@ public class AddUniqueConstraintExecutorTest extends AbstractExecuteTest {
     @SuppressWarnings("unchecked")
     @Test
     public void execute_noSchema() throws Exception {
-        this.statementUnderTest = new AddUniqueConstraintStatement(CONSTRAINT_NAME, null, TABLE_NAME, COLUMN_NAME);
+        this.statementUnderTest = new AddUniqueConstraintStatement(CONSTRAINT_NAME, null, null, TABLE_NAME, COLUMN_NAME);
         assertCorrect("alter table [adduqtest] add constraint [uq_test] unique ([coltomakeuq])", SybaseDatabase.class);
         assertCorrect("alter table [adduqtest] add constraint [uq_test] unique ([coltomakeuq])", MSSQLDatabase.class);
         assertCorrect("alter table [adduqtest] add constraint [uq_test] unique ([coltomakeuq])", SybaseASADatabase.class);
