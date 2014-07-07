@@ -6,7 +6,7 @@ import liquibase.statement.NotNullConstraint
 import liquibase.statement.PrimaryKeyConstraint
 import liquibase.statement.UniqueConstraint
 
-public class AddColumnStatementTest extends AbstractStatementTest<AddColumnStatement> {
+public class AddColumnStatementTest extends AbstractStatementTest {
 
     def "constructor without remarks but with constraints"() {
         when:

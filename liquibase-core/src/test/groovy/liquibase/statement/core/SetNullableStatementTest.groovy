@@ -2,7 +2,7 @@ package liquibase.statement.core;
 
 import liquibase.statement.AbstractStatementTest;
 
-public class SetNullableStatementTest extends AbstractStatementTest<SetNullableStatement> {
+public class SetNullableStatementTest extends AbstractStatementTest {
 
     @Override
     protected Object getDefaultPropertyValue(String propertyName) {

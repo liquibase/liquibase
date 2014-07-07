@@ -2,7 +2,7 @@ package liquibase.statement.core;
 
 import liquibase.statement.AbstractStatementTest;
 
-public class DropIndexStatementTest extends AbstractStatementTest<DropIndexStatement> {
+public class DropIndexStatementTest extends AbstractStatementTest {
 
 
 }

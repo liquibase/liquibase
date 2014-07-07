@@ -2,7 +2,7 @@ package liquibase.statement.core;
 
 import liquibase.statement.AbstractStatementTest;
 
-public class DropTableStatementTest extends AbstractStatementTest<DropTableStatement> {
+public class DropTableStatementTest extends AbstractStatementTest {
 
     @Override
     protected Object getDefaultPropertyValue(String propertyName) {

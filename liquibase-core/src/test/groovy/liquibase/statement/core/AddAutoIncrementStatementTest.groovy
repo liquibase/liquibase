@@ -3,7 +3,7 @@ package liquibase.statement.core;
 import liquibase.statement.AbstractStatementTest;
 import org.junit.Test;
 
-public class AddAutoIncrementStatementTest extends AbstractStatementTest<AddAutoIncrementStatement> {
+public class AddAutoIncrementStatementTest extends AbstractStatementTest {
     
     def constructor() {
         when:

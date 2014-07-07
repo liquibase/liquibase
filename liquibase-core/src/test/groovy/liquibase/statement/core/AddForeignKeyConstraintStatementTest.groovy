@@ -2,7 +2,7 @@ package liquibase.statement.core;
 
 import liquibase.statement.AbstractStatementTest;
 
-public class AddForeignKeyConstraintStatementTest extends AbstractStatementTest<AddForeignKeyConstraintStatement> {
+public class AddForeignKeyConstraintStatementTest extends AbstractStatementTest {
 
     def "constructor"() {
         when:

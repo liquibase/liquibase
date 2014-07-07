@@ -2,7 +2,7 @@ package liquibase.statement.core;
 
 import liquibase.statement.AbstractStatementTest;
 
-public class ExecuteStoredProcedureStatementTest extends AbstractStatementTest<ExecuteStoredProcedureStatement> {
+public class ExecuteStoredProcedureStatementTest extends AbstractStatementTest {
 
     def "Adding parameters"() {
         when:

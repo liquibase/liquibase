@@ -2,7 +2,7 @@ package liquibase.statement.core;
 
 import liquibase.statement.AbstractStatementTest;
 
-public class SelectFromDatabaseChangeLogLockStatementTest extends AbstractStatementTest<SelectFromDatabaseChangeLogLockStatement> {
+public class SelectFromDatabaseChangeLogLockStatementTest extends AbstractStatementTest {
 
     def "constructor with no arguments yields null getColumnsToSelect"() {
         when:

@@ -2,7 +2,7 @@ package liquibase.statement.core;
 
 import liquibase.statement.AbstractStatementTest;
 
-public class CreateViewStatementTest extends AbstractStatementTest<CreateViewStatement> {
+public class CreateViewStatementTest extends AbstractStatementTest {
 
     def "constructor"() {
         when:

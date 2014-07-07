@@ -10,7 +10,7 @@ import spock.lang.Unroll
 import static org.hamcrest.Matchers.containsInAnyOrder
 import static spock.util.matcher.HamcrestSupport.that
 
-public class CreateTableStatementTest extends AbstractStatementTest<CreateTableStatement> {
+public class CreateTableStatementTest extends AbstractStatementTest {
 
     def "constructor"() {
         when:

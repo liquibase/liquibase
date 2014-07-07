@@ -2,7 +2,7 @@ package liquibase.statement.core;
 
 import liquibase.statement.AbstractStatementTest;
 
-public class AddPrimaryKeyStatementTest extends AbstractStatementTest<AddPrimaryKeyStatement> {
+public class AddPrimaryKeyStatementTest extends AbstractStatementTest {
 
     def "constructor"() {
         when:

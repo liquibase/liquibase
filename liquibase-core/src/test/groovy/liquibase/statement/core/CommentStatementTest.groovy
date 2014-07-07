@@ -2,7 +2,7 @@ package liquibase.statement.core;
 
 import liquibase.statement.AbstractStatementTest;
 
-public class CommentStatementTest extends AbstractStatementTest<CommentStatement> {
+public class CommentStatementTest extends AbstractStatementTest {
 
     def "toString logic"() {
         when:

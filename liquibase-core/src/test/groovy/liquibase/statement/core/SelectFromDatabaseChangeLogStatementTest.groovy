@@ -3,7 +3,7 @@ package liquibase.statement.core;
 import liquibase.statement.AbstractStatementTest
 import spock.lang.Unroll;
 
-public class SelectFromDatabaseChangeLogStatementTest extends AbstractStatementTest<SelectFromDatabaseChangeLogStatement> {
+public class SelectFromDatabaseChangeLogStatementTest extends AbstractStatementTest {
 
     @Unroll
     def "setting orderBy and columnsToSelect to null or empty columns yields null collection"() {

@@ -2,7 +2,7 @@ package liquibase.statement.core;
 
 import liquibase.statement.AbstractStatementTest;
 
-public class AlterSequenceStatementTest extends AbstractStatementTest<AlterSequenceStatement> {
+public class AlterSequenceStatementTest extends AbstractStatementTest {
 
     def "constructor"() {
         when:

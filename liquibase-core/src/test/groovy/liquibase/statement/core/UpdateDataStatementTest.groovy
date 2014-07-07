@@ -5,7 +5,7 @@ import org.hamcrest.Matchers
 
 import static spock.util.matcher.HamcrestSupport.that;
 
-public class UpdateDataStatementTest extends AbstractStatementTest<UpdateDataStatement> {
+public class UpdateDataStatementTest extends AbstractStatementTest {
 
     def "new column values logic"() {
         when:

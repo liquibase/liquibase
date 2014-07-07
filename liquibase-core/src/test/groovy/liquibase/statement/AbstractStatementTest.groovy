@@ -13,7 +13,7 @@ import static org.junit.Assert.fail;
 /**
  * Base class to use for all tests of Statement objects.
  */
-public abstract class AbstractStatementTest<StatementUnderTest extends Statement> extends AbstractExtensibleObjectTest {
+public abstract class AbstractStatementTest extends AbstractExtensibleObjectTest {
 
     def hasAtLeastOneGenerator() {
         expect:

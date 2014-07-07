@@ -2,7 +2,7 @@ package liquibase.statement.core;
 
 import liquibase.statement.AbstractStatementTest;
 
-public class AddUniqueConstraintStatementTest extends AbstractStatementTest<AddUniqueConstraintStatement> {
+public class AddUniqueConstraintStatementTest extends AbstractStatementTest {
 
     def "constructor"() {
         when:
