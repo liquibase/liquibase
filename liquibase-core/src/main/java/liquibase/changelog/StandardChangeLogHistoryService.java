@@ -28,7 +28,7 @@ import java.util.*;
 
 public class StandardChangeLogHistoryService extends AbstractChangeLogHistoryService {
 
-    private List<RanChangeSet> ranChangeSetList;
+    private List<RanChangeSet> ranChangeSetList = new ArrayList<RanChangeSet>();
 
     private Integer lastChangeSetSequenceValue;
 
@@ -59,11 +59,11 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
     }
 
     public void reset() {
-        this.ranChangeSetList = null;
+        this.ranChangeSetList = new ArrayList<RanChangeSet>();
     }
 
     public boolean hasDatabaseChangeLogTable() throws DatabaseException {
-        if (ranChangeSetList != null) {
+        if (!ranChangeSetList.isEmpty()) {
             return true;
         }
         try {
@@ -188,7 +188,7 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
      * Returns the ChangeSets that have been run against the current getDatabase().
      */
     public List<RanChangeSet> getRanChangeSets() throws DatabaseException {
-        if (this.ranChangeSetList == null) {
+        if (this.ranChangeSetList.isEmpty()) {
             Database database = getDatabase();
             String databaseChangeLogTableName = getDatabase().escapeTableName(getLiquibaseCatalogName(), getLiquibaseSchemaName(), getDatabaseChangeLogTableName());
             List<RanChangeSet> ranChangeSetList = new ArrayList<RanChangeSet>();
