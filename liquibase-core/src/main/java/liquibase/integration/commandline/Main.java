@@ -339,7 +339,8 @@ public class Main {
                 || "status".equalsIgnoreCase(command)
                 || "validate".equalsIgnoreCase(command)
                 || "changeLogSync".equalsIgnoreCase(command)
-                || "changeLogSyncSql".equalsIgnoreCase(command);
+                || "changeLogSyncSql".equalsIgnoreCase(command)
+                || "generateChangeLog".equalsIgnoreCase(command);
     }
 
     private boolean isCommand(String arg) {
