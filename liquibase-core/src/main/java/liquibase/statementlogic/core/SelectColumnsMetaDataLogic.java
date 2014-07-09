@@ -18,7 +18,7 @@ import liquibase.exception.ValidationErrors;
 import  liquibase.ExecutionEnvironment;
 import liquibase.structure.core.Column;
 
-public class ColumnsMetaDataQueryGenerator extends AbstractStatementLogic<SelectMetaDataStatement> {
+public class SelectColumnsMetaDataLogic extends AbstractStatementLogic<SelectMetaDataStatement> {
 
     @Override
     public boolean supports(SelectMetaDataStatement statement, ExecutionEnvironment env) {

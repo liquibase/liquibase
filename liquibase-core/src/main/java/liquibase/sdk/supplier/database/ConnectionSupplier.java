@@ -1,47 +1,62 @@
 package liquibase.sdk.supplier.database;
 
-import liquibase.database.Database;
-import liquibase.database.DatabaseConnection;
-import liquibase.sdk.exception.UnexpectedLiquibaseSdkException;
 import liquibase.servicelocator.ServiceLocator;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class ConnectionSupplier {
 
+    private static final Object existingConnectionsLock = new Object();
     private static Set<TestConnection> existingConnections = null;
 
+    public ConnectionSupplier() {
+        synchronized (existingConnectionsLock) {
+            ExecutorService executorService = Executors.newFixedThreadPool(10);
+            List<Callable<Object>> todo = new ArrayList<Callable<Object>>();
 
-    public Set<TestConnection> getConnections(Collection<Database> databases) throws Exception {
-        if (existingConnections == null) {
             existingConnections = new HashSet<TestConnection>();
-            for (Class testConnectionClasses : ServiceLocator.getInstance().findClasses(TestConnection.class)) {
-                TestConnection testConnection = (TestConnection) testConnectionClasses.newInstance();
-                existingConnections.add(testConnection);
+            for (final Class testConnectionClasses : ServiceLocator.getInstance().findClasses(TestConnection.class)) {
+                todo.add(Executors.callable(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            TestConnection testConnection = (TestConnection) testConnectionClasses.newInstance();
+                            long startTime = System.currentTimeMillis();
+                            System.out.println("Initializing "+testConnection+"...");
+                            testConnection.init();
+                            System.out.println("Initializing " + testConnection + " done in " + ((System.currentTimeMillis() - startTime) / 1000d)+"s");
+                            existingConnections.add(testConnection);
+                        } catch (Throwable e) {
+                            e.printStackTrace();
+                        }
+
+                    }
+                }));
             }
+
+            try {
+                System.out.println("Opening connections...");
+                executorService.invokeAll(todo);
+            } catch (InterruptedException ignored) {
+            }
+            System.out.println("Opening connections done");
+
         }
-
-        Set<TestConnection> returnConnections = new HashSet<TestConnection>();
-        for (Database database : databases) {
-            boolean foundConnection = false;
-            for (TestConnection connection : existingConnections) {
-                if (connection.supports(database)) {
-                    returnConnections.add(connection);
-
-                    Database clone  = database.getClass().newInstance();
-                    connection.init(clone);
-                    DatabaseConnection databaseConnection = connection.getConnection();
-                    clone.setConnection(databaseConnection);
-
-                    foundConnection = true;
-                }
-            }
-            if (!foundConnection) {
-                throw new UnexpectedLiquibaseSdkException("Found no TestConnection classes for " + database);
-            }
-        }
-        return returnConnections;
     }
+
+    /**
+     * Return all TestConnections.
+     */
+    public Set<TestConnection> getConnections() throws Exception {
+        synchronized (existingConnectionsLock) {
+            if (existingConnections == null) {
+            }
+
+            return Collections.unmodifiableSet(existingConnections);
+        }
+    }
+
 }

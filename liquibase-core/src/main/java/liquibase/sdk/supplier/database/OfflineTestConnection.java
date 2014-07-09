@@ -3,28 +3,28 @@ package liquibase.sdk.supplier.database;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.OfflineConnection;
+import liquibase.sdk.database.MockDatabase;
 
 public class OfflineTestConnection extends AbstractTestConnection {
     private String url;
-
-    @Override
-    public boolean supports(Database database) {
-        return true;
-    }
-
-    @Override
-    public void init(Database database) {
-        super.init(database);
-        this.url = "offline:"+database.getShortName();
-    }
 
     @Override
     public boolean connectionIsAvailable() {
         return true;
     }
 
+    @Override
+    public void init() throws Exception {
+
+    }
+
     protected String getUrl() {
         return url;
+    }
+
+    @Override
+    public Database getCorrectDatabase() {
+        return new MockDatabase();
     }
 
     @Override

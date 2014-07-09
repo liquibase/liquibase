@@ -62,7 +62,7 @@ NOTE: This output is generated when the test is ran. DO NOT EDIT MANUALLY
 
 ## Permutation: 4930c7 ##
 
-- _VERIFIED:_ false Was too lazy
+- _VERIFIED:_ Was too lazy
 - **Group Param:** b
 - **String Parameter 1:** param 1 on permutation 2
 - **String Parameter 2:** param 2 on permutation 2

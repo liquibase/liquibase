@@ -8,12 +8,19 @@ public class H2TestConnection extends JdbcTestConnection {
 
 
     @Override
-    public boolean supports(Database database) {
-        return database instanceof H2Database;
+    protected String getUrl() {
+        return "jdbc:h2:mem:lbcat;init=create schema if not exists lbschema";
     }
 
     @Override
-    protected String getUrl() {
-        return "jdbc:h2:mem:liquibase";
+    public Database getCorrectDatabase() {
+        return new H2Database();
     }
+
+
+    @Override
+    public String describe() {
+        return "Standard H2 connection";
+    }
+
 }

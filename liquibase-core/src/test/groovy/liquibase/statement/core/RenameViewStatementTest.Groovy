@@ -2,7 +2,7 @@ package liquibase.statement.core;
 
 import liquibase.statement.AbstractStatementTest;
 
-public class RenameViewStatementTest extends AbstractStatementTest<RenameViewStatement> {
+public class RenameViewStatementTest extends AbstractStatementTest {
 
 
 

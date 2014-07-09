@@ -1,9 +1,7 @@
 package liquibase.sdk.supplier.database;
 
-import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.jvm.JdbcConnection;
-import liquibase.sdk.exception.UnexpectedLiquibaseSdkException;
 
 import java.io.File;
 import java.io.FilenameFilter;
@@ -15,12 +13,11 @@ import java.net.URLClassLoader;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.Driver;
+import java.sql.SQLException;
 import java.util.Enumeration;
 import java.util.Properties;
 
 public abstract class JdbcTestConnection extends AbstractTestConnection {
-
-    private String driverClassName;
 
     private Connection connection;
     private Object unavailableConnectionProxy;
@@ -28,23 +25,8 @@ public abstract class JdbcTestConnection extends AbstractTestConnection {
     protected JdbcTestConnection() {
     }
 
-    @Override
-    public void init(Database database) {
-        super.init(database);
-        this.driverClassName = database.getDefaultDriver(getUrl());
-
-        try {
-            connection = openConnection();
-        } catch (Throwable e) {
-            unavailableConnectionProxy = Proxy.newProxyInstance(this.getClass().getClassLoader(), new Class[]{Connection.class, DatabaseMetaData.class}, new UnavailableConnection(e));
-            connection = (Connection) unavailableConnectionProxy;
-        }
-
-    }
-
-
-    protected String getDriverClassName() {
-        return driverClassName;
+    protected String getDriverClassName() throws Exception {
+        return getCorrectDatabase().getDefaultDriver(getUrl());
     }
 
     @Override
@@ -52,8 +34,20 @@ public abstract class JdbcTestConnection extends AbstractTestConnection {
         return unavailableConnectionProxy == null;
     }
 
+    public void init() throws Exception {
+        if (connection == null) {
+            try {
+                connection = openConnection();
+            } catch (Throwable e) {
+                unavailableConnectionProxy = Proxy.newProxyInstance(this.getClass().getClassLoader(), new Class[]{Connection.class, DatabaseMetaData.class}, new UnavailableConnection(e));
+                connection = (Connection) unavailableConnectionProxy;
+            }
+        }
+
+    }
+
     @Override
-    public DatabaseConnection getConnection() throws Exception {
+    public DatabaseConnection getConnection() {
         return new JdbcConnection(connection);
     }
 
@@ -71,23 +65,30 @@ public abstract class JdbcTestConnection extends AbstractTestConnection {
             urls[i] = jarFiles[i].toURL();
         }
         URLClassLoader classLoader = new URLClassLoader(urls, this.getClass().getClassLoader());
+        String driverClassName = getDriverClassName();
         Enumeration<URL> resources = classLoader.getResources(driverClassName.replace(".", "/") + ".class");
         int count = 0;
         while (resources.hasMoreElements()) {
             URL url = resources.nextElement();
             count++;
             if (count > 1) {
-                System.out.println("Found multiple versions of "+driverClassName);
+                System.out.println("Found multiple versions of "+ driverClassName);
             }
         }
 
         Driver driver = (Driver) Class.forName(driverClassName, true, classLoader).newInstance();
 
+        Properties properties = getConnectionProperties();
+
+        return driver.connect(this.getUrl(), properties);
+    }
+
+    protected Properties getConnectionProperties() {
         Properties properties = new Properties();
         properties.setProperty("user", this.getDatabaseUsername());
         properties.setProperty("password", this.getDatabasePassword());
-
-        return driver.connect(this.getUrl(), properties);
+        properties.setProperty("loginTimeout", "1");
+        return properties;
     }
 
     protected String getDatabaseUsername() {
@@ -111,11 +112,6 @@ public abstract class JdbcTestConnection extends AbstractTestConnection {
 
     public String getPrimarySchema() {
         return "lbschema";
-    }
-
-    @Override
-    public String describe() {
-        return "Standard connection to " + getDatabase().getShortName();
     }
 
     @Override
@@ -149,13 +145,15 @@ public abstract class JdbcTestConnection extends AbstractTestConnection {
                     return getUrl();
                 } else if (method.getName().equals("getSQLKeywords")) {
                     return "";
+                } else if (method.getName().equals("supportsMixedCaseIdentifiers")) {
+                    return true;
                 }
             } else if (method.getDeclaringClass().equals(Object.class)) {
                 if (method.getName().equals("hashCode")) {
                     return JdbcTestConnection.this.describe().hashCode();
                 }
             }
-            throw new UnexpectedLiquibaseSdkException("Cannot call '" + method.toString() + "' because the connection is unavailable: " + openException.getMessage(), openException);
+            throw new SQLException("Cannot call '" + method.toString() + "' because the connection is unavailable: " + openException.getMessage(), openException);
         }
     }
 }

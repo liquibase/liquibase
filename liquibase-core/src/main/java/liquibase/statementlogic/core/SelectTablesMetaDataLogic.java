@@ -3,6 +3,7 @@ package liquibase.statementlogic.core;
 import liquibase.CatalogAndSchema;
 import liquibase.action.Action;
 import liquibase.action.core.TablesJdbcMetaDataQueryAction;
+import liquibase.database.core.DerbyDatabase;
 import liquibase.exception.UnsupportedException;
 import liquibase.statement.core.SelectMetaDataStatement;
 import liquibase.statementlogic.AbstractStatementLogic;
@@ -18,7 +19,7 @@ import liquibase.exception.ValidationErrors;
 import  liquibase.ExecutionEnvironment;
 import liquibase.structure.core.Table;
 
-public class TablesMetaDataQueryGenerator extends AbstractStatementLogic<SelectMetaDataStatement> {
+public class SelectTablesMetaDataLogic extends AbstractStatementLogic<SelectMetaDataStatement> {
 
     @Override
     public boolean supports(SelectMetaDataStatement statement, ExecutionEnvironment env) {
@@ -68,6 +69,11 @@ public class TablesMetaDataQueryGenerator extends AbstractStatementLogic<SelectM
         CatalogAndSchema catalogAndSchema = new CatalogAndSchema(catalogName, schemaName).customize(database);
         catalogName = ((AbstractJdbcDatabase) database).getJdbcCatalogName(catalogAndSchema);
         schemaName = ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema);
+
+        if (database instanceof DerbyDatabase) {
+            schemaName = catalogName;
+            catalogName = null;
+        }
 
         return new Action[] {
                 new TablesJdbcMetaDataQueryAction(catalogName, schemaName, tableName)

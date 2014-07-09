@@ -79,7 +79,7 @@ public class VerifiedTestWriter {
         String message = String.valueOf(permutation.getVerified());
 
         if (!permutation.getVerified() && StringUtils.trimToNull(permutation.getNotRanMessage()) != null) {
-            message += " "+StringUtils.trimToEmpty(permutation.getNotRanMessage());
+            message = StringUtils.trimToEmpty(permutation.getNotRanMessage());
         }
 
         return message;

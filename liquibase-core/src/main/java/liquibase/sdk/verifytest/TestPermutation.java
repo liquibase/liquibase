@@ -159,9 +159,13 @@ public class TestPermutation implements Comparable<TestPermutation> {
         return this;
     }
 
-    public TestPermutation test() throws Exception {
+    /**
+     * Runs the actual test.
+     * Automatically called by {@link #expect(liquibase.sdk.verifytest.TestPermutation.Verification)}
+     */
+    protected void test() throws Exception {
         if (notRanMessage != null) {
-            return this;
+            return;
         }
 
         if (previousRun != null) {
@@ -179,7 +183,7 @@ public class TestPermutation implements Comparable<TestPermutation> {
                     this.setValid(true);
                     this.setVerified(true);
                     canSave = true;
-                    return this;
+                    return;
                 }
             }
         }
@@ -218,7 +222,7 @@ public class TestPermutation implements Comparable<TestPermutation> {
 
         if (!valid || !canVerify) {
             canSave = true;
-            return this;
+            return;
         }
 
         Exception cleanupError = null;
@@ -254,7 +258,7 @@ public class TestPermutation implements Comparable<TestPermutation> {
         }
 
         canSave = true;
-        return this;
+        return;
     }
 
     @Override
@@ -299,9 +303,14 @@ public class TestPermutation implements Comparable<TestPermutation> {
         return this;
     }
 
-    public TestPermutation expect(Verification logic) {
+    /**
+     * Runs the test with the given verification logic.
+     */
+    public void expect(Verification logic) throws Exception {
         verification = logic;
-        return this;
+
+        this.test();
+
     }
 
     public static interface SetupResult {

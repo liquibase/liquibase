@@ -248,10 +248,13 @@ public class VerifiedTestReader {
         }
 
         protected void setVerified(String value) {
-            String[] splitValue = value.split("\\s+", 2);
-            verified = Boolean.valueOf(splitValue[0]);
-            if (splitValue.length > 1) {
-                notRanMessage = splitValue[1];
+            if (value.equals("true")) {
+                verified = true;
+            } else {
+                verified = false;
+                if (!value.equals("false")) {
+                    notRanMessage = value;
+                }
             }
         }
 
