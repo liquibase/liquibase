@@ -1,43 +1,49 @@
 package liquibase.executor;
 
+import liquibase.ExecutionEnvironment;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
-import liquibase.exception.StatementNotSupportedOnDatabaseException;
-import liquibase.sql.Sql;
-import liquibase.sql.visitor.SqlVisitor;
-import liquibase.sqlgenerator.SqlGeneratorFactory;
-import liquibase.statement.SqlStatement;
+import liquibase.exception.UnsupportedException;
+import liquibase.statement.Statement;
 
-import java.util.List;
-import java.util.Set;
-
-public abstract class AbstractExecutor {
+/**
+ * Convenience base class for Executor implementations.
+ */
+public abstract class AbstractExecutor implements Executor {
     protected Database database;
 
     public void setDatabase(Database database) {
         this.database = database;
     }
 
-    protected String[] applyVisitors(SqlStatement statement, List<SqlVisitor> sqlVisitors) throws DatabaseException {
-        Sql[] sql = SqlGeneratorFactory.getInstance().generateSql(statement, database);
-        if (sql == null) {
-            return new String[0];
-        }
-        String[] returnSql = new String[sql.length];
-
-        for (int i=0; i<sql.length; i++) {
-            if (sql[i] == null) {
-                continue;
-            }
-            returnSql[i] = sql[i].toSql();
-            if (sqlVisitors != null) {
-                for (SqlVisitor visitor : sqlVisitors) {
-                    returnSql[i] = visitor.modifySql(returnSql[i], database);
-                }
-            }
-
-        }
-        return returnSql;
+    /**
+     * Default implementation delegates to {@link #query(liquibase.statement.Statement, liquibase.ExecutionEnvironment)}
+     */
+    @Override
+    public QueryResult query(Statement sql) throws DatabaseException, UnsupportedException {
+        return query(sql, createDefaultExecutionOptions());
     }
 
+    /**
+     * Default implementation delegates to {@link #execute(liquibase.statement.Statement, liquibase.ExecutionEnvironment)}
+     */
+    @Override
+    public ExecuteResult execute(Statement sql) throws DatabaseException, UnsupportedException {
+        return execute(sql, createDefaultExecutionOptions());
+    }
+
+    /**
+     * Default implementation delegates to {@link #update(liquibase.statement.Statement, liquibase.ExecutionEnvironment)}
+     */
+    @Override
+    public UpdateResult update(Statement sql) throws DatabaseException, UnsupportedException {
+        return update(sql, createDefaultExecutionOptions());
+    }
+
+    /**
+     * Create ExecutionOptions to use in single-parameter execute/update/query calls.
+     */
+    protected ExecutionEnvironment createDefaultExecutionOptions() {
+        return new ExecutionEnvironment(database);
+    }
 }

@@ -2,10 +2,10 @@ package liquibase.test;
 
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
-import liquibase.sdk.database.MockDatabase;
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import liquibase.resource.ResourceAccessor;
+import liquibase.sdk.database.MockDatabase;
 
 import java.io.File;
 import java.net.*;
@@ -37,8 +37,7 @@ public class TestContext {
 
             List<Database> toRemove = new ArrayList<Database>();
             for (Database database : allDatabases) {
-                if (database instanceof SQLiteDatabase //todo: re-enable sqlite testing
-                        || database instanceof MockDatabase) {
+                if (database instanceof MockDatabase) {
                     toRemove.add(database);
                 }
 

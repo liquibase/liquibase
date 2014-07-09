@@ -1,14 +1,13 @@
 package liquibase.sqlgenerator.core;
 
+import liquibase.action.Action;
+import liquibase.action.core.UnparsedSql;
+import liquibase.exception.UnsupportedException;
+import liquibase.statementlogic.StatementLogicChain;
 import liquibase.database.Database;
-import liquibase.structure.core.Schema;
-import liquibase.datatype.DataTypeFactory;
 import liquibase.database.core.SybaseASADatabase;
-import liquibase.structure.core.Column;
-import liquibase.structure.core.Table;
-import liquibase.sql.Sql;
-import liquibase.sql.UnparsedSql;
-import liquibase.sqlgenerator.SqlGeneratorChain;
+import liquibase.datatype.DataTypeFactory;
+import  liquibase.ExecutionEnvironment;
 import liquibase.statement.core.AddDefaultValueStatement;
 
 public class AddDefaultValueGeneratorSybaseASA extends AddDefaultValueGenerator {
@@ -18,16 +17,17 @@ public class AddDefaultValueGeneratorSybaseASA extends AddDefaultValueGenerator 
     }
 
     @Override
-    public boolean supports(AddDefaultValueStatement statement, Database database) {
-        return database instanceof SybaseASADatabase;
+    public boolean supports(AddDefaultValueStatement statement, ExecutionEnvironment env) {
+        return env.getTargetDatabase() instanceof SybaseASADatabase;
     }
 
     @Override
-    public Sql[] generateSql(AddDefaultValueStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public Action[] generateActions(AddDefaultValueStatement statement, ExecutionEnvironment env, StatementLogicChain chain) throws UnsupportedException {
+        Database database = env.getTargetDatabase();
+
         Object defaultValue = statement.getDefaultValue();
-        return new Sql[]{
-                new UnparsedSql("ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " MODIFY " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " DEFAULT " + DataTypeFactory.getInstance().fromObject(defaultValue, database).objectToSql(defaultValue, database),
-                        getAffectedColumn(statement))
+        return new Action[]{
+                new UnparsedSql("ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " MODIFY " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " DEFAULT " + DataTypeFactory.getInstance().fromObject(defaultValue, database).objectToSql(defaultValue, database))
         };
     }
 }

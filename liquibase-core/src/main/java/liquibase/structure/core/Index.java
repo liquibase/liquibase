@@ -1,12 +1,13 @@
 package liquibase.structure.core;
 
-import liquibase.database.Database;
-import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.structure.AbstractDatabaseObject;
 import liquibase.structure.DatabaseObject;
 import liquibase.util.StringUtils;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public class Index extends AbstractDatabaseObject {
 

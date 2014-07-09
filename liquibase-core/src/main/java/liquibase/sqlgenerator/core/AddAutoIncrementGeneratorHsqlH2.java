@@ -1,15 +1,14 @@
 package liquibase.sqlgenerator.core;
 
+import liquibase.action.Action;
+import liquibase.action.core.UnparsedSql;
+import liquibase.exception.UnsupportedException;
+import liquibase.statementlogic.StatementLogicChain;
 import liquibase.database.Database;
 import liquibase.database.core.H2Database;
 import liquibase.database.core.HsqlDatabase;
 import liquibase.datatype.DataTypeFactory;
-import liquibase.structure.core.Column;
-import liquibase.structure.core.Schema;
-import liquibase.structure.core.Table;
-import liquibase.sql.Sql;
-import liquibase.sql.UnparsedSql;
-import liquibase.sqlgenerator.SqlGeneratorChain;
+import  liquibase.ExecutionEnvironment;
 import liquibase.statement.core.AddAutoIncrementStatement;
 
 public class AddAutoIncrementGeneratorHsqlH2 extends AddAutoIncrementGenerator {
@@ -20,18 +19,19 @@ public class AddAutoIncrementGeneratorHsqlH2 extends AddAutoIncrementGenerator {
     }
 
     @Override
-    public boolean supports(AddAutoIncrementStatement statement, Database database) {
+    public boolean supports(AddAutoIncrementStatement statement, ExecutionEnvironment env) {
+        Database database = env.getTargetDatabase();
+
         return database instanceof HsqlDatabase || database instanceof H2Database;
     }
 
     @Override
-    public Sql[] generateSql(
-    		AddAutoIncrementStatement statement,
-    		Database database,
-    		SqlGeneratorChain sqlGeneratorChain) {
-        return new Sql[]{
+    public Action[] generateActions(AddAutoIncrementStatement statement, ExecutionEnvironment env, StatementLogicChain chain) throws UnsupportedException {
+        Database database = env.getTargetDatabase();
+
+        return new Action[]{
             new UnparsedSql(
-            	"ALTER TABLE "
+                    "ALTER TABLE "
             		+ database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName())
             		+ " ALTER COLUMN "
             		+ database.escapeColumnName(
@@ -43,8 +43,7 @@ public class AddAutoIncrementGeneratorHsqlH2 extends AddAutoIncrementGenerator {
             		+ DataTypeFactory.getInstance().fromDescription(statement.getColumnDataType(), database)
             		+ " "
             		+ database.getAutoIncrementClause(
-            			statement.getStartWith(), statement.getIncrementBy()),
-                getAffectedColumn(statement))
+            			statement.getStartWith(), statement.getIncrementBy()))
         };
     }
 }

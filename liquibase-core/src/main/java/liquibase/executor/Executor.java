@@ -1,53 +1,47 @@
 package liquibase.executor;
 
-import liquibase.change.Change;
+import liquibase.ExecutionEnvironment;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
-import liquibase.sql.visitor.SqlVisitor;
-import liquibase.statement.CallableSqlStatement;
-import liquibase.statement.SqlStatement;
+import liquibase.exception.UnsupportedException;
+import liquibase.statement.Statement;
 
-import java.util.List;
-import java.util.Map;
-
+/**
+ * Interface for interacting with the database.
+ */
 public interface Executor {
 
     void setDatabase(Database database);
 
-    /** Read methods */
-    <T>  T queryForObject(SqlStatement sql, Class<T> requiredType) throws DatabaseException;
+    /**
+     * Query the database using default ExecutionOptions.
+     */
+    QueryResult query(Statement sql) throws DatabaseException, UnsupportedException;
 
-    <T> T queryForObject(SqlStatement sql, Class<T> requiredType, List<SqlVisitor> sqlVisitors) throws DatabaseException;
+    /**
+     * Perform a query operation against the database
+     */
+    QueryResult query(Statement sql, ExecutionEnvironment env) throws DatabaseException, UnsupportedException;
 
-    long queryForLong(SqlStatement sql) throws DatabaseException;
+    /**
+     * Execute statement against the database using default ExecutionOptions.
+     */
+    ExecuteResult execute(Statement sql) throws DatabaseException, UnsupportedException;
 
-    long queryForLong(SqlStatement sql, List<SqlVisitor> sqlVisitors) throws DatabaseException;
+    /**
+     * Perform an execute operation against the database
+     */
+    ExecuteResult execute(Statement sql, ExecutionEnvironment env) throws DatabaseException, UnsupportedException;
 
-    int queryForInt(SqlStatement sql) throws DatabaseException;
+    /**
+     * Update using default ExecutionOptions.
+     */
+    UpdateResult update(Statement sql) throws DatabaseException, UnsupportedException;
 
-    int queryForInt(SqlStatement sql, List<SqlVisitor> sqlVisitors) throws DatabaseException;
-
-    List queryForList(SqlStatement sql, Class elementType) throws DatabaseException;
-
-    List queryForList(SqlStatement sql, Class elementType, List<SqlVisitor> sqlVisitors) throws DatabaseException;
-
-    List<Map<String, ?>> queryForList(SqlStatement sql) throws DatabaseException;
-
-    List<Map<String, ?>> queryForList(SqlStatement sql, List<SqlVisitor> sqlVisitors) throws DatabaseException;
-
-
-    /** Write methods */
-    void execute(Change change) throws DatabaseException;
-
-    void execute(Change change, List<SqlVisitor> sqlVisitors) throws DatabaseException;
-
-    void execute(SqlStatement sql) throws DatabaseException;
-
-    void execute(SqlStatement sql, List<SqlVisitor> sqlVisitors) throws DatabaseException;
-
-    int update(SqlStatement sql) throws DatabaseException;
-
-    int update(SqlStatement sql, List<SqlVisitor> sqlVisitors) throws DatabaseException;
+    /**
+     * Update data in the database
+     */
+    UpdateResult update(Statement sql, ExecutionEnvironment env) throws DatabaseException, UnsupportedException;
 
     /**
      * Adds a comment to the database.  Currently does nothing but is over-ridden in the output JDBC template

@@ -1,14 +1,13 @@
 package liquibase.change.core;
 
 import liquibase.change.*;
-import liquibase.database.Database;
 import liquibase.exception.ValidationErrors;
+import  liquibase.ExecutionEnvironment;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.resource.ResourceAccessor;
-import liquibase.statement.SqlStatement;
-import liquibase.statement.UpdateExecutablePreparedStatement;
-import liquibase.statement.core.UpdateStatement;
+import liquibase.statement.Statement;
+import liquibase.statement.core.UpdateDataStatement;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,8 +22,8 @@ public class UpdateDataChange extends AbstractModifyDataChange implements Change
     }
 
     @Override
-    public ValidationErrors validate(Database database) {
-        ValidationErrors validate = super.validate(database);
+    public ValidationErrors validate(ExecutionEnvironment env) {
+        ValidationErrors validate = super.validate(env);
         validate.checkRequiredField("columns", getColumns());
         return validate;
     }
@@ -50,7 +49,7 @@ public class UpdateDataChange extends AbstractModifyDataChange implements Change
     }
 
     @Override
-    public SqlStatement[] generateStatements(Database database) {
+    public Statement[] generateStatements(ExecutionEnvironment env) {
 
     	boolean needsPreparedStatement = false;
         for (ColumnConfig column : getColumns()) {
@@ -62,45 +61,31 @@ public class UpdateDataChange extends AbstractModifyDataChange implements Change
             }
         }
 
+        UpdateDataStatement statement = new UpdateDataStatement(getCatalogName(), getSchemaName(), getTableName());
         if (needsPreparedStatement) {
-            UpdateExecutablePreparedStatement statement = new UpdateExecutablePreparedStatement(database, catalogName, schemaName, tableName, columns, getChangeSet(), this.getResourceAccessor());
-            
-            statement.setWhereClause(where);
-            
-            for (ColumnConfig whereParam : whereParams) {
-                if (whereParam.getName() != null) {
-                    statement.addWhereColumnName(whereParam.getName());
-                }
-                statement.addWhereParameter(whereParam.getValueObject());
-            }
-            
-            return new SqlStatement[] {
-                    statement
-            };
+            statement.setNeedsPreparedStatement(true);
         }
-    	
-        UpdateStatement statement = new UpdateStatement(getCatalogName(), getSchemaName(), getTableName());
 
         for (ColumnConfig column : getColumns()) {
             statement.addNewColumnValue(column.getName(), column.getValueObject());
         }
 
-        statement.setWhereClause(where);
+        statement.setWhere(where);
 
         for (ColumnConfig whereParam : whereParams) {
             if (whereParam.getName() != null) {
-                statement.addWhereColumnName(whereParam.getName());
+                statement.addWhereColumnNames(whereParam.getName());
             }
-            statement.addWhereParameter(whereParam.getValueObject());
+            statement.addWhereParameters(whereParam.getValueObject());
         }
 
-        return new SqlStatement[]{
+        return new Statement[]{
                 statement
         };
     }
 
     @Override
-    public ChangeStatus checkStatus(Database database) {
+    public ChangeStatus checkStatus(ExecutionEnvironment env) {
         return new ChangeStatus().unknown("Cannot check updateData status");
     }
 

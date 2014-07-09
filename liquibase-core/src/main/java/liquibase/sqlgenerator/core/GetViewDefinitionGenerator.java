@@ -1,32 +1,36 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.CatalogAndSchema;
+import liquibase.action.Action;
+import liquibase.action.core.UnparsedSql;
+import liquibase.exception.UnsupportedException;
+import liquibase.statementlogic.StatementLogicChain;
 import liquibase.database.Database;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.core.MySQLDatabase;
-import liquibase.structure.core.View;
 import liquibase.exception.ValidationErrors;
-import liquibase.sql.Sql;
-import liquibase.sql.UnparsedSql;
-import liquibase.sqlgenerator.SqlGeneratorChain;
+import  liquibase.ExecutionEnvironment;
 import liquibase.statement.core.GetViewDefinitionStatement;
+import liquibase.structure.core.View;
 
 public class GetViewDefinitionGenerator extends AbstractSqlGenerator<GetViewDefinitionStatement> {
 
     @Override
-    public ValidationErrors validate(GetViewDefinitionStatement getViewDefinitionStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public ValidationErrors validate(GetViewDefinitionStatement getViewDefinitionStatement, ExecutionEnvironment env, StatementLogicChain chain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("viewName", getViewDefinitionStatement.getViewName());
         return validationErrors;
     }
 
     @Override
-    public Sql[] generateSql(GetViewDefinitionStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public Action[] generateActions(GetViewDefinitionStatement statement, ExecutionEnvironment env, StatementLogicChain chain) throws UnsupportedException {
+        Database database = env.getTargetDatabase();
+
         CatalogAndSchema schema = new CatalogAndSchema(statement.getCatalogName(), statement.getSchemaName()).customize(database);
 
         String sql;
         if (database instanceof MSSQLDatabase)
-        	sql = "select VIEW_DEFINITION from INFORMATION_SCHEMA.VIEWS where TABLE_NAME='" + database.correctObjectName(statement.getViewName(), View.class) + "'";
+            sql = "select VIEW_DEFINITION from INFORMATION_SCHEMA.VIEWS where TABLE_NAME='" + database.correctObjectName(statement.getViewName(), View.class) + "'";
         else
         	sql = "select view_definition from information_schema.views where table_name='" + database.correctObjectName(statement.getViewName(), View.class) + "'";
 
@@ -55,7 +59,7 @@ public class GetViewDefinitionGenerator extends AbstractSqlGenerator<GetViewDefi
             }
         }
 
-        return new Sql[]{
+        return new Action[]{
                 new UnparsedSql(sql)
         };
     }

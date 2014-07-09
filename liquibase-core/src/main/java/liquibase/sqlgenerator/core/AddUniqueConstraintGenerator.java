@@ -1,21 +1,22 @@
 package liquibase.sqlgenerator.core;
 
+import liquibase.action.Action;
+import liquibase.action.core.UnparsedSql;
+import liquibase.exception.UnsupportedException;
+import liquibase.statementlogic.StatementLogicChain;
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.exception.ValidationErrors;
-import liquibase.sql.Sql;
-import liquibase.sql.UnparsedSql;
-import liquibase.sqlgenerator.SqlGenerator;
-import liquibase.sqlgenerator.SqlGeneratorChain;
+import  liquibase.ExecutionEnvironment;
 import liquibase.statement.core.AddUniqueConstraintStatement;
-import liquibase.structure.core.Table;
-import liquibase.structure.core.UniqueConstraint;
 import liquibase.util.StringUtils;
 
 public class AddUniqueConstraintGenerator extends AbstractSqlGenerator<AddUniqueConstraintStatement> {
 
     @Override
-    public boolean supports(AddUniqueConstraintStatement statement, Database database) {
+    public boolean supports(AddUniqueConstraintStatement statement, ExecutionEnvironment env) {
+        Database database = env.getTargetDatabase();
+
         return !(database instanceof SQLiteDatabase)
         		&& !(database instanceof MSSQLDatabase)
         		&& !(database instanceof SybaseDatabase)
@@ -25,7 +26,7 @@ public class AddUniqueConstraintGenerator extends AbstractSqlGenerator<AddUnique
     }
 
     @Override
-    public ValidationErrors validate(AddUniqueConstraintStatement addUniqueConstraintStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public ValidationErrors validate(AddUniqueConstraintStatement addUniqueConstraintStatement, ExecutionEnvironment env, StatementLogicChain chain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("columnNames", addUniqueConstraintStatement.getColumnNames());
         validationErrors.checkRequiredField("tableName", addUniqueConstraintStatement.getTableName());
@@ -33,10 +34,11 @@ public class AddUniqueConstraintGenerator extends AbstractSqlGenerator<AddUnique
     }
 
     @Override
-    public Sql[] generateSql(AddUniqueConstraintStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public Action[] generateActions(AddUniqueConstraintStatement statement, ExecutionEnvironment env, StatementLogicChain chain) throws UnsupportedException {
+        Database database = env.getTargetDatabase();
 
 		String sql = null;
-		if (statement.getConstraintName() == null) {
+        if (statement.getConstraintName() == null) {
 			sql = String.format("ALTER TABLE %s ADD UNIQUE (%s)"
 					, database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName())
 					, database.escapeColumnNameList(statement.getColumnNames())
@@ -75,20 +77,9 @@ public class AddUniqueConstraintGenerator extends AbstractSqlGenerator<AddUnique
             }
         }
 
-        return new Sql[] {
-                new UnparsedSql(sql, getAffectedUniqueConstraint(statement))
+        return new Action[] {
+                new UnparsedSql(sql)
         };
 
-    }
-
-    protected UniqueConstraint getAffectedUniqueConstraint(AddUniqueConstraintStatement statement) {
-        UniqueConstraint uniqueConstraint = new UniqueConstraint()
-                .setName(statement.getConstraintName())
-                .setTable((Table) new Table().setName(statement.getTableName()).setSchema(statement.getCatalogName(), statement.getSchemaName()));
-        int i = 0;
-        for (String column : StringUtils.splitAndTrim(statement.getColumnNames(), ",")) {
-            uniqueConstraint.addColumn(i++, column);
-        }
-        return uniqueConstraint;
     }
 }

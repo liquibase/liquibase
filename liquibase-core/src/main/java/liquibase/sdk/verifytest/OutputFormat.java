@@ -1,9 +1,9 @@
 package liquibase.sdk.verifytest;
 
+import liquibase.action.Action;
+import liquibase.action.Sql;
 import liquibase.database.Database;
 import liquibase.serializer.LiquibaseSerializable;
-import liquibase.serializer.core.string.StringChangeLogSerializer;
-import liquibase.sql.Sql;
 import liquibase.util.StringUtils;
 
 import java.util.Collection;
@@ -33,8 +33,8 @@ public abstract class OutputFormat {
                 return ((Database) value).getShortName();
             }
 
-            if (value instanceof Sql) {
-                return ((Sql) value).toSql();
+            if (value instanceof Action) {
+                return ((Action) value).describe();
             }
 
             if (value instanceof Object[]) {

@@ -2,13 +2,17 @@ package liquibase.database.jvm;
 
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
+import liquibase.database.core.OracleDatabase;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.executor.ExecuteResult;
+import liquibase.executor.QueryResult;
+import liquibase.executor.UpdateResult;
 import liquibase.logging.LogFactory;
+import liquibase.util.JdbcUtils;
 
 import java.sql.*;
-import java.util.Arrays;
-import java.util.Map;
+import java.util.*;
 
 /**
  * A ConnectionWrapper implementation which delegates completely to an
@@ -18,6 +22,7 @@ import java.util.Map;
  */
 public class JdbcConnection implements DatabaseConnection {
     private java.sql.Connection con;
+    private Database database;
 
     public JdbcConnection(java.sql.Connection connection) {
         this.con = connection;
@@ -26,6 +31,7 @@ public class JdbcConnection implements DatabaseConnection {
 
     @Override
     public void attached(Database database) {
+        this.database = database;
         try {
             database.addReservedWords(Arrays.asList(this.getWrappedConnection().getMetaData().getSQLKeywords().toUpperCase().split(",\\s*")));
         } catch (SQLException e) {
@@ -434,5 +440,74 @@ public class JdbcConnection implements DatabaseConnection {
     @Override
     public int hashCode() {
         return this.getUnderlyingConnection().hashCode();
+    }
+
+    public QueryResult query(String sql) throws DatabaseException {
+
+        Statement stmt = null;
+        ResultSet rs = null;
+        try {
+            LogFactory.getInstance().getLog().debug("Executing QUERY database command: " + sql);
+
+            stmt = this.getUnderlyingConnection().createStatement();
+            rs = stmt.executeQuery(sql);
+
+            List<Map<String, Object>> rows = new ArrayList<Map<String, Object>>();
+            while (rs.next()) {
+                Map<String, Object> row = new HashMap<String, Object>();
+                ResultSetMetaData metaData = rs.getMetaData();
+                int columnCount = metaData.getColumnCount();
+
+                for (int i = 1; i <= columnCount; i++) {
+                    String key = metaData.getColumnLabel(i).toUpperCase();
+                    Object obj = JdbcUtils.getResultSetValue(rs, i);
+                    row.put(key, obj);
+                }
+                rows.add(row);
+            }
+
+            return new QueryResult(rows);
+        } catch (SQLException e) {
+            throw new DatabaseException(e);
+        } finally {
+            JdbcUtils.close(rs, stmt);
+        }
+    }
+
+    public ExecuteResult execute(String sql) throws DatabaseException {
+        Statement stmt = null;
+        try {
+            stmt = this.getUnderlyingConnection().createStatement();
+
+            if (database instanceof OracleDatabase) {
+                sql = sql.replaceFirst("/\\s*/\\s*$", ""); //remove duplicated /'s
+            }
+
+            LogFactory.getInstance().getLog().debug("Executing EXECUTE database command: " + sql);
+            if (sql.contains("?")) {
+                stmt.setEscapeProcessing(false);
+            }
+            stmt.execute(sql);
+
+            return new ExecuteResult();
+        } catch (SQLException e) {
+            throw new DatabaseException("Error executing '"+sql+"': "+e.getMessage(), e);
+        } finally {
+            JdbcUtils.closeStatement(stmt);
+        }
+    }
+
+    public UpdateResult update(String sql) throws DatabaseException {
+        Statement stmt = null;
+        try {
+            stmt = ((JdbcConnection) database.getConnection()).getUnderlyingConnection().createStatement();
+
+            LogFactory.getInstance().getLog().debug("Executing UPDATE database command: " + sql);
+            return new UpdateResult(stmt.executeUpdate(sql));
+        } catch (SQLException e) {
+            throw new DatabaseException(e);
+        } finally {
+            JdbcUtils.closeStatement(stmt);
+        }
     }
 }

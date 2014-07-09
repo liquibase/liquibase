@@ -19,7 +19,7 @@ public class AddAutoIncrementExecuteTest extends AbstractExecuteTest {
 
 
     @Override
-    protected List<? extends SqlStatement> setupStatements(Database database) {
+    protected List<? extends Statement> setupStatements(Database database) {
         ArrayList<CreateTableStatement> statements = new ArrayList<CreateTableStatement>();
         CreateTableStatement table = new CreateTableStatement(null, null, TABLE_NAME);
         if (database instanceof MySQLDatabase) {

@@ -1,14 +1,15 @@
 package liquibase.change.core;
 
+import liquibase.ExecutionEnvironment;
 import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.database.core.SQLiteDatabase.AlterTableVisitor;
 import liquibase.snapshot.SnapshotGeneratorFactory;
+import liquibase.statement.Statement;
+import liquibase.statement.core.RenameColumnStatement;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Index;
-import liquibase.statement.SqlStatement;
-import liquibase.statement.core.RenameColumnStatement;
 import liquibase.structure.core.Table;
 
 import java.util.ArrayList;
@@ -92,23 +93,26 @@ public class RenameColumnChange extends AbstractChange {
     }
 
     @Override
-    public SqlStatement[] generateStatements(Database database) {
+    public Statement[] generateStatements(ExecutionEnvironment env) {
 //todo    	if (database instanceof SQLiteDatabase) {
 //    		// return special statements for SQLite databases
 //    		return generateStatementsForSQLiteDatabase(database);
 //        }
 
-    	return new SqlStatement[] { new RenameColumnStatement(
+    	return new Statement[] { new RenameColumnStatement(
                 getCatalogName(),
                 getSchemaName(),
     			getTableName(), getOldColumnName(), getNewColumnName(), 
-    			getColumnDataType(),getRemarks())
+    			getColumnDataType())
+                .setRemarks(getRemarks())
         };
     }
 
     @Override
-    public ChangeStatus checkStatus(Database database) {
+    public ChangeStatus checkStatus(ExecutionEnvironment env) {
         try {
+            Database database = env.getTargetDatabase();
+
             ChangeStatus changeStatus = new ChangeStatus();
             Column newColumn = SnapshotGeneratorFactory.getInstance().createSnapshot(new Column(Table.class, getCatalogName(), getSchemaName(), getTableName(), getNewColumnName()), database);
             Column oldColumn = SnapshotGeneratorFactory.getInstance().createSnapshot(new Column(Table.class, getCatalogName(), getSchemaName(), getTableName(), getOldColumnName()), database);
@@ -127,13 +131,13 @@ public class RenameColumnChange extends AbstractChange {
         }
     }
 
-    private SqlStatement[] generateStatementsForSQLiteDatabase(Database database) {
+    private Statement[] generateStatementsForSQLiteDatabase(ExecutionEnvironment env) {
     	
     	// SQLite does not support this ALTER TABLE operation until now.
 		// For more information see: http://www.sqlite.org/omitted.html.
 		// This is a small work around...
     
-    	List<SqlStatement> statements = new ArrayList<SqlStatement>();
+    	List<Statement> statements = new ArrayList<Statement>();
     	
     	// define alter table logic
 		AlterTableVisitor rename_alter_visitor = 
@@ -167,13 +171,13 @@ public class RenameColumnChange extends AbstractChange {
     		// alter table
 			statements.addAll(SQLiteDatabase.getAlterTableStatements(
 					rename_alter_visitor,
-					database,getCatalogName(), getSchemaName(),getTableName()));
+					env,getCatalogName(), getSchemaName(),getTableName()));
 		} catch (Exception e) {
 			System.err.println(e);
 			e.printStackTrace();
 		}
     	
-    	return statements.toArray(new SqlStatement[statements.size()]);
+    	return statements.toArray(new Statement[statements.size()]);
     }
 
     @Override

@@ -1,164 +1,236 @@
 package liquibase.statement.core;
 
 import liquibase.datatype.LiquibaseDataType;
+import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.statement.*;
+import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.PrimaryKey;
+import liquibase.structure.core.Schema;
+import liquibase.structure.core.Table;
 
 import java.util.*;
 
-public class CreateTableStatement extends AbstractSqlStatement {
-    private String catalogName;
-    private String schemaName;
-    private String tableName;
-    private String tablespace;
-    private String remarks;
-    private List<String> columns = new ArrayList<String>();
-    private Set<AutoIncrementConstraint> autoIncrementConstraints = new HashSet<AutoIncrementConstraint>();
-    private Map<String, LiquibaseDataType> columnTypes = new HashMap<String, LiquibaseDataType>();
-    private Map<String, Object> defaultValues = new HashMap<String, Object>();
-    private Map<String, String> columnRemarks = new HashMap<String, String>();
+/**
+ * Creates a new table.
+ * Many get methods return unmodifiable collections and rely on add/remove methods to protect the internal consistency of the table description.
+ */
+public class CreateTableStatement extends AbstractTableStatement {
 
-    private PrimaryKeyConstraint primaryKeyConstraint;
-    private Set<String> notNullColumns = new HashSet<String>();
-    private Set<ForeignKeyConstraint> foreignKeyConstraints = new HashSet<ForeignKeyConstraint>();
-    private Set<UniqueConstraint> uniqueConstraints = new HashSet<UniqueConstraint>();
+    public static final String TABLESPACE = "tablespace";
+    public static final String REMARKS = "remarks";
+    public static final String COLUMN_NAMES = "columnNames";
+    public static final String AUTO_INCREMENT_CONSTRAINTS = "autoIncrementConstraints";
+    public static final String COLUMN_TYPES = "columnTypes";
+    public static final String DEFAULT_VALUES = "defaultValues";
+    public static final String COLUMN_REMARKS = "columnRemarks";
 
+    public static final String CONSTRAINTS = "constraints";
+
+    public CreateTableStatement() {
+    }
 
     public CreateTableStatement(String catalogName, String schemaName, String tableName) {
-        this.catalogName = catalogName;
-        this.schemaName = schemaName;
-        this.tableName = tableName;
+        super(catalogName, schemaName, tableName);
     }
 
-    public CreateTableStatement(String catalogName, String schemaName, String tableName,String remarks) {
-        this(catalogName,schemaName,tableName);
-        this.remarks = remarks;
+    protected void init() {
+        setAttribute(COLUMN_NAMES, new ArrayList<String>());
+        setAttribute(AUTO_INCREMENT_CONSTRAINTS, new HashSet<AutoIncrementConstraint>());
+        setAttribute(COLUMN_TYPES, new HashMap<String, LiquibaseDataType>());
+        setAttribute(DEFAULT_VALUES, new HashMap<String, Object>());
+        setAttribute(COLUMN_REMARKS, new HashMap<String, String>());
+        setAttribute(COLUMN_TYPES, new HashMap<String, LiquibaseDataType>());
+        setAttribute(CONSTRAINTS, new HashSet<Constraint>());
     }
 
-    public String getCatalogName() {
-        return catalogName;
-    }
-
-    public String getSchemaName() {
-        return schemaName;
-    }
-
-    public String getTableName() {
-        return tableName;
-    }
-
-    public List<String> getColumns() {
-        return columns;
+    /**
+     * Returns unmodifiable list of columns. To add a column use {@link #addColumn(String, liquibase.datatype.LiquibaseDataType)} or a variation.
+     * To remove a column use {@link #removeColumn(String)}
+     */
+    public List<String> getColumnNames() {
+        return Collections.unmodifiableList(getAttribute(COLUMN_NAMES, List.class));
     }
 
     public String getTablespace() {
-        return tablespace;
+        return getAttribute(TABLESPACE, String.class);
     }
 
     public CreateTableStatement setTablespace(String tablespace) {
-        this.tablespace = tablespace;
+        return (CreateTableStatement) setAttribute(TABLESPACE, tablespace);
+    }
+
+    /**
+     * Table-wide remarks. To get column remarks, use {@link #getColumnRemarks(String)}
+     */
+    public String getRemarks() {
+        return getAttribute(REMARKS, String.class);
+    }
+
+    public CreateTableStatement setRemarks(String remarks) {
+        return (CreateTableStatement) setAttribute(REMARKS, remarks);
+    }
+
+    /**
+     * Removes modifiable set of constraints defined on this table.
+     */
+    public Set<? extends Constraint> getConstraints() {
+        return getAttribute(CONSTRAINTS, Set.class);
+    }
+
+    /**
+     * Returns an unmodifiable set of constraints of the given type. If none are defined, returns an empty collection.
+     */
+    public <T extends Constraint> Set<T> getConstraints(Class<T> type) {
+        Set returnSet = new HashSet();
+        for (Constraint constraint : getConstraints()) {
+            if (type.isAssignableFrom(constraint.getClass())) {
+                returnSet.add(constraint);
+            }
+        }
+        return Collections.unmodifiableSet(returnSet);
+    }
+
+
+    /**
+     * Adds a new constraint for the table.
+     * No validation is done adding the constraint, so it is possible to add constraints before columns are added.
+     * Any validation needs to be done by the {@link liquibase.statementlogic.StatementLogic} class.
+     */
+    public CreateTableStatement addConstraint(Constraint constraint) {
+        getAttribute(CONSTRAINTS, Set.class).add(constraint);
         return this;
     }
 
-    public String getRemarks() {
-        return remarks;
-    }
 
-    public void setRemarks(String remarks) {
-        this.remarks = remarks;
-    }
-
+    /**
+     * Convenience method to return the defined primary key key.
+     * If multiple primary key constraints are added, one is returned randomly.
+     */
     public PrimaryKeyConstraint getPrimaryKeyConstraint() {
-        return primaryKeyConstraint;
+        Set<PrimaryKeyConstraint> constraints = getConstraints(PrimaryKeyConstraint.class);
+        if (constraints.isEmpty()) {
+            return null;
+        }
+        return constraints.iterator().next();
     }
 
+    /**
+     * Convenience method on {@link #getConstraints(Class)} to return the foreign keys. Returns unmodifiable collection.
+     */
     public Set<ForeignKeyConstraint> getForeignKeyConstraints() {
-        return foreignKeyConstraints;
+        return getConstraints(ForeignKeyConstraint.class);
     }
 
+    /**
+     * Convenience method on {@link #getConstraints(Class)} to return the unique constraints. Returns unmodifiable collection.
+     */
     public Set<UniqueConstraint> getUniqueConstraints() {
-        return uniqueConstraints;
+        return getConstraints(UniqueConstraint.class);
+    }
+
+    /**
+     * Convenience method on {@link #getConstraints(Class)} to return the not null constraints. Returns unmodifiable collection.
+     */
+    public Set<NotNullConstraint> getNotNullConstraints() {
+        return getConstraints(NotNullConstraint.class);
+    }
+
+    /**
+     * Convenience method to return the not null constraint for a given column. Returns null if no constraint is defined.
+     */
+    public NotNullConstraint getNotNullConstraint(String columnName) {
+        for (NotNullConstraint constraint : getNotNullConstraints()) {
+            if (constraint.getColumnName().equals(columnName)) {
+                return constraint;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Convenience method on {@link #getConstraints(Class)} to return the auto increment constraints. Returns unmodifiable collection.
+     */
+    public Set<AutoIncrementConstraint> getAutoIncrementConstraints() {
+        return getAttribute(AUTO_INCREMENT_CONSTRAINTS, Set.class);
     }
 
 
-    public Set<String> getNotNullColumns() {
-        return notNullColumns;
-    }
-
-    public CreateTableStatement addPrimaryKeyColumn(String columnName, LiquibaseDataType columnType, Object defaultValue, String keyName, String tablespace, ColumnConstraint... constraints) {
-//        String pkName = "PK_" + getTableName().toUpperCase();
-////        if (pkName.length() > 18) {
-////            pkName = pkName.substring(0, 17);
-////        }
+    /**
+     * Adds a new column with the given information, but also adds the column to the table's primary key constraint and creates a not null constraint for the column.
+     * If no primary key constraint is yet defined, it creates it.
+     */
+    public CreateTableStatement addPrimaryKeyColumn(String columnName, LiquibaseDataType columnType, Object defaultValue, String keyName, String tablespace, Constraint... constraints) {
         PrimaryKeyConstraint pkConstraint = new PrimaryKeyConstraint(keyName);
         pkConstraint.addColumns(columnName);
 	    pkConstraint.setTablespace(tablespace);
 
-        List<ColumnConstraint> allConstraints = new ArrayList<ColumnConstraint>();
+        List<Constraint> allConstraints = new ArrayList<Constraint>();
         allConstraints.addAll(Arrays.asList(constraints));
         allConstraints.add(new NotNullConstraint(columnName));
         allConstraints.add(pkConstraint);
 
 
-        addColumn(columnName, columnType, defaultValue, allConstraints.toArray(new ColumnConstraint[allConstraints.size()]));
+        addColumn(columnName, columnType, defaultValue, allConstraints.toArray(new Constraint[allConstraints.size()]));
 
         return this;
     }
 
     public CreateTableStatement addColumn(String columnName, LiquibaseDataType columnType) {
-        return addColumn(columnName, columnType, null, new ColumnConstraint[0]);
+        return addColumn(columnName, columnType, null, new Constraint[0]);
     }
 
     public CreateTableStatement addColumn(String columnName, LiquibaseDataType columnType, Object defaultValue) {
-        if (defaultValue instanceof ColumnConstraint) {
-            return addColumn(columnName,  columnType, null, new ColumnConstraint[]{(ColumnConstraint) defaultValue});
+        if (defaultValue instanceof Constraint) {
+            return addColumn(columnName,  columnType, null, new Constraint[]{(Constraint) defaultValue});
         }
-        return addColumn(columnName, columnType, defaultValue, new ColumnConstraint[0]);
+        return addColumn(columnName, columnType, defaultValue, new Constraint[0]);
     }
 
-    public CreateTableStatement addColumn(String columnName, LiquibaseDataType columnType, ColumnConstraint[] constraints) {
+    public CreateTableStatement addColumn(String columnName, LiquibaseDataType columnType, Constraint[] constraints) {
         return addColumn(columnName, columnType, null, constraints);
     }
 
-    public CreateTableStatement addColumn(String columnName, LiquibaseDataType columnType, Object defaultValue, ColumnConstraint[] constraints) {
+    public CreateTableStatement addColumn(String columnName, LiquibaseDataType columnType, Object defaultValue, Constraint[] constraints) {
         return addColumn(columnName,columnType,defaultValue,null,constraints);
 
     }
-    public CreateTableStatement addColumn(String columnName, LiquibaseDataType columnType, Object defaultValue, String remarks, ColumnConstraint... constraints) {
-        this.getColumns().add(columnName);
-        this.columnTypes.put(columnName, columnType);
+
+    /**
+     * Adds a column to the table definition.
+     * Will automatically call {@link liquibase.statement.ColumnConstraint#setColumnName(String)} for any ColumnConstraints with a null getColumnName().
+     * Any non-ColumnConstraints are not modified before being stored.
+     * If a primary key constraint is included in this call and a primary key already exists, this column will be merged with the existing constraint.
+     */
+    public CreateTableStatement addColumn(String columnName, LiquibaseDataType columnType, Object defaultValue, String remarks, Constraint... constraints) {
+        getAttribute(COLUMN_NAMES, List.class).add(columnName);
+        getAttribute(COLUMN_TYPES, Map.class).put(columnName, columnType);
         if (defaultValue != null) {
-            defaultValues.put(columnName, defaultValue);
+            getAttribute(DEFAULT_VALUES, Map.class).put(columnName, defaultValue);
         }
         if(remarks != null) {
-            this.columnRemarks.put(columnName, remarks);
+            getAttribute(COLUMN_REMARKS, Map.class).put(columnName, remarks);
         }
         if (constraints != null) {
-            for (ColumnConstraint constraint : constraints) {
+            for (Constraint constraint : constraints) {
                 if (constraint == null) {
                     continue;
                 }
 
                 if (constraint instanceof PrimaryKeyConstraint) {
-                    if (this.getPrimaryKeyConstraint() == null) {
-                        this.primaryKeyConstraint = (PrimaryKeyConstraint) constraint;
+                    PrimaryKeyConstraint existingPK = this.getPrimaryKeyConstraint();
+                    if (existingPK != null) {
+                        existingPK.addColumns(columnName);
                     } else {
-                        for (String column : ((PrimaryKeyConstraint) constraint).getColumns()) {
-                            this.getPrimaryKeyConstraint().addColumns(column);
+                        if (!((PrimaryKeyConstraint) constraint).getColumns().contains(columnName)) {
+                            ((PrimaryKeyConstraint) constraint).addColumns(columnName);
                         }
+                        addConstraint(constraint);
                     }
-                } else if (constraint instanceof NotNullConstraint) {
-                    ((NotNullConstraint) constraint).setColumnName(columnName);
-                    getNotNullColumns().add(columnName);
-                } else if (constraint instanceof ForeignKeyConstraint) {
-                    ((ForeignKeyConstraint) constraint).setColumn(columnName);
-                    getForeignKeyConstraints().add(((ForeignKeyConstraint) constraint));
-                } else if (constraint instanceof UniqueConstraint) {
-                    ((UniqueConstraint) constraint).addColumns(columnName);
-                    getUniqueConstraints().add(((UniqueConstraint) constraint));
-                } else if (constraint instanceof AutoIncrementConstraint) {
-                    autoIncrementConstraints.add((AutoIncrementConstraint) constraint);
                 } else {
-                    throw new RuntimeException("Unknown constraint type: " + constraint.getClass().getName());
+                    if (constraint instanceof ColumnConstraint && ((ColumnConstraint) constraint).getColumnName() == null) {
+                        ((ColumnConstraint) constraint).setColumnName(columnName);
+                    }
+                    addConstraint(constraint);
                 }
             }
         }
@@ -166,47 +238,60 @@ public class CreateTableStatement extends AbstractSqlStatement {
         return this;
     }
 
+    public CreateTableStatement removeColumn (String columnName) {
+        getAttribute(COLUMN_NAMES, List.class).remove(columnName);
+        getAttribute(COLUMN_TYPES, Map.class).remove(columnName);
+        getAttribute(DEFAULT_VALUES, Map.class).remove(columnName);
+
+        getAttribute(COLUMN_REMARKS, Map.class).remove(columnName);
+
+        Iterator<? extends Constraint> constraints = getConstraints().iterator();
+        while (constraints.hasNext()) {
+            Constraint constraint = constraints.next();
+            if (constraint instanceof ColumnConstraint && ((ColumnConstraint) constraint).getColumnName().equals(columnName)) {
+                constraints.remove();
+            }
+        }
+
+        return this;
+    }
+
+    /**
+     * Return the default value for the given column. Null if not default value is specified
+     */
     public Object getDefaultValue(String column) {
-        return defaultValues.get(column);
+        return getAttribute(DEFAULT_VALUES, Map.class).get(column);
+    }
+
+    public CreateTableStatement setDefaultValue(String column, Object value) {
+        getAttribute(DEFAULT_VALUES, Map.class).put(column, value);
+        return this;
     }
 
     public String getColumnRemarks(String column) {
-        return columnRemarks.get(column);
+        return (String) getAttribute(COLUMN_REMARKS, Map.class).get(column);
     }
 
-    public CreateTableStatement addColumnConstraint(NotNullConstraint notNullConstraint) {
-        getNotNullColumns().add(notNullConstraint.getColumnName());
+    public CreateTableStatement setColumnRemarks(String column, String remarks) {
+        getAttribute(COLUMN_REMARKS, Map.class).put(column, remarks);
+
         return this;
     }
 
-    public CreateTableStatement addColumnConstraint(ForeignKeyConstraint fkConstraint) {
-        getForeignKeyConstraints().add(fkConstraint);
+    public LiquibaseDataType getColumnType(String columnName) {
+        return (LiquibaseDataType) getAttribute(COLUMN_TYPES, Map.class).get(columnName);
+    }
+
+    public CreateTableStatement setColumnType(String column, LiquibaseDataType dataType) {
+        getAttribute(COLUMN_TYPES, Map.class).put(column, dataType);
+
         return this;
     }
 
-    public CreateTableStatement addColumnConstraint(UniqueConstraint uniqueConstraint) {
-        getUniqueConstraints().add(uniqueConstraint);
-        return this;
+    @Override
+    protected DatabaseObject[] getBaseAffectedDatabaseObjects() {
+        return new DatabaseObject[] {
+            new Table().setName(getTableName()).setSchema(new Schema(getCatalogName(), getSchemaName()))
+        };
     }
-
-    public CreateTableStatement addColumnConstraint(AutoIncrementConstraint autoIncrementConstraint) {
-        getAutoIncrementConstraints().add(autoIncrementConstraint);
-        return this;
-    }
-
-    public Set<AutoIncrementConstraint> getAutoIncrementConstraints() {
-        return autoIncrementConstraints;
-    }
-
-    public Map<String, LiquibaseDataType> getColumnTypes() {
-        return columnTypes;
-    }
-
-    public Map<String, Object> getDefaultValues() {
-        return defaultValues;
-    }
-
-	public void setSchemaName(String schemaName) {
-		this.schemaName = schemaName;
-	}
 }

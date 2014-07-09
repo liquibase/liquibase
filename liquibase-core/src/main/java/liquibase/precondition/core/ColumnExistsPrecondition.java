@@ -1,14 +1,13 @@
 package liquibase.precondition.core;
 
-import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.ChangeSet;
+import liquibase.changelog.DatabaseChangeLog;
 import liquibase.database.Database;
+import liquibase.exception.*;
 import liquibase.precondition.AbstractPrecondition;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Schema;
-import liquibase.exception.*;
-import liquibase.precondition.Precondition;
 import liquibase.structure.core.Table;
 import liquibase.util.StringUtils;
 

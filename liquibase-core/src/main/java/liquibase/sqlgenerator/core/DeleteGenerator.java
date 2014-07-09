@@ -1,31 +1,33 @@
 package liquibase.sqlgenerator.core;
 
+import liquibase.action.Action;
+import liquibase.action.core.UnparsedSql;
+import liquibase.exception.UnsupportedException;
+import liquibase.statement.core.DeleteDataStatement;
+import liquibase.statementlogic.StatementLogicChain;
 import liquibase.database.Database;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.ValidationErrors;
-import liquibase.sql.Sql;
-import liquibase.sql.UnparsedSql;
-import liquibase.sqlgenerator.SqlGeneratorChain;
-import liquibase.statement.core.DeleteStatement;
+import  liquibase.ExecutionEnvironment;
 import liquibase.structure.core.Column;
-import liquibase.structure.core.Relation;
-import liquibase.structure.core.Table;
 
-public class DeleteGenerator extends AbstractSqlGenerator<DeleteStatement> {
+public class DeleteGenerator extends AbstractSqlGenerator<DeleteDataStatement> {
 
     @Override
-    public ValidationErrors validate(DeleteStatement deleteStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public ValidationErrors validate(DeleteDataStatement deleteDataStatement, ExecutionEnvironment env, StatementLogicChain chain) {
         ValidationErrors validationErrors = new ValidationErrors();
-        validationErrors.checkRequiredField("tableName", deleteStatement.getTableName());
+        validationErrors.checkRequiredField("tableName", deleteDataStatement.getTableName());
         return validationErrors;
     }
 
     @Override
-    public Sql[] generateSql(DeleteStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public Action[] generateActions(DeleteDataStatement statement, ExecutionEnvironment env, StatementLogicChain chain) throws UnsupportedException {
+        Database database = env.getTargetDatabase();
+
         StringBuffer sql = new StringBuffer("DELETE FROM " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()));
 
-        if (statement.getWhereClause() != null) {
-            String fixedWhereClause = " WHERE " + statement.getWhereClause();
+        if (statement.getWhere() != null) {
+            String fixedWhereClause = " WHERE " + statement.getWhere();
             for (String columnName : statement.getWhereColumnNames()) {
                 if (columnName == null) {
                     continue;
@@ -39,10 +41,6 @@ public class DeleteGenerator extends AbstractSqlGenerator<DeleteStatement> {
             sql.append(" ").append(fixedWhereClause);
         }
 
-        return new Sql[]{new UnparsedSql(sql.toString(), getAffectedTable(statement))};
-    }
-
-    protected Relation getAffectedTable(DeleteStatement statement) {
-        return new Table().setName(statement.getTableName()).setSchema(statement.getCatalogName(), statement.getSchemaName());
+        return new Action[]{new UnparsedSql(sql.toString())};
     }
 }

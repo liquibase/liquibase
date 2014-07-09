@@ -1,9 +1,9 @@
 package liquibase.parser.core.xml;
 
-import liquibase.change.*;
+import liquibase.action.visitor.ActionVisitorFactory;
+import liquibase.change.ChangeFactory;
 import liquibase.changelog.ChangeLogParameters;
 import liquibase.changelog.DatabaseChangeLog;
-import liquibase.exception.ChangeLogParseException;
 import liquibase.logging.LogFactory;
 import liquibase.logging.Logger;
 import liquibase.parser.ChangeLogParserFactory;
@@ -11,7 +11,6 @@ import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.precondition.PreconditionFactory;
 import liquibase.resource.ResourceAccessor;
-import liquibase.sql.visitor.SqlVisitorFactory;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
 import org.xml.sax.Attributes;
@@ -20,13 +19,15 @@ import org.xml.sax.helpers.DefaultHandler;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.*;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Stack;
 
 class XMLChangeLogSAXHandler extends DefaultHandler {
 
     private final ChangeFactory changeFactory;
     private final PreconditionFactory preconditionFactory;
-    private final SqlVisitorFactory sqlVisitorFactory;
+    private final ActionVisitorFactory actionVisitorFactory;
     private final ChangeLogParserFactory changeLogParserFactory;
 
     protected Logger log;
@@ -55,7 +56,7 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
 
         changeFactory = ChangeFactory.getInstance();
         preconditionFactory = PreconditionFactory.getInstance();
-        sqlVisitorFactory = SqlVisitorFactory.getInstance();
+        actionVisitorFactory = ActionVisitorFactory.getInstance();
         changeLogParserFactory = ChangeLogParserFactory.getInstance();
     }
 

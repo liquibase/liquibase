@@ -4,9 +4,9 @@ import liquibase.change.AbstractChange;
 import liquibase.change.ChangeMetaData;
 import liquibase.change.DatabaseChange;
 import liquibase.change.DatabaseChangeProperty;
-import liquibase.database.Database;
+import  liquibase.ExecutionEnvironment;
 import liquibase.serializer.LiquibaseSerializable;
-import liquibase.statement.SqlStatement;
+import liquibase.statement.Statement;
 import liquibase.statement.core.DropProcedureStatement;
 
 @DatabaseChange(name="dropProcedure", description = "Drops an existing procedure", priority = ChangeMetaData.PRIORITY_DEFAULT+100, appliesTo = "storedProcedure")
@@ -49,8 +49,8 @@ public class DropProcedureChange extends AbstractChange {
     }
 
     @Override
-    public SqlStatement[] generateStatements(Database database) {
-        return new SqlStatement[]{
+    public Statement[] generateStatements(ExecutionEnvironment env) {
+        return new Statement[]{
                 new DropProcedureStatement(getCatalogName(), getSchemaName(), getProcedureName())
         };
     }

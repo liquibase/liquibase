@@ -1,17 +1,20 @@
 package liquibase.database.core;
 
-import java.math.BigInteger;
-import java.util.*;
-
 import liquibase.CatalogAndSchema;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
+import liquibase.exception.DatabaseException;
+import liquibase.exception.UnsupportedException;
+import liquibase.executor.ExecutorService;
+import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Index;
 import liquibase.structure.core.PrimaryKey;
-import liquibase.exception.DatabaseException;
-import liquibase.executor.ExecutorService;
-import liquibase.statement.core.RawSqlStatement;
+
+import java.math.BigInteger;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Encapsulates MySQL database support.
@@ -179,14 +182,22 @@ public class MySQLDatabase extends AbstractJdbcDatabase {
 
     @Override
     public boolean disableForeignKeyChecks() throws DatabaseException {
-        boolean enabled = ExecutorService.getInstance().getExecutor(this).queryForInt(new RawSqlStatement("SELECT @@FOREIGN_KEY_CHECKS")) == 1;
-        ExecutorService.getInstance().getExecutor(this).execute(new RawSqlStatement("SET FOREIGN_KEY_CHECKS=0"));
-        return enabled;
+        try {
+            boolean enabled = ExecutorService.getInstance().getExecutor(this).query(new RawSqlStatement("SELECT @@FOREIGN_KEY_CHECKS")).toObject(0) == 1;
+            ExecutorService.getInstance().getExecutor(this).execute(new RawSqlStatement("SET FOREIGN_KEY_CHECKS=0"));
+            return enabled;
+        } catch (UnsupportedException e) {
+            throw new DatabaseException(e);
+        }
     }
 
     @Override
     public void enableForeignKeyChecks() throws DatabaseException {
-        ExecutorService.getInstance().getExecutor(this).execute(new RawSqlStatement("SET FOREIGN_KEY_CHECKS=1"));
+        try {
+            ExecutorService.getInstance().getExecutor(this).execute(new RawSqlStatement("SET FOREIGN_KEY_CHECKS=1"));
+        } catch (liquibase.exception.UnsupportedException e) {
+            throw new DatabaseException(e);
+        }
     }
 
     @Override

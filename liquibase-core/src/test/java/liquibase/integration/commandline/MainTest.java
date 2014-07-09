@@ -1,24 +1,16 @@
 package liquibase.integration.commandline;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import liquibase.exception.CommandLineParsingException;
+import liquibase.util.StringUtils;
+import org.junit.Test;
 
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.PrintStream;
-import java.io.StringReader;
+import java.io.*;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Arrays;
 import java.util.Properties;
 
-import liquibase.exception.CommandLineParsingException;
-import liquibase.util.StringUtils;
-
-import org.junit.Test;
+import static org.junit.Assert.*;
 
 
 /**

@@ -1,6 +1,6 @@
 package liquibase.util;
 
-import liquibase.database.Database;
+import liquibase.ExtensibleObject;
 
 import java.util.*;
 import java.util.regex.Pattern;
@@ -12,6 +12,7 @@ public class StringUtils {
     private static final Pattern commentPattern = Pattern.compile("/\\*.*?\\*/", Pattern.DOTALL);
     private static final Pattern upperCasePattern = Pattern.compile(".*[A-Z].*");
     private static final Pattern lowerCasePattern = Pattern.compile(".*[a-z].*");
+    private static final Pattern allUpperCasePattern = Pattern.compile("[^a-z]*");
 
 
     /**
@@ -148,6 +149,18 @@ public class StringUtils {
         return join(map, delimiter, new ToStringFormatter());
     }
 
+    public static String join(ExtensibleObject object, String delimiter, StringUtilsFormatter formatter) {
+        SortedMap map = new TreeMap();
+        for (String attribute : object.getAttributes()) {
+            Object value = object.getAttribute(attribute, Object.class);
+            if (value != null) {
+                map.put(attribute, value);
+            }
+        }
+        return join(map, delimiter, formatter);
+
+    }
+
     public static String join(Map map, String delimiter, StringUtilsFormatter formatter) {
         List<String> list = new ArrayList<String>();
         for (Map.Entry entry : (Set<Map.Entry>) map.entrySet()) {
@@ -231,6 +244,14 @@ public class StringUtils {
         return upperCasePattern.matcher(string).matches();
     }
 
+    /**
+     * Returns if all letters in the string are upper case. Numbers and symbols are not included in the check.
+     * Passing null returns true.
+     */
+    public static boolean isUpperCase(String string) {
+        return string == null || allUpperCasePattern.matcher(string).matches();
+    }
+
     public static boolean hasLowerCase(String string) {
         return lowerCasePattern.matcher(string).matches();
     }
@@ -292,6 +313,10 @@ public class StringUtils {
         public String toString(Object obj) {
             if (obj == null) {
                 return null;
+            } else if (obj instanceof Object[]) {
+                return "["+StringUtils.join(((Object[]) obj), ", ", this)+"]";
+            } else if (obj instanceof Collection) {
+                return "["+StringUtils.join(((Collection) obj), ", ", this)+"]";
             }
             return obj.toString();
         }

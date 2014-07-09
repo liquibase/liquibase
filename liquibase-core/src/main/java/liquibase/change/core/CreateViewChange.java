@@ -1,13 +1,13 @@
 package liquibase.change.core;
 
 import liquibase.change.*;
-import liquibase.database.Database;
 import liquibase.database.core.SQLiteDatabase;
+import  liquibase.ExecutionEnvironment;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.resource.ResourceAccessor;
 import liquibase.snapshot.SnapshotGeneratorFactory;
-import liquibase.statement.SqlStatement;
+import liquibase.statement.Statement;
 import liquibase.statement.core.CreateViewStatement;
 import liquibase.statement.core.DropViewStatement;
 import liquibase.structure.core.View;
@@ -73,15 +73,15 @@ public class CreateViewChange extends AbstractChange {
 	}
 
 	@Override
-    public SqlStatement[] generateStatements(Database database) {
-        List<SqlStatement> statements = new ArrayList<SqlStatement>();
+    public Statement[] generateStatements(ExecutionEnvironment env) {
+        List<Statement> statements = new ArrayList<Statement>();
 
 		boolean replaceIfExists = false;
 		if (getReplaceIfExists() != null && getReplaceIfExists()) {
 			replaceIfExists = true;
 		}
 
-		if (!supportsReplaceIfExistsOption(database) && replaceIfExists) {
+		if (!supportsReplaceIfExistsOption(env) && replaceIfExists) {
 			statements.add(new DropViewStatement(getCatalogName(), getSchemaName(), getViewName()));
 			statements.add(new CreateViewStatement(getCatalogName(), getSchemaName(), getViewName(), getSelectQuery(),
 					false));
@@ -90,7 +90,7 @@ public class CreateViewChange extends AbstractChange {
 					getCatalogName(), getSchemaName(), getViewName(), getSelectQuery(), replaceIfExists));
 		}
 
-		return statements.toArray(new SqlStatement[statements.size()]);
+		return statements.toArray(new Statement[statements.size()]);
 	}
 
 	@Override
@@ -108,12 +108,12 @@ public class CreateViewChange extends AbstractChange {
 	}
 
     @Override
-    public ChangeStatus checkStatus(Database database) {
+    public ChangeStatus checkStatus(ExecutionEnvironment env) {
         ChangeStatus result = new ChangeStatus();
         try {
             View example = new View(getCatalogName(), getSchemaName(), getViewName());
 
-            View snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(example, database);
+            View snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(example, env.getTargetDatabase());
             result.assertComplete(snapshot != null, "View does not exist");
 
             return result;
@@ -123,8 +123,8 @@ public class CreateViewChange extends AbstractChange {
         }
     }
 
-	private boolean supportsReplaceIfExistsOption(Database database) {
-		return !(database instanceof SQLiteDatabase);
+	private boolean supportsReplaceIfExistsOption(ExecutionEnvironment env) {
+		return !(env.getTargetDatabase() instanceof SQLiteDatabase);
 	}
 
     @Override

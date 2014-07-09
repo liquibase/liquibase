@@ -8,9 +8,9 @@ import liquibase.exception.RollbackImpossibleException;
 import liquibase.exception.SetupException;
 import liquibase.exception.ValidationErrors;
 import liquibase.resource.ResourceAccessor;
-import liquibase.statement.SqlStatement;
-import liquibase.statement.core.DeleteStatement;
-import liquibase.statement.core.InsertStatement;
+import liquibase.statement.Statement;
+import liquibase.statement.core.DeleteDataStatement;
+import liquibase.statement.core.InsertDataStatement;
 
 /**
  *
@@ -19,9 +19,9 @@ import liquibase.statement.core.InsertStatement;
 public class CustomChange implements CustomSqlChange,CustomSqlRollback{
 
     @Override
-    public SqlStatement[] generateStatements(Database database) throws CustomChangeException {
-        SqlStatement st[]=new SqlStatement[1];
-        InsertStatement is=new InsertStatement(null, null,"persons");
+    public Statement[] generateStatements(Database database) throws CustomChangeException {
+        Statement st[]=new Statement[1];
+        InsertDataStatement is=new InsertDataStatement(null, null,"persons");
         is.addColumnValue("id",new Integer(1));
         is.addColumnValue("firstname", "joan");
         is.addColumnValue("lastname", "pujol");
@@ -50,9 +50,9 @@ public class CustomChange implements CustomSqlChange,CustomSqlRollback{
     }
 
     @Override
-    public SqlStatement[] generateRollbackStatements(Database database) throws CustomChangeException, RollbackImpossibleException {
-        SqlStatement st[]=new SqlStatement[1];
-        DeleteStatement ds=new DeleteStatement(null, null,"persons");
+    public Statement[] generateRollbackStatements(Database database) throws CustomChangeException, RollbackImpossibleException {
+        Statement st[]=new Statement[1];
+        DeleteDataStatement ds=new DeleteDataStatement(null, null,"persons");
         ds.setWhereClause("id=1");
         st[0]=ds;
         return st;

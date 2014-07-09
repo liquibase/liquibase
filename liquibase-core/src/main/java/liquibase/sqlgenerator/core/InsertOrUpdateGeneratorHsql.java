@@ -1,30 +1,29 @@
 package liquibase.sqlgenerator.core;
 
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashSet;
-
+import liquibase.statementlogic.StatementLogicChain;
 import liquibase.database.Database;
 import liquibase.database.core.HsqlDatabase;
 import liquibase.datatype.DataTypeFactory;
-import liquibase.sqlgenerator.SqlGeneratorChain;
-import liquibase.statement.core.InsertOrUpdateStatement;
+import  liquibase.ExecutionEnvironment;
+import liquibase.statement.core.InsertOrUpdateDataStatement;
+
+import java.util.Date;
 
 /**
  * @author Andrew Muraco
  */
 public class InsertOrUpdateGeneratorHsql extends InsertOrUpdateGenerator {
 	@Override
-	public boolean supports(InsertOrUpdateStatement statement, Database database) {
-		return database instanceof HsqlDatabase;
+	public boolean supports(InsertOrUpdateDataStatement statement, ExecutionEnvironment env) {
+		return env.getTargetDatabase() instanceof HsqlDatabase;
 	}
 
 	@Override
-	protected String getRecordCheck(InsertOrUpdateStatement insertOrUpdateStatement, Database database,
+	protected String getRecordCheck(InsertOrUpdateDataStatement insertOrUpdateDataStatement, ExecutionEnvironment env,
 			String whereClause) {
 		StringBuilder sql = new StringBuilder();
 		sql.append("MERGE INTO ");
-		sql.append(insertOrUpdateStatement.getTableName());
+		sql.append(insertOrUpdateDataStatement.getTableName());
 		sql.append(" USING (VALUES (1)) ON ");
 		sql.append(whereClause);
 		sql.append(" WHEN NOT MATCHED THEN ");
@@ -32,16 +31,16 @@ public class InsertOrUpdateGeneratorHsql extends InsertOrUpdateGenerator {
 	}
 
 	@Override
-	protected String getInsertStatement(InsertOrUpdateStatement insertOrUpdateStatement, Database database,
-			SqlGeneratorChain sqlGeneratorChain) {
+	protected String getInsertStatement(InsertOrUpdateDataStatement insertOrUpdateDataStatement, ExecutionEnvironment env,
+			StatementLogicChain chain) {
 		StringBuilder columns = new StringBuilder();
 		StringBuilder values = new StringBuilder();
 
-		for (String columnKey : insertOrUpdateStatement.getColumnValues().keySet()) {
+		for (String columnKey : insertOrUpdateDataStatement.getColumnNames()) {
 			columns.append(",");
 			columns.append(columnKey);
 			values.append(",");
-			values.append(convertToString(insertOrUpdateStatement.getColumnValue(columnKey), database));
+			values.append(convertToString(insertOrUpdateDataStatement.getColumnValue(columnKey), env.getTargetDatabase()));
 		}
 		columns.deleteCharAt(0);
 		values.deleteCharAt(0);
@@ -49,22 +48,22 @@ public class InsertOrUpdateGeneratorHsql extends InsertOrUpdateGenerator {
 	}
 
 	@Override
-	protected String getElse(Database database) {
+	protected String getElse(ExecutionEnvironment env) {
 		return " WHEN MATCHED THEN ";
 	}
 
 	@Override
-	protected String getUpdateStatement(InsertOrUpdateStatement insertOrUpdateStatement, Database database,
-			String whereClause, SqlGeneratorChain sqlGeneratorChain) {
+	protected String getUpdateStatement(InsertOrUpdateDataStatement insertOrUpdateDataStatement, ExecutionEnvironment env,
+			String whereClause, StatementLogicChain chain) {
 
 		StringBuilder sql = new StringBuilder("UPDATE SET ");
 
 //		String[] pkFields = insertOrUpdateStatement.getPrimaryKey().split(",");
 //		HashSet<String> hashPkFields = new HashSet<String>(Arrays.asList(pkFields));
-		for (String columnKey : insertOrUpdateStatement.getColumnValues().keySet()) {
+		for (String columnKey : insertOrUpdateDataStatement.getColumnNames()) {
 //			if (!hashPkFields.contains(columnKey)) {
 				sql.append(columnKey).append(" = ");
-				sql.append(convertToString(insertOrUpdateStatement.getColumnValue(columnKey), database));
+				sql.append(convertToString(insertOrUpdateDataStatement.getColumnValue(columnKey), env.getTargetDatabase()));
 				sql.append(",");
 //			}
 		}

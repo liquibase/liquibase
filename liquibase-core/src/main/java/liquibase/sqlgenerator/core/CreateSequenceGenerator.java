@@ -1,26 +1,27 @@
 package liquibase.sqlgenerator.core;
 
+import liquibase.action.Action;
+import liquibase.action.core.UnparsedSql;
+import liquibase.exception.UnsupportedException;
+import liquibase.statementlogic.StatementLogicChain;
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.exception.ValidationErrors;
-import liquibase.sql.Sql;
-import liquibase.sql.UnparsedSql;
-import liquibase.sqlgenerator.SqlGenerator;
-import liquibase.sqlgenerator.SqlGeneratorChain;
+import  liquibase.ExecutionEnvironment;
 import liquibase.statement.core.CreateSequenceStatement;
-import liquibase.structure.core.Sequence;
 
 public class CreateSequenceGenerator extends AbstractSqlGenerator<CreateSequenceStatement> {
 
     @Override
-    public boolean supports(CreateSequenceStatement statement, Database database) {
-        return database.supportsSequences();
+    public boolean supports(CreateSequenceStatement statement, ExecutionEnvironment env) {
+        return env.getTargetDatabase().supportsSequences();
     }
 
     @Override
-    public ValidationErrors validate(CreateSequenceStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public ValidationErrors validate(CreateSequenceStatement statement, ExecutionEnvironment env, StatementLogicChain chain) {
         ValidationErrors validationErrors = new ValidationErrors();
 
+        Database database = env.getTargetDatabase();
         validationErrors.checkRequiredField("sequenceName", statement.getSequenceName());
 
         validationErrors.checkDisallowedField("startValue", statement.getStartValue(), database, FirebirdDatabase.class);
@@ -36,7 +37,9 @@ public class CreateSequenceGenerator extends AbstractSqlGenerator<CreateSequence
     }
 
     @Override
-    public Sql[] generateSql(CreateSequenceStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public Action[] generateActions(CreateSequenceStatement statement, ExecutionEnvironment env, StatementLogicChain chain) throws UnsupportedException {
+        Database database = env.getTargetDatabase();
+
         StringBuffer buffer = new StringBuffer();
         buffer.append("CREATE SEQUENCE ");
         buffer.append(database.escapeSequenceName(statement.getCatalogName(), statement.getSchemaName(), statement.getSequenceName()));
@@ -75,10 +78,6 @@ public class CreateSequenceGenerator extends AbstractSqlGenerator<CreateSequence
             }
         }
 
-        return new Sql[]{new UnparsedSql(buffer.toString(), getAffectedSequence(statement))};
-    }
-
-    protected Sequence getAffectedSequence(CreateSequenceStatement statement) {
-        return new Sequence().setName(statement.getSequenceName()).setSchema(statement.getCatalogName(), statement.getSchemaName());
+        return new Action[]{new UnparsedSql(buffer.toString())};
     }
 }

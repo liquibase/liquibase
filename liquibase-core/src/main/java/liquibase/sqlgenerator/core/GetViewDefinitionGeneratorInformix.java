@@ -1,10 +1,11 @@
 package liquibase.sqlgenerator.core;
 
-import liquibase.database.Database;
+import liquibase.action.Action;
+import liquibase.action.core.UnparsedSql;
+import liquibase.exception.UnsupportedException;
+import liquibase.statementlogic.StatementLogicChain;
 import liquibase.database.core.InformixDatabase;
-import liquibase.sql.Sql;
-import liquibase.sql.UnparsedSql;
-import liquibase.sqlgenerator.SqlGeneratorChain;
+import  liquibase.ExecutionEnvironment;
 import liquibase.statement.core.GetViewDefinitionStatement;
 
 public class GetViewDefinitionGeneratorInformix extends GetViewDefinitionGenerator {
@@ -14,16 +15,16 @@ public class GetViewDefinitionGeneratorInformix extends GetViewDefinitionGenerat
     }
 
     @Override
-    public boolean supports(GetViewDefinitionStatement statement, Database database) {
-        return database instanceof InformixDatabase;
+    public boolean supports(GetViewDefinitionStatement statement, ExecutionEnvironment env) {
+        return env.getTargetDatabase() instanceof InformixDatabase;
     }
 
     @Override
-    public Sql[] generateSql(GetViewDefinitionStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public Action[] generateActions(GetViewDefinitionStatement statement, ExecutionEnvironment env, StatementLogicChain chain) throws UnsupportedException {
         // TODO owner is schemaName ?
         // view definition is distributed over multiple rows, each 64 chars
-    	// see InformixDatabase.getViewDefinition
-        return new Sql[]{
+        // see InformixDatabase.getViewDefinition
+        return new Action[]{
                 new UnparsedSql("select v.viewtext from sysviews v, systables t where t.tabname = '" + statement.getViewName() + "' and v.tabid = t.tabid and t.tabtype = 'V' order by v.seqno")
         };
     }

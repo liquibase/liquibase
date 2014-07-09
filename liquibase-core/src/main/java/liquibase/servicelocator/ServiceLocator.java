@@ -10,12 +10,7 @@ import liquibase.util.StringUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
 import java.lang.reflect.Modifier;
-import java.net.URL;
 import java.util.*;
 import java.util.jar.Manifest;
 

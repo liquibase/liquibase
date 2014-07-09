@@ -1,23 +1,25 @@
 package liquibase.statement.core;
 
-import liquibase.statement.AbstractSqlStatement;
+import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.Sequence;
 
 import java.math.BigInteger;
 
-public class AlterSequenceStatement extends AbstractSqlStatement {
+/**
+ * Alters an existing sequence.
+ */
+public class AlterSequenceStatement extends AbstractSequenceStatement {
 
-    private String catalogName;
-    private String schemaName;
-    private String sequenceName;
-    private BigInteger incrementBy;
-    private BigInteger maxValue;
-    private BigInteger minValue;
-    private Boolean ordered;
+    public static final String INCREMENT_BY = "incrementBy";
+    public static final String MAX_VALUE = "maxValue";
+    public static final String MIN_VALUE = "minValue";
+    public static final String ORDERED = "ordered";
+
+    public AlterSequenceStatement() {
+    }
 
     public AlterSequenceStatement(String catalogName, String schemaName, String sequenceName) {
-        this.catalogName = catalogName;
-        this.schemaName = schemaName;
-        this.sequenceName = sequenceName;
+        super(catalogName, schemaName, sequenceName);
     }
 
     @Override
@@ -25,51 +27,42 @@ public class AlterSequenceStatement extends AbstractSqlStatement {
         return true;
     }
 
-    public String getCatalogName() {
-        return catalogName;
-    }
-
-    public String getSchemaName() {
-        return schemaName;
-    }
-
-    public String getSequenceName() {
-        return sequenceName;
-    }
-
     public BigInteger getIncrementBy() {
-        return incrementBy;
+        return getAttribute(INCREMENT_BY, BigInteger.class);
     }
 
     public AlterSequenceStatement setIncrementBy(BigInteger incrementBy) {
-        this.incrementBy = incrementBy;
-        return this;
+        return (AlterSequenceStatement) setAttribute(INCREMENT_BY, incrementBy);
     }
 
     public BigInteger getMaxValue() {
-        return maxValue;
+        return getAttribute(MAX_VALUE, BigInteger.class);
     }
 
     public AlterSequenceStatement setMaxValue(BigInteger maxValue) {
-        this.maxValue = maxValue;
-        return this;
+        return (AlterSequenceStatement) setAttribute(MAX_VALUE, maxValue);
     }
 
     public BigInteger getMinValue() {
-        return minValue;
+        return getAttribute(MIN_VALUE, BigInteger.class);
     }
 
     public AlterSequenceStatement setMinValue(BigInteger minValue) {
-        this.minValue = minValue;
-        return this;
+        return (AlterSequenceStatement) setAttribute(MIN_VALUE, minValue);
     }
 
     public Boolean getOrdered() {
-        return ordered;
+        return getAttribute(ORDERED, Boolean.class);
     }
 
     public AlterSequenceStatement setOrdered(Boolean ordered) {
-        this.ordered = ordered;
-        return this;
+        return (AlterSequenceStatement) setAttribute(ORDERED, ordered);
+    }
+
+    @Override
+    protected DatabaseObject[] getBaseAffectedDatabaseObjects() {
+        return new DatabaseObject[] {
+            new Sequence().setName(getSequenceName()).setSchema(getCatalogName(), getSchemaName())
+        };
     }
 }

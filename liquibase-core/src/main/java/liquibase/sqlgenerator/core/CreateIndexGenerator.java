@@ -1,14 +1,15 @@
 package liquibase.sqlgenerator.core;
 
+import liquibase.action.Action;
+import liquibase.action.core.UnparsedSql;
+import liquibase.exception.UnsupportedException;
+import liquibase.statementlogic.StatementLogicChain;
 import liquibase.database.Database;
 import liquibase.database.core.*;
-import liquibase.structure.core.Index;
 import liquibase.exception.ValidationErrors;
-import liquibase.sql.Sql;
-import liquibase.sql.UnparsedSql;
-import liquibase.sqlgenerator.SqlGeneratorChain;
+import  liquibase.ExecutionEnvironment;
 import liquibase.statement.core.CreateIndexStatement;
-import liquibase.structure.core.Table;
+import liquibase.structure.core.Index;
 import liquibase.util.StringUtils;
 
 import java.util.Arrays;
@@ -18,10 +19,12 @@ import java.util.List;
 public class CreateIndexGenerator extends AbstractSqlGenerator<CreateIndexStatement> {
 
     @Override
-    public ValidationErrors validate(CreateIndexStatement createIndexStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public ValidationErrors validate(CreateIndexStatement createIndexStatement, ExecutionEnvironment env, StatementLogicChain chain) {
+        Database database = env.getTargetDatabase();
+
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("tableName", createIndexStatement.getTableName());
-        validationErrors.checkRequiredField("columns", createIndexStatement.getColumns());
+        validationErrors.checkRequiredField("columnNames", createIndexStatement.getColumnNames());
         if (database instanceof HsqlDatabase) {
             validationErrors.checkRequiredField("name", createIndexStatement.getIndexName());
         }
@@ -29,14 +32,16 @@ public class CreateIndexGenerator extends AbstractSqlGenerator<CreateIndexStatem
     }
 
     @Override
-    public Sql[] generateSql(CreateIndexStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public Action[] generateActions(CreateIndexStatement statement, ExecutionEnvironment env, StatementLogicChain chain) throws UnsupportedException {
 
-	    if (database instanceof OracleDatabase) {
-		    // Oracle don't create index when creates foreignKey
+        Database database = env.getTargetDatabase();
+
+        if (database instanceof OracleDatabase) {
+            // Oracle don't create index when creates foreignKey
 		    // It means that all indexes associated with foreignKey should be created manualy
 		    List<String> associatedWith = StringUtils.splitAndTrim(statement.getAssociatedWith(), ",");
 		    if (associatedWith != null && (associatedWith.contains(Index.MARK_PRIMARY_KEY) || associatedWith.contains(Index.MARK_UNIQUE_CONSTRAINT))) {
-			    return new Sql[0];
+			    return new Action[0];
 		    }
 	    } else {
 		    // Default filter of index creation:
@@ -45,7 +50,7 @@ public class CreateIndexGenerator extends AbstractSqlGenerator<CreateIndexStatem
 		    if (associatedWith != null && (associatedWith.contains(Index.MARK_PRIMARY_KEY) ||
 		        associatedWith.contains(Index.MARK_UNIQUE_CONSTRAINT) ||
 				associatedWith.contains(Index.MARK_FOREIGN_KEY))) {
-			    return new Sql[0];
+			    return new Action[0];
 		    }
 	    }
 
@@ -63,7 +68,7 @@ public class CreateIndexGenerator extends AbstractSqlGenerator<CreateIndexStatem
 	    }
 	    buffer.append("ON ");
 	    buffer.append(database.escapeTableName(statement.getTableCatalogName(), statement.getTableSchemaName(), statement.getTableName())).append("(");
-	    Iterator<String> iterator = Arrays.asList(statement.getColumns()).iterator();
+	    Iterator<String> iterator = Arrays.asList(statement.getColumnNames()).iterator();
 	    while (iterator.hasNext()) {
 		    String column = iterator.next();
 		    buffer.append(database.escapeColumnName(statement.getTableCatalogName(), statement.getTableSchemaName(), statement.getTableName(), column));
@@ -83,10 +88,6 @@ public class CreateIndexGenerator extends AbstractSqlGenerator<CreateIndexStatem
 		    }
 	    }
 
-	    return new Sql[]{new UnparsedSql(buffer.toString(), getAffectedIndex(statement))};
-    }
-
-    protected Index getAffectedIndex(CreateIndexStatement statement) {
-        return new Index().setName(statement.getIndexName()).setTable((Table) new Table().setName(statement.getTableName()).setSchema(statement.getTableCatalogName(), statement.getTableSchemaName()));
+	    return new Action[]{new UnparsedSql(buffer.toString())};
     }
 }

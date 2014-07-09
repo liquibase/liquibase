@@ -1,5 +1,6 @@
 package liquibase.changelog.visitor;
 
+import liquibase.ExecutionEnvironment;
 import liquibase.change.Change;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
@@ -7,18 +8,14 @@ import liquibase.changelog.RanChangeSet;
 import liquibase.changelog.filter.ChangeSetFilterResult;
 import liquibase.database.Database;
 import liquibase.exception.*;
+import  liquibase.ExecutionEnvironment;
+import liquibase.logging.LogFactory;
 import liquibase.precondition.ErrorPrecondition;
 import liquibase.precondition.FailedPrecondition;
 import liquibase.precondition.core.PreconditionContainer;
-import liquibase.logging.LogFactory;
 import liquibase.util.StringUtils;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class ValidatingVisitor implements ChangeSetVisitor {
 
@@ -74,7 +71,7 @@ public class ValidatingVisitor implements ChangeSetVisitor {
     }
 
     @Override
-    public void visit(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database, Set<ChangeSetFilterResult> filterResults) throws LiquibaseException {
+    public void visit(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, ExecutionEnvironment env, Set<ChangeSetFilterResult> filterResults) throws LiquibaseException {
         RanChangeSet ranChangeSet = ranIndex.get(changeSet.toString(false));
         boolean ran = ranChangeSet != null;
         boolean shouldValidate = !ran || changeSet.shouldRunOnChange() || changeSet.shouldAlwaysRun();
@@ -87,10 +84,10 @@ public class ValidatingVisitor implements ChangeSetVisitor {
             
             
             if(shouldValidate){
-                warnings.addAll(change.warn(database));
+                warnings.addAll(change.warn(env));
             
                 try {                
-                    ValidationErrors foundErrors = change.validate(database);
+                    ValidationErrors foundErrors = change.validate(env);
 
                     if (foundErrors != null && foundErrors.hasErrors()) {
                         if (changeSet.getOnValidationFail().equals(ChangeSet.ValidationFailOption.MARK_RAN)) {

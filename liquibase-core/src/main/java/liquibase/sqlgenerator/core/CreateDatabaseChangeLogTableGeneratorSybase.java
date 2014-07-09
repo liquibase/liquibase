@@ -1,15 +1,15 @@
 package liquibase.sqlgenerator.core;
 
+import liquibase.action.Action;
+import liquibase.action.core.UnparsedSql;
+import liquibase.exception.UnsupportedException;
+import liquibase.statementlogic.StatementLogicChain;
 import liquibase.database.Database;
-import liquibase.datatype.DataTypeFactory;
 import liquibase.database.core.SybaseDatabase;
+import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.ValidationErrors;
-import liquibase.sql.Sql;
-import liquibase.sql.UnparsedSql;
-import liquibase.sqlgenerator.SqlGeneratorChain;
+import  liquibase.ExecutionEnvironment;
 import liquibase.statement.core.CreateDatabaseChangeLogTableStatement;
-import liquibase.structure.core.Relation;
-import liquibase.structure.core.Table;
 
 public class CreateDatabaseChangeLogTableGeneratorSybase extends AbstractSqlGenerator<CreateDatabaseChangeLogTableStatement> {
     @Override
@@ -18,18 +18,20 @@ public class CreateDatabaseChangeLogTableGeneratorSybase extends AbstractSqlGene
     }
 
     @Override
-    public boolean supports(CreateDatabaseChangeLogTableStatement statement, Database database) {
-        return database instanceof SybaseDatabase;
+    public boolean supports(CreateDatabaseChangeLogTableStatement statement, ExecutionEnvironment env) {
+        return env.getTargetDatabase() instanceof SybaseDatabase;
     }
 
     @Override
-    public ValidationErrors validate(CreateDatabaseChangeLogTableStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public ValidationErrors validate(CreateDatabaseChangeLogTableStatement statement, ExecutionEnvironment env, StatementLogicChain chain) {
         return new ValidationErrors();
     }
 
     @Override
-    public Sql[] generateSql(CreateDatabaseChangeLogTableStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-        return new Sql[] {
+    public Action[] generateActions(CreateDatabaseChangeLogTableStatement statement, ExecutionEnvironment env, StatementLogicChain chain) throws UnsupportedException {
+        Database database = env.getTargetDatabase();
+
+        return new Action[] {
                 new UnparsedSql("CREATE TABLE " + database.escapeTableName(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName()) + " (ID VARCHAR(150) NOT NULL, " +
                 "AUTHOR VARCHAR(150) NOT NULL, " +
                 "FILENAME VARCHAR(255) NOT NULL, " +
@@ -41,12 +43,7 @@ public class CreateDatabaseChangeLogTableGeneratorSybase extends AbstractSqlGene
                 "COMMENTS VARCHAR(255) NULL, " +
                 "TAG VARCHAR(255) NULL, " +
                 "LIQUIBASE VARCHAR(20) NULL, " +
-                "PRIMARY KEY(ID, AUTHOR, FILENAME))",
-                        getAffectedTable(database))
-        };  //To change body of implemented methods use File | Settings | File Templates.
-    }
-
-    protected Relation getAffectedTable(Database database) {
-        return new Table().setName(database.getDatabaseChangeLogTableName()).setSchema(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName());
+                "PRIMARY KEY(ID, AUTHOR, FILENAME))")
+        };
     }
 }

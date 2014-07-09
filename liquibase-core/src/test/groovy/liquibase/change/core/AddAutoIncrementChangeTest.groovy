@@ -1,5 +1,6 @@
-package liquibase.change.core;
+package liquibase.change.core
 
+import liquibase.ExecutionEnvironment;
 import liquibase.change.ChangeFactory
 import liquibase.change.ChangeStatus;
 import liquibase.change.StandardChangeTest
@@ -56,20 +57,20 @@ public class AddAutoIncrementChangeTest extends StandardChangeTest {
         change.columnName = testColumn.name
 
         then:
-        assert change.checkStatus(database).status == ChangeStatus.Status.unknown
+        assert change.checkStatus(new ExecutionEnvironment(database)).status == ChangeStatus.Status.unknown
 
 
         when: "Objects exist but not auto-increment"
         snapshotFactory.addObjects(table)
         then:
-        assert change.checkStatus(database).status == ChangeStatus.Status.notApplied
+        assert change.checkStatus(new ExecutionEnvironment(database)).status == ChangeStatus.Status.notApplied
 
         when: "Column is auto-increment"
         testColumn.autoIncrementInformation = new Column.AutoIncrementInformation(columnStartWith, columnIncrementBy)
         change.startWith = changeStartWith
         change.incrementBy = changeIncrementBy
         then:
-        change.checkStatus(database).status == expectedResult
+        change.checkStatus(new ExecutionEnvironment(database)).status == expectedResult
 
         where:
         columnStartWith | columnIncrementBy | changeStartWith | changeIncrementBy | expectedResult

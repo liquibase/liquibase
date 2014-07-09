@@ -8,18 +8,16 @@ import liquibase.exception.DatabaseException;
 import liquibase.executor.ExecutorService;
 import liquibase.logging.LogFactory;
 import liquibase.statement.DatabaseFunction;
-import liquibase.statement.core.RawCallStatement;
+import liquibase.statement.core.RawDatabaseCommandStatement;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Catalog;
 import liquibase.structure.core.Schema;
-import liquibase.structure.core.Table;
 
 import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -132,7 +130,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
             return getConnection().getCatalog();
         }
         try {
-            return ExecutorService.getInstance().getExecutor(this).queryForObject(new RawCallStatement("select sys_context( 'userenv', 'current_schema' ) from dual"), String.class);
+            return ExecutorService.getInstance().getExecutor(this).query(new RawDatabaseCommandStatement("select sys_context( 'userenv', 'current_schema' ) from dual")).toObject(String.class);
         } catch (Exception e) {
             LogFactory.getLogger().info("Error getting default schema", e);
         }
@@ -294,9 +292,11 @@ public class OracleDatabase extends AbstractJdbcDatabase {
             userDefinedTypes = new HashSet<String>();
             if (getConnection() != null && !(getConnection() instanceof OfflineConnection)) {
                 try {
-                    userDefinedTypes.addAll(ExecutorService.getInstance().getExecutor(this).queryForList(new RawSqlStatement("SELECT TYPE_NAME FROM USER_TYPES"), String.class));
+                    userDefinedTypes.addAll(ExecutorService.getInstance().getExecutor(this).query(new RawSqlStatement("SELECT TYPE_NAME FROM USER_TYPES")).toList(String.class));
                 } catch (DatabaseException e) {
                     //ignore error
+                } catch (liquibase.exception.UnsupportedException e) {
+                  //ignore the error
                 }
             }
         }

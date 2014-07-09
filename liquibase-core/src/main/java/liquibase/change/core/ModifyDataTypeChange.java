@@ -1,14 +1,14 @@
 package liquibase.change.core;
 
 import liquibase.change.AbstractChange;
-import liquibase.change.DatabaseChange;
 import liquibase.change.ChangeMetaData;
+import liquibase.change.DatabaseChange;
 import liquibase.change.DatabaseChangeProperty;
 import liquibase.database.core.DB2Database;
-import liquibase.statement.SqlStatement;
+import  liquibase.ExecutionEnvironment;
+import liquibase.statement.Statement;
 import liquibase.statement.core.ModifyDataTypeStatement;
-import liquibase.database.Database;
-import liquibase.statement.core.ReorganizeTableStatement;
+import liquibase.statement.core.ReindexStatement;
 
 @DatabaseChange(name="modifyDataType", description = "Modify data type", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "column")
 public class ModifyDataTypeChange extends AbstractChange {
@@ -25,15 +25,15 @@ public class ModifyDataTypeChange extends AbstractChange {
     }
 
     @Override
-    public SqlStatement[] generateStatements(Database database) {
+    public Statement[] generateStatements(ExecutionEnvironment env) {
         ModifyDataTypeStatement modifyDataTypeStatement = new ModifyDataTypeStatement(getCatalogName(), getSchemaName(), getTableName(), getColumnName(), getNewDataType());
-        if (database instanceof DB2Database) {
-            return new SqlStatement[] {
+        if (env.getTargetDatabase() instanceof DB2Database) {
+            return new Statement[] {
                     modifyDataTypeStatement,
-                    new ReorganizeTableStatement(getCatalogName(), getSchemaName(), getTableName())
+                    new ReindexStatement(getCatalogName(), getSchemaName(), getTableName())
             };
         } else {
-            return new SqlStatement[] {
+            return new Statement[] {
                     modifyDataTypeStatement
             };
         }

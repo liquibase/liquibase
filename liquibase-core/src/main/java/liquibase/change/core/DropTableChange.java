@@ -1,9 +1,9 @@
 package liquibase.change.core;
 
 import liquibase.change.*;
-import liquibase.database.Database;
+import  liquibase.ExecutionEnvironment;
 import liquibase.snapshot.SnapshotGeneratorFactory;
-import liquibase.statement.SqlStatement;
+import liquibase.statement.Statement;
 import liquibase.statement.core.DropTableStatement;
 import liquibase.structure.core.Table;
 
@@ -54,21 +54,21 @@ public class DropTableChange extends AbstractChange {
     }
 
     @Override
-    public SqlStatement[] generateStatements(Database database) {
+    public Statement[] generateStatements(ExecutionEnvironment env) {
         boolean constraints = false;
         if (isCascadeConstraints() != null) {
             constraints = isCascadeConstraints();
         }
         
-        return new SqlStatement[]{
+        return new Statement[]{
                 new DropTableStatement(getCatalogName(), getSchemaName(), getTableName(), constraints)
         };
     }
 
     @Override
-    public ChangeStatus checkStatus(Database database) {
+    public ChangeStatus checkStatus(ExecutionEnvironment env) {
         try {
-            return new ChangeStatus().assertComplete(!SnapshotGeneratorFactory.getInstance().has(new Table(getCatalogName(), getSchemaName(), getTableName()), database), "Table exists");
+            return new ChangeStatus().assertComplete(!SnapshotGeneratorFactory.getInstance().has(new Table(getCatalogName(), getSchemaName(), getTableName()), env.getTargetDatabase()), "Table exists");
         } catch (Exception e) {
             return new ChangeStatus().unknown(e);
         }

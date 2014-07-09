@@ -1,25 +1,25 @@
 package liquibase.sqlgenerator.core;
 
-import liquibase.database.Database;
+import liquibase.action.Action;
+import liquibase.action.core.UnparsedSql;
+import liquibase.exception.UnsupportedException;
+import liquibase.statementlogic.StatementLogicChain;
 import liquibase.exception.ValidationErrors;
-import liquibase.sql.Sql;
-import liquibase.sql.UnparsedSql;
-import liquibase.sqlgenerator.SqlGenerator;
-import liquibase.sqlgenerator.SqlGeneratorChain;
+import  liquibase.ExecutionEnvironment;
 import liquibase.statement.core.RawSqlStatement;
 
 public class RawSqlGenerator extends AbstractSqlGenerator<RawSqlStatement> {
 
     @Override
-    public ValidationErrors validate(RawSqlStatement rawSqlStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public ValidationErrors validate(RawSqlStatement rawSqlStatement, ExecutionEnvironment env, StatementLogicChain chain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("sql", rawSqlStatement.getSql());
         return validationErrors;
     }
 
     @Override
-    public Sql[] generateSql(RawSqlStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-        return new Sql[] {
+    public Action[] generateActions(RawSqlStatement statement, ExecutionEnvironment env, StatementLogicChain chain) throws UnsupportedException {
+        return new Action[] {
            new UnparsedSql(statement.getSql(), statement.getEndDelimiter())
         };
     }

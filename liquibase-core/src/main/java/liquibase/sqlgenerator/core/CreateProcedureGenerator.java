@@ -1,25 +1,24 @@
 package liquibase.sqlgenerator.core;
 
-import liquibase.database.Database;
+import liquibase.action.Action;
+import liquibase.action.core.UnparsedSql;
+import liquibase.exception.UnsupportedException;
+import liquibase.statementlogic.StatementLogicChain;
 import liquibase.exception.ValidationErrors;
-import liquibase.sql.Sql;
-import liquibase.sql.UnparsedSql;
-import liquibase.sqlgenerator.SqlGeneratorChain;
+import  liquibase.ExecutionEnvironment;
 import liquibase.statement.core.CreateProcedureStatement;
-import liquibase.structure.core.Schema;
-import liquibase.structure.core.StoredProcedure;
 
 public class CreateProcedureGenerator extends AbstractSqlGenerator<CreateProcedureStatement> {
     @Override
-    public ValidationErrors validate(CreateProcedureStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public ValidationErrors validate(CreateProcedureStatement statement, ExecutionEnvironment env, StatementLogicChain chain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("procedureText", statement.getProcedureText());
         return validationErrors;
     }
 
     @Override
-    public Sql[] generateSql(CreateProcedureStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-        return new Sql[] {
+    public Action[] generateActions(CreateProcedureStatement statement, ExecutionEnvironment env, StatementLogicChain chain) throws UnsupportedException {
+        return new Action[] {
                 new UnparsedSql(statement.getProcedureText(), statement.getEndDelimiter()
 //todo: procedureName is not yet set or required                        new StoredProcedure().setName(statement.getProcedureName()).setSchema(new Schema(statement.getCatalogName(), statement.getSchemaName()))
                 )};

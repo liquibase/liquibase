@@ -1,25 +1,25 @@
 package liquibase.sqlgenerator.core;
 
-import liquibase.database.Database;
 import liquibase.database.core.DB2Database;
-import liquibase.statement.core.InsertOrUpdateStatement;
+import  liquibase.ExecutionEnvironment;
+import liquibase.statement.core.InsertOrUpdateDataStatement;
 
 public class InsertOrUpdateGeneratorDB2 extends InsertOrUpdateGenerator {
 
 	@Override
-	protected String getElse(Database database) {
+	protected String getElse(ExecutionEnvironment env) {
         return "\tELSEIF v_reccount = 1 THEN\n";
 	}
 
 	@Override
 	protected String getRecordCheck(
-			InsertOrUpdateStatement insertOrUpdateStatement, Database database,
+			InsertOrUpdateDataStatement insertOrUpdateDataStatement, ExecutionEnvironment env,
 			String whereClause) {
         StringBuffer recordCheckSql = new StringBuffer();
 
         recordCheckSql.append("BEGIN ATOMIC\n");
         recordCheckSql.append("\tDECLARE v_reccount INTEGER;\n");
-        recordCheckSql.append("\tSET v_reccount = (SELECT COUNT(*) FROM " + database.escapeTableName(insertOrUpdateStatement.getCatalogName(), insertOrUpdateStatement.getSchemaName(), insertOrUpdateStatement.getTableName()) + " WHERE ");
+        recordCheckSql.append("\tSET v_reccount = (SELECT COUNT(*) FROM " + env.getTargetDatabase().escapeTableName(insertOrUpdateDataStatement.getCatalogName(), insertOrUpdateDataStatement.getSchemaName(), insertOrUpdateDataStatement.getTableName()) + " WHERE ");
 
         recordCheckSql.append(whereClause);
         recordCheckSql.append(");\n");
@@ -30,12 +30,12 @@ public class InsertOrUpdateGeneratorDB2 extends InsertOrUpdateGenerator {
 	}
 	
 	@Override
-	public boolean supports(InsertOrUpdateStatement statement, Database database) {
-		return database instanceof DB2Database;
+	public boolean supports(InsertOrUpdateDataStatement statement, ExecutionEnvironment env) {
+		return env.getTargetDatabase() instanceof DB2Database;
 	}
 	
 	@Override
-	protected String getPostUpdateStatements(Database database) {
+	protected String getPostUpdateStatements(ExecutionEnvironment env) {
         StringBuffer endStatements = new StringBuffer();
         endStatements.append("END IF;\n");
         endStatements.append("END\n");

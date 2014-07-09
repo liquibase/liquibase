@@ -5,9 +5,11 @@ import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.OfflineConnection;
 import liquibase.database.jvm.JdbcConnection;
-import liquibase.structure.DatabaseObject;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.DateParseException;
+import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.logging.LogFactory;
+import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Catalog;
 import liquibase.util.JdbcUtils;
 import liquibase.util.StringUtils;
@@ -96,8 +98,9 @@ public class DB2Database extends AbstractJdbcDatabase {
                     this.defaultSchemaName = StringUtils.trimToNull(super.getDefaultSchemaName());
                 }
             }
-        } catch (Exception e) {
-            throw new RuntimeException("Could not determine current schema", e);
+        } catch (Throwable e) {
+            LogFactory.getInstance().getLog().warning("Could not determine current schema", e);
+            return null;
         } finally {
             JdbcUtils.closeResultSet(rs);
             JdbcUtils.closeStatement(stmt);

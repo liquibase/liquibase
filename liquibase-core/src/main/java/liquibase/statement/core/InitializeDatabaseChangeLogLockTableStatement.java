@@ -1,6 +1,11 @@
 package liquibase.statement.core;
 
-import liquibase.statement.AbstractSqlStatement;
+import liquibase.statement.AbstractStatement;
+import liquibase.structure.DatabaseObject;
 
-public class InitializeDatabaseChangeLogLockTableStatement extends AbstractSqlStatement {
+public class InitializeDatabaseChangeLogLockTableStatement extends AbstractStatement {
+    @Override
+    protected DatabaseObject[] getBaseAffectedDatabaseObjects() {
+        return null;
+    }
 }

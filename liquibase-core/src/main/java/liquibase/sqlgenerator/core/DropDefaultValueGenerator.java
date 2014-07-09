@@ -1,31 +1,31 @@
 package liquibase.sqlgenerator.core;
 
+import liquibase.action.Action;
+import liquibase.action.core.UnparsedSql;
+import liquibase.exception.UnsupportedException;
+import liquibase.statementlogic.StatementLogicChain;
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
-import liquibase.sql.Sql;
-import liquibase.sql.UnparsedSql;
-import liquibase.sqlgenerator.SqlGeneratorChain;
+import  liquibase.ExecutionEnvironment;
 import liquibase.statement.core.DropDefaultValueStatement;
-import liquibase.structure.core.Column;
-import liquibase.structure.core.Table;
 
 public class DropDefaultValueGenerator extends AbstractSqlGenerator<DropDefaultValueStatement> {
 
     @Override
-    public boolean supports(DropDefaultValueStatement statement, Database database) {
-        return !(database instanceof SQLiteDatabase);
+    public boolean supports(DropDefaultValueStatement statement, ExecutionEnvironment env) {
+        return !(env.getTargetDatabase() instanceof SQLiteDatabase);
     }
 
     @Override
-    public ValidationErrors validate(DropDefaultValueStatement dropDefaultValueStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public ValidationErrors validate(DropDefaultValueStatement dropDefaultValueStatement, ExecutionEnvironment env, StatementLogicChain chain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("tableName", dropDefaultValueStatement.getTableName());
         validationErrors.checkRequiredField("columnName", dropDefaultValueStatement.getColumnName());
 
-        if (database instanceof InformixDatabase) {
+        if (env.getTargetDatabase() instanceof InformixDatabase) {
             validationErrors.checkRequiredField("columnDataType", dropDefaultValueStatement.getColumnDataType());
         }
 
@@ -34,7 +34,8 @@ public class DropDefaultValueGenerator extends AbstractSqlGenerator<DropDefaultV
     }
 
     @Override
-    public Sql[] generateSql(DropDefaultValueStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public Action[] generateActions(DropDefaultValueStatement statement, ExecutionEnvironment env, StatementLogicChain chain) throws UnsupportedException {
+        Database database = env.getTargetDatabase();
         String sql;
         String escapedTableName = database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName());
         if (database instanceof MSSQLDatabase) {
@@ -52,7 +53,7 @@ public class DropDefaultValueGenerator extends AbstractSqlGenerator<DropDefaultV
                 // System.out.println("DROP QUERY : " + query);
                 sql = query;
              } else {
-        		// FIXME this syntax does not supported by MSSQL 2000
+                 // FIXME this syntax does not supported by MSSQL 2000
         		sql = "ALTER TABLE " + escapedTableName + " DROP CONSTRAINT select d.name from syscolumns c,sysobjects d, sysobjects t where c.id=t.id AND d.parent_obj=t.id AND d.type='D' AND t.type='U' AND c.name='"+statement.getColumnName()+"' AND t.name='"+statement.getTableName()+"'";
              }
         } else if (database instanceof MySQLDatabase) {
@@ -75,12 +76,8 @@ public class DropDefaultValueGenerator extends AbstractSqlGenerator<DropDefaultV
             sql = "ALTER TABLE " + escapedTableName + " ALTER COLUMN  " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " SET DEFAULT NULL";
          }
 
-        return new Sql[] {
-                new UnparsedSql(sql, getAffectedColumn(statement))
+        return new Action[] {
+                new UnparsedSql(sql)
         };
-    }
-
-    protected Column getAffectedColumn(DropDefaultValueStatement statement) {
-        return new Column().setName(statement.getColumnName()).setRelation(new Table().setName(statement.getTableName()).setSchema(statement.getCatalogName(), statement.getSchemaName()));
     }
 }

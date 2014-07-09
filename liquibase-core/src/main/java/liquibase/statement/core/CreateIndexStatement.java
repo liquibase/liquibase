@@ -1,69 +1,68 @@
 package liquibase.statement.core;
 
-import liquibase.statement.AbstractSqlStatement;
+import liquibase.statement.AbstractStatement;
+import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.Index;
+import liquibase.structure.core.Table;
 
-public class CreateIndexStatement extends AbstractSqlStatement {
+/**
+ * Creates an index on an existing table
+ */
+public class CreateIndexStatement extends AbstractIndexStatement {
 
-    private String tableCatalogName;
-    private String tableSchemaName;
-    private String indexName;
-    private String tableName;
-    private String[] columns;
-    private String tablespace;
-    private Boolean unique;
-	// Contain associations of index
-	// for example: foreignKey, primaryKey or uniqueConstraint
-	private String associatedWith;
+    public static final String COLUMN_NAMES ="columnNames";
+    public static final String TABLESPACE = "tablespace";
+    public static final String UNIQUE = "unique";
+	public static final String ASSOCIATED_WITH = "associatedWith";
+
+    public CreateIndexStatement() {
+    }
 
     public CreateIndexStatement(String indexName, String tableCatalogName, String tableSchemaName, String tableName, Boolean isUnique, String associatedWith, String... columns) {
-        this.indexName = indexName;
-        this.tableCatalogName = tableCatalogName;
-        this.tableSchemaName = tableSchemaName;
-        this.tableName = tableName;
-        this.columns = columns;
-        this.unique = isUnique;
-	    this.associatedWith = associatedWith;
+        super(indexName, tableCatalogName, tableSchemaName, tableName);
+        setColumnNames(columns);
+        setUnique(isUnique);
+	    setAssociatedWith(associatedWith);
     }
 
-    public String getTableCatalogName() {
-        return tableCatalogName;
+
+    public String[] getColumnNames() {
+        return getAttribute(COLUMN_NAMES, String[].class);
     }
 
-    public String getTableSchemaName() {
-        return tableSchemaName;
-    }
-
-    public String getIndexName() {
-        return indexName;
-    }
-
-    public String getTableName() {
-        return tableName;
-    }
-
-    public String[] getColumns() {
-        return columns;
+    public CreateIndexStatement setColumnNames(String[] columns) {
+        return (CreateIndexStatement) setAttribute(COLUMN_NAMES, columns);
     }
 
     public String getTablespace() {
-        return tablespace;
+        return getAttribute(TABLESPACE, String.class);
     }
 
     public CreateIndexStatement setTablespace(String tablespace) {
-        this.tablespace = tablespace;
-
-        return this;
+        return (CreateIndexStatement) setAttribute(TABLESPACE, tablespace);
     }
 
     public Boolean isUnique() {
-        return unique;
+        return getAttribute(UNIQUE, Boolean.class);
     }
 
-	public String getAssociatedWith() {
-		return associatedWith;
+    public CreateIndexStatement setUnique(Boolean unique) {
+        return (CreateIndexStatement) setAttribute(UNIQUE, unique);
+    }
+
+
+    public String getAssociatedWith() {
+        return getAttribute(ASSOCIATED_WITH, String.class);
 	}
 
-	public void setAssociatedWith(String associatedWith) {
-		this.associatedWith = associatedWith;
+	public CreateIndexStatement setAssociatedWith(String associatedWith) {
+		return (CreateIndexStatement) setAttribute(ASSOCIATED_WITH, associatedWith);
 	}
+
+    @Override
+    protected DatabaseObject[] getBaseAffectedDatabaseObjects() {
+        return new DatabaseObject[] {
+            new Index().setName(getIndexName()).setTable((Table) new Table().setName(getTableName()).setSchema(getTableCatalogName(), getTableSchemaName()))
+        };
+    }
 }

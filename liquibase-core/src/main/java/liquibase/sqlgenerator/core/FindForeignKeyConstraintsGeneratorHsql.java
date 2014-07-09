@@ -1,11 +1,12 @@
 package liquibase.sqlgenerator.core;
 
-import liquibase.database.Database;
+import liquibase.action.Action;
+import liquibase.action.core.UnparsedSql;
+import liquibase.exception.UnsupportedException;
+import liquibase.statementlogic.StatementLogicChain;
 import liquibase.database.core.HsqlDatabase;
 import liquibase.exception.ValidationErrors;
-import liquibase.sql.Sql;
-import liquibase.sql.UnparsedSql;
-import liquibase.sqlgenerator.SqlGeneratorChain;
+import  liquibase.ExecutionEnvironment;
 import liquibase.statement.core.FindForeignKeyConstraintsStatement;
 
 public class FindForeignKeyConstraintsGeneratorHsql extends AbstractSqlGenerator<FindForeignKeyConstraintsStatement> {
@@ -15,18 +16,24 @@ public class FindForeignKeyConstraintsGeneratorHsql extends AbstractSqlGenerator
 	}
 
 	@Override
-	public boolean supports(FindForeignKeyConstraintsStatement statement, Database database) {
-		return database instanceof HsqlDatabase;
+	public boolean supports(FindForeignKeyConstraintsStatement statement, ExecutionEnvironment env) {
+		return env.getTargetDatabase() instanceof HsqlDatabase;
 	}
 
-	public ValidationErrors validate(FindForeignKeyConstraintsStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    @Override
+    public boolean generateActionsIsVolatile(ExecutionEnvironment env) {
+        return false;
+    }
+
+    public ValidationErrors validate(FindForeignKeyConstraintsStatement statement, ExecutionEnvironment env, StatementLogicChain chain) {
 		ValidationErrors validationErrors = new ValidationErrors();
 		validationErrors.checkRequiredField("baseTableName", statement.getBaseTableName());
 		return validationErrors;
 	}
 
-	public Sql[] generateSql(FindForeignKeyConstraintsStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-		StringBuilder sb = new StringBuilder();
+    @Override
+    public Action[] generateActions(FindForeignKeyConstraintsStatement statement, ExecutionEnvironment env, StatementLogicChain chain) throws UnsupportedException {
+        StringBuilder sb = new StringBuilder();
 
 		sb.append("SELECT ");
 		sb.append("FKTABLE_NAME as ").append(FindForeignKeyConstraintsStatement.RESULT_COLUMN_BASE_TABLE_NAME).append(", ");
@@ -37,6 +44,6 @@ public class FindForeignKeyConstraintsGeneratorHsql extends AbstractSqlGenerator
 		sb.append("FROM INFORMATION_SCHEMA.SYSTEM_CROSSREFERENCE ");
 		sb.append("WHERE FKTABLE_NAME = '").append(statement.getBaseTableName().toUpperCase()).append("'");
 
-		return new Sql[] { new UnparsedSql(sb.toString()) };
+		return new Action[] { new UnparsedSql(sb.toString()) };
 	}
 }

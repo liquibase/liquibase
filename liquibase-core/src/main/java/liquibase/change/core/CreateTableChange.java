@@ -1,15 +1,15 @@
 package liquibase.change.core;
 
+import liquibase.statementlogic.StatementLogicFactory;
 import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.database.core.MySQLDatabase;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.datatype.LiquibaseDataType;
-import liquibase.exception.*;
-import liquibase.parser.core.ParsedNode;
-import liquibase.resource.ResourceAccessor;
+import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.exception.ValidationErrors;
+import  liquibase.ExecutionEnvironment;
 import liquibase.snapshot.SnapshotGeneratorFactory;
-import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.*;
 import liquibase.statement.core.CreateTableStatement;
 import liquibase.statement.core.SetColumnRemarksStatement;
@@ -19,7 +19,6 @@ import liquibase.structure.core.PrimaryKey;
 import liquibase.structure.core.Table;
 import liquibase.util.StringUtils;
 
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -42,9 +41,9 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
     }
 
     @Override
-    public ValidationErrors validate(Database database) {
+    public ValidationErrors validate(ExecutionEnvironment env) {
         ValidationErrors validationErrors = new ValidationErrors();
-        validationErrors.addAll(super.validate(database));
+        validationErrors.addAll(super.validate(env));
 
         if (columns != null) {
             for (ColumnConfig columnConfig : columns) {
@@ -60,7 +59,9 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
     }
 
     @Override
-    public SqlStatement[] generateStatements(Database database) {
+    public Statement[] generateStatements(ExecutionEnvironment env) {
+
+        Database database = env.getTargetDatabase();
 
         CreateTableStatement statement = generateCreateTableStatement();
         for (ColumnConfig column : getColumns()) {
@@ -84,7 +85,7 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
 
             if (constraints != null) {
                 if (constraints.isNullable() != null && !constraints.isNullable()) {
-                    statement.addColumnConstraint(new NotNullConstraint(column.getName()));
+                    statement.addConstraint(new NotNullConstraint(column.getName()));
                 }
 
                 if (constraints.getReferences() != null ||
@@ -94,31 +95,31 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
                     }
                     ForeignKeyConstraint fkConstraint = new ForeignKeyConstraint(constraints.getForeignKeyName(),
                             constraints.getReferences(), constraints.getReferencedTableName(), constraints.getReferencedColumnNames());
-                    fkConstraint.setColumn(column.getName());
+                    fkConstraint.addColumns(column.getName());
                     fkConstraint.setDeleteCascade(constraints.isDeleteCascade() != null && constraints.isDeleteCascade());
                     fkConstraint.setInitiallyDeferred(constraints.isInitiallyDeferred() != null && constraints.isInitiallyDeferred());
                     fkConstraint.setDeferrable(constraints.isDeferrable() != null && constraints.isDeferrable());
-                    statement.addColumnConstraint(fkConstraint);
+                    statement.addConstraint(fkConstraint);
                 }
 
                 if (constraints.isUnique() != null && constraints.isUnique()) {
-                    statement.addColumnConstraint(new UniqueConstraint(constraints.getUniqueConstraintName()).addColumns(column.getName()));
+                    statement.addConstraint(new UniqueConstraint(constraints.getUniqueConstraintName()).addColumns(column.getName()));
                 }
             }
 
             if (isAutoIncrement) {
-                statement.addColumnConstraint(new AutoIncrementConstraint(column.getName(), column.getStartWith(), column.getIncrementBy()));
+                statement.addConstraint(new AutoIncrementConstraint(column.getName(), column.getStartWith(), column.getIncrementBy()));
             }
         }
 
         statement.setTablespace(StringUtils.trimToNull(getTablespace()));
 
-        List<SqlStatement> statements = new ArrayList<SqlStatement>();
+        List<Statement> statements = new ArrayList<Statement>();
         statements.add(statement);
 
         if (StringUtils.trimToNull(remarks) != null) {
             SetTableRemarksStatement remarksStatement = new SetTableRemarksStatement(catalogName, schemaName, tableName, remarks);
-            if (SqlGeneratorFactory.getInstance().supports(remarksStatement, database)) {
+            if (StatementLogicFactory.getInstance().supports(remarksStatement, env)) {
                 statements.add(remarksStatement);
             }
         }
@@ -127,17 +128,17 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
             String columnRemarks = StringUtils.trimToNull(column.getRemarks());
             if (columnRemarks != null) {
                 SetColumnRemarksStatement remarksStatement = new SetColumnRemarksStatement(catalogName, schemaName, tableName, column.getName(), columnRemarks);
-                if (!(database instanceof MySQLDatabase) && SqlGeneratorFactory.getInstance().supports(remarksStatement, database)) {
+                if (!(database instanceof MySQLDatabase) && StatementLogicFactory.getInstance().supports(remarksStatement, env)) {
                     statements.add(remarksStatement);
                 }
             }
         }
 
-        return statements.toArray(new SqlStatement[statements.size()]);
+        return statements.toArray(new Statement[statements.size()]);
     }
 
     protected CreateTableStatement generateCreateTableStatement() {
-        return new CreateTableStatement(getCatalogName(), getSchemaName(), getTableName(),getRemarks());
+        return new CreateTableStatement(getCatalogName(), getSchemaName(), getTableName()).setRemarks(getRemarks());
     }
 
     @Override
@@ -153,8 +154,10 @@ public class CreateTableChange extends AbstractChange implements ChangeWithColum
     }
 
     @Override
-    public ChangeStatus checkStatus(Database database) {
+    public ChangeStatus checkStatus(ExecutionEnvironment env) {
         try {
+            Database database = env.getTargetDatabase();
+
             Table example = (Table) new Table().setName(getTableName()).setSchema(getCatalogName(), getSchemaName());
             ChangeStatus status = new ChangeStatus();
             Table tableSnapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(example, database);

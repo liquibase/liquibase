@@ -1,10 +1,11 @@
 package liquibase.sqlgenerator.core;
 
-import liquibase.database.Database;
+import liquibase.action.Action;
+import liquibase.action.core.UnparsedSql;
+import liquibase.exception.UnsupportedException;
+import liquibase.statementlogic.StatementLogicChain;
 import liquibase.exception.ValidationErrors;
-import liquibase.sql.Sql;
-import liquibase.sql.UnparsedSql;
-import liquibase.sqlgenerator.SqlGeneratorChain;
+import  liquibase.ExecutionEnvironment;
 import liquibase.statement.core.TableRowCountStatement;
 
 public class TableRowCountGenerator extends AbstractSqlGenerator<TableRowCountStatement> {
@@ -15,24 +16,24 @@ public class TableRowCountGenerator extends AbstractSqlGenerator<TableRowCountSt
     }
 
     @Override
-    public boolean supports(TableRowCountStatement statement, Database database) {
+    public boolean supports(TableRowCountStatement statement, ExecutionEnvironment env) {
         return true;
     }
 
     @Override
-    public ValidationErrors validate(TableRowCountStatement dropColumnStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public ValidationErrors validate(TableRowCountStatement dropColumnStatement, ExecutionEnvironment env, StatementLogicChain chain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("tableName", dropColumnStatement.getTableName());
         return validationErrors;
     }
 
-    protected String generateCountSql(TableRowCountStatement statement, Database database) {
-        return "SELECT COUNT(*) FROM "+database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName());
+    protected String generateCountSql(TableRowCountStatement statement, ExecutionEnvironment env) {
+        return "SELECT COUNT(*) FROM "+env.getTargetDatabase().escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName());
     }
 
     @Override
-    public Sql[] generateSql(TableRowCountStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-        return new Sql[] { new UnparsedSql(generateCountSql(statement, database)) };
+    public Action[] generateActions(TableRowCountStatement statement, ExecutionEnvironment env, StatementLogicChain chain) throws UnsupportedException {
+        return new Action[] { new UnparsedSql(generateCountSql(statement, env)) };
     }
 
 

@@ -8,6 +8,7 @@ target
 /bin
 liquibase.integrationtest.local.properties
 /liquibase
+/tmp
 derby.log
 /.idea
 *.iml

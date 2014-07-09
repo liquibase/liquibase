@@ -1,24 +1,24 @@
 package liquibase.change;
 
-import java.lang.reflect.Type;
-import java.util.*;
-
+import liquibase.ExecutionEnvironment;
+import liquibase.statement.Statement;
+import liquibase.statementlogic.StatementLogicFactory;
 import liquibase.changelog.ChangeSet;
 import liquibase.database.Database;
+import liquibase.exception.*;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
-import liquibase.serializer.LiquibaseSerializable;
-import liquibase.structure.DatabaseObject;
-import liquibase.exception.*;
 import liquibase.resource.ResourceAccessor;
+import liquibase.serializer.LiquibaseSerializable;
 import liquibase.serializer.core.string.StringChangeLogSerializer;
-import liquibase.sqlgenerator.SqlGeneratorFactory;
-import liquibase.statement.SqlStatement;
+import liquibase.structure.DatabaseObject;
 import liquibase.util.StringUtils;
 
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
+import java.lang.reflect.Type;
+import java.util.*;
 
 /**
  * Standard superclass to simplify {@link Change } implementations. You can implement Change directly, this class is purely for convenience but recommended.
@@ -252,17 +252,17 @@ public abstract class AbstractChange implements Change {
     }
 
     /**
-     * Implementation delegates logic to the {@link liquibase.sqlgenerator.SqlGenerator#generateStatementsIsVolatile(Database) } method on the {@link SqlStatement} objects returned by {@link #generateStatements }.
+     * Implementation delegates logic to the {@link liquibase.sqlgenerator.SqlGenerator#generateActionsIsVolatile(liquibase.ExecutionEnvironment) } method on the {@link liquibase.statement.Statement} objects returned by {@link #generateStatements }.
      * If zero or null SqlStatements are returned by generateStatements then this method returns false.
      */
     @Override
-    public boolean generateStatementsVolatile(Database database) {
-        SqlStatement[] statements = generateStatements(database);
+    public boolean generateStatementsVolatile(ExecutionEnvironment env) {
+        Statement[] statements = generateStatements(env);
         if (statements == null) {
             return false;
         }
-        for (SqlStatement statement : statements) {
-            if (SqlGeneratorFactory.getInstance().generateStatementsVolatile(statement, database)) {
+        for (Statement statement : statements) {
+            if (StatementLogicFactory.getInstance().generateActionsIsVolatile(statement, env)) {
                 return true;
             }
         }
@@ -270,42 +270,46 @@ public abstract class AbstractChange implements Change {
     }
 
     /**
-     * Implementation delegates logic to the {@link liquibase.sqlgenerator.SqlGenerator#generateRollbackStatementsIsVolatile(Database) } method on the {@link SqlStatement} objects returned by {@link #generateStatements }
+     * Implementation delegates logic to the {@link liquibase.sqlgenerator.SqlGenerator#generateActionsIsVolatile(liquibase.ExecutionEnvironment) } method on the {@link liquibase.statement.Statement} objects returned by {@link #generateStatements }
      * If no or null SqlStatements are returned by generateRollbackStatements then this method returns false.
      */
     @Override
-    public boolean generateRollbackStatementsVolatile(Database database) {
-        if (generateStatementsVolatile(database)) {
+    public boolean generateRollbackStatementsVolatile(ExecutionEnvironment env) {
+        if (generateStatementsVolatile(env)) {
             return true;
         }
-        SqlStatement[] statements = generateStatements(database);
-        if (statements == null) {
-            return false;
-        }
-        for (SqlStatement statement : statements) {
-            if (SqlGeneratorFactory.getInstance().generateRollbackStatementsVolatile(statement, database)) {
-                return true;
+        try {
+            Statement[] statements = generateRollbackStatements(env);
+            if (statements == null) {
+                return false;
             }
+            for (Statement statement : statements) {
+                if (StatementLogicFactory.getInstance().generateActionsIsVolatile(statement, env)) {
+                    return true;
+                }
+            }
+            return false;
+        } catch (RollbackImpossibleException e) {
+            throw new UnexpectedLiquibaseException(e);
         }
-        return false;
     }
 
     /**
-     * Implementation delegates logic to the {@link liquibase.sqlgenerator.SqlGenerator#supports(liquibase.statement.SqlStatement, liquibase.database.Database)} method on the {@link SqlStatement} objects returned by {@link #generateStatements }.
+     * Implementation delegates logic to the {@link liquibase.statementlogic.StatementLogic#supports(liquibase.statement.Statement, liquibase.ExecutionEnvironment)} method on the {@link liquibase.statement.Statement} objects returned by {@link #generateStatements }.
      * If no or null SqlStatements are returned by generateStatements then this method returns true.
-     * If {@link #generateStatementsVolatile(liquibase.database.Database)} returns true, we cannot call generateStatements and so assume true.
+     * If {@link Change#generateStatementsVolatile(liquibase.ExecutionEnvironment)} returns true, we cannot call generateStatements and so assume true.
      */
     @Override
-    public boolean supports(Database database) {
-        if (generateStatementsVolatile(database)) {
+    public boolean supports(ExecutionEnvironment env) {
+        if (generateStatementsVolatile(env)) {
             return true;
         }
-        SqlStatement[] statements = generateStatements(database);
+        Statement[] statements = generateStatements(env);
         if (statements == null) {
             return true;
         }
-        for (SqlStatement statement : statements) {
-            if (!SqlGeneratorFactory.getInstance().supports(statement, database)) {
+        for (Statement statement : statements) {
+            if (!StatementLogicFactory.getInstance().supports(statement, env)) {
                 return false;
             }
         }
@@ -313,26 +317,26 @@ public abstract class AbstractChange implements Change {
     }
 
     /**
-     * Implementation delegates logic to the {@link liquibase.sqlgenerator.SqlGenerator#warn(liquibase.statement.SqlStatement, liquibase.database.Database, liquibase.sqlgenerator.SqlGeneratorChain)} method on the {@link SqlStatement} objects returned by {@link #generateStatements }.
+     * Implementation delegates logic to the {@link liquibase.statementlogic.StatementLogic#warn(liquibase.statement.Statement, liquibase.ExecutionEnvironment, liquibase.statementlogic.StatementLogicChain)} method on the {@link liquibase.statement.Statement} objects returned by {@link #generateStatements }.
      * If a generated statement is not supported for the given database, no warning will be added since that is a validation error.
      * If no or null SqlStatements are returned by generateStatements then this method returns no warnings.
      */
     @Override
-    public Warnings warn(Database database) {
+    public Warnings warn(ExecutionEnvironment env) {
         Warnings warnings = new Warnings();
-        if (generateStatementsVolatile(database)) {
+        if (generateStatementsVolatile(env)) {
             return warnings;
         }
 
-        SqlStatement[] statements = generateStatements(database);
+        Statement[] statements = generateStatements(env);
         if (statements == null) {
             return warnings;
         }
-        for (SqlStatement statement : statements) {
-            if (SqlGeneratorFactory.getInstance().supports(statement, database)) {
-                warnings.addAll(SqlGeneratorFactory.getInstance().warn(statement, database));
+        for (Statement statement : statements) {
+            if (StatementLogicFactory.getInstance().supports(statement, env)) {
+                warnings.addAll(StatementLogicFactory.getInstance().warn(statement, env));
             } else if (statement.skipOnUnsupported()) {
-                warnings.addWarning(statement.getClass().getName() + " is not supported on " + database.getShortName() + ", but " + ChangeFactory.getInstance().getChangeMetaData(this).getName() + " will still execute");
+                warnings.addWarning(statement.getClass().getName() + " is not supported on " + env.getTargetDatabase().getShortName() + ", but " + ChangeFactory.getInstance().getChangeMetaData(this).getName() + " will still execute");
             }
         }
 
@@ -341,13 +345,15 @@ public abstract class AbstractChange implements Change {
 
     /**
      * Implementation checks the ChangeParameterMetaData for declared required fields
-     * and also delegates logic to the {@link liquibase.sqlgenerator.SqlGenerator#validate(liquibase.statement.SqlStatement, liquibase.database.Database, liquibase.sqlgenerator.SqlGeneratorChain)}  method on the {@link SqlStatement} objects returned by {@link #generateStatements }.
+     * and also delegates logic to the {@link liquibase.statementlogic.StatementLogic#validate(liquibase.statement.Statement, liquibase.ExecutionEnvironment, liquibase.statementlogic.StatementLogicChain)}  method on the {@link liquibase.statement.Statement} objects returned by {@link #generateStatements }.
      * If no or null SqlStatements are returned by generateStatements then this method returns no errors.
      * If there are no parameters than this method returns no errors
      */
     @Override
-    public ValidationErrors validate(Database database) {
+    public ValidationErrors validate(ExecutionEnvironment env) {
         ValidationErrors changeValidationErrors = new ValidationErrors();
+
+        Database database = env.getTargetDatabase();
 
         for (ChangeParameterMetaData param : ChangeFactory.getInstance().getChangeMetaData(this).getParameters().values()) {
             if (param.isRequiredFor(database) && param.getCurrentValue(this) == null) {
@@ -359,22 +365,22 @@ public abstract class AbstractChange implements Change {
         }
 
         String unsupportedWarning = ChangeFactory.getInstance().getChangeMetaData(this).getName() + " is not supported on " + database.getShortName();
-        if (!this.supports(database)) {
+        if (!this.supports(env)) {
             changeValidationErrors.addError(unsupportedWarning);
-        } else if (!generateStatementsVolatile(database)) {
+        } else if (!generateStatementsVolatile(env)) {
             boolean sawUnsupportedError = false;
-            SqlStatement[] statements;
-            statements = generateStatements(database);
+            Statement[] statements;
+            statements = generateStatements(env);
             if (statements != null) {
-                for (SqlStatement statement : statements) {
-                    boolean supported = SqlGeneratorFactory.getInstance().supports(statement, database);
+                for (Statement statement : statements) {
+                    boolean supported = StatementLogicFactory.getInstance().supports(statement, env);
                     if (!supported && !sawUnsupportedError) {
                         if (!statement.skipOnUnsupported()) {
                             changeValidationErrors.addError(unsupportedWarning);
                             sawUnsupportedError = true;
                         }
                     } else {
-                        changeValidationErrors.addAll(SqlGeneratorFactory.getInstance().validate(statement, database));
+                        changeValidationErrors.addAll(StatementLogicFactory.getInstance().validate(statement, env));
                     }
                 }
             }
@@ -384,7 +390,7 @@ public abstract class AbstractChange implements Change {
     }
 
     @Override
-    public ChangeStatus checkStatus(Database database) {
+    public ChangeStatus checkStatus(ExecutionEnvironment env) {
         return new ChangeStatus().unknown("Not implemented");
     }
 
@@ -392,15 +398,15 @@ public abstract class AbstractChange implements Change {
      * Implementation relies on value returned from {@link #createInverses()}.
      */
     @Override
-    public SqlStatement[] generateRollbackStatements(Database database) throws RollbackImpossibleException {
-        return generateRollbackStatementsFromInverse(database);
+    public Statement[] generateRollbackStatements(ExecutionEnvironment env) throws RollbackImpossibleException {
+        return generateRollbackStatementsFromInverse(env);
     }
 
     /**
      * Implementation returns true if {@link #createInverses()} returns a non-null value.
      */
     @Override
-    public boolean supportsRollback(Database database) {
+    public boolean supportsRollback(ExecutionEnvironment env) {
         return createInverses() != null;
     }
 
@@ -417,33 +423,33 @@ public abstract class AbstractChange implements Change {
      * Throws RollbackImpossibleException if the changes created by createInverses() is not supported for the passed database.
      *
      */
-    private SqlStatement[] generateRollbackStatementsFromInverse(Database database) throws RollbackImpossibleException {
+    private Statement[] generateRollbackStatementsFromInverse(ExecutionEnvironment env) throws RollbackImpossibleException {
         Change[] inverses = createInverses();
         if (inverses == null) {
             throw new RollbackImpossibleException("No inverse to " + getClass().getName() + " created");
         }
 
-        List<SqlStatement> statements = new ArrayList<SqlStatement>();
+        List<Statement> statements = new ArrayList<Statement>();
 
         try {
             for (Change inverse : inverses) {
-                if (!inverse.supports(database)) {
-                    throw new RollbackImpossibleException(ChangeFactory.getInstance().getChangeMetaData(inverse).getName() + " is not supported on " + database.getShortName());
+                if (!inverse.supports(env)) {
+                    throw new RollbackImpossibleException(ChangeFactory.getInstance().getChangeMetaData(inverse).getName() + " is not supported on " + env.getTargetDatabase().getShortName());
                 }
-                statements.addAll(Arrays.asList(inverse.generateStatements(database)));
+                statements.addAll(Arrays.asList(inverse.generateStatements(env)));
             }
         } catch (LiquibaseException e) {
             throw new RollbackImpossibleException(e);
         }
 
-        return statements.toArray(new SqlStatement[statements.size()]);
+        return statements.toArray(new Statement[statements.size()]);
     }
 
     /**
      * Create inverse changes that can roll back this change. This method is intended
      * to be overriden by Change implementations that have a logical inverse operation. Default implementation returns null.
      * <p/>
-     * If {@link #generateRollbackStatements(liquibase.database.Database)} is overridden, this method may not be called.
+     * If {@link Change#generateRollbackStatements(liquibase.ExecutionEnvironment)} is overridden, this method may not be called.
      *
      * @return Return null if there is no corresponding inverse and therefore automatic rollback is not possible. Return an empty array to have a no-op rollback.
      * @also #generateRollbackStatements #supportsRollback
@@ -469,20 +475,20 @@ public abstract class AbstractChange implements Change {
     }
 
     /**
-     * Implementation delegates logic to the {@link liquibase.sqlgenerator.SqlGeneratorFactory#getAffectedDatabaseObjects(liquibase.statement.SqlStatement, liquibase.database.Database)}  method on the {@link SqlStatement} objects returned by {@link #generateStatements }
+     * Implementation delegates logic to the {@link liquibase.statement.Statement#getAffectedDatabaseObjects()}  method on the {@link liquibase.statement.Statement} objects returned by {@link #generateStatements }
      * Returns empty set if change is not supported for the passed database
      */
     @Override
-    public Set<DatabaseObject> getAffectedDatabaseObjects(Database database) {
-        if (this.generateStatementsVolatile(database)) {
+    public Set<DatabaseObject> getAffectedDatabaseObjects(ExecutionEnvironment env) {
+        if (this.generateStatementsVolatile(env)) {
             return new HashSet<DatabaseObject>();
         }
         Set<DatabaseObject> affectedObjects = new HashSet<DatabaseObject>();
-        SqlStatement[] statements = generateStatements(database);
+        Statement[] statements = generateStatements(env);
 
         if (statements != null) {
-            for (SqlStatement statement : statements) {
-                affectedObjects.addAll(SqlGeneratorFactory.getInstance().getAffectedDatabaseObjects(statement, database));
+            for (Statement statement : statements) {
+                affectedObjects.addAll(statement.getAffectedDatabaseObjects());
             }
         }
 

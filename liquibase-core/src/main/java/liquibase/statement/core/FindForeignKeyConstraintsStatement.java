@@ -1,8 +1,9 @@
 package liquibase.statement.core;
 
-import liquibase.statement.AbstractSqlStatement;
+import liquibase.statement.AbstractStatement;
+import liquibase.structure.DatabaseObject;
 
-public class FindForeignKeyConstraintsStatement extends AbstractSqlStatement {
+public class FindForeignKeyConstraintsStatement extends AbstractStatement {
 
     public static final String RESULT_COLUMN_BASE_TABLE_NAME        = "TABLE_NAME";
     public static final String RESULT_COLUMN_BASE_TABLE_COLUMN_NAME = "COLUMN_NAME";
@@ -10,9 +11,9 @@ public class FindForeignKeyConstraintsStatement extends AbstractSqlStatement {
     public static final String RESULT_COLUMN_FOREIGN_COLUMN_NAME    = "REFERENCED_COLUMN_NAME";
     public static final String RESULT_COLUMN_CONSTRAINT_NAME        = "CONSTRAINT_NAME";
 
-    private String baseTableCatalogName;
-    private String baseTableSchemaName;
-    private String baseTableName;
+    public String baseTableCatalogName;
+    public String baseTableSchemaName;
+    public String baseTableName;
 
     public FindForeignKeyConstraintsStatement(String baseTableCatalogName, String baseTableSchemaName, String baseTableName) {
         this.baseTableCatalogName = baseTableCatalogName;
@@ -38,5 +39,10 @@ public class FindForeignKeyConstraintsStatement extends AbstractSqlStatement {
 
     public void setBaseTableName(String baseTableName) {
         this.baseTableName = baseTableName;
+    }
+
+    @Override
+    protected DatabaseObject[] getBaseAffectedDatabaseObjects() {
+        return null;
     }
 }

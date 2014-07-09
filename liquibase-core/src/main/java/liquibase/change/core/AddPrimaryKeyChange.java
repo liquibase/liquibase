@@ -1,14 +1,13 @@
 package liquibase.change.core;
 
 import liquibase.change.*;
-import liquibase.database.Database;
 import liquibase.database.core.DB2Database;
+import  liquibase.ExecutionEnvironment;
 import liquibase.snapshot.SnapshotGeneratorFactory;
-import liquibase.statement.SqlStatement;
+import liquibase.statement.Statement;
 import liquibase.statement.core.AddPrimaryKeyStatement;
-import liquibase.statement.core.ReorganizeTableStatement;
+import liquibase.statement.core.ReindexStatement;
 import liquibase.structure.core.PrimaryKey;
-import liquibase.structure.core.Table;
 
 /**
  * Creates a primary key out of an existing column or set of columns.
@@ -78,34 +77,34 @@ public class AddPrimaryKeyChange extends AbstractChange {
     }
 
     @Override
-    public SqlStatement[] generateStatements(Database database) {
+    public Statement[] generateStatements(ExecutionEnvironment env) {
 
 
-        AddPrimaryKeyStatement statement = new AddPrimaryKeyStatement(getCatalogName(), getSchemaName(), getTableName(), getColumnNames(), getConstraintName());
+        AddPrimaryKeyStatement statement = new AddPrimaryKeyStatement(getConstraintName(), getCatalogName(), getSchemaName(), getTableName(), getColumnNames());
         statement.setTablespace(getTablespace());
 
-        if (database instanceof DB2Database) {
-            return new SqlStatement[]{
+        if (env.getTargetDatabase() instanceof DB2Database) {
+            return new Statement[]{
                     statement,
-                    new ReorganizeTableStatement(getCatalogName(), getSchemaName(), getTableName())
+                    new ReindexStatement(getCatalogName(), getSchemaName(), getTableName())
             };
 //todo        } else if (database instanceof SQLiteDatabase) {
 //            // return special statements for SQLite databases
 //            return generateStatementsForSQLiteDatabase(database);
         }
 
-        return new SqlStatement[]{
+        return new Statement[]{
                 statement
         };
     }
 
     @Override
-    public ChangeStatus checkStatus(Database database) {
+    public ChangeStatus checkStatus(ExecutionEnvironment env) {
         ChangeStatus result = new ChangeStatus();
         try {
             PrimaryKey example = new PrimaryKey(getConstraintName(), getCatalogName(), getSchemaName(), getTableName(), getColumnNames().split("\\s+,\\s+"));
 
-            PrimaryKey snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(example, database);
+            PrimaryKey snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(example, env.getTargetDatabase());
             result.assertComplete(snapshot != null, "Primary key does not exist");
 
             return result;

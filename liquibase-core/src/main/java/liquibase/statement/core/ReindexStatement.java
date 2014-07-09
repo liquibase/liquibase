@@ -1,28 +1,23 @@
 package liquibase.statement.core;
 
-import liquibase.statement.AbstractSqlStatement;
+import liquibase.statement.AbstractStatement;
+import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.Table;
 
-public class ReindexStatement extends AbstractSqlStatement {
+/**
+ * Reindexes and/or defragments a table.
+ */
+public class ReindexStatement extends AbstractTableStatement {
 
-    private String catalogName;
-	private String schemaName;
-    private String tableName;
-    
-	public ReindexStatement(String catalogName, String schemaName, String tableName) {
-        this.catalogName = catalogName;
-		this.schemaName = schemaName;
-        this.tableName = tableName;
-	}
-
-    public String getCatalogName() {
-        return catalogName;
+    public ReindexStatement() {
     }
 
-    public String getSchemaName() {
-        return schemaName;
+    public ReindexStatement(String catalogName, String schemaName, String tableName) {
+        super(catalogName, schemaName, tableName);
     }
 
-    public String getTableName() {
-        return tableName;
+    @Override
+    protected DatabaseObject[] getBaseAffectedDatabaseObjects() {
+        return new DatabaseObject[]{new Table(getCatalogName(), getSchemaName(), getTableName())};
     }
 }

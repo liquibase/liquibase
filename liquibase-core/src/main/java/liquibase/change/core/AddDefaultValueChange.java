@@ -1,12 +1,12 @@
 package liquibase.change.core;
 
 import liquibase.change.*;
-import liquibase.database.Database;
 import liquibase.exception.ValidationErrors;
+import  liquibase.ExecutionEnvironment;
 import liquibase.snapshot.SnapshotGeneratorFactory;
-import liquibase.statement.SequenceNextValueFunction;
-import liquibase.statement.SqlStatement;
 import liquibase.statement.DatabaseFunction;
+import liquibase.statement.SequenceNextValueFunction;
+import liquibase.statement.Statement;
 import liquibase.statement.core.AddDefaultValueStatement;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Table;
@@ -39,7 +39,7 @@ public class AddDefaultValueChange extends AbstractChange {
     private SequenceNextValueFunction defaultValueSequenceNext;
 
     @Override
-    public ValidationErrors validate(Database database) {
+    public ValidationErrors validate(ExecutionEnvironment env) {
         ValidationErrors validate = new ValidationErrors();
 
         int nonNullValues = 0;
@@ -65,7 +65,7 @@ public class AddDefaultValueChange extends AbstractChange {
         if (nonNullValues > 1) {
             validate.addError("Only one defaultValue* value can be specified");
         } else {
-            validate.addAll(super.validate(database));
+            validate.addAll(super.validate(env));
         }
 
         return validate;
@@ -173,7 +173,7 @@ public class AddDefaultValueChange extends AbstractChange {
     }
 
     @Override
-    public SqlStatement[] generateStatements(Database database) {
+    public Statement[] generateStatements(ExecutionEnvironment env) {
         Object defaultValue = null;
 
         if (getDefaultValue() != null) {
@@ -198,7 +198,7 @@ public class AddDefaultValueChange extends AbstractChange {
             defaultValue = getDefaultValueSequenceNext();
         }
 
-        return new SqlStatement[]{
+        return new Statement[]{
                 new AddDefaultValueStatement(getCatalogName(), getSchemaName(), getTableName(), getColumnName(), getColumnDataType(), defaultValue)
         };
     }
@@ -227,10 +227,10 @@ public class AddDefaultValueChange extends AbstractChange {
     }
 
     @Override
-    public ChangeStatus checkStatus(Database database) {
+    public ChangeStatus checkStatus(ExecutionEnvironment env) {
         ChangeStatus result = new ChangeStatus();
         try {
-            Column column = SnapshotGeneratorFactory.getInstance().createSnapshot(new Column(Table.class, getCatalogName(), getSchemaName(), getTableName(), getColumnName()), database);
+            Column column = SnapshotGeneratorFactory.getInstance().createSnapshot(new Column(Table.class, getCatalogName(), getSchemaName(), getTableName(), getColumnName()), env.getTargetDatabase());
             if (column == null) {
                 return result.unknown("Column " + getColumnName() + " does not exist");
             }

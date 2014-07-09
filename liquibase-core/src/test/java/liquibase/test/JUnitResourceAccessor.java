@@ -1,16 +1,10 @@
 package liquibase.test;
 
-import liquibase.resource.AbstractResourceAccessor;
 import liquibase.resource.ClassLoaderResourceAccessor;
-import liquibase.resource.ResourceAccessor;
-import liquibase.util.StringUtils;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.*;
 
 public class JUnitResourceAccessor extends ClassLoaderResourceAccessor {
 

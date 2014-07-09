@@ -1,20 +1,19 @@
 package liquibase.sqlgenerator.core;
 
+import liquibase.action.Action;
+import liquibase.action.core.UnparsedSql;
+import liquibase.exception.UnsupportedException;
+import liquibase.statementlogic.StatementLogicChain;
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.exception.ValidationErrors;
+import  liquibase.ExecutionEnvironment;
 import liquibase.logging.LogFactory;
-import liquibase.sql.Sql;
-import liquibase.sql.UnparsedSql;
-import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.AutoIncrementConstraint;
 import liquibase.statement.ForeignKeyConstraint;
 import liquibase.statement.UniqueConstraint;
 import liquibase.statement.core.CreateTableStatement;
-import liquibase.structure.core.Relation;
-import liquibase.structure.core.Schema;
-import liquibase.structure.core.Sequence;
 import liquibase.structure.core.Table;
 import liquibase.util.StringUtils;
 
@@ -27,22 +26,23 @@ import java.util.List;
 public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatement> {
 
     @Override
-    public ValidationErrors validate(CreateTableStatement createTableStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public ValidationErrors validate(CreateTableStatement createTableStatement, ExecutionEnvironment env, StatementLogicChain chain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("tableName", createTableStatement.getTableName());
-        validationErrors.checkRequiredField("columns", createTableStatement.getColumns());
+        validationErrors.checkRequiredField("columns", createTableStatement.getColumnNames());
         return validationErrors;
     }
 
     @Override
-    public Sql[] generateSql(CreateTableStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-    	
-    	if (database instanceof InformixDatabase) {
-    		AbstractSqlGenerator<CreateTableStatement> gen = new CreateTableGeneratorInformix();
-    		return gen.generateSql(statement, database, sqlGeneratorChain);
+    public Action[] generateActions(CreateTableStatement statement, ExecutionEnvironment env, StatementLogicChain chain) throws UnsupportedException {
+        Database database = env.getTargetDatabase();
+
+        if (database instanceof InformixDatabase) {
+            AbstractSqlGenerator<CreateTableStatement> gen = new CreateTableGeneratorInformix();
+    		return gen.generateActions(statement, env, chain);
     	}
 
-        List<Sql> additionalSql = new ArrayList<Sql>();
+        List<Action> additionalSql = new ArrayList<Action>();
     	
         StringBuffer buffer = new StringBuffer();
         buffer.append("CREATE TABLE ").append(database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName())).append(" ");
@@ -53,14 +53,14 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
         
         boolean isPrimaryKeyAutoIncrement = false;
         
-        Iterator<String> columnIterator = statement.getColumns().iterator();
+        Iterator<String> columnIterator = statement.getColumnNames().iterator();
         List<String> primaryKeyColumns = new LinkedList<String>();
 
         BigInteger mysqlTableOptionStartWith = null;
 
         while (columnIterator.hasNext()) {
             String column = columnIterator.next();
-            DatabaseDataType columnType = statement.getColumnTypes().get(column).toDatabaseDataType(database);
+            DatabaseDataType columnType = statement.getColumnType(column).toDatabaseDataType(database);
             buffer.append(database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), column));
 
             buffer.append(" ").append(columnType);
@@ -106,7 +106,7 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
                     buffer.append(" CONSTRAINT ").append(((MSSQLDatabase) database).generateDefaultConstraintName(statement.getTableName(), column));
                 }
                 buffer.append(" DEFAULT ");
-                buffer.append(statement.getColumnTypes().get(column).objectToSql(defaultValue, database));
+                buffer.append(statement.getColumnType(column).objectToSql(defaultValue, database));
             }
 
             if (isAutoIncrementColumn) {
@@ -121,7 +121,7 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
                     if( autoIncrementConstraint.getStartWith() != null ){
 	                    if (database instanceof PostgresDatabase) {
 	                        String sequenceName = statement.getTableName()+"_"+column+"_seq";
-	                        additionalSql.add(new UnparsedSql("alter sequence "+database.escapeSequenceName(statement.getCatalogName(), statement.getSchemaName(), sequenceName)+" start with "+autoIncrementConstraint.getStartWith(), new Sequence().setName(sequenceName).setSchema(statement.getCatalogName(), statement.getSchemaName())));
+	                        additionalSql.add(new UnparsedSql("alter sequence "+ database.escapeSequenceName(statement.getCatalogName(), statement.getSchemaName(), sequenceName)+" start with "+autoIncrementConstraint.getStartWith()));
 	                    }else if(database instanceof MySQLDatabase){
 	                    	mysqlTableOptionStartWith = autoIncrementConstraint.getStartWith();
 	                    }
@@ -131,7 +131,7 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
                 }
             }
 
-            if (statement.getNotNullColumns().contains(column)) {
+            if (statement.getNotNullConstraint(column) != null) {
                 buffer.append(" NOT NULL");
             } else {
                 if (database instanceof SybaseDatabase || database instanceof SybaseASADatabase || database instanceof MySQLDatabase) {
@@ -201,7 +201,7 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
             String referencesString = fkConstraint.getReferences();
 
             buffer.append(" FOREIGN KEY (")
-                    .append(database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), fkConstraint.getColumn()))
+                    .append(StringUtils.join(fkConstraint.getColumnNames(), ", "))
                     .append(") REFERENCES ");
             if (referencesString != null) {
                 if (!referencesString.contains(".") && database.getDefaultSchemaName() != null && database.getOutputDefaultSchema()) {
@@ -217,7 +217,7 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
             }
 
 
-            if (fkConstraint.isDeleteCascade()) {
+            if (fkConstraint.getDeleteCascade()) {
                 buffer.append(" ON DELETE CASCADE");
             }
 
@@ -226,10 +226,10 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
                 buffer.append(database.escapeConstraintName(fkConstraint.getForeignKeyName()));
             }
 
-            if (fkConstraint.isInitiallyDeferred()) {
+            if (fkConstraint.getInitiallyDeferred()) {
                 buffer.append(" INITIALLY DEFERRED");
             }
-            if (fkConstraint.isDeferrable()) {
+            if (fkConstraint.getDeferrable()) {
                 buffer.append(" DEFERRABLE");
             }
             buffer.append(",");
@@ -241,7 +241,7 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
                 buffer.append(database.escapeConstraintName(uniqueConstraint.getConstraintName()));
             }
             buffer.append(" UNIQUE (");
-            buffer.append(database.escapeColumnNameList(StringUtils.join(uniqueConstraint.getColumns(), ", ")));
+            buffer.append(database.escapeColumnNameList(StringUtils.join(uniqueConstraint.getColumnNames(), ", ")));
             buffer.append(")");
             if (uniqueConstraint.getConstraintName() != null && constraintNameAfterUnique(database)) {
                 buffer.append(" CONSTRAINT ");
@@ -260,7 +260,7 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
 
         if (database instanceof MySQLDatabase && mysqlTableOptionStartWith != null){
         	LogFactory.getLogger().info("[MySQL] Using last startWith statement ("+mysqlTableOptionStartWith.toString()+") as table option.");
-        	sql += " "+((MySQLDatabase)database).getTableOptionAutoIncrementStartWithClause(mysqlTableOptionStartWith);
+        	sql += " "+((MySQLDatabase) database).getTableOptionAutoIncrementStartWithClause(mysqlTableOptionStartWith);
         }
 
 
@@ -285,14 +285,10 @@ public class CreateTableGenerator extends AbstractSqlGenerator<CreateTableStatem
         }
 
         if( database instanceof MySQLDatabase && statement.getRemarks() != null) {
-            sql += " COMMENT='"+database.escapeStringForDatabase(statement.getRemarks())+"' ";
+            sql += " COMMENT='"+ database.escapeStringForDatabase(statement.getRemarks())+"' ";
         }
-        additionalSql.add(0, new UnparsedSql(sql, getAffectedTable(statement)));
-        return additionalSql.toArray(new Sql[additionalSql.size()]);
-    }
-
-    protected Relation getAffectedTable(CreateTableStatement statement) {
-        return new Table().setName(statement.getTableName()).setSchema(new Schema(statement.getCatalogName(), statement.getSchemaName()));
+        additionalSql.add(0, new UnparsedSql(sql));
+        return additionalSql.toArray(new Action[additionalSql.size()]);
     }
 
     private boolean constraintNameAfterUnique(Database database) {

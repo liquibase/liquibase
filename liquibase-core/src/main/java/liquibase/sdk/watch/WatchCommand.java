@@ -1,16 +1,15 @@
 package liquibase.sdk.watch;
 
-import com.sun.org.apache.xpath.internal.SourceTree;
-import liquibase.changelog.ChangeLogHistoryServiceFactory;
-import liquibase.changelog.StandardChangeLogHistoryService;
 import liquibase.command.AbstractCommand;
 import liquibase.command.CommandValidationErrors;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.exception.UnsupportedException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
+import liquibase.executor.Row;
 import liquibase.integration.commandline.CommandLineResourceAccessor;
 import liquibase.lockservice.LockService;
 import liquibase.lockservice.LockServiceFactory;
@@ -165,10 +164,10 @@ public class WatchCommand extends AbstractCommand {
                     if (SnapshotGeneratorFactory.getInstance().hasDatabaseChangeLogTable(database)) {
                         LockService lockService = LockServiceFactory.getInstance().getLockService(database);
                         lockService.waitForLock();
-                        List<Map<String, ?>> rows;
+                        List<Row> rows;
                         try {
                             SelectFromDatabaseChangeLogStatement select = new SelectFromDatabaseChangeLogStatement("COUNT(*) AS ROW_COUNT", "MAX(DATEEXECUTED) AS LAST_EXEC");
-                            rows = executor.queryForList(select);
+                            rows = executor.query(select).toList();
                         } finally {
                             lockService.releaseLock();
                         }
@@ -179,8 +178,8 @@ public class WatchCommand extends AbstractCommand {
                         if (rows.size() == 0) {
                             writer.print("{\"count\": 0}");
                         } else {
-                            Map<String, ?> row = rows.iterator().next();
-                            writer.print("{\"count\":" + row.get("ROW_COUNT") + ", \"lastExec\": \"" + new ISODateFormat().format((Date) row.get("LAST_EXEC")) + "\"}");
+                            Row row = rows.iterator().next();
+                            writer.print("{\"count\":" + row.get("ROW_COUNT", Integer.class) + ", \"lastExec\": \"" + new ISODateFormat().format(row.get("LAST_EXEC", Date.class)) + "\"}");
                         }
                         request.setHandled(true);
                     } else {
@@ -206,7 +205,12 @@ public class WatchCommand extends AbstractCommand {
                 outString += "<tr><th>Id</th><th>Author</th><th>Path</th><th>ExecType</th><th>Tag</th></tr>";
 
                 SelectFromDatabaseChangeLogStatement select = new SelectFromDatabaseChangeLogStatement("FILENAME", "AUTHOR", "ID", "MD5SUM", "DATEEXECUTED", "ORDEREXECUTED", "EXECTYPE", "DESCRIPTION", "COMMENTS", "TAG", "LIQUIBASE").setOrderBy("DATEEXECUTED DESC", "ORDEREXECUTED DESC"); //going in opposite order for easier reading
-                List<Map> ranChangeSets = (List) ExecutorService.getInstance().getExecutor(database).queryForList(select);
+                List<Map> ranChangeSets = null;
+                try {
+                    ranChangeSets = (List) ExecutorService.getInstance().getExecutor(database).query(select).toList();
+                } catch (UnsupportedException e) {
+                    throw new DatabaseException(e);
+                }
 
                 for (Map row : ranChangeSets) {
                     String id = cleanHtmlId(row.get("ID") + ":" + row.get("AUTHOR") + ":" + row.get("FILENAME"));

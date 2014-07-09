@@ -1,5 +1,6 @@
 package liquibase.change.core
 
+import liquibase.ExecutionEnvironment
 import liquibase.change.AddColumnConfig
 import liquibase.change.Change
 import liquibase.change.ChangeStatus
@@ -83,7 +84,7 @@ public class AddColumnChangeTest extends StandardChangeTest {
         change.addColumn(testColumnConfig)
 
         then: "table is not there yet"
-        assert change.checkStatus(database).status == ChangeStatus.Status.notApplied
+        assert change.checkStatus(new ExecutionEnvironment(database)).status == ChangeStatus.Status.notApplied
 
         when: "Table exists but not column"
         snapshotFactory.addObjects(table)

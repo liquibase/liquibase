@@ -1,10 +1,11 @@
 package liquibase.change;
 
+import liquibase.ExecutionEnvironment;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.exception.DatabaseException;
-import liquibase.statement.SqlStatement;
+import liquibase.statement.Statement;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.util.StreamUtil;
 import org.junit.Test;
@@ -28,7 +29,7 @@ public class AbstractSQLChangeTest {
 
     @Test
     public void supports() {
-        assertTrue("AbstractSQLChange automatically supports all databases", new ExampleAbstractSQLChange().supports(mock(Database.class)));
+        assertTrue("AbstractSQLChange automatically supports all databases", new ExampleAbstractSQLChange().supports(new ExecutionEnvironment(mock(Database.class))));
     }
 
     @Test
@@ -117,7 +118,7 @@ public class AbstractSQLChangeTest {
 
     @Test
     public void generateStatements_nullSqlMakesNoStatements() {
-        assertEquals(0, new ExampleAbstractSQLChange(null).generateStatements(mock(Database.class)).length);
+        assertEquals(0, new ExampleAbstractSQLChange(null).generateStatements(new ExecutionEnvironment(mock(Database.class))).length);
     }
 
     @Test
@@ -126,7 +127,7 @@ public class AbstractSQLChangeTest {
 
         change.setSplitStatements(true);
         change.setStripComments(true);
-        SqlStatement[] statements = change.generateStatements(mock(Database.class));
+        Statement[] statements = change.generateStatements(new ExecutionEnvironment(mock(Database.class)));
         assertEquals(3, statements.length);
         assertEquals("LINE 1", ((RawSqlStatement) statements[0]).getSql());
         assertEquals("LINE 2", ((RawSqlStatement) statements[1]).getSql());
@@ -139,7 +140,7 @@ public class AbstractSQLChangeTest {
 
         change.setSplitStatements(true);
         change.setStripComments(true);
-        SqlStatement[] statements = change.generateStatements(mock(Database.class));
+        Statement[] statements = change.generateStatements(new ExecutionEnvironment(mock(Database.class)));
         assertEquals(3, statements.length);
         assertEquals("LINE 1", ((RawSqlStatement) statements[0]).getSql());
         assertEquals("LINE 2", ((RawSqlStatement) statements[1]).getSql());
@@ -152,7 +153,7 @@ public class AbstractSQLChangeTest {
 
         change.setSplitStatements(false);
         change.setStripComments(true);
-        SqlStatement[] statements = change.generateStatements(new MSSQLDatabase());
+        Statement[] statements = change.generateStatements(new ExecutionEnvironment(new MSSQLDatabase()));
         assertEquals(1, statements.length);
         assertEquals("LINE 1;\r\nLINE 2;\r\nLINE 3;", ((RawSqlStatement) statements[0]).getSql());
     }
@@ -163,7 +164,7 @@ public class AbstractSQLChangeTest {
 
         change.setSplitStatements(true);
         change.setStripComments(false);
-        SqlStatement[] statements = change.generateStatements(mock(Database.class));
+        Statement[] statements = change.generateStatements(new ExecutionEnvironment(mock(Database.class)));
         assertEquals(3, statements.length);
         assertEquals("LINE 1", ((RawSqlStatement) statements[0]).getSql());
         assertEquals("--a comment\nLINE 2", ((RawSqlStatement) statements[1]).getSql());
@@ -176,7 +177,7 @@ public class AbstractSQLChangeTest {
 
         change.setSplitStatements(false);
         change.setStripComments(true);
-        SqlStatement[] statements = change.generateStatements(mock(Database.class));
+        Statement[] statements = change.generateStatements(new ExecutionEnvironment(mock(Database.class)));
         assertEquals(1, statements.length);
         assertEquals("LINE 1;\nLINE 2;\nLINE 3;", ((RawSqlStatement) statements[0]).getSql());
     }
@@ -187,7 +188,7 @@ public class AbstractSQLChangeTest {
 
         change.setSplitStatements(false);
         change.setStripComments(false);
-        SqlStatement[] statements = change.generateStatements(mock(Database.class));
+        Statement[] statements = change.generateStatements(new ExecutionEnvironment(mock(Database.class)));
         assertEquals(1, statements.length);
         assertEquals("LINE 1;\n--a comment\nLINE 2;\nLINE 3;", ((RawSqlStatement) statements[0]).getSql());
     }
@@ -241,13 +242,13 @@ public class AbstractSQLChangeTest {
         when(database.getConnection()).thenReturn(connection);
         when(connection.nativeSQL("SOME SQL")).thenReturn("SOME NATIVE SQL");
 
-        SqlStatement[] statements = change.generateStatements(database);
+        Statement[] statements = change.generateStatements(new ExecutionEnvironment(database));
         assertEquals(1, statements.length);
         assertEquals("SOME NATIVE SQL", ((RawSqlStatement) statements[0]).getSql());
 
         //If there is an error, it falls back to passed SQL
         when(connection.nativeSQL("SOME SQL")).thenThrow(new DatabaseException("Testing exception"));
-        statements = change.generateStatements(database);
+        statements = change.generateStatements(new ExecutionEnvironment(database));
         assertEquals(1, statements.length);
         assertEquals("SOME SQL", ((RawSqlStatement) statements[0]).getSql());
     }

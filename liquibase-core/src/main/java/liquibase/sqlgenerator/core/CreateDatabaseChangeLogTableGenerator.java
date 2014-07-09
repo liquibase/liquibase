@@ -1,14 +1,14 @@
 package liquibase.sqlgenerator.core;
 
+import liquibase.action.Action;
+import liquibase.exception.UnsupportedException;
+import liquibase.statementlogic.StatementLogicChain;
+import liquibase.statementlogic.StatementLogicFactory;
 import liquibase.database.Database;
-import liquibase.database.core.InformixDatabase;
 import liquibase.database.core.SybaseDatabase;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.ValidationErrors;
-import liquibase.sql.Sql;
-import liquibase.sqlgenerator.SqlGeneratorChain;
-import liquibase.sqlgenerator.SqlGeneratorFactory;
-import liquibase.statement.ColumnConstraint;
+import  liquibase.ExecutionEnvironment;
 import liquibase.statement.NotNullConstraint;
 import liquibase.statement.core.CreateDatabaseChangeLogTableStatement;
 import liquibase.statement.core.CreateTableStatement;
@@ -16,18 +16,20 @@ import liquibase.statement.core.CreateTableStatement;
 public class CreateDatabaseChangeLogTableGenerator extends AbstractSqlGenerator<CreateDatabaseChangeLogTableStatement> {
 
     @Override
-    public boolean supports(CreateDatabaseChangeLogTableStatement statement, Database database) {
-        return (!(database instanceof SybaseDatabase));
+    public boolean supports(CreateDatabaseChangeLogTableStatement statement, ExecutionEnvironment env) {
+        return (!(env.getTargetDatabase() instanceof SybaseDatabase));
     }
 
     @Override
-    public ValidationErrors validate(CreateDatabaseChangeLogTableStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public ValidationErrors validate(CreateDatabaseChangeLogTableStatement statement, ExecutionEnvironment env, StatementLogicChain chain) {
         return new ValidationErrors();
     }
 
     @Override
-    public Sql[] generateSql(CreateDatabaseChangeLogTableStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-    	
+    public Action[] generateActions(CreateDatabaseChangeLogTableStatement statement, ExecutionEnvironment env, StatementLogicChain statementLogicChain) throws UnsupportedException {
+
+        Database database = env.getTargetDatabase();
+
         CreateTableStatement createTableStatement = new CreateTableStatement(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName())
                 .setTablespace(database.getLiquibaseTablespaceName())
                 .addColumn("ID", DataTypeFactory.getInstance().fromDescription("VARCHAR(" + getIdColumnSize() + ")", database), null, null, null, new NotNullConstraint())
@@ -42,7 +44,7 @@ public class CreateDatabaseChangeLogTableGenerator extends AbstractSqlGenerator<
                 .addColumn("TAG", DataTypeFactory.getInstance().fromDescription("VARCHAR(255)", database))
                 .addColumn("LIQUIBASE", DataTypeFactory.getInstance().fromDescription("VARCHAR(20)", database));
 
-        return SqlGeneratorFactory.getInstance().generateSql(createTableStatement, database);
+        return StatementLogicFactory.getInstance().generateActions(createTableStatement, env);
     }
 
     protected String getIdColumnSize() {

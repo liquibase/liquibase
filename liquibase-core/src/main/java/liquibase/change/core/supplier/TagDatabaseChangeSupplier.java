@@ -7,9 +7,10 @@ import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.database.Database;
 import liquibase.diff.DiffResult;
+import  liquibase.ExecutionEnvironment;
 import liquibase.executor.ExecutorService;
 import liquibase.sdk.supplier.change.AbstractChangeSupplier;
-import liquibase.statement.SqlStatement;
+import liquibase.statement.Statement;
 import liquibase.statement.core.CreateDatabaseChangeLogTableStatement;
 import liquibase.statement.core.MarkChangeSetRanStatement;
 import liquibase.statement.core.RawSqlStatement;
@@ -31,8 +32,8 @@ public class TagDatabaseChangeSupplier extends AbstractChangeSupplier<TagDatabas
             }
 
             @Override
-            public SqlStatement[] generateStatements(Database database) {
-                return new SqlStatement[]{
+            public Statement[] generateStatements(ExecutionEnvironment env) {
+                return new Statement[]{
                         new CreateDatabaseChangeLogTableStatement(),
                         new MarkChangeSetRanStatement(new ChangeSet("1", "test", false, false, "com/example/test.xml", null, null, new DatabaseChangeLog("com/example/test.xml")), ChangeSet.ExecType.EXECUTED),
                         new MarkChangeSetRanStatement(new ChangeSet("2", "test", false, false, "com/example/test.xml", null, null, new DatabaseChangeLog("com/example/test.xml")), ChangeSet.ExecType.EXECUTED),
@@ -48,7 +49,7 @@ public class TagDatabaseChangeSupplier extends AbstractChangeSupplier<TagDatabas
     @Override
     public void checkDiffResult(DiffResult diffResult, TagDatabaseChange change) throws Exception {
         Database database = diffResult.getComparisonSnapshot().getDatabase();
-        int rows = ExecutorService.getInstance().getExecutor(database).queryForInt(new RawSqlStatement("select count(*) from " + database.getDatabaseChangeLogTableName() + " where tag='" + change.getTag() + "'"));
+        int rows = ExecutorService.getInstance().getExecutor(database).query(new RawSqlStatement("select count(*) from " + database.getDatabaseChangeLogTableName() + " where tag='" + change.getTag() + "'")).toObject(0);
         assertTrue(rows > 0);
 
     }

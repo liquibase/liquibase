@@ -1,15 +1,15 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.CatalogAndSchema;
+import liquibase.action.Action;
+import liquibase.action.core.UnparsedSql;
+import liquibase.exception.UnsupportedException;
+import liquibase.statementlogic.StatementLogicChain;
 import liquibase.database.Database;
 import liquibase.database.core.*;
-import liquibase.structure.core.Relation;
 import liquibase.exception.ValidationErrors;
-import liquibase.sql.Sql;
-import liquibase.sql.UnparsedSql;
-import liquibase.sqlgenerator.SqlGeneratorChain;
+import  liquibase.ExecutionEnvironment;
 import liquibase.statement.core.CreateViewStatement;
-import liquibase.structure.core.View;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,10 +17,11 @@ import java.util.List;
 public class CreateViewGenerator extends AbstractSqlGenerator<CreateViewStatement> {
 
     @Override
-    public ValidationErrors validate(CreateViewStatement createViewStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-    	
+    public ValidationErrors validate(CreateViewStatement createViewStatement, ExecutionEnvironment env, StatementLogicChain chain) {
+
+        Database database = env.getTargetDatabase();
     	if (database instanceof InformixDatabase) {
-    		return new CreateViewGeneratorInformix().validate(createViewStatement, database, sqlGeneratorChain);
+    		return new CreateViewGeneratorInformix().validate(createViewStatement, env, chain);
     	}
     	
         ValidationErrors validationErrors = new ValidationErrors();
@@ -36,15 +37,15 @@ public class CreateViewGenerator extends AbstractSqlGenerator<CreateViewStatemen
     }
 
     @Override
-    public Sql[] generateSql(CreateViewStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-    	
-    	if (database instanceof InformixDatabase) {
-    		return new CreateViewGeneratorInformix().generateSql(statement, database, sqlGeneratorChain);
+    public Action[] generateActions(CreateViewStatement statement, ExecutionEnvironment env, StatementLogicChain chain) throws UnsupportedException {
+        Database database = env.getTargetDatabase();
+        if (database instanceof InformixDatabase) {
+    		return new CreateViewGeneratorInformix().generateActions(statement, env, chain);
     	}
     	
         String createClause;
 
-        List<Sql> sql = new ArrayList<Sql>();
+        List<Action> sql = new ArrayList<Action>();
 
         if (database instanceof FirebirdDatabase) {
             if (statement.isReplaceIfExists()) {
@@ -54,7 +55,7 @@ public class CreateViewGenerator extends AbstractSqlGenerator<CreateViewStatemen
             }
         } else if (database instanceof SybaseASADatabase && statement.getSelectQuery().toLowerCase().startsWith("create view")) {
             // Sybase ASA saves view definitions with header.
-            return new Sql[]{
+            return new Action[]{
                     new UnparsedSql(statement.getSelectQuery())
             };
         } else if (database instanceof MSSQLDatabase) {
@@ -69,18 +70,14 @@ public class CreateViewGenerator extends AbstractSqlGenerator<CreateViewStatemen
             }
         } else if (database instanceof PostgresDatabase) {
             if (statement.isReplaceIfExists()) {
-                sql.add(new UnparsedSql("DROP VIEW IF EXISTS "+database.escapeViewName(statement.getCatalogName(), statement.getSchemaName(), statement.getViewName())));
+                sql.add(new UnparsedSql("DROP VIEW IF EXISTS "+ database.escapeViewName(statement.getCatalogName(), statement.getSchemaName(), statement.getViewName())));
             }
             createClause = "CREATE VIEW";
         } else {
             createClause = "CREATE " + (statement.isReplaceIfExists() ? "OR REPLACE " : "") + "VIEW";
         }
-        sql.add(new UnparsedSql(createClause + " " + database.escapeViewName(statement.getCatalogName(), statement.getSchemaName(), statement.getViewName()) + " AS " + statement.getSelectQuery(), getAffectedView(statement)));
+        sql.add(new UnparsedSql(createClause + " " + database.escapeViewName(statement.getCatalogName(), statement.getSchemaName(), statement.getViewName()) + " AS " + statement.getSelectQuery()));
 
-        return sql.toArray(new Sql[sql.size()]);
-    }
-
-    protected Relation getAffectedView(CreateViewStatement statement) {
-        return new View().setName(statement.getViewName()).setSchema(statement.getCatalogName(), statement.getSchemaName());
+        return sql.toArray(new Action[sql.size()]);
     }
 }

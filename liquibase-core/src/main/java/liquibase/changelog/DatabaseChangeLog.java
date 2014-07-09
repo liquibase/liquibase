@@ -1,15 +1,18 @@
 package liquibase.changelog;
 
 import liquibase.Contexts;
+import liquibase.ExecutionEnvironment;
 import liquibase.LabelExpression;
-import liquibase.RuntimeEnvironment;
 import liquibase.changelog.filter.ContextChangeSetFilter;
 import liquibase.changelog.filter.DbmsChangeSetFilter;
 import liquibase.changelog.filter.LabelChangeSetFilter;
 import liquibase.changelog.visitor.ValidatingVisitor;
 import liquibase.database.Database;
 import liquibase.database.ObjectQuotingStrategy;
-import liquibase.exception.*;
+import liquibase.exception.LiquibaseException;
+import liquibase.exception.SetupException;
+import liquibase.exception.UnknownChangelogFormatException;
+import liquibase.exception.ValidationFailedException;
 import liquibase.logging.LogFactory;
 import liquibase.logging.Logger;
 import liquibase.parser.ChangeLogParserFactory;
@@ -35,21 +38,11 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
     private List<ChangeSet> changeSets = new ArrayList<ChangeSet>();
     private ChangeLogParameters changeLogParameters;
 
-    private RuntimeEnvironment runtimeEnvironment;
-
     public DatabaseChangeLog() {
     }
 
     public DatabaseChangeLog(String physicalFilePath) {
         this.physicalFilePath = physicalFilePath;
-    }
-
-    public RuntimeEnvironment getRuntimeEnvironment() {
-        return runtimeEnvironment;
-    }
-
-    public void setRuntimeEnvironment(RuntimeEnvironment runtimeEnvironment) {
-        this.runtimeEnvironment = runtimeEnvironment;
     }
 
     @Override
@@ -180,7 +173,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
 
         ValidatingVisitor validatingVisitor = new ValidatingVisitor(database.getRanChangeSetList());
         validatingVisitor.validate(database, this);
-        logIterator.run(validatingVisitor, new RuntimeEnvironment(database, contexts, labelExpression));
+        logIterator.run(validatingVisitor, new ExecutionEnvironment(database).setContexts(contexts).setLabelExpression(labelExpression));
 
         for (String message : validatingVisitor.getWarnings().getMessages()) {
             LogFactory.getLogger().warning(message);

@@ -11,7 +11,6 @@ import liquibase.util.StringUtils;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.net.URLEncoder;
 import java.text.DateFormat;
 import java.util.Date;
 import java.util.List;

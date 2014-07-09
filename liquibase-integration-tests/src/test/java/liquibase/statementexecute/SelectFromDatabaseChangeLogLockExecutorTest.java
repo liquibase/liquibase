@@ -5,7 +5,7 @@ import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.core.OracleDatabase;
 import liquibase.database.core.SybaseASADatabase;
 import liquibase.database.core.SybaseDatabase;
-import liquibase.statement.SqlStatement;
+import liquibase.statement.Statement;
 import liquibase.statement.core.CreateDatabaseChangeLogLockTableStatement;
 import liquibase.statement.core.SelectFromDatabaseChangeLogLockStatement;
 
@@ -17,7 +17,7 @@ import org.junit.Test;
 public class SelectFromDatabaseChangeLogLockExecutorTest extends AbstractExecuteTest {
 
     @Override
-    protected List<? extends SqlStatement> setupStatements(Database database) {
+    protected List<? extends Statement> setupStatements(Database database) {
         return Arrays.asList(new CreateDatabaseChangeLogLockTableStatement());
     }
 

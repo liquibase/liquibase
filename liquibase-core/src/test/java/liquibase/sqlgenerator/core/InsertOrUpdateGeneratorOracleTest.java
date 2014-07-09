@@ -1,24 +1,26 @@
 package liquibase.sqlgenerator.core;
 
-import org.junit.Test;
-import static org.junit.Assert.assertEquals;
-import liquibase.statement.core.InsertOrUpdateStatement;
+import liquibase.ExecutionEnvironment;
+import liquibase.action.Action;
 import liquibase.database.core.OracleDatabase;
-import liquibase.sql.Sql;
+import liquibase.statement.core.InsertOrUpdateDataStatement;
+import org.junit.Test;
+
 import static junit.framework.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
 
 
 public class InsertOrUpdateGeneratorOracleTest {
 
     @Test
-    public void ContainsInsertStatement(){
+    public void ContainsInsertStatement() throws Exception {
         OracleDatabase database = new OracleDatabase();
         InsertOrUpdateGeneratorOracle generator = new InsertOrUpdateGeneratorOracle();
-        InsertOrUpdateStatement statement = new InsertOrUpdateStatement("mycatalog", "myschema","mytable","pk_col1");
+        InsertOrUpdateDataStatement statement = new InsertOrUpdateDataStatement("mycatalog", "myschema","mytable","pk_col1");
         statement.addColumnValue("pk_col1","value1");
         statement.addColumnValue("col2","value2");
-        Sql[] sql = generator.generateSql( statement, database,  null);
-        String theSql = sql[0].toSql();
+        Action[] action = generator.generateActions( statement, new ExecutionEnvironment(database),  null);
+        String theSql = action[0].describe();
         assertTrue(theSql.contains("INSERT INTO mycatalog.mytable (pk_col1, col2) VALUES ('value1', 'value2');"));
         assertTrue(theSql.contains("UPDATE mycatalog.mytable"));
         String[] sqlLines = theSql.split("\n");

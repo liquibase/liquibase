@@ -1,26 +1,27 @@
 package liquibase.statement.core;
 
-import liquibase.statement.AbstractSqlStatement;
+import liquibase.statement.AbstractStatement;
+import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.Sequence;
 
 import java.math.BigInteger;
 
-public class CreateSequenceStatement extends AbstractSqlStatement {
+public class CreateSequenceStatement extends AbstractSequenceStatement {
 
-    private String catalogName;
-    private String schemaName;
-    private String sequenceName;
-    private BigInteger startValue;
-    private BigInteger incrementBy;
-    private BigInteger maxValue;
-    private BigInteger minValue;
-    private Boolean ordered;
-    private Boolean cycle;
-    private BigInteger cacheSize;
+    public static final String INCREMENT_BY = "incrementBy";
+    public static final String MAX_VALUE = "maxValue";
+    public static final String MIN_VALUE = "minValue";
+    public static final String ORDERED = "ordered";
+
+    public static final String START_VALUE = "startValue";
+    public static final String CYCLE = "cycle";
+    public static final String CACHE_SIZE = "cacheSize";
+
+    public CreateSequenceStatement() {
+    }
 
     public CreateSequenceStatement(String catalogName, String schemaName, String sequenceName) {
-        this.catalogName = catalogName;
-        this.schemaName = schemaName;
-        this.sequenceName = sequenceName;
+        super(catalogName, schemaName, sequenceName);
     }
 
     @Override
@@ -28,82 +29,66 @@ public class CreateSequenceStatement extends AbstractSqlStatement {
         return true;
     }
 
-    public String getCatalogName() {
-        return catalogName;
-    }
-
-    public void setCatalogName(String catalogName) {
-        this.catalogName = catalogName;
-    }
-
-    public String getSchemaName() {
-        return schemaName;
-    }
-
-    public String getSequenceName() {
-        return sequenceName;
-    }
-
-    public BigInteger getStartValue() {
-        return startValue;
-    }
-
-    public CreateSequenceStatement setStartValue(BigInteger startValue) {
-        this.startValue = startValue;
-        return this;
-    }
-
     public BigInteger getIncrementBy() {
-        return incrementBy;
+        return getAttribute(INCREMENT_BY, BigInteger.class);
     }
 
     public CreateSequenceStatement setIncrementBy(BigInteger incrementBy) {
-        this.incrementBy = incrementBy;
-        return this;
+        return (CreateSequenceStatement) setAttribute(INCREMENT_BY, incrementBy);
     }
 
     public BigInteger getMaxValue() {
-        return maxValue;
+        return getAttribute(MAX_VALUE, BigInteger.class);
     }
 
     public CreateSequenceStatement setMaxValue(BigInteger maxValue) {
-        this.maxValue = maxValue;
-        return this;
+        return (CreateSequenceStatement) setAttribute(MAX_VALUE, maxValue);
     }
 
     public BigInteger getMinValue() {
-        return minValue;
+        return getAttribute(MIN_VALUE, BigInteger.class);
     }
 
     public CreateSequenceStatement setMinValue(BigInteger minValue) {
-        this.minValue = minValue;
-        return this;
+        return (CreateSequenceStatement) setAttribute(MIN_VALUE, minValue);
+    }
+
+    public BigInteger getStartValue() {
+        return getAttribute(START_VALUE, BigInteger.class);
+    }
+
+    public CreateSequenceStatement setStartValue(BigInteger startValue) {
+        return (CreateSequenceStatement) setAttribute(START_VALUE, startValue);
     }
 
     public Boolean getOrdered() {
-        return ordered;
+        return getAttribute(ORDERED, Boolean.class);
     }
 
     public CreateSequenceStatement setOrdered(Boolean ordered) {
-        this.ordered = ordered;
-        return this;
+        return (CreateSequenceStatement) setAttribute(ORDERED, ordered);
     }
 
     public Boolean getCycle() {
-        return cycle;
+        return getAttribute(CYCLE, Boolean.class);
     }
 
     public CreateSequenceStatement setCycle(Boolean cycle) {
-        this.cycle = cycle;
-        return this;
+        return (CreateSequenceStatement) setAttribute(CYCLE, cycle);
     }
 
     public BigInteger getCacheSize() {
-        return cacheSize;
+        return getAttribute(CACHE_SIZE, BigInteger.class);
     }
 
     public CreateSequenceStatement setCacheSize(BigInteger cacheSize) {
-        this.cacheSize = cacheSize;
-        return this;
+        return (CreateSequenceStatement) setAttribute(CACHE_SIZE, cacheSize);
+    }
+
+    @Override
+    protected DatabaseObject[] getBaseAffectedDatabaseObjects() {
+        return new DatabaseObject[] {
+            new Sequence().setName(getSequenceName()).setSchema(getCatalogName(), getSchemaName())
+        };
     }
 }

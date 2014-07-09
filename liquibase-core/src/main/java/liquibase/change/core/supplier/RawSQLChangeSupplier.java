@@ -34,7 +34,7 @@ public class RawSQLChangeSupplier extends AbstractChangeSupplier<RawSQLChange>  
     public void checkDiffResult(DiffResult diffResult, RawSQLChange change) throws Exception {
         //todo generic check
 
-        int rows = ExecutorService.getInstance().getExecutor(diffResult.getComparisonSnapshot().getDatabase()).queryForInt(new RawSqlStatement("select count(*) from person"));
+        int rows = ExecutorService.getInstance().getExecutor(diffResult.getComparisonSnapshot().getDatabase()).query(new RawSqlStatement("select count(*) from person")).toObject(0);
         assertTrue(rows > 0);
 
     }

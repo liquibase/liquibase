@@ -1,12 +1,9 @@
 package liquibase.util;
 
 import java.io.*;
-import java.net.URL;
-import java.net.URLDecoder;
 import java.util.Enumeration;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
-import java.util.zip.ZipInputStream;
 
 public class FileUtil {
     /**

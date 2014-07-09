@@ -1,11 +1,7 @@
 package liquibase.sqlgenerator;
 
-import liquibase.database.Database;
-import liquibase.exception.ValidationErrors;
-import liquibase.exception.Warnings;
-import liquibase.servicelocator.PrioritizedService;
-import liquibase.sql.Sql;
-import liquibase.statement.SqlStatement;
+import liquibase.statement.Statement;
+import liquibase.statementlogic.StatementLogic;
 
 /**
  * SqlGenerator implementations take a database-independent SqlStatement interface and create a database-specific Sql object.
@@ -31,42 +27,9 @@ import liquibase.statement.SqlStatement;
  * If it supports multiple SqlStatement types, pass SqlStatement.  The SqlGeneratorFactory will use this paramter to augment the response from the supports() method
  *
  * @see SqlGeneratorFactory
- * @see liquibase.statement.SqlStatement
- * @see liquibase.sql.Sql
+ * @see liquibase.statement.Statement
+ * @see liquibase.action.Sql
  */
-public interface SqlGenerator<StatementType extends SqlStatement> extends PrioritizedService {
+public interface SqlGenerator<StatementType extends Statement> extends StatementLogic<StatementType> {
 
-    public static final int PRIORITY_DEFAULT = 1;
-    public static final int PRIORITY_DATABASE = 5;
-
-    /**
-     * Of all the SqlGenerators that "support" a given SqlStatement/Database, SqlGeneratorFactory will return the one with the highest priority. 
-     * @return
-     */
-    @Override
-    public int getPriority();
-
-    /**
-     * Does this generator support the given statement/database combination? Do not validate the statement with this method, only return if it <i>can</i> suppot it.
-     */
-    public boolean supports(StatementType statement, Database database);
-
-    /**
-     * Does this change require access to the database metadata?  If true, the change cannot be used in an updateSql-style command.
-     */
-    public boolean generateStatementsIsVolatile(Database database);
-
-    public boolean generateRollbackStatementsIsVolatile(Database database);
-    /**
-     * Validate the data contained in the SqlStatement.  If there are no errors, return an empty ValidationErrors object, not a null value.
-     * Liquibase will inspect the ValidationErrors result before attempting to call generateSql.
-     */
-    public ValidationErrors validate(StatementType statement, Database database, SqlGeneratorChain sqlGeneratorChain);
-
-    public Warnings warn(StatementType statementType, Database database, SqlGeneratorChain sqlGeneratorChain);
-
-    /**
-     * Generate the actual Sql for the given statement and database.
-     */
-    public Sql[] generateSql(StatementType statement, Database database, SqlGeneratorChain sqlGeneratorChain);
 }

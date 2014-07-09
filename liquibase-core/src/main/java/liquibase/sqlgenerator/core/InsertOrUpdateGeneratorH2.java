@@ -1,37 +1,38 @@
 package liquibase.sqlgenerator.core;
 
-import liquibase.database.Database;
+import liquibase.exception.UnsupportedException;
+import liquibase.statementlogic.StatementLogicChain;
 import liquibase.database.core.H2Database;
-import liquibase.sqlgenerator.SqlGeneratorChain;
-import liquibase.sqlgenerator.core.InsertOrUpdateGenerator;
-import liquibase.statement.core.InsertOrUpdateStatement;
+import  liquibase.ExecutionEnvironment;
+import liquibase.statement.core.InsertOrUpdateDataStatement;
 
 import java.util.regex.Matcher;
 
 public class InsertOrUpdateGeneratorH2 extends InsertOrUpdateGenerator {
     @Override
-    public boolean supports(InsertOrUpdateStatement statement, Database database) {
-        return database instanceof H2Database;
+    public boolean supports(InsertOrUpdateDataStatement statement, ExecutionEnvironment env) {
+        return env.getTargetDatabase() instanceof H2Database;
     }
 
     @Override
-    protected String getInsertStatement(InsertOrUpdateStatement insertOrUpdateStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-        String insertStatement = super.getInsertStatement(insertOrUpdateStatement, database, sqlGeneratorChain);
-        return insertStatement.replaceAll("(?i)insert into (.+) (values .+)", "MERGE INTO $1 KEY(" + Matcher.quoteReplacement(insertOrUpdateStatement.getPrimaryKey()) + ") $2");
+    protected String getInsertStatement(InsertOrUpdateDataStatement insertOrUpdateDataStatement, ExecutionEnvironment env, StatementLogicChain chain) throws UnsupportedException {
+        String insertStatement = super.getInsertStatement(insertOrUpdateDataStatement, env, chain);
+        return insertStatement.replaceAll("(?i)insert into (.+) (values .+)", "MERGE INTO $1 KEY(" + Matcher.quoteReplacement(insertOrUpdateDataStatement.getPrimaryKey()) + ") $2");
     }
 
+
     @Override
-    protected String getUpdateStatement(InsertOrUpdateStatement insertOrUpdateStatement, Database database, String whereClause, SqlGeneratorChain sqlGeneratorChain) {
+    protected String getUpdateStatement(InsertOrUpdateDataStatement insertOrUpdateDataStatement, ExecutionEnvironment env, String whereClause, StatementLogicChain chain) {
         return "";
     }
 
     @Override
-    protected String getRecordCheck(InsertOrUpdateStatement insertOrUpdateStatement, Database database, String whereClause) {
+    protected String getRecordCheck(InsertOrUpdateDataStatement insertOrUpdateDataStatement, ExecutionEnvironment env, String whereClause) {
         return "";
     }
 
     @Override
-    protected String getElse(Database database) {
+    protected String getElse(ExecutionEnvironment env) {
         return "";
     }
 

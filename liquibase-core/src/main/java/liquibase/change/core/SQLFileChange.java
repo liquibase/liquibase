@@ -1,16 +1,19 @@
 package liquibase.change.core;
 
-import java.io.IOException;
-import java.io.InputStream;
-
-import liquibase.change.*;
+import liquibase.change.AbstractSQLChange;
+import liquibase.change.ChangeMetaData;
+import liquibase.change.DatabaseChange;
+import liquibase.change.DatabaseChangeProperty;
 import liquibase.changelog.ChangeLogParameters;
-import liquibase.database.Database;
 import liquibase.exception.SetupException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
+import  liquibase.ExecutionEnvironment;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
+
+import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * Represents a Change for custom SQL stored in a File.
@@ -41,12 +44,12 @@ public class SQLFileChange extends AbstractSQLChange {
     private Boolean relativeToChangelogFile;
 
     @Override
-    public boolean generateStatementsVolatile(Database database) {
+    public boolean generateStatementsVolatile(ExecutionEnvironment env) {
         return false;
     }
 
     @Override
-    public boolean generateRollbackStatementsVolatile(Database database) {
+    public boolean generateRollbackStatementsVolatile(ExecutionEnvironment env) {
         return false;
     }
 
@@ -115,7 +118,7 @@ public class SQLFileChange extends AbstractSQLChange {
     }
 
     @Override
-    public ValidationErrors validate(Database database) {
+    public ValidationErrors validate(ExecutionEnvironment env) {
         ValidationErrors validationErrors = new ValidationErrors();
         if (StringUtils.trimToNull(getPath()) == null) {
             validationErrors.addError("'path' is required");

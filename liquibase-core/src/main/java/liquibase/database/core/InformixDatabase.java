@@ -1,22 +1,23 @@
 package liquibase.database.core;
 
-import java.math.BigInteger;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.regex.Pattern;
-
 import liquibase.CatalogAndSchema;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.OfflineConnection;
 import liquibase.exception.DatabaseException;
-import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.exception.UnsupportedException;
 import liquibase.executor.ExecutorService;
+import liquibase.executor.Row;
+import liquibase.logging.LogFactory;
 import liquibase.statement.core.GetViewDefinitionStatement;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
+
+import java.math.BigInteger;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.regex.Pattern;
 
 public class InformixDatabase extends AbstractJdbcDatabase {
 
@@ -131,7 +132,7 @@ public class InformixDatabase extends AbstractJdbcDatabase {
                  */
                 ExecutorService.getInstance().getExecutor(this).execute(new RawSqlStatement("EXECUTE PROCEDURE IFX_ALLOW_NEWLINE('T');"));
             } catch (Exception e) {
-                throw new UnexpectedLiquibaseException("Could not allow newline characters in quoted strings with IFX_ALLOW_NEWLINE", e);
+                LogFactory.getInstance().getLog().warning("Could not allow newline characters in quoted strings with IFX_ALLOW_NEWLINE", e);
             }
         }
     }
@@ -171,11 +172,16 @@ public class InformixDatabase extends AbstractJdbcDatabase {
 	@Override
 	public String getViewDefinition(CatalogAndSchema schema, final String viewName) throws DatabaseException {
         schema = schema.customize(this);
-		List<Map<String, ?>> retList = ExecutorService.getInstance().getExecutor(this).queryForList(new GetViewDefinitionStatement(schema.getCatalogName(), schema.getSchemaName(), viewName));
-		// building the view definition from the multiple rows
+        List<Row> retList = null;
+        try {
+            retList = ExecutorService.getInstance().getExecutor(this).query(new GetViewDefinitionStatement(schema.getCatalogName(), schema.getSchemaName(), viewName)).toList();
+        } catch (UnsupportedException e) {
+            throw new DatabaseException(e);
+        }
+        // building the view definition from the multiple rows
 		StringBuilder sb = new StringBuilder();
-		for (Map rowMap : retList) {
-			String s = (String) rowMap.get("VIEWTEXT");
+		for (Row rowMap : retList) {
+			String s = rowMap.get("VIEWTEXT", String.class);
 			sb.append(s);
 		}
 		return CREATE_VIEW_AS_PATTERN.matcher(sb.toString()).replaceFirst("");

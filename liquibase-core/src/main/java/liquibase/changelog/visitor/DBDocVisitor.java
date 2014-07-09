@@ -1,23 +1,20 @@
 package liquibase.changelog.visitor;
 
-import liquibase.CatalogAndSchema;
+import liquibase.ExecutionEnvironment;
 import liquibase.change.Change;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.changelog.filter.ChangeSetFilterResult;
 import liquibase.database.Database;
 import liquibase.dbdoc.*;
-import liquibase.diff.compare.CompareControl;
+import liquibase.exception.DatabaseHistoryException;
+import liquibase.exception.LiquibaseException;
+import liquibase.resource.ResourceAccessor;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.SnapshotControl;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.structure.DatabaseObject;
-import liquibase.exception.DatabaseException;
-import liquibase.exception.DatabaseHistoryException;
-import liquibase.exception.LiquibaseException;
-import liquibase.resource.ResourceAccessor;
 import liquibase.structure.core.Column;
-import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
 import liquibase.util.StreamUtil;
 
@@ -64,7 +61,7 @@ public class DBDocVisitor implements ChangeSetVisitor {
     }
 
     @Override
-    public void visit(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database, Set<ChangeSetFilterResult> filterResults) throws LiquibaseException {
+    public void visit(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, ExecutionEnvironment env, Set<ChangeSetFilterResult> filterResults) throws LiquibaseException {
         ChangeSet.RunStatus runStatus = this.database.getRunStatus(changeSet);
         if (rootChangeLogName == null) {
             rootChangeLogName = changeSet.getFilePath();
@@ -99,7 +96,7 @@ public class DBDocVisitor implements ChangeSetVisitor {
         }
 
         for (Change change : changeSet.getChanges()) {
-            Set<DatabaseObject> affectedDatabaseObjects = change.getAffectedDatabaseObjects(database);
+            Set<DatabaseObject> affectedDatabaseObjects = change.getAffectedDatabaseObjects(env);
             if (affectedDatabaseObjects != null) {
                 for (DatabaseObject dbObject : affectedDatabaseObjects) {
                     if (toRun) {

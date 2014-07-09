@@ -1,7 +1,7 @@
 package liquibase.statement;
 
 /**
- * Represents a function for getting the current value from a sequence
+ * Describes a function for getting the current value of a sequence, used in {@link liquibase.statement.Statement} objects.
  */
 public class SequenceCurrentValueFunction extends DatabaseFunction {
 

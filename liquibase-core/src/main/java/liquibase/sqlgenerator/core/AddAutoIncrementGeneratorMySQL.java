@@ -1,10 +1,11 @@
 package liquibase.sqlgenerator.core;
 
-import liquibase.database.Database;
+import liquibase.action.Action;
+import liquibase.action.core.UnparsedSql;
+import liquibase.exception.UnsupportedException;
+import liquibase.statementlogic.StatementLogicChain;
 import liquibase.database.core.MySQLDatabase;
-import liquibase.sql.Sql;
-import liquibase.sql.UnparsedSql;
-import liquibase.sqlgenerator.SqlGeneratorChain;
+import  liquibase.ExecutionEnvironment;
 import liquibase.statement.core.AddAutoIncrementStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Schema;
@@ -23,30 +24,30 @@ public class AddAutoIncrementGeneratorMySQL extends AddAutoIncrementGenerator {
     }
 
     @Override
-    public boolean supports(AddAutoIncrementStatement statement, Database database) {
-        return database instanceof MySQLDatabase;
+    public boolean supports(AddAutoIncrementStatement statement, ExecutionEnvironment env) {
+        return env.getTargetDatabase() instanceof MySQLDatabase;
     }
 
     @Override
-    public Sql[] generateSql(final AddAutoIncrementStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public Action[] generateActions(AddAutoIncrementStatement statement, ExecutionEnvironment env, StatementLogicChain chain) throws UnsupportedException {
 
-    	Sql[] sql = super.generateSql(statement, database, sqlGeneratorChain);
+    	Action[] actions = super.generateActions(statement, env, chain);
 
     	if(statement.getStartWith() != null){
-	    	MySQLDatabase mysqlDatabase = (MySQLDatabase)database;
+            MySQLDatabase mysqlDatabase = (MySQLDatabase) env.getTargetDatabase();
 	        String alterTableSql = "ALTER TABLE "
 	            + mysqlDatabase.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName())
 	            + " "
 	            + mysqlDatabase.getTableOptionAutoIncrementStartWithClause(statement.getStartWith());
 
-	        sql = concact(sql, new UnparsedSql(alterTableSql, getAffectedTable(statement)));
+	        actions = concact(actions, new UnparsedSql(alterTableSql));
     	}
 
-        return sql;
+        return actions;
     }
 
-	private Sql[] concact(Sql[] origSql, UnparsedSql unparsedSql) {
-		Sql[] changedSql = new Sql[origSql.length+1];
+	private Action[] concact(Action[] origSql, UnparsedSql unparsedSql) {
+		Action[] changedSql = new Action[origSql.length+1];
 		System.arraycopy(origSql, 0, changedSql, 0, origSql.length);
 		changedSql[origSql.length] = unparsedSql;
 

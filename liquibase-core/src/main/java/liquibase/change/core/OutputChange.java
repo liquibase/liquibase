@@ -1,19 +1,20 @@
 package liquibase.change.core;
 
+import liquibase.action.Action;
+import liquibase.action.ExecuteAction;
 import liquibase.change.AbstractChange;
 import liquibase.change.ChangeMetaData;
 import liquibase.change.DatabaseChange;
 import liquibase.change.DatabaseChangeProperty;
-import liquibase.database.Database;
+import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
+import  liquibase.ExecutionEnvironment;
+import liquibase.executor.ExecuteResult;
 import liquibase.logging.LogFactory;
-import liquibase.parser.core.ParsedNode;
-import liquibase.parser.core.ParsedNodeException;
 import liquibase.serializer.LiquibaseSerializable;
-import liquibase.sql.Sql;
-import liquibase.statement.SqlStatement;
-import liquibase.statement.core.RuntimeStatement;
+import liquibase.statement.Statement;
+import liquibase.statement.core.RawActionStatement;
 import liquibase.util.StringUtils;
 
 @DatabaseChange(name="output", description = "Logs a message and continues execution.", priority = ChangeMetaData.PRIORITY_DEFAULT, since = "3.3")
@@ -23,8 +24,8 @@ public class OutputChange extends AbstractChange {
     private String target = "";
 
     @Override
-    public ValidationErrors validate(Database database) {
-        ValidationErrors validate = super.validate(database);
+    public ValidationErrors validate(ExecutionEnvironment env) {
+        ValidationErrors validate = super.validate(env);
         validate.checkRequiredField("message", getMessage());
         return validate;
     }
@@ -52,10 +53,10 @@ public class OutputChange extends AbstractChange {
 
 
     @Override
-    public SqlStatement[] generateStatements(Database database) {
-        return new SqlStatement[] { new RuntimeStatement() {
+    public Statement[] generateStatements(ExecutionEnvironment env) {
+        Action action = new ExecuteAction() {
             @Override
-            public Sql[] generate(Database database) {
+            public ExecuteResult execute(ExecutionEnvironment env) throws DatabaseException {
                 String target = getTarget();
                 if (target.equalsIgnoreCase("STDOUT")) {
                     System.out.println(getMessage());
@@ -72,9 +73,17 @@ public class OutputChange extends AbstractChange {
                 } else {
                     throw new UnexpectedLiquibaseException("Unknown target: "+target);
                 }
-                return null;
+
+                return new ExecuteResult();
             }
-        }};
+
+            @Override
+            public String describe() {
+                return getTarget()+": "+getMessage();
+            }
+        };
+
+        return new Statement[] { new RawActionStatement(action) };
     }
 
     @Override

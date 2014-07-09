@@ -4,13 +4,14 @@ import liquibase.CatalogAndSchema;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.OfflineConnection;
-import liquibase.statement.core.RawSqlStatement;
-import liquibase.structure.DatabaseObject;
 import liquibase.exception.DatabaseException;
+import liquibase.exception.UnsupportedException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.logging.LogFactory;
 import liquibase.statement.core.GetViewDefinitionStatement;
+import liquibase.statement.core.RawSqlStatement;
+import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Table;
 import liquibase.structure.core.View;
 
@@ -228,7 +229,7 @@ public class SybaseDatabase extends AbstractJdbcDatabase {
             return null;
         }
         try {
-            return ExecutorService.getInstance().getExecutor(this).queryForObject(new RawSqlStatement("select user_name()"), String.class);
+            return ExecutorService.getInstance().getExecutor(this).query(new RawSqlStatement("select user_name()")).toObject(String.class);
         } catch (Exception e) {
             LogFactory.getLogger().info("Error getting default schema", e);
         }
@@ -247,7 +248,12 @@ public class SybaseDatabase extends AbstractJdbcDatabase {
         GetViewDefinitionStatement statement = new GetViewDefinitionStatement(schema.getCatalogName(), schema.getSchemaName(), viewName);
         Executor executor = ExecutorService.getInstance().getExecutor(this);
         @SuppressWarnings("unchecked")
-        List<String> definitionRows = (List<String>) executor.queryForList(statement, String.class);
+        List<String> definitionRows = null;
+        try {
+            definitionRows = executor.query(statement).toList(String.class);
+        } catch (UnsupportedException e) {
+            throw new DatabaseException(e);
+        }
         StringBuilder definition = new StringBuilder();
         for (String d : definitionRows) {
         	definition.append(d);

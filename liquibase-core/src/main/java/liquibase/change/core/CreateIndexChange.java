@@ -1,9 +1,9 @@
 package liquibase.change.core;
 
 import liquibase.change.*;
-import liquibase.database.Database;
+import  liquibase.ExecutionEnvironment;
 import liquibase.snapshot.SnapshotGeneratorFactory;
-import liquibase.statement.SqlStatement;
+import liquibase.statement.Statement;
 import liquibase.statement.core.CreateIndexStatement;
 import liquibase.structure.core.Index;
 
@@ -90,13 +90,13 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
     }
 
     @Override
-    public SqlStatement[] generateStatements(Database database) {
+    public Statement[] generateStatements(ExecutionEnvironment env) {
         List<String> columns = new ArrayList<String>();
         for (ColumnConfig column : getColumns()) {
             columns.add(column.getName());
         }
 
-	    return new SqlStatement[]{
+	    return new Statement[]{
                 new CreateIndexStatement(
 					    getIndexName(),
                         getCatalogName(),
@@ -122,7 +122,7 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
     }
 
     @Override
-    public ChangeStatus checkStatus(Database database) {
+    public ChangeStatus checkStatus(ExecutionEnvironment env) {
         ChangeStatus result = new ChangeStatus();
         try {
             Index example = new Index(getIndexName(), getCatalogName(), getSchemaName(), getTableName());
@@ -132,7 +132,7 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
                 }
             }
 
-            Index snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(example, database);
+            Index snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(example, env.getTargetDatabase());
             result.assertComplete(snapshot != null, "Index does not exist");
 
             if (snapshot != null) {

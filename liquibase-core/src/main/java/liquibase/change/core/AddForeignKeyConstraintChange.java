@@ -3,12 +3,13 @@ package liquibase.change.core;
 import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
+import liquibase.exception.UnexpectedLiquibaseException;
+import  liquibase.ExecutionEnvironment;
 import liquibase.snapshot.SnapshotGeneratorFactory;
+import liquibase.statement.Statement;
+import liquibase.statement.core.AddForeignKeyConstraintStatement;
 import liquibase.structure.core.ForeignKey;
 import liquibase.structure.core.ForeignKeyConstraintType;
-import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.statement.SqlStatement;
-import liquibase.statement.core.AddForeignKeyConstraintStatement;
 import liquibase.structure.core.Table;
 
 import java.util.ArrayList;
@@ -217,7 +218,7 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
     }
 
     @Override
-    public SqlStatement[] generateStatements(Database database) {
+    public Statement[] generateStatements(ExecutionEnvironment env) {
 
         boolean deferrable = false;
         if (getDeferrable() != null) {
@@ -229,7 +230,7 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
             initiallyDeferred = getInitiallyDeferred();
         }
 
-        return new SqlStatement[]{
+        return new Statement[]{
                 new AddForeignKeyConstraintStatement(getConstraintName(),
                         getBaseTableCatalogName(),
                         getBaseTableSchemaName(),
@@ -259,7 +260,7 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
     }
 
     @Override
-    public ChangeStatus checkStatus(Database database) {
+    public ChangeStatus checkStatus(ExecutionEnvironment env) {
         ChangeStatus result = new ChangeStatus();
         try {
             ForeignKey example = new ForeignKey(getConstraintName(), getBaseTableCatalogName(), getBaseTableSchemaName(), getBaseTableName());
@@ -267,7 +268,7 @@ public class AddForeignKeyConstraintChange extends AbstractChange {
             example.setForeignKeyColumns(getBaseColumnNames());
             example.setPrimaryKeyColumns(getReferencedColumnNames());
 
-            ForeignKey snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(example, database);
+            ForeignKey snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(example, env.getTargetDatabase());
             result.assertComplete(snapshot != null, "Foreign key does not exist");
 
             if (snapshot != null) {

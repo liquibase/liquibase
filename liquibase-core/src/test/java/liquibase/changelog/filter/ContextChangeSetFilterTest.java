@@ -2,13 +2,12 @@ package liquibase.changelog.filter;
 
 import liquibase.ContextExpression;
 import liquibase.Contexts;
+import liquibase.action.visitor.AbstractSqlVisitor;
 import liquibase.changelog.ChangeSet;
+import  liquibase.ExecutionEnvironment;
+import org.junit.Test;
 
 import static org.junit.Assert.*;
-
-import liquibase.database.Database;
-import liquibase.sql.visitor.AbstractSqlVisitor;
-import org.junit.Test;
 
 public class ContextChangeSetFilterTest {
 
@@ -20,7 +19,7 @@ public class ContextChangeSetFilterTest {
         }
 
         @Override
-        public String modifySql(String sql, Database database) {
+        public String modifySql(String sql, ExecutionEnvironment env) {
             throw new UnsupportedOperationException("modifySql has not been implemented");
         }
 
@@ -122,7 +121,7 @@ public class ContextChangeSetFilterTest {
 
         assertTrue(filter.accepts(changeSet).isAccepted());
 
-        assertEquals(1, changeSet.getSqlVisitors().size());
+        assertEquals(1, changeSet.getActionVisitors().size());
     }
 
     @Test
@@ -134,7 +133,7 @@ public class ContextChangeSetFilterTest {
 
         assertTrue(filter.accepts(changeSet).isAccepted());
 
-        assertEquals(1, changeSet.getSqlVisitors().size());
+        assertEquals(1, changeSet.getActionVisitors().size());
     }
 
     @Test
@@ -146,7 +145,7 @@ public class ContextChangeSetFilterTest {
 
         assertTrue(filter.accepts(changeSet).isAccepted());
 
-        assertEquals(1, changeSet.getSqlVisitors().size());
+        assertEquals(1, changeSet.getActionVisitors().size());
     }
 
     @Test
@@ -158,6 +157,6 @@ public class ContextChangeSetFilterTest {
 
         assertTrue(filter.accepts(changeSet).isAccepted());
 
-        assertEquals(1, changeSet.getSqlVisitors().size());
+        assertEquals(1, changeSet.getActionVisitors().size());
     }
 }

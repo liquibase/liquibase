@@ -1,17 +1,8 @@
 package liquibase.sdk.database;
 
-import java.io.IOException;
-import java.io.Writer;
-import java.math.BigInteger;
-import java.sql.Connection;
-import java.sql.Time;
-import java.sql.Timestamp;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-
 import liquibase.CatalogAndSchema;
 import liquibase.Liquibase;
+import liquibase.action.visitor.ActionVisitor;
 import liquibase.change.Change;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
@@ -20,19 +11,21 @@ import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.InternalDatabase;
 import liquibase.database.ObjectQuotingStrategy;
-import liquibase.exception.DatabaseException;
-import liquibase.exception.DatabaseHistoryException;
-import liquibase.exception.DateParseException;
-import liquibase.exception.LiquibaseException;
-import liquibase.exception.LockException;
-import liquibase.exception.RollbackImpossibleException;
-import liquibase.exception.StatementNotSupportedOnDatabaseException;
+import liquibase.exception.*;
 import liquibase.lockservice.DatabaseChangeLogLock;
-import liquibase.sql.visitor.SqlVisitor;
 import liquibase.statement.DatabaseFunction;
-import liquibase.statement.SqlStatement;
+import liquibase.statement.Statement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Schema;
+
+import java.io.IOException;
+import java.io.Writer;
+import java.math.BigInteger;
+import java.sql.Time;
+import java.sql.Timestamp;
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
 
 public class MockDatabase implements Database, InternalDatabase {
 
@@ -43,6 +36,7 @@ public class MockDatabase implements Database, InternalDatabase {
     private String defaultCatalogName;
     private String defaultSchemaName;
     private boolean caseSensitive;
+    private DatabaseConnection connection;
 
 
     @Override
@@ -104,14 +98,12 @@ public class MockDatabase implements Database, InternalDatabase {
 
     @Override
     public DatabaseConnection getConnection() {
-        return null;
-    }
-
-    public void setConnection(final Connection conn) {
+        return connection;
     }
 
     @Override
     public void setConnection(final DatabaseConnection conn) {
+        this.connection = conn;
     }
 
     @Override
@@ -264,7 +256,7 @@ public class MockDatabase implements Database, InternalDatabase {
     		    + incrementBy != null ? (" " + incrementBy) : "";
     }
 
-    public SqlStatement getCommitSQL() {
+    public Statement getCommitSQL() {
         return null;
     }
 
@@ -478,7 +470,7 @@ public class MockDatabase implements Database, InternalDatabase {
         ;
     }
 
-    public SqlStatement getSelectChangeLogLockSQL() throws DatabaseException {
+    public Statement getSelectChangeLogLockSQL() throws DatabaseException {
         return null;
     }
 
@@ -518,27 +510,27 @@ public class MockDatabase implements Database, InternalDatabase {
     }
 
     @Override
-    public void executeStatements(final Change change, final DatabaseChangeLog changeLog, final List<SqlVisitor> sqlVisitors) throws LiquibaseException {
+    public void executeStatements(final Change change, final DatabaseChangeLog changeLog, final List<ActionVisitor> actionVisitors) throws LiquibaseException {
         ;
     }
 
     @Override
-    public void execute(final SqlStatement[] statements, final List<SqlVisitor> sqlVisitors) throws LiquibaseException {
+    public void execute(final Statement[] statements, final List<ActionVisitor> actionVisitors) throws LiquibaseException {
         ;
     }
 
     @Override
-    public void saveStatements(final Change change, final List<SqlVisitor> sqlVisitors, final Writer writer) throws IOException, StatementNotSupportedOnDatabaseException, LiquibaseException {
+    public void saveStatements(final Change change, final List<ActionVisitor> actionVisitors, final Writer writer) throws IOException, StatementNotSupportedOnDatabaseException, LiquibaseException {
         ;
     }
 
     @Override
-    public void executeRollbackStatements(final Change change, final List<SqlVisitor> sqlVisitors) throws LiquibaseException, RollbackImpossibleException {
+    public void executeRollbackStatements(final Change change, final List<ActionVisitor> actionVisitors) throws LiquibaseException, RollbackImpossibleException {
         ;
     }
 
     @Override
-    public void saveRollbackStatement(final Change change, final List<SqlVisitor> sqlVisitors, final Writer writer) throws IOException, RollbackImpossibleException, StatementNotSupportedOnDatabaseException, LiquibaseException {
+    public void saveRollbackStatement(final Change change, final List<ActionVisitor> actionVisitors, final Writer writer) throws IOException, RollbackImpossibleException, StatementNotSupportedOnDatabaseException, LiquibaseException {
         ;
     }
 

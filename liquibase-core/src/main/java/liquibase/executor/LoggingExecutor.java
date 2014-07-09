@@ -1,26 +1,24 @@
 package liquibase.executor;
 
-import liquibase.change.Change;
+import liquibase.ExecutionEnvironment;
+import liquibase.action.Action;
+import liquibase.exception.UnsupportedException;
+import liquibase.statement.Statement;
+import liquibase.statementlogic.StatementLogicFactory;
 import liquibase.database.Database;
-import liquibase.database.core.MSSQLDatabase;
-import liquibase.database.core.SybaseASADatabase;
-import liquibase.database.core.SybaseDatabase;
 import liquibase.exception.DatabaseException;
 import liquibase.servicelocator.LiquibaseService;
-import liquibase.sql.visitor.SqlVisitor;
-import liquibase.sqlgenerator.SqlGeneratorFactory;
-import liquibase.statement.SqlStatement;
-import liquibase.statement.core.*;
+import liquibase.statement.core.GetNextChangeSetSequenceValueStatement;
+import liquibase.statement.core.LockDatabaseChangeLogStatement;
+import liquibase.statement.core.SelectFromDatabaseChangeLogLockStatement;
+import liquibase.statement.core.UnlockDatabaseChangeLogStatement;
 import liquibase.util.StreamUtil;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 
 @LiquibaseService(skip = true)
-public class LoggingExecutor extends AbstractExecutor implements Executor {
+public class LoggingExecutor extends AbstractExecutor {
 
     private Writer output;
     private Executor delegatedReadExecutor;
@@ -36,48 +34,22 @@ public class LoggingExecutor extends AbstractExecutor implements Executor {
     }
 
     @Override
-    public void execute(Change change) throws DatabaseException {
-        execute(change, new ArrayList<SqlVisitor>());
+    public ExecuteResult execute(Statement sql, ExecutionEnvironment env) throws DatabaseException, UnsupportedException {
+        outputStatement(sql, env);
+        return new ExecuteResult();
     }
 
     @Override
-    public void execute(Change change, List<SqlVisitor> sqlVisitors) throws DatabaseException {
-        SqlStatement[] sqlStatements = change.generateStatements(database);
-        if (sqlStatements != null) {
-            for (SqlStatement statement : sqlStatements) {
-                execute(statement, sqlVisitors);
-            }
-        }
-
-    }
-
-    @Override
-    public void execute(SqlStatement sql) throws DatabaseException {
-        outputStatement(sql);
-    }
-
-    @Override
-    public int update(SqlStatement sql) throws DatabaseException {
+    public UpdateResult update(Statement sql, ExecutionEnvironment env) throws DatabaseException, UnsupportedException {
         if (sql instanceof LockDatabaseChangeLogStatement) {
-            return 1;
+            return new UpdateResult(1);
         } else if (sql instanceof UnlockDatabaseChangeLogStatement) {
-            return 1;
+            return new UpdateResult(1);
         }
 
-        outputStatement(sql);
+        outputStatement(sql, env);
 
-        return 0;
-    }
-
-    @Override
-    public void execute(SqlStatement sql, List<SqlVisitor> sqlVisitors) throws DatabaseException {
-        outputStatement(sql, sqlVisitors);
-    }
-
-    @Override
-    public int update(SqlStatement sql, List<SqlVisitor> sqlVisitors) throws DatabaseException {
-        outputStatement(sql, sqlVisitors);
-        return 0;
+        return new UpdateResult(0);
     }
 
     @Override
@@ -92,103 +64,40 @@ public class LoggingExecutor extends AbstractExecutor implements Executor {
         }
     }
 
-    private void outputStatement(SqlStatement sql) throws DatabaseException {
-        outputStatement(sql, new ArrayList<SqlVisitor>());
-    }
-
-    private void outputStatement(SqlStatement sql, List<SqlVisitor> sqlVisitors) throws DatabaseException {
+    protected void outputStatement(Statement sql, ExecutionEnvironment env) throws DatabaseException {
         try {
-            if (SqlGeneratorFactory.getInstance().generateStatementsVolatile(sql, database)) {
+            if (StatementLogicFactory.getInstance().generateActionsIsVolatile(sql, env)) {
                 throw new DatabaseException(sql.getClass().getSimpleName()+" requires access to up to date database metadata which is not available in SQL output mode");
             }
-            for (String statement : applyVisitors(sql, sqlVisitors)) {
-                if (statement == null) {
+            for (Action action : StatementLogicFactory.getInstance().generateActions(sql, env)) {
+                if (action == null) {
                     continue;
                 }
-                output.write(statement);
 
-
-                if (database instanceof MSSQLDatabase || database instanceof SybaseDatabase || database instanceof SybaseASADatabase) {
-                    output.write(StreamUtil.getLineSeparator());
-                    output.write("GO");
-    //            } else if (database instanceof OracleDatabase) {
-    //                output.write(StreamUtil.getLineSeparator());
-    //                output.write("/");
-                } else {
-                    String endDelimiter = ";";
-                    if (sql instanceof RawSqlStatement) {
-                        endDelimiter = ((RawSqlStatement) sql).getEndDelimiter();
-                    }
-                    if (!statement.endsWith(endDelimiter)) {
-                        output.write(endDelimiter);
-                    }
-                }
+                output.write(action.describe());
                 output.write(StreamUtil.getLineSeparator());
                 output.write(StreamUtil.getLineSeparator());
             }
         } catch (IOException e) {
             throw new DatabaseException(e);
+        } catch (UnsupportedException e) {
+            throw new DatabaseException(e);
         }
     }
 
     @Override
-    public <T> T queryForObject(SqlStatement sql, Class<T> requiredType) throws DatabaseException {
+    public QueryResult query(Statement sql, ExecutionEnvironment env) throws DatabaseException, UnsupportedException {
         if (sql instanceof SelectFromDatabaseChangeLogLockStatement) {
-            return (T) Boolean.FALSE;
+            return new QueryResult(Boolean.FALSE);
         }
-        return delegatedReadExecutor.queryForObject(sql, requiredType);
-    }
-
-    @Override
-    public <T> T queryForObject(SqlStatement sql, Class<T> requiredType, List<SqlVisitor> sqlVisitors) throws DatabaseException {
-        return delegatedReadExecutor.queryForObject(sql, requiredType, sqlVisitors);
-    }
-
-    @Override
-    public long queryForLong(SqlStatement sql) throws DatabaseException {
-        return delegatedReadExecutor.queryForLong(sql);
-    }
-
-    @Override
-    public long queryForLong(SqlStatement sql, List<SqlVisitor> sqlVisitors) throws DatabaseException {
-        return delegatedReadExecutor.queryForLong(sql, sqlVisitors);
-    }
-
-    @Override
-    public int queryForInt(SqlStatement sql) throws DatabaseException {
         try {
-            return delegatedReadExecutor.queryForInt(sql);
+            return delegatedReadExecutor.query(sql, env);
         } catch (DatabaseException e) {
             if (sql instanceof GetNextChangeSetSequenceValueStatement) { //table probably does not exist
-                return 0;
+                return new QueryResult(0);
             }
             throw e;
         }
-    }
-
-    @Override
-    public int queryForInt(SqlStatement sql, List<SqlVisitor> sqlVisitors) throws DatabaseException {
-        return delegatedReadExecutor.queryForInt(sql, sqlVisitors);
-    }
-
-    @Override
-    public List queryForList(SqlStatement sql, Class elementType) throws DatabaseException {
-        return delegatedReadExecutor.queryForList(sql, elementType);
-    }
-
-    @Override
-    public List queryForList(SqlStatement sql, Class elementType, List<SqlVisitor> sqlVisitors) throws DatabaseException {
-        return delegatedReadExecutor.queryForList(sql, elementType, sqlVisitors);
-    }
-
-    @Override
-    public List<Map<String, ?>> queryForList(SqlStatement sql) throws DatabaseException {
-        return delegatedReadExecutor.queryForList(sql);
-    }
-
-    @Override
-    public List<Map<String, ?>> queryForList(SqlStatement sql, List<SqlVisitor> sqlVisitors) throws DatabaseException {
-        return delegatedReadExecutor.queryForList(sql, sqlVisitors);
     }
 
     @Override

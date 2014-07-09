@@ -1,32 +1,34 @@
 package liquibase.change.core;
 
-import liquibase.change.*;
-import liquibase.database.Database;
+import liquibase.change.ChangeMetaData;
+import liquibase.change.ColumnConfig;
+import liquibase.change.DatabaseChange;
+import  liquibase.ExecutionEnvironment;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.resource.ResourceAccessor;
-import liquibase.statement.SqlStatement;
-import liquibase.statement.core.DeleteStatement;
+import liquibase.statement.Statement;
+import liquibase.statement.core.DeleteDataStatement;
 
 @DatabaseChange(name="delete", description = "Deletes data from an existing table", priority = ChangeMetaData.PRIORITY_DEFAULT, appliesTo = "table")
 public class DeleteDataChange extends AbstractModifyDataChange {
 
 
     @Override
-    public SqlStatement[] generateStatements(Database database) {
+    public Statement[] generateStatements(ExecutionEnvironment env) {
 
-        DeleteStatement statement = new DeleteStatement(getCatalogName(), getSchemaName(), getTableName());
+        DeleteDataStatement statement = new DeleteDataStatement(getCatalogName(), getSchemaName(), getTableName());
 
-        statement.setWhereClause(where);
+        statement.setWhere(where);
 
         for (ColumnConfig whereParam : whereParams) {
             if (whereParam.getName() != null) {
-                statement.addWhereColumnName(whereParam.getName());
+                statement.addWhereColumnNames(whereParam.getName());
             }
-            statement.addWhereParameter(whereParam.getValueObject());
+            statement.addWhereParameters(whereParam.getValueObject());
         }
 
-        return new SqlStatement[]{
+        return new Statement[]{
                 statement
         };
     }

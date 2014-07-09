@@ -1,12 +1,15 @@
 package liquibase.sqlgenerator.core;
 
-import java.util.Arrays;
-import java.util.HashSet;
+import liquibase.exception.UnsupportedException;
+import liquibase.statementlogic.StatementLogicChain;
 import liquibase.database.Database;
 import liquibase.database.core.MySQLDatabase;
 import liquibase.datatype.DataTypeFactory;
-import liquibase.sqlgenerator.SqlGeneratorChain;
-import liquibase.statement.core.InsertOrUpdateStatement;
+import  liquibase.ExecutionEnvironment;
+import liquibase.statement.core.InsertOrUpdateDataStatement;
+
+import java.util.Arrays;
+import java.util.HashSet;
 
 /**
  *
@@ -14,26 +17,30 @@ import liquibase.statement.core.InsertOrUpdateStatement;
  */
 public class InsertOrUpdateGeneratorMySQL extends InsertOrUpdateGenerator {
     @Override
-    public boolean supports(InsertOrUpdateStatement statement, Database database) {
-         return database instanceof MySQLDatabase;
+    public boolean supports(InsertOrUpdateDataStatement statement, ExecutionEnvironment env) {
+        Database database = env.getTargetDatabase();
+
+        return database instanceof MySQLDatabase;
     }
 
     @Override
-    protected String getInsertStatement(InsertOrUpdateStatement insertOrUpdateStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-        StringBuffer sql = new StringBuffer(super.getInsertStatement(insertOrUpdateStatement, database, sqlGeneratorChain));
+    protected String getInsertStatement(InsertOrUpdateDataStatement insertOrUpdateDataStatement, ExecutionEnvironment env, StatementLogicChain chain) throws UnsupportedException {
+        Database database = env.getTargetDatabase();
+
+        StringBuffer sql = new StringBuffer(super.getInsertStatement(insertOrUpdateDataStatement, env, chain));
         
         sql.deleteCharAt(sql.lastIndexOf(";"));
         
         StringBuffer updateClause = new StringBuffer("ON DUPLICATE KEY UPDATE ");
-        String[] pkFields=insertOrUpdateStatement.getPrimaryKey().split(",");
+        String[] pkFields= insertOrUpdateDataStatement.getPrimaryKey().split(",");
         HashSet<String> hashPkFields = new HashSet<String>(Arrays.asList(pkFields));
         boolean hasFields = false;
-        for(String columnKey:insertOrUpdateStatement.getColumnValues().keySet())
+        for(String columnKey: insertOrUpdateDataStatement.getColumnNames())
         {
             if (!hashPkFields.contains(columnKey)) {
             	hasFields = true;
             	updateClause.append(columnKey).append(" = ");
-                Object columnValue = insertOrUpdateStatement.getColumnValue(columnKey);
+                Object columnValue = insertOrUpdateDataStatement.getColumnValue(columnKey);
                 updateClause.append(DataTypeFactory.getInstance().fromObject(columnValue, database).objectToSql(columnValue, database));
             	updateClause.append(",");
             }
@@ -52,17 +59,17 @@ public class InsertOrUpdateGeneratorMySQL extends InsertOrUpdateGenerator {
     }
 
     @Override
-    protected String getUpdateStatement(InsertOrUpdateStatement insertOrUpdateStatement, Database database, String whereClause, SqlGeneratorChain sqlGeneratorChain) {
+    protected String getUpdateStatement(InsertOrUpdateDataStatement insertOrUpdateDataStatement, ExecutionEnvironment env, String whereClause, StatementLogicChain chain) {
         return "";
     }
 
     @Override
-    protected String getRecordCheck(InsertOrUpdateStatement insertOrUpdateStatement, Database database, String whereClause) {
+    protected String getRecordCheck(InsertOrUpdateDataStatement insertOrUpdateDataStatement, ExecutionEnvironment env, String whereClause) {
         return "";
     }
 
     @Override
-    protected String getElse(Database database) {
+    protected String getElse(ExecutionEnvironment env) {
         return "";
     }
 }

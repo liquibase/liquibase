@@ -1,29 +1,27 @@
 package liquibase.sqlgenerator.core;
 
+import liquibase.action.Action;
+import liquibase.action.core.UnparsedSql;
+import liquibase.exception.UnsupportedException;
+import liquibase.statementlogic.StatementLogicChain;
 import liquibase.database.Database;
 import liquibase.database.core.HsqlDatabase;
+import liquibase.datatype.DataTypeFactory;
 import liquibase.datatype.LiquibaseDataType;
 import liquibase.datatype.core.BooleanType;
 import liquibase.datatype.core.CharType;
-import liquibase.datatype.core.NumberType;
+import liquibase.exception.ValidationErrors;
+import  liquibase.ExecutionEnvironment;
 import liquibase.statement.DatabaseFunction;
 import liquibase.statement.SequenceNextValueFunction;
-import liquibase.structure.core.Schema;
-import liquibase.datatype.DataTypeFactory;
-import liquibase.structure.core.Column;
-import liquibase.structure.core.Table;
-import liquibase.exception.ValidationErrors;
-import liquibase.sql.Sql;
-import liquibase.sql.UnparsedSql;
-import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.AddDefaultValueStatement;
-
-import javax.management.Query;
 
 public class AddDefaultValueGenerator extends AbstractSqlGenerator<AddDefaultValueStatement> {
 
     @Override
-    public ValidationErrors validate(AddDefaultValueStatement addDefaultValueStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public ValidationErrors validate(AddDefaultValueStatement addDefaultValueStatement, ExecutionEnvironment env, StatementLogicChain chain) {
+        Database database = env.getTargetDatabase();
+
         Object defaultValue = addDefaultValueStatement.getDefaultValue();
 
         ValidationErrors validationErrors = new ValidationErrors();
@@ -31,7 +29,7 @@ public class AddDefaultValueGenerator extends AbstractSqlGenerator<AddDefaultVal
         validationErrors.checkRequiredField("columnName", addDefaultValueStatement.getColumnName());
         validationErrors.checkRequiredField("tableName", addDefaultValueStatement.getTableName());
         if (!database.supportsSequences() && defaultValue instanceof SequenceNextValueFunction) {
-            validationErrors.addError("Database "+database.getShortName()+" does not support sequences");
+            validationErrors.addError("Database "+ database.getShortName()+" does not support sequences");
         }
         if (database instanceof HsqlDatabase) {
             if (defaultValue instanceof SequenceNextValueFunction) {
@@ -64,17 +62,12 @@ public class AddDefaultValueGenerator extends AbstractSqlGenerator<AddDefaultVal
     }
 
     @Override
-    public Sql[] generateSql(AddDefaultValueStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-        Object defaultValue = statement.getDefaultValue();
-        return new Sql[]{
-                new UnparsedSql("ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " ALTER COLUMN  " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " SET DEFAULT " + DataTypeFactory.getInstance().fromObject(defaultValue, database).objectToSql(defaultValue, database),
-                        getAffectedColumn(statement))
-        };
-    }
+    public Action[] generateActions(AddDefaultValueStatement statement, ExecutionEnvironment env, StatementLogicChain chain) throws UnsupportedException {
+        Database database = env.getTargetDatabase();
 
-    protected Column getAffectedColumn(AddDefaultValueStatement statement) {
-        return new Column()
-                .setRelation(new Table().setName(statement.getTableName()).setSchema(new Schema(statement.getCatalogName(), statement.getSchemaName())))
-                .setName(statement.getColumnName());
+        Object defaultValue = statement.getDefaultValue();
+        return new Action[]{
+                new UnparsedSql("ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " ALTER COLUMN  " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " SET DEFAULT " + DataTypeFactory.getInstance().fromObject(defaultValue, database).objectToSql(defaultValue, database))
+        };
     }
 }

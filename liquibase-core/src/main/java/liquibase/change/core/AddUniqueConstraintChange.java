@@ -1,9 +1,9 @@
 package liquibase.change.core;
 
 import liquibase.change.*;
-import liquibase.database.Database;
+import  liquibase.ExecutionEnvironment;
 import liquibase.snapshot.SnapshotGeneratorFactory;
-import liquibase.statement.SqlStatement;
+import liquibase.statement.Statement;
 import liquibase.statement.core.AddUniqueConstraintStatement;
 import liquibase.structure.core.UniqueConstraint;
 
@@ -105,7 +105,7 @@ public class AddUniqueConstraintChange extends AbstractChange {
     }
 
     @Override
-    public SqlStatement[] generateStatements(Database database) {
+    public Statement[] generateStatements(ExecutionEnvironment env) {
 
 //todo    	if (database instanceof SQLiteDatabase) {
 //    		// return special statements for SQLite databases
@@ -126,23 +126,23 @@ public class AddUniqueConstraintChange extends AbstractChange {
             disabled = getDisabled();
         }
 
-    	AddUniqueConstraintStatement statement = new AddUniqueConstraintStatement(getCatalogName(), getSchemaName(), getTableName(), getColumnNames(), getConstraintName());
+    	AddUniqueConstraintStatement statement = new AddUniqueConstraintStatement(getConstraintName(), getCatalogName(), getSchemaName(), getTableName(), getColumnNames());
         statement.setTablespace(getTablespace())
                         .setDeferrable(deferrable)
                         .setInitiallyDeferred(initiallyDeferred)
                         .setDisabled(disabled);
 
-        return new SqlStatement[] { statement };
+        return new Statement[] { statement };
     }
 
 
     @Override
-    public ChangeStatus checkStatus(Database database) {
+    public ChangeStatus checkStatus(ExecutionEnvironment env) {
         ChangeStatus result = new ChangeStatus();
         try {
             UniqueConstraint example = new UniqueConstraint(getConstraintName(), getCatalogName(), getSchemaName(), getTableName(), getColumnNames().split("\\s+,\\s+"));
 
-            UniqueConstraint snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(example, database);
+            UniqueConstraint snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(example, env.getTargetDatabase());
             result.assertComplete(snapshot != null, "Unique constraint does not exist");
 
             return result;

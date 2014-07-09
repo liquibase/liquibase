@@ -1,14 +1,15 @@
 package liquibase.changelog;
 
-import static org.easymock.EasyMock.*;
-import static org.junit.Assert.*;
 import liquibase.database.Database;
 import liquibase.database.ObjectQuotingStrategy;
 import liquibase.exception.DatabaseException;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
-
 import org.junit.Test;
+
+import static org.easymock.EasyMock.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Tests for {@link liquibase.changelog.ChangeSet#execute(DatabaseChangeLog, Database)}

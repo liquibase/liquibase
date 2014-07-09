@@ -1,25 +1,25 @@
 package liquibase.sqlgenerator.core;
 
+import liquibase.action.Action;
+import liquibase.action.core.UnparsedSql;
+import liquibase.exception.UnsupportedException;
+import liquibase.statement.core.InsertDataStatement;
+import liquibase.statementlogic.StatementLogicChain;
 import liquibase.database.Database;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.ValidationErrors;
-import liquibase.sql.Sql;
-import liquibase.sql.UnparsedSql;
-import liquibase.sqlgenerator.SqlGeneratorChain;
+import  liquibase.ExecutionEnvironment;
 import liquibase.statement.DatabaseFunction;
-import liquibase.statement.core.InsertStatement;
-import liquibase.structure.core.Relation;
-import liquibase.structure.core.Table;
 
 import java.util.Date;
 
-public class InsertGenerator extends AbstractSqlGenerator<InsertStatement> {
+public class InsertGenerator extends AbstractSqlGenerator<InsertDataStatement> {
 
     @Override
-    public ValidationErrors validate(InsertStatement insertStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public ValidationErrors validate(InsertDataStatement insertDataStatement, ExecutionEnvironment env, StatementLogicChain chain) {
         ValidationErrors validationErrors = new ValidationErrors();
-        validationErrors.checkRequiredField("tableName", insertStatement.getTableName());
-        validationErrors.checkRequiredField("columns", insertStatement.getColumnValues());
+        validationErrors.checkRequiredField("tableName", insertDataStatement.getTableName());
+        validationErrors.checkRequiredField("columns", insertDataStatement.getColumnNames());
 
 //        if (insertStatement.getSchemaName() != null && !database.supportsSchemas()) {
 //           validationErrors.addError("Database does not support schemas");
@@ -29,9 +29,11 @@ public class InsertGenerator extends AbstractSqlGenerator<InsertStatement> {
     }
 
     @Override
-    public Sql[] generateSql(InsertStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public Action[] generateActions(InsertDataStatement statement, ExecutionEnvironment env, StatementLogicChain chain) throws UnsupportedException {
+        Database database = env.getTargetDatabase();
+
         StringBuffer sql = new StringBuffer("INSERT INTO " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " (");
-        for (String column : statement.getColumnValues().keySet()) {
+        for (String column : statement.getColumnNames()) {
             sql.append(database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), column)).append(", ");
         }
         sql.deleteCharAt(sql.lastIndexOf(" "));
@@ -42,8 +44,8 @@ public class InsertGenerator extends AbstractSqlGenerator<InsertStatement> {
 
         sql.append(") VALUES (");
 
-        for (String column : statement.getColumnValues().keySet()) {
-            Object newValue = statement.getColumnValues().get(column);
+        for (String column : statement.getColumnNames()) {
+            Object newValue = statement.getColumnValue(column);
             if (newValue == null || newValue.toString().equalsIgnoreCase("NULL")) {
                 sql.append("NULL");
             } else if (newValue instanceof String && !looksLikeFunctionCall(((String) newValue), database)) {
@@ -73,12 +75,8 @@ public class InsertGenerator extends AbstractSqlGenerator<InsertStatement> {
 
         sql.append(")");
 
-        return new Sql[] {
-                new UnparsedSql(sql.toString(), getAffectedTable(statement))
+        return new Action[] {
+                new UnparsedSql(sql.toString())
         };
-    }
-
-    protected Relation getAffectedTable(InsertStatement statement) {
-        return new Table().setName(statement.getTableName()).setSchema(statement.getCatalogName(), statement.getSchemaName());
     }
 }

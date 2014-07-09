@@ -5,8 +5,8 @@ import liquibase.exception.CustomChangeException;
 import liquibase.exception.SetupException;
 import liquibase.exception.ValidationErrors;
 import liquibase.resource.ResourceAccessor;
-import liquibase.statement.SqlStatement;
-import liquibase.statement.StoredProcedureStatement;
+import liquibase.statement.Statement;
+import liquibase.statement.core.ExecuteStoredProcedureStatement;
 
 public class ExampleCustomProcCallChange implements CustomSqlChange {
 
@@ -25,9 +25,9 @@ public class ExampleCustomProcCallChange implements CustomSqlChange {
     }
 
     @Override
-    public SqlStatement[] generateStatements(Database database) throws CustomChangeException {
-        StoredProcedureStatement procedureStatement = new StoredProcedureStatement("testHello");
-        return new SqlStatement[]{
+    public Statement[] generateStatements(Database database) throws CustomChangeException {
+        ExecuteStoredProcedureStatement procedureStatement = new ExecuteStoredProcedureStatement("testHello");
+        return new Statement[]{
                 procedureStatement,
         };
     }

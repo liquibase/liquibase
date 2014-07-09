@@ -5,10 +5,11 @@ import liquibase.database.Database;
 import liquibase.database.core.DerbyDatabase;
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.database.core.SQLiteDatabase.AlterTableVisitor;
+import  liquibase.ExecutionEnvironment;
+import liquibase.statement.Statement;
+import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Index;
-import liquibase.statement.SqlStatement;
-import liquibase.statement.core.RawSqlStatement;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -30,8 +31,8 @@ public class MergeColumnChange extends AbstractChange {
     private String finalColumnType;
 
     @Override
-    public boolean supports(Database database) {
-        return super.supports(database) && !(database instanceof DerbyDatabase);
+    public boolean supports(ExecutionEnvironment env) {
+        return super.supports(env) && !(env.getTargetDatabase() instanceof DerbyDatabase);
     }
 
     public String getCatalogName() {
@@ -105,16 +106,18 @@ public class MergeColumnChange extends AbstractChange {
     }
 
     @Override
-    public boolean generateStatementsVolatile(Database database) {
-        if (database instanceof SQLiteDatabase) {
+    public boolean generateStatementsVolatile(ExecutionEnvironment env) {
+        if (env.getTargetDatabase() instanceof SQLiteDatabase) {
             return true;
         }
         return false;
     }
 
     @Override
-    public SqlStatement[] generateStatements(Database database) {
-        List<SqlStatement> statements = new ArrayList<SqlStatement>();
+    public Statement[] generateStatements(ExecutionEnvironment env) {
+        Database database = env.getTargetDatabase();
+
+        List<Statement> statements = new ArrayList<Statement>();
 
         AddColumnChange addNewColumnChange = new AddColumnChange();
         addNewColumnChange.setSchemaName(schemaName);
@@ -123,7 +126,7 @@ public class MergeColumnChange extends AbstractChange {
         columnConfig.setName(getFinalColumnName());
         columnConfig.setType(getFinalColumnType());
         addNewColumnChange.addColumn(columnConfig);
-        statements.addAll(Arrays.asList(addNewColumnChange.generateStatements(database)));
+        statements.addAll(Arrays.asList(addNewColumnChange.generateStatements(env)));
 
         String updateStatement = "UPDATE " + database.escapeTableName(getCatalogName(), getSchemaName(), getTableName()) +
                 " SET " + database.escapeObjectName(getFinalColumnName(), Column.class)
@@ -169,7 +172,7 @@ public class MergeColumnChange extends AbstractChange {
         		// alter table
 				statements.addAll(SQLiteDatabase.getAlterTableStatements(
 						rename_alter_visitor,
-						database,getCatalogName(), getSchemaName(),getTableName()));
+                        env,getCatalogName(), getSchemaName(),getTableName()));
     		} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -181,16 +184,16 @@ public class MergeColumnChange extends AbstractChange {
 	        dropColumn1Change.setSchemaName(schemaName);
 	        dropColumn1Change.setTableName(getTableName());
 	        dropColumn1Change.setColumnName(getColumn1Name());
-	        statements.addAll(Arrays.asList(dropColumn1Change.generateStatements(database)));
+	        statements.addAll(Arrays.asList(dropColumn1Change.generateStatements(env)));
 	
 	        DropColumnChange dropColumn2Change = new DropColumnChange();
 	        dropColumn2Change.setSchemaName(schemaName);
 	        dropColumn2Change.setTableName(getTableName());
 	        dropColumn2Change.setColumnName(getColumn2Name());
-	        statements.addAll(Arrays.asList(dropColumn2Change.generateStatements(database)));
+	        statements.addAll(Arrays.asList(dropColumn2Change.generateStatements(env)));
         
         }
-        return statements.toArray(new SqlStatement[statements.size()]);
+        return statements.toArray(new Statement[statements.size()]);
 
     }
 

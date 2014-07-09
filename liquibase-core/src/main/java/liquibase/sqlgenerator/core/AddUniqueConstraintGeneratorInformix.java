@@ -1,11 +1,13 @@
 package liquibase.sqlgenerator.core;
 
+import liquibase.action.Action;
+import liquibase.action.core.UnparsedSql;
+import liquibase.exception.UnsupportedException;
+import liquibase.statementlogic.StatementLogicChain;
 import liquibase.database.Database;
 import liquibase.database.core.InformixDatabase;
-import liquibase.sql.Sql;
-import liquibase.sql.UnparsedSql;
+import  liquibase.ExecutionEnvironment;
 import liquibase.sqlgenerator.SqlGenerator;
-import liquibase.sqlgenerator.SqlGeneratorChain;
 import liquibase.statement.core.AddUniqueConstraintStatement;
 
 public class AddUniqueConstraintGeneratorInformix extends AddUniqueConstraintGenerator {
@@ -20,29 +22,30 @@ public class AddUniqueConstraintGeneratorInformix extends AddUniqueConstraintGen
     }
 
     @Override
-	public boolean supports(AddUniqueConstraintStatement statement, Database database) {
-        return (database instanceof InformixDatabase);
+	public boolean supports(AddUniqueConstraintStatement statement, ExecutionEnvironment env) {
+        return (env.getTargetDatabase() instanceof InformixDatabase);
 	}
 
-	@Override
-	public Sql[] generateSql(AddUniqueConstraintStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    @Override
+    public Action[] generateActions(AddUniqueConstraintStatement statement, ExecutionEnvironment env, StatementLogicChain chain) throws UnsupportedException {
+        Database database = env.getTargetDatabase();
 
 		final String sqlNoContraintNameTemplate = "ALTER TABLE %s ADD CONSTRAINT UNIQUE (%s)";
-		final String sqlTemplate = "ALTER TABLE %s ADD CONSTRAINT UNIQUE (%s) CONSTRAINT %s";
+        final String sqlTemplate = "ALTER TABLE %s ADD CONSTRAINT UNIQUE (%s) CONSTRAINT %s";
 		if (statement.getConstraintName() == null) {
-			return new Sql[] {
+			return new Action[] {
 				new UnparsedSql(String.format(sqlNoContraintNameTemplate 
 						, database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName())
 						, database.escapeColumnNameList(statement.getColumnNames())
-				), getAffectedUniqueConstraint(statement))
+				))
 			};
 		} else {
-			return new Sql[] {
+			return new Action[] {
 				new UnparsedSql(String.format(sqlTemplate
 						, database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName())
 						, database.escapeColumnNameList(statement.getColumnNames())
 						, database.escapeConstraintName(statement.getConstraintName())
-				), getAffectedUniqueConstraint(statement))
+				))
 			};
 		}
 

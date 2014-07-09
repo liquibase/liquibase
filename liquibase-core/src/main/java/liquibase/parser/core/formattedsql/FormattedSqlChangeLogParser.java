@@ -16,7 +16,9 @@ import liquibase.resource.UtfBomAwareReader;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 

@@ -1,23 +1,42 @@
 package liquibase.statement.core;
 
-import liquibase.statement.AbstractSqlStatement;
+import liquibase.statement.AbstractStatement;
+import liquibase.statement.Statement;
+import liquibase.structure.DatabaseObject;
 
-public class ClearDatabaseChangeLogTableStatement extends AbstractSqlStatement {
+/**
+ * Removes all objects from an database. DANGER!!!
+ */
+public class ClearDatabaseChangeLogTableStatement extends AbstractStatement {
 
-    private String catalogName;
-    private String schemaName;
+    public static final String CATALOG_NAME = "catalogName";
+    public static final String SCHEMA_NAME = "schemaName";
 
-    public ClearDatabaseChangeLogTableStatement(String catalogName, String schemaName) {
-        super();
-        this.catalogName = catalogName;
-        this.schemaName = schemaName;
+    public ClearDatabaseChangeLogTableStatement() {
     }
 
+    public ClearDatabaseChangeLogTableStatement(String catalogName, String schemaName) {
+        setCatalogName(catalogName);
+        setSchemaName(schemaName);    }
+
     public String getCatalogName() {
-        return catalogName;
+        return getAttribute(CATALOG_NAME, String.class);
+    }
+
+    public Statement setCatalogName(String catalogName) {
+        return (Statement) setAttribute(CATALOG_NAME, catalogName);
     }
 
     public String getSchemaName() {
-        return schemaName;
+        return getAttribute(SCHEMA_NAME, String.class);
+    }
+
+    public Statement setSchemaName(String schemaName) {
+        return (Statement) setAttribute(SCHEMA_NAME, schemaName);
+    }
+
+    @Override
+    protected DatabaseObject[] getBaseAffectedDatabaseObjects() {
+        return null;
     }
 }

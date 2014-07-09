@@ -1,10 +1,10 @@
 package liquibase.changelog;
 
-import liquibase.RuntimeEnvironment;
-import liquibase.changelog.filter.*;
-import liquibase.changelog.visitor.SkippedChangeSetVisitor;
+import liquibase.ExecutionEnvironment;
+import liquibase.changelog.filter.ChangeSetFilter;
+import liquibase.changelog.filter.ChangeSetFilterResult;
 import liquibase.changelog.visitor.ChangeSetVisitor;
-import liquibase.database.Database;
+import liquibase.changelog.visitor.SkippedChangeSetVisitor;
 import liquibase.exception.LiquibaseException;
 import liquibase.logging.LogFactory;
 import liquibase.logging.Logger;
@@ -38,9 +38,8 @@ public class ChangeLogIterator {
         this.changeSetFilters = Arrays.asList(changeSetFilters);
     }
 
-    public void run(ChangeSetVisitor visitor, RuntimeEnvironment env) throws LiquibaseException {
+    public void run(ChangeSetVisitor visitor, ExecutionEnvironment env) throws LiquibaseException {
       Logger log = LogFactory.getLogger();
-      databaseChangeLog.setRuntimeEnvironment(env);
       log.setChangeLog(databaseChangeLog);
         try {
             List<ChangeSet> changeSetList = new ArrayList<ChangeSet>(databaseChangeLog.getChangeSets());
@@ -67,7 +66,7 @@ public class ChangeLogIterator {
 
                 log.setChangeSet(changeSet);
                 if (shouldVisit) {
-                    visitor.visit(changeSet, databaseChangeLog, env.getTargetDatabase(), reasonsAccepted);
+                    visitor.visit(changeSet, databaseChangeLog, env, reasonsAccepted);
                 } else {
                     if (visitor instanceof SkippedChangeSetVisitor) {
                         ((SkippedChangeSetVisitor) visitor).skipped(changeSet, databaseChangeLog, env.getTargetDatabase(), reasonsDenied);
@@ -77,7 +76,6 @@ public class ChangeLogIterator {
             }
         } finally {
             log.setChangeLog(null);
-            databaseChangeLog.setRuntimeEnvironment(null);
         }
     }
 

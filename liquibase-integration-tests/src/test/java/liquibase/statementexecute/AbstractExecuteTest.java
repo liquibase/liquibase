@@ -4,13 +4,16 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import liquibase.CatalogAndSchema;
+import liquibase.ExecutionEnvironment;
+import liquibase.action.Action;
+import liquibase.statement.Statement;
+import liquibase.statementlogic.StatementLogicFactory;
 import liquibase.changelog.ChangeLogHistoryServiceFactory;
 import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
@@ -24,9 +27,6 @@ import liquibase.database.example.ExampleCustomDatabase;
 import liquibase.sdk.database.MockDatabase;
 import liquibase.database.core.UnsupportedDatabase;
 import liquibase.executor.ExecutorService;
-import liquibase.sql.Sql;
-import liquibase.sqlgenerator.SqlGeneratorFactory;
-import liquibase.statement.SqlStatement;
 import liquibase.test.TestContext;
 import liquibase.test.DatabaseTestContext;
 import liquibase.exception.DatabaseException;
@@ -36,7 +36,7 @@ import org.junit.After;
 public abstract class AbstractExecuteTest {
 
     private Set<Class<? extends Database>> testedDatabases = new HashSet<Class<? extends Database>>();
-    protected SqlStatement statementUnderTest;
+    protected Statement statementUnderTest;
 
     @After
     public void reset() {
@@ -55,7 +55,7 @@ public abstract class AbstractExecuteTest {
         SnapshotGeneratorFactory.resetAll();
     }
 
-    protected abstract List<? extends SqlStatement> setupStatements(Database database);
+    protected abstract List<? extends Statement> setupStatements(Database database);
 
     protected void testOnAll(String expectedSql) throws Exception {
         test(expectedSql, null, null);
@@ -95,10 +95,10 @@ public abstract class AbstractExecuteTest {
                         LockServiceFactory.getInstance().getLockService(database).init();
                     }
 
-                    Sql[] sql = SqlGeneratorFactory.getInstance().generateSql(statementUnderTest, database);
+                    Action[] actions = StatementLogicFactory.getInstance().generateActions(statementUnderTest, new ExecutionEnvironment(database));
 
-                    assertNotNull("Null SQL for " + database, sql);
-                    assertEquals("Unexpected number of  SQL statements for " + database, expectedSql.length, sql.length);
+                    assertNotNull("Null SQL for " + database, actions);
+                    assertEquals("Unexpected number of  SQL statements for " + database, expectedSql.length, actions.length);
 
                     int index = 0;
                     for (String convertedSql : expectedSql) {
@@ -106,7 +106,7 @@ public abstract class AbstractExecuteTest {
                         convertedSql = replaceDatabaseClauses(convertedSql, database);
                         convertedSql = replaceStandardTypes(convertedSql, database);
 
-                        assertEquals("Incorrect SQL for " + database.getClass().getName(), convertedSql.toLowerCase().trim(), sql[index].toSql().toLowerCase());
+                        assertEquals("Incorrect SQL for " + database.getClass().getName(), convertedSql.toLowerCase().trim(), actions[index].describe().toLowerCase());
                         index++;
                     }
                 }
@@ -115,9 +115,9 @@ public abstract class AbstractExecuteTest {
 
         resetAvailableDatabases();
         for (Database availableDatabase : DatabaseTestContext.getInstance().getAvailableDatabases()) {
-            Statement statement = ((JdbcConnection) availableDatabase.getConnection()).getUnderlyingConnection().createStatement();
+            java.sql.Statement statement = ((JdbcConnection) availableDatabase.getConnection()).getUnderlyingConnection().createStatement();
             if (shouldTestDatabase(availableDatabase, includeDatabases, excludeDatabases)) {
-                String sqlToRun = SqlGeneratorFactory.getInstance().generateSql(statementUnderTest, availableDatabase)[0].toSql();
+                String sqlToRun = StatementLogicFactory.getInstance().generateActions(statementUnderTest, new ExecutionEnvironment(availableDatabase))[0].describe();
                 try {
                     statement.execute(sqlToRun);
                 } catch (Exception e) {
@@ -154,8 +154,8 @@ public abstract class AbstractExecuteTest {
         if (database instanceof MockDatabase || database instanceof ExampleCustomDatabase || database instanceof UnsupportedDatabase) {
             return false;
         }
-        if (!SqlGeneratorFactory.getInstance().supports(statementUnderTest, database)
-                || SqlGeneratorFactory.getInstance().validate(statementUnderTest, database).hasErrors()) {
+        if (!StatementLogicFactory.getInstance().supports(statementUnderTest, new ExecutionEnvironment(database))
+                || StatementLogicFactory.getInstance().validate(statementUnderTest, new ExecutionEnvironment(database)).hasErrors()) {
             return false;
         }
 
@@ -193,7 +193,7 @@ public abstract class AbstractExecuteTest {
     public void resetAvailableDatabases() throws Exception {
         for (Database database : DatabaseTestContext.getInstance().getAvailableDatabases()) {
             DatabaseConnection connection = database.getConnection();
-            Statement connectionStatement = ((JdbcConnection) connection).getUnderlyingConnection().createStatement();
+            java.sql.Statement connectionStatement = ((JdbcConnection) connection).getUnderlyingConnection().createStatement();
 
             try {
                 database.dropDatabaseObjects(CatalogAndSchema.DEFAULT);
@@ -231,9 +231,9 @@ public abstract class AbstractExecuteTest {
                 connection.commit();
             }
 
-            List<? extends SqlStatement> setupStatements = setupStatements(database);
+            List<? extends Statement> setupStatements = setupStatements(database);
             if (setupStatements != null) {
-                for (SqlStatement statement : setupStatements) {
+                for (Statement statement : setupStatements) {
                     ExecutorService.getInstance().getExecutor(database).execute(statement);
                 }
             }

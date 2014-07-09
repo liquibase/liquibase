@@ -1,7 +1,6 @@
 package liquibase.serializer.core.json;
 
 import liquibase.change.AddColumnConfig;
-import liquibase.change.ColumnConfig;
 import liquibase.change.core.AddColumnChange;
 import liquibase.changelog.ChangeSet;
 import liquibase.statement.DatabaseFunction;

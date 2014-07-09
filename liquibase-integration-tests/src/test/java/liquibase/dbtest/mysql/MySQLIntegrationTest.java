@@ -2,7 +2,6 @@ package liquibase.dbtest.mysql;
 
 import liquibase.CatalogAndSchema;
 import liquibase.dbtest.AbstractIntegrationTest;
-import liquibase.exception.DatabaseException;
 import liquibase.executor.ExecutorService;
 import liquibase.snapshot.*;
 import liquibase.statement.DatabaseFunction;
@@ -11,9 +10,6 @@ import liquibase.structure.core.Column;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
 import org.junit.Test;
-
-import java.util.Calendar;
-import java.util.Date;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
@@ -69,7 +65,7 @@ public class MySQLIntegrationTest extends AbstractIntegrationTest {
         Object defaultValue = createdColumn.getDefaultValue();
         assertNotNull(defaultValue);
         assertTrue(defaultValue instanceof DatabaseFunction);
-        assertEquals("0000-00-00 00:00:00", ((DatabaseFunction) defaultValue).getValue());
+        assertEquals("0000-00-00 00:00:00", ((DatabaseFunction) defaultValue).getText());
     }
 
 }

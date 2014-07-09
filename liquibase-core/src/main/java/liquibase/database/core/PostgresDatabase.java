@@ -1,20 +1,18 @@
 package liquibase.database.core;
 
-import liquibase.CatalogAndSchema;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.ObjectQuotingStrategy;
-import liquibase.database.jvm.JdbcConnection;
-import liquibase.structure.DatabaseObject;
 import liquibase.exception.DatabaseException;
+import liquibase.exception.UnsupportedException;
 import liquibase.executor.ExecutorService;
 import liquibase.logging.LogFactory;
 import liquibase.statement.core.RawSqlStatement;
+import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Table;
 import liquibase.util.StringUtils;
 
 import java.math.BigInteger;
-import java.sql.Types;
 import java.util.*;
 
 /**
@@ -206,7 +204,7 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
             DatabaseConnection con = getConnection();
 
             if (con != null) {
-                String searchPathResult = (String) ExecutorService.getInstance().getExecutor(this).queryForObject(new RawSqlStatement("SHOW search_path"), String.class);
+                String searchPathResult = ExecutorService.getInstance().getExecutor(this).query(new RawSqlStatement("SHOW search_path")).toObject(String.class);
 
                 if (searchPathResult != null) {
                     String dirtySearchPaths[] = searchPathResult.split("\\,");
@@ -248,8 +246,12 @@ public class PostgresDatabase extends AbstractJdbcDatabase {
     }
 
     private boolean runExistsQuery(String query) throws DatabaseException {
-        Long count = ExecutorService.getInstance().getExecutor(this).queryForLong(new RawSqlStatement(query));
+        try {
+            Long count = ExecutorService.getInstance().getExecutor(this).query(new RawSqlStatement(query)).toObject(0L);
 
-        return count != null && count > 0;
+            return count > 0;
+        } catch (UnsupportedException e) {
+            throw new DatabaseException(e);
+        }
     }
 }

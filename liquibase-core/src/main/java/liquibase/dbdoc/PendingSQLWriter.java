@@ -1,6 +1,5 @@
 package liquibase.dbdoc;
 
-import liquibase.Liquibase;
 import liquibase.change.Change;
 import liquibase.change.ChangeFactory;
 import liquibase.changelog.ChangeSet;

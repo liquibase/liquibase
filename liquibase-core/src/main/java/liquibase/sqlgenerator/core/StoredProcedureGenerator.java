@@ -1,25 +1,25 @@
 package liquibase.sqlgenerator.core;
 
-import liquibase.database.Database;
+import liquibase.action.Action;
+import liquibase.action.core.UnparsedSql;
+import liquibase.exception.UnsupportedException;
+import liquibase.statement.core.ExecuteStoredProcedureStatement;
+import liquibase.statementlogic.StatementLogicChain;
 import liquibase.database.core.OracleDatabase;
 import liquibase.exception.ValidationErrors;
-import liquibase.sql.Sql;
-import liquibase.sql.UnparsedSql;
-import liquibase.sqlgenerator.SqlGenerator;
-import liquibase.sqlgenerator.SqlGeneratorChain;
-import liquibase.statement.StoredProcedureStatement;
+import  liquibase.ExecutionEnvironment;
 
-public class StoredProcedureGenerator extends AbstractSqlGenerator<StoredProcedureStatement> {
+public class StoredProcedureGenerator extends AbstractSqlGenerator<ExecuteStoredProcedureStatement> {
 
     @Override
-    public ValidationErrors validate(StoredProcedureStatement storedProcedureStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public ValidationErrors validate(ExecuteStoredProcedureStatement executeStoredProcedureStatement, ExecutionEnvironment env, StatementLogicChain chain) {
         ValidationErrors validationErrors = new ValidationErrors();
-        validationErrors.checkRequiredField("procedureName", storedProcedureStatement.getProcedureName());
+        validationErrors.checkRequiredField("procedureName", executeStoredProcedureStatement.getProcedureName());
         return validationErrors;
     }
 
     @Override
-    public Sql[] generateSql(StoredProcedureStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public Action[] generateActions(ExecuteStoredProcedureStatement statement, ExecutionEnvironment env, StatementLogicChain chain) throws UnsupportedException {
         StringBuilder string = new StringBuilder();
         string.append("exec ").append(statement.getProcedureName()).append("(");
         for (String param : statement.getParameters()) {
@@ -27,10 +27,10 @@ public class StoredProcedureGenerator extends AbstractSqlGenerator<StoredProcedu
         }
         String sql = string.toString().replaceFirst(",$", "")+")";
 
-        if (database instanceof OracleDatabase) {
+        if (env.getTargetDatabase() instanceof OracleDatabase) {
             sql = sql.replaceFirst("exec ", "BEGIN ").replaceFirst("\\)$", "); END;");
         }
-        return new Sql[] { new UnparsedSql(sql)};
+        return new Action[] { new UnparsedSql(sql)};
 
     }
 }

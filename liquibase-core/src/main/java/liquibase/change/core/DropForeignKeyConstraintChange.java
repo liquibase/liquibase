@@ -1,10 +1,10 @@
 package liquibase.change.core;
 
 import liquibase.change.*;
-import liquibase.database.Database;
 import liquibase.database.core.SQLiteDatabase;
+import  liquibase.ExecutionEnvironment;
 import liquibase.snapshot.SnapshotGeneratorFactory;
-import liquibase.statement.SqlStatement;
+import liquibase.statement.Statement;
 import liquibase.statement.core.DropForeignKeyConstraintStatement;
 import liquibase.structure.core.ForeignKey;
 
@@ -55,36 +55,38 @@ public class DropForeignKeyConstraintChange extends AbstractChange {
     }
 
     @Override
-    public SqlStatement[] generateStatements(Database database) {
+    public Statement[] generateStatements(ExecutionEnvironment env) {
 
-        if (database instanceof SQLiteDatabase) {
+        if (env.getTargetDatabase() instanceof SQLiteDatabase) {
     		// return special statements for SQLite databases
     		return generateStatementsForSQLiteDatabase();
     	} 
     	
-        return new SqlStatement[]{
+        return new Statement[]{
                 new DropForeignKeyConstraintStatement(
+                        getConstraintName(),
                         getBaseTableCatalogName(),
                         getBaseTableSchemaName(),
-                        getBaseTableName(),
-                        getConstraintName()),
+                        getBaseTableName()
+                )
+
         };    	
     }
 
     @Override
-    public ChangeStatus checkStatus(Database database) {
+    public ChangeStatus checkStatus(ExecutionEnvironment env) {
         try {
-            return new ChangeStatus().assertComplete(!SnapshotGeneratorFactory.getInstance().has(new ForeignKey(getConstraintName(), getBaseTableCatalogName(), getBaseTableSchemaName(), getBaseTableCatalogName()), database), "Foreign key exists");
+            return new ChangeStatus().assertComplete(!SnapshotGeneratorFactory.getInstance().has(new ForeignKey(getConstraintName(), getBaseTableCatalogName(), getBaseTableSchemaName(), getBaseTableCatalogName()), env.getTargetDatabase()), "Foreign key exists");
         } catch (Exception e) {
             return new ChangeStatus().unknown(e);
         }
     }
 
-    private SqlStatement[] generateStatementsForSQLiteDatabase() {
+    private Statement[] generateStatementsForSQLiteDatabase() {
     	// SQLite does not support foreign keys until now.
 		// See for more information: http://www.sqlite.org/omitted.html
 		// Therefore this is an empty operation...
-		return new SqlStatement[]{};
+		return new Statement[]{};
     }
 
     @Override

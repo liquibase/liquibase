@@ -1,34 +1,37 @@
 package liquibase.sqlgenerator.core;
 
+import liquibase.action.Action;
+import liquibase.action.core.UnparsedSql;
+import liquibase.exception.UnsupportedException;
+import liquibase.statement.core.ReindexStatement;
+import liquibase.statementlogic.StatementLogicChain;
+import liquibase.statementlogic.StatementLogicFactory;
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.ValidationErrors;
-import liquibase.sql.Sql;
-import liquibase.sql.UnparsedSql;
-import liquibase.sqlgenerator.SqlGeneratorChain;
-import liquibase.sqlgenerator.SqlGeneratorFactory;
+import  liquibase.ExecutionEnvironment;
 import liquibase.statement.core.SetNullableStatement;
-import liquibase.statement.core.ReorganizeTableStatement;
-import liquibase.structure.core.Column;
-import liquibase.structure.core.Table;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Arrays;
+import java.util.List;
 
 public class SetNullableGenerator extends AbstractSqlGenerator<SetNullableStatement> {
 
     @Override
-    public boolean supports(SetNullableStatement statement, Database database) {
+    public boolean supports(SetNullableStatement statement, ExecutionEnvironment env) {
+        Database database = env.getTargetDatabase();
+
         return !(database instanceof FirebirdDatabase ||
                 database instanceof SQLiteDatabase);
     }
 
     @Override
-    public ValidationErrors validate(SetNullableStatement setNullableStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public ValidationErrors validate(SetNullableStatement setNullableStatement, ExecutionEnvironment env, StatementLogicChain chain) {
         ValidationErrors validationErrors = new ValidationErrors();
+        Database database = env.getTargetDatabase();
 
         validationErrors.checkRequiredField("tableName", setNullableStatement.getTableName());
         validationErrors.checkRequiredField("columnName", setNullableStatement.getColumnName());
@@ -48,7 +51,9 @@ public class SetNullableGenerator extends AbstractSqlGenerator<SetNullableStatem
     }
 
     @Override
-    public Sql[] generateSql(SetNullableStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public Action[] generateActions(SetNullableStatement statement, ExecutionEnvironment env, StatementLogicChain chain) throws UnsupportedException {
+        Database database = env.getTargetDatabase();
+
         String sql;
 
         String nullableString;
@@ -80,20 +85,16 @@ public class SetNullableGenerator extends AbstractSqlGenerator<SetNullableStatem
             sql = "ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " ALTER COLUMN  " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + (statement.isNullable() ? " DROP NOT NULL" : " SET NOT NULL");
         }
 
-        List<Sql> returnList = new ArrayList<Sql>();
-        returnList.add(new UnparsedSql(sql, getAffectedColumn(statement)));
+        List<Action> returnList = new ArrayList<Action>();
+        returnList.add(new UnparsedSql(sql));
 
         if (database instanceof DB2Database) {
-            Sql[] a = SqlGeneratorFactory.getInstance().generateSql(new ReorganizeTableStatement(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()), database);
+            Action[] a = StatementLogicFactory.getInstance().generateActions(new ReindexStatement(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()), env);
             if (a != null) {
                 returnList.addAll(Arrays.asList(a));
             }
         }
 
-        return returnList.toArray(new Sql[returnList.size()]);
-    }
-
-    protected Column getAffectedColumn(SetNullableStatement statement) {
-        return new Column().setName(statement.getColumnName()).setRelation(new Table().setName(statement.getTableName()).setSchema(statement.getCatalogName(), statement.getSchemaName()));
+        return returnList.toArray(new Action[returnList.size()]);
     }
 }

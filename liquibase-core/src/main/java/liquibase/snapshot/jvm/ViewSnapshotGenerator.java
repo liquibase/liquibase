@@ -4,9 +4,10 @@ import liquibase.CatalogAndSchema;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
 import liquibase.exception.DatabaseException;
+import liquibase.exception.UnsupportedException;
 import liquibase.snapshot.CachedRow;
-import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.DatabaseSnapshot;
+import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.JdbcDatabaseSnapshot;
 import liquibase.statement.core.GetViewDefinitionStatement;
 import liquibase.structure.DatabaseObject;
@@ -47,7 +48,7 @@ public class ViewSnapshotGenerator extends JdbcSnapshotGenerator {
 
 
     @Override
-    protected DatabaseObject snapshotObject(DatabaseObject example, DatabaseSnapshot snapshot) throws DatabaseException {
+    protected DatabaseObject snapshotObject(DatabaseObject example, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException, UnsupportedException {
         Database database = snapshot.getDatabase();
         Schema schema = example.getSchema();
 
@@ -87,7 +88,7 @@ public class ViewSnapshotGenerator extends JdbcSnapshotGenerator {
     }
 
     @Override
-    protected void addTo(DatabaseObject foundObject, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException {
+    protected void addTo(DatabaseObject foundObject, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException, UnsupportedException {
         if (!snapshot.getSnapshotControl().shouldInclude(View.class)) {
             return;
         }

@@ -1,18 +1,16 @@
 package liquibase.sqlgenerator.core;
 
+import liquibase.action.Action;
+import liquibase.action.Sql;
+import liquibase.action.core.UnparsedSql;
+import liquibase.exception.UnsupportedException;
+import liquibase.statementlogic.StatementLogicChain;
 import liquibase.database.Database;
-import liquibase.database.core.OracleDatabase;
 import liquibase.database.core.PostgresDatabase;
-import liquibase.datatype.DataTypeFactory;
-import liquibase.sql.Sql;
-import liquibase.sql.UnparsedSql;
-import liquibase.sqlgenerator.SqlGeneratorChain;
+import  liquibase.ExecutionEnvironment;
 import liquibase.statement.SequenceNextValueFunction;
 import liquibase.statement.core.AddDefaultValueStatement;
 import liquibase.structure.core.Column;
-import liquibase.structure.core.Schema;
-import liquibase.structure.core.Sequence;
-import liquibase.structure.core.Table;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -29,34 +27,30 @@ public class AddDefaultValueGeneratorPostgres extends AddDefaultValueGenerator {
     }
 
     @Override
-    public boolean supports(AddDefaultValueStatement statement, Database database) {
+    public boolean supports(AddDefaultValueStatement statement, ExecutionEnvironment env) {
+        Database database = env.getTargetDatabase();
+
         return database instanceof PostgresDatabase;
     }
 
     @Override
-    public Sql[] generateSql(final AddDefaultValueStatement statement, final Database database,
-                             final SqlGeneratorChain sqlGeneratorChain) {
+    public Action[] generateActions(AddDefaultValueStatement statement, ExecutionEnvironment env, StatementLogicChain chain) throws UnsupportedException {
+        Database database = env.getTargetDatabase();
 
         if (!(statement.getDefaultValue() instanceof SequenceNextValueFunction)) {
-            return super.generateSql(statement, database, sqlGeneratorChain);
+            return super.generateActions(statement, env, chain);
         }
 
-        List<Sql> commands = new ArrayList<Sql>(Arrays.asList(super.generateSql(statement, database, sqlGeneratorChain)));
+        List<Action> commands = new ArrayList<Action>(Arrays.asList(super.generateActions(statement, env, chain)));
         // for postgres, we need to also set the sequence to be owned by this table for true serial like functionality.
         // this will allow a drop table cascade to remove the sequence as well.
         SequenceNextValueFunction sequenceFunction = (SequenceNextValueFunction) statement.getDefaultValue();
 
         Sql alterSequenceOwner = new UnparsedSql("ALTER SEQUENCE " + database.escapeSequenceName(statement.getCatalogName(),
-                statement.getSchemaName(), sequenceFunction.getValue()) + " OWNED BY " +
+                statement.getSchemaName(), sequenceFunction.getText()) + " OWNED BY " +
                 database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + "."
-                + database.escapeObjectName(statement.getColumnName(), Column.class),
-                getAffectedColumn(statement),
-                getAffectedSequence(sequenceFunction));
+                + database.escapeObjectName(statement.getColumnName(), Column.class));
         commands.add(alterSequenceOwner);
-        return commands.toArray(new Sql[commands.size()]);
-    }
-
-    protected Sequence getAffectedSequence(SequenceNextValueFunction sequenceFunction) {
-        return new Sequence().setName(sequenceFunction.getValue());
+        return commands.toArray(new Action[commands.size()]);
     }
 }

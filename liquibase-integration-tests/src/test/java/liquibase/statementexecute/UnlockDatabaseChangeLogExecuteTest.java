@@ -1,7 +1,7 @@
 package liquibase.statementexecute;
 
 import liquibase.database.core.*;
-import liquibase.statement.SqlStatement;
+import liquibase.statement.Statement;
 import liquibase.statement.core.CreateDatabaseChangeLogLockTableStatement;
 import liquibase.statement.core.UnlockDatabaseChangeLogStatement;
 import liquibase.database.Database;
@@ -13,7 +13,7 @@ import org.junit.Test;
 
 public class UnlockDatabaseChangeLogExecuteTest extends AbstractExecuteTest {
     @Override
-    protected List<? extends SqlStatement> setupStatements(Database database) {
+    protected List<? extends Statement> setupStatements(Database database) {
         return Arrays.asList(new CreateDatabaseChangeLogLockTableStatement());
     }
     

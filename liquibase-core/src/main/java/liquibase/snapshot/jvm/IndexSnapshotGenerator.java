@@ -5,16 +5,21 @@ import liquibase.database.Database;
 import liquibase.database.core.DB2Database;
 import liquibase.database.core.DerbyDatabase;
 import liquibase.database.core.InformixDatabase;
-import liquibase.database.core.OracleDatabase;
 import liquibase.diff.compare.DatabaseObjectComparatorFactory;
 import liquibase.exception.DatabaseException;
-import liquibase.snapshot.*;
+import liquibase.exception.UnsupportedException;
+import liquibase.snapshot.CachedRow;
+import liquibase.snapshot.DatabaseSnapshot;
+import liquibase.snapshot.InvalidExampleException;
+import liquibase.snapshot.JdbcDatabaseSnapshot;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
 import liquibase.util.StringUtils;
 
 import java.sql.DatabaseMetaData;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
     public IndexSnapshotGenerator() {
@@ -133,7 +138,7 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
 
 
     @Override
-    protected void addTo(DatabaseObject foundObject, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException {
+    protected void addTo(DatabaseObject foundObject, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException, UnsupportedException {
         if (!snapshot.getSnapshotControl().shouldInclude(Index.class)) {
             return;
         }
@@ -187,7 +192,7 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
     }
 
     @Override
-    protected DatabaseObject snapshotObject(DatabaseObject example, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException {
+    protected DatabaseObject snapshotObject(DatabaseObject example, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException, UnsupportedException {
         Database database = snapshot.getDatabase();
         Table exampleTable = ((Index) example).getTable();
 

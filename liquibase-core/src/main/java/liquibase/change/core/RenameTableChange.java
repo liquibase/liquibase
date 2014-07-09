@@ -3,11 +3,11 @@ package liquibase.change.core;
 import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.database.core.DB2Database;
+import  liquibase.ExecutionEnvironment;
 import liquibase.snapshot.SnapshotGeneratorFactory;
-import liquibase.statement.SqlStatement;
+import liquibase.statement.Statement;
+import liquibase.statement.core.ReindexStatement;
 import liquibase.statement.core.RenameTableStatement;
-import liquibase.statement.core.ReorganizeTableStatement;
-import liquibase.structure.core.Column;
 import liquibase.structure.core.Table;
 
 import java.util.ArrayList;
@@ -65,19 +65,20 @@ public class RenameTableChange extends AbstractChange {
     }
 
     @Override
-    public SqlStatement[] generateStatements(Database database) {
-        List<SqlStatement> statements = new ArrayList<SqlStatement>();
+    public Statement[] generateStatements(ExecutionEnvironment env) {
+        List<Statement> statements = new ArrayList<Statement>();
         statements.add(new RenameTableStatement(getCatalogName(), getSchemaName(), getOldTableName(), getNewTableName()));
-        if (database instanceof DB2Database) {
-            statements.add(new ReorganizeTableStatement(getCatalogName(), getSchemaName(), getNewTableName()));
+        if (env.getTargetDatabase() instanceof DB2Database) {
+            statements.add(new ReindexStatement(getCatalogName(), getSchemaName(), getNewTableName()));
         }
 
-        return statements.toArray(new SqlStatement[statements.size()]);
+        return statements.toArray(new Statement[statements.size()]);
     }
 
     @Override
-    public ChangeStatus checkStatus(Database database) {
+    public ChangeStatus checkStatus(ExecutionEnvironment env) {
         try {
+            Database database = env.getTargetDatabase();
             ChangeStatus changeStatus = new ChangeStatus();
             Table newTable = SnapshotGeneratorFactory.getInstance().createSnapshot(new Table(getCatalogName(), getSchemaName(), getNewTableName()), database);
             Table oldTable = SnapshotGeneratorFactory.getInstance().createSnapshot(new Table(getCatalogName(), getSchemaName(), getOldTableName()), database);

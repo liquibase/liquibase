@@ -4,13 +4,12 @@ import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.database.core.SQLiteDatabase.AlterTableVisitor;
+import  liquibase.ExecutionEnvironment;
 import liquibase.snapshot.SnapshotGeneratorFactory;
-import liquibase.structure.core.Column;
-import liquibase.structure.core.Index;
-import liquibase.statement.SqlStatement;
+import liquibase.statement.Statement;
 import liquibase.statement.core.DropPrimaryKeyStatement;
+import liquibase.structure.core.Index;
 import liquibase.structure.core.PrimaryKey;
-import liquibase.structure.core.Table;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,8 +25,8 @@ public class DropPrimaryKeyChange extends AbstractChange {
     private String constraintName;
 
     @Override
-    public boolean generateStatementsVolatile(Database database) {
-        if (database instanceof SQLiteDatabase) {
+    public boolean generateStatementsVolatile(ExecutionEnvironment env) {
+        if (env.getTargetDatabase() instanceof SQLiteDatabase) {
             return true;
         }
         return false;
@@ -70,29 +69,30 @@ public class DropPrimaryKeyChange extends AbstractChange {
     }
 
     @Override
-    public SqlStatement[] generateStatements(Database database) {
+    public Statement[] generateStatements(ExecutionEnvironment env) {
 
+        Database database = env.getTargetDatabase();
         if (database instanceof SQLiteDatabase) {
     		// return special statements for SQLite databases
-    		return generateStatementsForSQLiteDatabase(database);
+    		return generateStatementsForSQLiteDatabase(env);
         }
     	
-        return new SqlStatement[]{
-                new DropPrimaryKeyStatement(getCatalogName(), getSchemaName(), getTableName(), getConstraintName()),
+        return new Statement[]{
+                new DropPrimaryKeyStatement(getConstraintName(), getCatalogName(), getSchemaName(), getTableName()),
         };
     }
 
     @Override
-    public ChangeStatus checkStatus(Database database) {
+    public ChangeStatus checkStatus(ExecutionEnvironment env) {
         try {
-            return new ChangeStatus().assertComplete(!SnapshotGeneratorFactory.getInstance().has(new PrimaryKey(getConstraintName(), getCatalogName(), getSchemaName(), getTableName()), database), "Primary key exists");
+            return new ChangeStatus().assertComplete(!SnapshotGeneratorFactory.getInstance().has(new PrimaryKey(getConstraintName(), getCatalogName(), getSchemaName(), getTableName()), env.getTargetDatabase()), "Primary key exists");
         } catch (Exception e) {
             return new ChangeStatus().unknown(e);
         }
 
     }
     
-    private SqlStatement[] generateStatementsForSQLiteDatabase(Database database) {
+    private Statement[] generateStatementsForSQLiteDatabase(ExecutionEnvironment env) {
     	
     	// SQLite does not support this ALTER TABLE operation until now.
 		// For more information see: http://www.sqlite.org/omitted.html.
@@ -101,7 +101,7 @@ public class DropPrimaryKeyChange extends AbstractChange {
     	// Note: The attribute "constraintName" is used to pass the column 
     	// name instead of the constraint name.
 		
-    	List<SqlStatement> statements = new ArrayList<SqlStatement>();
+    	List<Statement> statements = new ArrayList<Statement>();
     	
 		// define alter table logic
 		AlterTableVisitor rename_alter_visitor = new AlterTableVisitor() {
@@ -130,12 +130,12 @@ public class DropPrimaryKeyChange extends AbstractChange {
     		// alter table
 			statements.addAll(SQLiteDatabase.getAlterTableStatements(
 					rename_alter_visitor,
-					database,getCatalogName(), getSchemaName(),getTableName()));
+					env,getCatalogName(), getSchemaName(),getTableName()));
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		
-		return statements.toArray(new SqlStatement[statements.size()]);
+		return statements.toArray(new Statement[statements.size()]);
     }
 
     @Override

@@ -5,13 +5,13 @@ import liquibase.database.Database;
 import liquibase.database.core.DB2Database;
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.exception.ValidationErrors;
+import  liquibase.ExecutionEnvironment;
 import liquibase.snapshot.SnapshotGeneratorFactory;
-import liquibase.statement.SqlStatement;
+import liquibase.statement.Statement;
 import liquibase.statement.core.DropColumnStatement;
-import liquibase.statement.core.ReorganizeTableStatement;
+import liquibase.statement.core.ReindexStatement;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Index;
-import liquibase.structure.core.PrimaryKey;
 import liquibase.structure.core.Table;
 
 import java.util.ArrayList;
@@ -29,31 +29,31 @@ public class DropColumnChange extends AbstractChange {
     private String columnName;
 
     @Override
-    public boolean generateStatementsVolatile(Database database) {
-        if (database instanceof SQLiteDatabase) {
+    public boolean generateStatementsVolatile(ExecutionEnvironment env) {
+        if (env.getTargetDatabase() instanceof SQLiteDatabase) {
             return true;
         }
-        return super.generateStatementsVolatile(database);
+        return super.generateStatementsVolatile(env);
     }
 
     @Override
-    public boolean supports(Database database) {
-        if (database instanceof SQLiteDatabase) {
+    public boolean supports(ExecutionEnvironment env) {
+        if (env.getTargetDatabase() instanceof SQLiteDatabase) {
             return true;
         }
-        return super.supports(database);
+        return super.supports(env);
     }
 
     @Override
-    public ValidationErrors validate(Database database) {
-        if (database instanceof SQLiteDatabase) {
+    public ValidationErrors validate(ExecutionEnvironment env) {
+        if (env.getTargetDatabase() instanceof SQLiteDatabase) {
             ValidationErrors validationErrors = new ValidationErrors();
             validationErrors.checkRequiredField("tableName", tableName);
             validationErrors.checkRequiredField("columnName", columnName);
 
             return validationErrors;
         }
-        return super.validate(database);
+        return super.validate(env);
     }
 
     @DatabaseChangeProperty(mustEqualExisting = "column", description = "Name of the column to drop")
@@ -94,40 +94,42 @@ public class DropColumnChange extends AbstractChange {
     }
 
     @Override
-    public SqlStatement[] generateStatements(Database database) {
+    public Statement[] generateStatements(ExecutionEnvironment env) {
+
+        Database database = env.getTargetDatabase();
 
         if (database instanceof SQLiteDatabase) {
             // return special statements for SQLite databases
-            return generateStatementsForSQLiteDatabase(database);
+            return generateStatementsForSQLiteDatabase(env);
         }
 
-        List<SqlStatement> statements = new ArrayList<SqlStatement>();
+        List<Statement> statements = new ArrayList<Statement>();
 
         statements.add(new DropColumnStatement(getCatalogName(), getSchemaName(), getTableName(), getColumnName()));
         if (database instanceof DB2Database) {
-            statements.add(new ReorganizeTableStatement(getCatalogName(), getSchemaName(), getTableName()));
+            statements.add(new ReindexStatement(getCatalogName(), getSchemaName(), getTableName()));
         }
 
-        return statements.toArray(new SqlStatement[statements.size()]);
+        return statements.toArray(new Statement[statements.size()]);
     }
 
     @Override
-    public ChangeStatus checkStatus(Database database) {
+    public ChangeStatus checkStatus(ExecutionEnvironment env) {
         try {
-            return new ChangeStatus().assertComplete(!SnapshotGeneratorFactory.getInstance().has(new Column(Table.class, getCatalogName(), getSchemaName(), getTableName(), getColumnName()), database), "Column exists");
+            return new ChangeStatus().assertComplete(!SnapshotGeneratorFactory.getInstance().has(new Column(Table.class, getCatalogName(), getSchemaName(), getTableName(), getColumnName()), env.getTargetDatabase()), "Column exists");
         } catch (Exception e) {
             return new ChangeStatus().unknown(e);
         }
 
     }
 
-    private SqlStatement[] generateStatementsForSQLiteDatabase(Database database) {
+    private Statement[] generateStatementsForSQLiteDatabase(ExecutionEnvironment env) {
 
         // SQLite does not support this ALTER TABLE operation until now.
         // For more information see: http://www.sqlite.org/omitted.html.
         // This is a small work around...
 
-        List<SqlStatement> statements = new ArrayList<SqlStatement>();
+        List<Statement> statements = new ArrayList<Statement>();
 
         // define alter table logic
         SQLiteDatabase.AlterTableVisitor rename_alter_visitor = new SQLiteDatabase.AlterTableVisitor() {
@@ -151,13 +153,13 @@ public class DropColumnChange extends AbstractChange {
         try {
             // alter table
             statements.addAll(SQLiteDatabase.getAlterTableStatements(rename_alter_visitor,
-                    database, getCatalogName(), getSchemaName(), getTableName()));
+                    env, getCatalogName(), getSchemaName(), getTableName()));
 
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        return statements.toArray(new SqlStatement[statements.size()]);
+        return statements.toArray(new Statement[statements.size()]);
     }
 
     @Override

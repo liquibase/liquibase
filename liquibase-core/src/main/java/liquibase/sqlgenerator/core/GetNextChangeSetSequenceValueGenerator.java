@@ -1,23 +1,23 @@
 package liquibase.sqlgenerator.core;
 
-import liquibase.database.Database;
+import liquibase.action.Action;
+import liquibase.exception.UnsupportedException;
+import liquibase.statementlogic.StatementLogicChain;
+import liquibase.statementlogic.StatementLogicFactory;
 import liquibase.exception.ValidationErrors;
-import liquibase.sql.Sql;
-import liquibase.sqlgenerator.SqlGenerator;
-import liquibase.sqlgenerator.SqlGeneratorChain;
-import liquibase.sqlgenerator.SqlGeneratorFactory;
+import  liquibase.ExecutionEnvironment;
 import liquibase.statement.core.GetNextChangeSetSequenceValueStatement;
 import liquibase.statement.core.SelectFromDatabaseChangeLogStatement;
 
 public class GetNextChangeSetSequenceValueGenerator extends AbstractSqlGenerator<GetNextChangeSetSequenceValueStatement> {
 
     @Override
-    public ValidationErrors validate(GetNextChangeSetSequenceValueStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public ValidationErrors validate(GetNextChangeSetSequenceValueStatement statement, ExecutionEnvironment env, StatementLogicChain chain) {
         return new ValidationErrors();
     }
 
     @Override
-    public Sql[] generateSql(GetNextChangeSetSequenceValueStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-        return SqlGeneratorFactory.getInstance().generateSql(new SelectFromDatabaseChangeLogStatement("MAX(ORDEREXECUTED)"), database);
+    public Action[] generateActions(GetNextChangeSetSequenceValueStatement statement, ExecutionEnvironment env, StatementLogicChain chain) throws UnsupportedException {
+        return StatementLogicFactory.getInstance().generateActions(new SelectFromDatabaseChangeLogStatement("MAX(ORDEREXECUTED)"), env);
     }
 }

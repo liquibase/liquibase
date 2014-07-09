@@ -1,37 +1,40 @@
 package liquibase.sqlgenerator.core;
 
+import liquibase.action.Action;
+import liquibase.action.core.UnparsedSql;
+import liquibase.exception.UnsupportedException;
+import liquibase.statementlogic.StatementLogicChain;
 import liquibase.database.Database;
 import liquibase.database.core.DB2Database;
 import liquibase.database.core.MySQLDatabase;
 import liquibase.database.core.OracleDatabase;
 import liquibase.database.core.PostgresDatabase;
 import liquibase.exception.ValidationErrors;
-import liquibase.sql.Sql;
-import liquibase.sql.UnparsedSql;
-import liquibase.sqlgenerator.SqlGeneratorChain;
+import  liquibase.ExecutionEnvironment;
 import liquibase.statement.core.SetTableRemarksStatement;
-import liquibase.structure.core.Relation;
-import liquibase.structure.core.Table;
 
 public class SetTableRemarksGenerator extends AbstractSqlGenerator<SetTableRemarksStatement> {
 
 	@Override
-	public boolean supports(SetTableRemarksStatement statement, Database database) {
+	public boolean supports(SetTableRemarksStatement statement, ExecutionEnvironment env) {
+        Database database = env.getTargetDatabase();
+
 		return database instanceof MySQLDatabase || database instanceof OracleDatabase || database instanceof PostgresDatabase
 				|| database instanceof DB2Database;
 	}
 
 	@Override
-    public ValidationErrors validate(SetTableRemarksStatement setTableRemarksStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public ValidationErrors validate(SetTableRemarksStatement setTableRemarksStatement, ExecutionEnvironment env, StatementLogicChain chain) {
 		ValidationErrors validationErrors = new ValidationErrors();
 		validationErrors.checkRequiredField("tableName", setTableRemarksStatement.getTableName());
 		validationErrors.checkRequiredField("remarks", setTableRemarksStatement.getRemarks());
 		return validationErrors;
 	}
 
-	@Override
-    public Sql[] generateSql(SetTableRemarksStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-		String sql;
+    @Override
+    public Action[] generateActions(SetTableRemarksStatement statement, ExecutionEnvironment env, StatementLogicChain chain) throws UnsupportedException {
+        Database database = env.getTargetDatabase();
+        String sql;
 		String remarks = database.escapeStringForDatabase(statement.getRemarks());
 		if (database instanceof MySQLDatabase) {
 			sql = "ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " COMMENT = '" + remarks
@@ -43,10 +46,6 @@ public class SetTableRemarksGenerator extends AbstractSqlGenerator<SetTableRemar
 					+ database.escapeStringForDatabase(remarks) + "'";
 		}
 
-		return new Sql[] { new UnparsedSql(sql, getAffectedTable(statement)) };
+		return new Action[] { new UnparsedSql(sql) };
 	}
-
-    protected Relation getAffectedTable(SetTableRemarksStatement statement) {
-        return new Table().setName(statement.getTableName()).setSchema(statement.getCatalogName(), statement.getSchemaName());
-    }
 }

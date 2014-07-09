@@ -1,13 +1,14 @@
 package liquibase.sqlgenerator.core;
 
+import liquibase.ExecutionEnvironment;
+import liquibase.statement.Statement;
+import liquibase.statementlogic.StatementLogicChain;
 import liquibase.database.Database;
+import liquibase.exception.ValidationErrors;
 import liquibase.exception.Warnings;
 import liquibase.sqlgenerator.SqlGenerator;
-import liquibase.sqlgenerator.SqlGeneratorChain;
-import liquibase.statement.SqlStatement;
-import liquibase.statement.core.CreateViewStatement;
 
-public abstract class AbstractSqlGenerator<StatementType extends SqlStatement> implements SqlGenerator<StatementType> {
+public abstract class AbstractSqlGenerator<StatementType extends Statement> implements SqlGenerator<StatementType> {
 
     @Override
     public int getPriority() {
@@ -15,27 +16,26 @@ public abstract class AbstractSqlGenerator<StatementType extends SqlStatement> i
     }
 
     @Override
-    public boolean generateStatementsIsVolatile(Database database) {
+    public boolean generateActionsIsVolatile(ExecutionEnvironment env) {
         return false;
     }
 
     @Override
-    public boolean generateRollbackStatementsIsVolatile(Database database) {
-        return false;
-    }
-
-    @Override
-    public boolean supports(StatementType statement, Database database) {
+    public boolean supports(StatementType statement, ExecutionEnvironment env) {
         return true;
     }
 
     @Override
-    public Warnings warn(StatementType statementType, Database database, SqlGeneratorChain sqlGeneratorChain) {
-        return sqlGeneratorChain.warn(statementType, database);
+    public Warnings warn(StatementType statementType, ExecutionEnvironment env, StatementLogicChain chain) {
+        return chain.warn(statementType, env);
+    }
+
+    @Override
+    public ValidationErrors validate(StatementType statement, ExecutionEnvironment env, StatementLogicChain chain) {
+        return chain.validate(statement, env);
     }
 
     public boolean looksLikeFunctionCall(String value, Database database) {
         return value.startsWith("\"SYSIBM\"") || value.startsWith("to_date(") || value.equalsIgnoreCase(database.getCurrentDateTimeFunction());
     }
-
 }

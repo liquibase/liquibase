@@ -1,14 +1,13 @@
 package liquibase.sqlgenerator.core;
 
+import liquibase.action.Action;
+import liquibase.action.core.UnparsedSql;
+import liquibase.exception.UnsupportedException;
+import liquibase.statementlogic.StatementLogicChain;
 import liquibase.database.Database;
 import liquibase.database.core.DB2Database;
 import liquibase.exception.ValidationErrors;
-import liquibase.structure.core.Column;
-import liquibase.structure.core.Schema;
-import liquibase.structure.core.Table;
-import liquibase.sql.Sql;
-import liquibase.sql.UnparsedSql;
-import liquibase.sqlgenerator.SqlGeneratorChain;
+import  liquibase.ExecutionEnvironment;
 import liquibase.statement.core.AddAutoIncrementStatement;
 
 public class AddAutoIncrementGeneratorDB2 extends AddAutoIncrementGenerator {
@@ -19,15 +18,15 @@ public class AddAutoIncrementGeneratorDB2 extends AddAutoIncrementGenerator {
     }
 
     @Override
-    public boolean supports(AddAutoIncrementStatement statement, Database database) {
-        return database instanceof DB2Database;
+    public boolean supports(AddAutoIncrementStatement statement, ExecutionEnvironment env) {
+        return env.getTargetDatabase() instanceof DB2Database;
     }
 
     @Override
     public ValidationErrors validate(
             AddAutoIncrementStatement statement,
-            Database database,
-            SqlGeneratorChain sqlGeneratorChain) {
+            ExecutionEnvironment env,
+            StatementLogicChain chain) {
         ValidationErrors validationErrors = new ValidationErrors();
 
         validationErrors.checkRequiredField("columnName", statement.getColumnName());
@@ -37,13 +36,12 @@ public class AddAutoIncrementGeneratorDB2 extends AddAutoIncrementGenerator {
     }
 
     @Override
-    public Sql[] generateSql(
-    		AddAutoIncrementStatement statement,
-    		Database database,
-    		SqlGeneratorChain sqlGeneratorChain) {
-        return new Sql[]{
+    public Action[] generateActions(AddAutoIncrementStatement statement, ExecutionEnvironment env, StatementLogicChain chain) throws UnsupportedException {
+        Database database = env.getTargetDatabase();
+
+        return new Action[]{
             new UnparsedSql(
-            	"ALTER TABLE "
+                    "ALTER TABLE "
             		+ database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName())
             		+ " ALTER COLUMN "
             		+ database.escapeColumnName(
@@ -53,8 +51,7 @@ public class AddAutoIncrementGeneratorDB2 extends AddAutoIncrementGenerator {
             			statement.getColumnName())
             		+ " SET "
             		+ database.getAutoIncrementClause(
-            			statement.getStartWith(), statement.getIncrementBy()),
-                getAffectedColumn(statement))
+            			statement.getStartWith(), statement.getIncrementBy()))
         };
     }
 }

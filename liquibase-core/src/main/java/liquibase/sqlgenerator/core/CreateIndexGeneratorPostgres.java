@@ -1,21 +1,19 @@
 package liquibase.sqlgenerator.core;
 
+import liquibase.action.Action;
+import liquibase.action.core.UnparsedSql;
+import liquibase.exception.UnsupportedException;
+import liquibase.statementlogic.StatementLogicChain;
+import liquibase.database.Database;
+import liquibase.database.core.*;
+import  liquibase.ExecutionEnvironment;
+import liquibase.statement.core.CreateIndexStatement;
+import liquibase.structure.core.Index;
+import liquibase.util.StringUtils;
+
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-
-import liquibase.database.Database;
-import liquibase.database.core.DB2Database;
-import liquibase.database.core.InformixDatabase;
-import liquibase.database.core.MSSQLDatabase;
-import liquibase.database.core.PostgresDatabase;
-import liquibase.database.core.SybaseASADatabase;
-import liquibase.structure.core.Index;
-import liquibase.sql.Sql;
-import liquibase.sql.UnparsedSql;
-import liquibase.sqlgenerator.SqlGeneratorChain;
-import liquibase.statement.core.CreateIndexStatement;
-import liquibase.util.StringUtils;
 
 public class CreateIndexGeneratorPostgres extends CreateIndexGenerator {
 
@@ -25,12 +23,14 @@ public class CreateIndexGeneratorPostgres extends CreateIndexGenerator {
     }
 
     @Override
-    public boolean supports(CreateIndexStatement statement, Database database) {
-        return database instanceof PostgresDatabase;
+    public boolean supports(CreateIndexStatement statement, ExecutionEnvironment env) {
+        return env.getTargetDatabase() instanceof PostgresDatabase;
     }
 
     @Override
-    public Sql[] generateSql(CreateIndexStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public Action[] generateActions(CreateIndexStatement statement, ExecutionEnvironment env, StatementLogicChain chain) throws UnsupportedException {
+
+        Database database = env.getTargetDatabase();
 
         // Default filter of index creation:
         // creation of all indexes with associations are switched off.
@@ -38,13 +38,13 @@ public class CreateIndexGeneratorPostgres extends CreateIndexGenerator {
         if (associatedWith != null && (associatedWith.contains(Index.MARK_PRIMARY_KEY) ||
             associatedWith.contains(Index.MARK_UNIQUE_CONSTRAINT) ||
             associatedWith.contains(Index.MARK_FOREIGN_KEY))) {
-            return new Sql[0];
+            return new Action[0];
         }
 
 	    StringBuilder buffer = new StringBuilder();
 
 	    buffer.append("CREATE ");
-	    if (statement.isUnique() != null && statement.isUnique()) {
+        if (statement.isUnique() != null && statement.isUnique()) {
 		    buffer.append("UNIQUE ");
 	    }
 	    buffer.append("INDEX ");
@@ -55,7 +55,7 @@ public class CreateIndexGeneratorPostgres extends CreateIndexGenerator {
 	    }
 	    buffer.append("ON ");
 	    buffer.append(database.escapeTableName(statement.getTableCatalogName(), statement.getTableSchemaName(), statement.getTableName())).append("(");
-	    Iterator<String> iterator = Arrays.asList(statement.getColumns()).iterator();
+	    Iterator<String> iterator = Arrays.asList(statement.getColumnNames()).iterator();
 	    while (iterator.hasNext()) {
 		    String column = iterator.next();
 		    buffer.append(database.escapeColumnName(statement.getTableCatalogName(), statement.getTableSchemaName(), statement.getTableName(), column));
@@ -75,6 +75,6 @@ public class CreateIndexGeneratorPostgres extends CreateIndexGenerator {
 		    }
 	    }
 
-	    return new Sql[]{new UnparsedSql(buffer.toString(), getAffectedIndex(statement))};
+	    return new Action[]{new UnparsedSql(buffer.toString())};
     }
 }

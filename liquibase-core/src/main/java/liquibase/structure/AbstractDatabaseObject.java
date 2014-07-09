@@ -1,5 +1,6 @@
 package liquibase.structure;
 
+import liquibase.AbstractExtensibleObject;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
@@ -7,14 +8,10 @@ import liquibase.resource.ResourceAccessor;
 import liquibase.serializer.LiquibaseSerializable;
 import liquibase.util.StringUtils;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
-public abstract class AbstractDatabaseObject implements DatabaseObject {
-
-    private Map<String, Object> attributes = new HashMap<String, Object>();
+public abstract class AbstractDatabaseObject extends AbstractExtensibleObject implements DatabaseObject {
 
     private String snapshotId;
 
@@ -50,35 +47,6 @@ public abstract class AbstractDatabaseObject implements DatabaseObject {
     }
 
     @Override
-    public Set<String> getAttributes() {
-        return attributes.keySet();
-    }
-
-    @Override
-    public <T> T getAttribute(String attribute, Class<T> type) {
-        return (T) attributes.get(attribute);
-    }
-
-    @Override
-    public <T> T getAttribute(String attribute, T defaultValue) {
-        T value = (T) attributes.get(attribute);
-        if (value == null) {
-            return defaultValue;
-        }
-        return value;
-    }
-
-    @Override
-    public DatabaseObject setAttribute(String attribute, Object value) {
-        if (value == null) {
-            attributes.remove(attribute);
-        } else {
-            attributes.put(attribute, value);
-        }
-        return this;
-    }
-
-    @Override
     public String getSerializedObjectName() {
         return getObjectTypeName();
     }
@@ -90,7 +58,7 @@ public abstract class AbstractDatabaseObject implements DatabaseObject {
 
     @Override
     public Set<String> getSerializableFields() {
-        TreeSet<String> fields = new TreeSet<String>(attributes.keySet());
+        TreeSet<String> fields = new TreeSet<String>(getAttributes());
         fields.add("snapshotId");
         return fields;
     }
@@ -100,10 +68,10 @@ public abstract class AbstractDatabaseObject implements DatabaseObject {
         if (field.equals("snapshotId")) {
             return snapshotId;
         }
-        if (!attributes.containsKey(field)) {
+        if (!getAttributes().contains(field)) {
             throw new UnexpectedLiquibaseException("Unknown field "+field);
         }
-        Object value = attributes.get(field);
+        Object value = getAttribute(field, Object.class);
         if (value instanceof DatabaseObject) {
             try {
                 DatabaseObject clone = (DatabaseObject) value.getClass().newInstance();

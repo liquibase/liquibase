@@ -1,28 +1,21 @@
 package liquibase.statement.core;
 
-import liquibase.statement.AbstractSqlStatement;
+import liquibase.structure.DatabaseObject;
 
-public class TableRowCountStatement extends AbstractSqlStatement {
+/**
+ * Query the number of rows in a table.
+ */
+public class TableRowCountStatement extends AbstractTableStatement {
 
-    private String catalogName;
-    private String schemaName;
-    private String tableName;
+    public TableRowCountStatement() {
+    }
 
     public TableRowCountStatement(String catalogName, String schemaName, String tableName) {
-        this.catalogName = catalogName;
-        this.schemaName = schemaName;
-        this.tableName = tableName;
+        super(catalogName, schemaName, tableName);
     }
 
-    public String getCatalogName() {
-        return catalogName;
-    }
-
-    public String getSchemaName() {
-        return schemaName;
-    }
-
-    public String getTableName() {
-        return tableName;
+    @Override
+    protected DatabaseObject[] getBaseAffectedDatabaseObjects() {
+        return null;
     }
 }

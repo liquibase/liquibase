@@ -1,17 +1,17 @@
 package liquibase.change.core;
 
 import liquibase.change.AbstractChange;
-import liquibase.change.DatabaseChange;
 import liquibase.change.ChangeMetaData;
-import liquibase.database.Database;
-import liquibase.statement.SqlStatement;
+import liquibase.change.DatabaseChange;
+import  liquibase.ExecutionEnvironment;
+import liquibase.statement.Statement;
 
 @DatabaseChange(name="empty", description = "empty", priority = ChangeMetaData.PRIORITY_DEFAULT)
 public class EmptyChange extends AbstractChange {
 
     @Override
-    public SqlStatement[] generateStatements(Database database) {
-        return new SqlStatement[0];
+    public Statement[] generateStatements(ExecutionEnvironment env) {
+        return new Statement[0];
     }
 
     @Override

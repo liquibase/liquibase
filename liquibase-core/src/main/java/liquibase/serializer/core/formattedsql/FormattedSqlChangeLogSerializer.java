@@ -1,17 +1,16 @@
 package liquibase.serializer.core.formattedsql;
 
+import liquibase.ExecutionEnvironment;
+import liquibase.action.Action;
+import liquibase.exception.UnsupportedException;
+import liquibase.statementlogic.StatementLogicFactory;
 import liquibase.change.Change;
 import liquibase.changelog.ChangeSet;
-import liquibase.changelog.DatabaseChangeLog;
 import liquibase.database.Database;
 import liquibase.database.DatabaseFactory;
-import liquibase.database.core.OracleDatabase;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.serializer.ChangeLogSerializer;
 import liquibase.serializer.LiquibaseSerializable;
-import liquibase.sql.Sql;
-import liquibase.sqlgenerator.SqlGeneratorFactory;
-import liquibase.statement.SqlStatement;
 
 import java.io.File;
 import java.io.IOException;
@@ -44,11 +43,16 @@ public class FormattedSqlChangeLogSerializer  implements ChangeLogSerializer {
 
             builder.append("--changeset ").append(author).append(":").append(changeSet.getId()).append("\n");
             for (Change change : changeSet.getChanges()) {
-                Sql[] sqls = SqlGeneratorFactory.getInstance().generateSql(change.generateStatements(database), database);
-                if (sqls != null) {
-                    for (Sql sql : sqls) {
-                        builder.append(sql.toSql()).append(sql.getEndDelimiter()).append("\n");
+                ExecutionEnvironment env = new ExecutionEnvironment(database);
+                try {
+                    Action[] actions = StatementLogicFactory.getInstance().generateActions(change.generateStatements(env), env);
+                if (actions != null) {
+                    for (Action action : actions) {
+                        builder.append(action.describe()).append("\n");
                     }
+                }
+                } catch (UnsupportedException e) {
+                    throw new UnexpectedLiquibaseException(e);
                 }
             }
 

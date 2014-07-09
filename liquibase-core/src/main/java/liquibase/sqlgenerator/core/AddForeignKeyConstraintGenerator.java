@@ -1,29 +1,29 @@
 package liquibase.sqlgenerator.core;
 
+import liquibase.action.Action;
+import liquibase.action.core.UnparsedSql;
+import liquibase.exception.UnsupportedException;
+import liquibase.statementlogic.StatementLogicChain;
 import liquibase.database.Database;
 import liquibase.database.core.InformixDatabase;
 import liquibase.database.core.MSSQLDatabase;
-import liquibase.database.core.SQLiteDatabase;
 import liquibase.database.core.OracleDatabase;
+import liquibase.database.core.SQLiteDatabase;
 import liquibase.exception.ValidationErrors;
-import liquibase.sql.Sql;
-import liquibase.sql.UnparsedSql;
-import liquibase.sqlgenerator.SqlGenerator;
-import liquibase.sqlgenerator.SqlGeneratorChain;
+import  liquibase.ExecutionEnvironment;
 import liquibase.statement.core.AddForeignKeyConstraintStatement;
-import liquibase.structure.core.ForeignKey;
-import liquibase.structure.core.Table;
 
 public class AddForeignKeyConstraintGenerator extends AbstractSqlGenerator<AddForeignKeyConstraintStatement> {
 
     @Override
     @SuppressWarnings({"SimplifiableIfStatement"})
-    public boolean supports(AddForeignKeyConstraintStatement statement, Database database) {
-        return (!(database instanceof SQLiteDatabase));
+    public boolean supports(AddForeignKeyConstraintStatement statement, ExecutionEnvironment env) {
+        return (!(env.getTargetDatabase() instanceof SQLiteDatabase));
     }
 
     @Override
-    public ValidationErrors validate(AddForeignKeyConstraintStatement addForeignKeyConstraintStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public ValidationErrors validate(AddForeignKeyConstraintStatement addForeignKeyConstraintStatement, ExecutionEnvironment env, StatementLogicChain chain) {
+        Database database = env.getTargetDatabase();
         ValidationErrors validationErrors = new ValidationErrors();
 
         if ((addForeignKeyConstraintStatement.isInitiallyDeferred() || addForeignKeyConstraintStatement.isDeferrable()) && !database.supportsInitiallyDeferrableColumns()) {
@@ -41,8 +41,9 @@ public class AddForeignKeyConstraintGenerator extends AbstractSqlGenerator<AddFo
     }
 
     @Override
-    public Sql[] generateSql(AddForeignKeyConstraintStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-	    StringBuilder sb = new StringBuilder();
+    public Action[] generateActions(AddForeignKeyConstraintStatement statement, ExecutionEnvironment env, StatementLogicChain chain) throws UnsupportedException {
+        Database database = env.getTargetDatabase();
+        StringBuilder sb = new StringBuilder();
 	    sb.append("ALTER TABLE ")
 			    .append(database.escapeTableName(statement.getBaseTableCatalogName(), statement.getBaseTableSchemaName(), statement.getBaseTableName()))
 			    .append(" ADD CONSTRAINT ");
@@ -95,12 +96,8 @@ public class AddForeignKeyConstraintGenerator extends AbstractSqlGenerator<AddFo
 		    sb.append(database.escapeConstraintName(statement.getConstraintName()));
 	    }
 
-	    return new Sql[]{
-			    new UnparsedSql(sb.toString(), getAffectedForeignKey(statement))
+	    return new Action[]{
+			    new UnparsedSql(sb.toString())
 	    };
-    }
-
-    protected ForeignKey getAffectedForeignKey(AddForeignKeyConstraintStatement statement) {
-        return new ForeignKey().setName(statement.getConstraintName()).setForeignKeyColumns(statement.getBaseColumnNames()).setForeignKeyTable((Table) new Table().setName(statement.getBaseTableName()).setSchema(statement.getBaseTableCatalogName(), statement.getBaseTableSchemaName()));
     }
 }

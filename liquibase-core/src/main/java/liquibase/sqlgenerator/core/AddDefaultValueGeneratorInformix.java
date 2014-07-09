@@ -1,15 +1,14 @@
 package liquibase.sqlgenerator.core;
 
+import liquibase.action.Action;
+import liquibase.action.core.UnparsedSql;
+import liquibase.exception.UnsupportedException;
+import liquibase.statementlogic.StatementLogicChain;
 import liquibase.database.Database;
 import liquibase.database.core.InformixDatabase;
-import liquibase.structure.core.Schema;
 import liquibase.datatype.DataTypeFactory;
-import liquibase.structure.core.Column;
-import liquibase.structure.core.Table;
 import liquibase.exception.ValidationErrors;
-import liquibase.sql.Sql;
-import liquibase.sql.UnparsedSql;
-import liquibase.sqlgenerator.SqlGeneratorChain;
+import  liquibase.ExecutionEnvironment;
 import liquibase.statement.core.AddDefaultValueStatement;
 
 public class AddDefaultValueGeneratorInformix extends AddDefaultValueGenerator {
@@ -19,25 +18,26 @@ public class AddDefaultValueGeneratorInformix extends AddDefaultValueGenerator {
 	}
 
 	@Override
-	public boolean supports(AddDefaultValueStatement statement, Database database) {
-		return database instanceof InformixDatabase;
+	public boolean supports(AddDefaultValueStatement statement, ExecutionEnvironment env) {
+		return env.getTargetDatabase() instanceof InformixDatabase;
 	}
 
 	@Override
-	public ValidationErrors validate(AddDefaultValueStatement addDefaultValueStatement, Database database,
-			SqlGeneratorChain sqlGeneratorChain) {
-		ValidationErrors validationErrors = super.validate(addDefaultValueStatement, database, sqlGeneratorChain);
+	public ValidationErrors validate(AddDefaultValueStatement addDefaultValueStatement, ExecutionEnvironment env,
+			StatementLogicChain chain) {
+		ValidationErrors validationErrors = super.validate(addDefaultValueStatement, env, chain);
 		if (addDefaultValueStatement.getColumnDataType() == null) {
 			validationErrors.checkRequiredField("columnDataType", addDefaultValueStatement.getColumnDataType());
 		}
 		return validationErrors;
 	}
 
-	@Override
-	public Sql[] generateSql(AddDefaultValueStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    @Override
+    public Action[] generateActions(AddDefaultValueStatement statement, ExecutionEnvironment env, StatementLogicChain chain) throws UnsupportedException {
+        Database database = env.getTargetDatabase();
 
-		Object defaultValue = statement.getDefaultValue();
-		StringBuffer sql = new StringBuffer("ALTER TABLE ");
+        Object defaultValue = statement.getDefaultValue();
+        StringBuffer sql = new StringBuffer("ALTER TABLE ");
 		sql.append(database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()));
 		sql.append(" MODIFY (");
 		sql.append(database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(),
@@ -48,7 +48,7 @@ public class AddDefaultValueGeneratorInformix extends AddDefaultValueGenerator {
 		sql.append(DataTypeFactory.getInstance().fromObject(defaultValue, database)
 				.objectToSql(defaultValue, database));
 		sql.append(")");
-		UnparsedSql unparsedSql = new UnparsedSql(sql.toString(), getAffectedColumn(statement));
-		return new Sql[] { unparsedSql };
+		UnparsedSql unparsedSql = new UnparsedSql(sql.toString());
+		return new Action[] { unparsedSql };
 	}
 }

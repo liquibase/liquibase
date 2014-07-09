@@ -1,20 +1,20 @@
 package liquibase.sqlgenerator.core;
 
+import liquibase.action.Action;
+import liquibase.exception.UnsupportedException;
+import liquibase.statement.Statement;
+import liquibase.statement.core.UpdateDataStatement;
+import liquibase.statementlogic.StatementLogicChain;
+import liquibase.statementlogic.StatementLogicFactory;
 import liquibase.changelog.ChangeSet;
-import liquibase.changelog.RanChangeSet;
 import liquibase.database.Database;
 import liquibase.exception.ValidationErrors;
-import liquibase.sql.Sql;
-import liquibase.sqlgenerator.SqlGenerator;
-import liquibase.sqlgenerator.SqlGeneratorChain;
-import liquibase.sqlgenerator.SqlGeneratorFactory;
-import liquibase.statement.SqlStatement;
+import  liquibase.ExecutionEnvironment;
 import liquibase.statement.core.UpdateChangeSetChecksumStatement;
-import liquibase.statement.core.UpdateStatement;
 
 public class UpdateChangeSetChecksumGenerator extends AbstractSqlGenerator<UpdateChangeSetChecksumStatement> {
     @Override
-    public ValidationErrors validate(UpdateChangeSetChecksumStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public ValidationErrors validate(UpdateChangeSetChecksumStatement statement, ExecutionEnvironment env, StatementLogicChain chain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("changeSet", statement.getChangeSet());
 
@@ -22,15 +22,16 @@ public class UpdateChangeSetChecksumGenerator extends AbstractSqlGenerator<Updat
     }
 
     @Override
-    public Sql[] generateSql(UpdateChangeSetChecksumStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public Action[] generateActions(UpdateChangeSetChecksumStatement statement, ExecutionEnvironment env, StatementLogicChain chain) throws UnsupportedException {
         ChangeSet changeSet = statement.getChangeSet();
+        Database database = env.getTargetDatabase();
 
-        SqlStatement runStatement = null;
-        runStatement = new UpdateStatement(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName())
+        Statement runStatement = null;
+        runStatement = new UpdateDataStatement(database.getLiquibaseCatalogName(), database.getLiquibaseSchemaName(), database.getDatabaseChangeLogTableName())
                 .addNewColumnValue("MD5SUM", changeSet.generateCheckSum().toString())
-                .setWhereClause("ID=? AND AUTHOR=? AND FILENAME=?")
+                .setWhere("ID=? AND AUTHOR=? AND FILENAME=?")
                 .addWhereParameters(changeSet.getId(), changeSet.getAuthor(), changeSet.getFilePath());
 
-        return SqlGeneratorFactory.getInstance().generateSql(runStatement, database);
+        return StatementLogicFactory.getInstance().generateActions(runStatement, env);
     }
 }

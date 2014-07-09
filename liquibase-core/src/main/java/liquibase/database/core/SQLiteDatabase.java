@@ -1,6 +1,7 @@
 package liquibase.database.core;
 
 import liquibase.CatalogAndSchema;
+import liquibase.ExecutionEnvironment;
 import liquibase.change.ColumnConfig;
 import liquibase.change.core.CreateTableChange;
 import liquibase.database.AbstractJdbcDatabase;
@@ -8,13 +9,10 @@ import liquibase.database.Database;
 import liquibase.database.DatabaseConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.snapshot.DatabaseSnapshot;
+import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.SnapshotControl;
 import liquibase.snapshot.SnapshotGeneratorFactory;
-import liquibase.snapshot.InvalidExampleException;
-import liquibase.sql.Sql;
-import liquibase.sqlgenerator.SqlGeneratorFactory;
-import liquibase.statement.SqlStatement;
+import liquibase.statement.Statement;
 import liquibase.statement.core.*;
 import liquibase.structure.core.*;
 import liquibase.util.ISODateFormat;
@@ -120,15 +118,16 @@ public class SQLiteDatabase extends AbstractJdbcDatabase {
         return false;
     }
 
-    public static List<SqlStatement> getAlterTableStatements(
+    public static List<Statement> getAlterTableStatements(
             AlterTableVisitor alterTableVisitor,
-            Database database, String catalogName, String schemaName, String tableName)
+            ExecutionEnvironment env, String catalogName, String schemaName, String tableName)
             throws DatabaseException {
 
-        List<SqlStatement> statements = new ArrayList<SqlStatement>();
+        List<Statement> statements = new ArrayList<Statement>();
 
         Table table = null;
         try {
+            Database database = env.getTargetDatabase();
             table = SnapshotGeneratorFactory.getInstance().createSnapshot((Table) new Table().setName(tableName).setSchema(new Schema(new Catalog(null), null)), database);
 
             List<ColumnConfig> createColumns = new ArrayList<ColumnConfig>();
@@ -175,9 +174,9 @@ public class SQLiteDatabase extends AbstractJdbcDatabase {
             for (ColumnConfig column : createColumns) {
                 ct_change_tmp.addColumn(column);
             }
-            statements.addAll(Arrays.asList(ct_change_tmp.generateStatements(database)));
+            statements.addAll(Arrays.asList(ct_change_tmp.generateStatements(env)));
             // copy rows to temporary table
-            statements.addAll(Arrays.asList(new CopyRowsStatement(temp_table_name, tableName, copyColumns)));
+            statements.addAll(Arrays.asList(new CopyDataStatement().setSourceTableCatalogName(temp_table_name).setTargetTableName(tableName).setSourceColumns(copyColumns)));
             // delete original table
             statements.addAll(Arrays.asList(new DropTableStatement(catalogName, schemaName, temp_table_name, false)));
             // validate indices

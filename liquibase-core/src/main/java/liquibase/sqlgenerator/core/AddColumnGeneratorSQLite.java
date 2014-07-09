@@ -1,14 +1,14 @@
 package liquibase.sqlgenerator.core;
 
+import liquibase.action.Action;
+import liquibase.exception.UnsupportedException;
+import liquibase.statement.Statement;
+import liquibase.statementlogic.StatementLogicChain;
+import liquibase.statementlogic.StatementLogicFactory;
 import liquibase.change.ColumnConfig;
-import liquibase.database.Database;
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.exception.DatabaseException;
-import liquibase.sql.Sql;
-import liquibase.sql.UnparsedSql;
-import liquibase.sqlgenerator.SqlGeneratorChain;
-import liquibase.sqlgenerator.SqlGeneratorFactory;
-import liquibase.statement.SqlStatement;
+import  liquibase.ExecutionEnvironment;
 import liquibase.statement.core.AddColumnStatement;
 import liquibase.structure.core.Index;
 
@@ -23,22 +23,22 @@ public class AddColumnGeneratorSQLite extends AddColumnGenerator {
     }
 
     @Override
-    public boolean supports(AddColumnStatement statement, Database database) {
-        return database instanceof SQLiteDatabase;
+    public boolean supports(AddColumnStatement statement, ExecutionEnvironment env) {
+        return env.getTargetDatabase() instanceof SQLiteDatabase;
     }
 
     @Override
-    public boolean generateStatementsIsVolatile(Database database) {
+    public boolean generateActionsIsVolatile(ExecutionEnvironment env) {
         return true;
     }
 
     @Override
-    public Sql[] generateSql(final AddColumnStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public Action[] generateActions(final AddColumnStatement statement, ExecutionEnvironment env, StatementLogicChain chain) throws UnsupportedException {
         // SQLite does not support this ALTER TABLE operation until now.
         // For more information see: http://www.sqlite.org/omitted.html.
         // This is a small work around...
 
-        List<Sql> sql = new ArrayList<Sql>();
+        List<Action> sql = new ArrayList<Action>();
 
         // define alter table logic
         SQLiteDatabase.AlterTableVisitor rename_alter_visitor =
@@ -64,13 +64,13 @@ public class AddColumnGeneratorSQLite extends AddColumnGenerator {
 
         try {
             // alter table
-            List<SqlStatement> alterTableStatements = SQLiteDatabase.getAlterTableStatements(rename_alter_visitor, database, statement.getCatalogName(), statement.getSchemaName(), statement.getTableName());
-            sql.addAll(Arrays.asList(SqlGeneratorFactory.getInstance().generateSql(alterTableStatements.toArray(new SqlStatement[alterTableStatements.size()]), database)));
+            List<Statement> alterTableStatements = SQLiteDatabase.getAlterTableStatements(rename_alter_visitor, env, statement.getCatalogName(), statement.getSchemaName(), statement.getTableName());
+            sql.addAll(Arrays.asList(StatementLogicFactory.getInstance().generateActions(alterTableStatements.toArray(new Statement[alterTableStatements.size()]), env)));
         } catch (DatabaseException e) {
             System.err.println(e);
             e.printStackTrace();
         }
 
-        return sql.toArray(new Sql[sql.size()]);
+        return sql.toArray(new Action[sql.size()]);
     }
 }

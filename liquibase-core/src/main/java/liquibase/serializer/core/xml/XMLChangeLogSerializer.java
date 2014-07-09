@@ -1,6 +1,7 @@
 package liquibase.serializer.core.xml;
 
-import liquibase.change.*;
+import liquibase.change.ColumnConfig;
+import liquibase.change.ConstraintsConfig;
 import liquibase.changelog.ChangeSet;
 import liquibase.changelog.DatabaseChangeLog;
 import liquibase.exception.UnexpectedLiquibaseException;

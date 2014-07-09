@@ -1,18 +1,17 @@
 package liquibase.sqlgenerator.core;
 
+import liquibase.action.Action;
+import liquibase.action.core.UnparsedSql;
+import liquibase.exception.UnsupportedException;
+import liquibase.statementlogic.StatementLogicChain;
 import liquibase.database.Database;
 import liquibase.database.core.DerbyDatabase;
 import liquibase.database.core.H2Database;
 import liquibase.database.core.HsqlDatabase;
 import liquibase.database.core.MSSQLDatabase;
-import liquibase.structure.core.Column;
-import liquibase.structure.core.Schema;
-import liquibase.structure.core.Table;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.ValidationErrors;
-import liquibase.sql.Sql;
-import liquibase.sql.UnparsedSql;
-import liquibase.sqlgenerator.SqlGeneratorChain;
+import  liquibase.ExecutionEnvironment;
 import liquibase.statement.core.AddAutoIncrementStatement;
 
 public class AddAutoIncrementGenerator extends AbstractSqlGenerator<AddAutoIncrementStatement> {
@@ -23,7 +22,9 @@ public class AddAutoIncrementGenerator extends AbstractSqlGenerator<AddAutoIncre
     }
 
     @Override
-    public boolean supports(AddAutoIncrementStatement statement, Database database) {
+    public boolean supports(AddAutoIncrementStatement statement, ExecutionEnvironment env) {
+        Database database = env.getTargetDatabase();
+
         return (database.supportsAutoIncrement()
                 && !(database instanceof DerbyDatabase)
                 && !(database instanceof MSSQLDatabase)
@@ -34,8 +35,8 @@ public class AddAutoIncrementGenerator extends AbstractSqlGenerator<AddAutoIncre
     @Override
     public ValidationErrors validate(
     		AddAutoIncrementStatement statement,
-    		Database database,
-    		SqlGeneratorChain sqlGeneratorChain) {
+    		ExecutionEnvironment env,
+    		StatementLogicChain chain) {
         ValidationErrors validationErrors = new ValidationErrors();
 
         validationErrors.checkRequiredField("columnName", statement.getColumnName());
@@ -47,10 +48,9 @@ public class AddAutoIncrementGenerator extends AbstractSqlGenerator<AddAutoIncre
     }
 
     @Override
-    public Sql[] generateSql(
-    		AddAutoIncrementStatement statement,
-    		Database database,
-    		SqlGeneratorChain sqlGeneratorChain) {
+    public Action[] generateActions(AddAutoIncrementStatement statement, ExecutionEnvironment env, StatementLogicChain chain) throws UnsupportedException {
+        Database database = env.getTargetDatabase();
+
         String sql = "ALTER TABLE "
             + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName())
             + " MODIFY "
@@ -60,14 +60,8 @@ public class AddAutoIncrementGenerator extends AbstractSqlGenerator<AddAutoIncre
             + " " 
             + database.getAutoIncrementClause(statement.getStartWith(), statement.getIncrementBy());
 
-        return new Sql[]{
-            new UnparsedSql(sql, getAffectedColumn(statement))
+        return new Action[]{
+            new UnparsedSql(sql)
         };
-    }
-
-    protected Column getAffectedColumn(AddAutoIncrementStatement statement) {
-        return new Column()
-            .setRelation(new Table().setName(statement.getTableName()).setSchema(new Schema(statement.getCatalogName(), statement.getSchemaName())))
-            .setName(statement.getColumnName());
     }
 }

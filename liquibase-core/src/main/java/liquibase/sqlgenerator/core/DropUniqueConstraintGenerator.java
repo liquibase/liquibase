@@ -1,27 +1,29 @@
 package liquibase.sqlgenerator.core;
 
+import liquibase.action.Action;
+import liquibase.action.core.UnparsedSql;
+import liquibase.exception.UnsupportedException;
+import liquibase.statementlogic.StatementLogicChain;
 import liquibase.database.Database;
-import liquibase.database.core.*;
+import liquibase.database.core.MySQLDatabase;
+import liquibase.database.core.OracleDatabase;
+import liquibase.database.core.SQLiteDatabase;
+import liquibase.database.core.SybaseASADatabase;
 import liquibase.exception.ValidationErrors;
-import liquibase.sql.Sql;
-import liquibase.sql.UnparsedSql;
-import liquibase.sqlgenerator.SqlGenerator;
-import liquibase.sqlgenerator.SqlGeneratorChain;
+import  liquibase.ExecutionEnvironment;
 import liquibase.statement.core.DropUniqueConstraintStatement;
-import liquibase.structure.core.Column;
-import liquibase.structure.core.Table;
-import liquibase.structure.core.UniqueConstraint;
-import liquibase.util.StringUtils;
 
 public class DropUniqueConstraintGenerator extends AbstractSqlGenerator<DropUniqueConstraintStatement> {
 
     @Override
-    public boolean supports(DropUniqueConstraintStatement statement, Database database) {
+    public boolean supports(DropUniqueConstraintStatement statement, ExecutionEnvironment env) {
+        Database database = env.getTargetDatabase();
+
         return !(database instanceof SQLiteDatabase);
     }
 
     @Override
-    public ValidationErrors validate(DropUniqueConstraintStatement dropUniqueConstraintStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public ValidationErrors validate(DropUniqueConstraintStatement dropUniqueConstraintStatement, ExecutionEnvironment env, StatementLogicChain chain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("tableName", dropUniqueConstraintStatement.getTableName());
         validationErrors.checkRequiredField("constraintName", dropUniqueConstraintStatement.getConstraintName());
@@ -29,31 +31,22 @@ public class DropUniqueConstraintGenerator extends AbstractSqlGenerator<DropUniq
     }
 
     @Override
-    public Sql[] generateSql(DropUniqueConstraintStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public Action[] generateActions(DropUniqueConstraintStatement statement, ExecutionEnvironment env, StatementLogicChain chain) throws UnsupportedException {
+        Database database = env.getTargetDatabase();
+
         String sql;
         if (database instanceof MySQLDatabase) {
             sql = "ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " DROP KEY " + database.escapeConstraintName(statement.getConstraintName());
         } else if (database instanceof OracleDatabase) {
             sql = "ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " DROP CONSTRAINT " + database.escapeConstraintName(statement.getConstraintName()) + " DROP INDEX";
         } else if (database instanceof SybaseASADatabase) {
-            sql = "ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " DROP UNIQUE (" + statement.getUniqueColumns() + ")";
+            sql = "ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " DROP UNIQUE (" + statement.getColumnNames() + ")";
         } else {
             sql = "ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " DROP CONSTRAINT " + database.escapeConstraintName(statement.getConstraintName());
         }
 
-        return new Sql[] {
-                new UnparsedSql(sql, getAffectedUniqueConstraint(statement))
+        return new Action[] {
+                new UnparsedSql(sql)
         };
-    }
-
-    protected UniqueConstraint getAffectedUniqueConstraint(DropUniqueConstraintStatement statement) {
-        UniqueConstraint constraint = new UniqueConstraint().setName(statement.getConstraintName()).setTable((Table) new Table().setName(statement.getTableName()).setSchema(statement.getCatalogName(), statement.getSchemaName()));
-        if (statement.getUniqueColumns() != null) {
-            int i = 0;
-            for (String column : StringUtils.splitAndTrim(statement.getUniqueColumns(), ",")) {
-                constraint.addColumn(i++, column);
-            }
-        }
-        return constraint;
     }
 }

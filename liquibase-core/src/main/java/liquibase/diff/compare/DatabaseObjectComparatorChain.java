@@ -4,7 +4,8 @@ import liquibase.database.Database;
 import liquibase.diff.ObjectDifferences;
 import liquibase.structure.DatabaseObject;
 
-import java.util.*;
+import java.util.List;
+import java.util.Set;
 
 public class DatabaseObjectComparatorChain {
     private List<DatabaseObjectComparator> comparators;

@@ -7,7 +7,7 @@ import liquibase.exception.DatabaseException;
 import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.structure.DatabaseObject;
 
-import java.io.*;
+import java.io.IOException;
 import java.util.*;
 
 public class DiffResult {

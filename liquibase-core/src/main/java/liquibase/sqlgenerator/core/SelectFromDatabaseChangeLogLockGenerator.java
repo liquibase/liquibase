@@ -1,19 +1,20 @@
 package liquibase.sqlgenerator.core;
 
+import liquibase.action.Action;
+import liquibase.action.core.UnparsedSql;
+import liquibase.exception.UnsupportedException;
+import liquibase.statementlogic.StatementLogicChain;
 import liquibase.database.Database;
 import liquibase.database.core.OracleDatabase;
 import liquibase.exception.ValidationErrors;
-import liquibase.sql.Sql;
-import liquibase.sql.UnparsedSql;
-import liquibase.sqlgenerator.SqlGenerator;
-import liquibase.sqlgenerator.SqlGeneratorChain;
+import  liquibase.ExecutionEnvironment;
 import liquibase.statement.core.SelectFromDatabaseChangeLogLockStatement;
 import liquibase.util.StringUtils;
 
 public class SelectFromDatabaseChangeLogLockGenerator extends AbstractSqlGenerator<SelectFromDatabaseChangeLogLockStatement> {
 
     @Override
-    public ValidationErrors validate(SelectFromDatabaseChangeLogLockStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public ValidationErrors validate(SelectFromDatabaseChangeLogLockStatement statement, ExecutionEnvironment env, StatementLogicChain chain) {
         ValidationErrors errors = new ValidationErrors();
         errors.checkRequiredField("columnToSelect", statement.getColumnsToSelect());
 
@@ -21,8 +22,9 @@ public class SelectFromDatabaseChangeLogLockGenerator extends AbstractSqlGenerat
     }
 
     @Override
-    public Sql[] generateSql(SelectFromDatabaseChangeLogLockStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-    	String liquibaseSchema;
+    public Action[] generateActions(SelectFromDatabaseChangeLogLockStatement statement, ExecutionEnvironment env, StatementLogicChain chain) throws UnsupportedException {
+        Database database = env.getTargetDatabase();
+        String liquibaseSchema;
    		liquibaseSchema = database.getLiquibaseSchemaName();
 		
 		String[] columns = statement.getColumnsToSelect();
@@ -39,7 +41,7 @@ public class SelectFromDatabaseChangeLogLockGenerator extends AbstractSqlGenerat
         if (database instanceof OracleDatabase) {
             sql += " FOR UPDATE";
         }
-        return new Sql[] {
+        return new Action[] {
                 new UnparsedSql(sql)
         };
     }

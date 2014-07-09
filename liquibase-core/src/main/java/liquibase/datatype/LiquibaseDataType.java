@@ -14,6 +14,12 @@ import java.util.List;
  */
 public abstract class LiquibaseDataType implements PrioritizedService {
 
+    /**
+     * String value used for comparison. If a function matches this value then it should be replaces by the
+     * real current timestamp function.
+     */
+    public static final String CURRENT_DATE_TIME_PLACE_HOLDER = "current_datetime";
+
     private String name;
     private String[] aliases;
     private int priority;
@@ -170,7 +176,7 @@ public abstract class LiquibaseDataType implements PrioritizedService {
 
     protected boolean isCurrentDateTimeFunction(String string, Database database) {
         return string.toLowerCase().startsWith("current_timestamp")
-                || string.toLowerCase().startsWith(DatabaseFunction.CURRENT_DATE_TIME_PLACE_HOLDER)
+                || string.toLowerCase().startsWith(CURRENT_DATE_TIME_PLACE_HOLDER)
                 || database.getCurrentDateTimeFunction().equalsIgnoreCase(string);
     }
 

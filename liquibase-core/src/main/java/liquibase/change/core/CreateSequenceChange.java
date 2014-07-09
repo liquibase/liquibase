@@ -1,9 +1,9 @@
 package liquibase.change.core;
 
 import liquibase.change.*;
-import liquibase.database.Database;
+import  liquibase.ExecutionEnvironment;
 import liquibase.snapshot.SnapshotGeneratorFactory;
-import liquibase.statement.SqlStatement;
+import liquibase.statement.Statement;
 import liquibase.statement.core.CreateSequenceStatement;
 import liquibase.structure.core.Sequence;
 
@@ -116,8 +116,8 @@ public class CreateSequenceChange extends AbstractChange {
     }
 
     @Override
-    public SqlStatement[] generateStatements(Database database) {
-        return new SqlStatement[] {
+    public Statement[] generateStatements(ExecutionEnvironment env) {
+        return new Statement[] {
                 new CreateSequenceStatement(getCatalogName(), getSchemaName(), getSequenceName())
                 .setIncrementBy(getIncrementBy())
                 .setMaxValue(getMaxValue())
@@ -130,10 +130,10 @@ public class CreateSequenceChange extends AbstractChange {
     }
 
     @Override
-    public ChangeStatus checkStatus(Database database) {
+    public ChangeStatus checkStatus(ExecutionEnvironment env) {
         ChangeStatus result = new ChangeStatus();
         try {
-            Sequence sequence = SnapshotGeneratorFactory.getInstance().createSnapshot(new Sequence(getCatalogName(), getSchemaName(), getSequenceName()), database);
+            Sequence sequence = SnapshotGeneratorFactory.getInstance().createSnapshot(new Sequence(getCatalogName(), getSchemaName(), getSequenceName()), env.getTargetDatabase());
             result.assertComplete(sequence != null, "Sequence " + getSequenceName() + " does not exist");
             if (sequence != null) {
                 if (getIncrementBy() != null) {

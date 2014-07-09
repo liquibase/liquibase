@@ -1,24 +1,22 @@
 package liquibase.change.core;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
+import liquibase.statement.core.*;
+import liquibase.statementlogic.StatementLogicFactory;
 import liquibase.change.*;
 import liquibase.database.Database;
 import liquibase.database.core.*;
+import  liquibase.ExecutionEnvironment;
 import liquibase.snapshot.SnapshotGeneratorFactory;
-import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.*;
-import liquibase.statement.core.AddColumnStatement;
-import liquibase.statement.core.ReorganizeTableStatement;
-import liquibase.statement.core.SetColumnRemarksStatement;
-import liquibase.statement.core.UpdateStatement;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.PrimaryKey;
 import liquibase.structure.core.Table;
 import liquibase.util.StringUtils;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Adds a column to an existing table.
@@ -83,18 +81,19 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
     }
 
     @Override
-    public SqlStatement[] generateStatements(Database database) {
+    public Statement[] generateStatements(ExecutionEnvironment env) {
 
-        List<SqlStatement> sql = new ArrayList<SqlStatement>();
+        Database database = env.getTargetDatabase();
+        List<Statement> sql = new ArrayList<Statement>();
 
         if (getColumns().size() == 0) {
-            return new SqlStatement[] {
+            return new Statement[] {
                     new AddColumnStatement(catalogName, schemaName, tableName, null, null, null)
             };
         }
 
         for (AddColumnConfig column : getColumns()) {
-            Set<ColumnConstraint> constraints = new HashSet<ColumnConstraint>();
+            Set<Constraint> constraints = new HashSet<Constraint>();
             ConstraintsConfig constraintsConfig =column.getConstraints();
             if (constraintsConfig != null) {
                 if (constraintsConfig.isNullable() != null && !constraintsConfig.isNullable()) {
@@ -123,8 +122,8 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
                     column.getName(),
                     column.getType(),
                     column.getDefaultValueObject(),
-                    column.getRemarks(),
-                    constraints.toArray(new ColumnConstraint[constraints.size()]));
+                    constraints.toArray(new ColumnConstraint[constraints.size()]))
+                    .setRemarks(column.getRemarks());
 
             if ((database instanceof MySQLDatabase) && (column.getAfterColumn() != null)) {
                 addColumnStatement.setAddAfterColumn(column.getAfterColumn());
@@ -138,13 +137,13 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
             sql.add(addColumnStatement);
 
             if (database instanceof DB2Database) {
-                sql.add(new ReorganizeTableStatement(getCatalogName(), getSchemaName(), getTableName()));
+                sql.add(new ReindexStatement(getCatalogName(), getSchemaName(), getTableName()));
             }            
 
             if (column.getValueObject() != null) {
-                UpdateStatement updateStatement = new UpdateStatement(getCatalogName(), getSchemaName(), getTableName());
-                updateStatement.addNewColumnValue(column.getName(), column.getValueObject());
-                sql.add(updateStatement);
+                UpdateDataStatement updateDataStatement = new UpdateDataStatement(getCatalogName(), getSchemaName(), getTableName());
+                updateDataStatement.addNewColumnValue(column.getName(), column.getValueObject());
+                sql.add(updateDataStatement);
             }
         }
 
@@ -152,13 +151,13 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
           String columnRemarks = StringUtils.trimToNull(column.getRemarks());
           if (columnRemarks != null) {
               SetColumnRemarksStatement remarksStatement = new SetColumnRemarksStatement(catalogName, schemaName, tableName, column.getName(), columnRemarks);
-              if (SqlGeneratorFactory.getInstance().supports(remarksStatement, database)) {
+              if (StatementLogicFactory.getInstance().supports(remarksStatement, env)) {
                   sql.add(remarksStatement);
               }
           }
       }
 
-      return sql.toArray(new SqlStatement[sql.size()]);
+      return sql.toArray(new Statement[sql.size()]);
     }
 
     @Override
@@ -187,11 +186,11 @@ public class AddColumnChange extends AbstractChange implements ChangeWithColumns
     }
 
     @Override
-    public ChangeStatus checkStatus(Database database) {
+    public ChangeStatus checkStatus(ExecutionEnvironment env) {
         ChangeStatus result = new ChangeStatus();
         try {
             for (AddColumnConfig column : getColumns()) {
-                Column snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(new Column(Table.class, getCatalogName(), getSchemaName(), getTableName(), column.getName()), database);
+                Column snapshot = SnapshotGeneratorFactory.getInstance().createSnapshot(new Column(Table.class, getCatalogName(), getSchemaName(), getTableName(), column.getName()), env.getTargetDatabase());
                 result.assertComplete(snapshot != null, "Column "+column.getName()+" does not exist");
 
                 if (snapshot != null) {

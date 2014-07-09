@@ -1,35 +1,37 @@
 package liquibase.statement.core;
 
-import liquibase.statement.AbstractSqlStatement;
+import liquibase.statement.AbstractStatement;
+import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.View;
 
-public class RenameViewStatement extends AbstractSqlStatement {
+/**
+ * Renames an existing view.
+ */
+public class RenameViewStatement extends AbstractViewStatement {
 
-    private String catalogName;
-    private String schemaName;
-    private String oldViewName;
-    private String newViewName;
+    public static final String NEW_VIEW_NAME = "newViewName";
+
+    public RenameViewStatement() {
+    }
 
     public RenameViewStatement(String catalogName, String schemaName, String oldViewName, String newViewName) {
-        this.catalogName = catalogName;
-        this.schemaName = schemaName;
-        this.oldViewName = oldViewName;
-        this.newViewName = newViewName;
-    }
-
-
-    public String getCatalogName() {
-        return catalogName;
-    }
-
-    public String getSchemaName() {
-        return schemaName;
-    }
-
-    public String getOldViewName() {
-        return oldViewName;
+        super(catalogName, schemaName, oldViewName);
+        setNewViewName(newViewName);
     }
 
     public String getNewViewName() {
-        return newViewName;
+        return getAttribute(NEW_VIEW_NAME, String.class);
+    }
+
+    public RenameViewStatement setNewViewName(String newViewName) {
+        return (RenameViewStatement) setAttribute(NEW_VIEW_NAME, newViewName);
+    }
+
+    @Override
+    protected DatabaseObject[] getBaseAffectedDatabaseObjects() {
+        return new DatabaseObject[] {
+            new View().setName(getNewViewName()).setSchema(getCatalogName(), getSchemaName()),
+            new View().setName(getViewName()).setSchema(getCatalogName(), getSchemaName()),
+        };
     }
 }

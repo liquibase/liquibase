@@ -4,11 +4,19 @@ import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.exception.UnsupportedException;
 import liquibase.executor.ExecutorService;
-import liquibase.snapshot.*;
+import liquibase.executor.Row;
+import liquibase.snapshot.CachedRow;
+import liquibase.snapshot.DatabaseSnapshot;
+import liquibase.snapshot.InvalidExampleException;
+import liquibase.snapshot.JdbcDatabaseSnapshot;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.core.*;
+import liquibase.structure.core.Catalog;
+import liquibase.structure.core.Schema;
+import liquibase.structure.core.Table;
+import liquibase.structure.core.UniqueConstraint;
 import liquibase.util.StringUtils;
 
 import java.sql.SQLException;
@@ -31,12 +39,12 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
 
 
     @Override
-    protected DatabaseObject snapshotObject(DatabaseObject example, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException {
+    protected DatabaseObject snapshotObject(DatabaseObject example, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException, UnsupportedException {
         Database database = snapshot.getDatabase();
         UniqueConstraint exampleConstraint = (UniqueConstraint) example;
         Table table = exampleConstraint.getTable();
 
-        List<Map<String, ?>> metadata = listColumns(exampleConstraint, database);
+        List<Row> metadata = listColumns(exampleConstraint, database);
 
         if (metadata.size() == 0) {
             return null;
@@ -44,8 +52,8 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
         UniqueConstraint constraint = new UniqueConstraint();
         constraint.setTable(table);
         constraint.setName(example.getName());
-        for (Map<String, ?> col : metadata) {
-            constraint.getColumns().add((String) col.get("COLUMN_NAME"));
+        for (Row col : metadata) {
+            constraint.getColumns().add(col.get("COLUMN_NAME", String.class));
         }
 
         return constraint;
@@ -53,7 +61,7 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
 
 
     @Override
-    protected void addTo(DatabaseObject foundObject, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException {
+    protected void addTo(DatabaseObject foundObject, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException, UnsupportedException {
 
         if (!snapshot.getSnapshotControl().shouldInclude(UniqueConstraint.class)) {
             return;
@@ -88,7 +96,7 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
         return ((JdbcDatabaseSnapshot) snapshot).getMetaData().getUniqueConstraints(schema.getCatalogName(), schema.getName(), table.getName());
     }
 
-    protected List<Map<String, ?>> listColumns(UniqueConstraint example, Database database) throws DatabaseException {
+    protected List<Row> listColumns(UniqueConstraint example, Database database) throws DatabaseException, UnsupportedException {
         Table table = example.getTable();
         Schema schema = table.getSchema();
         String name = example.getName();
@@ -139,26 +147,26 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
                     "JOIN sys.sysconstraints c ON c.constraintid = k.constraintid " +
                     "JOIN sys.systables t ON c.tableid = t.tableid "+
                     "WHERE c.constraintname='"+database.correctObjectName(name, UniqueConstraint.class)+"'";
-            List<Map<String, ?>> rows = ExecutorService.getInstance().getExecutor(database).queryForList(new RawSqlStatement(sql));
+            List<Row> rows = ExecutorService.getInstance().getExecutor(database).query(new RawSqlStatement(sql)).toList();
 
-            List<Map<String, ?>> returnList = new ArrayList<Map<String, ?>>();
+            List<Row> returnList = new ArrayList<Row>();
             if (rows.size() == 0) {
                 return returnList;
             } else if (rows.size() > 1) {
                 throw new UnexpectedLiquibaseException("Got multiple rows back querying unique constraints");
             } else {
-                Map rowData = rows.get(0);
-                String descriptor = rowData.get("DESCRIPTOR").toString();
+                Row rowData = rows.get(0);
+                String descriptor = rowData.get("DESCRIPTOR", String.class);
                 descriptor = descriptor.replaceFirst(".*\\(","").replaceFirst("\\).*","");
                 for (String columnNumber : StringUtils.splitAndTrim(descriptor, ",")) {
-                    String columnName = (String) ExecutorService.getInstance().getExecutor(database).queryForObject(new RawSqlStatement(
+                    String columnName = ExecutorService.getInstance().getExecutor(database).query(new RawSqlStatement(
                             "select c.columnname from sys.syscolumns c " +
                                     "join sys.systables t on t.tableid=c.referenceid " +
-                                    "where t.tablename='"+rowData.get("TABLENAME")+"' and c.columnnumber=" + columnNumber), String.class);
+                                    "where t.tablename='" + rowData.get("TABLENAME", String.class) + "' and c.columnnumber=" + columnNumber)).toObject(String.class);
 
                     Map<String, String> row = new HashMap<String, String>();
                     row.put("COLUMN_NAME", columnName);
-                    returnList.add(row);
+                    returnList.add(new Row(row));
                 }
                 return returnList;
             }
@@ -192,7 +200,7 @@ public class UniqueConstraintSnapshotGenerator extends JdbcSnapshotGenerator {
                 sql += "and constraint_name='" + constraintName + "'";
             }
         }
-        return ExecutorService.getInstance().getExecutor(database).queryForList(new RawSqlStatement(sql));
+        return ExecutorService.getInstance().getExecutor(database).query(new RawSqlStatement(sql)).toList();
     }
 
 

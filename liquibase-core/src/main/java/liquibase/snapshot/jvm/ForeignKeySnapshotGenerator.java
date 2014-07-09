@@ -5,15 +5,19 @@ import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.exception.DatabaseException;
+import liquibase.exception.UnsupportedException;
 import liquibase.snapshot.CachedRow;
-import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.DatabaseSnapshot;
+import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.JdbcDatabaseSnapshot;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
 
 import java.sql.DatabaseMetaData;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public class ForeignKeySnapshotGenerator extends JdbcSnapshotGenerator {
 
@@ -57,7 +61,7 @@ public class ForeignKeySnapshotGenerator extends JdbcSnapshotGenerator {
 
 
     @Override
-    protected void addTo(DatabaseObject foundObject, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException {
+    protected void addTo(DatabaseObject foundObject, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException, UnsupportedException {
         if (!snapshot.getSnapshotControl().shouldInclude(ForeignKey.class)) {
             return;
         }
@@ -89,7 +93,7 @@ public class ForeignKeySnapshotGenerator extends JdbcSnapshotGenerator {
     }
 
     @Override
-    protected DatabaseObject snapshotObject(DatabaseObject example, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException {
+    protected DatabaseObject snapshotObject(DatabaseObject example, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException, UnsupportedException {
 
         Database database = snapshot.getDatabase();
 

@@ -1,12 +1,11 @@
 package liquibase.change.core;
 
 import liquibase.change.*;
-import liquibase.database.Database;
 import liquibase.database.core.PostgresDatabase;
-import liquibase.exception.UnexpectedLiquibaseException;
+import  liquibase.ExecutionEnvironment;
 import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.statement.SequenceNextValueFunction;
-import liquibase.statement.SqlStatement;
+import liquibase.statement.Statement;
 import liquibase.statement.core.AddAutoIncrementStatement;
 import liquibase.statement.core.AddDefaultValueStatement;
 import liquibase.statement.core.CreateSequenceStatement;
@@ -14,8 +13,6 @@ import liquibase.statement.core.SetNullableStatement;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Table;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.math.BigInteger;
 
 /**
@@ -101,17 +98,17 @@ public class AddAutoIncrementChange extends AbstractChange {
     }
     
     @Override
-    public SqlStatement[] generateStatements(Database database) {
-        if (database instanceof PostgresDatabase) {
+    public Statement[] generateStatements(ExecutionEnvironment env) {
+        if (env.getTargetDatabase() instanceof PostgresDatabase) {
             String sequenceName = (getTableName() + "_" + getColumnName() + "_seq").toLowerCase();
-            return new SqlStatement[]{
+            return new Statement[]{
                     new CreateSequenceStatement(catalogName, schemaName, sequenceName),
                     new SetNullableStatement(catalogName, schemaName, getTableName(), getColumnName(), null, false),
                     new AddDefaultValueStatement(catalogName, schemaName, getTableName(), getColumnName(), getColumnDataType(), new SequenceNextValueFunction(sequenceName)),
             };
         }
 
-        return new SqlStatement[]{new AddAutoIncrementStatement(getCatalogName(), getSchemaName(), getTableName(), getColumnName(), getColumnDataType(), getStartWith(), getIncrementBy())};
+        return new Statement[]{new AddAutoIncrementStatement(getCatalogName(), getSchemaName(), getTableName(), getColumnName(), getColumnDataType(), getStartWith(), getIncrementBy())};
     }
 
     @Override
@@ -120,11 +117,11 @@ public class AddAutoIncrementChange extends AbstractChange {
     }
 
     @Override
-    public ChangeStatus checkStatus(Database database) {
+    public ChangeStatus checkStatus(ExecutionEnvironment env) {
         ChangeStatus result = new ChangeStatus();
         Column example = new Column(Table.class, getCatalogName(), getSchemaName(), getTableName(), getColumnName());
         try {
-            Column column = SnapshotGeneratorFactory.getInstance().createSnapshot(example, database);
+            Column column = SnapshotGeneratorFactory.getInstance().createSnapshot(example, env.getTargetDatabase());
             if (column == null) return result.unknown("Column does not exist");
 
 

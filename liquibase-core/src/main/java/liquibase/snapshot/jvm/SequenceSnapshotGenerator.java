@@ -5,20 +5,18 @@ import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.exception.UnsupportedException;
 import liquibase.executor.ExecutorService;
-import liquibase.snapshot.InvalidExampleException;
-import liquibase.snapshot.SnapshotGeneratorChain;
+import liquibase.executor.Row;
 import liquibase.snapshot.DatabaseSnapshot;
+import liquibase.snapshot.InvalidExampleException;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.Sequence;
 
-import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class SequenceSnapshotGenerator extends JdbcSnapshotGenerator {
 
@@ -27,7 +25,7 @@ public class SequenceSnapshotGenerator extends JdbcSnapshotGenerator {
     }
 
     @Override
-    protected void addTo(DatabaseObject foundObject, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException {
+    protected void addTo(DatabaseObject foundObject, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException, UnsupportedException {
         if (!snapshot.getDatabase().supportsSequences()) {
             return;
         }
@@ -39,37 +37,37 @@ public class SequenceSnapshotGenerator extends JdbcSnapshotGenerator {
             }
 
             //noinspection unchecked
-            List<Map<String, ?>> sequenceNames = ExecutorService.getInstance().getExecutor(database).queryForList(new RawSqlStatement(getSelectSequenceSql(schema, database)));
+            List<Row> sequenceNames = ExecutorService.getInstance().getExecutor(database).query(new RawSqlStatement(getSelectSequenceSql(schema, database))).toList();
 
             if (sequenceNames != null) {
-                for (Map<String, ?> sequence : sequenceNames) {
-                    schema.addDatabaseObject(new Sequence().setName(cleanNameFromDatabase((String) sequence.get("SEQUENCE_NAME"), database)).setSchema(schema));
+                for (Row sequence : sequenceNames) {
+                    schema.addDatabaseObject(new Sequence().setName(cleanNameFromDatabase(sequence.get("SEQUENCE_NAME", String.class), database)).setSchema(schema));
                 }
             }
         }
     }
 
     @Override
-    protected DatabaseObject snapshotObject(DatabaseObject example, DatabaseSnapshot snapshot) throws DatabaseException {
+    protected DatabaseObject snapshotObject(DatabaseObject example, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException, UnsupportedException {
         Database database = snapshot.getDatabase();
         if (!database.supportsSequences()) {
             return null;
         }
 
-        List<Map<String, ?>> sequences = ExecutorService.getInstance().getExecutor(database).queryForList(new RawSqlStatement(getSelectSequenceSql(example.getSchema(), database)));
-        for (Map<String, ?> sequenceRow : sequences) {
-            String name = cleanNameFromDatabase((String) sequenceRow.get("SEQUENCE_NAME"), database);
+        List<Row> sequences = ExecutorService.getInstance().getExecutor(database).query(new RawSqlStatement(getSelectSequenceSql(example.getSchema(), database))).toList();
+        for (Row sequenceRow : sequences) {
+            String name = cleanNameFromDatabase(sequenceRow.get("SEQUENCE_NAME", String.class), database);
             if ((database.isCaseSensitive() && name.equals(example.getName()) || (!database.isCaseSensitive() && name.equalsIgnoreCase(example.getName())))) {
                 Sequence seq = new Sequence();
                 seq.setName(name);
                 seq.setSchema(example.getSchema());
-                seq.setStartValue(toBigInteger(sequenceRow.get("START_VALUE"), database));
-                seq.setMinValue(toBigInteger(sequenceRow.get("MIN_VALUE"), database));
-                seq.setMaxValue(toBigInteger(sequenceRow.get("MAX_VALUE"), database));
-                seq.setCacheSize(toBigInteger(sequenceRow.get("CACHE_SIZE"), database));
-                seq.setIncrementBy(toBigInteger(sequenceRow.get("INCREMENT_BY"), database));
-                seq.setWillCycle(toBoolean(sequenceRow.get("WILL_CYCLE"), database));
-                seq.setOrdered(toBoolean(sequenceRow.get("IS_ORDERED"), database));
+                seq.setStartValue(sequenceRow.get("START_VALUE", BigInteger.class));
+                seq.setMinValue(sequenceRow.get("MIN_VALUE", BigInteger.class));
+                seq.setMaxValue(sequenceRow.get("MAX_VALUE", BigInteger.class));
+                seq.setCacheSize(sequenceRow.get("CACHE_SIZE", BigInteger.class));
+                seq.setIncrementBy(sequenceRow.get("INCREMENT_BY", BigInteger.class));
+                seq.setWillCycle(sequenceRow.get("WILL_CYCLE", Boolean.class));
+                seq.setOrdered(sequenceRow.get("IS_ORDERED", Boolean.class));
 
 
                 return seq;
@@ -78,40 +76,6 @@ public class SequenceSnapshotGenerator extends JdbcSnapshotGenerator {
         }
 
         return null;
-    }
-
-    protected Boolean toBoolean(Object value, Database database) {
-        if (value == null) {
-            return null;
-        }
-
-        if (value instanceof Boolean) {
-            return (Boolean) value;
-        }
-
-        String valueAsString = value.toString();
-        valueAsString = valueAsString.replace("'","");
-        if (valueAsString.equalsIgnoreCase("true")
-                || valueAsString.equalsIgnoreCase("'true'")
-                || valueAsString.equalsIgnoreCase("y")
-                || valueAsString.equalsIgnoreCase("1")
-                || valueAsString.equalsIgnoreCase("t")) {
-            return Boolean.TRUE;
-        } else {
-            return Boolean.FALSE;
-        }
-    }
-
-    protected BigInteger toBigInteger(Object value, Database database) {
-        if (value == null) {
-            return null;
-        }
-
-        if (value instanceof BigInteger) {
-            return (BigInteger) value;
-        }
-
-        return new BigInteger(value.toString());
     }
 
     protected String getSelectSequenceSql(Schema schema, Database database) {

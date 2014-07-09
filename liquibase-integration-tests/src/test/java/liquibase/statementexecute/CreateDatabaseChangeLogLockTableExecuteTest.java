@@ -2,7 +2,7 @@ package liquibase.statementexecute;
 
 import liquibase.database.*;
 import liquibase.database.core.*;
-import liquibase.statement.SqlStatement;
+import liquibase.statement.Statement;
 import liquibase.statement.core.CreateDatabaseChangeLogLockTableStatement;
 
 import java.util.List;
@@ -11,7 +11,7 @@ import org.junit.Test;
 
 public class CreateDatabaseChangeLogLockTableExecuteTest extends AbstractExecuteTest {
     @Override
-    protected List<? extends SqlStatement> setupStatements(Database database) {
+    protected List<? extends Statement> setupStatements(Database database) {
         return null;
     }
 

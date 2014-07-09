@@ -1,14 +1,15 @@
 package liquibase.sqlgenerator.core;
 
+import liquibase.action.Action;
+import liquibase.action.core.UnparsedSql;
+import liquibase.exception.UnsupportedException;
+import liquibase.statementlogic.StatementLogicChain;
 import liquibase.database.Database;
 import liquibase.database.core.*;
-import liquibase.structure.core.Index;
 import liquibase.exception.ValidationErrors;
-import liquibase.sql.Sql;
-import liquibase.sql.UnparsedSql;
-import liquibase.sqlgenerator.SqlGeneratorChain;
+import  liquibase.ExecutionEnvironment;
 import liquibase.statement.core.DropIndexStatement;
-import liquibase.structure.core.Table;
+import liquibase.structure.core.Index;
 import liquibase.util.StringUtils;
 
 import java.util.List;
@@ -16,7 +17,9 @@ import java.util.List;
 public class DropIndexGenerator extends AbstractSqlGenerator<DropIndexStatement> {
 
     @Override
-    public ValidationErrors validate(DropIndexStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public ValidationErrors validate(DropIndexStatement statement, ExecutionEnvironment env, StatementLogicChain chain) {
+        Database database = env.getTargetDatabase();
+
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("indexName", statement.getIndexName());
 
@@ -28,14 +31,16 @@ public class DropIndexGenerator extends AbstractSqlGenerator<DropIndexStatement>
     }
 
     @Override
-    public Sql[] generateSql(DropIndexStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public Action[] generateActions(DropIndexStatement statement, ExecutionEnvironment env, StatementLogicChain chain) throws UnsupportedException {
+        Database database = env.getTargetDatabase();
+
         List<String> associatedWith = StringUtils.splitAndTrim(statement.getAssociatedWith(), ",");
         if (associatedWith != null) {
             if (associatedWith.contains(Index.MARK_PRIMARY_KEY)|| associatedWith.contains(Index.MARK_UNIQUE_CONSTRAINT)) {
-                return new Sql[0];
+                return new Action[0];
             } else if (associatedWith.contains(Index.MARK_FOREIGN_KEY) ) {
                 if (!(database instanceof OracleDatabase || database instanceof MSSQLDatabase)) {
-                    return new Sql[0];
+                    return new Action[0];
                 }
             }
         }
@@ -43,23 +48,16 @@ public class DropIndexGenerator extends AbstractSqlGenerator<DropIndexStatement>
         String schemaName = statement.getTableSchemaName();
         
         if (database instanceof MySQLDatabase) {
-            return new Sql[] {new UnparsedSql("DROP INDEX " + database.escapeIndexName(null, null, statement.getIndexName()) + " ON " + database.escapeTableName(statement.getTableCatalogName(), schemaName, statement.getTableName()), getAffectedIndex(statement)) };
+            return new Action[] {new UnparsedSql("DROP INDEX " + database.escapeIndexName(null, null, statement.getIndexName()) + " ON " + database.escapeTableName(statement.getTableCatalogName(), schemaName, statement.getTableName())) };
         } else if (database instanceof MSSQLDatabase) {
-            return new Sql[] {new UnparsedSql("DROP INDEX " + database.escapeTableName(null, schemaName, statement.getTableName()) + "." + database.escapeIndexName(null, null, statement.getIndexName()), getAffectedIndex(statement)) };
+            return new Action[] {new UnparsedSql("DROP INDEX " + database.escapeTableName(null, schemaName, statement.getTableName()) + "." + database.escapeIndexName(null, null, statement.getIndexName()))};
         } else if (database instanceof SybaseDatabase) {
-            return new Sql[]{new UnparsedSql("DROP INDEX " + statement.getTableName() + "." + statement.getIndexName(), getAffectedIndex(statement))};
+            return new Action[]{new UnparsedSql("DROP INDEX " + statement.getTableName() + "." + statement.getIndexName())};
         } else if (database instanceof PostgresDatabase) {
-			return new Sql[]{new UnparsedSql("DROP INDEX " + database.escapeIndexName(statement.getTableCatalogName(),schemaName, statement.getIndexName()), getAffectedIndex(statement))};
+            return new Action[]{new UnparsedSql("DROP INDEX " + database.escapeIndexName(statement.getTableCatalogName(),schemaName, statement.getIndexName()))};
 		}
 
-        return new Sql[] {new UnparsedSql("DROP INDEX " + database.escapeIndexName(statement.getTableCatalogName(), schemaName, statement.getIndexName()), getAffectedIndex(statement)) };
+        return new Action[] {new UnparsedSql("DROP INDEX " + database.escapeIndexName(statement.getTableCatalogName(), schemaName, statement.getIndexName())) };
     }
 
-    protected Index getAffectedIndex(DropIndexStatement statement) {
-        Table table = null;
-        if (statement.getTableName() != null) {
-            table = (Table) new Table().setName(statement.getTableName()).setSchema(statement.getTableCatalogName(), statement.getTableSchemaName());
-        }
-        return new Index().setName(statement.getIndexName()).setTable(table);
-    }
 }

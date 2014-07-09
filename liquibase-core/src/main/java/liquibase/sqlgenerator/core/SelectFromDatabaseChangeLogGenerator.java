@@ -1,12 +1,13 @@
 package liquibase.sqlgenerator.core;
 
+import liquibase.action.Action;
+import liquibase.action.core.UnparsedSql;
+import liquibase.exception.UnsupportedException;
+import liquibase.statementlogic.StatementLogicChain;
 import liquibase.database.Database;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
-import liquibase.sql.Sql;
-import liquibase.sql.UnparsedSql;
-import liquibase.sqlgenerator.SqlGenerator;
-import liquibase.sqlgenerator.SqlGeneratorChain;
+import  liquibase.ExecutionEnvironment;
 import liquibase.statement.core.SelectFromDatabaseChangeLogStatement;
 import liquibase.util.StringUtils;
 
@@ -16,7 +17,7 @@ import java.util.List;
 public class SelectFromDatabaseChangeLogGenerator extends AbstractSqlGenerator<SelectFromDatabaseChangeLogStatement> {
 
     @Override
-    public ValidationErrors validate(SelectFromDatabaseChangeLogStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public ValidationErrors validate(SelectFromDatabaseChangeLogStatement statement, ExecutionEnvironment env, StatementLogicChain chain) {
         ValidationErrors errors = new ValidationErrors();
         errors.checkRequiredField("columnToSelect", statement.getColumnsToSelect());
 
@@ -24,7 +25,9 @@ public class SelectFromDatabaseChangeLogGenerator extends AbstractSqlGenerator<S
     }
 
     @Override
-    public Sql[] generateSql(SelectFromDatabaseChangeLogStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public Action[] generateActions(SelectFromDatabaseChangeLogStatement statement, ExecutionEnvironment env, StatementLogicChain chain) throws UnsupportedException {
+        Database database = env.getTargetDatabase();
+
         List<String> columnsToSelect = Arrays.asList(statement.getColumnsToSelect());
         for (int i=0; i<columnsToSelect.size(); i++) {
             columnsToSelect.set(i, database.escapeColumnName(null, null, null, columnsToSelect.get(i)));
@@ -35,7 +38,7 @@ public class SelectFromDatabaseChangeLogGenerator extends AbstractSqlGenerator<S
         SelectFromDatabaseChangeLogStatement.WhereClause whereClause = statement.getWhereClause();
         if (whereClause != null) {
             if (whereClause instanceof SelectFromDatabaseChangeLogStatement.ByTag) {
-                sql += " WHERE "+database.escapeColumnName(null, null, null, "TAG")+"='" + ((SelectFromDatabaseChangeLogStatement.ByTag) whereClause).getTagName() + "'";
+                sql += " WHERE "+ database.escapeColumnName(null, null, null, "TAG")+"='" + ((SelectFromDatabaseChangeLogStatement.ByTag) whereClause).getTagName() + "'";
             } else if (whereClause instanceof SelectFromDatabaseChangeLogStatement.ByNotNullCheckSum) {
                     sql += " WHERE MD5SUM IS NOT NULL";
             } else {
@@ -43,11 +46,11 @@ public class SelectFromDatabaseChangeLogGenerator extends AbstractSqlGenerator<S
             }
         }
 
-        if (statement.getOrderByColumns() != null && statement.getOrderByColumns().length > 0) {
-            sql += " ORDER BY "+StringUtils.join(statement.getOrderByColumns(), ", ").toUpperCase();
+        if (statement.getOrderBy() != null && statement.getOrderBy().length > 0) {
+            sql += " ORDER BY "+StringUtils.join(statement.getOrderBy(), ", ").toUpperCase();
         }
 
-        return new Sql[]{
+        return new Action[]{
                 new UnparsedSql(sql)
         };
     }

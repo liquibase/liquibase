@@ -1,16 +1,11 @@
 package liquibase.serializer;
 
-import liquibase.change.Change;
-import liquibase.change.ColumnConfig;
 import liquibase.changelog.ChangeSet;
-import liquibase.changelog.DatabaseChangeLog;
-import liquibase.sql.visitor.SqlVisitor;
 
 import java.io.File;
-import java.io.InputStream;
-import java.util.List;
-import java.io.OutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.util.List;
 
 
 public class MockChangeLogSerializer implements ChangeLogSerializer {

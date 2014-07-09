@@ -1,34 +1,35 @@
 package liquibase.sqlgenerator.core;
 
+import liquibase.action.Action;
+import liquibase.action.core.UnparsedSql;
+import liquibase.exception.UnsupportedException;
+import liquibase.statement.Constraint;
+import liquibase.statementlogic.StatementLogicChain;
+import liquibase.statementlogic.StatementLogicFactory;
 import liquibase.database.Database;
-import liquibase.statement.core.AddUniqueConstraintStatement;
-import liquibase.structure.core.Schema;
-import liquibase.datatype.DataTypeFactory;
 import liquibase.database.core.*;
-import liquibase.structure.core.Column;
-import liquibase.structure.core.Table;
-import liquibase.exception.ValidationErrors;
+import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.sql.Sql;
-import liquibase.sql.UnparsedSql;
-import liquibase.sqlgenerator.SqlGeneratorChain;
-import liquibase.sqlgenerator.SqlGeneratorFactory;
+import liquibase.exception.ValidationErrors;
+import  liquibase.ExecutionEnvironment;
+import liquibase.statement.AutoIncrementConstraint;
+import liquibase.statement.ForeignKeyConstraint;
 import liquibase.statement.core.AddColumnStatement;
 import liquibase.statement.core.AddForeignKeyConstraintStatement;
-import liquibase.statement.AutoIncrementConstraint;
-import liquibase.statement.ColumnConstraint;
-import liquibase.statement.ForeignKeyConstraint;
+import liquibase.statement.core.AddUniqueConstraintStatement;
 
-import java.util.List;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement> {
 
     @Override
-    public ValidationErrors validate(AddColumnStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public ValidationErrors validate(AddColumnStatement statement, ExecutionEnvironment env, StatementLogicChain chain) {
+        Database database = env.getTargetDatabase();
+
         ValidationErrors validationErrors = new ValidationErrors();
 
         validationErrors.checkRequiredField("columnName", statement.getColumnName());
@@ -62,13 +63,14 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
     }
 
     @Override
-    public Sql[] generateSql(AddColumnStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public Action[] generateActions(AddColumnStatement statement, ExecutionEnvironment env, StatementLogicChain chain) throws UnsupportedException {
 
+        Database database = env.getTargetDatabase();
         String alterTable = "ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()) + " ADD " + database.escapeColumnName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName()) + " " + DataTypeFactory.getInstance().fromDescription(statement.getColumnType() + (statement.isAutoIncrement() ? "{autoIncrement:true}" : ""), database).toDatabaseDataType(database);
 
         if (statement.isAutoIncrement() && database.supportsAutoIncrement()) {
             AutoIncrementConstraint autoIncrementConstraint = statement.getAutoIncrementConstraint();
-        	alterTable += " " + database.getAutoIncrementClause(autoIncrementConstraint.getStartWith(), autoIncrementConstraint.getIncrementBy());
+            alterTable += " " + database.getAutoIncrementClause(autoIncrementConstraint.getStartWith(), autoIncrementConstraint.getIncrementBy());
         }
 
         if (!statement.isNullable()) {
@@ -89,30 +91,24 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
             alterTable += " COMMENT '" + statement.getRemarks() + "' ";
         }
 
-        List<Sql> returnSql = new ArrayList<Sql>();
-        returnSql.add(new UnparsedSql(alterTable, getAffectedColumn(statement)));
+        List<Action> returnSql = new ArrayList<Action>();
+        returnSql.add(new UnparsedSql(alterTable));
 
-        addUniqueConstrantStatements(statement, database, returnSql);
-        addForeignKeyStatements(statement, database, returnSql);
+        addUniqueConstrantStatements(statement, env, returnSql);
+        addForeignKeyStatements(statement, env, returnSql);
 
-        return returnSql.toArray(new Sql[returnSql.size()]);
+        return returnSql.toArray(new Action[returnSql.size()]);
     }
 
-    protected Column getAffectedColumn(AddColumnStatement statement) {
-        return new Column()
-                .setRelation(new Table().setName(statement.getTableName()).setSchema(new Schema(statement.getCatalogName(), statement.getSchemaName())))
-                .setName(statement.getColumnName());
-    }
-
-    protected void addUniqueConstrantStatements(AddColumnStatement statement, Database database, List<Sql> returnSql) {
+    protected void addUniqueConstrantStatements(AddColumnStatement statement, ExecutionEnvironment env, List<Action> returnSql) throws UnsupportedException {
         if (statement.isUnique()) {
-            AddUniqueConstraintStatement addConstraintStmt = new AddUniqueConstraintStatement(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName(), statement.getUniqueStatementName());
-            returnSql.addAll(Arrays.asList(SqlGeneratorFactory.getInstance().generateSql(addConstraintStmt, database)));
+            AddUniqueConstraintStatement addConstraintStmt = new AddUniqueConstraintStatement(statement.getUniqueConstraintName(), statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName());
+            returnSql.addAll(Arrays.asList(StatementLogicFactory.getInstance().generateActions(addConstraintStmt, env)));
         }
     }
 
-    protected void addForeignKeyStatements(AddColumnStatement statement, Database database, List<Sql> returnSql) {
-        for (ColumnConstraint constraint : statement.getConstraints()) {
+    protected void addForeignKeyStatements(AddColumnStatement statement, ExecutionEnvironment env, List<Action> returnSql) throws UnsupportedException {
+        for (Constraint constraint : statement.getConstraints()) {
             if (constraint instanceof ForeignKeyConstraint) {
                 ForeignKeyConstraint fkConstraint = (ForeignKeyConstraint) constraint;
                 String refSchemaName = null;
@@ -137,7 +133,7 @@ public class AddColumnGenerator extends AbstractSqlGenerator<AddColumnStatement>
 
 
                 AddForeignKeyConstraintStatement addForeignKeyConstraintStatement = new AddForeignKeyConstraintStatement(fkConstraint.getForeignKeyName(), statement.getCatalogName(), statement.getSchemaName(), statement.getTableName(), statement.getColumnName(), null, refSchemaName, refTableName, refColName);
-                returnSql.addAll(Arrays.asList(SqlGeneratorFactory.getInstance().generateSql(addForeignKeyConstraintStatement, database)));
+                returnSql.addAll(Arrays.asList(StatementLogicFactory.getInstance().generateActions(addForeignKeyConstraintStatement, env)));
             }
         }
     }

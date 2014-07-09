@@ -2,14 +2,22 @@ package liquibase.change;
 
 import liquibase.database.Database;
 import liquibase.database.core.MSSQLDatabase;
-import liquibase.exception.*;
+import liquibase.exception.DatabaseException;
+import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.exception.ValidationErrors;
+import liquibase.exception.Warnings;
+import  liquibase.ExecutionEnvironment;
 import liquibase.logging.LogFactory;
-import liquibase.statement.SqlStatement;
+import liquibase.statement.Statement;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.util.StringUtils;
 
-import java.io.*;
-import java.util.*;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.PushbackInputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A common parent for all raw SQL related changes regardless of where the sql was sourced from.
@@ -50,21 +58,21 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
 
     /**
      * {@inheritDoc}
-     * @param database
+     * @param options
      * @return
      */
     @Override
-    public boolean supports(Database database) {
+    public boolean supports(ExecutionEnvironment env) {
         return true;
     }
 
     @Override
-    public Warnings warn(Database database) {
+    public Warnings warn(ExecutionEnvironment env) {
         return new Warnings();
     }
 
     @Override
-    public ValidationErrors validate(Database database) {
+    public ValidationErrors validate(ExecutionEnvironment env) {
         ValidationErrors validationErrors = new ValidationErrors();
         if (StringUtils.trimToNull(sql) == null) {
             validationErrors.addError("'sql' is required");
@@ -195,13 +203,15 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
      * The set SQL is passed through the {@link java.sql.Connection#nativeSQL} method if a connection is available.
      */
     @Override
-    public SqlStatement[] generateStatements(Database database) {
+    public Statement[] generateStatements(ExecutionEnvironment env) {
 
-        List<SqlStatement> returnStatements = new ArrayList<SqlStatement>();
+        Database database = env.getTargetDatabase();
+
+        List<Statement> returnStatements = new ArrayList<Statement>();
 
         String sql = StringUtils.trimToNull(getSql());
         if (sql == null) {
-            return new SqlStatement[0];
+            return new Statement[0];
         }
 
         String processedSQL = normalizeLineEndings(sql);
@@ -222,21 +232,21 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
             returnStatements.add(new RawSqlStatement(escapedStatement, getEndDelimiter()));
         }
 
-        return returnStatements.toArray(new SqlStatement[returnStatements.size()]);
+        return returnStatements.toArray(new Statement[returnStatements.size()]);
     }
 
     @Override
-    public boolean generateStatementsVolatile(Database database) {
+    public boolean generateStatementsVolatile(ExecutionEnvironment env) {
         return false;
     }
 
     @Override
-    public boolean generateRollbackStatementsVolatile(Database database) {
+    public boolean generateRollbackStatementsVolatile(ExecutionEnvironment env) {
         return false;
     }
 
     @Override
-    public ChangeStatus checkStatus(Database database) {
+    public ChangeStatus checkStatus(ExecutionEnvironment env) {
         return new ChangeStatus().unknown("Cannot check raw sql status");
     }
 

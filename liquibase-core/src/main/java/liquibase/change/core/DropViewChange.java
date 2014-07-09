@@ -1,9 +1,9 @@
 package liquibase.change.core;
 
 import liquibase.change.*;
-import liquibase.database.Database;
+import  liquibase.ExecutionEnvironment;
 import liquibase.snapshot.SnapshotGeneratorFactory;
-import liquibase.statement.SqlStatement;
+import liquibase.statement.Statement;
 import liquibase.statement.core.DropViewStatement;
 import liquibase.structure.core.View;
 
@@ -45,16 +45,16 @@ public class DropViewChange extends AbstractChange {
     }
 
     @Override
-    public SqlStatement[] generateStatements(Database database) {
-        return new SqlStatement[]{
+    public Statement[] generateStatements(ExecutionEnvironment env) {
+        return new Statement[]{
                 new DropViewStatement(getCatalogName(), getSchemaName(), getViewName()),
         };
     }
 
     @Override
-    public ChangeStatus checkStatus(Database database) {
+    public ChangeStatus checkStatus(ExecutionEnvironment env) {
         try {
-            return new ChangeStatus().assertComplete(!SnapshotGeneratorFactory.getInstance().has(new View(getCatalogName(), getSchemaName(), getViewName()), database), "View exists");
+            return new ChangeStatus().assertComplete(!SnapshotGeneratorFactory.getInstance().has(new View(getCatalogName(), getSchemaName(), getViewName()), env.getTargetDatabase()), "View exists");
         } catch (Exception e) {
             return new ChangeStatus().unknown(e);
         }

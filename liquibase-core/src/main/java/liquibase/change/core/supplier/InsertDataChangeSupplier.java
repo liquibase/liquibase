@@ -34,7 +34,7 @@ public class InsertDataChangeSupplier extends AbstractChangeSupplier<InsertDataC
     @Override
     public void checkDiffResult(DiffResult diffResult, InsertDataChange change) throws Exception {
         Database database = diffResult.getComparisonSnapshot().getDatabase();
-        int rows = ExecutorService.getInstance().getExecutor(database).queryForInt(new RawSqlStatement("select count(*) from " + database.escapeTableName(change.getCatalogName(), change.getSchemaName(), change.getTableName())));
+        int rows = ExecutorService.getInstance().getExecutor(database).query(new RawSqlStatement("select count(*) from " + database.escapeTableName(change.getCatalogName(), change.getSchemaName(), change.getTableName()))).toObject(0);
         assertTrue(rows > 0);
     }
 }

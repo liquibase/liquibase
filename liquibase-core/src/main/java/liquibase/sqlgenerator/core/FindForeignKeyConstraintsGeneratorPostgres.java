@@ -1,12 +1,12 @@
 package liquibase.sqlgenerator.core;
 
-import liquibase.database.Database;
+import liquibase.action.Action;
+import liquibase.action.core.UnparsedSql;
+import liquibase.exception.UnsupportedException;
+import liquibase.statementlogic.StatementLogicChain;
 import liquibase.database.core.PostgresDatabase;
 import liquibase.exception.ValidationErrors;
-import liquibase.sql.Sql;
-import liquibase.sql.UnparsedSql;
-import liquibase.sqlgenerator.SqlGenerator;
-import liquibase.sqlgenerator.SqlGeneratorChain;
+import  liquibase.ExecutionEnvironment;
 import liquibase.statement.core.FindForeignKeyConstraintsStatement;
 
 public class FindForeignKeyConstraintsGeneratorPostgres extends AbstractSqlGenerator<FindForeignKeyConstraintsStatement> {
@@ -16,19 +16,19 @@ public class FindForeignKeyConstraintsGeneratorPostgres extends AbstractSqlGener
     }
 
     @Override
-    public boolean supports(FindForeignKeyConstraintsStatement statement, Database database) {
-        return database instanceof PostgresDatabase;
+    public boolean supports(FindForeignKeyConstraintsStatement statement, ExecutionEnvironment env) {
+        return env.getTargetDatabase() instanceof PostgresDatabase;
     }
 
     @Override
-    public ValidationErrors validate(FindForeignKeyConstraintsStatement findForeignKeyConstraintsStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public ValidationErrors validate(FindForeignKeyConstraintsStatement findForeignKeyConstraintsStatement, ExecutionEnvironment env, StatementLogicChain chain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("baseTableName", findForeignKeyConstraintsStatement.getBaseTableName());
         return validationErrors;
     }
 
     @Override
-    public Sql[] generateSql(FindForeignKeyConstraintsStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public Action[] generateActions(FindForeignKeyConstraintsStatement statement, ExecutionEnvironment env, StatementLogicChain chain) throws UnsupportedException {
          StringBuilder sb = new StringBuilder();
 
             sb.append("SELECT ");
@@ -49,7 +49,7 @@ public class FindForeignKeyConstraintsGeneratorPostgres extends AbstractSqlGener
             sb.append(") PT ON PT.TABLE_NAME = PK.TABLE_NAME ");
             sb.append("WHERE      lower(FK.TABLE_NAME)='").append(statement.getBaseTableName().toLowerCase()).append("'");
 
-        return new Sql[] {
+        return new Action[] {
                 new UnparsedSql(sb.toString())
         };
     }

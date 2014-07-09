@@ -6,12 +6,16 @@ import liquibase.database.Database;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.exception.DatabaseException;
+import liquibase.exception.UnsupportedException;
 import liquibase.snapshot.CachedRow;
-import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.DatabaseSnapshot;
+import liquibase.snapshot.InvalidExampleException;
 import liquibase.snapshot.JdbcDatabaseSnapshot;
 import liquibase.structure.DatabaseObject;
-import liquibase.structure.core.*;
+import liquibase.structure.core.Index;
+import liquibase.structure.core.PrimaryKey;
+import liquibase.structure.core.Schema;
+import liquibase.structure.core.Table;
 
 import java.sql.SQLException;
 import java.util.Arrays;
@@ -24,7 +28,7 @@ public class PrimaryKeySnapshotGenerator extends JdbcSnapshotGenerator {
     }
 
     @Override
-    protected DatabaseObject snapshotObject(DatabaseObject example, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException {
+    protected DatabaseObject snapshotObject(DatabaseObject example, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException, UnsupportedException {
         Database database = snapshot.getDatabase();
         Schema schema = example.getSchema();
         String searchTableName = null;
@@ -75,7 +79,7 @@ public class PrimaryKeySnapshotGenerator extends JdbcSnapshotGenerator {
     }
 
     @Override
-    protected void addTo(DatabaseObject foundObject, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException {
+    protected void addTo(DatabaseObject foundObject, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException, UnsupportedException {
         if (!snapshot.getSnapshotControl().shouldInclude(PrimaryKey.class)) {
             return;
         }

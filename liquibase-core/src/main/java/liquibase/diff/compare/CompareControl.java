@@ -1,12 +1,7 @@
 package liquibase.diff.compare;
 
 import liquibase.CatalogAndSchema;
-import liquibase.database.Database;
-import liquibase.diff.ObjectDifferences;
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.logging.LogFactory;
-import liquibase.servicelocator.ServiceLocator;
-import liquibase.snapshot.SnapshotGeneratorFactory;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.DatabaseObjectFactory;
 

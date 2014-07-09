@@ -5,12 +5,13 @@ import liquibase.database.Database;
 import liquibase.database.core.DB2Database;
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.database.core.SQLiteDatabase.AlterTableVisitor;
+import  liquibase.ExecutionEnvironment;
+import liquibase.statement.Statement;
+import liquibase.statement.core.ReindexStatement;
+import liquibase.statement.core.SetNullableStatement;
+import liquibase.statement.core.UpdateDataStatement;
 import liquibase.structure.core.Column;
 import liquibase.structure.core.Index;
-import liquibase.statement.SqlStatement;
-import liquibase.statement.core.ReorganizeTableStatement;
-import liquibase.statement.core.SetNullableStatement;
-import liquibase.statement.core.UpdateStatement;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -84,41 +85,43 @@ public class AddNotNullConstraintChange extends AbstractChange {
     }
 
     @Override
-    public SqlStatement[] generateStatements(Database database) {
+    public Statement[] generateStatements(ExecutionEnvironment env) {
 
 ////        if (database instanceof SQLiteDatabase) {
 //    		// return special statements for SQLite databases
 //    		return generateStatementsForSQLiteDatabase(database);
 //        }
 
-    	List<SqlStatement> statements = new ArrayList<SqlStatement>();
+        Database database = env.getTargetDatabase();
+
+    	List<Statement> statements = new ArrayList<Statement>();
 
         if (defaultNullValue != null) {
-            statements.add(new UpdateStatement(getCatalogName(), getSchemaName(), getTableName())
+            statements.add(new UpdateDataStatement(getCatalogName(), getSchemaName(), getTableName())
                     .addNewColumnValue(getColumnName(), defaultNullValue)
-                    .setWhereClause(database.escapeObjectName(getColumnName(), Column.class) + " IS NULL"));
+                    .setWhere(database.escapeObjectName(getColumnName(), Column.class) + " IS NULL"));
         }
         
     	statements.add(new SetNullableStatement(getCatalogName(), getSchemaName(), getTableName(), getColumnName(), getColumnDataType(), false));
         if (database instanceof DB2Database) {
-            statements.add(new ReorganizeTableStatement(getCatalogName(), getSchemaName(), getTableName()));
+            statements.add(new ReindexStatement(getCatalogName(), getSchemaName(), getTableName()));
         }           
         
-        return statements.toArray(new SqlStatement[statements.size()]);
+        return statements.toArray(new Statement[statements.size()]);
     }
 
-    private SqlStatement[] generateStatementsForSQLiteDatabase(Database database) {
+    private Statement[] generateStatementsForSQLiteDatabase(ExecutionEnvironment env) {
     	
     	// SQLite does not support this ALTER TABLE operation until now.
 		// For more information see: http://www.sqlite.org/omitted.html.
 		// This is a small work around...
     	
-    	List<SqlStatement> statements = new ArrayList<SqlStatement>();
+    	List<Statement> statements = new ArrayList<Statement>();
     	
         if (defaultNullValue != null) {
-            statements.add(new UpdateStatement(getCatalogName(), getSchemaName(), getTableName())
+            statements.add(new UpdateDataStatement(getCatalogName(), getSchemaName(), getTableName())
                     .addNewColumnValue(getColumnName(), getDefaultNullValue())
-                    .setWhereClause(getColumnName() + " IS NULL"));
+                    .setWhere(getColumnName() + " IS NULL"));
         }
 
 //		// ... test if column contains NULL values
@@ -167,12 +170,12 @@ public class AddNotNullConstraintChange extends AbstractChange {
     		
 		try {
     		// alter table
-			statements.addAll(SQLiteDatabase.getAlterTableStatements(rename_alter_visitor, database,getCatalogName(), getSchemaName(),getTableName()));
+			statements.addAll(SQLiteDatabase.getAlterTableStatements(rename_alter_visitor, env,getCatalogName(), getSchemaName(),getTableName()));
     	} catch (Exception e) {
 			e.printStackTrace();
 		}
     	
-    	return statements.toArray(new SqlStatement[statements.size()]);
+    	return statements.toArray(new Statement[statements.size()]);
     }
 
     @Override

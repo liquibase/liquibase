@@ -3,12 +3,11 @@ package liquibase.snapshot;
 import liquibase.database.Database;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
-import liquibase.executor.jvm.ColumnMapRowMapper;
-import liquibase.executor.jvm.RowMapperResultSetExtractor;
 import liquibase.util.JdbcUtils;
 import liquibase.util.StringUtils;
 
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.*;
@@ -216,24 +215,28 @@ class ResultSetCache {
         protected List<CachedRow> extract(ResultSet resultSet) throws SQLException {
             List<Map> result;
             List<CachedRow> returnList = new ArrayList<CachedRow>();
-            try {
-                result = (List<Map>) new RowMapperResultSetExtractor(new ColumnMapRowMapper() {
-                    @Override
-                    protected Object getColumnValue(ResultSet rs, int index) throws SQLException {
-                        Object value = super.getColumnValue(rs, index);
-                        if (value != null && value instanceof String) {
-                            value = ((String) value).trim();
-                        }
-                        return value;
-                    }
-                }).extractData(resultSet);
 
-                for (Map row : result) {
+            try {
+                while (resultSet.next()) {
+                    Map<String, Object> row = new HashMap<String, Object>();
+                    ResultSetMetaData metaData = resultSet.getMetaData();
+                    int columnCount = metaData.getColumnCount();
+
+                    for (int i = 1; i <= columnCount; i++) {
+                        String key = metaData.getColumnLabel(i).toUpperCase();
+                        Object obj = JdbcUtils.getResultSetValue(resultSet, i);
+                        if (obj != null && obj instanceof String) {
+                            obj = ((String) obj).trim();
+                        }
+
+                        row.put(key, obj);
+                    }
                     returnList.add(new CachedRow(row));
                 }
             } finally {
                 JdbcUtils.closeResultSet(resultSet);
             }
+
             return returnList;
         }
 

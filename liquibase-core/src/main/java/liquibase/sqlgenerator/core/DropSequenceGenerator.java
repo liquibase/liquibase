@@ -1,32 +1,34 @@
 package liquibase.sqlgenerator.core;
 
+import liquibase.action.Action;
+import liquibase.action.core.UnparsedSql;
+import liquibase.exception.UnsupportedException;
+import liquibase.statementlogic.StatementLogicChain;
 import liquibase.database.Database;
 import liquibase.database.core.DerbyDatabase;
 import liquibase.database.core.PostgresDatabase;
 import liquibase.exception.ValidationErrors;
-import liquibase.sql.Sql;
-import liquibase.sql.UnparsedSql;
-import liquibase.sqlgenerator.SqlGenerator;
-import liquibase.sqlgenerator.SqlGeneratorChain;
+import  liquibase.ExecutionEnvironment;
 import liquibase.statement.core.DropSequenceStatement;
-import liquibase.structure.core.Sequence;
 
 public class DropSequenceGenerator extends AbstractSqlGenerator<DropSequenceStatement> {
 
     @Override
-    public boolean supports(DropSequenceStatement statement, Database database) {
-        return database.supportsSequences();
+    public boolean supports(DropSequenceStatement statement, ExecutionEnvironment env) {
+        return env.getTargetDatabase().supportsSequences();
     }
 
     @Override
-    public ValidationErrors validate(DropSequenceStatement dropSequenceStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public ValidationErrors validate(DropSequenceStatement dropSequenceStatement, ExecutionEnvironment env, StatementLogicChain chain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("sequenceName", dropSequenceStatement.getSequenceName());
         return validationErrors;
     }
 
     @Override
-    public Sql[] generateSql(DropSequenceStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public Action[] generateActions(DropSequenceStatement statement, ExecutionEnvironment env, StatementLogicChain chain) throws UnsupportedException {
+        Database database = env.getTargetDatabase();
+
         String sql = "DROP SEQUENCE " + database.escapeSequenceName(statement.getCatalogName(), statement.getSchemaName(), statement.getSequenceName());
         if (database instanceof PostgresDatabase) {
             sql += " CASCADE";
@@ -34,12 +36,8 @@ public class DropSequenceGenerator extends AbstractSqlGenerator<DropSequenceStat
         if (database instanceof DerbyDatabase) {
             sql += " RESTRICT";
         }
-        return new Sql[] {
-                new UnparsedSql(sql, getAffectedSequence(statement))
+        return new Action[] {
+                new UnparsedSql(sql)
         };
-    }
-
-    protected Sequence getAffectedSequence(DropSequenceStatement statement) {
-        return new Sequence().setName(statement.getSequenceName()).setSchema(statement.getCatalogName(), statement.getSchemaName());
     }
 }

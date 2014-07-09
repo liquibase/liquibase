@@ -124,4 +124,40 @@ class StringUtilsTest extends Specification {
         "abc"   | 5   | "abc  "
         "abc "  | 5   | "abc  "
     }
+
+    @Unroll
+    def "toStringFormatter"() {
+        expect:
+        new StringUtils.ToStringFormatter().toString(obj) == expected
+
+        where:
+        obj                     | expected
+        null                    | null
+        ""                      | ""
+        "x"                     | "x"
+        ["a", "b"]              | "[a, b]"
+        ["a", "b"].toArray()    | "[a, b]"
+        [1, 2]                  | "[1, 2]"
+        [1, 2].toArray()        | "[1, 2]"
+        ["a", [1, 2]].toArray() | "[a, [1, 2]]"
+    }
+
+    @Unroll("#featureName: #string")
+    def "allUpperCase"() {
+        expect:
+        StringUtils.isUpperCase(string) == expected
+
+        where:
+        string   | expected
+        null     | true
+        ""       | true
+        "A"      | true
+        "ABC"    | true
+        "Abc"    | false
+        "abc"    | false
+        "A1B2C3" | true
+        "A_B_C"  | true
+        "123"    | true
+    }
 }
+

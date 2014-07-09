@@ -1,72 +1,90 @@
 package liquibase.statement.core;
 
 import liquibase.statement.*;
+import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.Column;
+import liquibase.structure.core.Schema;
+import liquibase.structure.core.Table;
 
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-public class AddColumnStatement extends AbstractSqlStatement {
+/**
+ * Adds a column to an existing table.
+ */
+public class AddColumnStatement extends AbstractColumnStatement {
 
-    private String catalogName;
-    private String schemaName;
-    private String tableName;
-    private String columnName;
-    private String columnType;
-    private Object defaultValue;
-    private String remarks;
-    private String addAfterColumn;
-    private String addBeforeColumn;
-    private Integer addAtPosition;
-    private Set<ColumnConstraint> constraints = new HashSet<ColumnConstraint>();
+    public static final String COLUMN_TYPE = "columnType";
+    public static final String DEFAULT_VALUE = "defaultValue";
+    public static final String REMARKS = "remarks";
+    public static final String ADD_AFTER_COLUMN = "addAfterColumn";
+    public static final String ADD_BEFORE_COLUMN = "addBeforeColumn";
+    public static final String ADD_AT_POSITION = "addAtPosition";
+    public static final String CONSTRAINTS = "constraints";
 
-    public AddColumnStatement(String catalogName, String schemaName, String tableName, String columnName, String columnType, Object defaultValue, ColumnConstraint... constraints) {
-        this.catalogName = catalogName;
-        this.schemaName = schemaName;
-        this.tableName = tableName;
-        this.columnName = columnName;
-        this.columnType = columnType;
-        this.defaultValue = defaultValue;
+    public AddColumnStatement() {
+
+    }
+
+    public AddColumnStatement(String catalogName, String schemaName, String tableName, String columnName, String columnType, Object defaultValue, Constraint... constraints) {
+        super(catalogName, schemaName, tableName, columnName);
+        setColumnType(columnType);
+        setDefaultValue(defaultValue);
         if (constraints != null) {
-            this.constraints.addAll(Arrays.asList(constraints));
+            getConstraints().addAll(Arrays.asList(constraints));
         }
     }
 
-    public AddColumnStatement(String catalogName, String schemaName, String tableName, String columnName, String columnType, Object defaultValue, String remarks,ColumnConstraint... constraints) {
-        this(catalogName,schemaName,tableName,columnName,columnType,defaultValue,constraints);
-        this.remarks = remarks;
-    }
-
-    public String getCatalogName() {
-        return catalogName;
-    }
-
-    public String getSchemaName() {
-        return schemaName;
-    }
-
-    public String getTableName() {
-        return tableName;
-    }
-
-    public String getColumnName() {
-        return columnName;
+    @Override
+    protected void init() {
+        super.init();
+        setAttribute(CONSTRAINTS, new HashSet<Constraint>());
     }
 
     public String getColumnType() {
-        return columnType;
+        return getAttribute(COLUMN_TYPE, String.class);
     }
+
+    public AddColumnStatement setColumnType(String columnType) {
+        return (AddColumnStatement) setAttribute(COLUMN_TYPE, columnType);
+    }
+
 
     public String getRemarks() {
-        return remarks;
+        return getAttribute(REMARKS, String.class);
     }
 
-    public Set<ColumnConstraint> getConstraints() {
-        return constraints;
+    public AddColumnStatement setRemarks(String remarks) {
+        return (AddColumnStatement) setAttribute(REMARKS, remarks);
     }
 
+
+    public Set<Constraint> getConstraints() {
+        return (Set<Constraint>) getAttribute(CONSTRAINTS, Set.class);
+    }
+
+    public AddColumnStatement addConstraint(Constraint constraint) {
+        getConstraints().add(constraint);
+        return this;
+    }
+
+
+    @Override
+    protected DatabaseObject[] getBaseAffectedDatabaseObjects() {
+        return new DatabaseObject[] {
+                new Column()
+                        .setRelation(new Table().setName(getTableName()).setSchema(new Schema(getCatalogName(), getSchemaName())))
+                        .setName(getColumnName())
+        };
+    }
+
+
+    /**
+     * Convenience method to search the defined constraints for an {@link liquibase.statement.AutoIncrementConstraint}
+     */
     public boolean isAutoIncrement() {
-        for (ColumnConstraint constraint : getConstraints()) {
+        for (Constraint constraint : getConstraints()) {
             if (constraint instanceof AutoIncrementConstraint) {
                 return true;
             }
@@ -74,10 +92,13 @@ public class AddColumnStatement extends AbstractSqlStatement {
         return false;
     }
 
+    /**
+     * Convenience method to search the defined constraints for an {@link liquibase.statement.AutoIncrementConstraint}
+     */
     public AutoIncrementConstraint getAutoIncrementConstraint() {
         AutoIncrementConstraint autoIncrementConstraint = null;
         
-        for (ColumnConstraint constraint : getConstraints()) {
+        for (Constraint constraint : getConstraints()) {
             if (constraint instanceof AutoIncrementConstraint) {
                 autoIncrementConstraint = (AutoIncrementConstraint) constraint;
                 break;
@@ -87,8 +108,11 @@ public class AddColumnStatement extends AbstractSqlStatement {
         return autoIncrementConstraint;
     }
 
+    /**
+     * Convenience method to search the defined constraints for a {@link liquibase.statement.PrimaryKeyConstraint}
+     */
     public boolean isPrimaryKey() {
-        for (ColumnConstraint constraint : getConstraints()) {
+        for (Constraint constraint : getConstraints()) {
             if (constraint instanceof PrimaryKeyConstraint) {
                 return true;
             }
@@ -96,11 +120,14 @@ public class AddColumnStatement extends AbstractSqlStatement {
         return false;
     }
 
+    /**
+     * Convenience method to search the defined constraints for a {@link liquibase.statement.NotNullConstraint}
+     */
     public boolean isNullable() {
         if (isPrimaryKey()) {
             return false;
         }
-        for (ColumnConstraint constraint : getConstraints()) {
+        for (Constraint constraint : getConstraints()) {
             if (constraint instanceof NotNullConstraint) {
                 return false;
             }
@@ -108,8 +135,11 @@ public class AddColumnStatement extends AbstractSqlStatement {
         return true;
     }
 
+    /**
+     * Convenience method to search the defined constraints for an {@link liquibase.statement.UniqueConstraint}
+     */
     public boolean isUnique() {
-        for (ColumnConstraint constraint : getConstraints()) {
+        for (Constraint constraint : getConstraints()) {
             if (constraint instanceof UniqueConstraint) {
                 return true;
             }
@@ -117,8 +147,12 @@ public class AddColumnStatement extends AbstractSqlStatement {
         return false;
     }
 
-    public String getUniqueStatementName() {
-        for (ColumnConstraint constraint : getConstraints()) {
+    /**
+     * Convenience method to search the defined constraints for an {@link liquibase.statement.UniqueConstraint}
+     * Returns null if no unique constraint was defined.
+     */
+    public String getUniqueConstraintName() {
+        for (Constraint constraint : getConstraints()) {
             if (constraint instanceof UniqueConstraint) {
                 return ((UniqueConstraint) constraint).getConstraintName();
             }
@@ -127,30 +161,33 @@ public class AddColumnStatement extends AbstractSqlStatement {
     }
 
     public Object getDefaultValue() {
-        return defaultValue;
+        return getAttribute(DEFAULT_VALUE, Object.class);
+    }
+    public AddColumnStatement setDefaultValue(Object defaultValue) {
+        return (AddColumnStatement) setAttribute(DEFAULT_VALUE, defaultValue);
     }
 
     public String getAddAfterColumn() {
-    	return addAfterColumn;
+        return getAttribute(ADD_AFTER_COLUMN, String.class);
     }
 
-    public void setAddAfterColumn(String addAfterColumn) {
-		this.addAfterColumn = addAfterColumn;
-	}
+    public AddColumnStatement setAddAfterColumn(String addAfterColumn) {
+        return (AddColumnStatement) setAttribute(ADD_AFTER_COLUMN, addAfterColumn);
+    }
 
     public String getAddBeforeColumn() {
-    	return addBeforeColumn;
+        return getAttribute(ADD_BEFORE_COLUMN, String.class);
     }
 
-    public void setAddBeforeColumn(String addBeforeColumn) {
-		this.addBeforeColumn = addBeforeColumn;
+    public AddColumnStatement setAddBeforeColumn(String addBeforeColumn) {
+        return (AddColumnStatement) setAttribute(ADD_BEFORE_COLUMN, addBeforeColumn);
 	}
 
 	public Integer getAddAtPosition() {
-		return addAtPosition;
-	}
+        return getAttribute(ADD_AT_POSITION, Integer.class);
+    }
 
-	public void setAddAtPosition(Integer addAtPosition) {
-		this.addAtPosition = addAtPosition;
+	public AddColumnStatement setAddAtPosition(Integer addAtPosition) {
+        return (AddColumnStatement) setAttribute(ADD_AT_POSITION, addAtPosition);
 	}
 }

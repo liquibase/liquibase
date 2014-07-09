@@ -1,81 +1,79 @@
 package liquibase.statement.core;
 
-import liquibase.statement.AbstractSqlStatement;
+import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.Table;
+import liquibase.structure.core.UniqueConstraint;
+import liquibase.util.StringUtils;
 
-public class AddUniqueConstraintStatement extends AbstractSqlStatement {
+public class AddUniqueConstraintStatement extends AbstractUniqueConstraintStatement {
 
-    private String catalogName;
-    private String schemaName;
-    private String tableName;
-    private String columnNames;
-    private String constraintName;
-    private String tablespace;
+    public static final String TABLESPACE = "tablespace";
+    public static final String COLUMN_NAMES = "columnNames";
 
-    private boolean deferrable;
-    private boolean initiallyDeferred;
-    private boolean disabled;
+    public static final String DEFERRABLE = "deferrable";
+    public static final String INITIALLY_DEFERRED = "initiallyDeferred";
+    public static final String DISABLED = "disabled";
 
-    public AddUniqueConstraintStatement(String catalogName, String schemaName, String tableName, String columnNames, String constraintName) {
-        this.catalogName = catalogName;
-        this.schemaName = schemaName;
-        this.tableName = tableName;
-        this.columnNames = columnNames;
-        this.constraintName = constraintName;
+    public AddUniqueConstraintStatement() {
     }
 
-    public String getCatalogName() {
-        return catalogName;
-    }
-
-    public String getSchemaName() {
-        return schemaName;
-    }
-
-    public String getTableName() {
-        return tableName;
-    }
-
-    public String getColumnNames() {
-        return columnNames;
-    }
-
-    public String getConstraintName() {
-        return constraintName;
+    public AddUniqueConstraintStatement(String constraintName, String catalogName, String schemaName, String tableName, String columnNames) {
+        super(constraintName, catalogName, schemaName, tableName);
+        setColumnNames(columnNames);
     }
 
     public String getTablespace() {
-        return tablespace;
+        return getAttribute(TABLESPACE, String.class);
     }
 
     public AddUniqueConstraintStatement setTablespace(String tablespace) {
-        this.tablespace = tablespace;
-        return this;
+        return (AddUniqueConstraintStatement) setAttribute(TABLESPACE, tablespace);
     }
+
+    public String getColumnNames() {
+        return getAttribute(COLUMN_NAMES, String.class);
+    }
+
+    public AddUniqueConstraintStatement setColumnNames(String columnNames) {
+        return (AddUniqueConstraintStatement) setAttribute(COLUMN_NAMES, columnNames);
+    }
+
     public boolean isDeferrable() {
-        return deferrable;
+        return getAttribute(DEFERRABLE, false);
     }
 
     public AddUniqueConstraintStatement setDeferrable(boolean deferrable) {
-        this.deferrable = deferrable;
-        return this;
+        return (AddUniqueConstraintStatement) setAttribute(DEFERRABLE, deferrable);
     }
 
     public boolean isInitiallyDeferred() {
-        return initiallyDeferred;
+        return getAttribute(INITIALLY_DEFERRED, false);
     }
 
     public AddUniqueConstraintStatement setInitiallyDeferred(boolean initiallyDeferred) {
-        this.initiallyDeferred = initiallyDeferred;
-        return this;
-    }
-
-    public AddUniqueConstraintStatement setDisabled(boolean disabled) {
-        this.disabled= disabled;
-        return this;
+        return (AddUniqueConstraintStatement) setAttribute(INITIALLY_DEFERRED, initiallyDeferred);
     }
 
     public boolean isDisabled() {
-        return disabled;
+        return getAttribute(DISABLED, false);
     }
 
+    public AddUniqueConstraintStatement setDisabled(boolean disabled) {
+        return (AddUniqueConstraintStatement) setAttribute(DISABLED, disabled);
+    }
+
+    @Override
+    protected DatabaseObject[] getBaseAffectedDatabaseObjects() {
+        UniqueConstraint uniqueConstraint = new UniqueConstraint()
+                .setName(getConstraintName())
+                .setTable((Table) new Table().setName(getTableName()).setSchema(getCatalogName(), getSchemaName()));
+        int i = 0;
+        for (String column : StringUtils.splitAndTrim(getColumnNames(), ",")) {
+            uniqueConstraint.addColumn(i++, column);
+        }
+
+        return new DatabaseObject[]{
+                uniqueConstraint
+        };
+    }
 }

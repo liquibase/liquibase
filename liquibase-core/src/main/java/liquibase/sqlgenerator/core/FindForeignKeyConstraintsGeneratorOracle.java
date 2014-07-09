@@ -1,12 +1,13 @@
 package liquibase.sqlgenerator.core;
 
 import liquibase.CatalogAndSchema;
-import liquibase.database.Database;
+import liquibase.action.Action;
+import liquibase.action.core.UnparsedSql;
+import liquibase.exception.UnsupportedException;
+import liquibase.statementlogic.StatementLogicChain;
 import liquibase.database.core.OracleDatabase;
 import liquibase.exception.ValidationErrors;
-import liquibase.sql.Sql;
-import liquibase.sql.UnparsedSql;
-import liquibase.sqlgenerator.SqlGeneratorChain;
+import  liquibase.ExecutionEnvironment;
 import liquibase.statement.core.FindForeignKeyConstraintsStatement;
 
 public class FindForeignKeyConstraintsGeneratorOracle extends AbstractSqlGenerator<FindForeignKeyConstraintsStatement> {
@@ -16,20 +17,20 @@ public class FindForeignKeyConstraintsGeneratorOracle extends AbstractSqlGenerat
     }
 
     @Override
-    public boolean supports(FindForeignKeyConstraintsStatement statement, Database database) {
-        return database instanceof OracleDatabase;
+    public boolean supports(FindForeignKeyConstraintsStatement statement, ExecutionEnvironment env) {
+        return env.getTargetDatabase() instanceof OracleDatabase;
     }
 
     @Override
-    public ValidationErrors validate(FindForeignKeyConstraintsStatement findForeignKeyConstraintsStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public ValidationErrors validate(FindForeignKeyConstraintsStatement findForeignKeyConstraintsStatement, ExecutionEnvironment env, StatementLogicChain chain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("baseTableName", findForeignKeyConstraintsStatement.getBaseTableName());
         return validationErrors;
     }
 
     @Override
-    public Sql[] generateSql(FindForeignKeyConstraintsStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-        CatalogAndSchema baseTableSchema = new CatalogAndSchema(statement.getBaseTableCatalogName(), statement.getBaseTableSchemaName()).customize(database);
+    public Action[] generateActions(FindForeignKeyConstraintsStatement statement, ExecutionEnvironment env, StatementLogicChain chain) throws UnsupportedException {
+        CatalogAndSchema baseTableSchema = new CatalogAndSchema(statement.getBaseTableCatalogName(), statement.getBaseTableSchemaName()).customize(env.getTargetDatabase());
 
         StringBuilder sb = new StringBuilder();
 
@@ -53,7 +54,7 @@ public class FindForeignKeyConstraintsGeneratorOracle extends AbstractSqlGenerat
         sb.append("AND BASE.CONSTRAINT_TYPE = 'R' ");
         sb.append("AND BASE.OWNER = '").append(baseTableSchema.getSchemaName()).append("'");
 
-        return new Sql[]{
+        return new Action[]{
                 new UnparsedSql(sb.toString())
         };
     }

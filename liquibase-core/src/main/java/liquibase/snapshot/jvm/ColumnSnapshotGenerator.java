@@ -9,21 +9,21 @@ import liquibase.datatype.LiquibaseDataType;
 import liquibase.datatype.core.*;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.exception.UnsupportedException;
 import liquibase.executor.ExecutorService;
 import liquibase.logging.LogFactory;
-import liquibase.snapshot.*;
+import liquibase.snapshot.CachedRow;
+import liquibase.snapshot.DatabaseSnapshot;
+import liquibase.snapshot.InvalidExampleException;
+import liquibase.snapshot.JdbcDatabaseSnapshot;
 import liquibase.statement.DatabaseFunction;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
-import liquibase.util.ISODateFormat;
 import liquibase.util.StringUtils;
 
 import java.math.BigDecimal;
 import java.sql.*;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Scanner;
 
@@ -34,7 +34,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
     }
 
     @Override
-    protected DatabaseObject snapshotObject(DatabaseObject example, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException {
+    protected DatabaseObject snapshotObject(DatabaseObject example, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException, UnsupportedException {
         Database database = snapshot.getDatabase();
         Relation relation = ((Column) example).getRelation();
         Schema schema = relation.getSchema();
@@ -58,7 +58,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
     }
 
     @Override
-    protected void addTo(DatabaseObject foundObject, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException {
+    protected void addTo(DatabaseObject foundObject, DatabaseSnapshot snapshot) throws DatabaseException, InvalidExampleException, UnsupportedException {
         if (!snapshot.getSnapshotControl().shouldInclude(Column.class)) {
             return;
         }
@@ -238,12 +238,12 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                     boilerLength = "7";
                 else // SET
                     boilerLength = "6";
-                List<String> enumValues = ExecutorService.getInstance().getExecutor(database).queryForList(new RawSqlStatement("SELECT DISTINCT SUBSTRING_INDEX(SUBSTRING_INDEX(SUBSTRING(COLUMN_TYPE, " + boilerLength + ", LENGTH(COLUMN_TYPE) - " + boilerLength + " - 1 ), \"','\", 1 + units.i + tens.i * 10) , \"','\", -1)\n" +
+                List<String> enumValues = ExecutorService.getInstance().getExecutor(database).query(new RawSqlStatement("SELECT DISTINCT SUBSTRING_INDEX(SUBSTRING_INDEX(SUBSTRING(COLUMN_TYPE, " + boilerLength + ", LENGTH(COLUMN_TYPE) - " + boilerLength + " - 1 ), \"','\", 1 + units.i + tens.i * 10) , \"','\", -1)\n" +
                         "FROM INFORMATION_SCHEMA.COLUMNS\n" +
                         "CROSS JOIN (SELECT 0 AS i UNION SELECT 1 UNION SELECT 2 UNION SELECT 3 UNION SELECT 4 UNION SELECT 5 UNION SELECT 6 UNION SELECT 7 UNION SELECT 8 UNION SELECT 9) units\n" +
                         "CROSS JOIN (SELECT 0 AS i UNION SELECT 1 UNION SELECT 2 UNION SELECT 3 UNION SELECT 4 UNION SELECT 5 UNION SELECT 6 UNION SELECT 7 UNION SELECT 8 UNION SELECT 9) tens\n" +
                         "WHERE TABLE_NAME = '"+column.getRelation().getName()+"' \n" +
-                        "AND COLUMN_NAME = '"+column.getName()+"'"), String.class);
+                        "AND COLUMN_NAME = '"+column.getName()+"'")).toList(String.class);
                 String enumClause = "";
                 for (String enumValue : enumValues) {
                     enumClause += "'"+enumValue+"', ";
@@ -251,6 +251,8 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
                 enumClause = enumClause.replaceFirst(", $", "");
                 return new DataType(columnTypeName + "("+enumClause+")");
             } catch (DatabaseException e) {
+                LogFactory.getLogger().warning("Error fetching enum values", e);
+            } catch (liquibase.exception.UnsupportedException e) {
                 LogFactory.getLogger().warning("Error fetching enum values", e);
             }
         }

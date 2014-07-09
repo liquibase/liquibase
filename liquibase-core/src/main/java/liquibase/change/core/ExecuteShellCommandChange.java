@@ -1,13 +1,17 @@
 package liquibase.change.core;
 
+import liquibase.action.Action;
+import liquibase.action.ExecuteAction;
 import liquibase.change.AbstractChange;
-import liquibase.change.DatabaseChange;
 import liquibase.change.ChangeMetaData;
+import liquibase.change.DatabaseChange;
 import liquibase.change.DatabaseChangeProperty;
-import liquibase.database.Database;
+import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.exception.ValidationErrors;
 import liquibase.exception.Warnings;
+import  liquibase.ExecutionEnvironment;
+import liquibase.executor.ExecuteResult;
 import liquibase.executor.Executor;
 import liquibase.executor.ExecutorService;
 import liquibase.executor.LoggingExecutor;
@@ -15,10 +19,9 @@ import liquibase.logging.LogFactory;
 import liquibase.parser.core.ParsedNode;
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.resource.ResourceAccessor;
-import liquibase.sql.Sql;
-import liquibase.statement.SqlStatement;
+import liquibase.statement.Statement;
 import liquibase.statement.core.CommentStatement;
-import liquibase.statement.core.RuntimeStatement;
+import liquibase.statement.core.RawActionStatement;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
 
@@ -41,12 +44,12 @@ public class ExecuteShellCommandChange extends AbstractChange {
     private List<String> args = new ArrayList<String>();
 
     @Override
-    public boolean generateStatementsVolatile(Database database) {
+    public boolean generateStatementsVolatile(ExecutionEnvironment env) {
         return true;
     }
 
     @Override
-    public boolean generateRollbackStatementsVolatile(Database database) {
+    public boolean generateRollbackStatementsVolatile(ExecutionEnvironment env) {
         return true;
     }
 
@@ -77,18 +80,18 @@ public class ExecuteShellCommandChange extends AbstractChange {
     }
 
     @Override
-    public ValidationErrors validate(Database database) {
+    public ValidationErrors validate(ExecutionEnvironment env) {
         return new ValidationErrors();
     }
 
 
     @Override
-    public Warnings warn(Database database) {
+    public Warnings warn(ExecutionEnvironment env) {
         return new Warnings();
     }
 
     @Override
-    public SqlStatement[] generateStatements(final Database database) {
+    public Statement[] generateStatements(final ExecutionEnvironment env) {
         boolean shouldRun = true;
         if (os != null && os.size() > 0) {
             String currentOS = System.getProperty("os.name");
@@ -100,18 +103,16 @@ public class ExecuteShellCommandChange extends AbstractChange {
 
     	// check if running under not-executed mode (logging output)
         boolean nonExecutedMode = false;
-        Executor executor = ExecutorService.getInstance().getExecutor(database);
+        Executor executor = ExecutorService.getInstance().getExecutor(env.getTargetDatabase());
         if (executor instanceof LoggingExecutor) {
             nonExecutedMode = true;
         }
         
         if (shouldRun && !nonExecutedMode) {
 
-
-            return new SqlStatement[]{new RuntimeStatement() {
-
+            Action action = new ExecuteAction() {
                 @Override
-                public Sql[] generate(Database database) {
+                public ExecuteResult execute(ExecutionEnvironment env) throws DatabaseException {
                     List<String> commandArray = new ArrayList<String>();
                     commandArray.add(executable);
                     commandArray.addAll(getArgs());
@@ -138,22 +139,29 @@ public class ExecuteShellCommandChange extends AbstractChange {
                         if (returnCode != 0) {
                             throw new RuntimeException(getCommandString() + " returned an code of " + returnCode);
                         }
+
+                        return new ExecuteResult();
                     } catch (IOException e) {
                         throw new UnexpectedLiquibaseException("Error executing command: " + e);
                     }
-
-                    return null;
                 }
-            }};
+
+                @Override
+                public String describe() {
+                    return executable+" "+StringUtils.join(getArgs(), " ");
+                }
+            };
+
+            return new Statement[] {new RawActionStatement(action)};
         }
         
         if (nonExecutedMode) {
-        	return new SqlStatement[] {
+        	return new Statement[] {
         			new CommentStatement(getCommandString())
         	};
         }
         
-        return new SqlStatement[0];
+        return new Statement[0];
     }
 
     @Override

@@ -1,27 +1,27 @@
 package liquibase.sqlgenerator.core;
 
-import java.util.Arrays;
+import liquibase.ExecutionEnvironment;
+import liquibase.action.Action;
+import liquibase.action.core.UnparsedSql;
+import liquibase.exception.UnsupportedException;
+import liquibase.statement.core.UpdateDataStatement;
+import liquibase.statementlogic.StatementLogicChain;
 import liquibase.database.Database;
 import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.LiquibaseException;
 import liquibase.exception.ValidationErrors;
-import liquibase.sqlgenerator.SqlGeneratorChain;
-import liquibase.statement.core.InsertOrUpdateStatement;
-import liquibase.statement.core.UpdateStatement;
-import liquibase.sql.Sql;
-import liquibase.sql.UnparsedSql;
-import liquibase.structure.core.Relation;
-import liquibase.structure.core.Table;
+import liquibase.statement.core.InsertOrUpdateDataStatement;
 
+import java.util.Arrays;
 import java.util.HashSet;
 
-public abstract class InsertOrUpdateGenerator extends AbstractSqlGenerator<InsertOrUpdateStatement> {
+public abstract class InsertOrUpdateGenerator extends AbstractSqlGenerator<InsertOrUpdateDataStatement> {
 
-    protected abstract String getRecordCheck(InsertOrUpdateStatement insertOrUpdateStatement, Database database, String whereClause);
+    protected abstract String getRecordCheck(InsertOrUpdateDataStatement insertOrUpdateDataStatement, ExecutionEnvironment env, String whereClause);
 
-    protected abstract String getElse(Database database);
+    protected abstract String getElse(ExecutionEnvironment env);
 
-    protected String getPostUpdateStatements(Database database){
+    protected String getPostUpdateStatements(ExecutionEnvironment env){
         return "";
     }
 
@@ -31,24 +31,27 @@ public abstract class InsertOrUpdateGenerator extends AbstractSqlGenerator<Inser
     }
 
     @Override
-    public ValidationErrors validate(InsertOrUpdateStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public ValidationErrors validate(InsertOrUpdateDataStatement statement, ExecutionEnvironment env, StatementLogicChain chain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("tableName", statement.getTableName());
-        validationErrors.checkRequiredField("columns", statement.getColumnValues());
+        validationErrors.checkRequiredField("columns", statement.getColumnNames());
         validationErrors.checkRequiredField("primaryKey", statement.getPrimaryKey());
 
         return validationErrors;
     }
 
-    protected String getWhereClause(InsertOrUpdateStatement insertOrUpdateStatement, Database database) {
+    protected String getWhereClause(InsertOrUpdateDataStatement insertOrUpdateDataStatement, ExecutionEnvironment env) {
+
+        Database database = env.getTargetDatabase();
+
         StringBuffer where = new StringBuffer();
 
-        String[] pkColumns = insertOrUpdateStatement.getPrimaryKey().split(",");
+        String[] pkColumns = insertOrUpdateDataStatement.getPrimaryKey().split(",");
 
         for(String thisPkColumn:pkColumns)
         {
-            where.append(database.escapeColumnName(insertOrUpdateStatement.getCatalogName(), insertOrUpdateStatement.getSchemaName(), insertOrUpdateStatement.getTableName(), thisPkColumn)).append(" = ");
-            Object newValue = insertOrUpdateStatement.getColumnValues().get(thisPkColumn);
+            where.append(database.escapeColumnName(insertOrUpdateDataStatement.getCatalogName(), insertOrUpdateDataStatement.getSchemaName(), insertOrUpdateDataStatement.getTableName(), thisPkColumn)).append(" = ");
+            Object newValue = insertOrUpdateDataStatement.getColumnValue(thisPkColumn);
             if (newValue == null || newValue.toString().equals("NULL")) {
                 where.append("NULL");
             } else {
@@ -58,18 +61,18 @@ public abstract class InsertOrUpdateGenerator extends AbstractSqlGenerator<Inser
             where.append(" AND ");
         }
 
-        where.delete(where.lastIndexOf(" AND "),where.lastIndexOf(" AND ") + " AND ".length());
+        where.delete(where.lastIndexOf(" AND "), where.lastIndexOf(" AND ") + " AND ".length());
         return where.toString();
     }
 
-    protected String getInsertStatement(InsertOrUpdateStatement insertOrUpdateStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    protected String getInsertStatement(InsertOrUpdateDataStatement insertOrUpdateDataStatement, ExecutionEnvironment env, StatementLogicChain chain) throws UnsupportedException {
         StringBuffer insertBuffer = new StringBuffer();
         InsertGenerator insert = new InsertGenerator();
-        Sql[] insertSql = insert.generateSql(insertOrUpdateStatement,database,sqlGeneratorChain);
+        Action[] insertSql = insert.generateActions(insertOrUpdateDataStatement, env, chain);
 
-        for(Sql s:insertSql)
-        {
-            insertBuffer.append(s.toSql());
+        for(Action action:insertSql) {
+            insertBuffer.append(action
+                    .describe());
             insertBuffer.append(";");
         }
 
@@ -78,43 +81,35 @@ public abstract class InsertOrUpdateGenerator extends AbstractSqlGenerator<Inser
         return insertBuffer.toString();
     }
 
-    /**
-     * 
-     * @param insertOrUpdateStatement
-     * @param database
-     * @param whereClause
-     * @param sqlGeneratorChain
-     * @return the update statement, if there is nothing to update return null
-     */
-    protected String getUpdateStatement(InsertOrUpdateStatement insertOrUpdateStatement,Database database, String whereClause, SqlGeneratorChain sqlGeneratorChain) throws LiquibaseException {
+    protected String getUpdateStatement(InsertOrUpdateDataStatement insertOrUpdateDataStatement,ExecutionEnvironment env, String whereClause, StatementLogicChain chain) throws LiquibaseException {
 
         StringBuffer updateSqlString = new StringBuffer();
 
         UpdateGenerator update = new UpdateGenerator();
-        UpdateStatement updateStatement = new UpdateStatement(
-        		insertOrUpdateStatement.getCatalogName(), 
-        		insertOrUpdateStatement.getSchemaName(),
-        		insertOrUpdateStatement.getTableName());
-        updateStatement.setWhereClause(whereClause + ";\n");
+        UpdateDataStatement updateDataStatement = new UpdateDataStatement(
+        		insertOrUpdateDataStatement.getCatalogName(),
+        		insertOrUpdateDataStatement.getSchemaName(),
+        		insertOrUpdateDataStatement.getTableName());
+        updateDataStatement.setWhere(whereClause + ";\n");
 
-        String[] pkFields=insertOrUpdateStatement.getPrimaryKey().split(",");
+        String[] pkFields= insertOrUpdateDataStatement.getPrimaryKey().split(",");
         HashSet<String> hashPkFields = new HashSet<String>(Arrays.asList(pkFields));
-        for(String columnKey:insertOrUpdateStatement.getColumnValues().keySet())
+        for(String columnKey: insertOrUpdateDataStatement.getColumnNames())
         {
             if (!hashPkFields.contains(columnKey)) {
-                updateStatement.addNewColumnValue(columnKey,insertOrUpdateStatement.getColumnValue(columnKey));
+                updateDataStatement.addNewColumnValue(columnKey, insertOrUpdateDataStatement.getColumnValue(columnKey));
             }
         }
         // this isn't very elegant but the code fails above without any columns to update
-        if(updateStatement.getNewColumnValues().isEmpty()) {
+        if(updateDataStatement.getColumnNames().isEmpty()) {
         	throw new LiquibaseException("No fields to update in set clause");
         }
 
-        Sql[] updateSql = update.generateSql(updateStatement, database, sqlGeneratorChain);
+        Action[] updateSql = update.generateActions(updateDataStatement, env, chain);
 
-        for(Sql s:updateSql)
+        for(Action s:updateSql)
         {
-            updateSqlString.append(s.toSql());
+            updateSqlString.append(s.describe());
             updateSqlString.append(";");
         }
 
@@ -126,32 +121,28 @@ public abstract class InsertOrUpdateGenerator extends AbstractSqlGenerator<Inser
     }
 
     @Override
-    public Sql[] generateSql(InsertOrUpdateStatement insertOrUpdateStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public Action[] generateActions(InsertOrUpdateDataStatement statement, ExecutionEnvironment env, StatementLogicChain chain) throws UnsupportedException {
         StringBuffer completeSql = new StringBuffer();
-        String whereClause = getWhereClause(insertOrUpdateStatement, database);
+        String whereClause = getWhereClause(statement, env);
 
-        completeSql.append( getRecordCheck(insertOrUpdateStatement, database, whereClause));
+        completeSql.append( getRecordCheck(statement, env, whereClause));
 
-        completeSql.append(getInsertStatement(insertOrUpdateStatement, database, sqlGeneratorChain));
+        completeSql.append(getInsertStatement(statement, env, chain));
 
         try {
-        	
-            String updateStatement = getUpdateStatement(insertOrUpdateStatement,database,whereClause,sqlGeneratorChain);
+
+            String updateStatement = getUpdateStatement(statement, env,whereClause,chain);
             
-            completeSql.append(getElse(database));
+            completeSql.append(getElse(env));
 
             completeSql.append(updateStatement);
             
         } catch (LiquibaseException e) {}
 
-        completeSql.append(getPostUpdateStatements(database));
+        completeSql.append(getPostUpdateStatements(env));
 
-        return new Sql[]{
-                new UnparsedSql(completeSql.toString(), "", getAffectedTable(insertOrUpdateStatement))
+        return new Action[]{
+                new UnparsedSql(completeSql.toString(), "")
         };
-    }
-
-    protected Table getAffectedTable(InsertOrUpdateStatement insertOrUpdateStatement) {
-        return (Table) new Table().setName(insertOrUpdateStatement.getTableName()).setSchema(insertOrUpdateStatement.getCatalogName(), insertOrUpdateStatement.getSchemaName());
     }
 }

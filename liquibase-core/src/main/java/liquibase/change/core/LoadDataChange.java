@@ -4,23 +4,25 @@ import liquibase.change.*;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.exception.ValidationErrors;
 import liquibase.exception.Warnings;
+import  liquibase.ExecutionEnvironment;
 import liquibase.logging.LogFactory;
 import liquibase.logging.Logger;
 import liquibase.resource.ResourceAccessor;
 import liquibase.resource.UtfBomAwareReader;
-import liquibase.statement.SqlStatement;
-import liquibase.statement.core.InsertStatement;
+import liquibase.statement.Statement;
+import liquibase.statement.core.InsertDataStatement;
 import liquibase.structure.core.Column;
 import liquibase.util.StreamUtil;
 import liquibase.util.StringUtils;
 import liquibase.util.csv.CSVReader;
 
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Reader;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 
 @DatabaseChange(name="loadData",
@@ -47,14 +49,14 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
     private List<LoadDataColumnConfig> columns = new ArrayList<LoadDataColumnConfig>();
 
     @Override
-    public boolean supports(Database database) {
+    public boolean supports(ExecutionEnvironment env) {
         return true;
     }
 
 
 
     @Override
-    public boolean generateRollbackStatementsVolatile(Database database) {
+    public boolean generateRollbackStatementsVolatile(ExecutionEnvironment env) {
         return true;
     }
 
@@ -141,8 +143,9 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
     }
 
     @Override
-    public SqlStatement[] generateStatements(Database database) {
+    public Statement[] generateStatements(ExecutionEnvironment env) {
         CSVReader reader = null;
+        Database database = env.getTargetDatabase();
         try {
             reader = getCSVReader();
 
@@ -155,7 +158,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
                 throw new UnexpectedLiquibaseException("Data file "+getFile()+" was empty");
             }
 
-            List<SqlStatement> statements = new ArrayList<SqlStatement>();
+            List<Statement> statements = new ArrayList<Statement>();
             String[] line;
             int lineNumber = 0;
 
@@ -165,7 +168,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
                 if (line.length == 0 || (line.length == 1 && StringUtils.trimToNull(line[0]) == null)) {
                     continue; //nothing on this line
                 }
-                InsertStatement insertStatement = this.createStatement(getCatalogName(), getSchemaName(), getTableName());
+                InsertDataStatement insertDataStatement = this.createStatement(getCatalogName(), getSchemaName(), getTableName());
                 for (int i=0; i<headers.length; i++) {
                     String columnName = null;
                     if( i >= line.length ) {
@@ -213,19 +216,19 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
                     }
 
 
-                    insertStatement.addColumnValue(columnName, value);
+                    insertDataStatement.addColumnValue(columnName, value);
                 }
-                statements.add(insertStatement);
+                statements.add(insertDataStatement);
             }
 
-            return statements.toArray(new SqlStatement[statements.size()]);
+            return statements.toArray(new Statement[statements.size()]);
         } catch (IOException e) {
             throw new RuntimeException(e);
         } catch (UnexpectedLiquibaseException ule) {
                 if (getChangeSet() != null && getChangeSet().getFailOnError() != null && !getChangeSet().getFailOnError()) {
                     Logger log = LogFactory.getLogger();
                     log.info("Change set " + getChangeSet().toString(false) + " failed, but failOnError was false.  Error: " + ule.getMessage());        
-                    return new SqlStatement[0];
+                    return new Statement[0];
                 } else {
                     throw ule;
                 }
@@ -241,7 +244,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
     }
 
     @Override
-    public boolean generateStatementsVolatile(Database database) {
+    public boolean generateStatementsVolatile(ExecutionEnvironment env) {
         return true;
     }
 
@@ -276,8 +279,8 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
         return new CSVReader(streamReader, separator.charAt(0), quotchar );
     }
 
-    protected InsertStatement createStatement(String catalogName, String schemaName, String tableName){
-        return new InsertStatement(catalogName, schemaName,tableName);
+    protected InsertDataStatement createStatement(String catalogName, String schemaName, String tableName){
+        return new InsertDataStatement(catalogName, schemaName,tableName);
     }
 
     protected ColumnConfig getColumnConfig(int index, String header) {
@@ -297,7 +300,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
     }
 
     @Override
-    public ChangeStatus checkStatus(Database database) {
+    public ChangeStatus checkStatus(ExecutionEnvironment env) {
         return new ChangeStatus().unknown("Cannot check loadData status");
     }
 
@@ -328,7 +331,7 @@ public class LoadDataChange extends AbstractChange implements ChangeWithColumns<
     }
 
     @Override
-    public Warnings warn(Database database) {
+    public Warnings warn(ExecutionEnvironment env) {
         return null;
     }
 

@@ -1,17 +1,16 @@
 package liquibase.statement.core;
 
-import liquibase.statement.AbstractSqlStatement;
+import liquibase.statement.AbstractStatement;
+import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.Sequence;
 
-public class DropSequenceStatement extends AbstractSqlStatement {
+public class DropSequenceStatement extends AbstractSequenceStatement {
 
-    private String catalogName;
-    private String schemaName;
-    private String sequenceName;
+    public DropSequenceStatement() {
+    }
 
     public DropSequenceStatement(String catalogName, String schemaName, String sequenceName) {
-        this.catalogName  =catalogName;
-        this.schemaName = schemaName;
-        this.sequenceName = sequenceName;
+        super(catalogName, schemaName, sequenceName);
     }
 
     @Override
@@ -19,15 +18,10 @@ public class DropSequenceStatement extends AbstractSqlStatement {
         return true;
     }
 
-    public String getCatalogName() {
-        return catalogName;
-    }
-
-    public String getSchemaName() {
-        return schemaName;
-    }
-
-    public String getSequenceName() {
-        return sequenceName;
+    @Override
+    protected DatabaseObject[] getBaseAffectedDatabaseObjects() {
+        return new DatabaseObject[] {
+            new Sequence().setName(getSequenceName()).setSchema(getCatalogName(), getSchemaName())
+        };
     }
 }

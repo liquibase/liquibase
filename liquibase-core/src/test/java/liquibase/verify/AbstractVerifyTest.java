@@ -6,8 +6,6 @@ import org.junit.Rule;
 import org.junit.rules.TestName;
 
 import java.io.*;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.regex.Pattern;
 
 import static org.junit.Assert.assertEquals;

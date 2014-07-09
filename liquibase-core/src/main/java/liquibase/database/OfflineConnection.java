@@ -5,8 +5,6 @@ import liquibase.changelog.ChangeLogHistoryServiceFactory;
 import liquibase.changelog.OfflineChangeLogHistoryService;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.lockservice.LockService;
-import liquibase.lockservice.LockServiceFactory;
 import liquibase.logging.LogFactory;
 import liquibase.util.ObjectUtil;
 import liquibase.util.StringUtils;

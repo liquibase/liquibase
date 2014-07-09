@@ -1,30 +1,34 @@
 package liquibase.sqlgenerator.core;
 
-import liquibase.datatype.DataTypeFactory;
-import liquibase.exception.Warnings;
-import liquibase.sqlgenerator.SqlGeneratorChain;
-import liquibase.statement.core.ModifyDataTypeStatement;
+import liquibase.action.Action;
+import liquibase.action.core.UnparsedSql;
+import liquibase.exception.UnsupportedException;
+import liquibase.statementlogic.StatementLogicChain;
 import liquibase.database.Database;
 import liquibase.database.core.*;
+import liquibase.datatype.DataTypeFactory;
 import liquibase.exception.ValidationErrors;
-import liquibase.sql.Sql;
-import liquibase.sql.UnparsedSql;
-import liquibase.structure.core.Relation;
-import liquibase.structure.core.Table;
+import liquibase.exception.Warnings;
+import  liquibase.ExecutionEnvironment;
+import liquibase.statement.core.ModifyDataTypeStatement;
 
 public class ModifyDataTypeGenerator extends AbstractSqlGenerator<ModifyDataTypeStatement> {
 
     @Override
-    public boolean supports(ModifyDataTypeStatement statement, Database database) {
+    public boolean supports(ModifyDataTypeStatement statement, ExecutionEnvironment env) {
+        Database database = env.getTargetDatabase();
+
         if (database instanceof SQLiteDatabase) {
             return false;
         }
-        return super.supports(statement, database);
+        return super.supports(statement, env);
     }
 
     @Override
-    public Warnings warn(ModifyDataTypeStatement modifyDataTypeStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-        Warnings warnings = super.warn(modifyDataTypeStatement, database, sqlGeneratorChain);
+    public Warnings warn(ModifyDataTypeStatement modifyDataTypeStatement, ExecutionEnvironment env, StatementLogicChain chain) {
+        Database database = env.getTargetDatabase();
+
+        Warnings warnings = super.warn(modifyDataTypeStatement, env, chain);
 
         if (database instanceof MySQLDatabase && !modifyDataTypeStatement.getNewDataType().toLowerCase().contains("varchar")) {
             warnings.addWarning("modifyDataType will lose primary key/autoincrement/not null settings for mysql.  Use <sql> and re-specify all configuration if this is the case");
@@ -34,7 +38,7 @@ public class ModifyDataTypeGenerator extends AbstractSqlGenerator<ModifyDataType
     }
 
     @Override
-    public ValidationErrors validate(ModifyDataTypeStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public ValidationErrors validate(ModifyDataTypeStatement statement, ExecutionEnvironment env, StatementLogicChain chain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("tableName", statement.getTableName());
         validationErrors.checkRequiredField("columnName", statement.getColumnName());
@@ -44,7 +48,9 @@ public class ModifyDataTypeGenerator extends AbstractSqlGenerator<ModifyDataType
     }
 
     @Override
-    public Sql[] generateSql(ModifyDataTypeStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public Action[] generateActions(ModifyDataTypeStatement statement, ExecutionEnvironment env, StatementLogicChain chain) throws UnsupportedException {
+        Database database = env.getTargetDatabase();
+
         String alterTable = "ALTER TABLE " + database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName());
 
         // add "MODIFY"
@@ -58,11 +64,7 @@ public class ModifyDataTypeGenerator extends AbstractSqlGenerator<ModifyDataType
         // add column type
         alterTable += DataTypeFactory.getInstance().fromDescription(statement.getNewDataType(), database).toDatabaseDataType(database);
 
-        return new Sql[]{new UnparsedSql(alterTable, getAffectedTable(statement))};
-    }
-
-    protected Relation getAffectedTable(ModifyDataTypeStatement statement) {
-        return new Table().setName(statement.getTableName()).setSchema(statement.getCatalogName(), statement.getSchemaName());
+        return new Action[]{new UnparsedSql(alterTable)};
     }
 
     /**

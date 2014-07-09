@@ -1,6 +1,12 @@
 package liquibase.database;
 
 import liquibase.CatalogAndSchema;
+import liquibase.ExecutionEnvironment;
+import liquibase.action.Action;
+import liquibase.action.visitor.ActionVisitor;
+import liquibase.statement.Statement;
+import liquibase.statement.core.RawDatabaseCommandStatement;
+import liquibase.statementlogic.StatementLogicFactory;
 import liquibase.change.Change;
 import liquibase.change.core.DropTableChange;
 import liquibase.changelog.*;
@@ -23,14 +29,10 @@ import liquibase.snapshot.DatabaseSnapshot;
 import liquibase.snapshot.EmptyDatabaseSnapshot;
 import liquibase.snapshot.SnapshotControl;
 import liquibase.snapshot.SnapshotGeneratorFactory;
-import liquibase.sql.Sql;
-import liquibase.sql.visitor.SqlVisitor;
-import liquibase.sqlgenerator.SqlGeneratorFactory;
 import liquibase.statement.DatabaseFunction;
 import liquibase.statement.SequenceCurrentValueFunction;
 import liquibase.statement.SequenceNextValueFunction;
-import liquibase.statement.SqlStatement;
-import liquibase.statement.core.*;
+import liquibase.statement.core.GetViewDefinitionStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
 import liquibase.util.ISODateFormat;
@@ -59,7 +61,6 @@ public abstract class AbstractJdbcDatabase implements Database {
     private DatabaseConnection connection;
     protected String defaultCatalogName;
     protected String defaultSchemaName;
-
     protected String currentDateTimeFunction;
 
     /**
@@ -315,7 +316,7 @@ public abstract class AbstractJdbcDatabase implements Database {
             return null;
         }
         try {
-            return ExecutorService.getInstance().getExecutor(this).queryForObject(new RawCallStatement("call current_schema"), String.class);
+            return ExecutorService.getInstance().getExecutor(this).query(new RawDatabaseCommandStatement("call current_schema")).toObject(String.class);
 
         } catch (Exception e) {
             LogFactory.getLogger().info("Error getting default schema", e);
@@ -744,8 +745,8 @@ public abstract class AbstractJdbcDatabase implements Database {
                         if (change instanceof DropTableChange) {
                             ((DropTableChange) change).setCascadeConstraints(true);
                         }
-                        SqlStatement[] sqlStatements = change.generateStatements(this);
-                        for (SqlStatement statement : sqlStatements) {
+                        Statement[] statements = change.generateStatements(new ExecutionEnvironment(this));
+                        for (Statement statement : statements) {
                             ExecutorService.getInstance().getExecutor(this).execute(statement);
                         }
 
@@ -842,17 +843,26 @@ public abstract class AbstractJdbcDatabase implements Database {
     @Override
     public String toString() {
         if (getConnection() == null) {
-            return getShortName() + " Database";
+            return getShortName() + " database";
         }
 
-        return getConnection().getConnectionUserName() + " @ " + getConnection().getURL() + (getDefaultSchemaName() == null ? "" : " (Default Schema: " + getDefaultSchemaName() + ")");
+        String out = getConnection().getURL();
+        if (getConnection().getConnectionUserName() != null) {
+            out = getConnection().getConnectionUserName() + " @ " + out;
+        }
+        return out;
     }
 
 
     @Override
     public String getViewDefinition(CatalogAndSchema schema, final String viewName) throws DatabaseException {
         schema = schema.customize(this);
-        String definition = (String) ExecutorService.getInstance().getExecutor(this).queryForObject(new GetViewDefinitionStatement(schema.getCatalogName(), schema.getSchemaName(), viewName), String.class);
+        String definition = null;
+        try {
+            definition = ExecutorService.getInstance().getExecutor(this).query(new GetViewDefinitionStatement(schema.getCatalogName(), schema.getSchemaName(), viewName)).toObject(String.class);
+        } catch (UnsupportedException e) {
+            throw new DatabaseException(e);
+        }
         if (definition == null) {
             return null;
         }
@@ -1183,10 +1193,10 @@ public abstract class AbstractJdbcDatabase implements Database {
     }
 
     @Override
-    public void executeStatements(final Change change, final DatabaseChangeLog changeLog, final List<SqlVisitor> sqlVisitors) throws LiquibaseException {
-        SqlStatement[] statements = change.generateStatements(this);
+    public void executeStatements(final Change change, final DatabaseChangeLog changeLog, final List<ActionVisitor> actionVisitors) throws LiquibaseException {
+        Statement[] statements = change.generateStatements(new ExecutionEnvironment(this));
 
-        execute(statements, sqlVisitors);
+        execute(statements, actionVisitors);
     }
 
     /*
@@ -1197,34 +1207,34 @@ public abstract class AbstractJdbcDatabase implements Database {
      * @throws DatabaseException if there were problems issuing the statements
      */
     @Override
-    public void execute(final SqlStatement[] statements, final List<SqlVisitor> sqlVisitors) throws LiquibaseException {
-        for (SqlStatement statement : statements) {
-            if (statement.skipOnUnsupported() && !SqlGeneratorFactory.getInstance().supports(statement, this)) {
+    public void execute(final Statement[] statements, final List<ActionVisitor> actionVisitors) throws LiquibaseException {
+        for (Statement statement : statements) {
+            if (statement.skipOnUnsupported() && !StatementLogicFactory.getInstance().supports(statement, new ExecutionEnvironment(this))) {
                 continue;
             }
             LogFactory.getLogger().debug("Executing Statement: " + statement.getClass().getName());
-            ExecutorService.getInstance().getExecutor(this).execute(statement, sqlVisitors);
+            ExecutorService.getInstance().getExecutor(this).execute(statement, new ExecutionEnvironment(this));
         }
     }
 
 
     @Override
-    public void saveStatements(final Change change, final List<SqlVisitor> sqlVisitors, final Writer writer) throws IOException, StatementNotSupportedOnDatabaseException, LiquibaseException {
-        SqlStatement[] statements = change.generateStatements(this);
-        for (SqlStatement statement : statements) {
-            for (Sql sql : SqlGeneratorFactory.getInstance().generateSql(statement, this)) {
-                writer.append(sql.toSql()).append(sql.getEndDelimiter()).append(StreamUtil.getLineSeparator()).append(StreamUtil.getLineSeparator());
+    public void saveStatements(final Change change, final List<ActionVisitor> actionVisitors, final Writer writer) throws IOException, StatementNotSupportedOnDatabaseException, LiquibaseException {
+        Statement[] statements = change.generateStatements(new ExecutionEnvironment(this));
+        for (Statement statement : statements) {
+            for (Action action : StatementLogicFactory.getInstance().generateActions(statement, new ExecutionEnvironment(this))) {
+                writer.append(action.describe()).append(StreamUtil.getLineSeparator()).append(StreamUtil.getLineSeparator());
             }
         }
     }
 
     @Override
-    public void executeRollbackStatements(final Change change, final List<SqlVisitor> sqlVisitors) throws LiquibaseException, RollbackImpossibleException {
-        SqlStatement[] statements = change.generateRollbackStatements(this);
-        List<SqlVisitor> rollbackVisitors = new ArrayList<SqlVisitor>();
-        if (sqlVisitors != null) {
-            for (SqlVisitor visitor : sqlVisitors) {
-                if (visitor.isApplyToRollback()) {
+    public void executeRollbackStatements(final Change change, final List<ActionVisitor> actionVisitors) throws LiquibaseException, RollbackImpossibleException {
+        Statement[] statements = change.generateRollbackStatements(new ExecutionEnvironment(this));
+        List<ActionVisitor> rollbackVisitors = new ArrayList<ActionVisitor>();
+        if (actionVisitors != null) {
+            for (ActionVisitor visitor : actionVisitors) {
+                if (visitor.getApplyToRollback()) {
                     rollbackVisitors.add(visitor);
                 }
             }
@@ -1233,11 +1243,11 @@ public abstract class AbstractJdbcDatabase implements Database {
     }
 
     @Override
-    public void saveRollbackStatement(final Change change, final List<SqlVisitor> sqlVisitors, final Writer writer) throws IOException, RollbackImpossibleException, StatementNotSupportedOnDatabaseException, LiquibaseException {
-        SqlStatement[] statements = change.generateRollbackStatements(this);
-        for (SqlStatement statement : statements) {
-            for (Sql sql : SqlGeneratorFactory.getInstance().generateSql(statement, this)) {
-                writer.append(sql.toSql()).append(sql.getEndDelimiter()).append("\n\n");
+    public void saveRollbackStatement(final Change change, final List<ActionVisitor> actionVisitors, final Writer writer) throws IOException, RollbackImpossibleException, StatementNotSupportedOnDatabaseException, LiquibaseException {
+        Statement[] statements = change.generateRollbackStatements(new ExecutionEnvironment(this));
+        for (Statement statement : statements) {
+            for (Action action : StatementLogicFactory.getInstance().generateActions(statement, new ExecutionEnvironment(this))) {
+                writer.append(action.describe()).append("\n\n");
             }
         }
     }
@@ -1336,25 +1346,25 @@ public abstract class AbstractJdbcDatabase implements Database {
 
     @Override
     public String generateDatabaseFunctionValue(final DatabaseFunction databaseFunction) {
-        if (databaseFunction.getValue() == null) {
+        if (databaseFunction.getText() == null) {
             return null;
         }
-        if (isCurrentTimeFunction(databaseFunction.getValue().toLowerCase())) {
+        if (isCurrentTimeFunction(databaseFunction.getText().toLowerCase())) {
             return getCurrentDateTimeFunction();
         } else if (databaseFunction instanceof SequenceNextValueFunction) {
             if (sequenceNextValueFunction == null) {
                 throw new RuntimeException(String.format("next value function for a sequence is not configured for database %s",
                         getDefaultDatabaseProductName()));
             }
-            return String.format(sequenceNextValueFunction, escapeObjectName(databaseFunction.getValue(), Sequence.class));
+            return String.format(sequenceNextValueFunction, escapeObjectName(databaseFunction.getText(), Sequence.class));
         } else if (databaseFunction instanceof SequenceCurrentValueFunction) {
             if (sequenceCurrentValueFunction == null) {
                 throw new RuntimeException(String.format("current value function for a sequence is not configured for database %s",
                         getDefaultDatabaseProductName()));
             }
-            return String.format(sequenceCurrentValueFunction, escapeObjectName(databaseFunction.getValue(), Sequence.class));
+            return String.format(sequenceCurrentValueFunction, escapeObjectName(databaseFunction.getText(), Sequence.class));
         } else {
-            return databaseFunction.getValue();
+            return databaseFunction.getText();
         }
     }
 

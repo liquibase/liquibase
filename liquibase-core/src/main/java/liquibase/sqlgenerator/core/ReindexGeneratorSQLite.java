@@ -1,14 +1,13 @@
 package liquibase.sqlgenerator.core;
 
-import liquibase.database.Database;
+import liquibase.action.Action;
+import liquibase.action.core.UnparsedSql;
+import liquibase.exception.UnsupportedException;
+import liquibase.statementlogic.StatementLogicChain;
 import liquibase.database.core.SQLiteDatabase;
 import liquibase.exception.ValidationErrors;
-import liquibase.sql.Sql;
-import liquibase.sql.UnparsedSql;
-import liquibase.sqlgenerator.SqlGenerator;
-import liquibase.sqlgenerator.SqlGeneratorChain;
+import  liquibase.ExecutionEnvironment;
 import liquibase.statement.core.ReindexStatement;
-import liquibase.structure.core.Table;
 
 public class ReindexGeneratorSQLite extends AbstractSqlGenerator<ReindexStatement> {
     @Override
@@ -17,21 +16,21 @@ public class ReindexGeneratorSQLite extends AbstractSqlGenerator<ReindexStatemen
     }
 
     @Override
-    public boolean supports(ReindexStatement statement, Database database) {
-        return (database instanceof SQLiteDatabase);
+    public boolean supports(ReindexStatement statement, ExecutionEnvironment env) {
+        return (env.getTargetDatabase() instanceof SQLiteDatabase);
     }
 
     @Override
-    public ValidationErrors validate(ReindexStatement reindexStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public ValidationErrors validate(ReindexStatement reindexStatement, ExecutionEnvironment env, StatementLogicChain chain) {
         ValidationErrors validationErrors = new ValidationErrors();
         validationErrors.checkRequiredField("tableName", reindexStatement.getTableName());
         return validationErrors;
     }
 
     @Override
-    public Sql[] generateSql(ReindexStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-        return new Sql[] {
-                new UnparsedSql("REINDEX "+database.escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()), new Table().setName(statement.getTableName()).setSchema(statement.getCatalogName(), statement.getSchemaName()))
+    public Action[] generateActions(ReindexStatement statement, ExecutionEnvironment env, StatementLogicChain chain) throws UnsupportedException {
+        return new Action[] {
+                new UnparsedSql("REINDEX "+ env.getTargetDatabase().escapeTableName(statement.getCatalogName(), statement.getSchemaName(), statement.getTableName()))
         };
     }
 }

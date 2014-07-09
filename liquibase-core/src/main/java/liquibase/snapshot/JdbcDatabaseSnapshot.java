@@ -12,8 +12,12 @@ import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
 import liquibase.util.StringUtils;
 
-import java.sql.*;
-import java.util.*;
+import java.sql.DatabaseMetaData;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
     private CachingDatabaseMetaData cachingDatabaseMetaData;

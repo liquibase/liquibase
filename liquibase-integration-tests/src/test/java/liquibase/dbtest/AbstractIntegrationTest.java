@@ -5,6 +5,7 @@ import liquibase.Contexts;
 import liquibase.LabelExpression;
 import liquibase.Liquibase;
 import liquibase.database.core.OracleDatabase;
+import liquibase.exception.*;
 import liquibase.structure.core.*;
 import liquibase.test.DiffResultAssert;
 import liquibase.changelog.ChangeSet;
@@ -19,14 +20,10 @@ import liquibase.datatype.DataTypeFactory;
 import liquibase.diff.DiffGeneratorFactory;
 import liquibase.diff.output.DiffOutputControl;
 import liquibase.diff.output.changelog.DiffToChangeLog;
-import liquibase.exception.ChangeLogParseException;
-import liquibase.exception.LiquibaseException;
 import liquibase.servicelocator.ServiceLocator;
 import liquibase.executor.ExecutorService;
 import liquibase.executor.Executor;
 import liquibase.diff.DiffResult;
-import liquibase.exception.DatabaseException;
-import liquibase.exception.ValidationFailedException;
 import liquibase.lockservice.LockService;
 import liquibase.lockservice.LockServiceFactory;
 import liquibase.logging.LogFactory;
@@ -722,7 +719,7 @@ public abstract class AbstractIntegrationTest {
 //        liquibase.update(this.contexts);
 //    }
 
-    private void dropDatabaseChangeLogTable(String catalog, String schema, Database database) {
+    private void dropDatabaseChangeLogTable(String catalog, String schema, Database database) throws Exception {
         try {
             ExecutorService.getInstance().getExecutor(database).execute(new DropTableStatement(catalog, schema, database.getDatabaseChangeLogTableName(), false));
         } catch (DatabaseException e) {

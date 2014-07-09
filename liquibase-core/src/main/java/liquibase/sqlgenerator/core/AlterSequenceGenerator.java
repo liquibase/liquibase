@@ -1,24 +1,29 @@
 package liquibase.sqlgenerator.core;
 
+import liquibase.action.Action;
+import liquibase.action.core.UnparsedSql;
+import liquibase.exception.UnsupportedException;
+import liquibase.statementlogic.StatementLogicChain;
 import liquibase.database.Database;
-import liquibase.database.core.*;
+import liquibase.database.core.DB2Database;
+import liquibase.database.core.FirebirdDatabase;
+import liquibase.database.core.H2Database;
+import liquibase.database.core.HsqlDatabase;
 import liquibase.exception.ValidationErrors;
-import liquibase.sql.Sql;
-import liquibase.sql.UnparsedSql;
-import liquibase.sqlgenerator.SqlGenerator;
-import liquibase.sqlgenerator.SqlGeneratorChain;
+import  liquibase.ExecutionEnvironment;
 import liquibase.statement.core.AlterSequenceStatement;
-import liquibase.structure.core.Sequence;
 
 public class AlterSequenceGenerator extends AbstractSqlGenerator<AlterSequenceStatement> {
 
     @Override
-    public boolean supports(AlterSequenceStatement statement, Database database) {
-        return database.supportsSequences();
+    public boolean supports(AlterSequenceStatement statement, ExecutionEnvironment env) {
+        return env.getTargetDatabase().supportsSequences();
     }
 
     @Override
-    public ValidationErrors validate(AlterSequenceStatement alterSequenceStatement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public ValidationErrors validate(AlterSequenceStatement alterSequenceStatement, ExecutionEnvironment env, StatementLogicChain chain) {
+        Database database = env.getTargetDatabase();
+
         ValidationErrors validationErrors = new ValidationErrors();
 
         validationErrors.checkDisallowedField("incrementBy", alterSequenceStatement.getIncrementBy(), database, HsqlDatabase.class, H2Database.class);
@@ -32,7 +37,9 @@ public class AlterSequenceGenerator extends AbstractSqlGenerator<AlterSequenceSt
     }
 
     @Override
-    public Sql[] generateSql(AlterSequenceStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
+    public Action[] generateActions(AlterSequenceStatement statement, ExecutionEnvironment env, StatementLogicChain chain) throws UnsupportedException {
+        Database database = env.getTargetDatabase();
+
         StringBuffer buffer = new StringBuffer();
         buffer.append("ALTER SEQUENCE ");
         buffer.append(database.escapeSequenceName(statement.getCatalogName(), statement.getSchemaName(), statement.getSequenceName()));
@@ -59,12 +66,8 @@ public class AlterSequenceGenerator extends AbstractSqlGenerator<AlterSequenceSt
             }
         }
 
-        return new Sql[]{
-                new UnparsedSql(buffer.toString(), getAffectedSequence(statement))
+        return new Action[]{
+                new UnparsedSql(buffer.toString())
         };
-    }
-
-    protected Sequence getAffectedSequence(AlterSequenceStatement statement) {
-        return new Sequence().setName(statement.getSequenceName()).setSchema(statement.getCatalogName(), statement.getSchemaName());
     }
 }

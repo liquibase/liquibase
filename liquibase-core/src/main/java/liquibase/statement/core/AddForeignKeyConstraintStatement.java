@@ -1,109 +1,123 @@
 package liquibase.statement.core;
 
-import liquibase.statement.AbstractSqlStatement;
+import liquibase.statement.AbstractStatement;
+import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.ForeignKey;
+import liquibase.structure.core.Table;
 
-public class AddForeignKeyConstraintStatement extends AbstractSqlStatement {
+/**
+ * Adds a foreign key constraint to an existing column
+ */
+public class AddForeignKeyConstraintStatement extends AbstractForeignKeyStatement {
 
-    private String baseTableCatalogName;
-    private String baseTableSchemaName;
-    private String baseTableName;
-    private String baseColumnNames;
+    public static final String BASE_COLUMN_NAMES = "baseColumnNames";
 
-    private String referencedTableCatalogName;
-    private String referencedTableSchemaName;
-    private String referencedTableName;
-    private String referencedColumnNames;
+    public static final String REFERENCED_TABLE_CATALOG_NAME = "referencedTableCatalogName";
+    public static final String REFERENCED_TABLE_SCHEMA_NAME = "referencedTableSchemaName";
+    public static final String REFERENCED_TABLE_NAME = "referencedTableName";
+    public static final String REFERENCED_COLUMN_NAMES = "referencedColumnNames";
 
-    private String constraintName;
+    public static final String DEFERRABLE = "deferrable";
+    public static final String INITIALLY_DEFERRED = "initiallyDeferred";
 
-    private boolean deferrable;
-    private boolean initiallyDeferred;
+    public static final String ON_DELETE = "onDelete";
+    public static final String ON_UPDATE = "onUpdate";
 
-    private String onDelete;
-    private String onUpdate;
+    public AddForeignKeyConstraintStatement() {
+    }
 
     public AddForeignKeyConstraintStatement(String constraintName, String baseTableCatalogName, String baseTableSchemaName, String baseTableName, String baseColumnNames, String referencedTableCatalogName, String referencedTableSchemaName, String referencedTableName, String referencedColumnNames) {
-        this.baseTableCatalogName = baseTableCatalogName;
-        this.baseTableSchemaName = baseTableSchemaName;
-        this.baseTableName = baseTableName;
-        this.baseColumnNames = baseColumnNames;
+        super(constraintName, baseTableCatalogName, baseTableSchemaName, baseTableName);
 
-        this.referencedTableCatalogName = referencedTableCatalogName;
-        this.referencedTableSchemaName = referencedTableSchemaName;
-        this.referencedTableName = referencedTableName;
-        this.referencedColumnNames = referencedColumnNames;
-        this.constraintName = constraintName;
-    }
+        setBaseColumnNames(baseColumnNames);
 
-    public String getBaseTableCatalogName() {
-        return baseTableCatalogName;
-    }
-
-    public String getBaseTableSchemaName() {
-        return baseTableSchemaName;
-    }
-
-    public String getBaseTableName() {
-        return baseTableName;
+        setReferencedTableCatalogName(referencedTableCatalogName);
+        setReferencedTableSchemaName(referencedTableSchemaName);
+        setReferencedTableName(referencedTableName);
+        setReferencedColumnNames(referencedColumnNames);
     }
 
     public String getBaseColumnNames() {
-        return baseColumnNames;
+        return getAttribute(BASE_COLUMN_NAMES, String.class);
+    }
+
+    public AddForeignKeyConstraintStatement setBaseColumnNames(String baseColumnNames) {
+        return (AddForeignKeyConstraintStatement) setAttribute(BASE_COLUMN_NAMES, baseColumnNames);
     }
 
     public String getReferencedTableCatalogName() {
-        return referencedTableCatalogName;
+        return getAttribute(REFERENCED_TABLE_CATALOG_NAME, String.class);
     }
+
+    public AddForeignKeyConstraintStatement setReferencedTableCatalogName(String referencedTableCatalogName) {
+        return (AddForeignKeyConstraintStatement) setAttribute(REFERENCED_TABLE_CATALOG_NAME, referencedTableCatalogName);
+    }
+
 
     public String getReferencedTableSchemaName() {
-        return referencedTableSchemaName;
+        return getAttribute(REFERENCED_TABLE_SCHEMA_NAME, String.class);
     }
+
+    public AddForeignKeyConstraintStatement setReferencedTableSchemaName(String referencedTableSchemaName) {
+        return (AddForeignKeyConstraintStatement) setAttribute(REFERENCED_TABLE_SCHEMA_NAME, referencedTableSchemaName);
+    }
+
 
     public String getReferencedTableName() {
-        return referencedTableName;
+        return getAttribute(REFERENCED_TABLE_NAME, String.class);
     }
+
+    public AddForeignKeyConstraintStatement setReferencedTableName(String referencedTableName) {
+        return (AddForeignKeyConstraintStatement) setAttribute(REFERENCED_TABLE_NAME, referencedTableName);
+    }
+
 
     public String getReferencedColumnNames() {
-        return referencedColumnNames;
+        return getAttribute(REFERENCED_COLUMN_NAMES, String.class);
     }
 
-    public String getConstraintName() {
-        return constraintName;
+    public AddForeignKeyConstraintStatement setReferencedColumnNames(String referencedColumnNames) {
+        return (AddForeignKeyConstraintStatement) setAttribute(REFERENCED_COLUMN_NAMES, referencedColumnNames);
     }
 
     public boolean isDeferrable() {
-        return deferrable;
-    }
-
-    public String getOnDelete() {
-        return onDelete;
-    }
-
-    public String getOnUpdate() {
-        return onUpdate;
+        return getAttribute(DEFERRABLE, false);
     }
 
     public AddForeignKeyConstraintStatement setDeferrable(boolean deferrable) {
-        this.deferrable = deferrable;
-        return this;
+        return (AddForeignKeyConstraintStatement) setAttribute(DEFERRABLE, deferrable);
     }
 
-    public boolean isInitiallyDeferred() {
-        return initiallyDeferred;
-    }
-
-    public AddForeignKeyConstraintStatement setInitiallyDeferred(boolean initiallyDeferred) {
-        this.initiallyDeferred = initiallyDeferred;
-        return this;
-    }
-
-    public AddForeignKeyConstraintStatement setOnUpdate(String updateRule) {
-        this.onUpdate = updateRule;
-        return this;
+    public String getOnDelete() {
+        return getAttribute(ON_DELETE, String.class);
     }
 
     public AddForeignKeyConstraintStatement setOnDelete(String deleteRule) {
-        this.onDelete = deleteRule;
-        return this;
+        return (AddForeignKeyConstraintStatement) setAttribute(ON_DELETE, deleteRule);
+    }
+
+
+    public String getOnUpdate() {
+        return getAttribute(ON_UPDATE, String.class);
+    }
+
+    public AddForeignKeyConstraintStatement setOnUpdate(String updateRule) {
+        return (AddForeignKeyConstraintStatement) setAttribute(ON_UPDATE, updateRule);
+    }
+
+
+    public boolean isInitiallyDeferred() {
+        return getAttribute(INITIALLY_DEFERRED, false);
+    }
+
+    public AddForeignKeyConstraintStatement setInitiallyDeferred(boolean initiallyDeferred) {
+        return (AddForeignKeyConstraintStatement) setAttribute(INITIALLY_DEFERRED, initiallyDeferred);
+    }
+
+    @Override
+    protected DatabaseObject[] getBaseAffectedDatabaseObjects() {
+        return new DatabaseObject[] {
+            new ForeignKey().setName(getConstraintName()).setForeignKeyColumns(getBaseColumnNames()).setForeignKeyTable((Table) new Table().setName(getBaseTableName()).setSchema(getBaseTableCatalogName(), getBaseTableSchemaName()))
+        };
     }
 }

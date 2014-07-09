@@ -1,7 +1,5 @@
 package liquibase.snapshot;
 
-import liquibase.executor.jvm.ColumnMapRowMapper;
-
 import java.util.Map;
 
 public class CachedRow {

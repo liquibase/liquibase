@@ -1,19 +1,18 @@
 package liquibase.sqlgenerator.core;
 
+import liquibase.action.Action;
+import liquibase.exception.UnsupportedException;
+import liquibase.statement.Statement;
+import liquibase.statementlogic.StatementLogicChain;
+import liquibase.statementlogic.StatementLogicFactory;
 import liquibase.change.ColumnConfig;
 import liquibase.change.ConstraintsConfig;
-import liquibase.database.Database;
 import liquibase.database.core.SQLiteDatabase;
-import liquibase.exception.LiquibaseException;
-import liquibase.exception.ValidationErrors;
-import liquibase.structure.core.Index;
 import liquibase.exception.DatabaseException;
-import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.sql.Sql;
-import liquibase.sqlgenerator.SqlGeneratorChain;
-import liquibase.sqlgenerator.SqlGeneratorFactory;
-import liquibase.statement.SqlStatement;
+import liquibase.exception.ValidationErrors;
+import  liquibase.ExecutionEnvironment;
 import liquibase.statement.core.AddAutoIncrementStatement;
+import liquibase.structure.core.Index;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -32,15 +31,15 @@ public class AddAutoIncrementGeneratorSQLite extends AddAutoIncrementGenerator {
     }
 
     @Override
-    public boolean supports(AddAutoIncrementStatement statement, Database database) {
-        return database instanceof SQLiteDatabase;
+    public boolean supports(AddAutoIncrementStatement statement, ExecutionEnvironment env) {
+        return env.getTargetDatabase() instanceof SQLiteDatabase;
     }
 
     @Override
     public ValidationErrors validate(
             AddAutoIncrementStatement statement,
-            Database database,
-            SqlGeneratorChain sqlGeneratorChain) {
+            ExecutionEnvironment env,
+            StatementLogicChain chain) {
         ValidationErrors validationErrors = new ValidationErrors();
 
         validationErrors.checkRequiredField("columnName", statement.getColumnName());
@@ -51,13 +50,13 @@ public class AddAutoIncrementGeneratorSQLite extends AddAutoIncrementGenerator {
     }
 
     @Override
-    public boolean generateStatementsIsVolatile(Database database) {
+    public boolean generateActionsIsVolatile(ExecutionEnvironment env) {
         return true;
     }
 
     @Override
-    public Sql[] generateSql(final AddAutoIncrementStatement statement, Database database, SqlGeneratorChain sqlGeneratorChain) {
-        List<Sql> statements = new ArrayList<Sql>();
+    public Action[] generateActions(final AddAutoIncrementStatement statement, ExecutionEnvironment env, StatementLogicChain chain) throws UnsupportedException {
+        List<Action> statements = new ArrayList<Action>();
 
         // define alter table logic
         SQLiteDatabase.AlterTableVisitor rename_alter_visitor = new SQLiteDatabase.AlterTableVisitor() {
@@ -89,12 +88,12 @@ public class AddAutoIncrementGeneratorSQLite extends AddAutoIncrementGenerator {
 
         try {
             // alter table
-            List<SqlStatement> alterTableStatements = SQLiteDatabase.getAlterTableStatements(rename_alter_visitor, database, statement.getCatalogName(), statement.getSchemaName(), statement.getTableName());
-            statements.addAll(Arrays.asList(SqlGeneratorFactory.getInstance().generateSql(alterTableStatements.toArray(new SqlStatement[alterTableStatements.size()]), database)));
+            List<Statement> alterTableStatements = SQLiteDatabase.getAlterTableStatements(rename_alter_visitor, env, statement.getCatalogName(), statement.getSchemaName(), statement.getTableName());
+            statements.addAll( Arrays.asList(StatementLogicFactory.getInstance().generateActions(alterTableStatements.toArray(new Statement[alterTableStatements.size()]), env)));
         } catch (DatabaseException e) {
             e.printStackTrace();
         }
 
-        return statements.toArray(new Sql[statements.size()]);
+        return statements.toArray(new Action[statements.size()]);
     }
 }

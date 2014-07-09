@@ -1,15 +1,12 @@
 package liquibase.changelog;
 
 import liquibase.Contexts;
-import liquibase.RuntimeEnvironment;
+import liquibase.ExecutionEnvironment;
 import liquibase.changelog.filter.ChangeSetFilterResult;
 import liquibase.changelog.filter.ContextChangeSetFilter;
 import liquibase.changelog.filter.DbmsChangeSetFilter;
 import liquibase.changelog.visitor.ChangeSetVisitor;
-import liquibase.database.Database;
 import liquibase.database.core.MySQLDatabase;
-import static org.junit.Assert.*;
-
 import liquibase.exception.LiquibaseException;
 import org.junit.Before;
 import org.junit.Test;
@@ -17,6 +14,8 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+
+import static org.junit.Assert.assertEquals;
 
 public class ChangeLogIteratorTest {
     private DatabaseChangeLog changeLog;
@@ -37,7 +36,7 @@ public class ChangeLogIteratorTest {
         TestChangeSetVisitor testChangeLogVisitor = new TestChangeSetVisitor();
 
         ChangeLogIterator iterator = new ChangeLogIterator(changeLog);
-        iterator.run(testChangeLogVisitor, new RuntimeEnvironment(null, null, null));
+        iterator.run(testChangeLogVisitor, new ExecutionEnvironment());
         assertEquals(6, testChangeLogVisitor.visitedChangeSets.size());
     }
 
@@ -46,7 +45,7 @@ public class ChangeLogIteratorTest {
         TestChangeSetVisitor testChangeLogVisitor = new TestChangeSetVisitor();
 
         ChangeLogIterator iterator = new ChangeLogIterator(changeLog, new ContextChangeSetFilter(new Contexts("test1")));
-        iterator.run(testChangeLogVisitor, new RuntimeEnvironment(null, null, null));
+        iterator.run(testChangeLogVisitor, new ExecutionEnvironment());
         assertEquals(4, testChangeLogVisitor.visitedChangeSets.size());
     }
 
@@ -55,7 +54,7 @@ public class ChangeLogIteratorTest {
         TestChangeSetVisitor testChangeLogVisitor = new TestChangeSetVisitor();
 
         ChangeLogIterator iterator = new ChangeLogIterator(changeLog, new ContextChangeSetFilter(new Contexts("test1")), new DbmsChangeSetFilter(new MySQLDatabase()));
-        iterator.run(testChangeLogVisitor, new RuntimeEnvironment(null, null, null));
+        iterator.run(testChangeLogVisitor, new ExecutionEnvironment());
         assertEquals(3, testChangeLogVisitor.visitedChangeSets.size());
         assertEquals("1", testChangeLogVisitor.visitedChangeSets.get(0).getId());
         assertEquals("4", testChangeLogVisitor.visitedChangeSets.get(1).getId());
@@ -68,7 +67,7 @@ public class ChangeLogIteratorTest {
         TestChangeSetVisitor testChangeLogVisitor = new ReverseChangeSetVisitor();
 
         ChangeLogIterator iterator = new ChangeLogIterator(changeLog, new ContextChangeSetFilter(new Contexts("test1")), new DbmsChangeSetFilter(new MySQLDatabase()));
-        iterator.run(testChangeLogVisitor, new RuntimeEnvironment(null, null, null));
+        iterator.run(testChangeLogVisitor, new ExecutionEnvironment());
         assertEquals(3, testChangeLogVisitor.visitedChangeSets.size());
         assertEquals("5", testChangeLogVisitor.visitedChangeSets.get(0).getId());
         assertEquals("4", testChangeLogVisitor.visitedChangeSets.get(1).getId());
@@ -86,7 +85,7 @@ public class ChangeLogIteratorTest {
         }
 
         @Override
-        public void visit(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, Database database, Set<ChangeSetFilterResult> filterResults) throws LiquibaseException {
+        public void visit(ChangeSet changeSet, DatabaseChangeLog databaseChangeLog, ExecutionEnvironment env, Set<ChangeSetFilterResult> filterResults) throws LiquibaseException {
             visitedChangeSets.add(changeSet);
         }
     }

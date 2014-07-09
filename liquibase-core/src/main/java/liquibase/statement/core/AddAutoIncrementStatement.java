@@ -1,61 +1,72 @@
 package liquibase.statement.core;
 
+import liquibase.statement.AbstractStatement;
+import liquibase.structure.DatabaseObject;
+import liquibase.structure.core.Column;
+import liquibase.structure.core.Schema;
+import liquibase.structure.core.Table;
+
 import java.math.BigInteger;
 
-import liquibase.statement.AbstractSqlStatement;
+/**
+ * Marks an existing column as auto-increment.
+ */
+public class AddAutoIncrementStatement extends AbstractColumnStatement {
 
-public class AddAutoIncrementStatement extends AbstractSqlStatement {
+    public static final String COLUMN_DATA_TYPE = "columnDataType";
+    public static final String STARTS_WITH = "startWith";
+    public static final String INCREMENT_BY = "incrementBy";
 
-    private String catalogName;
-    private String schemaName;
-    private String tableName;
-    private String columnName;
-    private String columnDataType;
-    private BigInteger startWith;
-    private BigInteger incrementBy;
-    
+    public AddAutoIncrementStatement() {
+    }
+
     public AddAutoIncrementStatement(
             String catalogName,
-    		String schemaName,
-    		String tableName,
-    		String columnName,
-    		String columnDataType,
-    		BigInteger startWith,
-    		BigInteger incrementBy) {
-        this.catalogName = catalogName;
-        this.schemaName = schemaName;
-        this.tableName = tableName;
-        this.columnName = columnName;
-        this.columnDataType = columnDataType;
-        this.startWith = startWith;
-        this.incrementBy = incrementBy;
-    }
-
-    public String getCatalogName() {
-        return catalogName;
-    }
-
-    public String getSchemaName() {
-        return schemaName;
-    }
-
-    public String getTableName() {
-        return tableName;
-    }
-
-    public String getColumnName() {
-        return columnName;
+            String schemaName,
+            String tableName,
+            String columnName,
+            String columnDataType,
+            BigInteger startWith,
+            BigInteger incrementBy) {
+        super(catalogName, schemaName, tableName, columnName);
+        setColumnDataType(columnDataType);
+        setStartWith(startWith);
+        setIncrementBy(incrementBy);
     }
 
     public String getColumnDataType() {
-        return columnDataType;
+        return getAttribute(COLUMN_DATA_TYPE, String.class);
     }
-    
+
+    public AddAutoIncrementStatement setColumnDataType(String columnDataType) {
+        return (AddAutoIncrementStatement) setAttribute(COLUMN_DATA_TYPE, columnDataType);
+    }
+
+
     public BigInteger getStartWith() {
-    	return startWith;
+        return getAttribute(STARTS_WITH, BigInteger.class);
     }
-    
+
+    public AddAutoIncrementStatement setStartWith(BigInteger startWith) {
+        return (AddAutoIncrementStatement) setAttribute(STARTS_WITH, startWith);
+    }
+
+
     public BigInteger getIncrementBy() {
-    	return incrementBy;
+        return getAttribute(INCREMENT_BY, BigInteger.class);
+    }
+
+    public AddAutoIncrementStatement setIncrementBy(BigInteger incrementBy) {
+        return (AddAutoIncrementStatement) setAttribute(INCREMENT_BY, incrementBy);
+    }
+
+
+    @Override
+    protected DatabaseObject[] getBaseAffectedDatabaseObjects() {
+        return new DatabaseObject[]{
+                new Column()
+                        .setRelation(new Table().setName(getTableName()).setSchema(new Schema(getCatalogName(), getSchemaName())))
+                        .setName(getColumnName())
+        };
     }
 }

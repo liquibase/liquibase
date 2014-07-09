@@ -1,27 +1,26 @@
 package liquibase.database.core;
 
-import java.math.BigInteger;
-
 import liquibase.CatalogAndSchema;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
 import liquibase.database.OfflineConnection;
+import liquibase.exception.DatabaseException;
+import liquibase.exception.UnexpectedLiquibaseException;
+import liquibase.exception.UnsupportedException;
+import liquibase.executor.ExecutorService;
+import liquibase.logging.LogFactory;
+import liquibase.statement.core.GetViewDefinitionStatement;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Index;
 import liquibase.structure.core.Table;
 import liquibase.structure.core.View;
-import liquibase.exception.DatabaseException;
-import liquibase.exception.UnexpectedLiquibaseException;
-import liquibase.executor.ExecutorService;
-import liquibase.statement.core.GetViewDefinitionStatement;
 
+import java.math.BigInteger;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
-
-import liquibase.logging.LogFactory;
 
 /**
  * Encapsulates MS-SQL database support.
@@ -174,7 +173,7 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
             return null;
         }
         try {
-            return ExecutorService.getInstance().getExecutor(this).queryForObject(new RawSqlStatement("select schema_name()"), String.class);
+            return ExecutorService.getInstance().getExecutor(this).query(new RawSqlStatement("select schema_name()")).toObject(String.class);
         } catch (Exception e) {
             LogFactory.getLogger().info("Error getting default schema", e);
         }
@@ -298,7 +297,12 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
     @Override
     public String getViewDefinition(CatalogAndSchema schema, String viewName) throws DatabaseException {
           schema = schema.customize(this);
-        List<String> defLines = (List<String>) ExecutorService.getInstance().getExecutor(this).queryForList(new GetViewDefinitionStatement(schema.getCatalogName(), schema.getSchemaName(), viewName), String.class);
+        List<String> defLines = null;
+        try {
+            defLines = ExecutorService.getInstance().getExecutor(this).query(new GetViewDefinitionStatement(schema.getCatalogName(), schema.getSchemaName(), viewName)).toList(String.class);
+        } catch (UnsupportedException e) {
+            throw new DatabaseException(e);
+        }
         StringBuffer sb = new StringBuffer();
         for (String defLine : defLines) {
             sb.append(defLine);
@@ -345,7 +349,7 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
         if (caseSensitive == null) {
             try {
                 if (getConnection() != null) {
-                    String collation = ExecutorService.getInstance().getExecutor(this).queryForObject(new RawSqlStatement("SELECT CONVERT(varchar(100), SERVERPROPERTY('COLLATION'))"), String.class);
+                    String collation = ExecutorService.getInstance().getExecutor(this).query(new RawSqlStatement("SELECT CONVERT(varchar(100), SERVERPROPERTY('COLLATION'))")).toObject(String.class);
                     caseSensitive = ! collation.contains("_CI_");
                 }
             } catch (Exception e) {

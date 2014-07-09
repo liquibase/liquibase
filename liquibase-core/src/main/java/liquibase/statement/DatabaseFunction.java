@@ -1,28 +1,41 @@
 package liquibase.statement;
 
-public class DatabaseFunction {
+import liquibase.AbstractExtensibleObject;
 
-    /**
-     * String value used for comparison. If a function matches this value then it should be replaces by the
-     * real current timestamp function.
-     */
-    public static final String CURRENT_DATE_TIME_PLACE_HOLDER = "current_datetime";
+/**
+ * Describes a general database function, used in {@link liquibase.statement.Statement} objects.
+ * No attempts at normalization or case-fixing is made.
+ */
+public class DatabaseFunction extends AbstractExtensibleObject {
 
-    private String value;
+    private static final String TEXT = "text";
 
-    public DatabaseFunction(String value) {
-        this.value = value;
+    public DatabaseFunction() {
     }
 
-    public String getValue() {
-        return value;
+    public DatabaseFunction(String text) {
+        setAttribute(TEXT, text);
+    }
+
+    /**
+     * Contains the text of the database function.
+     */
+    public String getText() {
+        return getAttribute(TEXT, String.class);
+    }
+
+    public DatabaseFunction setText(String text) {
+        return (DatabaseFunction) setAttribute(TEXT, text);
     }
 
     @Override
     public String toString() {
-        return getValue();
+        return getText();
     }
 
+    /**
+     * Two database functions are equal if their {@link #getText()} values are equal.
+     */
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof DatabaseFunction) {

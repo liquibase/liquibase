@@ -33,8 +33,8 @@ import liquibase.precondition.core.PreconditionContainer
 import liquibase.precondition.core.PrimaryKeyExistsPrecondition
 import liquibase.precondition.core.RunningAsPrecondition
 import liquibase.sdk.supplier.resource.ResourceSupplier
-import liquibase.sql.visitor.AppendSqlVisitor
-import liquibase.sql.visitor.ReplaceSqlVisitor
+import liquibase.action.visitor.core.AppendSqlVisitor
+import liquibase.action.visitor.core.ReplaceSqlVisitor
 import liquibase.test.JUnitResourceAccessor
 import liquibase.util.ISODateFormat
 import spock.lang.Shared
@@ -436,31 +436,31 @@ public class YamlChangeLogParser_RealFile_Test extends Specification {
         changeLog.getChangeSet(path, "nvoxland", "precondition attributes 4").preconditions.onFail == PreconditionContainer.FailOption.WARN
 
         and: "modifySql is parsed correctly"
-        changeLog.getChangeSet(path, "nvoxland", "standard changeSet").sqlVisitors.size() == 0
-        changeLog.getChangeSet(path, "nvoxland", "changeSet with modifySql").sqlVisitors.size() == 5
-        ((ReplaceSqlVisitor) changeLog.getChangeSet(path, "nvoxland", "changeSet with modifySql").sqlVisitors[0]).replace == "with_modifysql"
-        ((ReplaceSqlVisitor) changeLog.getChangeSet(path, "nvoxland", "changeSet with modifySql").sqlVisitors[0]).with == "after_modifysql"
-        ((ReplaceSqlVisitor) changeLog.getChangeSet(path, "nvoxland", "changeSet with modifySql").sqlVisitors[0]).applicableDbms == null
-        ((ReplaceSqlVisitor) changeLog.getChangeSet(path, "nvoxland", "changeSet with modifySql").sqlVisitors[0]).contexts == null
-        assert !((ReplaceSqlVisitor) changeLog.getChangeSet(path, "nvoxland", "changeSet with modifySql").sqlVisitors[0]).applyToRollback
+        changeLog.getChangeSet(path, "nvoxland", "standard changeSet").actionVisitors.size() == 0
+        changeLog.getChangeSet(path, "nvoxland", "changeSet with modifySql").actionVisitors.size() == 5
+        ((ReplaceSqlVisitor) changeLog.getChangeSet(path, "nvoxland", "changeSet with modifySql").actionVisitors[0]).replace == "with_modifysql"
+        ((ReplaceSqlVisitor) changeLog.getChangeSet(path, "nvoxland", "changeSet with modifySql").actionVisitors[0]).with == "after_modifysql"
+        ((ReplaceSqlVisitor) changeLog.getChangeSet(path, "nvoxland", "changeSet with modifySql").actionVisitors[0]).dbms == null
+        ((ReplaceSqlVisitor) changeLog.getChangeSet(path, "nvoxland", "changeSet with modifySql").actionVisitors[0]).contexts == null
+        assert !((ReplaceSqlVisitor) changeLog.getChangeSet(path, "nvoxland", "changeSet with modifySql").actionVisitors[0]).applyToRollback
 
-        ((ReplaceSqlVisitor) changeLog.getChangeSet(path, "nvoxland", "changeSet with modifySql").sqlVisitors[1]).replace == ")"
-        ((ReplaceSqlVisitor) changeLog.getChangeSet(path, "nvoxland", "changeSet with modifySql").sqlVisitors[1]).with == ""
-        that(((ReplaceSqlVisitor) changeLog.getChangeSet(path, "nvoxland", "changeSet with modifySql").sqlVisitors[1]).getApplicableDbms(), containsInAnyOrder(["mysql", "mock"].toArray()))
-        ((ReplaceSqlVisitor) changeLog.getChangeSet(path, "nvoxland", "changeSet with modifySql").sqlVisitors[1]).contexts == null
+        ((ReplaceSqlVisitor) changeLog.getChangeSet(path, "nvoxland", "changeSet with modifySql").actionVisitors[1]).replace == ")"
+        ((ReplaceSqlVisitor) changeLog.getChangeSet(path, "nvoxland", "changeSet with modifySql").actionVisitors[1]).with == ""
+        that(((ReplaceSqlVisitor) changeLog.getChangeSet(path, "nvoxland", "changeSet with modifySql").actionVisitors[1]).getDbms(), containsInAnyOrder(["mysql", "mock"].toArray()))
+        ((ReplaceSqlVisitor) changeLog.getChangeSet(path, "nvoxland", "changeSet with modifySql").actionVisitors[1]).contexts == null
 
-        ((AppendSqlVisitor) changeLog.getChangeSet(path, "nvoxland", "changeSet with modifySql").sqlVisitors[2]).value == " , name varchar(255) )"
-        ((AppendSqlVisitor) changeLog.getChangeSet(path, "nvoxland", "changeSet with modifySql").sqlVisitors[2]).contexts == null
-        that(((AppendSqlVisitor) changeLog.getChangeSet(path, "nvoxland", "changeSet with modifySql").sqlVisitors[2]).applicableDbms, containsInAnyOrder(["mysql", "mock"].toArray()))
-        assert ((AppendSqlVisitor) changeLog.getChangeSet(path, "nvoxland", "changeSet with modifySql").sqlVisitors[2]).applyToRollback
+        ((AppendSqlVisitor) changeLog.getChangeSet(path, "nvoxland", "changeSet with modifySql").actionVisitors[2]).value == " , name varchar(255) )"
+        ((AppendSqlVisitor) changeLog.getChangeSet(path, "nvoxland", "changeSet with modifySql").actionVisitors[2]).contexts == null
+        that(((AppendSqlVisitor) changeLog.getChangeSet(path, "nvoxland", "changeSet with modifySql").actionVisitors[2]).dbms, containsInAnyOrder(["mysql", "mock"].toArray()))
+        assert ((AppendSqlVisitor) changeLog.getChangeSet(path, "nvoxland", "changeSet with modifySql").actionVisitors[2]).applyToRollback
 
-        ((AppendSqlVisitor) changeLog.getChangeSet(path, "nvoxland", "changeSet with modifySql").sqlVisitors[3]).value == " partitioned by stuff"
-        ((AppendSqlVisitor) changeLog.getChangeSet(path, "nvoxland", "changeSet with modifySql").sqlVisitors[3]).contexts.toString() == "(prod), (qa)"
-        ((AppendSqlVisitor) changeLog.getChangeSet(path, "nvoxland", "changeSet with modifySql").sqlVisitors[3]).applicableDbms == null
+        ((AppendSqlVisitor) changeLog.getChangeSet(path, "nvoxland", "changeSet with modifySql").actionVisitors[3]).value == " partitioned by stuff"
+        ((AppendSqlVisitor) changeLog.getChangeSet(path, "nvoxland", "changeSet with modifySql").actionVisitors[3]).contexts.toString() == "(prod), (qa)"
+        ((AppendSqlVisitor) changeLog.getChangeSet(path, "nvoxland", "changeSet with modifySql").actionVisitors[3]).dbms == null
 
-        ((AppendSqlVisitor) changeLog.getChangeSet(path, "nvoxland", "changeSet with modifySql").sqlVisitors[4]).value == " engine innodb"
-        ((AppendSqlVisitor) changeLog.getChangeSet(path, "nvoxland", "changeSet with modifySql").sqlVisitors[4]).contexts.toString() == "(prod)"
-        that(((AppendSqlVisitor) changeLog.getChangeSet(path, "nvoxland", "changeSet with modifySql").sqlVisitors[4]).getApplicableDbms(), containsInAnyOrder(["mysql"].toArray()))
+        ((AppendSqlVisitor) changeLog.getChangeSet(path, "nvoxland", "changeSet with modifySql").actionVisitors[4]).value == " engine innodb"
+        ((AppendSqlVisitor) changeLog.getChangeSet(path, "nvoxland", "changeSet with modifySql").actionVisitors[4]).contexts.toString() == "(prod)"
+        that(((AppendSqlVisitor) changeLog.getChangeSet(path, "nvoxland", "changeSet with modifySql").actionVisitors[4]).getDbms(), containsInAnyOrder(["mysql"].toArray()))
 
         and: "utf8 is read correctly"
         ((RawSQLChange) changeLog.getChangeSet(path, "nvoxland", "changeSet with UTF8").changes[0]).sql == "insert into testutf8insert (stringvalue) values ('string with € and £')"
