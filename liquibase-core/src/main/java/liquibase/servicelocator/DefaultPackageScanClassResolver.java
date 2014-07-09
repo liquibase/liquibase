@@ -334,15 +334,17 @@ public class DefaultPackageScanClassResolver implements PackageScanClassResolver
                 return;
             }
 
-            String packageName = type.getPackage().getName();
-            List<String> packageNameParts = Arrays.asList(packageName.split("\\."));
-            for (int i=0; i<packageNameParts.size(); i++) {
-                String thisPackage = StringUtils.join(packageNameParts.subList(0, i+1), "/");
+            if (type.getPackage() != null) {
+                String packageName = type.getPackage().getName();
+                List<String> packageNameParts = Arrays.asList(packageName.split("\\."));
+                for (int i=0; i<packageNameParts.size(); i++) {
+                    String thisPackage = StringUtils.join(packageNameParts.subList(0, i+1), "/");
 
-                if (!this.allClassesByPackage.containsKey(thisPackage)) {
-                    this.allClassesByPackage.put(thisPackage, new HashSet<Class>());
+                    if (!this.allClassesByPackage.containsKey(thisPackage)) {
+                        this.allClassesByPackage.put(thisPackage, new HashSet<Class>());
+                    }
+                    this.allClassesByPackage.get(thisPackage).add(type);
                 }
-                this.allClassesByPackage.get(thisPackage).add(type);
             }
 
 
