@@ -22,7 +22,7 @@ public class SmallIntType extends LiquibaseDataType {
 
     @Override
     public DatabaseDataType toDatabaseDataType(Database database) {
-        if (database instanceof DB2Database || database instanceof DerbyDatabase || database instanceof FirebirdDatabase || database instanceof MSSQLDatabase || database instanceof PostgresDatabase || database instanceof InformixDatabase) {
+        if (database instanceof DB2Database || database instanceof DerbyDatabase || database instanceof FirebirdDatabase || database instanceof MSSQLDatabase || database instanceof PostgresDatabase || database instanceof InformixDatabase || database instanceof MySQLDatabase) {
             return new DatabaseDataType("SMALLINT"); //always smallint regardless of parameters passed
         }
 

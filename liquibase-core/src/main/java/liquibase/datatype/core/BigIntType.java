@@ -32,7 +32,7 @@ public class BigIntType extends LiquibaseDataType {
             return new DatabaseDataType("NUMBER", 38,0);
         }
         if (database instanceof DB2Database || database instanceof DerbyDatabase
-                || database instanceof MSSQLDatabase || database instanceof HsqlDatabase || database instanceof FirebirdDatabase) {
+                || database instanceof MSSQLDatabase || database instanceof HsqlDatabase || database instanceof FirebirdDatabase || database instanceof MySQLDatabase) {
             return new DatabaseDataType("BIGINT");
         }
         if (database instanceof PostgresDatabase) {

@@ -25,7 +25,7 @@ public class TinyIntType  extends LiquibaseDataType {
         if (database instanceof DerbyDatabase || database instanceof PostgresDatabase || database instanceof FirebirdDatabase) {
             return new DatabaseDataType("SMALLINT");
         }
-        if (database instanceof MSSQLDatabase) {
+        if (database instanceof MSSQLDatabase || database instanceof MySQLDatabase) {
             return new DatabaseDataType("TINYINT");
         }
         if (database instanceof OracleDatabase) {
