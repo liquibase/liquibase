@@ -1,4 +1,7 @@
-package liquibase.serializer.core.string;
+package liquibase.serializer.core.string
+
+import spock.lang.Specification
+import spock.lang.Unroll;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -36,11 +39,10 @@ import liquibase.statement.SequenceCurrentValueFunction;
 import liquibase.statement.SequenceNextValueFunction;
 import org.junit.Test;
 
-public class StringChangeLogSerializerTest {
+public class StringChangeLogSerializerTest extends Specification {
 
-    @Test
-    public void serialized_CustomChange() throws Exception {
-
+    def "serialized customChange"() throws Exception {
+        when:
         String expectedString = "customChange:[\n" +
                 "    class=\"liquibase.change.custom.ExampleCustomSqlChange\"\n" +
                 "    param={\n" +
@@ -60,36 +62,42 @@ public class StringChangeLogSerializerTest {
         wrapper.setParam("newValue", "new_value");
         wrapper.setParam("tableName", "table_name");
 
-        assertEquals(expectedString, new StringChangeLogSerializer().serialize(wrapper,false));
+        then:
+        new StringChangeLogSerializer().serialize(wrapper, false) == expectedString
     }
 
-    @Test
-    public void serialized_AddColumnChange() {
+    def serialized_AddColumnChange() {
+        when:
         AddColumnChange change = new AddColumnChange();
 
-        assertEquals("addColumn:[\n" +
+        then:
+        new StringChangeLogSerializer().serialize(change, false) == "addColumn:[\n" +
                 "    columns=[]\n" +
-                "]", new StringChangeLogSerializer().serialize(change, false));
+                "]"
 
+        when:
         change.setTableName("TABLE_NAME");
-
-        assertEquals("addColumn:[\n" +
+        then:
+        new StringChangeLogSerializer().serialize(change, false) == "addColumn:[\n" +
                 "    columns=[]\n" +
                 "    tableName=\"TABLE_NAME\"\n" +
-                "]", new StringChangeLogSerializer().serialize(change, false));
+                "]"
 
+        when:
         change.setSchemaName("SCHEMA_NAME");
-        assertEquals("addColumn:[\n" +
+        then:
+        new StringChangeLogSerializer().serialize(change, false) == "addColumn:[\n" +
                 "    columns=[]\n" +
                 "    schemaName=\"SCHEMA_NAME\"\n" +
                 "    tableName=\"TABLE_NAME\"\n" +
-                "]", new StringChangeLogSerializer().serialize(change, false));
+                "]"
 
+        when:
         AddColumnConfig column = new AddColumnConfig();
         change.addColumn(column);
         column.setName("COLUMN_NAME");
-
-        assertEquals("addColumn:[\n" +
+        then:
+        new StringChangeLogSerializer().serialize(change, false) == "addColumn:[\n" +
                 "    columns=[\n" +
                 "        [\n" +
                 "            name=\"COLUMN_NAME\"\n" +
@@ -97,15 +105,16 @@ public class StringChangeLogSerializerTest {
                 "    ]\n" +
                 "    schemaName=\"SCHEMA_NAME\"\n" +
                 "    tableName=\"TABLE_NAME\"\n" +
-                "]", new StringChangeLogSerializer().serialize(change, false));
+                "]"
 
+        when:
         AddColumnConfig column2 = new AddColumnConfig();
         change.addColumn(column2);
         column2.setName("COLUMN2_NAME");
         column2.setAutoIncrement(true);
         column2.setValueNumeric(52);
-
-        assertEquals("addColumn:[\n" +
+        then:
+        new StringChangeLogSerializer().serialize(change, false) == "addColumn:[\n" +
                 "    columns=[\n" +
                 "        [\n" +
                 "            name=\"COLUMN_NAME\"\n" +
@@ -118,15 +127,17 @@ public class StringChangeLogSerializerTest {
                 "    ]\n" +
                 "    schemaName=\"SCHEMA_NAME\"\n" +
                 "    tableName=\"TABLE_NAME\"\n" +
-                "]", new StringChangeLogSerializer().serialize(change, false));
+                "]"
     }
 
-    @Test
-    public void serialized_AddForeignKeyConstraint() {
+    def "serialized AddForeignKeyConstraint"() {
+        when:
         AddForeignKeyConstraintChange change = new AddForeignKeyConstraintChange();
 
-        assertEquals("addForeignKeyConstraint:[]", new StringChangeLogSerializer().serialize(change, false));
+        then:
+        new StringChangeLogSerializer().serialize(change, false) == "addForeignKeyConstraint:[]"
 
+        when:
         change.setBaseTableName("TABLE_NAME");
         change.setBaseColumnNames("COL1, COL2");
         change.setBaseTableSchemaName("BASE_SCHEM");
@@ -139,8 +150,8 @@ public class StringChangeLogSerializerTest {
         change.setReferencedTableName("REF_TABLE");
         change.setReferencedColumnNames("COLA, COLB");
         change.setReferencedTableSchemaName("REF_SCHEM");
-
-        assertEquals("addForeignKeyConstraint:[\n" +
+        then:
+        new StringChangeLogSerializer().serialize(change, false) == "addForeignKeyConstraint:[\n" +
                 "    baseColumnNames=\"COL1, COL2\"\n" +
                 "    baseTableName=\"TABLE_NAME\"\n" +
                 "    baseTableSchemaName=\"BASE_SCHEM\"\n" +
@@ -152,15 +163,18 @@ public class StringChangeLogSerializerTest {
                 "    referencedColumnNames=\"COLA, COLB\"\n" +
                 "    referencedTableName=\"REF_TABLE\"\n" +
                 "    referencedTableSchemaName=\"REF_SCHEM\"\n" +
-                "]", new StringChangeLogSerializer().serialize(change, false));
+                "]"
 
     }
-    @Test
-    public void serialized_AddUniqueKeyConstraint() {
-    	AddUniqueConstraintChange change = new AddUniqueConstraintChange();
 
-        assertEquals("addUniqueConstraint:[]", new StringChangeLogSerializer().serialize(change, false));
+    def serialized_AddUniqueKeyConstraint() {
+        when:
+        AddUniqueConstraintChange change = new AddUniqueConstraintChange();
 
+        then:
+        new StringChangeLogSerializer().serialize(change, false) == "addUniqueConstraint:[]"
+
+        when:
         change.setTableName("TABLE_NAME");
         change.setColumnNames("COL1, COL2");
         change.setSchemaName("BASE_SCHEM");
@@ -170,7 +184,8 @@ public class StringChangeLogSerializerTest {
         change.setDisabled(true);
         change.setTablespace("TABLESPACE1");
 
-        assertEquals("addUniqueConstraint:[\n" +
+        then:
+        new StringChangeLogSerializer().serialize(change, false) == "addUniqueConstraint:[\n" +
                 "    columnNames=\"COL1, COL2\"\n" +
                 "    constraintName=\"FK_TEST\"\n" +
                 "    deferrable=\"true\"\n" +
@@ -179,7 +194,7 @@ public class StringChangeLogSerializerTest {
                 "    schemaName=\"BASE_SCHEM\"\n" +
                 "    tableName=\"TABLE_NAME\"\n" +
                 "    tablespace=\"TABLESPACE1\"\n" +
-                "]", new StringChangeLogSerializer().serialize(change, false));
+                "]"
 
     }
 //    @Test
@@ -205,51 +220,58 @@ public class StringChangeLogSerializerTest {
 //                "]", new StringChangeLogSerializer().serialize(changeSet));
 //    }
 
-    @Test
-    public void serialized_SQLFileChange() {
+    def "serialized SQLFileChange"() {
+        when:
         SQLFileChange change = new SQLFileChange();
 
-        assertEquals("sqlFile:[\n" +
+        then:
+        new StringChangeLogSerializer().serialize(change, false) == "sqlFile:[\n" +
                 "    splitStatements=\"true\"\n" +
-                "    stripComments=\"false\"\n]", new StringChangeLogSerializer().serialize(change, false));
+                "    stripComments=\"false\"\n]"
 
+        when:
         change.setPath("PATH/TO/File.txt");
 
-        assertEquals("sqlFile:[\n" +
+        then:
+        new StringChangeLogSerializer().serialize(change, false) == "sqlFile:[\n" +
                 "    path=\"PATH/TO/File.txt\"\n" +
                 "    splitStatements=\"true\"\n" +
                 "    stripComments=\"false\"\n" +
-                "]", new StringChangeLogSerializer().serialize(change, false));
+                "]"
     }
 
-    @Test
-    public void serialized_rawSql() {
+    def serialized_rawSql() {
+        when:
         RawSQLChange change = new RawSQLChange();
 
-        assertEquals("sql:[\n" +
+        then:
+        new StringChangeLogSerializer().serialize(change, false) == "sql:[\n" +
                 "    splitStatements=\"true\"\n" +
-                "    stripComments=\"false\"\n]", new StringChangeLogSerializer().serialize(change, false));
+                "    stripComments=\"false\"\n]"
 
+        when:
         change.setSql("some SQL Here");
-
-        assertEquals("sql:[\n" +
+        then:
+        new StringChangeLogSerializer().serialize(change, false) == "sql:[\n" +
                 "    splitStatements=\"true\"\n" +
                 "    sql=\"some SQL Here\"\n" +
                 "    stripComments=\"false\"\n" +
-                "]", new StringChangeLogSerializer().serialize(change, false));
+                "]"
     }
 
-    @Test
-    public void tryAllChanges() throws Exception {
-        for (SortedSet<Class<? extends Change>> changeClassSet : ChangeFactory.getInstance().getRegistry().values()) {
-            Change change = changeClassSet.iterator().next().getConstructor().newInstance();
+    @Unroll("#featureName: #change.class.name")
+    def "general field serialization check"() throws Exception {
+        expect:
+        setFields(change);
 
-            setFields(change);
-
-            String string = new StringChangeLogSerializer().serialize(change, false);
+        String string = new StringChangeLogSerializer().serialize(change, false);
 //            System.out.println(string);
 //            System.out.println("-------------");
-            assertTrue("@ in string.  Probably poorly serialzed object reference." + string, string.indexOf("@") < 0);
+        assert string.indexOf("@") < 0: "@ in string.  Probably poorly serialzed object reference." + string;
+
+        where:
+        change << ChangeFactory.getInstance().getRegistry().values().collect {
+            it.iterator().next().getConstructor().newInstance()
         }
     }
 
@@ -258,7 +280,7 @@ public class StringChangeLogSerializerTest {
         if (clazz.getName().indexOf(".ext.") > 0) {
             return; //don't worry about ext samples
         }
-        
+
         for (Field field : clazz.getDeclaredFields()) {
             if (field.getAnnotation(DatabaseChangeProperty.class) != null && !field.getAnnotation(DatabaseChangeProperty.class).isChangeProperty()) {
                 continue;
@@ -270,8 +292,7 @@ public class StringChangeLogSerializerTest {
                 //nothing
             } else if (Modifier.isStatic(field.getModifiers())) {
                 // nothing if it is static
-            }
-            else if (field.getType().equals(Logger.class)) {
+            } else if (field.getType().equals(Logger.class)) {
                 //nothing
             } else if (field.getType().equals(ResourceAccessor.class)) {
                 //nothing
@@ -309,8 +330,8 @@ public class StringChangeLogSerializerTest {
                 field.set(object, createCustomChange());
             } else if (field.getType().equals(Map.class)) {
                 field.set(object, createMap());
-            } else if (field.getType().equals(ChangeLogParameters.class)){
-                 // TODO: unclear what to do here ...               
+            } else if (field.getType().equals(ChangeLogParameters.class)) {
+                // TODO: unclear what to do here ...
             } else if (Collection.class.isAssignableFrom(field.getType())) {
                 Type genericType = field.getGenericType();
                 if (genericType instanceof ParameterizedType) {
@@ -435,20 +456,31 @@ public class StringChangeLogSerializerTest {
         return config;
     }
 
-    @Test
-    public void serialize_withDoubleOnJava6() {
+    @Unroll("#featureName: #value")
+    def "serialize with double on java 6"() {
+        when:
         InsertDataChange change = new InsertDataChange();
         change.setTableName("NUMBER_TABLE");
-        change.addColumn(new ColumnConfig().setName("VALUE").setValueNumeric(new Double("0.001")));
-        String out = new StringChangeLogSerializer().serialize(change, true);
-        assertEquals("insert:[\n" +
+        change.addColumn(new ColumnConfig().setName("VALUE").setValueNumeric(new Double(value)));
+
+        then:
+        new StringChangeLogSerializer().serialize(change, true) == "insert:[\n" +
                 "    columns=[\n" +
                 "        [\n" +
                 "            name=\"VALUE\"\n" +
-                "            valueNumeric=\"0.001\"\n" +
+                "            valueNumeric=\"${expected}\"\n" +
                 "        ]\n" +
                 "    ]\n" +
                 "    tableName=\"NUMBER_TABLE\"\n" +
-                "]", out);
+                "]"
+
+        where:
+        value   | expected
+        "0"     | "0.0"
+        "1"     | "1.0"
+        "0.0"   | "0.0"
+        "0.1"   | "0.1"
+        "0.010" | "0.01"
+        "0.001" | "0.001"
     }
 }
