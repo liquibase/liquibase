@@ -1,0 +1,150 @@
+Build rpm package prerequisites
+
+* Introduction
+
+    The {{{http://mojo.codehaus.org/rpm-maven-plugin/}RPM Maven Plugin}} is not 100% java based and <<relies on native rpm tools>>.
+
+    Hence to build rpm, you need to have rpm tools installed.
+
+
+* Build on Debian based distros
+
+    To build on debian, simply run :
+
++--------------------------
+sudo apt-get install rpm
+sudo apt-get install rpm-build
++--------------------------
+
+    And you're ready to build liquibase rpm package.
+
+* Build on CentOS
+    
+    As root, run :
+
++-------------------------------------------
+yum install rpm-build
++-------------------------------------------
+
+* Build on Windows (not tested by me)
+
+    Based on on a {{{http://tim-perry.co.uk/blog/2012/11/22/building_rpms_on_windows_with_maven}blog}}, here are the steps to be able
+to build a rpm on Windows, using <<cygwin>>.
+
+    * Configure RPM building in your pom (see {{{https://github.com/pimterry/js-test-runner/commit/adcf064e74c10069590aa06851fcb3cfdd974d89}here}} for example)
+    
+    * Download {{{https://www.cygwin.com/}cygwin}}
+
+    * Run the installer, and select rpm and rpm-build as packages that you’d like to have installed.
+
+    * Add your Cygwin bin folder (e.g. C:\cygwin\bin) to your PATH
+
+    * Rename the ‘system file’ (actually a symlink) at cygwin\bin\rpmbuild to cygwin\bin\rpmb
+
+    * Copy the script provided in {{{https://jira.codehaus.org/browse/MRPM-4}this}} bug ticket comment to a new batch file called ‘rpmbuild.bat’ in your PATH, e.g. C:\cygwin\bin\rpmbuild.bat
+
+    * Make a small tweak to that file, changing the ‘rpmbuild’ at the start of the last line to ‘rpmb’
+
+ 
+
+Build and install rpm
+
+* rpm Build from maven
+
+    Assuming you meet <<prerequisites>>, just run :
+
++-------------------------------------------
+mvn clean site package
++-------------------------------------------
+
+    Then you have a html site in 
+
++-------------------------------------------
+target/site/index.html
++-------------------------------------------
+
+    and a ready to use rpm in
+
++-------------------------------------------
+target/rpm/liquibase/RPMS/noarch/
++-------------------------------------------
+
+* rpm install, remove, search and info
+
+
++-------------------------------------------
+yum --nogpgcheck localinstall  liquibase-3.3.0-SNAPSHOT20140618000252.noarch.rpm
++-------------------------------------------
+
+    To rapidly check if liquibase is already installed :
+
++-------------------------------------------
+yum list installed | grep liquibase
++-------------------------------------------
+
+    Get infos about liquibase package :
+
++-------------------------------------------
+yum info liquibase.noarch
++-------------------------------------------
+
+    which should give you this kind of output (still developing on SNAPSHOT) :
+
++-------------------------------------------
+Installed Packages
+Name        : liquibase
+Arch        : noarch
+Version     : 3.3.0
+Release     : SNAPSHOT20140618000252
+Size        : 2.6 M
+Repo        : installed
+Summary     : Liquibase rpm Packager
+URL         : http://www.liquibase.org
+License     : Apache License, Version 2.0
+Description : Liquibase is an open source database-independent library for tracking,
+            :         managing and applying database schema changes. It was started in 2006 to allow
+            :         easier tracking of database changes, especially in an agile software development
+            :         environment.
++-------------------------------------------
+
+
+    Take a look at the (very concise but yet existing) man page :
+
++-------------------------------------------
+man liquibase
++-------------------------------------------
+
+
+    To remove/uninstall liquibase :
+
++-------------------------------------------
+yum remove liquibase.noarch
++-------------------------------------------
+
+    which should give you this kind of output :
+
++-------------------------------------------
+Dependencies Resolved
+
+===================================================================================================================================================================================
+ Package                                Arch                                Version                                                   Repository                              Size
+===================================================================================================================================================================================
+Removing:
+ liquibase                              noarch                              3.3.0-SNAPSHOT20140618000252                              installed                              2.6 M
+
+Transaction Summary
+===================================================================================================================================================================================
+Remove        1 Package(s)
+
+Installed size: 2.6 M
+Is this ok [y/N]: y
+Downloading Packages:
+Running rpm_check_debug
+Running Transaction Test
+Transaction Test Succeeded
+Running Transaction
+Warning: RPMDB altered outside of yum.
+  Erasing    : liquibase-3.3.0-SNAPSHOT20140618000252.noarch                                                                                                                   1/1 
+  Verifying  : liquibase-3.3.0-SNAPSHOT20140618000252.noarch
++-------------------------------------------
+
