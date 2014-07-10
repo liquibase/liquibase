@@ -288,4 +288,9 @@
         <stop>Stop message!</stop>
     </changeSet>
 
+    <changeSet id="large number" author="nvoxland">
+        <createSequence cacheSize="20" cycle="false" incrementBy="1" maxValue="9999999999999999999999999999"
+                        minValue="1" ordered="false" sequenceName="BATCH_JOB_EXECUTION_SEQ" startValue="1"/>
+    </changeSet>
+
 </databaseChangeLog>
