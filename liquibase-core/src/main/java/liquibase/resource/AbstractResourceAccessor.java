@@ -91,6 +91,8 @@ public abstract class AbstractResourceAccessor implements ResourceAccessor {
         while (string.matches(".*/.*?/\\.\\./.*")) {
             string = string.replaceAll("/[^/]+/\\.\\./", "/");
         }
+
+        string = string.replaceFirst(".*liquibase-unzip\\d+\\.dir/", ""); //
         return string;
     }
 
