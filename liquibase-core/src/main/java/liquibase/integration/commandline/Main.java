@@ -888,6 +888,10 @@ public class Main {
                 CommandLineUtils.doDiffToChangeLog(changeLogFile, createReferenceDatabaseFromCommandParams(commandParams), database, diffOutputControl,  StringUtils.trimToNull(diffTypes), finalSchemaComparisons);
                 return;
             } else if ("generateChangeLog".equalsIgnoreCase(command)) {
+                String changeLogFile = this.changeLogFile;
+                if (changeLogFile == null) {
+                    changeLogFile = ""; //will output to stdout
+                }
                 // By default the generateChangeLog command is destructive, and
                 // Liquibase's attempt to append doesn't work properly. Just
                 // fail the build if the file already exists.
