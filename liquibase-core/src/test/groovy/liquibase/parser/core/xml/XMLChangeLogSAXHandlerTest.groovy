@@ -110,7 +110,7 @@ class XMLChangeLogSAXHandlerTest extends Specification {
         handler.characters("child node 1".toCharArray(), 0, "child node 1".size());
 
         handler.startElement(uri, "grandChildNode1", "grandChildNode1", childAttributes);
-        handler.characters("grand child node 1 text".toCharArray(), 0, "grand child node 1 text".size());
+        handler.characters("\n  grand child node 1 text with surrounding spaces\n   ".toCharArray(), 0, "\n  grand child node 1 text with surrounding spaces\n   ".size());
         handler.endElement(uri, "grandChildNode1", "grandChildNode1");
 
         handler.startElement(uri, "grandChildNode2", "grandChildNode2", null);
@@ -135,7 +135,7 @@ class XMLChangeLogSAXHandlerTest extends Specification {
 
         handler.databaseChangeLogTree.getChild(null, "childNode1").value == "child node 1 has more text for child node 1"
         handler.databaseChangeLogTree.getChild(null, "childNode1").children.size() == 2
-        handler.databaseChangeLogTree.getChild(null, "childNode1").getChild(null, "grandChildNode1").value == "grand child node 1 text"
+        handler.databaseChangeLogTree.getChild(null, "childNode1").getChild(null, "grandChildNode1").value == "grand child node 1 text with surrounding spaces"
         handler.databaseChangeLogTree.getChild(null, "childNode1").getChild(null, "grandChildNode1").children.size() == 2
         handler.databaseChangeLogTree.getChild(null, "childNode1").getChild(null, "grandChildNode1").getChild(null, "childAttr0").value == "child attr 0 value"
         handler.databaseChangeLogTree.getChild(null, "childNode1").getChild(null, "grandChildNode1").getChild(null, "childAttr1").value == "child attr 1 value"
