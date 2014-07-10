@@ -177,4 +177,13 @@ public abstract class LiquibaseDataType implements PrioritizedService {
     public void finishInitialization(String originalDefinition) {
         this.rawDefinition = originalDefinition;
     }
+
+    protected String formatNumber(String value) {
+        if (value == null) {
+            return null;
+        }
+        return value.replaceFirst("\\.0+$", "");
+    }
+
+
 }
