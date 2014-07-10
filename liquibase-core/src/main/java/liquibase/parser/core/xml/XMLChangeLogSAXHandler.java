@@ -131,7 +131,7 @@ class XMLChangeLogSAXHandler extends DefaultHandler {
         try {
             String seenText = this.textStack.pop().toString();
             if (!StringUtils.trimToEmpty(seenText).equals("")) {
-                node.setValue(changeLogParameters.expandExpressions(seenText));
+                node.setValue(changeLogParameters.expandExpressions(seenText).trim());
             }
         } catch (ParsedNodeException e) {
             throw new SAXException(e);

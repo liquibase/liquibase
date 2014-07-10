@@ -67,7 +67,7 @@ public class StringChangeLogSerializer implements ChangeLogSerializer {
                             String valueString = value.toString();
                             if (value instanceof Double || value instanceof Float) { //java 6 adds additional zeros to the end of doubles and floats
                                 if (valueString.contains(".")) {
-                                    valueString = valueString.replaceFirst("0*$","");
+                                    valueString = valueString.replaceFirst("(\\.[0-9]+)0+","$1");
                                 }
                             }
                             values.add(indent(indent) + field + "=\"" + valueString + "\"");
