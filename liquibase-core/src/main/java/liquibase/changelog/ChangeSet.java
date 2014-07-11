@@ -247,7 +247,12 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
         this.contexts = new ContextExpression(node.getChildValue(null, "context", String.class));
         setDbms(node.getChildValue(null, "dbms", String.class));
         this.runInTransaction  = node.getChildValue(null, "runInTransaction", true);
-        this.comments = node.getChildValue(null, "comment", String.class);
+        this.comments = StringUtils.join(node.getChildren(null, "comment"), "\n", new StringUtils.StringUtilsFormatter() {
+            @Override
+            public String toString(Object obj) {
+                return StringUtils.trimToEmpty((String) ((ParsedNode) obj).getValue());
+            }
+        });
 
         String objectQuotingStrategyString = StringUtils.trimToNull(node.getChildValue(null, "objectQuotingStrategy", String.class));
         this.objectQuotingStrategy = ObjectQuotingStrategy.LEGACY;
