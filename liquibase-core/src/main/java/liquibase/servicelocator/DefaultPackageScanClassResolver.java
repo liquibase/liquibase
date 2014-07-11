@@ -383,7 +383,7 @@ public class DefaultPackageScanClassResolver implements PackageScanClassResolver
             JarEntry entry;
             while ((entry = jarStream.getNextJarEntry()) != null) {
                 String name = entry.getName();
-                if (name != null) {
+                if (name != null && name.contains(parent)) {
                     name = name.trim();
                     if (!entry.isDirectory() && name.endsWith(".class")) {
                         loadClass(name, loader);
