@@ -9,8 +9,7 @@ import liquibase.changelog.DatabaseChangeLog;
 import liquibase.exception.ChangeLogParseException;
 import liquibase.logging.LogFactory;
 import liquibase.parser.ChangeLogParser;
-import liquibase.precondition.core.PreconditionContainer;
-import liquibase.precondition.core.SqlPrecondition;
+import liquibase.precondition.core.*;
 import liquibase.resource.ResourceAccessor;
 import liquibase.resource.UtfBomAwareReader;
 import liquibase.util.StreamUtil;
@@ -192,9 +191,33 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
                             if (preconditionMatcher.groupCount() == 2) {
                                 String name = StringUtils.trimToNull(preconditionMatcher.group(1));
                                 if (name != null) {
+                                    boolean useNot = false;
                                     String body = preconditionMatcher.group(2).trim();
+                                    if (name.startsWith("not-")) {
+                                        useNot = true;
+                                        name = name.substring(4);
+                                    }
                                     if ("sql-check".equals(name)) {
-                                        changeSet.getPreconditions().addNestedPrecondition(parseSqlCheckCondition(body));
+                                        String replaced = changeLogParameters.expandExpressions(StringUtils.trimToNull(body));
+                                        changeSet.getPreconditions().addNestedPrecondition(parseSqlCheckCondition(replaced));
+                                    } else if ("table-exists".equals(name)) {
+                                        String replaced = changeLogParameters.expandExpressions(StringUtils.trimToNull(body));
+                                        TableExistsPrecondition tableExistsPrecondition = parseTableExistsCondition(replaced);
+                                        NotPrecondition notPrecondition = null;
+                                        if (useNot) {
+                                            notPrecondition = new NotPrecondition();
+                                            notPrecondition.addNestedPrecondition(tableExistsPrecondition);
+                                        }
+                                        changeSet.getPreconditions().addNestedPrecondition(useNot ? notPrecondition : tableExistsPrecondition);
+                                    } else if ("column-exists".equals(name)) {
+                                        String replaced = changeLogParameters.expandExpressions(StringUtils.trimToNull(body));
+                                        ColumnExistsPrecondition columnExistsPrecondition = parseColumnExistsCondition(replaced);
+                                        NotPrecondition notPrecondition = null;
+                                        if (useNot) {
+                                            notPrecondition = new NotPrecondition();
+                                            notPrecondition.addNestedPrecondition(columnExistsPrecondition);
+                                        }
+                                        changeSet.getPreconditions().addNestedPrecondition(useNot ? notPrecondition : columnExistsPrecondition);
                                     } else {
                                         throw new ChangeLogParseException("The '" + name + "' precondition type is not supported.");
                                     }
@@ -234,7 +257,39 @@ public class FormattedSqlChangeLogParser implements ChangeLogParser {
         return changeLog;
     }
 
+    private ColumnExistsPrecondition parseColumnExistsCondition(String body) throws ChangeLogParseException {
+        Pattern schemaPattern = Pattern.compile("^.*(?:schema:)(\\S+).*?", Pattern.CASE_INSENSITIVE);
+        Pattern tablePattern = Pattern.compile("^.*(?:table:)(\\S+).*?", Pattern.CASE_INSENSITIVE);
+        Pattern columnPattern = Pattern.compile("^.*(?:column:)(\\S+).*?", Pattern.CASE_INSENSITIVE);
+        Matcher schemaMatcher = schemaPattern.matcher(body);
+        Matcher tableMatcher = tablePattern.matcher(body);
+        Matcher columnMatcher = columnPattern.matcher(body);
+        if (tableMatcher.matches() && schemaMatcher.matches() && columnMatcher.matches()) {
+            ColumnExistsPrecondition p = new ColumnExistsPrecondition();
+            p.setTableName(tableMatcher.group(1));
+            p.setSchemaName(schemaMatcher.group(1));
+            p.setColumnName(columnMatcher.group(1));
+            return p;
+        }
+        throw new ChangeLogParseException("Could not parse a columnExists precondition from '" + body + "'.");
+    }
 
+
+    private TableExistsPrecondition parseTableExistsCondition(String body) throws ChangeLogParseException {
+        Pattern schemaPattern = Pattern.compile("^.*(?:schema:)(\\S+).*?", Pattern.CASE_INSENSITIVE);
+        Pattern tablePattern = Pattern.compile("^.*(?:table:)(\\S+).*?", Pattern.CASE_INSENSITIVE);
+        Matcher schemaMatcher = schemaPattern.matcher(body);
+        Matcher tableMatcher = tablePattern.matcher(body);
+        if (tableMatcher.matches()) {
+            TableExistsPrecondition p = new TableExistsPrecondition();
+            p.setTableName(tableMatcher.group(1));
+            if (schemaMatcher.matches()) {
+                p.setSchemaName(schemaMatcher.group(1));
+            }
+            return p;
+        }
+        throw new ChangeLogParseException("Could not parse a tableExists precondition from '" + body + "'.");
+    }
 
     private SqlPrecondition parseSqlCheckCondition(String body) throws ChangeLogParseException{
         Pattern[] patterns = new Pattern[] {
