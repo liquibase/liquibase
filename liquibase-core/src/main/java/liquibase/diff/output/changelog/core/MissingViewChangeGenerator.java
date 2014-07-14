@@ -50,7 +50,13 @@ public class MissingViewChangeGenerator implements MissingObjectChangeGenerator 
         if (selectQuery == null) {
             selectQuery = "COULD NOT DETERMINE VIEW QUERY";
         } else if (comparisonDatabase instanceof OracleDatabase && view.getColumns() != null && view.getColumns().size() > 0) {
-            selectQuery = "CREATE OR REPLACE FORCE VIEW "+comparisonDatabase.escapeViewName(change.getCatalogName(), change.getSchemaName(), change.getViewName())
+            String viewName;
+            if (change.getCatalogName() == null && change.getSchemaName() == null) {
+                viewName = comparisonDatabase.escapeObjectName(change.getViewName(), View.class);
+            } else {
+                viewName = comparisonDatabase.escapeViewName(change.getCatalogName(), change.getSchemaName(), change.getViewName());
+            }
+            selectQuery = "CREATE OR REPLACE FORCE VIEW "+ viewName
                     + " (" + StringUtils.join(view.getColumns(), ", ", new StringUtils.StringUtilsFormatter() {
                 @Override
                 public String toString(Object obj) {
