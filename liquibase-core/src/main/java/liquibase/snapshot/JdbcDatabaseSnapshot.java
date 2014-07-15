@@ -324,6 +324,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                             sql += " AND ALL_TAB_COLUMNS.COLUMN_NAME='"+database.escapeObjectName(columnName, Column.class)+"'";
                         }
                     }
+                    sql += " ORDER BY COLUMN_ID";
 
                     return this.executeAndExtract(sql, database);
                 }
