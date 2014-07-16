@@ -17,12 +17,10 @@ public class ClassLoaderResourceAccessor extends AbstractResourceAccessor {
     private ClassLoader classLoader;
     public ClassLoaderResourceAccessor() {
         this.classLoader = getClass().getClassLoader();
-        init();
     }
 
     public ClassLoaderResourceAccessor(ClassLoader classLoader) {
         this.classLoader = classLoader;
-        init();
     }
 
     @Override

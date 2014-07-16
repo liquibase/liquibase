@@ -240,7 +240,7 @@ public class DefaultPackageScanClassResolver implements PackageScanClassResolver
     protected void findInAllClasses(PackageScanFilter test, String packageName, Set<Class<?>> classes) {
         log.debug("Searching for: " + test + " in package: " + packageName );
 
-        Set<Class> packageClasses = this.allClassesByPackage.get(packageName);
+        Set<Class> packageClasses = getFoundClasses(packageName);
         if (packageClasses == null) {
             log.debug("No classes found in package: " + packageName );
             return;
@@ -251,6 +251,34 @@ public class DefaultPackageScanClassResolver implements PackageScanClassResolver
             }
         }
 
+    }
+
+    protected void addFoundClass(Class<?> type) {
+        if (type.getPackage() != null) {
+            String packageName = type.getPackage().getName();
+            List<String> packageNameParts = Arrays.asList(packageName.split("\\."));
+            for (int i = 0; i < packageNameParts.size(); i++) {
+                String thisPackage = StringUtils.join(packageNameParts.subList(0, i + 1), "/");
+                addFoundClass(thisPackage, type);
+            }
+        }
+    }
+
+
+    protected void addFoundClass(String packageName, Class<?> type) {
+        packageName = packageName.replace("/", ".");
+
+        if (!this.allClassesByPackage.containsKey(packageName)) {
+            this.allClassesByPackage.put(packageName, new HashSet<Class>());
+        }
+
+        this.allClassesByPackage.get(packageName).add(type);
+    }
+
+
+    protected Set<Class> getFoundClasses(String packageName) {
+        packageName = packageName.replace("/", ".");
+        return this.allClassesByPackage.get(packageName);
     }
 
     // We can override this method to support the custom ResourceLocator
@@ -334,19 +362,7 @@ public class DefaultPackageScanClassResolver implements PackageScanClassResolver
                 return;
             }
 
-            if (type.getPackage() != null) {
-                String packageName = type.getPackage().getName();
-                List<String> packageNameParts = Arrays.asList(packageName.split("\\."));
-                for (int i=0; i<packageNameParts.size(); i++) {
-                    String thisPackage = StringUtils.join(packageNameParts.subList(0, i+1), "/");
-
-                    if (!this.allClassesByPackage.containsKey(thisPackage)) {
-                        this.allClassesByPackage.put(thisPackage, new HashSet<Class>());
-                    }
-                    this.allClassesByPackage.get(thisPackage).add(type);
-                }
-            }
-
+            addFoundClass(type);
 
         } catch (ClassNotFoundException e) {
             log.debug("Cannot find class '" + className + "' in classloader: " + classLoader

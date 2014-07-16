@@ -37,10 +37,11 @@ public class MediumIntType extends LiquibaseDataType {
             return value.toString();
         }
 
-        if (value instanceof Boolean)
+        if (value instanceof Boolean) {
             return Boolean.TRUE.equals(value) ? "1" : "0";
-        else
-            return value.toString();
+        } else {
+            return formatNumber(value.toString());
+        }
     }
 
 }

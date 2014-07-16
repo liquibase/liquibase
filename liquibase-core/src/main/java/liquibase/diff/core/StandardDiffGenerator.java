@@ -70,34 +70,37 @@ public class StandardDiffGenerator implements DiffGenerator {
 
     protected <T extends DatabaseObject> void compareObjectType(Class<T> type, DatabaseSnapshot referenceSnapshot, DatabaseSnapshot comparisonSnapshot, DiffResult diffResult) {
 
-        for (CompareControl.SchemaComparison schemaComparison : diffResult.getCompareControl().getSchemaComparisons()) {
-            for (T referenceObject : referenceSnapshot.get(type)) {
-//                if (referenceObject instanceof Table && referenceSnapshot.getDatabase().isLiquibaseTable(referenceSchema, referenceObject.getName())) {
-//                    continue;
-//                }
-                T comparisonObject = comparisonSnapshot.get(referenceObject);
-                if (comparisonObject == null) {
-                    diffResult.addMissingObject(referenceObject);
-                } else {
-                    ObjectDifferences differences = DatabaseObjectComparatorFactory.getInstance().findDifferences(referenceObject, comparisonObject, comparisonSnapshot.getDatabase(), diffResult.getCompareControl());
-                    if (differences.hasDifferences()) {
-                        diffResult.addChangedObject(referenceObject, differences);
+        CompareControl.SchemaComparison[] schemaComparisons = diffResult.getCompareControl().getSchemaComparisons();
+        if (schemaComparisons != null) {
+            for (CompareControl.SchemaComparison schemaComparison : schemaComparisons) {
+                for (T referenceObject : referenceSnapshot.get(type)) {
+                    //                if (referenceObject instanceof Table && referenceSnapshot.getDatabase().isLiquibaseTable(referenceSchema, referenceObject.getName())) {
+                    //                    continue;
+                    //                }
+                    T comparisonObject = comparisonSnapshot.get(referenceObject);
+                    if (comparisonObject == null) {
+                        diffResult.addMissingObject(referenceObject);
+                    } else {
+                        ObjectDifferences differences = DatabaseObjectComparatorFactory.getInstance().findDifferences(referenceObject, comparisonObject, comparisonSnapshot.getDatabase(), diffResult.getCompareControl());
+                        if (differences.hasDifferences()) {
+                            diffResult.addChangedObject(referenceObject, differences);
+                        }
                     }
                 }
-            }
-//
-            for (T comparisonObject : comparisonSnapshot.get(type)) {
-//                if (targetObject instanceof Table && comparisonSnapshot.getDatabase().isLiquibaseTable(comparisonSchema, targetObject.getName())) {
-//                    continue;
-//                }
-                if (referenceSnapshot.get(comparisonObject) == null) {
-                    diffResult.addUnexpectedObject(comparisonObject);
+                //
+                for (T comparisonObject : comparisonSnapshot.get(type)) {
+                    //                if (targetObject instanceof Table && comparisonSnapshot.getDatabase().isLiquibaseTable(comparisonSchema, targetObject.getName())) {
+                    //                    continue;
+                    //                }
+                    if (referenceSnapshot.get(comparisonObject) == null) {
+                        diffResult.addUnexpectedObject(comparisonObject);
+                    }
+                    //            }
                 }
-//            }
-        }
+            }
 
-        //todo: add logic for when container is missing or unexpected also
-    }
+            //todo: add logic for when container is missing or unexpected also
+        }
 
 //    /**
 //     * Removes duplicate Indexes from the DiffResult object.
