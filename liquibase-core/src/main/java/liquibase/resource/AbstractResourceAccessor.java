@@ -15,20 +15,32 @@ public abstract class AbstractResourceAccessor implements ResourceAccessor {
 
     private Set<String> rootStrings = new HashSet<String>();
 
+    protected AbstractResourceAccessor() {
+        init();
+    }
+
     protected void init() {
-        Enumeration<URL> baseUrls;
         try {
-            baseUrls = toClassLoader().getResources("");
+            Enumeration<URL> baseUrls;
+            ClassLoader classLoader = toClassLoader();
+            if (classLoader != null) {
+                baseUrls = classLoader.getResources("");
+
+                while (baseUrls.hasMoreElements()) {
+                    addRootPath(baseUrls.nextElement());
+                }
+            }
         } catch (IOException e) {
             throw new UnexpectedLiquibaseException(e);
-        }
-        while (baseUrls.hasMoreElements()) {
-            this.rootStrings.add(baseUrls.nextElement().toExternalForm());
         }
     }
 
     protected boolean isCaseSensitive() {
         return !SystemUtils.isWindows();
+    }
+
+    protected void addRootPath(URL path) {
+        rootStrings.add(path.toExternalForm());
     }
 
     protected Set<String> getRootPaths() {
