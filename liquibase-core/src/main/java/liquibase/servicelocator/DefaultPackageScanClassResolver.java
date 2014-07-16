@@ -2,6 +2,7 @@ package liquibase.servicelocator;
 
 import liquibase.logging.Logger;
 import liquibase.logging.core.DefaultLogger;
+import liquibase.util.StringUtils;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -252,13 +253,26 @@ public class DefaultPackageScanClassResolver implements PackageScanClassResolver
 
     }
 
-    protected boolean addFoundClass(Class<?> type) {
-        String thisPackage = type.getPackage().getName();
-        if (!this.allClassesByPackage.containsKey(thisPackage)) {
-            this.allClassesByPackage.put(thisPackage, new HashSet<Class>());
+    protected void addFoundClass(Class<?> type) {
+        if (type.getPackage() != null) {
+            String packageName = type.getPackage().getName();
+            List<String> packageNameParts = Arrays.asList(packageName.split("\\."));
+            for (int i = 0; i < packageNameParts.size(); i++) {
+                String thisPackage = StringUtils.join(packageNameParts.subList(0, i + 1), "/");
+                addFoundClass(thisPackage, type);
+            }
+        }
+    }
+
+
+    protected void addFoundClass(String packageName, Class<?> type) {
+        packageName = packageName.replace("/", ".");
+
+        if (!this.allClassesByPackage.containsKey(packageName)) {
+            this.allClassesByPackage.put(packageName, new HashSet<Class>());
         }
 
-        return this.allClassesByPackage.get(thisPackage).add(type);
+        this.allClassesByPackage.get(packageName).add(type);
     }
 
 
@@ -348,13 +362,7 @@ public class DefaultPackageScanClassResolver implements PackageScanClassResolver
                 return;
             }
 
-            if (type.getPackage() != null) {
-                String packageName = type.getPackage().getName();
-                List<String> packageNameParts = Arrays.asList(packageName.split("\\."));
-                for (int i=0; i<packageNameParts.size(); i++) {
-                    addFoundClass(type);
-                }
-            }
+            addFoundClass(type);
 
 
         } catch (ClassNotFoundException e) {
