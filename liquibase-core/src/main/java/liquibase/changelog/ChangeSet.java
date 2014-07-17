@@ -726,6 +726,7 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
             return;
         }
         rollBackChanges.add(change);
+        change.setChangeSet(this);
     }
 
 
