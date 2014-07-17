@@ -99,7 +99,7 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
 
                 @Override
 				public List<CachedRow> bulkFetch() throws SQLException, DatabaseException {
-                    if (database instanceof OracleDatabase) { //from https://community.oracle.com/thread/2563173
+                    if (database instanceof OracleDatabase) {
                         CatalogAndSchema catalogAndSchema = new CatalogAndSchema(catalogName, schemaName).customize(database);
 
                         String jdbcSchemaName = ((AbstractJdbcDatabase) database).getJdbcSchemaName(catalogAndSchema);
@@ -119,27 +119,23 @@ public class JdbcDatabaseSnapshot extends DatabaseSnapshot {
                                 "  f.constraint_name as fk_name,  " +
                                 "  p.constraint_name as pk_name,  " +
                                 "  decode(f.deferrable, 'DEFERRABLE', 5, 'NOT DEFERRABLE', 7, 'DEFERRED', 6) deferrability  " +
-                                "FROM  " +
-                                "  all_cons_columns pc,  " +
-                                "  all_constraints p,  " +
-                                "  all_cons_columns fc,  " +
-                                "  all_constraints f  " +
-                                "WHERE 1 = 1  " +
-//                                "  AND p.table_name = '"+foundTable+"'  " +
-//                                    "  AND f.table_name = :2  " +
-                                "  AND p.owner = '"+jdbcSchemaName+"'  " +
-//                                    "  AND f.owner = '"+jdbcSchemaName+"'  " +
-                                "  AND f.constraint_type = 'R'  " +
-                                "  AND p.owner = f.r_owner  " +
-                                "  AND p.constraint_name = f.r_constraint_name  " +
-                                "  AND p.constraint_type in ('P', 'U')  " +
-                                "  AND pc.owner = p.owner  " +
-                                "  AND pc.constraint_name = p.constraint_name  " +
-                                "  AND pc.table_name = p.table_name  " +
-                                "  AND fc.owner = f.owner  " +
-                                "  AND fc.constraint_name = f.constraint_name  " +
-                                "  AND fc.table_name = f.table_name  " +
-                                "  AND fc.position = pc.position  " +
+                                "FROM " +
+                                "all_constraints p " +
+                                "INNER JOIN all_cons_columns pc " +
+                                "ON pc.owner = p.owner " +
+                                "AND pc.constraint_name = p.constraint_name " +
+                                "AND pc.table_name = p.table_name " +
+                                "INNER JOIN all_constraints f " +
+                                "ON p.owner = f.r_owner " +
+                                "AND p.constraint_name = f.r_constraint_name " +
+                                "INNER JOIN all_cons_columns fc " +
+                                "ON fc.owner = f.owner " +
+                                "AND fc.constraint_name = f.constraint_name " +
+                                "AND fc.table_name = f.table_name " +
+                                "AND fc.position = pc.position " +
+                                "WHERE p.owner = '" +jdbcSchemaName+"' "+
+                                "AND p.constraint_type in ('P', 'U') " +
+                                "AND f.constraint_type = 'R' " +
                                 "ORDER BY fktable_schem, fktable_name, key_seq";
                         return executeAndExtract(sql, database);
                     } else {
