@@ -1,6 +1,7 @@
 package liquibase.datatype.core;
 
 import liquibase.database.Database;
+import liquibase.database.core.HsqlDatabase;
 import liquibase.database.core.InformixDatabase;
 import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.core.OracleDatabase;
@@ -13,7 +14,8 @@ public class VarcharType extends CharType {
 
     @Override
     public DatabaseDataType toDatabaseDataType(Database database) {
-        if (database instanceof OracleDatabase) {
+        if (database instanceof OracleDatabase
+                || (database instanceof HsqlDatabase && ((HsqlDatabase) database).isUsingOracleSyntax())) {
             return new DatabaseDataType("VARCHAR2", getParameters());
         }
 
