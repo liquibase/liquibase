@@ -1,6 +1,36 @@
 Liquibase Core Changelog
 ===========================================
 
+Changes in version 3.2.1 (2014.07.18)
+- Fixes to checksums on valueNumeric, defaultValueNumeric fields
+- Fixes to checksums on createProcuedure and sql changes
+- Fixed null pointer exception performing a tag
+- Fixes to Spring support
+- Fixed issue handling changeSet with multiple comments
+- Fix support for sqlFile tags in rollback
+- Fixed sqlFile not using changelog parameters
+- Other bug fixes
+
+- [CORE-1844] - bulkFetch of foreign keys on Oracle is very slow
+- [CORE-1918] - Multiple comment blocks in changesets no longer works
+- [CORE-1920] - SpringLiqubase includeAll is not including files
+- [CORE-1922] - 3.2.0 Regression due to CORE-1721
+- [CORE-1923] - Error raised: Unknown Reason when doing tagging via command line
+- [CORE-1930] - Snapshot command returns no information on MSSQL
+- [CORE-1933] - [3.0.8 -> 3.2.0] pom.xml: 2Mb of superfluous dependencies
+- [CORE-1934] - file path in databasechangelog is absoulte since liquibase 3.2.0 when using includeAll inside a jar
+- [CORE-1936] - NullPointerException while diffing database against hibernate.cfg.xml
+- [CORE-1938] - defaultValueNumeric="0" or defaultValue="0" is translated to 0.0
+- [CORE-1940] - Maximum Oracle Sequence fails to be parsed as a BigInteger
+- [CORE-1944] - NullPointerException when tagging through Ant before applying changesets
+- [CORE-1947] - Liquibase dependency to jetty-servlet/velocity should be <optional>true</optional>
+- [CORE-1950] - Checksum validation failed after Liquibase upgrade (3.1.1 -> 3.2.0)
+- [CORE-1957] - Using VARCHAR2 column type fails for Hsqldb running in oracle syntax mode
+- [CORE-1960] - "Could not find implementation of liquibase.logging.Logger" starts appearing after migration from 3.1.1 to 3.2.0
+- [CORE-1970] - NullPointerException on rollback with <sqlFile> tag
+- [CORE-1746] - Support <sqlFile> parameters
+- [CORE-1951] - Regression on 3.2.0 : --diffTypes=data generates Unknown Reason Exception
+
 Changes in version 3.2.0 (2014.06.02)
 
 - Support for and/or/not logic in context expressions

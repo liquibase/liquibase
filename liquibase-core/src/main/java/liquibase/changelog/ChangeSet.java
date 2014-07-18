@@ -257,9 +257,14 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
         this.comments = StringUtils.join(node.getChildren(null, "comment"), "\n", new StringUtils.StringUtilsFormatter() {
             @Override
             public String toString(Object obj) {
-                return StringUtils.trimToEmpty((String) ((ParsedNode) obj).getValue());
+                if (((ParsedNode) obj).getValue() == null) {
+                    return "";
+                } else {
+                    return ((ParsedNode) obj).getValue().toString();
+                }
             }
         });
+        this.comments = StringUtils.trimToNull(this.comments);
 
         String objectQuotingStrategyString = StringUtils.trimToNull(node.getChildValue(null, "objectQuotingStrategy", String.class));
         this.objectQuotingStrategy = ObjectQuotingStrategy.LEGACY;
@@ -744,6 +749,7 @@ public class ChangeSet implements Conditional, LiquibaseSerializable {
             return;
         }
         rollBackChanges.add(change);
+        change.setChangeSet(this);
     }
 
 

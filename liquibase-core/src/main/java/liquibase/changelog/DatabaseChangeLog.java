@@ -315,6 +315,7 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
 
     protected ChangeSet createChangeSet(ParsedNode node, ResourceAccessor resourceAccessor) throws ParsedNodeException, SetupException {
         ChangeSet changeSet = new ChangeSet(this);
+        changeSet.setChangeLogParameters(this.getChangeLogParameters());
         try {
             changeSet.load(node, resourceAccessor);
         } catch (ParsedNodeException e) {
