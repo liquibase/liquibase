@@ -380,7 +380,7 @@
 		<xsd:attribute name="maxValue" type="xsd:string" />
 		<xsd:attribute name="minValue" type="xsd:string" />
 		<xsd:attribute name="ordered" type="booleanExp" />
-        <xsd:attribute name="cacheSize" type="xsd:positiveInteger" />
+        <xsd:attribute name="cacheSize" type="xsd:nonNegativeInteger" />
     </xsd:attributeGroup>
 
 	<xsd:attributeGroup name="indexName">
