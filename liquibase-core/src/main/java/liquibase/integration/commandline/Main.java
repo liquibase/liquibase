@@ -287,16 +287,17 @@ public class Main {
             if (commandParams.size() > 0) {
                 for (String cmdParm : commandParams) {
                     if (!cmdParm.startsWith("--referenceUsername")
-                        && !cmdParm.startsWith("--referencePassword")
-                        && !cmdParm.startsWith("--referenceDriver")
-                        && !cmdParm.startsWith("--referenceDefaultCatalogName")
-                        && !cmdParm.startsWith("--referenceDefaultSchemaName")
-                            && !cmdParm.startsWith("--includeSchema")
-                            && !cmdParm.startsWith("--includeCatalog")
-                            && !cmdParm.startsWith("--includeTablespace")
-                            && !cmdParm.startsWith("--schemas")
-                            && !cmdParm.startsWith("--referenceUrl")) {
-                        messages.add("unexpected command parameter: "+cmdParm);
+                      && !cmdParm.startsWith("--referencePassword")
+                      && !cmdParm.startsWith("--referenceDriver")
+                      && !cmdParm.startsWith("--referenceDefaultCatalogName")
+                      && !cmdParm.startsWith("--referenceDefaultSchemaName")
+                      && !cmdParm.startsWith("--includeSchema")
+                      && !cmdParm.startsWith("--includeCatalog")
+                      && !cmdParm.startsWith("--includeTablespace")
+                      && !cmdParm.startsWith("--schemas")
+                      && !cmdParm.startsWith("--referenceUrl")
+                      && !cmdParm.startsWith("--diffTypes")) {
+                      messages.add("unexpected command parameter: "+cmdParm);
                     }
                 }
             }
