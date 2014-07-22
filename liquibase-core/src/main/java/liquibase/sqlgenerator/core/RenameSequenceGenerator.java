@@ -6,6 +6,7 @@ import liquibase.database.core.FirebirdDatabase;
 import liquibase.database.core.H2Database;
 import liquibase.database.core.HsqlDatabase;
 import liquibase.database.core.InformixDatabase;
+import liquibase.database.core.MSSQLDatabase;
 import liquibase.database.core.OracleDatabase;
 import liquibase.database.core.PostgresDatabase;
 import liquibase.exception.ValidationErrors;
@@ -44,6 +45,8 @@ public class RenameSequenceGenerator extends AbstractSqlGenerator<RenameSequence
             sql = "ALTER SEQUENCE " + database.escapeSequenceName(statement.getCatalogName(), statement.getSchemaName(), statement.getOldSequenceName()) + " RENAME TO " + database.escapeObjectName(statement.getNewSequenceName(), Sequence.class);
         } else if (database instanceof OracleDatabase) {
             sql = "RENAME " + database.escapeObjectName(statement.getOldSequenceName(), Sequence.class) + " TO " + database.escapeObjectName(statement.getNewSequenceName(), Sequence.class);
+        } else if( database instanceof MSSQLDatabase){
+            sql = "SP_RENAME " + database.escapeObjectName(statement.getOldSequenceName(), Sequence.class) + " ," + database.escapeObjectName(statement.getNewSequenceName(),Sequence.class);
         } else {
             sql = "ALTER SEQUENCE " + database.escapeSequenceName(statement.getCatalogName(), statement.getSchemaName(), statement.getOldSequenceName()) + " RENAME TO " + database.escapeObjectName(statement.getNewSequenceName(), Sequence.class);
         }
