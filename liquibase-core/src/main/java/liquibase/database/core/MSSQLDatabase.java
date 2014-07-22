@@ -306,10 +306,10 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
         String definition = sb.toString();
 
         String finalDef =definition.replaceAll("\\r\\n", "\n");
+        finalDef = finalDef.replaceAll("--.*", "").trim();
         finalDef = INITIAL_COMMENT_PATTERN.matcher(finalDef).replaceFirst("").trim(); //handle views that start with '/****** Script for XYZ command from SSMS  ******/'
         finalDef = CREATE_VIEW_AS_PATTERN.matcher(finalDef).replaceFirst("").trim();
 
-        finalDef = finalDef.replaceAll("--.*", "").trim();
 
         /**handle views that end up as '(select XYZ FROM ABC);' */
         if (finalDef.startsWith("(") && (finalDef.endsWith(")") || finalDef.endsWith(");"))) {
