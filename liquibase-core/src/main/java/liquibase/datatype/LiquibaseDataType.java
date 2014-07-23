@@ -123,6 +123,8 @@ public abstract class LiquibaseDataType implements PrioritizedService {
             return null;
         } else if (value instanceof DatabaseFunction) {
             return database.generateDatabaseFunctionValue((DatabaseFunction) value);
+        } else if (value instanceof Number) {
+            return formatNumber(value.toString());
         }
         return value.toString();
     }
