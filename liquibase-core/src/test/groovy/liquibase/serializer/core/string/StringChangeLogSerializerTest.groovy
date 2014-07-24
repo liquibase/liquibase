@@ -476,9 +476,9 @@ public class StringChangeLogSerializerTest extends Specification {
 
         where:
         value   | expected
-        "0"     | "0.0"
-        "1"     | "1.0"
-        "0.0"   | "0.0"
+        "0"     | "0"
+        "1"     | "1"
+        "0.0"   | "0"
         "0.1"   | "0.1"
         "0.010" | "0.01"
         "0.001" | "0.001"
