@@ -380,7 +380,7 @@
 		<xsd:attribute name="maxValue" type="xsd:string" />
 		<xsd:attribute name="minValue" type="xsd:string" />
 		<xsd:attribute name="ordered" type="booleanExp" />
-        <xsd:attribute name="cacheSize" type="xsd:positiveInteger" />
+        <xsd:attribute name="cacheSize" type="xsd:nonNegativeInteger" />
     </xsd:attributeGroup>
 
 	<xsd:attributeGroup name="indexName">
@@ -852,6 +852,7 @@
 					<xsd:attribute name="schemaName" type="xsd:string" />
 					<xsd:attribute name="viewName" type="xsd:string" use="required" />
 					<xsd:attribute name="replaceIfExists" type="booleanExp" />
+                    <xsd:attribute name="fullDefinition" type="booleanExp" />
 				</xsd:extension>
 			</xsd:simpleContent>
 		</xsd:complexType>

@@ -271,7 +271,9 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
             throw new DatabaseException(e);
         }
         getDatabase().commit();
-        this.ranChangeSetList.add(new RanChangeSet(changeSet, execType));
+        if (this.ranChangeSetList != null) {
+            this.ranChangeSetList.add(new RanChangeSet(changeSet, execType));
+        }
 
     }
 
@@ -285,7 +287,9 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
         }
         getDatabase().commit();
 
-        this.ranChangeSetList.remove(new RanChangeSet(changeSet));
+        if (this.ranChangeSetList != null) {
+            this.ranChangeSetList.remove(new RanChangeSet(changeSet));
+        }
     }
 
     @Override
@@ -319,7 +323,9 @@ public class StandardChangeLogHistoryService extends AbstractChangeLogHistorySer
             executor.execute(new TagDatabaseStatement(tagString));
             getDatabase().commit();
 
-            ranChangeSetList.get(ranChangeSetList.size() - 1).setTag(tagString);
+            if (this.ranChangeSetList != null) {
+                ranChangeSetList.get(ranChangeSetList.size() - 1).setTag(tagString);
+            }
         } catch (Exception e) {
             throw new DatabaseException(e);
         }

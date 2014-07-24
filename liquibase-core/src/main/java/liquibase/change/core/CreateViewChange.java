@@ -26,6 +26,7 @@ public class CreateViewChange extends AbstractChange {
 	private String viewName;
 	private String selectQuery;
 	private Boolean replaceIfExists;
+    private Boolean fullDefinition;
 
 
     @DatabaseChangeProperty(since = "3.0")
@@ -72,7 +73,16 @@ public class CreateViewChange extends AbstractChange {
 		this.replaceIfExists = replaceIfExists;
 	}
 
-	@Override
+    @DatabaseChangeProperty(description = "Set to true if selectQuery is the entire view definition. False if the CREATE VIEW header should be added", since = "3.3")
+    public Boolean getFullDefinition() {
+        return fullDefinition;
+    }
+
+    public void setFullDefinition(Boolean fullDefinition) {
+        this.fullDefinition = fullDefinition;
+    }
+
+    @Override
     public Statement[] generateStatements(ExecutionEnvironment env) {
         List<Statement> statements = new ArrayList<Statement>();
 
@@ -81,13 +91,18 @@ public class CreateViewChange extends AbstractChange {
 			replaceIfExists = true;
 		}
 
+        boolean fullDefinition = false;
+        if (this.fullDefinition != null) {
+            fullDefinition = this.fullDefinition;
+        }
+
 		if (!supportsReplaceIfExistsOption(env) && replaceIfExists) {
 			statements.add(new DropViewStatement(getCatalogName(), getSchemaName(), getViewName()));
-			statements.add(new CreateViewStatement(getCatalogName(), getSchemaName(), getViewName(), getSelectQuery(),
-					false));
+			statements.add(new CreateViewStatement(getCatalogName(), getSchemaName(), getViewName(), getSelectQuery(), false)
+                    .setFullDefinition(fullDefinition));
 		} else {
-			statements.add(new CreateViewStatement(
-					getCatalogName(), getSchemaName(), getViewName(), getSelectQuery(), replaceIfExists));
+			statements.add(new CreateViewStatement(getCatalogName(), getSchemaName(), getViewName(), getSelectQuery(), replaceIfExists)
+                    .setFullDefinition(fullDefinition));
 		}
 
 		return statements.toArray(new Statement[statements.size()]);

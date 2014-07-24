@@ -94,6 +94,17 @@ public class DateTimeType extends LiquibaseDataType {
 
             return new Timestamp(dateTimeFormat.parse(value).getTime());
         } catch (ParseException e) {
+            String[] genericFormats = new String[] {"yyyy-MM-dd HH:mm:ss.SSS", "yyyy-MM-dd HH:mm:ss", "yyyy-MM-dd'T'HH:mm:ss.SSS", "yyyy-MM-dd'T'HH:mm:ss" };
+
+            for (String format : genericFormats) {
+                try {
+                    return new Timestamp(new SimpleDateFormat(format).parse(value).getTime());
+                } catch (ParseException ignore) {
+                    //doesn't match
+                }
+            }
+
+
             return new DatabaseFunction(value);
         }
     }

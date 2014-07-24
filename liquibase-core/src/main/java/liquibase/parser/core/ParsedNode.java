@@ -241,7 +241,7 @@ public class ParsedNode {
             } else if (type.equals(Long.class)) {
                 return (T) Long.valueOf(rawValue.toString());
             } else if (type.equals(BigInteger.class)) {
-                return (T) BigInteger.valueOf(Long.valueOf(rawValue.toString()));
+                return (T) new BigInteger(rawValue.toString());
             } else if (type.equals(Boolean.class) && rawValue instanceof String) {
                 return (T) Boolean.valueOf(rawValue.toString());
             } else if (type.isAssignableFrom(Date.class)) {

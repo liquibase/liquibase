@@ -19,6 +19,8 @@ public class HsqlDatabase extends AbstractJdbcDatabase {
     private static String END_CONCAT = ")";
     private static String SEP_CONCAT = ", ";
 
+    private Boolean oracleSyntax;
+
     public HsqlDatabase() {
     	super.unquotedObjectsAreUppercased=true;
         super.setCurrentDateTimeFunction("NOW");
@@ -432,7 +434,6 @@ public class HsqlDatabase extends AbstractJdbcDatabase {
             "SEMICOLON",
             "SEQUENCE",
             "SHUTDOWN",
-            "SOURCE",
             "TEMP",
             "TEXT",
             "VIEW",
@@ -453,5 +454,26 @@ public class HsqlDatabase extends AbstractJdbcDatabase {
     @Override
     public boolean isCaseSensitive() {
         return false;
+    }
+    
+    @Override
+    public void setConnection(DatabaseConnection conn) {
+        oracleSyntax = null;
+        super.setConnection(conn);
+    }
+
+    public boolean isUsingOracleSyntax() {
+        if (oracleSyntax == null) {
+            oracleSyntax = Boolean.FALSE;
+            if (getConnection() != null && getConnection().getURL() != null) {
+                for (String str : getConnection().getURL().split(";")) {
+                    if (str.contains("sql.syntax_ora") && str.contains("=")) {
+                        oracleSyntax = Boolean.valueOf(str.split("=")[1].trim());
+                        break;
+                    }
+                }
+            }
+        }
+        return oracleSyntax;
     }
 }

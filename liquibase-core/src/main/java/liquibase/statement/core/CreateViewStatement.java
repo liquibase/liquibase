@@ -12,6 +12,8 @@ public class CreateViewStatement extends AbstractViewStatement {
     public static final String SELECT_QUERY = "selectQuery";
     public static final String REPLACE_IF_EXISTS = "replaceIfExists";
 
+    public static final String FULL_DEFINITION = "fullDefinition";
+
     public CreateViewStatement() {
     }
 
@@ -40,6 +42,14 @@ public class CreateViewStatement extends AbstractViewStatement {
         return (CreateViewStatement) setAttribute(REPLACE_IF_EXISTS, replaceIfExists);
     }
 
+    public boolean isFullDefinition() {
+        return getAttribute(FULL_DEFINITION, false);
+    }
+
+    public CreateViewStatement setFullDefinition(boolean fullDefinition) {
+        return (CreateViewStatement) setAttribute(FULL_DEFINITION, fullDefinition);
+    }
+    
     @Override
     protected DatabaseObject[] getBaseAffectedDatabaseObjects() {
         return new DatabaseObject[] {

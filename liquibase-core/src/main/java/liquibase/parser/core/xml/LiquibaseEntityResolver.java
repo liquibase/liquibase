@@ -49,6 +49,7 @@ public class LiquibaseEntityResolver implements EntityResolver2 {
 
    @Override
    public InputSource resolveEntity(String name, String publicId, String baseURI, String systemId) throws SAXException, IOException {
+       log.debug("Resolving XML entity name='" + name + "', publicId='" + publicId + "', baseURI='" + baseURI + "', systemId='" + systemId + "'");
        InputSource resolved=null;
        if(systemId!=null && systemId.toLowerCase().endsWith(".xsd")) {
            if (systemId.startsWith("http://www.liquibase.org/xml/ns/migrator/")) {
@@ -58,6 +59,10 @@ public class LiquibaseEntityResolver implements EntityResolver2 {
        }
        if(resolved==null && resourceAccessor!=null && basePath!=null && systemId!=null) {
             resolved=tryResolveFromResourceAccessor(systemId);
+       }
+
+       if (resolved == null) {
+           log.debug("Unable to resolve XML entity locally. Will load from network.");
        }
        return resolved;
     }
@@ -71,9 +76,13 @@ public class LiquibaseEntityResolver implements EntityResolver2 {
                 namespaceDetails = NamespaceDetailsFactory.getInstance().getNamespaceDetails(parser, systemId);
             }
             if (namespaceDetails == null) {
+                log.debug("Found no namespace details class "+namespaceDetails.getClass().getName()+" for "+systemId);
                 return null;
             }
+            log.debug("Found namespace details class "+namespaceDetails.getClass().getName()+" for "+systemId);
             String xsdFile = namespaceDetails.getLocalPath(systemId);
+            log.debug("Local path for "+systemId+" is "+xsdFile);
+
             if (xsdFile == null) {
                 return null;
             }
@@ -81,16 +90,21 @@ public class LiquibaseEntityResolver implements EntityResolver2 {
                 InputStream resourceAsStream = StreamUtil.singleInputStream(xsdFile, resourceAccessor);
 
                 if (resourceAsStream == null) {
+                    log.debug("Could not load "+xsdFile+" with the standard resource accessor. Trying context classloader...");
                     if (Thread.currentThread().getContextClassLoader() != null) {
                         resourceAsStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(xsdFile);
                     }
                     if (resourceAsStream == null) {
+                        log.debug("Could not load "+xsdFile+" with the standard resource accessor. Trying class classloader...");
                         resourceAsStream = this.getClass().getClassLoader().getResourceAsStream(xsdFile);
                     }
                 }
                 if (resourceAsStream == null) {
+                    log.debug("Could not find "+xsdFile+" locally");
                     return null;
                 }
+
+                log.debug("Successfully loaded XSD from "+xsdFile);
                 InputSource source = new InputSource(resourceAsStream);
                 source.setPublicId(publicId);
                 source.setSystemId(systemId);
@@ -104,9 +118,12 @@ public class LiquibaseEntityResolver implements EntityResolver2 {
 
     private InputSource tryResolveFromResourceAccessor(String systemId) {
         String path=FilenameUtils.concat(basePath, systemId);
+        log.debug("Attempting to load "+systemId+" from resourceAccessor as "+path);
+
         try {
             InputStream resourceAsStream = StreamUtil.singleInputStream(path, resourceAccessor);
             if (resourceAsStream == null) {
+                log.debug("Could not load "+systemId+" from resourceAccessor as "+path);
                 return null;
             }
             return new InputSource(resourceAsStream);

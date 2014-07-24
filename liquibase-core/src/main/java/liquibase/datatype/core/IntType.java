@@ -5,6 +5,7 @@ import liquibase.database.core.*;
 import liquibase.datatype.DataTypeInfo;
 import liquibase.datatype.DatabaseDataType;
 import liquibase.datatype.LiquibaseDataType;
+import liquibase.statement.DatabaseFunction;
 
 @DataTypeInfo(name = "int", aliases = {"integer", "java.sql.Types.INTEGER", "java.lang.Integer", "serial"}, minParameters = 0, maxParameters = 1, priority = LiquibaseDataType.PRIORITY_DEFAULT)
 public class IntType extends LiquibaseDataType {
@@ -36,10 +37,10 @@ public class IntType extends LiquibaseDataType {
                 return new DatabaseDataType("SERIAL");
             }
         }
-        if (database instanceof MSSQLDatabase || database instanceof HsqlDatabase || database instanceof FirebirdDatabase || database instanceof InformixDatabase) {
+        if (database instanceof MSSQLDatabase || database instanceof HsqlDatabase || database instanceof FirebirdDatabase || database instanceof InformixDatabase  || database instanceof MySQLDatabase) {
             return new DatabaseDataType("INT");
         }
-        if (database instanceof SQLiteDatabase ) {
+        if (database instanceof SQLiteDatabase) {
         	return new DatabaseDataType("INTEGER");
         }
         return super.toDatabaseDataType(database);
@@ -59,5 +60,18 @@ public class IntType extends LiquibaseDataType {
             autoIncrement = true;
         }
     }
+
+    @Override
+    public String objectToSql(Object value, Database database) {
+        if (value == null || value.toString().equalsIgnoreCase("null")) {
+            return null;
+        }
+        if (value instanceof DatabaseFunction) {
+            return value.toString();
+        }
+
+        return formatNumber(value.toString());
+    }
+
 
 }
