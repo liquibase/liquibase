@@ -1,48 +1,26 @@
 package liquibase.serializer.core.string
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import liquibase.change.*
+import liquibase.change.core.*
+import liquibase.change.custom.CustomChangeWrapper
+import liquibase.change.custom.CustomSqlChange
+import liquibase.change.custom.ExampleCustomSqlChange
+import liquibase.changelog.ChangeLogParameters
+import liquibase.logging.Logger
+import liquibase.resource.ClassLoaderResourceAccessor
+import liquibase.resource.ResourceAccessor
+import liquibase.statement.DatabaseFunction
+import liquibase.statement.SequenceCurrentValueFunction
+import liquibase.statement.SequenceNextValueFunction
+import spock.lang.Specification
+import spock.lang.Unroll
 
-import java.io.InputStream;
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import java.lang.reflect.Field
+import java.lang.reflect.Modifier
+import java.lang.reflect.ParameterizedType
+import java.lang.reflect.Type
 
-import liquibase.change.*;
-import liquibase.change.core.*;
-import liquibase.change.custom.CustomChangeWrapper;
-import liquibase.change.custom.CustomSqlChange;
-import liquibase.change.custom.ExampleCustomSqlChange;
-import liquibase.changelog.ChangeLogParameters;
-import liquibase.logging.Logger;
-import liquibase.resource.ClassLoaderResourceAccessor;
-import liquibase.resource.ResourceAccessor;
-import liquibase.statement.DatabaseFunction;
-import liquibase.statement.SequenceCurrentValueFunction;
-import liquibase.statement.SequenceNextValueFunction;
-import org.junit.Test;
-
-import java.io.InputStream;
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.math.BigInteger;
-import java.util.*;
-
-import static org.junit.Assert.*;
+import static org.junit.Assert.fail
 
 public class StringChangeLogSerializerTest extends Specification {
 
