@@ -2,6 +2,7 @@ package liquibase.change.core
 
 import liquibase.change.ChangeStatus
 import liquibase.change.StandardChangeTest;
+import liquibase.changelog.ChangeSet;
 import liquibase.sdk.database.MockDatabase
 import liquibase.parser.core.ParsedNodeException;
 import liquibase.resource.ClassLoaderResourceAccessor
@@ -179,5 +180,37 @@ public class LoadDataChangeTest extends StandardChangeTest {
 
         change.columns[1].name == "new_col"
         change.columns[1].header == "new_col_header"
+    }
+
+    def "relativeToChangelogFile works"() throws Exception {
+        when:
+        ChangeSet changeSet = new ChangeSet(null, null, true, false,
+                                            "liquibase/change/fakeChangeSet.xml",
+                                            null, null, false, null, null);
+
+        LoadDataChange relativeChange = new LoadDataChange();
+
+        relativeChange.setSchemaName("SCHEMA_NAME");
+        relativeChange.setTableName("TABLE_NAME");
+        relativeChange.setRelativeToChangelogFile(Boolean.TRUE);
+        relativeChange.setChangeSet(changeSet);
+        relativeChange.setFile("core/sample.data1.csv");
+        relativeChange.setResourceAccessor(new ClassLoaderResourceAccessor());
+
+        SqlStatement[] relativeStatements = relativeChange.generateStatements(new MockDatabase());
+
+        LoadUpdateDataChange nonRelativeChange = new LoadUpdateDataChange();
+        nonRelativeChange.setSchemaName("SCHEMA_NAME");
+        nonRelativeChange.setTableName("TABLE_NAME");
+        nonRelativeChange.setChangeSet(changeSet);
+        nonRelativeChange.setFile("liquibase/change/core/sample.data1.csv");
+        nonRelativeChange.setResourceAccessor(new ClassLoaderResourceAccessor());
+
+        SqlStatement[] nonRelativeStatements = nonRelativeChange.generateStatements(new MockDatabase());
+
+        then:
+        assert relativeStatements != null
+        assert nonRelativeStatements != null
+        assert relativeStatements.size() == nonRelativeStatements.size()
     }
 }
