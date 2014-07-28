@@ -188,7 +188,10 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
 
     public void load(ParsedNode parsedNode, ResourceAccessor resourceAccessor) throws ParsedNodeException, SetupException {
         setLogicalFilePath(parsedNode.getChildValue(null, "logicalFilePath", String.class));
-
+        String objectQuotingStrategy = parsedNode.getChildValue(null, "objectQuotingStrategy", String.class);
+        if (objectQuotingStrategy != null) {
+            setObjectQuotingStrategy(ObjectQuotingStrategy.valueOf(objectQuotingStrategy));
+        }
         for (ParsedNode childNode : parsedNode.getChildren()) {
             handleChildNode(childNode, resourceAccessor);
         }
