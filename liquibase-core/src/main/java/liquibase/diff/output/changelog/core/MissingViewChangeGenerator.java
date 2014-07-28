@@ -67,6 +67,7 @@ public class MissingViewChangeGenerator implements MissingObjectChangeGenerator 
 
         }
         change.setSelectQuery(selectQuery);
+        change.setFullDefinition(view.getContainsFullDefinition());
 
         return new Change[] { change };
 

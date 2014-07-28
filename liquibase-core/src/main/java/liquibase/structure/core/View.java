@@ -2,6 +2,8 @@ package liquibase.structure.core;
 
 public class View extends Relation {
 
+    private boolean containsFullDefinition;
+
     public View() {
     }
 
@@ -59,4 +61,12 @@ public class View extends Relation {
     }
 
 
+    public boolean getContainsFullDefinition() {
+        return this.containsFullDefinition;
+    }
+
+    public View setContainsFullDefinition(boolean fullDefinition) {
+        this.containsFullDefinition = fullDefinition;
+        return this;
+    }
 }
