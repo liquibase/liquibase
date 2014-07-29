@@ -7,8 +7,10 @@ import java.util.List;
 
 public abstract class RanChangeSetFilter implements ChangeSetFilter {
     public List<RanChangeSet> ranChangeSets;
+    private final boolean ignoreClasspathPrefix;
 
-    public RanChangeSetFilter(List<RanChangeSet> ranChangeSets) {
+    public RanChangeSetFilter(List<RanChangeSet> ranChangeSets, boolean ignoreClasspathPrefix) {
+        this.ignoreClasspathPrefix = ignoreClasspathPrefix;
         this.ranChangeSets = ranChangeSets;
     }
 
@@ -16,11 +18,17 @@ public abstract class RanChangeSetFilter implements ChangeSetFilter {
         for (RanChangeSet ranChangeSet : ranChangeSets) {
             if (ranChangeSet.getId().equalsIgnoreCase(changeSet.getId())
                     && ranChangeSet.getAuthor().equalsIgnoreCase(changeSet.getAuthor())
-                    && ranChangeSet.getChangeLog().equalsIgnoreCase(changeSet.getFilePath())) {
+                    && normalizePath(ranChangeSet.getChangeLog()).equalsIgnoreCase(normalizePath(changeSet.getFilePath()))) {
                 return ranChangeSet;
             }
         }
         return null;
 
+    }
+    protected String normalizePath(String filePath) {
+        if (ignoreClasspathPrefix) {
+            return filePath.replaceFirst("^classpath:", "");
+        }
+        return filePath;
     }
 }
