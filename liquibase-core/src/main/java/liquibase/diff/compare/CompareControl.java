@@ -39,7 +39,11 @@ public class CompareControl {
     }
 
     public CompareControl(SchemaComparison[] schemaComparison, String compareTypes) {
-        this.schemaComparisons = schemaComparison;
+        if (schemaComparison != null && schemaComparison.length > 0) {
+            this.schemaComparisons = schemaComparison;
+        } else {
+            this.schemaComparisons = new SchemaComparison[]{new SchemaComparison(new CatalogAndSchema(null, null), new CatalogAndSchema(null, null))};
+        }
         setTypes(DatabaseObjectFactory.getInstance().parseTypes(compareTypes));
     }
 
