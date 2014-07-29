@@ -338,6 +338,10 @@ public class DatabaseChangeLog implements Comparable<DatabaseChangeLog>, Conditi
         this.ignoreClasspathPrefix = ignoreClasspathPrefix;
     }
 
+    public boolean ignoreClasspathPrefix() {
+        return ignoreClasspathPrefix;
+    }
+
     protected String normalizePath(String filePath) {
         if (ignoreClasspathPrefix) {
             return filePath.replaceFirst("^classpath:", "");
