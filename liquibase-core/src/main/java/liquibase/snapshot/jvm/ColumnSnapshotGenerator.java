@@ -4,28 +4,19 @@ import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.Database;
 import liquibase.database.core.*;
 import liquibase.database.jvm.JdbcConnection;
-import liquibase.datatype.DataTypeFactory;
-import liquibase.datatype.LiquibaseDataType;
-import liquibase.datatype.core.*;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.executor.ExecutorService;
 import liquibase.logging.LogFactory;
 import liquibase.snapshot.*;
-import liquibase.statement.DatabaseFunction;
 import liquibase.statement.core.RawSqlStatement;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.*;
-import liquibase.util.ISODateFormat;
+import liquibase.util.SqlUtil;
 import liquibase.util.StringUtils;
 
-import java.math.BigDecimal;
 import java.sql.*;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.List;
-import java.util.Scanner;
 
 public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
 
@@ -311,193 +302,7 @@ public class ColumnSnapshotGenerator extends JdbcSnapshotGenerator {
 
         }
 
-        Object val = columnMetadataResultSet.get("COLUMN_DEF");
-        if (!(val instanceof String)) {
-            return val;
-        }
-
-        int type = Integer.MIN_VALUE;
-        if (columnInfo.getType().getDataTypeId() != null) {
-            type = columnInfo.getType().getDataTypeId();
-        }
-        String typeName = columnInfo.getType().getTypeName();
-
-        LiquibaseDataType liquibaseDataType = DataTypeFactory.getInstance().from(columnInfo.getType(), database);
-
-        String stringVal = (String) val;
-        if (stringVal.isEmpty()) {
-            if (liquibaseDataType instanceof CharType) {
-                return "";
-            } else {
-                return null;
-            }
-        }
-
-
-        if (database instanceof OracleDatabase && !stringVal.startsWith("'") && !stringVal.endsWith("'")) {
-            //oracle returns functions without quotes
-            Object maybeDate = null;
-
-            if (liquibaseDataType instanceof DateType || type == Types.DATE) {
-                if (stringVal.endsWith("'HH24:MI:SS')")) {
-                    maybeDate = DataTypeFactory.getInstance().fromDescription("time", database).sqlToObject(stringVal, database);
-                } else {
-                    maybeDate = DataTypeFactory.getInstance().fromDescription("date", database).sqlToObject(stringVal, database);
-                }
-            } else if (liquibaseDataType instanceof DateTimeType || type == Types.TIMESTAMP) {
-                maybeDate = DataTypeFactory.getInstance().fromDescription("datetime", database).sqlToObject(stringVal, database);
-            } else {
-                return new DatabaseFunction(stringVal);
-            }
-            if (maybeDate != null) {
-                if (maybeDate instanceof java.util.Date) {
-                    return maybeDate;
-                } else {
-                    return new DatabaseFunction(stringVal);
-                }
-            }
-        }
-
-        if (stringVal.startsWith("'") && stringVal.endsWith("'")) {
-            stringVal = stringVal.substring(1, stringVal.length() - 1);
-        } else if (stringVal.startsWith("((") && stringVal.endsWith("))")) {
-            stringVal = stringVal.substring(2, stringVal.length() - 2);
-        } else if (stringVal.startsWith("('") && stringVal.endsWith("')")) {
-            stringVal = stringVal.substring(2, stringVal.length() - 2);
-        } else if (stringVal.startsWith("(") && stringVal.endsWith(")")) {
-            return new DatabaseFunction(stringVal.substring(1, stringVal.length() - 1));
-        }
-
-        Scanner scanner = new Scanner(stringVal.trim());
-        if (type == Types.ARRAY) {
-            return new DatabaseFunction(stringVal);
-        } else if ((liquibaseDataType instanceof BigIntType || type == Types.BIGINT)) {
-            if (scanner.hasNextBigInteger()) {
-                return scanner.nextBigInteger();
-            } else {
-                return new DatabaseFunction(stringVal);
-            }
-        } else if (type == Types.BINARY) {
-            return new DatabaseFunction(stringVal.trim());
-        } else if (type == Types.BIT) {
-            if (stringVal.startsWith("b'")) { //mysql returns boolean values as b'0' and b'1'
-                stringVal = stringVal.replaceFirst("b'", "").replaceFirst("'$", "");
-            }
-            stringVal = stringVal.trim();
-            if (scanner.hasNextBoolean()) {
-                return scanner.nextBoolean();
-            } else {
-                return new Integer(stringVal);
-            }
-        } else if (liquibaseDataType instanceof BlobType|| type == Types.BLOB) {
-            return new DatabaseFunction(stringVal);
-        } else if ((liquibaseDataType instanceof BooleanType || type == Types.BOOLEAN )) {
-            if (scanner.hasNextBoolean()) {
-                return scanner.nextBoolean();
-            } else {
-                return new DatabaseFunction(stringVal);
-            }
-        } else if (liquibaseDataType instanceof CharType || type == Types.CHAR) {
-            return stringVal;
-        } else if (liquibaseDataType instanceof ClobType || type == Types.CLOB) {
-            return stringVal;
-        } else if (type == Types.DATALINK) {
-            return new DatabaseFunction(stringVal);
-        } else if (liquibaseDataType instanceof DateType || type == Types.DATE) {
-            if (typeName.equalsIgnoreCase("year")) {
-                return stringVal.trim();
-            }
-            return DataTypeFactory.getInstance().fromDescription("date", database).sqlToObject(stringVal, database);
-        } else if ((liquibaseDataType instanceof DecimalType || type == Types.DECIMAL)) {
-            if (scanner.hasNextBigDecimal()) {
-                return scanner.nextBigDecimal();
-            } else {
-                return new DatabaseFunction(stringVal);
-            }
-        } else if (type == Types.DISTINCT) {
-            return new DatabaseFunction(stringVal);
-        } else if ((liquibaseDataType instanceof DoubleType || type == Types.DOUBLE)) {
-            if (scanner.hasNextDouble()) {
-                return scanner.nextDouble();
-            } else {
-                return new DatabaseFunction(stringVal);
-            }
-        } else if ((liquibaseDataType instanceof FloatType || type == Types.FLOAT)) {
-            if (scanner.hasNextFloat()) {
-                return scanner.nextFloat();
-            } else {
-                return new DatabaseFunction(stringVal);
-            }
-        } else if ((liquibaseDataType instanceof IntType || type == Types.INTEGER)) {
-            if (scanner.hasNextInt()) {
-                return scanner.nextInt();
-            } else {
-                return new DatabaseFunction(stringVal);
-            }
-        } else if (type == Types.JAVA_OBJECT) {
-            return new DatabaseFunction(stringVal);
-        } else if (type == Types.LONGNVARCHAR) {
-            return stringVal;
-        } else if (type == Types.LONGVARBINARY) {
-            return new DatabaseFunction(stringVal);
-        } else if (type == Types.LONGVARCHAR) {
-            return stringVal;
-        } else if (liquibaseDataType instanceof NCharType || type == Types.NCHAR) {
-            return stringVal;
-        } else if (type == Types.NCLOB) {
-            return stringVal;
-        } else if (type == Types.NULL) {
-            return null;
-        } else if ((liquibaseDataType instanceof NumberType || type == Types.NUMERIC)) {
-            if (scanner.hasNextBigDecimal()) {
-                return scanner.nextBigDecimal();
-            } else {
-                return new DatabaseFunction(stringVal);
-            }
-        } else if (liquibaseDataType instanceof NVarcharType || type == Types.NVARCHAR) {
-            return stringVal;
-        } else if (type == Types.OTHER) {
-            if (database instanceof DB2Database && typeName.equalsIgnoreCase("DECFLOAT")) {
-                return new BigDecimal(stringVal);
-            }
-            return new DatabaseFunction(stringVal);
-        } else if (type == Types.REAL) {
-            return new BigDecimal(stringVal.trim());
-        } else if (type == Types.REF) {
-            return new DatabaseFunction(stringVal);
-        } else if (type == Types.ROWID) {
-            return new DatabaseFunction(stringVal);
-        } else if ((liquibaseDataType instanceof SmallIntType || type == Types.SMALLINT)) {
-            if (scanner.hasNextInt()) {
-                return scanner.nextInt();
-            } else {
-                return new DatabaseFunction(stringVal);
-            }
-        } else if (type == Types.SQLXML) {
-            return new DatabaseFunction(stringVal);
-        } else if (type == Types.STRUCT) {
-            return new DatabaseFunction(stringVal);
-        } else if (liquibaseDataType instanceof TimeType || type == Types.TIME) {
-            return DataTypeFactory.getInstance().fromDescription("time", database).sqlToObject(stringVal, database);
-        } else if (liquibaseDataType instanceof DateTimeType || liquibaseDataType instanceof TimestampType || type == Types.TIMESTAMP) {
-            return DataTypeFactory.getInstance().fromDescription("datetime", database).sqlToObject(stringVal, database);
-        } else if ((liquibaseDataType instanceof TinyIntType || type == Types.TINYINT)) {
-            if (scanner.hasNextInt()) {
-                return scanner.nextInt();
-            } else {
-                return new DatabaseFunction(stringVal);
-            }
-        } else if (type == Types.VARBINARY) {
-            return new DatabaseFunction(stringVal);
-        } else if (liquibaseDataType instanceof VarcharType || type == Types.VARCHAR) {
-            return stringVal;
-        } else if (database instanceof MySQLDatabase && typeName.toLowerCase().startsWith("enum")) {
-            return stringVal;
-        } else {
-            LogFactory.getLogger().info("Unknown default value: value '" + stringVal + "' type " + typeName + " (" + type + "), assuming it is a function");
-            return new DatabaseFunction(stringVal);
-        }
-
+        return SqlUtil.parseValue(database, columnMetadataResultSet.get("COLUMN_DEF"), columnInfo.getType());
     }
 
     //START CODE FROM SQLITEDatabaseSnapshotGenerator
