@@ -305,12 +305,14 @@ public class MSSQLDatabase extends AbstractJdbcDatabase {
         }
         String definition = sb.toString();
 
-        String finalDef =definition.replaceAll("\\r\\n", "\n");
+        String finalDef =definition.replaceAll("\\r\\n", "\n").trim();
 
-        String selectOnly = CREATE_VIEW_AS_PATTERN.matcher(finalDef).replaceFirst("").trim();
+        String selectOnly = CREATE_VIEW_AS_PATTERN.matcher(finalDef).replaceFirst("");
         if (selectOnly.equals(finalDef)) {
             return "FULL_DEFINITION: " + finalDef;
         }
+
+        selectOnly = selectOnly.trim();
 
 
         /**handle views that end up as '(select XYZ FROM ABC);' */
