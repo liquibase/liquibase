@@ -47,6 +47,7 @@ public class MissingViewChangeGenerator implements MissingObjectChangeGenerator 
             change.setSchemaName(view.getSchema().getName());
         }
         String selectQuery = view.getDefinition();
+        boolean fullDefinitionOverridden = false;
         if (selectQuery == null) {
             selectQuery = "COULD NOT DETERMINE VIEW QUERY";
         } else if (comparisonDatabase instanceof OracleDatabase && view.getColumns() != null && view.getColumns().size() > 0) {
@@ -64,10 +65,13 @@ public class MissingViewChangeGenerator implements MissingObjectChangeGenerator 
                 }
             }) + ") AS "+selectQuery;
             change.setFullDefinition(true);
+            fullDefinitionOverridden = true;
 
         }
         change.setSelectQuery(selectQuery);
-        change.setFullDefinition(view.getContainsFullDefinition());
+        if (!fullDefinitionOverridden) {
+            change.setFullDefinition(view.getContainsFullDefinition());
+        }
 
         return new Change[] { change };
 
