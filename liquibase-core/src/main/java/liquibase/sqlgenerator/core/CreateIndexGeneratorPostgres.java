@@ -75,6 +75,13 @@ public class CreateIndexGeneratorPostgres extends CreateIndexGenerator {
 		    }
 	    }
 
-	    return new Sql[]{new UnparsedSql(buffer.toString(), getAffectedIndex(statement))};
+        if (statement.isClustered() != null && statement.isClustered()) {
+            return new Sql[]{
+                    new UnparsedSql(buffer.toString(), getAffectedIndex(statement)),
+                    new UnparsedSql("CLUSTER " + database.escapeTableName(statement.getTableCatalogName(), statement.getTableSchemaName(), statement.getTableName()) + " USING " + database.escapeObjectName(statement.getIndexName(), Index.class))
+            };
+        } else {
+            return new Sql[]{new UnparsedSql(buffer.toString(), getAffectedIndex(statement))};
+        }
     }
 }

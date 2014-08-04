@@ -2,6 +2,7 @@ package liquibase.sqlgenerator.core;
 
 import liquibase.database.Database;
 import liquibase.database.core.*;
+import liquibase.sdk.database.MockDatabase;
 import liquibase.structure.core.Index;
 import liquibase.exception.ValidationErrors;
 import liquibase.sql.Sql;
@@ -25,7 +26,7 @@ public class CreateIndexGenerator extends AbstractSqlGenerator<CreateIndexStatem
         if (database instanceof HsqlDatabase) {
             validationErrors.checkRequiredField("name", createIndexStatement.getIndexName());
         }
-        if (!(database instanceof MSSQLDatabase || database instanceof OracleDatabase || database instanceof DB2Database || database instanceof PostgresDatabase)) {
+        if (!(database instanceof MSSQLDatabase || database instanceof OracleDatabase || database instanceof DB2Database || database instanceof PostgresDatabase || database instanceof MockDatabase)) {
             validationErrors.checkDisallowedField("clustered", createIndexStatement.isClustered(), database);
         }
         return validationErrors;
@@ -105,16 +106,7 @@ public class CreateIndexGenerator extends AbstractSqlGenerator<CreateIndexStatem
             buffer.append(" CLUSTER");
         }
 
-        if (database instanceof PostgresDatabase && statement.isClustered() != null && statement.isClustered()){
-            return new Sql[] {
-                    new UnparsedSql(buffer.toString(), getAffectedIndex(statement)),
-                    new UnparsedSql("CLUSTER "+database.escapeTableName(statement.getTableCatalogName(), statement.getTableSchemaName(), statement.getTableName())+" USING "+database.escapeObjectName(statement.getIndexName(), Index.class))
-            };
-        } else {
-            return new Sql[] {new UnparsedSql(buffer.toString(), getAffectedIndex(statement))};
-
-        }
-
+        return new Sql[] {new UnparsedSql(buffer.toString(), getAffectedIndex(statement))};
     }
 
     protected Index getAffectedIndex(CreateIndexStatement statement) {
