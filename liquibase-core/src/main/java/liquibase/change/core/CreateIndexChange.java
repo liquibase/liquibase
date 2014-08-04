@@ -27,6 +27,7 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
 	// Contain associations of index
 	// for example: foreignKey, primaryKey or uniqueConstraint
 	private String associatedWith;
+    private Boolean clustered;
 
 
     public CreateIndexChange() {
@@ -189,6 +190,14 @@ public class CreateIndexChange extends AbstractChange implements ChangeWithColum
 
     public void setCatalogName(String catalogName) {
         this.catalogName = catalogName;
+    }
+
+    public Boolean getClustered() {
+        return clustered;
+    }
+
+    public void setClustered(Boolean clustered) {
+        this.clustered = clustered;
     }
 
     @Override

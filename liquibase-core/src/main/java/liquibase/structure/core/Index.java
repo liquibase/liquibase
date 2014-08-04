@@ -127,6 +127,14 @@ public class Index extends AbstractDatabaseObject {
 	}
 
 
+    public Boolean getClustered() {
+        return getAttribute("clustered", Boolean.class);
+    }
+
+    public Index setClustered(Boolean clustered) {
+        return (Index) setAttribute("clustered", clustered);
+    }
+
 //    @Override
 //    public boolean equals(Object o) {
 //        if (this == o) return true;

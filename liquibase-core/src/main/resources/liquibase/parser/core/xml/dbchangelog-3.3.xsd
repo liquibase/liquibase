@@ -392,6 +392,7 @@
 		<xsd:attributeGroup ref="indexName" />
 		<xsd:attribute name="associatedWith" type="xsd:string" use="optional" />
 		<xsd:attribute name="unique" type="booleanExp" />
+        <xsd:attribute name="clustered" type="booleanExp" />
         <xsd:attribute name="tablespace" type="xsd:string" />
 	</xsd:attributeGroup>
 

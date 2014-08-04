@@ -163,6 +163,12 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                         index = new Index();
                         index.setName(indexName);
                         index.setTable(table);
+
+                        short type = row.getShort("TYPE");
+                        if (type != DatabaseMetaData.tableIndexClustered) {
+                            index.setClustered(false);
+                        }
+
                         foundIndexes.put(indexName, index);
                     }
                     index.getColumns().add(row.getString("COLUMN_NAME"));
@@ -283,6 +289,11 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                     returnIndex.setTable((Table) new Table().setName(row.getString("TABLE_NAME")).setSchema(schema));
                     returnIndex.setName(indexName);
                     returnIndex.setUnique(!nonUnique);
+
+                    if (type == DatabaseMetaData.tableIndexClustered) {
+                        returnIndex.setClustered(true);
+                    }
+
                     foundIndexes.put(indexName, returnIndex);
                 }
 
