@@ -34,24 +34,6 @@ public abstract class StoredDatabaseLogic<T extends StoredDatabaseLogic> extends
         return (T) this;
     }
 
-    public Date getCreated() {
-        return getAttribute("created", Date.class);
-    }
-
-    public T setCreated(Date date) {
-        setAttribute("created", date);
-        return (T) this;
-    }
-
-    public Date getLastModified() {
-        return getAttribute("lastModified", Date.class);
-    }
-
-    public T setLastModified(Date date) {
-        setAttribute("lastModified", date);
-        return (T) this;
-    }
-
     public Boolean isValid() {
         return getAttribute("valid", Boolean.class);
     }

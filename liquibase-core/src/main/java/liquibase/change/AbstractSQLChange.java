@@ -204,16 +204,6 @@ public abstract class AbstractSQLChange extends AbstractChange implements DbmsTa
             return new SqlStatement[0];
         }
 
-        sql = sql
-                .replace((char)34, '\"')
-                .replace((char)39, '\'')
-                .replace((char)34, '\"')
-                .replace((char)145, '\'')
-                .replace((char)146, '\'')
-                .replace((char)147, '\"')
-                .replace((char)148, '\"')
-        ;
-
         String processedSQL = normalizeLineEndings(sql);
         for (String statement : StringUtils.processMutliLineSQL(processedSQL, isStripComments(), isSplitStatements(), getEndDelimiter())) {
             if (database instanceof MSSQLDatabase) {
