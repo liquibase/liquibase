@@ -11,13 +11,6 @@
             <directory>src/main/resources/dist</directory>
             <outputDirectory>/</outputDirectory>
             <lineEnding>unix</lineEnding>
-            <excludes>
-                <exclude>*.bat</exclude>
-            </excludes>
-        </fileSet>
-        <fileSet>
-            <directory>src/main/resources/dist</directory>
-            <outputDirectory>/</outputDirectory>
             <includes>
                 <include>liquibase</include>
                 <include>liquibase-sdk</include>
@@ -31,9 +24,15 @@
             <includes>
                 <include>*.bat</include>
             </includes>
+        </fileSet>
+        <fileSet>
+            <directory>src/main/resources/dist</directory>
+            <outputDirectory>/</outputDirectory>
+            <lineEnding>unix</lineEnding>
             <excludes>
                 <exclude>liquibase</exclude>
                 <exclude>liquibase-sdk</exclude>
+                <exclude>*.bat</exclude>
             </excludes>
         </fileSet>
         <fileSet>
