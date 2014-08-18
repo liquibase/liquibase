@@ -68,6 +68,7 @@ public class UnknownType extends LiquibaseDataType {
                     || getName().equalsIgnoreCase("BFILE")
                     || getName().equalsIgnoreCase("ROWID")
                     || getName().equalsIgnoreCase("XMLTYPE")
+                    || getName().equalsIgnoreCase("SDO_GEOMETRY")
                     ) {
                 parameters = new Object[0];
             } else if (getName().toUpperCase().startsWith("INTERVAL ")) {
