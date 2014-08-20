@@ -72,7 +72,12 @@ public class CreateIndexStatement extends AbstractSqlStatement {
         return clustered;
     }
 
-    public void setClustered(Boolean clustered) {
-        this.clustered = clustered;
+    public CreateIndexStatement setClustered(Boolean clustered) {
+        if (clustered == null) {
+            this.clustered = false;
+        } else {
+            this.clustered = clustered;
+        }
+        return this;
     }
 }

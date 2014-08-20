@@ -165,8 +165,8 @@ public class IndexSnapshotGenerator extends JdbcSnapshotGenerator {
                         index.setTable(table);
 
                         short type = row.getShort("TYPE");
-                        if (type != DatabaseMetaData.tableIndexClustered) {
-                            index.setClustered(false);
+                        if (type == DatabaseMetaData.tableIndexClustered) {
+                            index.setClustered(true);
                         }
 
                         foundIndexes.put(indexName, index);
