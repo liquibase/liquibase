@@ -149,7 +149,11 @@ public class JdbcExecutor extends AbstractExecutor implements Executor {
 
     public Object queryForObject(SqlStatement sql, RowMapper rowMapper, List<SqlVisitor> sqlVisitors) throws DatabaseException {
         List results = query(sql, rowMapper, sqlVisitors);
-        return JdbcUtils.requiredSingleResult(results);
+        try {
+            return JdbcUtils.requiredSingleResult(results);
+        } catch (DatabaseException e) {
+            throw new DatabaseException("Expected single row from " + sql + " but got "+results.size(), e);
+        }
     }
 
     @Override
