@@ -92,6 +92,7 @@ public class ExecuteSqlCommand extends AbstractCommand {
             }
             out += "\n";
         }
+        database.commit();
         return out.trim();
     }
 }

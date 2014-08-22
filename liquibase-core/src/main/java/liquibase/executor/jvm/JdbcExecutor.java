@@ -312,8 +312,8 @@ public class JdbcExecutor extends AbstractExecutor implements Executor {
                 }
                 try {
                     stmt.execute(statement);
-                } catch (SQLException e) {
-                    throw e;
+                } catch (Throwable e) {
+                    throw new DatabaseException(e);
                 }
             }
             return null;
