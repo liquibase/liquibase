@@ -270,6 +270,9 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable{
 
     protected boolean isWrongSchema(DatabaseObject fieldValue) {
         boolean isSchemaExamples = true;
+        if (originalExamples == null) {
+            return false;
+        }
         for (DatabaseObject obj : originalExamples) {
             if (!(obj instanceof Schema)) {
                 isSchemaExamples = false;
