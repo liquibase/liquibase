@@ -2,6 +2,7 @@ package liquibase.snapshot;
 
 import liquibase.CatalogAndSchema;
 import liquibase.database.Database;
+import liquibase.diff.compare.core.SchemaComparator;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.UnexpectedLiquibaseException;
 import liquibase.parser.core.ParsedNode;
@@ -17,6 +18,7 @@ import java.util.*;
 
 public abstract class DatabaseSnapshot implements LiquibaseSerializable{
 
+    private final DatabaseObject[] originalExamples;
     private HashSet<String> serializableFields;
     private SnapshotControl snapshotControl;
     private Database database;
@@ -29,6 +31,8 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable{
         this.database = database;
         allFound = new DatabaseObjectCollection(database);
         this.snapshotControl = snapshotControl;
+
+        this.originalExamples = examples;
 
         init(examples);
 
@@ -202,6 +206,11 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable{
             if (!snapshotControl.shouldInclude(((DatabaseObject) fieldValue).getClass())) {
                 return fieldValue;
             }
+
+            if (isWrongSchema(((DatabaseObject) fieldValue))) {
+                return fieldValue;
+            }
+
             if (((DatabaseObject) fieldValue).getSnapshotId() == null) {
                 return include((DatabaseObject) fieldValue);
             } else {
@@ -257,6 +266,27 @@ public abstract class DatabaseSnapshot implements LiquibaseSerializable{
         }
 
         return fieldValue;
+    }
+
+    protected boolean isWrongSchema(DatabaseObject fieldValue) {
+        boolean isSchemaExamples = true;
+        for (DatabaseObject obj : originalExamples) {
+            if (!(obj instanceof Schema)) {
+                isSchemaExamples = false;
+                break;
+            }
+        }
+
+        if (!isSchemaExamples) {
+            return false;
+        }
+
+        for (DatabaseObject obj : originalExamples) {
+            if (DatabaseObjectComparatorFactory.getInstance().isSameObject(fieldValue.getSchema(), obj, database)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
